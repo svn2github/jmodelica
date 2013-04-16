@@ -705,8 +705,7 @@ class TestDiscreteVariableRefs(object):
        """
        Test that the value references are correct
        """
-       nose.tools.assert_equal(self.model._save_real_variables_val[0],0)
-       nose.tools.assert_equal(self.model._save_real_variables_val[1],2)
+       nose.tools.assert_equal(self.model._save_real_variables_val[0],2)
 
 class TestDependentParameters(object):
     """

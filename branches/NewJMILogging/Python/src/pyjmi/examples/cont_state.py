@@ -35,50 +35,52 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     jmu_name = compile_jmu("JMExamples_opt.ContState_opt", 
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     cs = JMUModel(jmu_name)
     
     res = cs.optimize()
 
     # Extract variable profiles
-    x1=res['x1']
-    x2=res['x2']
-    u=res['u']
-    t=res['time']
-    p=res['p']
-    J=res['J']  
+    x1 = res['x1']
+    x2 = res['x2']
+    u = res['u']
+    t = res['time']
+    p = res['p']
+    J = res['J']  
 
-    print "t = ", repr(N.array(t))
-    print "x1 = ", repr(N.array(x1))
-    print "x2 = ", repr(N.array(x2))
-    print "u = ", repr(N.array(u))
-    print "J = ", repr(N.array(J))
-    
+    assert N.abs(res.final('x1') + 0.22364) < 1e-4
+    assert N.abs(res.final('x2') - 0.00813) < 1e-4
+    assert N.abs(res.final('p') - 1.49187)  < 1e-4
+    assert N.abs(res.final('J') - 0.16982)  < 1e-4
+   
     if with_plots:
-        # Plot
         plt.figure(1)
         plt.clf()
+        
         plt.subplot(221)
         plt.plot(t,x1,t,x2)
         plt.grid()
         plt.ylabel('x')
-
+        plt.xlabel('time')
         
         plt.subplot(222)
         plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
+        plt.xlabel('time')
         
         plt.subplot(223)
         plt.plot(t,J)
         plt.grid()
         plt.ylabel('J')
-		
+        plt.xlabel('time')
+        
         plt.subplot(224)
         plt.plot(t,p)
         plt.grid()
         plt.ylabel('path')
         plt.xlabel('time')
+        
         plt.show()
 
 if __name__ == "__main__":

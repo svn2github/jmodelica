@@ -463,6 +463,10 @@ aspect FlatTypeAnalysis {
 	
 	eq FSmoothExp.type() = getFExp().type();
 	
+	// TODO: Maybe there should be a special type for "no return value"
+	eq FConnectionsOp.type() = null;
+	eq FConnBoolOp.type()    = fBooleanScalarType();
+	
 	/**
 	 * The scalar type of the expression.
 	 * 

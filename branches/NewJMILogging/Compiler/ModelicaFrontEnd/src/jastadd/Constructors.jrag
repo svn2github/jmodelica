@@ -787,6 +787,7 @@ aspect InheritedFactoryMethods {
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
+	public abstract FConnectionsOp      	  FConnectionsOp.createEmptyNode();
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
@@ -905,9 +906,16 @@ aspect InheritedFactoryMethods {
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	
+	// Operators for overconstrained connection graphs
+	public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
+	public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
+	public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
+	public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
+	public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
+	public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
+	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FBinExp FBinExp.createNode(FExp left, FExp right) {
 		FBinExp node = createEmptyNode();
@@ -917,8 +925,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryExp FUnaryExp.createNode(FExp exp) {
 		FUnaryExp node = createEmptyNode();
@@ -927,8 +934,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
 		FIdUseExp node = createEmptyNode();
@@ -937,8 +943,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
 		FMathematicalFunctionCall node = createEmptyNode();
@@ -947,8 +952,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * \Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
 		FUnaryBuiltIn node = createEmptyNode();
@@ -957,8 +961,8 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children. For missing y, use null.
+	 * Create new node of same class as this, with the specified 
+	 * children. For missing y, use null.
 	 */
 	public FMinMaxExp FMinMaxExp.createNode(FExp x, FExp y) {
 		FMinMaxExp node = createEmptyNode();
@@ -969,12 +973,20 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(List<FExp> exps) {
 		FInfArgsFunctionCall node = createEmptyNode();
 		node.setFExpList(exps);
+		return node;
+	}
+	
+	/**
+	 * Create new node of same class as this, with the specified children.
+	 */
+	public FConnectionsOp FConnectionsOp.createNode(FExp exps) {
+		FConnectionsOp node = createEmptyNode();
+		node.setA(exps);
 		return node;
 	}
 	

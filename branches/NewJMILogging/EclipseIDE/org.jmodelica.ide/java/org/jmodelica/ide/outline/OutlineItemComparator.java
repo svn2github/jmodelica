@@ -15,7 +15,6 @@
 */
 package org.jmodelica.ide.outline;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.preferences.Preferences;
+import org.jmodelica.ide.preferences.ModelicaPreferences;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.InstClassDecl;
@@ -41,7 +40,7 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	
 	public OutlineItemComparator() {
 		updateComparator();
-		Preferences.addListener(this);
+		ModelicaPreferences.INSTANCE.addListener(this);
 	}
 	
 	public int category(Object element) {
@@ -68,7 +67,7 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	}
 
 	public void updateComparator() {
-		cmp = COMPARATORS.get(Preferences.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
+		cmp = COMPARATORS.get(ModelicaPreferences.INSTANCE.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
 	}
 
 	public static class CompAlpha extends ViewerSorter {

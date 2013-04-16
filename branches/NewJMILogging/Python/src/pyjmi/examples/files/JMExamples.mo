@@ -15,7 +15,7 @@ package JMExamples
     equation
       der(x1) = x2;
       der(x2) = u;
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=30),
         Documentation(info="<HTML>
   <p>
   This is a minimum-time problem with two states and one
@@ -100,110 +100,6 @@ package JMExamples
     end Examples;
   end BangControl;
 
-  package BatchFermentor
-    model BatchFermentor
-      //state start values
-      parameter Real x1_0=1.5;
-      parameter Real x2_0=0;
-      parameter Real x3_0=0;
-      parameter Real x4_0=7;
-      parameter Real u_0=0;
-      //states
-      Real x1(start=x1_0, fixed=true);
-      Real x2(start=x2_0, fixed=true);
-      Real x3(start=x3_0, fixed=true);
-      Real x4(start=x4_0, fixed=true);
-      Real h1;
-      Real h2;
-      //control input
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(x1) = h1*x1-u*x1/500/x4;
-      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
-      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
-      der(x4) = u/500;
-      h1 = 0.11*x3/(0.006*x1+x3);
-      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-      annotation (experiment(StopTime=150, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>  
-<p>
-   This problem considers a fed-batch reactor for the production of penicillin. 
-   We consider here the free terminal time version where the objective is to maximize 
-   the amount of penicillin using the feed rate as the control variable.  
-</p>   
-<p>
-References:
-</p>    
-<p>
-Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
-Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
-</p>    
-<p>
-Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
-</p>
-<p>
-Simulation time:150s
-</p>
-</HTML>"),
-        Icon(graphics));
-    end BatchFermentor;
-
-    model BatchFermentor2
-      //state start values
-      parameter Real x1_0=1.5;
-      parameter Real x2_0=0;
-      parameter Real x3_0=0;
-      parameter Real x4_0=7;
-      parameter Real u_0=0;
-      //states
-      Real x1(start=x1_0, fixed=true);
-      Real x2(start=x2_0, fixed=true);
-      Real x3(start=x3_0, fixed=true);
-      Real x4(start=x4_0, fixed=true);
-      Real u(start=0, fixed=true);
-      Real h1;
-      Real h2;
-      //control input
-      Modelica.Blocks.Interfaces.RealInput du
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(x1) = h1*x1-u*x1/500/x4;
-      der(x2) = h2*x1-0.01*x2-u*x2/500/x4;
-      der(x3) = -h1*x1/0.47-h2*x1/1.2-x1*0.029*x3/(0.0001+x3)+u/x4*(1-x3/500);
-      der(x4) = u/500;
-      der(u) = du;
-      h1 = 0.11*x3/(0.006*x1+x3);
-      h2 = 0.0055*x3/(0.0001+x3*(1+10*x3));
-      annotation (experiment(StopTime=150, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-</p>    
-<p>
-   This problem considers a fed-batch reactor for the production of penicillin. 
-   We consider here the free terminal time version where the objective is to maximize 
-   the amount of penicillin using the feed rate as the control variable.  
-<p>
-References:
-</p>    
-<p>
-Dynamic optimization of bioprocesses: efficient and robust numerical strategies 2003, 
-Julio R. Banga, Eva Balsa-Cantro, Carmen G. Moles and Antonio A. Alonso
-</p>    
-<p>
-Case Study I: Optimal Control of a Fed-Batch Fermentor for Penicillin Production
-</p>
-<p>
-Simulation time:150s
-</p>
-</HTML>"),
-        Icon(graphics));
-    end BatchFermentor2;
-  end BatchFermentor;
-
   package BloodGlucose
     model BloodGlucose
       //State start values
@@ -232,7 +128,7 @@ Simulation time:150s
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
       der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -335,7 +231,7 @@ using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
       der(D) =dD
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -433,7 +329,6 @@ Simulation time: 400s
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time/60)/60;
       annotation (experiment(StopTime=24000),
-                                            __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -522,7 +417,7 @@ Simulation time: 400s
       der(X) = -P2 * (X - X_init) + P3 * (I - I_init);
       der(I) = -n * I + D / V1;
       dist = 3*exp(-0.05*time);
-      annotation (experiment(StopTime=400), __Dymola_experimentSetupOutput,
+      annotation (experiment(StopTime=400),
         Documentation(info="<HTML>
 <p>
 This is a model that predicts the blood glucose levels of a type-I diabetic. 
@@ -677,7 +572,6 @@ Simulation time: 400s
             smooth=Smooth.None));
         annotation (Diagram(graphics),
           experiment(StopTime=400),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
     <p>
     The model is based on BloodGlucose1 and a constant input is set.
@@ -701,8 +595,7 @@ Simulation time: 400s
             smooth=Smooth.None));
         annotation (
           Diagram(graphics),
-          experiment(StopTime=400),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=400));
       end BloodGlucoseInputscaled;
     end Examples;
   end BloodGlucose;
@@ -722,7 +615,7 @@ Simulation time: 400s
     equation
       der(x1) = u*(10*x2-x1);
       der(x2) = u*(x1-10*x2) - (1-u)*x2;
-      annotation (experiment, __Dymola_experimentSetupOutput,
+      annotation (experiment,
       Documentation(info="<HTML>
   <p>
   This problem considers a plug-flow reactor, packed with two catalysts, involving the reactions S1 <-> S2 -> S3.
@@ -835,8 +728,7 @@ Simulation time: 1s
               color={0,0,0},
               thickness=0.5,
               smooth=Smooth.None)}),
-        experiment,
-        __Dymola_experimentSetupOutput);
+        experiment);
     end CatalyticCracking;
   end CatalyticCracking;
 
@@ -964,7 +856,6 @@ Simulation time: 150s
 
 </HTML>"),
         experiment(StopTime=150),
-        __Dymola_experimentSetupOutput,
         Diagram(graphics),
         Icon(graphics={
             Rectangle(
@@ -1067,7 +958,6 @@ Simulation time: 150s
             smooth=Smooth.None));
         annotation (Diagram(graphics),
           experiment(StopTime=60),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
 <p>
 input: step function
@@ -1145,7 +1035,6 @@ Simulation time: 150s
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1274,7 +1163,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1432,7 +1320,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1523,7 +1410,7 @@ Simulation time: 7200s
     initial equation
     //steady state
     der(x) = zeros(32);
-      annotation (experiment(StopTime=7200), __Dymola_experimentSetupOutput);
+      annotation (experiment(StopTime=7200));
     end Distillation1Input_init;
 
     model Distillation1Inputstep
@@ -1562,7 +1449,6 @@ Simulation time: 7200s
        FL=Feed+L;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200),
-        __Dymola_experimentSetupOutput,
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1723,13 +1609,6 @@ Simulation time: 7200s
        der(x[32]) = 1/areb  * (FL*x[31] - (Feed-D)*x[32] - V*y[32]) "reboiler";
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=120, Algorithm="Dassl"),
-        __Dymola_experimentSetupOutput(
-          textual=true,
-          doublePrecision=true,
-          derivatives=false,
-          inputs=false,
-          outputs=false,
-          auxiliaries=false),
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -1893,10 +1772,6 @@ Simulation time: 7200s
        end for;
         annotation (Placement(transformation(extent={{-84,12},{-44,52}})),
         experiment(StopTime=7200, Algorithm="Dassl"),
-        __Dymola_experimentSetupOutput(
-          textual=true,
-          doublePrecision=true,
-          inputs=false),
                     Placement(transformation(extent={{-118,0},{-78,40}})),
         Documentation(info="<HTML>
 <p>
@@ -2251,9 +2126,7 @@ Simulation time: 7200s
     Temp_dot[1]=0;
     yA[1]=0;
       annotation (experiment(StopTime=6000, Algorithm="Dassl"),
-          __Dymola_experimentSetupOutput,
         Diagram(graphics),
-        DymolaStoredErrors,
         Documentation(info="<HTML>
 <p>
 This distillation column is a separation of cyclohexane (component A) and n-heptane (component B). 
@@ -2392,8 +2265,7 @@ Simulation time: 7200s
             smooth=Smooth.None));
         annotation (
           Diagram(graphics),
-          experiment(StopTime=7200),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=7200));
       end Distillation1const;
 
       model Distillation1step
@@ -2410,8 +2282,7 @@ Simulation time: 7200s
             color={0,0,127},
             smooth=Smooth.None));
         annotation (Diagram(graphics),
-          experiment(StopTime=7200),
-          __Dymola_experimentSetupOutput);
+          experiment(StopTime=7200));
       end Distillation1step;
     end Examples;
   end Distillation;
@@ -2444,645 +2315,8 @@ Simulation time: 7200s
           delta = alpha*beta/A;
           der(x1) = -gamma*sqrt(x1)+delta*u;
           der(x2) = gamma*(sqrt(x1)-sqrt(x2));
-      annotation (DymolaStoredErrors);
     end DoubleTank;
   end DoubleTank;
-
-  package FlightPath
-    model FlightPath
-      //state start values
-      parameter Real x1_0 = 153.73;
-      parameter Real x2_0 = 0;
-      parameter Real x3_0 = 0;
-      //states
-      Real x1(start = x1_0, fixed=true);
-      Real x2(start = x2_0, fixed=true);
-      Real x3(start = x3_0, fixed=true);
-      //control
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
-            iconTransformation(extent={{-120,20},{-80,60}})));
-      Modelica.Blocks.Interfaces.RealInput v
-        annotation (Placement(transformation(extent={{-120,-40},{-80,0}}),
-            iconTransformation(extent={{-120,-40},{-80,0}})));
-      //parameter
-      parameter Real L = 65.3;
-      parameter Real D = 3.18;
-      parameter Real m = 160e3;
-      parameter Real g = 9.81;
-      parameter Real c = 6;
-    equation
-      der(x1) = (-D/m*x1^2-g*sin(x2)+u/m);
-      der(x2) = L/m*x1*(1-c*x2)-g*cos(x2)/x1+L*c/m*v;
-      der(x3) = (x1*sin(x2));
-      annotation (experiment(StopTime=100), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-Minimum Cost Optimal Control: An Application to Flight Level Tracking 
-</p>
-<p>
-Reference:
-</p>
-<p>
-John Lygeros, Department of Engineering, University of Cambridge, Cambridge, UK
-</p>
-<p>
-PROPT - Matlab Optimal Control Software (DAE, ODE)
-</p>
-<p>
-Simulation time: 100s
-</p>
-</HTML>"),
-        Icon(graphics={Line(
-              points={{-66,-40},{10,-40},{26,-36},{36,-30},{46,-20},{58,-4},{68,12},
-                  {70,14}},
-              color={0,0,255},
-              smooth=Smooth.None,
-              arrow={Arrow.None,Arrow.Filled},
-              thickness=0.5)}));
-    end FlightPath;
-
-    package Examples
-      model FlightPathExp
-        FlightPath flightPath
-          annotation (Placement(transformation(extent={{20,20},{40,40}})));
-        Modelica.Blocks.Sources.RealExpression realExpression(y=25)
-          annotation (Placement(transformation(extent={{-34,-2},{-14,18}})));
-        Modelica.Blocks.Sources.Exponentials exponentials(outMax=10, riseTime=80)
-          annotation (Placement(transformation(extent={{-40,40},{-20,60}})));
-      equation
-        connect(realExpression.y, flightPath.u1) annotation (Line(
-            points={{-13,8},{6,8},{6,30.6},{26,30.6}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        connect(exponentials.y, flightPath.u2) annotation (Line(
-            points={{-19,50},{2,50},{2,34.6},{26.2,34.6}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-          Documentation(info="<HTML>
-<p>
-input: exponential function
-</p>
-<p>
-Simulation time: 100s
-</p>
-
-</HTML>"));
-      end FlightPathExp;
-
-      model FlightPathSine
-        FlightPath flightPath
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.Sine sine(amplitude=20, freqHz=10)
-          annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
-        Modelica.Blocks.Sources.Sine sine1(amplitude=20, freqHz=10)
-          annotation (Placement(transformation(extent={{-40,-20},{-20,0}})));
-      equation
-        connect(sine1.y, flightPath.u1) annotation (Line(
-            points={{-19,-10},{4,-10},{4,10.6},{26,10.6}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        connect(sine.y, flightPath.u2) annotation (Line(
-            points={{-19,30},{2,30},{2,14.6},{26.2,14.6}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-          Documentation(info="<HTML>
-<p>
-input: sine function
-</p>
-<p>
-Simulation time: 100s
-</p>
-
-
-</HTML>"));
-      end FlightPathSine;
-    end Examples;
-    annotation (Icon(graphics));
-  end FlightPath;
-
-  package Greenhouse
-    model Greenhouse
-      import SI = Modelica.SIunits;
-      //parameter
-      parameter Real pW = 3e-6/40;
-      parameter Real pT = 1;
-      parameter Real pH = 0.1;
-      parameter Real pHc = 7.5e-2/220;
-      parameter Real pWc = 3e4/220;
-      parameter Real pi = 3.14159;
-      parameter Real tf = 48;
-      //state start values
-      parameter Real x1_0 = 0;
-      parameter Real x2_0 = 10;
-      parameter Real x3_0 = 0;
-      //states
-      SI.Mass x1(start=x1_0,fixed=true) "dry weight";
-      SI.Temp_C x2(start=x2_0,fixed=true) "Greenhouse temperature";
-      SI.Energy x3(start=x3_0,fixed=true);
-      SI.Power sun "sunlight";
-      SI.Temp_C temp "outside temperature";
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput u
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      der(x1) = pW*sun*x2;
-      der(x2) = pT*(temp-x2)+pH*u;
-      der(x3) = pHc*u;
-      sun = 800*sin(4*pi*time/tf-0.65*pi);
-      temp = 15+10*sin(4*pi*time/tf-0.65*pi);
-      annotation (experiment(StopTime=48), __Dymola_experimentSetupOutput,
-        Icon(graphics={
-            Ellipse(
-              extent={{-40,22},{-26,8}},
-              lineColor={255,255,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Sphere,
-              fillColor={255,213,170}),
-            Ellipse(
-              extent={{54,38},{68,24}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              fillColor={170,170,255},
-              fillPattern=FillPattern.Solid),
-            Line(
-              points={{-38,20},{-42,22},{-46,26},{-50,32},{-50,36},{-48,42},{-42,46},
-                  {-36,46},{-32,44},{-30,38},{-30,32},{-30,26},{-32,22}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Ellipse(
-              extent={{56,62},{62,38}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{68,34},{96,28}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{60,24},{68,2}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{54,30},{32,24}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillColor={255,85,85},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{32,38},{54,32}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{68,28},{96,20}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{66,60},{62,38}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Solid,
-              fillColor={255,85,85}),
-            Ellipse(
-              extent={{54,24},{60,0}},
-              lineColor={255,85,85},
-              lineThickness=0.5,
-              fillColor={255,85,85},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{48,46},{76,16}},
-              lineColor={170,170,255},
-              lineThickness=0.5),
-            Line(
-              points={{-28,20},{-26,28},{-22,32},{-14,36},{-6,34},{-4,28},{-4,
-                  24},{-6,20},{-14,18},{-20,18},{-26,18}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-26,12},{-18,12},{-10,10},{-4,6},{-2,4},{-2,0},{-4,-4},{
-                  -10,-8},{-18,-8},{-26,-2},{-28,2},{-28,6},{-28,8}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,8},{-32,4},{-32,-4},{-36,-10},{-44,-12},{-50,-10},{
-                  -52,-4},{-48,4},{-44,6},{-38,10}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-40,18},{-46,24},{-52,28},{-60,28},{-66,26},{-68,22},{
-                  -68,18},{-66,14},{-62,10},{-54,8},{-46,8},{-40,10},{-38,10}},
-              color={255,0,128},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Ellipse(
-              extent={{-6,68},{28,38}},
-              lineColor={255,170,255},
-              lineThickness=0.5,
-              fillColor={255,170,255},
-              fillPattern=FillPattern.Solid),
-            Line(
-              points={{-4,54},{-12,60},{4,58},{0,70},{8,62},{20,72},{20,60},{34,
-                  56},{22,50},{26,40},{14,44},{8,34},{4,46},{-12,42},{-2,52},{
-                  -4,54}},
-              color={170,85,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-32,8},{-26,-16},{-12,-42},{10,-68},{18,-84},{18,-60},{
-                  20,-42},{22,-26},{22,-6},{18,8},{14,24},{14,32},{14,38}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{52,12},{46,-2},{44,-28},{38,-48},{32,-62},{26,-72},{22,
-                  -78},{18,-84}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{4,-60},{-8,-54},{-24,-40},{-30,-32},{-34,-32},{-38,-36},
-                  {-36,-48},{-26,-54},{-14,-60},{-4,-62},{4,-64},{10,-70},{14,
-                  -74}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{36,-52},{44,-42},{54,-32},{66,-28},{72,-30},{78,-36},{78,-42},
-                  {74,-46},{64,-48},{48,-50},{42,-54},{36,-60},{32,-64},{30,-66}},
-              color={0,127,0},
-              thickness=0.5,
-              smooth=Smooth.None)}),
-        Diagram(graphics),
-        Documentation(info="<HTML>
-<p>
-A solar greenhouse has been designed that maximizes solar energy use and minimizes
-fossil energy consumption. It is based on a conventional greenhouse extended with a heat
-pump, a heat exchanger, an aquifer and ventilation with heat recovery. The aim is to
-minimize fossil energy consumption, while maximizing crop dry weight and keeping
-temperature and humidity within certain limits. These requirements are defined in a goal
-function, which is minimized by optimal control. A greenhouse with crop model is used
-to simulate the process behaviour. It is found that open loop optimal control trajectories
-can be determined. The boiler use is reduced to a minimum, thus reducing fossil energy
-use. Compared to a conventional greenhouse it is found that the energy costs are
-decreased and the crop dry weight is increased.
-</p>
-<p>
-Reference:
-</p>
-<p>
-OPTIMAL CONTROL OF A SOLAR GREENHOUSE, R.J.C. van Ooteghem, J.D. Stigter, L.G. van Willigenburg, G. van Straten
-</p>
-<p>
-  Simulation time: 48s
-  </p>
-</HTML>"));
-    end Greenhouse;
-  end Greenhouse;
-
-  package Helicopter
-    model Helicopter
-         import SI = Modelica.SIunits;
-         //State start values and parameters
-         parameter SI.MomentOfInertia Je = 0.91
-        "Moment of inertia about elevation axis";
-         parameter SI.Length la = 0.66
-        "Arm length from elevation axis to helicopter body";
-         parameter Real Kf = 0.5 "Motor force constant";
-         parameter SI.Force Fg = 0.5
-        "Differential force due to gravity and counter weight";
-         parameter SI.Torque Tg = 0.33 "Differential torque";
-         parameter SI.MomentOfInertia Jp = 0.0364
-        "Moment of inertia about pitch axis";
-         parameter SI.Length lh = 0.177
-        "Distance from pitch axis to either motor";
-         parameter SI.MomentOfInertia Jt = 0.91
-        "Moment of inertia about travel axis";
-         //States
-         Real te(fixed=true);
-         Real tr(fixed=true);
-         Real tp(fixed=true);
-         Real dte(fixed=true);
-         Real dtr(fixed=true);
-         Real dtp(fixed=true);
-         //Control Signal
-      Modelica.Blocks.Interfaces.RealInput Vf
-        annotation (Placement(transformation(extent={{-120,20},{-80,60}}),
-            iconTransformation(extent={{-120,20},{-80,60}})));
-      Modelica.Blocks.Interfaces.RealInput Vb
-        annotation (Placement(transformation(extent={{-120,-40},{-80,0}}),
-            iconTransformation(extent={{-120,-40},{-80,0}})));
-    equation
-         der(te) = dte;
-         der(tr) = dtr;
-         der(tp) = dtp;
-         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
-         der(dtr)= -(Fg*la/Jt)*sin(tp);
-         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
-      annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
-      Documentation(info="<HTML>   
-  <p>
-   As an example of a process with fast dynamics, a helicopter is considered.
-   The helicopter consists of an arm mounted to a base, enabling the arm to rotate freely. 
-  </p>       
-  <p>
-  References:
-  </p>    
-  <p>
-  Operator Interaction and Optimization in Control Systems, Johan Åkesson
-  </p>    
-  <p>
-  Simulation time:150s
-  </p>
-  </HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-34,36},{66,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{-80,20},{-28,20},{-34,12},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-20,-14},{-22,-22},{-22,-24}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{20,-22},{18,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Polygon(
-              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{14,54},{6,32},{22,32},{14,54}},
-              lineColor={213,170,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.Forward),
-            Polygon(
-              points={{12,54},{-54,46},{-58,58},{12,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={213,170,255}),
-            Polygon(
-              points={{16,54},{84,68},{86,50},{16,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.CrossDiag),
-            Polygon(
-              points={{-80,20},{-84,30},{-88,8},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None)}));
-    end Helicopter;
-
-    model HelicopterDer
-      import SI = Modelica.SIunits;
-         //State start values and parameters
-         parameter SI.MomentOfInertia Je = 0.91
-        "Moment of inertia about elevation axis";
-         parameter SI.Length la = 0.66
-        "Arm length from elevation axis to helicopter body";
-         parameter Real Kf = 0.5 "Motor force constant";
-         parameter SI.Force Fg = 0.5
-        "Differential force due to gravity and counter weight";
-         parameter SI.Torque Tg = 0.33 "Differential torque";
-         parameter SI.MomentOfInertia Jp = 0.0364
-        "Moment of inertia about pitch axis";
-         parameter SI.Length lh = 0.177
-        "Distance from pitch axis to either motor";
-         parameter SI.MomentOfInertia Jt = 0.91
-        "Moment of inertia about travel axis";
-         //States
-         Real te(start=0,fixed=true);
-         Real tr(start=0,fixed=true);
-         Real tp(start=0,fixed=true);
-         Real dte(start=1,fixed=true);
-         Real dtr(start=0,fixed=true);
-         Real dtp(start=-2,fixed=true);
-         Real Vf(start=0,fixed=true);
-         Real Vb(start=0,fixed=true);
-         //Control Signal
-      Modelica.Blocks.Interfaces.RealInput dVf
-        annotation (Placement(transformation(extent={{-52,10},{-12,50}})));
-      Modelica.Blocks.Interfaces.RealInput dVb
-        annotation (Placement(transformation(extent={{-50,-46},{-10,-6}})));
-    equation
-         der(te) = dte;
-         der(tr) = dtr;
-         der(tp) = dtp;
-         der(dte)= (Kf*la/Je)*(Vf+Vb)-Tg/Je;
-         der(dtr)= -(Fg*la/Jt)*sin(tp);
-         der(dtp)= (Kf*lh/Jp)*(Vf-Vb);
-         der(Vf) = dVf;
-         der(Vb) = dVb;
-         annotation (experiment(StopTime=30), __Dymola_experimentSetupOutput,
-        Diagram(graphics),
-        Documentation(info="<HTML>   
-    <p>
-     The model is equivalent to Helicopter but the derivatives of the input a given. That makes it possible to use the derivatives in the cost function when setting up the optimization problem.
-    </p>    
-    <p>
-    Simulation time:150s
-    </p>
-    </HTML>"),
-        Icon(graphics={
-            Ellipse(
-              extent={{-34,36},{66,-22}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{-80,20},{-28,20},{-34,12},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-34,-22},{40,-36},{46,-36},{50,-34},{54,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{-20,-14},{-22,-22},{-22,-24}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{20,-22},{18,-32}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Line(
-              points={{58,-24},{52,-28},{46,-30},{40,-30},{32,-28},{24,-26},{10,-22}},
-              color={0,0,255},
-              thickness=0.5,
-              smooth=Smooth.None),
-            Polygon(
-              points={{26,26},{30,-4},{56,-4},{52,16},{26,26}},
-              lineColor={255,0,0},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.Forward,
-              fillColor={255,170,170}),
-            Polygon(
-              points={{14,54},{6,32},{22,32},{14,54}},
-              lineColor={213,170,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.Forward),
-            Polygon(
-              points={{12,54},{-54,46},{-58,58},{12,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={213,170,255}),
-            Polygon(
-              points={{16,54},{84,68},{86,50},{16,54}},
-              lineColor={170,85,255},
-              lineThickness=0.5,
-              smooth=Smooth.None,
-              fillColor={213,170,255},
-              fillPattern=FillPattern.CrossDiag),
-            Polygon(
-              points={{-80,20},{-84,30},{-88,8},{-80,20}},
-              lineColor={0,0,255},
-              lineThickness=0.5,
-              smooth=Smooth.None)}));
-    end HelicopterDer;
-
-    package Examples
-      model HelicopterInput
-        HelicopterDer helicopterDer
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.TimeTable timeTable(table=[0,0.3; 7,0.3; 7,0; 15,
-              0; 15,0.3; 22,0.3; 22,0; 30,0])
-          annotation (Placement(transformation(extent={{-60,22},{-40,42}})));
-        Modelica.Blocks.Sources.TimeTable timeTable1(table=[0,3; 15,3; 15,0; 30,0])
-          annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
-      equation
-        connect(timeTable.y, helicopterDer.u) annotation (Line(
-            points={{-39,32},{-8,32},{-8,13.4},{23.4,13.4}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        connect(timeTable1.y, helicopterDer.u1) annotation (Line(
-            points={{-39,-30},{-8,-30},{-8,7.8},{23,7.8}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-        Documentation(info="<HTML>
-    <p>
-    The model is based on HelicopterDer and step functions are set as an input.
-    </p>
-    <p>
-    Simulation time: 150s
-    </p>
-    </HTML>"));
-      end HelicopterInput;
-    end Examples;
-  end Helicopter;
-
-  package MarinePopulation
-    model MarinePopulation
-      //parameter
-      parameter Real m[8]={0,0,0,0,0,0,0,0};
-      parameter Real g[7]={0,0,0,0,0,0,0};
-      //states
-      Real y[8](start={ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000}, each fixed=true);
-    equation
-      der(y) = cat(1,{0},g).*cat(1,{0},y[1:7]) - (m+cat(1,g,{0})).*y;
-      annotation (experiment(StopTime=10), __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-Given estimates of the abundance of the population of a marine species at each stage (for
-example, nauplius, juvenile, adult) as a function of time, determine stage speci c growth
-and mortality rates.
-The objective is to minimize the error between computed and observed data.
-m and g are the unknown mortality and growth rates at the stages with g0=0.
-</p>
-<p>
-Simulation time: 10s
-</p>
-</HTML>"),
-        Diagram(graphics),
-        Icon(graphics={
-            Ellipse(
-              extent={{-40,20},{84,-20}},
-              lineColor={0,0,255},
-              fillPattern=FillPattern.Sphere),
-            Polygon(
-              points={{-36,2},{-76,22},{-76,-18},{-36,2}},
-              lineColor={0,0,255},
-              smooth=Smooth.None,
-              fillPattern=FillPattern.CrossDiag,
-              fillColor={167,167,0}),
-            Line(
-              points={{22,-6},{22,-12},{20,-18},{16,-26},{10,-28},{4,-28},{-2,
-                  -26},{-4,-24},{-4,-20},{0,-16},{4,-12},{8,-6}},
-              color={0,127,0},
-              smooth=Smooth.None,
-              thickness=1),
-            Ellipse(
-              extent={{56,10},{62,4}},
-              lineColor={0,0,255},
-              fillColor={0,127,0},
-              fillPattern=FillPattern.CrossDiag),
-            Line(
-              points={{74,-12},{66,-8},{78,-8}},
-              color={0,127,0},
-              thickness=1,
-              smooth=Smooth.None),
-            Line(
-              points={{-14,12},{-14,28},{-8,24},{-2,30},{4,26},{12,32},{18,28},
-                  {26,32},{30,26},{42,24},{42,14}},
-              color={0,127,0},
-              thickness=1,
-              smooth=Smooth.None)}));
-    end MarinePopulation;
-  end MarinePopulation;
 
   package MoonLander
     model MoonLander
@@ -3106,7 +2340,6 @@ Simulation time: 10s
       der(v) = -1+u/m;
       der(m) = -u/2.349;
       annotation (experiment(NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 Example about landing an object.
@@ -3179,7 +2412,6 @@ Simulation time: 1s
         annotation (
           Diagram(graphics),
           experiment(StopTime=1.5, NumberOfIntervals=1),
-          __Dymola_experimentSetupOutput,
           Documentation(info="<HTML>
     <p>
     The model is based on MoonLander and a step function is set as an input.
@@ -3191,517 +2423,6 @@ Simulation time: 1s
       end MoonLanderInput;
     end Examples;
   end MoonLander;
-
-  package PenicillinPlant
-    model PenicillinPlant1
-      import SI = Modelica.SIunits;
-      parameter Real miu_m = 0.02;
-      parameter Real Km =   0.05;
-      parameter Real Ki = 5;
-      parameter Real Yx =    0.5;
-      parameter Real Yp =   1.2;
-      parameter Real v = 0.004;
-      parameter Real Sin =   200;
-      //state start values
-      parameter Real X1_0=1;
-      parameter Real S1_0=0.5;
-      parameter Real P1_0=0;
-      parameter Real V1_0=150;
-      parameter Real u1_0=1;
-      //state start values
-      Real X1(start=X1_0,fixed=true) "Cell mass concentration";
-      Real S1(start=S1_0,fixed=true) "Substrate concentration";
-      Real P1(start=P1_0,fixed=true) "Penicillin concentration";
-      Real V1(start=V1_0,fixed=true) "Volume of medium";
-      Real u1(start=u1_0,fixed=true);
-      Real miu1;
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput du1 "Feed Flowrate derivative"
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
-      der(X1) = miu1*X1-u1/V1*X1;
-      der(S1) = -miu1*X1/Yx - v*X1/Yp + u1/V1*(Sin - S1);
-      der(P1) = v*X1 - u1/V1*P1;
-      der(V1) = u1;
-      der(u1) = du1;
-      annotation (experiment(StopTime=150, NumberOfIntervals=100),
-          __Dymola_experimentSetupOutput,
-     Documentation(info="<HTML>
- <p>
-In this problem, the objective is to maximize the concentration of penicillin, P, produced 
-in a fed-batch bioreactor, given a finite amount of time.
-</p>
-<ul>
-<li> Reactions: S -> X, S -> P  </li>
-<li> Conditions: Fed-batch, isothermal </li>
-<li> Objective: Maximize the concentration of product P at a given final time </li>
-<li> Manipulated variable: Feed rate of S </li>
-<li> Constraints: Input bounds; upper limit on the biomass concentration,
-which is motivated by oxygen-transfer limitation typically occurring at
-large biomass concentration </li>
-</ul>
- <p>
-Two phases occur in the model. After the cell mass concetration X has reached a certain value 
-(3.7), the constraint for u changes. In the Python file 'penicillin_plant_time.py' an optimal
-time for the phase change is determed (80.334).
-</p>
- <p>
-Reference:
-</p>
-<p>
-Fed-batch Fermentor Control: Dynamic Optimization of Batch Processes II. Role of Measurements 
-in Handling Uncertainty 2001, B. Srinivasan, D. Bonvin, E. Visser, S. Palanki 
-</p>
-<p>
-PROPT - Matlab Optimal Control Software (DAE, ODE)
-</p>
-<p>
-Simulation time: 150s
-</p>
-
-</HTML>"),
-        Diagram(graphics),
-        Icon(graphics={
-            Rectangle(
-              extent={{-20,40},{20,0}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Rectangle(
-              extent={{-20,0},{20,-40}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,60},{20,20}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,-20},{20,-60}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid)}));
-    end PenicillinPlant1;
-
-    model PenicillinPlant2
-      import SI = Modelica.SIunits;
-       //parameter
-          parameter Real miu_m = 0.02;
-          parameter Real Km =   0.05;
-          parameter Real Ki = 5;
-          parameter Real Yx = 0.5;
-          parameter Real Yp = 1.2;
-          parameter Real v = 0.004;
-          parameter Real Sin = 200;
-          //state start values, equal to final values of first phase
-          parameter Real X2_0 = 3.7;
-          parameter Real S2_0 = 0;
-          parameter Real P2_0 = 0.6;
-          parameter Real V2_0 = 150;
-          parameter Real u2_0 = 0.03;
-          parameter Real du2_0 = 0;
-          //state start values
-          Real X2(start=X2_0,fixed=true);
-          Real S2(start=S2_0,fixed=true);
-          Real P2(start=P2_0,fixed=true);
-          Real V2(start=V2_0,fixed=true);
-          Real u2(start=u2_0,fixed=true);
-          Real miu2;
-          //control signal
-      Modelica.Blocks.Interfaces.RealInput du2 annotation (Placement(transformation(
-              extent={{-120,-20},{-80,20}}),
-                                         iconTransformation(extent={{-120,-20},
-                {-80,20}})));
-    equation
-          miu2 = (miu_m*S2)/(Km+S2+S2^2/Ki);
-          der(X2) = miu2*X2-u2/V2*X2;
-          der(S2) = -miu2*X2/Yx - v*X2/Yp + u2/V2*(Sin - S2);
-          der(P2) = v*X2 - u2/V2*P2;
-          der(V2) = u2;
-          der(u2) = du2;
-      annotation (Documentation(info="<HTML>
-<p>
-The model is equivalent to PenicillinPlant1 except the input value. Furthermore the upper constraint for u is set to 0.03.
-</p>
-<p>
-Simulation time: 150s
-</p>
-
-</HTML>"),
-    Icon(graphics={
-            Rectangle(
-              extent={{-20,40},{20,0}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Rectangle(
-              extent={{-20,0},{20,-40}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,60},{20,20}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,-20},{20,-60}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid)}));
-    end PenicillinPlant2;
-
-    model PenicillinPlantTest
-      import SI = Modelica.SIunits;
-      parameter Real miu_m = 0.02;
-      parameter Real Km =   0.05;
-      parameter Real Ki = 5;
-      parameter Real Yx =    0.3;
-      parameter Real Yp =   1.2;
-      parameter Real v = 0.004;
-      parameter Real Sin =   200;
-      //state start values
-      parameter Real X1_0=1;
-      parameter Real S1_0=0.5;
-      parameter Real P1_0=0;
-      parameter Real V1_0=150;
-      //state start values
-      Real X1(start=X1_0,fixed=true) "Cell mass concentration";
-      Real S1(start=S1_0,fixed=true) "Substrate concentration";
-      Real P1(start=P1_0,fixed=true) "Penicillin concentration";
-      Real V1(start=V1_0,fixed=true) "Volume of medium";
-      Real miu1;
-      //control signal
-      Modelica.Blocks.Interfaces.RealInput u1 "Feed Flowrate"
-        annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
-            iconTransformation(extent={{-120,-20},{-80,20}})));
-    equation
-      miu1 = (miu_m*S1)/(Km+S1+S1^2/Ki);
-      der(X1) = miu1*X1-u1/V1*X1;
-      der(S1) = -miu1*X1/Yx - v*X1/Yp + u1/V1*(Sin - S1);
-      der(P1) = v*X1 - u1/V1*P1;
-      der(V1) = u1;
-      annotation (experiment(StopTime=150, NumberOfIntervals=100),
-          __Dymola_experimentSetupOutput,
-          Diagram(graphics),
-          Documentation(info="<HTML>
-      <p>
-      The model is equivalent to PenicillinPlant1 but u is set as an input instead of du. That makes it possible to experiment with input values in Dymola.
-      </p>
-      <p>
-      Simulation time: 150s
-      </p>
-
-      </HTML>"),
-        Icon(graphics={
-            Rectangle(
-              extent={{-20,40},{20,0}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Rectangle(
-              extent={{-20,0},{20,-40}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,60},{20,20}},
-              lineColor={255,0,128},
-              lineThickness=0.5,
-              fillColor={255,0,128},
-              fillPattern=FillPattern.Solid),
-            Ellipse(
-              extent={{-20,-20},{20,-60}},
-              lineColor={255,170,213},
-              lineThickness=0.5,
-              fillColor={255,170,213},
-              fillPattern=FillPattern.Solid)}));
-    end PenicillinPlantTest;
-
-    package Examples
-      model PenicillinPlantInput
-        PenicillinPlantTest penicillinPlantTest
-          annotation (Placement(transformation(extent={{0,0},{20,20}})));
-        Modelica.Blocks.Sources.Trapezoid trapezoid(
-          amplitude=0.09,
-          rising=75,
-          width=0,
-          falling=0.1,
-          period=150,
-          nperiod=1,
-          offset=0.01)
-          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-      equation
-        connect(trapezoid.y, penicillinPlantTest.u1) annotation (Line(
-            points={{-19,10},{-6.5,10},{-6.5,10},{0,10}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (
-          Diagram(graphics),
-          experiment(StopTime=150),
-          __Dymola_experimentSetupOutput,
-          Documentation(info="<HTML>
-    <p>
-    The model is based on PenicillinPlantTest and an input function which is adjusted to optimization results is set.
-    </p>
-    <p>
-    Simulation time: 150s
-    </p>
-    
-    </HTML>"));
-      end PenicillinPlantInput;
-
-      model PenicillinPlantInputConst
-        PenicillinPlantTest penicillinPlantTest
-          annotation (Placement(transformation(extent={{0,0},{20,20}})));
-        Modelica.Blocks.Sources.Constant const(k=0.03)
-          annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-      equation
-        connect(const.y, penicillinPlantTest.u1) annotation (Line(
-            points={{-39,10},{-16,10},{-16,10},{0,10}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (
-          Diagram(graphics),
-          experiment(StopTime=150),
-          __Dymola_experimentSetupOutput,
-          Documentation(info="<HTML>
-    <p>
-    The model is based on PenicillinPlantTest and a constant input is set.
-    </p>
-    <p>
-    Simulation time: 150s
-    </p>
-    
-    </HTML>"));
-      end PenicillinPlantInputConst;
-    end Examples;
-  end PenicillinPlant;
-
-  package Polyeth
-    model Polyeth
-      import SI = Modelica.SIunits;
-        //define constants:
-        parameter SI.Volume Vg = 500;
-        parameter SI.Volume Vp = 0.5;
-        parameter Real Pv = 17;
-        parameter SI.Mass Bw = 7e4;
-        parameter SI.SpecificHeatCapacity Cpm1 = 11*4.1868;
-        parameter Real Cv = 7.5;
-        parameter SI.SpecificHeatCapacity Cpw = 4.1868e3;
-        parameter SI.SpecificHeatCapacity CpIn = 6.9*4.1868;
-        parameter SI.SpecificHeatCapacity Cppol = 0.85e3 * 4.1868;
-        parameter SI.MolarMass Mw1 = 28.05e-3;
-        parameter SI.Mass Mw = 3.314e4;
-        parameter SI.AmountOfSubstance Mg = 6060.5;
-        parameter SI.HeatCapacity MrCpr = 1.4*4.1868e7;
-        parameter SI.SpecificEnergy Hreac = -894*4.1868e3;
-        parameter Real UA = 1.14*4.1868e6 "J/(K*s)";
-        parameter SI.MolarFlowRate FIn = 5;
-        parameter SI.MolarFlowRate FM1 = 190;
-        parameter SI.MolarFlowRate Fg = 8500;
-        parameter SI.MassFlowRate Fw = 3.11e5*18e-3;
-        parameter SI.Temperature Tf = 360;
-        parameter SI.Temperature Twi = 289.56;
-        parameter Real RR = 8.20575e-5;
-        parameter SI.MolarHeatCapacity R = 8.314;
-        //define parameter theta
-         parameter SI.IonicStrength ac = 0.548;
-         parameter Real kp0 = 85e-3;
-         parameter Real Ea = 9e3*4.1868 "J/mol";
-         parameter Real kd = 1e-4 "s^-1";
-        // Control Signal
-        parameter SI.MassFlowRate Fc = 1.5/3600;
-        parameter SI.Temperature Tfeed = 293 "scalar or vector??";
-        //Fc (start = Fc_ss) could be defined as input for optimization problems
-        //Tfeed (start = Tfeed_ss) step control signal value could be defined as input for optimization problems
-         //States
-         SI.Concentration In_con(start = 483.5818, fixed=true)
-        "Molar concentration of inert in the gas phase";
-         SI.Concentration M1_con(start = 218.6872, fixed=true)
-        "Molar concentration of ethylene in the gas phase";
-         SI.AmountOfSubstance Y1(start = 5.0385) "Moles of active site type 1";
-         SI.AmountOfSubstance Y2(start = 5.0385) "Moles of active site type 2";
-         SI.Temperature T(start = 360.069) "Reactor temperature";
-         SI.Temperature Tw(start = 290.3755)
-        "Cooling water temperature from exchanger";
-         SI.Temperature Tg(start = 294.3801) "Recycle gas temperature";
-         Real bt;
-         Real RM1;
-         Real Cpg;
-         Real Hf;
-         Real Hg1;
-         Real Hg0;
-         Real Hr;
-         Real Hpol;
-    equation
-         //Algebric equations:
-         0 = Vp * Cv * sqrt((M1_con+In_con) * RR * T - Pv) -bt;
-         0 = M1_con * kp0 * exp(-Ea/R*(1/T-1/Tf)) * (Y1+Y2) -RM1;
-         0 = M1_con/(M1_con + In_con) * Cpm1 + In_con/(M1_con + In_con) * CpIn-Cpg;
-         0 = FM1 * Cpm1 * ( Tfeed - Tf) + FIn * CpIn * (Tfeed - Tf)-Hf;
-         0 = Fg * (Tg - Tf) * Cpg-Hg1;
-         0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
-         0 = Hreac * Mw1 * RM1-Hr;
-         0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
-         // Differential equations:
-         der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
-         der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
-         der(Y1)     = Fc * ac - kd * Y1 - RM1 * Mw1 * Y1/ Bw;
-         der(Y2)     = Fc * ac - kd * Y2 - RM1 * Mw1 * Y2/ Bw;
-         der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
-         der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
-         der(Tg)     = Fg/Mg * (T - Tg)   + UA/(Mg * Cpg) * (Tw - Tg);
-      annotation (Icon(graphics),
-        experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-<p>
-reference:
-</p>
-<p>
-A. Gani et al. Journal of Process Control, 17 (2007), pp. 439-451
-</p>
-<p>
-temperature control of industrial gas phase polyethylene reactors, S. A. Dadebo, 
-P. J. McLellan and K. B. McAuley, J Proc. Cont. Vol. 7 No. 2, pp. 83 95, 1997.
-</p>
-<p>
-effects of perating conditions on stability of gas-phase polyethylene reactors, K. B. McAuley,
-D. A. Macdonald, and P. J. Mclellan, AIChE Journal, Vol. 41, pp. 868-879
-</p>
-<p>
-Simulation time: 36000s
-</p>
-</HTML>"));
-    end Polyeth;
-
-    model PolyethTest
-      import SI = Modelica.SIunits;
-        //define constants:
-        parameter SI.Volume Vg = 500;
-        parameter SI.Volume Vp = 0.5;
-        parameter Real Pv = 17;
-        parameter SI.Mass Bw = 7e4;
-        parameter SI.SpecificHeatCapacity Cpm1 = 11*4.1868;
-        parameter Real Cv = 7.5;
-        parameter SI.SpecificHeatCapacity Cpw = 4.1868e3;
-        parameter SI.SpecificHeatCapacity CpIn = 6.9*4.1868;
-        parameter SI.SpecificHeatCapacity Cppol = 0.85e3 * 4.1868;
-        parameter SI.MolarMass Mw1 = 28.05e-3;
-        parameter SI.Mass Mw = 3.314e4;
-        parameter SI.AmountOfSubstance Mg = 6060.5;
-        parameter SI.HeatCapacity MrCpr = 1.4*4.1868e7;
-        parameter SI.SpecificEnergy Hreac = -894*4.1868e3;
-        parameter Real UA = 1.14*4.1868e6 "J/(K*s)";
-        parameter SI.MolarFlowRate FIn = 5;
-        parameter SI.MolarFlowRate FM1 = 190;
-        parameter SI.MolarFlowRate Fg = 8500;
-        parameter SI.MassFlowRate Fw = 3.11e5*18e-3;
-        parameter SI.Temperature Tf = 360;
-        parameter SI.Temperature Twi = 289.56;
-        parameter Real RR = 8.20575e-5;
-        parameter SI.MolarHeatCapacity R = 8.314;
-        parameter SI.Temperature Tfeed=293;
-        //define parameter theta
-         parameter SI.IonicStrength ac = 0.548;
-         parameter Real kp0 = 85e-3;
-         parameter Real Ea = 9e3*4.1868 "J/mol";
-         parameter Real kd = 1e-4 "s^-1";
-         //States
-         SI.Concentration In_con(start = 483.5818, fixed=true)
-        "Molar concentration of inert in the gas phase";
-         SI.Concentration M1_con(start = 218.6872, fixed=true)
-        "Molar concentration of ethylene in the gas phase";
-         SI.AmountOfSubstance Y1(start = 5.0385) "Moles of active site type 1";
-         SI.AmountOfSubstance Y2(start = 5.0385) "Moles of active site type 2";
-         SI.Temperature T(start = 360.069) "Reactor temperature";
-         SI.Temperature Tw(start = 290.3755)
-        "Cooling water temperature from exchanger";
-         SI.Temperature Tg(start = 294.3801) "Recycle gas temperature";
-         Real bt;
-         Real RM1;
-         Real Cpg;
-         Real Hf;
-         Real Hg1;
-         Real Hg0;
-         Real Hr;
-         Real Hpol;
-         // Control Signal
-      Modelica.Blocks.Interfaces.RealInput Fc annotation (Placement(transformation(
-              extent={{-60,20},{-20,60}}), iconTransformation(extent={{-60,20},{-20,
-                60}})));
-    equation
-         //Algebric equations:
-         bt = Vp * Cv * sqrt((M1_con+In_con) * RR * T - Pv);
-         0 = M1_con * kp0 * exp(-Ea/R*(1/T-1/Tf)) * (Y1+Y2) -RM1;
-         0 = M1_con/(M1_con + In_con) * Cpm1 + In_con/(M1_con + In_con) * CpIn-Cpg;
-         0 = FM1 * Cpm1 * ( Tfeed - Tf) + FIn * CpIn * (Tfeed - Tf)-Hf;
-         0 = Fg * (Tg - Tf) * Cpg-Hg1;
-         0 = (Fg + bt) * (T - Tf) * Cpg-Hg0;
-         0 = Hreac * Mw1 * RM1-Hr;
-         0 = Cppol * (T - Tf) * RM1 * Mw1-Hpol;
-         // Differential equations:
-         der(In_con) = (FIn - In_con/(M1_con + In_con) * bt)/Vg;
-         der(M1_con) = (FM1 - M1_con/(M1_con + In_con) * bt - RM1)/Vg;
-         der(Y1)     = Fc * ac - kd * Y1 - RM1 * Mw1 * Y1/ Bw;
-         der(Y2)     = Fc * ac - kd * Y2 - RM1 * Mw1 * Y2/ Bw;
-         der(T)      = (Hf + Hg1 - Hg0 - Hr - Hpol)/(MrCpr + Bw * Cppol);
-         der(Tw)     = Fw/Mw * (Twi - Tw) - UA/(Mw * Cpw) * (Tw - Tg);
-         der(Tg)     = Fg/Mg * (T - Tg) + UA/(Mg * Cpg) * (Tw - Tg);
-      annotation (Icon(graphics),
-        experiment(StopTime=36000),
-        __Dymola_experimentSetupOutput,
-        Documentation(info="<HTML>
-    <p>
-    Based on the Polyeth model the Feed is defined as an input to experiment in Dymola.
-    </p>
-    <p>
-    Simulation time: 36000s
-    </p>
-    </HTML>"));
-    end PolyethTest;
-
-    package Examples
-      model PolyethInput
-        JMExamples.Polyeth.PolyethTest
-                     polyethInput
-          annotation (Placement(transformation(extent={{20,0},{40,20}})));
-        Modelica.Blocks.Sources.Constant const(k=1/1800) "1"
-          annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-      equation
-        connect(const.y, polyethInput.Fc) annotation (Line(
-            points={{-19,10},{4,10},{4,14},{26,14}},
-            color={0,0,127},
-            smooth=Smooth.None));
-        annotation (Diagram(graphics),
-          experiment(StopTime=36000),
-          __Dymola_experimentSetupOutput,
-           Documentation(info="<HTML>
-    <p>
-    The model is based on PolyethTest and a constant input is set.
-    </p>
-    <p>
-    Simulation time: 36000s
-    </p>
-    
-    </HTML>"));
-      end PolyethInput;
-    end Examples;
-  end Polyeth;
 
   package QuadrupleTank
     model QuadrupleTank
@@ -3741,8 +2462,7 @@ Simulation time: 36000s
           der(x3) = -au/Au*sqrt(2*g*x3) + (1-gamma1)*k2/Au*u2;
           der(x4) = -au/Au*sqrt(2*g*x4) + (1-gamma2)*k1/Au*u1;
       annotation (Diagram(graphics),
-        experiment(StopTime=60),
-        __Dymola_experimentSetupOutput);
+        experiment(StopTime=60));
     end QuadrupleTank;
 
     package Examples
@@ -3799,7 +2519,6 @@ Simulation time: 10s
 
 </HTML>"),
         experiment(StopTime=10),
-        __Dymola_experimentSetupOutput,
       Icon(graphics={Line(
             points={{40,4},{40,0},{38,-4},{34,-10},{28,-16},{22,-20},{16,-24},{0,-34},
                 {-6,-36},{-10,-36},{-14,-34},{-18,-32},{-22,-28},{-26,-22},{-30,-18},
@@ -3848,7 +2567,6 @@ Simulation time: 10s
       annotation (
         Diagram(graphics),
         experiment(StopTime=10, NumberOfIntervals=50),
-        __Dymola_experimentSetupOutput,
         Documentation(info="<HTML>
 <p>
 input: ramp function

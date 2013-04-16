@@ -314,10 +314,10 @@ end EnumerationTests.EnumerationTest12;
 			methodName="diagnostics",
 			methodResult="
 Diagnostics for flattened class EnumerationTests.FlatAPIEnum1
-Number of independent constants:              4
+Number of independent constants:              6
   Number of Real independent constants:       0
   Number of Integer independent constants:    0
-  Number of Enum independent constants:       4
+  Number of Enum independent constants:       6
   Number of Boolean independent constants:    0
   Number of String independent constants:     0
 Number of dependent constants:                0
@@ -338,10 +338,10 @@ Number of dependent parameters:               2
   Number of Enum dependent parameters:        2
   Number of Boolean dependent parameters:     0
   Number of String dependent parameters:      0
-Number of variables :                         2
+Number of variables :                         0
   Number of Real variables:                   0
   Number of Integer variables:                0
-  Number of Enum variables:                   2
+  Number of Enum variables:                   0
   Number of Boolean variables:                0
   Number of String variables:                 0
 Number of Real differentiated variables:      0
@@ -353,21 +353,21 @@ Number of inputs:                             0
   Number of Enum inputs:                      0
   Number of Boolean inputs:                   0
   Number of String inputs:                    0
-Number of discrete variables :                2
+Number of discrete variables :                0
   Number of Real discrete variables:          0
   Number of Integer discrete variables:       0
-  Number of Enum discrete variables:          2
+  Number of Enum discrete variables:          0
   Number of Boolean discrete variables:       0
   Number of String discrete variables:        0
-Number of equations:                          2
+Number of equations:                          0
 Number of variables with binding expression:  0
   Number of Real variables with binding exp:  0
   Number of Integer variables binding exp:    0
   Number of Enum variables binding exp:       0
   Number of Boolean variables binding exp:    0
   Number of String variables binding exp:     0
-Total number of equations:                    2
-Number of initial equations:                  2
+Total number of equations:                    0
+Number of initial equations:                  0
 Number of event indicators in equations:      0
 Number of event indicators in init equations: 0
 
@@ -376,6 +376,8 @@ Independent constants:
  bic: number of uses: 0, isLinear: true
  adc: number of uses: 0, isLinear: true
  bdc: number of uses: 0, isLinear: true
+ av: number of uses: 0, isLinear: true
+ bv: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -392,8 +394,6 @@ Differentiated variables:
 Derivative variables: 
 
 Discrete variables: 
- av: number of uses: 2, isLinear: true, alias: no
- bv: number of uses: 2, isLinear: true, alias: no
 
 Algebraic real variables: 
 
@@ -403,8 +403,6 @@ Alias sets:
 0 variables can be eliminated
 
 Incidence:
- eq 0: av 
- eq 1: bv 
 
 Connection sets: 0 sets
 ")})));
@@ -424,9 +422,7 @@ Connection sets: 0 sets
 			flatModel="
 fclass EnumerationTests.ShortEnumDecl
  parameter EnumerationTests.ShortEnumDecl.A b = EnumerationTests.ShortEnumDecl.A.one /* EnumerationTests.ShortEnumDecl.A.one */;
- Real x;
-equation
- x = 1;
+ constant Real x = 1;
 
 public
  type EnumerationTests.ShortEnumDecl.A = enumeration(one, two);

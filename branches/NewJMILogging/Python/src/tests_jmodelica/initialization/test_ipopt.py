@@ -132,7 +132,7 @@ class TestNLPInit:
             'DAEInitTest.mo')
         cpath_daeinit = "DAEInitTest"
         compile_jmu(cpath_daeinit, fpath_daeinit, 
-            compiler_options={'state_start_values_fixed':True})
+            compiler_options={'state_start_values_fixed':True, 'variability_propagation':False})
         
     def setUp(self):
         """Test setUp. Load the test model."""                    

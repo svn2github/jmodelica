@@ -87,6 +87,7 @@ aspect TransformCanonical {
 		addFPreVariables();
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
+		variabilityPropagationIfSet();
 		root().flushAllRecursive();
 		genInitialEquations();
 		sortDependentParameters();
@@ -100,16 +101,17 @@ aspect TransformCanonical {
 
 	public void FClass.transformCanonical() {
 		beginStep("transformCanonical()");
-
+	
 		transformCanonicalBase();
-
+	
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
 		}
-
+	
 		root().flushAllRecursive();	
 		transformCanonicalCleanup();
+
 		endStep("transformCanonical()");
 	}
 		
@@ -1763,12 +1765,12 @@ aspect TransformCanonical {
 		for (FAbstractEquation equationToReplace : equationsToReplace) {
 						
 			// How many equations are there in this when clause?
-			List<FEquation> newEquations = equationToReplace.getInitialEquations();
+			List<FAbstractEquation> newEquations = equationToReplace.getInitialEquations();
 		
 		    // Put the Equations in an ArrayList rather than a List
 		    // TODO: There are probably more elegant ways to do this...
 			java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
-			for (FEquation e : newEquations) {
+			for (FAbstractEquation e : newEquations) {
 				newEquations_.add(e);	
 			}
 
@@ -1900,7 +1902,7 @@ aspect TransformCanonical {
 		FQName pref = copyPrefix();
 		while (4 * order >= derPrefixString.length())
 			derPrefixString = derPrefixString + derPrefixString;
-		String name = derPrefixString.substring(0, 4 * order + 1) + lastPartName();
+		String name = derPrefixString.substring(0, 4 * order + 1) + lastActualPartName();
 		if (hasFArraySubscripts())
 			return pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
 		else

@@ -74,14 +74,9 @@ aspect Flattening {
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
     	beginStep("flattenInstClassDecl()");
 		fc.setFQName(new FQNameString(qualifiedName()));
-		fc.addFEquationBlock(new FEquationBlock(new List()));			
-		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) {
-		   ae.flatten(prefix, fc);
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		}
-		getInstComponentDeclList().flatten(fc);
-		getInstExtendsList().flatten(fc);
+		fc.addFEquationBlock(new FEquationBlock(new List()));
+		buildConnectionSets(fc);
+		flatten(fc);
 		fc.removeUniqueFVariableSet();
 		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
@@ -586,21 +581,39 @@ aspect Flattening {
 	
 	public void InstNode.flatten(FClass fc) {
 		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) {
+		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.flatten(prefix, fc);
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 	}
 	
 	public void InstComponentDecl.flatten(FClass fc) {
-		if (!isDisabled()  && !(isOuter() && !isInner())) {
+		if (!isDisabled() && !(isOuter() && !isInner())) {
 			super.flatten(fc);
 		}
 	}
 	
-	public void InstClassDecl.flatten(FClass fc) {}
+	public void ASTNode.buildConnectionSets(FClass fc) {
+		for (ASTNode n : this) {
+			n.buildConnectionSets(fc);
+		}
+	}
+	
+	public void InstNode.buildConnectionSets(FClass fc) {
+		FQName prefix = getFQName();
+		for (FAbstractEquation ae : getFAbstractEquations()) 
+		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
+		getInstComponentDeclList().buildConnectionSets(fc);
+		getInstExtendsList().buildConnectionSets(fc);
+	}
+	
+	public void InstComponentDecl.buildConnectionSets(FClass fc) {
+		if (!isDisabled() && !(isOuter() && !isInner())) {
+			super.buildConnectionSets(fc);
+		}
+	}
+	
+//	public void InstClassDecl.flatten(FClass fc) {}
 	
 	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc) {}
 	
@@ -1269,6 +1282,8 @@ aspect FlatExpressions {
 			if (feqn != null)
 				eqns.add(feqn);
 		}
+		if (eqns.getNumChild() == 0)
+			return null;
 		return new FForClauseE(forIndex, eqns);
 	}
 
@@ -1281,13 +1296,20 @@ aspect FlatExpressions {
 			if (feqn != null)
 				res.addFAbstractEquation(feqn);
 		}
+		if (res.getNumFAbstractEquation() == 0)
+			return null;
 		return res;
 	}
 
 	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
-		if (hasElse())
-			res.setElse(getElse().flattenEqn(prefix, fc));
+		if (res == null)
+			return null;
+		if (hasElse()) {
+			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
+			if (elseRes != null)
+				res.setElse(elseRes);
+		}
 		res.setTest(getTest().flatten(prefix));
 		return res;
 	}
@@ -1297,6 +1319,8 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
+		if (isIgnored())
+			return null;
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
@@ -1840,13 +1864,15 @@ aspect FlatExpressions {
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
 	
-	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
+	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	
 	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FOuterProduct FOuterProduct.flatten(FQName prefix) { return new FOuterProduct(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	                     
+	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
+
 	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
 	
 	

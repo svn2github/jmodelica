@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from collections import OrderedDict
 
 from scipy.io.matlab.mio import loadmat
 import matplotlib.pyplot as plt
@@ -26,7 +27,7 @@ from pymodelica import compile_fmux
 from pyfmi import load_fmu
 from pyjmi import CasadiModel
 from pyjmi.common.core import TrajectoryLinearInterpolation
-from pyjmi.optimization.casadi_collocation import ParameterEstimationData
+from pyjmi.optimization.casadi_collocation import MeasurementData
 
 def run_demo(with_plots=True):
     """
@@ -146,7 +147,7 @@ def run_demo(with_plots=True):
     The collocation algorithm minimizes, if the parameter_estimation_data
     option is set, a quadrature approximation of the integral
 
-    \int_{t_0}^{t_f} (y(t_i)-y_i^{meas})^T Q (y(t_i)-y_i^{meas}) dt
+    \int_{t_0}^{t_f} (y(t)-y^{meas}(t))^T Q (y(t)-y^{meas}(t)) dt
 
     The measurement data is given as a matrix where the first
     column is time and the following column contains data corresponding
@@ -159,24 +160,29 @@ def run_demo(with_plots=True):
     The weighting matrix Q may be used to express that inputs are typically
     more reliable than than measured outputs.
     """
-
-    Q = N.array([[1.,0,0,0],[0,1,0,0],[0,0,10,0],[0,0,0,10]])
-    measured_variables=['qt.x1','qt.x2','qt.u1','qt.u2']
-    data = N.transpose(N.vstack((t_meas,y1_meas,y2_meas,u1,u2)))
-
-    par_est_data = ParameterEstimationData(Q,measured_variables,data)
-
+    
+    # Create measurement data
+    Q = N.diag([1., 1., 10., 10.])
+    data_x1 = N.vstack([t_meas, y1_meas])
+    data_x2 = N.vstack([t_meas, y2_meas])
+    data_u1 = N.vstack([t_meas, u1])
+    data_u2 = N.vstack([t_meas, u2])
+    unconstrained = OrderedDict()
+    unconstrained['qt.x1'] = data_x1
+    unconstrained['qt.x2'] = data_x2
+    unconstrained['u1'] = data_u1
+    unconstrained['u2'] = data_u2
+    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
+    
     opts = model_casadi.optimize_options()
-
+    
     opts['n_e'] = 60
-
-    opts['parameter_estimation_data'] = par_est_data
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
-    #opts['IPOPT_options']['max_iter'] = 0
-
+    
+    opts['measurement_data'] = measurement_data
+    
     res = model_casadi.optimize(algorithm="LocalDAECollocationAlg",
                                 options=opts)
-
+    
     # Load state profiles
     x1_opt = res["qt.x1"]
     x2_opt = res["qt.x2"]
@@ -187,20 +193,16 @@ def run_demo(with_plots=True):
     t_opt  = res["time"]
 
     # Extract optimal values of parameters
-    a1_opt = res["qt.a1"]
-    a2_opt = res["qt.a2"]
+    a1_opt = res.final("qt.a1")
+    a2_opt = res.final("qt.a2")
 
-    # Print optimal parameter values
+    # Print and assert optimal parameter values
     print('a1: ' + str(a1_opt*1e4) + 'cm^2')
     print('a2: ' + str(a2_opt*1e4) + 'cm^2')
+    a_ref = [0.02656702, 0.02713898]
+    N.testing.assert_allclose(1e4 * N.array([a1_opt, a2_opt]),
+                              [0.02656702, 0.02713898], rtol=1e-4)
     
-    assert N.abs(res.final('qt.x1') - 0.0707102)  < 1e-3
-    assert N.abs(res.final('qt.x2') - 0.06655758) < 1e-3
-    assert N.abs(res.final('qt.x3') - 0.02736501) < 1e-3
-    assert N.abs(res.final('qt.x4') - 0.02789977) < 1e-3
-    assert N.abs(res.final('u1') - 6.0)           < 1e-3
-    assert N.abs(res.final('u2') - 5.0)           < 1e-3
-
     # Plot
     if with_plots:
         plt.figure(1)

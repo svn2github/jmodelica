@@ -314,9 +314,7 @@ aspect FlatVariability {
 	eq FNdimsExp.expVariability() = fConstant();
 	eq FEndExp.expVariability()   = fParameter();
 	eq FTimeExp.expVariability()  = fContinuous();
-	
-	eq FAbsExp.expVariability() = variabilityInNoEventExp();
-	eq FRelExp.expVariability() = variabilityInNoEventExp();
+	eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	
@@ -338,7 +336,14 @@ aspect FlatVariability {
 		return total;
 	}
 	
+	  
+	// TODO: Maybe there should be a special variability for "no return value"
+	eq FConnectionsOp.expVariability() = null;
+	eq FConnBoolOp.expVariability()    = fConstant();
+	
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
+	eq FDerExp.expVariability() = 
+			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		FAbstractVariable variable = myFV();
@@ -370,7 +375,7 @@ aspect FlatVariability {
 	eq FZeros.expVariability()     = fConstant();
 	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()    = fDiscrete();
+	eq FPreExp.expVariability()    = getFExp().variability().parameterOrLess() ? getFExp().variability() : fDiscrete();
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();

@@ -1133,10 +1133,10 @@ aspect FlatNames {
     
     syn String FDerivativeFunction.name() = getNameNoTransform().name();
       
-    eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
-    eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
-    eq FDummyDerivativeVariable.name()  =getFQNameNoTransform().derName();
-    eq FHDummyDerivativeVariable.name()  =getFQNameNoTransform().hDerName(getOrder());
+    eq FDerivativeVariable.name()       = getFQNameNoTransform().derName();
+    eq FHDerivativeVariable.name()      = getFQNameNoTransform().hDerName(getOrder());
+    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FHDummyDerivativeVariable.name() = getFQNameNoTransform().hDerName(getOrder());
 
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
@@ -2450,47 +2450,23 @@ aspect ComponentDeclMethods {
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstComponentDecl.isOuter() {
-    
-        if (getComponentDecl().isOuter())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
     
         /**
      * Check if a InstClassDecl is declared inner.
      */
-    syn boolean InstClassDecl.isInner() {
-    
-        if (getClassDecl().isInner())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
 
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstClassDecl.isOuter() {
-    
-        if (getClassDecl().isOuter())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
     
     /**
      * Check if a component is disabled by a conditional clause
      */
-    syn boolean InstComponentDecl.isDisabled() {
-    	if (!hasConditionalAttribute() || 
-    			(hasConditionalAttribute() && getConditionalAttribute().ceval().booleanValue())) {
-    		return false;
-    	} else {
-    		return true;
-    	}
-    }
+    syn boolean InstComponentDecl.isDisabled() = 
+    	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;

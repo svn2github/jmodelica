@@ -668,6 +668,8 @@ aspect Connections {
 			for (FAbstractEquation equ : getFAbstractEquations())
 			    equ.buildConnectionSets(prefix, csm);
 		}
+		for (InstForIndex fi : getInstForIndexs())
+			fi.getInstPrimitive().setEvaluationValue(null, null);
 	}
 	
 	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
@@ -678,4 +680,7 @@ aspect Connections {
 		}
 	}
 
+}
+
+aspect OverconstrainedConnections {
 }

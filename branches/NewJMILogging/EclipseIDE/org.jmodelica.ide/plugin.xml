@@ -381,7 +381,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.jmodelica.ide.preferences.Preferences">
+            class="org.jmodelica.ide.preferences.ModelicaPreferences">
       </initializer>
    </extension>
    <extension

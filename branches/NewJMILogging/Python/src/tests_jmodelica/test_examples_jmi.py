@@ -19,8 +19,12 @@
 """
 
 from tests_jmodelica import testattr
-from pyfmi.examples import *
 from pyjmi.examples import *
+
+@testattr(stddist = True)
+def test_ast_example():
+    """ Test the ast_example example."""
+    ast_example.run_demo(False)
 
 @testattr(ipopt = True)
 def test_bang_control():
@@ -72,6 +76,11 @@ def test_cstr():
     """ Test the cstr example. """
     cstr.run_demo(False)
 
+@testattr(slow = True)
+def test_cstr_mpc():
+    """ Test the cstr_mpc example. """    
+    cstr_mpc.run_demo(False)
+
 @testattr(ipopt = True)
 def test_cstr2():
     """ Test the cstr2 example. """
@@ -82,21 +91,15 @@ def test_dist1_init_sim():
     """ Test the dist1_init_sim example. """
     dist1_init_sim.run_demo(False)
     
-#@testattr(ipopt = True)
-#def test_flight_path():
-#    """ Test the flight_path example. """    
-#    flight_path.run_demo(False)
-    
-#@testattr(ipopt = True)
-#def test_greenhouse():
-#    """ Test the greenhouse example. """
-#    greenhouse.run_demo(False)
+@testattr(ma27 = True)
+def test_distillation():
+    """ Test the distillation example. """  
+    distillation.run_demo(False)
 
-# Optimization fails with number of iterations exceeded, but test still
-#@testattr(ipopt = True)
-#def test_helicopter_der():
-#    """ Test the helicopter_der example. """    
-#    helicopter_der.run_demo(False)    
+@testattr(ma27 = True)
+def test_distillation1_opt():
+    """ Test the distillation1_opt example. """
+    distillation1_opt.run_demo(False)
     
 @testattr(ipopt = True)
 def test_lagrange_cost():
@@ -107,11 +110,6 @@ def test_lagrange_cost():
 def test_leadtransport():
     """ Run the Lead example """
     leadtransport.run_demo(False)
-    
-@testattr(ipopt = True)
-def test_marine_population():
-    """ Test the marine_population example. """    
-    marine_population.run_demo(False)
     
 @testattr(ipopt = True)
 def test_moon_lander():
@@ -127,16 +125,6 @@ def test_parameter_estimation_1():
 def test_pendulum():
     """ Test the pendulum example """
     pendulum.run_demo(False)
-
-@testattr(ipopt = True)
-def test_penicillin_plant():
-    """ Test the penicillin_plant example. """    
-    penicillin_plant.run_demo(False)
-    
-@testattr(ipopt = True)
-def test_penicillin_plant_time():
-    """ Test the penicillin_plant_time example. """    
-    penicillin_plant_time.run_demo(False)
 
 @testattr(ipopt = True)
 def test_qt_par_est():

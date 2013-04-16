@@ -903,7 +903,7 @@ x = if a[1,1] > a[1,2] then true else false;
 	annotation(__JModelica(UnitTesting(tests={ 
 		TimeTestCase(
 			name="ParameterEval1",
-			description="",
+			description="Make sure time complexity of evaluation of array parameters is of an acceptable order",
 			maxTime=1.0
  )})));
 end ParameterEval1;

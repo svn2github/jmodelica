@@ -182,6 +182,6 @@ def run_demo(with_plots=True):
     
     print("*** Model statistics for CauerLowPassAnalog *** ")
     print("Number of differentiated variables: %d" % filter_flat_model.numDifferentiatedRealVariables())
-    print("Number of algebraic variables:      %d" % filter_flat_model.numAlgebraicRealVariables())
+    print("Number of algebraic variables:      %d" % filter_flat_model.numAlgebraicContinousRealVariables())
     print("Number of equations:                %d" % filter_flat_model.numEquations())
     print("Number of initial equation:         %d" % filter_flat_model.numInitialEquations())
