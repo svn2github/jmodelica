@@ -169,7 +169,7 @@ static void buffer_type(buf_t *buf, type_t type) {
             case jmiLogReal:   buffer(buf, "real");   break;
             case jmiLogInt:    buffer(buf, "int");    break;
             case jmiLogBool:   buffer(buf, "bool");   break;
-            case jmiLogVref:   buffer(buf, "vref");    break;
+            case jmiLogVref:   buffer(buf, "vref");   break;
             case jmiLogNamed:  buffer(buf, "named");  break;
             case jmiLogString: buffer(buf, "string"); break;
             case jmiLogAny:    buffer(buf, "any");    break;
@@ -693,8 +693,7 @@ void jmi_log_string_(log_t *log, const char *x) { log_value_(log, jmiLogString, 
 void jmi_log_real_(log_t *log, jmi_real_t x) {
     char buf[128];
     char *rep;
-/*    sprintf(buffer, "%30.16E", x);*/
-    sprintf(buf, "%8.1E", x);
+    sprintf(buf, "%30.16E", x);
 
     /* Don't put spaces in the value; it will be quoted. */
     force_commas(log);
