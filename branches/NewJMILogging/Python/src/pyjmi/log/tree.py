@@ -49,8 +49,11 @@ class NamedNode(object):
     def __repr__(self):
         return self.name + "( " + repr(self.value) + " )"
 
-    def children(self, name):
-        return [self.value] if self.name == name else find_children(self.value, name)
+    def children(self, names):
+        if isinstance(names, str):
+            return [self.value] if self.name == names else find_children(self.value, names)
+        else:
+            return [self] if self.name in names else find_children(self.value, names)
 
 
 class NodeList(object):
