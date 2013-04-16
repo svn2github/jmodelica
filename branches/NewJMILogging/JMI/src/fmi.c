@@ -114,30 +114,30 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoA");
-        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian A>", jmi->color_info_A->n_nz);
-        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian A>", jmi->color_info_A->n_groups);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian A>", jmi->color_info_A->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian A>", jmi->color_info_A->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_B != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoB");
-        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian B>", jmi->color_info_B->n_nz);
-        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian B>", jmi->color_info_B->n_groups);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_B");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian B>", jmi->color_info_B->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian B>", jmi->color_info_B->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_C != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoC");
-        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian C>", jmi->color_info_C->n_nz);
-        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian C>", jmi->color_info_C->n_groups);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_C");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian C>", jmi->color_info_C->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian C>", jmi->color_info_C->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_D != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "colorInfoD");
-        jmi_log_fmt(jmi->log, logInfo, "numNonzeros: %d <in Jacobian D>", jmi->color_info_D->n_nz);
-        jmi_log_fmt(jmi->log, logInfo, "numColors: %d <in Jacobian D>", jmi->color_info_D->n_groups);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_D");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian D>", jmi->color_info_D->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian D>", jmi->color_info_D->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
@@ -194,13 +194,13 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_pd && index<((fmi_t *)c)->jmi->offs_integer_ci) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Real dependent parameter> variable: #r%d#", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_real_ci && index<((fmi_t *)c)->jmi->offs_real_pi) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Real constant> variable: #r%d#", vr[i]);
             return fmiError;
         }
@@ -236,13 +236,13 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_pd && index<((fmi_t *)c)->jmi->offs_boolean_ci) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Integer dependent parameter> variable: #i%d#", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_ci && index<((fmi_t *)c)->jmi->offs_integer_pi) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Integer constant> variable: #i%d#", vr[i]);
             return fmiError;
         }
@@ -278,13 +278,13 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_pd && index<((fmi_t *)c)->jmi->offs_real_dx) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Boolean dependent parameter> variable: #b%d#", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_ci && index<((fmi_t *)c)->jmi->offs_boolean_pi) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "cannotSetVariable",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
                          "<Cannot set Boolean constant> variable: #b%d#", vr[i]);
             return fmiError;
         }
@@ -493,7 +493,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "error", "Failed to converge during global fixed point iteration "
+            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
                          "due to too many iterations at> t:%g <(initialization).>", jmi_get_t(jmi)[0]);
             return fmiError;
         }
@@ -590,7 +590,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "error", "Evaluating the derivatives failed at> t:%g",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "Evaluating the derivatives failed at> t:%g",
                          jmi_get_t(((fmi_t *)c)->jmi)[0]);
             return fmiError;
         }
@@ -677,10 +677,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 
 	/*
     if (fmi -> fmi_logging_on) {
-        jmi_log_node(jmi->log, logInfo, "sizeOfA", "m: %d, n:%d", nx, nx);
-        jmi_log_node(jmi->log, logInfo, "sizeOfB", "m: %d, n:%d", nx, nu);
-        jmi_log_node(jmi->log, logInfo, "sizeOfC", "m: %d, n:%d", ny, nx);
-        jmi_log_node(jmi->log, logInfo, "sizeOfD", "m: %d, n:%d", ny, nu);
+        jmi_log_node(jmi->log, logInfo, "size_of_A", "m: %d, n:%d", nx, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_B", "m: %d, n:%d", nx, nu);
+        jmi_log_node(jmi->log, logInfo, "size_of_C", "m: %d, n:%d", ny, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_D", "m: %d, n:%d", ny, nu);
     }
 	 */
 
@@ -1327,7 +1327,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 
     retval = jmi_ode_derivatives(jmi);
 
-    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "globalEventIteration", 
+    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "<Starting global event iteration at> t:%E", jmi_get_t(jmi)[0]);
 
     if(retval != 0) {
@@ -1349,7 +1349,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 
         iter += 1;
         
-        iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "iteration", 
+        iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
                                       "<Global iteration> iter:%d, <at> t:%E", iter, jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
@@ -1404,7 +1404,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "failed", "<Failed to converge during global fixed point "
+            jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point "
                          "iteration due to too many iterations at> t:%E",jmi_get_t(jmi)[0]);
             jmi_log_unwind(jmi->log, top_node);
             return fmiError;
@@ -1415,7 +1415,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 
     /* Only do the final steps if the event iteration is done. */
     if (eventInfo->iterationConverged == fmiTrue) {
-        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "finalStep");
+        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
 
     	/* Compute the next time event */
     	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
@@ -1506,7 +1506,7 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
     jmi_t* jmi = fmi->jmi;
     jmi_block_residual_t* block;
     int i;
-    jmi_log_node_t topnode = jmi_log_enter(jmi->log, logInfo, "fmiDebugInfo");
+    jmi_log_node_t topnode = jmi_log_enter(jmi->log, logInfo, "FMIDebugInfo");
     
     /* Extract debug information from initialization*/
     for (i = 0; i < jmi->n_dae_init_blocks; i++) {
@@ -1519,7 +1519,7 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
             jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "initialization");
             jmi_log_fmt(jmi->log, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
                         block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            jmi_log_fmt(jmi->log, logInfo, "timeSpent: %f", block->time_spent);
+            jmi_log_fmt(jmi->log, logInfo, "time_spent: %f", block->time_spent);
             jmi_log_leave(jmi->log, node);
         }
     }
@@ -1533,10 +1533,10 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         if (nniters > 0) {
             /* Output to logger */
             /* NB: Exactly the same code as above. Todo: factor out? */
-            jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "DAEBlocks");
+            jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "dae_blocks");
             jmi_log_fmt(jmi->log, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
                         block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            jmi_log_fmt(jmi->log, logInfo, "timeSpent: %f", block->time_spent);
+            jmi_log_fmt(jmi->log, logInfo, "time_spent: %f", block->time_spent);
             jmi_log_leave(jmi->log, node);            
         }
     }

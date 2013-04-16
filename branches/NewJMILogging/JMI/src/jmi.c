@@ -450,7 +450,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi_real_t *t = jmi_get_t(jmi);
 
     if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi->log, logInfo, "equationSolve", 
+        node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "<Model equations evaluation invoked at> t:%E", t[0]);
     }
 
@@ -518,7 +518,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
 	}
 
     if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi->log, logInfo, "equationSolve", 
+        node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "<Model equations evaluation invoked at> t:%E", t[0]);
     }
 

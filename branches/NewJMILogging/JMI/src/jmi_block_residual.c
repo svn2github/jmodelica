@@ -213,7 +213,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
      * Right now event handling at top level will iterate.
      */
     if (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) {
-        jmi_log_node_t top_node = jmi_log_enter_fmt(jmi->log, logInfo, "blockEventIteration", 
+        jmi_log_node_t top_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockEventIterations",
                                       "<Starting block (local) event iteration at> t:%E <in> block:%d", 
                                       jmi_get_t(jmi)[0], block->index);
 
@@ -240,7 +240,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         sw_old = (jmi_real_t*)calloc(nbr_allocated_iterations*nbr_sw, sizeof(jmi_real_t));
         memcpy(sw_old,switches,nbr_sw*sizeof(jmi_real_t)); /* Store the current switches */
         
-        jmi_log_reals(jmi->log, logInfo, "IVs", block->x, block->n);
+        jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
         jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
         jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
 
@@ -252,7 +252,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             iter += 1;
 
 #if 0            
-            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "iteration", "<Initial iteration> iter:%d <at> t:%E", 
+            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "<Initial iteration> iter:%d <at> t:%E", 
                                           iter, jmi_get_t(jmi)[0]);
             
 
@@ -267,7 +267,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 			block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
 			jmi_write_back_to_z_val(jmi);
             
-                        jmi_log_reals(jmi->log, logInfo, "IVs", block->x, block->n);
+                        jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
                         jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
                         jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
             
@@ -298,7 +298,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_log_leave(jmi->log, iter_node);
 #endif            
 
-            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "iteration", "<Local iteration> iter:%d <at> t:%E", 
+            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "<Local iteration> iter:%d <at> t:%E", 
                                           iter, jmi_get_t(jmi)[0]);
             /* Solve block */
             ef = block->solve(block); if (ef!=0){ break; }
@@ -310,7 +310,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
             jmi_write_back_to_z_val(jmi);
             
-            jmi_log_reals(jmi->log, logInfo, "IVs", block->x, block->n);
+            jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
             jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
             jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
 
@@ -352,7 +352,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         
         /* ENHANCED FIXED POINT ITERATION */
         if (converged==0 && ef==0){
-            jmi_log_node_t ebi_node = jmi_log_enter_fmt(jmi->log, logInfo, "enhancedIteration",
+            jmi_log_node_t ebi_node = jmi_log_enter_fmt(jmi->log, logInfo, "EnhancedBlockIterations",
                                           "<Starting enhanced block iteration at> t:%E", jmi_get_t(jmi)[0]);
 
             bool_old = (jmi_real_t*)calloc(nbr_allocated_iterations*nbr_bool, sizeof(jmi_real_t));
@@ -379,7 +379,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         
             iter = 0;
             while (1 && ef==0){
-                jmi_log_node_t iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "iteration", 
+                jmi_log_node_t iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", 
                                                "<Enhanced block iteration> iter:%d <at> t:%g", 
                                                iter, jmi_get_t(jmi)[0]);
 
@@ -402,7 +402,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 
                 memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
                 
-                jmi_log_reals(jmi->log, logInfo, "IVs", block->x, block->n);
+                jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
                 jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
                 jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
 

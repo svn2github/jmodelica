@@ -116,7 +116,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         
 		/* Handle events */
 		if (zero_crossning_event) {
-                    jmi_log_node(solver->jmi->log, logInfo, "event", "<An event was detected at> t:%g", tcur);
+                    jmi_log_node(solver->jmi->log, logInfo, "EulerEvent", "<An event was detected at> t:%g", tcur);
             return JMI_ODE_EVENT;
 		}
 
