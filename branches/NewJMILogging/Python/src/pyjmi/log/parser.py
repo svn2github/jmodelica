@@ -18,6 +18,8 @@
 Parser for the new FMU log file format
 """
 
+import numpy as np
+
 #import pyjmi.log.lexer
 #from pyjmi.log.lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF
 #from pyjmi.log.tree import Node, Comment
@@ -26,14 +28,17 @@ import lexer
 from lexer import SYMBOL, IDENTIFIER, COMMENT, STRING, EOF, kindof, textof
 from tree import Comment, NamedNode, NodeList
 
+def parse(tokens):
+    """Parse the token stream and return a NodeList in the format of tree.py."""
+    return nodelist_wrap(aslist(parse_nodes(Peeker(tokens))))    
 
-def parse(text):
+def parse_string(text):
     """Parse the string text and return a NodeList in the format of tree.py."""
-    return parse_nodes(Peeker(lexer.lex(text)+[(EOF, '')]))
+    return parse(lexer.lex(text)+[(EOF, '')])
 
 def parse_jmi_log(filename, modulename = 'Model'):
     """Parse the jmi log in filename and return a NodeList in the format of tree.py."""
-    return parse_nodes(Peeker(lexer.lex_lines(lexer.filter_fmi_log_lines(filename, modulename))))
+    return parse(lexer.lex_lines(lexer.filter_fmi_log_lines(filename, modulename)))
 
 
 ## Symbols ##
@@ -64,15 +69,43 @@ def expect(tokens, token):
     if actual != token:
         raise Exception("expected " + repr(token) + ", got " + repr(actual))
 
-def asnode(token):
+def asnode(token, node_type=None):
     kind, text = token
     if kind in (IDENTIFIER, STRING):
+        try:
+            if node_type == 'real':
+                return float(text)
+            elif node_type == 'int':
+                return int(text)
+            elif node_type == 'bool':
+                return bool(int(text))  # NB: quite permissive, should we only accept 0 and 1?
+        except ValueError:
+            pass
         return text
     elif kind == COMMENT:
         return Comment(text)
     else:
         raise Exception("asnode: don't know how to make a node from token " + repr(token))
 
+eltype_to_dtype = {'real': float, 'int': int, 'bool': bool, 'vref': str, 'string': str}
+
+def aslist(nodes, list_type=None):
+    try:
+        nesting = 0
+        t = list_type
+        while isinstance(t, list) and len(t) == 1:
+            nesting += 1
+            t = t[0]
+        if t in eltype_to_dtype:
+            if t == 'bool':
+                nodes = np.asarray(nodes, dtype=int)        
+            return np.asarray(nodes, dtype=eltype_to_dtype[t])
+    except ValueError:
+        pass
+    return nodes
+
+def nodelist_wrap(l):
+    return NodeList(l) if isinstance(l, list) else l
 
 ## Nonterminals ##
 
@@ -87,7 +120,7 @@ def parse_nodes(tokens):
             nodes.append(parse_node(tokens))
             if not closes_node(tokens.peek()):
                 expect(tokens, NODE_SEPARATOR)
-    return NodeList(nodes)
+    return nodes
 
 def parse_node(tokens):
     """Parse and return a node."""
@@ -104,7 +137,7 @@ def parse_node(tokens):
             tokens.next()
             return NamedNode(textof(name_token), parse_value(tokens, node_type))
         else:
-            node = NamedNode(textof(name_token), parse_list(tokens, node_type))
+            node = NamedNode(textof(name_token), nodelist_wrap(parse_list(tokens, node_type)))
             token = tokens.peek()
             if kindof(token) == IDENTIFIER: # ident list ident                
                 if not token == name_token:
@@ -138,7 +171,7 @@ def parse_value(tokens, node_type):
     """Parse and return a value."""
     token = tokens.next()
     if kindof(token) in (IDENTIFIER, STRING):
-        return asnode(token)
+        return asnode(token, node_type)
     else:
         raise Exception("parse_value: unexpected token " + token)    
 
@@ -157,7 +190,7 @@ def parse_list(tokens, node_type):
     tokens.next()
     nodes = parse_nodes(tokens)
     expect(tokens, closer)
-    return nodes
+    return aslist(nodes, node_type)
 
 
 ## Helper class ##
