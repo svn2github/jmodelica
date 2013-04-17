@@ -365,7 +365,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
           (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
         jmi_log_fmt(log, logInfo, "iteration_index:%d", nniters);
         jmi_log_reals(log, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
-        jmi_log_fmt(log, logInfo, "scaled_norm:%E", kin_mem->kin_fnorm);
+        jmi_log_fmt(log, logInfo, "scaled_residual_norm:%E", kin_mem->kin_fnorm);
         {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, "residuals", jmiLogReal);
@@ -378,7 +378,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
 void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
     if (flag != 0) {
-        jmi_log_node(jmi->log, logError, "KinsolError", "<KINSOL returned with> errorFlag: %s", KINGetReturnFlagName(flag));
+        jmi_log_node(jmi->log, logError, "KinsolError", "<KINSOL returned with> kinsol_flag: %s", KINGetReturnFlagName(flag));
     }
 }
 
@@ -1042,8 +1042,8 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, const jmi_l
     if((block->jmi->options.log_level >= 5)) {
         jmi_log_t *log = block->jmi->log;
         const char *flagname = kinsol_flag_to_name(flag);
-        if (flagname != NULL) jmi_log_fmt(log, logInfo, "<Newton solver finished with> exitFlag:%s", flagname);
-        else jmi_log_fmt(log, logInfo, "<Newton solver finished with> unknownExitFlag:%d", flag);
+        if (flagname != NULL) jmi_log_fmt(log, logInfo, "<Newton solver finished with> kinsol_exit_flag:%s", flagname);
+        else jmi_log_fmt(log, logInfo, "<Newton solver finished with unrecognized> kinsol_exit_flag:%d", flag);
         jmi_log_leave(log, *node);
     }
 }

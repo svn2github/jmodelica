@@ -58,7 +58,7 @@ int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
     
     if(flag != 0) {
         jmi_log_node(jmi->log, logError, "Error", "<Evaluating the event indicators failed. "
-                     "Returned with> errorFlag: %d", flag);
+                     "Returned with> error_flag: %d", flag);
         return -1; /* Failure */
     }
     
@@ -88,7 +88,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
         flag = CVodeReInit(integrator->cvode_mem, *(jmi_get_t(solver->jmi)), integrator->y_work);
         if (flag<0){
             jmi_log_node(solver->jmi->log, logError, "Error", "<Failed to re-initialize the solver. "
-                         "Returned with> errorFlag: %d", flag);
+                         "Returned with> error_flag: %d", flag);
             return JMI_ODE_ERROR;
         }
     }
@@ -97,14 +97,14 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
     flag = CVodeSetStopTime(integrator->cvode_mem, t_stop);
     if (flag < 0){
         jmi_log_node(solver->jmi->log, logError, "Error", "<Failed to specify the stop time. "
-                     "Returned with> errorFlag: %d", flag);
+                     "Returned with> error_flag: %d", flag);
         return JMI_ODE_ERROR;
     }
 
     flag = CVode(integrator->cvode_mem, t_stop, integrator->y_work,&tret,CV_NORMAL);
     if(flag<0){
         jmi_log_node(solver->jmi->log, logError, "Error", "Failed to calculate the next step. "
-                     "Returned with> errorFlag: %d", flag);
+                     "Returned with> error_flag: %d", flag);
         return JMI_ODE_ERROR;
     }
     
@@ -157,39 +157,39 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 
 	flag = CVodeInit(cvode_mem, cv_rhs, t0, integrator->y0);
     if(flag != 0) {
-        jmi_log_node(jmi->log, logError, "Error", "<Failed to initialize CVODE. Returned with> errorFlag: %d", flag);
+        jmi_log_node(jmi->log, logError, "Error", "<Failed to initialize CVODE. Returned with> error_flag: %d", flag);
         return -1;
     }
 
     flag = CVodeSStolerances(cvode_mem, integrator->rtol, integrator->atol);
     if(flag!=0){
-        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the tolerances. Returned with> errorFlag: %d", flag);
+        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the tolerances. Returned with> error_flag: %d", flag);
         return -1;
     }
 
     flag = CVDense(cvode_mem, solver->n_real_x);
     if(flag!=0){
-        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the linear solver. Returned with> errorFlag: %d", flag);
+        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the linear solver. Returned with> error_flag: %d", flag);
         return -1;
     }
 
     flag = CVodeSetUserData(cvode_mem, (void*)solver);
     if(flag!=0){
-        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the user data. Returned with> errorFlag: %d", flag);
+        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the user data. Returned with> error_flag: %d", flag);
         return -1;
     }
     
     if (jmi->n_sw > 0){
         flag = CVodeRootInit(cvode_mem, solver->n_sw, cv_root);
         if(flag!=0){
-            jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the event indicator function. Returned with> errorFlag: %d", flag);
+            jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the event indicator function. Returned with> error_flag: %d", flag);
             return -1;
         }
     }
     
     flag = CVodeSetErrHandlerFn(cvode_mem, cv_err, (void*)solver);
     if(flag!=0){
-        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the error handling function. Returned with> errorFlag: %d", flag);
+        jmi_log_node(jmi->log, logError, "Error", "<Failed to specify the error handling function. Returned with> error_flag: %d", flag);
         return -1;
     }
 
