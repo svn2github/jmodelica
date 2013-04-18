@@ -15,14 +15,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = sin(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = sin(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADsin;
 
@@ -41,14 +37,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = cos(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * -sin(_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = cos(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * -sin(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADcos;
 
@@ -67,14 +59,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = tan(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (cos(_x1_1) * cos(_x1_1));
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = tan(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (cos(_x1_1) * cos(_x1_1)) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADtan;
 
@@ -94,14 +82,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = asin(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / sqrt(1 - _x1_1 * _x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = asin(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / sqrt(1 - _x1_1 * _x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADasin;
 
@@ -121,14 +105,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = acos(_x1_1);
-d_0 = - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / sqrt(1 - _x1_1 * _x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = acos(_x1_1) - (_y_0);
+(*dF)[0] = - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / sqrt(1 - _x1_1 * _x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADacos;
 
@@ -148,14 +128,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = atan(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (1 + _x1_1 * _x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = atan(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (1 + _x1_1 * _x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADatan;
 
@@ -177,19 +153,12 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-
-jmi_ad_var_t v_1;
-v_0 = atan2(_x1_1, _x2_2);
-d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2*_x2_2 + _x1_1*_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-v_1 = - 1.5;
-(*res)[2] = v_1 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*res)[0] = atan2(_x1_1, _x2_2) - (_y_0);
+(*dF)[0] = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2 * _x2_2 + _x1_1 * _x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = - 1.5 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADatan2;
 
@@ -209,14 +178,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = sinh(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cosh(_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = sinh(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cosh(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADsinh;
 
@@ -236,14 +201,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = cosh(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * sinh(_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = cosh(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * sinh(_x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADcosh;
 
@@ -265,13 +226,11 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
 jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
 v_0 = tanh(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * (1 - tanh(_x1_1) * tanh(_x1_1));
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = v_0 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * (1 - v_0 * v_0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADtanh;
 
@@ -293,13 +252,11 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
 jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
 v_0 = exp(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * exp(_x1_1);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = v_0 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * v_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADexp;
 
@@ -320,14 +277,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = log(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1;
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = log(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 2 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADlog;
 
@@ -348,14 +301,10 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = log10(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * log10(exp(1)) / _x1_1;
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = log10(_x1_1) - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * log10(exp(1)) / _x1_1 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADlog10;
 
@@ -377,13 +326,11 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
 jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
 v_0 = sqrt(_x1_1);
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (2 * sqrt(_x1_1));
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+(*res)[0] = v_0 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / (2 * v_0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 2 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADsqrt;
 
@@ -407,16 +354,12 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = _x1_1 + _x2_2;
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-(*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*res)[0] = _x1_1 + _x2_2 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = 3 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADadd;
 
@@ -440,16 +383,12 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = _x1_1 - _x2_2;
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-(*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*res)[0] = _x1_1 - _x2_2 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = 3 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADsub;
 
@@ -473,16 +412,12 @@ equation
 			generate_dae_jacobian=true,
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = _x1_1 * _x2_2;
-d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-(*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*res)[0] = _x1_1 * _x2_2 - (_y_0);
+(*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = 3 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADmul;
 
@@ -505,16 +440,12 @@ equation
 $C_DAE_equation_directional_derivative$
 ",
 			generatedCode="
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = jmi_divide(_x1_1,_x2_2,\"Divide by zero: x1 / x2\");
-d_0 = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2 * _x2_2);
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 1 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-(*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+(*res)[0] = jmi_divide(_x1_1,_x2_2,\"Divide by zero: x1 / x2\") - (_y_0);
+(*dF)[0] = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2 * _x2_2) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 1 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = 3 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADdiv;
 
@@ -536,15 +467,13 @@ equation
 			template="$C_DAE_equation_directional_derivative$",
 			generatedCode="
 jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-v_0 = pow(_x1_1 , _x2_2);
-d_0 = _x1_1 == 0 ? 0 : (v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1));
-(*res)[0] = v_0 - _y_0;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-(*res)[1] = 2 - _x1_1;
-(*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-(*res)[2] = 3 - _x2_2;
-(*dF)[2] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+v_0 = pow(_x1_1,_x2_2);
+(*res)[0] = v_0 - (_y_0);
+(*dF)[0] = _x1_1 == 0 ? 0 : (v_0 * ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * log(jmi_abs(_x1_1)) + _x2_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] / _x1_1)) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+(*res)[1] = 2 - (_x1_1);
+(*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+(*res)[2] = 3 - (_x2_2);
+(*dF)[2] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 ")})));
 end CADpow;
 
@@ -572,22 +501,16 @@ $CAD_ode_derivatives$
 ",
 			generatedCode="
 /******** Declarations *******/
-jmi_ad_var_t v_0;
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
-v_0 = - 1;
-_x1_1 = v_0;
+_x1_1 = - 1;
 (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-v_1 = jmi_min(_x1_1, AD_WRAP_LITERAL(2));
-d_1 = _x1_1 < AD_WRAP_LITERAL(2) ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : AD_WRAP_LITERAL(0);
-_y_0 = v_1;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_1;
+_y_0 = jmi_min(_x1_1, AD_WRAP_LITERAL(2));
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = _x1_1 < AD_WRAP_LITERAL(2) ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : AD_WRAP_LITERAL(0);
 ")})));
 end CADmin;
 
@@ -612,24 +535,17 @@ equation
 $CAD_ode_derivatives$
 ",
 			generatedCode="
-
 /******** Declarations *******/
-jmi_ad_var_t v_0;
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
-v_0 = - 1;
-_x1_1 = v_0;
+_x1_1 = - 1;
 (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-v_1 = jmi_max(_x1_1, AD_WRAP_LITERAL(2));
-d_1 = _x1_1 > AD_WRAP_LITERAL(2) ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : AD_WRAP_LITERAL(0);
-_y_0 = v_1;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_1;
+_y_0 = jmi_max(_x1_1, AD_WRAP_LITERAL(2));
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = _x1_1 > AD_WRAP_LITERAL(2) ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : AD_WRAP_LITERAL(0);
 ")})));
 end CADmax;
 
@@ -656,22 +572,16 @@ $CAD_ode_derivatives$
 ",
 			generatedCode="
 /******** Declarations *******/
-jmi_ad_var_t v_0;
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
-v_0 = -1;
-_x1_1 = v_0;
+_x1_1 = - 1;
 (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-v_1 = jmi_abs(_x1_1);
-d_1 = _x1_1 >= 0 ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-_y_0 = v_1;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_1;
+_y_0 = jmi_abs(_x1_1);
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = _x1_1 >= 0 ? (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] : -(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
 ")})));
 end CADabs;
 
@@ -689,24 +599,17 @@ equation
 $C_DAE_equation_directional_derivative$
 ",
 			generatedCode="
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    v_2 = _sw(0);
-    if (v_2) {
-        v_1 = _x_0;
-        d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    } else {
-        v_1 = AD_WRAP_LITERAL(0);
-        d_1 = AD_WRAP_LITERAL(0);
-    }
-    v_0 = (v_1);
-    d_0 = d_1;
-    (*res)[0] = v_0 - _der_x_1;
-    (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+if (_sw(0)) {
+    v_0 = _x_0;
+    d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+} else {
+    v_0 = AD_WRAP_LITERAL(0);
+    d_0 = AD_WRAP_LITERAL(0);
+}
+(*res)[0] = (v_0) - (_der_x_1);
+(*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
 end smoothTest1;
 
@@ -724,26 +627,19 @@ equation
 $C_DAE_equation_directional_derivative$
 ",
 			generatedCode="
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t v_3;
-    v_3 = COND_EXP_GE(_x_0, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE);
-    v_2 = LOG_EXP_NOT(v_3);
-    if (v_2) {
-        v_1 = _x_0;
-        d_1 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    } else {
-        v_1 = AD_WRAP_LITERAL(0);
-        d_1 = AD_WRAP_LITERAL(0);
-    }
-    v_0 = (v_1);
-    d_0 = d_1;
-    (*res)[0] = v_0 - _der_x_1;
-    (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+jmi_ad_var_t v_1;
+v_1 = COND_EXP_GE(_x_0, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE);
+if (LOG_EXP_NOT(v_1)) {
+    v_0 = _x_0;
+    d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+} else {
+    v_0 = AD_WRAP_LITERAL(0);
+    d_0 = AD_WRAP_LITERAL(0);
+}
+(*res)[0] = (v_0) - (_der_x_1);
+(*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
 end notTest1;
 
@@ -765,6 +661,7 @@ equation
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
@@ -773,6 +670,7 @@ equation
     jmi_ad_var_t v_5;
     jmi_ad_var_t d_5;
     jmi_ad_var_t v_6;
+    jmi_ad_var_t d_6;
     jmi_ad_var_t v_7;
     jmi_ad_var_t d_7;
     jmi_ad_var_t v_8;
@@ -780,75 +678,61 @@ equation
     jmi_ad_var_t v_9;
     jmi_ad_var_t d_9;
     jmi_ad_var_t v_10;
+    jmi_ad_var_t d_10;
     jmi_ad_var_t v_11;
+    jmi_ad_var_t d_11;
     jmi_ad_var_t v_12;
-    jmi_ad_var_t d_12;
     jmi_ad_var_t v_13;
     jmi_ad_var_t d_13;
     jmi_ad_var_t v_14;
     jmi_ad_var_t d_14;
-    jmi_ad_var_t v_15;
-    jmi_ad_var_t d_15;
-    jmi_ad_var_t v_16;
-    jmi_ad_var_t v_17;
-    jmi_ad_var_t d_17;
-    jmi_ad_var_t v_18;
-    jmi_ad_var_t d_18;
-    jmi_ad_var_t v_19;
-    jmi_ad_var_t d_19;
-    v_1 = _sw(0);
-    if (v_1) {
-        v_5 = _time;
-        d_5 = (*dz)[jmi->offs_t];
-        v_6 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
-        v_4 = COND_EXP_LE(v_5, v_6, JMI_TRUE, JMI_FALSE);
-        if (v_4) {
+    if (_sw(0)) {
+        v_3 = _time;
+        d_3 = (*dz)[jmi->offs_t];
+        v_4 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+        if (COND_EXP_LE(v_3, v_4, JMI_TRUE, JMI_FALSE)) {
+            v_6 = _time;
+            d_6 = (*dz)[jmi->offs_t];
+            v_5 = sin(v_6);
+            d_5 = d_6 * cos(v_6);
+            v_2 = v_5;
+            d_2 = d_5;
+        } else {
             v_8 = _time;
             d_8 = (*dz)[jmi->offs_t];
-            v_7 = sin(v_8);
-            d_7 = d_8 * cos(v_8);
-            v_3 = v_7;
-            d_3 = d_7;
-        } else {
-            v_12 = _time;
-            d_12 = (*dz)[jmi->offs_t];
-            v_11 = COND_EXP_LE(v_12, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE);
-            v_10 = (v_11);
-            if (v_10) {
-                v_9 = AD_WRAP_LITERAL(1);
-                d_9 = AD_WRAP_LITERAL(0);
+            if ((COND_EXP_LE(v_8, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE))) {
+                v_7 = AD_WRAP_LITERAL(1);
+                d_7 = AD_WRAP_LITERAL(0);
             } else {
-                v_15 = _time;
-                d_15 = (*dz)[jmi->offs_t];
-                v_16 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
-                v_14 = v_15 - v_16;
-                d_14 = d_15 - AD_WRAP_LITERAL(0);
-                v_13 = sin(v_14);
-                d_13 = d_14 * cos(v_14);
-                v_9 = v_13;
-                d_9 = d_13;
+                v_11 = _time;
+                d_11 = (*dz)[jmi->offs_t];
+                v_12 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+                v_10 = v_11 - v_12;
+                d_10 = d_11 - AD_WRAP_LITERAL(0);
+                v_9 = sin(v_10);
+                d_9 = d_10 * cos(v_10);
+                v_7 = v_9;
+                d_7 = d_9;
             }
-            v_3 = v_9;
-            d_3 = d_9;
+            v_2 = v_7;
+            d_2 = d_7;
         }
-        v_2 = (v_3);
-        d_2 = d_3;
-        v_0 = v_2;
-        d_0 = d_2;
+        v_1 = (v_2);
+        d_1 = d_2;
+        v_0 = v_1;
+        d_0 = d_1;
     } else {
-        v_19 = AD_WRAP_LITERAL(3) * _x_0;
-        d_19 = AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-        v_18 = sin(v_19);
-        d_18 = d_19 * cos(v_19);
-        v_17 = (v_18);
-        d_17 = d_18;
-        v_0 = v_17;
-        d_0 = d_17;
+        v_14 = AD_WRAP_LITERAL(3) * _x_0;
+        d_14 = AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+        v_13 = (sin(v_14));
+        d_13 = d_14 * cos(v_14);
+        v_0 = v_13;
+        d_0 = d_13;
     }
-    (*res)[0] = v_0 - _u_1;
-    (*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    (*res)[1] = _u_1 - _der_x_2;
-    (*dF)[1]  = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    (*res)[0] = v_0 - (_u_1);
+    (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    (*res)[1] = _u_1 - (_der_x_2);
+    (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
 end IfExpExample1;
 
@@ -870,6 +754,7 @@ equation
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
@@ -877,44 +762,39 @@ equation
     jmi_ad_var_t v_4;
     jmi_ad_var_t d_4;
     jmi_ad_var_t v_5;
+    jmi_ad_var_t d_5;
     jmi_ad_var_t v_6;
     jmi_ad_var_t d_6;
     jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
-    jmi_ad_var_t v_9;
-    v_1 = _sw(0);
-    if (v_1) {
-        v_3 = _time;
-        d_3 = (*dz)[jmi->offs_t];
-        v_2 = sin(v_3);
-        d_2 = d_3 * cos(v_3);
-        v_0 = v_2;
-        d_0 = d_2;
+    if (_sw(0)) {
+        v_2 = _time;
+        d_2 = (*dz)[jmi->offs_t];
+        v_1 = sin(v_2);
+        d_1 = d_2 * cos(v_2);
+        v_0 = v_1;
+        d_0 = d_1;
     } else {
-        v_5 = _sw(1);
-        if (v_5) {
-            v_4 = AD_WRAP_LITERAL(1);
-            d_4 = AD_WRAP_LITERAL(0);
+        if (_sw(1)) {
+            v_3 = AD_WRAP_LITERAL(1);
+            d_3 = AD_WRAP_LITERAL(0);
         } else {
-            v_8 = _time;
-            d_8 = (*dz)[jmi->offs_t];
-            v_9 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
-            v_7 = v_8 - v_9;
-            d_7 = d_8 - AD_WRAP_LITERAL(0);
-            v_6 = sin(v_7);
-            d_6 = d_7 * cos(v_7);
-            v_4 = v_6;
-            d_4 = d_6;
+            v_6 = _time;
+            d_6 = (*dz)[jmi->offs_t];
+            v_7 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+            v_5 = v_6 - v_7;
+            d_5 = d_6 - AD_WRAP_LITERAL(0);
+            v_4 = sin(v_5);
+            d_4 = d_5 * cos(v_5);
+            v_3 = v_4;
+            d_3 = d_4;
         }
-        v_0 = v_4;
-        d_0 = d_4;
+        v_0 = v_3;
+        d_0 = d_3;
     }
-    (*res)[0] = v_0 - _u_1;
-    (*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    (*res)[1] = _u_1 - _der_x_2;
-    (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    (*res)[0] = v_0 - (_u_1);
+    (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    (*res)[1] = _u_1 - (_der_x_2);
+    (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
 end IfExpExample2;
 
@@ -937,6 +817,7 @@ equation
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t d_3;
     jmi_ad_var_t v_4;
@@ -945,6 +826,7 @@ equation
     jmi_ad_var_t v_6;
     jmi_ad_var_t d_6;
     jmi_ad_var_t v_7;
+    jmi_ad_var_t d_7;
     jmi_ad_var_t v_8;
     jmi_ad_var_t d_8;
     jmi_ad_var_t v_9;
@@ -952,76 +834,62 @@ equation
     jmi_ad_var_t v_10;
     jmi_ad_var_t d_10;
     jmi_ad_var_t v_11;
+    jmi_ad_var_t d_11;
     jmi_ad_var_t v_12;
+    jmi_ad_var_t d_12;
     jmi_ad_var_t v_13;
-    jmi_ad_var_t d_13;
     jmi_ad_var_t v_14;
     jmi_ad_var_t d_14;
     jmi_ad_var_t v_15;
     jmi_ad_var_t d_15;
-    jmi_ad_var_t v_16;
-    jmi_ad_var_t d_16;
-    jmi_ad_var_t v_17;
-    jmi_ad_var_t v_18;
-    jmi_ad_var_t d_18;
-    jmi_ad_var_t v_19;
-    jmi_ad_var_t d_19;
-    jmi_ad_var_t v_20;
-    jmi_ad_var_t d_20;
-    v_2 = _sw(0);
-    v_1 = LOG_EXP_OR(v_2, _b_2);
-    if (v_1) {
-        v_6 = _time;
-        d_6 = (*dz)[jmi->offs_t];
-        v_7 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
-        v_5 = COND_EXP_LE(v_6, v_7, JMI_TRUE, JMI_FALSE);
-        if (v_5) {
+    v_1 = _sw(0);
+    if (LOG_EXP_OR(v_1, _b_2)) {
+        v_4 = _time;
+        d_4 = (*dz)[jmi->offs_t];
+        v_5 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+        if (COND_EXP_LE(v_4, v_5, JMI_TRUE, JMI_FALSE)) {
+            v_7 = _time;
+            d_7 = (*dz)[jmi->offs_t];
+            v_6 = sin(v_7);
+            d_6 = d_7 * cos(v_7);
+            v_3 = v_6;
+            d_3 = d_6;
+        } else {
             v_9 = _time;
             d_9 = (*dz)[jmi->offs_t];
-            v_8 = sin(v_9);
-            d_8 = d_9 * cos(v_9);
-            v_4 = v_8;
-            d_4 = d_8;
-        } else {
-            v_13 = _time;
-            d_13 = (*dz)[jmi->offs_t];
-            v_12 = COND_EXP_LE(v_13, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE);
-            v_11 = (v_12);
-            if (v_11) {
-                v_10 = AD_WRAP_LITERAL(1);
-                d_10 = AD_WRAP_LITERAL(0);
+            if ((COND_EXP_LE(v_9, AD_WRAP_LITERAL(3.141592653589793), JMI_TRUE, JMI_FALSE))) {
+                v_8 = AD_WRAP_LITERAL(1);
+                d_8 = AD_WRAP_LITERAL(0);
             } else {
-                v_16 = _time;
-                d_16 = (*dz)[jmi->offs_t];
-                v_17 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
-                v_15 = v_16 - v_17;
-                d_15 = d_16 - AD_WRAP_LITERAL(0);
-                v_14 = sin(v_15);
-                d_14 = d_15 * cos(v_15);
-                v_10 = v_14;
-                d_10 = d_14;
+                v_12 = _time;
+                d_12 = (*dz)[jmi->offs_t];
+                v_13 = jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+                v_11 = v_12 - v_13;
+                d_11 = d_12 - AD_WRAP_LITERAL(0);
+                v_10 = sin(v_11);
+                d_10 = d_11 * cos(v_11);
+                v_8 = v_10;
+                d_8 = d_10;
             }
-            v_4 = v_10;
-            d_4 = d_10;
+            v_3 = v_8;
+            d_3 = d_8;
         }
-        v_3 = (v_4);
-        d_3 = d_4;
-        v_0 = v_3;
-        d_0 = d_3;
+        v_2 = (v_3);
+        d_2 = d_3;
+        v_0 = v_2;
+        d_0 = d_2;
     } else {
-        v_20 = AD_WRAP_LITERAL(3) * _x_0;
-        d_20 = AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-        v_19 = sin(v_20);
-        d_19 = d_20 * cos(v_20);
-        v_18 = (v_19);
-        d_18 = d_19;
-        v_0 = v_18;
-        d_0 = d_18;
+        v_15 = AD_WRAP_LITERAL(3) * _x_0;
+        d_15 = AD_WRAP_LITERAL(0) * _x_0 + AD_WRAP_LITERAL(3) * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+        v_14 = (sin(v_15));
+        d_14 = d_15 * cos(v_15);
+        v_0 = v_14;
+        d_0 = d_14;
     }
-    (*res)[0] = v_0 - _u_1;
-    (*dF)[0]  = d_0 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    (*res)[1] = _u_1 - _der_x_3;
-    (*dF)[1]  = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    (*res)[0] = v_0 - (_u_1);
+    (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    (*res)[1] = _u_1 - (_der_x_3);
+    (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[2] = JMI_FALSE - (_b_2);
 ")})));
 
@@ -1066,8 +934,8 @@ void func_CADCodeGenTests_CADFunction1_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 func_CADCodeGenTests_CADFunction1_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_0, &d_0);
-(*res)[0] = v_0 - _der_a_1;
-(*dF)[0] = d_0 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+(*res)[0] = v_0 - (_der_a_1);
+(*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
   end CADFunction1;
 
@@ -1107,41 +975,30 @@ void func_CADCodeGenTests_CADFunction2_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t b_der_v;
     jmi_ad_var_t c_var_v;
     jmi_ad_var_t c_der_v;
-	jmi_ad_var_t v_0;
-	jmi_ad_var_t d_0;
-	jmi_ad_var_t v_1;
-	jmi_ad_var_t d_1;
-	jmi_ad_var_t v_2;
-	jmi_ad_var_t d_2;
-	v_0 = x_var_v * 2;
-	d_0 = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
-	a_var_v = v_0;
-	a_der_v = d_0;
-	v_1 = x_var_v * 4;
-	d_1 = x_der_v * 4 + x_var_v * AD_WRAP_LITERAL(0);
-	b_var_v = v_1;
-	b_der_v = d_1;
-	v_2 = x_var_v * 8;
-	d_2 = x_der_v * 8 + x_var_v * AD_WRAP_LITERAL(0);
-	c_var_v = v_2;
-	c_der_v = d_2;
+    a_var_v = x_var_v * 2;
+    a_der_v = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
+    b_var_v = x_var_v * 4;
+    b_der_v = x_der_v * 4 + x_var_v * AD_WRAP_LITERAL(0);
+    c_var_v = x_var_v * 8;
+    c_der_v = x_der_v * 8 + x_var_v * AD_WRAP_LITERAL(0);
 
-	if (a_var_o != NULL) *a_var_o = a_var_v;
-	if (a_der_o != NULL) *a_der_o = a_der_v;
-	if (b_var_o != NULL) *b_var_o = b_var_v;
-	if (b_der_o != NULL) *b_der_o = b_der_v;
-	if (c_var_o != NULL) *c_var_o = c_var_v;
-	if (c_der_o != NULL) *c_der_o = c_der_v;
-	JMI_DYNAMIC_FREE()
-	return;
+    if (a_var_o != NULL) *a_var_o = a_var_v;
+    if (a_der_o != NULL) *a_der_o = a_der_v;
+    if (b_var_o != NULL) *b_var_o = b_var_v;
+    if (b_der_o != NULL) *b_der_o = b_der_v;
+    if (c_var_o != NULL) *c_var_o = c_var_v;
+    if (c_der_o != NULL) *c_der_o = c_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
 }
 
 
-jmi_ad_var_t v_3;
-jmi_ad_var_t d_3;
-func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_3, NULL, NULL,&d_3, NULL, NULL);
-(*res)[0] = v_3 - _der_x_1;
-(*dF)[0] = d_3 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &v_0, NULL, NULL, &d_0, NULL, NULL);
+(*res)[0] = v_0 - (_der_x_1);
+(*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+
 ")})));
   end CADFunction2;
   
@@ -1187,14 +1044,12 @@ void func_CADCodeGenTests_CADFunction3_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
     func_CADCodeGenTests_CADFunction3_F2_der_AD(x_var_v, x_der_v,&v_1, &d_1);
     v_0 = (1.0 * (v_1) * (v_1));
-    d_0 = v_1 == 0 ? 0 : (v_0 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_1)) + 2 * d_1 / v_1));
     y_var_v = v_0;
-    y_der_v = d_0;
+    y_der_v = v_1 == 0 ? 0 : (v_0 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_1)) + 2 * d_1 / v_1));
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -1207,14 +1062,12 @@ void func_CADCodeGenTests_CADFunction3_F2_der_AD(jmi_ad_var_t x_var_v, jmi_ad_va
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t d_3;
     func_CADCodeGenTests_CADFunction3_F3_der_AD(x_var_v, x_der_v,&v_3, &d_3);
     v_2 = (1.0 * (v_3) * (v_3));
-    d_2 = v_3 == 0 ? 0 : (v_2 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_3)) + 2 * d_3 / v_3));
     y_var_v = v_2;
-    y_der_v = d_2;
+    y_der_v = v_3 == 0 ? 0 : (v_2 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_3)) + 2 * d_3 / v_3));
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -1227,11 +1080,9 @@ void func_CADCodeGenTests_CADFunction3_F3_der_AD(jmi_ad_var_t x_var_v, jmi_ad_va
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
     v_4 = (1.0 * (x_var_v) * (x_var_v));
-    d_4 = x_var_v == 0 ? 0 : (v_4 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + 2 * x_der_v / x_var_v));
     y_var_v = v_4;
-    y_der_v = d_4;
+    y_der_v = x_var_v == 0 ? 0 : (v_4 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + 2 * x_der_v / x_var_v));
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -1243,14 +1094,10 @@ jmi_ad_var_t v_5;
 jmi_ad_var_t d_5;
 jmi_ad_var_t v_6;
 jmi_ad_var_t d_6;
-jmi_ad_var_t v_7;
-jmi_ad_var_t d_7;
-func_CADCodeGenTests_CADFunction3_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_6, &d_6);
-func_CADCodeGenTests_CADFunction3_F2_der_AD(_a_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_7, &d_7);
-v_5 = v_6 + v_7;
-d_5 = d_6 + d_7;
-(*res)[0] = v_5 - _der_a_1;
-(*dF)[0] = d_5 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+func_CADCodeGenTests_CADFunction3_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_5, &d_5);
+func_CADCodeGenTests_CADFunction3_F2_der_AD(_a_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_6, &d_6);
+(*res)[0] = v_5 + v_6 - (_der_a_1);
+(*dF)[0] = d_5 + d_6 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
   end CADFunction3; 
   
@@ -1295,13 +1142,9 @@ void func_CADCodeGenTests_CADFunction4_F2_der_AD(jmi_ad_var_t x_var_v, jmi_ad_va
     jmi_ad_var_t a_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    func_CADCodeGenTests_CADFunction4_F_der_AD(x_var_v, x_der_v, &v_1, NULL, NULL,&d_1, NULL, NULL);
-    v_0 = v_1 * x_var_v;
-    d_0 = d_1 * x_var_v + v_1 * x_der_v;
-    a_var_v = v_0;
-    a_der_v = d_0;
+    func_CADCodeGenTests_CADFunction4_F_der_AD(x_var_v, x_der_v, &v_0, NULL, NULL, &d_0, NULL, NULL);
+    a_var_v = v_0 * x_var_v;
+    a_der_v = d_0 * x_var_v + v_0 * x_der_v;
 
     if (a_var_o != NULL) *a_var_o = a_var_v;
     if (a_der_o != NULL) *a_der_o = a_der_v;
@@ -1317,40 +1160,28 @@ void func_CADCodeGenTests_CADFunction4_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t b_der_v;
     jmi_ad_var_t c_var_v;
     jmi_ad_var_t c_der_v;
-	jmi_ad_var_t v_2;
-	jmi_ad_var_t d_2;
-	jmi_ad_var_t v_3;
-	jmi_ad_var_t d_3;
-	jmi_ad_var_t v_4;
-	jmi_ad_var_t d_4;
-	v_2 = x_var_v * 2;
-	d_2 = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
-	a_var_v = v_2;
-	a_der_v = d_2;
-	v_3 = x_var_v * 4;
-	d_3 = x_der_v * 4 + x_var_v * AD_WRAP_LITERAL(0);
-	b_var_v = v_3;
-	b_der_v = d_3;
-	v_4 = x_var_v * 8;
-	d_4 = x_der_v * 8 + x_var_v * AD_WRAP_LITERAL(0);
-	c_var_v = v_4;
-	c_der_v = d_4;
+    a_var_v = x_var_v * 2;
+    a_der_v = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
+    b_var_v = x_var_v * 4;
+    b_der_v = x_der_v * 4 + x_var_v * AD_WRAP_LITERAL(0);
+    c_var_v = x_var_v * 8;
+    c_der_v = x_der_v * 8 + x_var_v * AD_WRAP_LITERAL(0);
 
-	if (a_var_o != NULL) *a_var_o = a_var_v;
-	if (a_der_o != NULL) *a_der_o = a_der_v;
-	if (b_var_o != NULL) *b_var_o = b_var_v;
-	if (b_der_o != NULL) *b_der_o = b_der_v;
-	if (c_var_o != NULL) *c_var_o = c_var_v;
-	if (c_der_o != NULL) *c_der_o = c_der_v;
-	JMI_DYNAMIC_FREE()
-	return;
+    if (a_var_o != NULL) *a_var_o = a_var_v;
+    if (a_der_o != NULL) *a_der_o = a_der_v;
+    if (b_var_o != NULL) *b_var_o = b_var_v;
+    if (b_der_o != NULL) *b_der_o = b_der_v;
+    if (c_var_o != NULL) *c_var_o = c_var_v;
+    if (c_der_o != NULL) *c_der_o = c_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
 }
 
-jmi_ad_var_t v_5;
-jmi_ad_var_t d_5;
-func_CADCodeGenTests_CADFunction4_F2_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx],&v_5, &d_5);
-(*res)[0] = v_5 - _der_x_1;
-(*dF)[0] = d_5 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+func_CADCodeGenTests_CADFunction4_F2_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &v_1, &d_1);
+(*res)[0] = v_1 - (_der_x_1);
+(*dF)[0] = d_1 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
   end CADFunction4; 
 
@@ -1432,52 +1263,24 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
-    v_0 = x_var_v * 2;
-    d_0 = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
-    a_var_v = v_0;
-    a_der_v = d_0;
-    v_1 = x1_var_v * 4;
-    d_1 = x1_der_v * 4 + x1_var_v * AD_WRAP_LITERAL(0);
-    b_var_v = v_1;
-    b_der_v = d_1;
-    v_2 = x2_var_v * 8;
-    d_2 = x2_der_v * 8 + x2_var_v * AD_WRAP_LITERAL(0);
-    c_var_v = v_2;
-    c_der_v = d_2;
-    v_3 = x3_var_v * 8;
-    d_3 = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
-    d_var_v = v_3;
-    d_der_v = d_3;
-    v_4 = x4_var_v * 8;
-    d_4 = x4_der_v * 8 + x4_var_v * AD_WRAP_LITERAL(0);
-    e_var_v = v_4;
-    e_der_v = d_4;
-    v_6 = x_var_v * x1_var_v;
-    d_6 = x_der_v * x1_var_v + x_var_v * x1_der_v;
-    v_5 = v_6 * x2_var_v;
-    d_5 = d_6 * x2_var_v + v_6 * x2_der_v;
-    f_var_v = v_5;
-    f_der_v = d_5;
-    v_8 = x3_var_v * x4_var_v;
-    d_8 = x3_der_v * x4_var_v + x3_var_v * x4_der_v;
-    v_7 = v_8 + x1_var_v;
-    d_7 = d_8 + x1_der_v;
-    g_var_v = v_7;
-    g_der_v = d_7;
+    a_var_v = x_var_v * 2;
+    a_der_v = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
+    b_var_v = x1_var_v * 4;
+    b_der_v = x1_der_v * 4 + x1_var_v * AD_WRAP_LITERAL(0);
+    c_var_v = x2_var_v * 8;
+    c_der_v = x2_der_v * 8 + x2_var_v * AD_WRAP_LITERAL(0);
+    d_var_v = x3_var_v * 8;
+    d_der_v = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
+    e_var_v = x4_var_v * 8;
+    e_der_v = x4_der_v * 8 + x4_var_v * AD_WRAP_LITERAL(0);
+    v_0 = x_var_v * x1_var_v;
+    d_0 = x_der_v * x1_var_v + x_var_v * x1_der_v;
+    f_var_v = v_0 * x2_var_v;
+    f_der_v = d_0 * x2_var_v + v_0 * x2_der_v;
+    v_1 = x3_var_v * x4_var_v;
+    d_1 = x3_der_v * x4_var_v + x3_var_v * x4_der_v;
+    g_var_v = v_1 + x1_var_v;
+    g_der_v = d_1 + x1_der_v;
 
     if (a_var_o != NULL) *a_var_o = a_var_v;
     if (a_der_o != NULL) *a_der_o = a_der_v;
@@ -1497,22 +1300,14 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     return;
 }
 
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t d_9;
-    jmi_ad_var_t v_10;
-    jmi_ad_var_t d_10;
-    jmi_ad_var_t v_11;
-    jmi_ad_var_t d_11;
-    jmi_ad_var_t v_12;
-    jmi_ad_var_t d_12;
-    jmi_ad_var_t v_13;
-    jmi_ad_var_t d_13;
-    jmi_ad_var_t v_14;
-    jmi_ad_var_t d_14;
-    jmi_ad_var_t v_15;
-    jmi_ad_var_t d_15;
-    jmi_ad_var_t v_16;
-    jmi_ad_var_t d_16;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t d_4;
+    jmi_ad_var_t v_5;
+    jmi_ad_var_t d_5;
     jmi_ad_var_t tmp_var_0;
     jmi_ad_var_t tmp_der_0;
     jmi_ad_var_t tmp_var_1;
@@ -1527,10 +1322,8 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t tmp_der_5;
     jmi_ad_var_t tmp_var_6;
     jmi_ad_var_t tmp_der_6;
-    v_9 = _x1_1 * _U_12;
-    d_9 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_12 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
-    (*res)[0] = v_9 - _der_x_14;
-    (*dF)[0] = d_9 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    (*res)[0] = _x1_1 * _U_12 - (_der_x_14);
+    (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_12 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     func_CADCodeGenTests_CADFunction5_F_der_AD(_x_0, _x1_1, _x2_2, _x3_3, _x4_4, (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx],&tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, &tmp_var_4, &tmp_var_5, &tmp_var_6, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3, &tmp_der_4, &tmp_der_5, &tmp_der_6);
     (*res)[1] = tmp_var_0 - (_a_5);
     (*dF)[1] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx]);
@@ -1546,30 +1339,24 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     (*dF)[6] = tmp_der_5 - ((*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx]);
     (*res)[7] = tmp_var_6 - (_g_11);
     (*dF)[7] = tmp_der_6 - ((*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx]);
-    (*res)[8] = _b_6 - _der_x1_15;
-    (*dF)[8] = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    (*res)[9] = _c_7 - _der_x2_16;
-    (*dF)[9] = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    v_10 = _d_8 + _a_5;
-    d_10 = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
-    (*res)[10] = v_10 - _der_x3_17;
-    (*dF)[10] = d_10 - (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-    v_12 = _e_9 * _f_10;
-    d_12 = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] * _f_10 + _e_9 * (*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx];
-    v_11 = v_12 + _g_11;
-    d_11 = d_12 + (*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx];
-    (*res)[11] = v_11 - _der_x4_18;
-    (*dF)[11] = d_11 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-    v_16 = _x_0 + _x1_1;
-    d_16 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-    v_15 = v_16 + _x2_2;
-    d_15 = d_16 + (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
-    v_14 = v_15 + _x3_3;
-    d_14 = d_15 + (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
-    v_13 = v_14 + _x4_4;
-    d_13 = d_14 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
-    (*res)[12] = v_13 - _Y_13;
-    (*dF)[12] = d_13 - (*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx];
+    (*res)[8] = _b_6 - (_der_x1_15);
+    (*dF)[8] = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[9] = _c_7 - (_der_x2_16);
+    (*dF)[9] = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    (*res)[10] = _d_8 + _a_5 - (_der_x3_17);
+    (*dF)[10] = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+    v_2 = _e_9 * _f_10;
+    d_2 = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] * _f_10 + _e_9 * (*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx];
+    (*res)[11] = v_2 + _g_11 - (_der_x4_18);
+    (*dF)[11] = d_2 + (*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
+    v_5 = _x_0 + _x1_1;
+    d_5 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+    v_4 = v_5 + _x2_2;
+    d_4 = d_5 + (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+    v_3 = v_4 + _x3_3;
+    d_3 = d_4 + (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
+    (*res)[12] = v_3 + _x4_4 - (_Y_13);
+    (*dF)[12] = d_3 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx]);
 ")})));
 end CADFunction5;
 
@@ -1662,30 +1449,14 @@ void func_CADCodeGenTests_CADFunction6_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t f_der_v;
     jmi_ad_var_t g_var_v;
     jmi_ad_var_t g_der_v;
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    v_0 = x_var_v * 2;
-    d_0 = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
-    a_var_v = v_0;
-    a_der_v = d_0;
-    v_1 = x1_var_v * 4;
-    d_1 = x1_der_v * 4 + x1_var_v * AD_WRAP_LITERAL(0);
-    b_var_v = v_1;
-    b_der_v = d_1;
-    v_2 = x2_var_v * 8;
-    d_2 = x2_der_v * 8 + x2_var_v * AD_WRAP_LITERAL(0);
-    c_var_v = v_2;
-    c_der_v = d_2;
-    v_3 = x3_var_v * 8;
-    d_3 = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
-    d_var_v = v_3;
-    d_der_v = d_3;
+    a_var_v = x_var_v * 2;
+    a_der_v = x_der_v * 2 + x_var_v * AD_WRAP_LITERAL(0);
+    b_var_v = x1_var_v * 4;
+    b_der_v = x1_der_v * 4 + x1_var_v * AD_WRAP_LITERAL(0);
+    c_var_v = x2_var_v * 8;
+    c_der_v = x2_der_v * 8 + x2_var_v * AD_WRAP_LITERAL(0);
+    d_var_v = x3_var_v * 8;
+    d_der_v = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
     func_CADCodeGenTests_CADFunction6_F2_der_AD(x4_var_v, x3_var_v, x2_var_v, x4_der_v, x3_der_v, x2_der_v, &e_var_v, &f_var_v, &g_var_v, &e_der_v, &f_der_v, &g_der_v);
 
     if (a_var_o != NULL) *a_var_o = a_var_v;
@@ -1714,24 +1485,12 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_v
     jmi_ad_var_t b_der_v;
     jmi_ad_var_t c_var_v;
     jmi_ad_var_t c_der_v;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    v_4 = x1_var_v * 2;
-    d_4 = x1_der_v * 2 + x1_var_v * AD_WRAP_LITERAL(0);
-    a_var_v = v_4;
-    a_der_v = d_4;
-    v_5 = x2_var_v * 4;
-    d_5 = x2_der_v * 4 + x2_var_v * AD_WRAP_LITERAL(0);
-    b_var_v = v_5;
-    b_der_v = d_5;
-    v_6 = x3_var_v * 8;
-    d_6 = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
-    c_var_v = v_6;
-    c_der_v = d_6;
+    a_var_v = x1_var_v * 2;
+    a_der_v = x1_der_v * 2 + x1_var_v * AD_WRAP_LITERAL(0);
+    b_var_v = x2_var_v * 4;
+    b_der_v = x2_der_v * 4 + x2_var_v * AD_WRAP_LITERAL(0);
+    c_var_v = x3_var_v * 8;
+    c_der_v = x3_der_v * 8 + x3_var_v * AD_WRAP_LITERAL(0);
 
     if (a_var_o != NULL) *a_var_o = a_var_v;
     if (a_der_o != NULL) *a_der_o = a_der_v;
@@ -1744,24 +1503,16 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_v
 }
 
 
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t d_9;
-    jmi_ad_var_t v_10;
-    jmi_ad_var_t d_10;
-    jmi_ad_var_t v_11;
-    jmi_ad_var_t d_11;
-    jmi_ad_var_t v_12;
-    jmi_ad_var_t d_12;
-    jmi_ad_var_t v_13;
-    jmi_ad_var_t d_13;
-    jmi_ad_var_t v_14;
-    jmi_ad_var_t d_14;
-    jmi_ad_var_t v_15;
-    jmi_ad_var_t d_15;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t d_4;
     jmi_ad_var_t tmp_var_0;
     jmi_ad_var_t tmp_der_0;
     jmi_ad_var_t tmp_var_1;
@@ -1776,10 +1527,8 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_v
     jmi_ad_var_t tmp_der_5;
     jmi_ad_var_t tmp_var_6;
     jmi_ad_var_t tmp_der_6;
-    v_7 = _x1_1 * _U_12;
-    d_7 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_12 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
-    (*res)[0] = v_7 - _der_x_14;
-    (*dF)[0] = d_7 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    (*res)[0] = _x1_1 * _U_12 - (_der_x_14);
+    (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_12 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     func_CADCodeGenTests_CADFunction6_F_der_AD(_x_0, _x1_1, _x2_2, _x3_3, _x4_4, (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, NULL, NULL, NULL, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3, NULL, NULL, NULL);
     (*res)[1] = tmp_var_0 - (_a_5);
     (*dF)[1] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx]);
@@ -1789,22 +1538,18 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_v
     (*dF)[3] = tmp_der_2 - ((*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx]);
     (*res)[4] = tmp_var_3 - (_d_8);
     (*dF)[4] = tmp_der_3 - ((*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx]);
-    (*res)[5] = _b_6 - _der_x1_15;
-    (*dF)[5] = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    (*res)[6] = _c_7 - _der_x2_16;
-    (*dF)[6] = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    v_8 = _d_8 + _a_5;
-    d_8 = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
-    (*res)[7] = v_8 - _der_x3_17;
-    (*dF)[7] = d_8 - (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-    v_11 = _e_9 * _f_10;
-    d_11 = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] * _f_10 + _e_9 * (*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx];
-    v_10 = v_11 + _g_11;
-    d_10 = d_11 + (*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx];
-    v_9 = v_10 + _x1_1;
-    d_9 = d_10 + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-    (*res)[8] = v_9 - _der_x4_18;
-    (*dF)[8] = d_9 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+    (*res)[5] = _b_6 - (_der_x1_15);
+    (*dF)[5] = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[6] = _c_7 - (_der_x2_16);
+    (*dF)[6] = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    (*res)[7] = _d_8 + _a_5 - (_der_x3_17);
+    (*dF)[7] = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+    v_1 = _e_9 * _f_10;
+    d_1 = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] * _f_10 + _e_9 * (*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx];
+    v_0 = v_1 + _g_11;
+    d_0 = d_1 + (*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx];
+    (*res)[8] = v_0 + _x1_1 - (_der_x4_18);
+    (*dF)[8] = d_0 + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
     func_CADCodeGenTests_CADFunction6_F_der_AD(_x_0, _x1_1, _x2_2, _x3_3, _x4_4, (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx], &tmp_var_4, &tmp_var_5, &tmp_var_6, NULL, NULL, NULL, NULL, &tmp_der_4, &tmp_der_5, &tmp_der_6, NULL, NULL, NULL, NULL);
     (*res)[9] = tmp_var_4 - (_e_9);
     (*dF)[9] = tmp_der_4 - ((*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx]);
@@ -1812,16 +1557,14 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD(jmi_ad_var_t x1_var_v, jmi_ad_v
     (*dF)[10] = tmp_der_5 - ((*dz)[jmi_get_index_from_value_ref(16)-jmi->offs_real_dx]);
     (*res)[11] = tmp_var_6 - (_g_11);
     (*dF)[11] = tmp_der_6 - ((*dz)[jmi_get_index_from_value_ref(17)-jmi->offs_real_dx]);
-    v_15 = _x_0 + _x1_1;
-    d_15 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-    v_14 = v_15 + _x2_2;
-    d_14 = d_15 + (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
-    v_13 = v_14 + _x3_3;
-    d_13 = d_14 + (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
-    v_12 = v_13 + _x4_4;
-    d_12 = d_13 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
-    (*res)[12] = v_12 - _Y_13;
-    (*dF)[12] = d_12 - (*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx];
+    v_4 = _x_0 + _x1_1;
+    d_4 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+    v_3 = v_4 + _x2_2;
+    d_3 = d_4 + (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+    v_2 = v_3 + _x3_3;
+    d_2 = d_3 + (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
+    (*res)[12] = v_2 + _x4_4 - (_Y_13);
+    (*dF)[12] = d_2 + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(18)-jmi->offs_real_dx]);
 ")})));
 end CADFunction6;
 
@@ -1859,18 +1602,10 @@ void func_CADCodeGenTests_CADFunction7_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t z_var_v;
     jmi_ad_var_t z_der_v;
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    v_0 = x_var_v * x_var_v;
-    d_0 = x_der_v * x_var_v + x_var_v * x_der_v;
-    y_var_v = v_0;
-    y_der_v = d_0;
-    v_1 = x_var_v * y_var_v;
-    d_1 = x_der_v * y_var_v + x_var_v * y_der_v;
-    z_var_v = v_1;
-    z_der_v = d_1;
+    y_var_v = x_var_v * x_var_v;
+    y_der_v = x_der_v * x_var_v + x_var_v * x_der_v;
+    z_var_v = x_var_v * y_var_v;
+    z_der_v = x_der_v * y_var_v + x_var_v * y_der_v;
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -1881,10 +1616,8 @@ void func_CADCodeGenTests_CADFunction7_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var
 }
 
 
-jmi_ad_var_t v_2;
-jmi_ad_var_t d_2;
-jmi_ad_var_t v_3;
-jmi_ad_var_t d_3;
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
 jmi_ad_var_t tmp_var_0;
 jmi_ad_var_t tmp_der_0;
 jmi_ad_var_t tmp_var_1;
@@ -1894,12 +1627,10 @@ func_CADCodeGenTests_CADFunction7_F_der_AD(_a_2, (*dz)[jmi_get_index_from_value_
 (*dF)[0] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
 (*res)[1] = tmp_var_1 - (_y_1);
 (*dF)[1] = tmp_der_1 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
-v_3 = _x_0 * _y_1;
-d_3 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-v_2 = log(v_3);
-d_2 = d_3 / v_3;
-(*res)[2] = v_2 - _der_a_3;
-(*dF)[2] = d_2 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+v_0 = _x_0 * _y_1;
+d_0 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
+(*res)[2] = log(v_0) - (_der_a_3);
+(*dF)[2] = d_0 / v_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
   end CADFunction7;
 
@@ -1947,20 +1678,8 @@ void func_CADCodeGenTests_CADFunction8_f2_der_AD(jmi_array_t* x_var_a, jmi_array
     JMI_ARRAY_STATIC(temp_2_der_a, 2, 1)
     JMI_ARRAY_STATIC(temp_3_var_a, 2, 1)
     JMI_ARRAY_STATIC(temp_3_der_a, 2, 1)
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
     JMI_ARRAY_STATIC(tmp_var_0, 2, 1)
     JMI_ARRAY_STATIC(tmp_der_0, 2, 1)
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
     JMI_ARRAY_STATIC_INIT_1(temp_1_var_a, 2)
     JMI_ARRAY_STATIC_INIT_1(temp_1_der_a, 2)
     JMI_ARRAY_STATIC_INIT_1(temp_2_var_a, 2)
@@ -1976,34 +1695,22 @@ void func_CADCodeGenTests_CADFunction8_f2_der_AD(jmi_array_t* x_var_a, jmi_array
         y_der_a = y_der_an;
     }
     func_CADCodeGenTests_CADFunction8_f1_der_AD(x_var_a, x_der_a, temp_1_var_a, temp_1_der_a);
-    v_0 = jmi_array_val_1(x_var_a, 1) + AD_WRAP_LITERAL(1);
-    d_0 = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
-    v_1 = jmi_array_val_1(x_var_a, 2) + AD_WRAP_LITERAL(1);
-    d_1 = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
     JMI_ARRAY_STATIC_INIT_1(tmp_var_0, 2)
-    jmi_array_ref_1(tmp_var_0, 1) = v_0;
-    jmi_array_ref_1(tmp_var_0, 2) = v_1;
+    jmi_array_ref_1(tmp_var_0, 1) = jmi_array_val_1(x_var_a, 1) + AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_var_0, 2) = jmi_array_val_1(x_var_a, 2) + AD_WRAP_LITERAL(1);
     JMI_ARRAY_STATIC_INIT_1(tmp_der_0, 2)
-    jmi_array_ref_1(tmp_der_0, 1) = d_0;
-    jmi_array_ref_1(tmp_der_0, 2) = d_1;
+    jmi_array_ref_1(tmp_der_0, 1) = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_der_0, 2) = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
     func_CADCodeGenTests_CADFunction8_f1_der_AD(tmp_var_0, tmp_der_0, temp_2_var_a, temp_2_der_a);
-    v_2 = jmi_array_val_1(temp_1_var_a, 1) + jmi_array_val_1(temp_2_var_a, 1);
-    d_2 = jmi_array_val_1(temp_1_der_a, 1) + jmi_array_val_1(temp_2_der_a, 1);
-    jmi_array_ref_1(y_var_a, 1) = v_2;
-    jmi_array_ref_1(y_der_a, 1) = d_2;
-    v_3 = jmi_array_val_1(temp_1_var_a, 2) + jmi_array_val_1(temp_2_var_a, 2);
-    d_3 = jmi_array_val_1(temp_1_der_a, 2) + jmi_array_val_1(temp_2_der_a, 2);
-    jmi_array_ref_1(y_var_a, 2) = v_3;
-    jmi_array_ref_1(y_der_a, 2) = d_3;
+    jmi_array_ref_1(y_var_a, 1) = jmi_array_val_1(temp_1_var_a, 1) + jmi_array_val_1(temp_2_var_a, 1);
+    jmi_array_ref_1(y_der_a, 1) = jmi_array_val_1(temp_1_der_a, 1) + jmi_array_val_1(temp_2_der_a, 1);
+    jmi_array_ref_1(y_var_a, 2) = jmi_array_val_1(temp_1_var_a, 2) + jmi_array_val_1(temp_2_var_a, 2);
+    jmi_array_ref_1(y_der_a, 2) = jmi_array_val_1(temp_1_der_a, 2) + jmi_array_val_1(temp_2_der_a, 2);
     func_CADCodeGenTests_CADFunction8_f1_der_AD(y_var_a, y_der_a, temp_3_var_a, temp_3_der_a);
-    v_4 = jmi_array_val_1(y_var_a, 1) + jmi_array_val_1(temp_3_var_a, 1);
-    d_4 = jmi_array_val_1(y_der_a, 1) + jmi_array_val_1(temp_3_der_a, 1);
-    jmi_array_ref_1(y_var_a, 1) = v_4;
-    jmi_array_ref_1(y_der_a, 1) = d_4;
-    v_5 = jmi_array_val_1(y_var_a, 2) + jmi_array_val_1(temp_3_var_a, 2);
-    d_5 = jmi_array_val_1(y_der_a, 2) + jmi_array_val_1(temp_3_der_a, 2);
-    jmi_array_ref_1(y_var_a, 2) = v_5;
-    jmi_array_ref_1(y_der_a, 2) = d_5;
+    jmi_array_ref_1(y_var_a, 1) = jmi_array_val_1(y_var_a, 1) + jmi_array_val_1(temp_3_var_a, 1);
+    jmi_array_ref_1(y_der_a, 1) = jmi_array_val_1(y_der_a, 1) + jmi_array_val_1(temp_3_der_a, 1);
+    jmi_array_ref_1(y_var_a, 2) = jmi_array_val_1(y_var_a, 2) + jmi_array_val_1(temp_3_var_a, 2);
+    jmi_array_ref_1(y_der_a, 2) = jmi_array_val_1(y_der_a, 2) + jmi_array_val_1(temp_3_der_a, 2);
 
     JMI_DYNAMIC_FREE()
     return;
@@ -2013,14 +1720,6 @@ void func_CADCodeGenTests_CADFunction8_f1_der_AD(jmi_array_t* x_var_a, jmi_array
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(y_var_an, 2, 1)
     JMI_ARRAY_STATIC(y_der_an, 2, 1)
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t d_9;
     if (y_var_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(y_var_an, 2)
         y_var_a = y_var_an;
@@ -2029,22 +1728,14 @@ void func_CADCodeGenTests_CADFunction8_f1_der_AD(jmi_array_t* x_var_a, jmi_array
         JMI_ARRAY_STATIC_INIT_1(y_der_an, 2)
         y_der_a = y_der_an;
     }
-    v_6 = jmi_array_val_1(x_var_a, 1) + 1;
-    d_6 = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(y_var_a, 1) = v_6;
-    jmi_array_ref_1(y_der_a, 1) = d_6;
-    v_7 = jmi_array_val_1(x_var_a, 2) + 1;
-    d_7 = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(y_var_a, 2) = v_7;
-    jmi_array_ref_1(y_der_a, 2) = d_7;
-    v_8 = jmi_array_val_1(y_var_a, 1) + jmi_array_val_1(x_var_a, 1);
-    d_8 = jmi_array_val_1(y_der_a, 1) + jmi_array_val_1(x_der_a, 1);
-    jmi_array_ref_1(y_var_a, 1) = v_8;
-    jmi_array_ref_1(y_der_a, 1) = d_8;
-    v_9 = jmi_array_val_1(y_var_a, 2) + jmi_array_val_1(x_var_a, 2);
-    d_9 = jmi_array_val_1(y_der_a, 2) + jmi_array_val_1(x_der_a, 2);
-    jmi_array_ref_1(y_var_a, 2) = v_9;
-    jmi_array_ref_1(y_der_a, 2) = d_9;
+    jmi_array_ref_1(y_var_a, 1) = jmi_array_val_1(x_var_a, 1) + 1;
+    jmi_array_ref_1(y_der_a, 1) = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(y_var_a, 2) = jmi_array_val_1(x_var_a, 2) + 1;
+    jmi_array_ref_1(y_der_a, 2) = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(y_var_a, 1) = jmi_array_val_1(y_var_a, 1) + jmi_array_val_1(x_var_a, 1);
+    jmi_array_ref_1(y_der_a, 1) = jmi_array_val_1(y_der_a, 1) + jmi_array_val_1(x_der_a, 1);
+    jmi_array_ref_1(y_var_a, 2) = jmi_array_val_1(y_var_a, 2) + jmi_array_val_1(x_var_a, 2);
+    jmi_array_ref_1(y_der_a, 2) = jmi_array_val_1(y_der_a, 2) + jmi_array_val_1(x_der_a, 2);
 
     JMI_DYNAMIC_FREE()
     return;
@@ -2054,12 +1745,8 @@ void func_CADCodeGenTests_CADFunction8_f1_der_AD(jmi_array_t* x_var_a, jmi_array
     JMI_ARRAY_STATIC(tmp_der_1, 2, 1)
     JMI_ARRAY_STATIC(tmp_var_2, 2, 1)
     JMI_ARRAY_STATIC(tmp_der_2, 2, 1)
-    jmi_ad_var_t v_10;
-    jmi_ad_var_t d_10;
-    jmi_ad_var_t v_11;
-    jmi_ad_var_t d_11;
-    jmi_ad_var_t v_12;
-    jmi_ad_var_t d_12;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
     JMI_ARRAY_STATIC_INIT_1(tmp_var_1, 2)
     JMI_ARRAY_STATIC_INIT_1(tmp_der_1, 2)
     JMI_ARRAY_STATIC_INIT_1(tmp_var_2, 2)
@@ -2073,16 +1760,12 @@ void func_CADCodeGenTests_CADFunction8_f1_der_AD(jmi_array_t* x_var_a, jmi_array
     (*res)[1] = jmi_array_val_1(tmp_var_1, 2) - (_y2_3);
     (*dF)[0] = jmi_array_val_1(tmp_der_1, 1) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
     (*dF)[1] = jmi_array_val_1(tmp_der_1, 2) - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
-    v_10 = _time;
-    d_10 = (*dz)[jmi->offs_t];
-    (*res)[2] = v_10 - _x_1_0;
-    (*dF)[2] = d_10 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-    v_12 = _time;
-    d_12 = (*dz)[jmi->offs_t];
-    v_11 = v_12 * 2;
-    d_11 = d_12 * 2 + v_12 * AD_WRAP_LITERAL(0);
-    (*res)[3] = v_11 - _x_2_1;
-    (*dF)[3] = d_11 - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    (*res)[2] = _time - (_x_1_0);
+    (*dF)[2] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+    v_0 = _time;
+    d_0 = (*dz)[jmi->offs_t];
+    (*res)[3] = v_0 * 2 - (_x_2_1);
+    (*dF)[3] = d_0 * 2 + v_0 * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 
 ")})));
 end CADFunction8;
@@ -2137,31 +1820,19 @@ void func_CADCodeGenTests_CADFunction9_f2_der_AD(jmi_array_t* x_var_a, jmi_array
     jmi_ad_var_t y2_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
     JMI_ARRAY_STATIC(tmp_var_0, 2, 1)
     JMI_ARRAY_STATIC(tmp_der_0, 2, 1)
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    v_1 = jmi_array_val_1(x_var_a, 1) + AD_WRAP_LITERAL(1);
-    d_1 = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
-    v_2 = jmi_array_val_1(x_var_a, 2) + AD_WRAP_LITERAL(1);
-    d_2 = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
     JMI_ARRAY_STATIC_INIT_1(tmp_var_0, 2)
-    jmi_array_ref_1(tmp_var_0, 1) = v_1;
-    jmi_array_ref_1(tmp_var_0, 2) = v_2;
+    jmi_array_ref_1(tmp_var_0, 1) = jmi_array_val_1(x_var_a, 1) + AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_var_0, 2) = jmi_array_val_1(x_var_a, 2) + AD_WRAP_LITERAL(1);
     JMI_ARRAY_STATIC_INIT_1(tmp_der_0, 2)
-    jmi_array_ref_1(tmp_der_0, 1) = d_1;
-    jmi_array_ref_1(tmp_der_0, 2) = d_2;
+    jmi_array_ref_1(tmp_der_0, 1) = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_der_0, 2) = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
     func_CADCodeGenTests_CADFunction9_f1_der_AD(tmp_var_0, tmp_der_0, &v_0, NULL, &d_0, NULL);
     y1_var_v = v_0;
     y1_der_v = d_0;
-    v_3 = y1_var_v + jmi_array_val_1(x_var_a, 2);
-    d_3 = y1_der_v + jmi_array_val_1(x_der_a, 2);
-    y2_var_v = v_3;
-    y2_der_v = d_3;
+    y2_var_v = y1_var_v + jmi_array_val_1(x_var_a, 2);
+    y2_der_v = y1_der_v + jmi_array_val_1(x_der_a, 2);
 
     if (y1_var_o != NULL) *y1_var_o = y1_var_v;
     if (y1_der_o != NULL) *y1_der_o = y1_der_v;
@@ -2179,40 +1850,20 @@ void func_CADCodeGenTests_CADFunction9_f1_der_AD(jmi_array_t* x_var_a, jmi_array
     jmi_ad_var_t y2_der_v;
     JMI_ARRAY_STATIC(tmp_var_a, 2, 1)
     JMI_ARRAY_STATIC(tmp_der_a, 2, 1)
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
     JMI_ARRAY_STATIC_INIT_1(tmp_var_a, 2)
     JMI_ARRAY_STATIC_INIT_1(tmp_der_a, 2)
-    v_4 = jmi_array_val_1(x_var_a, 1) + 1;
-    d_4 = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(tmp_var_a, 1) = v_4;
-    jmi_array_ref_1(tmp_der_a, 1) = d_4;
-    v_5 = jmi_array_val_1(x_var_a, 2) + 1;
-    d_5 = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(tmp_var_a, 2) = v_5;
-    jmi_array_ref_1(tmp_der_a, 2) = d_5;
-    v_6 = jmi_array_val_1(tmp_var_a, 1) + jmi_array_val_1(x_var_a, 1);
-    d_6 = jmi_array_val_1(tmp_der_a, 1) + jmi_array_val_1(x_der_a, 1);
-    jmi_array_ref_1(tmp_var_a, 1) = v_6;
-    jmi_array_ref_1(tmp_der_a, 1) = d_6;
-    v_7 = jmi_array_val_1(tmp_var_a, 2) + jmi_array_val_1(x_var_a, 2);
-    d_7 = jmi_array_val_1(tmp_der_a, 2) + jmi_array_val_1(x_der_a, 2);
-    jmi_array_ref_1(tmp_var_a, 2) = v_7;
-    jmi_array_ref_1(tmp_der_a, 2) = d_7;
+    jmi_array_ref_1(tmp_var_a, 1) = jmi_array_val_1(x_var_a, 1) + 1;
+    jmi_array_ref_1(tmp_der_a, 1) = jmi_array_val_1(x_der_a, 1) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_var_a, 2) = jmi_array_val_1(x_var_a, 2) + 1;
+    jmi_array_ref_1(tmp_der_a, 2) = jmi_array_val_1(x_der_a, 2) + AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_var_a, 1) = jmi_array_val_1(tmp_var_a, 1) + jmi_array_val_1(x_var_a, 1);
+    jmi_array_ref_1(tmp_der_a, 1) = jmi_array_val_1(tmp_der_a, 1) + jmi_array_val_1(x_der_a, 1);
+    jmi_array_ref_1(tmp_var_a, 2) = jmi_array_val_1(tmp_var_a, 2) + jmi_array_val_1(x_var_a, 2);
+    jmi_array_ref_1(tmp_der_a, 2) = jmi_array_val_1(tmp_der_a, 2) + jmi_array_val_1(x_der_a, 2);
     y1_var_v = jmi_array_val_1(tmp_var_a, 1);
     y1_der_v = jmi_array_val_1(tmp_der_a, 1);
-    v_8 = jmi_array_val_1(tmp_var_a, 1) + y1_var_v;
-    d_8 = jmi_array_val_1(tmp_der_a, 1) + y1_der_v;
-    y2_var_v = v_8;
-    y2_der_v = d_8;
+    y2_var_v = jmi_array_val_1(tmp_var_a, 1) + y1_var_v;
+    y2_der_v = jmi_array_val_1(tmp_der_a, 1) + y1_der_v;
 
     if (y1_var_o != NULL) *y1_var_o = y1_var_v;
     if (y1_der_o != NULL) *y1_der_o = y1_der_v;
@@ -2223,36 +1874,27 @@ void func_CADCodeGenTests_CADFunction9_f1_der_AD(jmi_array_t* x_var_a, jmi_array
 }
 
 
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t d_9;
-    JMI_ARRAY_STATIC(tmp_var_1, 2, 1)
-    JMI_ARRAY_STATIC(tmp_der_1, 2, 1)
-    jmi_ad_var_t v_10;
-    jmi_ad_var_t d_10;
-    jmi_ad_var_t v_11;
-    jmi_ad_var_t d_11;
-    jmi_ad_var_t v_12;
-    jmi_ad_var_t d_12;
-    JMI_ARRAY_STATIC_INIT_1(tmp_var_1, 2)
-    jmi_array_ref_1(tmp_var_1, 1) = _x_1_0;
-    jmi_array_ref_1(tmp_var_1, 2) = _x_2_1;
-    JMI_ARRAY_STATIC_INIT_1(tmp_der_1, 2)
-    jmi_array_ref_1(tmp_der_1, 1) = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-    jmi_array_ref_1(tmp_der_1, 2) = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    func_CADCodeGenTests_CADFunction9_f2_der_AD(tmp_var_1, tmp_der_1, &v_9, NULL, &d_9, NULL);
-    (*res)[0] = v_9 - _y1_2;
-    (*dF)[0] = d_9 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    v_10 = _time;
-    d_10 = (*dz)[jmi->offs_t];
-    (*res)[1] = v_10 - _x_1_0;
-    (*dF)[1] = d_10 - (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-    v_12 = _time;
-    d_12 = (*dz)[jmi->offs_t];
-    v_11 = v_12 * 2;
-    d_11 = d_12 * 2 + v_12 * AD_WRAP_LITERAL(0);
-    (*res)[2] = v_11 - _x_2_1;
-    (*dF)[2] = d_11 - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-
+jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
+JMI_ARRAY_STATIC(tmp_var_1, 2, 1)
+JMI_ARRAY_STATIC(tmp_der_1, 2, 1)
+jmi_ad_var_t v_2;
+jmi_ad_var_t d_2;
+JMI_ARRAY_STATIC_INIT_1(tmp_var_1, 2)
+jmi_array_ref_1(tmp_var_1, 1) = _x_1_0;
+jmi_array_ref_1(tmp_var_1, 2) = _x_2_1;
+JMI_ARRAY_STATIC_INIT_1(tmp_der_1, 2)
+jmi_array_ref_1(tmp_der_1, 1) = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+jmi_array_ref_1(tmp_der_1, 2) = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+func_CADCodeGenTests_CADFunction9_f2_der_AD(tmp_var_1, tmp_der_1, &v_1, NULL, &d_1, NULL);
+(*res)[0] = v_1 - (_y1_2);
+(*dF)[0] = d_1 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+(*res)[1] = _time - (_x_1_0);
+(*dF)[1] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+v_2 = _time;
+d_2 = (*dz)[jmi->offs_t];
+(*res)[2] = v_2 * 2 - (_x_2_1);
+(*dF)[2] = d_2 * 2 + v_2 * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
 ")})));
 end CADFunction9;
 
@@ -2366,13 +2008,9 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F2_der_AD(jmi_ad_var_t x_v
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t i_v;
     jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(&v_1);
-    v_0 = v_1 + x_var_v;
-    d_0 = AD_WRAP_LITERAL(0) + x_der_v;
-    y_var_v = v_0;
-    y_der_v = d_0;
+    func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(&v_0);
+    y_var_v = v_0 + x_var_v;
+    y_der_v = AD_WRAP_LITERAL(0) + x_der_v;
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -2429,14 +2067,10 @@ void func_CADCodeGenTests_FunctionMixedRecordInputTest1_F_der_AD(R_0_r* r_var_v,
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    v_1 = jmi_array_val_1(r_var_v->X, 1) + jmi_array_val_1(r_var_v->X, 2);
-    d_1 = jmi_array_val_1(r_der_v->X, 1) + jmi_array_val_1(r_der_v->X, 2);
-    v_0 = v_1 + r_var_v->i;
-    d_0 = d_1 + AD_WRAP_LITERAL(0);
-    y_var_v = v_0;
-    y_der_v = d_0;
+    v_0 = jmi_array_val_1(r_var_v->X, 1) + jmi_array_val_1(r_var_v->X, 2);
+    d_0 = jmi_array_val_1(r_der_v->X, 1) + jmi_array_val_1(r_der_v->X, 2);
+    y_var_v = v_0 + r_var_v->i;
+    y_der_v = d_0 + AD_WRAP_LITERAL(0);
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -2484,31 +2118,23 @@ void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
     jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    jmi_ad_var_t v_2;
     jmi_ad_var_t i1_1i;
     jmi_ad_var_t i1_1ie;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
     JMI_ARRAY_DYNAMIC_INIT_1(t_var_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
     JMI_ARRAY_DYNAMIC_INIT_1(t_der_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
     v_0 = jmi_array_size(t_var_a, 0);
     i1_0ie = v_0 + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
-        v_1 = jmi_array_val_1(x_var_a, i1_0i) * 23;
-        d_1 = jmi_array_val_1(x_der_a, i1_0i) * 23 + jmi_array_val_1(x_var_a, i1_0i) * AD_WRAP_LITERAL(0);
-        jmi_array_ref_1(t_var_a, i1_0i) = v_1;
-        jmi_array_ref_1(t_der_a, i1_0i) = d_1;
+        jmi_array_ref_1(t_var_a, i1_0i) = jmi_array_val_1(x_var_a, i1_0i) * 23;
+        jmi_array_ref_1(t_der_a, i1_0i) = jmi_array_val_1(x_der_a, i1_0i) * 23 + jmi_array_val_1(x_var_a, i1_0i) * AD_WRAP_LITERAL(0);
     }
     temp_1_var_v = 0.0;
     temp_1_der_v = AD_WRAP_LITERAL(0);
-    v_2 = jmi_array_size(x_var_a, 0);
-    i1_1ie = v_2 + 1 / 2.0;
+    v_1 = jmi_array_size(x_var_a, 0);
+    i1_1ie = v_1 + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
-        v_3 = temp_1_var_v + jmi_array_val_1(t_var_a, i1_1i);
-        d_3 = temp_1_der_v + jmi_array_val_1(t_der_a, i1_1i);
-        temp_1_var_v = v_3;
-        temp_1_der_v = d_3;
+        temp_1_var_v = temp_1_var_v + jmi_array_val_1(t_var_a, i1_1i);
+        temp_1_der_v = temp_1_der_v + jmi_array_val_1(t_der_a, i1_1i);
     }
     y_var_v = temp_1_var_v;
     y_der_v = temp_1_der_v;
@@ -2564,14 +2190,10 @@ void func_CADCodeGenTests_CADDerAnno1_f_der_der_AD(jmi_ad_var_t x_var_v, jmi_ad_
     jmi_ad_var_t der_y_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    v_1 = 2 * x_var_v;
-    d_1 = AD_WRAP_LITERAL(0) * x_var_v + 2 * x_der_v;
-    v_0 = v_1 * der_x_var_v;
-    d_0 = d_1 * der_x_var_v + v_1 * der_x_der_v;
-    der_y_var_v = v_0;
-    der_y_der_v = d_0;
+    v_0 = 2 * x_var_v;
+    d_0 = AD_WRAP_LITERAL(0) * x_var_v + 2 * x_der_v;
+    der_y_var_v = v_0 * der_x_var_v;
+    der_y_der_v = d_0 * der_x_var_v + v_0 * der_x_der_v;
     if (der_y_var_o != NULL) *der_y_var_o = der_y_var_v;
     if (der_y_der_o != NULL) *der_y_der_o = der_y_der_v;
     JMI_DYNAMIC_FREE()
@@ -2736,15 +2358,11 @@ void func_CADCodeGenTests_CADIfStmtTest1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_v
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
-    jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    v_1 = COND_EXP_GT(x_var_v, 5, JMI_TRUE, JMI_FALSE);
-    v_0 = LOG_EXP_OR(v_1, JMI_FALSE);
-    if (v_0) {
-        v_2 = (1.0 * (x_var_v) * (x_var_v));
-        d_2 = x_var_v == 0 ? 0 : (v_2 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + 2 * x_der_v / x_var_v));
-        y_var_v = v_2;
-        y_der_v = d_2;
+    v_0 = COND_EXP_GT(x_var_v, 5, JMI_TRUE, JMI_FALSE);
+    if (LOG_EXP_OR(v_0, JMI_FALSE)) {
+        v_1 = (1.0 * (x_var_v) * (x_var_v));
+        y_var_v = v_1;
+        y_der_v = x_var_v == 0 ? 0 : (v_1 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + 2 * x_der_v / x_var_v));
     } else {
         y_var_v = 2;
         y_der_v = AD_WRAP_LITERAL(0);
@@ -2789,38 +2407,30 @@ void func_CADCodeGenTests_CADForStmtTest1_f_der_AD(jmi_ad_var_t x_var_v, jmi_ad_
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
     jmi_ad_var_t i_0i;
     int i_0ii;
     jmi_ad_var_t i_0ia[3];
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
     jmi_ad_var_t j_1i;
     jmi_ad_var_t j_1ie;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    jmi_ad_var_t v_4;
-    v_0 = 2 + x_var_v;
-    d_0 = AD_WRAP_LITERAL(0) + x_der_v;
     i_0ia[0] = 1;
-    i_0ia[1] = v_0;
+    i_0ia[1] = 2 + x_var_v;
     i_0ia[2] = 4;
     for (i_0ii = 0; i_0ii < 3; i_0ii++) {
         i_0i = i_0ia[i_0ii];
-        v_1 = x_var_v + 1;
-        d_1 = x_der_v + AD_WRAP_LITERAL(0);
-        j_1ie = v_1 + 1 / 2.0;
+        v_0 = x_var_v + 1;
+        d_0 = x_der_v + AD_WRAP_LITERAL(0);
+        j_1ie = v_0 + 1 / 2.0;
         for (j_1i = 1; j_1i < j_1ie; j_1i += 1) {
-            v_3 = x_var_v + y_var_v;
-            d_3 = x_der_v + y_der_v;
-            v_4 = i_0i * j_1i;
-            v_2 = v_3 + v_4;
-            d_2 = d_3 + AD_WRAP_LITERAL(0);
-            y_var_v = v_2;
-            y_der_v = d_2;
+            v_1 = x_var_v + y_var_v;
+            d_1 = x_der_v + y_der_v;
+            v_2 = i_0i * j_1i;
+            y_var_v = v_1 + v_2;
+            y_der_v = d_1 + AD_WRAP_LITERAL(0);
         }
     }
 
@@ -2875,26 +2485,19 @@ void func_CADCodeGenTests_CADWhileStmtTest1_f_der_AD(jmi_ad_var_t x_var_v, jmi_a
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    v_2 = x_var_v - 2;
-    d_2 = x_der_v - AD_WRAP_LITERAL(0);
-    v_1 = COND_EXP_LT(y_var_v, v_2, JMI_TRUE, JMI_FALSE);
-    v_3 = COND_EXP_LT(n_v, y_var_v, JMI_TRUE, JMI_FALSE);
-    v_0 = LOG_EXP_OR(v_1, v_3);
-    while (v_0) {
-        v_4 = y_var_v + 1;
-        d_4 = y_der_v + AD_WRAP_LITERAL(0);
-        y_var_v = v_4;
-        y_der_v = d_4;
-        v_2 = x_var_v - 2;
-        d_2 = x_der_v - AD_WRAP_LITERAL(0);
-        v_1 = COND_EXP_LT(y_var_v, v_2, JMI_TRUE, JMI_FALSE);
-        v_3 = COND_EXP_LT(n_v, y_var_v, JMI_TRUE, JMI_FALSE);
-        v_0 = LOG_EXP_OR(v_1, v_3);
+    v_1 = x_var_v - 2;
+    d_1 = x_der_v - AD_WRAP_LITERAL(0);
+    v_0 = COND_EXP_LT(y_var_v, v_1, JMI_TRUE, JMI_FALSE);
+    v_2 = COND_EXP_LT(n_v, y_var_v, JMI_TRUE, JMI_FALSE);
+    while (LOG_EXP_OR(v_0, v_2)) {
+        y_var_v = y_var_v + 1;
+        y_der_v = y_der_v + AD_WRAP_LITERAL(0);
+    v_1 = x_var_v - 2;
+    d_1 = x_der_v - AD_WRAP_LITERAL(0);
+    v_0 = COND_EXP_LT(y_var_v, v_1, JMI_TRUE, JMI_FALSE);
+    v_2 = COND_EXP_LT(n_v, y_var_v, JMI_TRUE, JMI_FALSE);
     }
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
@@ -2934,7 +2537,6 @@ $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
 ",
 			generatedCode="
-
 /******** Declarations *******/
 jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
@@ -2944,37 +2546,27 @@ jmi_ad_var_t v_2;
 jmi_ad_var_t d_2;
 jmi_ad_var_t v_3;
 jmi_ad_var_t d_3;
-jmi_ad_var_t v_4;
-jmi_ad_var_t d_4;
-jmi_ad_var_t v_5;
-jmi_ad_var_t d_5;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-v_2 = _x_0 + AD_WRAP_LITERAL(1);
-d_2 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
-v_1 = log(v_2);
-d_1 = d_2 / v_2;
-v_0 = v_1 * _a_2;
-d_0 = d_1 * _a_2 + v_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-_der_a_4 = v_0;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+v_1 = _x_0 + AD_WRAP_LITERAL(1);
+d_1 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
+v_0 = log(v_1);
+d_0 = d_1 / v_1;
+_der_a_4 = v_0 * _a_2;
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 * _a_2 + v_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
 jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
-v_5 = _y_1 + AD_WRAP_LITERAL(2);
-d_5 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
-v_4 = log(v_5);
-d_4 = d_5 / v_5;
-v_3 = v_4 * _b_3;
-d_3 = d_4 * _b_3 + v_4 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-_der_b_5 = v_3;
-(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_3;
+v_3 = _y_1 + AD_WRAP_LITERAL(2);
+d_3 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
+v_2 = log(v_3);
+d_2 = d_3 / v_3;
+_der_b_5 = v_2 * _b_3;
+(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_2 * _b_3 + v_2 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-  jmi_ad_var_t v_6;
-  jmi_ad_var_t d_6;
   jmi_real_t** res = &residual;
   jmi_real_t** dF = &dRes;
   jmi_real_t** dz;
@@ -2994,18 +2586,14 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     return -1;
   }
   if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-    v_6 = sin(_x_0);
-    d_6 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_x_0);
-    (*res)[0] = v_6 - _x_0;
-    (*dF)[0]  = d_6 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+    (*res)[0] = sin(_x_0) - (_x_0);
+    (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_x_0) - ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
     (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
   }
   return 0;
 }
 
 static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-  jmi_ad_var_t v_7;
-  jmi_ad_var_t d_7;
   jmi_real_t** res = &residual;
   jmi_real_t** dF = &dRes;
   jmi_real_t** dz;
@@ -3025,10 +2613,8 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     return -1;
   }
   if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-    v_7 = sin(_y_1);
-    d_7 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1);
-    (*res)[0] = v_7 - _y_1;
-    (*dF)[0]  = d_7 - (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+    (*res)[0] = sin(_y_1) - (_y_1);
+    (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_y_1) - ((*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx]);
     (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = 0;
   }
   return 0;
@@ -3073,60 +2659,51 @@ jmi_ad_var_t v_0;
 jmi_ad_var_t d_0;
 jmi_ad_var_t v_1;
 jmi_ad_var_t d_1;
-jmi_ad_var_t v_2;
-jmi_ad_var_t d_2;
-jmi_ad_var_t v_3;
-jmi_ad_var_t d_3;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-v_0 = _x_0 * _a_2;
-d_0 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _a_2 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-_der_y_3 = v_0;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
-v_3 = _x_0 * _y_1;
-d_3 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-v_2 = v_3 + AD_WRAP_LITERAL(1);
-d_2 = d_3 + AD_WRAP_LITERAL(0);
-v_1 = log(v_2);
-d_1 = d_2 / v_2;
-_der_a_4 = v_1;
-(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_1;
+_der_y_3 = _x_0 * _a_2;
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _a_2 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
+v_1 = _x_0 * _y_1;
+d_1 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _y_1 + _x_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+v_0 = v_1 + AD_WRAP_LITERAL(1);
+d_0 = d_1 + AD_WRAP_LITERAL(0);
+_der_a_4 = log(v_0);
+(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_0 / v_0;
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
 
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-  jmi_ad_var_t v_4;
-  jmi_ad_var_t d_4;
-  jmi_real_t** res = &residual;
-  jmi_real_t** dF = &dRes;
-  jmi_real_t** dz;
-  if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_0;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_real_t** res = &residual;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
+        _x_0 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx], &v_2, &d_2);
+        (*res)[0] = v_2 - (_x_0);
+        (*dF)[0] = d_2 - ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
+    }
     return 0;
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-    dz = jmi->dz_active_variables;
-    (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-    _x_0 = x[0];
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
-    dz = jmi->dz;
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    dz = jmi->dz;
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-  } else {
-    return -1;
-  }
-  if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-    func_CADCodeGenTests_CADRes2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx],&v_4, &d_4);
-    (*res)[0] = v_4 - _x_0;
-    (*dF)[0]  = d_4 - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-    (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-  }
-  return 0;
 }
-
 ")})));
 end CADRes2;
 
@@ -3215,70 +2792,54 @@ jmi_ad_var_t v_16;
 jmi_ad_var_t d_16;
 jmi_ad_var_t v_17;
 jmi_ad_var_t d_17;
-jmi_ad_var_t v_18;
-jmi_ad_var_t d_18;
-jmi_ad_var_t v_19;
-jmi_ad_var_t d_19;
-jmi_ad_var_t v_20;
-jmi_ad_var_t d_20;
-jmi_ad_var_t v_21;
-jmi_ad_var_t d_21;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
 jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-v_3 = _x1_0 * _x2_1;
-d_3 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
-v_2 = v_3 + AD_WRAP_LITERAL(1);
-d_2 = d_3 + AD_WRAP_LITERAL(0);
-v_1 = log(v_2);
-d_1 = d_2 / v_2;
-v_0 = v_1 * _e_4;
-d_0 = d_1 * _e_4 + v_1 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-_der_e_8 = v_0;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
-v_7 = _x2_1 * _x3_2;
-d_7 = (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] * _x3_2 + _x2_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
-v_6 = v_7 + AD_WRAP_LITERAL(2);
-d_6 = d_7 + AD_WRAP_LITERAL(0);
-v_5 = sin(v_6);
-d_5 = d_6 * cos(v_6);
-v_4 = v_5 * _f_5;
-d_4 = d_5 * _f_5 + v_5 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-_der_f_9 = v_4;
-(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_4;
-v_15 = _x1_0 * _x2_1;
-d_15 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
-v_14 = v_15 * _x3_2;
-d_14 = d_15 * _x3_2 + v_15 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
-v_13 = v_14 * _x4_3;
-d_13 = d_14 * _x4_3 + v_14 * (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
-v_12 = v_13 + AD_WRAP_LITERAL(3);
-d_12 = d_13 + AD_WRAP_LITERAL(0);
-v_11 = log(v_12);
-d_11 = d_12 / v_12;
-v_10 = v_11 * _g_6;
-d_10 = d_11 * _g_6 + v_11 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-v_9 = v_10 + _e_4;
-d_9 = d_10 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-v_8 = v_9 + _f_5;
-d_8 = d_9 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-_der_g_10 = v_8;
-(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] =d_8;
-v_21 = _x1_0 + _x2_1;
-d_21 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
-v_20 = v_21 + _x3_2;
-d_20 = d_21 + (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
-v_19 = v_20 + _x4_3;
-d_19 = d_20 + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
-v_18 = v_19 + _e_4;
-d_18 = d_19 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-v_17 = v_18 + _f_5;
-d_17 = d_18 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-v_16 = v_17 + _g_6;
-d_16 = d_17 + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-_der_Y_11 = v_16;
-(*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] =d_16;
+v_2 = _x1_0 * _x2_1;
+d_2 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+v_1 = v_2 + AD_WRAP_LITERAL(1);
+d_1 = d_2 + AD_WRAP_LITERAL(0);
+v_0 = log(v_1);
+d_0 = d_1 / v_1;
+_der_e_8 = v_0 * _e_4;
+(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 * _e_4 + v_0 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+v_5 = _x2_1 * _x3_2;
+d_5 = (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] * _x3_2 + _x2_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
+v_4 = v_5 + AD_WRAP_LITERAL(2);
+d_4 = d_5 + AD_WRAP_LITERAL(0);
+v_3 = sin(v_4);
+d_3 = d_4 * cos(v_4);
+_der_f_9 = v_3 * _f_5;
+(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_3 * _f_5 + v_3 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+v_12 = _x1_0 * _x2_1;
+d_12 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+v_11 = v_12 * _x3_2;
+d_11 = d_12 * _x3_2 + v_12 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
+v_10 = v_11 * _x4_3;
+d_10 = d_11 * _x4_3 + v_11 * (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
+v_9 = v_10 + AD_WRAP_LITERAL(3);
+d_9 = d_10 + AD_WRAP_LITERAL(0);
+v_8 = log(v_9);
+d_8 = d_9 / v_9;
+v_7 = v_8 * _g_6;
+d_7 = d_8 * _g_6 + v_8 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+v_6 = v_7 + _e_4;
+d_6 = d_7 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+_der_g_10 = v_6 + _f_5;
+(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = d_6 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+v_17 = _x1_0 + _x2_1;
+d_17 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] + (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+v_16 = v_17 + _x3_2;
+d_16 = d_17 + (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx];
+v_15 = v_16 + _x4_3;
+d_15 = d_16 + (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx];
+v_14 = v_15 + _e_4;
+d_14 = d_15 + (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+v_13 = v_14 + _f_5;
+d_13 = d_14 + (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+_der_Y_11 = v_13 + _g_6;
+(*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = d_13 + (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
@@ -3372,144 +2933,143 @@ $CAD_dae_blocks_residual_functions$
 ",
 			generatedCode="
 /******** Declarations *******/
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
-jmi_ad_var_t v_2;
-jmi_ad_var_t d_2;
-jmi_ad_var_t v_3;
-jmi_ad_var_t d_3;
-jmi_ad_var_t v_4;
-jmi_ad_var_t d_4;
-jmi_ad_var_t v_5;
-jmi_ad_var_t d_5;
-jmi_ad_var_t v_6;
-jmi_ad_var_t d_6;
-jmi_ad_var_t v_7;
-jmi_ad_var_t d_7;
-jmi_ad_var_t v_8;
-jmi_ad_var_t d_8;
-jmi_ad_var_t v_9;
-jmi_ad_var_t d_9;
-jmi_ad_var_t v_10;
-jmi_ad_var_t d_10;
-jmi_ad_var_t v_11;
-jmi_ad_var_t d_11;
-jmi_ad_var_t v_12;
-jmi_ad_var_t d_12;
-jmi_ad_var_t v_13;
-jmi_ad_var_t d_13;
-jmi_ad_var_t v_14;
-jmi_ad_var_t d_14;
-jmi_ad_var_t v_15;
-jmi_ad_var_t d_15;
-jmi_ad_var_t v_16;
-jmi_ad_var_t v_17;
-jmi_ad_var_t d_17;
-jmi_ad_var_t v_18;
-jmi_ad_var_t d_18;
-jmi_ad_var_t v_19;
-jmi_ad_var_t d_19;
-jmi_ad_var_t v_20;
-jmi_ad_var_t d_20;
-jmi_ad_var_t v_21;
-jmi_ad_var_t d_21;
-jmi_ad_var_t v_22;
-jmi_ad_var_t d_22;
-jmi_ad_var_t v_23;
-jmi_ad_var_t d_23;
-jmi_ad_var_t v_24;
-jmi_ad_var_t d_24;
-jmi_ad_var_t v_25;
-jmi_ad_var_t d_25;
-jmi_ad_var_t v_26;
-jmi_ad_var_t v_27;
-jmi_ad_var_t d_27;
-jmi_ad_var_t v_28;
-jmi_ad_var_t d_28;
-jmi_ad_var_t v_29;
-jmi_ad_var_t d_29;
-jmi_ad_var_t v_30;
-jmi_ad_var_t v_31;
-jmi_ad_var_t d_31;
-jmi_ad_var_t v_32;
-jmi_ad_var_t d_32;
-jmi_ad_var_t v_33;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t d_4;
+    jmi_ad_var_t v_5;
+    jmi_ad_var_t d_5;
+    jmi_ad_var_t v_6;
+    jmi_ad_var_t d_6;
+    jmi_ad_var_t v_7;
+    jmi_ad_var_t d_7;
+    jmi_ad_var_t v_8;
+    jmi_ad_var_t d_8;
+    jmi_ad_var_t v_9;
+    jmi_ad_var_t d_9;
+    jmi_ad_var_t v_10;
+    jmi_ad_var_t d_10;
+    jmi_ad_var_t v_11;
+    jmi_ad_var_t d_11;
+    jmi_ad_var_t v_12;
+    jmi_ad_var_t d_12;
+    jmi_ad_var_t v_13;
+    jmi_ad_var_t d_13;
+    jmi_ad_var_t v_14;
+    jmi_ad_var_t d_14;
+    jmi_ad_var_t v_15;
+    jmi_ad_var_t v_16;
+    jmi_ad_var_t d_16;
+    jmi_ad_var_t v_17;
+    jmi_ad_var_t d_17;
+    jmi_ad_var_t v_18;
+    jmi_ad_var_t d_18;
+    jmi_ad_var_t v_19;
+    jmi_ad_var_t d_19;
+    jmi_ad_var_t v_20;
+    jmi_ad_var_t d_20;
+    jmi_ad_var_t v_21;
+    jmi_ad_var_t d_21;
+    jmi_ad_var_t v_22;
+    jmi_ad_var_t d_22;
+    jmi_ad_var_t v_23;
+    jmi_ad_var_t d_23;
+    jmi_ad_var_t v_24;
+    jmi_ad_var_t d_24;
+    jmi_ad_var_t v_25;
+    jmi_ad_var_t v_26;
+    jmi_ad_var_t d_26;
+    jmi_ad_var_t v_27;
+    jmi_ad_var_t d_27;
+    jmi_ad_var_t v_28;
+    jmi_ad_var_t d_28;
+    jmi_ad_var_t v_29;
+    jmi_ad_var_t v_30;
+    jmi_ad_var_t d_30;
+    jmi_ad_var_t v_31;
+    jmi_ad_var_t d_31;
+    jmi_ad_var_t v_32;
+
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
-jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-v_13 = 1.58 * _w_ode_1_1_1;
-d_13 = AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + 1.58 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-v_14 = sin(_w_ode_1_1_1);
-d_14 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
-v_12 = v_13 + v_14;
-d_12 = d_13 + d_14;
-v_16 = (- 2.51);
-v_15 = v_16 * _w_ode_1_2_2;
-d_15 = AD_WRAP_LITERAL(0) * _w_ode_1_2_2 + v_16 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-v_11 = v_12 + v_15;
-d_11 = d_12 + d_15;
-v_17 = sin(_w_ode_1_2_2);
-d_17 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
-v_10 = v_11 + v_17;
-d_10 = d_11 + d_17;
-v_18 = 2.15 * _x_1_0;
-d_18 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.15 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-v_9 = v_10 + v_18;
-d_9 = d_10 + d_18;
-v_19 = sin(_x_1_0);
-d_19 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
-v_8 = v_9 + v_19;
-d_8 = d_9 + d_19;
-v_21 = 2.19 * _x_1_0;
-d_21 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.19 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-v_20 = (- v_21);
-d_20 = -d_21;
-v_7 = v_8 + v_20;
-d_7 = d_8 + d_20;
-v_23 = sin(_x_1_0);
-d_23 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
-v_22 = (- v_23);
-d_22 = -d_23;
-v_6 = v_7 + v_22;
-d_6 = d_7 + d_22;
-v_26 = (- 2.89);
-v_25 = v_26 * _x_1_0;
-d_25 = AD_WRAP_LITERAL(0) * _x_1_0 + v_26 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-v_24 = (- v_25);
-d_24 = -d_25;
-v_5 = v_6 + v_24;
-d_5 = d_6 + d_24;
-v_27 = 2.99 * _ur_1_3;
-d_27 = AD_WRAP_LITERAL(0) * _ur_1_3 + 2.99 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-v_4 = v_5 + v_27;
-d_4 = d_5 + d_27;
-v_28 = sin(_ur_1_3);
-d_28 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * cos(_ur_1_3);
-v_3 = v_4 + v_28;
-d_3 = d_4 + d_28;
-v_30 = (- 2.34);
-v_29 = v_30 * _ur_3_5;
-d_29 = AD_WRAP_LITERAL(0) * _ur_3_5 + v_30 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-v_2 = v_3 + v_29;
-d_2 = d_3 + d_29;
-v_31 = sin(_ur_3_5);
-d_31 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
-v_1 = v_2 + v_31;
-d_1 = d_2 + d_31;
-v_33 = (- 1.23);
-v_32 = v_33 * _ur_2_4;
-d_32 = AD_WRAP_LITERAL(0) * _ur_2_4 + v_33 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-v_0 = v_1 + v_32;
-d_0 = d_1 + d_32;
-_der_x_1_6 = v_0;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+  v_12 = 1.58 * _w_ode_1_1_1;
+  d_12 = AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + 1.58 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+  v_13 = sin(_w_ode_1_1_1);
+  d_13 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
+  v_11 = v_12 + v_13;
+  d_11 = d_12 + d_13;
+  v_15 = (- 2.51);
+  v_14 = v_15 * _w_ode_1_2_2;
+  d_14 = AD_WRAP_LITERAL(0) * _w_ode_1_2_2 + v_15 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+  v_10 = v_11 + v_14;
+  d_10 = d_11 + d_14;
+  v_16 = sin(_w_ode_1_2_2);
+  d_16 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
+  v_9 = v_10 + v_16;
+  d_9 = d_10 + d_16;
+  v_17 = 2.15 * _x_1_0;
+  d_17 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.15 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  v_8 = v_9 + v_17;
+  d_8 = d_9 + d_17;
+  v_18 = sin(_x_1_0);
+  d_18 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+  v_7 = v_8 + v_18;
+  d_7 = d_8 + d_18;
+  v_20 = 2.19 * _x_1_0;
+  d_20 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.19 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  v_19 = (- v_20);
+  d_19 = -d_20;
+  v_6 = v_7 + v_19;
+  d_6 = d_7 + d_19;
+  v_22 = sin(_x_1_0);
+  d_22 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+  v_21 = (- v_22);
+  d_21 = -d_22;
+  v_5 = v_6 + v_21;
+  d_5 = d_6 + d_21;
+  v_25 = (- 2.89);
+  v_24 = v_25 * _x_1_0;
+  d_24 = AD_WRAP_LITERAL(0) * _x_1_0 + v_25 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  v_23 = (- v_24);
+  d_23 = -d_24;
+  v_4 = v_5 + v_23;
+  d_4 = d_5 + d_23;
+  v_26 = 2.99 * _ur_1_3;
+  d_26 = AD_WRAP_LITERAL(0) * _ur_1_3 + 2.99 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+  v_3 = v_4 + v_26;
+  d_3 = d_4 + d_26;
+  v_27 = sin(_ur_1_3);
+  d_27 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * cos(_ur_1_3);
+  v_2 = v_3 + v_27;
+  d_2 = d_3 + d_27;
+  v_29 = (- 2.34);
+  v_28 = v_29 * _ur_3_5;
+  d_28 = AD_WRAP_LITERAL(0) * _ur_3_5 + v_29 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+  v_1 = v_2 + v_28;
+  d_1 = d_2 + d_28;
+  v_30 = sin(_ur_3_5);
+  d_30 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
+  v_0 = v_1 + v_30;
+  d_0 = d_1 + d_30;
+  v_32 = (- 1.23);
+  v_31 = v_32 * _ur_2_4;
+  d_31 = AD_WRAP_LITERAL(0) * _ur_2_4 + v_32 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
+  _der_x_1_6 = v_0 + v_31;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 + d_31;
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
 
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t v_33;
+    jmi_ad_var_t d_33;
     jmi_ad_var_t v_34;
     jmi_ad_var_t d_34;
     jmi_ad_var_t v_35;
@@ -3543,19 +3103,19 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t v_49;
     jmi_ad_var_t d_49;
     jmi_ad_var_t v_50;
-    jmi_ad_var_t d_50;
     jmi_ad_var_t v_51;
     jmi_ad_var_t d_51;
     jmi_ad_var_t v_52;
+    jmi_ad_var_t d_52;
     jmi_ad_var_t v_53;
     jmi_ad_var_t d_53;
     jmi_ad_var_t v_54;
     jmi_ad_var_t d_54;
     jmi_ad_var_t v_55;
-    jmi_ad_var_t d_55;
     jmi_ad_var_t v_56;
     jmi_ad_var_t d_56;
     jmi_ad_var_t v_57;
+    jmi_ad_var_t d_57;
     jmi_ad_var_t v_58;
     jmi_ad_var_t d_58;
     jmi_ad_var_t v_59;
@@ -3569,10 +3129,10 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t v_63;
     jmi_ad_var_t d_63;
     jmi_ad_var_t v_64;
-    jmi_ad_var_t d_64;
     jmi_ad_var_t v_65;
     jmi_ad_var_t d_65;
     jmi_ad_var_t v_66;
+    jmi_ad_var_t d_66;
     jmi_ad_var_t v_67;
     jmi_ad_var_t d_67;
     jmi_ad_var_t v_68;
@@ -3590,12 +3150,12 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t v_74;
     jmi_ad_var_t d_74;
     jmi_ad_var_t v_75;
-    jmi_ad_var_t d_75;
     jmi_ad_var_t v_76;
     jmi_ad_var_t d_76;
     jmi_ad_var_t v_77;
     jmi_ad_var_t d_77;
     jmi_ad_var_t v_78;
+    jmi_ad_var_t d_78;
     jmi_ad_var_t v_79;
     jmi_ad_var_t d_79;
     jmi_ad_var_t v_80;
@@ -3606,12 +3166,6 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t d_82;
     jmi_ad_var_t v_83;
     jmi_ad_var_t d_83;
-    jmi_ad_var_t v_84;
-    jmi_ad_var_t d_84;
-    jmi_ad_var_t v_85;
-    jmi_ad_var_t d_85;
-    jmi_ad_var_t v_86;
-    jmi_ad_var_t d_86;
     jmi_real_t** res = &residual;
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
@@ -3630,113 +3184,109 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     } else {
         return -1;
     }
-    v_47 = 1.3 * _w_ode_1_2_2;
-    d_47 = AD_WRAP_LITERAL(0) * _w_ode_1_2_2 + 1.3 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-    v_46 = - v_47;
-    d_46 = - d_47;
-    v_49 = sin(_w_ode_1_2_2);
-    d_49 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
+    v_45 = 1.3 * _w_ode_1_2_2;
+    d_45 = AD_WRAP_LITERAL(0) * _w_ode_1_2_2 + 1.3 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+    v_44 = - v_45;
+    d_44 = -d_45;
+    v_47 = sin(_w_ode_1_2_2);
+    d_47 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * cos(_w_ode_1_2_2);
+    v_46 = (- v_47);
+    d_46 = -d_47;
+    v_43 = v_44 + v_46;
+    d_43 = d_44 + d_46;
+    v_50 = (- 2.01);
+    v_49 = v_50 * _x_1_0;
+    d_49 = AD_WRAP_LITERAL(0) * _x_1_0 + v_50 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
     v_48 = (- v_49);
     d_48 = -d_49;
-    v_45 = v_46 + v_48;
-    d_45 = d_46 + d_48;
-    v_52 = (- 2.01);
-    v_51 = v_52 * _x_1_0;
-    d_51 = AD_WRAP_LITERAL(0) * _x_1_0 + v_52 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    v_50 = (- v_51);
-    d_50 = -d_51;
-    v_44 = v_45 + v_50;
-    d_44 = d_45 + d_50;
-    v_54 = sin(_x_1_0);
-    d_54 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+    v_42 = v_43 + v_48;
+    d_42 = d_43 + d_48;
+    v_52 = sin(_x_1_0);
+    d_52 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+    v_51 = (- v_52);
+    d_51 = -d_52;
+    v_41 = v_42 + v_51;
+    d_41 = d_42 + d_51;
+    v_55 = (- 1.18);
+    v_54 = v_55 * _x_1_0;
+    d_54 = AD_WRAP_LITERAL(0) * _x_1_0 + v_55 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
     v_53 = (- v_54);
     d_53 = -d_54;
-    v_43 = v_44 + v_53;
-    d_43 = d_44 + d_53;
-    v_57 = (- 1.18);
-    v_56 = v_57 * _x_1_0;
-    d_56 = AD_WRAP_LITERAL(0) * _x_1_0 + v_57 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    v_55 = (- v_56);
-    d_55 = -d_56;
-    v_42 = v_43 + v_55;
-    d_42 = d_43 + d_55;
-    v_59 = 1.45 * _x_1_0;
-    d_59 = AD_WRAP_LITERAL(0) * _x_1_0 + 1.45 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    v_40 = v_41 + v_53;
+    d_40 = d_41 + d_53;
+    v_57 = 1.45 * _x_1_0;
+    d_57 = AD_WRAP_LITERAL(0) * _x_1_0 + 1.45 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    v_56 = (- v_57);
+    d_56 = -d_57;
+    v_39 = v_40 + v_56;
+    d_39 = d_40 + d_56;
+    v_59 = 1.09 * _ur_2_4;
+    d_59 = AD_WRAP_LITERAL(0) * _ur_2_4 + 1.09 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
     v_58 = (- v_59);
     d_58 = -d_59;
-    v_41 = v_42 + v_58;
-    d_41 = d_42 + d_58;
-    v_61 = 1.09 * _ur_2_4;
-    d_61 = AD_WRAP_LITERAL(0) * _ur_2_4 + 1.09 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
+    v_38 = v_39 + v_58;
+    d_38 = d_39 + d_58;
+    v_61 = sin(_ur_2_4);
+    d_61 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * cos(_ur_2_4);
     v_60 = (- v_61);
     d_60 = -d_61;
-    v_40 = v_41 + v_60;
-    d_40 = d_41 + d_60;
-    v_63 = sin(_ur_2_4);
-    d_63 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * cos(_ur_2_4);
+    v_37 = v_38 + v_60;
+    d_37 = d_38 + d_60;
+    v_64 = (- 1.24);
+    v_63 = v_64 * _ur_2_4;
+    d_63 = AD_WRAP_LITERAL(0) * _ur_2_4 + v_64 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
     v_62 = (- v_63);
     d_62 = -d_63;
-    v_39 = v_40 + v_62;
-    d_39 = d_40 + d_62;
-    v_66 = (- 1.24);
-    v_65 = v_66 * _ur_2_4;
-    d_65 = AD_WRAP_LITERAL(0) * _ur_2_4 + v_66 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
-    v_64 = (- v_65);
-    d_64 = -d_65;
-    v_38 = v_39 + v_64;
-    d_38 = d_39 + d_64;
-    v_68 = 2.16 * _ur_3_5;
-    d_68 = AD_WRAP_LITERAL(0) * _ur_3_5 + 2.16 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+    v_36 = v_37 + v_62;
+    d_36 = d_37 + d_62;
+    v_66 = 2.16 * _ur_3_5;
+    d_66 = AD_WRAP_LITERAL(0) * _ur_3_5 + 2.16 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+    v_65 = (- v_66);
+    d_65 = -d_66;
+    v_35 = v_36 + v_65;
+    d_35 = d_36 + d_65;
+    v_68 = sin(_ur_3_5);
+    d_68 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
     v_67 = (- v_68);
     d_67 = -d_68;
-    v_37 = v_38 + v_67;
-    d_37 = d_38 + d_67;
-    v_70 = sin(_ur_3_5);
-    d_70 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * cos(_ur_3_5);
-    v_69 = (- v_70);
-    d_69 = -d_70;
-    v_36 = v_37 + v_69;
-    d_36 = d_37 + d_69;
-    v_35 = (v_36 + 0);
-    d_35 = d_36 + AD_WRAP_LITERAL(0);
-    v_34 = jmi_divide(v_35,20,\"Divide by zero: (- 1.3 * w_ode_1_2 + (- sin(w_ode_1_2)) + (- (- 2.01) * x_1) + (- sin(x_1)) + (- (- 1.18) * x_1) + (- 1.45 * x_1) + (- 1.09 * ur_2) + (- sin(ur_2)) + (- (- 1.24) * ur_2) + (- 2.16 * ur_3) + (- sin(ur_3)) + 0) / 20\");
-    d_34 = (d_35 * 20 - v_35 * AD_WRAP_LITERAL(0) ) / ( 20 * 20);
-    _w_ode_1_1_1 = v_34;
-    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] =d_34;
+    v_34 = v_35 + v_67;
+    d_34 = d_35 + d_67;
+    v_33 = (v_34 + 0);
+    d_33 = d_34 + AD_WRAP_LITERAL(0);
+    _w_ode_1_1_1 = jmi_divide(v_33,20,\"Divide by zero: (- 1.3 * w_ode_1_2 + (- sin(w_ode_1_2)) + (- (- 2.01) * x_1) + (- sin(x_1)) + (- (- 1.18) * x_1) + (- 1.45 * x_1) + (- 1.09 * ur_2) + (- sin(ur_2)) + (- (- 1.24) * ur_2) + (- 2.16 * ur_3) + (- sin(ur_3)) + 0) / 20\");
+    (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = (d_33 * 20 - v_33 * AD_WRAP_LITERAL(0)) / (20 * 20);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        v_75 = _w_ode_1_2_2 * 20;
-        d_75 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * 20 + _w_ode_1_2_2 * AD_WRAP_LITERAL(0);
-        v_78 = (- 2.1);
-        v_77 = v_78 * _w_ode_1_1_1;
-        d_77 = AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + v_78 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-        v_79 = sin(_w_ode_1_1_1);
-        d_79 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
-        v_76 = (v_77 + v_79);
-        d_76 = d_77 + d_79;
-        v_74 = v_75 + v_76;
-        d_74 = d_75 + d_76;
-        v_81 = 1.63 * _x_1_0;
-        d_81 = AD_WRAP_LITERAL(0) * _x_1_0 + 1.63 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+        v_72 = _w_ode_1_2_2 * 20;
+        d_72 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * 20 + _w_ode_1_2_2 * AD_WRAP_LITERAL(0);
+        v_75 = (- 2.1);
+        v_74 = v_75 * _w_ode_1_1_1;
+        d_74 = AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + v_75 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+        v_76 = sin(_w_ode_1_1_1);
+        d_76 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] * cos(_w_ode_1_1_1);
+        v_73 = (v_74 + v_76);
+        d_73 = d_74 + d_76;
+        v_71 = v_72 + v_73;
+        d_71 = d_72 + d_73;
+        v_78 = 1.63 * _x_1_0;
+        d_78 = AD_WRAP_LITERAL(0) * _x_1_0 + 1.63 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+        v_79 = sin(_x_1_0);
+        d_79 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
+        v_77 = (v_78 + v_79);
+        d_77 = d_78 + d_79;
+        v_70 = v_71 + v_77;
+        d_70 = d_71 + d_77;
+        v_81 = 2.59 * _x_1_0;
+        d_81 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.59 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
         v_82 = sin(_x_1_0);
         d_82 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
         v_80 = (v_81 + v_82);
         d_80 = d_81 + d_82;
-        v_73 = v_74 + v_80;
-        d_73 = d_74 + d_80;
-        v_84 = 2.59 * _x_1_0;
-        d_84 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.59 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-        v_85 = sin(_x_1_0);
-        d_85 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * cos(_x_1_0);
-        v_83 = (v_84 + v_85);
-        d_83 = d_84 + d_85;
-        v_72 = v_73 + v_83;
-        d_72 = d_73 + d_83;
-        v_86 = 2.05 * _x_1_0;
-        d_86 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.05 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-        v_71 = v_72 - v_86;
-        d_71 = d_72 - d_86;
-        (*res)[0] = 0 - v_71;
-        (*dF)[0] = AD_WRAP_LITERAL(0) - d_71;
+        v_69 = v_70 + v_80;
+        d_69 = d_70 + d_80;
+        v_83 = 2.05 * _x_1_0;
+        d_83 = AD_WRAP_LITERAL(0) * _x_1_0 + 2.05 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+        (*res)[0] = 0 - (v_69 - v_83);
+        (*dF)[0] = AD_WRAP_LITERAL(0) - (d_69 - d_83);
         (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = 0;
     }
     return 0;
@@ -3767,8 +3317,6 @@ $CAD_dae_add_blocks_residual_functions$
 ",
 			generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
     jmi_real_t** res = &residual;
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
@@ -3788,10 +3336,8 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         return -1;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        v_0 = _c_2 * _b_1;
-        d_0 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _b_1 + _c_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-        (*res)[0] = v_0 - 23;
-        (*dF)[0] = d_0 - AD_WRAP_LITERAL(0);
+        (*res)[0] = _c_2 * _b_1 - (23);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _b_1 + _c_2 * (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
         (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
     }
     return 0;
@@ -3803,12 +3349,6 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
     jmi_real_t** res = &residual;
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
@@ -3828,20 +3368,16 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         return -1;
     }
     jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-    v_3 = - _c_2;
-    d_3 = -(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    v_2 = (v_3 + _b_1);
-    d_2 = d_3 + (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-    v_4 = (- 1.0);
-    v_1 = jmi_divide(v_2,v_4,\"Divide by zero: (- c + b) / (- 1.0)\");
-    d_1 = (d_2 * v_4 - v_2 * AD_WRAP_LITERAL(0)) / (v_4 * v_4);
-    _a_0 = v_1;
-    (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_1;
+    v_1 = - _c_2;
+    d_1 = -(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+    v_0 = (v_1 + _b_1);
+    d_0 = d_1 + (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+    v_2 = (- 1.0);
+    _a_0 = jmi_divide(v_0,v_2,\"Divide by zero: (- c + b) / (- 1.0)\");
+    (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (d_0 * v_2 - v_0 * AD_WRAP_LITERAL(0)) / (v_2 * v_2);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        v_5 = _c_2 * _a_0;
-        d_5 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-        (*res)[0] = v_5 - 20;
-        (*dF)[0] = d_5 - AD_WRAP_LITERAL(0);
+        (*res)[0] = _c_2 * _a_0 - (20);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _a_0 + _c_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] - (AD_WRAP_LITERAL(0));
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
     }
     return 0;
@@ -3898,16 +3434,15 @@ equation
 			equation_sorting=true,
 			template="$CAD_ode_derivatives$",
 			generatedCode="
-
 /******** Declarations *******/
 jmi_ad_var_t v_0;
 jmi_ad_var_t v_1;
+jmi_ad_var_t d_1;
 jmi_ad_var_t v_2;
 jmi_ad_var_t d_2;
 jmi_ad_var_t v_3;
 jmi_ad_var_t d_3;
 jmi_ad_var_t v_4;
-jmi_ad_var_t d_4;
 jmi_ad_var_t v_5;
 jmi_ad_var_t d_5;
 jmi_ad_var_t v_6;
@@ -3916,10 +3451,6 @@ jmi_ad_var_t v_7;
 jmi_ad_var_t d_7;
 jmi_ad_var_t v_8;
 jmi_ad_var_t d_8;
-jmi_ad_var_t v_9;
-jmi_ad_var_t d_9;
-jmi_ad_var_t v_10;
-jmi_ad_var_t d_10;
 jmi_ad_var_t tmp_var_0;
 jmi_ad_var_t tmp_der_0;
 jmi_ad_var_t tmp_var_1;
@@ -3931,34 +3462,30 @@ jmi_ad_var_t tmp_der_3;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
-v_1 = AD_WRAP_LITERAL(2) + AD_WRAP_LITERAL(1);
-v_0 = sin(v_1);
-_der_x1_8 = v_0;
+v_0 = AD_WRAP_LITERAL(2) + AD_WRAP_LITERAL(1);
+_der_x1_8 = sin(v_0);
 (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-v_5 = _x1_0 * _x3_2;
-d_5 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _x3_2 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-v_4 = v_5 + AD_WRAP_LITERAL(2);
-d_4 = d_5 + AD_WRAP_LITERAL(0);
-v_3 = cos(v_4);
-d_3 = d_4 * -sin(v_4);
-v_2 = v_3 * 5;
-d_2 = d_3 * 5 + v_3 * AD_WRAP_LITERAL(0);
-_der_x2_9 = v_2;
-(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_2;
-v_10 = _x1_0 * _x2_1;
-d_10 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-v_9 = v_10 * AD_WRAP_LITERAL(5);
-d_9 = d_10 * AD_WRAP_LITERAL(5) + v_10 * AD_WRAP_LITERAL(0);
-v_8 = v_9 * _x4_3;
-d_8 = d_9 * _x4_3 + v_9 * (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
-v_7 = v_8 + AD_WRAP_LITERAL(3);
-d_7 = d_8 + AD_WRAP_LITERAL(0);
-v_6 = tanh(v_7);
-d_6 = d_7 * (1 - tanh(v_7) * tanh(v_7));
-_der_x3_10 = v_6;
-(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] =d_6;
+v_3 = _x1_0 * _x3_2;
+d_3 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _x3_2 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+v_2 = v_3 + AD_WRAP_LITERAL(2);
+d_2 = d_3 + AD_WRAP_LITERAL(0);
+v_1 = cos(v_2);
+d_1 = d_2 * -sin(v_2);
+_der_x2_9 = v_1 * 5;
+(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_1 * 5 + v_1 * AD_WRAP_LITERAL(0);
+v_8 = _x1_0 * _x2_1;
+d_8 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+v_7 = v_8 * AD_WRAP_LITERAL(5);
+d_7 = d_8 * AD_WRAP_LITERAL(5) + v_8 * AD_WRAP_LITERAL(0);
+v_6 = v_7 * _x4_3;
+d_6 = d_7 * _x4_3 + v_7 * (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+v_5 = v_6 + AD_WRAP_LITERAL(3);
+d_5 = d_6 + AD_WRAP_LITERAL(0);
+v_4 = tanh(v_5);
+_der_x3_10 = v_4;
+(*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = d_5 * (1 - v_4 * v_4);
 _der_x4_11 = 1;
-(*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
+(*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
 /*********** Real outputs **********/
 func_CADCodeGenTests_CADOde1_F_der_AD(_x1_0, _x2_1, _x3_2, _x4_3, (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3);
 _e_4 = tmp_var_0;
@@ -4113,21 +3640,17 @@ void func_CADCodeGenTests_CADExpInFuncArg1_f3_der_AD(jmi_ad_var_t x1_var_v, jmi_
     jmi_ad_var_t y2_var_v;
     jmi_ad_var_t y2_der_v;
     jmi_ad_var_t v_2;
-    jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
     jmi_ad_var_t v_5;
     v_3 = (- 3);
     v_2 = (1.0 / (x1_var_v) / (x1_var_v) / (x1_var_v));
-    d_2 = x1_var_v == 0 ? 0 : (v_2 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x1_var_v)) + v_3 * x1_der_v / x1_var_v));
     y1_var_v = v_2;
-    y1_der_v = d_2;
+    y1_der_v = x1_var_v == 0 ? 0 : (v_2 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x1_var_v)) + v_3 * x1_der_v / x1_var_v));
     v_5 = (- 5);
     v_4 = (1.0 / (x2_var_v) / (x2_var_v) / (x2_var_v) / (x2_var_v) / (x2_var_v));
-    d_4 = x2_var_v == 0 ? 0 : (v_4 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x2_var_v)) + v_5 * x2_der_v / x2_var_v));
     y2_var_v = v_4;
-    y2_der_v = d_4;
+    y2_der_v = x2_var_v == 0 ? 0 : (v_4 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x2_var_v)) + v_5 * x2_der_v / x2_var_v));
 
     if (y1_var_o != NULL) *y1_var_o = y1_var_v;
     if (y1_der_o != NULL) *y1_der_o = y1_der_v;
@@ -4142,7 +3665,6 @@ void func_CADCodeGenTests_CADExpInFuncArg1_f1_der_AD(jmi_ad_var_t x_var_v, jmi_a
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
     jmi_ad_var_t v_7;
     jmi_ad_var_t d_7;
     jmi_ad_var_t v_8;
@@ -4153,9 +3675,8 @@ void func_CADCodeGenTests_CADExpInFuncArg1_f1_der_AD(jmi_ad_var_t x_var_v, jmi_a
     func_CADCodeGenTests_CADExpInFuncArg1_f2_der_AD(v_8, d_8, &v_7, &d_7);
     v_9 = (- 2);
     v_6 = (1.0 / (v_7) / (v_7));
-    d_6 = v_7 == 0 ? 0 : (v_6 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_7)) + v_9 * d_7 / v_7));
     y_var_v = v_6;
-    y_der_v = d_6;
+    y_der_v = v_7 == 0 ? 0 : (v_6 * (AD_WRAP_LITERAL(0) * log(jmi_abs(v_7)) + v_9 * d_7 / v_7));
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
@@ -4168,20 +3689,17 @@ void func_CADCodeGenTests_CADExpInFuncArg1_f2_der_AD(jmi_ad_var_t x_var_v, jmi_a
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
     jmi_ad_var_t v_10;
-    jmi_ad_var_t d_10;
     jmi_ad_var_t v_11;
     v_11 = (- 3);
     v_10 = (1.0 / (x_var_v) / (x_var_v) / (x_var_v));
-    d_10 = x_var_v == 0 ? 0 : (v_10 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + v_11 * x_der_v / x_var_v));
     y_var_v = v_10;
-    y_der_v = d_10;
+    y_der_v = x_var_v == 0 ? 0 : (v_10 * (AD_WRAP_LITERAL(0) * log(jmi_abs(x_var_v)) + v_11 * x_der_v / x_var_v));
 
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
     JMI_DYNAMIC_FREE()
     return;
 }
-
 
 ")})));
 end CADExpInFuncArg1;
@@ -4218,14 +3736,10 @@ void func_CADCodeGenTests_TestLiteralFuncArg1_F_der_AD(jmi_ad_var_t x_var_v, jmi
     jmi_ad_var_t z_der_v;
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    v_1 = pow(x_var_v , y_var_v);
-    d_1 = x_var_v == 0 ? 0 : (v_1 * (y_der_v * log(jmi_abs(x_var_v)) + y_var_v * x_der_v / x_var_v));
-    v_0 = v_1 + i_v;
-    d_0 = d_1 + AD_WRAP_LITERAL(0);
-    z_var_v = v_0;
-    z_der_v = d_0;
+    v_0 = pow(x_var_v,y_var_v);
+    d_0 = x_var_v == 0 ? 0 : (v_0 * (y_der_v * log(jmi_abs(x_var_v)) + y_var_v * x_der_v / x_var_v));
+    z_var_v = v_0 + i_v;
+    z_der_v = d_0 + AD_WRAP_LITERAL(0);
 
     if (z_var_o != NULL) *z_var_o = z_var_v;
     if (z_der_o != NULL) *z_der_o = z_der_v;
@@ -4275,39 +3789,35 @@ $CAD_functions$
 ",
 			generatedCode="
 /******** Declarations *******/
-    jmi_ad_var_t v_0;
-    jmi_ad_var_t d_0;
-    JMI_RECORD_STATIC(Complex_0_r, tmp_var_0)
-    JMI_RECORD_STATIC(Complex_0_r, tmp_der_0)
-    JMI_RECORD_STATIC(Complex_0_r, tmp_var_1)
-    JMI_RECORD_STATIC(Complex_0_r, tmp_der_1)
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t d_1;
-    JMI_RECORD_STATIC(Complex_0_r, tmp_var_2)
-    JMI_RECORD_STATIC(Complex_0_r, tmp_der_2)
+JMI_RECORD_STATIC(Complex_0_r, tmp_var_0)
+JMI_RECORD_STATIC(Complex_0_r, tmp_der_0)
+JMI_RECORD_STATIC(Complex_0_r, tmp_var_1)
+JMI_RECORD_STATIC(Complex_0_r, tmp_der_1)
+jmi_ad_var_t v_0;
+jmi_ad_var_t d_0;
+JMI_RECORD_STATIC(Complex_0_r, tmp_var_2)
+JMI_RECORD_STATIC(Complex_0_r, tmp_der_2)
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
   jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-  v_0 = _x_4 * _y_5;
-  d_0 = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _y_5 + _x_4 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-  _der_x_8 = v_0;
-  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0;
+  _der_x_8 = _x_4 * _y_5;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _y_5 + _x_4 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
   _c1_im_1 = 2.0;
   (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-  v_1 = _time;
-  d_1 = (*dz)[jmi->offs_t];
+  v_0 = _time;
+  d_0 = (*dz)[jmi->offs_t];
   tmp_var_1->re = _c1_re_0;
   tmp_var_1->im = _c1_im_1;
   tmp_der_1->re = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
   tmp_der_1->im = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
   tmp_var_2->re = AD_WRAP_LITERAL(4);
-  tmp_var_2->im = v_1;
+  tmp_var_2->im = v_0;
   tmp_der_2->re = AD_WRAP_LITERAL(0);
-  tmp_der_2->im = d_1;
+  tmp_der_2->im = d_0;
   func_CADCodeGenTests_CADRecord1_add_der_AD(tmp_var_1, tmp_var_2, tmp_der_1, tmp_der_2, tmp_var_0, tmp_der_0);
   _temp_1_re_6 = tmp_var_0->re;
   _temp_1_im_7 = tmp_var_0->im;
@@ -4319,14 +3829,10 @@ jmi_real_t** dz = jmi->dz;
   (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx];
 
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
-    jmi_ad_var_t v_3;
-    jmi_ad_var_t d_3;
-    jmi_ad_var_t v_4;
-    jmi_ad_var_t d_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t d_5;
     jmi_real_t** res = &residual;
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
@@ -4350,46 +3856,35 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         return -1;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        v_2 = _c1_re_0 + 0.1;
-        d_2 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
-        (*res)[0] = v_2 - _y_5;
-        (*dF)[0] = d_2 - (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-        v_5 = _time;
-        d_5 = (*dz)[jmi->offs_t];
-        v_4 = _y_5 + v_5;
-        d_4 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] + d_5;
-        v_3 = cos(v_4);
-        d_3 = d_4 * -sin(v_4);
-        (*res)[1] = v_3 - _c1_re_0;
-        (*dF)[1] = d_3 - (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+        (*res)[0] = _c1_re_0 + 0.1 - (_y_5);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+        v_2 = _time;
+        d_2 = (*dz)[jmi->offs_t];
+        v_1 = _y_5 + v_2;
+        d_1 = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] + d_2;
+        (*res)[1] = cos(v_1) - (_c1_re_0);
+        (*dF)[1] = d_1 * -sin(v_1) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
         (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] = 0;
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
     }
     return 0;
 }
 
+
 void func_CADCodeGenTests_CADRecord1_add_der_AD(Complex_0_r* u_var_v, Complex_0_r* v_var_v, Complex_0_r* u_der_v, Complex_0_r* v_der_v, Complex_0_r* w_var_v, Complex_0_r* w_der_v) {
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(Complex_0_r, w_var_vn)
     JMI_RECORD_STATIC(Complex_0_r, w_der_vn)
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
     if (w_var_v == NULL) {
         w_var_v = w_var_vn;
     }
     if (w_der_v == NULL) {
         w_der_v = w_der_vn;
     }
-    v_6 = u_var_v->re - v_var_v->re;
-    d_6 = u_der_v->re - v_der_v->re;
-    w_var_v->re = v_6;
-    w_der_v->re = d_6;
-    v_7 = u_var_v->im - v_var_v->re;
-    d_7 = u_der_v->im - v_der_v->re;
-    w_var_v->im = v_7;
-    w_der_v->im = d_7;
+    w_var_v->re = u_var_v->re - v_var_v->re;
+    w_der_v->re = u_der_v->re - v_der_v->re;
+    w_var_v->im = u_var_v->im - v_var_v->re;
+    w_der_v->im = u_der_v->im - v_der_v->re;
 
     JMI_DYNAMIC_FREE()
     return;
@@ -4492,51 +3987,43 @@ $CAD_dae_blocks_residual_functions$
 $CAD_functions$
 ",
 			generatedCode="
-
 /******** Declarations *******/
-jmi_ad_var_t v_0;
-jmi_ad_var_t d_0;
-jmi_ad_var_t v_1;
-jmi_ad_var_t d_1;
-jmi_ad_var_t v_2;
-jmi_ad_var_t d_2;
-jmi_ad_var_t v_3;
-jmi_ad_var_t d_3;
-jmi_ad_var_t v_4;
-jmi_ad_var_t d_4;
-jmi_ad_var_t v_5;
-jmi_ad_var_t d_5;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
 
 jmi_real_t** dz = jmi->dz;
 /*********** ODE section ***********/
-_X_1_1_4 = 0;
-(*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
-_X_1_2_5 = 0;
-(*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
-_X_2_1_6 = 0;
-(*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
-_X_2_2_7 = 0;
-(*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] =AD_WRAP_LITERAL(0);
-jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
-v_1 = _dx_1_1_8 * _A_1_1_0;
-d_1 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _A_1_1_0 + _dx_1_1_8 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
-v_2 = _dx_1_2_9 * _A_2_1_2;
-d_2 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * _A_2_1_2 + _dx_1_2_9 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-v_0 = v_1 + v_2;
-d_0 = d_1 + d_2;
-_der_dx_1_1_14 = v_0;
-(*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] =d_0;
-v_4 = _dx_1_1_8 * _A_1_2_1;
-d_4 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _A_1_2_1 + _dx_1_1_8 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-v_5 = _dx_1_2_9 * _A_2_2_3;
-d_5 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * _A_2_2_3 + _dx_1_2_9 * (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
-v_3 = v_4 + v_5;
-d_3 = d_4 + d_5;
-_der_dx_1_2_15 = v_3;
-(*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] =d_3;
+  _X_1_1_4 = 0;
+  (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  _X_1_2_5 = 0;
+  (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  _X_2_1_6 = 0;
+  (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  _X_2_2_7 = 0;
+  (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+  v_0 = _dx_1_1_8 * _A_1_1_0;
+  d_0 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _A_1_1_0 + _dx_1_1_8 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+  v_1 = _dx_1_2_9 * _A_2_1_2;
+  d_1 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * _A_2_1_2 + _dx_1_2_9 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
+  _der_dx_1_1_14 = v_0 + v_1;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 + d_1;
+  v_2 = _dx_1_1_8 * _A_1_2_1;
+  d_2 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _A_1_2_1 + _dx_1_1_8 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
+  v_3 = _dx_1_2_9 * _A_2_2_3;
+  d_3 = (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] * _A_2_2_3 + _dx_1_2_9 * (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+  _der_dx_1_2_15 = v_2 + v_3;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_2 + d_3;
 /*********** Real outputs **********/
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
+
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
   JMI_ARRAY_STATIC(tmp_var_0, 4, 2)
   JMI_ARRAY_STATIC(tmp_der_0, 4, 2)
@@ -4591,8 +4078,8 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     return -1;
   }
   if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-    (*res)[0] = _temp_1_2_2_13 - _A_2_2_3;
-    (*dF)[0]  = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx];
+    (*res)[0] = _temp_1_2_2_13 - (_A_2_2_3);
+    (*dF)[0]  = (*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx]);
     JMI_ARRAY_STATIC_INIT_2(tmp_var_0, 2, 2)
     JMI_ARRAY_STATIC_INIT_2(tmp_der_0, 2, 2)
     JMI_ARRAY_STATIC_INIT_2(tmp_var_1, 2, 2)
@@ -4624,12 +4111,12 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     (*dF)[2] = jmi_array_val_2(tmp_der_0, 1, 2) - ((*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx]);
     (*dF)[3] = jmi_array_val_2(tmp_der_0, 2, 1) - ((*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx]);
     (*dF)[4] = jmi_array_val_2(tmp_der_0, 2, 2) - ((*dz)[jmi_get_index_from_value_ref(15)-jmi->offs_real_dx]);
-    (*res)[5] = _temp_1_2_1_12 - _A_2_1_2;
-    (*dF)[5]  = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
-    (*res)[6] = _temp_1_1_2_11 - _A_1_2_1;
-    (*dF)[6]  = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
-    (*res)[7] = _temp_1_1_1_10 - _A_1_1_0;
-    (*dF)[7]  = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
+    (*res)[5] = _temp_1_2_1_12 - (_A_2_1_2);
+    (*dF)[5]  = (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx]);
+    (*res)[6] = _temp_1_1_2_11 - (_A_1_2_1);
+    (*dF)[6]  = (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx]);
+    (*res)[7] = _temp_1_1_1_10 - (_A_1_1_0);
+    (*dF)[7]  = (*dz)[jmi_get_index_from_value_ref(12)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx]);
     (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] = 0;
     (*dz)[jmi_get_index_from_value_ref(14)-jmi->offs_real_dx] = 0;
     (*dz)[jmi_get_index_from_value_ref(13)-jmi->offs_real_dx] = 0;
@@ -4647,14 +4134,6 @@ void func_CADCodeGenTests_CADArray1_f_der_AD(jmi_array_t* A_var_a, jmi_array_t* 
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(B_var_an, 4, 2)
     JMI_ARRAY_STATIC(B_der_an, 4, 2)
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t d_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t d_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t d_8;
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t d_9;
     if (B_var_a == NULL) {
         JMI_ARRAY_STATIC_INIT_2(B_var_an, 2, 2)
         B_var_a = B_var_an;
@@ -4663,22 +4142,14 @@ void func_CADCodeGenTests_CADArray1_f_der_AD(jmi_array_t* A_var_a, jmi_array_t* 
         JMI_ARRAY_STATIC_INIT_2(B_der_an, 2, 2)
         B_der_a = B_der_an;
     }
-    v_6 = jmi_array_val_2(A_var_a, 1, 1) - jmi_array_val_2(X_var_a, 1, 1);
-    d_6 = jmi_array_val_2(A_der_a, 1, 1) - jmi_array_val_2(X_der_a, 1, 1);
-    jmi_array_ref_2(B_var_a, 1, 1) = v_6;
-    jmi_array_ref_2(B_der_a, 1, 1) = d_6;
-    v_7 = jmi_array_val_2(A_var_a, 1, 2) - jmi_array_val_2(X_var_a, 1, 2);
-    d_7 = jmi_array_val_2(A_der_a, 1, 2) - jmi_array_val_2(X_der_a, 1, 2);
-    jmi_array_ref_2(B_var_a, 1, 2) = v_7;
-    jmi_array_ref_2(B_der_a, 1, 2) = d_7;
-    v_8 = jmi_array_val_2(A_var_a, 2, 1) - jmi_array_val_2(X_var_a, 2, 1);
-    d_8 = jmi_array_val_2(A_der_a, 2, 1) - jmi_array_val_2(X_der_a, 2, 1);
-    jmi_array_ref_2(B_var_a, 2, 1) = v_8;
-    jmi_array_ref_2(B_der_a, 2, 1) = d_8;
-    v_9 = jmi_array_val_2(A_var_a, 2, 2) - jmi_array_val_2(X_var_a, 2, 2);
-    d_9 = jmi_array_val_2(A_der_a, 2, 2) - jmi_array_val_2(X_der_a, 2, 2);
-    jmi_array_ref_2(B_var_a, 2, 2) = v_9;
-    jmi_array_ref_2(B_der_a, 2, 2) = d_9;
+    jmi_array_ref_2(B_var_a, 1, 1) = jmi_array_val_2(A_var_a, 1, 1) - jmi_array_val_2(X_var_a, 1, 1);
+    jmi_array_ref_2(B_der_a, 1, 1) = jmi_array_val_2(A_der_a, 1, 1) - jmi_array_val_2(X_der_a, 1, 1);
+    jmi_array_ref_2(B_var_a, 1, 2) = jmi_array_val_2(A_var_a, 1, 2) - jmi_array_val_2(X_var_a, 1, 2);
+    jmi_array_ref_2(B_der_a, 1, 2) = jmi_array_val_2(A_der_a, 1, 2) - jmi_array_val_2(X_der_a, 1, 2);
+    jmi_array_ref_2(B_var_a, 2, 1) = jmi_array_val_2(A_var_a, 2, 1) - jmi_array_val_2(X_var_a, 2, 1);
+    jmi_array_ref_2(B_der_a, 2, 1) = jmi_array_val_2(A_der_a, 2, 1) - jmi_array_val_2(X_der_a, 2, 1);
+    jmi_array_ref_2(B_var_a, 2, 2) = jmi_array_val_2(A_var_a, 2, 2) - jmi_array_val_2(X_var_a, 2, 2);
+    jmi_array_ref_2(B_der_a, 2, 2) = jmi_array_val_2(A_der_a, 2, 2) - jmi_array_val_2(X_der_a, 2, 2);
 
     JMI_DYNAMIC_FREE()
     return;
