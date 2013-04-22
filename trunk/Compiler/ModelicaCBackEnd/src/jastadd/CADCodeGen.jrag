@@ -1152,16 +1152,20 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void FEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {
+		FExp solution = solution(v.name());
 		if(v.needDerVar_CAD()){
-			solution(v.name()).genTempVars_CAD(printer_CAD, str, indent);
+			solution.genTempVars_CAD(printer_CAD, str, indent);
 			str.print(indent + v.name_C() + " = ");
-			solution(v.name()).genVar_CAD(printer_CAD, str, indent);
+			solution.genVar_CAD(printer_CAD, str, indent);
 			str.print(";\n");
 			str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] = ");
-			solution(v.name()).genDer_CAD(printer_CAD, str, indent);
+			solution.genDer_CAD(printer_CAD, str, indent);
 			str.print(";\n");
 		} else {
-			this.genSolvedBlock_C(v, indent, str);
+			solution.genTempVars_CAD(printer_CAD, str, indent);
+			str.format("%s%s = ", indent, v.name_C());
+			solution.genVar_CAD(printer_CAD, str, indent);
+			str.print(";\n");
 		}
 	}
 	
