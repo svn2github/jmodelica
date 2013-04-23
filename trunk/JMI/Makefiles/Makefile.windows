@@ -139,9 +139,9 @@ JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
 
 # Libraries necessary to link with jmi
-LIBS_FMUME = -L${JMI_LIB_DIR} -lfmi -ljmi -lModelicaExternalC -ltblAccess -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(JMTABLES_HOME)/lib -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
-LIBS_FMUCS = -L${JMI_LIB_DIR} -lfmi_cs -lfmi -ljmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
-LIBS_IPOPT = -L$(JMI_LIB_DIR) -lfmi -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial 
+LIBS_FMUME = -L${JMI_LIB_DIR} -ljmi -lfmi -lModelicaExternalC -ltblAccess -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(JMTABLES_HOME)/lib -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
+LIBS_FMUCS = -L${JMI_LIB_DIR} -lfmi_cs -ljmi -lfmi -lModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
+LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial 
 
 #LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 

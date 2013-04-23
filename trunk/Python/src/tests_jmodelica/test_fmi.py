@@ -29,7 +29,7 @@ from pymodelica.compiler import compile_fmu
 from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
-from pyjmi.log import parse_jmi_log, gather_solves
+from pyjmi.logger_util import get_structured_fmu_log
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -778,7 +778,7 @@ class Test_Logger:
         self.m.set('p',0.5)
         self.m.get('x1')
 
-        d = gather_solves(parse_jmi_log('LoggerTest_log.txt'))
+        d = get_structured_fmu_log('LoggerTest_log.txt')
         
         assert len(d)==8, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"

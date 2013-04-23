@@ -57,7 +57,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         flag = solver->root_fcn(solver->user_data, tcur, y, event_indicators_pre);
             
         if (flag != 0){
-            jmi_log_comment(solver->jmi->log, logError, "Could not retrieve event indicators");
+            jmi_log_error(solver->jmi, "[EULER] Could not retrieve event indicators");
             return -1;
         }
     }
@@ -72,7 +72,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
             flag = solver->rhs_fcn(solver->user_data, tcur, y, ydot);
             
             if (flag != 0){
-                jmi_log_comment(solver->jmi->log, logError, "Could not retrieve time derivatives");
+                jmi_log_error(solver->jmi, "[EULER] Could not retrieve time derivatives");
                 return -1;
             }
 		}
@@ -101,7 +101,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
             flag = solver->root_fcn((void*)jmi->fmi, tcur, y, event_indicators);
             
             if (flag != 0){
-                jmi_log_comment(solver->jmi->log, logError, "Could not retrieve event indicators");
+                jmi_log_error(solver->jmi, "[EULER] Could not retrieve event indicators");
                 return -1;
             }
 		}
@@ -116,7 +116,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         
 		/* Handle events */
 		if (zero_crossning_event) {
-                    jmi_log_node(solver->jmi->log, logInfo, "EulerEvent", "<An event was detected at> t:%g", tcur);
+			jmi_log_info(solver->jmi, "[EULER] An event was detected at t=%g",tcur);
             return JMI_ODE_EVENT;
 		}
 
@@ -133,9 +133,9 @@ int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver
     
 	integrator = (jmi_ode_euler_t*)calloc(1,sizeof(jmi_ode_euler_t));
     if(!integrator){
-        jmi_log_comment(jmi->log, logError, "Failed to allocate the internal EULER struct.");
-        return -1;
-    }
+		jmi_log_error(jmi, "[EULER] Failed to allocate the internal EULER struct.");
+		return -1;
+	}
 
 	/* DEFAULT VALUES NEEDS TO BE IMPROVED*/
 	integrator->step_size = 0.001;

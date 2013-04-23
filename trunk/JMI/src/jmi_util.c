@@ -745,6 +745,28 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 	return 0;
 }
 
+int jmi_print_array(jmi_t* jmi, jmi_real_t* x, jmi_int_t size_x, char* category, char* array_info){
+    int i, len=0;
+    int max_output_variables=100;
+    char buffer[3000];
+    
+    len += sprintf(buffer+len, "%s ",category);
+    len += sprintf(buffer+len, "%s ",array_info);
+    for (i=0; i<size_x && i<max_output_variables;i++){
+        len += sprintf(buffer+len, "%g; ",x[i]);
+    }
+    
+    jmi_log_info(jmi,buffer);
+    if (i==max_output_variables){
+        len = 0;
+        len += sprintf(buffer+len, "%s ",category);
+        len += sprintf(buffer+len, "Maximum number of output variables reached, printing the first hundred...");
+        jmi_log_info(jmi, buffer);
+    }
+    
+    return 0;
+}
+
 int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
     int i;
     for (i=0;i<size;i++){
@@ -813,3 +835,107 @@ int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode){
     free(event_indicators);
     return 0;
 }
+
+void jmi_log_error(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    if(jmi->options.log_level < 1) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[10000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiError, "ERROR", buf);
+    }
+    else {
+        fprintf(stderr, "ERROR:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_warning(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+    if(jmi->options.log_level < 3) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[10000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiWarning, "WARNING", buf);
+    }
+    else {
+        fprintf(stderr, "WARNING:");
+        fprintf(stderr, fmt,ap);
+        fprintf(stderr, "\n");
+    }
+}
+
+void jmi_log_info(jmi_t *jmi, char* fmt,...) {
+    va_list ap;
+
+    if(jmi->options.log_level < 4) return;
+    va_start (ap, fmt);
+    
+    if(jmi->fmi) {
+        fmi_t* fmi = jmi->fmi;
+        char buf[10000];
+        if(!fmi->fmi_logging_on) return;
+        vsprintf(buf, fmt, ap);
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  fmiOK, "INFO", buf);
+    }
+    else {
+        fprintf(stdout, "WARNING:");
+        fprintf(stdout, fmt,ap);
+        fprintf(stdout, "\n");
+    }
+}
+
+void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message) {
+    if(jmi->fmi) {
+        fmiStatus status;
+        fmiString fmiCategory;
+        fmi_t* fmi = jmi->fmi;
+        if(!fmi->fmi_logging_on) return;
+        switch (category) {
+        case logError:
+            status = fmiError;
+            fmiCategory = "ERROR";
+            break;
+        case logWarning:
+            if(jmi->options.log_level < 3) return;
+            status = fmiWarning;
+            fmiCategory = "WARNING";
+            break;
+        case logInfo:
+            if(jmi->options.log_level < 4) return;
+            status = fmiOK;
+            fmiCategory = "INFO";
+            break;
+        }
+        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
+                                  status, fmiCategory, message);
+    }
+    else {
+        switch (category) {
+        case logError:
+            fprintf(stderr, "ERROR: %s\n", message);
+            break;
+        case logWarning:
+            if(jmi->options.log_level < 3) return;
+            fprintf(stderr, "WARNING: %s\n", message);
+            break;
+        case logInfo:
+            if(jmi->options.log_level < 4) return;
+            fprintf(stdout, "%s\n", message);
+            break;
+        }
+    }
+}
+

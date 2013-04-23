@@ -25,7 +25,6 @@
 
 #include "jmi.h"
 #include "jmi_block_residual.h"
-#include "jmi_log.h"
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 		int n_real_pd, int n_integer_ci, int n_integer_cd,
@@ -245,8 +244,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
-    jmi_->log = jmi_log_init(jmi_);
-
     jmi_->is_initialized = 0;
 
 	return 0;
@@ -307,7 +304,6 @@ int jmi_delete(jmi_t* jmi){
 	free(jmi->variable_scaling_factors);
 	free(jmi->tp);
     free(jmi->ext_objs);
-    jmi_log_delete(jmi->log);
 	free(jmi);
 
 	return 0;
@@ -445,14 +441,17 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 int jmi_ode_derivatives(jmi_t* jmi) {
 
-    int i, return_status;
-    jmi_log_node_t node;
+	int i, return_status;
     jmi_real_t *t = jmi_get_t(jmi);
 
-    if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
-                                 "<Model equations evaluation invoked at> t:%E", t[0]);
-    }
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
 
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
@@ -460,11 +459,14 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 
 	return_status = jmi->dae->ode_derivatives(jmi);
 
-    if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi->log, logInfo, "<Model equations evaluation finished>");
-        jmi_log_leave(jmi->log, node);
-/*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
-    }
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
+	}
 
 	/* Write back evaluation result */
 	if (return_status==0) {
@@ -509,26 +511,32 @@ int jmi_ode_outputs(jmi_t* jmi) {
 
 int jmi_ode_initialize(jmi_t* jmi) {
 
-    int i, return_status;
-    jmi_log_node_t node;
-    jmi_real_t* t = jmi_get_t(jmi);
+	int i, return_status;
+	jmi_real_t* t = jmi_get_t(jmi);
 
 	for (i=0;i<jmi->n_z;i++) {
 		(*(jmi->z))[i] = (*(jmi->z_val))[i];
 	}
 
-    if((jmi->options.log_level >= 5)) {
-        node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
-                                 "<Model equations evaluation invoked at> t:%E", t[0]);
-    }
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation invoked at time:; %30.16E\n",t[0]);
+		fflush(jmi->options.debug_log);
+	}
 
-    return_status = jmi->dae->ode_initialize(jmi);
+	if((jmi->options.log_level >= 5)) {
+		jmi_log_info(jmi, "[NLE_ITERS]Model equations evaluation invoked at time:; %30.16E",t[0]);
+	}
 
-    if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi->log, logInfo, "<Model equations evaluation finished>");
-        jmi_log_leave(jmi->log, node);
-/*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
-    }
+	return_status = jmi->dae->ode_initialize(jmi);
+
+	if((jmi->options.nle_solver_log_level > 2) && (jmi->options.debug_log)) {
+		fprintf(jmi->options.debug_log, "Model equations evaluation finished\n");
+		fflush(jmi->options.debug_log);
+	}
+
+	if((jmi->options.log_level >= 5)) {
+		jmi_log(jmi, logInfo, "[NLE_ITERS]Model equations evaluation finished");
+	}
 
 	/* Write back evaluation result */
 	if (return_status==0) {
