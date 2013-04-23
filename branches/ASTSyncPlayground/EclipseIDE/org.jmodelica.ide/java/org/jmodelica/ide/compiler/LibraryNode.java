@@ -26,12 +26,11 @@ public class LibraryNode {
 	}
 
 	public ArrayList<ListenerObject> getListeners() {
-		return listeners; // TODO synchronize
+		return listeners;
 	}
 
 	public void addListener(IASTChangeListener listener, int listenerType) {
-		listeners.add(new ListenerObject(listener, listenerType));// TODO
-																	// synchronize
+		listeners.add(new ListenerObject(listener, listenerType));
 	}
 
 	public void removeListener(IASTChangeListener listener) {

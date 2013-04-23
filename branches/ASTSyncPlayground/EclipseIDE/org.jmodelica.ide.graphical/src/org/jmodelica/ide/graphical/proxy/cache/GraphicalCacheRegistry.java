@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
@@ -30,8 +30,8 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 
 	private void refreshClassDiagramProxyCache() {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(theFile)[0]).getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry.getInstance()
+				.doLookup(theFile.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());
@@ -60,13 +60,14 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 				.doLookup(input.getProject()).lookupAllFileNodes()[0].getFile();
 		// TODO hardcoded only works if one file in project, fixxx
 		ASTNode<?> classDecl;
-		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(theFile)[0]).getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry.getInstance()
+				.doLookup(theFile.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());
 			if (icd == null)
-				System.err.println("Graphical Editor could not find input class\n");
+				System.err
+						.println("Graphical Editor could not find input class\n");
 			createClassDiagramProxyCache(theFile, icd);
 			classDecl = icd.getClassDecl();
 		}
@@ -116,8 +117,8 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	}
 
 	public void saveModelicaFile(IProgressMonitor monitor) {
-		SourceRoot root = ((LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(theFile)[0]).getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry.getInstance()
+				.doLookup(theFile.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());

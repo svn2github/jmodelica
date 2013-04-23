@@ -2,7 +2,6 @@ package org.jastadd.ed.core.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +10,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 
@@ -29,6 +29,13 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	protected Map<IProject, ILock> fProjectLockMap = new HashMap<IProject, ILock>();
 	protected List<IASTChangeListener> fListereList = new ArrayList<IASTChangeListener>();
 	protected ILock fListenerLock = Job.getJobManager().newLock();
+
+	/**
+	 * Create the compiler for this Registry.
+	 * 
+	 * @return
+	 */
+	protected abstract ICompiler createCompiler();
 
 	@Override
 	public ILock getGlobalLock(IProject project) {
@@ -52,10 +59,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * @return true if an AST was found and updated, or false if not
 	 */
 	public boolean doUpdate(IProject project, IGlobalRootNode newNode) {
-		System.out
-				.println("MODELICAASTREG doUpdate(IProject project, IGlobalRootNode newNode)");
-		System.out.println("####STATUS####");
-		printProjAndFiles();
+		// printProjAndFiles();
 		if (project == null || newNode == null) {
 			return false;
 		}
@@ -75,10 +79,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * @return true if a matching AST was found and updated, or false if not
 	 */
 	public boolean doUpdate(IFile file, ILocalRootNode newNode) {
-		System.out
-				.println("MODELICAASTREG doUpdate(IFile file, ILocalRootNode newNode)");
-		System.out.println("####STATUS####");
-		printProjAndFiles();
 		if (file == null || newNode == null) {
 			return false;
 		}
@@ -122,7 +122,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * @return The AST or null if there was no entry for the project
 	 */
 	public IGlobalRootNode doLookup(IProject project) {
-		System.out.println("MODELICAASTREG doLookup(IProject project)");
 		if (project == null)
 			return null;
 		return lookupProject(project);
@@ -136,27 +135,27 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * @return The AST or null if no entry was found
 	 */
 	public ILocalRootNode[] doLookup(IFile file) {
-		return null;
-	}// overridden
-
-	// DEBUG TODO remove
-	private void printProjAndFiles() {
-		Iterator itr = fProjectASTMap.entrySet().iterator();
-		while (itr.hasNext()) {
-			Map.Entry pairs = (Map.Entry) itr.next();
-			IProject proj = (IProject) pairs.getKey();
-			IGlobalRootNode node = (IGlobalRootNode) pairs.getValue();
-			System.out.println("Found project: " + proj.getName());
-			printFiles(node);
+		if (file == null)
+			return null;
+		if (lookupFile(file).length == 0) {
+			System.out.println("Lookup of file: " + file.getName()
+					+ " returned 0 ast results...");
+			ICompiler compiler = createCompiler();
+			if (compiler.canCompile(file)) {
+				if (!fProjectASTMap.containsKey(file.getProject())) {
+					lookupProject(file.getProject());
+				} else {
+					System.out.println("Compiler compiling file: "
+							+ file.getName());
+					ILocalRootNode fileNode = compiler.compile(file);
+					doUpdate(file, fileNode);
+				}
+			} else {
+				System.out.println("Compiler could NOT compile file: "
+						+ file.getName());
+			}
 		}
-	}
-
-	// DEBUG TODO remove
-	private void printFiles(IGlobalRootNode node) {
-		ILocalRootNode[] nodes = node.lookupAllFileNodes();
-		if (nodes != null)
-			for (ILocalRootNode n : nodes)
-				System.out.println("File: " + n.getFile().getName());
+		return lookupFile(file);
 	}
 
 	/**
@@ -195,7 +194,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 	 * (global root node) for a matching file node (local root node).
 	 */
 	protected ILocalRootNode[] lookupFile(IFile file) {
-		System.out.println("LOOOOOKUP OF FILE:"+file.getName());
 		List<ILocalRootNode> nodeList = new ArrayList<ILocalRootNode>();
 		IProject project = file.getProject();
 		ILock lock = getGlobalLock(project);
@@ -203,7 +201,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 			lock.acquire();
 			for (IProject p : fProjectASTMap.keySet()) {
 				if (project.equals(p)) {
-					System.out.println("Found PROJECT OF FILE, P:"+p.getName());
 					IGlobalRootNode projectNode = fProjectASTMap.get(project);
 					nodeList = projectNode.lookupFileNode(file);
 					break;
@@ -231,6 +228,11 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		// TODO: Lock?
 		if (fProjectASTMap.containsKey(project)) {
 			projectNode = fProjectASTMap.get(project);
+		} else {
+			System.out.println("Compiler compiling project: "
+					+ project.getName());
+			projectNode = createCompiler().compile(project);
+			doUpdate(project, projectNode);
 		}
 		return projectNode;
 	}

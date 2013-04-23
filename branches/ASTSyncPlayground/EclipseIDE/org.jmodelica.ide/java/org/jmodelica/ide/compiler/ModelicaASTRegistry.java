@@ -6,7 +6,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.jastadd.ed.core.model.ASTChangeEvent;
+import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.GlobalRootRegistry;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
@@ -30,55 +30,41 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return registry;
 	}
 
-	public ILocalRootNode lookupFile(String fileName) {
-		System.out.println("Looking up file with containginFileName: "
-				+ fileName + "...");
+	/**
+	 * For textual editor FMU_Compile
+	 */
+	public IGlobalRootNode lookupFileGlobalRoot(String fileName) {
 		for (IGlobalRootNode gn : fProjectASTMap.values()) {
 			for (ILocalRootNode ln : gn.lookupAllFileNodes()) {
 				if (ln.getFile().getName().equals(fileName)) {
-					System.out.println("...foundit!");
+					return gn;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * For textual editor FMU_Compile
+	 */
+	public ILocalRootNode lookupFileLocalRoot(String fileName) {
+		for (IGlobalRootNode gn : fProjectASTMap.values()) {
+			for (ILocalRootNode ln : gn.lookupAllFileNodes()) {
+				if (ln.getFile().getName().equals(fileName)) {
 					return ln;
 				}
 			}
 		}
-		System.out.println("...fail!!!");
 		return null;
 	}
 
-	/**@Override
-	public boolean doUpdate(IFile file, ILocalRootNode newNode) {
-		boolean res = super.doUpdate(file, newNode);
-		ChangePropagationController.getInstance().handleNotifications(
-				ASTChangeEvent.POST_UPDATE, file, new Stack<String>());
-		return res;
-	}*/
-
-	@Override
-	public ILocalRootNode[] doLookup(IFile file) { // TODO FIX initial BUILD,
-													// this
-		// method should not have to override...
-		// System.out.println("MODELICAASTREG doLookup(IFile file)");
-		if (file == null)
-			return null;
-		if (lookupFile(file).length == 0) {
-			System.out.println("Lookup of file: " + file.getName()
-					+ " returned 0 ast results...");
-			ModelicaEclipseCompiler compiler = new ModelicaEclipseCompiler();
-			if (compiler.canCompile(file)) {
-				System.out
-						.println("Compiler compiling file: " + file.getName());
-				ILocalRootNode root = compiler.compile(file);
-//				doUpdate(file, root);
-//				IGlobalRootNode grn = lookupProject(file.getProject());
-//				grn.addFileNode(root);
-			} else {
-				System.out.println("Compiler could NOT compile file: "
-						+ file.getName());
-			}
-		}
-		System.out.println("RETURNING lookup of file:"+file.getName());
-		return lookupFile(file);
-	}
+	/**
+	 * @Override public boolean doUpdate(IFile file, ILocalRootNode newNode) {
+	 *           boolean res = super.doUpdate(file, newNode);
+	 *           ChangePropagationController.getInstance().handleNotifications(
+	 *           ASTChangeEvent.POST_UPDATE, file, new Stack<String>()); return
+	 *           res; }
+	 */
 
 	public boolean hasProject(IProject project) {
 		return fProjectASTMap.containsKey(project);
@@ -86,8 +72,6 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 
 	public void addListener(IFile file, ASTNode<?> node,
 			IASTChangeListener listener, int listenerType) {
-		System.out.println("MODELICAASTREGISTRY: Added listener to file "
-				+ file.getName());
 		Stack<String> nodePath = new Stack<String>();
 		if (node != null) {
 			synchronized (node.state()) {
@@ -112,7 +96,8 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 
 	/**
 	 * Tries to resolve the node of the given path in Instance AST from the
-	 * given InstProgramRoot.
+	 * given InstProgramRoot. Needed if Instance outline should have expandable
+	 * nodes
 	 * 
 	 * @param nodePath
 	 * @param root
@@ -126,18 +111,16 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	private InstNode resolveInstNodePath(Stack<String> nodePath, InstNode root) {
 		if (nodePath.size() == 0)
 			return root;
-		printPath(nodePath);
+		// printPath(nodePath);
 		String sought = nodePath.pop();
 		if (sought.split(":")[0].equals("List")) {
 			InstNode node = searchClassesAndComponents(nodePath.peek(), root);
 			if (node != null) {
-
 				System.out.println("found " + nodePath.pop()
 						+ " among classes/components");
 			}
 			return resolveInstNodePath(nodePath, node);
 		}
-		System.out.println("hmm, what now....");
 		return null;
 	}
 
@@ -161,7 +144,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 */
 	public ASTNode<?> resolveSourceASTPath(Stack<String> nodePath,
 			SourceRoot root) {
-		System.out.println("ModelicaASTReg: resolve src nodepath, nodepathsize:"+nodePath.size());
+		// System.out.println("ModelicaASTReg: resolve src nodepath, nodepathsize:"+nodePath.size());
 		Stack<String> copy = new Stack<String>();
 		copy.setSize(nodePath.size());
 		Collections.copy(copy, nodePath);
@@ -171,7 +154,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	private ASTNode<?> resolveSrcNodePath(Stack<String> nodePath,
 			ASTNode<?> root) {
 		long time = System.currentTimeMillis();
-		printPath(nodePath);
+		// printPath(nodePath);
 		String sought = "";
 		String next = "";
 		ASTNode<?> current = root;
@@ -193,13 +176,22 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return current;
 	}
 
-	private void printPath(Stack<String> nodePath) {
+	/**private void printPath(Stack<String> nodePath) {
 		String priint = "";
 		for (int i = 0; i < nodePath.size(); i++)
 			priint = nodePath.get(i) + " " + priint;
 		System.out.println("Trying to resolve path: " + priint);
-	}
+	}*/
 
+	/**
+	 * Bit messy, due to structure of MSL
+	 * 
+	 * @param sought
+	 * @param next
+	 * @param current
+	 * @param previous
+	 * @return
+	 */
 	private ASTNode<?> findSrcChild(String sought, String next,
 			ASTNode<?> current, ASTNode<?> previous) {
 		for (int i = 0; i < current.getNumChild(); i++) {
@@ -243,11 +235,23 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return nodePath;
 	}
 
+	/**
+	 * Currently creates identifier by concatenating
+	 * "ASTNode.getName():ASTNode.outlineId()"
+	 * 
+	 * @param node
+	 * @return
+	 */
 	private String createIdentifier(ASTNode<?> node) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(node.getNodeName());
 		sb.append(":");
 		sb.append(node.outlineId());
 		return sb.toString();
+	}
+
+	@Override
+	protected ICompiler createCompiler() {
+		return new ModelicaEclipseCompiler();
 	}
 }

@@ -20,7 +20,6 @@ public class UpdateOutlineJob implements IJobObject {
 
 	@Override
 	public void doJob() {
-		System.out.println("UpdateOutlineJob->doJob()");
 		listener.astChanged(null);
 	}
 

@@ -69,8 +69,6 @@ public class LibraryVisitor {
 			IASTChangeListener listener, int listenerType) {
 		if (nodePath.size() == 0) {
 			node.addListener(listener, listenerType);
-			System.out
-					.println("LibraryVisitorAdded listener to a library node...");
 			for (int i = 0; i < nodePath.size(); i++) {
 				System.out.println(nodePath.get(i) + "/");
 			}

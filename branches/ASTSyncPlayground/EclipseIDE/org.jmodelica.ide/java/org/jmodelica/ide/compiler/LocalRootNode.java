@@ -10,13 +10,8 @@ public class LocalRootNode implements ILocalRootNode {
 	private StoredDefinition def;
 	private SourceRoot sourceRoot;
 
-	public LocalRootNode(SourceRoot sourceRoot, StoredDefinition def) {
+	public LocalRootNode(StoredDefinition def) {
 		this.def = def;
-		this.sourceRoot = sourceRoot;
-	}
-
-	public StoredDefinition getStoredDef() {
-		return def;
 	}
 
 	@Override
@@ -63,7 +58,6 @@ public class LocalRootNode implements ILocalRootNode {
 	@Override
 	public void setFile(IFile file) {
 		// TODO Auto-generated method stub
-
 	}
 
 	public StoredDefinition getDef() {
@@ -72,12 +66,14 @@ public class LocalRootNode implements ILocalRootNode {
 
 	@Override
 	public IFile getFile() {
-		// TODO Auto-generated method stub
 		return def.getFile();
+	}
+
+	public void setSourceRoot(SourceRoot sRoot) {
+		this.sourceRoot = sRoot;
 	}
 
 	public SourceRoot getSourceRoot() {
 		return sourceRoot;
 	}
-
 }

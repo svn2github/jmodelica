@@ -71,9 +71,6 @@ public class InstanceOutlinePage extends CachedOutlinePage implements
 	}
 
 	public void astChanged(IASTChangeEvent e) {
-		long time = System.currentTimeMillis();
 		updateAST(cache.getCache());
-		System.out.println("InstanceOutline update took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

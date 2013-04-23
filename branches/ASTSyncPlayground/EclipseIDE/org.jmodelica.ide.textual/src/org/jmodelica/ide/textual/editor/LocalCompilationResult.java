@@ -18,7 +18,7 @@ private final ModelicaEclipseCompiler compiler;
 public LocalCompilationResult(EditorFile ef, Editor ed) {
 
     compiler = new ModelicaEclipseCompiler();
-    root = ((LocalRootNode)compiler.compileFile(ef.iFile())).getDef();
+    root = ((LocalRootNode)compiler.compile(ef.iFile())).getDef();
     editor = ed;
     
 }
@@ -28,7 +28,7 @@ public void update(IProject projChanged) { }
 public void dispose(Editor editor) { }
 
 public void recompileLocal(IDocument doc, IFile file) {
-    root = compiler.recompile(doc, file).defaultTo(root);
+    root = ((LocalRootNode)compiler.recompile(doc, file)).getDef();
 }
 
 @Override

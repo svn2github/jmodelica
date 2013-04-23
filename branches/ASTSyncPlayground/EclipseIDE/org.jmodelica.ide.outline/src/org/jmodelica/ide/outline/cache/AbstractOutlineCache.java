@@ -63,7 +63,6 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	@Override
 	public synchronized void astChanged(IASTChangeEvent e) {
 		if (e instanceof EventCachedChildren) {
-			System.out.println("YEAH cachedchildren event back in CACHE!!");
 			childrenUpdates.add((EventCachedChildren) e);
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
@@ -71,7 +70,6 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 				}
 			});
 		} else if (e instanceof EventCachedInitial) {
-			System.out.println("YEAH cachedinitial event back in CACHE!!");
 			rootUpdates.add((EventCachedInitial) e);
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {

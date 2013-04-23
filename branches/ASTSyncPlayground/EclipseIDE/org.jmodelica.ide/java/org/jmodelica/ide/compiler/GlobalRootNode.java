@@ -1,5 +1,6 @@
 package org.jmodelica.ide.compiler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,31 +9,41 @@ import org.eclipse.core.resources.IProject;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
+import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.error.InstanceErrorHandler;
+import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class GlobalRootNode implements IGlobalRootNode {
-	private ArrayList<ILocalRootNode> files = new ArrayList<ILocalRootNode>();
-	private SourceRoot sourceRoot;
-	private CompilationRoot compilationRoot;
 
-	public GlobalRootNode(SourceRoot sroot) {
-		this.sourceRoot = sroot;
+	private final SourceRoot root;
+	private final org.jmodelica.modelica.compiler.List<StoredDefinition> list;	
+	
+	private ArrayList<ILocalRootNode> files = new ArrayList<ILocalRootNode>();
+
+	public GlobalRootNode(IProject project) {
+		list = new org.jmodelica.modelica.compiler.List<StoredDefinition>();
+		Program prog = new Program(list);
+		root = new SourceRoot(prog);
+
+		root.options = new IDEOptions(project);
+		root.setProject(project);
+		root.setErrorHandler(new InstanceErrorHandler());
+
+		prog.setLibraryList(new IDELibraryList(root.options, project));
+		prog.getInstProgramRoot().options = root.options;
 	}
 
 	public SourceRoot getSourceRoot() {
-		return sourceRoot;
+		return root;
 	}
 
 	@Override
 	public List<ILocalRootNode> lookupFileNode(IFile file) {
-		System.out.println("GLOBALROOTNOBE looking for file:" + file.getName());
 		ArrayList<ILocalRootNode> newList = new ArrayList<ILocalRootNode>();
 		for (ILocalRootNode node : this.files) {
-			System.out.println("GRN: searching for: "+file.getName()+" current is:"+node.getFile().getName());
 			if (node.getFile().equals(file)) {
-				System.out.println("YEAH, found file in globalrootnode:"
-						+ node.getFile().getName());
 				newList.add(node);
 			}
 		}
@@ -41,8 +52,6 @@ public class GlobalRootNode implements IGlobalRootNode {
 
 	@Override
 	public ILocalRootNode[] lookupAllFileNodes() {
-		System.out.println("lookupAllFileNodes in globalrootnode, size:"
-				+ files.size());
 		return files.toArray(new ILocalRootNode[files.size()]);
 	}
 
@@ -55,73 +64,71 @@ public class GlobalRootNode implements IGlobalRootNode {
 		boolean found = false;
 		for (ILocalRootNode node : files) {
 			if (node.getFile().equals(newNode.getFile())) {
-				System.out
-						.println("GlobalRootNode recieved add buta already had file:"
-								+ node.getFile().getName()
-								+ " updating def of localrootnode...");
 				node = newNode;
+				found = true;
+			}
+		}
+		for (int i = 0; i < list.getNumChild();i++) {
+			if (list.getChildNoTransform(i).getFile().equals(newNode.getFile())) {
+				list.setChild(((LocalRootNode)newNode).getDef(), i);
 				found = true;
 			}
 		}
 		if (!found) {
 			files.add(newNode);
-			System.out
-					.println("GlobalRootNode recieved add and didnt have file:"
-							+ newNode.getFile().getName()
-							+ " added to globalrootnode...");
+			list.add(((LocalRootNode)newNode).getDef());
 		}
-		LocalRootNode lrn = (LocalRootNode) newNode;
-		lrn.getSourceRoot().getProgram().classes();
-		lrn.getSourceRoot().getProgram().getInstProgramRoot().classes();
-		lrn.getSourceRoot().getProgram().getInstProgramRoot().components();
 	}
 
 	public void addFiles(
 			org.jmodelica.modelica.compiler.List<StoredDefinition> files2) {
-		System.out.println("GlobalRootNode addFiles(): nbrnewfiles="
-				+ files2.length() + " number oldfiles:" + files.size());
-		for (int i = 0; i < files2.length(); i++) {
-			LocalRootNode fileNode = new LocalRootNode(sourceRoot,
-					files2.getChild(i));
+		for (int i = 0; i < files2.getNumChild(); i++) {
+			LocalRootNode fileNode = new LocalRootNode(files2.getChildNoTransform(i));
 			addOrUpdate(fileNode);
 		}
 	}
 
-	public void addFile(StoredDefinition def) {
-		System.out.println("GLOBALROOTNODE ADDED FILE:" +def.getFile().getName());
-		LocalRootNode fileNode = new LocalRootNode(sourceRoot, def);
+	public void addFile(ILocalRootNode fileNode) {
 		addOrUpdate(fileNode);
 	}
 
+	public void addPackageDirectory(File dir) {
+		try {
+			String path = root.options
+					.getStringOption(IDEConstants.PACKAGES_IN_WORKSPACE_OPTION);
+			path += (path.equals("") ? "" : File.pathSeparator)
+					+ dir.getAbsolutePath();
+			root.options.setStringOption(
+					IDEConstants.PACKAGES_IN_WORKSPACE_OPTION, path);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public IASTNode getChild(int i) {
-		// TODO Auto-generated method stub
+		System.err
+				.println("GlobalRootNode.getChild() should never be invoked\n");
 		return null;
 	}
 
 	@Override
 	public int getNumChild() {
-		// TODO Auto-generated method stub
+		System.err
+				.println("GlobalRootNode.getNumChild() should never be invoked\n");
 		return 0;
 	}
 
 	@Override
 	public IASTNode getParent() {
-		// TODO Auto-generated method stub
+		System.err
+				.println("GlobalRootNode.getParent() should never be invoked\n");
 		return null;
 	}
 
 	@Override
 	public IProject getProject() {
-		// TODO Auto-generated method stub
+		System.err
+				.println("GlobalRootNode.getProject() should never be invoked\n");
 		return null;
-	}
-
-	public void setCompilationRoot(CompilationRoot compilationRoot) {
-		this.compilationRoot = compilationRoot;
-	}
-
-	public CompilationRoot getCompilationRoot() {
-		return compilationRoot;
 	}
 }

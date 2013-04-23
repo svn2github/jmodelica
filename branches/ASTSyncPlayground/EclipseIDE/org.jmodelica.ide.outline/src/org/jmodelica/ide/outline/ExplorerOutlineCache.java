@@ -35,7 +35,7 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 
 	public void fetchFileChildren(IFile file, TreeViewer viewer) {
 		ChildrenTask task = new ChildrenTask(viewer, file);
-		// Don't automagically expand file Models unless user clickes expand...
+		// Don't automagically expand file Models unless user clicks expand...
 		task.expandDepth = 0;
 		OutlineCacheJob job = new JobExplorerOutlineCacheFileChildren(this,
 				file, this, task);
@@ -50,8 +50,6 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 	@Override
 	public void astChanged(IASTChangeEvent e) {
 		if (e instanceof EventCachedFileChildren) {
-			System.out
-					.println("YEAH CacheFileChildren event back in ExplorerOutlineCache!!");
 			childrenFileUpdates.add((EventCachedFileChildren) e);
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {

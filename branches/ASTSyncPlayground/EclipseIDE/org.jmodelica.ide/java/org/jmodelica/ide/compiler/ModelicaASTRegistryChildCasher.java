@@ -9,6 +9,8 @@ import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
+
+//TODO, not used?
 public class ModelicaASTRegistryChildCasher {
 	private ModelicaASTRegistry registry = ModelicaASTRegistry.getInstance();
 	private IFile file;
@@ -22,7 +24,7 @@ public class ModelicaASTRegistryChildCasher {
 	public ArrayList<ICachedOutlineNode> cacheChildren() {
 		long time = System.currentTimeMillis();
 		ArrayList<ICachedOutlineNode> toReturn = new ArrayList<ICachedOutlineNode>();
-		LocalRootNode root = (LocalRootNode) registry.doLookup(file)[0];
+		GlobalRootNode root = (GlobalRootNode) registry.doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			ASTNode<?> sought = ModelicaASTRegistry.getInstance().resolveSourceASTPath(

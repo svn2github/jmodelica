@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
@@ -23,17 +24,16 @@ public class JobInstanceOutlineCacheInitial extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		System.out
-				.println("JobHandler handling InitialCache from InstanceOutline...");
 		long time = System.currentTimeMillis();
-		LocalRootNode root = (LocalRootNode) ModelicaASTRegistry.getInstance()
+		LocalRootNode lroot = (LocalRootNode) ModelicaASTRegistry.getInstance()
 				.doLookup(file)[0];
+		GlobalRootNode groot = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
 		CachedASTNode toReturn = null;
 		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
-		synchronized (root.getSourceRoot()) {
-			InstProgramRoot iRoot = root.getSourceRoot().getProgram().getInstProgramRoot();
+		synchronized (groot.getSourceRoot()) {
+			InstProgramRoot iRoot = groot.getSourceRoot().getProgram().getInstProgramRoot();
 			toReturn = ASTNodeCacheFactory.cacheNode(iRoot, null, cache);
-			ArrayList<?> classes = root.getStoredDef().getElements()
+			ArrayList<?> classes = lroot.getDef().getElements()
 					.toArrayList();
 			for (InstClassDecl inst : iRoot.instClassDecls()) {
 				if (classes.contains(inst.getClassDecl())) {
@@ -51,7 +51,7 @@ public class JobInstanceOutlineCacheInitial extends OutlineCacheJob {
 			}
 		}
 		toReturn.setOutlineChildren(children);
-		System.out.println("InstanceOutlinePage caching took:"
+		System.out.println("Cache initial from InstanceOutline took:"
 				+ (System.currentTimeMillis() - time) + "ms");
 		IASTChangeEvent event = new EventCachedInitial(toReturn);
 		listener.astChanged(event);

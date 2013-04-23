@@ -4,6 +4,7 @@ package org.jmodelica.ide.namecomplete;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.Document;
 import org.jmodelica.ide.OffsetDocument;
+import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.indent.DocUtil;
@@ -35,7 +36,7 @@ public StoredDefinition recompilePartial(
     
     /* re-parse and add new AST to project AST */
     StoredDefinition def
-        = compiler.recompile(fileContents, file);
+        = ((LocalRootNode)compiler.recompile(fileContents, file)).getDef();
 
     if (mProjectRoot.hasValue()) {
         new Proxy(

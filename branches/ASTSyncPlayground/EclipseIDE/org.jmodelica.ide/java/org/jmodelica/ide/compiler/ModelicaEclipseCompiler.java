@@ -16,6 +16,9 @@
 package org.jmodelica.ide.compiler;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import org.eclipse.core.resources.IContainer;
@@ -28,38 +31,37 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.jastadd.ed.core.ICompiler;
-import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.helpers.DocumentReader;
-import org.jmodelica.ide.helpers.Maybe;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.LibNode;
+import org.jmodelica.modelica.compiler.ParserException;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
+import org.jmodelica.modelica.parser.ModelicaParser;
+import org.jmodelica.modelica.parser.ModelicaScanner;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.error.CompileErrorReport;
+
+import beaver.Parser;
 
 public class ModelicaEclipseCompiler implements ICompiler {
 
+	private final ModelicaParser parser = new ModelicaParser();
+	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy
+																			// stream
+	private final CompileErrorReport errorReport = new CompileErrorReport();
+
 	public ModelicaEclipseCompiler() {
 		super();
-		System.out.println("MODELICAECLIPSECOMPILER");
+		parser.setReport(errorReport);
 	}
 
-	/*
-	 * public IASTNode compileToProjectAST(IProject project) { System.out
-	 * .println(
-	 * "MODELICACOMPILER compileToProjectAST(IProject project, IProgressMonitor monitor)"
-	 * ); return recursiveCompile(new CompilationRoot(project), project)
-	 * .root(); }
-	 */// TODO NEVER USED?
-
-	private CompilationRoot recursiveCompile(CompilationRoot compilationRoot,
+	private IGlobalRootNode recursiveCompile(IGlobalRootNode gRoot,
 			IContainer parent) {
-		System.out
-				.println("MODELICACOMPILER recursiveCompile(CompilationRoot compilationRoot, IContainer parent, IProgressMonitor monitor)");
+		GlobalRootNode globalRoot = (GlobalRootNode) gRoot;
 		try {
 			IResource[] resources = parent.members();
 			for (IResource resource : resources) {
@@ -68,16 +70,17 @@ public class ModelicaEclipseCompiler implements ICompiler {
 				case IResource.FOLDER:
 					File dir = new File(resource.getRawLocation().toOSString());
 					if (LibNode.isStructuredLib(dir)) {
-						compilationRoot.addPackageDirectory(dir);
+						globalRoot.addPackageDirectory(dir);
 					} else {
-						recursiveCompile(compilationRoot, (IFolder) resource);
+						recursiveCompile(globalRoot, (IFolder) resource);
 					}
 					break;
 
 				case IResource.FILE:
 					IFile file = (IFile) resource;
 					if (Util.isModelicaFile(file)) {
-						compilationRoot.parseFile(file);
+						ILocalRootNode lroot = parseFile(file);
+						globalRoot.addFile(lroot);
 					}
 					break;
 				}
@@ -87,88 +90,24 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			e.printStackTrace();
 		}
 
-		return compilationRoot;
+		return globalRoot;
 	}
 
-	public ILocalRootNode compileToAST(IDocument document,
+	private ILocalRootNode compileToAST(IDocument document,
 			DirtyRegion dirtyRegion, IRegion region, IFile file) {
-		System.out
-				.println("MODELICACOMPILER compileToAST(IDocument document, DirtyRegion dirtyRegion, IRegion region, IFile file)");
 		if (file == null)
 			return null;
-		CompilationRoot compilationRoot = new CompilationRoot(file.getProject());
-		GlobalRootNode groot = new GlobalRootNode(compilationRoot.root());
-		groot.setCompilationRoot(compilationRoot);
-		ModelicaASTRegistry.getInstance().doUpdate(file.getProject(), groot);
-		compilationRoot.parseFile(new DocumentReader(document), file, false);
-		groot.addFile(compilationRoot.getStoredDefinition());
-		return new LocalRootNode(compilationRoot.root(),
-				compilationRoot.getStoredDefinition());
+		ILocalRootNode lRoot = parseFile(file);
+		ModelicaASTRegistry.getInstance().doUpdate(file, lRoot);
+		return lRoot;
 	}
 
-	public Maybe<ASTNode<?>> recompile(IDocument doc, IFile file) {
-		return new Maybe<ASTNode<?>>((ASTNode<?>) compileToAST(doc, null, null,
-				file));
+	public ILocalRootNode recompile(IDocument doc, IFile file) {
+		return compileToAST(doc, null, null, file);
 	}
 
-	public StoredDefinition recompile(String doc, IFile file) {
-		CompilationRoot root = new CompilationRoot(file.getProject());
-
-		root.parseDoc(doc, file);
-
-		return root.getStoredDefinition();
-	}
-
-	protected IASTNode compileToAST(IFile file) {
-		return compileFile(file);
-	}
-
-	public ILocalRootNode compileFile(IFile file) {
-		System.out.println("MODELICACOMPILER compileFile(IFile file)"
-				+ file.getName());
-
-		LocalRootNode toReturn = null;
-		CompilationRoot compilationRoot;
-		GlobalRootNode groot;
-		IGlobalRootNode igroot = ModelicaASTRegistry.getInstance().doLookup(
-				file.getProject());
-		if (igroot == null) {
-			compilationRoot = new CompilationRoot(file.getProject());
-			groot = new GlobalRootNode(compilationRoot.root());
-			groot.setCompilationRoot(compilationRoot);
-			System.out.println("COMPILER ADDING NEW PROJECT");
-			ModelicaASTRegistry.getInstance()
-					.doUpdate(file.getProject(), groot);
-		} else {
-			groot = (GlobalRootNode) igroot;
-			compilationRoot = groot.getCompilationRoot();
-		}
-		compilationRoot.parseFile(file);
-		System.out.println("COMPILER ADDING NEW FILE TO GLOBALROOTNODE");
-		groot.addFile(compilationRoot.getStoredDefinition());
-		toReturn = new LocalRootNode(groot.getSourceRoot(),
-				compilationRoot.getStoredDefinition());
-
-		return toReturn;
-	}
-
-	// Overridden to add synchronization
-	public void compile(IDocument document, DirtyRegion dirtyRegion,
-			IRegion region, IFile file) {
-		System.out
-				.println("MODLEICACOMPILER compile(IDocument document, DirtyRegion dirtyRegion, IRegion region, IFile file)");
-
-		ASTNode<?> node = (ASTNode<?>) compileToAST(document, dirtyRegion,
-				region, file);
-		ModelicaASTRegistry reg = ModelicaASTRegistry.getInstance();
-		if (reg != null && node != null && node.hasLookupKey()) {
-			synchronized (node.state()) {
-				// Depends on ASTNode.state being static (if it isn't, use an
-				// object that is unique to the tree)
-		//reg.doUpdate(file, (ILocalRootNode) node);// , node.lookupKey(),
-															// file);
-			}
-		}
+	public ILocalRootNode recompile(String doc, IFile file) {
+		return parseDoc(doc, file);
 	}
 
 	/*
@@ -211,19 +150,8 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 	@Override
 	public IGlobalRootNode compile(IProject project) {
-		IGlobalRootNode toReturn = ModelicaASTRegistry.getInstance().doLookup(
-				project);
-		CompilationRoot croot;
-		if (toReturn == null) {
-			croot = recursiveCompile(new CompilationRoot(project), project);
-			toReturn = new GlobalRootNode(croot.root());
-			((GlobalRootNode) toReturn).setCompilationRoot(croot);
-		} else {
-			croot = recursiveCompile(
-					((GlobalRootNode) toReturn).getCompilationRoot(), project);
-		}
-		((GlobalRootNode) toReturn).addFiles(croot.getFiles());
-		return toReturn;
+		GlobalRootNode toReturn = new GlobalRootNode(project);
+		return recursiveCompile(toReturn, project);
 	}
 
 	@Override
@@ -233,7 +161,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 	@Override
 	public ILocalRootNode compile(IFile file) {
-		return compileFile(file);
+		return parseFile(file);
 	}
 
 	private String acceptedNatureID() {
@@ -242,5 +170,93 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 	private Collection<String> acceptedFileExtensions() {
 		return Arrays.asList(IDEConstants.ALL_FILE_EXTENSIONS);
+	}
+
+	/**
+	 * Parse content and add to source root.
+	 */
+	private ILocalRootNode parseFile(IFile file) {
+		ILocalRootNode toReturn;
+		try {
+			toReturn = parseFile(Util.fileReader(file), file, true);
+		} catch (IOException e) {
+			toReturn = new LocalRootNode(createBadDef(file));
+		}
+		return toReturn;
+	}
+
+	private ILocalRootNode parseFile(Reader reader, IFile file,
+			boolean clearSemantic) {
+
+		errorReport.setFile(file, clearSemantic);
+		scanner.reset(reader);
+		org.jmodelica.modelica.compiler.List<StoredDefinition> list = new org.jmodelica.modelica.compiler.List<StoredDefinition>();
+		SourceRoot sRoot = null;
+		try {
+			sRoot = (SourceRoot) parser.parse(scanner);
+			synchronized (sRoot.state()) {
+				sRoot.setFormatting(scanner.getFormattingInfo());
+			}
+			int i = 0;
+			for (StoredDefinition def : sRoot.getProgram()
+					.getUnstructuredEntitys()) {
+				StoredDefinition sd = createAnnotatedDefinition(def, file);
+				list.add(sd);
+				i++;
+			}
+			if (i == 0) // for empty file
+				list.add(createBadDef(file));
+		} catch (Parser.Exception e) {
+			list.add(createBadDef(file));
+		} catch (ParserException e) {
+			list.add(createBadDef(file));
+		} catch (IOException e) {
+			list.add(createBadDef(file));
+		} finally {
+			errorReport.cleanUp();
+			if (sRoot != null)
+				sRoot.forceRewrites();
+			try {
+				reader.close();
+			} catch (IOException e) {
+			}
+		}
+		if (list.getNumChild() > 1)
+			System.err
+					.println("PARSING OF FILE RESULTED IN MORE THAN 1 STOREDDEF BUT ONLY ONE WAS KEPT, NEED FIXING");
+		LocalRootNode toReturn = new LocalRootNode(list.getChild(0));
+		toReturn.setSourceRoot(sRoot);
+		return toReturn;
+	}
+
+	private StoredDefinition createBadDef(IFile file) {
+		return createAnnotatedDefinition(new BadDefinition(), file);
+	}
+
+	private StoredDefinition createAnnotatedDefinition(StoredDefinition def,
+			IFile file) {
+		def.setFile(file);
+		def.setFileName(file.getRawLocation().toOSString());
+		def.setLineBreakMap(scanner.getLineBreakMap());
+		return def;
+	}
+
+	/**
+	 * Compile and add AST from string.
+	 * 
+	 * @param doc
+	 *            string to compile
+	 * @param file
+	 *            eclipse file handle. Used as a key to identify the resulting
+	 *            StoredDefinition.
+	 * @return this
+	 */
+	private ILocalRootNode parseDoc(String doc, IFile file) {
+		return parseFile(new StringReader(doc), file, true);
+	}
+
+	private void parseDocs(String[] docs, IFile file) {
+		for (String doc : docs)
+			parseDoc(doc, file);
 	}
 }

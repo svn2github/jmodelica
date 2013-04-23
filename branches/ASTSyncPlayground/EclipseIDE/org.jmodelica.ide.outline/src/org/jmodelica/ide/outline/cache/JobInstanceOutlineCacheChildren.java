@@ -6,7 +6,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
@@ -33,20 +33,14 @@ public class JobInstanceOutlineCacheChildren extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		System.out
-				.println("JobHandler handling CacheChildren from InstanceOutline...");
 		long time = System.currentTimeMillis();
 		ArrayList<ICachedOutlineNode> toReturn = new ArrayList<ICachedOutlineNode>();
-		LocalRootNode root = (LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(file)[0];
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			InstProgramRoot iRoot = sroot.getProgram().getInstProgramRoot();
-			long time2 = System.currentTimeMillis();
 			InstNode sought = ModelicaASTRegistry.getInstance()
 					.resolveInstanceASTPath(nodePath, iRoot);
-			System.out.println("ModelicaASTReg: ResolveInstPath() took: "
-					+ (System.currentTimeMillis() - time2) + "ms");
 			for (Object obj : sought.instClassDecls())
 				toReturn.add(ASTNodeCacheFactory.cacheNode((ASTNode<?>) obj,
 						parent, cache));

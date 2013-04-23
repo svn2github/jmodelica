@@ -14,17 +14,16 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ShowMessageJob;
 import org.jmodelica.ide.helpers.hooks.IErrorCheckHook;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.FClass;
 import org.jmodelica.modelica.compiler.IErrorHandler;
 import org.jmodelica.modelica.compiler.InstClassDecl;
@@ -64,7 +63,8 @@ public class ErrorCheckAction extends CurrentClassAction implements
 	}
 
 	public void checkForSyntaxErrors() {
-		LocalRootNode ln = (LocalRootNode)ModelicaASTRegistry.getInstance().lookupFile(currentClass.containingFileName());
+		LocalRootNode ln = (LocalRootNode) ModelicaASTRegistry.getInstance()
+				.lookupFileLocalRoot(currentClass.containingFileName());
 		IFile file = ln.getFile();
 		if (file != null) {
 			try {
@@ -129,11 +129,11 @@ public class ErrorCheckAction extends CurrentClassAction implements
 		}
 
 		protected IStatus run(IProgressMonitor monitor) {
-			LocalRootNode ln = (LocalRootNode) ModelicaASTRegistry
-					.getInstance()
-					.lookupFile(currentClass.containingFileName());
-			if (ln != null) {
-				SourceRoot root = ln.getSourceRoot();
+			GlobalRootNode groot = (GlobalRootNode) ModelicaASTRegistry
+					.getInstance().lookupFileGlobalRoot(
+							currentClass.containingFileName());
+			if (groot != null) {
+				SourceRoot root = groot.getSourceRoot();
 				synchronized (root.state()) {
 					InstProgramRoot ipr = root.getProgram()
 							.getInstProgramRoot();

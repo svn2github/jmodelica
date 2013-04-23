@@ -28,7 +28,7 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.progress.IProgressConstants2;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ShowMessageJob;
@@ -94,9 +94,9 @@ public class CompileFMUAction extends CurrentClassAction implements
 			showConsole();
 			String fileName[] = currentClass.containingFileName().split("/");
 			String theName = fileName[fileName.length-1];
-			LocalRootNode ln = (LocalRootNode) ModelicaASTRegistry
+			GlobalRootNode ln = (GlobalRootNode) ModelicaASTRegistry
 					.getInstance()
-					.lookupFile(theName);
+					.lookupFileGlobalRoot(theName);
 			if (ln != null) {
 				SourceRoot sr = ln.getSourceRoot();
 				synchronized (sr.state()) {

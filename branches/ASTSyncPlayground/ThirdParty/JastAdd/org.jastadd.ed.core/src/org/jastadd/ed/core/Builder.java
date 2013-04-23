@@ -25,12 +25,12 @@ public abstract class Builder extends IncrementalProjectBuilder {
 
 	private final IGlobalRootRegistry fRegistry;
 	private final ICompiler fCompiler;
-	//public static final String BUILDER_ID = "org.jastadd.core.ed.Builder";
+
+	// public static final String BUILDER_ID = "org.jastadd.core.ed.Builder";
 	public Builder() {
 		super();
 		fRegistry = createRegistry();
 		fCompiler = createCompiler();
-		System.out.println("BUILDER jastadd.ed.core");
 	}
 
 	protected abstract IGlobalRootRegistry createRegistry();
@@ -39,19 +39,18 @@ public abstract class Builder extends IncrementalProjectBuilder {
 
 	@Override
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
-	throws CoreException {
-		System.out.println("BUILDER build(int kind, Map args, IProgressMonitor monitor)");
+			throws CoreException {
 		switch (kind) {
-		case IncrementalProjectBuilder.AUTO_BUILD :
+		case IncrementalProjectBuilder.AUTO_BUILD:
 			autoBuild(args, monitor);
 			break;
-		case IncrementalProjectBuilder.CLEAN_BUILD :
+		case IncrementalProjectBuilder.CLEAN_BUILD:
 			cleanBuild(args, monitor);
 			break;
-		case IncrementalProjectBuilder.FULL_BUILD :
+		case IncrementalProjectBuilder.FULL_BUILD:
 			fullBuild(args, monitor);
 			break;
-		case IncrementalProjectBuilder.INCREMENTAL_BUILD :
+		case IncrementalProjectBuilder.INCREMENTAL_BUILD:
 			incrementalBuild(args, monitor);
 			break;
 		}
@@ -60,7 +59,6 @@ public abstract class Builder extends IncrementalProjectBuilder {
 	}
 
 	private void incrementalBuild(Map args, IProgressMonitor monitor) {
-		System.out.println("BUILDER incrementalBuild(Map args, IProgressMonitor monitor)");
 		IResourceDelta delta = getDelta(getProject());
 		if (delta == null) {
 			// No delta available, do a full build
@@ -70,9 +68,8 @@ public abstract class Builder extends IncrementalProjectBuilder {
 			try {
 				delta.accept(deltaVisitor);
 			} catch (CoreException e) {
-				String message = "Incremental build failed!"; 
-				IStatus status = new Status(IStatus.ERROR, 
-						Activator.PLUGIN_ID,
+				String message = "Incremental build failed!";
+				IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 						IStatus.ERROR, message, e);
 				Activator.getDefault().getLog().log(status);
 			}
@@ -80,14 +77,12 @@ public abstract class Builder extends IncrementalProjectBuilder {
 	}
 
 	private void fullBuild(Map args, IProgressMonitor monitor) {
-		System.out.println("BUILDER fullBuild(Map args, IProgressMonitor monitor)");
 		ResourceVisitor visitor = new ResourceVisitor();
 		try {
 			getProject().accept(visitor);
 		} catch (CoreException e) {
-			String message = "Full build failed!"; 
-			IStatus status = new Status(IStatus.ERROR, 
-					Activator.PLUGIN_ID,
+			String message = "Full build failed!";
+			IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 					IStatus.ERROR, message, e);
 			Activator.getDefault().getLog().log(status);
 		}
@@ -101,7 +96,6 @@ public abstract class Builder extends IncrementalProjectBuilder {
 		incrementalBuild(args, monitor);
 	}
 
-
 	class DeltaVisitor implements IResourceDeltaVisitor {
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource resource = delta.getResource();
@@ -109,52 +103,52 @@ public abstract class Builder extends IncrementalProjectBuilder {
 			// handle changed resource
 			case IResourceDelta.CHANGED:
 				if (resource instanceof IFile) {
-					IFile file = (IFile)resource;
-					if (fCompiler.canCompile(file)) {
-						ILocalRootNode fileNode = fCompiler.compile(file);
-						fRegistry.doUpdate(file, fileNode);
-					}
+					compileFile(resource);
 					return false;
 				}
 				break;
-				// handle added resource
+			// handle added resource
 			case IResourceDelta.ADDED:
 				if (resource instanceof IFile) {
-					IFile file = (IFile)resource;
-					if (fCompiler.canCompile(file)) {
-						ILocalRootNode fileNode = fCompiler.compile(file);
-						fRegistry.doUpdate(file, fileNode);
-					}
+					compileFile(resource);
 					return false;
-				}
-				else if (resource instanceof IProject) {
+				} else if (resource instanceof IProject) {
 					IProject project = (IProject) resource;
 					if (fCompiler.canCompile(project)) {
-						IGlobalRootNode projectNode = fCompiler.compile(project);
+						IGlobalRootNode projectNode = fCompiler
+								.compile(project);
 						fRegistry.doUpdate(project, projectNode);
 					}
 					return false;
 				}
 				break;
-				// handle removed resource
-			case IResourceDelta.REMOVED: 
+			// handle removed resource
+			case IResourceDelta.REMOVED:
 				if (resource instanceof IProject) {
-					fRegistry.doDiscard((IProject)resource);
+					fRegistry.doDiscard((IProject) resource);
 					return false;
 				} else if (resource instanceof IFile) {
-					fRegistry.doDiscard((IFile)resource);
+					fRegistry.doDiscard((IFile) resource);
 					return false;
 				}
 				break;
 			}
-			return true; 			// return true to continue visiting children.
+			return true; // return true to continue visiting children.
+		}
+
+		private void compileFile(IResource resource) {
+			IFile file = (IFile) resource;
+			if (fCompiler.canCompile(file)) {
+				ILocalRootNode fileNode = fCompiler.compile(file);
+				fRegistry.doUpdate(file, fileNode);
+			}
 		}
 	}
-
+	
 	public class ResourceVisitor implements IResourceVisitor {
 		public boolean visit(IResource resource) {
 			if (resource instanceof IProject) {
-				IProject project = (IProject)resource;
+				IProject project = (IProject) resource;
 				if (fCompiler.canCompile(project)) {
 					IGlobalRootNode projectNode = fCompiler.compile(project);
 					fRegistry.doUpdate(project, projectNode);
@@ -163,16 +157,12 @@ public abstract class Builder extends IncrementalProjectBuilder {
 				return false;
 			}
 			/*
-			else if (resource instanceof IFile) {
-				IFile file = (IFile)resource;
-				if (fCompiler.canCompile(file)) {
-					ILocalRootNode fileNode = fCompiler.compile(file);
-					fRegistry.doUpdate(file, fileNode);
-					updateErrors(file, fileNode);
-				}
-			}
+			 * else if (resource instanceof IFile) { IFile file =
+			 * (IFile)resource; if (fCompiler.canCompile(file)) { ILocalRootNode
+			 * fileNode = fCompiler.compile(file); fRegistry.doUpdate(file,
+			 * fileNode); updateErrors(file, fileNode); } }
 			 */
-			return true; 			// return true to continue visiting children.
+			return true; // return true to continue visiting children.
 
 		}
 	}
@@ -181,23 +171,22 @@ public abstract class Builder extends IncrementalProjectBuilder {
 		ILocalRootNode[] nodes = root.lookupAllFileNodes();
 		for (ILocalRootNode node : nodes) {
 			if (node instanceof IErrorFeedbackNode) {
-				updateSyntaxErrors(node.getFile(), (IErrorFeedbackNode)node);
-				updateSemanticErrors(node.getFile(), (IErrorFeedbackNode)node);
+				updateSyntaxErrors(node.getFile(), (IErrorFeedbackNode) node);
+				updateSemanticErrors(node.getFile(), (IErrorFeedbackNode) node);
 			}
 		}
 	}
 
 	protected void updateSyntaxErrors(IFile file, IErrorFeedbackNode root) {
-		Collection<IError> errors  = root.syntaxErrors();
+		Collection<IError> errors = root.syntaxErrors();
 		ErrorMarker.removeAll(file, IError.SYNTAX_MARKER_ID);
 		ErrorMarker.addAll(file, errors, IError.SYNTAX_MARKER_ID);
 	}
 
 	protected void updateSemanticErrors(IFile file, IErrorFeedbackNode root) {
-		Collection<IError> errors  = root.semanticErrors();
+		Collection<IError> errors = root.semanticErrors();
 		ErrorMarker.removeAll(file, IError.MARKER_ID);
 		ErrorMarker.addAll(file, errors, IError.MARKER_ID);
 	}
-
 
 }

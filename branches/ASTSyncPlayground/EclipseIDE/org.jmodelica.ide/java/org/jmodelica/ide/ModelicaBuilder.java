@@ -11,18 +11,15 @@ public class ModelicaBuilder extends Builder {
 
 	public ModelicaBuilder() {
 		super();
-		System.out.println("CREATED MODELICABUILDER");
 	}
 
 	@Override
 	protected IGlobalRootRegistry createRegistry() {
-		System.out.println("MODELICABUILDER createRegistry()");
 		return ModelicaASTRegistry.getInstance();
 	}
 
 	@Override
 	protected ICompiler createCompiler() {
-		System.out.println("MODELICABUILDER createCompiler()");
 		return new ModelicaEclipseCompiler();
 	}
 

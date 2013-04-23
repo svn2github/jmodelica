@@ -6,7 +6,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.LocalRootNode;
+import org.jmodelica.ide.compiler.GlobalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
@@ -31,12 +31,9 @@ public class JobClassOutlineCacheChildren extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		System.out
-				.println("JobHandler handling CacheChildren from ClassOutline...");
 		long time = System.currentTimeMillis();
 		ArrayList<ICachedOutlineNode> toReturn = new ArrayList<ICachedOutlineNode>();
-		LocalRootNode root = (LocalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(file)[0];
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			ASTNode<?> sought = ModelicaASTRegistry.getInstance().resolveSourceASTPath(

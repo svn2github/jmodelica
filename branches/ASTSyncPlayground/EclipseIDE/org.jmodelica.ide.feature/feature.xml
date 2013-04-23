@@ -544,10 +544,6 @@ Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.  END OF TERMS AND CONDITIONS
    </license>
 
-   <includes
-         id="org.jastadd.ed.core.feature"
-         version="0.0.0"/>
-
    <requires>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.core.resources"/>

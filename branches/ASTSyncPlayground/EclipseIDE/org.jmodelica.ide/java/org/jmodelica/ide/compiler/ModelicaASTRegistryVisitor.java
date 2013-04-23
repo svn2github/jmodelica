@@ -32,7 +32,8 @@ public class ModelicaASTRegistryVisitor {
 			} else if (jobType == IJobObject.ADD_COMPONENT) {
 				addNode(job);
 			} else if (jobType == IJobObject.RENAME_NODE) {
-				renameNode(job.getFile(), job.getModifyNodeASTPath(), job.getRenameName());
+				renameNode(job.getFile(), job.getModifyNodeASTPath(),
+						job.getRenameName());
 			} else if (jobType == IJobObject.ADD_CONNECTCLAUSE) {
 				addConnectClause(job);
 			} else if (jobType == IJobObject.REMOVE_CONNECTCLAUSE) {
@@ -43,8 +44,8 @@ public class ModelicaASTRegistryVisitor {
 
 	private void removeConnectClause(ModificationJob job) {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
-				.getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry.doLookup(job.getFile()
+				.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
 					job.getClassASTPath(), root);
@@ -69,8 +70,8 @@ public class ModelicaASTRegistryVisitor {
 
 	private void addConnectClause(ModificationJob job) {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
-				.getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry.doLookup(job.getFile()
+				.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
 					job.getClassASTPath(), root);
@@ -102,10 +103,11 @@ public class ModelicaASTRegistryVisitor {
 	 * @param file
 	 * @param instNode
 	 */
-	private void renameNode(IFile file, Stack<String> renameNodePath, String newName) {
+	private void renameNode(IFile file, Stack<String> renameNodePath,
+			String newName) {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((LocalRootNode) registry.doLookup(file)[0])
-				.getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry
+				.doLookup(file.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			ASTNode<?> srcNode = registry.resolveSourceASTPath(renameNodePath,
 					root);
@@ -132,17 +134,17 @@ public class ModelicaASTRegistryVisitor {
 	 */
 	private void addNode(ModificationJob job) {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((LocalRootNode) registry.doLookup(job.getFile())[0])
-				.getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry.doLookup(job.getFile()
+				.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			IFile file = job.getFile();
-			// System.out.println("MODELICAASTREGVISITOR addnode ist...: "
-			// + getNodeName(classDeclNode));
+			System.out.println("MODELICAASTREGVISITOR addnode ist...: "
+					+ job.getClassName());
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
 					job.getClassASTPath(), root);
 
-			// System.out.println("ADDNODE: className:" + job.getClassName()
-			// + " componentname:" + job.getComponentName());
+			System.out.println("ADDNODE: className:" + job.getClassName()
+					+ " componentname:" + job.getComponentName());
 			fcd.syncAddComponent(job.getClassName(), job.getComponentName(),
 					job.getPlacement());
 
@@ -164,28 +166,18 @@ public class ModelicaASTRegistryVisitor {
 	}
 
 	/**
-	 * Removes a node from the source and instance AST. TODO also remove from
-	 * all class accesses.
+	 * Removes a node from the source and instance AST.
 	 * 
 	 * @param file
 	 * @param instNode
 	 */
 	private void removeNode(IFile file, Stack<String> removeNodePath) {
 		long time = System.currentTimeMillis();
-		// System.out.println("ModelicaASTRegVISITOR: recieved remove job!");
-		SourceRoot root = ((LocalRootNode) registry.doLookup(file)[0])
-				.getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry
+				.doLookup(file.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			ASTNode<?> srcNode = registry.resolveSourceASTPath(removeNodePath,
 					root);
-			// ArrayList<String> instNodePath = getNodePathToRoot(instNode);
-			// System.out.println("ModelicaASTREGVisitor: PATH OF INSTNODE WAS: "
-			// + makeStringOfArrayPath(instNodePath));
-			// ArrayList<String> srcNodePath = getNodePathToRoot(srcNode);
-			// System.out.println("ModelicaASTREGVisitor: PATH OF SRCNODE WAS: "
-			// + makeStringOfArrayPath(srcNodePath));
-
-			// Create path before removal!
 			removeSrcNode(srcNode);
 			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
 			StoredDefinition def = lr.getDef();
@@ -195,7 +187,7 @@ public class ModelicaASTRegistryVisitor {
 			InstProgramRoot iRoot = pr.getInstProgramRoot();
 			iRoot.flushCache();
 
-			// TODO probably need project as identifier also?
+			// TODO probably want project as identifier also?
 			// TODO removeListenerPath(file, nodePath);
 
 			ChangePropagationController.getInstance().handleNotifications(
@@ -204,6 +196,31 @@ public class ModelicaASTRegistryVisitor {
 		System.out
 				.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "
 						+ (System.currentTimeMillis() - time) + "ms");
+	}
+
+	/**
+	 * Removes a node from the source AST.
+	 * 
+	 * @param theNode
+	 */
+	private void removeSrcNode(ASTNode<?> theNode) {
+		if (theNode instanceof ComponentDecl) {
+			ComponentDecl comp = (ComponentDecl) theNode;
+			ASTNode<?> parent = comp.getParent();
+			while (parent.getParent() != null
+					&& !(parent instanceof FullClassDecl)) {
+				parent = parent.getParent();
+			}
+			if (parent instanceof FullClassDecl) {
+				FullClassDecl decl = (FullClassDecl) parent;
+				decl.removeComponentDecl(comp);
+				decl.flushCache();
+				decl.components();
+
+				System.out
+						.println("SUCCESSFULLY REMOVED COMPONENTDECL FROM FULLCLASSDECL");
+			}
+		}
 	}
 
 	/**
@@ -254,35 +271,6 @@ public class ModelicaASTRegistryVisitor {
 	 * private String getNodeName(ASTNode<?> node) { String name =
 	 * node.getNodeName() + " " + node.outlineId(); return name; }
 	 */
-
-	/**
-	 * Removes a node from the source AST.
-	 * 
-	 * @param theNode
-	 */
-	private void removeSrcNode(ASTNode<?> theNode) {
-		if (theNode instanceof ComponentDecl) {
-			ComponentDecl comp = (ComponentDecl) theNode;
-			ASTNode<?> parent = comp.getParent();
-			while (parent.getParent() != null
-					&& !(parent instanceof FullClassDecl)) {
-				parent = parent.getParent();
-			}
-			if (parent instanceof FullClassDecl) {
-				FullClassDecl decl = (FullClassDecl) parent;
-				decl.removeComponentDecl(comp);
-				decl.flushCache();
-				decl.components();
-
-				System.out
-						.println("SUCCESSFULLY REMOVED COMPONENTDECL FROM FULLCLASSDECL");
-			}
-		}/*
-		 * else { //TODO only support remove component? ASTNode<?> parent =
-		 * theNode.getParent(); int myIndex = parent.getIndexOfChild(theNode);
-		 * parent.removeChild(myIndex); }
-		 */
-	}
 
 	/*
 	 * private void removeNodeFromSrcClassUses(ASTNode<?> component, String

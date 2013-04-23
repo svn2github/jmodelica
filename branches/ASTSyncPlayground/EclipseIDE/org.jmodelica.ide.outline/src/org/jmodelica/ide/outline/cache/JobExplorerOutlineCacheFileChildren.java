@@ -26,14 +26,12 @@ public class JobExplorerOutlineCacheFileChildren extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		System.out
-				.println("JobHandler handling CacheFileChildren from ExplorerOutline... File:"+file.getName());
 		long time = System.currentTimeMillis();
 		ICachedOutlineNode toReturn = null;
 		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
 		LocalRootNode root = (LocalRootNode) ModelicaASTRegistry.getInstance()
 				.doLookup(file)[0];
-		StoredDefinition def = root.getStoredDef();
+		StoredDefinition def = root.getDef();
 		synchronized (def.state()) {
 			toReturn = ASTNodeCacheFactory.cacheNode(def, file, cache);
 			for (Object obj : def.getElements())

@@ -33,7 +33,6 @@ public class Activator extends AbstractUIPlugin {
 	 * The constructor
 	 */
 	public Activator() {
-		System.out.println("org.jmodelica.ide ACTIVATOR");		
 	}
 
 	/*

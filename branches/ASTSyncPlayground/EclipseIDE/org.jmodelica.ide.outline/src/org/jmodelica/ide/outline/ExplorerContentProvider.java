@@ -36,7 +36,6 @@ import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.outline.cache.CachedContentProvider;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
 
-//TODO handle file changes comp added etc...
 public class ExplorerContentProvider extends CachedContentProvider implements
 		IResourceChangeListener, IResourceDeltaVisitor, IASTChangeListener {
 
@@ -64,16 +63,6 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		} else {
 			children = super.getChildren(parentElement);
 		}
-		// ICachedOutlineNode root = astCache.get((IFile) parentElement);
-		// children = root.outlineChildren().toArray();
-		// } else if (parentElement instanceof IProject) {
-		// LibrariesList libList = new LibrariesList((IProject)
-		// parentElement, viewer);
-		// return libList.hasChildren() ? new Object[] { libList } : null;
-		// } else if (parentElement instanceof ClassDecl) {
-		// children = getVisible(((ClassDecl) parentElement).classes());
-		// }
-		// return OutlineUpdateWorker.addIcons(viewer, children);
 		return children;
 	}
 
@@ -94,16 +83,12 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 	public boolean hasChildren(Object element) {
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
-			System.out.println(">>>Haschildren file:" + file.getName());
 			if (!astCacheMap.containsKey(file)) {
-				System.out.println(">>>didnt have file is astmap, fetching children");
 				cache.fetchFileChildren(file, viewer);
 				return true;
 			}
 			ICachedOutlineNode root = astCacheMap.get(file);
 			boolean hasc = (root != null && root.hasVisibleChildren());
-			System.out
-					.println(">>>we had file in astmap, haschildren?=" + hasc);
 			return hasc;
 		}
 		return super.hasChildren(element);
@@ -152,13 +137,11 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 			return true;
 		case IResource.FILE:
 			final IFile file = (IFile) source;
-			System.out.println("explorercontentprovider recieved file resource changed:"+file.getName());
 			String ext = file.getFileExtension();
 			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
 				ICachedOutlineNode ast = astCacheMap.get(file);
 				if (ast != null)
 					cache.fetchFileChildren(file, viewer);
-				// new UpdateJob(file).schedule();
 			}
 			return false;
 		}
