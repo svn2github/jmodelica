@@ -935,13 +935,13 @@ aspect Flattening {
 	eq FQNameString.splitArrayAccess(int index) {
 		FQNameFull res = new FQNameFull(getName());
 		int i = res.getNumFQNamePart();
-		res.setFQNamePart(res.getFQNamePart(i).splitArrayAccess(index, ndims()), i);
+		res.setFQNamePart(res.getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
 		return res;
 	}
 	eq FQNameFull.splitArrayAccess(int index) {
 		FQNameFull res = fullCopy();
 		int i = getNumFQNamePart();
-		res.setFQNamePart(getFQNamePart(i).splitArrayAccess(index, ndims()), i);
+		res.setFQNamePart(getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
 		return res;
 	}
 	
@@ -960,6 +960,7 @@ aspect Flattening {
 		FQNamePartArray res = fullCopy();
 		res.parent = parent; // Hack to allow lookups of uses from specifyNext()
 		res.getFArraySubscripts().specifyNext(index);
+		res.parent = null;
 		return res;
 	}
 	
@@ -1002,9 +1003,10 @@ aspect Flattening {
 	}
 	
 	syn FSubscript FSubscript.specify(int index);
-	eq FExpSubscript.specify(int index)     = this; // TODO: add array index to expression
+	eq FExpSubscript.specify(int index)     = 
+		new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
 	eq FIntegerSubscript.specify(int index) = this;
-	eq FColonSubscript.specify(int index)   = new FExpSubscript(new FIntegerLitExp(index));
+	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**

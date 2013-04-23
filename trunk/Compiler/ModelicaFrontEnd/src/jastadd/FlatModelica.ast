@@ -38,7 +38,8 @@ FClass : BaseNode ::= FQName
                       FEnumDecl*
                       FDerivedType*
                       /UnknownFVariable/
-                      FResidualPair*;
+                      FResidualPair*
+                      DummyVariable:FVariable*;
 
 /**
  * \brief A flattened user-defined function.

@@ -1230,6 +1230,7 @@ aspect FlatNames {
     eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
     eq FEnumDecl.getChild().findVariableIndex()           = -1;
+    eq FClass.getDummyVariable().findVariableIndex()      = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;

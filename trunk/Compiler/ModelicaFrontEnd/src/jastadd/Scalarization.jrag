@@ -177,6 +177,7 @@ aspect Scalarization {
 		flush();  // Must flush before traversing
 		evaluateArraySubscripts();
 		enableStreamsRewrite();
+		setDummyVariableList(new List<FVariable>());
 	}
 	
 	protected static List<FAbstractEquation> FClass.scalarizeEquationList(
@@ -403,6 +404,7 @@ aspect Scalarization {
 	public void FRecordVariable.scalarRecordCellFVariables(
 			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i) {
 		FVariable tmp = (FVariable) fullCopy();
+		myFClass().addDummyVariable(tmp);
 		tmp.inheritFrom(last);
 		FExp nbexp = null;
 		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
@@ -510,7 +512,7 @@ aspect Scalarization {
 		if (hasValue()) {
 			FExp val = getValue();
 			if (val.ndims() < i.ndims() || isInternal())
-				val = val.fullCopy();
+				val = val.scalarize(Collections.<String,FExp>emptyMap());
 			else
 				val = val.splitArrayExp(i).unboundCopy();
 			res.setValue(val);
