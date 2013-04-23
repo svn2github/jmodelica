@@ -909,7 +909,10 @@ class CasadiModel(BaseModel):
                     pass
                 else:
                     var = self.ocp.variable(int_names[index])
-                    var.setStart(start)
+                    # Assume that independent parameters have start values
+                    if start is not None:
+                        var.setStart(start)
+        casadi.updateDependent(self.ocp) # Handle dependent parameters
         
         # Count variables
         self.n_x = self.x.numel()
