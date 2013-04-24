@@ -6,6 +6,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.ide.compiler.IJobObject;
+import org.jmodelica.ide.compiler.ModelicaASTRegistryIDHandler;
 import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
 import org.jmodelica.ide.compiler.ModificationJob;
 import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
@@ -22,7 +23,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	public ClassDiagramProxy(IFile theFile, CachedInstClassDecl instClassDecl) {
 		this.theFile = theFile;
-		this.instClassDecl=instClassDecl;
+		this.instClassDecl = instClassDecl;
 	}
 
 	@Override
@@ -47,6 +48,8 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	@Override
 	public void addComponent(String className, String componentName,
 			Placement placement) {
+		System.out.println("Addcomp: classname=" + className);
+		System.out.println("addmocp: compname=" + componentName);
 		ModificationJob job = new ModificationJob(IJobObject.ADD_COMPONENT,
 				theFile, getCachedASTNode().getClassASTPath(), className,
 				componentName, placement);
@@ -56,16 +59,19 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	@Override
 	public void removeComponent(ComponentProxy component) {
 		ArrayList<IJobObject> jobs = new ArrayList<IJobObject>();
+		int changeSetId = ModelicaASTRegistryIDHandler.getInstance().getChangeSetID();
 		for (ConnectionProxy connection : component.getConnections()) {
 			ModificationJob job = new ModificationJob(
 					IJobObject.REMOVE_CONNECTCLAUSE, theFile, connection
 							.getConnectClause().getConnectClauseASTPath(),
 					getCachedASTNode().getClassASTPath());
+			job.setChangeSetId(changeSetId);
 			jobs.add(job);
 		}
 		ModificationJob job = new ModificationJob(IJobObject.REMOVE_NODE,
 				theFile, component.getComponentDecl().getComponentASTPath(),
 				getCachedASTNode().getClassASTPath());
+		job.setChangeSetId(changeSetId);
 		jobs.add(job);
 		for (IJobObject j : jobs)
 			ModelicaASTRegistryJobBucket.getInstance().addJob(j);
@@ -81,7 +87,8 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	protected void addConnection(ConnectionProxy connection) {
-		addConnection(connection.getSource().buildDiagramName(), connection.getTarget().buildDiagramName());
+		addConnection(connection.getSource().buildDiagramName(), connection
+				.getTarget().buildDiagramName());
 	}
 
 	@Override
@@ -97,7 +104,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	// TODO FIX SYNCH ASTREG
 	protected void setParameterValue(Stack<String> path, String value) {
 		// instClassDecl.syncSetParameterValue(path, value);
-		//notifyObservers(FLUSH_CONTENTS);
+		// notifyObservers(FLUSH_CONTENTS);
 	}
 
 	@Override
@@ -111,5 +118,17 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 			return instClassDecl.equals(other);
 		}
 		return false;
+	}
+
+	@Override
+	public void undoAddComponent() {
+		ModificationJob job = new ModificationJob(IJobObject.UNDO_ADD_COMPONENT, null, null);
+		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
+	}
+
+	@Override
+	public void undoRemoveComponent() {
+		ModificationJob job = new ModificationJob(IJobObject.UNDO_REMOVE_NODE, null, null);
+		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
 	}
 }

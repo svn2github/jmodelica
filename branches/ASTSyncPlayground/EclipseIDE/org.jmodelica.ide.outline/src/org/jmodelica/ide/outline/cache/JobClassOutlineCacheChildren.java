@@ -33,11 +33,12 @@ public class JobClassOutlineCacheChildren extends OutlineCacheJob {
 	public void doJob() {
 		long time = System.currentTimeMillis();
 		ArrayList<ICachedOutlineNode> toReturn = new ArrayList<ICachedOutlineNode>();
-		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
-			ASTNode<?> sought = ModelicaASTRegistry.getInstance().resolveSourceASTPath(
-					nodePath, sroot);
+			ASTNode<?> sought = ModelicaASTRegistry.getInstance()
+					.resolveSourceASTPath(nodePath, sroot);
 			for (Object obj : sought.outlineChildren())
 				toReturn.add(ASTNodeCacheFactory.cacheNode((ASTNode<?>) obj,
 						parent, cache));

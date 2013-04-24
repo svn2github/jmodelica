@@ -29,11 +29,14 @@ public class LibraryNode {
 		return listeners;
 	}
 
-	public void addListener(IASTChangeListener listener, int listenerType) {
-		listeners.add(new ListenerObject(listener, listenerType));
+	public void addListener(ListenerObject list) {
+		listeners.add(list);
 	}
 
 	public void removeListener(IASTChangeListener listener) {
-		listeners.remove(listener);
+		for (ListenerObject obj : listeners) {
+			if (obj.equals(listener))
+				listeners.remove(listener);
+		}
 	}
 }

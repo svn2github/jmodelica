@@ -8,6 +8,8 @@ public interface IJobObject {
 	public static final int CACHE = 5;
 	public static final int ADD_CONNECTCLAUSE = 6;
 	public static final int REMOVE_CONNECTCLAUSE = 7;
+	public static final int UNDO_REMOVE_NODE = 8;
+	public static final int UNDO_ADD_COMPONENT = 9;
 
 	public static final int PRIORITY_HIGH = 2;
 	public static final int PRIORITY_MEDIUM = 1;
@@ -16,4 +18,6 @@ public interface IJobObject {
 	public abstract void doJob();
 
 	public abstract int getPriority();
+
+	public abstract int getListenerID();
 }

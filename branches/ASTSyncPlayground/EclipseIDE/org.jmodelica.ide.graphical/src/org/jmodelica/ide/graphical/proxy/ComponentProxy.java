@@ -55,7 +55,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	protected CachedInstComponentDecl getComponentDecl() {
+	public CachedInstComponentDecl getComponentDecl() {
 		return myInstCompDeclCached;
 	}
 

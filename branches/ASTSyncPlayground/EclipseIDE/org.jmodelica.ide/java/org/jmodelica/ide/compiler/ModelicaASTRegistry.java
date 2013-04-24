@@ -71,15 +71,14 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	}
 
 	public void addListener(IFile file, ASTNode<?> node,
-			IASTChangeListener listener, int listenerType) {
+			ListenerObject listObj) {
 		Stack<String> nodePath = new Stack<String>();
 		if (node != null) {
 			synchronized (node.state()) {
 				nodePath = createPath(node);
 			}
 		}
-		ChangePropagationController.getInstance().addListener(listener,
-				listenerType, file, nodePath);
+		ChangePropagationController.getInstance().addListener(listObj, file, nodePath);
 	}
 
 	public void removeListener(IFile file, ASTNode<?> node,

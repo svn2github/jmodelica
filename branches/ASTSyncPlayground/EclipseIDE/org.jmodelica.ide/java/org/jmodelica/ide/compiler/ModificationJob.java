@@ -18,6 +18,10 @@ public class ModificationJob implements IJobObject {
 	private Stack<String> modifyNodeASTPath;
 	private String renameName;
 
+	// Used to specify changesets for undo in graphical editor (e.g. to restore
+	// all connections of a removed component).
+	private int changeSetId = 0;
+
 	/**
 	 * node = the node in src tree to remove
 	 * 
@@ -114,4 +118,16 @@ public class ModificationJob implements IJobObject {
 		return renameName;
 	}
 
+	@Override
+	public int getListenerID() {
+		return 0;
+	}
+
+	public void setChangeSetId(int changeSetId) {
+		this.changeSetId = changeSetId;
+	}
+
+	public int getChangeSetId() {
+		return changeSetId;
+	}
 }

@@ -8,6 +8,7 @@ import org.jastadd.ed.core.ReconcilingStrategy;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.LocalRootHandle;
+import org.jmodelica.ide.compiler.ListenerObject;
 import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
@@ -35,8 +36,9 @@ public class GlobalCompilationResult extends CompilationResult {
 
 		// registry.addListener(editor); // TODO JL listen against files, not
 		// against all...
+		ListenerObject listObj = new ListenerObject(editor, IASTChangeListener.TEXTEDITOR_LISTENER);
 		ModelicaASTRegistry.getInstance().addListener(editorFile.iFile(), null,
-				editor, IASTChangeListener.TEXTEDITOR_LISTENER);
+				listObj);
 	}
 
 	public void update(IProject projChanged, String keyChanged) {

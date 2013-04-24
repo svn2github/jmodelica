@@ -18,8 +18,8 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class GlobalRootNode implements IGlobalRootNode {
 
 	private final SourceRoot root;
-	private final org.jmodelica.modelica.compiler.List<StoredDefinition> list;	
-	
+	private final org.jmodelica.modelica.compiler.List<StoredDefinition> list;
+
 	private ArrayList<ILocalRootNode> files = new ArrayList<ILocalRootNode>();
 
 	public GlobalRootNode(IProject project) {
@@ -68,22 +68,23 @@ public class GlobalRootNode implements IGlobalRootNode {
 				found = true;
 			}
 		}
-		for (int i = 0; i < list.getNumChild();i++) {
+		for (int i = 0; i < list.getNumChild(); i++) {
 			if (list.getChildNoTransform(i).getFile().equals(newNode.getFile())) {
-				list.setChild(((LocalRootNode)newNode).getDef(), i);
+				list.setChild(((LocalRootNode) newNode).getDef(), i);
 				found = true;
 			}
 		}
 		if (!found) {
 			files.add(newNode);
-			list.add(((LocalRootNode)newNode).getDef());
+			list.add(((LocalRootNode) newNode).getDef());
 		}
 	}
 
 	public void addFiles(
 			org.jmodelica.modelica.compiler.List<StoredDefinition> files2) {
 		for (int i = 0; i < files2.getNumChild(); i++) {
-			LocalRootNode fileNode = new LocalRootNode(files2.getChildNoTransform(i));
+			LocalRootNode fileNode = new LocalRootNode(
+					files2.getChildNoTransform(i));
 			addOrUpdate(fileNode);
 		}
 	}
@@ -104,6 +105,7 @@ public class GlobalRootNode implements IGlobalRootNode {
 			e.printStackTrace();
 		}
 	}
+
 	@Override
 	public IASTNode getChild(int i) {
 		System.err
@@ -129,6 +131,14 @@ public class GlobalRootNode implements IGlobalRootNode {
 	public IProject getProject() {
 		System.err
 				.println("GlobalRootNode.getProject() should never be invoked\n");
+		return null;
+	}
+
+	public IFile lookupFileNode(String sourceFileName) {
+		for (ILocalRootNode fileNode : files) {
+			if (fileNode.getFile().getName().equals(sourceFileName))
+				return fileNode.getFile();
+		}
 		return null;
 	}
 }

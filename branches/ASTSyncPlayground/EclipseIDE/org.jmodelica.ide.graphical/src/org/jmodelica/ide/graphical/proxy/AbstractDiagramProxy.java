@@ -162,4 +162,8 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		}
 		return autoName;
 	}
+
+	public void undoRemoveComponent() {}
+
+	public void undoAddComponent() {}
 }

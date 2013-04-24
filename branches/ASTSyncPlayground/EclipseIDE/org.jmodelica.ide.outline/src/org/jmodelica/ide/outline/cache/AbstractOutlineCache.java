@@ -6,7 +6,9 @@ import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.compiler.IJobObject;
+import org.jmodelica.ide.compiler.ListenerObject;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.compiler.ModelicaASTRegistryIDHandler;
 import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.IOutlineCache;
@@ -19,16 +21,24 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	private CachedASTNode myCache;
 	private ArrayList<EventCachedChildren> childrenUpdates = new ArrayList<EventCachedChildren>();
 	private ArrayList<EventCachedInitial> rootUpdates = new ArrayList<EventCachedInitial>();
+	private int listenerID;
 
 	public AbstractOutlineCache(IASTChangeListener outline) {
 		myOutline = outline;
+		this.listenerID = ModelicaASTRegistryIDHandler.getInstance().getOutlineID();
+	}
+
+	public int getListenerID() {
+		return listenerID;
 	}
 
 	public void setFile(IFile file) {
 		myFile = file;
 		createInitialCache();
-		ModelicaASTRegistry.getInstance().addListener(file, null, this,
-				IASTChangeListener.OUTLINE_LISTENER);
+		ListenerObject listObj = new ListenerObject(this,
+				IASTChangeListener.OUTLINE_LISTENER,
+				ModelicaASTRegistryIDHandler.getInstance().getOutlineID());
+		ModelicaASTRegistry.getInstance().addListener(file, null, listObj);
 	}
 
 	protected void handleCachedChildrenEvent() {

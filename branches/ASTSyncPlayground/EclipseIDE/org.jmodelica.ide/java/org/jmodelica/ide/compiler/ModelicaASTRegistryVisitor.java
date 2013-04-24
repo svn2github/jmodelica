@@ -28,7 +28,7 @@ public class ModelicaASTRegistryVisitor {
 		if (job != null) {
 			int jobType = job.getJobType();
 			if (jobType == IJobObject.REMOVE_NODE) {
-				removeNode(job.getFile(), job.getModifyNodeASTPath());
+				removeNode(job);
 			} else if (jobType == IJobObject.ADD_COMPONENT) {
 				addNode(job);
 			} else if (jobType == IJobObject.RENAME_NODE) {
@@ -38,8 +38,20 @@ public class ModelicaASTRegistryVisitor {
 				addConnectClause(job);
 			} else if (jobType == IJobObject.REMOVE_CONNECTCLAUSE) {
 				removeConnectClause(job);
+			} else if (jobType == IJobObject.UNDO_ADD_COMPONENT) {
+				undoAddComponent(job);
+			} else if (jobType == IJobObject.UNDO_REMOVE_NODE) {
+				undoRemoveNode(job);
 			}
 		}
+	}
+
+	private void undoRemoveNode(ModificationJob job) {
+		ModelicaASTRegistryUndoer.getInstance().undoLastNodeRemove();
+	}
+
+	private void undoAddComponent(ModificationJob job) {
+		ModelicaASTRegistryUndoer.getInstance().undoLastNodeAdd();
 	}
 
 	private void removeConnectClause(ModificationJob job) {
@@ -51,7 +63,17 @@ public class ModelicaASTRegistryVisitor {
 					job.getClassASTPath(), root);
 			ConnectClause connectClause = (ConnectClause) registry
 					.resolveSourceASTPath(job.getModifyNodeASTPath(), root);
-			fcd.removeEquation(connectClause);
+			
+			// For undo command of graph ed (queue add job containing component
+			// info)
+			ModificationJob addJob = new ModificationJob(IJobObject.ADD_CONNECTCLAUSE,
+					job.getFile(), connectClause.getConnector1().toString(), connectClause.getConnector2().toString(),
+					job.getClassASTPath());
+			addJob.setChangeSetId(job.getChangeSetId());
+			ModelicaASTRegistryUndoer.getInstance().addUndoRemoveJob(addJob);
+			// continue...
+
+			fcd.removeEquation(connectClause);	
 			fcd.flushCache();
 			fcd.components();
 			fcd.classes();
@@ -82,6 +104,15 @@ public class ModelicaASTRegistryVisitor {
 			connectClause.setConnector2(Access.fromClassName(job
 					.getTargetDiagramName()));
 			fcd.addNewEquation(connectClause);
+			
+			// For undo command of graph ed (queue add job containing component
+			// info)
+			ModificationJob removeJob = new ModificationJob(
+					IJobObject.REMOVE_CONNECTCLAUSE, job.getFile(), ModelicaASTRegistry.getInstance().createPath(connectClause),
+					job.getClassASTPath());
+			ModelicaASTRegistryUndoer.getInstance().addUndoAddJob(removeJob);
+			// continue...
+			
 			fcd.flushCache();
 			fcd.components();
 			fcd.classes();
@@ -145,9 +176,18 @@ public class ModelicaASTRegistryVisitor {
 
 			System.out.println("ADDNODE: className:" + job.getClassName()
 					+ " componentname:" + job.getComponentName());
-			fcd.syncAddComponent(job.getClassName(), job.getComponentName(),
+			//TODO fix sync for this method and syncAddComponent
+			ComponentDecl added = fcd.syncAddComponent(job.getClassName(), job.getComponentName(),
 					job.getPlacement());
 
+			// For undo command of graph ed (queue add job containing component
+			// info)
+			ModificationJob removeJob = new ModificationJob(IJobObject.REMOVE_NODE,
+					file, ModelicaASTRegistry.getInstance().createPath(added),
+					job.getClassASTPath());
+			ModelicaASTRegistryUndoer.getInstance().addUndoAddJob(removeJob);
+			// continue...
+			
 			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
 			StoredDefinition def = lr.getDef();
 
@@ -171,15 +211,28 @@ public class ModelicaASTRegistryVisitor {
 	 * @param file
 	 * @param instNode
 	 */
-	private void removeNode(IFile file, Stack<String> removeNodePath) {
+	private void removeNode(ModificationJob job) {
 		long time = System.currentTimeMillis();
-		SourceRoot root = ((GlobalRootNode) registry
-				.doLookup(file.getProject())).getSourceRoot();
+		SourceRoot root = ((GlobalRootNode) registry.doLookup(job.getFile()
+				.getProject())).getSourceRoot();
 		synchronized (root.state()) {
-			ASTNode<?> srcNode = registry.resolveSourceASTPath(removeNodePath,
-					root);
+			ASTNode<?> srcNode = registry.resolveSourceASTPath(
+					job.getModifyNodeASTPath(), root);
+
+			// For undo command of graph ed (queue add job containing component
+			// info)
+			ModificationJob addJob = new ModificationJob(
+					IJobObject.ADD_COMPONENT, job.getFile(),
+					job.getClassASTPath(), ((ComponentDecl) srcNode)
+							.getClassName().toString(),
+					((ComponentDecl) srcNode).getName().getID(),
+					((ComponentDecl) srcNode).syncGetPlacement());
+			addJob.setChangeSetId(job.getChangeSetId());
+			ModelicaASTRegistryUndoer.getInstance().addUndoRemoveJob(addJob);
+			// continue...
+
 			removeSrcNode(srcNode);
-			LocalRootNode lr = (LocalRootNode) registry.doLookup(file)[0];
+			LocalRootNode lr = (LocalRootNode) registry.doLookup(job.getFile())[0];
 			StoredDefinition def = lr.getDef();
 
 			SourceRoot sr = (SourceRoot) def.root();
@@ -188,10 +241,10 @@ public class ModelicaASTRegistryVisitor {
 			iRoot.flushCache();
 
 			// TODO probably want project as identifier also?
-			// TODO removeListenerPath(file, nodePath);
 
 			ChangePropagationController.getInstance().handleNotifications(
-					ASTChangeEvent.POST_REMOVE, file, removeNodePath);
+					ASTChangeEvent.POST_REMOVE, job.getFile(),
+					job.getModifyNodeASTPath());
 		}
 		System.out
 				.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "

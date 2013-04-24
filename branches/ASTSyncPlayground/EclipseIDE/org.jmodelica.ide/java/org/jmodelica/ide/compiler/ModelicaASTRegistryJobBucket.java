@@ -32,7 +32,18 @@ public class ModelicaASTRegistryJobBucket {
 	 * the queue will also automatically be created, if necessary.
 	 */
 	public synchronized void addJob(IJobObject job) {
-		availableJobs.add(job);
+		if (job instanceof UpdateGraphicalJob
+				|| job instanceof UpdateOutlineJob) {
+			boolean contains = false;
+			for (IJobObject jobObj : availableJobs){
+				if (jobObj.getListenerID() == job.getListenerID())
+					contains = true;
+			}
+			if (!contains)
+				availableJobs.add(job);
+		} else {
+			availableJobs.add(job);
+		}
 		if (!threadRunning)
 			startNewThread();
 	}
@@ -42,6 +53,7 @@ public class ModelicaASTRegistryJobBucket {
 				+ availableJobs.size());
 		threadRunning = true;
 		nextJob = availableJobs.poll();
+		System.out.println("DOING JOB, prio: "+nextJob.getPriority()+", listenerID: "+nextJob.getListenerID());
 		if (nextJob instanceof UpdateGraphicalJob) {
 			createNewNonGraphicalJobHandlerThread(Job.SHORT);
 		} else if (nextJob instanceof UpdateOutlineJob) {

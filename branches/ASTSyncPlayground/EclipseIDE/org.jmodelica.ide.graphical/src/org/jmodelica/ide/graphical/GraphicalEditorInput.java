@@ -19,6 +19,8 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 	private IProject project;
 	private boolean editIcon;
 
+	private String sourceFileName;
+
 	public GraphicalEditorInput(String className, IProject project) {
 		this(className, project, DEFAULT_EDIT_ICON);
 	}
@@ -37,6 +39,7 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 	public GraphicalEditorInput(String className, File sourceFile,
 			boolean editIcon) {
 		this(className, lookupIProject(sourceFile), editIcon);
+		this.sourceFileName = sourceFile.getName();
 	}
 
 	public GraphicalEditorInput(CachedClassDecl classDecl) {
@@ -111,4 +114,7 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 		return GraphicalEditorInputFactory.ID_FACTORY;
 	}
 
+	public String getSourceFileName() {
+		return sourceFileName;
+	}
 }

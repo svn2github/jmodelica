@@ -10,7 +10,9 @@ import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.compiler.GlobalRootNode;
+import org.jmodelica.ide.compiler.ListenerObject;
 import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.compiler.ModelicaASTRegistryIDHandler;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -56,12 +58,11 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 		if (this.input != null)
 			removeAsListener();
 		this.input = input;
-		theFile = ModelicaASTRegistry.getInstance()
-				.doLookup(input.getProject()).lookupAllFileNodes()[0].getFile();
-		// TODO hardcoded only works if one file in project, fixxx
+		GlobalRootNode gRoot = (GlobalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(input.getProject());
+		theFile = gRoot.lookupFileNode(input.getSourceFileName());
+		SourceRoot root = gRoot.getSourceRoot();
 		ASTNode<?> classDecl;
-		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry.getInstance()
-				.doLookup(theFile.getProject())).getSourceRoot();
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());
@@ -81,8 +82,12 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	}
 
 	private void registerAsListener(IFile theFile, ASTNode<?> classDecl) {
-		ModelicaASTRegistry.getInstance().addListener(theFile, classDecl, this,
-				IASTChangeListener.GRAPHICAL_LISTENER);
+		ListenerObject listObj = new ListenerObject(this,
+				IASTChangeListener.GRAPHICAL_LISTENER,
+				ModelicaASTRegistryIDHandler.getInstance()
+						.getGraphicalEditorID());
+		ModelicaASTRegistry.getInstance().addListener(theFile, classDecl,
+				listObj);
 	}
 
 	private void createClassDiagramProxyCache(IFile theFile, InstClassDecl icd) {
@@ -133,6 +138,5 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 				e.printStackTrace();
 			}
 		}
-
 	}
 }

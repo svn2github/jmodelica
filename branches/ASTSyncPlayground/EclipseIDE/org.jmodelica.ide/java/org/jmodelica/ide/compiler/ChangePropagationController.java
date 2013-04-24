@@ -23,7 +23,7 @@ public class ChangePropagationController {
 		return controller;
 	}
 
-	public void addListener(IASTChangeListener listener, int listenerType,
+	public void addListener(ListenerObject listObj,
 			IFile file, Stack<String> nodePath) {
 
 		System.out.println("MODELICAASTREGISTRY: Added listener to file "
@@ -34,7 +34,7 @@ public class ChangePropagationController {
 			listenerTrees.put(file, root);
 		}
 		LibraryVisitor visitor = new LibraryVisitor();
-		visitor.addListener(root, nodePath, listener, listenerType);
+		visitor.addListener(root, nodePath, listObj);
 	}
 
 	/**

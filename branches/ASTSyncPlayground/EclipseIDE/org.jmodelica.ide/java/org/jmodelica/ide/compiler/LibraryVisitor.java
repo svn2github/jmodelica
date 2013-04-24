@@ -66,9 +66,9 @@ public class LibraryVisitor {
 	 * @param astChangeListenerType
 	 */
 	public void addListener(LibraryNode node, Stack<String> nodePath,
-			IASTChangeListener listener, int listenerType) {
+			ListenerObject listObj) {
 		if (nodePath.size() == 0) {
-			node.addListener(listener, listenerType);
+			node.addListener(listObj);
 			for (int i = 0; i < nodePath.size(); i++) {
 				System.out.println(nodePath.get(i) + "/");
 			}
@@ -79,7 +79,7 @@ public class LibraryVisitor {
 				// Check if any child is along path.
 				if (id.equals(child.getId())) {
 					found = true;
-					addListener(child, nodePath, listener, listenerType);
+					addListener(child, nodePath, listObj);
 					break;
 				}
 			}
@@ -87,7 +87,7 @@ public class LibraryVisitor {
 							// child node and move on to that node.
 				LibraryNode newNode = new LibraryNode(id);
 				node.addChild(newNode);
-				addListener(newNode, nodePath, listener, listenerType);
+				addListener(newNode, nodePath, listObj);
 			}
 		}
 	}
