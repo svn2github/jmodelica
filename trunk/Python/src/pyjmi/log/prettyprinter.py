@@ -21,7 +21,7 @@ Pretty printer/unparser for the new FMU log format
 import re
 
 import lexer
-from tree import NamedNode, Comment, NamedNodeList
+from tree import NamedNode, Comment
 
 indent_width = 2
 nodename_padding = 14
@@ -39,11 +39,11 @@ def is_vertical(nodes):
 def pprint(out, node, indent=0, wrapped=True):
     """Pretty print the log node node to the output stream out.
 
-    node may be a NamedNode, Comment, string, list, or NamedNodeList.
+    node may be a NamedNode, Comment, string or list
     """    
     if isinstance(node, NamedNode):
         ## NamedNode ##
-        if isinstance(node.value, (list, NamedNodeList)):
+        if isinstance(node.value, list):
             # name( named-nodes )name or name[ nodes ]name
             out.write(node.name if is_vertical(node.value) else node.name.ljust(nodename_padding))
             pprint(out, node.value, indent=indent)
@@ -52,13 +52,14 @@ def pprint(out, node, indent=0, wrapped=True):
             # name=value            
             out.write(node.name.ljust(nodename_padding-2) + ' = ')
             pprint(out, node.value, indent=indent)
-    elif isinstance(node, (list, NamedNodeList)):
-        ## list, NamedNodeList ##
+    elif isinstance(node, list):
+        ## list ##
         child_indent = indent + indent_width if wrapped else indent
         vertical = is_vertical(node)
         delim, post = (('\n' + ' '*child_indent, '\n' + ' '*indent) if vertical else (' ', ' '))        
         if wrapped:
-            pre, post = ('(', post + ')') if isinstance(node, NamedNodeList) else ('[', post + ']')
+            #pre, post = ('(', post + ')') if isinstance(node, NamedNodeList) else ('[', post + ']')
+            pre, post = ('[', post + ']')
             out.write(pre)
         for child in node:
             out.write(delim)

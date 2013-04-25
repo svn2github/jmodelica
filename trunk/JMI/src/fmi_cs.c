@@ -70,13 +70,13 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
         retval = jmi->ode_solver->solve(jmi->ode_solver, ttarget,reInitialize);
         if (retval==JMI_ODE_OK && ttarget == tfinal) {break;}
         if (retval<JMI_ODE_OK){
-            jmi_log_error(jmi, "Failed to perform a step.");
+            jmi_log_comment(jmi->log, logError, "Failed to perform a step.");
             return fmiError;
         }
         
         flag = fmi_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
         if (flag != fmiOK){
-            jmi_log_error(jmi, "Failed to handle the event.");
+            jmi_log_comment(jmi->log, logError, "<Failed to handle the event.>");
             return fmiError;
         }
         

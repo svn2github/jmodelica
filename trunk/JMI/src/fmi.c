@@ -24,6 +24,7 @@
 #include "fmi.h"
 #include "jmi.h"
 #include "jmi_block_residual.h"
+#include "jmi_log.h"
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
@@ -63,7 +64,6 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     char* tmpguid;
     size_t inst_name_len;
     size_t guid_len;
-    char buffer[400];
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
@@ -72,6 +72,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
          if(functions.logger) {
+             /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
              functions.logger(0, instanceName, fmiError, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
          }
          return 0;
@@ -113,31 +114,31 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian A: %d", jmi->color_info_A->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian A: %d", jmi->color_info_A->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian A>", jmi->color_info_A->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian A>", jmi->color_info_A->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_B != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian B: %d", jmi->color_info_B->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian B: %d", jmi->color_info_B->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_B");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian B>", jmi->color_info_B->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian B>", jmi->color_info_B->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_C != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian C: %d", jmi->color_info_C->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian C: %d", jmi->color_info_C->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_C");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian C>", jmi->color_info_C->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian C>", jmi->color_info_C->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_D != NULL) {
-    	sprintf(buffer,"Number of non-zeros in Jacobian D: %d", jmi->color_info_D->n_nz);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
-    	sprintf(buffer,"Number of colors in Jacobian D: %d", jmi->color_info_D->n_groups);
-    	(component->fmi_functions).logger(component, component->fmi_instance_name, fmiWarning, "INFO", buffer);
+        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_D");
+        jmi_log_fmt(jmi->log, logInfo, "num_nonzeros: %d <in Jacobian D>", jmi->color_info_D->n_nz);
+        jmi_log_fmt(jmi->log, logInfo, "num_colors: %d <in Jacobian D>", jmi->color_info_D->n_groups);
+        jmi_log_leave(jmi->log, node);
     }
 
     return (fmiComponent)component;
@@ -149,11 +150,6 @@ void fmi_free_model_instance(fmiComponent c) {
     if (c) {
         fmi_t* component = (fmi_t*)c;
         fmiCallbackFreeMemory fmi_free = component -> fmi_functions.freeMemory;
-		jmi_options_t* op = &component->jmi->options;
-		if(op->debug_log) {
-			fclose(op->debug_log);
-			op->debug_log = 0;
-		}
 
         jmi_delete(component->jmi);
         component->jmi = 0;
@@ -198,13 +194,15 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_pd && index<((fmi_t *)c)->jmi->offs_integer_ci) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Real dependent parameter #r%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Real dependent parameter> variable: #r%d#", vr[i]);
+            return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_real_ci && index<((fmi_t *)c)->jmi->offs_real_pi) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Real constant #r%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Real constant> variable: #r%d#", vr[i]);
+            return fmiError;
         }
 
     }
@@ -238,13 +236,15 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_pd && index<((fmi_t *)c)->jmi->offs_boolean_ci) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Integer dependent parameter #i%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Integer dependent parameter> variable: #i%d#", vr[i]);
+            return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_ci && index<((fmi_t *)c)->jmi->offs_integer_pi) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Integer constant #i%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Integer constant> variable: #i%d#", vr[i]);
+            return fmiError;
         }
 
     }
@@ -278,13 +278,15 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_pd && index<((fmi_t *)c)->jmi->offs_real_dx) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Boolean dependent parameter #b%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Boolean dependent parameter> variable: #b%d#", vr[i]);
+            return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_ci && index<((fmi_t *)c)->jmi->offs_boolean_pi) {
-        	jmi_log_error(((fmi_t *)c)->jmi,"Cannot set Boolean constant #b%d#",vr[i]);
-        	return fmiError;
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
+                         "<Cannot set Boolean constant> variable: #b%d#", vr[i]);
+            return fmiError;
         }
 
     }
@@ -310,7 +312,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
 fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
     /* Strings not yet supported. */
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
-    (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
+    jmi_log_comment(((fmi_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
     return fmiWarning;
 }
 
@@ -334,7 +336,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     jmi_t* jmi =fmi->jmi;
 
     if (((fmi_t*)c)->jmi->is_initialized==1) {
-        jmi_log_error(jmi, "FMU is already initialized: only one call to fmiInitialize is allowed");
+        jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one call to fmiInitialize is allowed");
         return fmiError;
     }
 
@@ -361,13 +363,13 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Get Sizes */
     retval = jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
     if(retval != 0) {
-        (fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the initial sizes.");
+        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the initial sizes.");
         return fmiError;
     }
 
     retval = jmi_dae_get_sizes(jmi,&nF,&nR);
     if(retval != 0) {
-        (fmi -> fmi_functions).logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Initialization failed when trying to retrieve the actual sizes.");
+        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the actual sizes.");
         return fmiError;
     }
     /* ---- */
@@ -462,7 +464,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
 
     if(retval != 0) { /* Error check */
-        (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+        jmi_log_comment(jmi->log, logError, "Initialization failed.");
         return fmiError;
     }
     
@@ -477,7 +479,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         retval = jmi_ode_initialize(((fmi_t *)c)->jmi);
 
         if(retval != 0) { /* Error check */
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+            jmi_log_comment(jmi->log, logError, "Initialization failed.");
             return fmiError;
         }
         
@@ -491,7 +493,8 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            fmi->fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Failed to converged during global fixed point iteration due to too many iterations at t=%g (initialization).",jmi_get_t(jmi)[0]);
+            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
+                         "due to too many iterations at> t:%g <(initialization).>", jmi_get_t(jmi)[0]);
             return fmiError;
         }
     }
@@ -502,7 +505,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     retval = jmi_ode_next_time_event(((fmi_t *)c)->jmi,&nextTimeEvent);
 
     if(retval != 0) { /* Error check */
-    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of next time event failed.");
+        jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
         return fmiError;
     }
 
@@ -528,7 +531,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     retval = jmi_ode_guards(((fmi_t *)c)->jmi);
 
     if(retval != 0) { /* Error check */
-    	(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Computation of guard expressions failed.");
+        jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
         return fmiError;
     }
 
@@ -546,7 +549,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
         retval = jmi_dae_R(((fmi_t *)c)->jmi,a_mode); //Get the event indicators after the initialisation
         
         if(retval != 0) { //Error check
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Initialization failed.");
+            jmi_log_comment(jmi->log, logError, "Initialization failed.");
             return fmiError;
         }
         
@@ -584,36 +587,37 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
 }
 
 fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
-		fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
-		if(retval != 0) {
-			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed at time %gs.",jmi_get_t(((fmi_t *)c)->jmi)[0]);
-			return fmiError;
-		}
-		((fmi_t *)c)->jmi->recomputeVariables = 0;
-	}
-	memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
-	return fmiOK;
+    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+        fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+        if(retval != 0) {
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "Evaluating the derivatives failed at> t:%g",
+                         jmi_get_t(((fmi_t *)c)->jmi)[0]);
+            return fmiError;
+        }
+        ((fmi_t *)c)->jmi->recomputeVariables = 0;
+    }
+    memcpy (derivatives, jmi_get_real_dx(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
+    return fmiOK;
 }
 
 fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     jmi_t* jmi = ((fmi_t *)c)->jmi;
-	fmiValueReference i;
-	fmiInteger retval;
-	if (((fmi_t *)c)->jmi->recomputeVariables==1) {
-		retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
-		if(retval != 0) {
-			(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
-			return fmiError;
-		}
-		((fmi_t *)c)->jmi->recomputeVariables = 0;
-	}
-	retval = jmi_dae_R_perturbed(((fmi_t *)c)->jmi,eventIndicators);
+    fmiValueReference i;
+    fmiInteger retval;
+    if (((fmi_t *)c)->jmi->recomputeVariables==1) {
+        retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return fmiError;
+        }
+        ((fmi_t *)c)->jmi->recomputeVariables = 0;
+    }
+    retval = jmi_dae_R_perturbed(((fmi_t *)c)->jmi,eventIndicators);
     
-	if(retval != 0) {
-		(((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the event indicators failed.");
-		return fmiError;
-	}
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
+        return fmiError;
+    }
 
     return fmiOK;
 }
@@ -641,8 +645,6 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	int n_outputs;
 	int* output_vrefs;
 
-	char msg[100]; /* Holder for the logger function's messages */
-
 	clock_t c0, c1, d0, d1;
 	jmi_real_t setElementTime;
 
@@ -652,10 +654,10 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 
 	/* Get number of outputs that are variability = "continuous", ny */
 	n_outputs = ny = jmi->n_outputs;
-	if (!(output_vrefs = (int*)fmi -> fmi_functions.allocateMemory(n_outputs, sizeof(int)))) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Out of memory.");
-		return fmiError;
-	}
+    if (!(output_vrefs = (int*)fmi -> fmi_functions.allocateMemory(n_outputs, sizeof(int)))) {
+        jmi_log_comment(jmi->log, logError, "Out of memory.");
+        return fmiError;
+    }
 		
 	jmi_get_output_vrefs(jmi, output_vrefs);
 
@@ -674,121 +676,115 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	nD = ny*nu;
 
 	/*
-	if (fmi -> fmi_logging_on) {
-		sprintf(msg,"size of A  = %d %d",nx,nx);
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
-		sprintf(msg,"size of B  = %d %d",nx,nu);
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
-		sprintf(msg,"size of C  = %d %d",ny,nx);
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
-		sprintf(msg,"size of D  = %d %d",ny,nu);
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiOK, "OK", msg);
-	}
+    if (fmi -> fmi_logging_on) {
+        jmi_log_node(jmi->log, logInfo, "size_of_A", "m: %d, n:%d", nx, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_B", "m: %d, n:%d", nx, nu);
+        jmi_log_node(jmi->log, logInfo, "size_of_C", "m: %d, n:%d", ny, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_D", "m: %d, n:%d", ny, nu);
+    }
 	 */
 
 	/* Allocate a big chunk of memory that is enough to compute all Jacobians */
 	jac_size = nA + nB + nC + nD;
 
-	/* Allocate memory for the biggest matrix, use this for all matrices. */
-	if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),jac_size))) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiError, "ERROR", "Out of memory.");
-		return fmiError;
-	}
+    /* Allocate memory for the biggest matrix, use this for all matrices. */
+    if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),jac_size))) {
+        jmi_log_comment(jmi->log, logError, "Out of memory.");
+        return fmiError;
+    }
 
 	/* Individual calls to evaluation of A, B, C, D matrices can be made
 	 * more efficiently by evaluating several Jacobian at the same time.
 	 */
 
-	/* Get the internal A matrix */
-	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
-	if (fmiFlag > fmiWarning) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the A matrix failed.");
-		fmi -> fmi_functions.freeMemory(jac);
-		return fmiFlag;
-	}
+    /* Get the internal A matrix */
+    fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
+    if (fmiFlag > fmiWarning) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the A matrix failed.");
+        fmi -> fmi_functions.freeMemory(jac);
+        return fmiFlag;
+    }
 
-	/* Update external A matrix */
-	for (row=0;row<nx;row++) {
-		for (col=0;col<nx;col++) {
-			d0 = clock();
-			fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
-			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
-			if (fmiFlag > fmiWarning) {
-				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix A");
-				fmi -> fmi_functions.freeMemory(jac);
-				return fmiFlag;
-			}
-		}
-	}
+    /* Update external A matrix */
+    for (row=0;row<nx;row++) {
+        for (col=0;col<nx;col++) {
+            d0 = clock();
+            fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
+            d1 = clock();
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+            if (fmiFlag > fmiWarning) {
+                jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix A");
+                fmi -> fmi_functions.freeMemory(jac);
+                return fmiFlag;
+            }
+        }
+    }
 
-	/* Get the internal B matrix */
-	fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
-	if (fmiFlag > fmiWarning) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the B matrix failed.");
-		fmi -> fmi_functions.freeMemory(jac);
-		return fmiFlag;
-	}
-	/* Update external B matrix */
-	for (row=0;row<nx;row++) {
-		for (col=0;col<nu;col++) {
-			d0 = clock();
-			fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
-			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
-			if (fmiFlag > fmiWarning) {
-				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix B");
-				fmi -> fmi_functions.freeMemory(jac);
-				return fmiFlag;
-			}
-		}
-	}
+    /* Get the internal B matrix */
+    fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
+    if (fmiFlag > fmiWarning) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the B matrix failed.");
+        fmi -> fmi_functions.freeMemory(jac);
+        return fmiFlag;
+    }
+    /* Update external B matrix */
+    for (row=0;row<nx;row++) {
+        for (col=0;col<nu;col++) {
+            d0 = clock();
+            fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
+            d1 = clock();
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+            if (fmiFlag > fmiWarning) {
+                jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix B");
+                fmi -> fmi_functions.freeMemory(jac);
+                return fmiFlag;
+            }
+        }
+    }
 
-	/* Get the internal C matrix */
-	fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
-	if (fmiFlag > fmiWarning) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the C matrix failed.");
-		fmi -> fmi_functions.freeMemory(jac);
-		return fmiFlag;
-	}
-	/* Update external C matrix */
-	for (row=0;row<ny;row++) {
-		for (col=0;col<nx;col++) {
-			d0 = clock();
-			fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
-			d1 = clock();
-			setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
-			if (fmiFlag > fmiWarning) {
-				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix C");
-				fmi -> fmi_functions.freeMemory(jac);
-				return fmiFlag;
-			}
-		}
-	}
+    /* Get the internal C matrix */
+    fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
+    if (fmiFlag > fmiWarning) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the C matrix failed.");
+        fmi -> fmi_functions.freeMemory(jac);
+        return fmiFlag;
+    }
+    /* Update external C matrix */
+    for (row=0;row<ny;row++) {
+        for (col=0;col<nx;col++) {
+            d0 = clock();
+            fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
+            d1 = clock();
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
+            if (fmiFlag > fmiWarning) {
+                jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix C");
+                fmi -> fmi_functions.freeMemory(jac);
+                return fmiFlag;
+            }
+        }
+    }
 
-
-
-	/* Get the internal D matrix */
-	fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_OUTPUTS, jac, nD); 
-	if (fmiFlag > fmiWarning) {
-		fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "Evaluating the D matrix failed.");
-		fmi -> fmi_functions.freeMemory(jac);
-		return fmiFlag;
-	}
-	/* Update external D matrix */
-	for (row=0;row<ny;row++) {
-		for (col=0;col<nu;col++) {
-			d0 = clock();
-			fmiFlag = setMatrixElement(D,row + 1, col + 1,jac[row + col*ny]);
-			d1 = clock();
-			setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
-			if (fmiFlag > fmiWarning) {
-				fmi -> fmi_functions.logger(c, fmi->fmi_instance_name, fmiFlag, "ERROR", "setMatrixElement failed to update matrix D");
-				fmi -> fmi_functions.freeMemory(jac);
-				return fmiFlag;
-			}
-		}
-	}
+    /* Get the internal D matrix */
+    fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_OUTPUTS, jac, nD); 
+    if (fmiFlag > fmiWarning) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the D matrix failed.");
+        fmi -> fmi_functions.freeMemory(jac);
+        return fmiFlag;
+    }
+    /* Update external D matrix */
+    for (row=0;row<ny;row++) {
+        for (col=0;col<nu;col++) {
+            d0 = clock();
+            fmiFlag = setMatrixElement(D,row + 1, col + 1,jac[row + col*ny]);
+            d1 = clock();
+            setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
+            if (fmiFlag > fmiWarning) {
+                jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix D");
+                fmi -> fmi_functions.freeMemory(jac);
+                return fmiFlag;
+            }
+        }
+    }
 
 	fmi -> fmi_functions.freeMemory(jac);
 
@@ -1156,7 +1152,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+            jmi_log_comment(((fmi_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
             return fmiError;
         }
         ((fmi_t *)c)->jmi->recomputeVariables = 0;
@@ -1198,7 +1194,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+            jmi_log_comment(((fmi_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
             return fmiError;
         }
         ((fmi_t *)c)->jmi->recomputeVariables = 0;
@@ -1239,7 +1235,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+            jmi_log_comment(((fmi_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
             return fmiError;
         }
         ((fmi_t *)c)->jmi->recomputeVariables = 0;
@@ -1279,7 +1275,7 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
     if (((fmi_t *)c)->jmi->recomputeVariables==1 && ((fmi_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiError, "ERROR", "Evaluating the derivatives failed.");
+            jmi_log_comment(((fmi_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
             return fmiError;
         }
         ((fmi_t *)c)->jmi->recomputeVariables = 0;
@@ -1288,7 +1284,7 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
     /* Strings not yet supported. */
     for(i = 0; i < nvr; i++) value[i] = 0;
     
-    (((fmi_t *)c) -> fmi_functions).logger(c, ((fmi_t *)c)->fmi_instance_name, fmiWarning, "INFO", "Strings are not yet supported.");
+    jmi_log_comment(((fmi_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
     return fmiWarning;
 }
 
@@ -1311,6 +1307,7 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     jmi_real_t* event_indicators;
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
+    jmi_log_node_t top_node;
 
 	/* Allocate memory */
     nGuards = jmi->n_guards;
@@ -1330,8 +1327,12 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 
     retval = jmi_ode_derivatives(jmi);
 
+    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
+                                 "<Starting global event iteration at> t:%E", jmi_get_t(jmi)[0]);
+
     if(retval != 0) {
-        jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Initial evaluation of the model equations during event iteration failed.");
+        jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
+        jmi_log_unwind(jmi->log, top_node);
         return fmiError;
     }
 
@@ -1341,14 +1342,15 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     /* We are at an event -> set atEvent to true. */
     jmi->atEvent = JMI_TRUE;
 
-    jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Starting global event iteration at t=%g.",jmi_get_t(jmi)[0]);
-
     /* Iterate */
     iter = 0;
     while ((eventInfo->iterationConverged)==fmiFalse){
+        jmi_log_node_t iter_node;
+
         iter += 1;
         
-        jmi_log_info(jmi, "[GLOBAL_EVENT_ITERATION] Global iteration %d at t=%g.",iter,jmi_get_t(jmi)[0]);
+        iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
+                                      "<Global iteration> iter:%d, <at> t:%E", iter, jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
         retval = jmi_evaluate_switches(jmi,switches,1);
@@ -1357,7 +1359,8 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         retval = jmi_ode_derivatives(jmi);
 
         if(retval != 0) {
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Evaluation of model equations during event iteration failed.");
+            jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
             return fmiError;
         }
 
@@ -1401,21 +1404,26 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Failed to converged during global fixed point iteration due to too many iterations at t=%g",jmi_get_t(jmi)[0]);
+            jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point "
+                         "iteration due to too many iterations at> t:%E",jmi_get_t(jmi)[0]);
+            jmi_log_unwind(jmi->log, top_node);
             return fmiError;
         }
 
+        jmi_log_leave(jmi->log, iter_node);
     }
 
     /* Only do the final steps if the event iteration is done. */
     if (eventInfo->iterationConverged == fmiTrue) {
+        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
 
     	/* Compute the next time event */
     	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
 
     	if(retval != 0) { /* Error check */
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of next time event failed.");
-    		return fmiError;
+            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return fmiError;
     	}
 
     	/* If there is an upcoming time event, then set the event information
@@ -1440,17 +1448,20 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     	retval = jmi_ode_guards(jmi);
 
     	if(retval != 0) { /* Error check */
-            jmi_log_error(jmi, "[GLOBAL_EVENT_ITERATION] Computation of guard expressions failed.");
-    		return fmiError;
+            jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return fmiError;
     	}
 
+        jmi_log_leave(jmi->log, final_node);
     }
 
     fmi->fmi_functions.freeMemory(event_indicators);
     fmi->fmi_functions.freeMemory(sw_temp);
 
-    return fmiOK;
+    jmi_log_leave(jmi->log, top_node);
 
+    return fmiOK;
 }
 
 fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
@@ -1491,18 +1502,11 @@ fmiStatus fmi_terminate(fmiComponent c) {
 fmiStatus fmi_extract_debug_info(fmiComponent c) {
     fmiInteger nniters;
     fmiReal avg_nniters;
-    char buf[100];
-    fmi_t* fmi;
-    jmi_t* jmi;
-    fmiCallbackLogger logger;
-    fmiString instance_name;
+    fmi_t* fmi = ((fmi_t*)c);
+    jmi_t* jmi = fmi->jmi;
     jmi_block_residual_t* block;
     int i;
-    
-    fmi = ((fmi_t*)c);
-    jmi = fmi->jmi;
-    logger = fmi->fmi_functions.logger;
-    instance_name = fmi->fmi_instance_name;
+    jmi_log_node_t topnode = jmi_log_enter(jmi->log, logInfo, "FMIDebugInfo");
     
     /* Extract debug information from initialization*/
     for (i = 0; i < jmi->n_dae_init_blocks; i++) {
@@ -1512,12 +1516,11 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "INIT Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
-                    block->index, block->n, nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            logger(c, instance_name, fmiOK, "DEBUG", buf);
-
-            sprintf(buf, "INIT Block %d ; time: %f", block->index, block->time_spent);
-            logger(c, instance_name, fmiOK, "TIMING", buf);
+            jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "initialization");
+            jmi_log_fmt(jmi->log, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
+                        block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
+            jmi_log_fmt(jmi->log, logInfo, "time_spent: %f", block->time_spent);
+            jmi_log_leave(jmi->log, node);
         }
     }
 
@@ -1529,20 +1532,21 @@ fmiStatus fmi_extract_debug_info(fmiComponent c) {
         /* Test if block is solved by KINSOL */
         if (nniters > 0) {
             /* Output to logger */
-            sprintf(buf, "SIM Block %d ; size: %d nniters: %d nbcalls: %d njevals: %d nfevals: %d", 
-                    block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            logger(c, instance_name, fmiOK, "DEBUG", buf);
-
-            sprintf(buf,"INIT Block %d ; time: %f", block->index, block->time_spent);
-            logger(c, instance_name, fmiOK, "TIMING", buf);
-
-            
+            /* NB: Exactly the same code as above. Todo: factor out? */
+            jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "dae_blocks");
+            jmi_log_fmt(jmi->log, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
+                        block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
+            jmi_log_fmt(jmi->log, logInfo, "time_spent: %f", block->time_spent);
+            jmi_log_leave(jmi->log, node);            
         }
     }
     /*
         for (i=0; i < jmi->n_dae_blocks;i=i+1){
             jmi_delete_block_residual(jmi->dae_block_residuals[i]);
     }*/
+
+    jmi_log_leave(jmi->log, topnode);
+
     return fmiOK;
 }
 
@@ -1582,21 +1586,7 @@ void fmi_update_runtime_options(fmi_t* fmi) {
 		op->enforce_bounds_flag = (int)z[index]; 
 	index = get_option_index("_nle_solver_log_level");
 	if(index)
-		op->nle_solver_log_level = (int)z[index]; 
-	if(op->debug_log) {
-		fclose(op->debug_log);
-		op->debug_log = 0;
-	}
-	if(op->nle_solver_log_level > 2) {
-		op->debug_log = fopen("nle_solver_log.csv","wb");
-		if(!op->debug_log) {
-			/* To be replaced once jmi_log_warning linking issue is fixed */
-			printf("Could not open debug log file for writing");
-			/*jmi_log_warning(fmi->jmi, "Could not open debug log file for writing");*/
-			
-		}
-	}
-	
+		op->nle_solver_log_level = (int)z[index]; 	
 	index = get_option_index("_use_jacobian_scaling");
 	if(index)
 		op->use_jacobian_scaling_flag = (int)z[index]; 
