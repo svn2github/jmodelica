@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 #include "fmi_cs.h" 
 #include "fmi.h"
 #include "jmi_ode_solver.h"
@@ -112,10 +113,38 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
         fmiCallbackFreeMemory fmi_free = fmi1_cs -> callback_functions.freeMemory;
 
         fmi_free((void*)fmi1_cs -> instance_name);
+        fmi_free((void*)fmi1_cs -> encoded_instance_name);
         fmi_free((void*)fmi1_cs -> GUID);
         fmi_free(fmi1_cs);
     }
     return;
+}
+
+void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...){
+    void *tmp;
+    fmi1_cs_t* fmi1_cs;
+    int verification, length;
+    va_list args;
+    char buffer[50000];
+    
+    sscanf(instanceName, "Encoded name: %p %i", &tmp, &verification);
+
+    va_start(args, message);
+    /* vsnprintf(buffer, sizeof buffer, message, args); */ /* Cannot be used due to C89 */
+    length = vsprintf (buffer,message, args);
+    va_end(args);
+  
+    
+    buffer[sizeof buffer - 1] = 0;
+    
+    if(verification == 123){
+         fmi1_cs = (fmi1_cs_t*)tmp;
+         
+         fmi1_cs->callback_functions.logger(tmp, fmi1_cs->instance_name, status, category, buffer);
+         
+    }else{
+         printf("ERROR! Log forwarding failed, the instance name has been manipulated... \n");
+    }
 }
 
 fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
@@ -124,11 +153,17 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     fmi1_cs_t *component;
     char* tmpname;
     char* tmpguid;
+    char* tmp_name_encoded;
+    fmiCallbackFunctions *tmp_callbacks;
     size_t inst_name_len;
     size_t guid_len;
     char buffer[400];
     
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));
+    
+    component -> me_callback_functions.allocateMemory = functions.allocateMemory;
+    component -> me_callback_functions.freeMemory = functions.freeMemory;
+    component -> me_callback_functions.logger = log_forwarding_me;
     
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)functions.allocateMemory(inst_name_len, sizeof(char));
@@ -140,10 +175,16 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     strncpy(tmpguid, GUID, guid_len);
     component -> GUID = tmpguid;
     
+    /* Encode the instance name passed to the ME interface to include the fmi1_cs_t struct */
+    /* Also encode a verification number to check against manipulation of the name (123) */
+    tmp_name_encoded = (char*)functions.allocateMemory(100, sizeof(char));
+    component -> encoded_instance_name = tmp_name_encoded;
+    sprintf(tmp_name_encoded, "Encoded name: %p 123", (void*)component);
+    
     component -> callback_functions = functions;
     component -> logging_on = loggingOn;                                   
     
-    component -> fmi1_me = fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
+    component -> fmi1_me = fmi_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
     
     if (component -> fmi1_me == NULL){
         return NULL;
@@ -202,7 +243,7 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmi_free_model_instance(fmi1_cs->fmi1_me);
     fmi1_cs->fmi1_me = NULL;
     
-    fmi1_cs -> fmi1_me = fmi_instantiate_model(fmi1_cs->instance_name, fmi1_cs->GUID, fmi1_cs->callback_functions, fmi1_cs->logging_on);
+    fmi1_cs -> fmi1_me = fmi_instantiate_model(fmi1_cs->encoded_instance_name, fmi1_cs->GUID, fmi1_cs->me_callback_functions, fmi1_cs->logging_on);
     
     if (fmi1_cs->fmi1_me == NULL){ return fmiError; }
     
