@@ -1166,6 +1166,23 @@ Alias sets:
 ")})));
 end AliasTest31;
 
+model AliasTest32
+  Integer a = 42;
+  Real b;
+equation
+  a = b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest32",
+			methodName="aliasDiagnostics",
+			description="Test so that variables with different types aren't alias eliminated",
+			methodResult="
+Alias sets:
+0 variables can be eliminated
+")})));
+  end AliasTest32;
+
 model AliasFuncTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

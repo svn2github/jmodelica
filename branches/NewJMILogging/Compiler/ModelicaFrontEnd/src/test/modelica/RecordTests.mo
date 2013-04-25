@@ -2028,6 +2028,70 @@ end RecordTests.RecordScalarize22;
 ")})));
 end RecordScalarize22;
 
+
+model RecordScalarize23
+	record R
+		Real[1] X;
+	end R;
+	
+	final parameter Real p = -0.1;
+	final parameter Real[1] s =  {0.4 - p};
+	R r(X(start=s)) = R({1});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize23",
+			description="",
+			variability_propagation=false,
+			flatModel="
+fclass RecordTests.RecordScalarize23
+ parameter Real p = - 0.1 /* -0.1 */;
+ parameter Real s[1];
+ Real r.X[1](start = s[1]);
+parameter equation
+ s[1] = 0.4 - p;
+equation
+ r.X[1] = 1;
+
+public
+ record RecordTests.RecordScalarize23.R
+  Real X[1];
+ end RecordTests.RecordScalarize23.R;
+
+end RecordTests.RecordScalarize23;
+")})));
+end RecordScalarize23;
+
+
+model RecordScalarize24
+	record R
+		Real[1] X;
+	end R;
+	
+	final parameter Real p = -0.1;
+	R r(X(start={0.4 - p})) = R({1});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize24",
+			description="",
+			variability_propagation=false,
+			flatModel="
+fclass RecordTests.RecordScalarize24
+ parameter Real p = - 0.1 /* -0.1 */;
+ Real r.X[1](start = 0.4 - p);
+equation
+ r.X[1] = 1;
+
+public
+ record RecordTests.RecordScalarize24.R
+  Real X[1];
+ end RecordTests.RecordScalarize24.R;
+
+end RecordTests.RecordScalarize24;
+")})));
+end RecordScalarize24;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 

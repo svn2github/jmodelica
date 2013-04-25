@@ -2031,6 +2031,73 @@ void func_CADCodeGenTests_FunctionDiscreteOutputTest2_F1_der_AD(jmi_ad_var_t* y_
 ")})));
 end FunctionDiscreteOutputTest2;
 
+model FunctionDiscreteOutputTest3
+	function F
+		input Real x[:];
+		output Integer i;
+	algorithm
+		i := size(x, 1);
+	end F;
+	Real x[:] = {1,2,3};
+	Integer i;
+equation
+	i = F(x);
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="FunctionDiscreteOutputTest3",
+			description="",
+			variability_propagation=false,
+			equation_sorting=true,
+			generate_dae=true,
+			generate_ode=true,
+			generate_ode_jacobian=true,
+			template="
+$CAD_ode_derivatives$
+$CAD_function_headers$
+$CAD_functions$",
+			generatedCode="
+/******** Declarations *******/
+    jmi_ad_var_t v_0;
+    JMI_ARRAY_STATIC(tmp_var_0, 3, 1)
+    JMI_ARRAY_STATIC(tmp_der_0, 3, 1)
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+  _x_1_0 = 1;
+  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  _x_2_1 = 2;
+  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  _x_3_2 = 3;
+  (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
+  JMI_ARRAY_STATIC_INIT_1(tmp_var_0, 3)
+  jmi_array_ref_1(tmp_var_0, 1) = _x_1_0;
+  jmi_array_ref_1(tmp_var_0, 2) = _x_2_1;
+  jmi_array_ref_1(tmp_var_0, 3) = _x_3_2;
+  JMI_ARRAY_STATIC_INIT_1(tmp_der_0, 3)
+  jmi_array_ref_1(tmp_der_0, 1) = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+  jmi_array_ref_1(tmp_der_0, 2) = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
+  jmi_array_ref_1(tmp_der_0, 3) = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+  func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD(tmp_var_0, tmp_der_0, &v_0);
+  _i_3 = v_0;
+
+void func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD(jmi_array_t* x_var_a, jmi_array_t* x_der_a, jmi_ad_var_t* i_o);
+
+void func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD(jmi_array_t* x_var_a, jmi_array_t* x_der_a, jmi_ad_var_t* i_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t i_v;
+    /*Zero derivative function*/
+    func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_def(x_var_a, &i_v);
+    if (i_o != NULL) *i_o = i_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end FunctionDiscreteOutputTest3;
+
 model FunctionMixedRecordInputTest1
 	record R
 		Real X[2];
