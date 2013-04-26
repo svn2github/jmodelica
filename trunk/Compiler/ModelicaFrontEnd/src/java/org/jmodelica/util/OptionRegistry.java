@@ -405,6 +405,12 @@ public class OptionRegistry {
 			 1e-6,
 			 "Specifies the relative tolerance for block jacobian check.",
 			 1e-12,1.0),
+        CS_SOLVER
+			("cs_solver",
+			 runtime,
+			 0,
+			 "Specifies the internal solver used in co-simulation. 0 == CVode, 1 == Euler",
+             0,1),
 		;
 					
 		public String key;

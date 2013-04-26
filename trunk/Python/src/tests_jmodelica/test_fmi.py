@@ -198,6 +198,24 @@ class Test_FMUModelCS1:
         res2 = self.rlc_square.simulate()        
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
+        
+    @testattr(fmi = True)
+    def test_simulation_using_euler(self):
+        """
+        Tests a simulation using Euler.
+        """
+        self.rlc.set("_cs_solver",1) 
+        
+        res1 = self.rlc_square.simulate()
+        resistor_v = res1['resistor.v']
+        
+        assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
+    
+    @testattr(fmi = True)
+    def test_unknown_solver(self):
+        self.rlc.set("_cs_solver",2) #Does not exists
+        
+        nose.tools.assert_raises(FMUException, self.rlc.simulate)
     
     @testattr(windows = True)
     def test_simulation_cs(self):

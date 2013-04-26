@@ -695,7 +695,8 @@ typedef struct jmi_options_t {
     double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */
 	int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
 	int block_jacobian_check; /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
-	double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */ 
+	double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */
+    int cs_solver; /**< \brief Option for changing the internal CS solver */ 
 } jmi_options_t;
 
 /**< \brief Initialize run-time options. */

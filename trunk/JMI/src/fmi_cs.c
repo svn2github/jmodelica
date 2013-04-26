@@ -211,14 +211,15 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
-    jmi_ode_solvers_t solver = JMI_ODE_CVODE;
+    /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
     fmiStatus retval;
                                         
     retval = fmi_initialize(fmi1_cs->fmi1_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
     if (retval != fmiOK){ return fmiError; }
     
     /* Create solver */
-    jmi_new_ode_solver(fmi1_me->jmi, solver, rhs_fcn, root_fcn, fmi1_cs->n_real_x, fmi1_cs->n_sw, tStart, (void*)fmi1_cs);
+    retval = jmi_new_ode_solver(fmi1_me->jmi, fmi1_me->jmi->options.cs_solver, rhs_fcn, root_fcn, fmi1_cs->n_real_x, fmi1_cs->n_sw, tStart, (void*)fmi1_cs);
+    if (retval != fmiOK){ return fmiError; }
     
     return fmiOK;
 }

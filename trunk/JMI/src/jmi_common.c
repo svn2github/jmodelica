@@ -1674,5 +1674,6 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->nle_solver_min_tol = 1e-12;  /**< \brief Minimum tolerance for the equation block solver */
     op->nle_solver_tol_factor = 0.0001;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     op->events_default_tol = 1e-10;  /**< \brief Default tolerance for the event iterations. */        
-    op->events_tol_factor = 0.0001;   /**< \brief Tolerance safety factor for the event iterations. */        
+    op->events_tol_factor = 0.0001;   /**< \brief Tolerance safety factor for the event iterations. */
+    op->cs_solver = JMI_ODE_CVODE; /** < \brief Option for changing the internal CS solver. */      
 }

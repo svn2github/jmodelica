@@ -7977,6 +7977,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  constant Real x = 1;
  parameter Boolean _block_jacobian_check = false /* false */;
  parameter Real _block_jacobian_check_tol = 1.0E-6 /* 1.0E-6 */;
+ parameter Integer _cs_solver = 0 /* 0 */;
  parameter Boolean _enforce_bounds = false /* false */;
  parameter Real _events_default_tol = 1.0E-10 /* 1.0E-10 */;
  parameter Real _events_tol_factor = 1.0E-4 /* 1.0E-4 */;

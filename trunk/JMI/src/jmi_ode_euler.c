@@ -98,7 +98,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         
 		/* Check if an event indicator has triggered */
 		if(n_event_indicators > 0){
-            flag = solver->root_fcn((void*)jmi->fmi, tcur, y, event_indicators);
+            flag = solver->root_fcn(solver->user_data, tcur, y, event_indicators);
             
             if (flag != 0){
                 jmi_log_comment(solver->jmi->log, logError, "Could not retrieve event indicators");

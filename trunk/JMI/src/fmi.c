@@ -1628,6 +1628,9 @@ void fmi_update_runtime_options(fmi_t* fmi) {
 		op->block_jacobian_check = z[index]; 
 	index = get_option_index("_block_jacobian_check_tol");
 	if(index)
-		op->block_jacobian_check_tol = z[index]; 
+		op->block_jacobian_check_tol = z[index];
+    index = get_option_index("_cs_solver");
+	if(index)
+		op->cs_solver = z[index]; 
 	
 }
