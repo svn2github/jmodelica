@@ -93,7 +93,7 @@ void fmi_update_runtime_options(fmi_t* fmi);
  * @param loggingOn Turn of or on logging, fmiBoolean.
  * @return An instance of a model.
  */
-fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn);
+fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn);
 
 /**
  * \brief Initialize the FMU.
@@ -104,7 +104,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
  * @param eventInfo (Output) fmiEventInfo struct.
  * @return Error code.
  */
-fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo);
+fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo);
 
 /**
  * \brief Dellocates all memory since fmi_initialize.
@@ -112,14 +112,14 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
  * @param c The FMU struct.
  * @return Error code.
  */
-fmiStatus fmi_terminate(fmiComponent c);
+fmiStatus fmi1_me_terminate(fmiComponent c);
 
 /**
  * \brief Dispose of the model instance.
  * 
  * @param c The FMU struct.
  */
-void fmi_free_model_instance(fmiComponent c);
+void fmi1_me_free_model_instance(fmiComponent c);
 
 /* @} */
 
@@ -138,7 +138,7 @@ void fmi_free_model_instance(fmiComponent c);
  * @param time The current time.
  * @return Error code.
  */
-fmiStatus fmi_set_time(fmiComponent c, fmiReal time);
+fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time);
 
 /**
  * \brief Set the current states.
@@ -148,7 +148,7 @@ fmiStatus fmi_set_time(fmiComponent c, fmiReal time);
  * @param nx Number of states.
  * @return Error code.
  */
-fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx);
+fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx);
 
 /**
  * \brief Calculates the derivatives.
@@ -158,7 +158,7 @@ fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx
  * @param nx Number of derivatives.
  * @return Error code.
  */
-fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx);
+fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx);
 
 /**
  * \brief Get the current states.
@@ -168,7 +168,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
  * @param nx Number of states.
  * @return Error code.
  */
-fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx);
+fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx);
 
 /**
  * \brief Get the nominal values of the states.
@@ -178,7 +178,7 @@ fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx)
  * @param nx Number of nominal values.
  * @return Error code.
  */
-fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx);
+fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx);
 
 /**
  * \brief Get the value-references of the states.
@@ -188,7 +188,7 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
  * @param nx Number of value-references.
  * @return Error code.
  */
-fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx);
+fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx);
 
 
 /* @} */
@@ -208,7 +208,7 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
  * @param callEventUpdate (Output) A fmiBoolean.
  * @return Error code.
  */
-fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate);
+fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate);
 
 /**
  * \brief Get the event indicators (for state-events)
@@ -218,7 +218,7 @@ fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpd
  * @param ni Number of event indicators.
  * @return Error code.
  */
-fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni);
+fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni);
 
 /**
  * \brief Updates the FMU after an event.
@@ -228,7 +228,7 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
  * @param eventInfo (Output) An fmiEventInfo struct.
  * @return Error code.
  */
-fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo);
+fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo);
 
 /* @} */
 
@@ -238,7 +238,7 @@ fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEv
 
 /* @{ */
 
-fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
+fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
 
 /**
  * \brief Evaluate matrices A, B, C, D
@@ -253,7 +253,7 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
  * A function pointer is also provied by the environemnt which updates the matrices. Values that are 
  * not explicitly set by this function are assumed to be zero. 
  */
-fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D);
+fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D);
 
 /**
  * \brief Evaluate Jacobian(s) of the ODE.
@@ -282,7 +282,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
  * @param njac Number of elements in jac.
  * @return Error code.
  */
-fmiStatus fmi_get_jacobian(fmiComponent c, const int independents, const int dependents, fmiReal jac[], size_t njac);
+fmiStatus fmi1_me_get_jacobian(fmiComponent c, const int independents, const int dependents, fmiReal jac[], size_t njac);
 
 /**
  * \brief Evaluate directional derivative of ODE.
@@ -299,7 +299,7 @@ fmiStatus fmi_get_jacobian(fmiComponent c, const int independents, const int dep
  * @param dv Input argument containing the input seed vector.
  * @return Error code.
  */
-fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
+fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
 
 /* @} */
 
@@ -321,7 +321,7 @@ fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]);
+fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]);
 
 /**
  * \brief Set Integer values.
@@ -332,7 +332,7 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]);
+fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]);
 
 /**
  * \brief Set Boolean values.
@@ -343,7 +343,7 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]);
+fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]);
 
 /**
  * \brief Set String values.
@@ -354,7 +354,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
  * @param value Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]);
+fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]);
 
 /**
  * \brief Get Real values.
@@ -365,7 +365,7 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]);
+fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]);
 
 /**
  * \brief Get Integer values.
@@ -376,7 +376,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]);
+fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]);
 
 /**
  * \brief Get Boolean values.
@@ -387,7 +387,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]);
+fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]);
 
 /**
  * \brief Get String values.
@@ -398,7 +398,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
  * @param value (Output) Array of variable values.
  * @return Error code.
  */
-fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]);
+fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]);
 
 /**
  * \brief Get a pointer to the internal jmi_t struct.
@@ -406,7 +406,7 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
  * @param c The FMU struct.
  * @return A pointer to the internal jmi_t struct.
  */
-jmi_t* fmi_get_jmi_t(fmiComponent c);
+jmi_t* fmi1_me_get_jmi_t(fmiComponent c);
 
 /* @} */
 
@@ -428,14 +428,14 @@ jmi_t* fmi_get_jmi_t(fmiComponent c);
  * 
  * @return The set of compatible platforms.
  */
-const char* fmi_get_model_types_platform();
+const char* fmi1_me_get_model_types_platform();
 
 /**
  * \brief Extracts info from nl-solver to logger.
  * 
  * @return fmiStatus - succeed or not.
  */
-fmiStatus fmi_extract_debug_info(fmiComponent c);
+fmiStatus fmi1_me_extract_debug_info(fmiComponent c);
   /*DLLExport fmiStatus fmiExtractDebugInfo(fmiComponent c);*/
 
 /**
@@ -443,7 +443,7 @@ fmiStatus fmi_extract_debug_info(fmiComponent c);
  * 
  * @return The version of fmiModelFunctions.h.
  */
-const char* fmi_get_version();
+const char* fmi1_me_get_version();
 
 /**
  * \brief Turns on or off debugging.
@@ -452,7 +452,7 @@ const char* fmi_get_version();
  * @param loggingOn A fmiBoolean.
  * @return Error code.
  */
-fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
+fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
 
 /* @} */

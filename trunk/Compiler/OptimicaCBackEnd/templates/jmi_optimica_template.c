@@ -347,107 +347,107 @@ extern "C" {
 
 /* Inquire version numbers of header files */
 DllExport const char* fmiGetModelTypesPlatform() {
-    return fmi_get_model_types_platform();
+    return fmi1_me_get_model_types_platform();
 }
 DllExport const char* fmiGetVersion() {
-    return fmi_get_version();
+    return fmi1_me_get_version();
 }
 
 /* Creation and destruction of model instances and setting debug status */
 DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
-    return fmi_instantiate_model(instanceName, GUID, functions, loggingOn);
+    return fmi1_me_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 
 DllExport void fmiFreeModelInstance(fmiComponent c) {
-    fmi_free_model_instance(c);
+    fmi1_me_free_model_instance(c);
 }
 
 DllExport fmiStatus fmiSetDebugLogging(fmiComponent c, fmiBoolean loggingOn) {
-    return fmi_set_debug_logging(c, loggingOn);
+    return fmi1_me_set_debug_logging(c, loggingOn);
 }
 
 
 /* Providing independent variables and re-initialization of caching */
 DllExport fmiStatus fmiSetTime(fmiComponent c, fmiReal fmitime) {
-    return fmi_set_time(c, fmitime);
+    return fmi1_me_set_time(c, fmitime);
 }
 
 DllExport fmiStatus fmiSetContinuousStates(fmiComponent c, const fmiReal x[], size_t nx) {
-    return fmi_set_continuous_states(c, x, nx);
+    return fmi1_me_set_continuous_states(c, x, nx);
 }
 
 DllExport fmiStatus fmiCompletedIntegratorStep(fmiComponent c, fmiBoolean* callEventUpdate) {
-    return fmi_completed_integrator_step(c, callEventUpdate);
+    return fmi1_me_completed_integrator_step(c, callEventUpdate);
 }
 
 DllExport fmiStatus fmiSetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
-    return fmi_set_real(c, vr, nvr, value);
+    return fmi1_me_set_real(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
-    return fmi_set_integer(c, vr, nvr, value);
+    return fmi1_me_set_integer(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
-    return fmi_set_boolean(c, vr, nvr, value);
+    return fmi1_me_set_boolean(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString  value[]) {
-    return fmi_set_string(c, vr, nvr, value);
+    return fmi1_me_set_string(c, vr, nvr, value);
 }
 
 
 /* Evaluation of the model equations */
 DllExport fmiStatus fmiInitialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
-    return fmi_initialize(c, toleranceControlled, relativeTolerance, eventInfo);
+    return fmi1_me_initialize(c, toleranceControlled, relativeTolerance, eventInfo);
 }
 
 DllExport fmiStatus fmiGetDerivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-    return fmi_get_derivatives(c, derivatives, nx);
+    return fmi1_me_get_derivatives(c, derivatives, nx);
 }
 
 DllExport fmiStatus fmiGetEventIndicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-    return fmi_get_event_indicators(c, eventIndicators, ni);
+    return fmi1_me_get_event_indicators(c, eventIndicators, ni);
 }
 
 DllExport fmiStatus fmiGetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
-    return fmi_get_real(c, vr, nvr, value);
+    return fmi1_me_get_real(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
-    return fmi_get_integer(c, vr, nvr, value);
+    return fmi1_me_get_integer(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
-    return fmi_get_boolean(c, vr, nvr, value);
+    return fmi1_me_get_boolean(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
-    return fmi_get_string(c, vr, nvr, value);
+    return fmi1_me_get_string(c, vr, nvr, value);
 }
 
 DllExport jmi_t* fmiGetJMI(fmiComponent c) {
-    return fmi_get_jmi_t(c);
+    return fmi1_me_get_jmi_t(c);
 }
 
 DllExport fmiStatus fmiEventUpdate(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
-    return fmi_event_update(c, intermediateResults, eventInfo);
+    return fmi1_me_event_update(c, intermediateResults, eventInfo);
 }
 
 DllExport fmiStatus fmiGetContinuousStates(fmiComponent c, fmiReal states[], size_t nx) {
-    return fmi_get_continuous_states(c, states, nx);
+    return fmi1_me_get_continuous_states(c, states, nx);
 }
 
 DllExport fmiStatus fmiGetNominalContinuousStates(fmiComponent c, fmiReal x_nominal[], size_t nx) {
-    return fmi_get_nominal_continuous_states(c, x_nominal, nx);
+    return fmi1_me_get_nominal_continuous_states(c, x_nominal, nx);
 }
 
 DllExport fmiStatus fmiGetStateValueReferences(fmiComponent c, fmiValueReference vrx[], size_t nx) {
-    return fmi_get_state_value_references(c, vrx, nx);
+    return fmi1_me_get_state_value_references(c, vrx, nx);
 }
 
 DllExport fmiStatus fmiTerminate(fmiComponent c) {
-    return fmi_terminate(c);
+    return fmi1_me_terminate(c);
 }
 
 #ifdef __cplusplus

@@ -48,16 +48,16 @@ static fmiValueReference get_type_from_value_ref(fmiValueReference valueref) {
 }
 
 /* Inquire version numbers of header files */
-const char* fmi_get_model_types_platform() {
+const char* fmi1_me_get_model_types_platform() {
     return fmiModelTypesPlatform;
 }
-const char* fmi_get_version() {
+const char* fmi1_me_get_version() {
     return fmiVersion;
 }
 
 /* Creation and destruction of model instances and setting debug status */
 
-fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
 
     fmi_t *component;
     char* tmpname;
@@ -144,7 +144,7 @@ fmiComponent fmi_instantiate_model(fmiString instanceName, fmiString GUID, fmiCa
     return (fmiComponent)component;
 }
 
-void fmi_free_model_instance(fmiComponent c) {
+void fmi1_me_free_model_instance(fmiComponent c) {
     /* Dispose the given model instance and deallocated all the allocated memory and other resources 
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
     if (c) {
@@ -159,31 +159,31 @@ void fmi_free_model_instance(fmiComponent c) {
     }
 }
 
-fmiStatus fmi_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
+fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
     ((fmi_t*)c) -> fmi_logging_on = loggingOn;
     return fmiOK;
 }
 
 /* Providing independent variables and re-initialization of caching */
 
-fmiStatus fmi_set_time(fmiComponent c, fmiReal time) {
+fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
     *(jmi_get_t(((fmi_t *)c)->jmi)) = time;
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
-fmiStatus fmi_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
+fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
 	memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
-fmiStatus fmi_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
+fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
     *callEventUpdate = fmiFalse;
     return fmiOK;
 }
 
-fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
+fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
     /* Get the z vector*/
     fmiValueReference i;
     fmiValueReference index;
@@ -225,7 +225,7 @@ fmiStatus fmi_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     return fmiOK;
 }
 
-fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
+fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
     /* Get the z vector*/
     fmiValueReference i;
     fmiValueReference index;
@@ -267,7 +267,7 @@ fmiStatus fmi_set_integer (fmiComponent c, const fmiValueReference vr[], size_t 
     return fmiOK;
 }
 
-fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
+fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
     /* Get the z vector*/
     fmiValueReference i;
     fmiValueReference index;
@@ -309,7 +309,7 @@ fmiStatus fmi_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t 
     return fmiOK;
 }
 
-fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
+fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
     /* Strings not yet supported. */
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     jmi_log_comment(((fmi_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
@@ -318,7 +318,7 @@ fmiStatus fmi_set_string(fmiComponent c, const fmiValueReference vr[], size_t nv
 
 /* Evaluation of the model equations */
 
-fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
+fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
 	fmiInteger retval;
     fmiInteger i;                   /* Iteration variable */
     fmiInteger nF0, nF1, nFp, nF;   /* Number of F-equations */
@@ -540,7 +540,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     /* Initialization is now complete, but we also need to handle events
      * at the start of the integration.
      */
-    fmi_event_update(c, fmiFalse, eventInfo);
+    fmi1_me_event_update(c, fmiFalse, eventInfo);
 
     /*
     //Set the final switches (if any)
@@ -586,7 +586,7 @@ fmiStatus fmi_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal
     return fmiOK;
 }
 
-fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
+fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
@@ -600,7 +600,7 @@ fmiStatus fmi_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx)
     return fmiOK;
 }
 
-fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     jmi_t* jmi = ((fmi_t *)c)->jmi;
     fmiValueReference i;
     fmiInteger retval;
@@ -622,7 +622,7 @@ fmiStatus fmi_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], si
     return fmiOK;
 }
 
-fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D){	
+fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D){	
 
 /* fmi_get_jacobian is not an FMI function. Still use fmiStatus as return arguments?. Is there an error handling policy? Standard messages? Which function should return errors?*/
 	
@@ -698,7 +698,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 	 */
 
     /* Get the internal A matrix */
-    fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
+    fmiFlag = fmi1_me_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
     if (fmiFlag > fmiWarning) {
         jmi_log_comment(jmi->log, logError, "Evaluating the A matrix failed.");
         fmi -> fmi_functions.freeMemory(jac);
@@ -721,7 +721,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
     }
 
     /* Get the internal B matrix */
-    fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
+    fmiFlag = fmi1_me_get_jacobian(c, FMI_INPUTS, FMI_DERIVATIVES, jac, nB); 
     if (fmiFlag > fmiWarning) {
         jmi_log_comment(jmi->log, logError, "Evaluating the B matrix failed.");
         fmi -> fmi_functions.freeMemory(jac);
@@ -743,7 +743,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
     }
 
     /* Get the internal C matrix */
-    fmiFlag = fmi_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
+    fmiFlag = fmi1_me_get_jacobian(c, FMI_STATES, FMI_OUTPUTS, jac, nC); 
     if (fmiFlag > fmiWarning) {
         jmi_log_comment(jmi->log, logError, "Evaluating the C matrix failed.");
         fmi -> fmi_functions.freeMemory(jac);
@@ -765,7 +765,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
     }
 
     /* Get the internal D matrix */
-    fmiFlag = fmi_get_jacobian(c, FMI_INPUTS, FMI_OUTPUTS, jac, nD); 
+    fmiFlag = fmi1_me_get_jacobian(c, FMI_INPUTS, FMI_OUTPUTS, jac, nD); 
     if (fmiFlag > fmiWarning) {
         jmi_log_comment(jmi->log, logError, "Evaluating the D matrix failed.");
         fmi -> fmi_functions.freeMemory(jac);
@@ -796,7 +796,7 @@ fmiStatus fmi_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixEleme
 
 /*Evaluates the A, B, C and D matrices using finite differences, this functions has
 only been used for debugging purposes*/
-fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac){
+fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac){
 	int i;
 	int j;
 	int k;
@@ -903,7 +903,7 @@ fmiStatus fmi_get_jacobian_fd(fmiComponent c, int independents, int dependents, 
 }
 
 /*Evaluates the A, B, C and D matrices*/
-fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
+fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
 	
 	int i;
 	int j;
@@ -1112,7 +1112,7 @@ fmiStatus fmi_get_jacobian(fmiComponent c, int independents, int dependents, fmi
 }
 
 /*Evaluate the directional derivative dz/dv dv*/
-fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
+fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
 	int i = 0;
 	jmi_t* jmi = ((fmi_t *)c)->jmi;
 	jmi_real_t** dv_ = jmi->dz;
@@ -1130,7 +1130,7 @@ fmiStatus fmi_get_directional_derivative(fmiComponent c, const fmiValueReference
 	return fmiOK;
 }
 
-fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
+fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
     fmiInteger retval;
     fmiValueReference i;
     fmiValueReference index;
@@ -1172,7 +1172,7 @@ fmiStatus fmi_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr,
     return fmiOK;
 }
 
-fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
+fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
     fmiInteger retval;
     jmi_real_t* z;
     fmiValueReference i;
@@ -1213,7 +1213,7 @@ fmiStatus fmi_get_integer(fmiComponent c, const fmiValueReference vr[], size_t n
     return fmiOK;
 }
 
-fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
+fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
     fmiInteger retval;
     jmi_real_t* z;
     fmiValueReference i;
@@ -1254,7 +1254,7 @@ fmiStatus fmi_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t n
     return fmiOK;
 }
 
-fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
+fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     fmiInteger retval;
     int i;
     int index;
@@ -1288,11 +1288,11 @@ fmiStatus fmi_get_string(fmiComponent c, const fmiValueReference vr[], size_t nv
     return fmiWarning;
 }
 
-jmi_t* fmi_get_jmi_t(fmiComponent c) {
+jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {
 	return ((fmi_t*)c)->jmi;
 }
 
-fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
+fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
 		                      fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
 	fmiInteger nGuards;
@@ -1464,17 +1464,17 @@ fmiStatus fmi_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
     return fmiOK;
 }
 
-fmiStatus fmi_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
-	return fmi_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
+	return fmi1_me_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
 }
 
-fmiStatus fmi_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
+fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
 	memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
 
-fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
+fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
 	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
 	fmiValueReference i;
 	for(i = 0; i <nx; i = i + 1) {
@@ -1484,7 +1484,7 @@ fmiStatus fmi_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[],
     return fmiOK;
 }
 
-fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
+fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
 	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
 	fmiValueReference i;
 	for(i = 0; i<nx; i = i + 1) {
@@ -1493,13 +1493,13 @@ fmiStatus fmi_get_state_value_references(fmiComponent c, fmiValueReference vrx[]
     return fmiOK;
 }
 
-fmiStatus fmi_terminate(fmiComponent c) {
+fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
 	jmi_terminate(((fmi_t *)c)->jmi);
     return fmiOK;
 }
 
-fmiStatus fmi_extract_debug_info(fmiComponent c) {
+fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
     fmiInteger nniters;
     fmiReal avg_nniters;
     fmi_t* fmi = ((fmi_t*)c);

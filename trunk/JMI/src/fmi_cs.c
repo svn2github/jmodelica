@@ -29,14 +29,14 @@ const char* fmi1_cs_get_types_platform() {
 }
 
 const char* fmi1_cs_get_version() {
-    return fmi_get_version();
+    return fmi1_me_get_version();
 }
 
 fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     fmi1_cs -> logging_on = loggingOn;     
     
-    return fmi_set_debug_logging(fmi1_cs->fmi1_me,loggingOn);
+    return fmi1_me_set_debug_logging(fmi1_cs->fmi1_me,loggingOn);
 }
 
 
@@ -75,7 +75,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
             return fmiError;
         }
         
-        flag = fmi_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
+        flag = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
         if (flag != fmiOK){
             jmi_log_comment(jmi->log, logError, "<Failed to handle the event.>");
             return fmiError;
@@ -107,7 +107,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
     if (jmi->ode_solver){
         jmi_delete_ode_solver(jmi);
     }
-    fmi_free_model_instance(fmi1_cs->fmi1_me);
+    fmi1_me_free_model_instance(fmi1_cs->fmi1_me);
     
     if (fmi1_cs) {
         fmiCallbackFreeMemory fmi_free = fmi1_cs -> callback_functions.freeMemory;
@@ -154,7 +154,6 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     char* tmpname;
     char* tmpguid;
     char* tmp_name_encoded;
-    fmiCallbackFunctions *tmp_callbacks;
     size_t inst_name_len;
     size_t guid_len;
     char buffer[400];
@@ -184,7 +183,7 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     component -> callback_functions = functions;
     component -> logging_on = loggingOn;                                   
     
-    component -> fmi1_me = fmi_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
+    component -> fmi1_me = fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
     
     if (component -> fmi1_me == NULL){
         return NULL;
@@ -201,7 +200,7 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
 fmiStatus fmi1_cs_terminate_slave(fmiComponent c) {
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
-    return fmi_terminate(fmi1_cs->fmi1_me);
+    return fmi1_me_terminate(fmi1_cs->fmi1_me);
 }
 
 fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
@@ -214,7 +213,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
     fmiStatus retval;
                                         
-    retval = fmi_initialize(fmi1_cs->fmi1_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
+    retval = fmi1_me_initialize(fmi1_cs->fmi1_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
     if (retval != fmiOK){ return fmiError; }
     
     /* Create solver */
@@ -241,10 +240,10 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
         jmi_delete_ode_solver(jmi);
     }
     
-    fmi_free_model_instance(fmi1_cs->fmi1_me);
+    fmi1_me_free_model_instance(fmi1_cs->fmi1_me);
     fmi1_cs->fmi1_me = NULL;
     
-    fmi1_cs -> fmi1_me = fmi_instantiate_model(fmi1_cs->encoded_instance_name, fmi1_cs->GUID, fmi1_cs->me_callback_functions, fmi1_cs->logging_on);
+    fmi1_cs -> fmi1_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name, fmi1_cs->GUID, fmi1_cs->me_callback_functions, fmi1_cs->logging_on);
     
     if (fmi1_cs->fmi1_me == NULL){ return fmiError; }
     
@@ -252,35 +251,35 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
 }
 
 fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]){
-    return fmi_set_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_set_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]){
-    return fmi_set_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_set_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]){
-    return fmi_set_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_set_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]){
-    return fmi_set_string(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_set_string(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]){
-    return fmi_get_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_get_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]){
-    return fmi_get_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_get_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]){
-    return fmi_get_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_get_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]){
-    return fmi_get_string(((fmi1_cs_t*)c)->fmi1_me,vr,nvr,value);
+    return fmi1_me_get_string(((fmi1_cs_t*)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
@@ -315,13 +314,13 @@ int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
-    retval = fmi_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
+    retval = fmi1_me_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_set_time(fmi1_cs->fmi1_me, t);
+    retval = fmi1_me_set_time(fmi1_cs->fmi1_me, t);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
+    retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
     return 0;
@@ -331,13 +330,13 @@ int root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
-    retval = fmi_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
+    retval = fmi1_me_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_set_time(fmi1_cs->fmi1_me, t);
+    retval = fmi1_me_set_time(fmi1_cs->fmi1_me, t);
     if (retval != fmiOK){return -1;}
     
-    retval = fmi_get_event_indicators(fmi1_cs->fmi1_me, (fmiReal*)root , fmi1_cs->n_sw);
+    retval = fmi1_me_get_event_indicators(fmi1_cs->fmi1_me, (fmiReal*)root , fmi1_cs->n_sw);
     if (retval != fmiOK){return -1;}
     
     return 0;
