@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "fmi.h"
+#include "fmi1_me.h"
 #include "jmi_log.h"
 
 /*#define INLINE inline */ /* not supported in c89 */

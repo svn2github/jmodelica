@@ -18,7 +18,7 @@
 #include <math.h>
 #include "fmiModelFunctions.h"
 #include <jmi.h>
-#include "fmi.h"
+#include "fmi1_me.h"
 
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$

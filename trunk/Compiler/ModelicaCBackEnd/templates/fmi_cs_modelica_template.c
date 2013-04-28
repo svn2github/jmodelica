@@ -20,8 +20,8 @@
 #include "fmi1_functions.h"
 #include <jmi.h>
 #include <jmi_block_residual.h>
-#include <fmi.h>
-#include <fmi_cs.h>
+#include <fmi1_me.h>
+#include <fmi1_cs.h>
 #include "ModelicaUtilities.h"
 #include "ModelicaTables.h"
 

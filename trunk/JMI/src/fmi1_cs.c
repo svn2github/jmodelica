@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include "fmi_cs.h" 
-#include "fmi.h"
+#include "fmi1_cs.h" 
+#include "fmi1_me.h"
 #include "jmi_ode_solver.h"
 
 const char* fmi1_cs_get_types_platform() {

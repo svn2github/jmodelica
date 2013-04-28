@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "fmi.h"
+#include "fmi1_me.h"
 #include "jmi.h"
 #include "jmi_block_residual.h"
 #include "jmi_log.h"

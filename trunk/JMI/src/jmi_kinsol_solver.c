@@ -27,7 +27,7 @@
 #include <kinpinv.h>  */
 
 #include "jmi.h"
-#include "fmi.h"
+#include "fmi1_me.h"
 #include "jmi_kinsol_solver.h"
 #include "jmi_block_residual.h"
 #include "jmi_util.h"

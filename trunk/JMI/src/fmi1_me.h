@@ -17,12 +17,12 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-/** \file fmi.h
+/** \file fmi1_me.h
  *  \brief The public FMI model interface.
  **/
 
-#ifndef fmi_h
-#define fmi_h
+#ifndef fmi1_me_h
+#define fmi1_me_h
 
 #include "fmi1_functions.h"
 #include "jmi.h"

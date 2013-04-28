@@ -19,7 +19,7 @@
 #include "fmiModelFunctions.h"
 #include <jmi.h>
 #include <jmi_block_residual.h>
-#include <fmi.h>
+#include <fmi1_me.h>
 #include "ModelicaUtilities.h"
 #include "ModelicaTables.h"
 
