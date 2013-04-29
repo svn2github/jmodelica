@@ -1,25 +1,24 @@
-package org.jmodelica.ide.outline.cache;
+package org.jmodelica.ide.outline.cache.tasks;
 
 import java.util.ArrayList;
-import java.util.Stack;
-
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.GlobalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
-import org.jmodelica.ide.helpers.LoadedLibraries;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
+import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
+import org.jmodelica.ide.outline.cache.EventCachedInitialNoLibs;
+import org.jmodelica.ide.sync.GlobalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
-public class JobClassOutlineCacheInitial extends OutlineCacheJob {
+public class ClassOutlineCacheInitialNoLibsTask extends OutlineCacheJob {
 	private int initialTreeCacheDepth = 1;
 
-	public JobClassOutlineCacheInitial(IASTChangeListener listener, IFile file,
+	public ClassOutlineCacheInitialNoLibsTask(IASTChangeListener listener, IFile file,
 			AbstractOutlineCache cache) {
 		super(listener, file, cache);
 	}
@@ -34,9 +33,9 @@ public class JobClassOutlineCacheInitial extends OutlineCacheJob {
 			cachedNode = ASTNodeCacheFactory.cacheNode(sroot, null, cache);
 			cacheChildren(sroot, cachedNode, initialTreeCacheDepth);
 		}
-		System.out.println("ClassOutlinePage initial caching took: "
+		System.out.println("ClassOutlinePage initial caching (no Libs) took: "
 				+ (System.currentTimeMillis() - time) + "ms");
-		IASTChangeEvent event = new EventCachedInitial(cachedNode);
+		IASTChangeEvent event = new EventCachedInitialNoLibs(cachedNode);
 		listener.astChanged(event);
 	}
 
@@ -51,25 +50,6 @@ public class JobClassOutlineCacheInitial extends OutlineCacheJob {
 							child, cachedNode, cache);
 					cacheChildren(child, cachedChild, depth - 1);
 					children.add(cachedChild);
-				} else if (obj instanceof LoadedLibraries) {
-					long time = System.currentTimeMillis();
-					LoadedLibraries lib = (LoadedLibraries) obj;
-					Stack<String> astPath = ModelicaASTRegistry.getInstance()
-							.createPath(node);
-					astPath.add(0, lib.getText());
-					lib.setASTPath(astPath);
-					lib.setParent(cachedNode);
-					ArrayList<ICachedOutlineNode> libChildren = new ArrayList<ICachedOutlineNode>();
-					for (ASTNode<?> child : lib.getChildren()) {
-						CachedASTNode cachedChild = ASTNodeCacheFactory
-								.cacheNode(child, lib, cache);
-						cacheChildren(child, cachedChild, depth - 1);
-						libChildren.add(cachedChild);
-					}
-					lib.setOutlineChildren(libChildren);
-					children.add(lib);
-					System.out.println(lib.getText() + " took: "
-							+ (System.currentTimeMillis() - time) + "ms");
 				}
 			}
 			cachedNode.setOutlineChildren(children);

@@ -3,7 +3,7 @@ package org.jmodelica.ide.graphical.proxy.cache;
 import java.util.Stack;
 
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ConnectClause;
 
 public class CachedConnectClause {

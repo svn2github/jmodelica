@@ -103,7 +103,8 @@ public abstract class Builder extends IncrementalProjectBuilder {
 			// handle changed resource
 			case IResourceDelta.CHANGED:
 				if (resource instanceof IFile) {
-					compileFile(resource);
+					if (shouldWeRecompile())
+						compileFile(resource);
 					return false;
 				}
 				break;
@@ -188,5 +189,5 @@ public abstract class Builder extends IncrementalProjectBuilder {
 		ErrorMarker.removeAll(file, IError.MARKER_ID);
 		ErrorMarker.addAll(file, errors, IError.MARKER_ID);
 	}
-
+	protected abstract boolean shouldWeRecompile();
 }

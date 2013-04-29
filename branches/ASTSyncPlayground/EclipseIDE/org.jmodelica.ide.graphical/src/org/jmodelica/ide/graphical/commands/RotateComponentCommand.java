@@ -26,11 +26,13 @@ public class RotateComponentCommand extends Command {
 	@Override
 	public void redo() {
 		component.getPlacement().getTransformation().setRotation(component.getPlacement().getTransformation().getRotation() + angle);
+		component.getDiagram().rotateComponent(component, angle);
 	}
 
 	@Override
 	public void undo() {
 		component.getPlacement().getTransformation().setRotation(component.getPlacement().getTransformation().getRotation() - angle);
+		component.getDiagram().rotateComponent(component, 0-angle);
 	}
 
 }

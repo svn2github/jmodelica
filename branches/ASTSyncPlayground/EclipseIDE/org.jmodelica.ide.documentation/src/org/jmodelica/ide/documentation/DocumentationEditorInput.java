@@ -10,7 +10,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.BaseClassDecl;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.Program;

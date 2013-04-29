@@ -36,7 +36,13 @@ public class EditorActionBarContributor extends ActionBarContributor {
 		toolBarManager.add(new Action("Rebuild") {
 			@Override
 			public void run() {
-				((Editor) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).flushInst();
+				((Editor) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).forceRebuild();
+			}
+		});
+		toolBarManager.add(new Action("Refresh") {
+			@Override
+			public void run() {
+				((Editor) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).forceRefresh();
 			}
 		});
 	}

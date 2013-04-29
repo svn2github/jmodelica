@@ -1,4 +1,4 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,12 +11,14 @@ import org.jastadd.ed.core.model.GlobalRootRegistry;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
+import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstNode;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class ModelicaASTRegistry extends GlobalRootRegistry {
 	private static ModelicaASTRegistry registry;
@@ -70,27 +72,21 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return fProjectASTMap.containsKey(project);
 	}
 
-	public void addListener(IFile file, ASTNode<?> node,
+	public void addListener(IFile file, Stack<String> nodePath,
 			ListenerObject listObj) {
-		Stack<String> nodePath = new Stack<String>();
-		if (node != null) {
-			synchronized (node.state()) {
-				nodePath = createPath(node);
-			}
-		}
-		ChangePropagationController.getInstance().addListener(listObj, file, nodePath);
+		ChangePropagationController.getInstance().addListener(listObj, file,
+				nodePath);
 	}
 
-	public void removeListener(IFile file, ASTNode<?> node,
+	public boolean removeListener(IFile file, Stack<String> nodePath,
 			IASTChangeListener listener) {
-		Stack<String> nodePath = new Stack<String>();
-		if (node != null) {
-			synchronized (node.state()) {
-				nodePath = createPath(node);
-			}
-		}
-		ChangePropagationController.getInstance().removeListener(listener,
-				file, nodePath);
+		boolean result = ChangePropagationController.getInstance().removeListener(
+				listener, file, nodePath);
+		if (result)
+			System.out.println("ModelicaASTRegistry successfully unregistered listener..."+listener.toString()+" file:"+file.getName()+" "+nodePath);
+		else
+			System.err.println("ModelicaASTRegistry failed to unregistered listener..."+listener.toString()+" file:"+file.getName()+" "+nodePath);			
+		return result;
 	}
 
 	/**
@@ -114,10 +110,10 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		String sought = nodePath.pop();
 		if (sought.split(":")[0].equals("List")) {
 			InstNode node = searchClassesAndComponents(nodePath.peek(), root);
-			if (node != null) {
+			/**if (node != null) {
 				System.out.println("found " + nodePath.pop()
 						+ " among classes/components");
-			}
+			}*/
 			return resolveInstNodePath(nodePath, node);
 		}
 		return null;
@@ -142,8 +138,10 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * @return Found node, or SourceRoot if path was empty.
 	 */
 	public ASTNode<?> resolveSourceASTPath(Stack<String> nodePath,
-			SourceRoot root) {
+			ASTNode<?> root) {
 		// System.out.println("ModelicaASTReg: resolve src nodepath, nodepathsize:"+nodePath.size());
+	//	System.out.println("RESOLVEPATH:");
+		//printPath(nodePath);
 		Stack<String> copy = new Stack<String>();
 		copy.setSize(nodePath.size());
 		Collections.copy(copy, nodePath);
@@ -153,7 +151,6 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	private ASTNode<?> resolveSrcNodePath(Stack<String> nodePath,
 			ASTNode<?> root) {
 		long time = System.currentTimeMillis();
-		// printPath(nodePath);
 		String sought = "";
 		String next = "";
 		ASTNode<?> current = root;
@@ -170,17 +167,47 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 			System.err
 					.println("ModelicaASTRegistry failed to resolve src nodepath...");
 		}
-		System.out.println("ModelicaASTReg: Successful ResolveSrcPath() took: "
-				+ (System.currentTimeMillis() - time) + "ms");
+		//System.out.println("ModelicaASTReg: Successful ResolveSrcPath() took: "
+		//		+ (System.currentTimeMillis() - time) + "ms");
 		return current;
 	}
 
-	/**private void printPath(Stack<String> nodePath) {
+	public ASTNode<?> recoveryResolve(ASTNode<?> node, Stack<String> nodePath) {
+		String soughtIdentifier = nodePath.get(0);
+		//System.err.println("RECOVERY lookup of: " + soughtIdentifier);
+		ASTNode<?> toReturn = recursiveResolve(node, soughtIdentifier);
+		//System.err.println("REC " + ((toReturn == null) ? "fail" : "success"));
+		return toReturn;
+	}
+	/**public ASTNode<?> recoveryResolveSourceRoot(SourceRoot root, Stack<String> nodePath) {
+		String soughtIdentifier = nodePath.get(0);
+		System.err.println("RECOVERY lookup of: " + soughtIdentifier);
+		ASTNode<?> toReturn = recursiveResolve(root, soughtIdentifier);
+		System.err.println("REC " + ((toReturn == null) ? "fail" : "success"));
+		return toReturn;
+	}*/
+	private ASTNode<?> recursiveResolve(ASTNode<?> node, String soughtIdentifier) {
+		ASTNode<?> toReturn = null;
+		for (int i = 0; i < node.getNumChild(); i++) {
+			//System.out.println(createIdentifier(node.getChild(i)));
+			if (createIdentifier(node.getChild(i)).equals(soughtIdentifier)) {
+				toReturn = node.getChild(i);
+				break;
+			} else {
+				toReturn = recursiveResolve(node.getChild(i), soughtIdentifier);
+				if (toReturn != null)
+					break;
+			}
+		}
+		return toReturn;
+	}
+
+	private void printPath(Stack<String> nodePath) {
 		String priint = "";
 		for (int i = 0; i < nodePath.size(); i++)
 			priint = nodePath.get(i) + " " + priint;
-		System.out.println("Trying to resolve path: " + priint);
-	}*/
+		System.out.println("Nodepath was: " +priint);
+	}
 
 	/**
 	 * Bit messy, due to structure of MSL
@@ -195,20 +222,24 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 			ASTNode<?> current, ASTNode<?> previous) {
 		for (int i = 0; i < current.getNumChild(); i++) {
 			ASTNode<?> currChild = current.getChild(i);
-			// System.out.println("Sought: " + sought + " Current: "
-			// + createIdentifier(currChild));
+			//System.out.println("Sought: " + sought + " Current: "
+			//		+ createIdentifier(currChild));
 			if (sought.equals(createIdentifier(currChild)))
 				return currChild;
 		}
 		if (!next.equals("") && next.split(":")[0].equals("LibNode")) {
-			// System.out.println("Found libnode, trying Program liblist...");
+			//System.out.println("Found libnode, trying Program liblist...");
 			if (previous instanceof Program) {
 				Program p = (Program) previous;
+				//System.out.println("Sought: " + sought + " Current: "
+				//		+ createIdentifier(p.getLibNodeList()));
+				//for (int i = 0; i < p.getLibNodeList().getNumChild(); i++)
+				//	System.out.println("LibChild: "
+				//			+ createIdentifier(p.getLibNodeList().getChild(i)));
 				if (createIdentifier(p.getLibNodeList()).equals(sought)) {
 					return p.getLibNodeList();
 				}
 			}
-
 		}
 		if (sought.split(":")[0].equals("StoredDefinition")
 				&& current instanceof LibNode) {
@@ -231,6 +262,18 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 				tmp = tmp.getParent();
 			}
 		}
+		// System.err.println("Created path:\n");
+		// printPath(nodePath);
+		return nodePath;
+	}
+
+	public Stack<String> createDefPath(ASTNode<?> node) {
+		Stack<String> nodePath = new Stack<String>();
+		ASTNode<?> tmp = node;
+		while (tmp != null && !(tmp instanceof StoredDefinition)) {
+			nodePath.add(createIdentifier(tmp));
+			tmp = tmp.getParent();
+		}
 		return nodePath;
 	}
 
@@ -252,5 +295,20 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	@Override
 	protected ICompiler createCompiler() {
 		return new ModelicaEclipseCompiler();
+	}
+
+	public void recompileFile(IFile file) {
+		compileFile(file);
+	}
+
+	public StoredDefinition getLatestDef(IFile theFile) {
+		SourceRoot sroot = ((GlobalRootNode)doLookup(theFile.getProject())).getSourceRoot();
+		org.jmodelica.modelica.compiler.List<StoredDefinition> defs = sroot.getProgram().getUnstructuredEntityList();
+		for (int i = 0; i < defs.getNumChild();i++){
+			if (defs.getChild(i).getFile().equals(theFile))
+				return defs.getChild(i);
+		}
+		System.err.println("Could not find latest def");
+		return null;
 	}
 }

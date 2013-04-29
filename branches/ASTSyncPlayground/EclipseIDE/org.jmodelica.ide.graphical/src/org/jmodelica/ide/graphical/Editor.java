@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
@@ -46,6 +45,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
+import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.icons.Observable;
@@ -61,6 +61,11 @@ import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 import org.jmodelica.ide.graphical.proxy.cache.GraphicalCacheRegistry;
+import org.jmodelica.ide.sync.ASTRegTaskBucket;
+import org.jmodelica.ide.sync.UniqueIDGenerator;
+import org.jmodelica.ide.sync.tasks.CompileFileTask;
+import org.jmodelica.ide.sync.tasks.ITaskObject;
+import org.jmodelica.ide.sync.tasks.NotifyGraphicalTask;
 
 public class Editor extends GraphicalEditor implements IASTChangeListener,
 		IPartListener2, Observer {
@@ -72,6 +77,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	private Stack<ComponentDiagramProxy> openComponentStack;
 	private Composite breadcrumbsBar;
 	private boolean ASTDirty;
+	private boolean iForcedRebuild = false;
 	private GraphicalCacheRegistry cacheRegistry = new GraphicalCacheRegistry();
 
 	public Editor() {
@@ -202,7 +208,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	}
 
 	private void setContent() {
-		//System.out.println("GRAPH->setContent()");
+		// System.out.println("GRAPH->setContent()");
 		if (input.editIcon()) {
 			getGraphicalViewer().setContents(dp);
 		} else {
@@ -222,7 +228,6 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	public void doSave(final IProgressMonitor monitor) {
 		if (dp == null)
 			return;
-
 		SafeRunner.run(new SafeRunnable() {
 			@Override
 			public void run() throws Exception {
@@ -340,13 +345,14 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 				.getSelectedEditParts()) {
 			selectedModels.add(o.getModel());
 		}
-		//System.out.println("copy selection, t+"
-		//		+ (System.currentTimeMillis() - start));
+		// System.out.println("copy selection, t+"
+		// + (System.currentTimeMillis() - start));
 		dp.setCachedInstClassDeclRoot(cacheRegistry.getCache());
-		//System.out.println("flush, t+" + (System.currentTimeMillis() - start));
+		// System.out.println("flush, t+" + (System.currentTimeMillis() -
+		// start));
 		setContent();
-		//System.out.println("set content, t+"
-		//		+ (System.currentTimeMillis() - start));
+		// System.out.println("set content, t+"
+		// + (System.currentTimeMillis() - start));
 		for (Object selectedModel : selectedModels) {
 			EditPart part = (EditPart) getGraphicalViewer()
 					.getEditPartRegistry().get(selectedModel);
@@ -355,40 +361,31 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 						.appendSelection(part);
 		}
 		System.out.println("Graphical editor flush took: "
-				+ (System.currentTimeMillis() - start)+"ms");
+				+ (System.currentTimeMillis() - start) + "ms");
 	}
 
-	public void refreshInst() {
-		new Job("Refresh Diagram") {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				// InstClassDecl icd = getProgramRoot()
-				// .syncSimpleLookupInstClassDecl(input.getClassName());
-				/*
-				 * if (dp.equals(icd)) { // TODO wont notice changes from event
-				 * via // compare??? System.out.println("NODIFF!!!!!!!!!!");
-				 * return Status.OK_STATUS; } if (getCommandStack().isDirty()) {
-				 * ASTDirty = true; if
-				 * (getSite().getWorkbenchWindow().getActivePage()
-				 * .getActiveEditor() == Editor.this) showSourceChangeDialog();
-				 * return Status.OK_STATUS; } dp.setInstClassDecl(icd);
-				 */
-				new UIJob("Refresh Diagram") {
-
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						System.out.println("Refresh diagram job");
-						getCommandStack().markSaveLocation();
-						ASTDirty = false;
-						setContent();
-						return Status.OK_STATUS;
-					}
-				}.schedule();
-				return Status.OK_STATUS;
-			}
-		}.schedule();
-	}
+	/**
+	 * public void refreshInst() { new Job("Refresh Diagram") {
+	 * 
+	 * @Override protected IStatus run(IProgressMonitor monitor) { InstClassDecl
+	 *           icd = getProgramRoot()
+	 *           .syncSimpleLookupInstClassDecl(input.getClassName());
+	 * 
+	 *           if (dp.equals(icd)) { // TODO wont notice changes from event
+	 *           via // // compare??? // System.out.println("NODIFF!!!!!!!!!!");
+	 *           return Status.OK_STATUS; } if (getCommandStack().isDirty()) {
+	 *           ASTDirty = true; if
+	 *           (getSite().getWorkbenchWindow().getActivePage()
+	 *           .getActiveEditor() == Editor.this) showSourceChangeDialog();
+	 *           return Status.OK_STATUS; } dp.setInstClassDecl(icd);
+	 * 
+	 *           new UIJob("Refresh Diagram") {
+	 * @Override public IStatus runInUIThread(IProgressMonitor monitor) {
+	 *           System.out.println("Refresh diagram job");
+	 *           getCommandStack().markSaveLocation(); ASTDirty = false;
+	 *           setContent(); return Status.OK_STATUS; } }.schedule(); return
+	 *           Status.OK_STATUS; } }.schedule(); }
+	 */
 
 	private void showSourceChangeDialog() {
 		new UIJob("Refresh Diagram") {
@@ -397,16 +394,24 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (!ASTDirty)
 					return Status.OK_STATUS;
-				boolean choise = MessageDialog
-						.openQuestion(
-								PlatformUI.getWorkbench().getDisplay()
-										.getActiveShell(),
-								"Source file has changed",
-								"The source file has changed and you have unsaved changes!\nDo you want to reload and discard your changes?");
-				if (!choise)
+				MessageDialog dialog = new MessageDialog(
+						PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+						"Source file has changed!",
+						null,
+						"The source file has changed and you have unsaved changes!\nDo you want to discard your changes and rebuild (REBUILD)\nOr save your changes and overwrite? (SAVE)",
+						MessageDialog.QUESTION, new String[] { "Rebuild",
+								"Save" }, 0);
+				int result = dialog.open();
+				ASTDirty = false;
+				if (result == 1) {
+					doSave(null);
 					return Status.OK_STATUS;
+				}
 				getCommandStack().flush();
-				refreshInst();
+				NotifyGraphicalTask job = new NotifyGraphicalTask(
+						ITaskObject.PRIORITY_HIGH, cacheRegistry,
+						new Stack<String>(), 0);
+				ASTRegTaskBucket.getInstance().addTask(job);
 				return Status.OK_STATUS;
 			}
 		}.schedule();
@@ -461,7 +466,35 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		} else if (c.isDisposed()) {
 			System.err.print("Graphical control is disposed\n");
 		} else {
-			flushInst();
+			if (e == null) {
+				flushInst();
+			} else {
+				if (e.getType() == IASTChangeEvent.FILE_RECOMPILED) {
+					if (!getCommandStack().isDirty() || iForcedRebuild) {
+						iForcedRebuild = false;
+						forceRefresh();
+					} else {
+						ASTDirty = true;
+						if (getSite().getWorkbenchWindow().getActivePage()
+								.getActiveEditor() == Editor.this)
+							showSourceChangeDialog();
+					}
+				}
+			}
 		}
+	}
+
+	protected void forceRefresh() {
+		NotifyGraphicalTask job = new NotifyGraphicalTask(
+				ASTChangeEvent.POST_UPDATE, cacheRegistry, null, UniqueIDGenerator.getInstance().getListenerID());
+		ASTRegTaskBucket.getInstance().addTask(job);
+	}
+
+	protected void forceRebuild() {
+		iForcedRebuild = true;
+		getCommandStack().flush();
+		CompileFileTask job = new CompileFileTask(input.getSourceFileName(),
+				input.getProject());
+		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 }

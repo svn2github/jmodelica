@@ -62,7 +62,7 @@ public class OutlineUpdateWorker {
 	 *            the node to update the outline children for
 	 */
 	public static void addChildren(TreeViewer viewer, ICachedOutlineNode node) {
-		if (!node.childrenAlreadyCached())
+		//if (!node.childrenAlreadyCached())
 			node.getCache().fetchChildren(node.getASTPath(), node,
 					new ChildrenTask(viewer, node));
 		// if (!node.cachedOutlineChildrenIsCurrent())
@@ -214,8 +214,10 @@ public class OutlineUpdateWorker {
 
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			Object node = task.node;
-			task.viewer.refresh(node);
-			task.viewer.expandToLevel(node, task.expandDepth);
+			if (task.viewer != null) {
+				task.viewer.refresh(node);
+				task.viewer.expandToLevel(node, task.expandDepth);
+			}
 			Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap
 					.get(node);
 			if (listeners != null)

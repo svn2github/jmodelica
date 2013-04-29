@@ -12,8 +12,7 @@ public class EventCachedChildren extends ASTChangeEvent {
 
 	public EventCachedChildren(ArrayList<ICachedOutlineNode> cachedChildren,
 			ChildrenTask task) {
-		super(IASTChangeEvent.CACHED_CHILDREN, IASTChangeEvent.FILE_LEVEL,
-				null, null, null);
+		super(IASTChangeEvent.CACHED_CHILDREN, IASTChangeEvent.FILE_LEVEL);
 		this.cachedChildren = cachedChildren;
 		this.task = task;
 	}

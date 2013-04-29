@@ -79,9 +79,10 @@ public class ParameterProxy implements IPropertyDescriptor {
 	}
 
 	public void setValue(String value) {
+		this.value = value;
 		Stack<String> path = new Stack<String>();
 		path.push(name);
-		owner.setParameterValue(path, value);
+		owner.setParameterValue(null, path, value);
 	}
 
 	public String getValue() {

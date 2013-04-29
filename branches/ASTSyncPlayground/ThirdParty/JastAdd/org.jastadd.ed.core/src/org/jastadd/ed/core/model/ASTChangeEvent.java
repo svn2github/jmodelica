@@ -2,6 +2,7 @@ package org.jastadd.ed.core.model;
 
 import java.util.Stack;
 
+import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.IASTDelta;
 
@@ -21,24 +22,24 @@ public class ASTChangeEvent implements IASTChangeEvent {
 	protected IASTNode changedNode;
 	protected int type;
 	protected int level;
+	protected IFile file;
 
 	public ASTChangeEvent(int type, int level, IASTNode changedNode,
-			Stack<Integer> changedPath, IASTDelta delta) {
+			Stack<Integer> changedPath, ASTDelta delta) {
+		this(type, level);
+		this.changedNode = changedNode;
+		this.delta = delta;
+		this.changedPath = changedPath;
+	}
+
+	public ASTChangeEvent(int type, int level) {
 		this.type = type;
 		this.level = level;
-		this.changedNode = changedNode;
-		this.changedPath = changedPath;
-		this.delta = delta;
 	}
 
-	@Override
-	public IASTDelta getDelta() {
-		return delta;
-	}
-
-	@Override
-	public IASTNode getChangedNode() {
-		return changedNode;
+	public ASTChangeEvent(IFile file, int type, int level) {
+		this(type, level);
+		this.file = file;
 	}
 
 	@Override
@@ -51,13 +52,18 @@ public class ASTChangeEvent implements IASTChangeEvent {
 		return level;
 	}
 
-	public void setDelta(IASTDelta value) {
-		delta = value;
-	}
+	/**
+	 * public void setDelta(IASTDelta value) { delta = value; }
+	 */
 
 	@Override
 	public Stack<Integer> getChangedPath() {
 		return changedPath;
+	}
+
+	@Override
+	public IFile getFile() {
+		return file;
 	}
 
 }

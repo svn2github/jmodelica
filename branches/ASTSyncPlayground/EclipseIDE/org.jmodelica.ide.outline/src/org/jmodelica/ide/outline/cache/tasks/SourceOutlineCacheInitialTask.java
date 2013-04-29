@@ -1,21 +1,23 @@
-package org.jmodelica.ide.outline.cache;
+package org.jmodelica.ide.outline.cache.tasks;
 
 import java.util.ArrayList;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.GlobalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
+import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
+import org.jmodelica.ide.outline.cache.EventCachedInitial;
+import org.jmodelica.ide.sync.GlobalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
-public class JobSourceOutlineCacheInitial extends OutlineCacheJob {
+public class SourceOutlineCacheInitialTask extends OutlineCacheJob {
 
-	public JobSourceOutlineCacheInitial(IASTChangeListener listener,
+	public SourceOutlineCacheInitialTask(IASTChangeListener listener,
 			IFile file, AbstractOutlineCache cache) {
 		super(listener, file, cache);
 	}
@@ -23,7 +25,8 @@ public class JobSourceOutlineCacheInitial extends OutlineCacheJob {
 	@Override
 	public void doJob() {
 		long time = System.currentTimeMillis();
-		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
 		CachedASTNode toReturn = null;

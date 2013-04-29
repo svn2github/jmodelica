@@ -91,21 +91,116 @@ aspect Core {
 	 * JL_ADDED
 	 * Synchronized method for adding a new component to a fullclassdecl.
 	 */
-	public void FullClassDecl.syncAddComponent(String className, String componentName, Placement placement) {
-		synchronized (state()) {
-			ComponentDecl componentDecl = new ComponentDecl();
-			componentDecl.setClassName(Access.fromClassName(className));
-			componentDecl.setVisibilityType(new PublicVisibilityType());
-			componentDecl.setName(new IdDecl(componentName));
-			componentDecl.setComment(new Comment());
-			componentDecl.setCCComment(new Comment());
-			componentDecl.annotation().savePlacement(placement);
-			
-			addNewComponentDecl(componentDecl);
-			flushCache();
-			classes(); //TODO prob dont need?
-			components();
-		}
+	public ComponentDecl FullClassDecl.addComponent(String className, String componentName, Placement placement) {
+		ComponentDecl componentDecl = new ComponentDecl();
+		componentDecl.setClassName(Access.fromClassName(className));
+		componentDecl.setVisibilityType(new PublicVisibilityType());
+		componentDecl.setName(new IdDecl(componentName));
+		componentDecl.setComment(new Comment());
+		componentDecl.setCCComment(new Comment());
+		componentDecl.annotation().savePlacement(placement);
+		
+		addNewComponentDecl(componentDecl);
+		flushCache();
+		classes(); //TODO prob dont need?
+		components();
+		return componentDecl;
 	}
 	
+	/*
+	 * We don't want to flush MSL libraries.
+	 */
+	public void Program.flushCacheNotLibs() {
+		super.flushCache();
+	    getInstProgramRoot_computed = false;
+	    getInstProgramRoot_value = null;
+	    classes_computed = false;
+	    classes_value = null;
+	    getPredefinedTypeList_computed = false;
+	    getPredefinedTypeList_value = null;
+	    getEnumBaseDecl_computed = false;
+	    getEnumBaseDecl_value = null;
+	    getBuiltInFunctionList_computed = false;
+	    getBuiltInFunctionList_value = null;
+	    getBuiltInTypeList_computed = false;
+	    getBuiltInTypeList_value = null;
+	    getUnknownClassDecl_computed = false;
+	    getUnknownClassDecl_value = null;
+	    getUnknownComponentDecl_computed = false;
+	    getUnknownComponentDecl_value = null;
+	    simpleLookupClassDefaultScope_String_values = null;
+	}
+	
+	/*
+	 * Cache the diagram Layer
+	 */
+    public Layer InstNode.cacheDiagramLayer() {
+    	ClassDecl decl = iconClassDecl();
+		if (decl == null)
+			return Layer.NO_LAYER;
+		else
+			return decl.cacheDiagramLayer();
+	}
+	
+	private Layer ClassDecl.cachedDiagramLayer = null;
+	/*
+	 * Cache the diagram Layer
+	 */
+	public Layer ClassDecl.cacheDiagramLayer() {
+		if (cachedDiagramLayer != null)
+			return cachedDiagramLayer;
+		cachedDiagramLayer = annotation().createDiagramLayer();
+		return cachedDiagramLayer;
+	}
+	
+	/*
+	 * Cache the icon Layer
+	 */
+	public Layer InstNode.cacheIconLayer() {
+    	ClassDecl decl = iconClassDecl();
+		if (decl == null)
+			return Layer.NO_LAYER;
+		else
+			return decl.iconLayer();
+	}
+	
+	private Layer ClassDecl.cachedIconLayer = null;
+	/*
+	 * Cache the icon Layer
+	 */	
+	public Layer ClassDecl.cacheIconLayer() {
+		if (cachedIconLayer != null)
+			return cachedIconLayer;
+		cachedIconLayer = annotation().createIconLayer();
+		return cachedIconLayer;
+	}
+	
+	/*
+	 * Cache the placement
+	 */
+	public Placement InstComponentDecl.cachePlacement() {
+		return getComponentDecl().cachePlacement();
+	}
+	
+	private Placement ComponentDecl.cachedPlacement = null;
+	/*
+	 * Cache the placement
+	 */
+	public Placement ComponentDecl.cachePlacement() {
+		if (cachedPlacement != null)
+			return cachedPlacement;
+		try {
+			cachedPlacement = annotation().createPlacement(Context.DIAGRAM);
+		}
+		catch(FailedConstructionException fe) {
+			cachedPlacement = new Placement(new Transformation(new Extent(new Point(-10, -10), new Point(10, 10))));
+		}
+		return cachedPlacement;
+	}
+	
+	public void ComponentDecl.syncSetParameterValue(Stack<String> path, String value) {
+		synchronized(state()) {
+			setParameterValue(path, value);
+		}
+	}
 }

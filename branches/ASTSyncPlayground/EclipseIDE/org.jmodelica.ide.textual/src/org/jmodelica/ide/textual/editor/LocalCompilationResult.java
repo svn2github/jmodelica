@@ -5,9 +5,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.jastadd.ed.core.model.IASTChangeEvent;
-import org.jmodelica.ide.compiler.LocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.EditorFile;
+import org.jmodelica.ide.sync.LocalRootNode;
 
 
 public class LocalCompilationResult extends CompilationResult {

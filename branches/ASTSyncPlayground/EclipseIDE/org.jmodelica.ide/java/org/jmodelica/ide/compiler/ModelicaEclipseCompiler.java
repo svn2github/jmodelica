@@ -35,6 +35,9 @@ import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
+import org.jmodelica.ide.sync.GlobalRootNode;
+import org.jmodelica.ide.sync.LocalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.ParserException;
@@ -42,7 +45,6 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
 import org.jmodelica.modelica.parser.ModelicaScanner;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.error.CompileErrorReport;
 
 import beaver.Parser;
@@ -201,6 +203,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			for (StoredDefinition def : sRoot.getProgram()
 					.getUnstructuredEntitys()) {
 				StoredDefinition sd = createAnnotatedDefinition(def, file);
+				System.err.println("compiler parsed new storeddef: "+sd.getNodeName()+":"+sd.outlineId());
 				list.add(sd);
 				i++;
 			}
@@ -225,7 +228,6 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			System.err
 					.println("PARSING OF FILE RESULTED IN MORE THAN 1 STOREDDEF BUT ONLY ONE WAS KEPT, NEED FIXING");
 		LocalRootNode toReturn = new LocalRootNode(list.getChild(0));
-		toReturn.setSourceRoot(sRoot);
 		return toReturn;
 	}
 

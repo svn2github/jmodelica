@@ -38,21 +38,29 @@ public abstract class RemoveBendpointCommand extends Command {
 		} else {
 			System.err.println("Unable to redo remove line point, oldpoint is missing from pointlist, someone probably swapped it already!");
 		}
+		connection.getProxy().getDiagram().removeBendPoint(connection, index);
 	}
 
 	@Override
 	public void undo() {
 		Line line = connection.getLine();
 		if (line == null) {
-			System.err.println("Unable to undo remove line point, connection not found!");
+			System.err
+					.println("Unable to undo remove line point, connection not found!");
 			return;
 		}
 		if (index != -1) {
 			line.getPoints().add(index, oldPoint);
 			line.pointsChanged();
 		} else {
-			System.err.println("Unable to undo remove line point, index is invalid, someone probably changed the list already!");
+			System.err
+					.println("Unable to undo remove line point, index is invalid, someone probably changed the list already!");
 		}
+		connection
+				.getProxy()
+				.getDiagram()
+				.addBendPoint(connection, oldPoint.getX(), oldPoint.getY(),
+						index);
 	}
 
 }

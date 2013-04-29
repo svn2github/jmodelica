@@ -1,8 +1,9 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
+import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 
@@ -13,8 +14,8 @@ public class LibraryVisitor {
 	 * @param root
 	 * @param nodePath
 	 */
-	public void handleChangedNode(int astChangeEventType, LibraryNode root,
-			Stack<String> nodePath) {
+	public void handleChangedNode(IFile file, int astChangeEventType,
+			LibraryNode root, Stack<String> nodePath) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(root, nodePath, affectedListeners);
 		System.out
@@ -24,7 +25,7 @@ public class LibraryVisitor {
 			removeLibraryPath(root, nodePath);
 		} // TODO rename
 		for (ListenerObject obj : affectedListeners) {
-			obj.doUpdate(nodePath);
+			obj.doUpdate(file, astChangeEventType, nodePath);
 		}
 	}
 
@@ -67,11 +68,8 @@ public class LibraryVisitor {
 	 */
 	public void addListener(LibraryNode node, Stack<String> nodePath,
 			ListenerObject listObj) {
-		if (nodePath.size() == 0) {
+		if (nodePath == null || nodePath.size() == 0) {
 			node.addListener(listObj);
-			for (int i = 0; i < nodePath.size(); i++) {
-				System.out.println(nodePath.get(i) + "/");
-			}
 		} else if (nodePath.size() > 0) {
 			String id = nodePath.pop();
 			boolean found = false;
@@ -148,22 +146,24 @@ public class LibraryVisitor {
 		return listenerlist;
 	}
 
-	public void removeListener(LibraryNode root, Stack<String> nodePath,
+	public boolean removeListener(LibraryNode root, Stack<String> nodePath,
 			IASTChangeListener listener) {
 		if (!nodePath.isEmpty()) {
 			String soughtNodeId = nodePath.pop();
 			for (LibraryNode child : root.getChildren()) {
 				if (child.getId().equals(soughtNodeId)) {
 					if (nodePath.size() == 0) {
-						child.removeListener(listener);
+						if (child.removeListener(listener))
+							return true;
 					} else {
-						removeListener(child, nodePath, listener);
+						return removeListener(child, nodePath, listener);
 					}
 					break;
 				}
 			}
 		} else {
-			root.removeListener(listener);
+			return root.removeListener(listener);
 		}
+		return false;
 	}
 }

@@ -33,13 +33,15 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 import org.jmodelica.ide.outline.cache.CachedContentProvider;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
+import org.jmodelica.ide.sync.ListenerObject;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
 public class ExplorerContentProvider extends CachedContentProvider implements
 		IResourceChangeListener, IResourceDeltaVisitor, IASTChangeListener {
 
-	private TreeViewer viewer;
 	private Map<IFile, ICachedOutlineNode> astCacheMap;
 	private ExplorerOutlineCache cache;
 
@@ -54,11 +56,10 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		Object[] children = null;
 		if (parentElement instanceof IFile) {
 			IFile file = (IFile) parentElement;
-			if (!astCacheMap.containsKey((IFile) parentElement)) {
-				cache.fetchFileChildren(file, viewer);
+			if (!astCacheMap.containsKey(file)) {
+				cache.fetchFileChildren(file);
 			} else {
-				children = super.getChildren(astCacheMap
-						.get((IFile) parentElement));
+				children = super.getChildren(astCacheMap.get(file));
 			}
 		} else {
 			children = super.getChildren(parentElement);
@@ -84,7 +85,9 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
 			if (!astCacheMap.containsKey(file)) {
-				cache.fetchFileChildren(file, viewer);
+				ModelicaASTRegistry.getInstance().addListener(file, null,
+						new ListenerObject(cache, OUTLINE_LISTENER));
+				cache.fetchFileChildren(file);
 				return true;
 			}
 			ICachedOutlineNode root = astCacheMap.get(file);
@@ -136,12 +139,18 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		case IResource.FOLDER:
 			return true;
 		case IResource.FILE:
-			final IFile file = (IFile) source;
-			String ext = file.getFileExtension();
-			if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
-				ICachedOutlineNode ast = astCacheMap.get(file);
-				if (ast != null)
-					cache.fetchFileChildren(file, viewer);
+			if (delta.getKind() != IResourceDelta.CHANGED) {
+				final IFile file = (IFile) source;
+				String ext = file.getFileExtension();
+				if (ext != null && ext.equals(IDEConstants.MODELICA_FILE_EXT)) {
+					cache.fetchFileChildren(file);
+				}
+				if (delta.getKind() == IResourceDelta.ADDED)
+					ModelicaASTRegistry.getInstance().addListener(file, null,
+							new ListenerObject(cache, OUTLINE_LISTENER));
+				if (delta.getKind() == IResourceDelta.REMOVED)
+					ModelicaASTRegistry.getInstance().removeListener(file,
+							null, cache);
 			}
 			return false;
 		}
@@ -153,8 +162,9 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		if (e instanceof EventCachedFileChildren) {
 			EventCachedFileChildren event = (EventCachedFileChildren) e;
 			astCacheMap.put(event.getFile(), event.getRoot());
-			OutlineUpdateWorker.addChildrenTask(event.getTask());
+			ChildrenTask task = new ChildrenTask(viewer, event.getFile());
+			task.expandDepth = 1;
+			OutlineUpdateWorker.addChildrenTask(task);
 		}
 	}
-
 }

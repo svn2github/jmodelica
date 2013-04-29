@@ -33,6 +33,8 @@ Export-Package: org.jmodelica.generated.scanners,
  org.jmodelica.ide.indent,
  org.jmodelica.ide.namecomplete,
  org.jmodelica.ide.scanners,
+ org.jmodelica.ide.sync,
+ org.jmodelica.ide.sync.tasks,
  org.jmodelica.modelica.compiler,
  org.jmodelica.modelica.parser,
  org.jmodelica.util

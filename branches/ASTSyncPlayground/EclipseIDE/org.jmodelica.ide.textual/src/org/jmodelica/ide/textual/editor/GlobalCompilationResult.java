@@ -8,11 +8,11 @@ import org.jastadd.ed.core.ReconcilingStrategy;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.LocalRootHandle;
-import org.jmodelica.ide.compiler.ListenerObject;
-import org.jmodelica.ide.compiler.LocalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.EditorFile;
+import org.jmodelica.ide.sync.ListenerObject;
+import org.jmodelica.ide.sync.LocalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ASTNode;
 
 public class GlobalCompilationResult extends CompilationResult {

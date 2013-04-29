@@ -1,0 +1,58 @@
+package org.jmodelica.ide.outline.cache.tasks;
+
+import java.util.ArrayList;
+
+import org.eclipse.core.resources.IFile;
+import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
+import org.jmodelica.ide.helpers.CachedASTNode;
+import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jmodelica.ide.helpers.OutlineCacheJob;
+import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
+import org.jmodelica.ide.outline.cache.EventCachedInitial;
+import org.jmodelica.ide.sync.GlobalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.modelica.compiler.InstClassDecl;
+import org.jmodelica.modelica.compiler.InstProgramRoot;
+import org.jmodelica.modelica.compiler.SourceRoot;
+
+public class InstanceOutlineCacheInitialTask extends OutlineCacheJob {
+
+	public InstanceOutlineCacheInitialTask(IASTChangeListener listener,
+			IFile file, AbstractOutlineCache cache) {
+		super(listener, file, cache);
+	}
+
+	@Override
+	public void doJob() {
+		long time = System.currentTimeMillis();
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(file.getProject());
+		SourceRoot sroot = root.getSourceRoot();
+		CachedASTNode toReturn = null;
+		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
+		synchronized (sroot) {
+			InstProgramRoot iRoot = sroot.getProgram().getInstProgramRoot();
+			toReturn = ASTNodeCacheFactory.cacheNode(iRoot, null, cache);
+			for (InstClassDecl inst : iRoot.instClassDecls()) {
+				CachedASTNode cachedNode = ASTNodeCacheFactory.cacheNode(inst,
+						toReturn, cache);
+				// Also cache children initially?
+				/**
+				 * ArrayList<?> comps = inst.outlineChildren();
+				 * ArrayList<ICachedOutlineNode> cacc = new
+				 * ArrayList<ICachedOutlineNode>(); for (Object obj : comps) {
+				 * cacc.add(ASTNodeCacheFactory.cacheNode( (ASTNode<?>) obj,
+				 * cachedNode, cache)); } cachedNode.setOutlineChildren(cacc);
+				 */
+				children.add(cachedNode);
+			}
+		}
+		toReturn.setOutlineChildren(children);
+		System.out.println("Cache initial from InstanceOutline took:"
+				+ (System.currentTimeMillis() - time) + "ms");
+		IASTChangeEvent event = new EventCachedInitial(toReturn);
+		listener.astChanged(event);
+	}
+}

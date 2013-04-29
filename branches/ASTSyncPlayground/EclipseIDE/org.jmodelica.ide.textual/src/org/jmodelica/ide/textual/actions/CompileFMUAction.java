@@ -28,10 +28,11 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.progress.IProgressConstants2;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.GlobalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.ide.sync.GlobalRootNode;
+import org.jmodelica.ide.sync.LocalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.textual.editor.Editor;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.AbstractGenerator;
@@ -94,11 +95,11 @@ public class CompileFMUAction extends CurrentClassAction implements
 			showConsole();
 			String fileName[] = currentClass.containingFileName().split("/");
 			String theName = fileName[fileName.length-1];
-			GlobalRootNode ln = (GlobalRootNode) ModelicaASTRegistry
+			GlobalRootNode gr = (GlobalRootNode) ModelicaASTRegistry
 					.getInstance()
 					.lookupFileGlobalRoot(theName);
-			if (ln != null) {
-				SourceRoot sr = ln.getSourceRoot();
+			if (gr != null) {
+				SourceRoot sr =gr.getSourceRoot();
 				synchronized (sr.state()) {
 					OptionRegistry opt = new OptionRegistry(sr.options);
 

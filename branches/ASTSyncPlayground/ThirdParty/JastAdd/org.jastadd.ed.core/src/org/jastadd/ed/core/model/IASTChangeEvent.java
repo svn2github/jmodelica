@@ -2,7 +2,7 @@ package org.jastadd.ed.core.model;
 
 import java.util.Stack;
 
-import org.jastadd.ed.core.model.node.IASTNode;
+import org.eclipse.core.resources.IFile;
 
 public interface IASTChangeEvent {
 
@@ -11,6 +11,7 @@ public interface IASTChangeEvent {
 	public static final int POST_ADDED = 2;
 	public static final int POST_RENAME = 5;
 	public static final int CACHED_CHILDREN = 6;
+	public static final int FILE_RECOMPILED = 7;
 	
 	public static final int PROJECT_LEVEL = 3;
 	public static final int FILE_LEVEL = 4;
@@ -21,16 +22,8 @@ public interface IASTChangeEvent {
 	 * 
 	 * @return the AST delta, or null if not applicable
 	 */
-	public IASTDelta getDelta();
-
-	/**
-	 * Returns the AST (node) in question. This will always be the previous node
-	 * on the tree which has either been removed or updated.
-	 * 
-	 * @return the AST
-	 */
-	public IASTNode getChangedNode();
-
+	/**public IASTDelta getDelta();*/
+	
 	/**
 	 * Returns the type of event being reported.
 	 * 
@@ -50,4 +43,6 @@ public interface IASTChangeEvent {
 	public int getLevel();
 
 	public Stack<Integer> getChangedPath();
+	
+	public IFile getFile();
 }

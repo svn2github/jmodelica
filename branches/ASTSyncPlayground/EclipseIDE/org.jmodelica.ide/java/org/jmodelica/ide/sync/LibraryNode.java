@@ -1,4 +1,4 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.util.ArrayList;
 
@@ -33,10 +33,13 @@ public class LibraryNode {
 		listeners.add(list);
 	}
 
-	public void removeListener(IASTChangeListener listener) {
+	public boolean removeListener(IASTChangeListener listener) {
 		for (ListenerObject obj : listeners) {
-			if (obj.equals(listener))
-				listeners.remove(listener);
+			if (obj.equals(listener)){
+				listeners.remove(obj);
+				return true;
+			}
 		}
+		return false;
 	}
 }

@@ -1,8 +1,11 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.util.Stack;
 
+import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jmodelica.ide.sync.tasks.NotifyGraphicalTask;
+import org.jmodelica.ide.sync.tasks.NotifyOutlineTask;
 
 public class ListenerObject {
 	private IASTChangeListener listener;
@@ -19,17 +22,17 @@ public class ListenerObject {
 		listenerID = id;
 	}
 
-	public void doUpdate(Stack<String> changedPath) {
+	public void doUpdate(IFile file, int astChangeEventType, Stack<String> changedPath) {
 		if (listenerType == IASTChangeListener.GRAPHICAL_LISTENER) {
-			UpdateGraphicalJob ug = new UpdateGraphicalJob(listener,
-					changedPath, listenerID);
-			ModelicaASTRegistryJobBucket.getInstance().addJob(ug);
+			NotifyGraphicalTask ug = new NotifyGraphicalTask(astChangeEventType,
+					listener, changedPath, listenerID);
+			ASTRegTaskBucket.getInstance().addTask(ug);
 		} else if (listenerType == IASTChangeListener.OUTLINE_LISTENER) {
-			UpdateOutlineJob uo = new UpdateOutlineJob(listener, changedPath,
-					listenerID);
-			ModelicaASTRegistryJobBucket.getInstance().addJob(uo);
+			NotifyOutlineTask uo = new NotifyOutlineTask(file, astChangeEventType,
+					listener, listenerID);
+			ASTRegTaskBucket.getInstance().addTask(uo);
 		} else if (listenerType == IASTChangeListener.TEXTEDITOR_LISTENER) {
-			// TODO
+			// TODO for AST driven text editor...
 		}
 	}
 

@@ -40,7 +40,7 @@ public class InstanceOutlinePage extends CachedOutlinePage implements
 	}
 
 	public void setFile(IFile file) {
-		cache.setFile(file);
+		cache.setFile(file, true);
 	}
 
 	@Override

@@ -126,22 +126,26 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return this;
 	}
 
-	public void addComponent(String className, Placement placement) {
+	public void addComponent(String className, Placement placement,
+			int actionUndoId) {
 		String componentName = generateUniqueName(className);
-		addComponent(className, componentName, placement);
+		addComponent(className, componentName, placement, actionUndoId);
 	}
 
 	public abstract void addComponent(String className, String componentName,
-			Placement placement);
+			Placement placement, int actionUndoId);
 
-	public abstract void removeComponent(ComponentProxy component);
+	public abstract void removeComponent(ComponentProxy component,
+			int actionUndoId);
 
 	public abstract void addConnection(String sourceDiagramName,
-			String targetDiagramName);
+			String targetDiagramName, int actionUndoId);
 
-	protected abstract void addConnection(ConnectionProxy connection);
+	protected abstract void addConnection(ConnectionProxy connection,
+			int actionUndoId);
 
-	public abstract void removeConnection(ConnectionProxy connection);
+	public abstract void removeConnection(ConnectionProxy connection,
+			int actionUndoId);
 
 	private String generateUniqueName(String className) {
 		String baseAutoName = className;
@@ -163,7 +167,19 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return autoName;
 	}
 
-	public void undoRemoveComponent() {}
+	public abstract void moveComponent(ComponentProxy component, double x,
+			double y);
 
-	public void undoAddComponent() {}
+	public abstract void rotateComponent(ComponentProxy component, double angle);
+
+	public abstract void resizeComponent(ComponentProxy component, double x,
+			double y, double x2, double y2);
+
+	public abstract void addBendPoint(ConnectionProxy connection, double x,
+			double y, int index);
+
+	public abstract void removeBendPoint(ConnectionProxy connection, int index);
+
+	public abstract void moveBendPoint(ConnectionProxy connection, double x,
+			double y, int index);
 }

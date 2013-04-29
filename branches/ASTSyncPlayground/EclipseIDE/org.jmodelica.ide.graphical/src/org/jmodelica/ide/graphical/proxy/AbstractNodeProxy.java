@@ -23,7 +23,7 @@ public abstract class AbstractNodeProxy extends Observable {
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
 
-	abstract protected void setParameterValue(Stack<String> path, String value);
+	abstract protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value);
 
 	protected abstract String buildDiagramName();
 

@@ -27,10 +27,12 @@ public abstract class MoveComponentCommand extends Command {
 	@Override
 	public void redo() {
 		component.getPlacement().getTransformation().setOrigin(newOrigin);
+		component.getDiagram().moveComponent(component, newOrigin.getX(),newOrigin.getY());
 	}
 
 	@Override
 	public void undo() {
 		component.getPlacement().getTransformation().setOrigin(oldOrigin);
+		component.getDiagram().moveComponent(component, oldOrigin.getX(),oldOrigin.getY());
 	}
 }

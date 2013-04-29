@@ -140,20 +140,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		if (lookupFile(file).length == 0) {
 			System.out.println("Lookup of file: " + file.getName()
 					+ " returned 0 ast results...");
-			ICompiler compiler = createCompiler();
-			if (compiler.canCompile(file)) {
-				if (!fProjectASTMap.containsKey(file.getProject())) {
-					lookupProject(file.getProject());
-				} else {
-					System.out.println("Compiler compiling file: "
-							+ file.getName());
-					ILocalRootNode fileNode = compiler.compile(file);
-					doUpdate(file, fileNode);
-				}
-			} else {
-				System.out.println("Compiler could NOT compile file: "
-						+ file.getName());
-			}
+			compileFile(file);
 		}
 		return lookupFile(file);
 	}
@@ -335,53 +322,23 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 				if (project.equals(p)) {
 					IGlobalRootNode projectNode = fProjectASTMap.get(file
 							.getProject());
-					// projectNode.fullFlush();
-					boolean foundCorresponding = false;
-					List<ILocalRootNode> nodeList = projectNode
-							.lookupFileNode(file);
-					for (ILocalRootNode oldNode : nodeList) {
-						if (oldNode.correspondsTo(newNode)) {
-							foundCorresponding = true;
-							if (oldNode.shouldBeUpdatedWith(newNode)) {
-								oldNode.updateWith(newNode);
-								ASTDelta delta = new ASTDelta(newNode,
-										new IASTDelta[] {});
-								delta.setStatus(IASTDelta.CHANGED
-										| IASTDelta.CONTENT);
-								IASTDelta[] childDelta = new IASTDelta[] { delta };
-								ASTDelta projectDelta = new ASTDelta(
-										projectNode, childDelta);
-								projectDelta.setStatus(IASTDelta.CHANGED
-										| IASTDelta.CHILD_CHANGED);
-								ASTChangeEvent evt = new ASTChangeEvent(
-										ASTChangeEvent.POST_UPDATE,
-										ASTChangeEvent.PROJECT_LEVEL,
-										projectNode, null, projectDelta);// TODO
-																			// fix
-																			// null
-								notifyListeners(evt);
-								result = true;
-							}
-						}
-					}
-					// No previous entry -- add node
-					if (!foundCorresponding) {
-						projectNode.addFileNode(newNode);
-						ASTDelta delta = new ASTDelta(newNode,
-								new IASTDelta[] {});
-						delta.setStatus(IASTDelta.ADDED);
-						IASTDelta[] childDelta = new IASTDelta[] { delta };
-						ASTDelta projectDelta = new ASTDelta(projectNode,
-								childDelta);
-						projectDelta.setStatus(IASTDelta.CHANGED
-								| IASTDelta.CHILD_CHANGED);
-						ASTChangeEvent evt = new ASTChangeEvent(
-								ASTChangeEvent.POST_UPDATE,
-								ASTChangeEvent.PROJECT_LEVEL, newNode, null,
-								projectDelta);// TODO fix null
-						notifyListeners(evt);
-						result = true;
-					}
+					projectNode.addFileNode(newNode);
+					ASTDelta delta = new ASTDelta(newNode, new IASTDelta[] {});
+					delta.setStatus(IASTDelta.CHANGED | IASTDelta.CONTENT);
+					IASTDelta[] childDelta = new IASTDelta[] { delta };
+					ASTDelta projectDelta = new ASTDelta(projectNode,
+							childDelta);
+					projectDelta.setStatus(IASTDelta.CHANGED
+							| IASTDelta.CHILD_CHANGED);
+					ASTChangeEvent evt = new ASTChangeEvent(
+							ASTChangeEvent.POST_UPDATE,
+							ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
+							projectDelta);// TODO
+											// fix
+											// null
+					notifyListeners(evt);
+					result = true;
+					break;
 				}
 			}
 		} finally {
@@ -538,6 +495,23 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 				}
 			});
 
+		}
+	}
+
+	protected void compileFile(IFile file) {
+		ICompiler compiler = createCompiler();
+		if (compiler.canCompile(file)) {
+			if (!fProjectASTMap.containsKey(file.getProject())) {
+				lookupProject(file.getProject());
+			} else {
+				System.out
+						.println("Compiler compiling file: " + file.getName());
+				ILocalRootNode fileNode = compiler.compile(file);
+				doUpdate(file, fileNode);
+			}
+		} else {
+			System.out.println("Compiler could NOT compile file: "
+					+ file.getName());
 		}
 	}
 }

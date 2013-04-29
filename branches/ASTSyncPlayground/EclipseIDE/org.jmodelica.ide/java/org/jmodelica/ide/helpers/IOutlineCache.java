@@ -2,11 +2,11 @@ package org.jmodelica.ide.helpers;
 
 import java.util.Stack;
 
-import org.jmodelica.ide.compiler.IJobObject;
+import org.jmodelica.ide.sync.tasks.ITaskObject;
 
 public interface IOutlineCache {
 	/**
-	 * Create an {@link IJobObject} caching the children of the specified node.
+	 * Create an {@link ITaskObject} caching the children of the specified node.
 	 * 
 	 * @param nodePath
 	 * @param node

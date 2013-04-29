@@ -50,7 +50,7 @@ public class ClassOutlinePage extends CachedOutlinePage implements
 		IFileEditorInput fInput = (IFileEditorInput) fTextEditor
 				.getEditorInput();
 		IFile file = fInput.getFile();
-		cache.setFile(file);
+		cache.setFile(file, true);
 		setDoubleClickHandling(true);
 	}
 

@@ -6,7 +6,7 @@ import java.util.Stack;
 import org.eclipse.swt.graphics.Image;
 import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
 

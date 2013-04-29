@@ -14,6 +14,7 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	public ComponentDiagramProxy(ComponentProxy component) {
 		this.component = component;
 	}
+
 	@Override
 	public String getQualifiedClassName() {
 		return component.getQualifiedClassName();
@@ -35,33 +36,79 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public void addComponent(String className, String componentName, Placement placement) {
-		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	public void addComponent(String className, String componentName,
+			Placement placement, int undoActionId) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
 
 	@Override
-	public void removeComponent(ComponentProxy component) {
-		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	public void removeComponent(ComponentProxy component, int undoActionId) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
 
 	@Override
-	public void addConnection(String sourceDiagramName, String targetDiagramName) {
-		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	public void addConnection(String sourceDiagramName,
+			String targetDiagramName, int undoActionId) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
 
 	@Override
-	protected void addConnection(ConnectionProxy connection) {
-		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	protected void addConnection(ConnectionProxy connection, int undoActionId) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
 
 	@Override
-	public void removeConnection(ConnectionProxy connection) {
-		throw new UnsupportedOperationException("It is not possible to alter component definition!");
+	public void removeConnection(ConnectionProxy connection, int undoActionId) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
-	
+
 	@Override
-	protected void setParameterValue(Stack<String> path, String value) {
-		component.setParameterValue(path, value);
+	protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value) {
+		component.setParameterValue(comp, path, value);
+	}
+
+	@Override
+	public void moveComponent(ComponentProxy component, double x, double y) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
+	}
+
+	@Override
+	public void rotateComponent(ComponentProxy component, double angle) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
+	}
+
+	@Override
+	public void resizeComponent(ComponentProxy component, double x, double y,
+			double x2, double y2) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
+	}
+
+	@Override
+	public void addBendPoint(ConnectionProxy connection, double x, double y,
+			int index) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
+	}
+
+	@Override
+	public void removeBendPoint(ConnectionProxy connection, int index) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
+	}
+
+	@Override
+	public void moveBendPoint(ConnectionProxy connection, double x, double y,
+			int index) {
+		throw new UnsupportedOperationException(
+				"It is not possible to alter component definition!");
 	}
 
 }

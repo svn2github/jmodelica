@@ -31,15 +31,22 @@ public abstract class MoveBendpointCommand extends Command {
 	public void redo() {
 		Line line = connection.getLine();
 		if (line == null) {
-			System.err.println("Unable to redo move line point, connection not found!");
+			System.err
+					.println("Unable to redo move line point, connection not found!");
 			return;
 		}
 		int index = line.getPoints().indexOf(oldPoint);
 		if (index != -1) {
 			line.getPoints().set(index, newPoint);
 			line.pointsChanged();
+			connection
+					.getProxy()
+					.getDiagram()
+					.moveBendPoint(connection, newPoint.getX(),
+							newPoint.getY(), index);
 		} else {
-			System.err.println("Unable to redo move line point, oldpoint is missing from pointlist, someone probably swapped it already!");
+			System.err
+					.println("Unable to redo move line point, oldpoint is missing from pointlist, someone probably swapped it already!");
 		}
 	}
 
@@ -47,15 +54,22 @@ public abstract class MoveBendpointCommand extends Command {
 	public void undo() {
 		Line line = connection.getLine();
 		if (line == null) {
-			System.err.println("Unable to undo move line point, connection not found!");
+			System.err
+					.println("Unable to undo move line point, connection not found!");
 			return;
 		}
 		int index = line.getPoints().indexOf(newPoint);
 		if (index != -1) {
 			line.getPoints().set(index, oldPoint);
 			line.pointsChanged();
+			connection
+					.getProxy()
+					.getDiagram()
+					.moveBendPoint(connection, oldPoint.getX(),
+							oldPoint.getY(), index);
 		} else {
-			System.err.println("Unable to undo move line point, newpoint is missing from pointlist, someone probably swapped it already!");
+			System.err
+					.println("Unable to undo move line point, newpoint is missing from pointlist, someone probably swapped it already!");
 		}
 	}
 

@@ -9,7 +9,7 @@ import org.jmodelica.ide.outline.OutlineUpdateWorker;
 
 public class CachedContentProvider implements ITreeContentProvider {
 
-	private TreeViewer viewer;
+	protected TreeViewer viewer;
 
 	public Object[] getChildren(Object element) {
 			if (element instanceof ICachedOutlineNode) {
@@ -46,7 +46,6 @@ public class CachedContentProvider implements ITreeContentProvider {
 	}
 
 	public void dispose() {
-		//TODO
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {

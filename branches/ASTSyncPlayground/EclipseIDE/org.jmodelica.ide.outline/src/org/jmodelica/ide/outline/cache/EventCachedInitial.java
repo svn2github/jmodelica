@@ -8,8 +8,7 @@ public class EventCachedInitial extends ASTChangeEvent {
 	private CachedASTNode cachedRoot;
 
 	public EventCachedInitial(CachedASTNode cachedRoot) {
-		super(IASTChangeEvent.CACHED_CHILDREN, IASTChangeEvent.FILE_LEVEL,
-				null, null, null);
+		super(IASTChangeEvent.CACHED_CHILDREN, IASTChangeEvent.FILE_LEVEL);
 		this.cachedRoot = cachedRoot;
 	}
 

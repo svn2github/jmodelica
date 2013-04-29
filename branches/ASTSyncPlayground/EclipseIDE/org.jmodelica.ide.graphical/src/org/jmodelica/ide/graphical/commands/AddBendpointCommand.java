@@ -31,20 +31,28 @@ public abstract class AddBendpointCommand extends Command {
 	public void redo() {
 		Line line = connection.getLine();
 		if (line == null) {
-			System.err.println("Unable to redo add line point, connection not found!");
+			System.err
+					.println("Unable to redo add line point, connection not found!");
 			return;
 		}
 		if (line.getPoints().size() <= index)
-			System.err.println("Unable to redo add line point, index is out of bounds someone probably changed it already!");
+			System.err
+					.println("Unable to redo add line point, index is out of bounds someone probably changed it already!");
 		line.getPoints().add(index, newPoint);
 		line.pointsChanged();
+		connection
+				.getProxy()
+				.getDiagram()
+				.addBendPoint(connection, newPoint.getX(), newPoint.getY(),
+						index);
 	}
 
 	@Override
 	public void undo() {
 		Line line = connection.getLine();
 		if (line == null) {
-			System.err.println("Unable to undo add line point, connection not found!");
+			System.err
+					.println("Unable to undo add line point, connection not found!");
 			return;
 		}
 		int index = line.getPoints().indexOf(newPoint);
@@ -52,8 +60,9 @@ public abstract class AddBendpointCommand extends Command {
 			line.getPoints().remove(index);
 			line.pointsChanged();
 		} else {
-			System.err.println("Unable to undo add line point, newpoint is missing from pointlist, someone probably swapped it already!");
+			System.err
+					.println("Unable to undo add line point, newpoint is missing from pointlist, someone probably swapped it already!");
 		}
+		connection.getProxy().getDiagram().removeBendPoint(connection, index);
 	}
-
 }

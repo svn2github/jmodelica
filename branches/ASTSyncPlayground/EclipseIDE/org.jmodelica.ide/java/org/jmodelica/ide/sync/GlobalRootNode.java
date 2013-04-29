@@ -1,15 +1,19 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.compiler.IDELibraryList;
+import org.jmodelica.ide.compiler.IDEOptions;
 import org.jmodelica.ide.error.InstanceErrorHandler;
 import org.jmodelica.modelica.compiler.Program;
 import org.jmodelica.modelica.compiler.SourceRoot;
@@ -62,6 +66,7 @@ public class GlobalRootNode implements IGlobalRootNode {
 
 	private void addOrUpdate(ILocalRootNode newNode) {
 		boolean found = false;
+		boolean found2 = false;
 		for (ILocalRootNode node : files) {
 			if (node.getFile().equals(newNode.getFile())) {
 				node = newNode;
@@ -69,15 +74,23 @@ public class GlobalRootNode implements IGlobalRootNode {
 			}
 		}
 		for (int i = 0; i < list.getNumChild(); i++) {
-			if (list.getChildNoTransform(i).getFile().equals(newNode.getFile())) {
+			if (list.getChild(i).getFile().equals(newNode.getFile())) {
 				list.setChild(((LocalRootNode) newNode).getDef(), i);
-				found = true;
+				found2 = true;
 			}
 		}
-		if (!found) {
+		if (!found)
 			files.add(newNode);
+		if (!found2)
 			list.add(((LocalRootNode) newNode).getDef());
-		}
+		root.getProgram().flushCacheNotLibs();
+		root.flushCache();
+		root.getProgram().getInstProgramRoot().flushCache();
+		root.getProgram().getInstProgramRoot().classes();
+		root.getProgram().getInstProgramRoot().components();
+		ChangePropagationController.getInstance().handleNotifications(
+				IASTChangeEvent.FILE_RECOMPILED, newNode.getFile(),
+				new Stack<String>());
 	}
 
 	public void addFiles(
@@ -134,10 +147,10 @@ public class GlobalRootNode implements IGlobalRootNode {
 		return null;
 	}
 
-	public IFile lookupFileNode(String sourceFileName) {
+	public ILocalRootNode lookupFileNode(String sourceFileName) {
 		for (ILocalRootNode fileNode : files) {
 			if (fileNode.getFile().getName().equals(sourceFileName))
-				return fileNode.getFile();
+				return fileNode;
 		}
 		return null;
 	}

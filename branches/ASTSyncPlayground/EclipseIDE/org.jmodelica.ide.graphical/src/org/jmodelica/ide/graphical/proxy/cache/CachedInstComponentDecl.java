@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstExtends;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -16,7 +16,7 @@ public class CachedInstComponentDecl extends CachedInstNode {
 	private String syncQualifiedName;
 	private boolean syncIsConnector;
 	private boolean syncIsIconRenderable;
-	private Placement syncGetPlacement;
+	private Placement cachedPlacement;
 	private boolean syncIsPrimitive;
 	private boolean syncIsParameter;
 	private Stack<String> astPath;
@@ -29,11 +29,16 @@ public class CachedInstComponentDecl extends CachedInstNode {
 		syncQualifiedName = icd.syncQualifiedName();
 		syncIsConnector = icd.syncIsConnector();
 		syncIsIconRenderable = icd.syncIsIconRenderable();
-		syncGetPlacement = icd.syncGetPlacement();
+		cachedPlacement = icd.cachePlacement();
 		syncIsPrimitive = icd.syncIsPrimitive();
 		syncIsParameter = icd.syncIsParameter();
-		astPath = ModelicaASTRegistry.getInstance().createPath(
+		//TODO def
+		astPath = ModelicaASTRegistry.getInstance().createDefPath(
 				icd.getComponentDecl());
+		//String top = "";
+		//for (int i = astPath.size()-1;i>=0;i--)
+		//	top += astPath.get(i) + " ";
+		//System.out.println("incstcompdecl: "+top);
 		params = getParameters(icd);
 	}
 
@@ -62,7 +67,7 @@ public class CachedInstComponentDecl extends CachedInstNode {
 	}
 
 	public Placement syncGetPlacement() {
-		return syncGetPlacement;
+		return cachedPlacement;
 	}
 
 	public boolean syncIsPrimitive() {

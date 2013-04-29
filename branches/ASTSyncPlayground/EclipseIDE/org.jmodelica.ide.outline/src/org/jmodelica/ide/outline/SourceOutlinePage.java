@@ -33,9 +33,10 @@ public class SourceOutlinePage extends CachedOutlinePage implements
 	}
 
 	public void setFile(IFile file) {
-		cache.setFile(file);
+		cache.setFile(file, true);
 	}
-	public void dispose(){
+
+	public void dispose() {
 		cache.dispose();
 	}
 

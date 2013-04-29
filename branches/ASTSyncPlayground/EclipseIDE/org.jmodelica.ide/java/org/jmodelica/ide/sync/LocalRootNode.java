@@ -1,14 +1,12 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
-import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class LocalRootNode implements ILocalRootNode {
 	private StoredDefinition def;
-	private SourceRoot sourceRoot;
 
 	public LocalRootNode(StoredDefinition def) {
 		this.def = def;
@@ -27,14 +25,11 @@ public class LocalRootNode implements ILocalRootNode {
 
 	@Override
 	public boolean shouldBeUpdatedWith(ILocalRootNode newNode) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void updateWith(ILocalRootNode newNode) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -67,13 +62,5 @@ public class LocalRootNode implements ILocalRootNode {
 	@Override
 	public IFile getFile() {
 		return def.getFile();
-	}
-
-	public void setSourceRoot(SourceRoot sRoot) {
-		this.sourceRoot = sRoot;
-	}
-
-	public SourceRoot getSourceRoot() {
-		return sourceRoot;
 	}
 }

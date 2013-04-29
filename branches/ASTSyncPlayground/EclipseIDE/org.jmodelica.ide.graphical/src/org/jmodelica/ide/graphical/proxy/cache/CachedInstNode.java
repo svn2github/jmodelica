@@ -12,16 +12,16 @@ import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class CachedInstNode {
 	private List<CachedInstExtends> syncGetInstExtendss = new ArrayList<CachedInstExtends>();
-	private Layer syncGetDiagramLayer;
-	private Layer syncGetIconLayer;
+	private Layer cacheDiagramLayer;
+	private Layer cacheIconLayer;
 	private List<CachedInstComponentDecl> syncGetInstComponentDecls = new ArrayList<CachedInstComponentDecl>();
 	// private String syncLookupParameterValue; // TODO fix these
 	protected List<CachedConnectClause> connectionClauses = new ArrayList<CachedConnectClause>();
 
 	public CachedInstNode(InstNode node) {
 		setSyncGetInstExtendss(node);
-		syncGetDiagramLayer = node.syncGetDiagramLayer(); //TODO
-		syncGetIconLayer = node.syncGetIconLayer(); //TODO
+		cacheDiagramLayer = node.cacheDiagramLayer();
+		cacheIconLayer = node.cacheIconLayer();
 		setSyncGetInstComponentDecls(node);
 		setConnectionClauses(node);
 		//node.syncLookupParameterValue(node.syncName());
@@ -60,11 +60,11 @@ public abstract class CachedInstNode {
 	}
 
 	public Layer syncGetDiagramLayer() {
-		return syncGetDiagramLayer;
+		return cacheDiagramLayer;
 	}
 
 	public Layer syncGetIconLayer() {
-		return syncGetIconLayer;
+		return cacheIconLayer;
 	}
 
 	public List<CachedInstComponentDecl> syncGetInstComponentDecls() {

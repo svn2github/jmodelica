@@ -7,10 +7,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.TreeItem;
 import org.jastadd.ed.core.model.node.IASTNode;
-import org.jmodelica.ide.compiler.IJobObject;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
-import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
-import org.jmodelica.ide.compiler.ModificationJob;
+import org.jmodelica.ide.sync.ASTRegTaskBucket;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
@@ -30,7 +29,7 @@ public class TestRemoveAction extends Action {
 	public void run() {
 		TreeItem[] selection = viewer.getTree().getSelection();
 		System.out.println("TestRemoveAction: A TestRemoveAction was run!");
-		for (int i = 0; i < selection.length; i++) {
+		/**for (int i = 0; i < selection.length; i++) {
 			String s = ((IASTNode) selection[i].getData()).toString();
 			System.out.println("TestRemoveAction: Selection contains node: "
 					+ s);
@@ -45,9 +44,9 @@ public class TestRemoveAction extends Action {
 				astPath = ModelicaASTRegistry.getInstance().createPath(
 						icd.getClassDecl());
 			}
-			IJobObject job = new ModificationJob(IJobObject.REMOVE_NODE, file,
+			ITaskObject job = new ModificationTask(ITaskObject.REMOVE_COMPONENT, file,
 					astPath);
-			ModelicaASTRegistryJobBucket.getInstance().addJob(job);
-		}
+			ASTRegTaskBucket.getInstance().addTask(job);
+		}*/
 	}
 }

@@ -177,9 +177,9 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}*/
 
 	@Override
-	protected void setParameterValue(Stack<String> path, String value) {
+	protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value) {
 		path.push(componentName);
-		getParent().setParameterValue(path, value);
+		getParent().setParameterValue(getComponentDecl(), path, value);
 	}
 
 	public void setComponentName(String newName) {

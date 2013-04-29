@@ -2,9 +2,9 @@ package org.jmodelica.ide.helpers;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.IJobObject;
+import org.jmodelica.ide.sync.tasks.ITaskObject;
 
-public abstract class OutlineCacheJob implements IJobObject {
+public abstract class OutlineCacheJob implements ITaskObject {
 	protected IASTChangeListener listener;
 	protected IFile file;
 	protected IOutlineCache cache;
@@ -19,10 +19,15 @@ public abstract class OutlineCacheJob implements IJobObject {
 	}
 
 	@Override
-	public int getPriority() {
-		return IJobObject.PRIORITY_HIGH;
+	public int getJobPriority() {
+		return ITaskObject.PRIORITY_HIGH;
 	}
 
+	@Override
+	public int getJobType(){
+		return ITaskObject.UPDATE;
+	}
+	
 	@Override
 	public int getListenerID() {
 		return listenerID;

@@ -1,4 +1,4 @@
-package org.jmodelica.ide.compiler;
+package org.jmodelica.ide.sync;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,18 +23,20 @@ public class ChangePropagationController {
 		return controller;
 	}
 
-	public void addListener(ListenerObject listObj,
-			IFile file, Stack<String> nodePath) {
-
-		System.out.println("MODELICAASTREGISTRY: Added listener to file "
-				+ file.getName());
+	public void addListener(ListenerObject listObj, IFile file,
+			Stack<String> nodePath) {
 		LibraryNode root = listenerTrees.get(file);
 		if (root == null) {
 			root = new LibraryNode(null);
 			listenerTrees.put(file, root);
 		}
+		Stack<String> copy = new Stack<String>();
+		if (nodePath != null) {
+			copy.setSize(nodePath.size());
+			Collections.copy(copy, nodePath);
+		}
 		LibraryVisitor visitor = new LibraryVisitor();
-		visitor.addListener(root, nodePath, listObj);
+		visitor.addListener(root, copy, listObj);
 	}
 
 	/**
@@ -53,16 +55,22 @@ public class ChangePropagationController {
 			Stack<String> copy = new Stack<String>();
 			copy.setSize(nodePath.size());
 			Collections.copy(copy, nodePath);
-			visitor.handleChangedNode(changeType, libroot, copy);
+			visitor.handleChangedNode(file, changeType, libroot, copy);
 		}
 	}
 
-	public void removeListener(IASTChangeListener listener, IFile file,
+	public boolean removeListener(IASTChangeListener listener, IFile file,
 			Stack<String> nodePath) {
 		LibraryNode root = listenerTrees.get(file);
 		if (root != null) {
+			Stack<String> copy = new Stack<String>();
+			if (nodePath != null) {
+				copy.setSize(nodePath.size());
+				Collections.copy(copy, nodePath);
+			}
 			LibraryVisitor visitor = new LibraryVisitor();
-			visitor.removeListener(root, nodePath, listener);
+			return visitor.removeListener(root, copy, listener);
 		}
+		return false;
 	}
 }

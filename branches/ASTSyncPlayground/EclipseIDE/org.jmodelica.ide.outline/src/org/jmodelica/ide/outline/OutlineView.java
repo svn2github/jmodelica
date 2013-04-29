@@ -35,13 +35,13 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.ide.compiler.LocalRootNode;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
+import org.jmodelica.ide.sync.LocalRootNode;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
 public abstract class OutlineView extends PageBookView 
 implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {

@@ -3,15 +3,20 @@ package org.jmodelica.ide.graphical.commands;
 import org.eclipse.gef.commands.Command;
 import org.jmodelica.ide.graphical.proxy.ConnectionProxy;
 import org.jmodelica.ide.graphical.proxy.ConnectorProxy;
+import org.jmodelica.ide.sync.ASTRegTaskBucket;
+import org.jmodelica.ide.sync.UniqueIDGenerator;
+import org.jmodelica.ide.sync.tasks.ITaskObject;
+import org.jmodelica.ide.sync.tasks.UndoTask;
 
 public abstract class CreateConnectionCommand extends Command {
 
 	private ConnectorProxy source;
 	private ConnectorProxy target;
-	private ConnectionProxy connection;
+	private int myId;
 
 	public CreateConnectionCommand(ConnectorProxy source) {
 		this.source = source;
+		myId = UniqueIDGenerator.getInstance().getChangeSetID();
 		setLabel("add connection");
 	}
 
@@ -43,20 +48,19 @@ public abstract class CreateConnectionCommand extends Command {
 
 	@Override
 	public void execute() {
-		source.getDiagram().addConnection(source.buildDiagramName(), target.buildDiagramName());
-		//connection = source.getDiagram().addConnection(source, target);
-		//initConnection(connection);
-		//TODO fix UNDO/REDO
+		source.getDiagram().addConnection(source.buildDiagramName(),
+				target.buildDiagramName(), myId);
 	}
 
 	@Override
 	public void redo() {
-		connection.connect();
+		UndoTask job = new UndoTask(ITaskObject.UNDO_REMOVE, myId);
+		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
 	public void undo() {
-		connection.disconnect();
+		UndoTask job = new UndoTask(ITaskObject.UNDO_ADD, myId);
+		ASTRegTaskBucket.getInstance().addTask(job);
 	}
-
 }

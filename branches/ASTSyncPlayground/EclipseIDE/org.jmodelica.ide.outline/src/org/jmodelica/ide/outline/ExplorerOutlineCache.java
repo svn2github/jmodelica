@@ -3,18 +3,16 @@ package org.jmodelica.ide.outline;
 import java.util.ArrayList;
 import java.util.Stack;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.compiler.ModelicaASTRegistryJobBucket;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
-import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
-import org.jmodelica.ide.outline.cache.JobClassOutlineCacheChildren;
-import org.jmodelica.ide.outline.cache.JobExplorerOutlineCacheFileChildren;
+import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
+import org.jmodelica.ide.outline.cache.tasks.ExplorerOutlineCacheFileChildrenTask;
+import org.jmodelica.ide.sync.ASTRegTaskBucket;
 
 public class ExplorerOutlineCache extends AbstractOutlineCache {
 	private ArrayList<EventCachedFileChildren> childrenFileUpdates = new ArrayList<EventCachedFileChildren>();
@@ -28,18 +26,17 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 
 	public void fetchChildren(Stack<String> nodePath, ICachedOutlineNode node,
 			Object task) {
-		OutlineCacheJob job = new JobClassOutlineCacheChildren(this, nodePath,
+		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this, node);
-		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
+		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
-	public void fetchFileChildren(IFile file, TreeViewer viewer) {
-		ChildrenTask task = new ChildrenTask(viewer, file);
-		// Don't automagically expand file Models unless user clicks expand...
-		task.expandDepth = 0;
-		OutlineCacheJob job = new JobExplorerOutlineCacheFileChildren(this,
-				file, this, task);
-		ModelicaASTRegistryJobBucket.getInstance().addJob(job);
+	public void fetchFileChildren(IFile file) {
+			// Don't automagically expand file Models unless user clicks
+			// expand...
+			OutlineCacheJob job = new ExplorerOutlineCacheFileChildrenTask(this,
+					file, this);
+			ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	protected synchronized void handleCachedFileChildrenEvent() {
@@ -56,8 +53,8 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 					handleCachedFileChildrenEvent();
 				}
 			});
-		} else {
-			super.astChanged(e);
+		} else if (e.getType() == IASTChangeEvent.FILE_RECOMPILED) {
+			fetchFileChildren(e.getFile());
 		}
 	}
 }

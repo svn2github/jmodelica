@@ -37,7 +37,8 @@ public class ReconcilingStrategy implements IReconcilingStrategy,
 
 	@Override
 	public void initialReconcile() {
-		recompileDocument();
+		//Not needed, file already compiled...
+		//recompileDocument();
 	}
 
 	@Override
@@ -47,17 +48,17 @@ public class ReconcilingStrategy implements IReconcilingStrategy,
 
 	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		recompileDocument();
+		//recompileDocument();
 	}
 
 	@Override
 	public void reconcile(IRegion partition) {
-		recompileDocument();
+		//recompileDocument();
 	}
 
 	
 	protected void recompileDocument() {
-		if (fDocument != null && fRootHandle != null) {
+		/**if (fDocument != null && fRootHandle != null) {
 			try {
 				fRootHandle.getLock().acquire();
 				IFile file = fRootHandle.getFile();
@@ -69,7 +70,7 @@ public class ReconcilingStrategy implements IReconcilingStrategy,
 				fRootHandle.getLock().release();
 			}
 			fRootHandle.notifyListeners();
-		}
+		}*/
 	}
 	
 	protected void updateErrors(IFile file, ILocalRootNode root) {

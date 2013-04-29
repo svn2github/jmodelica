@@ -19,8 +19,6 @@ package org.jmodelica.ide.textual.editor;
 //import static org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR;
 
 import java.io.File;
-import java.util.Stack;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,8 +51,6 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.ChangePropagationController;
-import org.jmodelica.ide.compiler.ModelicaASTRegistry;
 import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.helpers.EditorWithFile;
@@ -270,7 +266,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 
 		compResult = file.inModelicaProject() ? new GlobalCompilationResult(
 				file, this) : new LocalCompilationResult(file, this);
-		System.out.println("Editor uses compresult: " + file.toString());
 		fSourceOutlinePage.setFile(file.iFile());
 		// fnewSourceOutlinePage.setFile(file.iFile());
 		fInstanceOutlinePage.setFile(file.iFile());
@@ -313,9 +308,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
-		System.err.println("SAAAAAAAAAAAVED");
-		ChangePropagationController.getInstance().handleNotifications(
-				IASTChangeEvent.POST_UPDATE, file.iFile(), new Stack<String>());
 	}
 
 	@Override
@@ -357,11 +349,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		if (compResult.failed())
 			return;
 
-		// Update outline
-		// fSourceOutlinePage.astChanged(null);
-		// fnewSourceOutlinePage.astChanged(null);
-		// fInstanceOutlinePage.astChanged(null);
-		// fInstanceOutlinePage2.astChanged(null);
 		goToDeclaration.updateAST(compResult.root());
 
 		// updateProjectionAnnotations();
