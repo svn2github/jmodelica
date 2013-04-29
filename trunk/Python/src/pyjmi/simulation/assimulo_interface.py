@@ -185,6 +185,9 @@ class JMIDAE(Implicit_Problem):
         #Used for determine if there are discontinuities
         [f_nbr, g_nbr] = self._model.jmimodel.dae_get_sizes()
         [f0_nbr, f1_nbr, fp_nbr, g0_nbr] = self._model.jmimodel.init_get_sizes()
+        
+        if f_nbr == 0:
+            raise Exception("The JMI framework does not support 'simulation' of 0-dimension systems. Use the FMI framework.")
 
         if g_nbr > 0:
             #Change the models values of the switches from ints to booleans
@@ -682,6 +685,10 @@ class JMIDAESens(Implicit_Problem):
         
         if g_nbr > 0:
             raise JMIModel_Exception("Hybrid models with event functions are currently not supported.")
+        
+        if f_nbr == 0:
+            raise Exception("The JMI framework does not support 'simulation' of 0-dimension systems. Use the FMI framework.")
+
         
         #Construct the input nominal vector
         if self.input != None:
