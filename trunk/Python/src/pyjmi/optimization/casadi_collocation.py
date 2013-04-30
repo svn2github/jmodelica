@@ -628,6 +628,10 @@ class MeasurementData(object):
                     hasattr(data, '__call__')):
                     variable_list[name] = TrajectoryUserFunction(data)
                 else:
+                    if data.shape[0] != 2:
+                        raise ValueError("If variable data is not a " +
+                                         "function, it must be a matrix " +
+                                         "with exactly two rows.")
                     variable_list[name] = TrajectoryLinearInterpolation(
                             data[0], data[1].reshape([-1, 1]))
         
