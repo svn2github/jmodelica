@@ -67,17 +67,15 @@ aspect OptimicaFlattening {
 		getInstExtendsList().flatten(fc);
 	}
 	
-	refine Flattening public void InstNode.buildConnectionSets(FClass fc) {
-		FQName prefix = getFQName();
+	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		prefix = getFQName();
 		for (FAbstractEquation ae : getFAbstractEquations()) 
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
+		   ae.buildConnectionSets(prefix, csm, connect);
         for (FConstraint c : getFConstraints()) 
-           c.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		getInstComponentDeclList().buildConnectionSets(fc);
-		getInstExtendsList().buildConnectionSets(fc);
+           c.buildConnectionSets(prefix, csm, connect);
+		getInstComponentDeclList().buildConnectionSets(prefix, csm, connect);
+		getInstExtendsList().buildConnectionSets(prefix, csm, connect);
 	}
-	
-	public void FConstraint.buildConnectionSets(FQName prefix, ConnectionSetManager csm) { }
 
 	syn lazy ArrayList<Constraint> ClassDecl.constraints() = new ArrayList<Constraint>();
 	eq OptClassDecl.constraints() {
