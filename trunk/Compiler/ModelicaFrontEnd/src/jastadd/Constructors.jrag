@@ -787,7 +787,7 @@ aspect InheritedFactoryMethods {
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
-	public abstract FConnectionsOp      	  FConnectionsOp.createEmptyNode();
+	public abstract FConnBoolOp      	      FConnBoolOp.createEmptyNode();
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
@@ -984,8 +984,8 @@ aspect InheritedFactoryMethods {
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
-	public FConnectionsOp FConnectionsOp.createNode(FExp exps) {
-		FConnectionsOp node = createEmptyNode();
+	public FConnBoolOp FConnBoolOp.createNode(FExp exps) {
+		FConnBoolOp node = createEmptyNode();
 		node.setA(exps);
 		return node;
 	}

@@ -571,8 +571,8 @@ aspect Scalarization {
 	public interface FlatLookupNode {
 		public FAbstractVariable lookupFV(FQName fqn);
 	}
-	public class FFunctionVariable implements FlatLookupNode {}
-	public class FExp implements FlatLookupNode {}
+	FFunctionVariable implements FlatLookupNode;
+	FExp implements FlatLookupNode;
 	
 	/**
 	 * \brief Creates and organizes names of for indices for generated for loops.

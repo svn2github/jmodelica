@@ -1870,13 +1870,21 @@ aspect FlatNames {
     eq FEnumLiteralType.name() 		= getName();
     eq FRecordType.name()      		= getName();
     eq FUnknownType.name()     		= "(unknown type)";
-    eq FExternalObjectType.name()	= "ExternalObject"; 
+    eq FExternalObjectType.name()	= "ExternalObject";
+    
+    
+    syn boolean FAbstractFunctionCall.ignoreInFlattening() = false;
+    eq FIgnoredBuiltIn.ignoreInFlattening()                = true;
+    eq FConnectionsOp.ignoreInFlattening()                 = true;
+    
+    syn boolean FAbstractEquation.ignoreInFlattening() = false;
+    eq FFunctionCallEquation.ignoreInFlattening()      = getCall().ignoreInFlattening();
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
-    eq FIgnoredBuiltIn.isIgnored() = true;
+    eq FIgnoredBuiltIn.isIgnored()                = true;
     
     syn boolean FAbstractEquation.isIgnored() = false;
-    eq FFunctionCallEquation.isIgnored() = getCall().isIgnored();
+    eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
     
     /**
      * \brief Add an equation to the first equation block.

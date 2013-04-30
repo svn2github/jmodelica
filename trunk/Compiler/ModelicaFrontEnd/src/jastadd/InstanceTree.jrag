@@ -650,8 +650,8 @@ aspect InstanceTreeConstruction {
 		InstClassDecl lookupInstClassRedirect(String name);
 	}
 	
-	public class InstNode implements InstLookupRedirectNode {}
-	public class InstModification implements InstLookupRedirectNode {}
+	InstNode implements InstLookupRedirectNode;
+	InstModification implements InstLookupRedirectNode;
 	
 	syn lazy List InstNode.getInstComponentDeclList() {
 		
@@ -806,8 +806,8 @@ aspect InstanceTreeConstruction {
     	public InstClassDecl lookupInstClass(String name);
     	public ClassDecl redeclaringClassDecl();
     }
-    public class InstClassDecl implements InstRedeclareClassNode {}
-    public class InstClassRedeclare implements InstRedeclareClassNode {}
+    InstClassDecl implements InstRedeclareClassNode;
+    InstClassRedeclare implements InstRedeclareClassNode;
     
     syn ClassDecl InstClassDecl.redeclaringClassDecl()      = getClassDecl();
     syn ClassDecl InstClassRedeclare.redeclaringClassDecl() = getClassRedeclare().getBaseClassDecl();

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -273,9 +273,9 @@ equation
  b1.a1.y[1:2] = b2.a2.y[1:2];
  - b1.a1.x[1:2] - b1.a2.x[1:2] = zeros(2);
  b1.a1.y[1:2] = b1.a2.y[1:2];
+ b1.a2.x[1:2] = zeros(2);
  - b2.a1.x[1:2] - b2.a2.x[1:2] = zeros(2);
  b2.a1.y[1:2] = b2.a2.y[1:2];
- b1.a2.x[1:2] = zeros(2);
  b2.a1.x[1:2] = zeros(2);
 end ConnectTests.ConnectTest6;
 ")})));

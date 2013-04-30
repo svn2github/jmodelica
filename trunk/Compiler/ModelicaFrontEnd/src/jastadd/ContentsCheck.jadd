@@ -94,6 +94,10 @@ aspect ContentCheck {
 		}
 	}
 	
+	public void FConnRootedDep.contentCheck() {
+		warning("The rooted() operator has been deprecated in favor of Connections.rooted()");
+	}
+	
 	public void InstClassDecl.contentCheck() {
 		if (isExternalObject()) {
 			checkContentsOKInExternalObject();

@@ -463,7 +463,7 @@ aspect InstLookupClasses {
 	}
 	
 	eq InstComponentDecl.memberInstClass(String name) {
-		if (isArray()) {
+		if (isArray() && !isPrimitive()) {
 			return arrayCellInstComponent(ndims()).memberInstClass(name);
 		} else {
 			if (!constrainMemberInstClass(name))

@@ -322,7 +322,7 @@ aspect FlatNameBinding {
 		
 	}
 	
-	public class FAbstractVariable implements FlatVariableMap.HierarchicalMapNode {}
+	FAbstractVariable implements FlatVariableMap.HierarchicalMapNode;
 	
 	public FAbstractVariable FAbstractVariable.lookupHierarchical(FQName name, int part, boolean outermost) {
 		return (outermost || name.numParts() <= part) ? this : null;

@@ -587,30 +587,20 @@ aspect Flattening {
 		getInstExtendsList().flatten(fc);
 	}
 	
+	/**
+	 * Check if this component should be considered during flattening.
+	 */
+	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
+	
 	public void InstComponentDecl.flatten(FClass fc) {
-		if (!isDisabled() && !(isOuter() && !isInner())) {
+		if (useInFlattening()) 
 			super.flatten(fc);
-		}
 	}
 	
-	public void ASTNode.buildConnectionSets(FClass fc) {
-		for (ASTNode n : this) {
-			n.buildConnectionSets(fc);
-		}
-	}
-	
-	public void InstNode.buildConnectionSets(FClass fc) {
-		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) 
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		getInstComponentDeclList().buildConnectionSets(fc);
-		getInstExtendsList().buildConnectionSets(fc);
-	}
-	
-	public void InstComponentDecl.buildConnectionSets(FClass fc) {
-		if (!isDisabled() && !(isOuter() && !isInner())) {
-			super.buildConnectionSets(fc);
-		}
+	public void InstClassDecl.buildConnectionSets(FClass fc) {
+		ConnectionSetManager csm = fc.getConnectionSetManager();
+		buildConnectionSets(new FQNameEmpty(), csm, true);
+		csm.getGraph().buildTrees(csm);
 	}
 	
 //	public void InstClassDecl.flatten(FClass fc) {}
@@ -628,13 +618,9 @@ aspect Flattening {
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
-		if (!isDisabled() && !(isOuter() && !isInner())) {
+		if (useInFlattening()) {
 			fc.addUniqueFVariable(createFVariable());
 			myInstClass().addFDerivedType(fc);
-			if (isFlow()) {
-				FQName name = flattenedAccess(getFQNamePrefix());
-				fc.getConnectionSetManager().addInsideFlowVar(this, name);
-			}
 		}
 	}
 	
@@ -1182,7 +1168,8 @@ aspect Flattening {
 			InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
 			FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
 			
-			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
+					new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
 		}
 	}
 	
@@ -1321,7 +1308,7 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
-		if (isIgnored())
+		if (ignoreInFlattening())
 			return null;
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
@@ -1874,9 +1861,13 @@ aspect FlatExpressions {
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	                     
 	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
+	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
+		FConnBoolOp res = createNode(getA().flatten(prefix));
+		res.connectionGraph = connectionGraph;
+		return res;
+	}
 
 	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
-	
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 

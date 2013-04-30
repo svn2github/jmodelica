@@ -160,9 +160,9 @@ aspect VariabilityPropagation {
 		}
 
 		if (solutionVariability.constantVariability()) {
-			if (solution.canCeval()) {
+			try {
 				solution = solution.ceval().buildLiteral();
-			} else {
+			} catch (ConstantEvaluationException e) {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
 			}
@@ -181,9 +181,8 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
 			List<FAbstractEquation> parameterEquations) {
 		
-		
 		FTypePrefixVariability callVariability = getCall().variability();
-		CValue val[] = null;
+		FExp literals[] = null;
 	
 		if (!canPropagate()) {
 			return;
@@ -200,9 +199,14 @@ aspect VariabilityPropagation {
 		}
 		
 		if (callVariability.constantVariability()) {
-			if (getCall().canCeval()) {
-				val = getCall().cevalFunction();
-			} else {
+			try {
+				CValue[] val = getCall().cevalFunction();
+				literals = new FExp[val.length];
+				for (int i = 0; i < val.length && i < getNumLeft(); i++)
+					if (getLeft(i).hasFExp())
+						literals[i] = val[i].buildLiteral();
+			} catch (ConstantEvaluationException e) {
+				// If we can't evaluate right now, set it as parameter
 				callVariability = fParameter();
 			}
 		}
@@ -215,8 +219,8 @@ aspect VariabilityPropagation {
 		int i = 0;
 		for (FFunctionCallLeft left : getLefts()) {
 			if (left.hasFExp()) {
-				left.getFExp().variabilityPropagation(worklist,callVariability, 
-						callVariability.constantVariability() ? val[i].buildLiteral() : null);				
+				left.getFExp().variabilityPropagation(worklist, callVariability, 
+						callVariability.constantVariability() ? literals[i] : null);				
 			}
 			i++;
 		}		
@@ -374,13 +378,15 @@ aspect ConstantFolding {
 	}
 
 	rewrite FAbstractExp {
-		when (constantFoldingEnabled && isConstantExp() && canCeval()) to FExp {
-			CValue value = ceval();
-			if (value.size().isEmpty()) {
-				constantFoldingEnabled = false;
-				return this;
+		when (constantFoldingEnabled && isConstantExp()) to FExp {
+			try {
+				CValue value = ceval();
+				if (!value.size().isEmpty()) 
+					return value.buildLiteral();
+			} catch (ConstantEvaluationException e) {
 			}
-			return value.buildLiteral();
+			constantFoldingEnabled = false;
+			return this;
 		}
 	}
 

@@ -52,7 +52,7 @@ aspect ConstantEvaluation {
 		}
 		
 		public ConstantEvaluationException() {
-			super();
+			super("Unspecified constant evaluation failure");
 			this.val = null;
 		}
 		
@@ -67,10 +67,17 @@ aspect ConstantEvaluation {
 		 * \brief Gets the error message.
 		 */
 		public String getMessage() {
-			return (val == null) ? 
-				"Unspecified constant evaluation failure" :
+			return (val == null) ? super.getMessage() :
 				"Cannot " + super.getMessage() + val.errorDesc();
 		}
+	}
+	
+	public class ConstantEvaluationNotReadyException extends ConstantEvaluationException {
+		
+		public ConstantEvaluationNotReadyException() {
+			super(null, "Cannot evaluate expression yet");
+		}
+		
 	}
   
 	/**
@@ -1071,10 +1078,15 @@ aspect ConstantEvaluation {
    * Check if this expression can be constant evaluated.
    * 
    * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
+   * Use only for error checking, since it does not guarantee that the expression can be 
+   * evaluated at the moment - only after calculating overconstrained connection graph.
    */
   syn boolean FExp.canCeval() {
   	  try {
-  	  	   return !ceval().isUnknown();
+  	  	  return !ceval().isUnknown();
+	  } catch (ConstantEvaluationNotReadyException e) {
+		  // Will be evaluatable later, ignore for now
+		  return true;
   	  } catch (Exception e) {
   	  	  return false;
   	  }
@@ -1176,12 +1188,21 @@ aspect ConstantEvaluation {
   eq FConnectionsOp.cevalCalc() {
 	  throw new ConstantEvaluationException();
   }
-  eq FConnBoolOp.cevalCalc() = new CValueBoolean(value);
+  eq FConnBoolOp.cevalCalc() {
+	  if (connectionGraph != null && connectionGraph.builtTreesDone()) 
+		  return new CValueBoolean(cevalFromGraph());
+	  else
+		  throw new ConstantEvaluationNotReadyException();
+  }
+  
+  syn boolean FConnBoolOp.cevalFromGraph();
+  eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
+  eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
 
   /**
-   * The calculated value of a Connections.x() operator with boolean result.
+   * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
    */
-  private boolean FConnBoolOp.value = true;
+  protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
   
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
@@ -1717,8 +1738,8 @@ aspect ConstantEvaluation {
 	  public String name();
   }
   
-  public class FAbstractVariable implements CommonVariableDecl {}
-  public class InstComponentDecl implements CommonVariableDecl {}
+  FAbstractVariable implements CommonVariableDecl;
+  InstComponentDecl implements CommonVariableDecl;
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
@@ -2082,8 +2103,8 @@ aspect ConstantEvaluation {
   public interface FunctionEvalNode {
 	  public int evaluate(Map<CommonVariableDecl, CValue> values);
   }
-  public class FStatement implements FunctionEvalNode {}
-  public class FIfWhenClause implements FunctionEvalNode {}
+  FStatement implements FunctionEvalNode;
+  FIfWhenClause implements FunctionEvalNode;
   
   /**
    * \brief Evaluate statement during function evaluation.
@@ -2161,8 +2182,8 @@ aspect ConstantEvaluation {
 	  public boolean isArray();
 	  public CommonNamePart nextNamePart();
   }
-  public class InstAccess implements CommonNamePart {}
-  public class FQNamePart implements CommonNamePart {}
+  InstAccess implements CommonNamePart;
+  FQNamePart implements CommonNamePart;
   
   public Indices FQNamePart.indices() {
 	  return Indices.createFromFas(getFArraySubscripts());

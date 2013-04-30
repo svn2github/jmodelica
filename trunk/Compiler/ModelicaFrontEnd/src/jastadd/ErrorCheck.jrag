@@ -761,6 +761,8 @@ aspect InstanceErrorCheck {
 					}
 				}
 			}
+		} catch (ConstantEvaluationNotReadyException e) {
+			// Will be evaluatable later, ignore for now
 		} catch (ConstantEvaluationException e) {
 			failed = true;
 		}
