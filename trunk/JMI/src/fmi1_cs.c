@@ -186,6 +186,10 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     component -> fmi1_me = fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
     
     if (component -> fmi1_me == NULL){
+        functions.freeMemory((void*)component -> instance_name);
+        functions.freeMemory((void*)component -> encoded_instance_name);
+        functions.freeMemory((void*)component -> GUID);
+        functions.freeMemory(component);
         return NULL;
     }
     
