@@ -29,6 +29,7 @@ public class ModelicaSettingsControl  {
 
 	private Button delLibraryButton;
 	private Button addLibraryButton;
+	private Button editLibraryButton;
 	private Table libraryTable;
 	private Group libraryGroup;
 
@@ -103,6 +104,10 @@ public class ModelicaSettingsControl  {
 		delLibraryButton = createButton(container, "Remove");
 		delLibraryButton.addSelectionListener(new DeleteListener());
 		delLibraryButton.setEnabled(false);
+		
+		editLibraryButton = createButton(container, "Edit");
+		editLibraryButton.addSelectionListener(new EditListener());
+		editLibraryButton.setEnabled(false);
 
 		container.pack();
 	}
@@ -150,6 +155,36 @@ public class ModelicaSettingsControl  {
 		new TableItem(libraryTable, SWT.NONE).setText(0, library);
 	}
 
+	private void replaceLibrary(String libraryToAdd, String libraryToReplace, int index) {
+		libraryPaths.remove(libraryToReplace);
+		libraryTable.remove(index);	
+		new TableItem(libraryTable, SWT.NONE, index).setText(0, libraryToAdd);
+	}
+	
+	private void updateSelection() {
+		boolean enable = libraryTable.getSelectionIndex() > -1;
+		delLibraryButton.setEnabled(enable);
+		editLibraryButton.setEnabled(enable);
+	}
+
+	private void changeLibrary(int i) {
+		// if i = -1 add library otherwise replace
+		String addPath = libraryDlg.open();
+		if (addPath != null) {
+			if (libraryPaths.contains(addPath)) {
+				error.setMessage("Library path already added.");
+				error.open();
+			}  else {
+				if (i >= 0) {
+					replaceLibrary(addPath, libraryTable.getItem(i).getText(), i);	
+				} else {
+					addLibrary(addPath);
+				}
+				libraryPaths.add(addPath);
+				libraryTable.select(i);
+			}
+		}
+	}
 
 	public class AddListener implements SelectionListener {
 
@@ -157,16 +192,7 @@ public class ModelicaSettingsControl  {
 		}
 
 		public void widgetSelected(SelectionEvent e) {
-			String path = libraryDlg.open();
-			if (path != null) {
-				if (libraryPaths.contains(path)) {
-					error.setMessage("Library path already added.");
-					error.open();
-				} else {
-					libraryPaths.add(path);
-					addLibrary(path);
-				}
-			}
+			changeLibrary(-1);
 		}
 
 	}
@@ -177,10 +203,26 @@ public class ModelicaSettingsControl  {
 		}
 
 		public void widgetSelected(SelectionEvent e) {
-			libraryTable.getSelectionIndex();
 			int i = libraryTable.getSelectionIndex();
 			libraryTable.remove(i);
 			libraryPaths.remove(i);
+			updateSelection();
+		}
+
+	}
+
+	public class EditListener implements SelectionListener {
+
+		public void widgetDefaultSelected(SelectionEvent e) {
+		}
+
+		public void widgetSelected(SelectionEvent e) {
+			int i = libraryTable.getSelectionIndex();
+			TableItem item = libraryTable.getItem(i);
+			String currentPath = item.getText();
+			libraryDlg.setFilterPath(currentPath);
+			
+			changeLibrary(i);
 		}
 
 	}
@@ -192,9 +234,9 @@ public class ModelicaSettingsControl  {
 		}
 
 		public void widgetSelected(SelectionEvent e) {
-			delLibraryButton.setEnabled(e.item != null);
+			updateSelection();
 		}
 
 	}
-
+	
 }
