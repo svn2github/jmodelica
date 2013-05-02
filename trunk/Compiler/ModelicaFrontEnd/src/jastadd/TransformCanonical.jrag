@@ -3469,12 +3469,34 @@ aspect TransformCanonical {
 	/**
 	 * Create a copy of the list with all equations with <code>markedForRemoval == true</code> removed. 
 	 */
-	private List<FAbstractEquation> FClass.removeMarkedEqns(List<FAbstractEquation> list) {
+	protected static List<FAbstractEquation> ASTNode.removeMarkedEqns(List<FAbstractEquation> list) {
 		List<FAbstractEquation> res = new List<FAbstractEquation>();
-		for (FAbstractEquation eqn : list)
-			if (!eqn.markedForRemoval)
+		for (FAbstractEquation eqn : list) {
+			if (!eqn.markedForRemoval) {
+				eqn.removeMarkedEqns();
 				res.add(eqn);
+			}
+		}
 		return res;
+	}
+	
+	/**
+	 * Remove all contained equations with <code>markedForRemoval == true</code>. 
+	 */
+	public void FAbstractEquation.removeMarkedEqns() {}
+	
+	public void FForClauseE.removeMarkedEqns() {
+		setFAbstractEquationList(removeMarkedEqns(getFAbstractEquations()));
+	}
+	
+	public void FIfWhenElseEquation.removeMarkedEqns() {
+		setFAbstractEquationList(removeMarkedEqns(getFAbstractEquations()));
+	}
+	
+	public void FIfWhenEquation.removeMarkedEqns() {
+		super.removeMarkedEqns();
+		if (hasElse())
+			getElse().removeMarkedEqns();
 	}
 	
 	/**
@@ -4065,7 +4087,7 @@ aspect IfEquations {
 			l.add(new FEquation(getType().fullCopy(), v.createUseExp(), ifExp));
 		}
 		
-		ParallelIterable<FEquation> unmatched = new ParallelIterable(new FEquation[2], 
+		ParallelIterable<FEquation> unmatched = new ParallelIterable(new FEquation[2], true, 
 				unmatchedEquations(this, varsInBoth), unmatchedEquations(getElse(), varsInBoth));
 		for (FEquation[] eqs : unmatched) {
 			FExp left = eqs[0].createResidualExp();

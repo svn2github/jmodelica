@@ -2015,6 +2015,59 @@ equation
 end FunctionInlining.IfEquationInline6;
 ")})));
     end IfEquationInline6;
+
+
+model IfEquationInline7
+    record R
+        Real p;
+    end R;
+    
+    function f1
+        input Real p;
+        output R r;
+    algorithm
+        r := R(p);
+    end f1;
+    
+    function f2
+        input R r;
+        output Real x;
+    algorithm
+        x := r.p;
+    end f2;
+    
+    Real x;
+    Real y;
+equation
+    if time > 0 then
+        x = 4;
+        y = 2;
+    else
+        x = f2(f1(time));
+        time = y + 1;
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline7",
+			description="Check that temporary equations are removed properly within if equations",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.IfEquationInline7
+ Real x;
+ Real y;
+equation
+ x = if time > 0 then 4 else time;
+ 0.0 = if time > 0 then y - 2 else time - (y + 1);
+
+public
+ record FunctionInlining.IfEquationInline7.R
+  Real p;
+ end FunctionInlining.IfEquationInline7.R;
+
+end FunctionInlining.IfEquationInline7;
+")})));
+end IfEquationInline7;
     
     
     
