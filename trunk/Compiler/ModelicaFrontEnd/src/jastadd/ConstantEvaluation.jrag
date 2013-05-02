@@ -2315,7 +2315,7 @@ aspect ConstantEvaluation {
 
   public int FFunctionCallStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue[] vals = getCall().evaluate();
-	  for (int i = 0; i < vals.length; i++)
+	  for (int i = 0, n = getNumLeft(); i < n; i++)
 		  getLeft(i).setEvaluationValue(vals[i], values);
 	  return EVAL_CONT;
   }
