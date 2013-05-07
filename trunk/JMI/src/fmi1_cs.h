@@ -83,7 +83,7 @@ const char* fmi1_cs_get_version();
  * @return Error code.
  */
 fmiStatus fmi1_cs_do_step(fmiComponent c,
-						 fmiReal currentCommunicationPoint,
+                         fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep);
                          

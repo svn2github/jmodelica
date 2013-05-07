@@ -81,10 +81,10 @@ typedef struct jmi_opt_coll_t jmi_opt_coll_t;
 
 /* Function typedefs */
 typedef int (*jmi_opt_coll_get_dimensions_t)(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g, int *n_h,
-		int *dg_n_nz, int *dh_n_nz);
+        int *dg_n_nz, int *dh_n_nz);
 
 typedef int (*jmi_opt_coll_get_interval_spec_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *startTime, int *startTimeFree,
-		jmi_real_t *finalTime, int *finalTimeFree);
+        jmi_real_t *finalTime, int *finalTimeFree);
 
 typedef int (*jmi_opt_coll_f_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *f);
 
@@ -99,48 +99,48 @@ typedef int (*jmi_opt_coll_g_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res);
 typedef int (*jmi_opt_coll_dg_t)(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac);
 
 typedef int (*jmi_opt_coll_get_bounds_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *x_lb, jmi_real_t *x_ub);
+        jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 typedef int (*jmi_opt_coll_set_bounds_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *x_lb, jmi_real_t *x_ub);
+        jmi_real_t *x_lb, jmi_real_t *x_ub);
 
 typedef int (*jmi_opt_coll_get_initial_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *x_init);
+        jmi_real_t *x_init);
 
 typedef int (*jmi_opt_coll_set_initial_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *x_init);
+        jmi_real_t *x_init);
 
 typedef int (*jmi_opt_coll_set_initial_from_trajectory_t)(
-		jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
-		jmi_real_t final_time_init);
+        jmi_opt_coll_t *jmi_opt_coll,
+        jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
+        int traj_n_points, jmi_real_t *hs_init, jmi_real_t start_time_init,
+        jmi_real_t final_time_init);
 
 typedef int (*jmi_opt_coll_h_nz_indices_t)(jmi_opt_coll_t *jmi_opt_coll,
-		int *colIndex, int *rowIndex);
+        int *colIndex, int *rowIndex);
 
 typedef int (*jmi_opt_coll_g_nz_indices_t)(jmi_opt_coll_t *jmi_opt_coll,
-		int *colIndex, int *rowIndex);
+        int *colIndex, int *rowIndex);
 
 typedef int (*jmi_opt_coll_write_file_matlab_t)(jmi_opt_coll_t *jmi_opt_coll,
-		const char *file_name);
+        const char *file_name);
 
 typedef int (*jmi_opt_coll_get_result_variable_vector_length_t)(jmi_opt_coll_t
-		*jmi_opt_coll, int *n);
+        *jmi_opt_coll, int *n);
 
 typedef int (*jmi_opt_coll_get_result_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *p_opt, jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x,
-		jmi_real_t *u, jmi_real_t *w);
+        jmi_real_t *p_opt, jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x,
+        jmi_real_t *u, jmi_real_t *w);
 
 typedef int (*jmi_opt_coll_get_result_mesh_interpolation_t)(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 typedef int (*jmi_opt_coll_get_result_element_interpolation_t)(jmi_opt_coll_t *jmi_opt_coll,
-		int n_interpolation_points, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        int n_interpolation_points, jmi_real_t *p_opt,
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 /* @} */
 
@@ -164,7 +164,7 @@ typedef int (*jmi_opt_coll_get_result_element_interpolation_t)(jmi_opt_coll_t *j
  * constraints.
  */
 int jmi_opt_coll_get_dimensions(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g,
-		int *n_h, int *dg_n_nz, int *dh_n_nz);
+        int *n_h, int *dg_n_nz, int *dh_n_nz);
 
 /**
  * \brief Retrieve data that specifies the optimization interval.
@@ -177,8 +177,8 @@ int jmi_opt_coll_get_dimensions(jmi_opt_coll_t *jmi_opt_coll, int *n_x, int *n_g
  * \return Error code.
  */
 int jmi_opt_coll_get_interval_spec(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *start_time, int *start_time_free,
-		jmi_real_t *final_time, int *final_time_free);
+        jmi_real_t *start_time, int *start_time_free,
+        jmi_real_t *final_time, int *final_time_free);
 
 /**
  * \brief Get the number of finite elements
@@ -232,7 +232,7 @@ int jmi_opt_coll_get_blocking_factors(jmi_opt_coll_t *jmi_opt_coll, int *n_block
  * @return Error code.
  */
  int jmi_opt_coll_set_initial(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *x_init);
+        jmi_real_t *x_init);
 
 /**
  * \brief Set the initial point based on time series trajectories of the
@@ -259,10 +259,10 @@ int jmi_opt_coll_get_blocking_factors(jmi_opt_coll_t *jmi_opt_coll, int *n_block
  *
  */
 int jmi_opt_coll_set_initial_from_trajectory(
-		jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
-		int traj_n_points,jmi_real_t *hs_init, jmi_real_t start_time_init,
-		jmi_real_t final_time_init);
+        jmi_opt_coll_t *jmi_opt_coll,
+        jmi_real_t *p_opt_init, jmi_real_t *trajectory_data_init,
+        int traj_n_points,jmi_real_t *hs_init, jmi_real_t start_time_init,
+        jmi_real_t final_time_init);
 
 /**
  * \brief The main struct in the jmi_opt_coll interface is jmi_opt_coll_t.
@@ -271,49 +271,49 @@ int jmi_opt_coll_set_initial_from_trajectory(
  * the NLP, and variable vectors.
  */
 struct jmi_opt_coll_t{
-	jmi_t *jmi;                        /* jmi_t struct */
-	int n_x;                           /* Number of variables */
-	int n_e;                           /* Number of elements in mesh */
-	jmi_real_t *hs;                    /* Normalized element lengths in mesh (sum(h[i]=1) */
-	int hs_free;                       /* Free element lengths */
-	int *tp_e;                         /* Element indices for time points */
-	jmi_real_t* tp_tau;                /* Taus for time points within elements */
-	jmi_real_t *x;                     /* x vector. */
-	jmi_real_t *x_lb;                  /* Lower bounds for variables */
-	jmi_real_t *x_ub;                  /* Upper bound for variables */
-	jmi_real_t *x_init;                /* Initial starting point */
-	int *blocking_factors;             /* Specification of blocking factors */
-	int n_blocking_factors;            /* Number of blocking factors */
-	int n_blocking_factor_constraints; /* Number of constraints resulting */
-		                               /* from blocking factors divided by the number of inputs */
-	int dg_n_nz;
-	int dh_n_nz;
-	int *dg_row;
-	int *dg_col;
-	int *dh_row;
-	int *dh_col;
-	int n_nonlinear_variables;
-	int *non_linear_variables_indices; /* Stored Fortran style (first index = 1) */
-	jmi_opt_coll_get_dimensions_t get_dimensions;
-	jmi_opt_coll_get_interval_spec_t get_interval_spec;
-	jmi_opt_coll_f_t f;
-	jmi_opt_coll_df_t df;
-	jmi_opt_coll_h_t h;
-	jmi_opt_coll_dh_t dh;
-	jmi_opt_coll_g_t g;
-	jmi_opt_coll_dg_t dg;
-	int n_g;                          /* Number of inequality constraints */
-	int n_h;                          /* Number of equality constraints */
-	jmi_opt_coll_get_bounds_t get_bounds;
-	jmi_opt_coll_get_initial_t get_initial;
-	jmi_opt_coll_set_initial_from_trajectory_t set_initial_from_trajectory;
-	jmi_opt_coll_g_nz_indices_t dg_nz_indices;
-	jmi_opt_coll_h_nz_indices_t dh_nz_indices;
-	jmi_opt_coll_write_file_matlab_t write_file_matlab;
-	jmi_opt_coll_get_result_variable_vector_length_t get_result_variable_vector_length;
-	jmi_opt_coll_get_result_t get_result;
-	jmi_opt_coll_get_result_mesh_interpolation_t get_result_mesh_interpolation;
-	jmi_opt_coll_get_result_element_interpolation_t get_result_element_interpolation;
+    jmi_t *jmi;                        /* jmi_t struct */
+    int n_x;                           /* Number of variables */
+    int n_e;                           /* Number of elements in mesh */
+    jmi_real_t *hs;                    /* Normalized element lengths in mesh (sum(h[i]=1) */
+    int hs_free;                       /* Free element lengths */
+    int *tp_e;                         /* Element indices for time points */
+    jmi_real_t* tp_tau;                /* Taus for time points within elements */
+    jmi_real_t *x;                     /* x vector. */
+    jmi_real_t *x_lb;                  /* Lower bounds for variables */
+    jmi_real_t *x_ub;                  /* Upper bound for variables */
+    jmi_real_t *x_init;                /* Initial starting point */
+    int *blocking_factors;             /* Specification of blocking factors */
+    int n_blocking_factors;            /* Number of blocking factors */
+    int n_blocking_factor_constraints; /* Number of constraints resulting */
+                                       /* from blocking factors divided by the number of inputs */
+    int dg_n_nz;
+    int dh_n_nz;
+    int *dg_row;
+    int *dg_col;
+    int *dh_row;
+    int *dh_col;
+    int n_nonlinear_variables;
+    int *non_linear_variables_indices; /* Stored Fortran style (first index = 1) */
+    jmi_opt_coll_get_dimensions_t get_dimensions;
+    jmi_opt_coll_get_interval_spec_t get_interval_spec;
+    jmi_opt_coll_f_t f;
+    jmi_opt_coll_df_t df;
+    jmi_opt_coll_h_t h;
+    jmi_opt_coll_dh_t dh;
+    jmi_opt_coll_g_t g;
+    jmi_opt_coll_dg_t dg;
+    int n_g;                          /* Number of inequality constraints */
+    int n_h;                          /* Number of equality constraints */
+    jmi_opt_coll_get_bounds_t get_bounds;
+    jmi_opt_coll_get_initial_t get_initial;
+    jmi_opt_coll_set_initial_from_trajectory_t set_initial_from_trajectory;
+    jmi_opt_coll_g_nz_indices_t dg_nz_indices;
+    jmi_opt_coll_h_nz_indices_t dh_nz_indices;
+    jmi_opt_coll_write_file_matlab_t write_file_matlab;
+    jmi_opt_coll_get_result_variable_vector_length_t get_result_variable_vector_length;
+    jmi_opt_coll_get_result_t get_result;
+    jmi_opt_coll_get_result_mesh_interpolation_t get_result_mesh_interpolation;
+    jmi_opt_coll_get_result_element_interpolation_t get_result_element_interpolation;
 };
 
 /**
@@ -448,7 +448,7 @@ int jmi_opt_coll_dh_nz_indices(jmi_opt_coll_t *jmi_opt_coll, int *irow, int *ico
  *
  */
 int jmi_opt_coll_write_file_matlab(jmi_opt_coll_t *jmi_opt_coll_t,
-		const char *file_name);
+        const char *file_name);
 
 /**
  * \brief Get the length of the result variable vectors.
@@ -459,7 +459,7 @@ int jmi_opt_coll_write_file_matlab(jmi_opt_coll_t *jmi_opt_coll_t,
  *
  */
 int jmi_opt_coll_get_result_variable_vector_length(jmi_opt_coll_t
-		*jmi_opt_coll, int *n);
+        *jmi_opt_coll, int *n);
 
 /**
  * \brief Get the optimization results.
@@ -481,8 +481,8 @@ int jmi_opt_coll_get_result_variable_vector_length(jmi_opt_coll_t
  * @param w (Output) The algebraic variables.
  */
 int jmi_opt_coll_get_result(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 /**
  * \brief Get the optimization results based on a user defined mesh.
@@ -507,9 +507,9 @@ int jmi_opt_coll_get_result(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *p_opt,
  * @param w (Output) The algebraic variables.
  */
 int jmi_opt_coll_get_result_mesh_interpolation(jmi_opt_coll_t *jmi_opt_coll,
-		jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        jmi_real_t *mesh, int n_mesh, jmi_real_t *p_opt,
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 /**
  * \brief Get the optimization results based on interpolation within finite
@@ -538,9 +538,9 @@ int jmi_opt_coll_get_result_mesh_interpolation(jmi_opt_coll_t *jmi_opt_coll,
  * @param w (Output) The algebraic variables.
  */
 int jmi_opt_coll_get_result_element_interpolation(jmi_opt_coll_t *jmi_opt_coll,
-		int n_interpolation_points, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        int n_interpolation_points, jmi_real_t *p_opt,
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 
 #ifdef __cplusplus

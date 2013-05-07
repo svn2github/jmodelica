@@ -159,11 +159,11 @@ typedef struct jmi_log_t jmi_log_t;                       /**< \brief Forward de
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
-			   < representation used in the Runtime
-			   < Library. */
+               < representation used in the Runtime
+               < Library. */
 typedef int jmi_int_t; /*< Typedef for the integer number
-			   < representation used in the Runtime
-			   < Library. */
+               < representation used in the Runtime
+               < Library. */
 
 /* This section defines types in the case of no AD and
  in the case of CppAD.*/
@@ -250,8 +250,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
-	type name##_rec;\
-	type* name = &name##_rec;
+    type name##_rec;\
+    type* name = &name##_rec;
 
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
@@ -359,7 +359,7 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
  *
  */
 typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
-		jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
+        jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
 
 
 /**
@@ -415,9 +415,9 @@ typedef int (*jmi_jacobian_func_t)(jmi_t* jmi, int sparsity,
  */
 int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F,
                  int n_eq_F, jmi_jacobian_func_t sym_dF,
-        		 int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
-        		 jmi_directional_der_residual_func_t cad_dir_dF,
-        		 int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col);
+                 int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,
+                 jmi_directional_der_residual_func_t cad_dir_dF,
+                 int cad_dF_n_nz, int* cad_dF_row, int* cad_dF_col);
 
 /**
  * \brief Delete a jmi_func_t.
@@ -451,7 +451,7 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res);
  *
  */
 int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
-		int independent_vars, int* mask, jmi_real_t* jac) ;
+        int independent_vars, int* mask, jmi_real_t* jac) ;
 
 /**
  * \brief Returns the number of non-zeros in the symbolic Jacobian.
@@ -498,8 +498,8 @@ int jmi_func_sym_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
  */
 int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
-		    int *dF_n_cols, int *dF_n_nz);
-		    
+            int *dF_n_cols, int *dF_n_nz);
+            
 /**
  * \brief Evaluate the directional AD derivative of the residual function of
  * a jmi_func_t struct, using symbolic differentiation.
@@ -513,7 +513,7 @@ int jmi_func_sym_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
  */
 
 int jmi_func_sym_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
-			 jmi_real_t *dF, jmi_real_t* dv);
+             jmi_real_t *dF, jmi_real_t* dv);
 
 /**
  * \brief Evaluate the directional AD derivative of the residual function of
@@ -527,7 +527,7 @@ int jmi_func_sym_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
  * @return Error code.
  */
 int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
-			 jmi_real_t *dF, jmi_real_t* dv);
+             jmi_real_t *dF, jmi_real_t* dv);
 
 /**
  * \brief Evaluation of the AD Jacobian of the
@@ -543,7 +543,7 @@ int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
  */
 
 int jmi_func_cad_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
-		int independent_vars, int* mask, jmi_real_t* jac) ;
+        int independent_vars, int* mask, jmi_real_t* jac) ;
 
 /**
  * \brief Returns the number of non-zeros in the AD Jacobian.
@@ -594,7 +594,7 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
 
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
-		    int *dF_n_cols, int *dF_n_nz);
+            int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the directional finite difference derivative of the residual function of
@@ -609,7 +609,7 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
  */
 
 int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
-			 jmi_real_t *dF, jmi_real_t* dv);
+             jmi_real_t *dF, jmi_real_t* dv);
 
 /**
  * \brief Evaluation of the finite difference Jacobian of the
@@ -625,7 +625,7 @@ int jmi_func_fd_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
  */
 
 int jmi_func_fd_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
-		int independent_vars, int* mask, jmi_real_t* jac) ;
+        int independent_vars, int* mask, jmi_real_t* jac) ;
 
 /**
  * \brief Returns the number of non-zeros in the finite difference Jacobian.
@@ -675,7 +675,7 @@ int jmi_func_fd_dF_nz_indices(jmi_t *jmi, jmi_func_t *func,
 
 int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
-		    int *dF_n_cols, int *dF_n_nz);
+            int *dF_n_cols, int *dF_n_nz);
 
 /**< \brief Run-time options. */
 typedef struct jmi_options_t {
@@ -693,9 +693,9 @@ typedef struct jmi_options_t {
     double nle_solver_tol_factor;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     double events_default_tol;  /**< \brief Default tolerance for the event iterations. */        
     double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */
-	int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
-	int block_jacobian_check; /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
-	double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */
+    int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
+    int block_jacobian_check; /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
+    double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */
     int cs_solver; /**< \brief Option for changing the internal CS solver */ 
 } jmi_options_t;
 
@@ -739,47 +739,47 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
  * with AD support).
  */
 struct jmi_func_t{
-	jmi_residual_func_t F;  /**< \brief Pointer to a function for evaluation of \f$F(z)\f$. */
-	jmi_jacobian_func_t sym_dF; /**< \brief Pointer to a function for evaluation of the symbolic Jacobian of \f$F(z)\f$. */
-	jmi_directional_der_residual_func_t cad_dir_dF; /**< \brief Pointer to a function for evaluation of the directional AD derivative of the function */
-	int n_eq_F;             /**< \brief Size of the function. */
-	int sym_dF_n_nz;            /**< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available). */
-	int* sym_dF_row;            /**< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
-	int* sym_dF_col;            /**< \brief Column indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
-	int cad_dF_n_nz;            /**< \brief Number of non-zeros in the AD Jacobian of \f$F(z)\f$ (if available). */
-	int* cad_dF_row;            /**< \brief Row indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
-	int* cad_dF_col;            /**< \brief Column indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
-	jmi_func_ad_t* ad;      /**< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support). */
-	int coloring_counter;	/**< \brief Number of times that the graph coloring algorithm  has been performed. */
-	int* coloring_done;		/**< \brief Contains info of which independent_vars that the graph_coloring algorithm has been done. */
-	jmi_color_info** c_info;  /**< \brief Vector of jmi_graph_coloring struct, contains graph coloring results for every independent_vars that has been performed  */
-	
+    jmi_residual_func_t F;  /**< \brief Pointer to a function for evaluation of \f$F(z)\f$. */
+    jmi_jacobian_func_t sym_dF; /**< \brief Pointer to a function for evaluation of the symbolic Jacobian of \f$F(z)\f$. */
+    jmi_directional_der_residual_func_t cad_dir_dF; /**< \brief Pointer to a function for evaluation of the directional AD derivative of the function */
+    int n_eq_F;             /**< \brief Size of the function. */
+    int sym_dF_n_nz;            /**< \brief Number of non-zeros in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+    int* sym_dF_row;            /**< \brief Row indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+    int* sym_dF_col;            /**< \brief Column indices of the non-zero elements in the symbolic Jacobian of \f$F(z)\f$ (if available). */
+    int cad_dF_n_nz;            /**< \brief Number of non-zeros in the AD Jacobian of \f$F(z)\f$ (if available). */
+    int* cad_dF_row;            /**< \brief Row indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
+    int* cad_dF_col;            /**< \brief Column indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
+    jmi_func_ad_t* ad;      /**< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support). */
+    int coloring_counter;   /**< \brief Number of times that the graph coloring algorithm  has been performed. */
+    int* coloring_done;     /**< \brief Contains info of which independent_vars that the graph_coloring algorithm has been done. */
+    jmi_color_info** c_info;  /**< \brief Vector of jmi_graph_coloring struct, contains graph coloring results for every independent_vars that has been performed  */
+    
 };
 
 /**
  * \brief Contains result of a graph coloring.
  */
 struct jmi_color_info{
-	int* sparse_repr;
-	int* offs;
-	int n_colors;
-	int* map_info;
-	int* map_off;
+    int* sparse_repr;
+    int* offs;
+    int n_colors;
+    int* map_info;
+    int* map_off;
 };
 
 struct jmi_simple_color_info_t {
-	int n_nz;                       /**< \brief Number of non-zeros. */
-	int n_cols;                     /**< \brief Number of columns */
-	int* col_n_nz;                   /**< \brief Number of non-zeros in each column */
-	int col_offset;                 /**< \brief Column offset (in some cases, column indexing does not start at zero)*/
-	int* rows;                      /**< \brief Row indices. */
-	int* cols;                      /**< \brief Column indices. */
-	int* col_start_index;           /**< \brief Column start indices (incidence patterns are stored column major)*/
-	int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
-	int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
-	int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
-	int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
-	int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
+    int n_nz;                       /**< \brief Number of non-zeros. */
+    int n_cols;                     /**< \brief Number of columns */
+    int* col_n_nz;                   /**< \brief Number of non-zeros in each column */
+    int col_offset;                 /**< \brief Column offset (in some cases, column indexing does not start at zero)*/
+    int* rows;                      /**< \brief Row indices. */
+    int* cols;                      /**< \brief Column indices. */
+    int* col_start_index;           /**< \brief Column start indices (incidence patterns are stored column major)*/
+    int n_groups;                   /**< \brief Number of groups in the CPR seeding. */
+    int n_cols_in_grouping;         /**< \brief Total number of columns used in CPR seeding computation. */
+    int* n_cols_in_group;           /**< \brief The number of column in each CPR group. */
+    int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
+    int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
 };
 
 /**
@@ -789,25 +789,25 @@ struct jmi_simple_color_info_t {
  * information for a particular jmi_func_t struct.
  */
 struct jmi_func_ad_t{
-	jmi_ad_var_vec_p F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
-	jmi_ad_tape_p F_z_tape;         /**< \brief An AD tape. */
-	int tape_initialized;           /**< \brief Flag to indicate if the other fields are initialized. 0 if uninitialized and 1 if initialized. */
-	int dF_z_n_nz;                  /**< \brief Number of non-zeros in Jacobian. */
-	int* dF_z_row;                  /**< \brief Row indices of non-zeros in Jacobian. */
-	int* dF_z_col;                  /**< \brief Column indices of non-zeros in Jacobian. */
-	int* dF_z_col_start_index;        /**< \brief The index in the sparse Jacobian vector of the
-	                                            first element corresponding to a particular column. */
-	int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
-	                                            Jacobian. */
-	jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
-	int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
-	jmi_simple_color_info_t* color_info; /**< \brief A struct containing coloring info for the CPR seeding. */
+    jmi_ad_var_vec_p F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
+    jmi_ad_tape_p F_z_tape;         /**< \brief An AD tape. */
+    int tape_initialized;           /**< \brief Flag to indicate if the other fields are initialized. 0 if uninitialized and 1 if initialized. */
+    int dF_z_n_nz;                  /**< \brief Number of non-zeros in Jacobian. */
+    int* dF_z_row;                  /**< \brief Row indices of non-zeros in Jacobian. */
+    int* dF_z_col;                  /**< \brief Column indices of non-zeros in Jacobian. */
+    int* dF_z_col_start_index;        /**< \brief The index in the sparse Jacobian vector of the
+                                                first element corresponding to a particular column. */
+    int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
+                                                Jacobian. */
+    jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
+    int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
+    jmi_simple_color_info_t* color_info; /**< \brief A struct containing coloring info for the CPR seeding. */
 
-	/*int n_groups;*/                   /**< \brief Number of groups in the CPR seeding. */
-	/*int n_cols_in_grouping;*/         /**< \brief Total number of columns used in CPR seeding computation. */
-	/*int* n_cols_in_group;    */       /**< \brief The number of column in each CPR group. */
-	/*int* group_cols;          */      /**< \brief An ordered array of column indices corresponding to CPR groups. */
-	/*int* group_start_index;     */    /**< \brief An array containing the start indices for each group in the array group_cols. */
+    /*int n_groups;*/                   /**< \brief Number of groups in the CPR seeding. */
+    /*int n_cols_in_grouping;*/         /**< \brief Total number of columns used in CPR seeding computation. */
+    /*int* n_cols_in_group;    */       /**< \brief The number of column in each CPR group. */
+    /*int* group_cols;          */      /**< \brief An ordered array of column indices corresponding to CPR groups. */
+    /*int* group_start_index;     */    /**< \brief An array containing the start indices for each group in the array group_cols. */
 
 };
 
@@ -877,22 +877,22 @@ struct jmi_func_ad_t{
  * @return Error code.
  */
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
-		int n_real_pd, int n_integer_ci, int n_integer_cd,
-		int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
-		int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
-		int n_string_pi, int n_string_pd,
-		int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
-		int n_tp,int n_real_d,
-		int n_integer_d, int n_integer_u,
-		int n_boolean_d, int n_boolean_u,
-		int n_string_d, int n_string_u,
-		int n_outputs, int* output_vrefs,
-		int n_sw, int n_sw_init,
-		int n_guards, int n_guards_init,
-		int n_dae_blocks, int n_dae_init_blocks,
+        int n_real_pd, int n_integer_ci, int n_integer_cd,
+        int n_integer_pi, int n_integer_pd,int n_boolean_ci, int n_boolean_cd,
+        int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
+        int n_string_pi, int n_string_pd,
+        int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
+        int n_tp,int n_real_d,
+        int n_integer_d, int n_integer_u,
+        int n_boolean_d, int n_boolean_u,
+        int n_string_d, int n_string_u,
+        int n_outputs, int* output_vrefs,
+        int n_sw, int n_sw_init,
+        int n_guards, int n_guards_init,
+        int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-		int scaling_method, int n_ext_objs);
+        int scaling_method, int n_ext_objs);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -969,7 +969,7 @@ int jmi_dae_init(jmi_t* jmi, jmi_residual_func_t F, int n_eq_F,
  * @return Error code
  */
 int jmi_new_simple_color_info(jmi_simple_color_info_t** c_info, int n_cols, int n_cols_in_grouping, int n_nz,
-		int* rows, int* cols, int col_offset, int one_indexing);
+        int* rows, int* cols, int col_offset, int one_indexing);
 
 /**
  * \brief Deletes the contents of a jmi_simple_color_info struct
@@ -1042,18 +1042,18 @@ int jmi_delete_color_info(jmi_color_info *c_i);
  *
  */
 int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
-		  jmi_jacobian_func_t dF0,
-		  int dF0_n_nz, int* dF0_row, int* dF0_col,
-		  jmi_residual_func_t F1, int n_eq_F1,
-		  jmi_jacobian_func_t dF1,
-		  int dF1_n_nz, int* dF1_row, int* dF1_col,
-		  jmi_residual_func_t Fp, int n_eq_Fp,
-		  jmi_jacobian_func_t dFp,
-		  int dFp_n_nz, int* dFp_row, int* dFp_col,
-		  jmi_generic_func_t eval_parameters,
-		  jmi_residual_func_t R0, int n_eq_R0,
-		  jmi_jacobian_func_t dR0,
-		  int dR0_n_nz, int* dR0_row, int* dR0_col);
+          jmi_jacobian_func_t dF0,
+          int dF0_n_nz, int* dF0_row, int* dF0_col,
+          jmi_residual_func_t F1, int n_eq_F1,
+          jmi_jacobian_func_t dF1,
+          int dF1_n_nz, int* dF1_row, int* dF1_col,
+          jmi_residual_func_t Fp, int n_eq_Fp,
+          jmi_jacobian_func_t dFp,
+          int dFp_n_nz, int* dFp_row, int* dFp_col,
+          jmi_generic_func_t eval_parameters,
+          jmi_residual_func_t R0, int n_eq_R0,
+          jmi_jacobian_func_t dR0,
+          int dR0_n_nz, int* dR0_row, int* dR0_col);
 
 /**
  * \brief Frees memory from jmi_init_t struct.
@@ -1140,24 +1140,24 @@ void jmi_delete_init(jmi_init_t** pinit);
  * @return Error code.
  */
 int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
-		 jmi_jacobian_func_t dFfdp,
-		 int dfdp_n_nz, int* dfdp_row, int* dfdp_col,
-		 jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
-		 int dJ_n_nz, int* dJ_row, int* dJ_col,
-		 jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
-		 int dL_n_nz, int* dL_row, int* dL_col,
-		 jmi_residual_func_t Ceq, int n_eq_Ceq,
-		 jmi_jacobian_func_t dCeq,
-		 int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
-		 jmi_residual_func_t Cineq, int n_eq_Cineq,
-		 jmi_jacobian_func_t dCineq,
-		 int dCineq_n_nz, int* dCineq_row, int* dCineq_col,
-		 jmi_residual_func_t Heq, int n_eq_Heq,
-		 jmi_jacobian_func_t dHeq,
-		 int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
-		 jmi_residual_func_t Hineq, int n_eq_Hineq,
-		 jmi_jacobian_func_t dHineq,
-		 int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
+         jmi_jacobian_func_t dFfdp,
+         int dfdp_n_nz, int* dfdp_row, int* dfdp_col,
+         jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
+         int dJ_n_nz, int* dJ_row, int* dJ_col,
+         jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
+         int dL_n_nz, int* dL_row, int* dL_col,
+         jmi_residual_func_t Ceq, int n_eq_Ceq,
+         jmi_jacobian_func_t dCeq,
+         int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
+         jmi_residual_func_t Cineq, int n_eq_Cineq,
+         jmi_jacobian_func_t dCineq,
+         int dCineq_n_nz, int* dCineq_row, int* dCineq_col,
+         jmi_residual_func_t Heq, int n_eq_Heq,
+         jmi_jacobian_func_t dHeq,
+         int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
+         jmi_residual_func_t Hineq, int n_eq_Hineq,
+         jmi_jacobian_func_t dHineq,
+         int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
 
 /**
  * \brief The main struct of the JMI Model interface containing
@@ -1171,147 +1171,147 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
  */
 struct jmi_t{
   jmi_dae_t* dae;                        /**< \brief A jmi_dae_t struct pointer. */
-	jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
-	jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
+    jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
+    jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
         /* never used: fmiCallbackFunctions* user_func;*/     /**< \brief fmiCallbackFunctions, user provided. */
         fmi_t*      fmi;                     /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
-	int n_real_ci;                       /**< \brief Number of independent constants. */
-	int n_real_cd;                       /**< \brief Number of dependent constants. */
-	int n_real_pi;                       /**< \brief Number of independent parameters. */
-	int n_real_pd;                       /**< \brief Number of dependent parameters. */
+    int n_real_ci;                       /**< \brief Number of independent constants. */
+    int n_real_cd;                       /**< \brief Number of dependent constants. */
+    int n_real_pi;                       /**< \brief Number of independent parameters. */
+    int n_real_pd;                       /**< \brief Number of dependent parameters. */
 
-	int n_integer_ci;                    /**< \brief Number of integer independent constants. */
-	int n_integer_cd;                    /**< \brief Number of integer dependent constants. */
-	int n_integer_pi;                    /**< \brief Number of integer independent parameters. */
-	int n_integer_pd;                    /**< \brief Number of integer dependent parameters. */
+    int n_integer_ci;                    /**< \brief Number of integer independent constants. */
+    int n_integer_cd;                    /**< \brief Number of integer dependent constants. */
+    int n_integer_pi;                    /**< \brief Number of integer independent parameters. */
+    int n_integer_pd;                    /**< \brief Number of integer dependent parameters. */
 
-	int n_boolean_ci;                    /**< \brief Number of boolean independent constants. */
-	int n_boolean_cd;                    /**< \brief Number of boolean dependent constants. */
-	int n_boolean_pi;                    /**< \brief Number of boolean independent parameters. */
-	int n_boolean_pd;                    /**< \brief Number of boolean dependent parameters. */
+    int n_boolean_ci;                    /**< \brief Number of boolean independent constants. */
+    int n_boolean_cd;                    /**< \brief Number of boolean dependent constants. */
+    int n_boolean_pi;                    /**< \brief Number of boolean independent parameters. */
+    int n_boolean_pd;                    /**< \brief Number of boolean dependent parameters. */
 
-	int n_string_ci;                     /**< \brief Number of string independent constants. */
-	int n_string_cd;                     /**< \brief Number of string dependent constants. */
-	int n_string_pi;                     /**< \brief Number of string independent parameters. */
-	int n_string_pd;                     /**< \brief Number of string dependent parameters. */
+    int n_string_ci;                     /**< \brief Number of string independent constants. */
+    int n_string_cd;                     /**< \brief Number of string dependent constants. */
+    int n_string_pi;                     /**< \brief Number of string independent parameters. */
+    int n_string_pd;                     /**< \brief Number of string dependent parameters. */
 
-	int n_real_dx;                       /**< \brief Number of derivatives. */
-	int n_real_x;                        /**< \brief Number of differentiated states. */
-	int n_real_u;                        /**< \brief Number of inputs. */
-	int n_real_w;                        /**< \brief Number of algebraics. */
-	int n_tp;                            /**< \brief Number of time points included in the optimization problem */
+    int n_real_dx;                       /**< \brief Number of derivatives. */
+    int n_real_x;                        /**< \brief Number of differentiated states. */
+    int n_real_u;                        /**< \brief Number of inputs. */
+    int n_real_w;                        /**< \brief Number of algebraics. */
+    int n_tp;                            /**< \brief Number of time points included in the optimization problem */
 
-	int n_real_d;                        /**< \brief Number of discrete variables. */
+    int n_real_d;                        /**< \brief Number of discrete variables. */
 
-	int n_integer_d;                     /**< \brief Number of integer discrete variables. */
-	int n_integer_u;                     /**< \brief Number of integer inputs. */
+    int n_integer_d;                     /**< \brief Number of integer discrete variables. */
+    int n_integer_u;                     /**< \brief Number of integer inputs. */
 
-	int n_boolean_d;                     /**< \brief Number of boolean discrete variables. */
-	int n_boolean_u;                     /**< \brief Number of boolean inputs. */
+    int n_boolean_d;                     /**< \brief Number of boolean discrete variables. */
+    int n_boolean_u;                     /**< \brief Number of boolean inputs. */
 
-	int n_string_d;                      /**< \brief Number of string discrete variables. */
-	int n_string_u;                      /**< \brief Number of string inputs. */
+    int n_string_d;                      /**< \brief Number of string discrete variables. */
+    int n_string_u;                      /**< \brief Number of string inputs. */
 
-	int n_outputs;                       /** \brief Number of output variables. */
+    int n_outputs;                       /** \brief Number of output variables. */
 
-	int *output_vrefs;                   /** \brief Value references of the output variables. */
+    int *output_vrefs;                   /** \brief Value references of the output variables. */
 
-	int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
-	int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */
+    int n_sw;                            /**< \brief Number of switching functions in the DAE \f$F\f$. */
+    int n_sw_init;                       /**< \brief Number of switching functions in the DAE initialization system\f$F_0\f$. */
 
-	int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
-	int n_guards_init;                     /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
+    int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
+    int n_guards_init;                     /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
 
-	int n_p;                             /**< \brief Number of elements in \f$p\f$. */
-	int n_v;                             /**< \brief Number of elements in \f$v\f$. */
-	int n_q;                             /**< \brief Number of elements in \f$q\f$. */
-	int n_d;                             /**< \brief Number of elements in \f$d\f$. */
+    int n_p;                             /**< \brief Number of elements in \f$p\f$. */
+    int n_v;                             /**< \brief Number of elements in \f$v\f$. */
+    int n_q;                             /**< \brief Number of elements in \f$q\f$. */
+    int n_d;                             /**< \brief Number of elements in \f$d\f$. */
 
-	int n_z;                             /**< \brief Number of elements in \f$z\f$. */
-	
-	int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
-	int n_dae_init_blocks;		     /**< \brief Number of initial BLT blocks. */
-	
-	jmi_real_t *tp;                      /**< \brief Time point values in the normalized interval [0..1]. A value \f$\leq 0\f$ corresponds to the initial time and a value \f$\geq 1\f$ corresponds to the final time. */
+    int n_z;                             /**< \brief Number of elements in \f$z\f$. */
+    
+    int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
+    int n_dae_init_blocks;           /**< \brief Number of initial BLT blocks. */
+    
+    jmi_real_t *tp;                      /**< \brief Time point values in the normalized interval [0..1]. A value \f$\leq 0\f$ corresponds to the initial time and a value \f$\geq 1\f$ corresponds to the final time. */
 
-	/* Offset variables in the z vector, for convenience. */
-	int offs_real_ci;                    /**< \brief  Offset of the independent real constant vector in \f$z\f$. */
-	int offs_real_cd;                    /**< \brief  Offset of the dependent real constant vector in \f$z\f$. */
-	int offs_real_pi;                    /**< \brief  Offset of the independent real parameter vector in \f$z\f$. */
-	int offs_real_pd;                    /**< \brief  Offset of the dependent real parameter vector in \f$z\f$. */
+    /* Offset variables in the z vector, for convenience. */
+    int offs_real_ci;                    /**< \brief  Offset of the independent real constant vector in \f$z\f$. */
+    int offs_real_cd;                    /**< \brief  Offset of the dependent real constant vector in \f$z\f$. */
+    int offs_real_pi;                    /**< \brief  Offset of the independent real parameter vector in \f$z\f$. */
+    int offs_real_pd;                    /**< \brief  Offset of the dependent real parameter vector in \f$z\f$. */
 
-	int offs_integer_ci;                 /**< \brief  Offset of the independent integer constant vector in \f$z\f$. */
-	int offs_integer_cd;                 /**< \brief  Offset of the dependent integer constant vector in \f$z\f$. */
-	int offs_integer_pi;                 /**< \brief  Offset of the independent integer parameter vector in \f$z\f$. */
-	int offs_integer_pd;                 /**< \brief  Offset of the dependent integer parameter vector in \f$z\f$. */
+    int offs_integer_ci;                 /**< \brief  Offset of the independent integer constant vector in \f$z\f$. */
+    int offs_integer_cd;                 /**< \brief  Offset of the dependent integer constant vector in \f$z\f$. */
+    int offs_integer_pi;                 /**< \brief  Offset of the independent integer parameter vector in \f$z\f$. */
+    int offs_integer_pd;                 /**< \brief  Offset of the dependent integer parameter vector in \f$z\f$. */
 
-	int offs_boolean_ci;                 /**< \brief  Offset of the independent boolean constant vector in \f$z\f$. */
-	int offs_boolean_cd;                 /**< \brief  Offset of the dependent boolean constant vector in \f$z\f$. */
-	int offs_boolean_pi;                 /**< \brief  Offset of the independent boolean parameter vector in \f$z\f$. */
-	int offs_boolean_pd;                 /**< \brief  Offset of the dependent boolean parameter vector in \f$z\f$. */
+    int offs_boolean_ci;                 /**< \brief  Offset of the independent boolean constant vector in \f$z\f$. */
+    int offs_boolean_cd;                 /**< \brief  Offset of the dependent boolean constant vector in \f$z\f$. */
+    int offs_boolean_pi;                 /**< \brief  Offset of the independent boolean parameter vector in \f$z\f$. */
+    int offs_boolean_pd;                 /**< \brief  Offset of the dependent boolean parameter vector in \f$z\f$. */
 
-	int offs_real_dx;                    /**< \brief  Offset of the derivative real vector in \f$z\f$. */
-	int offs_real_x;                     /**< \brief  Offset of the differentiated real variable vector in \f$z\f$. */
-	int offs_real_u;                     /**< \brief  Offset of the input real vector in \f$z\f$. */
-	int offs_real_w;                     /**< \brief  Offset of the algebraic real variables vector in \f$z\f$. */
-	int offs_t;                          /**< \brief  Offset of the time entry in \f$z\f$. */
+    int offs_real_dx;                    /**< \brief  Offset of the derivative real vector in \f$z\f$. */
+    int offs_real_x;                     /**< \brief  Offset of the differentiated real variable vector in \f$z\f$. */
+    int offs_real_u;                     /**< \brief  Offset of the input real vector in \f$z\f$. */
+    int offs_real_w;                     /**< \brief  Offset of the algebraic real variables vector in \f$z\f$. */
+    int offs_t;                          /**< \brief  Offset of the time entry in \f$z\f$. */
 
-	int offs_real_dx_p;                  /**< \brief  Offset of the first time point derivative vector in \f$z\f$. */
-	int offs_real_x_p;                   /**< \brief  Offset of the first time point differentiated variable vector in \f$z\f$. */
-	int offs_real_u_p;                   /**< \brief  Offset of the first time point input vector in \f$z\f$. */
-	int offs_real_w_p;                   /**< \brief  Offset of the first time point algebraic variable vector in \f$z\f$. */
+    int offs_real_dx_p;                  /**< \brief  Offset of the first time point derivative vector in \f$z\f$. */
+    int offs_real_x_p;                   /**< \brief  Offset of the first time point differentiated variable vector in \f$z\f$. */
+    int offs_real_u_p;                   /**< \brief  Offset of the first time point input vector in \f$z\f$. */
+    int offs_real_w_p;                   /**< \brief  Offset of the first time point algebraic variable vector in \f$z\f$. */
 
-	int offs_real_d;                     /**< \brief  Offset of the discrete real variable vector in \f$z\f$. */
+    int offs_real_d;                     /**< \brief  Offset of the discrete real variable vector in \f$z\f$. */
 
-	int offs_integer_d;                  /**< \brief  Offset of the discrete integer variable vector in \f$z\f$. */
-	int offs_integer_u;                  /**< \brief  Offset of the input integer vector in \f$z\f$. */
+    int offs_integer_d;                  /**< \brief  Offset of the discrete integer variable vector in \f$z\f$. */
+    int offs_integer_u;                  /**< \brief  Offset of the input integer vector in \f$z\f$. */
 
-	int offs_boolean_d;                  /**< \brief  Offset of the discrete boolean variable vector in \f$z\f$. */
-	int offs_boolean_u;                  /**< \brief  Offset of the input boolean vector in \f$z\f$. */
+    int offs_boolean_d;                  /**< \brief  Offset of the discrete boolean variable vector in \f$z\f$. */
+    int offs_boolean_u;                  /**< \brief  Offset of the input boolean vector in \f$z\f$. */
 
-	int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
-	int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
+    int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
+    int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
 
-	int offs_guards;                         /**< \brief  Offset of the first guard \f$F\f$ */
-	int offs_guards_init;                    /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
+    int offs_guards;                         /**< \brief  Offset of the first guard \f$F\f$ */
+    int offs_guards_init;                    /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
 
-	int offs_pre_real_dx;                    /**< \brief  Offset of the pre derivative real vector in \f$z\f$. */
-	int offs_pre_real_x;                     /**< \brief  Offset of the pre differentiated real variable vector in \f$z\f$. */
-	int offs_pre_real_u;                     /**< \brief  Offset of the pre input real vector in \f$z\f$. */
-	int offs_pre_real_w;                     /**< \brief  Offset of the pre algebraic real variables vector in \f$z\f$. */
+    int offs_pre_real_dx;                    /**< \brief  Offset of the pre derivative real vector in \f$z\f$. */
+    int offs_pre_real_x;                     /**< \brief  Offset of the pre differentiated real variable vector in \f$z\f$. */
+    int offs_pre_real_u;                     /**< \brief  Offset of the pre input real vector in \f$z\f$. */
+    int offs_pre_real_w;                     /**< \brief  Offset of the pre algebraic real variables vector in \f$z\f$. */
 
-	int offs_pre_real_d;                     /**< \brief  Offset of the pre discrete real variable vector in \f$z\f$. */
+    int offs_pre_real_d;                     /**< \brief  Offset of the pre discrete real variable vector in \f$z\f$. */
 
-	int offs_pre_integer_d;                  /**< \brief  Offset of the pre discrete integer variable vector in \f$z\f$. */
-	int offs_pre_integer_u;                  /**< \brief  Offset of the pre input integer vector in \f$z\f$. */
+    int offs_pre_integer_d;                  /**< \brief  Offset of the pre discrete integer variable vector in \f$z\f$. */
+    int offs_pre_integer_u;                  /**< \brief  Offset of the pre input integer vector in \f$z\f$. */
 
-	int offs_pre_boolean_d;                  /**< \brief  Offset of the pre discrete boolean variable vector in \f$z\f$. */
-	int offs_pre_boolean_u;                  /**< \brief  Offset of the pre input boolean vector in \f$z\f$. */
+    int offs_pre_boolean_d;                  /**< \brief  Offset of the pre discrete boolean variable vector in \f$z\f$. */
+    int offs_pre_boolean_u;                  /**< \brief  Offset of the pre input boolean vector in \f$z\f$. */
 
-	int offs_pre_sw;                         /**< \brief  Offset of the first pre switching function in the DAE \f$F\f$ */
-	int offs_pre_sw_init;                    /**< \brief  Offset of the first pre switching function in the DAE initialization system \f$F_0\f$ */
+    int offs_pre_sw;                         /**< \brief  Offset of the first pre switching function in the DAE \f$F\f$ */
+    int offs_pre_sw_init;                    /**< \brief  Offset of the first pre switching function in the DAE initialization system \f$F_0\f$ */
 
-	int offs_pre_guards;                         /**< \brief  Offset of the first pre guard \f$F\f$ */
-	int offs_pre_guards_init;                    /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
+    int offs_pre_guards;                         /**< \brief  Offset of the first pre guard \f$F\f$ */
+    int offs_pre_guards_init;                    /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
 
-	int offs_p;                          /**< \brief  Offset of the \f$p\f$ vector in \f$z\f$. */
-	int offs_v;                          /**< \brief  Offset of the \f$v\f$ vector in \f$z\f$. */
-	int offs_q;                          /**< \brief  Offset of the \f$q\f$ vector in \f$z\f$. */
-	int offs_d;                          /**< \brief  Offset of the \f$d\f$ vector in \f$z\f$. */
+    int offs_p;                          /**< \brief  Offset of the \f$p\f$ vector in \f$z\f$. */
+    int offs_v;                          /**< \brief  Offset of the \f$v\f$ vector in \f$z\f$. */
+    int offs_q;                          /**< \brief  Offset of the \f$q\f$ vector in \f$z\f$. */
+    int offs_d;                          /**< \brief  Offset of the \f$d\f$ vector in \f$z\f$. */
 
-	jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
-	jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
-	jmi_real_t **dz;					 /**< \brief  This vector is used to store calculated directional derivatives */
-	jmi_real_t **dz_active_variables;	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
-	void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
-	int indep_extobjs_initialized;      /** <\brief Flag indicating if initialization of independent external objects have been done. */
+    jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
+    jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
+    jmi_real_t **dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
+    jmi_real_t **dz_active_variables;    /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
+    void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
+    int indep_extobjs_initialized;      /** <\brief Flag indicating if initialization of independent external objects have been done. */
         int dep_extobjs_initialized;        /** <\brief Flag indicating if initialization of dependent external objects have been done. */
-	
-	jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
-	int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
-	jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
-	jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
+    
+    jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
+    int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
+    jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
+    jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
     int cached_block_jacobians;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 
     jmi_int_t n_initial_relations; /** \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
@@ -1319,15 +1319,15 @@ struct jmi_t{
     jmi_int_t n_relations; /** \brief Number of relational operators used in the event indicators for the DAE system */
     jmi_int_t* relations; /** \brief Kind of relational operators used in the event indicators for the DAE system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
 
-	jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
-	jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
+    jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
+    jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
-	jmi_int_t is_initialized; /** Flag to keep track of if the initial equations have been solved. */
+    jmi_int_t is_initialized; /** Flag to keep track of if the initial equations have been solved. */
 
-	jmi_simple_color_info_t* color_info_A; /** \brief CPR coloring info for the ODE Jacobian A */
-	jmi_simple_color_info_t* color_info_B; /** \brief CPR coloring info for the ODE Jacobian B */
-	jmi_simple_color_info_t* color_info_C; /** \brief CPR coloring info for the ODE Jacobian C */
-	jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
+    jmi_simple_color_info_t* color_info_A; /** \brief CPR coloring info for the ODE Jacobian A */
+    jmi_simple_color_info_t* color_info_B; /** \brief CPR coloring info for the ODE Jacobian B */
+    jmi_simple_color_info_t* color_info_C; /** \brief CPR coloring info for the ODE Jacobian C */
+    jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
     jmi_options_t options; /** \brief Runtime options */
     jmi_real_t events_epsilon; /** \brief Value used to adjust the event indicator functions */
@@ -1343,8 +1343,8 @@ struct jmi_t{
  * function.
  */
 struct jmi_dae_t{
-	jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
-	jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
+    jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
+    jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
     jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
     jmi_generic_func_t ode_derivatives_dir_der;      /**< \brief A function pointer to a function for evaluating the ODE directional derivative. */
     jmi_generic_func_t ode_outputs;          /**< \brief A function pointer to a function for evaluating the ODE outputs. */
@@ -1358,10 +1358,10 @@ struct jmi_dae_t{
  * \brief A struct containing a DAE initialization system.
  */
 struct jmi_init_t{
-	jmi_func_t* F0;                      /**< \brief  A jmi_func_t struct representing \f$F_0\f$. */
-	jmi_func_t* F1;                      /**< \brief  A jmi_func_t struct representing \f$F_1\f$. */
-	jmi_func_t* Fp;                      /**< \brief  A jmi_func_t struct representing \f$F_p\f$. */
-	jmi_func_t* R0;                      /**< \brief  A jmi_func_t struct representing \f$R_0\f$. */
+    jmi_func_t* F0;                      /**< \brief  A jmi_func_t struct representing \f$F_0\f$. */
+    jmi_func_t* F1;                      /**< \brief  A jmi_func_t struct representing \f$F_1\f$. */
+    jmi_func_t* Fp;                      /**< \brief  A jmi_func_t struct representing \f$F_p\f$. */
+    jmi_func_t* R0;                      /**< \brief  A jmi_func_t struct representing \f$R_0\f$. */
     jmi_generic_func_t eval_parameters;  /**< \brief A function pointer to a function for evaluating parameters. */
 };
 
@@ -1371,19 +1371,19 @@ struct jmi_init_t{
  * problem.
  */
 struct  jmi_opt_t{
-	jmi_func_t* Ffdp;                     /**< \brief  Function pointer to the free dependent parameters residual function. */
-	jmi_func_t* J;                        /**< \brief  Function pointer to the cost function. */
-	jmi_func_t* L;                        /**< \brief  Function pointer to the Lagrange integrand. */
-	jmi_func_t* Ceq;                      /**< \brief  Function pointer to the equality path constraint residual function. */
-	jmi_func_t* Cineq;                    /**< \brief  Function pointer to the inequality path constraint residual function. */
-	jmi_func_t* Heq;                      /**< \brief  Function pointer to the equality point constraint residual function. */
-	jmi_func_t* Hineq;                    /**< \brief  Function pointer to the inequality point constraint residual function. */
-	jmi_real_t start_time;                /**< \brief  Optimization interval start time. */
-	int start_time_free;                  /**< \brief  Start time free or fixed. */
-	jmi_real_t final_time;                /**< \brief  Optimization interval final time. */
-	int final_time_free;                  /**< \brief  Final time free or fixed. */
-	int n_p_opt;                          /**< \brief  Number of parameters to optimize (in the \f$p_i\f$ vector). */
-	int *p_opt_indices;                   /**< \brief  Indices of the parameters to optimize (in the \f$p_i\f$ vector). */
+    jmi_func_t* Ffdp;                     /**< \brief  Function pointer to the free dependent parameters residual function. */
+    jmi_func_t* J;                        /**< \brief  Function pointer to the cost function. */
+    jmi_func_t* L;                        /**< \brief  Function pointer to the Lagrange integrand. */
+    jmi_func_t* Ceq;                      /**< \brief  Function pointer to the equality path constraint residual function. */
+    jmi_func_t* Cineq;                    /**< \brief  Function pointer to the inequality path constraint residual function. */
+    jmi_func_t* Heq;                      /**< \brief  Function pointer to the equality point constraint residual function. */
+    jmi_func_t* Hineq;                    /**< \brief  Function pointer to the inequality point constraint residual function. */
+    jmi_real_t start_time;                /**< \brief  Optimization interval start time. */
+    int start_time_free;                  /**< \brief  Start time free or fixed. */
+    jmi_real_t final_time;                /**< \brief  Optimization interval final time. */
+    int final_time_free;                  /**< \brief  Final time free or fixed. */
+    int n_p_opt;                          /**< \brief  Number of parameters to optimize (in the \f$p_i\f$ vector). */
+    int *p_opt_indices;                   /**< \brief  Indices of the parameters to optimize (in the \f$p_i\f$ vector). */
 };
 
 /* @} */

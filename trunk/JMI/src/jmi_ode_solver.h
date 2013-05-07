@@ -54,7 +54,7 @@ typedef int (*jmi_ode_rhs_func_t)(void *, jmi_real_t t, jmi_real_t* y, jmi_real_
 typedef int (*jmi_ode_root_func_t)(void *, jmi_real_t t, jmi_real_t* y, jmi_real_t* root);
 
 struct jmi_ode_solver_t {
-	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
+    jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
     void *user_data;
     
     void *integrator;

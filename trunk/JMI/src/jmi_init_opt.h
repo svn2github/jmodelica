@@ -84,7 +84,7 @@ typedef struct jmi_init_opt_t jmi_init_opt_t;
  * constraints.
  */
 int jmi_init_opt_get_dimensions(jmi_init_opt_t *jmi_init_opt, int *n_x,
-		int *n_h, int *dh_n_nz);
+        int *n_h, int *dh_n_nz);
 
 /**
  * \brief Get the x vector of the NLP.
@@ -111,7 +111,7 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init);
  * @return Error code.
  */
  int jmi_init_opt_set_initial(jmi_init_opt_t *jmi_init_opt,
-		jmi_real_t *x_init);
+        jmi_real_t *x_init);
 
 /**
   * \brief Set the initial point of the NLP based on values in the JMI model.
@@ -128,46 +128,46 @@ int jmi_init_opt_get_initial(jmi_init_opt_t *jmi_init_opt, jmi_real_t *x_init);
  * the NLP, and variable vectors.
  */
 struct jmi_init_opt_t{
-	jmi_t *jmi;                       /* jmi_t struct */
-	jmi_real_t *x;                    /* x vector. */
-	jmi_real_t *x_lb;                 /* Lower bounds for variables */
-	jmi_real_t *x_ub;                 /* Upper bound for variables */
-	jmi_real_t *x_init;               /* Initial starting point */
-	int n_x;                          /* Number of variables in the initialization problem */
-	int n_p_free;                     /* Number of parameters with fixed = false */
-	int *p_free_indices;              /* Indices of parameters with fixed = false */
-	int n_h;                          /* Number of equality constraints */
-	int dh_n_nz;
-	int *dh_irow;
-	int *dh_icol;
-	int dF0_n_nz;
-	int n_nonlinear_variables;
-	int *non_linear_variables_indices;  /* Stored Fortran style (first index = 1) */
-	jmi_real_t *res_F1;                 /* work vector */
-	jmi_real_t *dF1_dv;                 /* work vector */
-	int dF1_dv_n_nz;
-	int *dF1_dv_irow;
-	int *dF1_dv_icol;
-	int dF_dv_n_nz;
-	int *der_mask_v;
-	int der_eval_alg;
-	int stat;
+    jmi_t *jmi;                       /* jmi_t struct */
+    jmi_real_t *x;                    /* x vector. */
+    jmi_real_t *x_lb;                 /* Lower bounds for variables */
+    jmi_real_t *x_ub;                 /* Upper bound for variables */
+    jmi_real_t *x_init;               /* Initial starting point */
+    int n_x;                          /* Number of variables in the initialization problem */
+    int n_p_free;                     /* Number of parameters with fixed = false */
+    int *p_free_indices;              /* Indices of parameters with fixed = false */
+    int n_h;                          /* Number of equality constraints */
+    int dh_n_nz;
+    int *dh_irow;
+    int *dh_icol;
+    int dF0_n_nz;
+    int n_nonlinear_variables;
+    int *non_linear_variables_indices;  /* Stored Fortran style (first index = 1) */
+    jmi_real_t *res_F1;                 /* work vector */
+    jmi_real_t *dF1_dv;                 /* work vector */
+    int dF1_dv_n_nz;
+    int *dF1_dv_irow;
+    int *dF1_dv_icol;
+    int dF_dv_n_nz;
+    int *der_mask_v;
+    int der_eval_alg;
+    int stat;
 };
 
 /**
  * \brief Create a new jmi_init_opt_t struct.
  */
 int jmi_init_opt_new(jmi_init_opt_t **jmi_init_opt_new, jmi_t *jmi,
-		int n_p_free, int *p_free_indices,
-		jmi_real_t *p_opt_init, jmi_real_t *p_free_init, jmi_real_t *dx_init,
-		jmi_real_t *x_init, jmi_real_t *w_init,
-		jmi_real_t *p_opt_lb, jmi_real_t *p_free_lb, jmi_real_t *dx_lb,
-		jmi_real_t *x_lb, jmi_real_t *w_lb,
-		jmi_real_t *p_opt_ub, jmi_real_t *p_free_ub, jmi_real_t *dx_ub,
-		jmi_real_t *x_ub, jmi_real_t *w_ub,
-		int linearity_information_provided,
-		int* p_opt_lin, int* p_free_lin, int* dx_lin, int* x_lin, int* w_lin,
-		int der_eval_alg, int stat) ;
+        int n_p_free, int *p_free_indices,
+        jmi_real_t *p_opt_init, jmi_real_t *p_free_init, jmi_real_t *dx_init,
+        jmi_real_t *x_init, jmi_real_t *w_init,
+        jmi_real_t *p_opt_lb, jmi_real_t *p_free_lb, jmi_real_t *dx_lb,
+        jmi_real_t *x_lb, jmi_real_t *w_lb,
+        jmi_real_t *p_opt_ub, jmi_real_t *p_free_ub, jmi_real_t *dx_ub,
+        jmi_real_t *x_ub, jmi_real_t *w_ub,
+        int linearity_information_provided,
+        int* p_opt_lin, int* p_free_lin, int* dx_lin, int* x_lin, int* w_lin,
+        int der_eval_alg, int stat) ;
 
 /**
  * \brief Delete a jmi_init_opt_t struct.
@@ -274,7 +274,7 @@ int jmi_init_opt_dh_nz_indices(jmi_init_opt_t *jmi_init_opt, int *irow, int *ico
  *
  */
 int jmi_init_opt_write_file_matlab(jmi_init_opt_t *jmi_init_opt_t,
-		const char *file_name);
+        const char *file_name);
 
 /**
  * \brief Get the optimization results.
@@ -296,8 +296,8 @@ int jmi_init_opt_write_file_matlab(jmi_init_opt_t *jmi_init_opt_t,
  * @param w (Output) The algebraic variables.
  */
 int jmi_init_opt_get_result(jmi_init_opt_t *jmi_init_opt, jmi_real_t *p_opt,
-		jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
-		jmi_real_t *w);
+        jmi_real_t *t, jmi_real_t *dx, jmi_real_t *x, jmi_real_t *u,
+        jmi_real_t *w);
 
 #ifdef __cplusplus
 }

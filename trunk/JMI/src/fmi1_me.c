@@ -173,7 +173,7 @@ fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
-	memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
+    memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
@@ -218,7 +218,7 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
         z[index] = value[i];
 
         if (index < (((fmi_t *)c)->jmi)->offs_real_dx) {
-        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+            jmi_init_eval_parameters(((fmi_t *)c)->jmi);
         }
 
     }
@@ -260,7 +260,7 @@ fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], siz
         z[index] = value[i];
 
         if (index < (((fmi_t *)c)->jmi)->offs_real_dx) {
-        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+            jmi_init_eval_parameters(((fmi_t *)c)->jmi);
         }
 
     }
@@ -302,7 +302,7 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
         z[index] = value[i];
 
         if (index<(((fmi_t *)c)->jmi)->offs_real_dx) {
-        	jmi_init_eval_parameters(((fmi_t *)c)->jmi);
+            jmi_init_eval_parameters(((fmi_t *)c)->jmi);
         }
 
     }
@@ -319,7 +319,7 @@ fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_
 /* Evaluation of the model equations */
 
 fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
-	fmiInteger retval;
+    fmiInteger retval;
     fmiInteger i;                   /* Iteration variable */
     fmiInteger nF0, nF1, nFp, nF;   /* Number of F-equations */
     fmiInteger nR0, nR;             /* Number of R-equations */
@@ -332,7 +332,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
     jmi_real_t* b_mode;
-	fmi_t* fmi = (fmi_t *)c;
+    fmi_t* fmi = (fmi_t *)c;
     jmi_t* jmi =fmi->jmi;
 
     if (((fmi_t*)c)->jmi->is_initialized==1) {
@@ -512,11 +512,11 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     if (!(nextTimeEvent==JMI_INF)) {
         /* If there is an upcoming time event, then set the event information
            accordingly. */
-    	eventInfo->upcomingTimeEvent = fmiTrue;
+        eventInfo->upcomingTimeEvent = fmiTrue;
         eventInfo->nextEventTime = nextTimeEvent;
         /*printf("fmiInitialize: nextTimeEvent: %f\n",nextTimeEvent);*/
     } else {
-    	eventInfo->upcomingTimeEvent = fmiFalse;
+        eventInfo->upcomingTimeEvent = fmiFalse;
     }
 
     /* Reset atEvent flag */
@@ -572,10 +572,10 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, n_states);
 
     for (i=0;i<n_states;i++) {
-    	for (j=0;j<n_states;j++) {
-    		printf("%f, ",jac[i + j*n_states]);
-    	}
-    	printf("\n");
+        for (j=0;j<n_states;j++) {
+            printf("%f, ",jac[i + j*n_states]);
+        }
+        printf("\n");
     }
 
     free(jac);
@@ -622,70 +622,70 @@ fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[]
     return fmiOK;
 }
 
-fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D){	
+fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D){    
 
 /* fmi_get_jacobian is not an FMI function. Still use fmiStatus as return arguments?. Is there an error handling policy? Standard messages? Which function should return errors?*/
-	
-	fmiStatus fmiFlag;
-	fmiReal* jac;
-	jmi_t* jmi = ((fmi_t *)c)->jmi;
-	fmi_t* fmi = (fmi_t *)c;
-	int nA;
-	int nB;
-	int nC;
-	int nD;
-	int nx;
-	int nu;
-	int ny;
-	int jac_size;
-	int i;
-	int row;
-	int col;
+    
+    fmiStatus fmiFlag;
+    fmiReal* jac;
+    jmi_t* jmi = ((fmi_t *)c)->jmi;
+    fmi_t* fmi = (fmi_t *)c;
+    int nA;
+    int nB;
+    int nC;
+    int nD;
+    int nx;
+    int nu;
+    int ny;
+    int jac_size;
+    int i;
+    int row;
+    int col;
 
-	int n_outputs;
-	int* output_vrefs;
+    int n_outputs;
+    int* output_vrefs;
 
-	clock_t c0, c1, d0, d1;
-	jmi_real_t setElementTime;
+    clock_t c0, c1, d0, d1;
+    jmi_real_t setElementTime;
 
-	c0 = clock();
+    c0 = clock();
 
-	setElementTime = 0;
+    setElementTime = 0;
 
-	/* Get number of outputs that are variability = "continuous", ny */
-	n_outputs = ny = jmi->n_outputs;
+    /* Get number of outputs that are variability = "continuous", ny */
+    n_outputs = ny = jmi->n_outputs;
     if (!(output_vrefs = (int*)fmi -> fmi_functions.allocateMemory(n_outputs, sizeof(int)))) {
         jmi_log_comment(jmi->log, logError, "Out of memory.");
         return fmiError;
     }
-		
-	jmi_get_output_vrefs(jmi, output_vrefs);
+        
+    jmi_get_output_vrefs(jmi, output_vrefs);
 
-	/* This analysis needs to be extended to account for discrete reals*/
-	for(i = 0; i < n_outputs; i++)
-		if (get_type_from_value_ref(output_vrefs[i])!= 0)
-			ny--;	
-	fmi -> fmi_functions.freeMemory(output_vrefs);
-	
-	nx = jmi->n_real_x;
-	nu = jmi->n_real_u;
-	
-	nA = nx*nx;
-	nB = nx*nu;
-	nC = ny*nx;
-	nD = ny*nu;
+    /* This analysis needs to be extended to account for discrete reals*/
+    for(i = 0; i < n_outputs; i++)
+        if (get_type_from_value_ref(output_vrefs[i])!= 0)
+            ny--;   
+    fmi -> fmi_functions.freeMemory(output_vrefs);
+    
+    nx = jmi->n_real_x;
+    nu = jmi->n_real_u;
+    
+    nA = nx*nx;
+    nB = nx*nu;
+    nC = ny*nx;
+    nD = ny*nu;
 
-	/*
+    /*
     if (fmi -> fmi_logging_on) {
         jmi_log_node(jmi->log, logInfo, "size_of_A", "m: %d, n:%d", nx, nx);
         jmi_log_node(jmi->log, logInfo, "size_of_B", "m: %d, n:%d", nx, nu);
         jmi_log_node(jmi->log, logInfo, "size_of_C", "m: %d, n:%d", ny, nx);
         jmi_log_node(jmi->log, logInfo, "size_of_D", "m: %d, n:%d", ny, nu);
     }
-	 */
+     */
 
-	/* Allocate a big chunk of memory that is enough to compute all Jacobians */
-	jac_size = nA + nB + nC + nD;
+    /* Allocate a big chunk of memory that is enough to compute all Jacobians */
+    jac_size = nA + nB + nC + nD;
 
     /* Allocate memory for the biggest matrix, use this for all matrices. */
     if (!(jac = fmi -> fmi_functions.allocateMemory(sizeof(fmiReal),jac_size))) {
@@ -693,9 +693,9 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
         return fmiError;
     }
 
-	/* Individual calls to evaluation of A, B, C, D matrices can be made
-	 * more efficiently by evaluating several Jacobian at the same time.
-	 */
+    /* Individual calls to evaluation of A, B, C, D matrices can be made
+     * more efficiently by evaluating several Jacobian at the same time.
+     */
 
     /* Get the internal A matrix */
     fmiFlag = fmi1_me_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, nA); 
@@ -786,348 +786,348 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
         }
     }
 
-	fmi -> fmi_functions.freeMemory(jac);
+    fmi -> fmi_functions.freeMemory(jac);
 
-	c1 = clock();
-	/*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
-	/*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
-	return fmiOK;
+    c1 = clock();
+    /*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    /*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
+    return fmiOK;
 }
 
 /*Evaluates the A, B, C and D matrices using finite differences, this functions has
 only been used for debugging purposes*/
 fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac){
-	int i;
-	int j;
-	int k;
-	int offs;
-	fmiReal h = 0.000001;
-	size_t nvvr = 0;
-	size_t nzvr = 0;
-	fmiReal* z1;
-	fmiReal* z2;
-	
-	int n_outputs;
-	int* output_vrefs;
-	int n_outputs2;
-	int* output_vrefs2;
-	
-	jmi_t* jmi = ((fmi_t *)c)->jmi;
-	
-	n_outputs = jmi->n_outputs;
-	n_outputs2 = n_outputs;
-	
-	output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-	output_vrefs2 = (int*)calloc(n_outputs, sizeof(int));
-	
-	jmi_get_output_vrefs(jmi, output_vrefs);
-	j = 0;
-	for(i = 0; i < n_outputs; i++){
-		if(get_type_from_value_ref(output_vrefs[i]) == 0){
-			output_vrefs2[j] = output_vrefs[i];	
-			j++;		
-		}else{
-			n_outputs2--;
-		}
-	}
-	
-	offs = jmi->offs_real_x;
-	if(independents&FMI_STATES){
-		nvvr += jmi->n_real_x;
- 	}else{
- 		offs = jmi->offs_real_u;
- 	}
-	if(independents&FMI_INPUTS){
-		nvvr += jmi->n_real_u;
- 	}
- 	if(dependents&FMI_DERIVATIVES){
-		nzvr += jmi->n_real_dx;
- 	}
-	if(dependents&FMI_OUTPUTS){
-		nzvr += n_outputs2;
- 	}
- 	
-	z1 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
-	z2 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
- 	
- 	for(i = 0; i < nvvr; i++){
- 		k = 0;
- 		if((*(jmi->z))[offs+i] != 0){
- 			h = (*(jmi->z))[offs+i]*0.000000015;
- 		}else{
- 			h = 0.000001;
- 		}
- 		(*(jmi->z))[offs+i] += h;
- 		jmi->dae->ode_derivatives(jmi);
- 		if(dependents&FMI_DERIVATIVES){
- 			for(j = 0; j < jmi->n_real_dx; j++){
- 				z1[k] = (*(jmi->z))[jmi->offs_real_dx+j];
- 				k++;
- 			}
- 		}
- 		
- 		if(dependents&FMI_OUTPUTS){
- 			for(j = 0; j < n_outputs2; j++){
- 				z1[k] = (*(jmi->z))[get_index_from_value_ref(output_vrefs2[j])];
- 				k++;
- 			}
- 		}
- 		
- 		(*(jmi->z))[offs+i] -= 2*h;
- 		jmi->dae->ode_derivatives(jmi);
- 		k = 0;
- 		if(dependents&FMI_DERIVATIVES){
- 			for(j = 0; j < jmi->n_real_dx; j++){
- 				z2[k] = (*(jmi->z))[jmi->offs_real_dx+j];
- 				k++;
- 			}
- 		}
- 		if(dependents&FMI_OUTPUTS){
- 			for(j = 0; j < n_outputs2; j++){
- 				z2[k] = (*(jmi->z))[get_index_from_value_ref(output_vrefs2[j])];
- 				k++;
- 			}
- 		}
- 		(*(jmi->z))[offs+i] += h;
- 		
- 		for(j = 0; j < nzvr;j++){
- 			jac[i*nzvr+j] = (z1[j] - z2[j])/(2*h);
- 		}
- 		
- 	}
- 	
- 	free(output_vrefs);
- 	free(output_vrefs2);
- 	
- 	return fmiOK;
+    int i;
+    int j;
+    int k;
+    int offs;
+    fmiReal h = 0.000001;
+    size_t nvvr = 0;
+    size_t nzvr = 0;
+    fmiReal* z1;
+    fmiReal* z2;
+    
+    int n_outputs;
+    int* output_vrefs;
+    int n_outputs2;
+    int* output_vrefs2;
+    
+    jmi_t* jmi = ((fmi_t *)c)->jmi;
+    
+    n_outputs = jmi->n_outputs;
+    n_outputs2 = n_outputs;
+    
+    output_vrefs = (int*)calloc(n_outputs, sizeof(int));
+    output_vrefs2 = (int*)calloc(n_outputs, sizeof(int));
+    
+    jmi_get_output_vrefs(jmi, output_vrefs);
+    j = 0;
+    for(i = 0; i < n_outputs; i++){
+        if(get_type_from_value_ref(output_vrefs[i]) == 0){
+            output_vrefs2[j] = output_vrefs[i]; 
+            j++;        
+        }else{
+            n_outputs2--;
+        }
+    }
+    
+    offs = jmi->offs_real_x;
+    if(independents&FMI_STATES){
+        nvvr += jmi->n_real_x;
+    }else{
+        offs = jmi->offs_real_u;
+    }
+    if(independents&FMI_INPUTS){
+        nvvr += jmi->n_real_u;
+    }
+    if(dependents&FMI_DERIVATIVES){
+        nzvr += jmi->n_real_dx;
+    }
+    if(dependents&FMI_OUTPUTS){
+        nzvr += n_outputs2;
+    }
+    
+    z1 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
+    z2 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
+    
+    for(i = 0; i < nvvr; i++){
+        k = 0;
+        if((*(jmi->z))[offs+i] != 0){
+            h = (*(jmi->z))[offs+i]*0.000000015;
+        }else{
+            h = 0.000001;
+        }
+        (*(jmi->z))[offs+i] += h;
+        jmi->dae->ode_derivatives(jmi);
+        if(dependents&FMI_DERIVATIVES){
+            for(j = 0; j < jmi->n_real_dx; j++){
+                z1[k] = (*(jmi->z))[jmi->offs_real_dx+j];
+                k++;
+            }
+        }
+        
+        if(dependents&FMI_OUTPUTS){
+            for(j = 0; j < n_outputs2; j++){
+                z1[k] = (*(jmi->z))[get_index_from_value_ref(output_vrefs2[j])];
+                k++;
+            }
+        }
+        
+        (*(jmi->z))[offs+i] -= 2*h;
+        jmi->dae->ode_derivatives(jmi);
+        k = 0;
+        if(dependents&FMI_DERIVATIVES){
+            for(j = 0; j < jmi->n_real_dx; j++){
+                z2[k] = (*(jmi->z))[jmi->offs_real_dx+j];
+                k++;
+            }
+        }
+        if(dependents&FMI_OUTPUTS){
+            for(j = 0; j < n_outputs2; j++){
+                z2[k] = (*(jmi->z))[get_index_from_value_ref(output_vrefs2[j])];
+                k++;
+            }
+        }
+        (*(jmi->z))[offs+i] += h;
+        
+        for(j = 0; j < nzvr;j++){
+            jac[i*nzvr+j] = (z1[j] - z2[j])/(2*h);
+        }
+        
+    }
+    
+    free(output_vrefs);
+    free(output_vrefs2);
+    
+    return fmiOK;
 }
 
 /*Evaluates the A, B, C and D matrices*/
 fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
-	
-	int i;
-	int j;
-	int k;
-	int index;
-	int output_off = 0;
-	
-	int passed = 0;
-	int failed = 0;
-	
-	fmiReal rel_tol;
-	fmiReal abs_tol;
-	
-	int offs;
-	jmi_real_t** dv;
-	jmi_real_t** dz;
+    
+    int i;
+    int j;
+    int k;
+    int index;
+    int output_off = 0;
+    
+    int passed = 0;
+    int failed = 0;
+    
+    fmiReal rel_tol;
+    fmiReal abs_tol;
+    
+    int offs;
+    jmi_real_t** dv;
+    jmi_real_t** dz;
 
 
-	/*Used for debugging 
-	fmiReal tol = 0.001;	
-	fmiReal* jac2;*/
-	
-	size_t nvvr = 0;
-	size_t nzvr = 0;
-	
-	int n_outputs;
-	int* output_vrefs;
-	int n_outputs_real;
-	int* output_vrefs_real;
-	jmi_t* jmi = ((fmi_t *)c)->jmi;
+    /*Used for debugging 
+    fmiReal tol = 0.001;    
+    fmiReal* jac2;*/
+    
+    size_t nvvr = 0;
+    size_t nzvr = 0;
+    
+    int n_outputs;
+    int* output_vrefs;
+    int n_outputs_real;
+    int* output_vrefs_real;
+    jmi_t* jmi = ((fmi_t *)c)->jmi;
     clock_t c0, c1;
 
-	c0 = clock();
-	n_outputs = jmi->n_outputs;
-	n_outputs_real = n_outputs;
-	
-	/*dv and the dz are stored in the same vector*/
-	dv = jmi->dz;
-	dz = jmi->dz;
-	
-	/* Used for debbugging
-	jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
-	*/
-	
-	offs = jmi->n_real_dx;
-	
- 	for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
- 		(*dz)[i] = 0;
-	}
+    c0 = clock();
+    n_outputs = jmi->n_outputs;
+    n_outputs_real = n_outputs;
+    
+    /*dv and the dz are stored in the same vector*/
+    dv = jmi->dz;
+    dz = jmi->dz;
+    
+    /* Used for debbugging
+    jac2 = (fmiReal*)calloc(njac, sizeof(fmiReal));
+    */
+    
+    offs = jmi->n_real_dx;
+    
+    for(i = 0; i<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;i++){
+        (*dz)[i] = 0;
+    }
 
-	for(i = 0; i < jmi->n_real_u; i++){
-		(*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
-	}
+    for(i = 0; i < jmi->n_real_u; i++){
+        (*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
+    }
 
-	if ((dependents==FMI_DERIVATIVES) && (independents==FMI_STATES) && jmi->color_info_A != NULL) {
-		/* Compute Jacobian A with compression */
-		for (i=0;i<jmi->color_info_A->n_groups;i++) {
-		 	for(k = 0; k<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;k++){
-		 		(*dz)[k] = 0;
-			}
-			/* Set the seed vector */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 1.;
-			}
-			/*
-			for (j=0;j<jmi->n_v;j++) {
-				printf(" * %d %f\n",j,(*(jmi->dz))[j]);
-			}
-			*/
-			/* Evaluate directional derivative */
-			if (i==0) {
-				jmi->cached_block_jacobians = 0;
-			} else {
-				jmi->cached_block_jacobians = 1;
-			}
-			jmi->dae->ode_derivatives_dir_der(jmi);
-			/* Extract Jacobian values */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				for (k=jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
-					 k<jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]]+
-					   jmi->color_info_A->col_n_nz[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
-						k++) {
-					jac[(jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j])*(jmi->n_real_x) +
-					    jmi->color_info_A->rows[k]] = (*dz)[jmi->color_info_A->rows[k]];
-				}
-			}
-			/* Reset seed vector */
-			for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
-				(*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
-			}
-		}
-		c1 = clock();
+    if ((dependents==FMI_DERIVATIVES) && (independents==FMI_STATES) && jmi->color_info_A != NULL) {
+        /* Compute Jacobian A with compression */
+        for (i=0;i<jmi->color_info_A->n_groups;i++) {
+            for(k = 0; k<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;k++){
+                (*dz)[k] = 0;
+            }
+            /* Set the seed vector */
+            for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+                (*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 1.;
+            }
+            /*
+            for (j=0;j<jmi->n_v;j++) {
+                printf(" * %d %f\n",j,(*(jmi->dz))[j]);
+            }
+            */
+            /* Evaluate directional derivative */
+            if (i==0) {
+                jmi->cached_block_jacobians = 0;
+            } else {
+                jmi->cached_block_jacobians = 1;
+            }
+            jmi->dae->ode_derivatives_dir_der(jmi);
+            /* Extract Jacobian values */
+            for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+                for (k=jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
+                     k<jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]]+
+                       jmi->color_info_A->col_n_nz[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
+                        k++) {
+                    jac[(jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j])*(jmi->n_real_x) +
+                        jmi->color_info_A->rows[k]] = (*dz)[jmi->color_info_A->rows[k]];
+                }
+            }
+            /* Reset seed vector */
+            for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
+                (*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
+            }
+        }
+        c1 = clock();
 
-		/*printf("Jac A eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+        /*printf("Jac A eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
 
-	} else {
+    } else {
 
-		output_vrefs = (int*)calloc(n_outputs, sizeof(int));
-		output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
+        output_vrefs = (int*)calloc(n_outputs, sizeof(int));
+        output_vrefs_real = (int*)calloc(n_outputs, sizeof(int));
 
-		jmi_get_output_vrefs(jmi, output_vrefs);
-		j = 0;
-		for(i = 0; i < n_outputs; i++){
-			if(get_type_from_value_ref(output_vrefs[i]) == 0){
-				output_vrefs_real[j] = output_vrefs[i];
-				j++;
-			}else{
-				n_outputs_real--;
-			}
-		}
+        jmi_get_output_vrefs(jmi, output_vrefs);
+        j = 0;
+        for(i = 0; i < n_outputs; i++){
+            if(get_type_from_value_ref(output_vrefs[i]) == 0){
+                output_vrefs_real[j] = output_vrefs[i];
+                j++;
+            }else{
+                n_outputs_real--;
+            }
+        }
 
-		/*nvvr: number of x and/or u variables used
-	  nzvr: number of dx and/or w variables used*/
+        /*nvvr: number of x and/or u variables used
+      nzvr: number of dx and/or w variables used*/
 
-		if(independents&FMI_STATES){
-			nvvr += jmi->n_real_x;
-		}else{
-			offs += jmi->n_real_x;
-		}
-		if(independents&FMI_INPUTS){
-			nvvr += jmi->n_real_u;
-		}
-		if(dependents&FMI_DERIVATIVES){
-			nzvr += jmi->n_real_dx;
-			output_off = jmi->n_real_dx;
-		}
-		if(dependents&FMI_OUTPUTS){
-			nzvr += n_outputs_real;
-		}
+        if(independents&FMI_STATES){
+            nvvr += jmi->n_real_x;
+        }else{
+            offs += jmi->n_real_x;
+        }
+        if(independents&FMI_INPUTS){
+            nvvr += jmi->n_real_u;
+        }
+        if(dependents&FMI_DERIVATIVES){
+            nzvr += jmi->n_real_dx;
+            output_off = jmi->n_real_dx;
+        }
+        if(dependents&FMI_OUTPUTS){
+            nzvr += n_outputs_real;
+        }
 
-		/*For every x and/or u variable...*/
-		for(i = 0; i < nvvr; i++){
-			(*dv)[i+offs] = 1;
+        /*For every x and/or u variable...*/
+        for(i = 0; i < nvvr; i++){
+            (*dv)[i+offs] = 1;
 
-			/*Evaluate directional derivative*/
-			jmi->dae->ode_derivatives_dir_der(jmi);
+            /*Evaluate directional derivative*/
+            jmi->dae->ode_derivatives_dir_der(jmi);
 
-			/*Jacobian elements ddx/dx and/or ddx/du*/
-			if(dependents&FMI_DERIVATIVES){
-				for(j = 0; j<jmi->n_real_dx;j++){
-					jac[i*nzvr+j] = (*dz)[j];
-				}
-			}
+            /*Jacobian elements ddx/dx and/or ddx/du*/
+            if(dependents&FMI_DERIVATIVES){
+                for(j = 0; j<jmi->n_real_dx;j++){
+                    jac[i*nzvr+j] = (*dz)[j];
+                }
+            }
 
-			/*Jacobian elements dy/dx and/or dy/du*/
-			if(dependents&FMI_OUTPUTS){
-				for(j = 0; j<n_outputs_real;j++){
-					index = get_index_from_value_ref(output_vrefs_real[j]);
-					if(index < jmi->n_real_x + jmi->n_real_u){
-						if(index == i + offs){
-							jac[i*nzvr+output_off+j] = 1;
-						} else{
-							jac[i*nzvr+output_off+j] = 0;
-						}
-					} else{
-						jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];
-					}
-				}
-			}
-			/*reset dz vector*/
-			for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
-				(*dz)[j] = 0;
-			}
+            /*Jacobian elements dy/dx and/or dy/du*/
+            if(dependents&FMI_OUTPUTS){
+                for(j = 0; j<n_outputs_real;j++){
+                    index = get_index_from_value_ref(output_vrefs_real[j]);
+                    if(index < jmi->n_real_x + jmi->n_real_u){
+                        if(index == i + offs){
+                            jac[i*nzvr+output_off+j] = 1;
+                        } else{
+                            jac[i*nzvr+output_off+j] = 0;
+                        }
+                    } else{
+                        jac[i*nzvr+j+output_off] = (*dz)[index-jmi->offs_real_dx];
+                    }
+                }
+            }
+            /*reset dz vector*/
+            for(j = 0; j<jmi->n_real_dx+jmi->n_real_x+jmi->n_real_u+jmi->n_real_w;j++){
+                (*dz)[j] = 0;
+            }
 
-		}
+        }
 
-		free(output_vrefs);
-		free(output_vrefs_real);
+        free(output_vrefs);
+        free(output_vrefs_real);
 
-	}
-	/*
-	---This section has been used for debugging---
-	fmi_get_jacobian_fd(c, independents, dependents, jac2, njac);
-	
-	for(j = 0; j < nvvr; j++){
-		for(k = 0; k < nzvr; k++){
-			i = j*nzvr + k;
-			if(jac[i] != 0 && jac2[i] != 0){
-				rel_tol = 1.0 - jac2[i]/jac[i];
-				if((rel_tol < tol) && (rel_tol > -tol)){
-					passed++;
-				} else{
-					failed++;
-					printf("\ni: %d,j: %d, cad: %f, fd: %f, rel_tol: %f",k, j, jac[i], jac2[i], rel_tol);
-				}
-			} else{
-				abs_tol = jac[i]-jac2[i];
-				if((abs_tol < tol) && (abs_tol > -tol)){
-					passed++;
-				} else{
-					failed++;
-					printf("\ni: %d, j: %d, cad: %f, fd: %f, abs_tol: %f",k, j, jac[i], jac2[i], abs_tol);
-				}
-			}
-		}
-	}
-	printf("\nPASSED: %d\tFAILED: %d\n\n", passed, failed);
+    }
+    /*
+    ---This section has been used for debugging---
+    fmi_get_jacobian_fd(c, independents, dependents, jac2, njac);
+    
+    for(j = 0; j < nvvr; j++){
+        for(k = 0; k < nzvr; k++){
+            i = j*nzvr + k;
+            if(jac[i] != 0 && jac2[i] != 0){
+                rel_tol = 1.0 - jac2[i]/jac[i];
+                if((rel_tol < tol) && (rel_tol > -tol)){
+                    passed++;
+                } else{
+                    failed++;
+                    printf("\ni: %d,j: %d, cad: %f, fd: %f, rel_tol: %f",k, j, jac[i], jac2[i], rel_tol);
+                }
+            } else{
+                abs_tol = jac[i]-jac2[i];
+                if((abs_tol < tol) && (abs_tol > -tol)){
+                    passed++;
+                } else{
+                    failed++;
+                    printf("\ni: %d, j: %d, cad: %f, fd: %f, abs_tol: %f",k, j, jac[i], jac2[i], abs_tol);
+                }
+            }
+        }
+    }
+    printf("\nPASSED: %d\tFAILED: %d\n\n", passed, failed);
 
-	free(jac2);
-	*/
-	
-	c1 = clock();
+    free(jac2);
+    */
+    
+    c1 = clock();
 
-	/*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
-	return fmiOK;
+    /*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    return fmiOK;
 }
 
 /*Evaluate the directional derivative dz/dv dv*/
 fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
-	int i = 0;
-	jmi_t* jmi = ((fmi_t *)c)->jmi;
-	jmi_real_t** dv_ = jmi->dz;
-	jmi_real_t** dz_ = jmi->dz;
-	for (i=0;i<jmi->n_v;i++) {
-		(*dv_)[i] = 0.;
-	}
-	for (i=0;i<nvvr;i++) {
-		(*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
-	}
-	jmi->dae->ode_derivatives_dir_der(jmi);
-	for (i=0;i<nzvr;i++) {
-		dz[i] = (*dz_)[get_index_from_value_ref(z_vref[i])];
-	}
-	return fmiOK;
+    int i = 0;
+    jmi_t* jmi = ((fmi_t *)c)->jmi;
+    jmi_real_t** dv_ = jmi->dz;
+    jmi_real_t** dz_ = jmi->dz;
+    for (i=0;i<jmi->n_v;i++) {
+        (*dv_)[i] = 0.;
+    }
+    for (i=0;i<nvvr;i++) {
+        (*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
+    }
+    jmi->dae->ode_derivatives_dir_der(jmi);
+    for (i=0;i<nzvr;i++) {
+        dz[i] = (*dz_)[get_index_from_value_ref(z_vref[i])];
+    }
+    return fmiOK;
 }
 
 fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
@@ -1144,8 +1144,8 @@ fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t 
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
-        	isParameterOrConstant = 0;
-        	break;
+            isParameterOrConstant = 0;
+            break;
         }
     }
 
@@ -1186,8 +1186,8 @@ fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
-        	isParameterOrConstant = 0;
-        	break;
+            isParameterOrConstant = 0;
+            break;
         }
     }
 
@@ -1200,7 +1200,7 @@ fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size
         ((fmi_t *)c)->jmi->recomputeVariables = 0;
     }
 
-	/* Get the z vector*/
+    /* Get the z vector*/
     z = jmi_get_z(((fmi_t *)c)->jmi);
     
     for (i = 0; i <nvr; i = i + 1) {
@@ -1227,8 +1227,8 @@ fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
-        	isParameterOrConstant = 0;
-        	break;
+            isParameterOrConstant = 0;
+            break;
         }
     }
 
@@ -1267,8 +1267,8 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
         index = get_index_from_value_ref(vr[i]);
 
         if (index>=((fmi_t *)c)->jmi->offs_real_dx) {
-        	isParameterOrConstant = 0;
-        	break;
+            isParameterOrConstant = 0;
+            break;
         }
     }
 
@@ -1289,27 +1289,27 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
 }
 
 jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {
-	return ((fmi_t*)c)->jmi;
+    return ((fmi_t*)c)->jmi;
 }
 
 fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
-		                      fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+                              fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
-	fmiInteger nGuards;
-	fmiInteger nF;
-	fmiInteger nR;
-	fmiInteger retval;
-	fmiInteger i,iter, max_iterations;
+    fmiInteger nGuards;
+    fmiInteger nF;
+    fmiInteger nR;
+    fmiInteger retval;
+    fmiInteger i,iter, max_iterations;
     jmi_real_t nextTimeEvent;
-	fmi_t* fmi = ((fmi_t *)c);
-	jmi_t* jmi = fmi->jmi;
-	jmi_real_t* z = jmi_get_z(jmi);
+    fmi_t* fmi = ((fmi_t *)c);
+    jmi_t* jmi = fmi->jmi;
+    jmi_real_t* z = jmi_get_z(jmi);
     jmi_real_t* event_indicators;
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
     jmi_log_node_t top_node;
 
-	/* Allocate memory */
+    /* Allocate memory */
     nGuards = jmi->n_guards;
     jmi_dae_get_sizes(jmi, &nF, &nR);
     event_indicators = fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
@@ -1336,8 +1336,8 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
         return fmiError;
     }
 
-	/* Copy all pre values */
-	jmi_copy_pre_values(jmi);
+    /* Copy all pre values */
+    jmi_copy_pre_values(jmi);
 
     /* We are at an event -> set atEvent to true. */
     jmi->atEvent = JMI_TRUE;
@@ -1355,7 +1355,7 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
         /* Evaluate and turn the switches */
         retval = jmi_evaluate_switches(jmi,switches,1);
 
-    	/* Evaluate the ODE again */
+        /* Evaluate the ODE again */
         retval = jmi_ode_derivatives(jmi);
 
         if(retval != 0) {
@@ -1364,28 +1364,28 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
             return fmiError;
         }
 
-    	/* Compare new values with values
-    	 * with the pre values. If there is an element that differs, set
-    	 * eventInfo->iterationConverged to false
-    	 */
+        /* Compare new values with values
+         * with the pre values. If there is an element that differs, set
+         * eventInfo->iterationConverged to false
+         */
         eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
 
         /* Start with continuous variables - they could change due to
          * the reinit operator. */
 
         /*
-    	for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
-    		if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
-    			eventInfo->iterationConverged = fmiFalse;
-    		}
-    	}
+        for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
+            if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
+                eventInfo->iterationConverged = fmiFalse;
+            }
+        }
          */
 
-    	for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i=i+1) {
-    		if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
-    			eventInfo->iterationConverged = fmiFalse;
-    		}
-    	}
+        for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i=i+1) {
+            if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
+                eventInfo->iterationConverged = fmiFalse;
+            }
+        }
         
         /* Evaluate the switches */
         memcpy(sw_temp,switches,nR*sizeof(jmi_real_t));
@@ -1395,12 +1395,12 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
             eventInfo->iterationConverged = fmiFalse;
         }
 
-    	/* Copy new values to pre values */
-    	jmi_copy_pre_values(jmi);
+        /* Copy new values to pre values */
+        jmi_copy_pre_values(jmi);
 
-    	if (intermediateResults){
-    		break;
-    	}
+        if (intermediateResults){
+            break;
+        }
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
@@ -1417,41 +1417,41 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
     if (eventInfo->iterationConverged == fmiTrue) {
         jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
 
-    	/* Compute the next time event */
-    	retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
+        /* Compute the next time event */
+        retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
 
-    	if(retval != 0) { /* Error check */
+        if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
             jmi_log_unwind(jmi->log, top_node);
             return fmiError;
-    	}
+        }
 
-    	/* If there is an upcoming time event, then set the event information
-    	 * accordingly.
-    	 */
-    	if (!(nextTimeEvent==JMI_INF)) {
-    		eventInfo->upcomingTimeEvent = fmiTrue;
-    		eventInfo->nextEventTime = nextTimeEvent;
-    		/*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
-    	} else {
-    		eventInfo->upcomingTimeEvent = fmiFalse;
-    	}
+        /* If there is an upcoming time event, then set the event information
+         * accordingly.
+         */
+        if (!(nextTimeEvent==JMI_INF)) {
+            eventInfo->upcomingTimeEvent = fmiTrue;
+            eventInfo->nextEventTime = nextTimeEvent;
+            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
+        } else {
+            eventInfo->upcomingTimeEvent = fmiFalse;
+        }
 
-    	/* Reset atEvent flag */
-    	jmi->atEvent = JMI_FALSE;
+        /* Reset atEvent flag */
+        jmi->atEvent = JMI_FALSE;
 
-    	/* Evaluate the guards with the event flat set to false in order to
-    	 * reset guards depending on samplers before copying pre values.
-    	 * If this is not done, then the corresponding pre values for these guards
-    	 * will be true, and no event will be triggered at the next sample.
-    	 */
-    	retval = jmi_ode_guards(jmi);
+        /* Evaluate the guards with the event flat set to false in order to
+         * reset guards depending on samplers before copying pre values.
+         * If this is not done, then the corresponding pre values for these guards
+         * will be true, and no event will be triggered at the next sample.
+         */
+        retval = jmi_ode_guards(jmi);
 
-    	if(retval != 0) { /* Error check */
+        if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
             jmi_log_unwind(jmi->log, top_node);
             return fmiError;
-    	}
+        }
 
         jmi_log_leave(jmi->log, final_node);
     }
@@ -1466,36 +1466,36 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
 
 fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
-	return fmi1_me_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
+    return fmi1_me_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
 }
 
 fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
-	memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
+    memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
-	fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
-	fmiValueReference i;
-	for(i = 0; i <nx; i = i + 1) {
-		ones[i]=1.0;
-	}
-	memcpy (x_nominal, ones, nx*sizeof(fmiReal));
+    fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
+    fmiValueReference i;
+    for(i = 0; i <nx; i = i + 1) {
+        ones[i]=1.0;
+    }
+    memcpy (x_nominal, ones, nx*sizeof(fmiReal));
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
-	fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
-	fmiValueReference i;
-	for(i = 0; i<nx; i = i + 1) {
-		vrx[i] = offset + i;
-	}
+    fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
+    fmiValueReference i;
+    for(i = 0; i<nx; i = i + 1) {
+        vrx[i] = offset + i;
+    }
     return fmiOK;
 }
 
 fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
-	jmi_terminate(((fmi_t *)c)->jmi);
+    jmi_terminate(((fmi_t *)c)->jmi);
     return fmiOK;
 }
 
@@ -1555,82 +1555,82 @@ extern const int fmi_runtime_options_map_vrefs[];
 extern const int fmi_runtime_options_map_length;
 
 int compare_option_names(const void* a, const void* b) {
-	const char** sa = a;
-	const char** sb = b;
-	return strcmp(*sa, *sb);
+    const char** sa = a;
+    const char** sb = b;
+    return strcmp(*sa, *sb);
 }
 
 static int get_option_index(char* option) {
-	const char** found=(const char**)bsearch(&option,fmi_runtime_options_map_names,fmi_runtime_options_map_length,sizeof(char*),compare_option_names);
-	int vr, index;
-	if(!found) return 0;
+    const char** found=(const char**)bsearch(&option,fmi_runtime_options_map_names,fmi_runtime_options_map_length,sizeof(char*),compare_option_names);
+    int vr, index;
+    if(!found) return 0;
     index = (int)(found - &fmi_runtime_options_map_names[0]);
     if(index >= fmi_runtime_options_map_length ) return 0;
-	vr = fmi_runtime_options_map_vrefs[index];
-	return get_index_from_value_ref(vr);
+    vr = fmi_runtime_options_map_vrefs[index];
+    return get_index_from_value_ref(vr);
 }
 
 /**
  * Update run-time options specified by the user.
  */
 void fmi_update_runtime_options(fmi_t* fmi) {
-	jmi_t* jmi = fmi->jmi;
-	jmi_real_t* z = jmi_get_z(jmi);
-	int index;
-	jmi_options_t* op = &fmi->jmi->options;
-	index = get_option_index("_log_level");
-	if(index)
-		op->log_level = (int)z[index]; 
-	index = get_option_index("_enforce_bounds");
-	if(index)
-		op->enforce_bounds_flag = (int)z[index]; 
-	index = get_option_index("_nle_solver_log_level");
-	if(index)
-		op->nle_solver_log_level = (int)z[index]; 	
-	index = get_option_index("_use_jacobian_scaling");
-	if(index)
-		op->use_jacobian_scaling_flag = (int)z[index]; 
-	index = get_option_index("_use_automatic_scaling");
-	if(index)
-		op->use_automatic_scaling_flag = (int)z[index]; 
-	index = get_option_index("_rescale_each_step");
-	if(index)
-		op->rescale_each_step_flag = (int)z[index]; 
-	index = get_option_index("_rescale_after_singular_jac");
-	if(index)
-		op->rescale_after_singular_jac_flag = (int)z[index]; 
-	index = get_option_index("_use_Brent_in_1d");
-	if(index)
-		op->use_Brent_in_1d_flag = (int)z[index]; 
-	index = get_option_index("_nle_solver_default_tol");
-	if(index)
-		op->nle_solver_default_tol = z[index]; 
-	index = get_option_index("_nle_solver_check_jac_cond");
-	if(index)
-		op->nle_solver_check_jac_cond_flag = (int)z[index]; 
-	index = get_option_index("_nle_solver_min_tol");
-	if(index)
-		op->nle_solver_min_tol = z[index]; 
-	index = get_option_index("_nle_solver_tol_factor");
-	if(index)
-		op->nle_solver_tol_factor = z[index]; 
-	index = get_option_index("_events_default_tol");
-	if(index)
-		op->events_default_tol = z[index]; 
-	index = get_option_index("_events_tol_factor");
-	if(index)
-		op->events_tol_factor = z[index];
-	index = get_option_index("_use_manual_equation_scaling");
-	if(index)
-		op->use_manual_scaling_flag = z[index]; 
-	index = get_option_index("_block_jacobian_check");
-	if(index)
-		op->block_jacobian_check = z[index]; 
-	index = get_option_index("_block_jacobian_check_tol");
-	if(index)
-		op->block_jacobian_check_tol = z[index];
+    jmi_t* jmi = fmi->jmi;
+    jmi_real_t* z = jmi_get_z(jmi);
+    int index;
+    jmi_options_t* op = &fmi->jmi->options;
+    index = get_option_index("_log_level");
+    if(index)
+        op->log_level = (int)z[index]; 
+    index = get_option_index("_enforce_bounds");
+    if(index)
+        op->enforce_bounds_flag = (int)z[index]; 
+    index = get_option_index("_nle_solver_log_level");
+    if(index)
+        op->nle_solver_log_level = (int)z[index];   
+    index = get_option_index("_use_jacobian_scaling");
+    if(index)
+        op->use_jacobian_scaling_flag = (int)z[index]; 
+    index = get_option_index("_use_automatic_scaling");
+    if(index)
+        op->use_automatic_scaling_flag = (int)z[index]; 
+    index = get_option_index("_rescale_each_step");
+    if(index)
+        op->rescale_each_step_flag = (int)z[index]; 
+    index = get_option_index("_rescale_after_singular_jac");
+    if(index)
+        op->rescale_after_singular_jac_flag = (int)z[index]; 
+    index = get_option_index("_use_Brent_in_1d");
+    if(index)
+        op->use_Brent_in_1d_flag = (int)z[index]; 
+    index = get_option_index("_nle_solver_default_tol");
+    if(index)
+        op->nle_solver_default_tol = z[index]; 
+    index = get_option_index("_nle_solver_check_jac_cond");
+    if(index)
+        op->nle_solver_check_jac_cond_flag = (int)z[index]; 
+    index = get_option_index("_nle_solver_min_tol");
+    if(index)
+        op->nle_solver_min_tol = z[index]; 
+    index = get_option_index("_nle_solver_tol_factor");
+    if(index)
+        op->nle_solver_tol_factor = z[index]; 
+    index = get_option_index("_events_default_tol");
+    if(index)
+        op->events_default_tol = z[index]; 
+    index = get_option_index("_events_tol_factor");
+    if(index)
+        op->events_tol_factor = z[index];
+    index = get_option_index("_use_manual_equation_scaling");
+    if(index)
+        op->use_manual_scaling_flag = z[index]; 
+    index = get_option_index("_block_jacobian_check");
+    if(index)
+        op->block_jacobian_check = z[index]; 
+    index = get_option_index("_block_jacobian_check_tol");
+    if(index)
+        op->block_jacobian_check_tol = z[index];
     index = get_option_index("_cs_solver");
-	if(index)
-		op->cs_solver = z[index]; 
-	
+    if(index)
+        op->cs_solver = z[index]; 
+    
 }

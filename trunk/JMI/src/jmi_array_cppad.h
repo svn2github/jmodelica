@@ -46,38 +46,38 @@ typedef CppAD::VecAD<jmi_real_t>::reference jmi_ad_array_ref_t;
 // Linked list for saving pointers to be freed at return
 class jmi_dynamic_list {
 public:
-	jmi_dynamic_list() { next = 0; }
-	jmi_dynamic_list(jmi_dynamic_list* n) { next = n; }
-	virtual ~jmi_dynamic_list();
+    jmi_dynamic_list() { next = 0; }
+    jmi_dynamic_list(jmi_dynamic_list* n) { next = n; }
+    virtual ~jmi_dynamic_list();
 private:
-	jmi_dynamic_list* next;
+    jmi_dynamic_list* next;
 };
 class jmi_dynamic_list_arr : public jmi_dynamic_list {
 public:
-	jmi_dynamic_list_arr(jmi_dynamic_list* n, CppAD::VecAD<jmi_real_t>* d) : jmi_dynamic_list(n) { data = d; }
-	virtual ~jmi_dynamic_list_arr();
+    jmi_dynamic_list_arr(jmi_dynamic_list* n, CppAD::VecAD<jmi_real_t>* d) : jmi_dynamic_list(n) { data = d; }
+    virtual ~jmi_dynamic_list_arr();
 private:
-	CppAD::VecAD<jmi_real_t>* data;
+    CppAD::VecAD<jmi_real_t>* data;
 };
 
 // Record array type declaration macro
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
-	typedef struct _##arr {\
-		int* size;\
+    typedef struct _##arr {\
+        int* size;\
         int  num_dims;\
         int  num_elems;\
-		std::vector<rec>* var;\
-	} arr;\
-	class jmi_dynamic_list_arr_##arr : public jmi_dynamic_list {\
-	public:\
-		jmi_dynamic_list_arr_##arr(jmi_dynamic_list* n, std::vector<rec>* d) : jmi_dynamic_list(n) { data = d; }\
-		virtual ~jmi_dynamic_list_arr_##arr();\
-	private:\
-		std::vector<rec>* data;\
-	};\
-	jmi_dynamic_list_arr_##arr::~jmi_dynamic_list_arr_##arr() {\
-		delete data;\
-	}
+        std::vector<rec>* var;\
+    } arr;\
+    class jmi_dynamic_list_arr_##arr : public jmi_dynamic_list {\
+    public:\
+        jmi_dynamic_list_arr_##arr(jmi_dynamic_list* n, std::vector<rec>* d) : jmi_dynamic_list(n) { data = d; }\
+        virtual ~jmi_dynamic_list_arr_##arr();\
+    private:\
+        std::vector<rec>* data;\
+    };\
+    jmi_dynamic_list_arr_##arr::~jmi_dynamic_list_arr_##arr() {\
+        delete data;\
+    }
 
 // Array creation macro
 #define JMI_ARRAY_STATIC(name, ne, nd) \
@@ -89,23 +89,23 @@ private:
 // Record array creation macro
 #define JMI_RECORD_ARRAY_STATIC(type, arr, name, ne, nd) \
     int name##_size[nd];\
-	std::vector<type> name##_var(ne);\
-	arr name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
-	arr* name = &name##_obj;
+    std::vector<type> name##_var(ne);\
+    arr name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
+    arr* name = &name##_obj;
 
 // Dynamic array creation macro
 #define JMI_ARRAY_DYNAMIC(name, nd) \
     int name##_size[nd];\
-	jmi_array_t name##_obj = { name##_size, (int) (nd), 0, 0 };\
-	jmi_array_t* name = &name##_obj;
+    jmi_array_t name##_obj = { name##_size, (int) (nd), 0, 0 };\
+    jmi_array_t* name = &name##_obj;
 
 // Dynamic record array creation macro
 #define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, nd) \
     int name##_size[nd];\
-	std::vector<type>* name##_var = new std::vector<type>(0);\
-	JMI_DYNAMIC_ADD_POINTER(name##_var, jmi_dynamic_list_arr_##arr)\
-	arr name##_obj = { name##_size, (int) (nd), 0, name##_var };\
-	arr* name = &name##_obj;
+    std::vector<type>* name##_var = new std::vector<type>(0);\
+    JMI_DYNAMIC_ADD_POINTER(name##_var, jmi_dynamic_list_arr_##arr)\
+    arr name##_obj = { name##_size, (int) (nd), 0, name##_var };\
+    arr* name = &name##_obj;
 
 
 // Array initialization macros
@@ -346,15 +346,15 @@ private:
 
 // Macro for declaring dynamic list variable - should be called at beginning of function
 #define JMI_DYNAMIC_INIT() \
-	jmi_dynamic_list* jmi_dynamic_first = new jmi_dynamic_list;
+    jmi_dynamic_list* jmi_dynamic_first = new jmi_dynamic_list;
 
 // Macro for adding a pointer to dynamic list - only for use in other macros
 #define JMI_DYNAMIC_ADD_POINTER(pointer, type) \
-	jmi_dynamic_first = new type(jmi_dynamic_first, pointer);
+    jmi_dynamic_first = new type(jmi_dynamic_first, pointer);
 
 // Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return
 #define JMI_DYNAMIC_FREE() \
-	delete jmi_dynamic_first;
+    delete jmi_dynamic_first;
 
 // Record array access macros
 #define jmi_array_rec_1(arr, i1) (&((*((arr)->var))[_JMI_ARR_I_1(arr, i1)]))

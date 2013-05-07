@@ -44,11 +44,11 @@ struct jmi_ode_cvode_t {
 
     void *cvode_mem;
     int lmm;      /* Specifies the LMM (CV_ADAMS or CV_BDF) */
-	int iter;     /* Specifies the nonlinear solver iterations (CV_NEWTON or CV_FUNCTIONAL) */
-	realtype rtol; /* Specifies the relative tolerance */
-	realtype atol; /* Specifies the absolute tolerance */
-	N_Vector y0; /* Work vector for the states y */
-	N_Vector y_work;
+    int iter;     /* Specifies the nonlinear solver iterations (CV_NEWTON or CV_FUNCTIONAL) */
+    realtype rtol; /* Specifies the relative tolerance */
+    realtype atol; /* Specifies the absolute tolerance */
+    N_Vector y0; /* Work vector for the states y */
+    N_Vector y_work;
 };
 
 

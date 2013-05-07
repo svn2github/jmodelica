@@ -144,7 +144,7 @@ int jmi_dae_cad_get_connections( int n_col, int n_nz, int *row, int *col, int **
  *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
  *                         to set this argument.
  * @param screen_use Set the flag to JMI_DER_CHECK_SCREEN_ON to print the result of the comparasion on the screen
- *		       or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
+ *             or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
  *             The size of this vector is the same as the z vector.
@@ -155,7 +155,7 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
 
 /**
  * \brief Help function that is used in jmi_func_cad_dF and jmi_func_fd_dF that determines the mapping between the original col vector
- *				in the sparse triplet representation and the decrease col vector due to independent_vars.
+ *              in the sparse triplet representation and the decrease col vector due to independent_vars.
  *
  * @param jmi A jmi_t struct.
  * @param func The jmi_func_t struct.

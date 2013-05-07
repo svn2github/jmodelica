@@ -27,13 +27,13 @@
 #include "jmi_log.h"
 
 int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
-	realtype *y, *ydot;
-	int flag;
-	jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
-	jmi_t* jmi = solver->jmi;
+    realtype *y, *ydot;
+    int flag;
+    jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
+    jmi_t* jmi = solver->jmi;
 
-	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
-	ydot = NV_DATA_S(yydot); /*ydot is now a vector of realtype*/
+    y = NV_DATA_S(yy); /*y is now a vector of realtype*/
+    ydot = NV_DATA_S(yydot); /*ydot is now a vector of realtype*/
 
     flag = solver->rhs_fcn(solver->user_data, t, y, ydot);
     
@@ -48,11 +48,11 @@ int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
 
 int cv_root(realtype t, N_Vector yy, realtype *gout,  void* problem_data){
     realtype *y;
-	int flag;
-	jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
-	jmi_t* jmi = solver->jmi;
+    int flag;
+    jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
+    jmi_t* jmi = solver->jmi;
 
-	y = NV_DATA_S(yy); /*y is now a vector of realtype*/
+    y = NV_DATA_S(yy); /*y is now a vector of realtype*/
 
     flag = solver->root_fcn(solver->user_data, t, y, gout);
     
@@ -77,9 +77,9 @@ void cv_err(int error_code, const char *module,const char *function, char *msg, 
 }
 
 int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initialize){
-	int flag = 0;
-	jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
-	realtype tret,*y;
+    int flag = 0;
+    jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
+    realtype tret,*y;
     
     y = NV_DATA_S(integrator->y_work);
     memcpy(y, jmi_get_real_x(solver->jmi), (solver->n_real_x)*sizeof(realtype));
@@ -112,35 +112,35 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype t_stop, int initializ
     *(jmi_get_t(solver->jmi)) = tret;
     solver->tout = tret;
     /* Set states */
-	y = NV_DATA_S(integrator->y_work);
-	memcpy(jmi_get_real_x(solver->jmi), y, (solver->n_real_x)*sizeof(realtype));
+    y = NV_DATA_S(integrator->y_work);
+    memcpy(jmi_get_real_x(solver->jmi), y, (solver->n_real_x)*sizeof(realtype));
     
     
     if (flag == CV_ROOT_RETURN){
         jmi_log_node(solver->jmi->log, logInfo, "CVODEEvent", "<An event was detected at> t:%g", tret);
         return JMI_ODE_EVENT;
     }
-	return JMI_ODE_OK;
+    return JMI_ODE_OK;
 }
 
 int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver) {
     jmi_ode_cvode_t* integrator;
     jmi_t* jmi = solver->jmi;
-	realtype t0;
+    realtype t0;
     int flag = 0;
     void* cvode_mem;
     
-	integrator = (jmi_ode_cvode_t*)calloc(1,sizeof(jmi_ode_cvode_t));
+    integrator = (jmi_ode_cvode_t*)calloc(1,sizeof(jmi_ode_cvode_t));
     if(!integrator){
         jmi_log_node(jmi->log, logError, "Error", "<Failed to allocate the internal CVODE struct.>");
         return -1;
     }
 
-	/* DEFAULT VALUES NEEDS TO BE IMPROVED*/
-	integrator->lmm  = CV_BDF;
-	integrator->iter = CV_NEWTON;
-	integrator->rtol = 1e-4;
-	integrator->atol = 1e-6;
+    /* DEFAULT VALUES NEEDS TO BE IMPROVED*/
+    integrator->lmm  = CV_BDF;
+    integrator->iter = CV_NEWTON;
+    integrator->rtol = 1e-4;
+    integrator->atol = 1e-6;
 
     cvode_mem = CVodeCreate(integrator->lmm,integrator->iter);
     if(!cvode_mem){
@@ -148,14 +148,14 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
 
-	/* Get the default values for the time and states */
-	t0 = solver->t_start;
-	integrator->y0 = N_VNew_Serial(solver->n_real_x);
-	integrator->y_work = N_VNew_Serial(solver->n_real_x);
-	memcpy(NV_DATA_S(integrator->y_work), jmi_get_real_x(jmi), (solver->n_real_x)*sizeof(realtype));
+    /* Get the default values for the time and states */
+    t0 = solver->t_start;
+    integrator->y0 = N_VNew_Serial(solver->n_real_x);
+    integrator->y_work = N_VNew_Serial(solver->n_real_x);
+    memcpy(NV_DATA_S(integrator->y_work), jmi_get_real_x(jmi), (solver->n_real_x)*sizeof(realtype));
     memcpy(NV_DATA_S(integrator->y0), jmi_get_real_x(jmi), (solver->n_real_x)*sizeof(realtype));
 
-	flag = CVodeInit(cvode_mem, cv_rhs, t0, integrator->y0);
+    flag = CVodeInit(cvode_mem, cv_rhs, t0, integrator->y0);
     if(flag != 0) {
         jmi_log_node(jmi->log, logError, "Error", "<Failed to initialize CVODE. Returned with> error_flag: %d", flag);
         return -1;
@@ -202,9 +202,9 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 void jmi_ode_cvode_delete(jmi_ode_solver_t* solver) {
     
     if((jmi_ode_cvode_t*)(solver->integrator)){
-		/*Deallocate work vectors.*/
+        /*Deallocate work vectors.*/
         N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y_work));
-		N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y0));
+        N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y0));
         /*Deallocate CVode */
         CVodeFree(&(((jmi_ode_cvode_t*)(solver->integrator))->cvode_mem));
         

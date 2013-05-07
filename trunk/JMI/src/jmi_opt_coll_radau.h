@@ -1005,7 +1005,7 @@ extern "C" {
 
 
 typedef struct {
-	jmi_opt_coll_t jmi_opt_coll;
+    jmi_opt_coll_t jmi_opt_coll;
     int n_cp;                       /* Number of collocation points */
     jmi_real_t *cp;                 /* Collocation points for algebraic variables */
     jmi_real_t *w;                  /* Quadrature weights */
@@ -1021,17 +1021,17 @@ typedef struct {
     int dF0_n_nz;
     int dF_dp_n_nz;
     int dF_ddx_dx_du_dw_n_nz;
-	int dCeq_dp_n_nz;
-	int dCeq_ddx_dx_du_dw_n_nz;
-	int dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dCineq_dp_n_nz;
-	int dCineq_ddx_dx_du_dw_n_nz;
-	int dCineq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dHeq_dp_n_nz;
-	int dHeq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int dHineq_dp_n_nz;
-	int dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;
-	int offs_p_opt;
+    int dCeq_dp_n_nz;
+    int dCeq_ddx_dx_du_dw_n_nz;
+    int dCeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+    int dCineq_dp_n_nz;
+    int dCineq_ddx_dx_du_dw_n_nz;
+    int dCineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+    int dHeq_dp_n_nz;
+    int dHeq_ddx_p_dx_p_du_p_dw_p_n_nz;
+    int dHineq_dp_n_nz;
+    int dHineq_ddx_p_dx_p_du_p_dw_p_n_nz;
+    int offs_p_opt;
     int offs_dx_0;
     int offs_x_0;
     int offs_u_0;
@@ -1135,20 +1135,20 @@ typedef struct {
  * @return Error code.
  */
 int jmi_opt_coll_radau_new(jmi_opt_coll_t **jmi_opt_coll, jmi_t *jmi, int n_e,
-		            jmi_real_t *hs, int hs_free,
-		            jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
-		            jmi_real_t *u_init, jmi_real_t *w_init,
-		            jmi_real_t *p_opt_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
-		            jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
-		            jmi_real_t tf_lb, jmi_real_t *hs_lb,
-		            jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
-		            jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
-		            jmi_real_t tf_ub, jmi_real_t *hs_ub,
-		            int linearity_information_provided,
-		            int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
-		            int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
-		            int n_cp, int der_eval_alg, int n_blocking_factors,
-		            int *blocking_factors);
+                    jmi_real_t *hs, int hs_free,
+                    jmi_real_t *p_opt_init, jmi_real_t *dx_init, jmi_real_t *x_init,
+                    jmi_real_t *u_init, jmi_real_t *w_init,
+                    jmi_real_t *p_opt_lb, jmi_real_t *dx_lb, jmi_real_t *x_lb,
+                    jmi_real_t *u_lb, jmi_real_t *w_lb, jmi_real_t t0_lb,
+                    jmi_real_t tf_lb, jmi_real_t *hs_lb,
+                    jmi_real_t *p_opt_ub, jmi_real_t *dx_ub, jmi_real_t *x_ub,
+                    jmi_real_t *u_ub, jmi_real_t *w_ub, jmi_real_t t0_ub,
+                    jmi_real_t tf_ub, jmi_real_t *hs_ub,
+                    int linearity_information_provided,
+                    int* p_opt_lin, int* dx_lin, int* x_lin, int* u_lin, int* w_lin,
+                    int* dx_tp_lin, int* x_tp_lin, int* u_tp_lin, int* w_tp_lin,
+                    int n_cp, int der_eval_alg, int n_blocking_factors,
+                    int *blocking_factors);
 
 /**
  * \brief Deallocate the fields of a jmi_opt_coll_t struct created by the function
@@ -1840,9 +1840,9 @@ jmi_real_t jmi_opt_coll_radau_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, i
  * @return Error code.
  */
 int jmi_opt_coll_radau_get_pols(int n_cp, jmi_real_t *cp, jmi_real_t *w,
-		jmi_real_t *cpp, jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
-		jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
-		                          jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals);
+        jmi_real_t *cpp, jmi_real_t *Lp_coeffs, jmi_real_t *Lpp_coeffs,
+        jmi_real_t *Lp_dot_coeffs, jmi_real_t *Lpp_dot_coeffs,
+                                  jmi_real_t *Lp_dot_vals, jmi_real_t *Lpp_dot_vals);
 
 #ifdef __cplusplus
 }

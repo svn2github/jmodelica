@@ -25,97 +25,97 @@
 //using namespace Ipopt;
 
 struct jmi_init_opt_ipopt_t{
-	jmi_init_opt_t *jmi_init_opt;
-	Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app;
-	Ipopt::SmartPtr<Ipopt::TNLP> tnlp;
-	int solved;
-	int return_status;
+    jmi_init_opt_t *jmi_init_opt;
+    Ipopt::SmartPtr<Ipopt::IpoptApplication> ipopt_app;
+    Ipopt::SmartPtr<Ipopt::TNLP> tnlp;
+    int solved;
+    int return_status;
 };
 
 int jmi_init_opt_ipopt_new(jmi_init_opt_ipopt_t **jmi_init_opt_ipopt, jmi_init_opt_t *jmi_init_opt) {
 
-	jmi_init_opt_ipopt_t* nlp = (jmi_init_opt_ipopt_t*)calloc(1,sizeof(jmi_init_opt_ipopt_t));
-	*jmi_init_opt_ipopt = nlp;
+    jmi_init_opt_ipopt_t* nlp = (jmi_init_opt_ipopt_t*)calloc(1,sizeof(jmi_init_opt_ipopt_t));
+    *jmi_init_opt_ipopt = nlp;
 
-	nlp->jmi_init_opt = jmi_init_opt;
+    nlp->jmi_init_opt = jmi_init_opt;
 
-	nlp->ipopt_app = new Ipopt::IpoptApplication();
-	nlp->ipopt_app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-	nlp->tnlp = new jmi_init_opt_TNLP(jmi_init_opt);
-	nlp->solved = 0;
-	nlp->return_status = -1;
+    nlp->ipopt_app = new Ipopt::IpoptApplication();
+    nlp->ipopt_app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+    nlp->tnlp = new jmi_init_opt_TNLP(jmi_init_opt);
+    nlp->solved = 0;
+    nlp->return_status = -1;
 
-	return 0;
+    return 0;
 }
 
 int jmi_init_opt_ipopt_solve(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt) {
-	int i;
-	// Copy initial guess into x
-	for (i=0;i<jmi_init_opt_ipopt->jmi_init_opt->n_x;i++) {
-		jmi_init_opt_ipopt->jmi_init_opt->x[i] = jmi_init_opt_ipopt->jmi_init_opt->x_init[i];
-	}
+    int i;
+    // Copy initial guess into x
+    for (i=0;i<jmi_init_opt_ipopt->jmi_init_opt->n_x;i++) {
+        jmi_init_opt_ipopt->jmi_init_opt->x[i] = jmi_init_opt_ipopt->jmi_init_opt->x_init[i];
+    }
 
-	// Initialize and process options
-	if (jmi_init_opt_ipopt->ipopt_app->Initialize() != Ipopt::Solve_Succeeded) {
-		return false;
-	}
+    // Initialize and process options
+    if (jmi_init_opt_ipopt->ipopt_app->Initialize() != Ipopt::Solve_Succeeded) {
+        return false;
+    }
 
-	Ipopt::ApplicationReturnStatus status;
-	status = jmi_init_opt_ipopt->ipopt_app->OptimizeTNLP(jmi_init_opt_ipopt->tnlp);
-	jmi_init_opt_ipopt->solved = 1;
-	jmi_init_opt_ipopt->return_status = status;
+    Ipopt::ApplicationReturnStatus status;
+    status = jmi_init_opt_ipopt->ipopt_app->OptimizeTNLP(jmi_init_opt_ipopt->tnlp);
+    jmi_init_opt_ipopt->solved = 1;
+    jmi_init_opt_ipopt->return_status = status;
 
-	return status;
+    return status;
 
 }
 
 int jmi_init_opt_ipopt_set_string_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, char* val) {
-	std::string tag(key);
-	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetStringValue(tag, val))  {
-		return 0;
-	} else {
-		return -1;
-	}
+    std::string tag(key);
+    if (jmi_init_opt_ipopt->ipopt_app->Options()->SetStringValue(tag, val))  {
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 int jmi_init_opt_ipopt_set_int_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, int val) {
-	std::string tag(key);
-	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val)) {
-		return 0;
-	} else {
-		return -1;
-	}
+    std::string tag(key);
+    if (jmi_init_opt_ipopt->ipopt_app->Options()->SetIntegerValue(tag, val)) {
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 int jmi_init_opt_ipopt_set_num_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, char* key, double val) {
-	std::string tag(key);
-	if (jmi_init_opt_ipopt->ipopt_app->Options()->SetNumericValue(tag, val)) {
-		return 0;
-	} else {
-		return -1;
-	}
+    std::string tag(key);
+    if (jmi_init_opt_ipopt->ipopt_app->Options()->SetNumericValue(tag, val)) {
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 int jmi_init_opt_ipopt_get_statistics(jmi_init_opt_ipopt_t* jmi_init_opt_ipopt,
-		int* return_status, int* nbr_iter, jmi_real_t* objective,
-		jmi_real_t* total_exec_time) {
-	if (jmi_init_opt_ipopt->solved==1) {
-		*return_status = jmi_init_opt_ipopt->return_status;
-		*nbr_iter = jmi_init_opt_ipopt->ipopt_app->Statistics()->IterationCount();
-		*objective = jmi_init_opt_ipopt->ipopt_app->Statistics()->FinalObjective();
-		*total_exec_time = jmi_init_opt_ipopt->ipopt_app->Statistics()->TotalCpuTime();
-		return 0;
-	} else {
-		return -1;
-	}
+        int* return_status, int* nbr_iter, jmi_real_t* objective,
+        jmi_real_t* total_exec_time) {
+    if (jmi_init_opt_ipopt->solved==1) {
+        *return_status = jmi_init_opt_ipopt->return_status;
+        *nbr_iter = jmi_init_opt_ipopt->ipopt_app->Statistics()->IterationCount();
+        *objective = jmi_init_opt_ipopt->ipopt_app->Statistics()->FinalObjective();
+        *total_exec_time = jmi_init_opt_ipopt->ipopt_app->Statistics()->TotalCpuTime();
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 
 /*
 int jmi_init_opt_ipopt_get_starting_point(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, Index n, int init_x, Number* x,
-				      int init_z, Number* z_L, Number* z_U,
-				      Index m, int init_lambda,
-				      Number* lambda) {
+                      int init_z, Number* z_L, Number* z_U,
+                      Index m, int init_lambda,
+                      Number* lambda) {
 
   return jmi_init_opt_get_initial(x);
 

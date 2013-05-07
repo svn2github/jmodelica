@@ -36,7 +36,7 @@ typedef struct jmi_array_t jmi_array_t;
 struct jmi_array_t {
     int*        size;
     int         num_dims;
-	int			num_elems;
+    int         num_elems;
     jmi_real_t* var;
 };
 
@@ -44,25 +44,25 @@ typedef struct jmi_int_array_t jmi_int_array_t;
 struct jmi_int_array_t {
     int*        size;
     int         num_dims;
-	int			num_elems;
+    int         num_elems;
     jmi_int_t*  var;
 };
 
 /* Linked list for saving pointers to be freed at return */
 typedef struct _jmi_dynamic_list jmi_dynamic_list;
 struct _jmi_dynamic_list {
-	void* data;
-	jmi_dynamic_list* next;
+    void* data;
+    jmi_dynamic_list* next;
 };
 
 /* Record array type declaration macro */
 #define JMI_RECORD_ARRAY_TYPE(rec, arr) \
-	typedef struct _##arr {\
-		int* size;\
-		int  num_dims;\
+    typedef struct _##arr {\
+        int* size;\
+        int  num_dims;\
         int  num_elems;\
-		rec* var;\
-	} arr;
+        rec* var;\
+    } arr;
 
 /* Array creation macros */
 #define JMI_ARRAY_STATIC(name, ne, nd) \
@@ -74,22 +74,22 @@ struct _jmi_dynamic_list {
 /* Record array creation macro */
 #define JMI_RECORD_ARRAY_STATIC(type, arr, name, ne, nd) \
     int name##_size[nd];\
-	type name##_var[ne];\
-	arr name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
-	arr* name = &name##_obj;
+    type name##_var[ne];\
+    arr name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
+    arr* name = &name##_obj;
 
 /* Dynamic array creation macro */
 #define JMI_ARRAY_DYNAMIC(name, nd) \
-	JMI_RECORD_ARRAY_DYNAMIC(jmi_real_t, jmi_array_t, name, nd)
+    JMI_RECORD_ARRAY_DYNAMIC(jmi_real_t, jmi_array_t, name, nd)
 
 #define JMI_INT_ARRAY_DYNAMIC(name, nd) \
-	JMI_RECORD_ARRAY_DYNAMIC(jmi_int_t, jmi_int_array_t, name, nd)
+    JMI_RECORD_ARRAY_DYNAMIC(jmi_int_t, jmi_int_array_t, name, nd)
 
 /* Dynamic record array creation macro */
 #define JMI_RECORD_ARRAY_DYNAMIC(type, arr, name, nd) \
     int name##_size[nd];\
-	arr name##_obj = { 0, (int) (nd), 0, 0 };\
-	arr* name = &name##_obj;
+    arr name##_obj = { 0, (int) (nd), 0, 0 };\
+    arr* name = &name##_obj;
 
 /* Array initialization macros */
 #define JMI_ARRAY_STATIC_INIT_1(name, d1) \
@@ -171,7 +171,7 @@ struct _jmi_dynamic_list {
 
 /* Dynamic array initialization macros */
 #define JMI_RECORD_ARRAY_DYNAMIC_INIT_1(type, name, ne, d1) \
-	name##_obj.size = name##_size;\
+    name##_obj.size = name##_size;\
     name##_obj.var = (type*) malloc((int) ((ne) * sizeof(type)));\
     JMI_DYNAMIC_ADD_POINTER(name##_obj.var)\
     name##_obj.num_elems = (int) (ne);\
@@ -356,25 +356,25 @@ struct _jmi_dynamic_list {
 
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
-	jmi_dynamic_list* jmi_dynamic_prev;\
-	jmi_dynamic_list* jmi_dynamic_cur;\
-	jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-	jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
+    jmi_dynamic_list* jmi_dynamic_prev;\
+    jmi_dynamic_list* jmi_dynamic_cur;\
+    jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
+    jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
 
 /* Macro for adding a pointer to dynamic list - only for use in other macros */
 #define JMI_DYNAMIC_ADD_POINTER(pointer) \
-	jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-	jmi_dynamic_last = jmi_dynamic_last->next;\
-	jmi_dynamic_last->data = pointer;
+    jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
+    jmi_dynamic_last = jmi_dynamic_last->next;\
+    jmi_dynamic_last->data = pointer;
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
-	jmi_dynamic_prev = jmi_dynamic_first;\
-	for (jmi_dynamic_cur = jmi_dynamic_prev->next; jmi_dynamic_cur; jmi_dynamic_prev = jmi_dynamic_cur, jmi_dynamic_cur = jmi_dynamic_cur->next) {\
-		free(jmi_dynamic_prev);\
-		free(jmi_dynamic_cur->data);\
-	}\
-	free(jmi_dynamic_prev);
+    jmi_dynamic_prev = jmi_dynamic_first;\
+    for (jmi_dynamic_cur = jmi_dynamic_prev->next; jmi_dynamic_cur; jmi_dynamic_prev = jmi_dynamic_cur, jmi_dynamic_cur = jmi_dynamic_cur->next) {\
+        free(jmi_dynamic_prev);\
+        free(jmi_dynamic_cur->data);\
+    }\
+    free(jmi_dynamic_prev);
 
 /* Record array access macros */
 #define jmi_array_rec_1(arr, i1) (&((arr)->var[(int) _JMI_ARR_I_1(arr, i1)]))

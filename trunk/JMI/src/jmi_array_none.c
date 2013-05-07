@@ -21,36 +21,36 @@
 
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
-	int i, j, tmp1, tmp2, k, n, dim, s; \
+    int i, j, tmp1, tmp2, k, n, dim, s; \
  \
-	n = arr->num_elems; \
-	dim = arr->num_dims; \
+    n = arr->num_elems; \
+    dim = arr->num_dims; \
  \
-	for (i = 0; i < n; i++) { \
-		j = 0; \
-		tmp1 = i; \
-		tmp2 = 0; \
+    for (i = 0; i < n; i++) { \
+        j = 0; \
+        tmp1 = i; \
+        tmp2 = 0; \
  \
-		for (k = 0; k < dim; k++) { \
-			s = arr->size[to_fortran ? k : dim - k - 1]; \
-			tmp2 = tmp1 % s; \
-			tmp1 /= s; \
-			j *= s; \
-			j += tmp2; \
-		} \
+        for (k = 0; k < dim; k++) { \
+            s = arr->size[to_fortran ? k : dim - k - 1]; \
+            tmp2 = tmp1 % s; \
+            tmp1 /= s; \
+            j *= s; \
+            j += tmp2; \
+        } \
  \
-		dest[i] = (dst_type) src[j]; \
-	} \
+        dest[i] = (dst_type) src[j]; \
+    } \
 }
 
 #define COPY_FUNC(name, src_type, dst_type) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \
-	int i, n; \
+    int i, n; \
  \
-	n = arr->num_elems; \
-	for (i = 0; i < n; i++) { \
-		dest[i] = (dst_type) src[i]; \
-	} \
+    n = arr->num_elems; \
+    for (i = 0; i < n; i++) { \
+        dest[i] = (dst_type) src[i]; \
+    } \
 }
 
 TRANSPOSE_FUNC(jmi_matrix_to_fortran_real, jmi_ad_var_t, jmi_ad_var_t, 1)

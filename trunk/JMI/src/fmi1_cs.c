@@ -41,7 +41,7 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
 
 
 fmiStatus fmi1_cs_do_step(fmiComponent c,
-						 fmiReal currentCommunicationPoint,
+                         fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;

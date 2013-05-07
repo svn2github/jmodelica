@@ -107,8 +107,8 @@ int jmi_init_opt_ipopt_set_num_option(jmi_init_opt_ipopt_t *jmi_init_opt_ipopt, 
  * @return Error code.
  */
 int jmi_init_opt_ipopt_get_statistics(jmi_init_opt_ipopt_t* jmi_init_opt_ipopt,
-		int* return_status, int* nbr_iter, jmi_real_t* objective,
-		jmi_real_t* total_exec_time);
+        int* return_status, int* nbr_iter, jmi_real_t* objective,
+        jmi_real_t* total_exec_time);
 
 /* @} */
 

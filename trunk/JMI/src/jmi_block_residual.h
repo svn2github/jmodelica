@@ -52,8 +52,8 @@ extern double dnrm2_(int* N, double* X, int* INCX);
  * @return Error code.
  */
 typedef int (*jmi_block_residual_func_t)(jmi_t* jmi, jmi_real_t* x,
-		jmi_real_t* residual, int init);
-		
+        jmi_real_t* residual, int init);
+        
 /**
  * \brief Function signature for evaluation of a directional derivatives for a
  * block function in the generated code.
@@ -71,7 +71,7 @@ typedef int (*jmi_block_residual_func_t)(jmi_t* jmi, jmi_real_t* x,
  * @return Error code.
  */
 typedef int (*jmi_block_dir_der_func_t)(jmi_t* jmi, jmi_real_t* x,
-		 jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init);
+         jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int init);
 
 /**
  * \brief A equation block solver function signature.
@@ -107,19 +107,19 @@ typedef int (*jmi_block_residual_jacobian_factorization_func_t)(jmi_block_residu
 typedef void (*jmi_block_residual_delete_func_t)(jmi_block_residual_t* block);
 
 struct jmi_block_residual_t {
-	jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
-	jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
-	jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
-	int n;                         /**< \brief The number of real unknowns in the equation system */
-	int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
-	jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
-	jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
-	jmi_real_t* dx;				   /**< \brief Work vector for the seed vector */
-	jmi_real_t* dv;					/**< \brief Work vector for (dF/dv)*dv */
+    jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
+    jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
+    jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
+    int n;                         /**< \brief The number of real unknowns in the equation system */
+    int n_nr;                         /**< \brief The number of non-real unknowns in the equation system */
+    jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
+    jmi_real_t* x_nr;                 /**< \brief Work vector for the non-real iteration variables */
+    jmi_real_t* dx;                /**< \brief Work vector for the seed vector */
+    jmi_real_t* dv;                 /**< \brief Work vector for (dF/dv)*dv */
     int index ;
 
     jmi_real_t* res;               /**< \brief Work vector for the block residual */
-    jmi_real_t* dres;			   /**< \brief Work vector for the directional derivative that corresponds to dx */
+    jmi_real_t* dres;              /**< \brief Work vector for the directional derivative that corresponds to dx */
     jmi_real_t* jac;               /**< \brief Work vector for the block Jacobian */
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
 
@@ -139,14 +139,14 @@ struct jmi_block_residual_t {
     jmi_block_residual_jacobian_func_t evaluate_jacobian;
     jmi_block_residual_jacobian_factorization_func_t evaluate_jacobian_factorization;
     
-    int init;			   /**< \brief A flag for initialization */
+    int init;              /**< \brief A flag for initialization */
     
     long int nb_calls;                    /**< \brief Nb of times the block has been solved */
     long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */
     long int nb_jevals ;
     long int nb_fevals;
     double time_spent;             /**< \brief Total time spent in non-linear solver */
-	char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
+    char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 };
 
 /**
