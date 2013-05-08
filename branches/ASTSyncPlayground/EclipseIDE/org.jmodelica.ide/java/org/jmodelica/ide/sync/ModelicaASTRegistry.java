@@ -51,19 +51,14 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * nodes.
 	 */
 	public InstNode resolveInstanceASTPath(Stack<ASTPathPart> nodePath,
-			InstProgramRoot root) {
-		return resolveInstNodePath(nodePath, root);
-	}
-
-	private InstNode resolveInstNodePath(Stack<ASTPathPart> nodePath,
 			InstNode root) {
 		if (nodePath.size() == 0)
 			return root;
 		String sought = nodePath.pop().id();
 		if (sought.substring(0, 5).equals("List:")) {
-			InstNode node = searchClassesAndComponents(nodePath.peek().id(),
+			InstNode node = searchClassesAndComponents(nodePath.pop().id(),
 					root);
-			return resolveInstNodePath(nodePath, node);
+			return resolveInstanceASTPath(nodePath, node);
 		}
 		return null;
 	}
