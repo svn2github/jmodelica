@@ -53,19 +53,18 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
     fmi1_cs_t* fmi1_cs;
     fmi_t* fmi1_me;
     jmi_t* jmi;
+    int flag, retval = JMI_ODE_EVENT;
+    int reInitialize = JMI_FALSE;
+    fmiReal tfinal = currentCommunicationPoint+communicationStepSize;
+    fmiReal ttarget;
     
     if (c == NULL) {
-		return;
+		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
     fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
     jmi = fmi1_me->jmi;
-    
-    int flag, retval = JMI_ODE_EVENT;
-    int reInitialize = JMI_FALSE;
-    fmiReal tfinal = currentCommunicationPoint+communicationStepSize;
-    fmiReal ttarget;
     
     jmi->ode_solver->tout = currentCommunicationPoint;
     
@@ -239,18 +238,17 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
     fmi1_cs_t* fmi1_cs;
     fmi_t* fmi1_me;
+    fmiBoolean toleranceControlled = fmiTrue;
+    fmiReal relativeTolerance = 1e-6;
+    /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
+    fmiStatus retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    
-    fmiBoolean toleranceControlled = fmiTrue;
-    fmiReal relativeTolerance = 1e-6;
-    /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
-    fmiStatus retval;
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);    
                                         
     retval = fmi1_me_initialize(fmi1_cs->fmi1_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
     if (retval != fmiOK){ return fmiError; }
