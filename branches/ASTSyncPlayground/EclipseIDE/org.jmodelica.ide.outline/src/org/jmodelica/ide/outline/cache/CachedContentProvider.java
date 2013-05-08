@@ -12,21 +12,19 @@ public class CachedContentProvider implements ITreeContentProvider {
 	protected TreeViewer viewer;
 
 	public Object[] getChildren(Object element) {
-			if (element instanceof ICachedOutlineNode) {
-				ICachedOutlineNode node = (ICachedOutlineNode)element;
-				if (node.childrenAlreadyCached()) {
-					return node.cachedOutlineChildren();
-				} else {
-					OutlineUpdateWorker.addChildren(viewer, node);
-				}
+		if (element instanceof ICachedOutlineNode) {
+			ICachedOutlineNode node = (ICachedOutlineNode) element;
+			if (node.childrenAlreadyCached()) {
+				return node.cachedOutlineChildren();
+			} else {
+				OutlineUpdateWorker.addChildren(viewer, node);
 			}
-			return null;
 		}
+		return null;
+	}
 
 	public Object getParent(Object element) {
 		if (element instanceof ICachedOutlineNode) {
-			//System.out.println("CachedContentProvider: getParent() node:"
-			//		+ ((ICachedOutlineNode) element).getText());
 			return ((ICachedOutlineNode) element).getParent();
 		}
 		return null;
@@ -34,8 +32,6 @@ public class CachedContentProvider implements ITreeContentProvider {
 
 	public boolean hasChildren(Object element) {
 		if (element instanceof ICachedOutlineNode) {
-			//System.out.println("CachedContentProvider: hasChildren() node:"
-			//		+ ((ICachedOutlineNode) element).getText());
 			return ((ICachedOutlineNode) element).hasVisibleChildren();
 		}
 		return false;

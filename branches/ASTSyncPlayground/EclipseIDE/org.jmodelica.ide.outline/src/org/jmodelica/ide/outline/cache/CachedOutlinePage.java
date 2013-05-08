@@ -45,13 +45,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.jmodelica.ide.outline.CopyClassAction;
-import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.ClassCopySource;
 import org.jmodelica.ide.outline.ClassDragListener;
 import org.jmodelica.ide.outline.OutlineItemComparator;
 import org.jmodelica.ide.outline.OutlineUpdateWorker;
+import org.jmodelica.ide.sync.CachedASTNode;
 
 public abstract class CachedOutlinePage extends ContentOutlinePage implements
 		IDoubleClickListener {

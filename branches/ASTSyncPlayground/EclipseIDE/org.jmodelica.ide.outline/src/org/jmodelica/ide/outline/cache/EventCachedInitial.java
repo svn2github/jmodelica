@@ -2,7 +2,7 @@ package org.jmodelica.ide.outline.cache;
 
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
-import org.jmodelica.ide.helpers.CachedASTNode;
+import org.jmodelica.ide.sync.CachedASTNode;
 
 public class EventCachedInitial extends ASTChangeEvent {
 	private CachedASTNode cachedRoot;

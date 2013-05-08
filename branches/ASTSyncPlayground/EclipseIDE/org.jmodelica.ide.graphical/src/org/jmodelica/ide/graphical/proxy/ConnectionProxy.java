@@ -40,15 +40,14 @@ public class ConnectionProxy extends Observable implements Observer {
 		return connectClause.syncGetConnectionLine();
 	}
 
-	public void disconnect(int undoActionId) {
+	/**public void disconnect(int undoActionId) {
 		if (!connected)
 			return;
-		diagram.removeConnection(this, undoActionId);
 		connected = false;
 		source.sourceConnectionsHasChanged();
 		target.targetConnectionsHasChanged();
-	}
-
+	}*/
+	
 	public AbstractDiagramProxy getProxy() {
 		return diagram;
 	}

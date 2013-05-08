@@ -8,20 +8,16 @@ public class CachedLabelProvider extends LabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof ICachedOutlineNode){
-			//System.out.println("CachedLabelProvider: getImage() node:"+((ICachedOutlineNode
-			//		)element).getText());
-			return((ICachedOutlineNode)element).getImage();
+		if (element instanceof ICachedOutlineNode) {
+			return ((ICachedOutlineNode) element).getImage();
 		}
 		return null;
 	}
 
 	@Override
 	public String getText(Object element) {
-		if (element instanceof ICachedOutlineNode){
-		//	System.out.println("CachedLabelProvider: getText() node:"+((ICachedOutlineNode
-		//			)element).getText());
-			return((ICachedOutlineNode)element).getText();
+		if (element instanceof ICachedOutlineNode) {
+			return ((ICachedOutlineNode) element).getText();
 		}
 		return null;
 	}

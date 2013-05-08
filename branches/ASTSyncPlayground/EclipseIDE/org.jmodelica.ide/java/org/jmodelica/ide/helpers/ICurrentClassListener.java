@@ -1,6 +1,6 @@
 package org.jmodelica.ide.helpers;
 
-import org.jmodelica.ide.helpers.CachedClassDecl;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
 public interface ICurrentClassListener {
 

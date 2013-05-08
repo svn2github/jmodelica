@@ -1,7 +1,7 @@
 package org.jmodelica.ide.documentation;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -10,61 +10,50 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.ide.sync.ModelicaASTRegistry;
-import org.jmodelica.modelica.compiler.BaseClassDecl;
-import org.jmodelica.modelica.compiler.FullClassDecl;
-import org.jmodelica.modelica.compiler.Program;
-import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.ide.sync.ASTPathPart;
 
-public class DocumentationEditorInput implements IEditorInput, IPersistableElement{
-
-	private String className;
+public class DocumentationEditorInput implements IEditorInput,
+		IPersistableElement {
 	private IProject project;
-	private FullClassDecl fullClassDecl;
+	private String filePath;
+	private Stack<ASTPathPart> classASTPath;
 	private boolean genDoc;
+	private IFile file;
 
-	public DocumentationEditorInput(FullClassDecl fullClassDecl, boolean genDoc){
+	public DocumentationEditorInput(String filePath,
+			Stack<ASTPathPart> classASTPath, boolean genDoc) {
 		this.genDoc = genDoc;
-		ArrayList<String> path = new ArrayList<String>();
-		String name = fullClassDecl.name();
-		StringBuilder sb = new StringBuilder();
-		BaseClassDecl tmp = fullClassDecl;
-		do{
-			path.add(tmp.name());
-			tmp = tmp.enclosingClassDecl();
-
-		}while(tmp != null && !name.equals(tmp.name()));
-		for (int i = path.size() - 1; i >= 0; i--){
-			sb.append(path.get(i));
-			if (i != 0){
-				sb.append(".");
-			}
-		}
-		className = sb.toString();
-		project = lookupIProject(new File(fullClassDecl.containingFileName()));
-		this.fullClassDecl = fullClassDecl;
+		this.filePath = filePath;
+		this.classASTPath = classASTPath;
+		file = getFileFromPath(filePath);
+		project = file.getProject();
 	}
 
-	public DocumentationEditorInput(String name, IProject iProject) {
-		className = name;
+	public DocumentationEditorInput(String filePath,
+			Stack<ASTPathPart> classASTPath, IProject iProject) {
+		this.filePath = filePath;
+		this.classASTPath = classASTPath;
+		file = getFileFromPath(filePath);
 		project = iProject;
-		Program program =null;//TODO ((SourceRoot) ModelicaASTRegistry.getInstance().lookupAST(null, project)).getProgram();
-		fullClassDecl = (FullClassDecl)(program.simpleLookupClassDotted(className));
 	}
 
-	public String getClassName() {
-		return className;
+	public Stack<ASTPathPart> getClassASTPath() {
+		return classASTPath;
+	}
+
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public IFile getFile() {
+		return file;
 	}
 
 	public IProject getProject() {
 		return project;
 	}
 
-	public FullClassDecl getFullClassDecl(){
-		return fullClassDecl;
-	}
-	
-	public boolean getGenDoc(){
+	public boolean getGenDoc() {
 		return genDoc;
 	}
 
@@ -85,7 +74,7 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 
 	@Override
 	public String getName() {
-		return className;
+		return classASTPath.get(0).id().split(":")[1];
 	}
 
 	@Override
@@ -98,14 +87,6 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 		return project.getFullPath() + ":" + getName();
 	}
 
-	private static IProject lookupIProject(File file) {
-		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(file.toURI());
-		for (IFile f : files) {
-			return f.getProject();
-		}
-		return null;
-	}
-
 	@Override
 	public void saveState(IMemento memento) {
 		DocumentationEditorInputFactory.save(memento, this);
@@ -114,5 +95,13 @@ public class DocumentationEditorInput implements IEditorInput, IPersistableEleme
 	@Override
 	public String getFactoryId() {
 		return DocumentationEditorInputFactory.ID_FACTORY;
+	}
+
+	public IFile getFileFromPath(String filePath2) {
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+				.findFilesForLocationURI((new File(filePath2)).toURI());
+		for (IFile file : files)
+			return file;
+		return null;
 	}
 }

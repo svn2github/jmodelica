@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import java.util.HashMap;
@@ -24,40 +24,41 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.compiler.Preferences;
-import org.jmodelica.ide.helpers.CachedASTNode;
-import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.LoadedLibraries;
+import org.jmodelica.ide.sync.CachedASTNode;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
-public class OutlineItemComparator extends ViewerSorter implements IPreferenceChangeListener {
+public class OutlineItemComparator extends ViewerSorter implements
+		IPreferenceChangeListener {
 
-	private static Map<String,ViewerSorter> COMPARATORS = new HashMap<String,ViewerSorter>();
+	private static Map<String, ViewerSorter> COMPARATORS = new HashMap<String, ViewerSorter>();
 	static {
 		COMPARATORS.put(IDEConstants.SORT_ALPHA, new CompAlpha());
 		COMPARATORS.put(IDEConstants.SORT_DECLARED, new CompDeclared());
 	}
-	
+
 	private ViewerSorter cmp;
-	
+
 	public OutlineItemComparator() {
 		updateComparator();
 		Preferences.addListener(this);
 	}
-	
+
 	public int category(Object element) {
 		if (element instanceof CachedASTNode)
 			return ((CachedASTNode) element).outlineCategory();
-		if (element instanceof LoadedLibraries) 
+		if (element instanceof LoadedLibraries)
 			return -5;
 		return super.category(element);
 	}
 
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		int cat1 = category(e1);
-        int cat2 = category(e2);
-        if (cat1 != cat2) 
+		int cat2 = category(e2);
+		if (cat1 != cat2)
 			return cat1 - cat2;
-        else
-        	return cmp.compare(viewer, e1, e2);
+		else
+			return cmp.compare(viewer, e1, e2);
 	}
 
 	public void preferenceChange(PreferenceChangeEvent event) {
@@ -66,11 +67,13 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 	}
 
 	public void updateComparator() {
-		cmp = COMPARATORS.get(Preferences.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
+		cmp = COMPARATORS.get(Preferences
+				.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
 	}
 
 	public static class CompAlpha extends ViewerSorter {
 
+		@SuppressWarnings("unchecked")
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			// TODO: Move to an attribute
 			if (e1 instanceof CachedClassDecl && e2 instanceof CachedClassDecl) {
@@ -82,15 +85,14 @@ public class OutlineItemComparator extends ViewerSorter implements IPreferenceCh
 		}
 
 	}
-	
+
 	public static class CompDeclared extends ViewerSorter {
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (e1 instanceof CachedASTNode && e2 instanceof CachedASTNode) 
-				return ((CachedASTNode) e1).declareOrder() - ((CachedASTNode) e2).declareOrder();
+			if (e1 instanceof CachedASTNode && e2 instanceof CachedASTNode)
+				return ((CachedASTNode) e1).declareOrder()
+						- ((CachedASTNode) e2).declareOrder();
 			return super.compare(viewer, e1, e2);
 		}
-
 	}
-	
 }

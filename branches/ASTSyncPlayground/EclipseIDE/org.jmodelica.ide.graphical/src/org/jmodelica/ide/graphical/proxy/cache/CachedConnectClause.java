@@ -3,6 +3,7 @@ package org.jmodelica.ide.graphical.proxy.cache;
 import java.util.Stack;
 
 import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ConnectClause;
 
@@ -10,17 +11,17 @@ public class CachedConnectClause {
 	private String connInstCompQName1;
 	private String connInstCompQName2;
 	private Line syncGetConnectionLine;
-	private Stack<String> astPath = new Stack<String>();
+	private Stack<ASTPathPart> astPath = new Stack<ASTPathPart>();
 
 	public CachedConnectClause(ConnectClause cc, String connInstComp1QName,
 			String connInstComp2QName) {
 		this.connInstCompQName1 = connInstComp1QName;
 		this.connInstCompQName2 = connInstComp2QName;
 		syncGetConnectionLine = cc.syncGetConnectionLine();
-		astPath = ModelicaASTRegistry.getInstance().createPath(cc);
+		astPath = ModelicaASTRegistry.getInstance().createDefPath(cc);
 	}
 
-	public Stack<String> getConnectClauseASTPath() {
+	public Stack<ASTPathPart> getConnectClauseASTPath() {
 		return astPath;
 	}
 

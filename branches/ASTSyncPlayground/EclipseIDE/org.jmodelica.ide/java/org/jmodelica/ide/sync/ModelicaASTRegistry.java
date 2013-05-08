@@ -1,16 +1,12 @@
 package org.jmodelica.ide.sync;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.GlobalRootRegistry;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jastadd.ed.core.model.node.IGlobalRootNode;
-import org.jastadd.ed.core.model.node.ILocalRootNode;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -32,88 +28,41 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return registry;
 	}
 
-	/**
-	 * For textual editor FMU_Compile
-	 */
-	public IGlobalRootNode lookupFileGlobalRoot(String fileName) {
-		for (IGlobalRootNode gn : fProjectASTMap.values()) {
-			for (ILocalRootNode ln : gn.lookupAllFileNodes()) {
-				if (ln.getFile().getName().equals(fileName)) {
-					return gn;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * For textual editor FMU_Compile
-	 */
-	public ILocalRootNode lookupFileLocalRoot(String fileName) {
-		for (IGlobalRootNode gn : fProjectASTMap.values()) {
-			for (ILocalRootNode ln : gn.lookupAllFileNodes()) {
-				if (ln.getFile().getName().equals(fileName)) {
-					return ln;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @Override public boolean doUpdate(IFile file, ILocalRootNode newNode) {
-	 *           boolean res = super.doUpdate(file, newNode);
-	 *           ChangePropagationController.getInstance().handleNotifications(
-	 *           ASTChangeEvent.POST_UPDATE, file, new Stack<String>()); return
-	 *           res; }
-	 */
-
-	public boolean hasProject(IProject project) {
-		return fProjectASTMap.containsKey(project);
-	}
-
 	public void addListener(IFile file, Stack<String> nodePath,
 			ListenerObject listObj) {
 		ChangePropagationController.getInstance().addListener(listObj, file,
 				nodePath);
 	}
 
-	public boolean removeListener(IFile file, Stack<String> nodePath,
+	public boolean removeListener(IFile file, Stack<ASTPathPart> nodePath,
 			IASTChangeListener listener) {
-		boolean result = ChangePropagationController.getInstance().removeListener(
-				listener, file, nodePath);
-		if (result)
-			System.out.println("ModelicaASTRegistry successfully unregistered listener..."+listener.toString()+" file:"+file.getName()+" "+nodePath);
-		else
-			System.err.println("ModelicaASTRegistry failed to unregistered listener..."+listener.toString()+" file:"+file.getName()+" "+nodePath);			
+		boolean result = ChangePropagationController.getInstance()
+				.removeListener(listener, file, nodePath);
+		String msg = result ? "successfully" : "failed to";
+		System.out.println("ModelicaASTRegistry " + msg
+				+ " unregistered listener: " + listener.toString()
+				+ ", for file:" + file.getName() + " " + nodePath);
 		return result;
 	}
 
 	/**
 	 * Tries to resolve the node of the given path in Instance AST from the
-	 * given InstProgramRoot. Needed if Instance outline should have expandable
-	 * nodes
-	 * 
-	 * @param nodePath
-	 * @param root
-	 * @return
+	 * given InstProgramRoot. Needed if Instance Outline should have expandable
+	 * nodes.
 	 */
-	public InstNode resolveInstanceASTPath(Stack<String> nodePath,
+	public InstNode resolveInstanceASTPath(Stack<ASTPathPart> nodePath,
 			InstProgramRoot root) {
 		return resolveInstNodePath(nodePath, root);
 	}
 
-	private InstNode resolveInstNodePath(Stack<String> nodePath, InstNode root) {
+	private InstNode resolveInstNodePath(Stack<ASTPathPart> nodePath,
+			InstNode root) {
 		if (nodePath.size() == 0)
 			return root;
-		// printPath(nodePath);
-		String sought = nodePath.pop();
-		if (sought.split(":")[0].equals("List")) {
-			InstNode node = searchClassesAndComponents(nodePath.peek(), root);
-			/**if (node != null) {
-				System.out.println("found " + nodePath.pop()
-						+ " among classes/components");
-			}*/
+		String sought = nodePath.pop().id();
+		if (sought.substring(0, 5).equals("List:")) {
+			InstNode node = searchClassesAndComponents(nodePath.peek().id(),
+					root);
 			return resolveInstNodePath(nodePath, node);
 		}
 		return null;
@@ -130,112 +79,59 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	}
 
 	/**
-	 * Tries to resolve the node of the given path in Source AST from the given
-	 * SourceRoot.
-	 * 
-	 * @param nodePath
-	 * @param root
-	 * @return Found node, or SourceRoot if path was empty.
+	 * debug
 	 */
-	public ASTNode<?> resolveSourceASTPath(Stack<String> nodePath,
-			ASTNode<?> root) {
-		// System.out.println("ModelicaASTReg: resolve src nodepath, nodepathsize:"+nodePath.size());
-	//	System.out.println("RESOLVEPATH:");
-		//printPath(nodePath);
-		Stack<String> copy = new Stack<String>();
-		copy.setSize(nodePath.size());
-		Collections.copy(copy, nodePath);
-		return resolveSrcNodePath(copy, root);
+	public void printPath(Stack<ASTPathPart> nodePath) {
+		String priint = "";
+		for (int i = 0; i < nodePath.size(); i++)
+			priint = nodePath.get(i).id() + " " + priint;
+		System.out.println("Nodepath was: " + priint);
 	}
 
-	private ASTNode<?> resolveSrcNodePath(Stack<String> nodePath,
+	/**
+	 * Used to resolve AST paths for MSL components in Package Explorer. Starts
+	 * looking from SourceRoot.
+	 * 
+	 * @return Found node, or SourceRoot if path was empty.
+	 */
+	public ASTNode<?> resolveSourceASTPath(Stack<ASTPathPart> nodePath,
 			ASTNode<?> root) {
-		long time = System.currentTimeMillis();
 		String sought = "";
 		String next = "";
 		ASTNode<?> current = root;
 		ASTNode<?> previous = null;
-		while (!nodePath.isEmpty() && current != null) {
+		int index = nodePath.size() - 1;
+		while (index >= 0 && current != null) {
 			next = "";
 			previous = current;
-			sought = nodePath.pop();
-			if (!nodePath.isEmpty())
-				next = nodePath.peek();
+			sought = nodePath.get(index).id();
+			if (index > 0)
+				next = nodePath.get(index - 1).id();
 			current = findSrcChild(sought, next, current, previous);
+			index--;
 		}
 		if (current == null) {
 			System.err
 					.println("ModelicaASTRegistry failed to resolve src nodepath...");
 		}
-		//System.out.println("ModelicaASTReg: Successful ResolveSrcPath() took: "
-		//		+ (System.currentTimeMillis() - time) + "ms");
 		return current;
 	}
 
-	public ASTNode<?> recoveryResolve(ASTNode<?> node, Stack<String> nodePath) {
-		String soughtIdentifier = nodePath.get(0);
-		//System.err.println("RECOVERY lookup of: " + soughtIdentifier);
-		ASTNode<?> toReturn = recursiveResolve(node, soughtIdentifier);
-		//System.err.println("REC " + ((toReturn == null) ? "fail" : "success"));
-		return toReturn;
-	}
-	/**public ASTNode<?> recoveryResolveSourceRoot(SourceRoot root, Stack<String> nodePath) {
-		String soughtIdentifier = nodePath.get(0);
-		System.err.println("RECOVERY lookup of: " + soughtIdentifier);
-		ASTNode<?> toReturn = recursiveResolve(root, soughtIdentifier);
-		System.err.println("REC " + ((toReturn == null) ? "fail" : "success"));
-		return toReturn;
-	}*/
-	private ASTNode<?> recursiveResolve(ASTNode<?> node, String soughtIdentifier) {
-		ASTNode<?> toReturn = null;
-		for (int i = 0; i < node.getNumChild(); i++) {
-			//System.out.println(createIdentifier(node.getChild(i)));
-			if (createIdentifier(node.getChild(i)).equals(soughtIdentifier)) {
-				toReturn = node.getChild(i);
-				break;
-			} else {
-				toReturn = recursiveResolve(node.getChild(i), soughtIdentifier);
-				if (toReturn != null)
-					break;
-			}
-		}
-		return toReturn;
-	}
-
-	private void printPath(Stack<String> nodePath) {
-		String priint = "";
-		for (int i = 0; i < nodePath.size(); i++)
-			priint = nodePath.get(i) + " " + priint;
-		System.out.println("Nodepath was: " +priint);
-	}
-
 	/**
-	 * Bit messy, due to structure of MSL
-	 * 
-	 * @param sought
-	 * @param next
-	 * @param current
-	 * @param previous
-	 * @return
+	 * Bit messy, due to structure/location of MSL. If we are looking for a
+	 * LibNode, and parent is a Program node, we need to search in the
+	 * LibNodeList.
 	 */
 	private ASTNode<?> findSrcChild(String sought, String next,
 			ASTNode<?> current, ASTNode<?> previous) {
 		for (int i = 0; i < current.getNumChild(); i++) {
 			ASTNode<?> currChild = current.getChild(i);
-			//System.out.println("Sought: " + sought + " Current: "
-			//		+ createIdentifier(currChild));
 			if (sought.equals(createIdentifier(currChild)))
 				return currChild;
 		}
-		if (!next.equals("") && next.split(":")[0].equals("LibNode")) {
-			//System.out.println("Found libnode, trying Program liblist...");
+		if (!next.equals("") && next.substring(0, 8).equals("LibNode:")) {
 			if (previous instanceof Program) {
 				Program p = (Program) previous;
-				//System.out.println("Sought: " + sought + " Current: "
-				//		+ createIdentifier(p.getLibNodeList()));
-				//for (int i = 0; i < p.getLibNodeList().getNumChild(); i++)
-				//	System.out.println("LibChild: "
-				//			+ createIdentifier(p.getLibNodeList().getChild(i)));
 				if (createIdentifier(p.getLibNodeList()).equals(sought)) {
 					return p.getLibNodeList();
 				}
@@ -248,41 +144,57 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return null;
 	}
 
-	public Stack<String> createPath(ASTNode<?> node) {
-		Stack<String> nodePath = new Stack<String>();
+	/**
+	 * Used to create AST paths for Instance Outline & MSL components in Package
+	 * Explorer.
+	 */
+	public Stack<ASTPathPart> createPath(ASTNode<?> node) {
+		Stack<ASTPathPart> nodePath = new Stack<ASTPathPart>();
 		ASTNode<?> tmp = node;
 		if (node instanceof InstNode) {
 			while (tmp != null && !(tmp instanceof InstProgramRoot)) {
-				nodePath.add(createIdentifier(tmp));
+				ASTPathPart part = new ASTPathPart(createIdentifier(tmp),
+						findIndex(tmp));
+				nodePath.add(part);
 				tmp = tmp.getParent();
 			}
 		} else {
 			while (tmp != null && !(tmp instanceof SourceRoot)) {
-				nodePath.add(createIdentifier(tmp));
+				ASTPathPart part = new ASTPathPart(createIdentifier(tmp),
+						findIndex(tmp));
+				nodePath.add(part);
 				tmp = tmp.getParent();
 			}
 		}
-		// System.err.println("Created path:\n");
-		// printPath(nodePath);
 		return nodePath;
 	}
 
-	public Stack<String> createDefPath(ASTNode<?> node) {
-		Stack<String> nodePath = new Stack<String>();
+	/**
+	 * Creates the AST identifier path from an AST node to its parent
+	 * StoredDefinition.
+	 */
+	public Stack<ASTPathPart> createDefPath(ASTNode<?> node) {
+		Stack<ASTPathPart> nodePath = new Stack<ASTPathPart>();
 		ASTNode<?> tmp = node;
 		while (tmp != null && !(tmp instanceof StoredDefinition)) {
-			nodePath.add(createIdentifier(tmp));
+			ASTPathPart part = new ASTPathPart(createIdentifier(tmp),
+					findIndex(tmp));
+			nodePath.add(part);
 			tmp = tmp.getParent();
 		}
 		return nodePath;
 	}
 
 	/**
-	 * Currently creates identifier by concatenating
-	 * "ASTNode.getName():ASTNode.outlineId()"
-	 * 
-	 * @param node
-	 * @return
+	 * Finds the index of this node at its parent.
+	 */
+	private int findIndex(ASTNode<?> node) {
+		return node.getParent().getIndexOfChild(node);
+	}
+
+	/**
+	 * Creates a node identifier by concatenating
+	 * "ASTNode.getNodeName():ASTNode.outlineId()".
 	 */
 	private String createIdentifier(ASTNode<?> node) {
 		StringBuilder sb = new StringBuilder();
@@ -297,18 +209,53 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 		return new ModelicaEclipseCompiler();
 	}
 
-	public void recompileFile(IFile file) {
-		compileFile(file);
+	/**
+	 * Find the latest StoredDefinition for the given IFile.
+	 */
+	public StoredDefinition getLatestDef(IFile theFile) {
+		return ((LocalRootNode) doLookup(theFile)[0]).getDef();
 	}
 
-	public StoredDefinition getLatestDef(IFile theFile) {
-		SourceRoot sroot = ((GlobalRootNode)doLookup(theFile.getProject())).getSourceRoot();
-		org.jmodelica.modelica.compiler.List<StoredDefinition> defs = sroot.getProgram().getUnstructuredEntityList();
-		for (int i = 0; i < defs.getNumChild();i++){
-			if (defs.getChild(i).getFile().equals(theFile))
-				return defs.getChild(i);
+	/**
+	 * Resolves the given AST path within the given StoredDefinition, and
+	 * returns the found AST node.
+	 */
+	public ASTNode<?> resolveSourceASTPath(StoredDefinition def,
+			Stack<ASTPathPart> astPath) {
+		ASTNode<?> tmp = def;
+		for (int i = astPath.size() - 1; i >= 0; i--) {
+			int index = astPath.get(i).index();
+			if (astPath.get(i).id().substring(0, 5).equals("List:")) {
+				tmp = tmp.getChild(index);
+			} else {
+				tmp = findChild(tmp, index, astPath.get(i).id());
+				if (tmp == null)
+					return null;
+			}
 		}
-		System.err.println("Could not find latest def");
+		return tmp;
+	}
+
+	/**
+	 * Find the sought child node. Start at cached index, continue with closest
+	 * neighbours and outwards.
+	 */
+	private ASTNode<?> findChild(ASTNode<?> tmp, int index, String string) {
+		if (createIdentifier(tmp.getChild(index)).equals(string))
+			return tmp.getChild(index);
+		int numChild = tmp.getNumChild();
+		int count = 0;
+		while (count < numChild) {
+			count++;
+			if (index - count >= 0)
+				if (createIdentifier(tmp.getChild(index - count))
+						.equals(string))
+					return tmp.getChild(index - count);
+			if (index + count < numChild)
+				if (createIdentifier(tmp.getChild(index + count))
+						.equals(string))
+					return tmp.getChild(index + count);
+		}
 		return null;
 	}
 }

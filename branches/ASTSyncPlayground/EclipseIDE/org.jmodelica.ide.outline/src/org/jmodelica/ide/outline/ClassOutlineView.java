@@ -47,8 +47,6 @@ public class ClassOutlineView extends OutlineView {
 					mapProjToPage.put(project, page);
 					initPage(page);
 					page.createControl(getPageBook());
-				} else {
-					System.out.println("CLASSOUTLINE PAGE FAILED!");
 				}
 				if (editor instanceof ICurrentClassListener)
 					page.addCurrentClassListener((ICurrentClassListener) editor);

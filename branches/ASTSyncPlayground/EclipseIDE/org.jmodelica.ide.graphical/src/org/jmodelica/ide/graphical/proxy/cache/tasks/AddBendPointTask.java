@@ -5,6 +5,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Line;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ConnectClause;
@@ -13,13 +14,14 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class AddBendPointTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
-	private Stack<String> connectClauseASTPath;
+	private Stack<ASTPathPart> connectClauseASTPath;
 	private int index;
 	private double x;
 	private double y;
 
-	public AddBendPointTask(IFile theFile, Stack<String> connectClauseASTPath,
-			int index, double x, double y) {
+	public AddBendPointTask(IFile theFile,
+			Stack<ASTPathPart> connectClauseASTPath, int index, double x,
+			double y) {
 		this.theFile = theFile;
 		this.connectClauseASTPath = connectClauseASTPath;
 		this.index = index;
@@ -34,7 +36,8 @@ public class AddBendPointTask extends AbstractAestheticModificationTask {
 				theFile);
 		synchronized (def.state()) {
 			ConnectClause clause = (ConnectClause) ModelicaASTRegistry
-					.getInstance().recoveryResolve(def, connectClauseASTPath);
+					.getInstance().resolveSourceASTPath(def,
+							connectClauseASTPath);
 			if (clause == null) {
 				System.err
 						.println("AddBendPointTask failed to resolve ASTPath!");

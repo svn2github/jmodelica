@@ -12,6 +12,7 @@ import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
 import org.jmodelica.ide.outline.cache.tasks.ExplorerOutlineCacheFileChildrenTask;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 
 public class ExplorerOutlineCache extends AbstractOutlineCache {
@@ -24,19 +25,19 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 	protected void createInitialCache() {
 	}
 
-	public void fetchChildren(Stack<String> nodePath, ICachedOutlineNode node,
-			Object task) {
+	public void fetchChildren(Stack<ASTPathPart> nodePath,
+			ICachedOutlineNode node, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this, node);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	public void fetchFileChildren(IFile file) {
-			// Don't automagically expand file Models unless user clicks
-			// expand...
-			OutlineCacheJob job = new ExplorerOutlineCacheFileChildrenTask(this,
-					file, this);
-			ASTRegTaskBucket.getInstance().addTask(job);
+		// Don't automagically expand file Models unless user clicks
+		// expand...
+		OutlineCacheJob job = new ExplorerOutlineCacheFileChildrenTask(this,
+				file, this);
+		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	protected synchronized void handleCachedFileChildrenEvent() {

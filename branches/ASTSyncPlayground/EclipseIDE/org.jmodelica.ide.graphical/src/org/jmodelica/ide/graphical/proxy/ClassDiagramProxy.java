@@ -67,7 +67,6 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public void removeComponent(ComponentProxy component, int undoActionId) {
 		ArrayList<ITaskObject> tasks = new ArrayList<ITaskObject>();
 		for (ConnectionProxy connection : component.getConnections()) {
-			System.err.println("bolololo");
 			ITaskObject connTask = new RemoveConnectionTask(theFile,
 					getCachedASTNode().getClassASTPath(), connection
 							.getConnectClause().getConnectClauseASTPath(),
@@ -89,9 +88,9 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		ITaskObject task = new RemoveComponentTask(theFile, component
 				.getComponentDecl().getComponentASTPath(), getCachedASTNode()
 				.getClassASTPath(), undoActionId);
-		tasks.add(task);
 		for (ITaskObject ito : tasks)
 			ASTRegTaskBucket.getInstance().addTask(ito);
+		ASTRegTaskBucket.getInstance().addTask(task);
 	}
 
 	@Override
@@ -119,20 +118,23 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	public void moveComponent(ComponentProxy component, double x, double y) {
-		ITaskObject job = new MoveComponentTask(theFile,
-				component.getComponentDecl().getComponentASTPath(), x, y);
+		ITaskObject job = new MoveComponentTask(theFile, component
+				.getComponentDecl().getComponentASTPath(), x, y);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
-	protected void setParameterValue(CachedInstComponentDecl comp,
+	public void setParameterValue(CachedInstComponentDecl comp,
 			Stack<String> path, String value) {
 		System.err.println("PARAMTER  val:" + value + " comp:"
 				+ comp.syncQualifiedName() + " astpath:"
 				+ comp.getComponentASTPath() + " path:" + path);
-		ITaskObject job = new SetParameterValueTask(
-				theFile, comp.getComponentASTPath(), path, value);
+		// path=new Stack<String>();
+		// path.push("R");
+		ITaskObject job = new SetParameterValueTask(theFile,
+				comp.getComponentASTPath(), path, value);
 		ASTRegTaskBucket.getInstance().addTask(job);
+		// notifyObservers(FLUSH_CONTENTS);
 	}
 
 	@Override
@@ -150,44 +152,39 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 
 	@Override
 	public void rotateComponent(ComponentProxy component, double angle) {
-		ITaskObject job = new RotateComponentTask(
-				theFile, component.getComponentDecl().getComponentASTPath(),
-				angle);
+		ITaskObject job = new RotateComponentTask(theFile, component
+				.getComponentDecl().getComponentASTPath(), angle);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
 	public void resizeComponent(ComponentProxy component, double x, double y,
 			double x2, double y2) {
-		ITaskObject job = new ResizeComponentTask(
-				theFile, component.getComponentDecl().getComponentASTPath(), x,
-				y, x2, y2);
+		ITaskObject job = new ResizeComponentTask(theFile, component
+				.getComponentDecl().getComponentASTPath(), x, y, x2, y2);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
 	public void addBendPoint(ConnectionProxy connection, double x, double y,
 			int index) {
-		ITaskObject job = new AddBendPointTask(theFile,
-				connection.getConnectClause().getConnectClauseASTPath(), index,
-				x, y);
+		ITaskObject job = new AddBendPointTask(theFile, connection
+				.getConnectClause().getConnectClauseASTPath(), index, x, y);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
 	public void moveBendPoint(ConnectionProxy connection, double x, double y,
 			int index) {
-		ITaskObject job = new MoveBendPointTask(theFile,
-				connection.getConnectClause().getConnectClauseASTPath(), x, y,
-				index);
+		ITaskObject job = new MoveBendPointTask(theFile, connection
+				.getConnectClause().getConnectClauseASTPath(), x, y, index);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 
 	@Override
 	public void removeBendPoint(ConnectionProxy connection, int index) {
-		ITaskObject job = new RemoveBendPointTask(
-				theFile, connection.getConnectClause()
-						.getConnectClauseASTPath(), index);
+		ITaskObject job = new RemoveBendPointTask(theFile, connection
+				.getConnectClause().getConnectClauseASTPath(), index);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 }

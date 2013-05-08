@@ -19,7 +19,7 @@
             priority="highest">
          <enablement>
             <instanceof
-                  value="org.jmodelica.ide.helpers.CachedASTNode">
+                  value="org.jmodelica.ide.sync.CachedASTNode">
             </instanceof></enablement>
       </actionProvider>
    </extension>

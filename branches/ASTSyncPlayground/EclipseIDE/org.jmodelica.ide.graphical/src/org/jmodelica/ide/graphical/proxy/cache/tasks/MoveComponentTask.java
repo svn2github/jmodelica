@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.coord.Point;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ComponentDecl;
@@ -12,12 +13,12 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class MoveComponentTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
-	private Stack<String> componentASTPath;
+	private Stack<ASTPathPart> componentASTPath;
 	private double destX;
 	private double destY;
 
-	public MoveComponentTask(IFile theFile, Stack<String> componentASTPath,
-			double destX, double destY) {
+	public MoveComponentTask(IFile theFile,
+			Stack<ASTPathPart> componentASTPath, double destX, double destY) {
 		this.theFile = theFile;
 		this.componentASTPath = componentASTPath;
 		this.destX = destX;
@@ -31,7 +32,7 @@ public class MoveComponentTask extends AbstractAestheticModificationTask {
 				theFile);
 		synchronized (def.state()) {
 			ComponentDecl cd = (ComponentDecl) ModelicaASTRegistry
-					.getInstance().recoveryResolve(def, componentASTPath);
+					.getInstance().resolveSourceASTPath(def, componentASTPath);
 			if (cd == null) {
 				System.err
 						.println("MoveComponentTask failed to resolve ASTPath!");

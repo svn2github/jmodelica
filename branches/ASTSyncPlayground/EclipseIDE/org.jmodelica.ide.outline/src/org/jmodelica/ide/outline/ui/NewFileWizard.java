@@ -12,25 +12,16 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-package org.jmodelica.ide.ui;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+ */
+package org.jmodelica.ide.outline.ui;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.WizardNewFileCreationPage;
@@ -39,11 +30,12 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
 
-public class NewClassWizard extends Wizard implements INewWizard {
+public class NewFileWizard extends Wizard implements INewWizard {
 
-	private static final String WINDOW_TITLE = "New Modelica Class";
-	private static final String TITLE = "New Modelica Class";
-	private static final String DESCRIPTION = "Creates a new Modelica class";
+	private static final String WINDOW_TITLE = "New Modelica File";
+	private static final String TITLE = "New Modelica File";
+	private static final String DESCRIPTION = "Creates a new Modelica File";
+	private static final String FILE_EXTENSION = IDEConstants.MODELICA_FILE_EXT;
 
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
@@ -51,7 +43,7 @@ public class NewClassWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		
+
 		IFile file = mainPage.createNewFile();
 		if (file == null) {
 			return false;
@@ -95,6 +87,7 @@ public class NewClassWizard extends Wizard implements INewWizard {
 		mainPage = new WizardNewFileCreationPage(WINDOW_TITLE, getSelection());//$NON-NLS-1$
 		mainPage.setTitle(TITLE);
 		mainPage.setDescription(DESCRIPTION);
+		mainPage.setFileExtension(FILE_EXTENSION);
 		addPage(mainPage);
 	}
 
@@ -111,9 +104,7 @@ public class NewClassWizard extends Wizard implements INewWizard {
 	 * @see ISetSelectionTarget
 	 */
 	protected void selectAndReveal(IResource newResource) {
-		Util.selectAndReveal(newResource, getWorkbench().getActiveWorkbenchWindow());
+		Util.selectAndReveal(newResource, getWorkbench()
+				.getActiveWorkbenchWindow());
 	}
-
-	protected IConfigurationElement configElement;
-
 }

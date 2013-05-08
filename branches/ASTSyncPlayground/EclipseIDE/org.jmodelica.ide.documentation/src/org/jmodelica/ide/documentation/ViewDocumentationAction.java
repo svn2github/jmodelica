@@ -6,32 +6,38 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.modelica.compiler.ASTNode;
-import org.jmodelica.modelica.compiler.FullClassDecl;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
-public class ViewDocumentationAction extends Action{
+public class ViewDocumentationAction extends Action {
 
 	private IWorkbenchPage page;
 	private ISelectionProvider selectionProvider;
-	
-	public ViewDocumentationAction(IWorkbenchPage page, ISelectionProvider selectionProvider) {
+
+	public ViewDocumentationAction(IWorkbenchPage page,
+			ISelectionProvider selectionProvider) {
 		this.page = page;
 		this.selectionProvider = selectionProvider;
 		setText("View Documentation");
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
 		Object elem = Util.getSelected(selectionProvider.getSelection());
-		return elem instanceof ASTNode<?>;
+		return elem instanceof CachedClassDecl;
 	}
 
 	@Override
 	public void run() {
 		Object elem = Util.getSelected(selectionProvider.getSelection());
-		if (elem instanceof FullClassDecl) {
+		if (elem instanceof CachedClassDecl) {
 			try {
-				IDE.openEditor(page, new DocumentationEditorInput((FullClassDecl) elem, false), "org.jmodelica.ide.documentation.documentationEditor", true);
+				CachedClassDecl cd = (CachedClassDecl) elem;
+				IDE.openEditor(
+						page,
+						new DocumentationEditorInput(cd.containingFileName(),
+								cd.getASTPath(), false),
+						"org.jmodelica.ide.documentation.documentationEditor",
+						true);
 			} catch (PartInitException e) {
 				System.err.println("Unable to open file: " + elem);
 			}

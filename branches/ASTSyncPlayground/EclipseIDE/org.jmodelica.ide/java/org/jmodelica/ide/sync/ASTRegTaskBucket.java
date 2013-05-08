@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
+import org.jmodelica.ide.sync.tasks.AbstractDocumentationTask;
 import org.jmodelica.ide.sync.tasks.AbstractModificationTask;
 import org.jmodelica.ide.sync.tasks.CompileFileTask;
 import org.jmodelica.ide.sync.tasks.ITaskObject;
@@ -47,9 +48,9 @@ public class ASTRegTaskBucket {
 			}
 			if (!contains)
 				availableTasks.add(task);
-		//	if (contains)
-		//		System.err
-		//				.println("DIDNT ADD UPDATE JOB TO QUEUE, ALREADY EXISTED IDENTICAL...");
+			// if (contains)
+			// System.err
+			// .println("DIDNT ADD UPDATE JOB TO QUEUE, ALREADY EXISTED IDENTICAL...");
 		} else {
 			availableTasks.add(task);
 		}
@@ -75,6 +76,8 @@ public class ASTRegTaskBucket {
 			startBackgroundTaskHandler(Job.BUILD);
 		} else if (nextTask instanceof AbstractAestheticModificationTask) {
 			startBackgroundTaskHandler(Job.SHORT);
+		} else if (nextTask instanceof AbstractDocumentationTask){
+			startBackgroundTaskHandler(Job.SHORT);
 		}
 	}
 
@@ -96,6 +99,7 @@ public class ASTRegTaskBucket {
 					System.err
 							.println("Background task handler thread generated exception! "
 									+ e.getMessage());
+					e.printStackTrace();
 				} finally {
 					attendOwnFuneral();
 				}
@@ -110,21 +114,26 @@ public class ASTRegTaskBucket {
 		Job job = new Job("GraphicalJob") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// Since we make changes to SWT/UI, we need this kind of
-				// thread
-				Display.getDefault().syncExec(new Runnable() {
-					public void run() {
-						try {
-							nextTask.doJob();
-						} catch (Exception e) {
-							System.err
-									.println("UI safe task handler thread generated exception! "
-											+ e.getMessage());
-						} finally {
-							attendOwnFuneral();
+				try {
+					// Since we make changes to SWT/UI, we need this kind of
+					// thread
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							try {
+								nextTask.doJob();
+							} catch (Exception e) {
+								System.err
+										.println("UI safe task handler thread generated exception! "
+												+ e.getMessage());
+								e.printStackTrace();
+							}
 						}
-					}
-				});
+					});
+				} catch (Exception e) {
+					System.err.println("Failed to start UI safe thread...");
+				} finally {
+					attendOwnFuneral();
+				}
 				return Status.OK_STATUS;
 			}
 		};

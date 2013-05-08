@@ -7,8 +7,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
 import org.jmodelica.ide.helpers.Util;
-import org.jmodelica.ide.helpers.CachedASTNode;
-import org.jmodelica.ide.helpers.CachedClassDecl;
+import org.jmodelica.ide.sync.CachedASTNode;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
 public abstract class EditAction extends Action {
 

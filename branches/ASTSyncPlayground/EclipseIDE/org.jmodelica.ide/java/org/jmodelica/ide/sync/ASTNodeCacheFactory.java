@@ -1,4 +1,4 @@
-package org.jmodelica.ide.helpers;
+package org.jmodelica.ide.sync;
 
 import org.jmodelica.ide.helpers.IOutlineCache;
 import org.jmodelica.modelica.compiler.ASTNode;

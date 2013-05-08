@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import org.eclipse.core.resources.IFile;
@@ -35,63 +35,63 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.PageBookView;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
-import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
-import org.jmodelica.ide.sync.LocalRootNode;
+import org.jmodelica.ide.sync.ASTNodeCacheFactory;
+import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public abstract class OutlineView extends PageBookView 
-implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
+public abstract class OutlineView extends PageBookView implements
+		ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 
-    private String defaultText = "An outline is not available."; 
+	private String defaultText = "An outline is not available.";
 
 	protected abstract IContentOutlinePage getOutlinePage(IASTEditor part);
 
 	@Override
 	protected IPage createDefaultPage(PageBook book) {
-        MessagePage page = new MessagePage();
-        initPage(page);
-        page.createControl(book);
-        page.setMessage(defaultText);
-        return page;
+		MessagePage page = new MessagePage();
+		initPage(page);
+		page.createControl(book);
+		page.setMessage(defaultText);
+		return page;
 	}
 
 	@Override
 	protected PageRec doCreatePage(IWorkbenchPart part) {
 		IContentOutlinePage page = setupOutlinePage(part);
-		if (page != null) 
+		if (page != null)
 			return new PageRec(part, page);
-        // There is no content outline
-        return null;
+		// There is no content outline
+		return null;
 	}
-	
+
 	protected IContentOutlinePage setupOutlinePage(IWorkbenchPart part) {
 		if (part instanceof IASTEditor) {
 			IContentOutlinePage page = getOutlinePage((IASTEditor) part);
-			if (page instanceof IPageBookViewPage) 
+			if (page instanceof IPageBookViewPage)
 				initPage((IPageBookViewPage) page);
 			page.createControl(getPageBook());
 			return page;
 		}
-        return null;
+		return null;
 	}
 
 	@Override
 	protected void doDestroyPage(IWorkbenchPart part, PageRec rec) {
-        IContentOutlinePage page = (IContentOutlinePage) rec.page;
-        page.dispose();
-        rec.dispose();
+		IContentOutlinePage page = (IContentOutlinePage) rec.page;
+		page.dispose();
+		rec.dispose();
 	}
 
 	@Override
 	protected IWorkbenchPart getBootstrapPart() {
-        IWorkbenchPage page = getSite().getPage();
-        if (page != null) 
+		IWorkbenchPage page = getSite().getPage();
+		if (page != null)
 			return page.getActiveEditor();
-       return null;
+		return null;
 	}
 
 	@Override
@@ -100,17 +100,17 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	}
 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-        getSelectionProvider().addSelectionChangedListener(listener);
+		getSelectionProvider().addSelectionChangedListener(listener);
 	}
 
 	public ISelection getSelection() {
 		return getSelectionProvider().getSelection();
 	}
 
-//	@Override
-//	public void partBroughtToTop(IWorkbenchPart part) {
-//		partActivated(part);
-//	}
+	// @Override
+	// public void partBroughtToTop(IWorkbenchPart part) {
+	// partActivated(part);
+	// }
 
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
@@ -125,27 +125,32 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 		getSelectionProvider().selectionChanged(event);
 	}
 
-    /**
-     * Extends the behavior of parent to use the current page as a selection provider.
-     * 
-     * @param pageRec the page record containing the page to show
-     */
-    protected void showPageRec(PageRec pageRec) {
-        IPageSite pageSite = getPageSite(pageRec.page);
-        ISelectionProvider provider = pageSite.getSelectionProvider();
-        if (provider == null && (pageRec.page instanceof IContentOutlinePage)) {
-			// This means that the page did not set a provider during its initialization 
-            // so for backward compatibility we will set the page itself as the provider.
-            pageSite.setSelectionProvider((IContentOutlinePage) pageRec.page);
+	/**
+	 * Extends the behavior of parent to use the current page as a selection
+	 * provider.
+	 * 
+	 * @param pageRec
+	 *            the page record containing the page to show
+	 */
+	protected void showPageRec(PageRec pageRec) {
+		IPageSite pageSite = getPageSite(pageRec.page);
+		ISelectionProvider provider = pageSite.getSelectionProvider();
+		if (provider == null && (pageRec.page instanceof IContentOutlinePage)) {
+			// This means that the page did not set a provider during its
+			// initialization
+			// so for backward compatibility we will set the page itself as the
+			// provider.
+			pageSite.setSelectionProvider((IContentOutlinePage) pageRec.page);
 		}
-        super.showPageRec(pageRec);
-    }
+		super.showPageRec(pageRec);
+	}
 
 	public boolean show(ShowInContext context) {
 		System.out.println("show!");
 		ISelection selection = context.getSelection();
 		if (selection instanceof ITreeSelection) {
-			// Pretty theoretic at this point, we don't support "show in" from any tree view
+			// Pretty theoretic at this point, we don't support "show in" from
+			// any tree view
 			ITreeSelection treeSel = (ITreeSelection) selection;
 			if (treeSel.size() == 1) {
 				Object elem = treeSel.getFirstElement();
@@ -156,25 +161,25 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 			} else {
 				// TODO: Does this work? probably not - but can't test yet
 				IPage page = getCurrentPage();
-				if (page instanceof CachedOutlinePage) 
+				if (page instanceof CachedOutlinePage)
 					((CachedOutlinePage) page).select(selection);
 			}
 		} else if (context.getInput() instanceof IFileEditorInput) {
 			IFileEditorInput input = (IFileEditorInput) context.getInput();
-			return selectNode(ASTNodeCacheFactory.cacheNode((((LocalRootNode)ModelicaASTRegistry.getInstance().doLookup(input.getFile())[0]).getDef().firstClassDecl()),null,null));
-			//rootASTOfInput(input); //TODO wtf? TODO fix above line so cache is not null, override method in subbclasses?
-			/*if (root != null) {
-				// TODO: Add needed methods to an interface instead
-				ASTNode root2 = (ASTNode) root;
-				if (selection instanceof ITextSelection) {
-					ITextSelection textSel = (ITextSelection) selection;
-					int offset = textSel.getOffset();
-					int length = textSel.getLength();
-					return selectNode(root2.containingClassDecl(offset, length));
-				} else {
-					return selectNode(root2.firstClassDecl());
-				}
-			}*/ //TODO lol...
+			return selectNode(ASTNodeCacheFactory.cacheNode(ModelicaASTRegistry
+					.getInstance().getLatestDef(input.getFile())
+					.firstClassDecl(), null, null));
+			// rootASTOfInput(input); //TODO wtf? TODO fix above line so cache
+			// is not null, override method in subbclasses?
+			/*
+			 * if (root != null) { // TODO: Add needed methods to an interface
+			 * instead ASTNode root2 = (ASTNode) root; if (selection instanceof
+			 * ITextSelection) { ITextSelection textSel = (ITextSelection)
+			 * selection; int offset = textSel.getOffset(); int length =
+			 * textSel.getLength(); return
+			 * selectNode(root2.containingClassDecl(offset, length)); } else {
+			 * return selectNode(root2.firstClassDecl()); } }
+			 */// TODO lol...
 		}
 		return false;
 	}
@@ -185,7 +190,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 	protected ICachedOutlineNode rootASTOfInput(IEditorInput input) {
 		IEditorPart editor = getSite().getPage().findEditor(input);
 		PageRec pageRec = getPageRec(editor);
-		if (pageRec != null && pageRec.page instanceof CachedOutlinePage) 
+		if (pageRec != null && pageRec.page instanceof CachedOutlinePage)
 			return ((CachedOutlinePage) pageRec.page).getRoot();
 		else
 			return null;
@@ -193,17 +198,23 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 
 	/**
 	 * Look up the AST for a specific file in the AST registry.
-	 * @param file  the file to look up in the registry
+	 * 
+	 * @param file
+	 *            the file to look up in the registry
 	 * @return
 	 */
 	private CachedASTNode lookupASTForFile(IFile file) {
-		LocalRootNode fileNode = (LocalRootNode)ModelicaASTRegistry.getInstance().doLookup(file)[0];
-		return ASTNodeCacheFactory.cacheNode(fileNode.getDef(),null,null); //TODO no cache
+		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
+				file);
+		return ASTNodeCacheFactory.cacheNode(def, null, null);
 	}
 
 	/**
-	 * Select and reveal the given node if it is in (the current page of) this view.
-	 * @param node  the node to select
+	 * Select and reveal the given node if it is in (the current page of) this
+	 * view.
+	 * 
+	 * @param node
+	 *            the node to select
 	 * @return <code>true</code> if selection was successful
 	 */
 	private boolean selectNode(CachedASTNode node) {
@@ -214,7 +225,7 @@ implements ISelectionProvider, ISelectionChangedListener, IShowInTarget {
 				page2.select((CachedASTNode) node);
 				return true;
 			}
-		} 
+		}
 		return false;
 	}
 

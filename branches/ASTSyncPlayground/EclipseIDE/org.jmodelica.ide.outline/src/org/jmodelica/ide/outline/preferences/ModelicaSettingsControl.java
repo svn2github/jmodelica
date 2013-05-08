@@ -1,6 +1,5 @@
-package org.jmodelica.ide.preferences;
+package org.jmodelica.ide.outline.preferences;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,12 +19,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
 
-public class ModelicaSettingsControl  {
+public class ModelicaSettingsControl {
 
 	private List<String> libraryPaths;
 
@@ -52,7 +50,8 @@ public class ModelicaSettingsControl  {
 	public void setLibraryPaths(String libStr) {
 		libraryPaths.clear();
 		if (libStr != null)
-			libraryPaths.addAll(Arrays.asList(libStr.split(IDEConstants.PATH_SEP)));
+			libraryPaths.addAll(Arrays.asList(libStr
+					.split(IDEConstants.PATH_SEP)));
 		updateLibraryPaths();
 	}
 
@@ -65,7 +64,7 @@ public class ModelicaSettingsControl  {
 				tc.pack();
 		}
 	}
-	
+
 	public Control createControl(Composite parent) {
 		libraryGroup = createLibraryGroup(parent);
 		updateLibraryPaths();
@@ -96,7 +95,8 @@ public class ModelicaSettingsControl  {
 
 	private void createLibraryButtonsComposite(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
+		container.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING,
+				false, false));
 		container.setLayout(marginlessGridLayout(1));
 
 		addLibraryButton = createButton(container, "Add");
@@ -110,7 +110,8 @@ public class ModelicaSettingsControl  {
 	}
 
 	private Table createLibraryTable(Composite parent) {
-		libraryTable = new Table(parent, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		libraryTable = new Table(parent, SWT.MULTI | SWT.BORDER
+				| SWT.FULL_SELECTION);
 		libraryTable.setLinesVisible(true);
 		libraryTable.setHeaderVisible(true);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -121,7 +122,7 @@ public class ModelicaSettingsControl  {
 			new TableColumn(libraryTable, SWT.NONE).setText(columnName);
 
 		libraryTable.addSelectionListener(new TableSelectionListener());
-		
+
 		return libraryTable;
 	}
 
@@ -151,7 +152,6 @@ public class ModelicaSettingsControl  {
 	private void addLibrary(String library) {
 		new TableItem(libraryTable, SWT.NONE).setText(0, library);
 	}
-
 
 	public class AddListener implements SelectionListener {
 
@@ -198,5 +198,4 @@ public class ModelicaSettingsControl  {
 		}
 
 	}
-
 }

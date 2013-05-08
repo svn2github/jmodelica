@@ -90,7 +90,7 @@ public class GlobalRootNode implements IGlobalRootNode {
 		root.getProgram().getInstProgramRoot().components();
 		ChangePropagationController.getInstance().handleNotifications(
 				IASTChangeEvent.FILE_RECOMPILED, newNode.getFile(),
-				new Stack<String>());
+				new Stack<ASTPathPart>());
 	}
 
 	public void addFiles(

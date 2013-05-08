@@ -1,10 +1,8 @@
 package org.jmodelica.ide.graphical;
 
-import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
@@ -16,7 +14,6 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.SnapToGrid;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
@@ -61,6 +58,7 @@ import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 import org.jmodelica.ide.graphical.proxy.cache.GraphicalCacheRegistry;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
 import org.jmodelica.ide.sync.tasks.CompileFileTask;
@@ -222,6 +220,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 			getGraphicalViewer().setContents(adp);
 			adp.constructConnections();
 		}
+		// getGraphicalViewer().getRootEditPart().refresh();
 	}
 
 	@Override
@@ -337,29 +336,21 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void flushInst() {
 		long start = System.currentTimeMillis();
-		List<Object> selectedModels = new ArrayList<Object>();
-		for (EditPart o : (List<EditPart>) getGraphicalViewer()
-				.getSelectedEditParts()) {
-			selectedModels.add(o.getModel());
-		}
-		// System.out.println("copy selection, t+"
-		// + (System.currentTimeMillis() - start));
-		dp.setCachedInstClassDeclRoot(cacheRegistry.getCache());
-		// System.out.println("flush, t+" + (System.currentTimeMillis() -
-		// start));
+		/**
+		 * List<Object> selectedModels = new ArrayList<Object>(); for (EditPart
+		 * o : (List<EditPart>) getGraphicalViewer() .getSelectedEditParts()) {
+		 * selectedModels.add(o.getModel()); }
+		 */
+		dp = cacheRegistry.getClassDiagramProxy();
 		setContent();
-		// System.out.println("set content, t+"
-		// + (System.currentTimeMillis() - start));
-		for (Object selectedModel : selectedModels) {
-			EditPart part = (EditPart) getGraphicalViewer()
-					.getEditPartRegistry().get(selectedModel);
-			if (part != null)
-				getGraphicalViewer().getSelectionManager()
-						.appendSelection(part);
-		}
+		/**
+		 * for (Object selectedModel : selectedModels) { EditPart part =
+		 * (EditPart) getGraphicalViewer()
+		 * .getEditPartRegistry().get(selectedModel); if (part != null)
+		 * getGraphicalViewer().getSelectionManager() .appendSelection(part); }
+		 */
 		System.out.println("Graphical editor flush took: "
 				+ (System.currentTimeMillis() - start) + "ms");
 	}
@@ -410,7 +401,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 				getCommandStack().flush();
 				NotifyGraphicalTask job = new NotifyGraphicalTask(
 						ITaskObject.PRIORITY_HIGH, cacheRegistry,
-						new Stack<String>(), 0);
+						new Stack<ASTPathPart>(), 0);
 				ASTRegTaskBucket.getInstance().addTask(job);
 				return Status.OK_STATUS;
 			}
@@ -486,7 +477,8 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 
 	protected void forceRefresh() {
 		NotifyGraphicalTask job = new NotifyGraphicalTask(
-				ASTChangeEvent.POST_UPDATE, cacheRegistry, null, UniqueIDGenerator.getInstance().getListenerID());
+				ASTChangeEvent.POST_UPDATE, cacheRegistry, null,
+				UniqueIDGenerator.getInstance().getListenerID());
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 

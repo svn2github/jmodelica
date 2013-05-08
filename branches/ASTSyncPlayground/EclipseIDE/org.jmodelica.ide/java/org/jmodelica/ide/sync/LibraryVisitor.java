@@ -15,7 +15,7 @@ public class LibraryVisitor {
 	 * @param nodePath
 	 */
 	public void handleChangedNode(IFile file, int astChangeEventType,
-			LibraryNode root, Stack<String> nodePath) {
+			LibraryNode root, Stack<ASTPathPart> nodePath) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(root, nodePath, affectedListeners);
 		System.out
@@ -35,11 +35,11 @@ public class LibraryVisitor {
 	 * @param root
 	 * @param nodePath
 	 */
-	private void removeLibraryPath(LibraryNode root, Stack<String> nodePath) {
+	private void removeLibraryPath(LibraryNode root, Stack<ASTPathPart> nodePath) {
 		int pathSize = nodePath.size();
 		if (pathSize > 0) {
 			while (nodePath.size() > 0) {
-				String sought = nodePath.pop();
+				String sought = nodePath.pop().id();
 				for (LibraryNode node : root.getChildren()) {
 					if (node.getId().equals(sought)) {
 						if (nodePath.size() == 0) {
@@ -100,7 +100,7 @@ public class LibraryVisitor {
 	 * @return
 	 */
 	public void getAllAffectedListeners(LibraryNode node,
-			Stack<String> nodePath, ArrayList<ListenerObject> listenerlist) {
+			Stack<ASTPathPart> nodePath, ArrayList<ListenerObject> listenerlist) {
 		if (nodePath.size() > 0) { // Collect listeners of nodes along path
 			collectVisitorsAndMoveOn(node, nodePath, listenerlist);
 		} else if (nodePath.size() == 0) { // Collect listeners in subtree under
@@ -119,9 +119,9 @@ public class LibraryVisitor {
 	 * @return
 	 */
 	private void collectVisitorsAndMoveOn(LibraryNode node,
-			Stack<String> nodePath, ArrayList<ListenerObject> listenerlist) {
+			Stack<ASTPathPart> nodePath, ArrayList<ListenerObject> listenerlist) {
 		listenerlist.addAll(node.getListeners());
-		String soughtNodeId = nodePath.pop();
+		String soughtNodeId = nodePath.pop().id();
 		for (LibraryNode child : node.getChildren()) {
 			if (child.getId().equals(soughtNodeId)) {
 				getAllAffectedListeners(child, nodePath, listenerlist);
@@ -146,10 +146,10 @@ public class LibraryVisitor {
 		return listenerlist;
 	}
 
-	public boolean removeListener(LibraryNode root, Stack<String> nodePath,
-			IASTChangeListener listener) {
+	public boolean removeListener(LibraryNode root,
+			Stack<ASTPathPart> nodePath, IASTChangeListener listener) {
 		if (!nodePath.isEmpty()) {
-			String soughtNodeId = nodePath.pop();
+			String soughtNodeId = nodePath.pop().id();
 			for (LibraryNode child : root.getChildren()) {
 				if (child.getId().equals(soughtNodeId)) {
 					if (nodePath.size() == 0) {

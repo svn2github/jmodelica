@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.jmodelica.ide.helpers.CachedClassDecl;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
 public class ClassCopySource {
 
@@ -20,7 +20,7 @@ public class ClassCopySource {
 
 	public static boolean canCopy(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			Iterator<Object> it = selection.iterator();
+			Iterator<?> it = selection.iterator();
 			while (it.hasNext())
 				if (!(it.next() instanceof CachedClassDecl))
 					return false;

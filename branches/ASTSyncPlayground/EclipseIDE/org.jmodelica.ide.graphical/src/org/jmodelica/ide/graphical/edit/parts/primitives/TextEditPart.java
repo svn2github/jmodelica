@@ -162,6 +162,8 @@ public class TextEditPart extends GraphicEditPart {
 		case RIGHT:
 			xPos = (int) Math.round(maxExtent.getWidth() - textDimension.width());
 			break;
+		default:
+			break;
 		}
 		Point location = new Point(xPos, (maxExtent.getHeight() - textDimension.height()) / 2);
 		Extent textExtents = new Extent(location, new Point(location.getX() + textDimension.width(), location.getY() + textDimension.height()));

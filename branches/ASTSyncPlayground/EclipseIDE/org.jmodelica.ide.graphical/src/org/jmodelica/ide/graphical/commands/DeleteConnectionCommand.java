@@ -27,7 +27,7 @@ public class DeleteConnectionCommand extends Command {
 
 	@Override
 	public void execute() {
-		connection.disconnect(myId);
+		proxy.removeConnection(connection, myId);
 	}
 
 	@Override

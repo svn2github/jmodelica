@@ -1,11 +1,14 @@
 package org.jmodelica.ide.textual.actions;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,17 +21,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.error.InstanceErrorHandler;
-import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ShowMessageJob;
 import org.jmodelica.ide.helpers.hooks.IErrorCheckHook;
+import org.jmodelica.ide.sync.CachedClassDecl;
 import org.jmodelica.ide.sync.GlobalRootNode;
-import org.jmodelica.ide.sync.LocalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.FClass;
 import org.jmodelica.modelica.compiler.IErrorHandler;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class ErrorCheckAction extends CurrentClassAction implements
@@ -63,9 +64,10 @@ public class ErrorCheckAction extends CurrentClassAction implements
 	}
 
 	public void checkForSyntaxErrors() {
-		LocalRootNode ln = (LocalRootNode) ModelicaASTRegistry.getInstance()
-				.lookupFileLocalRoot(currentClass.containingFileName());
-		IFile file = ln.getFile();
+		String filePath = currentClass.containingFileName();
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+				.findFilesForLocationURI((new File(filePath)).toURI());
+		IFile file = files[0];
 		if (file != null) {
 			try {
 				String type = IDEConstants.ERROR_MARKER_SYNTACTIC_ID;
@@ -129,9 +131,16 @@ public class ErrorCheckAction extends CurrentClassAction implements
 		}
 
 		protected IStatus run(IProgressMonitor monitor) {
-			GlobalRootNode groot = (GlobalRootNode) ModelicaASTRegistry
-					.getInstance().lookupFileGlobalRoot(
-							currentClass.containingFileName());
+			String filePath = currentClass.containingFileName();
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI((new File(filePath)).toURI());
+			IProject project;
+			GlobalRootNode groot = null;
+			if (files.length > 0) {
+				project = files[0].getProject();
+				groot = (GlobalRootNode) ModelicaASTRegistry.getInstance()
+						.doLookup(project);
+			}
 			if (groot != null) {
 				SourceRoot root = groot.getSourceRoot();
 				synchronized (root.state()) {
@@ -143,8 +152,8 @@ public class ErrorCheckAction extends CurrentClassAction implements
 					icd.resetCollectErrors();
 					icd.collectErrors();
 					if (!errorHandler.hasErrors()) {
-						ModelicaCompiler mc = new ModelicaCompiler(
-								icd.root().options);
+						// ModelicaCompiler mc = new ModelicaCompiler(
+						// icd.root().options);
 						FClass fc = FClass.create(icd, icd.fileName());
 						icd.flattenInstClassDecl(fc);
 						fc.setLocation(icd.getSelectionNode());

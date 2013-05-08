@@ -52,7 +52,7 @@ import org.jastadd.ed.core.service.errors.IError;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.compiler.Preferences;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
-import org.jmodelica.ide.helpers.CachedASTNode;
+import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.Dot;
 import org.jmodelica.modelica.compiler.ParseAccess;

@@ -21,7 +21,7 @@ public class CompileFileTask implements ITaskObject {
 		GlobalRootNode gRoot = (GlobalRootNode) ModelicaASTRegistry
 				.getInstance().doLookup(project);
 		LocalRootNode lroot = (LocalRootNode) gRoot.lookupFileNode(fileName);
-		ModelicaASTRegistry.getInstance().recompileFile(lroot.getFile());
+		ModelicaASTRegistry.getInstance().compileFile(lroot.getFile());
 	}
 
 	@Override

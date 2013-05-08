@@ -498,7 +498,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		}
 	}
 
-	protected void compileFile(IFile file) {
+	public void compileFile(IFile file) {
 		ICompiler compiler = createCompiler();
 		if (compiler.canCompile(file)) {
 			if (!fProjectASTMap.containsKey(file.getProject())) {

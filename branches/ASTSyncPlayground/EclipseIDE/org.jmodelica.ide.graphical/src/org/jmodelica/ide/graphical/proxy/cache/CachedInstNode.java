@@ -15,7 +15,6 @@ public abstract class CachedInstNode {
 	private Layer cacheDiagramLayer;
 	private Layer cacheIconLayer;
 	private List<CachedInstComponentDecl> syncGetInstComponentDecls = new ArrayList<CachedInstComponentDecl>();
-	// private String syncLookupParameterValue; // TODO fix these
 	protected List<CachedConnectClause> connectionClauses = new ArrayList<CachedConnectClause>();
 
 	public CachedInstNode(InstNode node) {
@@ -24,7 +23,6 @@ public abstract class CachedInstNode {
 		cacheIconLayer = node.cacheIconLayer();
 		setSyncGetInstComponentDecls(node);
 		setConnectionClauses(node);
-		//node.syncLookupParameterValue(node.syncName());
 	}
 
 	private void setConnectionClauses(InstNode node) {
@@ -74,9 +72,4 @@ public abstract class CachedInstNode {
 	public List<CachedConnectClause> getConnections() {
 		return connectionClauses;
 	}
-
-	/*
-	 * public String syncLookupParameterValue(String parameter) { return
-	 * syncLookupParameterValue; }
-	 */
 }

@@ -9,7 +9,7 @@
       </category>
       <wizard
             category="org.jmodelica.ide.category"
-            class="org.jmodelica.ide.ui.NewFileWizard"
+            class="org.jmodelica.ide.outline.ui.NewFileWizard"
             icon="resources/icons/outline/modelica_file.png"
             id="org.jmodelica.ide.wizard.file"
             name="Modelica File"
@@ -23,7 +23,7 @@
       </wizard>
       <wizard
             category="org.jmodelica.ide.category"
-            class="org.jmodelica.ide.ui.NewProjectWizard"
+            class="org.jmodelica.ide.outline.ui.NewProjectWizard"
             icon="resources/icons/modelica_project_new.png"
             id="org.jmodelica.ide.wizard.project"
             name="Modelica Project"
@@ -39,7 +39,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.jmodelica.ide.preferences.ModelicaPreferencePage"
+            class="org.jmodelica.ide.outline.preferences.ModelicaPreferencePage"
             id="org.jmodelica.ide.preference.modelica"
             name="Modelica">
       </page>
@@ -75,7 +75,7 @@
          </triggerPoints>
          <possibleChildren>
             <instanceof
-                  value="org.jmodelica.ide.helpers.CachedASTNode">
+                  value="org.jmodelica.ide.sync.CachedASTNode">
             </instanceof>
          </possibleChildren>
          <commonSorter
@@ -84,7 +84,7 @@
             <parentExpression>
                <or>
                   <instanceof
-                        value="org.jmodelica.ide.helpers.CachedASTNode">
+                        value="org.jmodelica.ide.sync.CachedASTNode">
                   </instanceof>
                   <and>
                      <adapt
@@ -205,7 +205,7 @@
          name="Modelica Properties"
          point="org.eclipse.ui.propertyPages">
       <page
-            class="org.jmodelica.ide.preferences.ProjectPropertyPage"
+            class="org.jmodelica.ide.outline.preferences.ProjectPropertyPage"
             id="org.jmodelica.ide.property.modelica"
             name="Modelica">
          <enabledWhen>
@@ -222,7 +222,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.jmodelica.ide.ui.ModelicaPerspective"
+            class="org.jmodelica.ide.outline.ui.ModelicaPerspective"
             icon="resources/icons/modelica_perspective.png"
             id="org.jmodelica.ide.perspective"
             name="Modelica">

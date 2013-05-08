@@ -4,15 +4,16 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jmodelica.icons.coord.Placement;
+import org.jmodelica.ide.sync.ASTPathPart;
 
 public class AddComponentTask extends AbstractModificationTask {
 
-	private Stack<String> classASTPath;
+	private Stack<ASTPathPart> classASTPath;
 	private Placement placement;
 	private String componentName;
 	private String className;
 
-	public AddComponentTask(IFile file, Stack<String> classASTPath,
+	public AddComponentTask(IFile file, Stack<ASTPathPart> classASTPath,
 			String className, String componentName, Placement placement,
 			int undoActionId) {
 		super(file, undoActionId);
@@ -44,7 +45,7 @@ public class AddComponentTask extends AbstractModificationTask {
 		return className;
 	}
 
-	public Stack<String> getClassASTPath() {
+	public Stack<ASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 }

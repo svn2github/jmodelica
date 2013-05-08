@@ -91,8 +91,7 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 				return true;
 			}
 			ICachedOutlineNode root = astCacheMap.get(file);
-			boolean hasc = (root != null && root.hasVisibleChildren());
-			return hasc;
+			return (root != null && root.hasVisibleChildren());
 		}
 		return super.hasChildren(element);
 	}
@@ -163,7 +162,7 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 			EventCachedFileChildren event = (EventCachedFileChildren) e;
 			astCacheMap.put(event.getFile(), event.getRoot());
 			ChildrenTask task = new ChildrenTask(viewer, event.getFile());
-			task.expandDepth = 1;
+			task.expandDepth = 0;
 			OutlineUpdateWorker.addChildrenTask(task);
 		}
 	}

@@ -5,7 +5,6 @@ import java.util.Stack;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.CachedASTNode;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
@@ -15,7 +14,9 @@ import org.jmodelica.ide.outline.cache.EventCachedInitialNoLibs;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialTask;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialNoLibsTask;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
+import org.jmodelica.ide.sync.CachedASTNode;
 
 public class ClassOutlineCache extends AbstractOutlineCache {
 	protected ArrayList<EventCachedInitialNoLibs> eventCachedInitialNoLibs = new ArrayList<EventCachedInitialNoLibs>();
@@ -31,8 +32,8 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 	}
 
 	@Override
-	public void fetchChildren(Stack<String> nodePath, ICachedOutlineNode node,
-			Object task) {
+	public void fetchChildren(Stack<ASTPathPart> nodePath,
+			ICachedOutlineNode node, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this, node);
 		ASTRegTaskBucket.getInstance().addTask(job);
@@ -61,10 +62,10 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 			Object[] children = myCache.cachedOutlineChildren();
 			for (Object obj : children)
 				if (!(obj instanceof CachedASTNode))
-					newChildren.add((ICachedOutlineNode)obj);
+					newChildren.add((ICachedOutlineNode) obj);
 			CachedASTNode node = event.getCachedRoot();
 			for (Object obj : node.cachedOutlineChildren())
-				newChildren.add((ICachedOutlineNode)obj);
+				newChildren.add((ICachedOutlineNode) obj);
 			myCache.setOutlineChildren(newChildren);
 			myOutline.astChanged(null);
 		}

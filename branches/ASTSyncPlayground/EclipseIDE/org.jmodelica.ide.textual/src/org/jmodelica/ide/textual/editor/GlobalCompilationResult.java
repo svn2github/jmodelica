@@ -11,9 +11,7 @@ import org.jastadd.ed.core.model.node.LocalRootHandle;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.sync.ListenerObject;
-import org.jmodelica.ide.sync.LocalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
-import org.jmodelica.modelica.compiler.ASTNode;
 
 public class GlobalCompilationResult extends CompilationResult {
 
@@ -30,22 +28,16 @@ public class GlobalCompilationResult extends CompilationResult {
 		project = ef.iFile().getProject();
 
 		if (project != null)
-			root = (ASTNode<?>) ((LocalRootNode) registry.doLookup(ef.iFile())[0])
-					.getDef();
-		// root = (ASTNode<?>) registry.lookupAST(key, project);
-
-		// registry.addListener(editor); // TODO JL listen against files, not
-		// against all...
-		ListenerObject listObj = new ListenerObject(editor, IASTChangeListener.TEXTEDITOR_LISTENER);
-		ModelicaASTRegistry.getInstance().addListener(editorFile.iFile(), null,
-				listObj);
+			root = registry.getLatestDef(editorFile.iFile());
+		ListenerObject listObj = new ListenerObject(editor,
+				IASTChangeListener.TEXTEDITOR_LISTENER);
+		registry.addListener(editorFile.iFile(), null, listObj);
 	}
 
 	public void update(IProject projChanged, String keyChanged) {
 		if (project == projChanged && keyChanged.equals(key)) {
-			LocalRootNode fileNode = (LocalRootNode) ModelicaASTRegistry.getInstance()
-					.doLookup(editorFile.iFile())[0];
-			root = (ASTNode<?>) fileNode.getDef();
+			root = ModelicaASTRegistry.getInstance().getLatestDef(
+					editorFile.iFile());
 		}
 	}
 
@@ -73,5 +65,4 @@ public class GlobalCompilationResult extends CompilationResult {
 	public void update(IASTChangeEvent e) {
 		this.update(project);
 	}
-
 }

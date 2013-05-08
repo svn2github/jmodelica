@@ -9,50 +9,35 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.ide.helpers.CachedClassDecl;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
 public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
-
-	private static final boolean DEFAULT_EDIT_ICON = false;
 
 	private String className;
 	private IProject project;
 	private boolean editIcon;
-
 	private String sourceFileName;
+	private String filePath;
 
-	public GraphicalEditorInput(String className, IProject project) {
-		this(className, project, DEFAULT_EDIT_ICON);
-	}
-
-	public GraphicalEditorInput(String className, IProject project,
+	public GraphicalEditorInput(String className, String filePath,
 			boolean editIcon) {
 		this.className = className;
-		this.project = project;
+		this.project = lookupIProject(new File(filePath));
 		this.editIcon = editIcon;
-	}
-
-	public GraphicalEditorInput(String className, File sourceFile) {
-		this(className, sourceFile, DEFAULT_EDIT_ICON);
-	}
-
-	public GraphicalEditorInput(String className, File sourceFile,
-			boolean editIcon) {
-		this(className, lookupIProject(sourceFile), editIcon);
-		this.sourceFileName = sourceFile.getName();
-	}
-
-	public GraphicalEditorInput(CachedClassDecl classDecl) {
-		this(classDecl, DEFAULT_EDIT_ICON);
+		this.sourceFileName = new File(filePath).getName();
+		this.filePath = filePath;
 	}
 
 	public GraphicalEditorInput(CachedClassDecl classDecl, boolean editIcon) {
-		this(classDecl.name(), new File(classDecl.containingFileName()),
-				editIcon);
+		this(classDecl.name(), classDecl.containingFileName(), editIcon);
 	}
 
 	public String getClassName() {
 		return className;
+	}
+
+	public String getFilePath() {
+		return filePath;
 	}
 
 	public IProject getProject() {

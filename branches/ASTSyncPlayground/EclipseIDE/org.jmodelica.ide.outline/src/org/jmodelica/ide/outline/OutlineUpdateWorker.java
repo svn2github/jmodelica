@@ -62,11 +62,8 @@ public class OutlineUpdateWorker {
 	 *            the node to update the outline children for
 	 */
 	public static void addChildren(TreeViewer viewer, ICachedOutlineNode node) {
-		//if (!node.childrenAlreadyCached())
-			node.getCache().fetchChildren(node.getASTPath(), node,
-					new ChildrenTask(viewer, node));
-		// if (!node.cachedOutlineChildrenIsCurrent())
-		// job.addTask(new ChildrenTask(viewer, node));
+		node.getCache().fetchChildren(node.getASTPath(), node,
+				new ChildrenTask(viewer, node));
 	}
 
 	/**
@@ -251,8 +248,6 @@ public class OutlineUpdateWorker {
 		}
 
 		public void run() {
-			// if (!node.imageRendered()) { not needed, calc when retrieved TODO
-			// refactor
 			try {
 				// synchronized (node.state()) {
 				// Depends on ASTNode.state being static (if it isn't, use
@@ -278,14 +273,6 @@ public class OutlineUpdateWorker {
 
 		public void run() {
 			try {
-				// synchronized (node.state()) {
-				// Depends on ASTNode.state being static (if it isn't, use an
-				// object that is unique to the tree)
-				// System.out.println("OutlineUpdateWorker->UpdateOutlineCachedChildren()");
-				// node.updateOutlineCachedChildren(); TODO not needed
-				// }
-				System.out
-						.println("OutlineUpdateWorker: Running ChildrenTask...");
 				new ChildrenUpdateJob(this).schedule();
 			} catch (Throwable t) {
 				// Don't let anything be thrown past here
@@ -341,7 +328,5 @@ public class OutlineUpdateWorker {
 			viewer.expandToLevel(node, 1);
 			work();
 		}
-
 	}
-
 }

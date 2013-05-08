@@ -6,12 +6,13 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.ASTNodeCacheFactory;
 import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedChildren;
+import org.jmodelica.ide.sync.ASTNodeCacheFactory;
+import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -20,12 +21,12 @@ import org.jmodelica.modelica.compiler.InstProgramRoot;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
 public class InstanceOutlineCacheChildrenTask extends OutlineCacheJob {
-	private Stack<String> nodePath;
+	private Stack<ASTPathPart> nodePath;
 	private ChildrenTask task;
 	private ICachedOutlineNode parent;
 
 	public InstanceOutlineCacheChildrenTask(IASTChangeListener listener,
-			Stack<String> nodePath, IFile file, ChildrenTask task,
+			Stack<ASTPathPart> nodePath, IFile file, ChildrenTask task,
 			AbstractOutlineCache cache, ICachedOutlineNode parent) {
 		super(listener, file, cache);
 		this.nodePath = nodePath;

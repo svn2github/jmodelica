@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import org.eclipse.swt.graphics.Image;
 import org.jmodelica.ide.helpers.IOutlineCache;
+import org.jmodelica.ide.sync.ASTPathPart;
 
 public interface ICachedOutlineNode {
 	Object[] cachedOutlineChildren();
@@ -27,6 +28,6 @@ public interface ICachedOutlineNode {
 
 	void setParent(ICachedOutlineNode parent);
 
-	Stack<String> getASTPath();
+	Stack<ASTPathPart> getASTPath();
 
 }

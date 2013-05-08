@@ -18,7 +18,7 @@
             priority="highest">
          <enablement>
             <instanceof
-                  value="org.jmodelica.modelica.compiler.CachedASTNode">
+                  value="org.jmodelica.ide.sync.CachedClassDecl">
             </instanceof></enablement>
       </actionProvider>
    </extension>

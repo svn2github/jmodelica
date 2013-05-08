@@ -3,14 +3,15 @@ package org.jmodelica.ide.sync.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.jmodelica.ide.sync.ASTPathPart;
 
 public class RemoveConnectionTask extends AbstractModificationTask {
 
-	private Stack<String> classASTPath;
-	private Stack<String> connectClauseASTPath;
+	private Stack<ASTPathPart> classASTPath;
+	private Stack<ASTPathPart> connectClauseASTPath;
 
-	public RemoveConnectionTask(IFile file, Stack<String> classASTPath,
-			Stack<String> connectClauseASTPath, int undoActionId) {
+	public RemoveConnectionTask(IFile file, Stack<ASTPathPart> classASTPath,
+			Stack<ASTPathPart> connectClauseASTPath, int undoActionId) {
 		super(file, undoActionId);
 		this.classASTPath = classASTPath;
 		this.connectClauseASTPath = connectClauseASTPath;
@@ -25,15 +26,15 @@ public class RemoveConnectionTask extends AbstractModificationTask {
 	 * We want to make sure we delete Connections before Components.
 	 */
 	@Override
-	public int getJobPriority(){
+	public int getJobPriority() {
 		return ITaskObject.PRIORITY_HIGHEST;
 	}
-	
-	public Stack<String> getConnectionClauseASTPath() {
+
+	public Stack<ASTPathPart> getConnectionClauseASTPath() {
 		return connectClauseASTPath;
 	}
 
-	public Stack<String> getClassASTPath() {
+	public Stack<ASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 }

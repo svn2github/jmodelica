@@ -1,7 +1,7 @@
 package org.jmodelica.ide.textual.actions;
 
-import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ICurrentClassListener;
+import org.jmodelica.ide.sync.CachedClassDecl;
 
 public abstract class CurrentClassAction extends ConnectedTextsAction implements
 		ICurrentClassListener {

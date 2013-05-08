@@ -1,4 +1,4 @@
-package org.jmodelica.ide.helpers;
+package org.jmodelica.ide.sync;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -6,12 +6,15 @@ import java.util.Stack;
 import org.eclipse.swt.graphics.Image;
 import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
-import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jmodelica.ide.helpers.IOutlineCache;
+import org.jmodelica.ide.helpers.ImageLoader;
+import org.jmodelica.ide.helpers.SWTIconDrawer;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
 
 public class CachedASTNode implements ICachedOutlineNode {
-	protected Stack<String> myASTPath;
+	protected Stack<ASTPathPart> myASTPath;
 	private ArrayList<ICachedOutlineNode> outlineChildren = new ArrayList<ICachedOutlineNode>();
 	protected Icon icon;
 	private Image image;
@@ -28,12 +31,14 @@ public class CachedASTNode implements ICachedOutlineNode {
 	private IOutlineCache cache;
 	private int selectionNodeLength;
 
-	public CachedASTNode(ASTNode<?> node, Object parent,
-			IOutlineCache cache) {
+	public CachedASTNode(ASTNode<?> node, Object parent, IOutlineCache cache) {
 		this.cache = cache;
 		if (node instanceof BaseNode)
 			this.icon = ((BaseNode) node).icon();
-		myASTPath = ModelicaASTRegistry.getInstance().createPath(node);
+		myASTPath = ModelicaASTRegistry.getInstance().createPath(node);// TODO
+																		// move
+																		// to
+																		// classdecl?
 		hasVisibleChildren = node.hasVisibleChildren();// TODO?
 		containingFileName = node.containingFileName(); // TODO fix this smarter
 		text = node.contentOutlineLabel();
@@ -48,7 +53,7 @@ public class CachedASTNode implements ICachedOutlineNode {
 		return parent;
 	}
 
-	public Stack<String> getASTPath() {
+	public Stack<ASTPathPart> getASTPath() {
 		return myASTPath;
 	}
 

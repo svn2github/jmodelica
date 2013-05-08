@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -28,10 +29,9 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.progress.IProgressConstants2;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.helpers.CachedClassDecl;
 import org.jmodelica.ide.helpers.ShowMessageJob;
+import org.jmodelica.ide.sync.CachedClassDecl;
 import org.jmodelica.ide.sync.GlobalRootNode;
-import org.jmodelica.ide.sync.LocalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.textual.editor.Editor;
 import org.jmodelica.modelica.compiler.ASTNode;
@@ -93,16 +93,20 @@ public class CompileFMUAction extends CurrentClassAction implements
 				return;
 
 			showConsole();
-			String fileName[] = currentClass.containingFileName().split("/");
-			String theName = fileName[fileName.length-1];
+			String filePath = currentClass.containingFileName();
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI((new File(filePath)).toURI());
+			IProject project;
+			if (files.length > 0)
+				project = files[0].getProject();
+			else
+				return;
 			GlobalRootNode gr = (GlobalRootNode) ModelicaASTRegistry
-					.getInstance()
-					.lookupFileGlobalRoot(theName);
+					.getInstance().doLookup(project);
 			if (gr != null) {
-				SourceRoot sr =gr.getSourceRoot();
+				SourceRoot sr = gr.getSourceRoot();
 				synchronized (sr.state()) {
 					OptionRegistry opt = new OptionRegistry(sr.options);
-
 					String className = currentClass.qualifiedName();
 					String[] paths = editor.editorFile().getPaths();
 					Job job = new CompileJob(className, paths, dir, proj, opt);

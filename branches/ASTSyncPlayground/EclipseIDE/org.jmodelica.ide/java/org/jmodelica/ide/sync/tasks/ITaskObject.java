@@ -13,6 +13,7 @@ public interface ITaskObject {
 	public static final int UNDO_ADD = 9;
 	public static final int RECOMPILE_FILE = 10;
 	public static final int GRAPHICAL_AESTHETIC = 11;
+	public static final int GENERATE_DOCUMENTATION = 12;
 
 	/* Task priorities */
 	public static final int PRIORITY_HIGHEST = 3;
@@ -23,7 +24,7 @@ public interface ITaskObject {
 	public abstract void doJob();
 
 	public abstract int getJobType();
-	
+
 	public abstract int getJobPriority();
 
 	public abstract int getListenerID();

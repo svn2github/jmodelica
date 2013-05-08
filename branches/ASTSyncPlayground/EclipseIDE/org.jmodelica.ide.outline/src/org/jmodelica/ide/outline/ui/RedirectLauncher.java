@@ -1,4 +1,4 @@
-package org.jmodelica.ide.ui;
+package org.jmodelica.ide.outline.ui;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -18,5 +18,4 @@ public class RedirectLauncher implements IEditorLauncher {
 		} catch (IOException e) {
 		}
 	}
-
 }

@@ -22,14 +22,15 @@ public class ListenerObject {
 		listenerID = id;
 	}
 
-	public void doUpdate(IFile file, int astChangeEventType, Stack<String> changedPath) {
+	public void doUpdate(IFile file, int astChangeEventType,
+			Stack<ASTPathPart> changedPath) {
 		if (listenerType == IASTChangeListener.GRAPHICAL_LISTENER) {
-			NotifyGraphicalTask ug = new NotifyGraphicalTask(astChangeEventType,
-					listener, changedPath, listenerID);
+			NotifyGraphicalTask ug = new NotifyGraphicalTask(
+					astChangeEventType, listener, changedPath, listenerID);
 			ASTRegTaskBucket.getInstance().addTask(ug);
 		} else if (listenerType == IASTChangeListener.OUTLINE_LISTENER) {
-			NotifyOutlineTask uo = new NotifyOutlineTask(file, astChangeEventType,
-					listener, listenerID);
+			NotifyOutlineTask uo = new NotifyOutlineTask(file,
+					astChangeEventType, listener, listenerID);
 			ASTRegTaskBucket.getInstance().addTask(uo);
 		} else if (listenerType == IASTChangeListener.TEXTEDITOR_LISTENER) {
 			// TODO for AST driven text editor...

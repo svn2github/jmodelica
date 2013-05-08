@@ -11,14 +11,12 @@ import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.ide.sync.tasks.RemoveComponentTask;
 import org.jmodelica.ide.sync.tasks.RemoveConnectionTask;
 import org.jmodelica.ide.sync.tasks.UndoTask;
-import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.Access;
 import org.jmodelica.modelica.compiler.Comment;
 import org.jmodelica.modelica.compiler.ComponentDecl;
 import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.InstProgramRoot;
-import org.jmodelica.modelica.compiler.Opt;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
@@ -28,7 +26,8 @@ public class ASTRegModificationHandler {
 	/**
 	 * Default constructor. The {@link ASTRegModificationHandler} is
 	 * instantiated by a job handler thread started by the
-	 * {@link ASTRegTaskBucket}, and will perform one {@link AbstractModificationTask}.
+	 * {@link ASTRegTaskBucket}, and will perform one
+	 * {@link AbstractModificationTask}.
 	 */
 	public ASTRegModificationHandler(AbstractModificationTask job) {
 		switch (job.getJobType()) {
@@ -68,30 +67,30 @@ public class ASTRegModificationHandler {
 
 	private void removeConnection(RemoveConnectionTask task) {
 		long time = System.currentTimeMillis();
-		Stack<String> astPath = task.getClassASTPath();
+		Stack<ASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			StoredDefinition def = registry.getLatestDef(task.getFile());
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
-					astPath, sroot);
+					def, astPath);
 			if (fcd == null) {
-				fcd = (FullClassDecl) registry.recoveryResolve(def, astPath);
+				fcd = (FullClassDecl) registry.resolveSourceASTPath(def,
+						astPath);
 				if (fcd == null) {
 					System.err.println("Could not resolve node ASTPath!");
 					return;
 				} else {
-					astPath = registry.createPath(fcd);
+					astPath = registry.createDefPath(fcd);
 				}
 			}
-
 			ConnectClause connectClause = (ConnectClause) registry
-					.resolveSourceASTPath(task.getConnectionClauseASTPath(),
-							sroot);
+					.resolveSourceASTPath(def,
+							task.getConnectionClauseASTPath());
 			if (connectClause == null) {
-				connectClause = (ConnectClause) registry.recoveryResolve(def,
-						task.getConnectionClauseASTPath());
+				connectClause = (ConnectClause) registry.resolveSourceASTPath(
+						def, task.getConnectionClauseASTPath());
 				if (connectClause == null) {
 					System.err.println("Could not resolve node ASTPath!");
 					return;
@@ -125,21 +124,22 @@ public class ASTRegModificationHandler {
 	 */
 	private void addConnection(AddConnectionTask task) {
 		long time = System.currentTimeMillis();
-		Stack<String> astPath = task.getClassASTPath();
+		Stack<ASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			StoredDefinition def = registry.getLatestDef(task.getFile());
-			FullClassDecl fcd = (FullClassDecl) registry.recoveryResolve(def,
-					astPath);
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					def, astPath);
 			if (fcd == null) {
-				fcd = (FullClassDecl) registry.recoveryResolve(def, astPath);
+				fcd = (FullClassDecl) registry.resolveSourceASTPath(def,
+						astPath);
 				if (fcd == null) {
 					System.err.println("Could not resolve node ASTPath!");
 					return;
 				} else {
-					astPath = registry.createPath(fcd);
+					astPath = registry.createDefPath(fcd);
 				}
 			}
 
@@ -211,8 +211,8 @@ public class ASTRegModificationHandler {
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
 			StoredDefinition def = registry.getLatestDef(task.getFile());
-			FullClassDecl fcd = (FullClassDecl) registry.recoveryResolve(def,
-					task.getClassASTPath());
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					def, task.getClassASTPath());
 			ComponentDecl added = fcd.addComponent(task.getClassName(),
 					task.getComponentName(), task.getPlacement());
 
@@ -224,14 +224,15 @@ public class ASTRegModificationHandler {
 			ASTRegModificationUndoer.getInstance().addUndoAddJob(undo);
 			// continue...
 
-			/**System.out.println(sroot.getProgram().getUnstructuredEntity(0)
-					.getNodeName()
-					+ ":"
-					+ sroot.getProgram().getUnstructuredEntity(0).outlineId());
-			System.out.println(def.getNodeName() + ":" + def.outlineId());
-			System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&add");
-
-			recursivePrint(sroot, "");*/
+			/**
+			 * System.out.println(sroot.getProgram().getUnstructuredEntity(0)
+			 * .getNodeName() + ":" +
+			 * sroot.getProgram().getUnstructuredEntity(0).outlineId());
+			 * System.out.println(def.getNodeName() + ":" + def.outlineId());
+			 * System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&add");
+			 * 
+			 * recursivePrint(sroot, "");
+			 */
 			flushInstRoot(sroot);
 			ChangePropagationController.getInstance().handleNotifications(
 					ASTChangeEvent.POST_ADDED, file, task.getClassASTPath());
@@ -248,14 +249,13 @@ public class ASTRegModificationHandler {
 		iRoot.components();
 	}
 
-	// TODO remove
-	private void recursivePrint(ASTNode<?> node, String indent) {
-		if (!(node instanceof Opt))
-			System.out.println(indent + node.getNodeName() + ":"
-					+ node.outlineId());
-		for (int i = 0; i < node.getNumChild(); i++)
-			recursivePrint(node.getChild(i), indent + " ");
-	}
+	// debug
+	/**
+	 * private void recursivePrint(ASTNode<?> node, String indent) { if (!(node
+	 * instanceof Opt)) System.out.println(indent + node.getNodeName() + ":" +
+	 * node.outlineId()); for (int i = 0; i < node.getNumChild(); i++)
+	 * recursivePrint(node.getChild(i), indent + " "); }
+	 */
 
 	/**
 	 * Removes a ComponentDecl from its ClassDecl.
@@ -266,12 +266,13 @@ public class ASTRegModificationHandler {
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		synchronized (sroot.state()) {
-			StoredDefinition def = (StoredDefinition) sroot.getProgram()
-					.getUnstructuredEntity(0);
-			FullClassDecl fcd = (FullClassDecl) registry.recoveryResolve(def,
-					task.getClassASTPath());
-			ComponentDecl cd = (ComponentDecl) registry.recoveryResolve(def,
-					task.getComponentASTPath());
+			StoredDefinition def = ModelicaASTRegistry.getInstance()
+					.getLatestDef(task.getFile());
+			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
+					def, task.getClassASTPath());
+
+			ComponentDecl cd = (ComponentDecl) registry.resolveSourceASTPath(
+					def, task.getComponentASTPath());
 
 			// For undo command of graph ed (queue add job containing component
 			// info)
@@ -288,13 +289,14 @@ public class ASTRegModificationHandler {
 			fcd.classes();
 			flushInstRoot(sroot);
 
-		/**	System.out.println(sroot.getProgram().getUnstructuredEntity(0)
-					.getNodeName()
-					+ ":"
-					+ sroot.getProgram().getUnstructuredEntity(0).outlineId());
-			System.out.println(def.getNodeName() + ":" + def.outlineId());
-			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55");
-			recursivePrint(sroot, "");*/
+			/**
+			 * System.out.println(sroot.getProgram().getUnstructuredEntity(0)
+			 * .getNodeName() + ":" +
+			 * sroot.getProgram().getUnstructuredEntity(0).outlineId());
+			 * System.out.println(def.getNodeName() + ":" + def.outlineId());
+			 * System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55");
+			 * recursivePrint(sroot, "");
+			 */
 			ChangePropagationController.getInstance().handleNotifications(
 					ASTChangeEvent.POST_REMOVE, task.getFile(),
 					task.getClassASTPath());
@@ -303,25 +305,4 @@ public class ASTRegModificationHandler {
 				.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "
 						+ (System.currentTimeMillis() - time) + "ms");
 	}
-
-	/**
-	 * Removes a node from the source AST.
-	 * 
-	 * @param theNode
-	 */
-	/**
-	 * private void removeSrcNode(ASTNode<?> theNode) { if (theNode instanceof
-	 * ComponentDecl) { ComponentDecl comp = (ComponentDecl) theNode; ASTNode<?>
-	 * parent = comp.getParent(); while (parent.getParent() != null && !(parent
-	 * instanceof FullClassDecl)) { parent = parent.getParent(); } if (parent
-	 * instanceof FullClassDecl) { FullClassDecl decl = (FullClassDecl) parent;
-	 * decl.removeComponentDecl(comp); decl.flushCache(); decl.components();
-	 * decl.classes();
-	 * 
-	 * System.out
-	 * .println("SUCCESSFULLY REMOVED COMPONENTDECL FROM FULLCLASSDECL"); } }
-	 * else { System.err .println(
-	 * "Tried to remove node that was not ComponentDecl, not implemented..."); }
-	 * }
-	 */
 }

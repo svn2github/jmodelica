@@ -48,11 +48,11 @@ public class ChangePropagationController {
 	 * @param nodePath
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
-			Stack<String> nodePath) {
+			Stack<ASTPathPart> nodePath) {
 		LibraryNode libroot = listenerTrees.get(file);
 		if (libroot != null) {
 			LibraryVisitor visitor = new LibraryVisitor();
-			Stack<String> copy = new Stack<String>();
+			Stack<ASTPathPart> copy = new Stack<ASTPathPart>();
 			copy.setSize(nodePath.size());
 			Collections.copy(copy, nodePath);
 			visitor.handleChangedNode(file, changeType, libroot, copy);
@@ -60,10 +60,10 @@ public class ChangePropagationController {
 	}
 
 	public boolean removeListener(IASTChangeListener listener, IFile file,
-			Stack<String> nodePath) {
+			Stack<ASTPathPart> nodePath) {
 		LibraryNode root = listenerTrees.get(file);
 		if (root != null) {
-			Stack<String> copy = new Stack<String>();
+			Stack<ASTPathPart> copy = new Stack<ASTPathPart>();
 			if (nodePath != null) {
 				copy.setSize(nodePath.size());
 				Collections.copy(copy, nodePath);
