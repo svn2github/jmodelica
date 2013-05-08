@@ -160,6 +160,10 @@ void fmi1_me_free_model_instance(fmiComponent c) {
 }
 
 fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     ((fmi_t*)c) -> fmi_logging_on = loggingOn;
     return fmiOK;
 }
@@ -167,18 +171,30 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 /* Providing independent variables and re-initialization of caching */
 
 fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     *(jmi_get_t(((fmi_t *)c)->jmi)) = time;
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     memcpy (jmi_get_real_x(((fmi_t *)c)->jmi), x, nx*sizeof(fmiReal));
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
 fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     *callEventUpdate = fmiFalse;
     return fmiOK;
 }
@@ -188,6 +204,10 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
     fmiValueReference i;
     fmiValueReference index;
     jmi_real_t* z;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
@@ -230,6 +250,10 @@ fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], siz
     fmiValueReference i;
     fmiValueReference index;
     jmi_real_t* z;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
@@ -273,6 +297,10 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
     fmiValueReference index;
     jmi_real_t* z;
     
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     for (i = 0; i <nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
         index = get_index_from_value_ref(vr[i]);
@@ -310,6 +338,10 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
 }
 
 fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     /* Strings not yet supported. */
     ((fmi_t *)c)->jmi->recomputeVariables = 1;
     jmi_log_comment(((fmi_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
@@ -332,8 +364,15 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
     jmi_real_t* b_mode;
-    fmi_t* fmi = (fmi_t *)c;
-    jmi_t* jmi =fmi->jmi;
+    fmi_t* fmi;
+    jmi_t* jmi;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi = (fmi_t *)c;
+    jmi = fmi->jmi;
 
     if (((fmi_t*)c)->jmi->is_initialized==1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one call to fmiInitialize is allowed");
@@ -587,6 +626,10 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 }
 
 fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
@@ -601,9 +644,16 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
 }
 
 fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-    jmi_t* jmi = ((fmi_t *)c)->jmi;
+    jmi_t* jmi;
     fmiValueReference i;
     fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    jmi = ((fmi_t *)c)->jmi;
+    
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
@@ -1136,6 +1186,10 @@ fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t 
     fmiValueReference index;
     jmi_real_t* z;
     int isParameterOrConstant = 1;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     /* This is to make sure that if all variables that are inquired
      * are parameters or constants, then the solver should not be invoked.
@@ -1178,6 +1232,10 @@ fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size
     fmiValueReference i;
     fmiValueReference index;
     int isParameterOrConstant = 1;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     /* This is to make sure that if all variables that are inquired
      * are parameters or constants, then the solver should not be invoked.
@@ -1219,6 +1277,10 @@ fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size
     fmiValueReference i;
     fmiValueReference index;
     int isParameterOrConstant = 1;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     /* This is to make sure that if all variables that are inquired
      * are parameters or constants, then the solver should not be invoked.
@@ -1259,6 +1321,10 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
     int i;
     int index;
     int isParameterOrConstant = 1;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
 
     /* This is to make sure that if all variables that are inquired
      * are parameters or constants, then the solver should not be invoked.
@@ -1465,18 +1531,32 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
 }
 
 fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
-
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
 }
 
 fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     memcpy (states, jmi_get_real_x(((fmi_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
-    fmiReal* ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
+    fmiReal* ones;
     fmiValueReference i;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
+    
     for(i = 0; i <nx; i = i + 1) {
         ones[i]=1.0;
     }
@@ -1485,8 +1565,15 @@ fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nomina
 }
 
 fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference vrx[], size_t nx) {
-    fmiInteger offset = ((fmi_t *)c)->jmi->offs_real_x;
+    fmiInteger offset;
     fmiValueReference i;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+        
+    offset = ((fmi_t *)c)->jmi->offs_real_x;
+    
     for(i = 0; i<nx; i = i + 1) {
         vrx[i] = offset + i;
     }

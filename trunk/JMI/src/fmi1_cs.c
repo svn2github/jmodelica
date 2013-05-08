@@ -33,7 +33,13 @@ const char* fmi1_cs_get_version() {
 }
 
 fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_cs_t* fmi1_cs;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
     fmi1_cs -> logging_on = loggingOn;     
     
     return fmi1_me_set_debug_logging(fmi1_cs->fmi1_me,loggingOn);
@@ -44,9 +50,17 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
                          fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize,
                          fmiBoolean   newStep) {
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
-    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    jmi_t* jmi = fmi1_me->jmi;
+    fmi1_cs_t* fmi1_cs;
+    fmi_t* fmi1_me;
+    jmi_t* jmi;
+    
+    if (c == NULL) {
+		return;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi = fmi1_me->jmi;
     
     int flag, retval = JMI_ODE_EVENT;
     int reInitialize = JMI_FALSE;
@@ -100,9 +114,17 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
 }
 
 void fmi1_cs_free_slave_instance(fmiComponent c) {
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
-    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    jmi_t* jmi = fmi1_me->jmi;
+    fmi1_cs_t* fmi1_cs;
+    fmi_t* fmi1_me;
+    jmi_t* jmi;
+    
+    if (c == NULL) {
+		return;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi = fmi1_me->jmi;
     
     if (jmi->ode_solver){
         jmi_delete_ode_solver(jmi);
@@ -202,15 +224,28 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
 
 
 fmiStatus fmi1_cs_terminate_slave(fmiComponent c) {
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_cs_t* fmi1_cs;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
     
     return fmi1_me_terminate(fmi1_cs->fmi1_me);
 }
 
 fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
-    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    fmi1_cs_t* fmi1_cs;
+    fmi_t* fmi1_me;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
     
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
@@ -233,9 +268,17 @@ fmiStatus fmi1_cs_cancel_step(fmiComponent c){
 
 fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmiStatus retval;
-    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
-    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    jmi_t* jmi = fmi1_me->jmi;
+    fmi1_cs_t* fmi1_cs;
+    fmi_t* fmi1_me;
+    jmi_t* jmi;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi1_cs = (fmi1_cs_t*)c;
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi = fmi1_me->jmi;
     
     retval = fmi1_cs_terminate_slave(c);
     if (retval != fmiOK){ return fmiError; }
@@ -255,34 +298,66 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
 }
 
 fmiStatus fmi1_cs_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_set_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_set_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_set_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_set_string(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_get_real(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_get_integer(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_get_boolean(((fmi1_cs_t *)c)->fmi1_me,vr,nvr,value);
 }
 
 fmiStatus fmi1_cs_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]){
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
     return fmi1_me_get_string(((fmi1_cs_t*)c)->fmi1_me,vr,nvr,value);
 }
 
