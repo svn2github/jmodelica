@@ -1,6 +1,5 @@
 package org.jmodelica.ide.graphical.proxy;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -8,22 +7,20 @@ import java.util.Stack;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.primitives.GraphicItem;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
+import org.jmodelica.ide.sync.ASTPathPart;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstExtends;
+import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractNodeProxy extends Observable {
 
-	protected abstract CachedInstClassDecl getClassDecl();
-
-	protected abstract CachedInstComponentDecl getComponentDecl();
-
-	protected abstract CachedInstNode getCachedASTNode();
+	protected abstract Stack<ASTPathPart> getASTPath();
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
 
-	abstract protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value);
+	abstract protected void setParameterValue(
+			Stack<ASTPathPart> componentASTPath, Stack<String> path,
+			String value);
 
 	protected abstract String buildDiagramName();
 
@@ -32,60 +29,40 @@ public abstract class AbstractNodeProxy extends Observable {
 	public abstract Layer getLayer();
 
 	public String getClassName() {
-		return getClassDecl().syncGetClassIconName();
-	}
-
-	public String getQualifiedClassName() {
-		return getClassDecl().syncQualifiedName();
+		return getDiagram().syncGetClassIconName();
 	}
 
 	public String getComponentName() {
-		CachedInstComponentDecl componentDecl = getComponentDecl();
-		if (componentDecl != null)
-			return componentDecl.syncQualifiedName();
-		else
-			return null;
+		return null;
 	}
 
 	public String getQualifiedComponentName() {
-		CachedInstComponentDecl componentDecl = getComponentDecl();
-		if (componentDecl != null)
-			return componentDecl.syncQualifiedName();
-		else
-			return null;
+		return null;
 	}
 
 	protected abstract boolean inDiagram();
 
-	public List<GraphicItem> getGraphics() {
-		List<GraphicItem> graphics = new ArrayList<GraphicItem>();
-		collectGraphics(getCachedASTNode(), graphics, inDiagram());
-		return graphics;
-	}
+	public abstract List<GraphicItem> getGraphics();
 
-	protected static void collectGraphics(CachedInstNode node,
+	protected static void collectGraphics(InstNode node,
 			List<GraphicItem> graphics, boolean inDiagram) {
-		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			collectGraphics(ie, graphics, inDiagram);
 		}
 		if (inDiagram)
-			graphics.addAll(node.syncGetDiagramLayer().getGraphics());
+			graphics.addAll(node.cacheDiagramLayer().getGraphics());
 		else
-			graphics.addAll(node.syncGetIconLayer().getGraphics());
+			graphics.addAll(node.cacheIconLayer().getGraphics());
 	}
 
-	public List<ComponentProxy> getComponents() {
-		List<ComponentProxy> components = new ArrayList<ComponentProxy>();
-		collectComponents(getCachedASTNode(), components);
-		return components;
-	}
+	public abstract List<ComponentProxy> getComponents();
 
-	private void collectComponents(CachedInstNode node,
+	protected void collectComponents(InstNode node,
 			List<ComponentProxy> components) {
-		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			collectComponents(ie, components);
 		}
-		for (CachedInstComponentDecl icd : node.syncGetInstComponentDecls()) {
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
 			boolean isConnector = icd.syncIsConnector();
 			boolean inDiagram = inDiagram();
 			if (!inDiagram && !isConnector)
@@ -111,9 +88,6 @@ public abstract class AbstractNodeProxy extends Observable {
 	}
 
 	public String getParameterValue(String parameter) {
-		for (String[] s : getComponentDecl().getParams())
-			if (s[0].equals(parameter))
-				return s[1];
 		return "";
 	}
 

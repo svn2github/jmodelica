@@ -138,8 +138,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		if (file == null)
 			return null;
 		if (lookupFile(file).length == 0) {
-			System.out.println("Lookup of file: " + file.getName()
-					+ " returned 0 ast results...");
 			compileFile(file);
 		}
 		return lookupFile(file);
@@ -504,8 +502,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 			if (!fProjectASTMap.containsKey(file.getProject())) {
 				lookupProject(file.getProject());
 			} else {
-				System.out
-						.println("Compiler compiling file: " + file.getName());
 				ILocalRootNode fileNode = compiler.compile(file);
 				doUpdate(file, fileNode);
 			}

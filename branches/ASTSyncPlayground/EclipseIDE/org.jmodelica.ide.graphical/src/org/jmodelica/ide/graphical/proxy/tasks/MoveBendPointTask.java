@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphical.proxy.cache.tasks;
+package org.jmodelica.ide.graphical.proxy.tasks;
 
 import java.util.Stack;
 
@@ -11,7 +11,7 @@ import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class AddBendPointTask extends AbstractAestheticModificationTask {
+public class MoveBendPointTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
 	private Stack<ASTPathPart> connectClauseASTPath;
@@ -19,9 +19,9 @@ public class AddBendPointTask extends AbstractAestheticModificationTask {
 	private double x;
 	private double y;
 
-	public AddBendPointTask(IFile theFile,
-			Stack<ASTPathPart> connectClauseASTPath, int index, double x,
-			double y) {
+	public MoveBendPointTask(IFile theFile,
+			Stack<ASTPathPart> connectClauseASTPath, double x, double y,
+			int index) {
 		this.theFile = theFile;
 		this.connectClauseASTPath = connectClauseASTPath;
 		this.index = index;
@@ -40,22 +40,23 @@ public class AddBendPointTask extends AbstractAestheticModificationTask {
 							connectClauseASTPath);
 			if (clause == null) {
 				System.err
-						.println("AddBendPointTask failed to resolve ASTPath!");
+						.println("MoveBendPointTask failed to resolve ASTPath!");
 				return;
 			}
 			Line line = clause.syncGetConnectionLine();
 			if (line == null) {
 				System.err
-						.println("Unable to add line point, connection not found!");
+						.println("Unable to move line point, connection not found!");
 				return;
 			}
-			if (line.getPoints().size() <= index)
+			if (index != -1) {
+				line.getPoints().set(index, new Point(x, y));
+			} else {
 				System.err
-						.println("Unable to add line point, index is out of bounds someone probably changed it already!");
-			line.getPoints().add(index, new Point(x, y));
-			line.pointsChanged();
+						.println("Unable to redo move line point, oldpoint is missing from pointlist, someone probably swapped it already!");
+			}
 		}
-		System.out.println("AddBendPointTask took: "
+		System.out.println("MoveBendPointTask took: "
 				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

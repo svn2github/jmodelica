@@ -12,7 +12,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package org.jmodelica.ide.outline;
 
 import org.eclipse.jface.action.Action;
@@ -36,18 +36,20 @@ public class ExplorerActionProvider extends CommonActionProvider {
 	@Override
 	public void init(ICommonActionExtensionSite site) {
 		super.init(site);
-		
+
 		ICommonViewerSite viewSite = site.getViewSite();
 		if (viewSite instanceof ICommonViewerWorkbenchSite) {
 			ICommonViewerWorkbenchSite wbs = (ICommonViewerWorkbenchSite) viewSite;
-			openAction = new OpenASTAction(wbs.getPage(), wbs.getSelectionProvider());
+			openAction = new OpenASTAction(wbs.getPage(),
+					wbs.getSelectionProvider());
 		}
 	}
 
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (openAction.isEnabled())
-			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN, openAction);
+			actionBars.setGlobalActionHandler(ICommonActionConstants.OPEN,
+					openAction);
 	}
 
 	@Override
@@ -61,7 +63,8 @@ public class ExplorerActionProvider extends CommonActionProvider {
 		private IWorkbenchPage page;
 		private ISelectionProvider provider;
 
-		public OpenASTAction(IWorkbenchPage page, ISelectionProvider selectionProvider) {
+		public OpenASTAction(IWorkbenchPage page,
+				ISelectionProvider selectionProvider) {
 			setText("Show in Editor");
 			this.page = page;
 			provider = selectionProvider;

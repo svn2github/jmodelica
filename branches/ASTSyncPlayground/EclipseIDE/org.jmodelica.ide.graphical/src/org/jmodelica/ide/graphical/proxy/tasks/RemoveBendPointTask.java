@@ -1,4 +1,4 @@
-package org.jmodelica.ide.graphical.proxy.cache.tasks;
+package org.jmodelica.ide.graphical.proxy.tasks;
 
 import java.util.Stack;
 

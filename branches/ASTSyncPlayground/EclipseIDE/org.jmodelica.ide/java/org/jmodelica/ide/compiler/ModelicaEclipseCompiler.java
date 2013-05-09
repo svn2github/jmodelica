@@ -203,7 +203,9 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			for (StoredDefinition def : sRoot.getProgram()
 					.getUnstructuredEntitys()) {
 				StoredDefinition sd = createAnnotatedDefinition(def, file);
-				System.err.println("compiler parsed new storeddef: "+sd.getNodeName()+":"+sd.outlineId());
+				System.err.println("Compiler parsed new storeddef: "
+						+ sd.getNodeName() + ":" + sd.outlineId() + " File:"
+						+ file.getName());
 				list.add(sd);
 				i++;
 			}

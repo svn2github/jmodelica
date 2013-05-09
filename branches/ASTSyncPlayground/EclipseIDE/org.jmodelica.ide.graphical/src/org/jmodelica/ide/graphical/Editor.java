@@ -57,7 +57,7 @@ import org.jmodelica.ide.graphical.proxy.AbstractNodeProxy;
 import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
-import org.jmodelica.ide.graphical.proxy.cache.GraphicalCacheRegistry;
+import org.jmodelica.ide.graphical.proxy.GraphicalCacheRegistry;
 import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
@@ -206,21 +206,17 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	}
 
 	private void setContent() {
-		// System.out.println("GRAPH->setContent()");
 		if (input.editIcon()) {
 			getGraphicalViewer().setContents(dp);
 		} else {
 			refreshBreadcrumbsBar();
-
 			AbstractDiagramProxy adp;
 			if (openComponentStack.isEmpty()) {
 				adp = dp;
 			} else
 				adp = openComponentStack.peek();
 			getGraphicalViewer().setContents(adp);
-			adp.constructConnections();
 		}
-		// getGraphicalViewer().getRootEditPart().refresh();
 	}
 
 	@Override
@@ -337,20 +333,18 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	}
 
 	public void flushInst() {
-		long start = System.currentTimeMillis();
-		/**
-		 * List<Object> selectedModels = new ArrayList<Object>(); for (EditPart
-		 * o : (List<EditPart>) getGraphicalViewer() .getSelectedEditParts()) {
-		 * selectedModels.add(o.getModel()); }
-		 */
+		long start = System.currentTimeMillis();	
+		//  List<Object> selectedModels = new ArrayList<Object>(); for (EditPart
+		//  o : (List<EditPart>) getGraphicalViewer() .getSelectedEditParts()) {
+		//  selectedModels.add(o.getModel()); }
+		 
 		dp = cacheRegistry.getClassDiagramProxy();
 		setContent();
-		/**
-		 * for (Object selectedModel : selectedModels) { EditPart part =
-		 * (EditPart) getGraphicalViewer()
-		 * .getEditPartRegistry().get(selectedModel); if (part != null)
-		 * getGraphicalViewer().getSelectionManager() .appendSelection(part); }
-		 */
+		
+		//  for (Object selectedModel : selectedModels) { EditPart part =
+		//  (EditPart) getGraphicalViewer()
+		// .getEditPartRegistry().get(selectedModel); if (part != null)
+		//  getGraphicalViewer().getSelectionManager() .appendSelection(part); } 
 		System.out.println("Graphical editor flush took: "
 				+ (System.currentTimeMillis() - start) + "ms");
 	}

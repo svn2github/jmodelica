@@ -100,24 +100,17 @@ public class Util {
 		return elem;
 	}
 
-	/**public static void openAndSelect(IWorkbenchPage page, Object elem) {
-		if (elem instanceof CachedASTNode) {
-			CachedASTNode node = (CachedASTNode) elem;
-			IEditorPart editor = null;
-			try {
-				URI uri = new File(node.containingFileName()).toURI();
-				Editor.nextReadOnly(node.isInLibrary());
-				editor = IDE
-						.openEditor(page, uri, IDEConstants.EDITOR_ID, true);
-				Editor.nextReadOnly(false);
-			} catch (PartInitException e) {
-			}
-			if (editor instanceof Editor && node != null)
-				((Editor) editor).selectNode(true, node.containingFileName(),
-						node.getSelectionNodeOffset(),
-						node.getSelectionNodeLength());
-		}
-	}*/
+	/**
+	 * public static void openAndSelect(IWorkbenchPage page, Object elem) { if
+	 * (elem instanceof CachedASTNode) { CachedASTNode node = (CachedASTNode)
+	 * elem; IEditorPart editor = null; try { URI uri = new
+	 * File(node.containingFileName()).toURI();
+	 * Editor.nextReadOnly(node.isInLibrary()); editor = IDE .openEditor(page,
+	 * uri, IDEConstants.EDITOR_ID, true); Editor.nextReadOnly(false); } catch
+	 * (PartInitException e) { } if (editor instanceof Editor && node != null)
+	 * ((Editor) editor).selectNode(true, node.containingFileName(),
+	 * node.getSelectionNodeOffset(), node.getSelectionNodeLength()); } }
+	 */
 
 	private static boolean ISNEXTREADONLY = false;
 
@@ -127,15 +120,17 @@ public class Util {
 
 	public static void openAndSelect(IWorkbenchPage page, Object elem) {
 		if (elem instanceof CachedASTNode) {
+			System.err.println("openAndSelect...");
 			CachedASTNode node = (CachedASTNode) elem;
 			IEditorPart editor = null;
 			try {
 				URI uri = new File(node.containingFileName()).toURI();
 				ISNEXTREADONLY = node.isInLibrary();
 				editor = IDE
-						.openEditor(page, uri, IDEConstants.PLUGIN_ID, true);
+						.openEditor(page, uri, IDEConstants.EDITOR_ID, true);
 				ISNEXTREADONLY = false;
 			} catch (PartInitException e) {
+				e.printStackTrace();
 			}
 			if (editor instanceof IASTEditor && node != null)
 				((IASTEditor) editor).selectNode(true,
@@ -144,6 +139,7 @@ public class Util {
 						node.getSelectionNodeLength());
 		}
 	}
+
 	public static void deleteErrorMarkers(IResource res, boolean clearSemantic) {
 		try {
 			if (clearSemantic)
@@ -327,7 +323,6 @@ public class Util {
 	 * 
 	 * @see ISetSelectionTarget
 	 */
-	@SuppressWarnings("unchecked")
 	public static void selectAndReveal(IResource resource,
 			IWorkbenchWindow window) {
 		// validate the input
@@ -340,7 +335,7 @@ public class Util {
 		}
 
 		// get all the view and editor parts
-		List parts = new ArrayList();
+		List<IWorkbenchPart> parts = new ArrayList<IWorkbenchPart>();
 		IWorkbenchPartReference refs[] = page.getViewReferences();
 		for (int i = 0; i < refs.length; i++) {
 			IWorkbenchPart part = refs[i].getPart(false);
@@ -356,7 +351,7 @@ public class Util {
 		}
 
 		final ISelection selection = new StructuredSelection(resource);
-		Iterator itr = parts.iterator();
+		Iterator<IWorkbenchPart> itr = parts.iterator();
 		while (itr.hasNext()) {
 			IWorkbenchPart part = (IWorkbenchPart) itr.next();
 
@@ -400,5 +395,4 @@ public class Util {
 	public static void setModelicaPath(IProject proj, String path) {
 		Preferences.set(proj, IDEConstants.PREFERENCE_LIBRARIES_ID, path);
 	}
-
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jmodelica.icons.Observable;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
 
 public abstract class ConnectorProxy extends ComponentProxy {
 
@@ -13,7 +13,7 @@ public abstract class ConnectorProxy extends ComponentProxy {
 	protected static final Object COLLECTING_SOURCE = new Object();
 	protected static final Object COLLECTING_TARGET = new Object();
 
-	public ConnectorProxy(CachedInstComponentDecl icdc, String componentName,
+	public ConnectorProxy(InstComponentDecl icdc, String componentName,
 			AbstractNodeProxy parent) {
 		super(icdc, componentName, parent);
 	}

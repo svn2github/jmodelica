@@ -1,27 +1,33 @@
 package org.jmodelica.ide.graphical.proxy;
 
 import java.util.List;
+import java.util.Stack;
 
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.ide.graphical.proxy.cache.CachedConnectClause;
+import org.jmodelica.ide.sync.ASTPathPart;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.modelica.compiler.ConnectClause;
 
 public class ConnectionProxy extends Observable implements Observer {
 
 	private AbstractDiagramProxy diagram;
 	private ConnectorProxy source;
 	private ConnectorProxy target;
-	private CachedConnectClause connectClause;
 	private boolean connected = true;
+	private Stack<ASTPathPart> astPath;
+	private Line syncGetConnectionLine;
 
 	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target,
-			CachedConnectClause connectClause, AbstractDiagramProxy diagram) {
+			ConnectClause connectClause, AbstractDiagramProxy diagram) {
 		this.source = source;
 		this.target = target;
-		this.connectClause = connectClause;
 		this.diagram = diagram;
+		syncGetConnectionLine = connectClause.syncGetConnectionLine();
+		astPath = ModelicaASTRegistry.getInstance()
+				.createDefPath(connectClause);
 		source.addObserver(this);
 		target.addObserver(this);
 		source.sourceConnectionsHasChanged();
@@ -29,37 +35,17 @@ public class ConnectionProxy extends Observable implements Observer {
 	}
 
 	public Line getLine() {
-		if (connectClause == null) {
-			ConnectionProxy newConnection = diagram.getConnection(source,
-					target);
-			if (newConnection == null)
-				return null;
-			else
-				return newConnection.getLine();
-		}
-		return connectClause.syncGetConnectionLine();
+		/**
+		 * if (connectClause == null) { ConnectionProxy newConnection =
+		 * diagram.getConnection(source, target); if (newConnection == null)
+		 * return null; else return newConnection.getLine(); }
+		 */
+		return syncGetConnectionLine;
 	}
 
-	/**public void disconnect(int undoActionId) {
-		if (!connected)
-			return;
-		connected = false;
-		source.sourceConnectionsHasChanged();
-		target.targetConnectionsHasChanged();
-	}*/
-	
 	public AbstractDiagramProxy getProxy() {
 		return diagram;
 	}
-
-	/**public void connect() {
-		if (connected)
-			return;
-		diagram.addConnection(this);
-		connected = true;
-		source.sourceConnectionsHasChanged();
-		target.targetConnectionsHasChanged();
-	}*/
 
 	public ConnectorProxy getSource() {
 		return source;
@@ -86,8 +72,8 @@ public class ConnectionProxy extends Observable implements Observer {
 		}
 	}
 
-	public CachedConnectClause getConnectClause() {
-		return connectClause;
+	public Stack<ASTPathPart> getASTPath() {
+		return astPath;
 	}
 
 	@Override
@@ -99,6 +85,5 @@ public class ConnectionProxy extends Observable implements Observer {
 		source.removeObserver(this);
 		target.removeObserver(this);
 		connected = false;
-		connectClause = null;
 	}
 }

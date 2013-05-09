@@ -11,10 +11,14 @@ import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Transformation;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
+import org.jmodelica.icons.primitives.GraphicItem;
 import org.jmodelica.ide.graphical.util.Transform;
+import org.jmodelica.ide.sync.ASTPathPart;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstExtends;
+import org.jmodelica.modelica.compiler.InstNode;
+import org.jmodelica.modelica.compiler.InstPrimitive;
 
 public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
@@ -23,26 +27,57 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	private String componentName;
 	private AbstractNodeProxy parent;
-	private CachedInstComponentDecl myInstCompDeclCached;
+	private Stack<ASTPathPart> astPath;
+	private Placement cachedPlacement;
+	private Layer cachedIconLayer;
+	List<ParameterProxy> parameters = new ArrayList<ParameterProxy>();
+	private Layer cachedDiagramLayer;
+	private String syncQualifiedName;
+	private List<GraphicItem> graphics = new ArrayList<GraphicItem>();
+	private List<ComponentProxy> components = new ArrayList<ComponentProxy>();
 
-	public ComponentProxy(CachedInstComponentDecl icdc, String componentName,
+	public ComponentProxy(InstComponentDecl icdc, String componentName,
 			AbstractNodeProxy parent) {
 		this.componentName = componentName;
 		this.parent = parent;
-		this.myInstCompDeclCached = icdc;
+		this.astPath = ModelicaASTRegistry.getInstance().createDefPath(
+				icdc.getComponentDecl());
 		parent.addObserver(this);
+		cachedPlacement = icdc.cachePlacement();
+		cachedIconLayer = icdc.cacheIconLayer();
+		cachedDiagramLayer = icdc.cacheDiagramLayer();
+		collectParameters(icdc, parameters);
+		syncQualifiedName = icdc.syncQualifiedName();
+		collectComponents(icdc, components);
+		collectGraphics(icdc, graphics, inDiagram());
 	}
 
-	@Override
-	public String getQualifiedClassName() {
-		CachedInstNode node = getCachedASTNode();
-		if (node instanceof CachedInstClassDecl)
-			return ((CachedInstClassDecl) node).syncQualifiedName();
-		return getParent().getQualifiedClassName();
+	private void collectParameters(InstNode node,
+			List<ParameterProxy> parameters) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
+			collectParameters(ie, parameters);
+		}
+		for (InstComponentDecl icd : node.syncGetInstComponentDecls()) {
+			if (icd.syncIsPrimitive() && icd.syncIsParameter()) {
+				ParameterProxy res = new ParameterProxy(icd.syncName(), this,
+						((InstPrimitive) icd).ceval().toString());
+				parameters.add(res);
+			}
+		}
 	}
 
 	protected AbstractNodeProxy getParent() {
 		return parent;
+	}
+
+	@Override
+	public String getComponentName() {
+		return syncQualifiedName;
+	}
+
+	@Override
+	public String getQualifiedComponentName() {
+		return syncQualifiedName;
 	}
 
 	@Override
@@ -55,18 +90,8 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	public CachedInstComponentDecl getComponentDecl() {
-		return myInstCompDeclCached;
-	}
-
-	@Override
-	protected CachedInstClassDecl getClassDecl() {
-		return getParent().getClassDecl();
-	}
-
-	@Override
-	protected CachedInstNode getCachedASTNode() {
-		return myInstCompDeclCached;
+	public Stack<ASTPathPart> getASTPath() {
+		return astPath;
 	}
 
 	@Override
@@ -115,12 +140,12 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	public Placement getPlacement() {
-		return getComponentDecl().syncGetPlacement();
+		return cachedPlacement;
 	}
 
 	@Override
 	public Layer getLayer() {
-		return getComponentDecl().syncGetIconLayer();
+		return cachedIconLayer;
 	}
 
 	public String getMapName() {
@@ -156,34 +181,40 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 		return buildDiagramName();
 	}
 
+	@Override
+	public String getParameterValue(String parameter) {
+		for (ParameterProxy pp : getParameters())
+			if (pp.getDisplayName().equals(parameter))
+				return pp.getValue();
+		return "";
+	}
+
 	public List<ParameterProxy> getParameters() {
-		List<ParameterProxy> parameters = new ArrayList<ParameterProxy>();
-		for (String[] s : myInstCompDeclCached.getParams())
-			parameters.add(new ParameterProxy(s[0],this,s[1]));
 		return parameters;
 	}
 
-/**	private void collectParameters(CachedInstNode node,
-			List<ParameterProxy> parameters) {
-		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
-			collectParameters(ie, parameters);
-		}
-		for (CachedInstComponentDecl icd : node.syncGetInstComponentDecls()) {
-			if (icd.syncIsPrimitive() && icd.syncIsParameter()) {
-				parameters.add(new ParameterProxy(icd.syncName(), this));
-			}
-		}
-
-	}*/
-
 	@Override
-	protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value) {
+	protected void setParameterValue(Stack<ASTPathPart> componentASTPath,
+			Stack<String> path, String value) {
 		path.push(componentName);
-		getParent().setParameterValue(getComponentDecl(), path, value);
+		getParent().setParameterValue(astPath, path, value);
 	}
 
 	public void setComponentName(String newName) {
 		componentName = newName;
 	}
 
+	public Layer getDiagramLayer() {
+		return cachedDiagramLayer;
+	}
+
+	@Override
+	public List<ComponentProxy> getComponents() {
+		return components;
+	}
+
+	@Override
+	public List<GraphicItem> getGraphics() {
+		return graphics;
+	}
 }

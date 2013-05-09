@@ -2,24 +2,28 @@ package org.jmodelica.ide.graphical.proxy;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Stack;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.graphical.proxy.cache.CachedConnectClause;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstExtends;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
+import org.jmodelica.ide.sync.ASTPathPart;
+import org.jmodelica.modelica.compiler.ConnectClause;
+import org.jmodelica.modelica.compiler.FAbstractEquation;
+import org.jmodelica.modelica.compiler.FConnectClause;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
+import org.jmodelica.modelica.compiler.InstExtends;
+import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
-	private Map<CachedConnectClause, ConnectionProxy> connectionMap = new HashMap<CachedConnectClause, ConnectionProxy>();
+	private Map<String, ConnectionProxy> connectionMap = new HashMap<String, ConnectionProxy>();
 	private Map<String, ComponentProxy> componentMap = new HashMap<String, ComponentProxy>();
 
 	@Override
-	protected abstract CachedInstNode getCachedASTNode();
+	protected abstract Stack<ASTPathPart> getASTPath();
 
 	@Override
 	protected String buildDiagramName() {
@@ -27,56 +31,50 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	}
 
 	@Override
-	public Layer getLayer() {
-		return getCachedASTNode().syncGetDiagramLayer();
-	}
+	public abstract Layer getLayer();
 
 	@Override
 	protected Map<String, ComponentProxy> getComponentMap() {
 		return componentMap;
 	}
 
-	protected Map<CachedConnectClause, ConnectionProxy> getConnectionMap() {
+	protected Map<String, ConnectionProxy> getConnectionMap() {
 		return connectionMap;
 	}
 
-	public void constructConnections() {
-		Iterator<Entry<CachedConnectClause, ConnectionProxy>> it = connectionMap
-				.entrySet().iterator();
-		while (it.hasNext()) {
-			it.next().getValue().dispose();
-			it.remove();
-		}
-		constructConnections(getCachedASTNode());
-	}
-
-	public void constructConnections(CachedInstNode node) {
-		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
+	public void constructConnections(InstNode node) {
+		for (InstExtends ie : node.syncGetInstExtendss()) {
 			constructConnections(ie);
 		}
-		for (CachedConnectClause ccc : node.getConnections()) {
-			if (connectionMap.containsKey(ccc))
-				continue;
-			ConnectorProxy source = getConnectorFromDecl(ccc
-					.getConnInstComp1QName());
-			if (source == null)
-				continue;
-			ConnectorProxy target = getConnectorFromDecl(ccc
-					.getConnInstComp2QName());
-			if (target == null)
-				continue;
-			ConnectionProxy connection = new ConnectionProxy(source, target,
-					ccc, this);
-			connectionMap.put(ccc, connection);
+		for (FAbstractEquation fae : node.syncGetFAbstractEquations()) {
+			if (fae instanceof FConnectClause) {
+				FConnectClause fcc = (FConnectClause) fae;
+				ConnectClause connectClause = fcc.syncGetConnectClause();
+				if (connectionMap.containsKey(connectClause.outlineId()))
+					continue;
+				ConnectorProxy source = getConnectorFromDecl(fcc
+						.syncGetConnector1().syncGetInstAccess()
+						.syncMyInstComponentDecl());
+				if (source == null)
+					continue;
+				ConnectorProxy target = getConnectorFromDecl(fcc
+						.syncGetConnector2().syncGetInstAccess()
+						.syncMyInstComponentDecl());
+				if (target == null)
+					continue;
+				ConnectionProxy connection = new ConnectionProxy(source,
+						target, connectClause, this);
+				connectionMap.put(connectClause.outlineId(), connection);
+			}
 		}
 	}
 
-	private ConnectorProxy getConnectorFromDecl(String instCompQualifiedName) {
-		String mapName = buildMapName(instCompQualifiedName, true, false);
+	private ConnectorProxy getConnectorFromDecl(InstComponentDecl icd) {
+		String mapName = buildMapName(icd.syncQualifiedName(), true, false);
 		ComponentProxy connector = getComponentMap().get(mapName);
 		if (connector != null)
 			return (ConnectorProxy) connector;
-		mapName = buildMapName(instCompQualifiedName, true, true);
+		mapName = buildMapName(icd.syncQualifiedName(), true, true);
 		connector = getComponentMap().get(mapName);
 		if (connector != null)
 			return (ConnectorProxy) connector;
@@ -90,8 +88,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	protected ConnectionProxy getConnection(ConnectorProxy source,
 			ConnectorProxy target) {
-		for (Entry<CachedConnectClause, ConnectionProxy> entry : connectionMap
-				.entrySet()) {
+		for (Entry<String, ConnectionProxy> entry : connectionMap.entrySet()) {
 			ConnectionProxy proxy = entry.getValue();
 			if (proxy.getSource() == source && proxy.getTarget() == target) {
 				return proxy;
@@ -100,26 +97,20 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 		return null;
 	}
 
-	protected CachedConnectClause getConnection(
-			CachedConnectClause connectClause) {
-		return searchForConnection(getCachedASTNode(), connectClause);
-	}
-
-	private static CachedConnectClause searchForConnection(CachedInstNode node,
-			CachedConnectClause connectClause) {
-		for (CachedConnectClause ccc : node.getConnections()) {
-			if (ccc == connectClause)
-				return ccc;
-		}
-		for (CachedInstExtends ie : node.syncGetInstExtendss()) {
-			CachedConnectClause val = searchForConnection(ie, connectClause);
-			if (val != null)
-				return val;
-		}
-		System.err.println("Unable to find FConnectClause for ConnectClause: "
-				+ connectClause);
-		return null;
-	}
+	/**
+	 * protected CachedConnectClause getConnection( CachedConnectClause
+	 * connectClause) { return searchForConnection(getCachedASTNode(),
+	 * connectClause); }
+	 * 
+	 * private static CachedConnectClause searchForConnection(CachedInstNode
+	 * node, CachedConnectClause connectClause) { for (CachedConnectClause ccc :
+	 * node.getConnections()) { if (ccc == connectClause) return ccc; } for
+	 * (CachedInstExtends ie : node.syncGetInstExtendss()) { CachedConnectClause
+	 * val = searchForConnection(ie, connectClause); if (val != null) return
+	 * val; }
+	 * System.err.println("Unable to find FConnectClause for ConnectClause: " +
+	 * connectClause); return null; }
+	 */
 
 	@Override
 	public AbstractDiagramProxy getDiagram() {
@@ -182,4 +173,6 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 
 	public abstract void moveBendPoint(ConnectionProxy connection, double x,
 			double y, int index);
+
+	public abstract String syncGetClassIconName();
 }

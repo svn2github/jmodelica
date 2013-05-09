@@ -1,9 +1,8 @@
-package org.jmodelica.ide.graphical.proxy.cache.tasks;
+package org.jmodelica.ide.graphical.proxy.tasks;
 
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
@@ -11,24 +10,19 @@ import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ComponentDecl;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
-public class ResizeComponentTask extends AbstractAestheticModificationTask {
+public class MoveComponentTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
 	private Stack<ASTPathPart> componentASTPath;
-	private double x;
-	private double y;
-	private double x2;
-	private double y2;
+	private double destX;
+	private double destY;
 
-	public ResizeComponentTask(IFile theFile,
-			Stack<ASTPathPart> componentASTPath, double x, double y, double x2,
-			double y2) {
+	public MoveComponentTask(IFile theFile,
+			Stack<ASTPathPart> componentASTPath, double destX, double destY) {
 		this.theFile = theFile;
 		this.componentASTPath = componentASTPath;
-		this.x = x;
-		this.y = y;
-		this.x2 = x2;
-		this.y2 = y2;
+		this.destX = destX;
+		this.destY = destY;
 	}
 
 	@Override
@@ -41,13 +35,13 @@ public class ResizeComponentTask extends AbstractAestheticModificationTask {
 					.getInstance().resolveSourceASTPath(def, componentASTPath);
 			if (cd == null) {
 				System.err
-						.println("ResizeComponentTask failed to resolve ASTPath!");
+						.println("MoveComponentTask failed to resolve ASTPath!");
 				return;
 			}
 			cd.syncGetPlacement().getTransformation()
-					.setExtent(new Extent(new Point(x, y), new Point(x2, y2)));
+					.setOrigin(new Point(destX, destY));
 		}
-		System.out.println("ResizeComponentTask took: "
+		System.out.println("MoveComponentTask took: "
 				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

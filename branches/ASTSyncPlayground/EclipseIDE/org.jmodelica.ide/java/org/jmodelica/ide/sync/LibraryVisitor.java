@@ -18,12 +18,9 @@ public class LibraryVisitor {
 			LibraryNode root, Stack<ASTPathPart> nodePath) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(root, nodePath, affectedListeners);
-		System.out
-				.println("LibraryVisitor: Found nbr affected listeners of path: "
-						+ affectedListeners.size());
 		if (astChangeEventType == IASTChangeEvent.POST_REMOVE) {
 			removeLibraryPath(root, nodePath);
-		} // TODO rename
+		}
 		for (ListenerObject obj : affectedListeners) {
 			obj.doUpdate(file, astChangeEventType, nodePath);
 		}

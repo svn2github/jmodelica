@@ -1,11 +1,12 @@
 package org.jmodelica.ide.graphical.proxy;
 
+import java.util.List;
 import java.util.Stack;
 
+import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstClassDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstNode;
+import org.jmodelica.icons.primitives.GraphicItem;
+import org.jmodelica.ide.sync.ASTPathPart;
 
 public class ComponentDiagramProxy extends AbstractDiagramProxy {
 
@@ -16,23 +17,8 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public String getQualifiedClassName() {
-		return component.getQualifiedClassName();
-	}
-
-	@Override
-	protected CachedInstNode getCachedASTNode() {
-		return component.getComponentDecl();
-	}
-
-	@Override
-	protected CachedInstClassDecl getClassDecl() {
-		return null;
-	}
-
-	@Override
-	protected CachedInstComponentDecl getComponentDecl() {
-		return component.getComponentDecl();
+	protected Stack<ASTPathPart> getASTPath() {
+		return component.getASTPath();
 	}
 
 	@Override
@@ -68,8 +54,9 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	protected void setParameterValue(CachedInstComponentDecl comp, Stack<String> path, String value) {
-		component.setParameterValue(comp, path, value);
+	protected void setParameterValue(Stack<ASTPathPart> componentASTPath,
+			Stack<String> path, String value) {
+		component.setParameterValue(componentASTPath, path, value);
 	}
 
 	@Override
@@ -111,4 +98,29 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 				"It is not possible to alter component definition!");
 	}
 
+	@Override
+	public Layer getLayer() {
+		return component.getDiagramLayer();
+	}
+
+	@Override
+	public String syncGetClassIconName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ComponentProxy> getComponents() {
+		return component.getComponents();
+	}
+
+	@Override
+	public List<GraphicItem> getGraphics() {
+		return component.getGraphics();
+	}
+
+	@Override
+	public String getComponentName() {
+		return component.getComponentName();
+	}
 }

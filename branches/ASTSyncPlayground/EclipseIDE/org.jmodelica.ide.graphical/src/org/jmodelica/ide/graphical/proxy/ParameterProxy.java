@@ -17,16 +17,11 @@ public class ParameterProxy implements IPropertyDescriptor {
 
 	private String value;
 
-	public ParameterProxy(String name, ComponentProxy owner,String value) {
+	public ParameterProxy(String name, ComponentProxy owner, String value) {
 		this.name = name;
 		this.owner = owner;
-		this.value=value;
+		this.value = value;
 	}
-
-	/*
-	 * protected InstPrimitive getInstPrimitive() { return (InstPrimitive)
-	 * owner.getInstComponentDecl(name); }
-	 */// TODO NOT NEEDED, DUNNO?
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent) {
@@ -40,7 +35,6 @@ public class ParameterProxy implements IPropertyDescriptor {
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -51,13 +45,11 @@ public class ParameterProxy implements IPropertyDescriptor {
 
 	@Override
 	public String[] getFilterFlags() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object getHelpContextIds() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -68,13 +60,11 @@ public class ParameterProxy implements IPropertyDescriptor {
 
 	@Override
 	public ILabelProvider getLabelProvider() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isCompatibleWith(IPropertyDescriptor anotherProperty) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -86,10 +76,6 @@ public class ParameterProxy implements IPropertyDescriptor {
 	}
 
 	public String getValue() {
-		//InstComponentDecl icd;
-		//icd.syncLookupParameterValue(parameter)
-		//return owner.getComponentDecl().syncLookupParameterValue(name);
 		return value;
 	}
-
 }

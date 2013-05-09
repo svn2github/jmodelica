@@ -1,12 +1,11 @@
 package org.jmodelica.ide.graphical.proxy;
 
-import org.jmodelica.ide.graphical.proxy.cache.CachedInstComponentDecl;
+import org.jmodelica.modelica.compiler.InstComponentDecl;
 
 public class IconConnectorProxy extends ConnectorProxy {
 
-	public IconConnectorProxy(CachedInstComponentDecl icdc,
-			String componentName, AbstractNodeProxy parent) {
+	public IconConnectorProxy(InstComponentDecl icdc, String componentName,
+			AbstractNodeProxy parent) {
 		super(icdc, componentName, parent);
 	}
-
 }
