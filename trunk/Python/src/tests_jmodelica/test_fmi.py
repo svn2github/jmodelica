@@ -156,6 +156,7 @@ class Test_FMUModelCS1:
         """
         rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
         rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="fmucs")
 
     def setUp(self):
         """
@@ -164,8 +165,23 @@ class Test_FMUModelCS1:
         self.rlc  = load_fmu('RLC_Circuit.fmu')
         #self.rlc.initialize()
         self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
+        self.no_state3 = load_fmu("NoState_Example3.fmu")
         #self.rlc_square.initialize()
-
+    
+    @testattr(stddist = True)
+    def test_simulation_no_state(self):
+        model = self.no_state3
+        
+        #Test CVode
+        res = model.simulate(final_time=1.0)
+        nose.tools.assert_almost_equal(res.final("x"),1.0)
+        
+        #Test Euler
+        model.reset()
+        model.set("_cs_solver",1)
+        res = model.simulate(final_time=1.0)
+        nose.tools.assert_almost_equal(res.final("x"),1.0)
+    
     @testattr(fmi = True)
     def test_version(self):
         """
