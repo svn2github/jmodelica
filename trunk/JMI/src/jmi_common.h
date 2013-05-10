@@ -1332,7 +1332,6 @@ struct jmi_t{
     jmi_options_t options; /** \brief Runtime options */
     jmi_real_t events_epsilon; /** \brief Value used to adjust the event indicator functions */
     jmi_int_t recomputeVariables; /** \brief Dirty flag indicating when equations should be resolved. */
-    jmi_ode_solver_t *ode_solver; /** \brief Struct containing the ODE solver. */
     jmi_log_t *log; /**< \brief Struct containing the structured logger. */
 };
 

@@ -19,14 +19,16 @@
 
 #include "jmi_ode_solver.h"
 #include "jmi_ode_euler.h"
+#include "fmi1_cs.h"
 
 int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;
     jmi_ode_euler_t* integrator = (jmi_ode_euler_t*)solver->integrator;
-    jmi_t* jmi = solver->jmi;
-    int n_states = solver->n_real_x;
-    int n_event_indicators = solver->n_sw;
-
+    fmi1_cs_t* fmi1_cs = solver->fmi1_cs;
+    int n_real_x = fmi1_cs->n_real_x;
+    int n_sw = fmi1_cs->n_sw;
+    fmiBoolean step_event = fmiFalse;
+    
     jmi_real_t tcur, tnext;
     jmi_real_t hcur;
     jmi_real_t hdef;
@@ -34,30 +36,34 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     jmi_real_t* y = 0;
     jmi_real_t* ydot = 0;
     jmi_real_t* event_indicators = 0;
-    jmi_real_t* event_indicators_pre = 0;
+    jmi_real_t* event_indicators_previous = 0;
     
     hdef = integrator->step_size;
 
-    if(n_states) {
-        y = integrator->y_work;
-        ydot = integrator->ydot_work;
+    /* if(n_real_x) { */
+    y = fmi1_cs->states;
+    ydot = fmi1_cs->states_derivative;
+    
+    
+    if(n_sw) {
+        event_indicators = fmi1_cs->event_indicators;
+        event_indicators_previous = fmi1_cs->event_indicators_previous;
 
     }
-    if(n_event_indicators) {
-        event_indicators = integrator->event_indicators;
-        event_indicators_pre = integrator->event_indicators_pre;
-
+    
+    flag = fmi1_cs_get_time((fmiComponent)fmi1_cs, &tcur);
+    if (flag != fmiOK) {
+        return JMI_ODE_ERROR;
     }
-
-    tcur = *(jmi_get_t(solver->jmi));
+    /* tcur = fmi1_cs->time; */
     hcur = hdef;
     
     /* Get the first event indicators */
-    if(n_event_indicators > 0){
-        flag = solver->root_fcn(solver->user_data, tcur, y, event_indicators_pre);
+    if(n_sw > 0){
+        flag = fmi1_cs_root_fcn(fmi1_cs, tcur, y, event_indicators_previous);
             
         if (flag != 0){
-            jmi_log_comment(solver->jmi->log, logError, "Could not retrieve event indicators");
+            jmi_log_comment(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Could not retrieve event indicators");
             return -1;
         }
     }
@@ -68,13 +74,11 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         int time_event = 0;
 
         /* Get derivatives */
-        if(n_states > 0) {
-            flag = solver->rhs_fcn(solver->user_data, tcur, y, ydot);
-            
-            if (flag != 0){
-                jmi_log_comment(solver->jmi->log, logError, "Could not retrieve time derivatives");
-                return -1;
-            }
+        /* if(n_real_x > 0) { */
+        flag = fmi1_cs_rhs_fcn(fmi1_cs, tcur, y, ydot);
+        if (flag != 0){
+            jmi_log_comment(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Could not retrieve time derivatives");
+            return -1;
         }
 
         /* Choose time step and advance tcur */
@@ -88,39 +92,53 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         hcur = tnext - tcur;
         tcur = tnext;
         
-        /* set solver tout */
-        solver->tout = tcur;
+        /* *tout = tcur; */
         
         /* integrate */
-        for (k = 0; k < n_states; k++) {
+        for (k = 0; k < n_real_x; k++) {
             y[k] = y[k] + hcur*ydot[k]; 
         }
         
         /* Check if an event indicator has triggered */
-        if(n_event_indicators > 0){
-            flag = solver->root_fcn(solver->user_data, tcur, y, event_indicators);
+        if(n_sw > 0){
+            flag = fmi1_cs_root_fcn(fmi1_cs, tcur, y, event_indicators);
             
             if (flag != 0){
-                jmi_log_comment(solver->jmi->log, logError, "Could not retrieve event indicators");
+                jmi_log_comment(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Could not retrieve event indicators");
                 return -1;
             }
         }
 
-        for (k = 0; k < n_event_indicators; k++) {
-            if (event_indicators[k]*event_indicators_pre[k] < 0) {
+        for (k = 0; k < n_sw; k++) {
+            if (event_indicators[k]*event_indicators_previous[k] < 0) {
                 zero_crossning_event = 1;
                 break;
             }
         }
-        memcpy(event_indicators_pre, event_indicators, (solver->n_sw)*sizeof(jmi_real_t));
+        memcpy(event_indicators_previous, event_indicators, (fmi1_cs->n_sw)*sizeof(jmi_real_t));
+        
+        /* After each step call completed integrator step */
+        flag = fmi1_cs_completed_integrator_step((fmiComponent)fmi1_cs, &step_event);
+        if (flag != fmiOK) {
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "Failed to complete an integrator step. "
+                     "Returned with> error_flag: %d", flag);
+            return JMI_ODE_ERROR;
+        }
         
         /* Handle events */
-        if (zero_crossning_event) {
-                    jmi_log_node(solver->jmi->log, logInfo, "EulerEvent", "<An event was detected at> t:%g", tcur);
+        if (zero_crossning_event || step_event == fmiTrue) {
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logInfo, "EulerEvent", "<An event was detected at> t:%g", tcur);
             return JMI_ODE_EVENT;
         }
 
     } /* while */
+    
+    /* Final call to the RHS */
+    flag = fmi1_cs_rhs_fcn(fmi1_cs, tcur, y, ydot);
+    if (flag != 0){
+        jmi_log_comment(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Could not retrieve time derivatives");
+        return -1;
+    }
     
     return JMI_ODE_OK;  
 }
@@ -129,38 +147,22 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver) {
     jmi_ode_euler_t* integrator;
-    jmi_t* jmi = solver->jmi;
+    fmi1_cs_t* fmi1_cs = solver->fmi1_cs;
     
     integrator = (jmi_ode_euler_t*)calloc(1,sizeof(jmi_ode_euler_t));
     if(!integrator){
-        jmi_log_comment(jmi->log, logError, "Failed to allocate the internal EULER struct.");
+        jmi_log_comment(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Failed to allocate the internal EULER struct.");
         return -1;
     }
-
     /* DEFAULT VALUES NEEDS TO BE IMPROVED*/
     integrator->step_size = 0.001;
 
-    /* Allocate work vectors */
-    integrator->y_work = calloc(solver->n_real_x,sizeof(jmi_real_t));
-    integrator->ydot_work = calloc(solver->n_real_x,sizeof(jmi_real_t));
-    integrator->event_indicators = calloc(solver->n_sw,sizeof(jmi_real_t));
-    integrator->event_indicators_pre = calloc(solver->n_sw,sizeof(jmi_real_t));
-    
-    memcpy(integrator->y_work, jmi_get_real_x(jmi), (solver->n_real_x)*sizeof(jmi_real_t));
-      
     *integrator_ptr = integrator;
     return 0;
 }
 
-void jmi_ode_euler_delete(jmi_ode_solver_t* solver) {
-    
+void jmi_ode_euler_delete(jmi_ode_solver_t* solver) {    
     if((jmi_ode_euler_t*)(solver->integrator)){
-        /*Deallocate work vectors.*/
-        free((((jmi_ode_euler_t*)(solver->integrator))->y_work));
-        free((((jmi_ode_euler_t*)(solver->integrator))->ydot_work));
-        free((((jmi_ode_euler_t*)(solver->integrator))->event_indicators));
-        free((((jmi_ode_euler_t*)(solver->integrator))->event_indicators_pre));
-        
         free((jmi_ode_euler_t*)(solver->integrator));
     }
 }

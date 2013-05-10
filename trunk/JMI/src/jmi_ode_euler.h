@@ -35,16 +35,12 @@ typedef struct jmi_ode_euler_t jmi_ode_euler_t;
 
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver);
 
-int jmi_ode_euler_solve(jmi_ode_solver_t* solver,double t_stop, int initialize);
+int jmi_ode_euler_solve(jmi_ode_solver_t* solver,double time_final, int initialize);
 
 void jmi_ode_euler_delete(jmi_ode_solver_t* solver);
 
 struct jmi_ode_euler_t {
     jmi_real_t step_size;
-    jmi_real_t* y_work;
-    jmi_real_t* ydot_work;
-    jmi_real_t* event_indicators;
-    jmi_real_t* event_indicators_pre;
 };
 
 

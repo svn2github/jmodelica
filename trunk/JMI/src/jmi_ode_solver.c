@@ -20,20 +20,17 @@
 #include "jmi_ode_solver.h"
 #include "jmi_ode_cvode.h"
 #include "jmi_ode_euler.h"
+#include "fmi1_cs.h"
 
 
-int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t rhs_fcn, jmi_ode_root_func_t root_fcn, jmi_int_t n_real_x, jmi_int_t n_sw, jmi_real_t t_start, void* user_data){
+int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver){
     int flag = 0;
     jmi_ode_solver_t* b = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
 
     if(!b) return -1;
 
-    b->jmi = jmi;
-    b->n_real_x = n_real_x;
-    b->n_sw = n_sw;
-    b->t_start = t_start;
-    b->user_data = user_data;
-    jmi->ode_solver = b;
+    b->fmi1_cs = fmi1_cs;
+    fmi1_cs->ode_solver = b;
 
     switch(solver) {
     case JMI_ODE_CVODE: {
@@ -42,8 +39,6 @@ int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t 
         b->integrator = integrator;
         b->solve = jmi_ode_cvode_solve;
         b->delete_solver = jmi_ode_cvode_delete;
-        b->rhs_fcn = rhs_fcn;
-        b->root_fcn = root_fcn;
     }
         break;
     case JMI_ODE_EULER: {
@@ -52,8 +47,6 @@ int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t 
         b->integrator = integrator;
         b->solve = jmi_ode_euler_solve;
         b->delete_solver = jmi_ode_euler_delete;
-        b->rhs_fcn = rhs_fcn;
-        b->root_fcn = root_fcn;
     }
         break;
 
@@ -64,9 +57,9 @@ int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver, jmi_ode_rhs_func_t 
     return flag;
 }
 
-void jmi_delete_ode_solver(jmi_t* jmi){
-    if(jmi->ode_solver){
-        (jmi->ode_solver)->delete_solver(jmi->ode_solver);
-        free(jmi->ode_solver);
+void jmi_delete_ode_solver(fmi1_cs_t* fmi1_cs){
+    if(fmi1_cs->ode_solver){
+        (fmi1_cs->ode_solver)->delete_solver(fmi1_cs->ode_solver);
+        free(fmi1_cs->ode_solver);
     }
 }

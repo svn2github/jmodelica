@@ -28,6 +28,7 @@
 #include "jmi_common.h"
 #include "jmi.h"
 #include "jmi_util.h"
+#include "fmi1_cs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +42,7 @@ extern "C" {
  * @param block A jmi_block_residual_t struct.
  * @return Error code.
  */
-typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t t_stop, int initialize);
+typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_final, int initialize);
 
 /**
  * \brief A ode solver destructor signature.
@@ -50,26 +51,16 @@ typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t t_stop, 
   */
 typedef void (*jmi_ode_delete_func_t)(jmi_ode_solver_t* block);
 
-typedef int (*jmi_ode_rhs_func_t)(void *, jmi_real_t t, jmi_real_t* y, jmi_real_t* rhs);
-typedef int (*jmi_ode_root_func_t)(void *, jmi_real_t t, jmi_real_t* y, jmi_real_t* root);
-
 struct jmi_ode_solver_t {
-    jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
-    void *user_data;
-    
+    fmi1_cs_t *fmi1_cs;                    /**< \brief A pointer to the corresponding jmi_t struct */
+
     void *integrator;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
-    jmi_ode_rhs_func_t rhs_fcn;
-    jmi_ode_root_func_t root_fcn;
-    jmi_real_t tout;  /**< \brief Value indicating which time the integrator integrated up to*/
-    jmi_int_t n_real_x;
-    jmi_int_t n_sw;
-    jmi_real_t t_start;
 };
 
-int jmi_new_ode_solver(jmi_t* jmi, jmi_ode_solvers_t solver,jmi_ode_rhs_func_t rhs, jmi_ode_root_func_t root, jmi_int_t n_real_x, jmi_int_t n_sw, jmi_real_t t_start, void* user_data);
-void jmi_delete_ode_solver(jmi_t* jmi);
+int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver);
+void jmi_delete_ode_solver(fmi1_cs_t* fmi1_cs);
 
 #ifdef __cplusplus
 }

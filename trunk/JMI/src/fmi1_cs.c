@@ -54,9 +54,9 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
     fmi_t* fmi1_me;
     jmi_t* jmi;
     int flag, retval = JMI_ODE_EVENT;
-    int reInitialize = JMI_FALSE;
-    fmiReal tfinal = currentCommunicationPoint+communicationStepSize;
-    fmiReal ttarget;
+    int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
+    fmiReal time_final = currentCommunicationPoint+communicationStepSize;
+    fmiReal time_event;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -65,24 +65,25 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
     fmi1_cs = (fmi1_cs_t*)c;
     fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
     jmi = fmi1_me->jmi;
-    
-    jmi->ode_solver->tout = currentCommunicationPoint;
-    
+
     /* Check if there are upcoming time events. */
     if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
-        if(fmi1_cs->event_info.nextEventTime < tfinal){
-            ttarget = fmi1_cs->event_info.nextEventTime;
+        if(fmi1_cs->event_info.nextEventTime < time_final){
+            time_event = fmi1_cs->event_info.nextEventTime;
         }else{
-            ttarget = tfinal;
+            time_event = time_final;
         }
     }else{
-        ttarget = tfinal;
+        time_event = time_final;
     }
     
-    while (retval == JMI_ODE_EVENT && jmi->ode_solver->tout < tfinal){
+    while (retval == JMI_ODE_EVENT && fmi1_cs->time < time_final){
     
-        retval = jmi->ode_solver->solve(jmi->ode_solver, ttarget,reInitialize);
-        if (retval==JMI_ODE_OK && ttarget == tfinal) {break;}
+        retval = fmi1_cs->ode_solver->solve(fmi1_cs->ode_solver, time_event, initialize);
+        if (retval==JMI_ODE_OK && time_event == time_final) {
+            break;
+        }
+        
         if (retval<JMI_ODE_OK){
             jmi_log_comment(jmi->log, logError, "Failed to perform a step.");
             return fmiError;
@@ -96,17 +97,17 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
         
         /* Check if there are upcoming time events. */
         if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
-            if(fmi1_cs->event_info.nextEventTime < tfinal){
-                ttarget = fmi1_cs->event_info.nextEventTime;
+            if(fmi1_cs->event_info.nextEventTime < time_final){
+                time_event = fmi1_cs->event_info.nextEventTime;
             }else{
-                ttarget = tfinal;
+                time_event = time_final;
             }
         }else{
-            ttarget = tfinal;
+            time_event = time_final;
         }
         
-        /* EVENT HANDLED, REINITIALIZE */
-        reInitialize = JMI_TRUE;
+        /* Event handled, initialize again */
+        initialize = JMI_TRUE;
     }
     
     return fmiOK;
@@ -114,19 +115,15 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
 
 void fmi1_cs_free_slave_instance(fmiComponent c) {
     fmi1_cs_t* fmi1_cs;
-    fmi_t* fmi1_me;
-    jmi_t* jmi;
     
     if (c == NULL) {
 		return;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    jmi = fmi1_me->jmi;
     
-    if (jmi->ode_solver){
-        jmi_delete_ode_solver(jmi);
+    if (fmi1_cs->ode_solver){
+        jmi_delete_ode_solver(fmi1_cs);
     }
     fmi1_me_free_model_instance(fmi1_cs->fmi1_me);
     
@@ -136,6 +133,10 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
         fmi_free((void*)fmi1_cs -> instance_name);
         fmi_free((void*)fmi1_cs -> encoded_instance_name);
         fmi_free((void*)fmi1_cs -> GUID);
+        fmi_free((void*)fmi1_cs -> states);
+        fmi_free((void*)fmi1_cs -> states_derivative);
+        fmi_free((void*)fmi1_cs -> event_indicators);
+        fmi_free((void*)fmi1_cs -> event_indicators_previous);
         fmi_free(fmi1_cs);
     }
     return;
@@ -216,7 +217,11 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
     component -> n_real_x = ((fmi_t*)component->fmi1_me)->jmi->n_real_x;
-    component -> n_sw = ((fmi_t*)component->fmi1_me)->jmi->n_sw;
+    component -> n_sw     = ((fmi_t*)component->fmi1_me)->jmi->n_sw;
+    component -> states   = (fmiReal*)functions.allocateMemory(component->n_real_x, sizeof(fmiReal));
+    component -> states_derivative   = (fmiReal*)functions.allocateMemory(component->n_real_x, sizeof(fmiReal));
+    component -> event_indicators = (fmiReal*)functions.allocateMemory(component->n_sw, sizeof(fmiReal));
+    component -> event_indicators_previous = (fmiReal*)functions.allocateMemory(component->n_sw, sizeof(fmiReal));
     
     return (fmiComponent)component;
 }
@@ -240,7 +245,6 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     fmi_t* fmi1_me;
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
-    /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
     fmiStatus retval;
     
     if (c == NULL) {
@@ -248,13 +252,26 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);    
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    
+    /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
                                         
     retval = fmi1_me_initialize(fmi1_cs->fmi1_me, toleranceControlled, relativeTolerance, &(fmi1_cs->event_info));
-    if (retval != fmiOK){ return fmiError; }
+    if (retval != fmiOK) { 
+        return fmiError; 
+    }
+    
+    /*Get the states*/ 
+    fmi1_me_get_continuous_states(fmi1_cs->fmi1_me, fmi1_cs->states, fmi1_cs->n_real_x);
+    /*Store the time */
+    fmi1_cs->time = tStart;
+    /*Get the event indicators */
+    fmi1_me_get_event_indicators(fmi1_cs->fmi1_me, fmi1_cs->event_indicators, fmi1_cs->n_sw);
+    fmi1_me_get_event_indicators(fmi1_cs->fmi1_me, fmi1_cs->event_indicators_previous, fmi1_cs->n_sw);
+    
     
     /* Create solver */
-    retval = jmi_new_ode_solver(fmi1_me->jmi, fmi1_me->jmi->options.cs_solver, rhs_fcn, root_fcn, fmi1_cs->n_real_x, fmi1_cs->n_sw, tStart, (void*)fmi1_cs);
+    retval = jmi_new_ode_solver(fmi1_cs, fmi1_me->jmi->options.cs_solver);
     if (retval != fmiOK){ return fmiError; }
     
     return fmiOK;
@@ -267,22 +284,18 @@ fmiStatus fmi1_cs_cancel_step(fmiComponent c){
 fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs;
-    fmi_t* fmi1_me;
-    jmi_t* jmi;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
-    jmi = fmi1_me->jmi;
     
     retval = fmi1_cs_terminate_slave(c);
     if (retval != fmiOK){ return fmiError; }
     
-    if (jmi->ode_solver){
-        jmi_delete_ode_solver(jmi);
+    if (fmi1_cs->ode_solver){
+        jmi_delete_ode_solver(fmi1_cs);
     }
     
     fmi1_me_free_model_instance(fmi1_cs->fmi1_me);
@@ -387,36 +400,90 @@ fmiStatus fmi1_cs_get_string_status(fmiComponent c, const fmiStatusKind s, fmiSt
     return fmiDiscard;
 }
 
-int rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
+int fmi1_cs_rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
     retval = fmi1_me_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
-    if (retval != fmiOK){return -1;}
+    if (retval != fmiOK) {
+        return -1;
+    }
     
-    retval = fmi1_me_set_time(fmi1_cs->fmi1_me, t);
-    if (retval != fmiOK){return -1;}
+    retval = fmi1_cs_set_time(c, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
     
-    retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
-    if (retval != fmiOK){return -1;}
+    if (fmi1_cs->n_real_x > 0) {
+        retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
+        if (retval != fmiOK) {
+            return -1;
+        }
+    }else{
+        rhs[0] = 0.0;
+    }
     
     return 0;
 }
 
-int root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
+int fmi1_cs_root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
     retval = fmi1_me_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
-    if (retval != fmiOK){return -1;}
+    if (retval != fmiOK) {
+        return -1;
+    }
     
-    retval = fmi1_me_set_time(fmi1_cs->fmi1_me, t);
-    if (retval != fmiOK){return -1;}
+    retval = fmi1_cs_set_time(c, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
     
     retval = fmi1_me_get_event_indicators(fmi1_cs->fmi1_me, (fmiReal*)root , fmi1_cs->n_sw);
-    if (retval != fmiOK){return -1;}
+    if (retval != fmiOK) {
+        return -1;
+    }
     
     return 0;
+}
+
+fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time){
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    int retval;
+    
+    retval = fmi1_me_set_time(fmi1_cs->fmi1_me, time);
+    if (retval != fmiOK) {
+        return fmiError;
+    }
+    fmi1_cs->time = time;
+    
+    return fmiOK;
+}
+
+fmiStatus fmi1_cs_get_time(fmiComponent c, fmiReal* value){
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    *value = fmi1_cs->time;
+    return fmiOK;
+}
+
+fmiStatus fmi1_cs_completed_integrator_step(fmiComponent c, fmiBoolean* step_event){
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    int retval;
+    
+    retval = fmi1_me_completed_integrator_step(fmi1_cs->fmi1_me, step_event);
+    if (retval != fmiOK) {
+        return fmiError;
+    }
+    
+    return fmiOK;
+}
+
+
+jmi_log_t* fmi1_cs_get_jmi_t_log(fmi1_cs_t* fmi1_cs) {
+    fmi_t* fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi_t* jmi = fmi1_me->jmi;
+    return jmi->log;
 }
 
 /*
