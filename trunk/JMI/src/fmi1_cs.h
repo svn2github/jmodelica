@@ -40,7 +40,10 @@
 extern "C" {
 #endif
 
+#define FMI1_CS_MAX_INPUT_DERIVATIVES 3
+
 typedef struct fmi1_cs_t fmi1_cs_t;
+typedef struct fmi1_cs_input_t fmi1_cs_input_t;
 
 struct fmi1_cs_t {
     fmiComponent fmi1_me;                /**< \brief Reference to a fmi1_me instance. */
@@ -58,7 +61,18 @@ struct fmi1_cs_t {
     fmiReal* states_derivative;
     fmiReal* event_indicators;
     fmiReal* event_indicators_previous;
+    fmi1_cs_input_t* inputs;
+    fmiInteger n_real_u;
     jmi_ode_solver_t *ode_solver;        /** \brief Struct containing the ODE solver. */
+};
+
+struct fmi1_cs_input_t {
+    fmiValueReference vr;         /**< \brief Valuereference of the input, note only reals */
+    fmiReal tn;                   /**< \brief Time when the input was specified. */
+    fmiReal input;
+    fmiBoolean active;
+    fmiReal input_derivatives[FMI1_CS_MAX_INPUT_DERIVATIVES];
+    fmiReal input_derivatives_factor[FMI1_CS_MAX_INPUT_DERIVATIVES];
 };
 
 /**
@@ -349,6 +363,9 @@ fmiStatus fmi1_cs_get_time(fmiComponent c, fmiReal* time);
  * @return Error code.
  */
 fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
+fmiStatus fmi1_cs_set_input(fmiComponent c, fmiReal time);
+
+fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value);
 
 int fmi1_cs_root_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
 int fmi1_cs_rhs_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);

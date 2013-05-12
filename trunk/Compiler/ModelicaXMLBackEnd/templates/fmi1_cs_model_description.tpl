@@ -28,7 +28,7 @@
         canHandleVariableCommunicationStepSize="true"
         canHandleEvents="false"
         canRejectSteps="false"
-        canInterpolateInputs="false"
+        canInterpolateInputs="true"
         maxOutputDerivativeOrder="0"
         canRunAsynchronuously="false"
         canSignalEvents="false"

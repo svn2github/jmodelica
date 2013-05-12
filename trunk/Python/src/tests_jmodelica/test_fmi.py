@@ -157,6 +157,8 @@ class Test_FMUModelCS1:
         rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
         rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
         no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="fmucs")
+        simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
+        simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
 
     def setUp(self):
         """
@@ -166,6 +168,8 @@ class Test_FMUModelCS1:
         #self.rlc.initialize()
         self.rlc_square  = load_fmu('RLC_Circuit_Square.fmu')
         self.no_state3 = load_fmu("NoState_Example3.fmu")
+        self.simple_input = load_fmu("Inputs_SimpleInput.fmu")
+        self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
         #self.rlc_square.initialize()
     
     @testattr(stddist = True)
@@ -181,6 +185,76 @@ class Test_FMUModelCS1:
         model.set("_cs_solver",1)
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
+        
+    @testattr(stddist = True)
+    def test_input_derivatives(self):
+        model = self.simple_input
+        
+        model.initialize()
+        
+        model.set("u", 0.0)
+        model.set_input_derivatives("u",2.0, 1)
+        
+        model.do_step(0, 1)
+        nose.tools.assert_almost_equal(model.get("u"),2.0)
+        
+        model.do_step(1, 1)
+        nose.tools.assert_almost_equal(model.get("u"),2.0)
+        
+        model.set_input_derivatives("u",2.0, 1)
+        model.do_step(2, 1)
+        nose.tools.assert_almost_equal(model.get("u"),4.0)
+       
+    @testattr(stddist = True)
+    def test_input_derivatives3(self):
+        model = self.simple_input
+        
+        model.initialize()
+        model.set_input_derivatives("u",1.0, 1)
+        model.set_input_derivatives("u",-1.0, 2)
+        model.do_step(0, 1)
+        nose.tools.assert_almost_equal(model.get("u"),0.5)
+        
+        model.do_step(1, 1)
+        nose.tools.assert_almost_equal(model.get("u"),0.5)
+        
+    @testattr(stddist = True)
+    def test_input_derivatives4(self):
+        model = self.simple_input
+        
+        model.initialize()
+        model.set_input_derivatives("u",1.0, 1)
+        model.set_input_derivatives("u",-1.0, 2)
+        model.set_input_derivatives("u",6.0, 3)
+        model.do_step(0, 2)
+        nose.tools.assert_almost_equal(model.get("u"),8.0)
+        
+        model.do_step(1, 1)
+        nose.tools.assert_almost_equal(model.get("u"),8.0)
+        
+            
+        
+    @testattr(stddist = True)
+    def test_input_derivatives2(self):
+        model = self.simple_input2
+        
+        model.initialize()
+        
+        model.set_input_derivatives("u1",2.0, 1)
+        model.do_step(0, 1)
+        nose.tools.assert_almost_equal(model.get("u1"),2.0)
+        nose.tools.assert_almost_equal(model.get("u2"),0.0)
+        
+        model.set_input_derivatives("u2",2.0, 1)
+        model.do_step(1,1)
+        nose.tools.assert_almost_equal(model.get("u2"),2.0)
+        nose.tools.assert_almost_equal(model.get("u1"),2.0)
+        
+        model.set_input_derivatives(["u1","u2"], [1.0,1.0],[1,1])
+        model.do_step(2,1)
+        nose.tools.assert_almost_equal(model.get("u2"),3.0)
+        nose.tools.assert_almost_equal(model.get("u1"),3.0)
+        
     
     @testattr(fmi = True)
     def test_version(self):

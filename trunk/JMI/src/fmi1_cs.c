@@ -57,6 +57,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
     int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
     fmiReal time_event;
+    fmiInteger i;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -77,6 +78,19 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
         time_event = time_final;
     }
     
+    /* For the active inputs, get the initialize input */
+    for (i = 0; i < fmi1_cs -> n_real_u; i++) {
+        if (fmi1_cs -> inputs[i].active == fmiTrue) {
+            fmi1_cs -> inputs[i].tn = fmi1_cs->time;
+            retval = fmi1_me_get_real(fmi1_cs->fmi1_me, &(fmi1_cs -> inputs[i].vr), 1, &(fmi1_cs -> inputs[i].input));
+            if (retval != fmiOK) {
+                jmi_log_comment(jmi->log, logError, "Failed to get the initial inputs.");
+                return fmiError;
+            }
+        }
+    }
+
+    retval = JMI_ODE_EVENT;
     while (retval == JMI_ODE_EVENT && fmi1_cs->time < time_final){
     
         retval = fmi1_cs->ode_solver->solve(fmi1_cs->ode_solver, time_event, initialize);
@@ -110,6 +124,11 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
         initialize = JMI_TRUE;
     }
     
+    /* De-activate inputs as they are no longer valid */
+    for (i = 0; i < fmi1_cs -> n_real_u; i++) {
+        fmi1_cs -> inputs[i].active = fmiFalse;
+    }
+    
     return fmiOK;
 }
 
@@ -137,6 +156,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
         fmi_free((void*)fmi1_cs -> states_derivative);
         fmi_free((void*)fmi1_cs -> event_indicators);
         fmi_free((void*)fmi1_cs -> event_indicators_previous);
+        fmi_free((void*)fmi1_cs -> inputs);
         fmi_free(fmi1_cs);
     }
     return;
@@ -179,6 +199,7 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     size_t inst_name_len;
     size_t guid_len;
     char buffer[400];
+    fmiInteger i;
     
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));
     
@@ -218,10 +239,17 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
     component -> n_real_x = ((fmi_t*)component->fmi1_me)->jmi->n_real_x;
     component -> n_sw     = ((fmi_t*)component->fmi1_me)->jmi->n_sw;
+    component -> n_real_u = ((fmi_t*)component->fmi1_me)->jmi->n_real_u;
     component -> states   = (fmiReal*)functions.allocateMemory(component->n_real_x, sizeof(fmiReal));
     component -> states_derivative   = (fmiReal*)functions.allocateMemory(component->n_real_x, sizeof(fmiReal));
     component -> event_indicators = (fmiReal*)functions.allocateMemory(component->n_sw, sizeof(fmiReal));
     component -> event_indicators_previous = (fmiReal*)functions.allocateMemory(component->n_sw, sizeof(fmiReal));
+    component -> inputs = (fmi1_cs_input_t*)functions.allocateMemory(component->n_real_u, sizeof(fmi1_cs_input_t));
+    
+    /* Initialize inputs */
+    for (i = 0; i < component -> n_real_u; i++) {
+        fmi1_cs_init_input_struct(&(component -> inputs[i]));
+    }
     
     return (fmiComponent)component;
 }
@@ -377,7 +405,95 @@ fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueRefe
 }
 
 fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
-    return fmiError;
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    fmiInteger i,j;
+    fmiBoolean found_input = fmiFalse;
+    fmi_t* fmi1_me;
+    jmi_t* jmi;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    fmi1_me = (fmi_t*)(fmi1_cs->fmi1_me);
+    jmi = fmi1_me->jmi;
+    
+    if (nvr > fmi1_cs -> n_real_u) {
+        jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, too many inputs.>");
+        return fmiError;
+    }
+    
+    for (i = 0; i < nvr; i++) {
+        if (order[i] < 1 || order[i] > FMI1_CS_MAX_INPUT_DERIVATIVES) {
+            jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, un-supported order (%d).>",order[i]);
+            return fmiError;
+        }
+        found_input = fmiFalse;
+        
+        /* Check if there exists an active input with the value reference vr[i] */
+        for (j = 0; j < fmi1_cs -> n_real_u; j++) {
+            if (fmi1_cs->inputs[j].vr == vr[i] && fmi1_cs -> inputs[j].active == fmiTrue) {
+                fmi1_cs -> inputs[j].input_derivatives[order[i]-1] = value[i];
+                found_input = fmiTrue;
+                break;
+            }
+        }
+        
+        /* Found an active input, continue */
+        if (found_input == fmiTrue) {
+            continue;
+        }
+        
+        /* No active input found, active an available */
+        for (j = 0; j < fmi1_cs -> n_real_u; j++) {
+            if (fmi1_cs -> inputs[j].active == fmiFalse) {
+                fmi1_cs_init_input_struct(&(fmi1_cs -> inputs[j]));
+                fmi1_cs -> inputs[j].active = fmiTrue;
+                fmi1_cs -> inputs[j].input_derivatives[order[i]-1] = value[i];
+                fmi1_cs -> inputs[j].vr = vr[i];
+                
+                found_input = fmiTrue;
+                break;
+            }
+        }
+        
+        /* No available inputs -> the user has set an input which is not an input */
+        if (found_input == fmiFalse) {
+            jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, inconsistent number of inputs.>");
+            return fmiError;
+        }
+        
+        /*
+        for (j = 0; j < fmi1_cs -> n_real_u; j++) {
+            if (fmi1_cs->inputs[j].vr == vr[i]) {
+                if (fmi1_cs -> inputs[j].active == fmiFalse) {
+                    fmi1_cs_init_input_struct(&(fmi1_cs -> inputs[j]));
+                    fmi1_cs -> inputs[j].active = fmiTrue;
+                }
+                fmi1_cs -> inputs[j].input_derivatives[order[i]-1] = value[i];
+                break;
+            }
+        }
+        */
+    }
+    
+    return fmiOK;
+}
+
+fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value) {
+    fmiInteger i = 0;
+    fmiReal fac[FMI1_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
+    
+    value -> active = fmiFalse;
+    value -> tn     = 0.0;
+    value -> input  = 0.0;
+    
+    for (i = 0; i < FMI1_CS_MAX_INPUT_DERIVATIVES; i++) {
+        value -> input_derivatives[i] = 0.0;
+        value -> input_derivatives_factor[i] = fac[i];
+    }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi1_cs_get_status(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
@@ -404,16 +520,25 @@ int fmi1_cs_rhs_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *rhs){
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     
+    /* Set the states */
     retval = fmi1_me_set_continuous_states(fmi1_cs->fmi1_me, (fmiReal*)y, fmi1_cs->n_real_x);
     if (retval != fmiOK) {
         return -1;
     }
     
+    /* Set the time */
     retval = fmi1_cs_set_time(c, t);
     if (retval != fmiOK) {
         return -1;
     }
     
+    /* Set the inputs */
+    retval = fmi1_cs_set_input(c, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
+    /* Evaluate the derivatives */
     if (fmi1_cs->n_real_x > 0) {
         retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, (fmiReal*)rhs , fmi1_cs->n_real_x);
         if (retval != fmiOK) {
@@ -440,12 +565,42 @@ int fmi1_cs_root_fcn(void* c, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
         return -1;
     }
     
+    /* Set the inputs */
+    retval = fmi1_cs_set_input(c, t);
+    if (retval != fmiOK) {
+        return -1;
+    }
+    
     retval = fmi1_me_get_event_indicators(fmi1_cs->fmi1_me, (fmiReal*)root , fmi1_cs->n_sw);
     if (retval != fmiOK) {
         return -1;
     }
     
     return 0;
+}
+
+fmiStatus fmi1_cs_set_input(fmiComponent c, fmiReal time) {
+    fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
+    fmiStatus retval;
+    fmiReal value;
+    fmiInteger i,j;
+    
+    for (i = 0; i < fmi1_cs -> n_real_u; i++) {
+        if (fmi1_cs->inputs[i].active == fmiFalse) {
+            continue;
+        }
+        value = fmi1_cs -> inputs[i].input;
+        for (j = 0; j < FMI1_CS_MAX_INPUT_DERIVATIVES; j++) {
+            value += pow((time - fmi1_cs -> inputs[i].tn),j+1.0) * (fmi1_cs -> inputs[i].input_derivatives[j]) / 
+                                    (fmi1_cs -> inputs[i].input_derivatives_factor[j]);
+        }
+        
+        retval = fmi1_me_set_real(fmi1_cs->fmi1_me, &(fmi1_cs -> inputs[i].vr), 1, &value);
+        if (retval != fmiOK) {
+            return fmiError;
+        }
+    }
+    return fmiOK;
 }
 
 fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time){
