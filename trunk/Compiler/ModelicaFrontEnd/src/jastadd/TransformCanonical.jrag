@@ -1968,7 +1968,7 @@ aspect TransformCanonical {
 			}
 		} else {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Unable to perform hand guided tearing on this block since the number of unmatched equations is different the number of unmatched variables.\n");
+			sb.append("Unable to perform hand guided tearing on this block. The number of unmatched equations is unequal to the number of unmatched variables.\n");
 			sb.append("Unmatched equations(" + unmatchedHGTEquations.size() + "):\n");
 			for (Eq eqn : unmatchedHGTEquations)
 				sb.append("  " + eqn.getEquation() + "\n");
@@ -2017,7 +2017,7 @@ aspect TransformCanonical {
 						log.info("Remaining unmatched equation: %s", eIt.next());
 					while (vIt.hasNext())
 						log.info("Remaining unmatched variable: %s", vIt.next());
-					error("Unable to perform hand guided tearing on this block since the resulting block system is unsolvable.");
+					error("Unable to perform hand guided tearing on this block. The resulting block system is unsolvable.");
 					throw new TearingException();
 				}
 			}

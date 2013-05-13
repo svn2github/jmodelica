@@ -1095,7 +1095,7 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 0, column 0:
-  Unable to perform hand guided tearing on this block since the number of unmatched equations is different the number of unmatched variables.
+  Unable to perform hand guided tearing on this block. The number of unmatched equations is unequal to the number of unmatched variables.
 Unmatched equations(1):
   u1 = R1 * i1
 
