@@ -89,39 +89,48 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
             }
         }
     }
-
-    retval = JMI_ODE_EVENT;
-    while (retval == JMI_ODE_EVENT && fmi1_cs->time < time_final){
     
-        retval = fmi1_cs->ode_solver->solve(fmi1_cs->ode_solver, time_event, initialize);
-        if (retval==JMI_ODE_OK && time_event == time_final) {
-            break;
+    if (communicationStepSize == 0.0) {
+        /* Evaluate the equations */
+        /* retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, fmi1_cs->states_derivative, fmi1_cs->n_real_x); */
+        retval = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
+        if (retval != fmiOK) {
+            jmi_log_comment(jmi->log, logError, "<Failed to evaluate the derivatives with step-size zero.>");
         }
+    } else {
+        retval = JMI_ODE_EVENT;
+        while (retval == JMI_ODE_EVENT && fmi1_cs->time < time_final){
         
-        if (retval<JMI_ODE_OK){
-            jmi_log_comment(jmi->log, logError, "Failed to perform a step.");
-            return fmiError;
-        }
-        
-        flag = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
-        if (flag != fmiOK){
-            jmi_log_comment(jmi->log, logError, "<Failed to handle the event.>");
-            return fmiError;
-        }
-        
-        /* Check if there are upcoming time events. */
-        if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
-            if(fmi1_cs->event_info.nextEventTime < time_final){
-                time_event = fmi1_cs->event_info.nextEventTime;
+            retval = fmi1_cs->ode_solver->solve(fmi1_cs->ode_solver, time_event, initialize);
+            if (retval==JMI_ODE_OK && time_event == time_final) {
+                break;
+            }
+            
+            if (retval<JMI_ODE_OK){
+                jmi_log_comment(jmi->log, logError, "Failed to perform a step.");
+                return fmiError;
+            }
+            
+            flag = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
+            if (flag != fmiOK){
+                jmi_log_comment(jmi->log, logError, "<Failed to handle the event.>");
+                return fmiError;
+            }
+            
+            /* Check if there are upcoming time events. */
+            if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
+                if(fmi1_cs->event_info.nextEventTime < time_final){
+                    time_event = fmi1_cs->event_info.nextEventTime;
+                }else{
+                    time_event = time_final;
+                }
             }else{
                 time_event = time_final;
             }
-        }else{
-            time_event = time_final;
+            
+            /* Event handled, initialize again */
+            initialize = JMI_TRUE;
         }
-        
-        /* Event handled, initialize again */
-        initialize = JMI_TRUE;
     }
     
     /* De-activate inputs as they are no longer valid */

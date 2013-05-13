@@ -159,6 +159,7 @@ class Test_FMUModelCS1:
         no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="fmucs")
         simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
         simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
+        input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
 
     def setUp(self):
         """
@@ -170,6 +171,7 @@ class Test_FMUModelCS1:
         self.no_state3 = load_fmu("NoState_Example3.fmu")
         self.simple_input = load_fmu("Inputs_SimpleInput.fmu")
         self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
+        self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
         #self.rlc_square.initialize()
     
     @testattr(stddist = True)
@@ -204,7 +206,28 @@ class Test_FMUModelCS1:
         model.set_input_derivatives("u",2.0, 1)
         model.do_step(2, 1)
         nose.tools.assert_almost_equal(model.get("u"),4.0)
-       
+    
+    @testattr(stddist = True)
+    def test_input_derivatives2(self):
+        model = self.simple_input2
+        
+        model.initialize()
+        
+        model.set_input_derivatives("u1",2.0, 1)
+        model.do_step(0, 1)
+        nose.tools.assert_almost_equal(model.get("u1"),2.0)
+        nose.tools.assert_almost_equal(model.get("u2"),0.0)
+        
+        model.set_input_derivatives("u2",2.0, 1)
+        model.do_step(1,1)
+        nose.tools.assert_almost_equal(model.get("u2"),2.0)
+        nose.tools.assert_almost_equal(model.get("u1"),2.0)
+        
+        model.set_input_derivatives(["u1","u2"], [1.0,1.0],[1,1])
+        model.do_step(2,1)
+        nose.tools.assert_almost_equal(model.get("u2"),3.0)
+        nose.tools.assert_almost_equal(model.get("u1"),3.0)
+    
     @testattr(stddist = True)
     def test_input_derivatives3(self):
         model = self.simple_input
@@ -232,29 +255,17 @@ class Test_FMUModelCS1:
         model.do_step(1, 1)
         nose.tools.assert_almost_equal(model.get("u"),8.0)
         
-            
         
     @testattr(stddist = True)
-    def test_input_derivatives2(self):
-        model = self.simple_input2
+    def test_zero_step_size(self):
+        model = self.input_discontinuity
         
         model.initialize()
-        
-        model.set_input_derivatives("u1",2.0, 1)
         model.do_step(0, 1)
-        nose.tools.assert_almost_equal(model.get("u1"),2.0)
-        nose.tools.assert_almost_equal(model.get("u2"),0.0)
-        
-        model.set_input_derivatives("u2",2.0, 1)
-        model.do_step(1,1)
-        nose.tools.assert_almost_equal(model.get("u2"),2.0)
-        nose.tools.assert_almost_equal(model.get("u1"),2.0)
-        
-        model.set_input_derivatives(["u1","u2"], [1.0,1.0],[1,1])
-        model.do_step(2,1)
-        nose.tools.assert_almost_equal(model.get("u2"),3.0)
-        nose.tools.assert_almost_equal(model.get("u1"),3.0)
-        
+        model.set("u", 1.0)
+        nose.tools.assert_almost_equal(model.get("x"),0.0)
+        model.do_step(1,0)
+        nose.tools.assert_almost_equal(model.get("x"),1.0)
     
     @testattr(fmi = True)
     def test_version(self):

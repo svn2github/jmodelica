@@ -20,5 +20,12 @@ package Inputs
         y = u1;
         z = u2;
     end SimpleInput2;
+    
+    model InputDiscontinuity
+        Real x(start = 0);
+        input Real u;
+    equation
+        x = if u > 0.5 then 1 else 0;
+    end InputDiscontinuity;
 
 end Inputs;

@@ -26,7 +26,7 @@
     <CoSimulation_StandAlone>
       <Capabilities
         canHandleVariableCommunicationStepSize="true"
-        canHandleEvents="false"
+        canHandleEvents="true"
         canRejectSteps="false"
         canInterpolateInputs="true"
         maxOutputDerivativeOrder="0"
