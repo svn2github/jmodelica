@@ -9046,7 +9046,7 @@ end TestExtObject6;
 model TestRuntimeOptions1
     Real x = 1;
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRuntimeOptions1",
 			description="Testing generation of runtime options map",
@@ -9058,7 +9058,9 @@ model TestRuntimeOptions1
 const char *fmi_runtime_options_map_names[] = {
     \"_block_jacobian_check\",
     \"_block_jacobian_check_tol\",
+    \"_cs_rel_tol\",
     \"_cs_solver\",
+    \"_cs_step_size\",
     \"_enforce_bounds\",
     \"_events_default_tol\",
     \"_events_tol_factor\",
@@ -9078,13 +9080,15 @@ const char *fmi_runtime_options_map_names[] = {
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870921, 0, 268435462, 536870922, 1, 2, 268435463, 536870923, 3, 268435464,
-    4, 5, 536870924, 536870925, 536870926, 536870927, 536870928, 536870929, 0
+    536870923, 0, 1, 268435464, 2, 536870924, 3, 4, 268435465, 536870925,
+    5, 268435466, 6, 7, 536870926, 536870927, 536870928, 536870929, 536870930, 536870931,
+    0
 };
 
-const int fmi_runtime_options_map_length = 18;
+const int fmi_runtime_options_map_length = 20;
 ")})));
 end TestRuntimeOptions1;
+
 
 
 model TestEmptyArray1
