@@ -20,6 +20,7 @@
 #include "jmi_ode_solver.h"
 #include "jmi_ode_euler.h"
 #include "fmi1_cs.h"
+#include "fmi1_me.h"
 
 int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;
@@ -148,6 +149,7 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver) {
     jmi_ode_euler_t* integrator;
     fmi1_cs_t* fmi1_cs = solver->fmi1_cs;
+    fmi_t* fmi1_me = (fmi_t*)fmi1_cs->fmi1_me;
     
     integrator = (jmi_ode_euler_t*)calloc(1,sizeof(jmi_ode_euler_t));
     if(!integrator){
@@ -155,7 +157,8 @@ int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
     /* DEFAULT VALUES NEEDS TO BE IMPROVED*/
-    integrator->step_size = 0.001;
+    /* integrator->step_size = 0.001; */
+    integrator->step_size = fmi1_me->jmi->options.cs_step_size;
 
     *integrator_ptr = integrator;
     return 0;

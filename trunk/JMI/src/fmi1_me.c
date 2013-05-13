@@ -1718,6 +1718,12 @@ void fmi_update_runtime_options(fmi_t* fmi) {
         op->block_jacobian_check_tol = z[index];
     index = get_option_index("_cs_solver");
     if(index)
-        op->cs_solver = z[index]; 
+        op->cs_solver = z[index];
+    index = get_option_index("_cs_rel_tol");
+    if(index)
+        op->cs_rel_tol = z[index];
+    index = get_option_index("_cs_step_size");
+    if(index)
+        op->cs_step_size = z[index]; 
     
 }

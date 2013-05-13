@@ -411,6 +411,17 @@ public class OptionRegistry {
 			 0,
 			 "Specifies the internal solver used in co-simulation. 0 == CVode, 1 == Euler",
              0,1),
+        CS_REL_TOL
+            ("cs_rel_tol",
+              runtime,
+             1e-6,
+             "Default tolerance for the adaptive solvers in the CS case.",
+              1e-14, 1.0),
+        CS_STEP_SIZE
+            ("cs_step_size",
+              runtime,
+             1e-3,
+             "Default step-size for the non-adaptive solvers in the CS case."),
 		;
 					
 		public String key;

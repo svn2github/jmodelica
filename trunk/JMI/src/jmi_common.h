@@ -696,7 +696,9 @@ typedef struct jmi_options_t {
     int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
     int block_jacobian_check; /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
     double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */
-    int cs_solver; /**< \brief Option for changing the internal CS solver */ 
+    int cs_solver; /**< \brief Option for changing the internal CS solver */
+    double cs_rel_tol; /** < \brief Default tolerance for the adaptive solvers in the CS case. */
+    double cs_step_size; /** < \brief Default step-size for the non-adaptive solvers in the CS case. */   
 } jmi_options_t;
 
 /**< \brief Initialize run-time options. */

@@ -26,6 +26,7 @@
 #include "jmi_ode_cvode.h"
 #include "jmi_log.h"
 #include "fmi1_cs.h"
+#include "fmi1_me.h"
 
 int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     realtype *y, *ydot;
@@ -176,21 +177,47 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
 int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver) {
     jmi_ode_cvode_t* integrator;
     fmi1_cs_t* fmi1_cs = solver->fmi1_cs;
+    fmi_t* fmi1_me = (fmi_t*)fmi1_cs->fmi1_me;
     int flag = 0;
     void* cvode_mem;
     jmi_real_t* y;
+    fmiReal* nominal;
+    fmiReal* atol_nv;
+    int i;
     
     integrator = (jmi_ode_cvode_t*)calloc(1,sizeof(jmi_ode_cvode_t));
     if(!integrator){
         jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to allocate the internal CVODE struct.>");
         return -1;
     }
+    
+    nominal = (fmiReal*)calloc(fmi1_cs->n_real_x, sizeof(fmiReal));
+    flag = fmi1_me_get_nominal_continuous_states(fmi1_cs->fmi1_me, nominal, fmi1_cs->n_real_x);
+    if (flag != fmiOK) {
+        jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to get the nominal states.>");
+        return -1;
+    }
 
     /* DEFAULT VALUES NEEDS TO BE IMPROVED*/
     integrator->lmm  = CV_BDF;
     integrator->iter = CV_NEWTON;
-    integrator->rtol = 1e-4;
-    integrator->atol = 1e-6;
+    /* integrator->rtol = 1e-4; */
+    integrator->rtol = fmi1_me->jmi->options.cs_rel_tol;
+    
+    if (fmi1_cs->n_real_x > 0) {
+        integrator->atol = N_VNew_Serial(fmi1_cs->n_real_x);
+    } else {
+        integrator->atol = N_VNew_Serial(1);
+    }
+    atol_nv = NV_DATA_S(integrator->atol);
+    
+    if (fmi1_cs -> n_real_x > 0) {
+        for (i = 0; i < fmi1_cs->n_real_x; i++) {
+            atol_nv[i] = 0.01*integrator->rtol*nominal[i];
+        }
+    }else{
+        atol_nv[0] = 0.01*integrator->rtol*1.0;
+    }
 
     cvode_mem = CVodeCreate(integrator->lmm,integrator->iter);
     if(!cvode_mem){
@@ -208,7 +235,8 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
             return JMI_ODE_ERROR;
         }
     }else{
-        integrator->y_work = N_VNew_Serial(1);
+        integrator->y_work = 
+        N_VNew_Serial(1);
         y = NV_DATA_S(integrator->y_work);
         y[0] = 0.0;
     }
@@ -219,7 +247,7 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         return -1;
     }
 
-    flag = CVodeSStolerances(cvode_mem, integrator->rtol, integrator->atol);
+    flag = CVodeSVtolerances(cvode_mem, integrator->rtol, integrator->atol);
     if(flag!=0){
         jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to specify the tolerances. Returned with> error_flag: %d", flag);
         return -1;
@@ -266,6 +294,7 @@ void jmi_ode_cvode_delete(jmi_ode_solver_t* solver) {
     if((jmi_ode_cvode_t*)(solver->integrator)){
         /*Deallocate work vectors.*/
         N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y_work));
+        N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->atol));
         /*Deallocate CVode */
         CVodeFree(&(((jmi_ode_cvode_t*)(solver->integrator))->cvode_mem));
         
