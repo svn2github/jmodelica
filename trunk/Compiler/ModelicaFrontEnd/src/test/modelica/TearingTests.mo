@@ -611,7 +611,7 @@ Solution:
 ")})));
 end HandGuidedTearing3;
 
-model HandGuidedTearing4
+/*model HandGuidedTearing4
   Real u0,u1,u2,u3,uL;
   Real i0,i1,i2,iL;
   Real i3 annotation(__Modelon(IterationVariable));
@@ -1409,7 +1409,7 @@ Solution:
   i1 + iL
 -------------------------------
       ")})));
-end HandGuidedTearing14;
+end HandGuidedTearing14;*/
 
 model HandGuidedTearing15
 
