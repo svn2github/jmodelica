@@ -1947,6 +1947,38 @@ aspect TransformCanonical {
 			varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
 		}
 		Iterator<Eq> it = block.iterator();
+		Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+		Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
+		for (Eq eqn : block) {
+			if (eqn.getEquation().hasResidual() && !eqn.getEquation().getResidual().hasIterationVariable())
+				unmatchedHGTEquations.add(eqn);
+		}
+		for (Var var : varsInBlock.values()) {
+			if (var.getVariable().getHGTType() == HGTVariableType.COMPONENT)
+				unmatchedHGTVariables.add(var);
+		}
+		if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+			Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
+			Iterator<Var> varIt = unmatchedHGTVariables.iterator();
+			while (eqnIt.hasNext() && varIt.hasNext()) {
+				Eq eqn = eqnIt.next();
+				Var var = varIt.next();
+				eqn.getEquation().getResidual().setIterationVariable(new FIdUse(var.getName()));
+				var.getVariable().setHGTType(HGTVariableType.PAIR);
+			}
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Unable to perform hand guided tearing on this block since the number of unmatched equations is different the number of unmatched variables.\n");
+			sb.append("Unmatched equations(" + unmatchedHGTEquations.size() + "):\n");
+			for (Eq eqn : unmatchedHGTEquations)
+				sb.append("  " + eqn.getEquation() + "\n");
+			sb.append("\n");
+			sb.append("Unmatched variables(" + unmatchedHGTVariables.size() + "):\n");
+			for (Var var : unmatchedHGTVariables)
+				sb.append("  " + var.getName() + "\n");
+			error(sb.toString());
+			throw new TearingException();
+		}
 		while (it.hasNext()) {
 			Eq e = it.next();
 			if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
@@ -1985,7 +2017,7 @@ aspect TransformCanonical {
 						log.info("Remaining unmatched equation: %s", eIt.next());
 					while (vIt.hasNext())
 						log.info("Remaining unmatched variable: %s", vIt.next());
-					error("Unable to perform hand guided tearing since the resulting system is unsolvable.");
+					error("Unable to perform hand guided tearing on this block since the resulting block system is unsolvable.");
 					throw new TearingException();
 				}
 			}
