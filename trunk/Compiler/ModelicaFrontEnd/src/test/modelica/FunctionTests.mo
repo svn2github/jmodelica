@@ -4589,6 +4589,54 @@ end FunctionTests.ArrayOutputScalarization20;
 end ArrayOutputScalarization20;
 
 
+model ArrayOutputScalarization21
+	record R
+		Real x[2,2];
+	end R;
+	
+	function f
+		input Real x;
+		output R y;
+	algorithm
+		y := R({{x, 2* x},{3 * x, 4 * x}});
+	end f;
+	
+	R z = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization21",
+			description="Scalarization of matrix in record as output of function",
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization21
+ Real z.x[1,1];
+ Real z.x[1,2];
+ Real z.x[2,1];
+ Real z.x[2,2];
+equation
+ (FunctionTests.ArrayOutputScalarization21.R({{z.x[1,1], z.x[1,2]}, {z.x[2,1], z.x[2,2]}})) = FunctionTests.ArrayOutputScalarization21.f(time);
+
+public
+ function FunctionTests.ArrayOutputScalarization21.f
+  input Real x;
+  output FunctionTests.ArrayOutputScalarization21.R y;
+ algorithm
+  y.x[1,1] := x;
+  y.x[1,2] := 2 * x;
+  y.x[2,1] := 3 * x;
+  y.x[2,2] := 4 * x;
+  return;
+ end FunctionTests.ArrayOutputScalarization21.f;
+
+ record FunctionTests.ArrayOutputScalarization21.R
+  Real x[2,2];
+ end FunctionTests.ArrayOutputScalarization21.R;
+
+end FunctionTests.ArrayOutputScalarization21;
+")})));
+end ArrayOutputScalarization21;
+
+
 
 /* ======================= Unknown array sizes ======================*/
 

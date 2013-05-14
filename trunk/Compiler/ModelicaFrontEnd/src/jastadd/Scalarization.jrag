@@ -1686,16 +1686,28 @@ aspect Scalarization {
 	 *        with the arguments taken from a record variable with the given name.
 	 */
 	public FExp FType.createRecordConstructor(FQName name) {
-		if (isArray()) {
-			FArray arr = new FArray();
-			for (Index i : indices()) {
-				FQName fqn = name.copyAndAddFas(i.createFArraySubscripts());
-				arr.addFExp(createRecordConstructorCell(fqn));
-			}
-			return arr;
-		} else {
+		if (isArray()) 
+			return createRecordConstructorArray(name, indices().iterator(), 0);
+		else 
 			return createRecordConstructorCell(name);
+	}
+	
+	/**
+	 * Create an FArray of expressions, with the arguments taken from a record 
+	 * variable or member with the given name.
+	 */
+	public FExp FType.createRecordConstructorArray(FQName name, Iterator<Index> it, int dim) {
+		FArray arr = new FArray();
+		boolean last = dim == ndims() - 1;
+		for (int i = 0, n = size().get(dim); i < n; i++) {
+			FExp exp;
+			if (last)
+				exp = createRecordConstructorCell(name.copyAndAddFas(it.next().createFArraySubscripts()));
+			else
+				exp = createRecordConstructorArray(name, it, dim + 1);
+			arr.addFExp(exp);
 		}
+		return arr;
 	}
 	
 	/**
