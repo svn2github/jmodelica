@@ -663,7 +663,6 @@ void jmi_log_unwind(log_t *log, node_t node) { _leave_(log, node); emit(log); }
 
 void jmi_log_fmt_(log_t *log, category_t c, const char *fmt, ...) {
     va_list ap;
-    if (!emitted_category(log, c)) return;
     va_start(ap, fmt);
     log_fmt_(log, c, fmt, ap);
     va_end(ap);
