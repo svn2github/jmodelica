@@ -18,15 +18,16 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 public class ClassOutlineCacheInitialNoLibsTask extends OutlineCacheJob {
 	private int initialTreeCacheDepth = 1;
 
-	public ClassOutlineCacheInitialNoLibsTask(IASTChangeListener listener, IFile file,
-			AbstractOutlineCache cache) {
+	public ClassOutlineCacheInitialNoLibsTask(IASTChangeListener listener,
+			IFile file, AbstractOutlineCache cache) {
 		super(listener, file, cache);
 	}
 
 	@Override
 	public void doJob() {
 		long time = System.currentTimeMillis();
-		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry.getInstance().doLookup(file.getProject());
+		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
+				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		CachedASTNode cachedNode = null;
 		synchronized (sroot.state()) {

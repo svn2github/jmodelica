@@ -93,4 +93,12 @@ public class ClassOutlinePage extends CachedOutlinePage implements
 		fRoot = cache.getCache();
 		updateAST(fRoot);
 	}
+
+	public void addFileListener(IFile file) {
+		cache.addFileListener(file);
+	}
+
+	public void removeFileListener(IFile file) {
+		cache.removeFileListener(file);
+	}
 }

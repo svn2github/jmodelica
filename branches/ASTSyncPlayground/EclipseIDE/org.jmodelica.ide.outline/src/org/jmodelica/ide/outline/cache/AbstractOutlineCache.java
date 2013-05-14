@@ -21,7 +21,7 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	protected CachedASTNode myCache;
 	private ArrayList<EventCachedChildren> childrenUpdates = new ArrayList<EventCachedChildren>();
 	private ArrayList<EventCachedInitial> rootUpdates = new ArrayList<EventCachedInitial>();
-	private int listenerID;
+	protected int listenerID;
 
 	public AbstractOutlineCache(IASTChangeListener outline) {
 		myOutline = outline;
@@ -39,7 +39,7 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 		if (registerASTListener) {
 			ListenerObject listObj = new ListenerObject(this,
 					IASTChangeListener.OUTLINE_LISTENER,
-					UniqueIDGenerator.getInstance().getListenerID());
+					listenerID);
 			ModelicaASTRegistry.getInstance().addListener(file, null, listObj);
 		}
 	}

@@ -24,5 +24,4 @@ public class SourceOutlineView extends OutlineView {
 	protected IContentOutlinePage getOutlinePage(IASTEditor part) {
 		return part.getSourceOutlinePage();
 	}
-
 }

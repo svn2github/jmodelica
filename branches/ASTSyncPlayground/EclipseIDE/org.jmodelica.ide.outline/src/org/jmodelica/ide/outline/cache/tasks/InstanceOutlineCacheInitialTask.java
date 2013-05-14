@@ -31,22 +31,26 @@ public class InstanceOutlineCacheInitialTask extends OutlineCacheJob {
 				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
 		CachedASTNode toReturn = null;
+		String filePath = file.getLocation().toOSString();
 		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
 		synchronized (sroot) {
 			InstProgramRoot iRoot = sroot.getProgram().getInstProgramRoot();
 			toReturn = ASTNodeCacheFactory.cacheNode(iRoot, null, cache);
 			for (InstClassDecl inst : iRoot.instClassDecls()) {
-				CachedASTNode cachedNode = ASTNodeCacheFactory.cacheNode(inst,
-						toReturn, cache);
-				// Also cache children initially?
-				/**
-				 * ArrayList<?> comps = inst.outlineChildren();
-				 * ArrayList<ICachedOutlineNode> cacc = new
-				 * ArrayList<ICachedOutlineNode>(); for (Object obj : comps) {
-				 * cacc.add(ASTNodeCacheFactory.cacheNode( (ASTNode<?>) obj,
-				 * cachedNode, cache)); } cachedNode.setOutlineChildren(cacc);
-				 */
-				children.add(cachedNode);
+				if (inst.containingFileName().equals(filePath)) {
+					CachedASTNode cachedNode = ASTNodeCacheFactory.cacheNode(
+							inst, toReturn, cache);
+					// Also cache children initially?
+					/**
+					 * ArrayList<?> comps = inst.outlineChildren();
+					 * ArrayList<ICachedOutlineNode> cacc = new
+					 * ArrayList<ICachedOutlineNode>(); for (Object obj : comps)
+					 * { cacc.add(ASTNodeCacheFactory.cacheNode( (ASTNode<?>)
+					 * obj, cachedNode, cache)); }
+					 * cachedNode.setOutlineChildren(cacc);
+					 */
+					children.add(cachedNode);
+				}
 			}
 		}
 		toReturn.setOutlineChildren(children);

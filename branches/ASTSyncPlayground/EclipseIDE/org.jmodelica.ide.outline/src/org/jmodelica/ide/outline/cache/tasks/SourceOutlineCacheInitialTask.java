@@ -12,8 +12,9 @@ import org.jmodelica.ide.sync.ASTNodeCacheFactory;
 import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
-import org.jmodelica.modelica.compiler.ASTNode;
+import org.jmodelica.modelica.compiler.FullClassDecl;
 import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class SourceOutlineCacheInitialTask extends OutlineCacheJob {
 
@@ -32,15 +33,20 @@ public class SourceOutlineCacheInitialTask extends OutlineCacheJob {
 		CachedASTNode toReturn = null;
 		synchronized (sroot.state()) {
 			toReturn = ASTNodeCacheFactory.cacheNode(sroot, null, cache);
-			for (Object obj : sroot.outlineChildren())
-				if (obj instanceof ASTNode<?>)
-					children.add(ASTNodeCacheFactory.cacheNode(
-							(ASTNode<?>) obj, toReturn, cache));
+			for (StoredDefinition def : sroot.getProgram()
+					.getUnstructuredEntitys()) {
+				if (def.getFile().equals(file)) {
+					for (Object obj : def.outlineChildren())
+						if (obj instanceof FullClassDecl)
+							children.add(ASTNodeCacheFactory.cacheNode(
+									(FullClassDecl) obj, toReturn, cache));
+					break;
+				}
+			}
 		}
 		toReturn.setOutlineChildren(children);
 		System.out.println("CacheChildren from SourceOutline took: "
-				+ (System.currentTimeMillis() - time) + "ms for nbrchild: "
-				+ children.size());
+				+ (System.currentTimeMillis() - time) + "ms");
 		IASTChangeEvent event = new EventCachedInitial(toReturn);
 		listener.astChanged(event);
 	}

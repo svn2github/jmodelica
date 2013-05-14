@@ -47,6 +47,11 @@ public class ClassOutlineView extends OutlineView {
 					mapProjToPage.put(project, page);
 					initPage(page);
 					page.createControl(getPageBook());
+				} else {
+					IFileEditorInput fInput = (IFileEditorInput) editor
+							.getEditorInput();
+					IFile file = fInput.getFile();
+					page.addFileListener(file);
 				}
 				if (editor instanceof ICurrentClassListener)
 					page.addCurrentClassListener((ICurrentClassListener) editor);
@@ -57,12 +62,27 @@ public class ClassOutlineView extends OutlineView {
 	}
 
 	protected void doDestroyPage(IWorkbenchPart part, PageRec rec) {
+		/**
+		 * IFileEditorInput fInput = (IFileEditorInput) ((AbstractTextEditor)
+		 * part) .getEditorInput(); IFile file = fInput.getFile();
+		 * ClassOutlinePage page = mapProjToPage.get(file.getProject()); if
+		 * (page != null) page.removeFileListener(file);
+		 */
 		if (part instanceof AbstractTextEditor)
 			mapProjToPage.remove(getProjectOfEditor((AbstractTextEditor) part));
 		super.doDestroyPage(part, rec);
 	}
 
 	public void partClosed(IWorkbenchPart part) {
+		if (part instanceof AbstractTextEditor) {
+			IFileEditorInput fInput = (IFileEditorInput) ((AbstractTextEditor) part)
+					.getEditorInput();
+			IFile file = fInput.getFile();
+			ClassOutlinePage page2 = mapProjToPage.get(file.getProject());
+			if (page2 != null) {
+				page2.removeFileListener(file);
+			}
+		}
 		if (part instanceof ICurrentClassListener) {
 			PageRec rec = getPageRec(part);
 			if (rec != null && rec.page instanceof ClassOutlinePage) {

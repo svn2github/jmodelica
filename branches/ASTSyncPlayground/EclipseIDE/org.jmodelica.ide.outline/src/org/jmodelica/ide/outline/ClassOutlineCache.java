@@ -2,6 +2,8 @@ package org.jmodelica.ide.outline;
 
 import java.util.ArrayList;
 import java.util.Stack;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
@@ -17,6 +19,8 @@ import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialNoLibsTask;
 import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.CachedASTNode;
+import org.jmodelica.ide.sync.ListenerObject;
+import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
 public class ClassOutlineCache extends AbstractOutlineCache {
 	protected ArrayList<EventCachedInitialNoLibs> eventCachedInitialNoLibs = new ArrayList<EventCachedInitialNoLibs>();
@@ -55,6 +59,17 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 		}
 	}
 
+
+	public void addFileListener(IFile file) {
+		ListenerObject listObj = new ListenerObject(this,
+				IASTChangeListener.OUTLINE_LISTENER, listenerID);
+		ModelicaASTRegistry.getInstance().addListener(file, null, listObj);
+	}
+	
+	public void removeFileListener(IFile file) {
+		ModelicaASTRegistry.getInstance().removeListener(file, null, this);		
+	}
+	
 	protected void handleCachedInitialNoLibsEvent() {
 		if (!eventCachedInitialNoLibs.isEmpty()) {
 			EventCachedInitialNoLibs event = eventCachedInitialNoLibs.remove(0);
@@ -76,4 +91,5 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 				myFile, this);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
+
 }
