@@ -271,7 +271,8 @@ static void force_commas(log_t *log) {
 
 static INLINE int current_indent_of(log_t *log) { return log->topindex; }
 
-static BOOL emitted_category(jmi_t *jmi, category_t category) {
+static BOOL emitted_category(log_t *log, category_t category) {
+    jmi_t *jmi = log->jmi;
     if((jmi->fmi != NULL) && !jmi->fmi->fmi_logging_on) return FALSE;
     switch (category) {
     case logError:   break;
@@ -281,8 +282,9 @@ static BOOL emitted_category(jmi_t *jmi, category_t category) {
     return TRUE;    
 }
 
-static void _emit(jmi_t *jmi, jmi_log_category_t category, char* message) {
-    if (!emitted_category(jmi, category)) return;
+static void _emit(log_t *log, jmi_log_category_t category, char* message) {
+    jmi_t *jmi = log->jmi;
+    if (!emitted_category(log, category)) return;
     if(jmi->fmi) {
         fmiStatus status;
         fmiString fmiCategory;
@@ -330,7 +332,7 @@ static void emit(log_t *log) {
         strcpy(msg2+log->indent, buf->msg);
 
         /* jmi_log(log, log->c, buf->msg); */
-        _emit(log->jmi, log->c, msg2);
+        _emit(log, log->c, msg2);
         clear(buf);
 
         free(msg2);
@@ -510,6 +512,7 @@ static void log_indented_value_(log_t *log, base_type_t type, const char *value,
 }
 
 static void log_comment_(log_t *log, category_t c, const char *msg) {
+    if (!emitted_category(log, c)) return;
     set_category(log, c);    
     buffer_comment(bufof(log), msg);
     buffer_char(bufof(log), ' ');
@@ -548,6 +551,7 @@ static INLINE node_t enter_named_be_(log_t *log, category_t c, const char *begin
 static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
     buf_t *buf = bufof(log);
 
+    if (!emitted_category(log, c)) return;
     set_category(log, c);
     while (*fmt != 0) {
         char ch = *fmt;
@@ -659,6 +663,7 @@ void jmi_log_unwind(log_t *log, node_t node) { _leave_(log, node); emit(log); }
 
 void jmi_log_fmt_(log_t *log, category_t c, const char *fmt, ...) {
     va_list ap;
+    if (!emitted_category(log, c)) return;
     va_start(ap, fmt);
     log_fmt_(log, c, fmt, ap);
     va_end(ap);
@@ -666,6 +671,7 @@ void jmi_log_fmt_(log_t *log, category_t c, const char *fmt, ...) {
 
 void jmi_log_fmt(log_t *log, category_t c, const char *fmt, ...) {
     va_list ap;
+    if (!emitted_category(log, c)) return;
     va_start(ap, fmt);
     log_fmt_(log, c, fmt, ap);
     va_end(ap);
@@ -686,6 +692,7 @@ jmi_log_node_t jmi_log_enter_fmt(log_t *log, jmi_log_category_t c, const char *n
 
 void jmi_log_node(log_t *log, category_t c, const char *name, const char* fmt, ...) {
     va_list ap;
+    if (!emitted_category(log, c)) return;
     node_t node = jmi_log_enter_(log, c, name); 
 
     va_start(ap, fmt);
@@ -738,28 +745,36 @@ void jmi_log_vref_(log_t *log, char t, int vref) { log_vref_(log, t, vref); }
 
 void jmi_log_reals(log_t *log, category_t c, const char *name, const jmi_real_t *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogReal);
+    node_t node;
+    if (!emitted_category(log, c)) return;
+    node = jmi_log_enter_vector_(log, logInfo, name, jmiLogReal);
     for (k=0; k < n; k++) jmi_log_real_(log, data[k]);
     jmi_log_leave(log, node);
 }
 
 void jmi_log_ints(log_t *log, category_t c, const char *name, const int *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogInt);
+    node_t node;
+    if (!emitted_category(log, c)) return;
+    node = jmi_log_enter_vector_(log, logInfo, name, jmiLogInt);
     for (k=0; k < n; k++) jmi_log_int_(log, data[k]);
     jmi_log_leave(log, node);
 }
 
 void jmi_log_bools(log_t *log, category_t c, const char *name, const BOOL *data, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogBool);
+    node_t node;
+    if (!emitted_category(log, c)) return;
+    node = jmi_log_enter_vector_(log, logInfo, name, jmiLogBool);
     for (k=0; k < n; k++) jmi_log_bool_(log, data[k]);
     jmi_log_leave(log, node);
 }
 
 void jmi_log_vrefs(log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
     int k;
-    jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, name, jmiLogVref);
+    node_t node;
+    if (!emitted_category(log, c)) return;
+    node = jmi_log_enter_vector_(log, logInfo, name, jmiLogVref);
     for (k=0; k < n; k++) jmi_log_vref_(log, t, vrefs[k]);
     jmi_log_leave(log, node);    
 }
@@ -767,7 +782,9 @@ void jmi_log_vrefs(log_t *log, jmi_log_category_t c, const char *name, char t, c
 
 void jmi_log_real_matrix(log_t *log, category_t c, const char *name, const jmi_real_t *data, int m, int n) {
     int k, l;
-    node_t node = enter_(log, c, name, matrixtype(jmiLogReal));
+    node_t node;
+    if (!emitted_category(log, c)) return;
+    node = enter_(log, c, name, matrixtype(jmiLogReal));
     emit(log);
     for (l=0; l < m; l++) {
         node_t rownode = enter_list_(log, vectortype(jmiLogReal));
