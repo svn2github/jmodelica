@@ -95,7 +95,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
         /* retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, fmi1_cs->states_derivative, fmi1_cs->n_real_x); */
         retval = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
         if (retval != fmiOK) {
-            jmi_log_comment(jmi->log, logError, "<Failed to evaluate the derivatives with step-size zero.>");
+            jmi_log_comment(jmi->log, logError, "Failed to evaluate the derivatives with step-size zero.");
         }
     } else {
         retval = JMI_ODE_EVENT;
@@ -113,7 +113,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c,
             
             flag = fmi1_me_event_update(fmi1_cs->fmi1_me, fmiFalse, &(fmi1_cs->event_info));
             if (flag != fmiOK){
-                jmi_log_comment(jmi->log, logError, "<Failed to handle the event.>");
+                jmi_log_comment(jmi->log, logError, "Failed to handle the event.");
                 return fmiError;
             }
             
@@ -428,13 +428,13 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
     jmi = fmi1_me->jmi;
     
     if (nvr > fmi1_cs -> n_real_u) {
-        jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, too many inputs.>");
+        jmi_log_comment(jmi->log, logError, "Failed to set the input derivative, too many inputs.");
         return fmiError;
     }
     
     for (i = 0; i < nvr; i++) {
         if (order[i] < 1 || order[i] > FMI1_CS_MAX_INPUT_DERIVATIVES) {
-            jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, un-supported order (%d).>",order[i]);
+            jmi_log_comment(jmi->log, logError, "Failed to set the input derivative, un-supported order (%d).",order[i]);
             return fmiError;
         }
         found_input = fmiFalse;
@@ -468,7 +468,7 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
         
         /* No available inputs -> the user has set an input which is not an input */
         if (found_input == fmiFalse) {
-            jmi_log_comment(jmi->log, logError, "<Failed to set the input derivative, inconsistent number of inputs.>");
+            jmi_log_comment(jmi->log, logError, "Failed to set the input derivative, inconsistent number of inputs.");
             return fmiError;
         }
         
