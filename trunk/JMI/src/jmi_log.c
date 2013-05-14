@@ -45,8 +45,9 @@ typedef struct {
     int len, alloced;    
 } buf_t;
 
-/* buf_t constructor. */
+/* buf_t constructor and destructor. */
 static void init_buffer(buf_t *buf);
+static void delete_buffer(buf_t *buf);
 
 
 static INLINE BOOL isempty(buf_t *buf) { return buf->len == 0; }
@@ -69,6 +70,14 @@ static void init_buffer(buf_t *buf) {
     buf->msg = (char *)malloc(buf->alloced+1); /* Allocate space for the null byte too */
     clear(buf);    
 }
+
+/** \brief buf_t destructor. */
+static void delete_buffer(buf_t *buf) {
+    free(buf->msg);
+    buf->msg = NULL;
+    buf->alloced = buf->len = 0;
+}
+
 
 static INLINE char *destof(buf_t *buf) { return buf->msg + buf->len; }
 
@@ -397,6 +406,7 @@ static void init_log(log_t *log, jmi_t *jmi) {
 }
 
 static void delete_log(log_t *log) {
+    delete_buffer(bufof(log));
     free(log->frames);
     free(log);
 }
