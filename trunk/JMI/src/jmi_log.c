@@ -271,24 +271,32 @@ static void force_commas(log_t *log) {
 
 static INLINE int current_indent_of(log_t *log) { return log->topindex; }
 
+static BOOL emitted_category(jmi_t *jmi, category_t category) {
+    if((jmi->fmi != NULL) && !jmi->fmi->fmi_logging_on) return FALSE;
+    switch (category) {
+    case logError:   break;
+    case logWarning: if(jmi->options.log_level < 3) return FALSE; break;
+    case logInfo:    if(jmi->options.log_level < 4) return FALSE; break;
+    }
+    return TRUE;    
+}
+
 static void _emit(jmi_t *jmi, jmi_log_category_t category, char* message) {
+    if (!emitted_category(jmi, category)) return;
     if(jmi->fmi) {
         fmiStatus status;
         fmiString fmiCategory;
         fmi_t* fmi = jmi->fmi;
-        if(!fmi->fmi_logging_on) return;
         switch (category) {
         case logError:
             status = fmiError;
             fmiCategory = "ERROR";
             break;
         case logWarning:
-            if(jmi->options.log_level < 3) return;
             status = fmiWarning;
             fmiCategory = "WARNING";
             break;
         case logInfo:
-            if(jmi->options.log_level < 4) return;
             status = fmiOK;
             fmiCategory = "INFO";
             break;
@@ -302,11 +310,9 @@ static void _emit(jmi_t *jmi, jmi_log_category_t category, char* message) {
             fprintf(stderr, "ERROR: %s\n", message);
             break;
         case logWarning:
-            if(jmi->options.log_level < 3) return;
             fprintf(stderr, "WARNING: %s\n", message);
             break;
         case logInfo:
-            if(jmi->options.log_level < 4) return;
             fprintf(stdout, "%s\n", message);
             break;
         }
