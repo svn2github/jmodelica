@@ -119,7 +119,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
     /*
     flag = CVode(integrator->cvode_mem, time_final, integrator->y_work, &tret, CV_NORMAL);
     if(flag<0){
-        jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "Failed to calculate the next step. "
+        jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to calculate the next step. "
                      "Returned with> error_flag: %d", flag);
         return JMI_ODE_ERROR;
     }
@@ -131,7 +131,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         /* Perform a step */
         flag = CVode(integrator->cvode_mem, time_final, integrator->y_work, &tret, CV_ONE_STEP);
         if(flag<0){
-            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "Failed to calculate the next step. "
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to calculate the next step. "
                      "Returned with> error_flag: %d", flag);
             return JMI_ODE_ERROR;
         }
@@ -139,7 +139,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         /* After each step call completed integrator step */
         retval = fmi1_cs_completed_integrator_step((fmiComponent)fmi1_cs, &step_event);
         if (retval != fmiOK) {
-            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "Failed to complete an integrator step. "
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to complete an integrator step. "
                      "Returned with> error_flag: %d", retval);
             return JMI_ODE_ERROR;
         }

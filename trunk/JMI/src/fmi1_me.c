@@ -532,7 +532,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
+            jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point iteration "
                          "due to too many iterations at> t:%g <(initialization).>", jmi_get_t(jmi)[0]);
             return fmiError;
         }
@@ -633,7 +633,7 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "Evaluating the derivatives failed at> t:%g",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "<Evaluating the derivatives failed at> t:%g",
                          jmi_get_t(((fmi_t *)c)->jmi)[0]);
             return fmiError;
         }
