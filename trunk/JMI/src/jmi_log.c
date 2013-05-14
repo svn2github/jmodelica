@@ -425,8 +425,10 @@ static void delete_log(log_t *log) {
 /** \brief Enter a named frame. */
 static node_t enter_named_(log_t *log, category_t c, const char *name) {
     push_named(log, c, name);
-    set_category(log, c);
-    buffer_ident(bufof(log), name);
+    if (emitted_category(log, c)) {
+        set_category(log, c);
+        buffer_ident(bufof(log), name);
+    }
     return node_from_top(log);
 }
 
@@ -437,9 +439,11 @@ static node_t enter_list_(log_t *log, type_t type) {
     BOOL suppress_type = is_dict || type_eq(topof(log)->type, type);
     frame_t *top = push_list(log, type, is_dict ? ')' : ']');
 
-    set_category(log, top->c);
-    if (!suppress_type) buffer_type(buf, type);
-    buffer_char(buf, is_dict ? '(' : '[');
+    if (emitted_category(log, top->c)) {
+        set_category(log, top->c);
+        if (!suppress_type) buffer_type(buf, type);
+        buffer_char(buf, is_dict ? '(' : '[');
+    }
     return node_from_top(log);
 }
 
@@ -453,16 +457,20 @@ static void leave_frame_(log_t *log) {
 
     if (can_pop(log)) --(log->topindex);
     else logging_error(log, "leave_frame_: frame stack empty; unable to pop.");
-    indent = current_indent_of(log);
-    if (log->indent > indent) log->indent = indent;
-    if (top->kind == listFrame) {
-        set_category(log, top->c);
-        buffer_char(buf, top->closing);
-        /* Note: relies on that topof(log) is the parent frame, which will name == "" if it's also a listFrame. */
-        if (!same_line) buffer_ident(buf, topof(log)->name);
+
+    if (emitted_category(log, top->c)) {
+        indent = current_indent_of(log);
+        if (log->indent > indent) log->indent = indent;
+        if (top->kind == listFrame) {
+            set_category(log, top->c);
+            buffer_char(buf, top->closing);
+            /* Note: relies on that topof(log) is the parent frame, which will name == "" if it's also a listFrame. */
+            if (!same_line) buffer_ident(buf, topof(log)->name);
+        }
+        defer_comma(log);
     }
+
     if (log->lineindex > log->topindex) log->lineindex = log->topindex;
-    defer_comma(log);    
 }
 
 static void _leave_(log_t *log, node_t node) {
@@ -691,8 +699,9 @@ jmi_log_node_t jmi_log_enter_fmt(log_t *log, jmi_log_category_t c, const char *n
 
 void jmi_log_node(log_t *log, category_t c, const char *name, const char* fmt, ...) {
     va_list ap;
+    node_t node;
     if (!emitted_category(log, c)) return;
-    node_t node = jmi_log_enter_(log, c, name); 
+    node = jmi_log_enter_(log, c, name); 
 
     va_start(ap, fmt);
     log_fmt_(log, c, fmt, ap);
