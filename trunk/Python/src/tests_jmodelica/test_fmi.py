@@ -173,100 +173,100 @@ class Test_FMUModelCS1:
         self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
         self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
         #self.rlc_square.initialize()
-    
+
     @testattr(stddist = True)
     def test_simulation_no_state(self):
         model = self.no_state3
-        
+
         #Test CVode
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
-        
+
         #Test Euler
         model.reset()
         model.set("_cs_solver",1)
         res = model.simulate(final_time=1.0)
         nose.tools.assert_almost_equal(res.final("x"),1.0)
-        
+
     @testattr(stddist = True)
     def test_input_derivatives(self):
         model = self.simple_input
-        
+
         model.initialize()
-        
+
         model.set("u", 0.0)
         model.set_input_derivatives("u",2.0, 1)
-        
+
         model.do_step(0, 1)
         nose.tools.assert_almost_equal(model.get("u"),2.0)
-        
+
         model.do_step(1, 1)
         nose.tools.assert_almost_equal(model.get("u"),2.0)
-        
+
         model.set_input_derivatives("u",2.0, 1)
         model.do_step(2, 1)
         nose.tools.assert_almost_equal(model.get("u"),4.0)
-    
+
     @testattr(stddist = True)
     def test_input_derivatives2(self):
         model = self.simple_input2
-        
+
         model.initialize()
-        
+
         model.set_input_derivatives("u1",2.0, 1)
         model.do_step(0, 1)
         nose.tools.assert_almost_equal(model.get("u1"),2.0)
         nose.tools.assert_almost_equal(model.get("u2"),0.0)
-        
+
         model.set_input_derivatives("u2",2.0, 1)
         model.do_step(1,1)
         nose.tools.assert_almost_equal(model.get("u2"),2.0)
         nose.tools.assert_almost_equal(model.get("u1"),2.0)
-        
+
         model.set_input_derivatives(["u1","u2"], [1.0,1.0],[1,1])
         model.do_step(2,1)
         nose.tools.assert_almost_equal(model.get("u2"),3.0)
         nose.tools.assert_almost_equal(model.get("u1"),3.0)
-    
+
     @testattr(stddist = True)
     def test_input_derivatives3(self):
         model = self.simple_input
-        
+
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
         model.set_input_derivatives("u",-1.0, 2)
         model.do_step(0, 1)
         nose.tools.assert_almost_equal(model.get("u"),0.5)
-        
+
         model.do_step(1, 1)
         nose.tools.assert_almost_equal(model.get("u"),0.5)
-        
+
     @testattr(stddist = True)
     def test_input_derivatives4(self):
         model = self.simple_input
-        
+
         model.initialize()
         model.set_input_derivatives("u",1.0, 1)
         model.set_input_derivatives("u",-1.0, 2)
         model.set_input_derivatives("u",6.0, 3)
         model.do_step(0, 2)
         nose.tools.assert_almost_equal(model.get("u"),8.0)
-        
+
         model.do_step(1, 1)
         nose.tools.assert_almost_equal(model.get("u"),8.0)
-        
-        
+
+
     @testattr(stddist = True)
     def test_zero_step_size(self):
         model = self.input_discontinuity
-        
+
         model.initialize()
         model.do_step(0, 1)
         model.set("u", 1.0)
         nose.tools.assert_almost_equal(model.get("x"),0.0)
         model.do_step(1,0)
         nose.tools.assert_almost_equal(model.get("x"),1.0)
-    
+
     @testattr(fmi = True)
     def test_version(self):
         """
@@ -947,9 +947,6 @@ class Test_SetDependentParameterError:
         nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
 
 
-
-
-
 class Test_load_fmu2:
     """
     This test the functionality of load_fmu2 method.
@@ -991,6 +988,304 @@ class Test_load_fmu2:
         assert isinstance(model, FMUModelCS2)
         model = load_fmu2(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
         assert isinstance(model, FMUModelCS2)
+
+class Test_FMUModelCS2:
+    """
+    This class tests pyfmi.fmi.FMUModelCS2
+    """
+
+#---------Test instantiation and initialization------------
+
+    @testattr(windows = True)
+    def test_init(self):
+        """
+        Test the method __init__ in FMUModelCS2
+        """
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+
+        assert self._bounce.get_identifier() == 'BouncingBall2'
+        nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=ME2, path=path_to_fmus_me2)
+        nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=CS1, path=path_to_fmus_cs1)
+        nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=ME1, path=path_to_fmus_me1)
+
+    @testattr(windows = True)
+    def test_dealloc(self):
+        """
+        Test the method __dealloc__ in FMUModelCS2
+        """
+        pass
+
+    @testattr(windows = True)
+    def test_instantiate_slave(self):
+        """
+        Test the method instantiate_slave in FMUModelCS2
+        """
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce.initialize()
+
+        self._bounce.reset_slave() #Test multiple instantiation
+        for i in range(0,10):
+            name_of_slave = 'slave' + str(i)
+            self._bounce.instantiate_slave(name = name_of_slave)
+
+    @testattr(windows = True)
+    def test_initialize(self):
+        """
+        Test the method initialize in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+
+        for i in range(10):
+            self._bounce.initialize(relTol = 10**-i)  #Initialize multiple times with different relTol
+            self._bounce.reset_slave()
+        self._bounce.initialize()    #Initialize with default options
+        self._bounce.reset_slave()
+
+        self._bounce.initialize(tStart = 4.5)
+        nose.tools.assert_almost_equal(self._bounce.time, 4.5)
+        self._bounce.reset_slave()
+
+        #Try to simulate past the defined stop
+        self._coupledCS2.initialize(tStop=1.0 , StopTimeDefined = True)
+        step_size=0.1
+        total_time=0
+        for i in range(10):
+            self._coupledCS2.do_step(total_time, step_size)
+            total_time += step_size
+        status=self._coupledCS2.do_step(total_time, step_size)
+        assert status != 0
+        self._coupledCS2.reset_slave()
+
+        #Try to initialize twice when not supported
+        self._coupledCS2.initialize()
+        nose.tools.assert_raises(FMUException, self._coupledCS2.initialize)
+
+    @testattr(windows = True)
+    def test_reset_slave(self):
+        """
+        Test the method reset_slave in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce.initialize()
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2.initialize()
+
+        self._bounce.reset_slave()
+        self._bounce.initialize()
+        self._coupledCS2.reset_slave()
+        self._coupledCS2.initialize()
+
+
+#---------Test time and steps------------
+
+    @testattr(windows = True)
+    def test_the_time(self):
+        """
+        Test the time in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce.initialize()
+
+        assert self._bounce._get_time() == 0.0
+        assert self._bounce.time == 0.0
+        self._bounce._set_time(4.5)
+        assert self._bounce._get_time() == 4.5
+        self._bounce.time = 3
+        assert self._bounce.time == 3.0
+
+        self._bounce.reset_slave()
+        self._bounce.initialize(tStart=2.5, tStop=3.0)
+        assert self._bounce.time == 2.5
+
+    @testattr(windows = True)
+    def test_do_step(self):
+        """
+        Test the method do_step in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce.initialize()
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2.initialize()
+
+        new_step_size = 1e-1
+        for i in range(1,30):
+            current_time = self._bounce.time
+            status = self._bounce.do_step(current_time, new_step_size, True)
+            assert status == 0
+            nose.tools.assert_almost_equal(self._bounce.time , current_time + new_step_size)
+
+
+        for i in range(10):
+            current_time = self._coupledCS2.time
+            status = self._coupledCS2.do_step(current_time, new_step_size, True)
+            assert status == 0
+            nose.tools.assert_almost_equal(self._coupledCS2.time , current_time + new_step_size)
+            self.test_get_status()
+
+    @testattr(windows = True)
+    def test_cancel_step(self):
+        """
+        Test the method cancel_step in FMUModelCS2
+        """
+        pass
+
+
+#---------Test derivatives and status------------
+
+    @testattr(windows = True)
+    def test_set_input_derivatives(self):
+        """
+        Test the method set_input_derivatives in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+
+        nose.tools.assert_raises(FMUException, self._coupledCS2.set_input_derivatives, 'J1.phi', 1.0, 0) #this is nou an input-variable
+        nose.tools.assert_raises(FMUException, self._coupledCS2.set_input_derivatives, 'J1.phi', 1.0, 1)
+        nose.tools.assert_raises(FMUException, self._coupledCS2.set_input_derivatives, 578, 1.0, 1)
+
+    @testattr(windows = True)
+    def test_get_output_derivatives(self):
+        """
+        Test the method get_output_derivatives in FMUModelCS2
+        """
+
+        #Do the setUp
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2.initialize()
+
+        self._coupledCS2.do_step(0.0, 0.02)
+        nose.tools.assert_raises(FMUException, self._coupledCS2.get_output_derivatives, 'J1.phi', 1)
+        nose.tools.assert_raises(FMUException, self._coupledCS2.get_output_derivatives, 'J1.phi', -1)
+        nose.tools.assert_raises(FMUException, self._coupledCS2.get_output_derivatives, 578, 0)
+
+    @testattr(windows = True)
+    def test_get_status(self):
+        """
+        Test the methods get status in FMUModelCS2
+        """
+        pass
+
+
+#---------Test complete simulation with and without options------------
+
+    @testattr(windows = True)
+    def test_simulate(self):
+        """
+        Test the main features of the method simulate() in FMUmodelCS2
+        """
+        #Set up for simulation
+        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+
+        #Try simulate the bouncing ball
+        res=self._bounce.simulate()
+        sim_time = res['time']
+        nose.tools.assert_almost_equal(sim_time[0], 0.0)
+        nose.tools.assert_almost_equal(sim_time[-1], 1.0)
+        self._bounce.reset_slave()
+
+        for i in range(5):
+            res=self._bounce.simulate(start_time=0.1, final_time=1.0)
+            sim_time = res['time']
+            nose.tools.assert_almost_equal(sim_time[0], 0.1)
+            nose.tools.assert_almost_equal(sim_time[-1],1.0)
+            assert sim_time.all() >= sim_time[0] - 1e-4   #Check that the time is increasing
+            assert sim_time.all() <= sim_time[-1] + 1e+4  #Give it some marginal
+            height = res['HIGHT']
+            assert height.all() >= -1e-4 #The height of the ball should be non-negative
+            if i>0: #check that the results stays the same
+                diff = height_old - height
+                nose.tools.assert_almost_equal(diff[-1],0.0)
+            height_old = height
+            self._bounce.reset_slave()
+
+        #Try to simulate the coupled-clutches
+        res_coupled=self._coupledCS2.simulate()
+        sim_time_coupled = res_coupled['time']
+        nose.tools.assert_almost_equal(sim_time_coupled[0], 0.0)
+        nose.tools.assert_almost_equal(sim_time_coupled[-1], 1.0)
+        self._coupledCS2.reset_slave()
+
+
+        for i in range(10):
+            self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+            res_coupled = self._coupledCS2.simulate(start_time=0.0, final_time=2.0)
+            sim_time_coupled = res_coupled['time']
+            nose.tools.assert_almost_equal(sim_time_coupled[0], 0.0)
+            nose.tools.assert_almost_equal(sim_time_coupled[-1],2.0)
+            assert sim_time_coupled.all() >= sim_time_coupled[0] - 1e-4   #Check that the time is increasing
+            assert sim_time_coupled.all() <= sim_time_coupled[-1] + 1e+4  #Give it some marginal
+
+            #val_J1 = res_coupled['J1.w']
+            #val_J2 = res_coupled['J2.w']
+            #val_J3 = res_coupled['J3.w']
+            #val_J4 = res_coupled['J4.w']
+
+            val=[res_coupled.final('J1.w'), res_coupled.final('J2.w'), res_coupled.final('J3.w'), res_coupled.final('J4.w')]
+            if i>0: #check that the results stays the same
+                for j in range(len(val)):
+                    nose.tools.assert_almost_equal(val[j], val_old[j])
+            val_old = val
+            self._coupledCS2.reset_slave()
+
+        #Compare to something we know is correct
+        cs1_model = load_fmu2('Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu',path_to_fmus_cs1, False)
+        res1 = cs1_model.simulate(final_time=10, options={'result_file_name':'result1'})
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        res2 = self._coupledCS2.simulate(final_time=10, options={'result_file_name':'result2'})
+        diff1 = res1.final("J1.w") - res2.final("J1.w")
+        diff2 = res1.final("J2.w") - res2.final("J2.w")
+        diff3 = res1.final("J3.w") - res2.final("J3.w")
+        diff4 = res1.final("J4.w") - res2.final("J4.w")
+        nose.tools.assert_almost_equal(abs(diff1), 0.000, 1)
+        nose.tools.assert_almost_equal(abs(diff2), 0.000, 1)
+        nose.tools.assert_almost_equal(abs(diff3), 0.000, 1)
+        nose.tools.assert_almost_equal(abs(diff4), 0.000, 1)
+
+    @testattr(windows = True)
+    def test_simulate_options(self):
+        """
+        Test the method simultaion_options in FMUModelCS2
+        """
+        #Do the setUp
+        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+
+        #Test the result file
+        res=self._coupledCS2.simulate()
+        assert res.result_file == 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_result.txt'
+        assert os.path.exists(res.result_file)
+
+        self._coupledCS2.reset_slave()
+        opts = {'result_file_name':'Modelica_Mechanics_Rotational_Examples_CoupledClutches_result_test.txt'}
+        res=self._coupledCS2.simulate(options=opts)
+        assert res.result_file == 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_result_test.txt'
+        assert os.path.exists(res.result_file)
+
+        #Test the option in the simulate method
+        self._coupledCS2.reset_slave()
+        opts={}
+        opts['ncp'] = 250
+        opts['initialize'] = False
+        self._coupledCS2.initialize()
+        res=self._coupledCS2.simulate(options=opts)
+        assert len(res['time']) == 251
+
+
+
+
 
 
 
