@@ -25,6 +25,7 @@
 
 
 #include "jmi.h"
+#include "jmi_log.h"
 
 jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
   if (den==0) {
@@ -34,6 +35,15 @@ jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
   } else {
     return num/den;
   }
+}
+
+jmi_ad_var_t jmi_divide_logged(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
+    if (den==0) {
+        jmi_log_node(jmi->log, logWarning, "DivideByZero", "msg:%s", msg);
+        return (num==0)? 0: ( (num>0)? 1.e20: -1.e20 );
+    } else {
+        return num/den;
+    }
 }
 
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {

@@ -259,8 +259,14 @@ extern "C" {
 
 /**
  * Function to wrap division and report errors.
+ * Use jmi_divide_logged below instead if jmi is available.
  */
 jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]);
+
+/**
+ * Function to wrap division and report errors to the log.
+ */
+jmi_ad_var_t jmi_divide_logged(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]);
 
 /**
  * Function to get the absolute value.
