@@ -1713,16 +1713,26 @@ aspect CCodeGen {
 		return unsolvedEquations();
 	}
 	
+	public Collection<SimpleEquationBlock> EquationBlock.blockResidualBlocks_C() {
+		return subBlocks();
+	}
+	
+	@Override
+	public Collection<SimpleEquationBlock> MixedEquationBlock.blockResidualBlocks_C() {
+		return continuousEquationBlocks();
+	}
+	
 	public void AbstractEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
 	}
 	
 	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+		// TODO: The indent used here is incorrect and this is a ugly hack that should be fixed!
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
 		for (FAbstractEquation ae : discreteEquations()) {
 			FEquation e = (FEquation)ae;
-			str.print(" ");
+			str.print(indent);
 			e.getLeft().prettyPrint_C(str,"");
 			str.print(" = ");
 			e.getRight().prettyPrint_C(str,"");
@@ -1730,37 +1740,27 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void AbstractEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
+	public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
+			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap);
+	
+	@Override
+	public void SimpleEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
 			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (FAbstractEquation e : blockResidualEquations_C()) {
-			e.genResidual_C(enumerator,indent,str, visited, null);
-		}
+		equation().genResidual_C(enumerator,indent,str, visited, null);
 	}
 	
+	@Override
 	public void EquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
 			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (SimpleEquationBlock block : subBlocks())
+		for (SimpleEquationBlock block : blockResidualBlocks_C())
 			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
 	}
 	
+	@Override
 	public void TornEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
 			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
 		for (SimpleEquationBlock block : getUnsolvedBlocks())
 			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
-	}
-	
-	public void LinearEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (FAbstractEquation e : blockResidualEquations_C()) {
-			e.genResidual_C(enumerator,indent,str, visited, null);
-		}
-	}
-	
-	public void MixedLinearEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (FAbstractEquation e : blockResidualEquations_C()) {
-			e.genResidual_C(enumerator,indent,str, visited, null);
-		}
 	}
 	
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
