@@ -11,6 +11,16 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.9.1</title>
+
+    <para>This release contains one important bug fix which concerns FMU
+    export on Windows. JModelica.org version 1.9 introduced an external
+    dependency for exported FMUs on Windows and that issue has been fixed in
+    this release. Apart from this bug fix, the release is identical to
+    JModelica.org version 1.9.</para>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.9</title>
 
     <section>
@@ -1372,7 +1382,7 @@ yres = res['y']
                     </m:mfenced>
                   </m:mrow>
 
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
 
                   <m:mtext>dt</m:mtext>
                 </m:mrow>
