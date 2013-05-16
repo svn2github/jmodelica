@@ -88,10 +88,14 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 				ModelicaASTRegistry.getInstance().addListener(file, null,
 						new ListenerObject(cache, OUTLINE_LISTENER));
 				cache.fetchFileChildren(file);
+				astCacheMap.put(file, null);
 				return true;
 			}
 			ICachedOutlineNode root = astCacheMap.get(file);
-			return (root != null && root.hasVisibleChildren());
+			if (root == null)
+				return true; // waiting for cachejob...
+			else
+				return root.hasVisibleChildren();
 		}
 		return super.hasChildren(element);
 	}

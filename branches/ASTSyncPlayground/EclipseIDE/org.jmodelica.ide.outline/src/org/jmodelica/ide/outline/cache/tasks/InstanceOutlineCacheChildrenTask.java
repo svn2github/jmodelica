@@ -23,15 +23,13 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 public class InstanceOutlineCacheChildrenTask extends OutlineCacheJob {
 	private Stack<ASTPathPart> nodePath;
 	private ChildrenTask task;
-	private ICachedOutlineNode parent;
 
 	public InstanceOutlineCacheChildrenTask(IASTChangeListener listener,
 			Stack<ASTPathPart> nodePath, IFile file, ChildrenTask task,
-			AbstractOutlineCache cache, ICachedOutlineNode parent) {
+			AbstractOutlineCache cache) {
 		super(listener, file, cache);
 		this.nodePath = nodePath;
 		this.task = task;
-		this.parent = parent;
 	}
 
 	@Override
@@ -47,10 +45,10 @@ public class InstanceOutlineCacheChildrenTask extends OutlineCacheJob {
 					.resolveInstanceASTPath(nodePath, iRoot);
 			for (Object obj : sought.instClassDecls())
 				toReturn.add(ASTNodeCacheFactory.cacheNode((ASTNode<?>) obj,
-						parent, cache));
+						task.node, cache));
 			for (Object obj : sought.instComponentDecls())
 				toReturn.add(ASTNodeCacheFactory.cacheNode((ASTNode<?>) obj,
-						parent, cache));
+						task.node, cache));
 		}
 		System.out.println("CacheChildren from InstanceOutline took: "
 				+ (System.currentTimeMillis() - time) + "ms");

@@ -15,8 +15,10 @@
  */
 package org.jmodelica.ide.outline;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.ImageLoader;
 import org.jmodelica.ide.outline.cache.CachedLabelProvider;
 
@@ -44,5 +46,14 @@ public class ExplorerLabelProvider extends CachedLabelProvider {
 			image = new Image(image.getDevice(), data);
 		}
 		return image;
+	}
+
+	@Override
+	public String getText(Object element) {
+		if (element instanceof ICachedOutlineNode) {
+			return ((ICachedOutlineNode) element).getText();
+		} else if (element instanceof IFile)
+			return ((IFile) element).getName();
+		return null;
 	}
 }

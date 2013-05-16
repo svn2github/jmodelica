@@ -21,15 +21,15 @@ import org.jmodelica.modelica.compiler.SourceRoot;
 public class ClassOutlineCacheChildrenTask extends OutlineCacheJob {
 	private Stack<ASTPathPart> nodePath;
 	private ChildrenTask task;
-	private ICachedOutlineNode parent;
+	private Object parent;
 
 	public ClassOutlineCacheChildrenTask(IASTChangeListener listener,
 			Stack<ASTPathPart> nodePath, IFile file, ChildrenTask task,
-			AbstractOutlineCache cache, ICachedOutlineNode parent) {
+			AbstractOutlineCache cache) {
 		super(listener, file, cache);
 		this.nodePath = nodePath;
 		this.task = task;
-		this.parent = parent;
+		this.parent = task.node;
 	}
 
 	@Override

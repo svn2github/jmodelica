@@ -74,7 +74,7 @@ public class ClassOutlineView extends OutlineView {
 	}
 
 	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof AbstractTextEditor) {
+		if (part instanceof AbstractTextEditor && part instanceof IFileEditorInput) {
 			IFileEditorInput fInput = (IFileEditorInput) ((AbstractTextEditor) part)
 					.getEditorInput();
 			IFile file = fInput.getFile();

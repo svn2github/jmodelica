@@ -24,7 +24,6 @@ public class CachedASTNode implements ICachedOutlineNode {
 	private boolean childrenAlreadyCached = false;
 	private String containingFileName;
 	private int selectionNodeOffset;
-	private boolean imageRendered = false;
 	private int outlineCategory;
 	private int declareOrder;
 	private boolean isInLibrary;
@@ -35,10 +34,7 @@ public class CachedASTNode implements ICachedOutlineNode {
 		this.cache = cache;
 		if (node instanceof BaseNode)
 			this.icon = ((BaseNode) node).icon();
-		myASTPath = ModelicaASTRegistry.getInstance().createPath(node);// TODO
-																		// move
-																		// to
-																		// classdecl?
+		myASTPath = ModelicaASTRegistry.getInstance().createPath(node);
 		hasVisibleChildren = node.hasVisibleChildren();// TODO?
 		containingFileName = node.containingFileName(); // TODO fix this smarter
 		text = node.contentOutlineLabel();
@@ -47,6 +43,7 @@ public class CachedASTNode implements ICachedOutlineNode {
 		outlineCategory = node.outlineCategory();
 		declareOrder = node.declareOrder();
 		isInLibrary = node.isInLibrary();
+		this.parent = parent;
 	}
 
 	public Object getParent() {
@@ -90,7 +87,6 @@ public class CachedASTNode implements ICachedOutlineNode {
 		else
 			image = SWTIconDrawer.convertImage(new AWTIconDrawer(icon)
 					.getImage());
-		imageRendered = true;
 		return image;
 	}
 
@@ -112,10 +108,6 @@ public class CachedASTNode implements ICachedOutlineNode {
 
 	public int getSelectionNodeLength() {
 		return selectionNodeLength;
-	}
-
-	public boolean imageRendered() {
-		return imageRendered;
 	}
 
 	public int outlineCategory() {

@@ -14,7 +14,7 @@ public interface IOutlineCache {
 	 * @param task
 	 *            org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask
 	 */
-	void fetchChildren(Stack<ASTPathPart> astPath, ICachedOutlineNode node,
+	void fetchChildren(Stack<ASTPathPart> astPath,
 			Object childrenTask);
 
 	int getListenerID();

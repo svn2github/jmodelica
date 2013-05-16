@@ -37,9 +37,9 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 
 	@Override
 	public void fetchChildren(Stack<ASTPathPart> nodePath,
-			ICachedOutlineNode node, Object task) {
+			Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
-				myFile, (OutlineUpdateWorker.ChildrenTask) task, this, node);
+				myFile, (OutlineUpdateWorker.ChildrenTask) task, this);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 

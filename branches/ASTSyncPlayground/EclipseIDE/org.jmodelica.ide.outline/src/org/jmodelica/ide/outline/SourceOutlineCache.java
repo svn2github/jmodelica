@@ -4,7 +4,6 @@ import java.util.Stack;
 
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedInitial;
@@ -27,10 +26,9 @@ public class SourceOutlineCache extends AbstractOutlineCache {
 	}
 
 	@Override
-	public void fetchChildren(Stack<ASTPathPart> nodePath,
-			ICachedOutlineNode node, Object task) {
+	public void fetchChildren(Stack<ASTPathPart> nodePath, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
-				myFile, (OutlineUpdateWorker.ChildrenTask) task, this, node);
+				myFile, (OutlineUpdateWorker.ChildrenTask) task, this);
 		ASTRegTaskBucket.getInstance().addTask(job);
 	}
 

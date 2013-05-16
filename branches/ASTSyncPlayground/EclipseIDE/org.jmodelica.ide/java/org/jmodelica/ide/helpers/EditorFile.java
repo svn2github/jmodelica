@@ -30,20 +30,14 @@ public class EditorFile {
 	 *            file input
 	 */
 	public EditorFile(IEditorInput input) {
-
 		if (input instanceof IFileEditorInput) {
-
 			IFileEditorInput i = (IFileEditorInput) input;
 			file = i.getFile();
 			path = file.getLocation().toOSString();
-
 		} else if (input instanceof IURIEditorInput) {
-
 			IURIEditorInput i = (IURIEditorInput) input;
-
 			path = new File(i.getURI().getPath()).getAbsolutePath();
 			file = EclipseUtil.getFileForPath(path).value();
-
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -66,7 +60,7 @@ public class EditorFile {
 	public boolean inLibrary() {
 		return path != null && (file == null || Util.isInLibrary(file));
 	}
-	
+
 	/**
 	 * Returns true if file is in a project with a Modelica nature
 	 */
@@ -77,14 +71,16 @@ public class EditorFile {
 	/**
 	 * Returns path of all files in root of the project this file belongs to.
 	 * 
-	 * If this file does not belong to a Modelica project, only the path of this file is returned.
+	 * If this file does not belong to a Modelica project, only the path of this
+	 * file is returned.
 	 */
 	public String[] getPaths() {
 		if (inModelicaProject()) {
 			try {
 				ArrayList<String> paths = new ArrayList<String>();
 				for (IResource res : file.getProject().members())
-					if (res.getType() == IResource.FILE && res.getName().endsWith(".mo"))
+					if (res.getType() == IResource.FILE
+							&& res.getName().endsWith(".mo"))
 						paths.add(res.getLocation().toOSString());
 				return paths.toArray(new String[paths.size()]);
 			} catch (CoreException e) {
@@ -129,8 +125,8 @@ public class EditorFile {
 	 * @return key representation
 	 */
 	public String toRegistryKey() {
-		return inLibrary() ? (file != null ? Util.getLibraryPath(file) : path) : file
-				.getRawLocation().toOSString();
+		return inLibrary() ? (file != null ? Util.getLibraryPath(file) : path)
+				: file.getRawLocation().toOSString();
 	}
 
 	/**

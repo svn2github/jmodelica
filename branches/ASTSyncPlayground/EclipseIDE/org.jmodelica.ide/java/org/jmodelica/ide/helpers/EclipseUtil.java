@@ -7,11 +7,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.INewWizard;
@@ -36,8 +33,8 @@ public class EclipseUtil {
 
 		try {
 
-			return Maybe.Just((IASTEditor) page.openEditor(
-					new FileEditorInput(file), desc.getId()));
+			return Maybe.Just((IASTEditor) page.openEditor(new FileEditorInput(
+					file), desc.getId()));
 
 		} catch (Exception e) {
 			e.printStackTrace();

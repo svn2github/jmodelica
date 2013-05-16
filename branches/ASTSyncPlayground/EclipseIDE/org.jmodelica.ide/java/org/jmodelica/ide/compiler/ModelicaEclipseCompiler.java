@@ -163,6 +163,8 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 	@Override
 	public ILocalRootNode compile(IFile file) {
+		if (file == null)
+			return null;
 		return parseFile(file);
 	}
 

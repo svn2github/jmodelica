@@ -51,6 +51,7 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jmodelica.generated.scanners.Modelica32PartitionScanner;
 import org.jmodelica.ide.IDEConstants;
+import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.helpers.EditorWithFile;
 import org.jmodelica.ide.helpers.ICurrentClassListener;
@@ -80,7 +81,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 
 	private IDocumentPartitioner fPartitioner;
 
-	// private AnnotationDrawer annotationDrawer; // For folding
+	//private AnnotationDrawer annotationDrawer; // For folding
 
 	private CompilationResult compResult;
 	public EditorFile file;
@@ -148,11 +149,11 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		ProjectionSupport projectionSupport = new ProjectionSupport(viewer,
 				getAnnotationAccess(), getSharedColors());
 
-		// annotationDrawer = new AnnotationDrawer(projectionSupport
-		// .getAnnotationPainterDrawingStrategy());
-		// annotationDrawer.setCursorLineBackground(getCursorLineBackground());
-
-		// projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
+//		annotationDrawer = new AnnotationDrawer(projectionSupport
+//		.getAnnotationPainterDrawingStrategy());
+//		annotationDrawer.setCursorLineBackground(getCursorLineBackground());
+//
+//		projectionSupport.setAnnotationPainterDrawingStrategy(annotationDrawer);
 		projectionSupport
 				.addSummarizableAnnotationType(IDEConstants.ERROR_MARKER_SYNTACTIC_ID);
 		projectionSupport
@@ -263,7 +264,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 			compResult.dispose(this);
 
 		file = new EditorFile(input);
-
 		compResult = file.inModelicaProject() ? new GlobalCompilationResult(
 				file, this) : new LocalCompilationResult(file, this);
 		fSourceOutlinePage.setFile(file.iFile());
@@ -328,7 +328,6 @@ public class Editor extends AbstractDecoratedTextEditor implements
 
 		IFile iFile = file.iFile();
 		compResult.recompileLocal(document(), iFile);
-		System.out.println("recompiled docu");
 
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
@@ -373,7 +372,7 @@ public class Editor extends AbstractDecoratedTextEditor implements
 	}
 
 	public void dispose() {
-		annotationFolds.dispose();
+		//annotationFolds.dispose();
 		super.dispose();
 	}
 

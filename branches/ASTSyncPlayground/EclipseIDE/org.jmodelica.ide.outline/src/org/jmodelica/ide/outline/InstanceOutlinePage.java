@@ -47,7 +47,6 @@ public class InstanceOutlinePage extends CachedOutlinePage implements
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		setDoubleClickHandling(true);
 	}
 
 	public void astChanged(IASTChangeEvent e) {

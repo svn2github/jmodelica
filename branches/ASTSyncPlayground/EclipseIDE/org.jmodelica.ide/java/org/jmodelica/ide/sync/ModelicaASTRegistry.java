@@ -36,12 +36,15 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 
 	public boolean removeListener(IFile file, Stack<ASTPathPart> nodePath,
 			IASTChangeListener listener) {
-		boolean result = ChangePropagationController.getInstance()
-				.removeListener(listener, file, nodePath);
-		String msg = result ? "successfully" : "failed to";
-		System.out.println("ModelicaASTRegistry " + msg
-				+ " unregistered listener: " + listener.toString()
-				+ ", for file:" + file.getName() + " " + nodePath);
+		boolean result = false;
+		if (file != null) {
+			result = ChangePropagationController.getInstance().removeListener(
+					listener, file, nodePath);
+			String msg = result ? "successfully" : "failed to";
+			System.out.println("ModelicaASTRegistry " + msg
+					+ " unregistered listener: " + listener.toString()
+					+ ", for file:" + file.getName() + " " + nodePath);
+		}
 		return result;
 	}
 
@@ -251,6 +254,34 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 						.equals(string))
 					return tmp.getChild(index + count);
 		}
+		return null;
+	}
+
+	public ASTNode<?> resolveSourceASTPath2(StoredDefinition def,
+			Stack<ASTPathPart> astPath) {
+		ASTNode<?> tmp = def;
+		for (int i = astPath.size() - 1; i >= 0; i--) {
+			int index = astPath.get(i).index();
+			if (astPath.get(i).id().substring(0, 5).equals("List:")) {
+				tmp = tmp.getChild(index);
+			} else {
+				tmp = findChild2(tmp, index, astPath.get(i).id());
+				if (tmp == null)
+					return null;
+			}
+		}
+		return tmp;
+	}
+
+	/**
+	 * Find the sought child node. Start at cached index, continue with closest
+	 * neighbours and outwards.
+	 */
+	private ASTNode<?> findChild2(ASTNode<?> tmp, int index, String string) {
+		int numChild = tmp.getNumChild();
+		for (int i = 0; i < numChild; i++)
+			if (createIdentifier(tmp.getChild(i)).equals(string))
+				return tmp.getChild(i);
 		return null;
 	}
 }

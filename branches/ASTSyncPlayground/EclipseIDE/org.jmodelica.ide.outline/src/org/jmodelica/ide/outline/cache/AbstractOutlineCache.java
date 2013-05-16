@@ -25,8 +25,7 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 
 	public AbstractOutlineCache(IASTChangeListener outline) {
 		myOutline = outline;
-		this.listenerID = UniqueIDGenerator.getInstance()
-				.getListenerID();
+		this.listenerID = UniqueIDGenerator.getInstance().getListenerID();
 	}
 
 	public int getListenerID() {
@@ -34,13 +33,15 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	}
 
 	public void setFile(IFile file, boolean registerASTListener) {
-		myFile = file;
-		createInitialCache();
-		if (registerASTListener) {
-			ListenerObject listObj = new ListenerObject(this,
-					IASTChangeListener.OUTLINE_LISTENER,
-					listenerID);
-			ModelicaASTRegistry.getInstance().addListener(file, null, listObj);
+		if (file != null) {
+			myFile = file;
+			createInitialCache();
+			if (registerASTListener) {
+				ListenerObject listObj = new ListenerObject(this,
+						IASTChangeListener.OUTLINE_LISTENER, listenerID);
+				ModelicaASTRegistry.getInstance().addListener(file, null,
+						listObj);
+			}
 		}
 	}
 

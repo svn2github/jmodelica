@@ -110,9 +110,7 @@ public class LoadedLibraries implements ICachedOutlineNode {
 
 	public Object[] cachedOutlineChildren() {
 		if (cachedOutlineChildren != null && cachedOutlineChildren.length > 0) {
-			System.out.println("LIB returned cahedOutlineChildren");
 			return cachedOutlineChildren;
-
 		}
 		System.out.println("lib returned getchildren");
 		return getChildren();

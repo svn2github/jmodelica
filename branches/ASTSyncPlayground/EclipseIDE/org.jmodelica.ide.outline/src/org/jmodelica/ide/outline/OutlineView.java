@@ -146,7 +146,6 @@ public abstract class OutlineView extends PageBookView implements
 	}
 
 	public boolean show(ShowInContext context) {
-		System.out.println("show!");
 		ISelection selection = context.getSelection();
 		if (selection instanceof ITreeSelection) {
 			// Pretty theoretic at this point, we don't support "show in" from
@@ -169,8 +168,7 @@ public abstract class OutlineView extends PageBookView implements
 			return selectNode(ASTNodeCacheFactory.cacheNode(ModelicaASTRegistry
 					.getInstance().getLatestDef(input.getFile())
 					.firstClassDecl(), null, null));
-			// rootASTOfInput(input); //TODO wtf? TODO fix above line so cache
-			// is not null, override method in subbclasses?
+			// rootASTOfInput(input);
 			/*
 			 * if (root != null) { // TODO: Add needed methods to an interface
 			 * instead ASTNode root2 = (ASTNode) root; if (selection instanceof
@@ -179,7 +177,7 @@ public abstract class OutlineView extends PageBookView implements
 			 * textSel.getLength(); return
 			 * selectNode(root2.containingClassDecl(offset, length)); } else {
 			 * return selectNode(root2.firstClassDecl()); } }
-			 */// TODO lol...
+			 */
 		}
 		return false;
 	}

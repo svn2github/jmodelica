@@ -60,9 +60,11 @@ public class OutlineUpdateWorker {
 	 *            the viewer that shows the node
 	 * @param node
 	 *            the node to update the outline children for
+	 * @param path
+	 *            the treeviewer path of the node
 	 */
 	public static void addChildren(TreeViewer viewer, ICachedOutlineNode node) {
-		node.getCache().fetchChildren(node.getASTPath(), node,
+		node.getCache().fetchChildren(node.getASTPath(),
 				new ChildrenTask(viewer, node));
 	}
 
@@ -208,22 +210,19 @@ public class OutlineUpdateWorker {
 			setPriority(INTERACTIVE);
 			this.task = task;
 		}
-
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			Object node = task.node;
-			if (task.viewer != null) {
-				task.viewer.refresh(node);
-				task.viewer.expandToLevel(node, task.expandDepth);
-			}
-			Set<ChildrenUpdatedListener> listeners = childrenUpdatedListenerMap
-					.get(node);
-			if (listeners != null)
-				for (ChildrenUpdatedListener listener : listeners)
-					listener.childrenUpdated(node);
-			childrenUpdatedListenerMap.remove(node);
+			task.viewer.refresh(node, false);
+			task.viewer.expandToLevel(node, task.expandDepth);
+			// Set<ChildrenUpdatedListener> listeners =
+			// childrenUpdatedListenerMap
+			// .get(node);
+			// if (listeners != null)
+			// for (ChildrenUpdatedListener listener : listeners)
+			// listener.childrenUpdated(node);
+			// childrenUpdatedListenerMap.remove(node);
 			return Status.OK_STATUS;
 		}
-
 	}
 
 	private static abstract class Task {
@@ -266,7 +265,6 @@ public class OutlineUpdateWorker {
 	}
 
 	public static class ChildrenTask extends Task {
-
 		public ChildrenTask(TreeViewer viewer, Object node) {
 			super(viewer, node);
 		}

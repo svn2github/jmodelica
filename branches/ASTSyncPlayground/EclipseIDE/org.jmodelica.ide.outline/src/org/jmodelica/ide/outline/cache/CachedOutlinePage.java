@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package org.jmodelica.ide.outline.cache;
 
 import java.util.ArrayList;
-
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -95,7 +94,6 @@ public abstract class CachedOutlinePage extends ContentOutlinePage implements
 		viewer.addSelectionChangedListener(this);
 		viewer.setComparator(getComparator());
 		viewer.setComparer(getComparer());
-
 		// Set up drag & drop
 		ClassCopySource copySource = new ClassCopySource(viewer);
 		int ops = DND.DROP_COPY | DND.DROP_MOVE;
@@ -181,7 +179,8 @@ public abstract class CachedOutlinePage extends ContentOutlinePage implements
 			IWorkbenchPage page = window.getActivePage();
 			IEditorPart editor = page.getActiveEditor();
 			if (editor instanceof IASTEditor)
-				((IASTEditor) editor).selectNode(true, node.containingFileName(),
+				((IASTEditor) editor).selectNode(true,
+						node.containingFileName(),
 						node.getSelectionNodeOffset(),
 						node.getSelectionNodeLength());
 		}
@@ -322,10 +321,9 @@ public abstract class CachedOutlinePage extends ContentOutlinePage implements
 		private String name(Object element) {
 			if (element == null)
 				return "";
-			if (element instanceof CachedASTNode)
-				return ((CachedASTNode) element).getText();
+			// getText() is not a unique ID. Viewer.refresh(node) will fail if
+			// getText() is used.
 			return element.toString();
 		}
-
 	}
 }

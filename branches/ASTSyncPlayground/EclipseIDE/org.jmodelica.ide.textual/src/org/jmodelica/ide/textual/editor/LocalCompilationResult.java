@@ -20,8 +20,10 @@ public class LocalCompilationResult extends CompilationResult {
 
 		compiler = new ModelicaEclipseCompiler();
 		ILocalRootNode lr = compiler.compile(ef.iFile());
-		ModelicaASTRegistry.getInstance().doUpdate(ef.iFile(), lr);
-		root = ((LocalRootNode) lr).getDef();
+		if (lr != null) {
+			ModelicaASTRegistry.getInstance().doUpdate(ef.iFile(), lr);
+			root = ((LocalRootNode) lr).getDef();
+		}
 		editor = ed;
 
 	}
@@ -36,7 +38,9 @@ public class LocalCompilationResult extends CompilationResult {
 	}
 
 	public void recompileLocal(IDocument doc, IFile file) {
-		root = ((LocalRootNode) compiler.recompile(doc, file)).getDef();
+		LocalRootNode lr = (LocalRootNode) compiler.recompile(doc, file);
+		if (lr != null)
+			root = lr.getDef();
 	}
 
 	@Override
