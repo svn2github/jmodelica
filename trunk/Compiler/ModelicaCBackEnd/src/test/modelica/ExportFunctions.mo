@@ -34,6 +34,7 @@ algorithm
 			description="",
 			export_functions=true,
 			export_functions_vba=true,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -78,6 +79,7 @@ algorithm
 			description="Check that the options activate/deactivate the export functions properly.",
 			export_functions=false,
 			export_functions_vba=false,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -104,6 +106,7 @@ algorithm
 			description="Check that the options activate/deactivate the export functions properly.",
 			export_functions=true,
 			export_functions_vba=false,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -157,6 +160,7 @@ algorithm
 			description="",
 			export_functions=true,
 			export_functions_vba=true,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -236,6 +240,7 @@ algorithm
 			description="",
 			export_functions=true,
 			export_functions_vba=true,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -308,6 +313,7 @@ algorithm
 			description="",
 			export_functions=true,
 			export_functions_vba=true,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$
@@ -390,6 +396,7 @@ algorithm
 			description="Test that unsupported functions aren't included when exporting functions",
 			export_functions=true,
 			export_functions_vba=true,
+			inline_functions="none",
 			template="
 $C_export_functions$
 $C_export_wrappers$

@@ -1974,6 +1974,7 @@ model RecordScalarize22
 			name="RecordScalarize22",
 			description="Array of records as argument to function",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordScalarize22
  Real x;
@@ -1986,7 +1987,7 @@ equation
  (RecordTests.RecordScalarize22.A(temp_1.a, {RecordTests.RecordScalarize22.B(temp_1.b[1].c), RecordTests.RecordScalarize22.B(temp_1.b[2].c)})) = RecordTests.RecordScalarize22.f2(4);
  (RecordTests.RecordScalarize22.B(temp_2.c)) = RecordTests.RecordScalarize22.f3(8);
  (RecordTests.RecordScalarize22.B(temp_3.c)) = RecordTests.RecordScalarize22.f3(9);
- x = RecordTests.RecordScalarize22.f1({RecordTests.RecordScalarize22.A(1, {RecordTests.RecordScalarize22.B(2), RecordTests.RecordScalarize22.B(3)}), RecordTests.RecordScalarize22.A(temp_1.a, {RecordTests.RecordScalarize22.B(temp_1.b[1].c), RecordTests.RecordScalarize22.B(temp_1.b[2].c)}), RecordTests.RecordScalarize22.A(7, {temp_2, temp_3})});
+ x = RecordTests.RecordScalarize22.f1({RecordTests.RecordScalarize22.A(1, {RecordTests.RecordScalarize22.B(2), RecordTests.RecordScalarize22.B(3)}), RecordTests.RecordScalarize22.A(temp_1.a, {RecordTests.RecordScalarize22.B(temp_1.b[1].c), RecordTests.RecordScalarize22.B(temp_1.b[2].c)}), RecordTests.RecordScalarize22.A(7, {RecordTests.RecordScalarize22.B(temp_2.c), RecordTests.RecordScalarize22.B(temp_3.c)})});
 
 public
  function RecordTests.RecordScalarize22.f1
@@ -2661,6 +2662,7 @@ model RecordOutput1
 			name="RecordOutput1",
 			description="Scalarization of records in functions: record output: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordOutput1
@@ -2758,6 +2760,7 @@ model RecordOutput3
 			name="RecordOutput3",
 			description="Scalarization of records in functions: record output: record containing array",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordOutput3
  Real x.x[1];
@@ -2813,6 +2816,7 @@ model RecordOutput4
 			name="RecordOutput4",
 			description="Scalarization of records in functions: record output: nestled records",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordOutput4
  Real x.x.x;
@@ -2871,6 +2875,7 @@ equation
 			name="RecordOutput5",
 			description="Test scalarization of function call equation left of record type",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordOutput5
  Real ry.x;
@@ -2925,6 +2930,7 @@ equation
 			name="RecordOutput6",
 			description="Test that access to record member with same name as alias variable isn't changed in alias elimination",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordOutput6
  Real ry.x;
@@ -2975,6 +2981,7 @@ model RecordInput1
 			name="RecordInput1",
 			description="Scalarization of records in functions: record input: record constructor",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput1
  Real x;
@@ -3021,6 +3028,7 @@ model RecordInput2
 			name="RecordInput2",
 			description="Scalarization of records in functions: record input:",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput2
  Real a.x;
@@ -3077,6 +3085,7 @@ model RecordInput3
 			name="RecordInput3",
 			description="Scalarization of records in functions: record input: output from another function",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput3
  Real x;
@@ -3134,6 +3143,7 @@ model RecordInput4
 			name="RecordInput4",
 			description="Scalarization of records in functions: record input: array of records",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput4
  Real a[1].x;
@@ -3188,6 +3198,7 @@ model RecordInput5
 			name="RecordInput5",
 			description="Scalarization of records in functions: record input: record containing array",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput5
  Real a.x[1];
@@ -3244,6 +3255,7 @@ model RecordInput6
 			name="RecordInput6",
 			description="Scalarization of records in functions: record input: nestled records",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput6
  Real a.z.x;
@@ -3305,6 +3317,7 @@ model RecordInput7
 			name="RecordInput7",
 			description="Scalarization of records in functions: record input: in functions",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordInput7
  Real a.x;
@@ -3366,8 +3379,8 @@ fclass RecordTests.RecordParBexp1
 
 public
  record RecordTests.RecordParBexp1.R
-  Real x = 1;
-  Real y = 1;
+  Real x;
+  Real y;
  end RecordTests.RecordParBexp1.R;
 
 end RecordTests.RecordParBexp1;
@@ -3633,7 +3646,7 @@ equation
 
 public
  record RecordTests.RecordParam1.A
-  parameter Real x = 1 /* 1 */;
+  parameter Real x;
   Real y;
  end RecordTests.RecordParam1.A;
 
@@ -3664,7 +3677,7 @@ equation
 
 public
  record RecordTests.RecordParam2.A
-  parameter Real x = 1 /* 1 */;
+  parameter Real x;
   Real y;
  end RecordTests.RecordParam2.A;
 
@@ -3692,6 +3705,7 @@ model RecordParam3
 			name="RecordParam3",
 			description="Parameter with default value in record",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam3
  parameter Real temp_1[1];
@@ -3717,7 +3731,7 @@ public
  end RecordTests.RecordParam3.f;
 
  record RecordTests.RecordParam3.A
-  parameter Real x[2] = RecordTests.RecordParam3.f(1);
+  parameter Real x[2];
   Real y;
  end RecordTests.RecordParam3.A;
 
@@ -3752,8 +3766,8 @@ equation
 
 public
  record RecordTests.RecordParam4.A
-  parameter Real x = 1 /* 1 */;
-  parameter Real z = x;
+  parameter Real x;
+  parameter Real z;
   Real y;
  end RecordTests.RecordParam4.A;
 
@@ -3788,8 +3802,8 @@ equation
 
 public
  record RecordTests.RecordParam5.A
-  parameter Real x = 2 /* 2 */;
-  parameter Real z = 3 /* 3 */;
+  parameter Real x;
+  parameter Real z;
   Real y;
  end RecordTests.RecordParam5.A;
 
@@ -3817,6 +3831,7 @@ model RecordParam6
 			name="RecordParam6",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam6
  parameter Real temp_1[1];
@@ -3832,8 +3847,8 @@ fclass RecordTests.RecordParam6
  parameter Real a2.y[1];
  parameter Real a2.y[2];
 parameter equation
- ({temp_1[1],temp_1[2]}) = RecordTests.RecordParam6.f();
- ({temp_2[1],temp_2[2]}) = RecordTests.RecordParam6.f();
+ ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam6.f();
+ ({temp_2[1], temp_2[2]}) = RecordTests.RecordParam6.f();
  a1.x[1] = temp_1[1];
  a1.x[2] = temp_1[2];
  a2.x[1] = temp_2[1];
@@ -3853,8 +3868,8 @@ public
  end RecordTests.RecordParam6.f;
 
  record RecordTests.RecordParam6.A
-  parameter Real x[2] = RecordTests.RecordParam6.f();
-  parameter Real y[2] = x[1:2];
+  parameter Real x[2];
+  parameter Real y[2];
  end RecordTests.RecordParam6.A;
 
 end RecordTests.RecordParam6;
@@ -3885,8 +3900,9 @@ model RecordMerge1
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="RecordMerge1",
-			description="",
+			description="Check that equivalent records are merged",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordMerge1
  Real r2.x;

@@ -225,24 +225,26 @@ abstract public class TestAnnotationizerHelper {
 		this.filePath = filePath;
 		this.className = className;
 		AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
-		this.description = annotationString(a.forPath("description"));
-		this.data = annotationString(a.forPath(dataName()));
+		this.description = annotationString(a.forPath("description"), false);
+		this.data = annotationString(a.forPath(dataName()), false);
 		ArrayList<String> optStrings = new ArrayList<String>();
 		for (AnnotationNode a2 : a) 
 			if (a2.name().indexOf('_') >= 0) 
-				optStrings.add(a2.name() + '=' + annotationString(a2));
+				optStrings.add(a2.name() + '=' + annotationString(a2, true));
 		opts = optStrings.toArray(new String[optStrings.size()]);
 		process();
 	}
 	
-	protected static String annotationString(AnnotationNode a) {
-		String res = a.string();
-		if (res == null) {
+	protected static String annotationString(AnnotationNode a, boolean option) {
+		if (a.isStringValue()) {
+			String str = prepare(a.string().trim());
+			return option ? '"' + str + '"' : str;
+		} else {
 			Exp exp = a.exp();
 			if (exp != null)
-				res = exp.toString();
+				return exp.toString();
 		}
-		return (res == null) ? null : res.trim();
+		return null;
 	}
 	
 	/**
@@ -457,7 +459,7 @@ abstract public class TestAnnotationizerHelper {
 	/**
 	 * \brief Escapes unallowed characters in the fields of the test annotation.
 	 */
-	protected String prepare(String str) {
+	protected static String prepare(String str) {
 		return str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"");	
 	}
 

@@ -844,6 +844,7 @@ equation
 			name="CFunctionTest1",
 			description="Test of code generation",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -884,6 +885,7 @@ equation
 			name="CFunctionTest2",
 			description="C code gen: functions: using multiple outputs",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -932,6 +934,7 @@ equation
 			name="CFunctionTest3",
 			description="C code gen: functions: two calls to same function",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -977,6 +980,7 @@ equation
 			name="CFunctionTest4",
 			description="C code gen: functions: calls to two functions",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1039,6 +1043,7 @@ equation
 			name="CFunctionTest5",
 			description="C code gen: functions: fewer components assigned than outputs",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1089,6 +1094,7 @@ equation
 			name="CFunctionTest6",
 			description="C code gen: functions: one output skipped",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1137,6 +1143,7 @@ equation
 			name="CFunctionTest7",
 			description="C code gen: functions: no components assigned",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1178,6 +1185,7 @@ model CFunctionTest8
 			name="CFunctionTest8",
 			description="C code gen: functions: function calling other function",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1234,6 +1242,7 @@ model CFunctionTest9
 			name="CFunctionTest9",
 			description="C code gen: functions:",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1276,6 +1285,7 @@ model CFunctionTest10
 			name="CFunctionTest10",
 			description="C code gen: functions: no inputs",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1314,6 +1324,7 @@ equation
 			name="CFunctionTest11",
 			description="C code gen: functions: no outputs",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1352,6 +1363,7 @@ w=f(z);
 			description="C code gen: function and variable scaling",
 			enable_variable_scaling=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1418,6 +1430,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1497,6 +1510,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1555,6 +1569,7 @@ model CForLoop1
 			name="CForLoop1",
 			description="C code generation for for loops: range exp",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_o) {
@@ -1601,6 +1616,7 @@ model CForLoop2
 			name="CForLoop2",
 			description="C code generation for for loops: generic exp",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_o) {
@@ -1649,6 +1665,7 @@ model CArrayInput1
 			name="CArrayInput1",
 			description="C code generation: array inputs to functions: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1698,6 +1715,7 @@ model CArrayInput2
 			name="CArrayInput2",
 			description="C code generation: array inputs to functions: expressions around call",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1747,6 +1765,7 @@ model CArrayInput3
 			name="CArrayInput3",
 			description="C code generation: array inputs to functions: nestled calls",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1817,6 +1836,7 @@ model CArrayInput4
 			name="CArrayInput4",
 			description="C code generation: array inputs to functions: in assign statement",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1889,6 +1909,7 @@ model CArrayInput5
 			name="CArrayInput5",
 			description="C code generation: array inputs to functions: function call stmt",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1969,6 +1990,7 @@ model CArrayInput6
 			name="CArrayInput6",
 			description="C code generation: array inputs to functions: if statement",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2062,6 +2084,7 @@ model CArrayInput7
 			name="CArrayInput7",
 			description="C code generation: array inputs to functions: while stmt",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2141,6 +2164,7 @@ model CArrayInput8
 			name="CArrayInput8",
 			description="C code generation: array inputs to functions: for stmt",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2222,6 +2246,7 @@ model CArrayOutputs1
 			name="CArrayOutputs1",
 			description="C code generation: array outputs from functions: in equation",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2268,6 +2293,7 @@ equation
 			name="CArrayOutputs2",
 			description="C code generation: array outputs from functions: in expression in equation",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2320,6 +2346,7 @@ model CArrayOutputs3
 			name="CArrayOutputs3",
 			description="C code generation: array outputs from functions: in expression in function",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2391,6 +2418,7 @@ model CArrayOutputs4
 			name="CArrayOutputs4",
 			description="C code generation: array outputs from functions: function call statement",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2466,6 +2494,7 @@ model CArrayOutputs5
 			name="CArrayOutputs5",
 			description="C code generation: array outputs from functions: passing input array",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2555,6 +2584,7 @@ model CUnknownArray1
 			name="CUnknownArray1",
 			description="C code generation for unknown array sizes: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a, jmi_array_t* o_a) {
@@ -2594,6 +2624,7 @@ model CUnknownArray2
 			name="CUnknownArray2",
 			description="C code generation for unknown array sizes: array constructor * array with unknown size",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
@@ -2666,6 +2697,7 @@ model CUnknownArray3
 			name="CUnknownArray3",
 			description="Passing array return value of unknown size directly to other function",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray3_f1_def(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
@@ -2879,6 +2911,7 @@ model CRecordDecl5
 			name="CRecordDecl5",
 			description="C code generation for records: declarations: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl5_f_def(jmi_ad_var_t* o_o) {
@@ -2927,6 +2960,7 @@ model CRecordDecl6
 			name="CRecordDecl6",
 			description="C code generation for records: declarations: nestled records",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl6_f_def(jmi_ad_var_t* o_o) {
@@ -2972,6 +3006,7 @@ model CRecordDecl7
 			name="CRecordDecl7",
 			description="C code generation for records: declarations: array in record",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl7_f_def(jmi_ad_var_t* o_o) {
@@ -3023,6 +3058,7 @@ model CRecordDecl8
 			name="CRecordDecl8",
 			description="C code generation for records: declarations: array of records",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl8_f_def(jmi_ad_var_t* o_o) {
@@ -3082,6 +3118,7 @@ model CRecordDecl9
 			name="CRecordDecl9",
 			description="C code generation for records: outputs: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3133,6 +3170,7 @@ model CRecordDecl10
 			name="CRecordDecl10",
 			description="C code generation for records: outputs: nested arrays",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3183,6 +3221,7 @@ model CRecordDecl11
 			name="CRecordDecl11",
 			description="C code generation for records: outputs: array in record",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3240,6 +3279,7 @@ model CRecordDecl12
 			name="CRecordDecl12",
 			description="C code generation for records: outputs: array of records",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3323,6 +3363,7 @@ model CRecordDecl13
 			name="CRecordDecl13",
 			description="C code generation for records: inputs: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3380,6 +3421,7 @@ model CRecordDecl14
 			name="CRecordDecl14",
 			description="C code generation for records: inputs: nested records",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3434,6 +3476,7 @@ model CRecordDecl15
 			name="CRecordDecl15",
 			description="C code generation for records: inputs: array in record",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3494,6 +3537,7 @@ model CRecordDecl16
 			name="CRecordDecl16",
 			description="C code generation for records: inputs: array of records",
 			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -4405,6 +4449,7 @@ model IntegerInFunc1
 			name="IntegerInFunc1",
 			description="Using Integer variable in function",
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_IntegerInFunc1_f_def(jmi_ad_var_t i_v, jmi_array_t* a_a, jmi_ad_var_t* x_o) {
@@ -4594,6 +4639,7 @@ model DependentParametersWithScalingTest1
 			description="",
 			enable_variable_scaling=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_DAE_initial_dependent_parameter_assignments$",
 			generatedCode="
     JMI_RECORD_STATIC(R_0_r, tmp_1)
@@ -8357,6 +8403,7 @@ equation
 			equation_sorting=true,
 			enable_tearing=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -8416,6 +8463,7 @@ equation
 			equation_sorting=true,
 			enable_tearing=true,
 			variability_propagation=false,
+			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -9182,6 +9230,7 @@ model TestEmptyArray1
 		output Real e;
 	algorithm
 		e := sum(size(d));
+		e := e + 1;
 	end f;
 	
 	parameter Real a[:, :] = fill(0.0,0,2);
@@ -9193,7 +9242,7 @@ model TestEmptyArray1
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestEmptyArray1",
-			description="",
+			description="Test handling of empty arrays",
 			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="

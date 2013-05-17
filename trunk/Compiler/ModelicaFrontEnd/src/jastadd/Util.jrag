@@ -926,8 +926,8 @@ aspect FlatNames {
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
         getFIdUse().getFArraySubscripts();
     
-    syn lazy FQName InstNode.getFQNamePrefix() = retrieveFQName();
-    
+    syn FQName InstNode.getFQNamePrefix() = retrieveFQName();
+
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
     eq InstClassDecl.getFQName()         = new FQNameEmpty();
     eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
@@ -941,16 +941,19 @@ aspect FlatNames {
     eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
     
     inh lazy FQName InstNode.retrieveFQName();
+    inh FQName FExp.retrieveFQName();
     eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
     eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
+    eq InstShortClassDecl.getInstExtends().retrieveFQName()               = retrieveFQName();
     eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
     eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
     eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
     eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
+    eq FClass.getChild().retrieveFQName()                                 = null;
 
     /**
      * \brief Get a string representation of a prefix of this name.
@@ -2170,6 +2173,14 @@ aspect FlatFunctionUtils {
      eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
      eq Root.getChild().inFunction()              = false;
+     
+     /**
+      * Get the class or component containing this node.
+      */
+     inh InstNode InstNode.containingEntity();
+     eq InstClassDecl.getChild().containingEntity()     = this;
+     eq InstComponentDecl.getChild().containingEntity() = this;
+     eq Root.getChild().containingEntity()              = null;
      
      /**
       * \brief Check is this node is in a non-function algorithm.

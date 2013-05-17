@@ -912,6 +912,7 @@ model CADFunction1
 			name="CADFunction1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -960,6 +961,7 @@ func_CADCodeGenTests_CADFunction1_F_der_AD(_a_0, (*dz)[jmi_get_index_from_value_
 			name="CADFunction2",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1032,6 +1034,7 @@ func_CADCodeGenTests_CADFunction2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_
 			name="CADFunction3",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1129,6 +1132,7 @@ func_CADCodeGenTests_CADFunction3_F2_der_AD(_a_0, (*dz)[jmi_get_index_from_value
 			name="CADFunction4",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1237,6 +1241,7 @@ model CADFunction5
 			name="CADFunction5",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1426,6 +1431,7 @@ model CADFunction6
 			name="CADFunction6",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1589,6 +1595,7 @@ model CADFunction7
 			name="CADFunction7",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1661,6 +1668,7 @@ equation
 			name="CADFunction8",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -1802,6 +1810,7 @@ equation
 			name="CADFunction9",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -1914,6 +1923,7 @@ equation
 			name="FunctionDiscreteInputTest1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -1952,6 +1962,7 @@ equation
 			name="FunctionDiscreteOutputTest1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -1994,6 +2005,7 @@ equation
 			name="FunctionDiscreteOutputTest2",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2047,6 +2059,7 @@ equation
 			name="FunctionDiscreteOutputTest3",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			equation_sorting=true,
 			generate_dae=true,
 			generate_ode=true,
@@ -2121,6 +2134,7 @@ equation
 			name="FunctionMixedRecordInputTest1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2166,6 +2180,7 @@ equation
 			name="FunctionUnknownArraySizeTest1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -2242,6 +2257,7 @@ model CADDerAnno1
 			name="CADDerAnno1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			generate_ode_jacobian=true,
 			template="
@@ -2326,6 +2342,7 @@ model CADDerAnno2
 			name="CADDerAnno2",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			generate_block_jacobian=true,
 			template="
@@ -2710,6 +2727,7 @@ equation
 			name="CADRes2",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -2810,6 +2828,7 @@ equation
 			name="CADRes3",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3494,6 +3513,7 @@ equation
 			name="CADOde1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3605,6 +3625,7 @@ model CADOde2
 			name="CADOde2",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3665,6 +3686,7 @@ equation
 			name="CADExpInFuncArg1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -3790,6 +3812,7 @@ equation
 			name="TestLiteralFuncArg1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			template="
 $CAD_function_headers$
@@ -3843,6 +3866,7 @@ equation
 			name="CADRecord1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -3980,6 +4004,7 @@ equation
 			name="CADTornRecord1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_block_jacobian=true,
 			fmi_version=2.0,
 			generate_ode=true,
@@ -4042,6 +4067,7 @@ equation
 			name="CADArray1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
 			fmi_version=2.0,
@@ -4243,6 +4269,7 @@ equation
 			name="CADTornArray1",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_block_jacobian=true,
 			fmi_version=2.0,
 			generate_ode=true,
@@ -4308,6 +4335,7 @@ equation
 			name="SparseJacTest1",
 			description="Test that sparsity information is generated correctly",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4349,6 +4377,7 @@ equation
 			name="SparseJacTest2",
 			description="Test that sparsity information is generated correctly",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4391,6 +4420,7 @@ equation
 			name="SparseJacTest3",
 			description="Test that sparsity information is generated correctly",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4431,6 +4461,7 @@ equation
 			name="SparseJacTest4",
 			description="Test that sparsity information is generated correctly",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$
@@ -4471,6 +4502,7 @@ equation
 			name="SparseJacTest5",
 			description="Test that sparsity information is generated correctly",
 			variability_propagation=false,
+			inline_functions="none",
 			generate_dae_jacobian=true,
 			template="
 $C_DAE_equation_sparsity$

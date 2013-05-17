@@ -184,6 +184,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			variability_propagation=false,
+			inline_functions="none",
 			enable_tearing=true,
 			description="Test of record tearing",
 			methodResult="
@@ -235,6 +236,7 @@ equation
 			description="Test of record tearing",
 			equation_sorting=true,
 			enable_tearing=true,
+			inline_functions="none",
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -278,6 +280,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
@@ -317,6 +320,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
@@ -362,6 +366,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			enable_tearing=true,
+			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
 -------------------------------

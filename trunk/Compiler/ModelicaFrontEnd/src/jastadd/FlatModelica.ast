@@ -1108,6 +1108,11 @@ FMatrixRow : FAbstractCat;
 FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
 /**
+ * Generated expression referring to the value of another argument to the same function call.
+ */
+FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
+
+/**
  * \brief Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.

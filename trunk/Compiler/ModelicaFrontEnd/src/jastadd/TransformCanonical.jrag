@@ -97,7 +97,18 @@ aspect TransformCanonical {
 	public void FClass.transformCanonicalCleanup() {
 		removeUnusedFunctions();
 	    root().flushAllRecursive();
+		for (FRecordDecl rec : getFRecordDecls())
+			rec.clearBindingEquations();
 	}
+
+	/**
+	 * After scalarization, binding expressions on members of record declarations are no longer needed. 
+	 */
+	public void FRecordDecl.clearBindingEquations() {
+		for (FVariable fv : getFVariables())
+			fv.setBindingExpOpt(new Opt());
+	}
+	
 
 	public void FClass.transformCanonical() {
 		beginStep("transformCanonical()");
@@ -4799,6 +4810,7 @@ aspect FunctionInlining {
 			vars.getChild(vars.getNumChild() - 1);
 			
 			replMap.put(oldName, var);
+			setSizeOf(oldName, type.size());
 			lookupMap.addVariable(var);
 			fc.variablesMap().addVariable(var);
 			return var;
@@ -5271,6 +5283,7 @@ aspect FunctionInlining {
 	 */
 	public abstract class TrivialInlineCheck {
 		protected abstract void check(FIdUse use, int i);
+		protected abstract void checkAll(FIdUse use);
 		public abstract boolean isOk();
 		
 		public void check(FIdUse use) { check(use, 1); }
@@ -5278,19 +5291,22 @@ aspect FunctionInlining {
 		public static class Scalar extends TrivialInlineCheck {
 			protected int n = 0;
 			protected void check(FIdUse use, int i) { n++; }
+			protected void checkAll(FIdUse use)     { n++; }
 			public boolean isOk()                   { return n == 1; }
 		}
 		
 		public static class KnownArray extends Scalar {
 			// TODO: check that each cell is assigned?
 			protected int size;
-			public KnownArray(int nElems) { size = nElems; };
-			public boolean isOk()         { return n == size; }
+			public KnownArray(int nElems)       { size = nElems; };
+			protected void checkAll(FIdUse use) { n += size; }
+			public boolean isOk()               { return n == size; }
 		}
 		
 		public static class UnknownArray extends Scalar {
 			// TODO: check sizes, and how loop indices are used?
 			protected void check(FIdUse use, int i) { n += use.inForLoop() ? 1 : 2; }
+			protected void checkAll(FIdUse use)     { n++; }
 		}
 		
 		public static class Record extends TrivialInlineCheck {
@@ -5305,11 +5321,20 @@ aspect FunctionInlining {
 			}
 			
 			protected void check(FIdUse use, int i) {
-				TrivialInlineCheck part = parts.get(use.getFQName().partName(i));
-				if (part != null)
-					part.check(use, i + 1);
-				else
-					namesOk = false;
+				if (i < use.getFQName().numParts()) {
+					TrivialInlineCheck part = parts.get(use.getFQName().partName(i));
+					if (part != null)
+						part.check(use, i + 1);
+					else
+						namesOk = false;
+				} else {
+					checkAll(use);
+				}
+			}
+			
+			protected void checkAll(FIdUse use) {
+				for (TrivialInlineCheck part : parts.values())
+					part.checkAll(use);
 			}
 
 			public boolean isOk() {
@@ -5322,6 +5347,7 @@ aspect FunctionInlining {
 		
 		public static class Unsupported extends TrivialInlineCheck {
 			protected void check(FIdUse use, int i) { }
+			protected void checkAll(FIdUse use)     { }
 			public boolean isOk()                   { return false; }
 		}
 		

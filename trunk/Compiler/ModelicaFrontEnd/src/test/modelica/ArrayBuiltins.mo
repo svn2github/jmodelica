@@ -2568,7 +2568,8 @@ model NonVectorizedSalarization3
 		TransformCanonicalTestCase(
 			name="NonVectorizedSalarization3",
 			description="Test of accesses that should be kept without indices during scalarization",
-			variability_propagation = false,
+			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedSalarization3
  Real x[1];

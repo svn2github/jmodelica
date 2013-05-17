@@ -2049,6 +2049,8 @@ aspect Scalarization {
 	inh boolean FExp.wantsRecordCon();
 	eq BaseNode.getChild().wantsRecordCon()         = false;
 	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
+	eq FRecordConstructor.getArg().wantsRecordCon() = wantsRecordCon();
+	eq FArray.getFExp().wantsRecordCon()            = wantsRecordCon();
  
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return new FIfExp(getIfExp().scalarize(indexMap),

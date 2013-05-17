@@ -1028,6 +1028,92 @@ end FunctionTests.FunctionBinding19;
 end FunctionBinding19;
 
 
+model FunctionBinding20
+    function f
+        input Real a;
+        input Real b = a + 2;
+        output Real c;
+    algorithm
+        c := a + b;
+    end f;
+
+    model E
+        Real g = f(time + 1);
+    end E;
+
+    E e;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionBinding20",
+			description="Default arguments referencing other arguments",
+			flatModel="
+fclass FunctionTests.FunctionBinding20
+ Real e.g = FunctionTests.FunctionBinding20.f(time + 1, time + 1 + 2);
+
+public
+ function FunctionTests.FunctionBinding20.f
+  input Real a;
+  input Real b := a + 2;
+  output Real c;
+ algorithm
+  c := a + b;
+  return;
+ end FunctionTests.FunctionBinding20.f;
+
+end FunctionTests.FunctionBinding20;
+")})));
+end FunctionBinding20;
+
+
+model FunctionBinding21
+    function f1
+        input Real a;
+        input Real b;
+        output Real c;
+    algorithm
+        c := a + b;
+    end f1;
+
+
+    model E
+	    parameter Real d = 2;
+	
+	    function f2 = f1(b = d);
+		
+		model F
+            Real h = f2(1);
+		end F;
+		
+		F f;
+    end E;
+
+    E e;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionBinding21",
+			description="Default arguments that reference parameters",
+			flatModel="
+fclass FunctionTests.FunctionBinding21
+ parameter Real e.d = 2 /* 2 */;
+ Real e.f.h = FunctionTests.FunctionBinding21.e.f2(1, e.d);
+
+public
+ function FunctionTests.FunctionBinding21.e.f2
+  input Real e.a;
+  input Real e.b := e.d;
+  output Real e.c;
+ algorithm
+  c := a + b;
+  return;
+ end FunctionTests.FunctionBinding21.e.f2;
+
+end FunctionTests.FunctionBinding21;
+")})));
+end FunctionBinding21;
+
+
 
 model BadFunctionCall1
   Real x = NonExistingFunction(1, 2);
@@ -2513,6 +2599,7 @@ algorithm
 			name="AlgorithmTransformation1",
 			description="Generating functions from algorithms: simple algorithm",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation1
  Real a;
@@ -2700,6 +2787,7 @@ algorithm
 			name="AlgorithmTransformation5",
 			description="Generating functions from algorithms: no used variables",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation5
  Real x;
@@ -2735,6 +2823,7 @@ algorithm
 			name="AlgorithmTransformation6",
 			description="Generating functions from algorithms: 2 algorithms",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation6
  Real x;
@@ -2779,6 +2868,7 @@ algorithm
 			name="AlgorithmTransformation7",
 			description="Generating functions from algorithms: generated name exists - function",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation7
  Real x;
@@ -2822,6 +2912,7 @@ algorithm
 			name="AlgorithmTransformation8",
 			description="Generating functions from algorithms: generated name exists - model",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation8
  Real x.a;
@@ -2857,6 +2948,7 @@ algorithm
 			name="AlgorithmTransformation9",
 			description="Generating functions from algorithms: generated name exists - component",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation9
  Real algorithm_1;
@@ -3114,6 +3206,7 @@ algorithm
 			name="AlgorithmTransformation15",
 			description="Generating functions from algorithms: function call statement",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation15
  Real a_in;
@@ -3586,6 +3679,7 @@ equation
 			name="ArrayOutputScalarization1",
 			description="Scalarization of array function outputs: function call equation",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization1
  Real x[1];
@@ -3627,6 +3721,7 @@ equation
 			name="ArrayOutputScalarization2",
 			description="Scalarization of array function outputs: expression with func call",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization2
  Real x[1];
@@ -3670,6 +3765,7 @@ equation
 			name="ArrayOutputScalarization3",
 			description="Scalarization of array function outputs: finding free temp name",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization3
  Real x[1];
@@ -4010,6 +4106,7 @@ equation
 			name="ArrayOutputScalarization9",
 			description="Scalarization of array function outputs: equation without expression",
 			variability_propagation=false,
+			inline_functions="none",
 			eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization9
@@ -4255,6 +4352,7 @@ model ArrayOutputScalarization14
 			name="ArrayOutputScalarization14",
 			description="Scalarization of array function outputs: part of scalar expression",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization14
  Real x;
@@ -4552,6 +4650,7 @@ model ArrayOutputScalarization20
 			name="ArrayOutputScalarization20",
 			description="Checks for bug in #1895",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization20
  Real x.a;
@@ -4607,6 +4706,7 @@ model ArrayOutputScalarization21
 		TransformCanonicalTestCase(
 			name="ArrayOutputScalarization21",
 			description="Scalarization of matrix in record as output of function",
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization21
  Real z.x[1,1];
@@ -4949,6 +5049,7 @@ model UnknownArray10
 			name="UnknownArray10",
 			description="Scalarization of operations on arrays of unknown size: assignment",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray10
  Real x[1];
@@ -4986,6 +5087,7 @@ model UnknownArray11
 			name="UnknownArray11",
 			description="Scalarization of operations on arrays of unknown size: binding expression",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray11
  Real x[1];
@@ -5026,6 +5128,7 @@ model UnknownArray12
 			name="UnknownArray12",
 			description="Scalarization of operations on arrays of unknown size: element-wise expression",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray12
  Real x[1];
@@ -5067,6 +5170,7 @@ model UnknownArray13
 			name="UnknownArray13",
 			description="Scalarization of operations on arrays of unknown size: element-wise binding expression",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray13
  Real x[1];
@@ -5309,6 +5413,7 @@ model UnknownArray18
 			name="UnknownArray18",
 			description="Scalarization of operations on arrays of unknown size: already expressed as loop",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray18
  Real x[1];
@@ -5377,6 +5482,7 @@ model UnknownArray20
 			name="UnknownArray20",
 			description="Function inputs of unknown size: scalarizing end",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UnknownArray20
  Real x[1];
@@ -6655,6 +6761,7 @@ model AttributeTemp1
 			name="AttributeTemp1",
 			description="Temporary variable for attribute",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AttributeTemp1
  Real x[1](start = temp_1[1]);
@@ -6697,6 +6804,7 @@ model InputAsArraySize1
 			name="InputAsArraySize1",
 			description="Input as array size of output in function: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.InputAsArraySize1
  Real x[1];
@@ -6737,6 +6845,7 @@ model InputAsArraySize2
 			name="InputAsArraySize2",
 			description="Input as array size of output in function: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.InputAsArraySize2
  parameter Integer n = 3 /* 3 */;
@@ -6778,6 +6887,7 @@ model InputAsArraySize3
 			name="InputAsArraySize3",
 			description="Input as array size of output in function: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.InputAsArraySize3
  parameter Integer n = 3 /* 3 */;
@@ -6818,6 +6928,7 @@ model InputAsArraySize4
 			name="InputAsArraySize4",
 			description="Input as array size of output in function: test using size()",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.InputAsArraySize4
  Real x[1];
@@ -7021,6 +7132,7 @@ model VectorizedCall1
 			name="VectorizedCall1",
 			description="Vectorization: basic test",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.VectorizedCall1
  Real z[1];
@@ -7060,6 +7172,7 @@ model VectorizedCall2
 			name="VectorizedCall2",
 			description="Vectorization: one of two args vectorized",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.VectorizedCall2
  Real z[1,1];
@@ -7387,6 +7500,7 @@ model VectorizedCall5
 			name="VectorizedCall5",
 			description="Vectorization: scalarized record arg",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.VectorizedCall5
  Real w[1].a;
@@ -7710,6 +7824,7 @@ equation
 			name="UseInterpolate",
 			description="",
 			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.UseInterpolate
  Real result;
@@ -7781,6 +7896,7 @@ model ComponentFunc1
             name="ComponentFunc1",
             description="Calling functions in components",
 			variability_propagation=false,
+			inline_functions="none",
             flatModel="
 fclass FunctionTests.ComponentFunc1
  Real b1.z(start = 2);

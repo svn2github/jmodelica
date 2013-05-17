@@ -1455,7 +1455,13 @@ aspect FlatExpressions {
 		InstAccess ia = getInstAccess();
 		if (ia.isAssignable()) {
 			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
-			if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
+			InstComponentDecl bindingOf = findComponentWithThisBindingExp();
+			if (inFunction() && bindingOf != null && bindingOf.isInput() && var.isInput() && 
+					var.containingEntity() == bindingOf.containingEntity()) {
+				int i = var.containingEntity().myInputs().indexOf(var);
+				int d = findDepthOfNestledFunctionCalls();
+				return new FArgumentExp(i, d);
+			} else if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
 				try {
 					if (!var.size().isEmpty()) {
 						// Check if we have non-constant array subscripts
@@ -1503,6 +1509,55 @@ aspect FlatExpressions {
 		}
 	}
 	
+	/**
+	 * Check if this access is in the binding expression of an input to a function, 
+	 * and refers to an input in the same function.
+	 */
+	syn boolean FInstAccessExp.inDefaultArgument() {
+		InstComponentDecl target = getInstAccess().myInstComponentDecl();
+		InstComponentDecl holder = findComponentWithThisBindingExp();
+		return inFunction() && !target.isUnknown() && holder != null && 
+				target.containingEntity() == holder.containingEntity();
+	}
+	
+	/**
+	 * Find the component that has this expression as a part of its binding expression, if any.
+	 */
+	inh InstComponentDecl FInstAccessExp.findComponentWithThisBindingExp();
+	eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
+	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;
+	
+	/**
+	 * Find the depth of nestled function calls in this expression.
+	 */
+	inh int FExp.findDepthOfNestledFunctionCalls();
+	eq InstModification.getChild().findDepthOfNestledFunctionCalls() = 0;
+	eq InstNode.getChild().findDepthOfNestledFunctionCalls()         = 0;
+	eq FClass.getChild().findDepthOfNestledFunctionCalls()           = 0;
+	eq FFunctionCall.getChild().findDepthOfNestledFunctionCalls()    = 1 + findDepthOfNestledFunctionCalls();
+	eq InstFunctionCall.getChild().findDepthOfNestledFunctionCalls() = 1 + findDepthOfNestledFunctionCalls();
+	
+	/**
+	 * Get the referenced argument.
+	 */
+	syn FExp FArgumentExp.copiedFExp() = findArgOfNestledFunctionCall(getIndex(), getDepth());
+	
+	/**
+	 * Find argument nr <code>index</code> in a surrounding function call, <code>depth</code> calls up.
+	 */
+	inh FExp FArgumentExp.findArgOfNestledFunctionCall(int index, int depth);
+	inh FExp FFunctionCall.findArgOfNestledFunctionCall(int index, int depth);
+	eq FFunctionCall.getChild().findArgOfNestledFunctionCall(int index, int depth) = 
+		(depth == 0) ? getArg(index) : findArgOfNestledFunctionCall(index, depth - 1);
+	eq InstNode.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	eq FlatRoot.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	
+	// TODO: Handle FArgumentExp all the way to C code generation or generate a temporary variable instead
+	rewrite FArgumentExp { 
+		to FExp copiedFExp().fullCopy();
+	} 
+
 	private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
 	private int InstClassDecl.nextTempVarIndex = 1;
 	
@@ -1973,6 +2028,10 @@ aspect FlatExpressions {
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {
 		return getFExp().flatten(prefix);
+	}
+
+	public FExp InstDefaultArgument.flatten(FQName prefix) {
+		return getFExp().flatten(getFExp().retrieveFQName());
 	}
 	
 	public abstract FForIndex CommonForIndex.flatten(FQName prefix);

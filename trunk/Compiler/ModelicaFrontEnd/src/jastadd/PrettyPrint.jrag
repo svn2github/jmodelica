@@ -1827,6 +1827,10 @@ aspect FlatPrettyPrint {
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
+	protected void FArgumentExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		p.print(copiedFExp(), str, indent);
+	}
+	
 	syn String FTypePrefixInputOutput.toString();
 	eq FInput.toString() = "input";
 	eq FOutput.toString()= "output";

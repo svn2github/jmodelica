@@ -2482,5 +2482,108 @@ end FunctionInlining.TrivialInline9;
 ")})));
     end TrivialInline9;
 
+
+model TrivialInline10
+    record R
+        Real a;
+        Real b[2];      
+    end R;
+    
+    function f
+        input Real c;
+        output R d;
+    algorithm
+        d := R(c, {1,2});
+    end f;
+    
+    R x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TrivialInline10",
+            description="Test that assigning an entire record at once works in trivial inlining mode",
+            variability_propagation=false,
+			inline_functions="trivial",
+            flatModel="
+fclass FunctionInlining.TrivialInline10
+ Real x.a;
+ Real x.b[1];
+ Real x.b[2];
+equation
+ x.a = 1;
+ x.b[1] = 1;
+ x.b[2] = 2;
+
+public
+ record FunctionInlining.TrivialInline10.R
+  Real a;
+  Real b[2];
+ end FunctionInlining.TrivialInline10.R;
+
+end FunctionInlining.TrivialInline10;
+")})));
+end TrivialInline10;
+
+
+model EmptyArray
+    function f
+        input Real d[:,:];
+        output Real e;
+    algorithm
+        e := sum(size(d));
+    end f;
+    
+    parameter Real a[:, :] = fill(0.0,0,2);
+    Real x = f(a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray",
+			description="Test inlining of functions with empty arrays",
+			variability_propagation=false,
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.EmptyArray
+ Real x;
+equation
+ x = 2;
+end FunctionInlining.EmptyArray;
+")})));
+end EmptyArray;
+
+
+model BindingExpInRecord
+    function f
+        input Real i;
+        output Real[2] o = { i, -i };
+    algorithm
+    end f;
+    
+    record A
+        parameter Real[2] x = f(1);
+    end A;
+    
+    A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BindingExpInRecord",
+			description="Check that inlining function only used in declaration of record class doesn't cause crash",
+			variability_propagation=false,
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.BindingExpInRecord
+ parameter Real a.x[1] = 1 /* 1 */;
+ parameter Real a.x[2] = -1 /* -1 */;
+
+public
+ record FunctionInlining.BindingExpInRecord.A
+  parameter Real x[2];
+ end FunctionInlining.BindingExpInRecord.A;
+
+end FunctionInlining.BindingExpInRecord;
+")})));
+end BindingExpInRecord;
+
 	
 end FunctionInlining;

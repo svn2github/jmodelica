@@ -320,6 +320,7 @@ equation
         ErrorTestCase(
             name="IndexReduction4_Err",
             description="Test error messages for unbalanced systems.",
+			inline_functions="none",
             errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
@@ -923,6 +924,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction24_DerFunc",
             description="Test of index reduction",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction24_DerFunc
  Real x1;
@@ -987,6 +989,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction25_DerFunc",
             description="Test of index reduction",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction25_DerFunc
  parameter Real A[1,1] = 1 /* 1 */;
@@ -1060,6 +1063,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction26_DerFunc",
             description="Test of index reduction",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction26_DerFunc
  Real x1[1];
@@ -1129,6 +1133,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction27_DerFunc",
             description="Test of index reduction",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction27_DerFunc
  parameter Real A[1,1] = 1 /* 1 */;
@@ -1215,6 +1220,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction28_Record",
             description="Index reduction: function with record input & output",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction28_Record
  parameter Real A[1,1] = 1 /* 1 */;
@@ -1309,6 +1315,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction29_FunctionNoDerivative",
             description="Index reduction: function with record input & output",
+			inline_functions="none",
             flatModel="
 fclass IndexReduction.IndexReduction29_FunctionNoDerivative
  Real x;
