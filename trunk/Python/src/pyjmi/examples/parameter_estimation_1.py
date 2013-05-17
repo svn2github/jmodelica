@@ -25,117 +25,100 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integr
 
 # Import the JModelica.org Python packages
-from pymodelica import compile_jmu
+from pymodelica import compile_jmu, compile_fmu
 from pyjmi import JMUModel
+from pyfmi import load_fmu
 from pyjmi.optimization import ipopt
 
 def run_demo(with_plots=True):
     """
     Demonstrate how to solve a simple parameter estimation problem.
     """
-
+    
+    # Locate model file
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    # Compile the Optimica model to a JMU
-    jmu_name = compile_jmu("ParEst.ParEst",
-        curr_dir+"/files/ParameterEstimation_1.mop")
+    model_path = curr_dir + "/files/ParameterEstimation_1.mop"
     
-    # Load the dynamic library
-    model=JMUModel(jmu_name)
+    # Compile the model into an FMU and JMU
+    fmu = compile_fmu("ParEst.SecondOrder", model_path)
+    jmu = compile_jmu("ParEst.ParEst", model_path)
     
-    # Retreive parameter and variable vectors
-    pi = model.real_pi
-    x = model.real_x
-    dx = model.real_dx
-    u = model.real_u
-    w = model.real_w
+    # Load the model
+    sim_model = load_fmu(fmu)
+    opt_model = JMUModel(jmu)
     
-    # Set model input
-    w[0] = 1
-
-    # ODE right hand side
-    # This can be done since DAE residuals 1 and 2
-    # are written on simple "ODE" form: f(x,u)-\dot x = 0
-    def F(xx,t):
-        dx[0] = 0. # Set derivatives to zero
-        dx[1] = 0.
-        x[0] = xx[0] # Set states
-        x[1] = xx[1]
-        res = N.zeros(3); # Create residual vector
-        model.jmimodel.dae_F(res) # Evaluate DAE residual
-        return N.array([res[1],res[2]])
-    
-    # Simulate model to get measurement data
-    N_points = 100 # Number of points in simulation
-    t0 = 0
-    tf = 15
-    t_sim = N.linspace(t0,tf,num=N_points)
-    xx0=N.array([0.,0.])
-    xx = integr.odeint(F,xx0,t_sim)
+    # Simulate model with nominal parameters
+    sim_res = sim_model.simulate(final_time=10)
         
-    # Extract measurements
-    N_points_meas = 11
-    t_meas = N.linspace(t0,10,num=N_points_meas)
-    xx_meas = integr.odeint(F,xx0,t_meas)
+    # Extract nominal trajectories
+    t_sim = sim_res['time']
+    x1_sim = sim_res['x1']
+    x2_sim = sim_res['x2']
 
-    # Add measurement noice
-    noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
-        -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
-    xx_meas[:,0] = xx_meas[:,0] + noice
-    
-    # Set parameters corresponding to measurement data in model
-    pi[4:15] = t_meas
-    pi[15:26] = xx_meas[:,0]
+    # Get measurement data with 1 Hz and add measurement noise
+    sim_model = load_fmu(fmu)
+    meas_res = sim_model.simulate(final_time=10, options={'ncp': 10})
+    x1_meas = meas_res['x1']
+    noise = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
+             -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024,
+             0.0779514]
+    t_meas = N.linspace(0, 10, 11)
+    y_meas = x1_meas + noise
 
     if with_plots:
         # Plot simulation
+        plt.close(1)
         plt.figure(1)
-        plt.clf()
-        plt.subplot(211)
-        plt.plot(t_sim,xx[:,0])
+        plt.subplot(2, 1, 1)
+        plt.plot(t_sim, x1_sim)
         plt.grid()
-        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.plot(t_meas, y_meas, 'x')
         plt.ylabel('x1')
         
-        plt.subplot(212)
-        plt.plot(t_sim,xx[:,1])
+        plt.subplot(2, 1, 2)
+        plt.plot(t_sim, x2_sim)
         plt.grid()
         plt.ylabel('x2')
         plt.show()
     
-    # optimize
-    opts = model.optimize_options()
-    opts['n_e'] = 10
-    res = model.optimize(options=opts)
+    # Insert measurement data
+    for i in xrange(11):
+        opt_model.set('t[' + repr(i+1) + ']', t_meas[i])
+        opt_model.set('y[' + repr(i+1) + ']', y_meas[i])
     
+    # Optimize
+    opt_res = opt_model.optimize()
+
     # Extract variable profiles
-    x1 = res['sys.x1']
-    u = res['u']
-    t = res['time']
+    x1_opt = opt_res['sys.x1']
+    x2_opt = opt_res['sys.x2']
+    w_opt = opt_res.final('sys.w')
+    z_opt = opt_res.final('sys.z')
+    t_opt = opt_res['time']
     
-    assert N.abs(res.final('sys.w') - 1.053339) < 1e-3
-    assert N.abs(res.final('sys.z') - 0.449854 ) < 1e-3  
+    # Assert results
+    assert N.abs(opt_res.final('sys.x1') - 1.) < 1e-2
+    assert N.abs(w_opt - 1.05)  < 1e-2
+    assert N.abs(z_opt - 0.45)   < 1e-2
     
+    # Plot optimization result
     if with_plots:
-        # Plot optimization result
+        plt.close(2)
         plt.figure(2)
-        plt.clf()
-        plt.subplot(211)
-        plt.plot(t,x1,'g')
-        plt.plot(t_sim,xx[:,0])
-        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.subplot(2, 1, 1)
+        plt.plot(t_opt, x1_opt, 'g')
+        plt.plot(t_sim, x1_sim)
+        plt.plot(t_meas, y_meas, 'x')
         plt.grid()
-        plt.ylabel('y')
-        
-        plt.subplot(212)
-        plt.plot(t,u)
+        plt.subplot(2, 1, 2)
+        plt.plot(t_opt, x2_opt, 'g')
         plt.grid()
-        plt.ylabel('u')
+        plt.plot(t_sim, x2_sim)
         plt.show()
         
         print("** Optimal parameter values: **")
-        print("w = %f"%pi[0])
-        print("z = %f"%pi[1])
+        print("w = %f" % w_opt)
+        print("z = %f" % z_opt)
 
 if __name__ == "__main__":
     run_demo()
