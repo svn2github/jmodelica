@@ -133,7 +133,7 @@ equation
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
 ")})));
 end CCodeGenTest4;
 
@@ -736,10 +736,10 @@ model CCodeGenDotOp
 			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
-    (*res)[0] = jmi_divide(_y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
-    (*res)[1] = jmi_divide(_y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"Divide by zero: y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
-    (*res)[2] = jmi_divide(_y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"Divide by zero: y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
-    (*res)[3] = jmi_divide(_y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"Divide by zero: y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
+    (*res)[0] = jmi_divide_logged(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
+    (*res)[1] = jmi_divide_logged(jmi, _y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"Divide by zero: y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
+    (*res)[2] = jmi_divide_logged(jmi, _y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"Divide by zero: y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
+    (*res)[3] = jmi_divide_logged(jmi, _y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"Divide by zero: y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
     (*res)[4] = 1 - (_y_1_1_4);
     (*res)[5] = 2 - (_y_1_2_5);
     (*res)[6] = 3 - (_y_2_1_6);
@@ -4838,12 +4838,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -4851,12 +4851,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -4869,13 +4869,13 @@ $C_ode_time_events$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-  _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\"));
+    _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _x_0 = pre_x_0 + 1;
   } else {
   _x_0 = pre_x_0;
   }
-  _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\"));
+    _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _y_1 = pre_y_1 + 1;
   } else {
@@ -8367,7 +8367,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     _i3_7 = x[1];
   _i1_5 = _i2_6 + _i3_7;
   _u1_1 = _R1_9 * _i1_5;
-  _u2_2 = jmi_divide((- _u0_0 + _u1_1),(- 1.0),\"Divide by zero: (- u0 + u1) / (- 1.0)\");
+  _u2_2 = jmi_divide_logged(jmi, (- _u0_0 + _u1_1),(- 1.0),\"Divide by zero: (- u0 + u1) / (- 1.0)\");
   (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
   (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -8566,7 +8566,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _c_2 = x[0];
         jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-        _a_0 = jmi_divide((- _c_2 + _b_1),(- 1.0),\"Divide by zero: (- c + b) / (- 1.0)\");
+        _a_0 = jmi_divide_logged(jmi, (- _c_2 + _b_1),(- 1.0),\"Divide by zero: (- c + b) / (- 1.0)\");
         (*res)[0] = _c_2 * _a_0 - (20);
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _c_2 = x[0];

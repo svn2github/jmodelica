@@ -1019,7 +1019,11 @@ aspect CCodeGen {
 	eq FDotDivExp.op_C() = " / ";
 
 	public void FDotDivExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.print("jmi_divide(");
+		if (inFunction()) {
+			str.print("jmi_divide(");
+		} else {
+			str.print("jmi_divide_logged(jmi, ");
+		}
 		p.print(getLeft(),str,indent);
 		str.print(","); 
 		p.print(getRight(),str,indent);
