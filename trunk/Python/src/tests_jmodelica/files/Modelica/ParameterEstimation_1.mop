@@ -6,8 +6,8 @@ package ParEst
     parameter Real x1_0 = 0;
     parameter Real x2_0 = 0;
     Real u;
-    Real x1(start=x1_0, nominal=1.5);
-    Real x2(start=x2_0, nominal=1.5);
+    Real x1(start=x1_0, fixed=true, nominal=1.5);
+    Real x2(start=x2_0, fixed=true, nominal=1.5);
     Real y=x1;
   
   equation
@@ -17,12 +17,8 @@ package ParEst
   end SecondOrder;
 
   optimization ParEstCasADi(startTime=0, finalTime=15)
-    // Create second order system instance,
-    // Set parameters w and z free and give 
-    // initial guesses
-    extends SecondOrder(w(free=true, initialGuess=2, min=0.1),
-                        z(free=true, initialGuess=1, min=0.1),
-                        x1(fixed=true), x2(fixed=true));
+    extends SecondOrder(w(free=true, initialGuess=1.3, min=0.1),
+                        z(free=true, initialGuess=0.3, min=0.1));
   end ParEstCasADi;
   
 end ParEst;

@@ -503,16 +503,16 @@ class TestLocalDAECollocator:
         opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         
-        w_unscaled = res['w']
-        z_unscaled = res['z']
+        w_unscaled = res.final('w')
+        z_unscaled = res.final('z')
         N.testing.assert_allclose(w_unscaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_unscaled, z_ref, 1e-2)
         
         # Optimize with scaling
         opts['variable_scaling'] = True
         res = model.optimize(self.algorithm, opts)
-        w_scaled = res['w']
-        z_scaled = res['z']
+        w_scaled = res.final('w')
+        z_scaled = res.final('z')
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
     
@@ -525,8 +525,8 @@ class TestLocalDAECollocator:
         opt_model = self.model_second_order_par_est
         
         # Simulate with initial guesses
-        sim_model.set('w', 2.)
-        sim_model.set('z', 1.)
+        sim_model.set('w', 1.3)
+        sim_model.set('z', 0.3)
         sim_res = sim_model.simulate(final_time=15.)
         
         # Reference values
@@ -552,8 +552,8 @@ class TestLocalDAECollocator:
         opt_res = opt_model.optimize(self.algorithm, opts)
         
         # Assert results
-        w = opt_res['w']
-        z = opt_res['z']
+        w = opt_res.final('w')
+        z = opt_res.final('z')
         N.testing.assert_allclose(w, w_ref, 1e-2)
         N.testing.assert_allclose(z, z_ref, 1e-2)
         
@@ -561,8 +561,8 @@ class TestLocalDAECollocator:
         opts['init_traj'] = sim_res.result_data
         opts['nominal_traj'] = sim_res.result_data
         traj_res = opt_model.optimize(self.algorithm, opts)
-        w_traj = traj_res['w']
-        z_traj = traj_res['z']
+        w_traj = traj_res.final('w')
+        z_traj = traj_res.final('z')
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
     
