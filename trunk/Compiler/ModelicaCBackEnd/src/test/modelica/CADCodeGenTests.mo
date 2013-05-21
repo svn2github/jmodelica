@@ -2990,6 +2990,68 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
 ")})));
 end CADRes3;
 
+model CADRes4
+    Real a;
+    Real b;
+    Boolean d;
+equation
+    a = 1 - b;
+    a = b * (if d then 1 else 2);
+    d = b < 0;
+	annotation(__JModelica(UnitTesting(tests={
+		CADCodeGenTestCase(
+			name="CADRes4",
+			description="Test cad code gen for mixed unsolved block with discrete variables",
+			generate_ode_jacobian=true,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$CAD_dae_blocks_residual_functions$
+",
+			generatedCode="static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t v_0;
+    jmi_real_t** res = &residual;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_1;
+        x[1] = _a_0;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[0];
+        _b_1 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = dx[1];
+        _a_0 = x[1];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = -(*dF)[1];
+    } else {
+        return -1;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        if (_d_2) {
+            v_0 = AD_WRAP_LITERAL(1);
+        } else {
+            v_0 = AD_WRAP_LITERAL(2);
+        }
+        (*res)[0] = _b_1 * v_0 - (_a_0);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * v_0 + _b_1 * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*res)[1] = 1 - _b_1 - (_a_0);
+        (*dF)[1] = AD_WRAP_LITERAL(0) - (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = 0;
+    }
+    return 0;
+}
+
+")})));
+end CADRes4;
+
 model CADTorn1
   Real x_1(start=1.29533105933);
   output Real w_ode_1_1;
