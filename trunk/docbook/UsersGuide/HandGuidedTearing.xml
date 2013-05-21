@@ -14,7 +14,7 @@
   tearing and this chapter explains how to use it.</para>
 
   <sect1>
-    <title>Options flags</title>
+    <title>Options Flags</title>
 
     <para>There are several compiler option flags that control the behaviour
     of the tearing algorithm.</para>
@@ -65,7 +65,7 @@
   </sect1>
 
   <sect1>
-    <title>Identification of equations</title>
+    <title>Identification of Equations</title>
 
     <para>In some situations, it is necessary to identify an equation so that
     it can be referenced.</para>
@@ -91,110 +91,24 @@
   </sect1>
 
   <sect1 xml:id="hgt_sec_spec">
-    <title>Specification of hand guided tearing</title>
+    <title>Specification of Hand Guided Tearing</title>
 
     <para>There are two ways to use hand guided tearing in
     JModelica.org:</para>
 
     <itemizedlist>
       <listitem>
-        <para>As bias to the automatic algorithm</para>
+        <para>As pairing where an equation is bound to a variable</para>
       </listitem>
 
       <listitem>
-        <para>As direct pairing where an equation is bound to a
-        variable</para>
+        <para>As unpaired variables and equations where pairs are bound by the
+        compiler</para>
       </listitem>
     </itemizedlist>
 
-    <sect2 xml:id="hgt_sec_bias">
-      <title>Bias the automatic tearing algorithm</title>
-
-      <para>There are two ways to bias the automatic tearing:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Bias an equation to be more prone to become a residual
-          equation</para>
-        </listitem>
-
-        <listitem>
-          <para>Bias a variable to be more prone to become a iteration
-          variable</para>
-        </listitem>
-      </itemizedlist>
-
-      <sect3 xml:id="hgt_sec_eq_as_reseq">
-        <title>Specify an equation as residual equation</title>
-
-        <para>By marking an equation as residual equation it will be more
-        prioritized during automatic tearing.</para>
-
-        <sect4>
-          <title>Syntax</title>
-
-          <para>It is possible to place annotations for residual equations in
-          the annotation block for an equation. The syntax for residual
-          equation annotation has the following syntax:</para>
-
-          <programlisting>"annotation" "("
-  "__Modelon" "("
-    ResidualEquation
-  ")"
-")"</programlisting>
-
-          <para>Where <literal>ResidualEquation</literal> has the following
-          format</para>
-
-          <programlisting>record ResidualEquation
-  Boolean enabled = true;
-end ResidualEquation;</programlisting>
-        </sect4>
-
-        <sect4>
-          <title>Example</title>
-
-          <programlisting>x = y + 1 annotation(__Modelon(ResidualEquation));</programlisting>
-        </sect4>
-      </sect3>
-
-      <sect3>
-        <title>Specify a variable as iteration variable</title>
-
-        <para>By marking a variable as iteration variable it will be
-        prioritized during automatic tearing.</para>
-
-        <sect4>
-          <title>Syntax</title>
-
-          <para>It is possible to place annotations for iteration variable in
-          the annotation block for a variable. The iteration variable
-          annotation has the following syntax:</para>
-
-          <programlisting>"annotation" "("
-  "__Modelon" "("
-    IterationVariable
-  ")"
-")"</programlisting>
-
-          <para>Where <literal>IterationVariable</literal> can be described
-          as:</para>
-
-          <programlisting>record IterationVariable
-  Boolean enabled = true;
-end IterationVariable;</programlisting>
-        </sect4>
-
-        <sect4>
-          <title>Example</title>
-
-          <programlisting>Real x annotation(__Modelon(IterationVariable));</programlisting>
-        </sect4>
-      </sect3>
-    </sect2>
-
     <sect2>
-      <title>Direct specification of tearing pairs</title>
+      <title>Paired Tearing</title>
 
       <para>In some situations it is crucial that an equation and a variable
       form a tearing pair. This is where the hand guided tearing pair
@@ -205,8 +119,7 @@ end IterationVariable;</programlisting>
       user specifies to many pairs, they will all be used and the torn block
       becomes unnecessarily complex. If the final system is unsolvable after
       all pairs are torn, the automatic algorithm will kick in and finalize
-      the tearing. During automatic tearing it is still possible to bias the
-      algorithm as specified in <xref linkend="hgt_sec_bias"/>.</para>
+      the tearing.</para>
 
       <para>There are two ways to specify hand guided tearing pairs.</para>
 
@@ -220,8 +133,8 @@ end IterationVariable;</programlisting>
         </listitem>
       </itemizedlist>
 
-      <sect3>
-        <title>Specify tearing pairs on component level</title>
+      <sect3 xml:id="hgt_sec_pairComponent">
+        <title>Specify Tearing Pairs on Component Level</title>
 
         <para>Tearing pairs can be specified in the annotation for the
         equation that should become residual equation. This type of hand
@@ -249,11 +162,6 @@ end IterationVariable;</programlisting>
   Boolean enabled = true;
   Real iterationVariable;
 end ResidualEquation;</programlisting>
-
-          <para>NOTE: This syntax has similar syntax as specifying an equation
-          as residual equation, see <xref linkend="hgt_sec_eq_as_reseq"/>.
-          However when the <literal>iterationVariable</literal> field is
-          specified it is turned into a residual pair.</para>
         </sect4>
 
         <sect4>
@@ -272,7 +180,7 @@ end A;</programlisting>
       </sect3>
 
       <sect3>
-        <title>Specify tearing pairs on system level</title>
+        <title>Specify Tearing Pairs on System Level</title>
 
         <para>Tearing pairs on system level are necessary when the residual
         equation and iteration variable are located in different name scopes.
@@ -326,6 +234,90 @@ end Pair;</programlisting>
   ...
   annotation(__Modelon(tearingPairs={Pair(residualEquation=b.res,iterationVariable=c.z)}));
 end A;</programlisting>
+        </sect4>
+      </sect3>
+    </sect2>
+
+    <sect2 xml:id="hgt_sec_bias">
+      <title>Unpaired Tearing</title>
+
+      <para>It is also possible to specify that an equation or variable should
+      be used in tearing without pairing. This is useful when there is no
+      requirement that a certain equation is bound to a specific variable. The
+      paring is instead done by the compiler during compilation. An error is
+      given If the number of unpaired equations is unequal to the number of
+      unpaired variables.</para>
+
+      <sect3 xml:id="hgt_sec_eq_as_reseq">
+        <title>Specify an Equation as Unpaired Residual Equation</title>
+
+        <para>By marking an equation as unpaired residual equation it will be
+        paired to an unpaired iteration variable during tearing.</para>
+
+        <sect4>
+          <title>Syntax</title>
+
+          <para>It is possible to place annotations for residual equations in
+          the annotation block for an equation. The syntax for residual
+          equation annotation has the following syntax:</para>
+
+          <programlisting>"annotation" "("
+  "__Modelon" "("
+    ResidualEquation
+  ")"
+")"</programlisting>
+
+          <para>Where <literal>ResidualEquation</literal> has the following
+          format</para>
+
+          <programlisting>record ResidualEquation
+  Boolean enabled = true;
+end ResidualEquation;</programlisting>
+
+          <para>NOTE: This syntax has similar syntax as specifying tearing
+          pairs on component level see<xref linkend="hgt_sec_pairComponent"/>.
+          - However the <literal>iterationVariable</literal> field is
+          unspecified.</para>
+        </sect4>
+
+        <sect4>
+          <title>Example</title>
+
+          <programlisting>x = y + 1 annotation(__Modelon(ResidualEquation));</programlisting>
+        </sect4>
+      </sect3>
+
+      <sect3>
+        <title>Specify a Variable as Unpaired Iteration Variable</title>
+
+        <para>By marking a variable as unpaired iteration variable it will be
+        paired to an unpaired residual equation during tearing.</para>
+
+        <sect4>
+          <title>Syntax</title>
+
+          <para>It is possible to place annotations for unpaired iteration
+          variable in the annotation block for a variable. The iteration
+          variable annotation has the following syntax:</para>
+
+          <programlisting>"annotation" "("
+  "__Modelon" "("
+    IterationVariable
+  ")"
+")"</programlisting>
+
+          <para>Where <literal>IterationVariable</literal> can be described
+          as:</para>
+
+          <programlisting>record IterationVariable
+  Boolean enabled = true;
+end IterationVariable;</programlisting>
+        </sect4>
+
+        <sect4>
+          <title>Example</title>
+
+          <programlisting>Real x annotation(__Modelon(IterationVariable));</programlisting>
         </sect4>
       </sect3>
     </sect2>
