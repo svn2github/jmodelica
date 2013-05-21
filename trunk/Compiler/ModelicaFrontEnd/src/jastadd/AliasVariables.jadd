@@ -34,6 +34,16 @@ aspect AliasVariables {
 	eq FVariable.isAlias() = aliasVariable() != null; 
 	
 	/**
+	 * Retreives the alias set for this variable or null if not an alias
+	 * 
+	 *  @return AliasSet that this variable belongs to
+	 */
+	syn AliasManager.AliasSet FVariable.aliasSet() {
+		AliasManager aliasManager = myFClass().getAliasManager();
+		return aliasManager.getAliasSet(this);
+	}
+	
+	/**
 	 * \brief Get the alias variable of an FVariable. 
 	 * 
 	 * If the FVariable is not an alias, null is returned.
@@ -42,8 +52,7 @@ aspect AliasVariables {
 	 * null.
 	 */
 	syn lazy AliasManager.AliasVariable FVariable.aliasVariable() {
-		AliasManager aliasManager = myFClass().getAliasManager();
-		AliasManager.AliasSet aliasSet = aliasManager.getAliasSet(this);
+		AliasManager.AliasSet aliasSet = aliasSet();
 		if (aliasSet == null || inRecord()) {
 			return null;
 		}
@@ -96,7 +105,7 @@ aspect AliasVariables {
 	 * AliasManager.AttributePropagator.
 	 */
 	public void FVariable.propagateAttributesFromAlias() {
-		AliasManager.AliasSet aliasSet = myFClass().getAliasManager().getAliasSet(this);
+		AliasManager.AliasSet aliasSet = aliasSet();
 		if (aliasSet != null) {
 			AliasManager.AliasVariable myAv = aliasSet.getIterationVariable();
 			if (myAv.getFVariable() == this) {

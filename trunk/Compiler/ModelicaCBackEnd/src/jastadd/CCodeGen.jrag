@@ -287,6 +287,7 @@ aspect CCodeGen {
 			v.printReturnWrite_C(str, indent);
 	}
 	
+	
 	private void FFunctionDecl.prettyPrintHead_C(Printer p, PrintStream str, String indent, 
 			String type, String suffix, boolean returnArgs) {
 		str.print(indent);
@@ -311,6 +312,8 @@ aspect CCodeGen {
 	}
 	
 	private void FFunctionDecl.prettyPrintWrappedCall_C(PrintStream str, String indent) {
+		if (!shouldPrintFuncDecl_C())
+			return;
 		str.print(indent);
 		str.print(funcNameUnderscore(C_SUFFIX_DEF));
 		str.print("(");
@@ -331,6 +334,8 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionDecl.genHeader_C(PrintStream str, String indent) {
+		if (!shouldPrintFuncDecl_C())
+			return;
 		prettyPrintHead_C(printer_C, str, indent, "void", C_SUFFIX_DEF, true);
 		str.print(";\n");
     	if (generateExpFunction()) {
@@ -340,7 +345,14 @@ aspect CCodeGen {
     	}
 	}
 	
+	/**
+	 * Helper method that checks wether the functiondecl should be printed.
+	 */
+	syn boolean FFunctionDecl.shouldPrintFuncDecl_C() = functionIsUsed();
+	
 	public void FFunctionDecl.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		if (!shouldPrintFuncDecl_C())
+			return;
 		String next = p.indent(indent);
 		// Print definition
 		prettyPrintHead_C(p, str, indent, "void", C_SUFFIX_DEF, true);

@@ -1184,6 +1184,36 @@ Alias sets:
 ")})));
   end AliasTest32;
 
+model AliasTest33
+  function f1
+    input Real x;
+    output Real y;
+  algorithm
+    y := x * 1;
+  end f1;
+  function f2
+    input Real x;
+    output Real y;
+  algorithm
+    y := x * 2;
+  end f2;
+  Real a (start = f1(1) * 1);
+  Real b (start = f2(2) * 2) = a;
+equation
+ a = time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest33",
+			methodName="aliasDiagnostics",
+			description="Test so that start values are printed correcly in alias set",
+			methodResult="
+Alias sets:
+{b(start=8.0), a(start=1.0)}
+1 variables can be eliminated
+")})));
+  end AliasTest33;
+
 model AliasFuncTest1
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(

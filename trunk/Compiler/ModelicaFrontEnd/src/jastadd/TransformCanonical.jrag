@@ -5811,8 +5811,9 @@ aspect FunctionInlining {
 	}
 	
 	class FFunctionDecl {
-		private enum UseType{
+		public enum UseType{
 			NONE(false, false),
+			ALIAS_ATTRIBUTE_USE(false, false),
 			ANNOTATION_DERIVATIVE(true, false),
 			DIRECT(true, true);
 			
@@ -5828,6 +5829,10 @@ aspect FunctionInlining {
 			public boolean derivativeUse() {
 				return derivativeUse;
 			}
+			
+			public UseType combine(UseType other) {
+				return compareTo(other) > 0 ? this : other;
+			}
 		}
 	}
 	
@@ -5836,7 +5841,7 @@ aspect FunctionInlining {
 	/**
 	 * Has this function been marked as used?
 	 */
-	syn boolean FFunctionDecl.functionIsUsed() = functionUsed.normalUse();
+	syn boolean FFunctionDecl.functionIsUsed() = functionUsed != UseType.NONE;
 	
 	/**
 	 * Has this function been marked as used?
@@ -5847,34 +5852,42 @@ aspect FunctionInlining {
 	 * Mark all called functions as used.
 	 */
 	public void ASTNode.markUsedFunctions() {
+		markUsedFunctions(FFunctionDecl.UseType.DIRECT);
+	}
+	public void ASTNode.markUsedFunctions(FFunctionDecl.UseType type) {
 		for (ASTNode node : this)
-			node.markUsedFunctions();
+			node.markUsedFunctions(type);
 	}
 	
-	public void FFunctionCall.markUsedFunctions() {
-		myFFunctionDecl().markUsedFunctions(true);
-		super.markUsedFunctions();
+	public void FVariable.markUsedFunctions(FFunctionDecl.UseType type) {
+		AliasManager.AliasSet set = aliasSet();
+		if (type != FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE && set != null)
+			for (AliasManager.AliasVariable alias : set)
+				if (alias.getFVariable() != this)
+					alias.getFVariable().markUsedFunctions(FFunctionDecl.UseType.ALIAS_ATTRIBUTE_USE);
+		super.markUsedFunctions(type);
 	}
 	
-	public void FFunctionDecl.markUsedFunctions(boolean direct) {
-		boolean useChanged = false;
-		if (functionUsed == UseType.NONE)
-			useChanged = true;
-		else if (functionUsed == UseType.ANNOTATION_DERIVATIVE && direct == true)
-			useChanged = true;
-		if (useChanged) {
-			functionUsed = direct ? UseType.DIRECT : UseType.ANNOTATION_DERIVATIVE;
-			if (direct &&
+	public void FFunctionCall.markUsedFunctions(FFunctionDecl.UseType type) {
+		myFFunctionDecl().markUsedFunctions(type);
+		super.markUsedFunctions(type);
+	}
+	
+	public void FFunctionDecl.markUsedFunctions(UseType type) {
+		UseType oldType = functionUsed;
+		functionUsed = functionUsed.combine(type);
+		if (functionUsed != oldType) {
+			if (functionUsed == UseType.DIRECT &&
 			   (root().options.getBooleanOption("generate_block_jacobian") ||
 			    root().options.getBooleanOption("generate_dae_jacobian") ||
 			    root().options.getBooleanOption("generate_ode_jacobian"))) {
 				if (requiresDerivative() && !canDifferentiate()) {
 					error("Unable to determine derivative function for function '" + name() + "'");
 				} else if (hasFDerivativeFunction()) {
-					getFDerivativeFunction().myFFunctionDecl().markUsedFunctions(false);
+					getFDerivativeFunction().myFFunctionDecl().markUsedFunctions(UseType.ANNOTATION_DERIVATIVE);
 				}
 			}
-			super.markUsedFunctions();
+			super.markUsedFunctions(functionUsed);
 		}
 	}
 
