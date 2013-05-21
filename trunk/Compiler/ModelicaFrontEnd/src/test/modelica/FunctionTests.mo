@@ -4737,6 +4737,52 @@ end FunctionTests.ArrayOutputScalarization21;
 end ArrayOutputScalarization21;
 
 
+model ArrayOutputScalarization22
+    function f
+        input Real a;
+        output Real[2] b;
+    algorithm
+        b := { a, a*a };
+    end f;
+    
+    parameter Integer n = 3;
+    Real[n,2] c = { f(i) for i in 1:n };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization22",
+			description="Iteration expression with function call",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization22
+ parameter Integer n = 3 /* 3 */;
+ Real c[1,1];
+ Real c[1,2];
+ Real c[2,1];
+ Real c[2,2];
+ Real c[3,1];
+ Real c[3,2];
+equation
+ ({c[1,1], c[1,2]}) = FunctionTests.ArrayOutputScalarization22.f(1);
+ ({c[2,1], c[2,2]}) = FunctionTests.ArrayOutputScalarization22.f(2);
+ ({c[3,1], c[3,2]}) = FunctionTests.ArrayOutputScalarization22.f(3);
+
+public
+ function FunctionTests.ArrayOutputScalarization22.f
+  input Real a;
+  output Real[2] b;
+ algorithm
+  b[1] := a;
+  b[2] := a * a;
+  return;
+ end FunctionTests.ArrayOutputScalarization22.f;
+
+end FunctionTests.ArrayOutputScalarization22;
+")})));
+end ArrayOutputScalarization22;
+
+
 
 /* ======================= Unknown array sizes ======================*/
 

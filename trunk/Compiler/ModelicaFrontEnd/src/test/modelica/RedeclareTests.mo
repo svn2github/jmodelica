@@ -4403,8 +4403,8 @@ model RedeclareFunction4
 			description="Redeclared versions of same function",
 			flatModel="
 fclass RedeclareTests.RedeclareFunction4
- constant Real b.x = 5.0;
- constant Real b.y = 14.0;
+ constant Real b.x = 5;
+ constant Real b.y = 14;
 end RedeclareTests.RedeclareFunction4;
 ")})));
 end RedeclareFunction4;

@@ -5164,9 +5164,9 @@ equation
 			flatModel="
 fclass ArrayTests.For.ForEquation3
  parameter Integer n = 3 /* 3 */;
- constant Real x[1] = 2.0;
- constant Real x[2] = 4.0;
- constant Real x[3] = 7.0;
+ constant Real x[1] = 2;
+ constant Real x[2] = 4;
+ constant Real x[3] = 7;
 end ArrayTests.For.ForEquation3;
 ")})));
 end ForEquation3;

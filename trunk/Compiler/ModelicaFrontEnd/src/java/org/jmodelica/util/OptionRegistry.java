@@ -267,7 +267,7 @@ public class OptionRegistry {
 		INLINE_FUNCS 
 			("inline_functions", 
 			 compiler, 
-			 Inlining.NONE, 
+			 Inlining.TRIVIAL, 
 			 "Perform function inlining on model after flattening (allowed values are none, trivial or all, default is none)", 
 			 Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
 		DEBUG_CSV_STEP_INFO 

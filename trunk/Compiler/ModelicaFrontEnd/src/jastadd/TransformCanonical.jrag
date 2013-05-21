@@ -3791,85 +3791,6 @@ aspect MapWhenClauses{
 }
 
 
-aspect TempVariables {
-	
-	protected ArrayList<FAbstractVariable> FAbstractEquation.ownedTempVars = null;
-	
-	protected ArrayList<FAbstractVariable> FAbstractEquation.NULL_EQUATION_LIST = 
-		new ArrayList<FAbstractVariable>(0);
-	
-	
-	/**
-	 * Get the list of temporary variables that was created together with this equation.
-	 */
-	public ArrayList<FAbstractVariable> FAbstractEquation.ownedTempVariables() {
-		return (ownedTempVars == null) ? NULL_EQUATION_LIST : ownedTempVars;
-	}
-	
-	/**
-	 * Add variable to the list of temporary variables that was created together with this equation.
-	 */
-	public void FAbstractEquation.addOwnedTempVariable(FAbstractVariable var) {
-		if (ownedTempVars == null)
-			ownedTempVars = new ArrayList<FAbstractVariable>();
-		ownedTempVars.add(var);
-	}
-	
-	/**
-	 * Mark all owned temp variables for removal.
-	 */
-	public void FAbstractEquation.markTempVarsForRemoval() {
-		for (FAbstractVariable var : ownedTempVariables())
-			var.markedForRemoval = true;
-	}
-	
-	public void FForClauseE.markTempVarsForRemoval() {
-		super.markTempVarsForRemoval();
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			eqn.markTempVarsForRemoval();
-	}
-	
-	public void FIfWhenElseEquation.markTempVarsForRemoval() {
-		super.markTempVarsForRemoval();
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			eqn.markTempVarsForRemoval();
-	}
-	
-	public void FIfWhenEquation.markTempVarsForRemoval() {
-		super.markTempVarsForRemoval();
-		if (hasElse())
-			getElse().markTempVarsForRemoval();
-	}
-	
-	/**
-	 * Mark all temp variables that are owned by any eqiation in list for removal.
-	 */
-	public static void FAbstractEquation.markTempVarsForRemoval(List<FAbstractEquation> eqns) {
-		for (FAbstractEquation eqn : eqns)
-			eqn.markTempVarsForRemoval();
-	}
-	
-	/**
-	 * Flag for removing variable.
-	 */
-	public boolean FAbstractVariable.markedForRemoval = false;
-	
-	/**
-	 * Remove all variables with <code>markedForRemoval == true</code>.
-	 */
-	public void FClass.removeMarkedVariables() {
-		// TODO: consider alias variables
-		List<FVariable> vars = new List<FVariable>();
-		for (FVariable var : getFVariables())
-			if (!var.markedForRemoval)
-				vars.add(var);
-		setFVariableList(vars);
-		root().flushAllRecursive();
-	}
-	
-}
-
-
 aspect IfEquations {
 	
 	/*
@@ -3891,8 +3812,9 @@ aspect IfEquations {
 		FEquationBlock b = getFEquationBlock(0);
 		b.setFAbstractEquationList(cleanEmptyElse(b.getFAbstractEquations()));
 		
-		// TODO: When workaround above is removed, add traversal to trigger the rewrites
-		removeMarkedVariables();
+		// Remove orphaned temporaries
+		flushAllRecursive();
+		removeUnusedTemporaries();
 		endStep("enableIfEquationElimination()");
 	}
 	
@@ -3931,19 +3853,14 @@ aspect IfEquations {
 	rewrite FIfEquation {
 		when (eliminateIfEquation && !hasEliminatedIfBranches) to FIfWhenElseEquation {
 			hasEliminatedIfBranches = true;
-			if (!shouldEliminateIf()) {
+			if (!shouldEliminateIf())
 				return this;
-			} else if (getTest().ceval().booleanValue()) {
-				if (hasElse())
-					getElse().markTempVarsForRemoval();
+			else if (getTest().ceval().booleanValue())
 				return new FElseEquation(getType(), getFAbstractEquations());
-			} else if (hasElse()) {
-				markTempVarsForRemoval(getFAbstractEquations());
+			else if (hasElse())
 				return getElse();
-			} else {
-				markTempVarsForRemoval(getFAbstractEquations());
+			else
 				return new FElseEquation(getType(), new List());
-			}
 		}	
 	}
 	
