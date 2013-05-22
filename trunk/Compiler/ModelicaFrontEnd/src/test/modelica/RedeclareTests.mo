@@ -4391,8 +4391,8 @@ model RedeclareFunction4
         package A2 = A;
         package A3 = A(n = 3);
         
-        Real x = A2.f(1:2);
-        Real y = A3.f(1:3);
+        Real x = A2.f(1.0:2.0);
+        Real y = A3.f(1.0:3.0);
     end B;
     
     B b;

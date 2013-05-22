@@ -5154,7 +5154,7 @@ model ForEquation3
 	Real x[n];
 equation
 	for i in 1:n loop
-		x[i] = f(sum(1:i));
+		x[i] = f(sum(1.0:i));
 	end for;
 
 	annotation(__JModelica(UnitTesting(tests={

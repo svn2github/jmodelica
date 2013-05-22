@@ -1969,17 +1969,43 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * Set the current function evaluation value.
+   * Set the current evaluation value.
    */
   public void FAbstractVariable.setEvaluationValue(CValue val) {
 	  evaluationValue = val;
   }
   
   /**
-   * Set the current function evaluation value.
+   * Set the current evaluation value.
    */
   public void InstComponentDecl.setEvaluationValue(CValue val) {
 	  evaluationValue = val;
+  }
+  
+  /**
+   * Set the current evaluation value.
+   */
+  public abstract void CommonForIndex.setEvaluationValue(CValue val);
+  
+  public void FForIndex.setEvaluationValue(CValue val) {
+	  getFVariable().setEvaluationValue(val);
+  }
+  
+  public void InstForIndex.setEvaluationValue(CValue val) {
+	  getInstPrimitive().setEvaluationValue(val);
+  }
+  
+  /**
+   * Get the current evaluation value.
+   */
+  public abstract CValue CommonForIndex.evaluationValue();
+  
+  public CValue FForIndex.evaluationValue() {
+	  return getFVariable().evaluationValue();
+  }
+  
+  public CValue InstForIndex.evaluationValue() {
+	  return getInstPrimitive().evaluationValue();
   }
   
   /**
@@ -2059,14 +2085,14 @@ aspect ConstantEvaluation {
   }
   
   /**
-   * Get the current function evaluation value.
+   * Get the current evaluation value.
    */
   public CValue FAbstractVariable.evaluationValue() {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;
   }
   
   /**
-   * Get the current function evaluation value.
+   * Get the current evaluation value.
    */
   public CValue InstComponentDecl.evaluationValue() {
 	  return evaluationValue == null ? CValue.UNKNOWN : evaluationValue;

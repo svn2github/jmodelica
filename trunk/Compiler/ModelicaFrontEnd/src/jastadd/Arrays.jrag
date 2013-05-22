@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.ArrayList;
@@ -201,8 +202,13 @@ aspect Arrays {
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
 	eq FIterExp.ndims() {
 		int exp = getFExp().ndims();
-		return (exp >= 0) ? exp + getNumForIndex() : -1;
+		return (exp >= 0) ? exp + localNdims() : -1;
 	}
+	
+	/**
+	 * The number of dimensions of the iteration indices of this iteration expression.
+	 */
+	syn int FIterExp.localNdims() = getNumForIndex();
 	
 	eq FTranspose.ndims()    = getFExp().ndims();
 	eq FCross.ndims()        = 1;
@@ -809,12 +815,37 @@ aspect Arrays {
 		if (ndims() <= 0)
 			return Size.SCALAR;
 		MutableSize s = new MutableSize(ndims());
-		for (CommonForIndex fi : getForIndexList())
-			if (fi.hasFExp() && fi.getFExp().ndims() == 1)
-				s.append(fi.getFExp().size());
+		s.append(localSize());
 		s.append(getFExp().size());
 		return s;
 	}
+	
+	/**
+	 * The size of the iteration indices of this iteration expression.
+	 */
+	syn lazy Size FIterExp.localSize() {
+		MutableSize s = new MutableSize(localNdims());
+		for (CommonForIndex fi : getForIndexList())
+			if (fi.hasFExp() && fi.getFExp().ndims() == 1)
+				s.append(fi.getFExp().size());
+		return s;
+	}
+	
+	/**
+	 * Check if this expression is inside an iteration expression.
+	 */
+	inh boolean FExp.inIterExp();
+	eq FIterExp.getFExp().inIterExp()  = true;
+	eq FClass.getChild().inIterExp()   = false;
+	eq InstNode.getChild().inIterExp() = false;
+	
+	/**
+	 * Return a size that represents the given size with sizes of surrounding iteration expressions appended.
+	 */
+	inh Size FExp.expandSizeForIterExp(Size s);
+	eq FIterExp.getFExp().expandSizeForIterExp(Size s)  = expandSizeForIterExp(s.expand(localSize()));
+	eq FClass.getChild().expandSizeForIterExp(Size s)   = s;
+	eq InstNode.getChild().expandSizeForIterExp(Size s) = s;
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
 	
@@ -1213,14 +1244,13 @@ aspect Arrays {
 		Array arr = new Array(Indices.create(expandedSize(newIndices.size())));
 		Map<String,FExp> indexMap = new HashMap<String,FExp>();
 		for (Index i : newIndices) {
-			int j = 0;
-			int[] ii = newIndices.translate(i).index();
-			for (CommonForIndex fi : forIndices) {
-				indexMap.put(fi.name(), new FIntegerLitExp(ii[j]));
-				j++;
-			}
+			newIndices.fillIndexMap(indexMap, i, forIndices);
+			for (CommonForIndex fi : forIndices)
+				indexMap.put(fi.uniqueIterExpName(), fi.evaluationValue().buildLiteral());
 			fillSubset(arr, i, indexMap);
 		}
+		for (CommonForIndex fi : forIndices) 
+			fi.setEvaluationValue(null);
 		return arr;
 	}
 	
@@ -1231,45 +1261,48 @@ aspect Arrays {
 	protected void Array.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
 		for (Index i2 : indices()) {
 			FExp e = get(i2).fullCopy();
-			arr.set(i.expand(i2), (FExp) replaceIndices(e, indexMap));
+			arr.set(i.expand(i2), e.replaceIndices(indexMap));
 		}
 	}
 	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
 		FExp e = get(Index.NULL).fullCopy();
-		arr.set(i, (FExp) replaceIndices(e, indexMap));
+		arr.set(i, e.replaceIndices(indexMap));
 	}
 	
 	/**
-	 * \brief Replaces all uses of indices in <code>indexMap</code> with the respective expressions.
+	 * Replaces all uses of indices in <code>indexMap</code> with the respective expressions.
 	 * 
-	 * May alter the tree below <code>org</code>.
+	 * May alter the tree below this.
 	 */
-	protected static ASTNode Array.replaceIndices(ASTNode org, Map<String,FExp> indexMap) {
-		ASTNode res = org.replaceFromIndexMap(indexMap);
-		if (org == res) {
-			int n = org.getNumChild();
-			for (int i = 0; i < n; i++) {
-				ASTNode sub = org.getChild(i);
-				ASTNode repl = replaceIndices(sub, indexMap);
+	protected ASTNode ASTNode.replaceIndices(Map<String,FExp> indexMap) {
+		ASTNode res = replaceFromIndexMap(indexMap);
+		if (this == res) {
+			for (int i = 0, n = getNumChild(); i < n; i++) {
+				ASTNode sub = getChild(i);
+				ASTNode repl = sub.replaceIndices(indexMap);
 				if (repl != sub)
-					org.setChild(repl, i);
+					setChild(repl, i);
 			}
 		}
 		return res;
+	}
+	
+	protected FExp FExp.replaceIndices(Map<String,FExp> indexMap) {
+		return (FExp) super.replaceIndices(indexMap);
 	}
 	
 	/**
 	 * \brief If this node is a use of an index in <code>indexMap</code>, return the 
 	 *        respective expression, otherwise return <code>this</code>.
 	 */
-	public ASTNode ASTNode.replaceFromIndexMap(Map<String,FExp> indexMap) {
+	protected ASTNode ASTNode.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		return this;
 	}
-	public ASTNode FInstAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+	protected ASTNode FInstAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
 	}
-	public ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
+	protected ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
 	}
@@ -1683,11 +1716,55 @@ aspect Arrays {
 		if (!isArray() || fc == null)
 			return super.getArray();
 		
+		FArraySubscripts fas = collectUniqueIterExpSubscripts();
 		Array arr = new Array(indices());
-		for (Index i : arr.indices()) 
-			arr.set(i, new FIdUseExp(tempVarName(), i.createFArraySubscripts()));
+		for (Index i : arr.indices()) {
+			FArraySubscripts fas2 = fas.fullCopy();
+			fas2.addFSubscripts(i);
+			arr.set(i, new FIdUseExp(tempVarName(), fas2));
+		}
 		return arr;
 	}
+	
+	/**
+	 * Collect a list of constructed names for the indexes of surrounding iteration expressions, 
+	 * that guarantees that there are no name collitions in the list.
+	 */
+	inh FArraySubscripts FExp.collectUniqueIterExpSubscripts();
+	eq FClass.getChild().collectUniqueIterExpSubscripts()   = new FArraySubscripts();
+	eq InstRoot.getChild().collectUniqueIterExpSubscripts() = new FArraySubscripts();
+	eq FIterExp.getFExp().collectUniqueIterExpSubscripts() {
+		FArraySubscripts res = collectUniqueIterExpSubscripts();
+		for (CommonForIndex i : getForIndexs())
+			res.addFSubscript(i.uniqueIterExpSubscript());
+		return res;
+	}
+	
+	/**
+	 * Creates an FSubscript to use when scalarizing iteration expressions.
+	 * 
+	 * Returns a use of {@see #uniqueIterExpName()} if there is no current evaluation value, 
+	 * or that value if there is one.
+	 */
+	syn FSubscript CommonForIndex.uniqueIterExpSubscript() = 
+		evaluationValue().isUnknown() ? 
+			new FExpSubscript(new FIdUseExp(uniqueIterExpName())) : 
+			new FIntegerSubscript(evaluationValue().intValue());
+	
+	/**
+	 * A name that is not a valid Modelica identifier, and is unique among the iteraton indices 
+	 * of nestled iteration expressions.
+	 */
+	syn lazy String CommonForIndex.uniqueIterExpName() = name() + '|' + iterExpDepth();
+	
+	/**
+	 * The number of nestled iteration expressions surrounding this index or iteration expression.
+	 */
+	inh int CommonForIndex.iterExpDepth();
+	inh int FIterExp.iterExpDepth();
+	eq FIterExp.getFExp().iterExpDepth()  = iterExpDepth() + 1;
+	eq FClass.getChild().iterExpDepth()   = 0;
+	eq InstNode.getChild().iterExpDepth() = 0;
 	
 	eq FIfExp.getArray() {
 		if (!isArray())
@@ -3263,7 +3340,15 @@ aspect ArrayHelpers {
 	     * @see #buildFArray(Iterator<FExp>,ElementBuilder,int)
 	     */
 	    protected FExp buildFArray(ElementBuilder builder) {
-	    	return buildFArray(iteratorFExp(), builder, 0);
+			Size s = size();
+			if (s.isEmpty()) {
+				List<FExp> dims = new List<FExp>();
+				for (int i = 0, n = s.ndims(); i < n ; i++)
+					dims.add(s.createFExp(i));
+				return new FFillExp(dims, type().zeroLiteral());
+			} else {
+		    	return buildFArray(iteratorFExp(), builder, 0);
+			}
 	    }
 	    
 	    /**
@@ -3729,6 +3814,21 @@ aspect ArrayHelpers {
 		 */
 		public Index translate(Index i) {
 			return i;
+		}
+		
+		/**
+		 * Add values to an index map for a given index from this set and a given set of for indices.
+		 * 
+		 * Also sets the evaluation values of the index variables.
+		 */
+		public void fillIndexMap(Map<String,FExp> indexMap, Index i, Iterable<? extends CommonForIndex> forIndices) {
+			int j = 0;
+			int[] ii = translate(i).index();
+			for (CommonForIndex fi : forIndices) {
+				indexMap.put(fi.name(), new FIntegerLitExp(ii[j]));
+				fi.setEvaluationValue(new CValueInteger(ii[j]));
+				j++;
+			}
 		}
 				
 		

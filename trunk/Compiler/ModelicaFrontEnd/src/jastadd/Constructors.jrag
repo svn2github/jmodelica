@@ -728,10 +728,32 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Add a new FExpSubscript with an integer literal as expression to the list of FSubscripts.
+	 * Add a new use expression subscript to the list of FSubscripts.
+	 */
+	public void FArraySubscripts.addFSubscript(FExp e) {
+		addFSubscript(new FExpSubscript(e));
+	}
+	
+	/**
+	 * Add a new integer literal subscript to the list of FSubscripts.
 	 */
 	public void FArraySubscripts.addFSubscript(int i) {
 		addFSubscript(new FIntegerSubscript(i));
+	}
+	
+	/**
+	 * Add new integer literal subscripts for each index to the list of FSubscripts.
+	 */
+	public void FArraySubscripts.addFSubscripts(int[] index) {
+		for (int i : index)
+			addFSubscript(i);
+	}
+	
+	/**
+	 * Add new integer literal subscripts for each index to the list of FSubscripts.
+	 */
+	public void FArraySubscripts.addFSubscripts(Index i) {
+		addFSubscripts(i.index());
 	}
 	
 	/**
@@ -754,13 +776,12 @@ aspect Constructors {
 	}
 	
 	/**
-	 * \brief Create a new FArraySubscripts containing integer literals.
+	 * Create a new FArraySubscripts containing integer literals.
 	 */
 	public static FArraySubscripts FArraySubscripts.createLiteralSubscripts(int[] index) {
-		List<FSubscript> l = new List<FSubscript>();
-		for (int i : index)
-			l.add(new FIntegerSubscript(i));
-		return new FArraySubscripts(l);
+		FArraySubscripts fas = new FArraySubscripts();
+		fas.addFSubscripts(index);
+		return fas;
 	}
 	
 }
