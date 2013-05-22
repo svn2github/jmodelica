@@ -2273,22 +2273,11 @@ aspect FlatFunctionUtils {
      eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
      eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
 
-     /**
-      * Get the name this expression should use for temporary variable.
-      * 
-      * Uses custom caching to avoid flushing.
-      */
-     syn String FExp.tempVarName() {
-    	 if (myTempVarName == null)
-    		 myTempVarName = calcTempVarName();
-    	 return myTempVarName;
-     }
-     private String FExp.myTempVarName;
-     inh String FExp.calcTempVarName();
-     eq InstNode.getChild().calcTempVarName()      = null;
-     eq FFunctionCall.getArray().calcTempVarName() = tempVarName();
-     eq FClass.getChild().calcTempVarName()        = nextTempVarName();
-     eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
+     inh lazy String FExp.tempVarName();
+     eq InstNode.getChild().tempVarName()      = null;
+     eq FFunctionCall.getArray().tempVarName() = tempVarName();
+     eq FClass.getChild().tempVarName()        = nextTempVarName();
+     eq FFunctionDecl.getChild().tempVarName() = nextTempVarName();
      
      public String FClass.nextTempVarName() {
     	 FlatVariableMap vars = variablesMap();

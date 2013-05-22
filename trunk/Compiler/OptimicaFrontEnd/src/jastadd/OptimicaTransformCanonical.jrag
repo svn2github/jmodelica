@@ -199,12 +199,15 @@ aspect OptimicaTransformCanonical {
 		myIndexMap.putAll(indexMap);
 		Indices indices = indices();
 		for (Index i : indices) {
-			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
+			int j = 0;
+			int[] ii = indices.translate(i).index();
+			for (FForIndex fi : getFForIndexs()) {
+				myIndexMap.put(fi.getFVariable().name(), new FIntegerLitExp(ii[j]));
+				j++;
+			}
 			for (FConstraint c : getFConstraints()) 
 				c.scalarize(constr, eqns, vars, myIndexMap);
 		}
-		for (FForIndex fi : getFForIndexs()) 
-			fi.setEvaluationValue(null);
 	}
 	
 	public FExp FTimedVariable.scalarize(Map<String,FExp> indexMap) { 
