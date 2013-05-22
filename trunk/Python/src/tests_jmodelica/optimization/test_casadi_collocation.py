@@ -501,6 +501,7 @@ class TestLocalDAECollocator:
         opts = model.optimize_options(self.algorithm)
         opts['measurement_data'] = measurement_data
         opts['variable_scaling'] = False
+        opts['n_e'] = 16
         res = model.optimize(self.algorithm, opts)
         
         w_unscaled = res.final('w')
@@ -549,6 +550,7 @@ class TestLocalDAECollocator:
         # Optimize without scaling
         opts = opt_model.optimize_options(self.algorithm)
         opts['measurement_data'] = measurement_data
+        opts['n_e'] = 16
         opt_res = opt_model.optimize(self.algorithm, opts)
         
         # Assert results
