@@ -1523,6 +1523,7 @@ aspect Scalarization {
 			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
 			scalarizeList(getFAbstractEquations(), eqns, vars, myIndexMap);
 			getFAbstractEquations().flushAllRecursive(); // Throw calculated sizes/arrays
+			getFAbstractEquations().flushTempVarNames();
 		}
 		for (FForIndex fi : getFForIndexs()) 
 			fi.setEvaluationValue(null);

@@ -2290,6 +2290,18 @@ aspect FlatFunctionUtils {
      eq FClass.getChild().calcTempVarName()        = nextTempVarName();
      eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
      
+     /**
+      * Throw away calculated temp names.
+      */
+     public void ASTNode.flushTempVarNames() {
+    	 for (ASTNode n : this)
+    		 n.flushTempVarNames();
+     }
+     public void FExp.flushTempVarNames() {
+    	 myTempVarName = null;
+    	 super.flushTempVarNames();
+     }
+     
      public String FClass.nextTempVarName() {
     	 FlatVariableMap vars = variablesMap();
          String name;
