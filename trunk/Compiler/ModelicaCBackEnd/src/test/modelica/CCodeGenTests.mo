@@ -6169,7 +6169,7 @@ model BlockTest8
     Boolean d;
 equation
     a = 1 - b;
-    a = b * (if d then 1 else 2);
+    a = sin(b) * (if d then 1 else 2);
     d = b < 0;
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -6201,7 +6201,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _b_1 = x[0];
         _a_0 = x[1];
-        (*res)[0] = _b_1 * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
+        (*res)[0] = sin(_b_1) * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
         (*res)[1] = 1 - _b_1 - (_a_0);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
         _d_2 = _sw(0);
@@ -6230,7 +6230,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _b_1 = x[0];
         _a_0 = x[1];
-        (*res)[0] = _b_1 * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
+        (*res)[0] = sin(_b_1) * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
         (*res)[1] = 1 - _b_1 - (_a_0);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
         _d_2 = _sw(0);

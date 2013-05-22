@@ -1963,7 +1963,8 @@ aspect LinearFVariables {
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
-
+    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = true;
+    
 	syn boolean FExp.isIndependent(Set<FVariable> set) {
 		for (FExp e : childFExps()) {
     		if (!e.isIndependent(set)) {
@@ -1971,6 +1972,12 @@ aspect LinearFVariables {
     		}
     	}
     	return true;
+	}
+
+	syn boolean FIfExp.isIndependent(Set<FVariable> set) {
+		// Don't check the guard exp since it is discrete and does not affect
+		// linearity.
+		return getThenExp().isIndependent(set) && getElseExp().isIndependent(set);
 	}
 
 	eq FIdUseExp.isIndependent(Set<FVariable> set) {

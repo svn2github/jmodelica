@@ -4505,6 +4505,42 @@ Jacobian:
 ")})));
 end BlockTest6;
 
+model BlockTest7
+    Real a;
+    Real b;
+    Boolean d;
+equation
+    a = 1 - b;
+    a = b * (if d then 1 else 2);
+    d = b < 0;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest7",
+			description="Test of linear systems of equations with if expression",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved mixed linear block of 3 variables:
+
+Coefficient variability: Discrete
+Unknown continuous variables:
+  b
+  a
+Unknown discrete variables:
+  d
+Continuous equations:
+  a = b * (if d then 1 else 2)
+  a = 1 - b
+Discrete equations:
+  d = b < 0
+Jacobian:
+  |(- 1.0 * (if d then 1 else 2)), 1.0|
+  |- (- 1.0), 1.0|
+-------------------------------
+")})));
+end BlockTest7;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];
