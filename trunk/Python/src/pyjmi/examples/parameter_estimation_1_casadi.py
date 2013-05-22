@@ -92,6 +92,7 @@ def run_demo(with_plots=True):
     # Set optimization options
     opts = opt_model.optimize_options()
     opts['measurement_data'] = measurement_data
+    opts['n_e'] = 16
     
     # Optimize
     opt_res = opt_model.optimize(options=opts)

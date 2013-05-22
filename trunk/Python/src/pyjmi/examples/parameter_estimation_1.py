@@ -86,8 +86,12 @@ def run_demo(with_plots=True):
         opt_model.set('t[' + repr(i+1) + ']', t_meas[i])
         opt_model.set('y[' + repr(i+1) + ']', y_meas[i])
     
+    # Set optimization options
+    opts = opt_model.optimize_options()
+    opts['n_e'] = 16
+    
     # Optimize
-    opt_res = opt_model.optimize()
+    opt_res = opt_model.optimize(options=opts)
 
     # Extract variable profiles
     x1_opt = opt_res['sys.x1']
