@@ -16,10 +16,6 @@
 
 aspect OptimicaTransformCanonical {
 	
-	public void FOptClass.variabilityPropagationIfSet() {
-		// Blocks variability propagation in optimization classes.
-	}
-	
 	public void FOptClass.transformCanonical() {
     	beginStep("transformCanonical()");
 		

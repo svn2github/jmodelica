@@ -15,7 +15,7 @@ package Test
     Modelica.Blocks.Interfaces.RealInput u_f00;
     Real mass(start=1);
   equation
-    mass = 1;
+    der(mass) = -1;
   end Template;
 
   model Model

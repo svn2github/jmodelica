@@ -35,6 +35,7 @@ package OptimicaTransformCanonicalTests
 			description="Test linearity of variables.",
 			methodResult="  
 Independent constants: 
+ x1: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -43,7 +44,9 @@ Independent parameters:
  p2: number of uses: 1, isLinear: false
  startTime: number of uses: 0, isLinear: true, evaluated binding exp: 0
  finalTime: number of uses: 1, isLinear: true, evaluated binding exp: 1
+
 Dependent parameters: 
+ x2: number of uses: 2, isLinear: true
 
 Differentiated variables: 
  cost: number of uses: 0, isLinear: true
@@ -53,9 +56,7 @@ Derivative variables:
 
 Discrete variables: 
 
-Algebraic real variables: 
- x1: number of uses: 3, isLinear: true, alias: no
- x2: number of uses: 2, isLinear: true, alias: no
+Algebraic real variables:
  x3: number of uses: 2, isLinear: false, alias: no
  x4: number of uses: 2, isLinear: true, alias: no
  x5: number of uses: 2, isLinear: false, alias: no
@@ -321,13 +322,10 @@ constraint
 			description="Timed array variables: basic test",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
- Real x[2];
- Real y;
+ constant Real x[2] = 2;
+ constant Real y = 1;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
-equation 
- y = 1;
- x[2] = 2;
 constraint 
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
@@ -347,15 +345,11 @@ constraint
 			description="Timed array variables: scalarizing vector multiplication",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(finalTime),startTime = 0,finalTime = 2)
- Real x[1];
- Real x[2];
- Real y;
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real y = 4.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
-equation
- x[1] = 1;
- x[2] = 2;
- y = x[1] + 3;
 constraint 
  y <= x[1](0) * 2 + x[2](0) * 3;
 end OptimicaTransformCanonicalTests.TimedArrayTest2;
@@ -415,17 +409,12 @@ constraint
 			description="Scalarization of for constraints",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](finalTime) + y[2](finalTime),startTime = 0,finalTime = 2)
- Real x[1];
- Real x[2];
- Real y[1];
- Real y[2];
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real y[1] = 4.0;
+ constant Real y[2] = 6.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
-equation 
- x[1] = 1;
- x[2] = 2;
- y[1] = 3 + x[1];
- y[2] = 4 + x[2];
 constraint 
  y[1] <= x[1];
  y[1] <= x[2];
@@ -640,6 +629,7 @@ equation
 Free independent parameters:
 p1
 Free dependent parameters:
+x
 ")})));
 end DepParTest1;
 
@@ -660,6 +650,8 @@ equation
 Free independent parameters:
 p1
 Free dependent parameters:
+p2
+x
 ")})));
 end DepParTest2;
 
@@ -685,6 +677,9 @@ equation
 Free independent parameters:
 p2
 Free dependent parameters:
+x
+m.p1
+m.x
 ")})));
 end DepParTest3;
 
@@ -712,6 +707,8 @@ Free independent parameters:
 p2
 Free dependent parameters:
 m.p1
+x
+m.x
 ")})));
 end DepParTest4;
 

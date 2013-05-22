@@ -357,6 +357,7 @@ p3
 			description="Test linearity of free dependent parameters.", 
             methodResult="
 Independent constants: 
+ x1: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -378,7 +379,6 @@ Derivative variables:
 Discrete variables: 
 
 Algebraic real variables: 
- x1: number of uses: 1, isLinear: true, alias: no
 
 Input variables: 
 ")})));
