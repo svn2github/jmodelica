@@ -201,6 +201,8 @@ aspect Flattening {
 			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
 			if (der != null)
 				ffd.setFDerivativeFunction(der);
+			// TODO: should we look in extends as well?
+			ffd.readInlineAnnotation(annotation());
 			
 			fc.addFFunctionDecl(ffd);
 			ffd.ensureFQNamesFull();

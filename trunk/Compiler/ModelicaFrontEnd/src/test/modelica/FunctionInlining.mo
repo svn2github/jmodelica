@@ -2525,6 +2525,250 @@ end FunctionInlining.TrivialInline10;
 end TrivialInline10;
 
 
+model InlineAnnotation1
+	function f
+		input Real a;
+		output Real b;
+	algorithm
+		b := a * a;
+		b := b - a;
+	annotation(Inline=true);
+	end f;
+	
+	Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation1",
+			description="Inline annotation",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation1
+ Real x;
+ Real temp_1;
+equation
+ x = temp_1 * temp_1 - temp_1;
+ temp_1 = time;
+end FunctionInlining.InlineAnnotation1;
+")})));
+end InlineAnnotation1;
+
+
+model InlineAnnotation2
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+		while b > a loop
+            b := b - a;
+		end while;
+    annotation(Inline=true);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation2",
+			description="Inline annotation on function that can't be inlined'",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation2
+ Real x;
+equation
+ x = FunctionInlining.InlineAnnotation2.f(time);
+
+public
+ function FunctionInlining.InlineAnnotation2.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a * a;
+  while b > a loop
+   b := b - a;
+  end while;
+  return;
+ end FunctionInlining.InlineAnnotation2.f;
+
+end FunctionInlining.InlineAnnotation2;
+")})));
+end InlineAnnotation2;
+
+
+model InlineAnnotation3
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+        b := b - a;
+    annotation(LateInline=true);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation3",
+			description="LateInline annotation",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation3
+ Real x;
+ Real temp_1;
+equation
+ x = temp_1 * temp_1 - temp_1;
+ temp_1 = time;
+end FunctionInlining.InlineAnnotation3;
+")})));
+end InlineAnnotation3;
+
+
+model InlineAnnotation4
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+        b := b - a;
+    annotation(InlineAfterIndexReduction=true);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation4",
+			description="InlineAfterIndexReduction annotation",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation4
+ Real x;
+ Real temp_1;
+equation
+ x = temp_1 * temp_1 - temp_1;
+ temp_1 = time;
+end FunctionInlining.InlineAnnotation4;
+")})));
+end InlineAnnotation4;
+
+
+model InlineAnnotation5
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+    annotation(Inline=false);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation5",
+			description="Inline annotation set to false on function we would normally inline",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation5
+ Real x;
+equation
+ x = FunctionInlining.InlineAnnotation5.f(time);
+
+public
+ function FunctionInlining.InlineAnnotation5.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a * a;
+  return;
+ end FunctionInlining.InlineAnnotation5.f;
+
+end FunctionInlining.InlineAnnotation5;
+")})));
+end InlineAnnotation5;
+
+
+model InlineAnnotation6
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+    annotation(LateInline=false);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation6",
+			description="LateInline annotation set to false on function we would normally inline",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation6
+ Real x;
+equation
+ x = FunctionInlining.InlineAnnotation6.f(time);
+
+public
+ function FunctionInlining.InlineAnnotation6.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a * a;
+  return;
+ end FunctionInlining.InlineAnnotation6.f;
+
+end FunctionInlining.InlineAnnotation6;
+")})));
+end InlineAnnotation6;
+
+
+model InlineAnnotation7
+    function f
+        input Real a;
+        output Real b;
+    algorithm
+        b := a * a;
+    annotation(InlineAfterIndexReduction=false);
+    end f;
+    
+    Real x = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InlineAnnotation7",
+			description="InlineAfterIndexReduction annotation set to false on function we would normally inline",
+			inline_functions="trivial",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionInlining.InlineAnnotation7
+ Real x;
+equation
+ x = FunctionInlining.InlineAnnotation7.f(time);
+
+public
+ function FunctionInlining.InlineAnnotation7.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a * a;
+  return;
+ end FunctionInlining.InlineAnnotation7.f;
+
+end FunctionInlining.InlineAnnotation7;
+")})));
+end InlineAnnotation7;
+
+
 model EmptyArray
     function f
         input Real d[:,:];

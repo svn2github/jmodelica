@@ -4531,6 +4531,57 @@ aspect FunctionInlining {
 		endStep("inlineFunctions()");
 	}
 	
+	public class FFunctionDecl {
+		/**
+		 * Describes the possible inputs from the user concerning if and how to inline the function.
+		 */
+		public enum InlineAnnotation { 
+			DEFAULT     (true, false), 
+			NONE        (false, false), 
+			INLINE      (true, true), 
+			LATE        (true, true), 
+			AFTER_INDEX (true, true);
+			
+			private boolean may;
+			private boolean always;
+			
+			private InlineAnnotation(boolean may, boolean always) {
+				this.may = may;
+				this.always = always;
+			}
+			
+			/**
+			 * Check if the annotation says that we may try to inline the function.
+			 */
+			public boolean may() {
+				return may;
+			}
+			
+			/**
+			 * Check if the annotation says that we should always try to inline the function.
+			 */
+			public boolean always() {
+				return always;
+			}
+			
+		}
+		// TODO: handle LATE & AFTER_INDEX diffrently
+		
+		private InlineAnnotation inlineAnnotation = InlineAnnotation.DEFAULT;
+		
+		public void readInlineAnnotation(AnnotationNode a) {
+			AnnotationNode inline = a.forPath("Inline");
+			AnnotationNode late = a.forPath("LateInline");
+			AnnotationNode index = a.forPath("InlineAfterIndexReduction");
+			if (late.isBoolValue())
+				inlineAnnotation = late.bool() ? InlineAnnotation.LATE : InlineAnnotation.NONE;
+			if (inline.isBoolValue() && !(late.isBoolValue() && late.bool()))
+				inlineAnnotation = inline.bool() ? InlineAnnotation.INLINE : InlineAnnotation.NONE;
+			if (index.isBoolValue())
+				inlineAnnotation = index.bool() ? InlineAnnotation.AFTER_INDEX : InlineAnnotation.NONE;
+		}
+	}
+	
 	/**
 	 * Helper class for inlining.
 	 * 
@@ -5124,12 +5175,17 @@ aspect FunctionInlining {
 	 * Check if we can inline this function.
 	 */
 	syn lazy boolean FFunctionDecl.isInlinable() =
-		isAllInlinable(getFAlgorithm().getFStatements());
-	
+		inlineAnnotation.may() && isAllInlinable(getFAlgorithm().getFStatements());
+	// TODO: Add warning if a function where user suggests inlining can't be inlined?
+
 	/**
 	 * Check if this function falls under the "trivial" inlining category.
 	 */
 	syn lazy boolean FFunctionDecl.isTrivialInlinable() {
+		if (!inlineAnnotation.may())
+			return false;
+		if (inlineAnnotation.always())
+			return isInlinable();
 		if (myProtected().size() > 0)
 			return false;
 		for (FStatement stmt : getFAlgorithm().getFStatements())
