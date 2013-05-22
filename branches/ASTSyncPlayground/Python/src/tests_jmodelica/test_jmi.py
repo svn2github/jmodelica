@@ -1312,14 +1312,14 @@ class TestModelGeneric:
     def setUpClass(cls):
 
         fpath = os.path.join(get_files_path(), 'Modelica', 'DependentParameterTest.mo')
-        cpath = "DependentParameterTest"
+        cpath = "DependentParameterTest1"
         
         fname = compile_jmu(cpath, fpath)
 
     
     def setUp(self):
         """Set up the test case."""
-        self.m = JMUModel("DependentParameterTest.jmu")
+        self.m = JMUModel("DependentParameterTest1.jmu")
 
     @testattr(stddist = True)
     def test_setget_independent_parameter(self):

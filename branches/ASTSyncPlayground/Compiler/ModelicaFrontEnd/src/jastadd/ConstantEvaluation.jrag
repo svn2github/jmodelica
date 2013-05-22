@@ -52,7 +52,7 @@ aspect ConstantEvaluation {
 		}
 		
 		public ConstantEvaluationException() {
-			super();
+			super("Unspecified constant evaluation failure");
 			this.val = null;
 		}
 		
@@ -67,10 +67,17 @@ aspect ConstantEvaluation {
 		 * \brief Gets the error message.
 		 */
 		public String getMessage() {
-			return (val == null) ? 
-				"Unspecified constant evaluation failure" :
+			return (val == null) ? super.getMessage() :
 				"Cannot " + super.getMessage() + val.errorDesc();
 		}
+	}
+	
+	public class ConstantEvaluationNotReadyException extends ConstantEvaluationException {
+		
+		public ConstantEvaluationNotReadyException() {
+			super(null, "Cannot evaluate expression yet");
+		}
+		
 	}
   
 	/**
@@ -1071,10 +1078,15 @@ aspect ConstantEvaluation {
    * Check if this expression can be constant evaluated.
    * 
    * Calls ceval and checks that no exception is thrown, and that the result isn't unknown.
+   * Use only for error checking, since it does not guarantee that the expression can be 
+   * evaluated at the moment - only after calculating overconstrained connection graph.
    */
   syn boolean FExp.canCeval() {
   	  try {
-  	  	   return !ceval().isUnknown();
+  	  	  return !ceval().isUnknown();
+	  } catch (ConstantEvaluationNotReadyException e) {
+		  // Will be evaluatable later, ignore for now
+		  return true;
   	  } catch (Exception e) {
   	  	  return false;
   	  }
@@ -1172,7 +1184,26 @@ aspect ConstantEvaluation {
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
- 
+  
+  eq FConnectionsOp.cevalCalc() {
+	  throw new ConstantEvaluationException();
+  }
+  eq FConnBoolOp.cevalCalc() {
+	  if (connectionGraph != null && connectionGraph.builtTreesDone()) 
+		  return new CValueBoolean(cevalFromGraph());
+	  else
+		  throw new ConstantEvaluationNotReadyException();
+  }
+  
+  syn boolean FConnBoolOp.cevalFromGraph();
+  eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
+  eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
+
+  /**
+   * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
+   */
+  protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
+  
   eq FSizeExp.cevalCalc() {
 	  if (!hasDim())
 		  return CValue.UNKNOWN;
@@ -1215,7 +1246,7 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval() : CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
   
   /** Decides what initial() is currently evaluated to. */
@@ -1334,6 +1365,8 @@ aspect ConstantEvaluation {
   }
  
   eq FIdUseExp.cevalCalc()      = getFIdUse().ceval();
+  eq FDerExp.cevalCalc() = 
+			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
@@ -1345,6 +1378,9 @@ aspect ConstantEvaluation {
 	  if (myInstComponentDecl().isAssignable()) {
 		  Index iHere = Index.NULL;
 		  InstAssignable var = (InstAssignable) myInstComponentDecl();
+		  InstComponentDecl inner = var.myInnerInstComponentDecl();
+		  if (!inner.isUnknown())
+			  var = (InstAssignable) inner;
 		  
 		  if (hasFArraySubscripts()) {
 			  FArraySubscripts fas = getFArraySubscripts();
@@ -1406,6 +1442,8 @@ aspect ConstantEvaluation {
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   
   eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
+  
+  eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
 	syn CValue FSubscript.ceval() = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval()      = getFExp().ceval();
@@ -1474,25 +1512,18 @@ aspect ConstantEvaluation {
 	/**
 	 * \brief Find and evaluate the "start" attribute. If it is not found, use default value.
 	 */
-	syn lazy CValue InstAssignable.startAttributeCValue() = CValue.UNKNOWN;
+	syn CValue InstComponentDecl.startAttributeCValue()  = CValue.UNKNOWN;
+	syn lazy CValue InstPrimitive.startAttributeCValue() = startAttributeCValueGeneric();
+	syn lazy CValue InstRecord.startAttributeCValue()    = startAttributeCValueGeneric();
 	
-	eq InstPrimitive.startAttributeCValue() {
+	protected CValue InstAssignable.startAttributeCValueGeneric() {
 		for (InstModification im : totalMergedEnvironment()) {
 			FExp exp = im.findStartAttribute();
 			if (exp != null)
 				return exp.ceval();
 		}
 		
-		// Default value
-		CValue res = CValue.UNKNOWN;
-		if (isReal())
-			res = new CValueReal(0.0);
-		else if (isInteger())
-			res = new CValueInteger(0);
-		else if (isBoolean())
-			res = new CValueBoolean(false);
-		else if (isString())
-			res = new CValueString("");
+		CValue res = startAttributeCValueDefault();
 		if (isArray()) {
 			CValueArray array = new CValueArray(size());
 			for (Index i : indices())
@@ -1502,13 +1533,24 @@ aspect ConstantEvaluation {
 		return res;
 	}
 	
-	eq InstRecord.startAttributeCValue() {
-		// TODO: perhaps this breakup should be done in ceval()?
-		// Assume an InstRecord can't be an array
+	syn CValue InstAssignable.startAttributeCValueDefault() = CValue.UNKNOWN;
+	eq InstPrimitive.startAttributeCValueDefault() {
+		CValue res = CValue.UNKNOWN;
+		if (isReal())
+			res = new CValueReal(0.0);
+		else if (isInteger())
+			res = new CValueInteger(0);
+		else if (isBoolean())
+			res = new CValueBoolean(false);
+		else if (isString())
+			res = new CValueString("");
+		return res;
+	}
+	eq InstRecord.startAttributeCValueDefault() {
 		CValueRecord res = new CValueRecord((FRecordType) type());
 		int i = 0;
-		for (InstComponentDecl var : getInstComponentDecls())
-			res.setMember(i++, var.ceval());
+		for (InstComponentDecl var : myInstClass().actualInstClass().getInstComponentDecls())
+			res.setMember(i++, var.startAttributeCValue());
 		return res;
 	}
 	
@@ -1516,7 +1558,7 @@ aspect ConstantEvaluation {
 	 * \brief Find the expression for the start attribute.
 	 */
 	public FExp InstModification.findStartAttribute() { 
-		return null; 
+		return null;
 	}
 	
 	public FExp InstComponentModification.findStartAttribute() {
@@ -1696,8 +1738,8 @@ aspect ConstantEvaluation {
 	  public String name();
   }
   
-  public class FAbstractVariable implements CommonVariableDecl {}
-  public class InstComponentDecl implements CommonVariableDecl {}
+  FAbstractVariable implements CommonVariableDecl;
+  InstComponentDecl implements CommonVariableDecl;
   
   syn ArrayList<? extends CommonVariableDecl> FAbstractFunctionCall.myFuncInputs() = 
 	  new ArrayList<CommonVariableDecl>(0);
@@ -1786,10 +1828,10 @@ aspect ConstantEvaluation {
 //	  // Flush getArray() - NB: uses internal JastAdd implementation details
 //	  if (size().isUnknown())
 //		  getArray_computed = false;
-	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size
+	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
 	  if (size().isUnknown()) {
 		  flushCache();
-		  size();
+		  size().isUnknown();
 	  }
   }
   
@@ -1802,7 +1844,7 @@ aspect ConstantEvaluation {
    *                Should be filled with the values of the inputs.
    */
   public void FFunctionDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
- 	  FAlgorithmBlock fab = getFAlgorithmBlock();
+ 	  FAlgorithm fab = getFAlgorithm();
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
 	  for (FFunctionVariable var : getFFunctionVariables())
@@ -1814,12 +1856,16 @@ aspect ConstantEvaluation {
 	  for (FFunctionVariable var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (FFunctionVariable var : getFFunctionVariables())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
   
@@ -1836,7 +1882,7 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithmBlock fab = findFunctionAlgorithm();
+ 	  FAlgorithm fab = findFunctionAlgorithm();
    	  if (fab == null || hasInstExternal()) {
 		  values.clear();
 		  return;
@@ -1844,6 +1890,8 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
+	  for (InstComponentDecl var : getInstComponentDecls())
+		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
 	  for (InstComponentDecl var : myInputs())
@@ -1851,12 +1899,16 @@ aspect ConstantEvaluation {
 	  for (InstComponentDecl var : myNonInputs())
 		  var.readEvaluationValue(values);
 	  
-	  fab.getFStatements().evaluateList(values);
-	  
-	  if (oldVal != null)
-		  for (CommonVariableDecl var : oldVal.keySet())
-			  var.readEvaluationValue(oldVal);
-	  currentEvaluationValues = oldVal;
+	  try {
+		  fab.getFStatements().evaluateList(values);
+	  } finally {
+		  for (InstComponentDecl var : getInstComponentDecls())
+			  var.setEvaluationValue(null);
+		  if (oldVal != null)
+			  for (CommonVariableDecl var : oldVal.keySet())
+				  var.readEvaluationValue(oldVal);
+		  currentEvaluationValues = oldVal;
+	  }
   }
   private Map<CommonVariableDecl, CValue> InstFullClassDecl.currentEvaluationValues = null;
   
@@ -2051,8 +2103,8 @@ aspect ConstantEvaluation {
   public interface FunctionEvalNode {
 	  public int evaluate(Map<CommonVariableDecl, CValue> values);
   }
-  public class FStatement implements FunctionEvalNode {}
-  public class FIfWhenClause implements FunctionEvalNode {}
+  FStatement implements FunctionEvalNode;
+  FIfWhenClause implements FunctionEvalNode;
   
   /**
    * \brief Evaluate statement during function evaluation.
@@ -2130,8 +2182,8 @@ aspect ConstantEvaluation {
 	  public boolean isArray();
 	  public CommonNamePart nextNamePart();
   }
-  public class InstAccess implements CommonNamePart {}
-  public class FQNamePart implements CommonNamePart {}
+  InstAccess implements CommonNamePart;
+  FQNamePart implements CommonNamePart;
   
   public Indices FQNamePart.indices() {
 	  return Indices.createFromFas(getFArraySubscripts());
@@ -2263,7 +2315,7 @@ aspect ConstantEvaluation {
 
   public int FFunctionCallStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue[] vals = getCall().evaluate();
-	  for (int i = 0; i < vals.length; i++)
+	  for (int i = 0, n = getNumLeft(); i < n; i++)
 		  getLeft(i).setEvaluationValue(vals[i], values);
 	  return EVAL_CONT;
   }
@@ -2606,6 +2658,21 @@ aspect ArrayConstantEvaluation {
 
 }
 
+aspect LiteralExpressions {
+	
+	syn boolean FExp.hasOnlyLiterals() {
+		for (FExp e : childFExps())
+			if (!e.hasOnlyLiterals())
+				return false;
+		return true;
+	}
+	
+	eq FIdUseExp.hasOnlyLiterals()      = false;
+	eq FInstAccessExp.hasOnlyLiterals() = false;
+	eq FFunctionCall.hasOnlyLiterals()  = false;
+	
+}
+
 aspect CircularExpressions {
 
 	/**
@@ -2615,31 +2682,34 @@ aspect CircularExpressions {
 	 * is circular.
 	 */
 	syn boolean FExp.isCircular() = false;
-	syn lazy boolean FAbstractExp.isCircular() circular [true] {
+    syn lazy boolean FAbstractExp.isCircular()  { 
+        if (inIsCircular) 
+        	return true; 
+        inIsCircular = true; 
+        boolean res = isCircularCalc(); 
+        inIsCircular = false; 
+        return res; 	
+    }
+	
+	syn boolean FExp.isCircularCalc() = false;
+	eq FAbstractExp.isCircularCalc() {
 		for (FExp e : childFExps())
 			if (e.isCircular())
 				return true;
 		return false;
 	}
 	
-	eq FIdUseExp.isCircular() = getFIdUse().isCircular();
-	eq FInstAccessExp.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
+	private boolean FAbstractExp.inIsCircular = false; 
+	
+	eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular();
+	eq FInstAccessExp.isCircularCalc() = getInstAccess().myInstComponentDecl().isCircular();
 	
 	syn boolean FIdUse.isCircular()  = myFV().isCircular();
 	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
-
-	/* Need this because automatic circularity detection doesn't work 
-	 * when circular attribute is calls a non-circular attribute that 
-	 * in turn calls the circular attribute again. 
-	 */
-	private boolean FSizeExp.inIsCircular = false;
 	
-	eq FSizeExp.isCircular() { 
-		if (inIsCircular)
-			return true;
-		inIsCircular = true;
+	eq FSizeExp.isCircularCalc() { 
 		boolean res;
 		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
 			res = true;
@@ -2647,15 +2717,21 @@ aspect CircularExpressions {
 			Size s = getFExp().size();
 			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
 		}
-		inIsCircular = false;
 		return res;
 	}
 	
-	syn boolean FExp.isUnknownSizeVarUse() = false;
-	eq FIdUseExp.isUnknownSizeVarUse()     = getFIdUse().myFV().isUnknownSizeVar();
+	syn boolean FExp.isUnknownSizeVarUse()  = false;
+	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
+	eq FInstAccessExp.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
+	
+	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
+	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
+	
+	syn boolean InstAccess.isUnknownSizeVarUse() = myInstComponentDecl().isUnknownSizeVar();
 	
 	syn boolean FAbstractVariable.isUnknownSizeVar() = false;
 	eq FFunctionArray.isUnknownSizeVar()             = getType().size().isUnknown();
+	syn boolean InstComponentDecl.isUnknownSizeVar() = type().size().isUnknown();
 	
 	public boolean Size.isCircular() {
 		for (int d = 0; d < size.length; d++)
@@ -2676,7 +2752,7 @@ aspect CircularExpressions {
 		}
 	}
 
-	eq FIterExp.isCircular() {
+	eq FIterExp.isCircularCalc() {
 		if (getFExp().isCircular()) 
 			return true;
 		for (CommonForIndex i : getForIndexList()) 
@@ -2685,7 +2761,7 @@ aspect CircularExpressions {
 		return false;
 	}
 	
-	eq InstFunctionCall.isCircular() {
+	eq InstFunctionCall.isCircularCalc() {
 		for (InstFunctionArgument a : getArgs())
 			if (a.isCircular())
 				return true;
@@ -2728,4 +2804,19 @@ aspect CircularExpressions {
 	syn boolean FSubscript.isCircular() = false;
 	eq FExpSubscript.isCircular() = getFExp().isCircular();
 
+}
+
+aspect AritmeticTransformations {
+	
+	/**
+	 * Create a negated copy of this expression.
+	 */
+	public FExp FExp.createNegated() {
+		return new FNegExp(fullCopy());
+	}
+	
+	public FExp FNegExp.createNegated() {
+		return getFExp().fullCopy();
+	}
+	
 }

@@ -44,15 +44,14 @@ def run_demo(with_plots=True):
     res = model.optimize()
 
     # Extract variable profiles
-    theta=res['pend.theta']
-    dtheta=res['pend.dtheta']
-    x=res['pend.x']
-    dx=res['pend.dx']
-    u=res['u']
-    t=res['time']
+    theta = res['pend.theta']
+    dtheta = res['pend.dtheta']
+    x = res['pend.x']
+    dx = res['pend.dx']
+    u = res['u']
+    t = res['time']
     
-    cost=res['cost']
-    assert N.abs(cost[-1] - 1.2921683e-01) < 1e-3  
+    assert N.abs(res.final('cost') - 1.2921683e-01) < 1e-3
 
     if with_plots:
         # Plot

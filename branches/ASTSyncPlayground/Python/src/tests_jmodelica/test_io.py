@@ -34,6 +34,8 @@ from pyjmi.optimization import ipopt
 from pyfmi.fmi import FMUModel, load_fmu
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
+path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_results = os.path.join(get_files_path(), 'Results')
 
 class TestIO:
@@ -112,7 +114,7 @@ class TestIO:
         assert max(N.abs(traj[:,3]-res.get_variable_data('x1').x))<1e-12
 
         # Check that the value of the cost function is correct
-        assert N.abs(p_opt[0]-2.2811587)<1e-5
+        assert N.abs(p_opt[0] - 2.2811587) < 1e-5
 
     @testattr(assimulo = True)
     def test_parameter_alias(self):
@@ -165,8 +167,8 @@ class TestIO:
         
         col = res.get_column('capacitor.v')
         
-        nose.tools.assert_almost_equal(dataMatrix[0,col], res['capacitor.v'][0],5)
-        nose.tools.assert_almost_equal(dataMatrix[-1,col], res['capacitor.v'][-1],5)
+        nose.tools.assert_almost_equal(dataMatrix[0,col], res.initial('capacitor.v'),5)
+        nose.tools.assert_almost_equal(dataMatrix[-1,col], res.final('capacitor.v'),5)
         
         nose.tools.assert_raises(VariableNotTimeVarying, res.get_column, 'sine.freqHz')
 
@@ -186,7 +188,18 @@ class TestIO:
 
         time_shifted = res['time']
 
-        assert max(N.abs(time_shifted_fix-time_shifted))<1e-6
+        assert max(N.abs(time_shifted_fix - time_shifted)) < 1e-6
+    
+    @testattr(stddist = True)    
+    def test_result_no_variable_data(self):
+        """
+        Test that it is possible to get time data from a result file 
+        with no variable data (no data_2 vector).
+        """
+        res_file = os.path.join(path_to_results, 'no_variables_result.txt')
+        res = ResultDymolaTextual(res_file)
+        time_traj = res.get_variable_data('time')
+        assert N.abs(time_traj.t[-1] - 1.0) < 1e-6
 
 class test_ResultWriterDymola:
     """Tests the class ResultWriterDymola."""
@@ -195,8 +208,8 @@ class test_ResultWriterDymola:
         """
         Sets up the test case.
         """
-        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus)
-        self._dq = FMUModel('dq.fmu',path_to_fmus)
+        self._bounce  = FMUModel('bouncingBall.fmu',path_to_fmus_me1)
+        self._dq = FMUModel('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         
@@ -227,7 +240,7 @@ class test_ResultWriterDymola:
         Tests the variable with parameter alias is presented as variable in the 
         result.
         """
-        simple_alias = load_fmu('SimpleAlias.fmu',path_to_fmus)
+        simple_alias = load_fmu('SimpleAlias.fmu',path_to_fmus_me1)
         res = simple_alias.simulate()
         
         # test that res['y'] returns a vector of the same length as the time

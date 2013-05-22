@@ -25,7 +25,6 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
 DynamicOpt : Opt;
 
 abstract InstRoot : InstNode;
-InstClassRoot : InstRoot ::= <ClassDecl:ClassDecl>;
 //InstFullClassDeclRoot :InstRoot ::= InstFullClassDecl;
 InstProgramRoot : InstRoot ::= <Program:Program>
 					           /UnknownInstClassDecl/

@@ -38,7 +38,8 @@ FClass : BaseNode ::= FQName
                       FEnumDecl*
                       FDerivedType*
                       /UnknownFVariable/
-                      FResidualPair*;
+                      FResidualPair*
+                      DummyVariable:FVariable*;
 
 /**
  * \brief A flattened user-defined function.
@@ -47,9 +48,19 @@ FClass : BaseNode ::= FQName
  */
 FFunctionDecl : BaseNode ::= FQName 
                              FFunctionVariable* 
-                             FAlgorithmBlock 
+                             FAlgorithm 
                              [FDerivativeFunction] 
                              /DummyExp:FExp/;
+
+/**
+ * A function that is the constructor of an external object.
+ */
+FConstructorDecl : FFunctionDecl;
+
+/**
+ * A function that is the destructor of an external object.
+ */
+FDestructorDecl : FFunctionDecl;
 
 /**
  * \brief A derivative function reference.
@@ -123,7 +134,7 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            [BindingExp:FExp]
                                            [FStringComment]
                                            FQName
-                                           <ManualIterationVariable:boolean>;
+                                           <HGTType:FClass.HGTVariableType>;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -213,7 +224,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * \brief An external object variable.
  */
-FExternalObjectVariable : FVariable ::= DestructorCall:FFunctionCallStmt;
+FExternalObjectVariable : FVariable ::= [DestructorCall:FFunctionCallStmt];
 
 /**
  * \brief Pre FVariable of type Real.
@@ -416,6 +427,7 @@ FAttribute : BaseNode ::= Type:FIdUse
                           Name:FIdDecl 			   
                           [Value:FExp]
                           <AttributeSet:boolean>
+                          <Level:int>
                           [FEach]
                           [FFinal]
                           FAttribute*;
@@ -487,10 +499,11 @@ FInitialEquation : FEquationType;
  * when equations that are not active during initialization.
  */
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
-                                          /InitialEquation:FEquation*/ 
+                                          /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
                                           [Name:FQName]
-                                          [Residual:FResidual];
+                                          [Residual:FResidual]
+                                          [Nominal:FNominal];
 
 /**
  * \brief Unsupported equation.
@@ -522,6 +535,12 @@ InstResidual : FResidual ::= [Enabled:FExp];
 FResidualPair : BaseNode ::= ResidualEquation:FIdUse IterationVariable:FIdUse <Level:int>;
 
 /**
+ * A class for storing nominal equation values.
+ */
+FNominal : BaseNode ::= Value:FExp;
+InstNominal : FNominal ::= [Enabled:FExp];
+
+/**
  * \brief One of the left hand side variables in a function call equation. 
  *
  * Needed because it is allowed to leave places in the variable list empty.
@@ -540,6 +559,48 @@ FConnectClause : FAbstractEquation ::= [FStringComment]
                                        <ConnectClause:ConnectClause>
                                        Connector1:FIdUseInstAccess 
                                        Connector2:FIdUseInstAccess;
+
+/**
+ * Base class for operators concerning overconstrained connection graphs.
+ */
+abstract FConnectionsOp : FBuiltInFunctionCall ::= A:FExp;
+
+/**
+ * Connections.branch() overconstrained connection graph operator.
+ */
+FConnBranch : FConnectionsOp ::= B:FExp;
+
+/**
+ * Connections.root() overconstrained connection graph operator.
+ */
+FConnRoot : FConnectionsOp;
+
+/**
+ * Connections.potentialRoot() overconstrained connection graph operator.
+ */
+FConnPotentialRoot : FConnectionsOp ::= [Priority:FExp];
+
+/**
+ * Base class for isRoot(), Connections.rooted() & rooted().
+ */
+abstract FConnBoolOp : FConnectionsOp;
+
+/**
+ * Connections.isRoot() overconstrained connection graph operator.
+ */
+FConnIsRoot : FConnBoolOp;
+
+/**
+ * Connections.rooted() overconstrained connection graph operator.
+ */
+FConnRooted : FConnBoolOp;
+
+/**
+ * rooted() overconstrained connection graph operator.
+ *
+ * This is a deprecated variant of Connections.rooted().
+ */
+FConnRootedDep : FConnRooted;
 
 /**
  * \brief For equation clause.
@@ -574,7 +635,7 @@ FElseEquation : FIfWhenElseEquation;
 /**
  * \brief A flattened algorithm clause.
  */
-FAlgorithmBlock : FAbstractEquation ::= FStatement*;
+FAlgorithm : FAbstractEquation ::= FStatement*;
 
 
 /**
@@ -718,8 +779,8 @@ abstract FExp : BaseNode ::= /Array/;
 /**
  * \brief Abstract base class for all flattened expressions that is not literal or unsupported.
  */
-
 abstract FAbstractExp : FExp;
+
 /**
  * \brief Abstract base class for all flattened scalar expressions.
  */
@@ -1047,6 +1108,11 @@ FMatrixRow : FAbstractCat;
 FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
 /**
+ * Generated expression referring to the value of another argument to the same function call.
+ */
+FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
+
+/**
  * \brief Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.
@@ -1308,9 +1374,24 @@ FEnumIntegerExp : FUnaryBuiltIn;
 FFloorExp : FUnaryBuiltIn;
 
 /**
- * \brief Scalar built-in function.
+ * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).
  */
-FScalar : FUnaryBuiltIn;
+abstract FDimensionConvert : FUnaryBuiltIn;
+
+/**
+ * Scalar built-in function.
+ */
+FScalarExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FVectorExp : FDimensionConvert;
+
+/**
+ * Vector built-in function.
+ */
+FMatrixExp : FDimensionConvert;
 
 /**
  * \brief Transpose built-in function.
@@ -1323,9 +1404,19 @@ FTranspose : FUnaryBuiltIn;
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
 
 /**
+ * \brief Skew built-in function.
+ */
+FSkew : FUnaryBuiltIn;
+
+/**
  * \brief Identity built-in function.
  */
 FIdentity : FUnaryBuiltIn;
+
+/**
+ * Diagonal built-in function.
+ */
+FDiagonal : FUnaryBuiltIn;
 
 /**
  * Outer product built-in function.

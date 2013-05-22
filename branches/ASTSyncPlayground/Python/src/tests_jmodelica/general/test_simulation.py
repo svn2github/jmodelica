@@ -40,6 +40,61 @@ class TestNominal(SimulationTest):
     @testattr(assimulo = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'z', 'der(x)', 'der(y)'])
+        
+class TestRLCSquareCS(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',format='fmu',target="fmucs")
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.01)
+        self.run()
+        self.load_expected_data('RLC_Circuit_Square_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['capacitor.v'])
+        
+class TestRLCSquareCSModified(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',format='fmu',target="fmucs")
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        """
+        Note, this tests when an event is detected at the same time as the
+        requested output time in the CS case.
+        """
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.1,abs_tol=1.0e-3,rel_tol=1.0e-3)
+        self.run()
+        self.load_expected_data('RLC_Circuit_Square_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['capacitor.v'])
+        
+class TestRLCCS(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+                'RLC_Circuit.mo', 'RLC_Circuit',format='fmu',target="fmucs")
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10.0, 
+            time_step = 0.01)
+        self.run()
+        self.load_expected_data('RLC_Circuit_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['capacitor.v'])
 
 class TestWriteScaledResult(SimulationTest):
 
@@ -265,7 +320,7 @@ class TestHybrid5(SimulationTest):
 
     @testattr(assimulo = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['x','u','ref','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
+        self.assert_all_trajectories(['x','I'], same_span=True, rel_tol=1e-3, abs_tol=1e-3)
 
 class TestHybrid6(SimulationTest):
     
@@ -525,6 +580,27 @@ class TestTearing2(SimulationTest):
 #    def test_trajectories(self):
 #        self.assert_all_trajectories(['R1.v','R1.i'],rel_tol=1e-4, abs_tol=1e-4)
 #
+
+class TestLocalLoop1(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'TearingTests.mo',
+            'TearingTests.TearingTest1',
+            format='fmu',
+            options={"enable_tearing":True,"local_iteration_in_tearing":True})
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=20,time_step=0.05,rel_tol=1e-6)
+        self.run()
+        self.load_expected_data(
+            'TearingTests_TearingTest1_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['iL','u1'],rel_tol=1e-4, abs_tol=1e-4)
 
 class TestQR1(SimulationTest):
     

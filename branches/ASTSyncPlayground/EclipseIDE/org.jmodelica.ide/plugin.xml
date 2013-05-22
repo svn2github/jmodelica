@@ -92,7 +92,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.jmodelica.ide.compiler.Preferences">
+            class="org.jmodelica.ide.compiler.ModelicaPreferences">
       </initializer>
    </extension>
 </plugin>

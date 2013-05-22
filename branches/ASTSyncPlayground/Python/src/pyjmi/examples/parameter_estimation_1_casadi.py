@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Import library for path manipulations
+# Import utility libraries
 import os.path
+from collections import OrderedDict
 
 # Import numerical libraries
 import numpy as N
@@ -24,11 +25,10 @@ import ctypes as ct
 import matplotlib.pyplot as plt
 
 # Import the JModelica.org Python packages
-from pymodelica import compile_fmux
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmux, compile_fmu
+from pyfmi import load_fmu
 from pyjmi import CasadiModel
-from pyjmi.optimization.casadi_collocation import ParameterEstimationData
+from pyjmi.optimization.casadi_collocation import MeasurementData
 
 import scipy.integrate as integr
 
@@ -36,122 +36,96 @@ def run_demo(with_plots=True):
     """
     Demonstrate how to solve a simple parameter estimation problem.
     """
-
+    
+    # Locate model file
     curr_dir = os.path.dirname(os.path.abspath(__file__));
-
-    # Compile the Optimica model to an XML file
-    model_name = compile_fmux("ParEst.ParEstCasADi",
-        curr_dir + "/files/ParameterEstimation_1.mop")
+    model_path = curr_dir + "/files/ParameterEstimation_1.mop"
+    
+    # Compile the model into an FMU and FMUX
+    fmu = compile_fmu("ParEst.SecondOrder", model_path)
+    fmux = compile_fmux("ParEst.ParEstCasADi", model_path)
     
     # Load the model
-    model_casadi = CasadiModel(model_name)
-
-    # Compile the Optimica model to a JMU
-    jmu_name = compile_jmu("ParEst.ParEst",
-        curr_dir + "/files/ParameterEstimation_1.mop")
+    sim_model = load_fmu(fmu)
+    opt_model = CasadiModel(fmux)
     
-    # Load the dynamic library
-    model = JMUModel(jmu_name)
-    
-    # Retreive parameter and variable vectors
-    pi = model.real_pi
-    x = model.real_x
-    dx = model.real_dx
-    u = model.real_u
-    w = model.real_w
-    
-    # Set model input
-    w[0] = 1
-
-    # ODE right hand side
-    # This can be done since DAE residuals 1 and 2
-    # are written on simple "ODE" form: f(x,u)-\dot x = 0
-    def F(xx, t):
-        dx[0] = 0. # Set derivatives to zero
-        dx[1] = 0.
-        x[0] = xx[0] # Set states
-        x[1] = xx[1]
-        res = N.zeros(3); # Create residual vector
-        model.jmimodel.dae_F(res) # Evaluate DAE residual
-        return N.array([res[1], res[2]])
-    
-    # Simulate model to get measurement data
-    N_points = 100 # Number of points in simulation
-    t0 = 0
-    tf = 15
-    t_sim = N.linspace(t0,tf,num=N_points)
-    xx0 = N.array([0.,0.])
-    xx = integr.odeint(F,xx0,t_sim)
+    # Simulate model with nominal parameters
+    sim_res = sim_model.simulate(final_time=10)
         
-    # Extract measurements
-    N_points_meas = 11
-    t_meas = N.linspace(t0,10,num=N_points_meas)
-    xx_meas = integr.odeint(F,xx0,t_meas)
+    # Extract nominal trajectories
+    t_sim = sim_res['time']
+    x1_sim = sim_res['x1']
+    x2_sim = sim_res['x2']
 
-    # Add measurement noice
-    #noice = N.random.random(N_points_meas)*0.2-0.1
-    noice = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
-        -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024, 0.0779514,]
-    xx_meas[:,0] = xx_meas[:,0] + noice
+    # Get measurement data with 1 Hz and add measurement noise
+    sim_model = load_fmu(fmu)
+    meas_res = sim_model.simulate(final_time=10, options={'ncp': 10})
+    x1_meas = meas_res['x1']
+    noise = [0.01463904, 0.0139424, 0.09834249, 0.0768069, 0.01971631, 
+             -0.03827911, 0.05266659, -0.02608245, 0.05270525, 0.04717024,
+             0.0779514]
+    t_meas = N.linspace(0, 10, 11)
+    y_meas = x1_meas + noise
 
     if with_plots:
         # Plot simulation
+        plt.close(1)
         plt.figure(1)
-        plt.clf()
-        plt.subplot(211)
-        plt.plot(t_sim,xx[:,0])
+        plt.subplot(2, 1, 1)
+        plt.plot(t_sim, x1_sim)
         plt.grid()
-        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.plot(t_meas, y_meas, 'x')
         plt.ylabel('x1')
         
-        plt.subplot(212)
-        plt.plot(t_sim,xx[:,1])
+        plt.subplot(2, 1, 2)
+        plt.plot(t_sim, x2_sim)
         plt.grid()
         plt.ylabel('x2')
         plt.show()
-
+    
+    # Create MeasurementData object
     Q = N.array([[1.]])
-    measured_variables=['sys.y']
-    data = N.hstack((N.transpose(N.array([t_meas])),N.transpose(N.array([xx_meas[:,0]]))))
-
-    par_est_data = ParameterEstimationData(Q,measured_variables,data)
-
-    opts = model_casadi.optimize_options(algorithm="LocalDAECollocationAlg")
-
-    opts['n_e'] = 16
-    opts['n_cp'] = 3
-
-    opts['parameter_estimation_data'] = par_est_data
-    #opts['IPOPT_options']['derivative_test'] = 'second-order'
-    #opts['IPOPT_options']['max_iter'] = 0
-
-    res_casadi = model_casadi.optimize(algorithm="LocalDAECollocationAlg", options=opts)
+    unconstrained = OrderedDict()
+    unconstrained['sys.y'] = N.vstack([t_meas, y_meas])
+    measurement_data = MeasurementData(Q=Q, unconstrained=unconstrained)
+    
+    # Set optimization options
+    opts = opt_model.optimize_options()
+    opts['measurement_data'] = measurement_data
+    
+    # Optimize
+    opt_res = opt_model.optimize(options=opts)
 
     # Extract variable profiles
-    x1 = res_casadi['sys.x1']
-    u = res_casadi['u']
-    w = res_casadi['sys.w']
-    z = res_casadi['sys.z']
-    t = res_casadi['time']
-
+    x1_opt = opt_res['sys.x1']
+    x2_opt = opt_res['sys.x2']
+    w_opt = opt_res.final('sys.w')
+    z_opt = opt_res.final('sys.z')
+    t_opt = opt_res['time']
+    
+    # Assert results
+    assert N.abs(opt_res.final('sys.x1') - 1.) < 1e-2
+    assert N.abs(w_opt - 1.05)  < 1e-2
+    assert N.abs(z_opt - 0.47)   < 1e-2
+    
+    # Plot optimization result
     if with_plots:
-        # Plot optimization result
-        plt.figure(3)
-        plt.clf()
-        plt.subplot(211)
-        plt.plot(t,x1,'g')
-        plt.plot(t_sim,xx[:,0])
-        plt.plot(t_meas,xx_meas[:,0],'x')
+        plt.close(2)
+        plt.figure(2)
+        plt.subplot(2, 1, 1)
+        plt.plot(t_opt, x1_opt, 'g')
+        plt.plot(t_sim, x1_sim)
+        plt.plot(t_meas, y_meas, 'x')
         plt.grid()
-        plt.subplot(212)
-        plt.plot(t,u)
+        plt.subplot(2, 1, 2)
+        plt.plot(t_opt, x2_opt, 'g')
         plt.grid()
-        plt.ylabel('u')
+        plt.plot(t_sim, x2_sim)
         plt.show()
-                
+        
         print("** Optimal parameter values: **")
-        print("w = %f"%w)
-        print("z = %f"%z)
+        print("w = %f" % w_opt)
+        print("z = %f" % z_opt)
 
 if __name__ == "__main__":
     run_demo()

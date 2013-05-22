@@ -28,6 +28,11 @@ from pyjmi.examples import *
 def test_fmi_bouncing_ball_raw():
     """ Test that the FMI bouncing ball example works """    
     fmi_bouncing_ball_native.run_demo(False)
+
+@testattr(assimulo = True)
+def test_bouncingball_cs_sim():
+    """ Test the FMI Bouncing Ball CS 1.0 example. """    
+    fmi_bouncing_ball_cs.run_demo(False)
     
 @testattr(assimulo = True)
 def test_crane():
@@ -64,30 +69,70 @@ def test_fmu_with_input():
     """ Run FMU with input example. """
     fmu_with_input.run_demo(False)
     
-@testattr(assimulo = True)
-def test_mechanics_rotational_examples_first():
-    """ Run mechanics high index example from MSL """
-    mechanical_rotational_examples_first.run_demo(False)
+@testattr(slow = True)
+def test_furuta_modified():
+    """ Test the furuta_modified example. """
+    furuta_modified.run_demo(False)
+
+@testattr(slow = True)
+def test_furuta_dfo():
+    """ Test the furuta_dfo example. """
+    furuta_dfo.run_demo(False)
     
+@testattr(assimulo = True)
+def test_extfunctions():
+    """ Test of simulation with external functions. """
+    extfunctions.run_demo(False)
+    
+@testattr(windows = True)
+def test_extfunctions_arrays():
+    """ Test of simulation with external functions using array input. """
+    extFunctions_arrays.run_demo(False)
+    
+@testattr(windows = True)
+def test_extfunctions_matrix():
+    """ Test of simulation with external functions using matrix input and output. """
+    extFunctions_matrix.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_if_example_1():
+    """ Test the if_example_1 example. """    
+    if_example_1.run_demo(False)
+
+@testattr(assimulo = True)
+def test_if_example_2():
+    """ Test the if_example_2 example. """    
+    if_example_2.run_demo(False)
+
 @testattr(assimulo = True)
 def test_mechanics_rotational_examples_coupled_clutches():
     """ Run mechanics high index example from MSL """
     mechanical_rotational_examples_coupled_clutches.run_demo(False)
-    
+
+@testattr(assimulo = True)
+def test_mechanics_rotational_examples_first():
+    """ Run mechanics high index example from MSL """
+    mechanical_rotational_examples_first.run_demo(False)
+
 @testattr(assimulo = True)
 def test_planar_pendulum():
     """ Run planar pendulum example """
     planar_pendulum.run_demo(False)
-	
+    
 @testattr(assimulo = True)
 def test_QR():
     """ Test the QR example. """    
     QR.run_demo(False)
-    
+
 @testattr(assimulo = True)
-def test_bouncingball_cs_sim():
-    """ Test the FMI Bouncing Ball CS 1.0 example. """    
-    fmi_bouncing_ball_cs.run_demo(False)
+def test_qt_par_est_dfo():
+    """ Test the qt_par_est_dfo example. """    
+    qt_par_est_dfo.run_demo(False)
+
+@testattr(assimulo = True)
+def test_RLC():
+    """ Test the RLC example. """    
+    RLC.run_demo(False)
 
 @testattr(assimulo = True)
 def test_robertson_sensitivity_fmu():
@@ -98,3 +143,28 @@ def test_robertson_sensitivity_fmu():
 def test_SEIRS():
     """ Test the sensitivity example by Niklas, SEIRS. """
     SEIRS.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_simulation_with_input():
+    """ Test the simulation_with_input example. """    
+    simulation_with_input.run_demo(False)
+
+@testattr(assimulo = True)
+def test_simulation_with_input_function():
+    """ Test the simulation_with_input_function example. """    
+    simulation_with_input_function.run_demo(False)
+    
+@testattr(ipopt = True)
+def test_SolAng():
+    """ Test the SolAng example """
+    SolAng.run_demo(False)
+
+@testattr(assimulo = True)
+def test_vdp_pp():
+    """ Test the vdp_pp example. """    
+    vdp_pp.run_demo(False)
+    
+@testattr(assimulo = True)
+def test_VDP_sim():
+    """ Test the VDP_sim example. """    
+    VDP_sim.run_demo(False)

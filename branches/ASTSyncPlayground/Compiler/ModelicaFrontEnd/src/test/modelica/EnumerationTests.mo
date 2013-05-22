@@ -1,6 +1,20 @@
+/*
+    Copyright (C) 2009-2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package EnumerationTests
-
-
 
   model EnumerationTest1
     type Size = enumeration(small "1st", medium, large, xlarge); 
@@ -300,10 +314,10 @@ end EnumerationTests.EnumerationTest12;
 			methodName="diagnostics",
 			methodResult="
 Diagnostics for flattened class EnumerationTests.FlatAPIEnum1
-Number of independent constants:              4
+Number of independent constants:              6
   Number of Real independent constants:       0
   Number of Integer independent constants:    0
-  Number of Enum independent constants:       4
+  Number of Enum independent constants:       6
   Number of Boolean independent constants:    0
   Number of String independent constants:     0
 Number of dependent constants:                0
@@ -324,44 +338,46 @@ Number of dependent parameters:               2
   Number of Enum dependent parameters:        2
   Number of Boolean dependent parameters:     0
   Number of String dependent parameters:      0
-Number of variables :                         2
+Number of variables :                         0
   Number of Real variables:                   0
   Number of Integer variables:                0
-  Number of Enum variables:                   2
+  Number of Enum variables:                   0
   Number of Boolean variables:                0
   Number of String variables:                 0
 Number of Real differentiated variables:      0
 Number of Real derivative variables:          0
-Number of Real algebraic variables:           0
+Number of Real continous algebraic variables: 0
 Number of inputs:                             0
   Number of Real inputs:                      0
   Number of Integer inputs:                   0
   Number of Enum inputs:                      0
   Number of Boolean inputs:                   0
   Number of String inputs:                    0
-Number of discrete variables :                2
+Number of discrete variables :                0
   Number of Real discrete variables:          0
   Number of Integer discrete variables:       0
-  Number of Enum discrete variables:          2
+  Number of Enum discrete variables:          0
   Number of Boolean discrete variables:       0
   Number of String discrete variables:        0
-Number of equations:                          2
+Number of equations:                          0
 Number of variables with binding expression:  0
   Number of Real variables with binding exp:  0
   Number of Integer variables binding exp:    0
   Number of Enum variables binding exp:       0
   Number of Boolean variables binding exp:    0
   Number of String variables binding exp:     0
-Total number of equations:                    2
-Number of initial equations:                  2
-Number of relational exps in equations:       0
-Number of relational exps in init equations:  0
+Total number of equations:                    0
+Number of initial equations:                  0
+Number of event indicators in equations:      0
+Number of event indicators in init equations: 0
 
 Independent constants: 
  aic: number of uses: 0, isLinear: true
  bic: number of uses: 0, isLinear: true
  adc: number of uses: 0, isLinear: true
  bdc: number of uses: 0, isLinear: true
+ av: number of uses: 0, isLinear: true
+ bv: number of uses: 0, isLinear: true
 
 Dependent constants: 
 
@@ -378,8 +394,6 @@ Differentiated variables:
 Derivative variables: 
 
 Discrete variables: 
- av: number of uses: 2, isLinear: true, alias: no
- bv: number of uses: 2, isLinear: true, alias: no
 
 Algebraic real variables: 
 
@@ -389,12 +403,33 @@ Alias sets:
 0 variables can be eliminated
 
 Incidence:
- eq 0: av 
- eq 1: bv 
 
 Connection sets: 0 sets
 ")})));
   end FlatAPIEnum1;
+  
+  
+  model ShortEnumDecl
+	  type A = enumeration( one, two );
+	  type B = A;
+	  parameter B b = B.one;
+	  Real x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ShortEnumDecl",
+			description="Short class decl of enumeration",
+			flatModel="
+fclass EnumerationTests.ShortEnumDecl
+ parameter EnumerationTests.ShortEnumDecl.A b = EnumerationTests.ShortEnumDecl.A.one /* EnumerationTests.ShortEnumDecl.A.one */;
+ constant Real x = 1;
+
+public
+ type EnumerationTests.ShortEnumDecl.A = enumeration(one, two);
+
+end EnumerationTests.ShortEnumDecl;
+")})));
+  end ShortEnumDecl;
 
 
 

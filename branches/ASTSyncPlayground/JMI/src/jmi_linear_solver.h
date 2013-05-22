@@ -39,11 +39,11 @@ extern "C" {
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
-extern int dgeequ_(int *m, int *n, double *a, int *	lda, double *r__, double *c__, double *rowcnd, double 
-	*colcnd, double *amax, int *info);
+extern int dgeequ_(int *m, int *n, double *a, int * lda, double *r__, double *c__, double *rowcnd, double 
+    *colcnd, double *amax, int *info);
 
-extern int dlaqge_(int *m, int *n, double *a, int *	lda, double *r__, double *c__, double *rowcnd, double 
-	*colcnd, double *amax, char *equed);
+extern int dlaqge_(int *m, int *n, double *a, int * lda, double *r__, double *c__, double *rowcnd, double 
+    *colcnd, double *amax, char *equed);
 
 typedef struct jmi_linear_solver_t jmi_linear_solver_t;
 

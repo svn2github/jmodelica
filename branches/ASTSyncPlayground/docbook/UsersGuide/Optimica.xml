@@ -14,7 +14,7 @@
   <para>In this chapter, the Optimica extension will be presented and
   informally defined. The Optimica extension in described in detail in
   <citation>Jak2008a</citation>, where additional motivations for introducing
-  Optimica can be found.The presentation will be made using the following
+  Optimica can be found. The presentation will be made using the following
   dynamic optimization problem, based on a double integrator system, as an
   example:</para>
 
@@ -84,7 +84,7 @@
             <m:mrow>
               <m:mtext>,</m:mtext>
 
-              <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+              <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
 
               <m:mrow>
                 <m:mrow>
@@ -140,7 +140,7 @@
             <m:mrow>
               <m:mtext>,</m:mtext>
 
-              <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+              <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
 
               <m:mrow>
                 <m:mrow>
@@ -262,11 +262,12 @@
     </m:math>
   </informalequation>
 
-  <para>In this problem, the final time, tf, is free, and the objective is
-  thus to minimize the time it takes to transfer the state of the double
-  integrator from the point (0,0) to (1,0), while respecting bounds on the
-  velocity <emphasis>v(t)</emphasis> and the input <emphasis>u(t)</emphasis>.
-  A Modelica model for the double integrator system is given by:</para>
+  <para>In this problem, the final time, <emphasis>tf</emphasis>, is free, and
+  the objective is thus to minimize the time it takes to transfer the state of
+  the double integrator from the point (0,0) to (1,0), while respecting bounds
+  on the velocity <emphasis>v(t)</emphasis> and the input
+  <emphasis>u(t)</emphasis>. A Modelica model for the double integrator system
+  is given by:</para>
 
   <programlisting language="modelica">model DoubleIntegrator
   Real x(start=0);
@@ -298,7 +299,7 @@ end DoubleIntegrator;
 
     <listitem>
       <para>Class attributes for the specialized class
-      <literal>optimization</literal>: objective},
+      <literal>optimization</literal>: <literal>objective</literal>,
       <literal>startTime</literal>, <literal>finalTime</literal> and
       <literal>static</literal></para>
     </listitem>
@@ -330,16 +331,17 @@ end DoubleIntegrator;
     <literal>optimization</literal> class can also contain component and
     variable declarations, local classes, and equations.</para>
 
-    <para>It is not possible to declare components from \texttt{optimization}
-    classes in the current version of Optimica. Rather, the underlying
-    assumption is that an <literal>optimization</literal> class defines an
-    optimization problem, that is solved off-line. An interesting extension
-    would, however, be to allow for <literal>optimization</literal> classes to
-    be instantiated. With this extension, it would be possible to solve
-    optimization problems, on-line, during simulation. A particularly
-    interesting application of this feature is model predictive control, which
-    is a control strategy that involves on-line solution of optimization
-    problems during execution.</para>
+    <para>It is not possible to declare components from
+    <literal>optimization</literal> classes in the current version of
+    Optimica. Rather, the underlying assumption is that an
+    <literal>optimization</literal> class defines an optimization problem,
+    that is solved off-line. An interesting extension would, however, be to
+    allow for <literal>optimization</literal> classes to be instantiated. With
+    this extension, it would be possible to solve optimization problems,
+    on-line, during simulation. A particularly interesting application of this
+    feature is model predictive control, which is a control strategy that
+    involves on-line solution of optimization problems during
+    execution.</para>
 
     <para>As a starting-point for the formulation of the optimization problem
     consider the <literal>optimization</literal> class:</para>
@@ -405,13 +407,14 @@ end DIMinTime;
     <para>An important component of some dynamic optimization problems, in
     particular parameter estimation problems where measurement data is
     available, is variable access at discrete time instants. For example, if a
-    measurement data value, y<subscript>i</subscript>, has been obtained at
-    time t<subscript>i</subscript>, it may be desirable to penalize the
-    deviation between y<subscript>i</subscript> and a corresponding variable
-    in the model, evaluated at the time instant t<subscript>i</subscript>. In
-    Modelica, it is not possible to access the value of a variable at a
-    particular time instant in a natural way, and a new construct therefore
-    has to be introduced.</para>
+    measurement data value,<emphasis> y<subscript>i</subscript></emphasis>,
+    has been obtained at time <emphasis>t<subscript>i</subscript></emphasis>,
+    it may be desirable to penalize the deviation between
+    <emphasis>y<subscript>i</subscript></emphasis> and a corresponding
+    variable in the model, evaluated at the time instant
+    <emphasis>t<subscript>i</subscript></emphasis>. In Modelica, it is not
+    possible to access the value of a variable at a particular time instant in
+    a natural way, and a new construct therefore has to be introduced.</para>
 
     <para>All variables in Modelica are functions of time. The variability of
     variables may be different-some are continuously changing, whereas others
@@ -523,14 +526,15 @@ end DIMinTime;
 </programlisting>
 
     <para>The Optimica specification can be translated into executable format
-    and solved by a numerical solver, yielding the result:</para>
+    and solved by a numerical solver, yielding the result seen in <xref
+    linkend="optimica_fig_res"/>.</para>
 
-    <figure>
+    <figure xml:id="optimica_fig_res">
       <title>Optimization result</title>
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/di_min_time.svg" scalefit="1" width="60%"></imagedata>
+          <imagedata fileref="images/di_min_time.svg" scalefit="1" width="60%"/>
         </imageobject>
       </mediaobject>
     </figure>

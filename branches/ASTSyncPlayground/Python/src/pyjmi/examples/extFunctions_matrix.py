@@ -26,27 +26,26 @@ def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     class_name = 'ExtFunctions.transposeSquareMatrix'
-    mofile = curr_dir+'/files/ExtFunctions.mo'
+    mofile = os.path.join(curr_dir, 'files', 'ExtFunctions.mo')
     
+    # Compile and load model
     fmu_name = compile_fmu(class_name, mofile)
     model = load_fmu(fmu_name)
 
-    #simulate
+    # Simulate
     res = model.simulate()
     
+    # Get result data
     b1_1 = res['b_out[1,1]']
     b1_2 = res['b_out[1,2]']
     b2_1 = res['b_out[2,1]']
     b2_2 = res['b_out[2,2]']
     t = res['time']
 
-    assert N.abs(b1_1[-1] - 1) < 1e-6
-     
-    assert N.abs(b1_2[-1] - 3) < 1e-6
-     
-    assert N.abs(b2_1[-1] - 2) < 1e-6
-     
-    assert N.abs(b2_2[-1] - 4) < 1e-6 
+    assert N.abs(res.final('b_out[1,1]') - 1) < 1e-6
+    assert N.abs(res.final('b_out[1,2]') - 3) < 1e-6
+    assert N.abs(res.final('b_out[2,1]') - 2) < 1e-6
+    assert N.abs(res.final('b_out[2,2]') - 4) < 1e-6 
            
     if with_plots:
         fig = p.figure()

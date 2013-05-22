@@ -1,20 +1,11 @@
 package org.jmodelica.ide.compiler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
 import org.jmodelica.util.OptionRegistry;
-import org.xml.sax.SAXException;
 
 /**
  * OptionsRegistry for use in the JModelica IDE.
@@ -41,7 +32,7 @@ public class IDEOptions extends OptionRegistry {
 		}
 
 		try {
-			String modelicaPath = Preferences.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
+			String modelicaPath = ModelicaPreferences.INSTANCE.get(project, IDEConstants.PREFERENCE_LIBRARIES_ID);
 			setStringOption(IDEConstants.MODELICAPATH, modelicaPath);
 
 			// Set standard options for FMU

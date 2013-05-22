@@ -51,6 +51,7 @@
 	<property name="ant_task_dir" value="ant" />
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" location="site" />
+    <property name="ast_dir" value="${java_dir}/org/jmodelica/modelica/compiler" />
 
 	<property name="compiler_dir" value="${jmodelica_root}/Compiler" />
 	<property name="modelica_frontend_dir" value="${compiler_dir}/ModelicaFrontEnd/src" />

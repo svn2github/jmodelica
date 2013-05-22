@@ -42,10 +42,8 @@ endif
 endif
 
 libjmi_la_SOURCES = jmi.h \
-                    fmiModelFunctions.h \
-                    fmiModelTypes.h \
-                    fmiCSFunctions.h \
-                    fmiCSPlatformTypes.h \
+                    fmi1_functions.h \
+                    fmi1_types.h \
                     jmi_common.h \
                     jmi.c \
                     jmi_common.c \
@@ -57,12 +55,20 @@ libjmi_la_SOURCES = jmi.h \
                     jmi_kinsol_solver.c \
                     jmi_linear_solver.h \
                     jmi_linear_solver.c \
+                    jmi_ode_solver.c \
+                    jmi_ode_solver.h \
+                    jmi_ode_cvode.h \
+                    jmi_ode_cvode.c \
+                    jmi_ode_euler.h \
+                    jmi_ode_euler.c \
                     jmi_opt_coll.h \
                     jmi_array_common.h \
                     jmi_array_none.h \
                     jmi_array_none.c \
                     jmi_util.h \
                     jmi_util.c \
+                    jmi_log.h \
+                    jmi_log.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
@@ -87,22 +93,22 @@ libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/in
 # static inclusion of the runtime libraries when creating model so:s.
 libjmi_algorithm_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-libfmi_la_SOURCES = fmi.h \
+libfmi_la_SOURCES = fmi1_me.h \
                     fmiModelFunctions.h \
                     fmiModelTypes.h \
                     jmi.h \
-                    fmi.c \
+                    fmi1_me.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libfmi_cs_la_SOURCES = fmi_cs.h \
+libfmi_cs_la_SOURCES = fmi1_cs.h \
                     fmiCSModelFunctions.h \
                     fmiCSPlatformTypes.h \
                     jmi.h \
-                    fmi_cs.c \
+                    fmi1_cs.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
@@ -166,6 +172,8 @@ libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_array_cppad.h \
                     jmi_util.h \
                     jmi_util.c \
+                    jmi_log.h \
+                    jmi_log.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.c \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c \
@@ -202,8 +210,8 @@ include_HEADERS = jmi.h \
                   fmiModelTypes.h \
                   fmiCSFunctions.h \
                   fmiCSPlatformTypes.h \
-                  fmi.h \
-                  fmi_cs.h\
+                  fmi1_me.h \
+                  fmi1_cs.h\
                   ModelicaUtilities.h \
                   jmi_common.h \
                   jmi_simple_newton.h \
@@ -217,6 +225,12 @@ include_HEADERS = jmi.h \
                   jmi_array_none.h \
                   jmi_array_cppad.h \
                   jmi_util.h \
+                  jmi_log.h \
+                  jmi_ode_solver.h \
+                  jmi_ode_cvode.h \
+                  jmi_ode_euler.h \
+                  fmi1_functions.h \
+                  fmi1_types.h \
                   $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
                   $(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
                   $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \

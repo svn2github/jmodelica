@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -34,8 +34,8 @@ def run_demo(with_plots=True):
     m_name = 'SolAngles'
     mofile = curr_dir+'/files/SolAngles.mo'
     
-    jmu_name = compile_jmu(m_name, mofile)
-    model = JMUModel(jmu_name)
+    fmu_name = compile_fmu(m_name, mofile)
+    model = load_fmu(fmu_name)
     
     res = model.simulate(final_time=86400.0, options={'ncp':86400})
 
@@ -43,6 +43,8 @@ def run_demo(with_plots=True):
     azim = res['azim']
     N_day = res['N_day']
     time = res['time']
+    
+    assert N.abs(res.final('theta') - 90.28737353) < 1e-3
     
     # Plot results
     if with_plots:

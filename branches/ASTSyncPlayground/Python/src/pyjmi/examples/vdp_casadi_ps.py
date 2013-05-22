@@ -42,12 +42,15 @@ def run_demo(with_plots=True):
     #opts['IPOPT_options']['hessian_approximation'] = 'limited-memory'
 
     res = model.optimize(algorithm='CasadiPseudoSpectralAlg',options=opts)
-    
+
     # Extract variable profiles
     x1   = res['x1']
     x2   = res['x2']
     u    = res['u']
     time = res['time']
+    
+    assert N.abs(res.final('x1') - 8.64330006e-07) < 1e-3
+    assert N.abs(res.final('x2') + 3.68158852e-07) < 1e-3
 
     if with_plots:
         # Plot

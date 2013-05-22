@@ -42,4 +42,5 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 		for (Iterator<T> it : iters)
 			it.remove();
 	}
+	
 }

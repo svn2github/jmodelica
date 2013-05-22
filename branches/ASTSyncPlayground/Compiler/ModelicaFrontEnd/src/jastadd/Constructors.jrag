@@ -90,14 +90,14 @@ aspect Constructors {
 	 * \brief Construcs a connect clause without any residual.
 	 */
 	public FConnectClause.FConnectClause(FEquationType type, Opt<FStringComment> comment, ConnectClause connectClause, FIdUseInstAccess left, FIdUseInstAccess right) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), comment, connectClause, left, right);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), comment, connectClause, left, right);
 	}
 	
 	/**
 	 * \brief Construcs a else equation without any residual.
 	 */
 	public FElseEquation.FElseEquation(FEquationType type, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns);
 	}
 	
 	/**
@@ -105,39 +105,41 @@ aspect Constructors {
 	 * residual.
 	 */
 	public FEquation.FEquation(FExp left, FExp right) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, right);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not marked as residual.
 	 */
 	public FEquation.FEquation(FEquationType type, FExp left, FExp right) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), left, right);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 	}
 	
 	/**
 	 * \brief Constructs an equation that is not initial
 	 */
-	public FEquation.FEquation(FQName name, FResidual residual, FExp left, FExp right) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, right);
+	public FEquation.FEquation(FQName name, FResidual residual, FNominal nominal, FExp left, FExp right) {
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, right);
 		if (name != null)
 			setName(name);
 		if (residual != null)
 			setResidual(residual);
+		if (nominal != null)
+			setNominal(nominal);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation that is not initial.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), left, call);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, call);
 	}
 	
 	/**
 	 * \brief Constructs a function call equation.
 	 */
 	public FFunctionCallEquation.FFunctionCallEquation(FEquationType type, List<FFunctionCallLeft> left, FAbstractFunctionCall call) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), left, call);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), left, call);
 	}
 	
 	/**
@@ -151,21 +153,21 @@ aspect Constructors {
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public FForClauseE.FForClauseE(List<FForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation that is not initial.
 	 */
 	public InstForClauseE.InstForClauseE(List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
 	 * \brief Constructs a for clause equation.
 	 */
 	public InstForClauseE.InstForClauseE(FEquationType type, List<InstForIndex> indices, List<FAbstractEquation> eqns) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), indices, eqns);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), indices, eqns);
 	}
 	
 	/**
@@ -196,15 +198,15 @@ aspect Constructors {
 	/**
 	 * \brief Constructs an algorithm block that is not initial.
 	 */
-	public FAlgorithmBlock.FAlgorithmBlock(List<FStatement> stmts) {
-		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), stmts);
+	public FAlgorithm.FAlgorithm(List<FStatement> stmts) {
+		this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts);
 	}
 	
 	/**
 	 * \brief Constructs an algorithm block.
 	 */
-	public FAlgorithmBlock.FAlgorithmBlock(FEquationType type, List<FStatement> stmts) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), stmts);
+	public FAlgorithm.FAlgorithm(FEquationType type, List<FStatement> stmts) {
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts);
 	}
 	
 	/**
@@ -255,7 +257,7 @@ aspect Constructors {
 	 * \brief Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns, guard, elseClause);
 	}
     
 	/**
@@ -340,14 +342,14 @@ aspect Constructors {
 	 * \brief Constructs an unsuported equation.
 	 */
 	public FUnsupportedEquation.FUnsupportedEquation(FEquationType type) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>());
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>());
 	}
 	
 	/**
 	 * \brief Constructs a when equation.
 	 */
 	public FWhenEquation.FWhenEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
-		this(type, new Opt<FQName>(), new Opt<FResidual>(), eqns, guard, elseClause);
+		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), eqns, guard, elseClause);
 	}
 	
 	/**
@@ -536,7 +538,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -544,7 +546,7 @@ aspect Constructors {
 	 */
 	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -552,7 +554,7 @@ aspect Constructors {
 	 */
 	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -560,7 +562,7 @@ aspect Constructors {
 	 */
 	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, order);
 	}
 	
 	/**
@@ -568,7 +570,7 @@ aspect Constructors {
 	 */
 	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, order);
 	}
 	
 	/**
@@ -577,7 +579,7 @@ aspect Constructors {
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
 	}
 	
 	/**
@@ -585,7 +587,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -594,7 +596,7 @@ aspect Constructors {
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
 	}
 	
 	/**
@@ -602,7 +604,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName enumName) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, enumName);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, enumName);
 	}
 	
 	/**
@@ -611,7 +613,7 @@ aspect Constructors {
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable(), fv.getEnum().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType(), fv.getEnum().fullCopy());
 	}
 	
 	/**
@@ -619,7 +621,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -628,7 +630,7 @@ aspect Constructors {
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
 	}
 	
 	/**
@@ -636,7 +638,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
 	}
 	
 	/**
@@ -645,7 +647,7 @@ aspect Constructors {
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getManualIterationVariable());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
 	}
 	
 	/**
@@ -653,7 +655,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName record) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, false, record);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, record);
 	}
 
 	
@@ -663,14 +665,25 @@ aspect Constructors {
 	 */
 	public FInternalAttribute.FInternalAttribute(String name, FExp value) {
 		this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt(value), 
-				true, new Opt(), new Opt(), new List());
+				true, 0, new Opt(), new Opt(), new List());
 	}
 	
 	/**
-	 * \brief Create an attribute with only the required children.
+	 * Create an attribute with only the required children.
 	 */
-	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet) {
-		this(typeName, name, new Opt(), isSet, new Opt(), new Opt(), new List());
+	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
+		this(typeName, name, new Opt(), isSet, level, new Opt(), new Opt(), new List());
+	}
+	
+	/**
+	 * Create an attribute with only the required children and a value.
+	 * 
+	 * The value may be <code>null</code>, then no value is set.
+	 */
+	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, FExp value, boolean isSet, int level) {
+		this(typeName, name, 
+				(value == null ? new Opt() : new Opt(value)), 
+				isSet, level, new Opt(), new Opt(), new List());
 	}
 	
 	/**
@@ -774,6 +787,7 @@ aspect InheritedFactoryMethods {
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
+	public abstract FConnBoolOp      	      FConnBoolOp.createEmptyNode();
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
@@ -840,6 +854,7 @@ aspect InheritedFactoryMethods {
 	public FMatrix         FMatrix.createEmptyNode()         { return new FMatrix();         }
 	public FMatrixRow      FMatrixRow.createEmptyNode()      { return new FMatrixRow();      }
 	public FSubscriptedExp FSubscriptedExp.createEmptyNode() { return new FSubscriptedExp(); }
+	public FArgumentExp    FArgumentExp.createEmptyNode()    { return new FArgumentExp();    }
 	public FRangeExp       FRangeExp.createEmptyNode()       { return new FRangeExp();       }
 	public FLinspace       FLinspace.createEmptyNode()       { return new FLinspace();       }
 	public FEndExp         FEndExp.createEmptyNode()         { return new FEndExp();         }
@@ -873,11 +888,15 @@ aspect InheritedFactoryMethods {
 	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
 	public FFloorExp       FFloorExp.createEmptyNode()       { return new FFloorExp();       }
 	public FStringExp      FStringExp.createEmptyNode()      { return new FStringExp();      }
-	public FScalar         FScalar.createEmptyNode()         { return new FScalar();         }
+	public FScalarExp      FScalarExp.createEmptyNode()      { return new FScalarExp();      }
+	public FVectorExp      FVectorExp.createEmptyNode()      { return new FVectorExp();      }
+	public FMatrixExp      FMatrixExp.createEmptyNode()      { return new FMatrixExp();      }
 	public FTranspose      FTranspose.createEmptyNode()      { return new FTranspose();      }
 	public FCross          FCross.createEmptyNode()          { return new FCross();          }
+	public FSkew           FSkew.createEmptyNode()           { return new FSkew();           }
 	public FOuterProduct   FOuterProduct.createEmptyNode()   { return new FOuterProduct();   }
 	public FIdentity       FIdentity.createEmptyNode()       { return new FIdentity();       }
+	public FDiagonal       FDiagonal.createEmptyNode()       { return new FDiagonal();       }
 	public FOnes           FOnes.createEmptyNode()           { return new FOnes();           }
 	public FZeros          FZeros.createEmptyNode()          { return new FZeros();          }
 	public FFillExp        FFillExp.createEmptyNode()        { return new FFillExp();        }
@@ -888,9 +907,16 @@ aspect InheritedFactoryMethods {
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	
+	// Operators for overconstrained connection graphs
+	public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
+	public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
+	public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
+	public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
+	public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
+	public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
+	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FBinExp FBinExp.createNode(FExp left, FExp right) {
 		FBinExp node = createEmptyNode();
@@ -900,8 +926,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryExp FUnaryExp.createNode(FExp exp) {
 		FUnaryExp node = createEmptyNode();
@@ -910,8 +935,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
 		FIdUseExp node = createEmptyNode();
@@ -920,8 +944,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
 		FMathematicalFunctionCall node = createEmptyNode();
@@ -930,8 +953,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * \Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
 		FUnaryBuiltIn node = createEmptyNode();
@@ -940,8 +962,8 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children. For missing y, use null.
+	 * Create new node of same class as this, with the specified 
+	 * children. For missing y, use null.
 	 */
 	public FMinMaxExp FMinMaxExp.createNode(FExp x, FExp y) {
 		FMinMaxExp node = createEmptyNode();
@@ -952,12 +974,20 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \brief Create new node of same class as this, with the specified 
-	 *        children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FInfArgsFunctionCall FInfArgsFunctionCall.createNode(List<FExp> exps) {
 		FInfArgsFunctionCall node = createEmptyNode();
 		node.setFExpList(exps);
+		return node;
+	}
+	
+	/**
+	 * Create new node of same class as this, with the specified children.
+	 */
+	public FConnBoolOp FConnBoolOp.createNode(FExp exps) {
+		FConnBoolOp node = createEmptyNode();
+		node.setA(exps);
 		return node;
 	}
 	

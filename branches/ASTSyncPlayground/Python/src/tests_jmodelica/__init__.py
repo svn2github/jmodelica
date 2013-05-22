@@ -24,10 +24,11 @@ import os
 import sys
 import os, os.path
 
-__all__ = ['general', 'initialization', 'optimization', 'simulation',
-           'simulation_jmi', 'test_cad', 'test_compiler', 'test_examples',
-           'test_fmi', 'test_init', 'test_io', 'test_jmi', 'test_linearization',
-           'test_xmlparser', 'test_core']
+__all__ = ['general', 'initialization', 'optimization', 'simulation', 
+           'test_compiler', 'test_core', 'test_examples_casadi', 
+           'test_examples_fmi', 'test_examples_jmi', 'test_fmi', 
+           'test_fmi_jacobians', 'test_init', 'test_io', 'test_jmi', 
+           'test_linearization', 'test_xmlparser']
 
 #create working directory for tests
 if sys.platform == 'win32':

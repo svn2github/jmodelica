@@ -16,6 +16,10 @@
 
 aspect OptimicaTransformCanonical {
 	
+	public void FOptClass.variabilityPropagationIfSet() {
+		// Blocks variability propagation in optimization classes.
+	}
+	
 	public void FOptClass.transformCanonical() {
     	beginStep("transformCanonical()");
 		
@@ -75,11 +79,9 @@ aspect OptimicaTransformCanonical {
 					if (!fv_startTime.startAttributeSet()) {
 						fv_startTime.addFAttribute(new FAttribute(new FIdUse("Real"),
 	                            new FIdDecl(new FQNameString("start")),
-	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(0.0)),
+	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(0.0),
 	                            true,
-	                            new Opt(),
-	                            new Opt(),
-	                            new List()));											
+	                            Integer.MAX_VALUE));											
 					}
 				} 
 				// Same as for startTime
@@ -107,11 +109,9 @@ aspect OptimicaTransformCanonical {
 					if (!fv_finalTime.startAttributeSet()) {
 						fv_finalTime.addFAttribute(new FAttribute(new FIdUse("Real"),
 	                            new FIdDecl(new FQNameString("start")),
-	                            new Opt(initialGuess_exp!=null? initialGuess_exp: new FRealLitExp(1.0)),
+	                            initialGuess_exp != null ? initialGuess_exp : new FRealLitExp(1.0),
 	                            true,
-	                            new Opt(),
-	                            new Opt(),
-	                            new List()));											
+	                            Integer.MAX_VALUE));											
 					}
 				}
 				enableStartAndFinalTimeRewrite();
@@ -119,7 +119,7 @@ aspect OptimicaTransformCanonical {
 			// Flush to reset cashes
 			root().flushAllRecursive();
 		}
-		transformCanonicalBase();		
+		transformCanonicalBase();
 	    transformCanonicalCleanup();
 
     	endStep("transformCanonical()");

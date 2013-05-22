@@ -15,6 +15,7 @@
 */
 
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -61,6 +63,7 @@ aspect RootAccess {
     	org.jmodelica.modelica.parser.ModelicaParser parser = 
     		new org.jmodelica.modelica.parser.ModelicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
+        parser.setFormattingInfo(scanner.getFormattingInfo());
 		return parser;
     }
     
@@ -99,7 +102,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         reader.close();
         return sr;
     }
@@ -111,7 +113,6 @@ aspect RootAccess {
         beaver.Parser parser = createModelicaParser(scanner);
         sr = (SourceRoot) parser.parse(scanner);
         sr.setFileName(fileName);
-        sr.setFormatting(scanner.getFormattingInfo());
         return sr;
     }
     
@@ -728,11 +729,6 @@ aspect Names {
 
     
     /**
-     * Get number of InstAccesses without triggering rewrites.
-     */
-    syn int InstDot.getNumInstAccessNoTransform() = getInstAccessListNoTransform().getNumChildNoTransform();
-    
-    /**
      * stripFirstAccess removes the first access in a qualified
      * name. If the name is not qualified, null is returned. 
      */
@@ -930,8 +926,8 @@ aspect FlatNames {
     syn FArraySubscripts FIdUseExp.getFArraySubscripts() = 
         getFIdUse().getFArraySubscripts();
     
-    syn lazy FQName InstNode.getFQNamePrefix() = retrieveFQName();
-    
+    syn FQName InstNode.getFQNamePrefix() = retrieveFQName();
+
     syn lazy FQName InstNode.getFQName() = getFQNamePrefix();
     eq InstClassDecl.getFQName()         = new FQNameEmpty();
     eq InstComponentDecl.getFQName()     = appendMyName(retrieveFQName());
@@ -945,16 +941,19 @@ aspect FlatNames {
     eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
     
     inh lazy FQName InstNode.retrieveFQName();
+    inh FQName FExp.retrieveFQName();
     eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
     eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
+    eq InstShortClassDecl.getInstExtends().retrieveFQName()               = retrieveFQName();
     eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
     eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
     eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
     eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
+    eq FClass.getChild().retrieveFQName()                                 = null;
 
     /**
      * \brief Get a string representation of a prefix of this name.
@@ -1120,6 +1119,7 @@ aspect FlatNames {
     syn String FClass.name()        = getFQNameNoTransform().name();
     syn String FFunctionDecl.name() = getFQNameNoTransform().name();
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
+    syn String FAttribute.name()    = getName().name();
     
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()     = getNameNoTransform().name();
@@ -1133,11 +1133,13 @@ aspect FlatNames {
     syn String FEnumDecl.name() = getName().name();
     
     syn String FEnumLiteral.name() = getName().name();
+    
+    syn String FDerivativeFunction.name() = getNameNoTransform().name();
       
-    eq FDerivativeVariable.name()  = getFQNameNoTransform().derName();
-    eq FHDerivativeVariable.name()  = getFQNameNoTransform().hDerName(getOrder());
-    eq FDummyDerivativeVariable.name()  =getFQNameNoTransform().derName();
-    eq FHDummyDerivativeVariable.name()  =getFQNameNoTransform().hDerName(getOrder());
+    eq FDerivativeVariable.name()       = getFQNameNoTransform().derName();
+    eq FHDerivativeVariable.name()      = getFQNameNoTransform().hDerName(getOrder());
+    eq FDummyDerivativeVariable.name()  = getFQNameNoTransform().derName();
+    eq FHDummyDerivativeVariable.name() = getFQNameNoTransform().hDerName(getOrder());
 
     syn String FIdUse.derName()    = getFQNameNoTransform().derName();
     syn String FIdUseExp.derName() = getFIdUseNoTransform().derName();
@@ -1149,10 +1151,16 @@ aspect FlatNames {
     eq FPreBooleanVariable.name()  = getFQNameNoTransform().preName();
     eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
     eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
-    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
-    syn String FPreExp.preName() {
-     	return ((FIdUseExp)getFExpNoTransform()).getFIdUse().preName();
-	}
+
+    syn String FPreExp.preName() = getFExpNoTransform().accessPreName();
+    
+    // Perhaps berrer to do like with der() and add InstPreExp?
+    syn String FExp.accessPreName() {
+    	throw new UnsupportedOperationException();
+    }
+    eq FIdUseExp.accessPreName()      = getFIdUse().getFQNameNoTransform().preName();
+    eq FInstAccessExp.accessPreName() = "pre(" + name() + ')';
+
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
 
@@ -1209,6 +1217,9 @@ aspect FlatNames {
     
     syn String FQName.funcNameUnderscore(String suffix) = "func_" + nameUnderscore() + "_" + suffix;
     syn String FIdUse.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FFunctionCall.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
+    syn String FFunctionDecl.funcNameUnderscore(String suffix) = getFQName().funcNameUnderscore(suffix);
+    syn String FDerivativeFunction.funcNameUnderscore(String suffix) = getName().funcNameUnderscore(suffix);
 
     syn int FAbstractVariable.variableIndex() = findVariableIndex();
     eq FPreBooleanVariable.variableIndex()    = myNonPreVariable().variableIndex();
@@ -1222,6 +1233,7 @@ aspect FlatNames {
     eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
     eq FEnumDecl.getChild().findVariableIndex()           = -1;
+    eq FClass.getDummyVariable().findVariableIndex()      = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
@@ -1861,13 +1873,21 @@ aspect FlatNames {
     eq FEnumLiteralType.name() 		= getName();
     eq FRecordType.name()      		= getName();
     eq FUnknownType.name()     		= "(unknown type)";
-    eq FExternalObjectType.name()	= "ExternalObject"; 
+    eq FExternalObjectType.name()	= "ExternalObject";
+    
+    
+    syn boolean FAbstractFunctionCall.ignoreInFlattening() = false;
+    eq FIgnoredBuiltIn.ignoreInFlattening()                = true;
+    eq FConnectionsOp.ignoreInFlattening()                 = true;
+    
+    syn boolean FAbstractEquation.ignoreInFlattening() = false;
+    eq FFunctionCallEquation.ignoreInFlattening()      = getCall().ignoreInFlattening();
     
     syn boolean FAbstractFunctionCall.isIgnored() = false;
-    eq FIgnoredBuiltIn.isIgnored() = true;
+    eq FIgnoredBuiltIn.isIgnored()                = true;
     
     syn boolean FAbstractEquation.isIgnored() = false;
-    eq FFunctionCallEquation.isIgnored() = getCall().isIgnored();
+    eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
     
     /**
      * \brief Add an equation to the first equation block.
@@ -1973,6 +1993,11 @@ aspect FlatFunctionUtils {
          return l;
      }
      
+	/**
+	 * \brief Returns the i:th FFunctionVariable that is  declared as "input".
+	 */
+	syn FFunctionVariable FFunctionDecl.myInput(int i) = myInputs().get(i);
+     
      /**
       * \brief Returns a list of all FFunctionVariables not declared as "input" or "output".
       */
@@ -2026,7 +2051,7 @@ aspect FlatFunctionUtils {
     
      syn lazy FunctionReturnDefinition FFunctionDecl.returnDefinition() = new FunctionReturnDefinition(this);
      inh FunctionReturnDefinition FReturnStmt.returnDefinition();
-     eq FFunctionDecl.getFAlgorithmBlock().returnDefinition() = returnDefinition();
+     eq FFunctionDecl.getFAlgorithm().returnDefinition() = returnDefinition();
      eq InstProgramRoot.getChild().returnDefinition()         = null;
      eq FClass.getChild().returnDefinition()                  = null;
      
@@ -2050,6 +2075,43 @@ aspect FlatFunctionUtils {
       * \brief Check if this function returns a non-primitive when used as an expression.
       */
      syn boolean FFunctionDecl.isComposite() = hasOutputs() ? expOutput().isComposite() : false;
+     
+	syn boolean FFunctionDecl.containsRealInputs() {
+		for (FFunctionVariable var : myInputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FFunctionDecl.containsRealOutputs() {
+		for (FFunctionVariable var : myOutputs())
+			if (var.type().containsReal())
+				return true;
+		return false;
+	}
+	
+	syn boolean FFunctionDecl.requiresDerivative() = true;
+	eq FConstructorDecl.requiresDerivative()       = false;
+	eq FDestructorDecl.requiresDerivative()        = false;
+	
+	syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+	
+	/**
+	 * Determines if the compiler is able to differentiate this function declaration
+	 */
+	syn boolean FFunctionDecl.canDifferentiate() {
+		if (hasFDerivativeFunction())
+			return true;
+		if (derivativEqualsZero())
+			return true;
+		for (FStatement statement : getFAlgorithm().getFStatements())
+			if (!statement.canDifferentiate())
+				return false;
+		return true;
+	}
+	
+	syn boolean FStatement.canDifferentiate() = true;
+	eq FExternalStmt.canDifferentiate()       = false;
+	
      
      /**
       * Returns a string (tersely) describing the signature of the function.
@@ -2113,10 +2175,18 @@ aspect FlatFunctionUtils {
      eq Root.getChild().inFunction()              = false;
      
      /**
+      * Get the class or component containing this node.
+      */
+     inh InstNode InstNode.containingEntity();
+     eq InstClassDecl.getChild().containingEntity()     = this;
+     eq InstComponentDecl.getChild().containingEntity() = this;
+     eq Root.getChild().containingEntity()              = null;
+     
+     /**
       * \brief Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
-     eq FAlgorithmBlock.getChild().inAlgorithm()   = !inFunction();
+     eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
      eq FClass.getChild().inAlgorithm()            = false;
@@ -2136,14 +2206,14 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithmBlock.getChild().insideBlockStmt() = false;
+     eq FAlgorithm.getChild().insideBlockStmt() = false;
      eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
      eq FWhileStmt.getChild().insideBlockStmt()      = true;
      eq FForStmt.getChild().insideBlockStmt()        = true;
      eq InstForStmt.getChild().insideBlockStmt()     = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithmBlock.getChild().insideBranchedStmt() = false;
+     eq FAlgorithm.getChild().insideBranchedStmt() = false;
      eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
      
      /**
@@ -2400,47 +2470,23 @@ aspect ComponentDeclMethods {
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstComponentDecl.isOuter() {
-    
-        if (getComponentDecl().isOuter())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
     
         /**
      * Check if a InstClassDecl is declared inner.
      */
-    syn boolean InstClassDecl.isInner() {
-    
-        if (getClassDecl().isInner())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
 
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstClassDecl.isOuter() {
-    
-        if (getClassDecl().isOuter())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
     
     /**
      * Check if a component is disabled by a conditional clause
      */
-    syn boolean InstComponentDecl.isDisabled() {
-    	if (!hasConditionalAttribute() || 
-    			(hasConditionalAttribute() && getConditionalAttribute().ceval().booleanValue())) {
-    		return false;
-    	} else {
-    		return true;
-    	}
-    }
+    syn boolean InstComponentDecl.isDisabled() = 
+    	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
@@ -2510,18 +2556,22 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
-    eq FAlgorithmBlock.getChild().inNoEventExp() = true;
+    eq FAlgorithm.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
+
+    inh boolean FExp.inSmoothExp(int order);
+    eq FSmoothExp.getChild().inSmoothExp(int order) = getOrder().ceval().intValue() >= order;
+    eq SourceRoot.getChild().inSmoothExp(int order) = false;
+    eq FlatRoot.getChild().inSmoothExp(int order) = false;
     
     inh boolean InstAccess.inConnectClause();
     inh boolean FExp.inConnectClause();
-    eq FConnectClause.getChild().inConnectClause() = true;
-    eq FAlgorithmBlock.getChild().inConnectClause() = false;
+    eq FConnectClause.getChild().inConnectClause()    = true;
     eq FAbstractEquation.getChild().inConnectClause() = false;
-    eq SourceRoot.getChild().inConnectClause() = false;
-    eq FlatRoot.getChild().inConnectClause() = false;
+    eq SourceRoot.getChild().inConnectClause()        = false;
+    eq FlatRoot.getChild().inConnectClause()          = false;
 
     inh boolean FExp.inIfCondition();
     eq FIfExp.getChild().inIfCondition() = true;
@@ -2795,6 +2845,20 @@ aspect GeneralHelpers {
 		}
 		
 	}
+		
+	/**
+	 * Adds all children to a Collection.
+	 */
+	public void ASTNode.addAllTo(Collection<? super T> col) {
+		for (T n : this)
+			col.add(n);
+	}
+	
+	/**
+	 * Is this class partial?
+	 */
+	syn boolean ClassDecl.isPartial() = false;
+	eq BaseClassDecl.isPartial()      = hasPartial();
 	
 	syn boolean Restriction.isModel() = false;
 	eq Model.isModel() = true;
@@ -2907,4 +2971,68 @@ aspect DebugHelpers {
 		 return false;
 	}
 
+}
+
+aspect DefaultExperiment {
+	
+	/**
+	 * Check if a class has an "experiment" annotation.
+	 */
+	syn boolean ClassDecl.isExperiment() = annotation("experiment").exists();
+	
+	/**
+	 * Check if a class has an "experiment" annotation.
+	 */
+	syn boolean InstClassDecl.isExperiment() = annotation("experiment").exists();
+	
+	public class FClass {
+		
+		public Experiment experiment = null;
+		
+		/**
+		 * Create an experiment description from an experiment annotation, if it exists.
+		 */
+		public void createExperiment(AnnotationNode a) {
+			if (a.exists())
+				experiment = new Experiment(a);
+		}
+		
+		/**
+		 * Represents an experiment annotation.
+		 */
+		public static class Experiment {
+			
+			public boolean hasStart = false;
+			public double start;
+			public boolean hasStop = false;
+			public double stop;
+			public boolean hasInterval = false;
+			public double interval;
+			public boolean hasTolerance = false;
+			public double tolerance;
+			
+			public Experiment(AnnotationNode expr) {
+				for (AnnotationNode val : expr) {
+					if (val.isRealValue()) {
+						if (val.name().equals("StartTime")) {
+							hasStart = true;
+							start = val.real();
+						} else if (val.name().equals("StopTime")) {
+							hasStop = true;
+							stop = val.real();
+						} else if (val.name().equals("Interval")) {
+							hasInterval = true;
+							interval = val.real();
+						} else if (val.name().equals("Tolerance")) {
+							hasTolerance = true;
+							tolerance = val.real();
+						}
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
 }

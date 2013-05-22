@@ -39,6 +39,7 @@ import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -482,11 +483,26 @@ public class Editor extends AbstractDecoratedTextEditor implements
 			offset = tsel.getOffset();
 			length = tsel.getLength();
 		}
-
+		
+		return getClassContaining(offset, length);
+	}
+	
+	public ClassDecl getClassContaining(int offset, int length) {
 		ASTNode root = compResult.root();
 		IASTNode iast = root.lookupChildAST(file.path());
 		ASTNode ast = (iast != null) ? (ASTNode) iast : root;
 		return ast.containingClassDecl(offset, length);
+	}
+	
+	public ClassDecl getClassContainingMouse() {
+		Point pos = Display.getCurrent().getCursorLocation(); 
+		StyledText textWidget = getSourceViewer().getTextWidget();
+		try {
+			int offset = textWidget.getOffsetAtLocation(textWidget.toControl(pos));
+			return getClassContaining(offset, 0);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 	}
 
 	@Override

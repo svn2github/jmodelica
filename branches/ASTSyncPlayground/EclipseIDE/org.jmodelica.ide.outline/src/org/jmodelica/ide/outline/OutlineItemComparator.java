@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChange
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.Preferences;
+import org.jmodelica.ide.compiler.ModelicaPreferences;
 import org.jmodelica.ide.helpers.LoadedLibraries;
 import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.CachedClassDecl;
@@ -41,7 +41,7 @@ public class OutlineItemComparator extends ViewerSorter implements
 
 	public OutlineItemComparator() {
 		updateComparator();
-		Preferences.addListener(this);
+		ModelicaPreferences.INSTANCE.addListener(this);
 	}
 
 	public int category(Object element) {
@@ -67,7 +67,7 @@ public class OutlineItemComparator extends ViewerSorter implements
 	}
 
 	public void updateComparator() {
-		cmp = COMPARATORS.get(Preferences
+		cmp = COMPARATORS.get(ModelicaPreferences.INSTANCE
 				.get(IDEConstants.PREFERENCE_EXPLORER_SORT_ORDER));
 	}
 

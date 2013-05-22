@@ -41,6 +41,7 @@ import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.BadDefinition;
 import org.jmodelica.modelica.compiler.LibNode;
 import org.jmodelica.modelica.compiler.ParserException;
+import org.jmodelica.modelica.compiler.ParserHandler;
 import org.jmodelica.modelica.compiler.SourceRoot;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 import org.jmodelica.modelica.parser.ModelicaParser;
@@ -51,13 +52,14 @@ import beaver.Parser;
 
 public class ModelicaEclipseCompiler implements ICompiler {
 
-	private final ModelicaParser parser = new ModelicaParser();
-	private final ModelicaScanner scanner = new ModelicaScanner(System.in); // Dummy
-																			// stream
+	private final ModelicaParser parser;
+	private final ModelicaScanner scanner;
 	private final CompileErrorReport errorReport = new CompileErrorReport();
 
 	public ModelicaEclipseCompiler() {
 		super();
+		scanner = new ModelicaScanner(System.in); // Dummy stream
+		parser = (ModelicaParser)ParserHandler.createModelicaParser(scanner);
 		parser.setReport(errorReport);
 	}
 
@@ -194,31 +196,25 @@ public class ModelicaEclipseCompiler implements ICompiler {
 
 		errorReport.setFile(file, clearSemantic);
 		scanner.reset(reader);
-		org.jmodelica.modelica.compiler.List<StoredDefinition> list = new org.jmodelica.modelica.compiler.List<StoredDefinition>();
 		SourceRoot sRoot = null;
+		StoredDefinition def = null;
 		try {
 			sRoot = (SourceRoot) parser.parse(scanner);
-			synchronized (sRoot.state()) {
-				sRoot.setFormatting(scanner.getFormattingInfo());
+			//synchronized (sRoot.state()) {
+			//	sRoot.setFormatting(scanner.getFormattingInfo());
+			//}
+			if (sRoot.getProgram().getNumUnstructuredEntity() == 0) { // for empty file
+				def = createBadDef(file);
+			} else {
+				def = sRoot.getProgram().getUnstructuredEntity(0);
+				annotateDefinition(def, file);
 			}
-			int i = 0;
-			for (StoredDefinition def : sRoot.getProgram()
-					.getUnstructuredEntitys()) {
-				StoredDefinition sd = createAnnotatedDefinition(def, file);
-				System.err.println("Compiler parsed new storeddef: "
-						+ sd.getNodeName() + ":" + sd.outlineId() + " File:"
-						+ file.getName());
-				list.add(sd);
-				i++;
-			}
-			if (i == 0) // for empty file
-				list.add(createBadDef(file));
 		} catch (Parser.Exception e) {
-			list.add(createBadDef(file));
+			def = createBadDef(file);
 		} catch (ParserException e) {
-			list.add(createBadDef(file));
+			def = createBadDef(file);
 		} catch (IOException e) {
-			list.add(createBadDef(file));
+			def = createBadDef(file);
 		} finally {
 			errorReport.cleanUp();
 			if (sRoot != null)
@@ -228,19 +224,17 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			} catch (IOException e) {
 			}
 		}
-		if (list.getNumChild() > 1)
+		if (sRoot.getProgram().getNumUnstructuredEntity() > 1)
 			System.err
 					.println("PARSING OF FILE RESULTED IN MORE THAN 1 STOREDDEF BUT ONLY ONE WAS KEPT, NEED FIXING");
-		LocalRootNode toReturn = new LocalRootNode(list.getChild(0));
-		return toReturn;
+		return new LocalRootNode(def);
 	}
 
 	private StoredDefinition createBadDef(IFile file) {
-		return createAnnotatedDefinition(new BadDefinition(), file);
+		return annotateDefinition(new BadDefinition(), file);
 	}
 
-	private StoredDefinition createAnnotatedDefinition(StoredDefinition def,
-			IFile file) {
+	private StoredDefinition annotateDefinition(StoredDefinition def, IFile file) {
 		def.setFile(file);
 		def.setFileName(file.getRawLocation().toOSString());
 		def.setLineBreakMap(scanner.getLineBreakMap());

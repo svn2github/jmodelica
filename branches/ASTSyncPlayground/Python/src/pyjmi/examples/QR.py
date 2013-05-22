@@ -47,14 +47,14 @@ def run_demo(with_plots=True):
     p_2    = res['p[2]']
     t = res['time']
 
-    assert N.abs(qr_1_1[-1] + 4.47214) < 1e-3
-    assert N.abs(qr_1_2[-1] + 3.13049) < 1e-3
-    assert N.abs(qr_2_1[-1] - 0.618034) < 1e-3
-    assert N.abs(qr_2_2[-1] - 0.447214) < 1e-3
-    assert N.abs(tau_1[-1] - 1.44721) < 1e-3
-    assert N.abs(tau_2[-1] - 0) < 1e-3
-    assert N.abs(p_1[-1] - 2) < 1e-3
-    assert N.abs(p_2[-1] - 1) < 1e-3  
+    assert N.abs(res.final('QR[1,1]') + 4.47214)  < 1e-3
+    assert N.abs(res.final('QR[1,2]') + 3.13049)  < 1e-3
+    assert N.abs(res.final('QR[2,1]') - 0.618034) < 1e-3
+    assert N.abs(res.final('QR[2,2]') - 0.447214) < 1e-3
+    assert N.abs(res.final('tau[1]') - 1.44721)   < 1e-3
+    assert N.abs(res.final('tau[2]') - 0)         < 1e-3
+    assert N.abs(res.final('p[1]') - 2)           < 1e-3
+    assert N.abs(res.final('p[2]') - 1)           < 1e-3
     
     if with_plots:
         fig = p.figure()

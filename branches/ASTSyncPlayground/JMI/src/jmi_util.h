@@ -144,7 +144,7 @@ int jmi_dae_cad_get_connections( int n_col, int n_nz, int *row, int *col, int **
  *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
  *                         to set this argument.
  * @param screen_use Set the flag to JMI_DER_CHECK_SCREEN_ON to print the result of the comparasion on the screen
- *		       or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
+ *             or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
  *             The size of this vector is the same as the z vector.
@@ -155,7 +155,7 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
 
 /**
  * \brief Help function that is used in jmi_func_cad_dF and jmi_func_fd_dF that determines the mapping between the original col vector
- *				in the sparse triplet representation and the decrease col vector due to independent_vars.
+ *              in the sparse triplet representation and the decrease col vector due to independent_vars.
  *
  * @param jmi A jmi_t struct.
  * @param func The jmi_func_t struct.
@@ -169,6 +169,54 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind);
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * \brief Evaluates the switches.
+ * 
+ * Evaluates the switches. Depending on the mode, it either evaluates
+ * all the switches at initial time (mode=0) or otherwise (mode=1).
+ * 
+ * @param jmi The jmi_t struct
+ * @param switches The switches (Input, Output)
+ * @param eps The epsilon used in determining if a switch or not
+ * @param mode Determine if we are evaluating initial switches or not.
+ * @return Error code.
+ */
+int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode);
+
+/**
+ * \brief Compares two sets of switches.
+ * 
+ * Compares two sets of switches and returns (1) if they are equal and
+ * (0) if not.
+ * 
+ * @param sw_pre The first set of switches
+ * @param sw_post The second set of switches
+ * @param size The size of the switches
+ * @return 1 if equal, 0 if not
+ */
+int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
+
+/**
+ * \brief Turns a switch.
+ * 
+ * Turns a switch depending on the indicator value and the relation 
+ * expression. The relation expression can either be >, >=, <, <=. An
+ * Example is if ev_ind is postive and the relation is > then a switch
+ * occurs if ev_ind is <= 0.0. If on the other hand the relation is >=
+ * , then the switch occurs if ev_ind < -eps.
+ * 
+ * @param ev_ind The indicator value.
+ * @param sw The switch value
+ * @param eps The epsilon used for "moving" the zero.
+ * @param rel The relation expression
+ * @return The new switch value
+ */
+jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+
 /**
  * \brief Types of log messages.
  */
@@ -178,35 +226,8 @@ typedef enum {
     logInfo
 } jmi_log_category_t;
 
-/**
- * \brief Log function should be used for all output in the run-time. Forwards the call to FMI logger in case of FMU.
- *  Use sprintf to form a message first.
- *
- * @param jmi       A jmi_t struct.
- * @param category  Log category. By default logError will go to stderr and other messages to stdout.
- * @param message   The message. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log(jmi_t *jmi, jmi_log_category_t category, char* message);
+#ifdef __cplusplus
+}
+#endif
 
-/**
- * \brief Log error. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_error(jmi_t *jmi, char* fmt,...);
-/**
- * \brief Log warning. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_warning(jmi_t *jmi, char* fmt,...);
-/**
- * \brief Log info. Forwards the call to FMI logger in case of FMU.
- *
- * @param jmi       A jmi_t struct.
- * @param fmt       Format string used for printf. Note that a trailing '\n' is always added to the message when printing.
- */
-void jmi_log_info(jmi_t *jmi, char* fmt,...);
 #endif

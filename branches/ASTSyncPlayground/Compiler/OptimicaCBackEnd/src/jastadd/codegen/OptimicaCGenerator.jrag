@@ -160,10 +160,10 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			generateVarList(genPrinter, foptclass.derivativeVariables(),         "real_dx_p");
-			generateVarList(genPrinter, foptclass.differentiatedRealVariables(), "real_x_p");
-			generateVarList(genPrinter, foptclass.realInputs(),                  "real_u_p");
-			generateVarList(genPrinter, foptclass.algebraicRealVariables(),      "real_w_p");
+			generateVarList(genPrinter, foptclass.derivativeVariables(),             "real_dx_p");
+			generateVarList(genPrinter, foptclass.differentiatedRealVariables(),     "real_x_p");
+			generateVarList(genPrinter, foptclass.realInputs(),                      "real_u_p");
+			generateVarList(genPrinter, foptclass.algebraicContinousRealVariables(), "real_w_p");
 		}
 	}
 

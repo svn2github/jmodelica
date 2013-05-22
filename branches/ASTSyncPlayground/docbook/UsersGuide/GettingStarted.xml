@@ -79,9 +79,8 @@
     <section>
       <title>Linux or Mac OS</title>
 
-      <para>To start the IPython shell with <link
-      xlink:href="PyLab">PyLab</link> on Linux or Mac OS X, open a terminal
-      and enter the command:</para>
+      <para>To start the IPython shell with pylab on Linux or Mac OS X, open a
+      terminal and enter the command:</para>
 
       <programlisting language="python">&gt; $JMODELICA_HOME/Python/jm_ipython.sh -pylab
 </programlisting>
@@ -126,33 +125,35 @@ RLC.run_demo()</programlisting></para>
     your computer. Missing or having the wrong version of a package can be a
     source of errors. Therefore it can be useful to run
     <literal>&lt;package&gt;.check_packages()</literal> after installation or
-    when trouble-shooting.<programlisting language="python"># Import the function from pyfmi
-from pyfmi import check_packages
+    when trouble-shooting.<programlisting language="python">import pyjmi
+pyjmi.check_packages()
 
-# Run check_packages
-check_packages()
-
-Performing pyfmi package check
-==============================
+Performing pymodelica/pyjmi package check
+=========================================
 
 Platform...................... win32
 
-Python version:............... 2.7.2
+Python version:............... 2.7.3
+
+pymodelica/pyjmi version:..... 1.9
 
 
 Dependencies:
 
 Package                        Version
 -------                        -------
-numpy......................... 1.6.1                          Ok
-scipy......................... 0.9.0                          Ok
-matplotlib.................... 1.0.1                          Ok
-lxml.......................... 2.3.0                          Ok
-assimulo...................... n/a                            Ok
-wxPython...................... 2.8.12.1                       Ok
-pyreadline.................... 1.7                            Ok
-setuptools.................... 0.6c11                         Ok
-
+assimulo...................... --
+casadi........................ 1.6.0
+Cython........................ 0.18
+jpype......................... --
+lxml.......................... 3.1.0
+matplotlib.................... 1.2.0
+nose.......................... 1.2.1
+numpy......................... 1.6.2
+scipy......................... 0.11.0
+wxPython...................... 2.8.12.1
+pyreadline.................... 1.7.1
+setuptools.................... 0.6
 </programlisting></para>
   </section>
 
@@ -194,20 +195,24 @@ setuptools.................... 0.6c11                         Ok
 
       <orderedlist>
         <listitem>
-          <para>Create a text file and name it
-          <filename>user_startup.py</filename>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Place the file in
-          <filename>$USERPROFILE/.jmodelica.org/</filename> (Windows) or
-          <filename>$HOME/.jmodelica.org/</filename> (unix). To find out where
+          <para>Go to the folder <filename>$USERPROFILE</filename> (Windows)
+          or <filename>$HOME</filename> (Linux). To find out where
           <literal>$USERPROFILE</literal> or <literal>$HOME</literal> points
           to, open a Python shell and type:</para>
 
           <programlisting language="python">import os
 os.environ['USERPROFILE']   // windows
-os.environ['HOME']          // unix</programlisting>
+os.environ['HOME']          // Linux</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Create a folder and name it <literal>.jmodelica.org</literal>
+          (or open it if it already exists)</para>
+        </listitem>
+
+        <listitem>
+          <para>In this folder, create a text file and name it
+          <filename>user_startup.py</filename>.</para>
         </listitem>
 
         <listitem>

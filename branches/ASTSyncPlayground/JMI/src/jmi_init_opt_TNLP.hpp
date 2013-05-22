@@ -44,12 +44,12 @@ public:
                               Index& nnz_h_lag, IndexStyleEnum& index_style);
 
   virtual bool get_bounds_info(Index n, Number* x_l, Number* x_u,
-			       Index m, Number* g_l, Number* g_u);
+                   Index m, Number* g_l, Number* g_u);
 
   virtual bool get_starting_point(Index n, bool init_x, Number* x,
-				  bool init_z, Number* z_L, Number* z_U,
-				  Index m, bool init_lambda,
-				  Number* lambda);
+                  bool init_z, Number* z_L, Number* z_U,
+                  Index m, bool init_lambda,
+                  Number* lambda);
   //@}
 
 //  virtual bool get_constraints_linearity(Index m, LinearityType* const_types);
@@ -57,17 +57,17 @@ public:
   /** @name NLP evaluation methods */
   //@{
   virtual bool eval_f(Index n, const Number* x, bool new_x,
-		      Number& obj_value);
+              Number& obj_value);
 
   virtual bool eval_grad_f(Index n, const Number* x, bool new_x,
-			   Number* grad_f);
+               Number* grad_f);
 
   virtual bool eval_g(Index n, const Number* x, bool new_x,
-		      Index m, Number* g);
+              Index m, Number* g);
 
   virtual bool eval_jac_g(Index n, const Number* x, bool new_x,
-			  Index m, Index nele_jac, Index* iRow,
-			  Index *jCol, Number* values);
+              Index m, Index nele_jac, Index* iRow,
+              Index *jCol, Number* values);
   //@}
 
     /** @name Solution Methods */

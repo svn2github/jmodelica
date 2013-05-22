@@ -28,49 +28,51 @@ from pyjmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    Bang bang optimal control problem
+    Bang bang optimal control problem.
+    
     reference : PROPT - Matlab Optimal Control Software (DAE, ODE)
     """
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     jmu_name = compile_jmu("JMExamples_opt.BangControl_opt", 
-    (curr_dir+"/files/JMExamples_opt.mop",curr_dir+"/files/JMExamples.mo"))
+    (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     bc = JMUModel(jmu_name)
     
     res = bc.optimize()
 
     # Extract variable profiles
-    x1=res['x1']
-    x2=res['x2']
-    u=res['u']
-    t=res['time'] 
-
-    print "t = ", repr(N.array(t))
-    print "x1 = ", repr(N.array(x1))
-    print "x2 = ", repr(N.array(x2))
-    print "u = ", repr(N.array(u))
+    x1 = res['x1']
+    x2 = res['x2']
+    u  = res['u']
+    t  = res['time']
+    
+    assert N.abs(res.final('x1') - 300.0) < 1e-4
+    assert N.abs(res.final('x2') - 0.0)   < 1e-4
+    assert N.abs(res.final('u')  + 2.0)   < 1e-4
     
     if with_plots:
-        # Plot
         plt.figure(1)
         plt.clf()
+        
         plt.subplot(311)
         plt.plot(t,x1)
         plt.grid()
         plt.ylabel('x1')
-		
+        plt.xlabel('time')
+
         plt.subplot(312)
         plt.plot(t,x2)
         plt.grid()
         plt.ylabel('x2')
+        plt.xlabel('time')
 
         plt.subplot(313)
         plt.plot(t,u)
         plt.grid()
         plt.ylabel('u')
-        
         plt.xlabel('time')
+
         plt.show()
 
 if __name__ == "__main__":

@@ -20,8 +20,8 @@ import os
 import numpy as N
 import pylab as p
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 def run_demo(with_plots=True):
     """
@@ -35,17 +35,23 @@ def run_demo(with_plots=True):
     class_name = 'IfExpExamples.IfExpExample1'
     mofile = curr_dir+'/files/IfExpExamples.mo'
     
-    jmu_name = compile_jmu(class_name, mofile)
-    model = JMUModel(jmu_name)
-    res = model.simulate(final_time=5, options={'ncp':500})
-                        
+    # Compile and load model
+    fmu_name = compile_fmu(class_name, mofile)
+    model = load_fmu(fmu_name)
+    
+    # Set options
+    opts = model.simulate_options()
+    opts['ncp'] = 500
+    
+    # Simulate
+    res = model.simulate(final_time=5, options=opts)
+
     x = res['x']
     u = res['u']
     t = res['time']
     
-    assert N.abs(x[-1] - 3.5297357) < 1e-3
-    
-    assert N.abs(u[-1] - (-0.2836625)) < 1e-3
+    assert N.abs(res.final('x') - 3.5297357)    < 1e-3
+    assert N.abs(res.final('u') - (-0.2836625)) < 1e-3
 
     if with_plots:
         fig = p.figure()

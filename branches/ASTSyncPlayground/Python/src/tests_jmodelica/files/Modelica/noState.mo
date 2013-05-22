@@ -22,4 +22,10 @@ package NoState
         x = if time>= 2.0 and time<=3.0 then 1.0 else -1.0;
     end Example2;
     
+    model Example3
+        Real x(start=0);
+    equation
+        x = time;
+    end Example3;
+    
 end NoState;

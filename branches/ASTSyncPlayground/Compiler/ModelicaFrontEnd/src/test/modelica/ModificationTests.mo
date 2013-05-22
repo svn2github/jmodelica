@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -372,7 +372,7 @@ model ModTest13_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
 end ModTest13_Err;
@@ -393,7 +393,7 @@ model ModTest14_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
-  The component y is undeclared
+  Cannot find component declaration for y
 
 ")})));
 end ModTest14_Err;
@@ -423,7 +423,7 @@ model ModTest15_Err
 1 error(s) found...
 In file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
-  The component z is undeclared
+  Cannot find component declaration for z
 
 ")})));
 end ModTest15_Err;
@@ -508,20 +508,12 @@ model ArrayModifications1
 			description="Modifications to arrays: array attributes",
 			flatModel="
 fclass ModificationTests.ArrayModifications1
- Real a[1](start = 3);
- Real a[2](start = 3);
- Real a[3](start = 3);
- Real b[1](start = 1);
- Real b[2](start = 2);
- Real b[3](start = 3);
-equation
- a[1] = 0;
- a[2] = 0;
- a[3] = 0;
- b[1] = 0;
- b[2] = 0;
- b[3] = 0;
-
+ constant Real a[1](start = 3) = 0;
+ constant Real a[2](start = 3) = 0;
+ constant Real a[3](start = 3) = 0;
+ constant Real b[1](start = 1) = 0;
+ constant Real b[2](start = 2) = 0;
+ constant Real b[3](start = 3) = 0;
 end ModificationTests.ArrayModifications1;
 ")})));
 end ArrayModifications1;
@@ -589,32 +581,18 @@ model ArrayModifications5
 			description="Modifications to arrays: members that are arrays",
 			flatModel="
 fclass ModificationTests.ArrayModifications5
- Real b[1].x[1];
- Real b[1].x[2];
- Real b[1].x[3];
- Real b[1].y[1];
- Real b[1].y[2];
- Real b[1].y[3];
- Real b[2].x[1];
- Real b[2].x[2];
- Real b[2].x[3];
- Real b[2].y[1];
- Real b[2].y[2];
- Real b[2].y[3];
-equation
- b[1].x[1] = 1;
- b[1].x[2] = 2;
- b[1].x[3] = 3;
- b[1].y[1] = 10;
- b[1].y[2] = 20;
- b[1].y[3] = 30;
- b[2].x[1] = 4;
- b[2].x[2] = 5;
- b[2].x[3] = 6;
- b[2].y[1] = 10;
- b[2].y[2] = 20;
- b[2].y[3] = 30;
-
+ constant Real b[1].x[1] = 1;
+ constant Real b[1].x[2] = 2;
+ constant Real b[1].x[3] = 3;
+ constant Real b[1].y[1] = 10;
+ constant Real b[1].y[2] = 20;
+ constant Real b[1].y[3] = 30;
+ constant Real b[2].x[1] = 4;
+ constant Real b[2].x[2] = 5;
+ constant Real b[2].x[3] = 6;
+ constant Real b[2].y[1] = 10;
+ constant Real b[2].y[2] = 20;
+ constant Real b[2].y[3] = 30;
 end ModificationTests.ArrayModifications5;
 ")})));
 end ArrayModifications5;
@@ -678,32 +656,18 @@ model ArrayModifications8
 			description="Modifications to arrays: arrays of composites: same name on different levels",
 			flatModel="
 fclass ModificationTests.ArrayModifications8
- Real x[1].y[1].x[1];
- Real x[1].y[1].x[2];
- Real x[1].y[2].x[1];
- Real x[1].y[2].x[2];
- Real x[1].x[1];
- Real x[1].x[2];
- Real x[2].y[1].x[1];
- Real x[2].y[1].x[2];
- Real x[2].y[2].x[1];
- Real x[2].y[2].x[2];
- Real x[2].x[1];
- Real x[2].x[2];
-equation
- x[1].y[1].x[1] = 1;
- x[1].y[1].x[2] = 2;
- x[1].y[2].x[1] = 1;
- x[1].y[2].x[2] = 2;
- x[1].x[1] = 10;
- x[1].x[2] = 20;
- x[2].y[1].x[1] = 1;
- x[2].y[1].x[2] = 2;
- x[2].y[2].x[1] = 1;
- x[2].y[2].x[2] = 2;
- x[2].x[1] = 30;
- x[2].x[2] = 40;
-
+ constant Real x[1].y[1].x[1] = 1;
+ constant Real x[1].y[1].x[2] = 2;
+ constant Real x[1].y[2].x[1] = 1;
+ constant Real x[1].y[2].x[2] = 2;
+ constant Real x[1].x[1] = 10;
+ constant Real x[1].x[2] = 20;
+ constant Real x[2].y[1].x[1] = 1;
+ constant Real x[2].y[1].x[2] = 2;
+ constant Real x[2].y[2].x[1] = 1;
+ constant Real x[2].y[2].x[2] = 2;
+ constant Real x[2].x[1] = 30;
+ constant Real x[2].x[2] = 40;
 end ModificationTests.ArrayModifications8;
 ")})));
 end ArrayModifications8;
@@ -727,32 +691,18 @@ model ArrayModifications9
 			description="Modifications to arrays: arrays of composites: same name on different levels, attribute",
 			flatModel="
 fclass ModificationTests.ArrayModifications9
- Real x[1].y[1].x[1](start = 1);
- Real x[1].y[1].x[2](start = 1);
- Real x[1].y[2].x[1](start = 1);
- Real x[1].y[2].x[2](start = 1);
- Real x[1].x[1](start = 10);
- Real x[1].x[2](start = 20);
- Real x[2].y[1].x[1](start = 1);
- Real x[2].y[1].x[2](start = 1);
- Real x[2].y[2].x[1](start = 1);
- Real x[2].y[2].x[2](start = 1);
- Real x[2].x[1](start = 30);
- Real x[2].x[2](start = 40);
-equation
- x[1].y[1].x[1] = 0;
- x[1].y[1].x[2] = 0;
- x[1].y[2].x[1] = 0;
- x[1].y[2].x[2] = 0;
- x[1].x[1] = 0;
- x[1].x[2] = 0;
- x[2].y[1].x[1] = 0;
- x[2].y[1].x[2] = 0;
- x[2].y[2].x[1] = 0;
- x[2].y[2].x[2] = 0;
- x[2].x[1] = 0;
- x[2].x[2] = 0;
-
+ constant Real x[1].y[1].x[1](start = 1) = 0;
+ constant Real x[1].y[1].x[2](start = 1) = 0;
+ constant Real x[1].y[2].x[1](start = 1) = 0;
+ constant Real x[1].y[2].x[2](start = 1) = 0;
+ constant Real x[1].x[1](start = 10) = 0;
+ constant Real x[1].x[2](start = 20) = 0;
+ constant Real x[2].y[1].x[1](start = 1) = 0;
+ constant Real x[2].y[1].x[2](start = 1) = 0;
+ constant Real x[2].y[2].x[1](start = 1) = 0;
+ constant Real x[2].y[2].x[2](start = 1) = 0;
+ constant Real x[2].x[1](start = 30) = 0;
+ constant Real x[2].x[2](start = 40) = 0;
 end ModificationTests.ArrayModifications9;
 ")})));
 end ArrayModifications9;
@@ -775,32 +725,18 @@ model ArrayModifications10
 			description="Modifications to arrays: arrays of composites: 3 levels deep, literal modifier on outer",
 			flatModel="
 fclass ModificationTests.ArrayModifications10
- Real x[1].y[1].z[1];
- Real x[1].y[1].z[2];
- Real x[1].y[1].z[3];
- Real x[1].y[2].z[1];
- Real x[1].y[2].z[2];
- Real x[1].y[2].z[3];
- Real x[2].y[1].z[1];
- Real x[2].y[1].z[2];
- Real x[2].y[1].z[3];
- Real x[2].y[2].z[1];
- Real x[2].y[2].z[2];
- Real x[2].y[2].z[3];
-equation
- x[1].y[1].z[1] = 1;
- x[1].y[1].z[2] = 2;
- x[1].y[1].z[3] = 3;
- x[1].y[2].z[1] = 4;
- x[1].y[2].z[2] = 5;
- x[1].y[2].z[3] = 6;
- x[2].y[1].z[1] = 7;
- x[2].y[1].z[2] = 8;
- x[2].y[1].z[3] = 9;
- x[2].y[2].z[1] = 10;
- x[2].y[2].z[2] = 11;
- x[2].y[2].z[3] = 12;
-
+ constant Real x[1].y[1].z[1] = 1;
+ constant Real x[1].y[1].z[2] = 2;
+ constant Real x[1].y[1].z[3] = 3;
+ constant Real x[1].y[2].z[1] = 4;
+ constant Real x[1].y[2].z[2] = 5;
+ constant Real x[1].y[2].z[3] = 6;
+ constant Real x[2].y[1].z[1] = 7;
+ constant Real x[2].y[1].z[2] = 8;
+ constant Real x[2].y[1].z[3] = 9;
+ constant Real x[2].y[2].z[1] = 10;
+ constant Real x[2].y[2].z[2] = 11;
+ constant Real x[2].y[2].z[3] = 12;
 end ModificationTests.ArrayModifications10;
 ")})));
 end ArrayModifications10;
@@ -823,32 +759,18 @@ model ArrayModifications11
 			description="Modifications to arrays: arrays of composites: 3 levels deep, literal attribute on outer",
 			flatModel="
 fclass ModificationTests.ArrayModifications11
- Real x[1].y[1].z[1](start = 1);
- Real x[1].y[1].z[2](start = 2);
- Real x[1].y[1].z[3](start = 3);
- Real x[1].y[2].z[1](start = 4);
- Real x[1].y[2].z[2](start = 5);
- Real x[1].y[2].z[3](start = 6);
- Real x[2].y[1].z[1](start = 7);
- Real x[2].y[1].z[2](start = 8);
- Real x[2].y[1].z[3](start = 9);
- Real x[2].y[2].z[1](start = 10);
- Real x[2].y[2].z[2](start = 11);
- Real x[2].y[2].z[3](start = 12);
-equation
- x[1].y[1].z[1] = 0;
- x[1].y[1].z[2] = 0;
- x[1].y[1].z[3] = 0;
- x[1].y[2].z[1] = 0;
- x[1].y[2].z[2] = 0;
- x[1].y[2].z[3] = 0;
- x[2].y[1].z[1] = 0;
- x[2].y[1].z[2] = 0;
- x[2].y[1].z[3] = 0;
- x[2].y[2].z[1] = 0;
- x[2].y[2].z[2] = 0;
- x[2].y[2].z[3] = 0;
-
+ constant Real x[1].y[1].z[1](start = 1) = 0;
+ constant Real x[1].y[1].z[2](start = 2) = 0;
+ constant Real x[1].y[1].z[3](start = 3) = 0;
+ constant Real x[1].y[2].z[1](start = 4) = 0;
+ constant Real x[1].y[2].z[2](start = 5) = 0;
+ constant Real x[1].y[2].z[3](start = 6) = 0;
+ constant Real x[2].y[1].z[1](start = 7) = 0;
+ constant Real x[2].y[1].z[2](start = 8) = 0;
+ constant Real x[2].y[1].z[3](start = 9) = 0;
+ constant Real x[2].y[2].z[1](start = 10) = 0;
+ constant Real x[2].y[2].z[2](start = 11) = 0;
+ constant Real x[2].y[2].z[3](start = 12) = 0;
 end ModificationTests.ArrayModifications11;
 ")})));
 end ArrayModifications11;
@@ -901,18 +823,18 @@ model ArrayModifications13
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute modifier on outer",
 			flatModel="
 fclass ModificationTests.ArrayModifications13
- Real xa[1].yb[1].zc[1](start = 1.0);
- Real xa[1].yb[1].zc[2](start = 2.0);
- Real xa[1].yb[1].zc[3](start = 3.0);
- Real xa[1].yb[2].zc[1](start = 4.0);
- Real xa[1].yb[2].zc[2](start = 5.0);
- Real xa[1].yb[2].zc[3](start = 6.0);
- Real xa[2].yb[1].zc[1](start = 7.0);
- Real xa[2].yb[1].zc[2](start = 8.0);
- Real xa[2].yb[1].zc[3](start = 9.0);
- Real xa[2].yb[2].zc[1](start = 10.0);
- Real xa[2].yb[2].zc[2](start = 11.0);
- Real xa[2].yb[2].zc[3](start = 12.0);
+ constant Real xa[1].yb[1].zc[1](start = 1.0) = 0;
+ constant Real xa[1].yb[1].zc[2](start = 2.0) = 0;
+ constant Real xa[1].yb[1].zc[3](start = 3.0) = 0;
+ constant Real xa[1].yb[2].zc[1](start = 4.0) = 0;
+ constant Real xa[1].yb[2].zc[2](start = 5.0) = 0;
+ constant Real xa[1].yb[2].zc[3](start = 6.0) = 0;
+ constant Real xa[2].yb[1].zc[1](start = 7.0) = 0;
+ constant Real xa[2].yb[1].zc[2](start = 8.0) = 0;
+ constant Real xa[2].yb[1].zc[3](start = 9.0) = 0;
+ constant Real xa[2].yb[2].zc[1](start = 10.0) = 0;
+ constant Real xa[2].yb[2].zc[2](start = 11.0) = 0;
+ constant Real xa[2].yb[2].zc[3](start = 12.0) = 0;
  constant Real za[1,1,1] = 1;
  constant Real za[1,1,2] = 2;
  constant Real za[1,1,3] = 3;
@@ -925,20 +847,6 @@ fclass ModificationTests.ArrayModifications13
  constant Real za[2,2,1] = 10;
  constant Real za[2,2,2] = 11;
  constant Real za[2,2,3] = 12;
-equation
- xa[1].yb[1].zc[1] = 0;
- xa[1].yb[1].zc[2] = 0;
- xa[1].yb[1].zc[3] = 0;
- xa[1].yb[2].zc[1] = 0;
- xa[1].yb[2].zc[2] = 0;
- xa[1].yb[2].zc[3] = 0;
- xa[2].yb[1].zc[1] = 0;
- xa[2].yb[1].zc[2] = 0;
- xa[2].yb[1].zc[3] = 0;
- xa[2].yb[2].zc[1] = 0;
- xa[2].yb[2].zc[2] = 0;
- xa[2].yb[2].zc[3] = 0;
-
 end ModificationTests.ArrayModifications13;
 ")})));
 end ArrayModifications13;
@@ -957,15 +865,10 @@ model ArrayModifications14
 			description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications14
- Real x[1].yb[1];
- Real x[1].yb[2];
- Real x[2].yb[1];
- Real x[2].yb[2];
-equation
- x[1].yb[1] = 1 * 10 + 2 * 30;
- x[1].yb[2] = 1 * 20 + 2 * 40;
- x[2].yb[1] = 3 * 10 + 4 * 30;
- x[2].yb[2] = 3 * 20 + 4 * 40;
+ constant Real x[1].yb[1] = 70;
+ constant Real x[1].yb[2] = 100;
+ constant Real x[2].yb[1] = 150;
+ constant Real x[2].yb[2] = 220;
 end ModificationTests.ArrayModifications14;
 ")})));
 end ArrayModifications14;
@@ -986,31 +889,18 @@ model ArrayModifications15
 			description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications15
- Real x[1].yb[1];
- Real x[1].yb[2];
- Real x[2].yb[1];
- Real x[2].yb[2];
- Real y[1,1];
- Real y[1,2];
- Real y[2,1];
- Real y[2,2];
- Real z[1,1];
- Real z[1,2];
- Real z[2,1];
- Real z[2,2];
-equation
- x[1].yb[1] = y[1,1] * z[1,1] + y[1,2] * z[2,1];
- x[1].yb[2] = y[1,1] * z[1,2] + y[1,2] * z[2,2];
- x[2].yb[1] = y[2,1] * z[1,1] + y[2,2] * z[2,1];
- x[2].yb[2] = y[2,1] * z[1,2] + y[2,2] * z[2,2];
- y[1,1] = 1;
- y[1,2] = 2;
- y[2,1] = 3;
- y[2,2] = 4;
- z[1,1] = 10;
- z[1,2] = 20;
- z[2,1] = 30;
- z[2,2] = 40;
+ constant Real x[1].yb[1] = 70.0;
+ constant Real x[1].yb[2] = 100.0;
+ constant Real x[2].yb[1] = 150.0;
+ constant Real x[2].yb[2] = 220.0;
+ constant Real y[1,1] = 1;
+ constant Real y[1,2] = 2;
+ constant Real y[2,1] = 3;
+ constant Real y[2,2] = 4;
+ constant Real z[1,1] = 10;
+ constant Real z[1,2] = 20;
+ constant Real z[2,1] = 30;
+ constant Real z[2,2] = 40;
 end ModificationTests.ArrayModifications15;
 ")})));
 end ArrayModifications15;
@@ -1279,56 +1169,30 @@ model ArrayModifications26
 			description="Modifications to arrays: scalarisation of accesses with colon subscrpt",
 			flatModel="
 fclass ModificationTests.ArrayModifications26
- Real x1[1,1];
- Real x1[1,2];
- Real x1[1,3];
- Real x1[2,1];
- Real x1[2,2];
- Real x1[2,3];
- Real x2[1,1];
- Real x2[1,2];
- Real x2[1,3];
- Real x2[2,1];
- Real x2[2,2];
- Real x2[2,3];
- Real y[1,1,1];
- Real y[1,1,2];
- Real y[1,1,3];
- Real y[1,2,1];
- Real y[1,2,2];
- Real y[1,2,3];
- Real y[2,1,1];
- Real y[2,1,2];
- Real y[2,1,3];
- Real y[2,2,1];
- Real y[2,2,2];
- Real y[2,2,3];
-equation
- x1[1,1] = y[1,1,1] .+ 1;
- x1[1,2] = y[1,1,2] .+ 1;
- x1[1,3] = y[1,1,3] .+ 1;
- x1[2,1] = y[1,2,1] .+ 1;
- x1[2,2] = y[1,2,2] .+ 1;
- x1[2,3] = y[1,2,3] .+ 1;
- x2[1,1] = y[2,1,1] .+ 1;
- x2[1,2] = y[2,1,2] .+ 1;
- x2[1,3] = y[2,1,3] .+ 1;
- x2[2,1] = y[2,2,1] .+ 1;
- x2[2,2] = y[2,2,2] .+ 1;
- x2[2,3] = y[2,2,3] .+ 1;
- y[1,1,1] = 1;
- y[1,1,2] = 2;
- y[1,1,3] = 3;
- y[1,2,1] = 4;
- y[1,2,2] = 5;
- y[1,2,3] = 6;
- y[2,1,1] = 7;
- y[2,1,2] = 8;
- y[2,1,3] = 9;
- y[2,2,1] = 10;
- y[2,2,2] = 11;
- y[2,2,3] = 12;
-
+ constant Real x1[1,1] = 2.0;
+ constant Real x1[1,2] = 3.0;
+ constant Real x1[1,3] = 4.0;
+ constant Real x1[2,1] = 5.0;
+ constant Real x1[2,2] = 6.0;
+ constant Real x1[2,3] = 7.0;
+ constant Real x2[1,1] = 8.0;
+ constant Real x2[1,2] = 9.0;
+ constant Real x2[1,3] = 10.0;
+ constant Real x2[2,1] = 11.0;
+ constant Real x2[2,2] = 12.0;
+ constant Real x2[2,3] = 13.0;
+ constant Real y[1,1,1] = 1;
+ constant Real y[1,1,2] = 2;
+ constant Real y[1,1,3] = 3;
+ constant Real y[1,2,1] = 4;
+ constant Real y[1,2,2] = 5;
+ constant Real y[1,2,3] = 6;
+ constant Real y[2,1,1] = 7;
+ constant Real y[2,1,2] = 8;
+ constant Real y[2,1,3] = 9;
+ constant Real y[2,2,1] = 10;
+ constant Real y[2,2,2] = 11;
+ constant Real y[2,2,3] = 12;
 end ModificationTests.ArrayModifications26;
 ")})));
 end ArrayModifications26;
@@ -1347,15 +1211,10 @@ model ArrayModifications27
 			description="Modifications to arrays: arrays of composites: array expression attribute on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications27
- Real x[1].yb[1](start = 1 * 10 + 2 * 30);
- Real x[1].yb[2](start = 1 * 20 + 2 * 40);
- Real x[2].yb[1](start = 3 * 10 + 4 * 30);
- Real x[2].yb[2](start = 3 * 20 + 4 * 40);
-equation
- x[1].yb[1] = 1;
- x[1].yb[2] = 2;
- x[2].yb[1] = 3;
- x[2].yb[2] = 4;
+ constant Real x[1].yb[1](start = 1 * 10 + 2 * 30) = 1;
+ constant Real x[1].yb[2](start = 1 * 20 + 2 * 40) = 2;
+ constant Real x[2].yb[1](start = 3 * 10 + 4 * 30) = 3;
+ constant Real x[2].yb[2](start = 3 * 20 + 4 * 40) = 4;
 end ModificationTests.ArrayModifications27;
 ")})));
 end ArrayModifications27;
@@ -1376,10 +1235,10 @@ model ArrayModifications28
 			description="Modifications to arrays: arrays of composites: array expression (with constants) attribute on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications28
- Real x[1].yb[1](start = 1.0 * 10.0 + 2.0 * 30.0);
- Real x[1].yb[2](start = 1.0 * 20.0 + 2.0 * 40.0);
- Real x[2].yb[1](start = 3.0 * 10.0 + 4.0 * 30.0);
- Real x[2].yb[2](start = 3.0 * 20.0 + 4.0 * 40.0);
+ constant Real x[1].yb[1](start = 1.0 * 10.0 + 2.0 * 30.0) = 1;
+ constant Real x[1].yb[2](start = 1.0 * 20.0 + 2.0 * 40.0) = 2;
+ constant Real x[2].yb[1](start = 3.0 * 10.0 + 4.0 * 30.0) = 3;
+ constant Real x[2].yb[2](start = 3.0 * 20.0 + 4.0 * 40.0) = 4;
  constant Real y[1,1] = 1;
  constant Real y[1,2] = 2;
  constant Real y[2,1] = 3;
@@ -1388,11 +1247,6 @@ fclass ModificationTests.ArrayModifications28
  constant Real z[1,2] = 20;
  constant Real z[2,1] = 30;
  constant Real z[2,2] = 40;
-equation
- x[1].yb[1] = 1;
- x[1].yb[2] = 2;
- x[2].yb[1] = 3;
- x[2].yb[2] = 4;
 end ModificationTests.ArrayModifications28;
 ")})));
 end ArrayModifications28;
@@ -1457,24 +1311,14 @@ model ArrayModifications31
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner",
 			flatModel="
 fclass ModificationTests.ArrayModifications31
- Real x[1].y[1].x[1];
- Real x[1].y[1].x[2];
- Real x[1].y[2].x[1];
- Real x[1].y[2].x[2];
- Real x[2].y[1].x[1];
- Real x[2].y[1].x[2];
- Real x[2].y[2].x[1];
- Real x[2].y[2].x[2];
-equation
- x[1].y[1].x[1] = 1;
- x[1].y[1].x[2] = 2;
- x[1].y[2].x[1] = 1;
- x[1].y[2].x[2] = 2;
- x[2].y[1].x[1] = 1;
- x[2].y[1].x[2] = 2;
- x[2].y[2].x[1] = 1;
- x[2].y[2].x[2] = 2;
-
+ constant Real x[1].y[1].x[1] = 1;
+ constant Real x[1].y[1].x[2] = 2;
+ constant Real x[1].y[2].x[1] = 1;
+ constant Real x[1].y[2].x[2] = 2;
+ constant Real x[2].y[1].x[1] = 1;
+ constant Real x[2].y[1].x[2] = 2;
+ constant Real x[2].y[2].x[1] = 1;
+ constant Real x[2].y[2].x[2] = 2;
 end ModificationTests.ArrayModifications31;
 ")})));
 end ArrayModifications31;
@@ -1497,24 +1341,14 @@ model ArrayModifications32
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner",
 			flatModel="
 fclass ModificationTests.ArrayModifications32
- Real x[1].y[1].x[1](start = 1);
- Real x[1].y[1].x[2](start = 2);
- Real x[1].y[2].x[1](start = 1);
- Real x[1].y[2].x[2](start = 2);
- Real x[2].y[1].x[1](start = 1);
- Real x[2].y[1].x[2](start = 2);
- Real x[2].y[2].x[1](start = 1);
- Real x[2].y[2].x[2](start = 2);
-equation
- x[1].y[1].x[1] = 3;
- x[1].y[1].x[2] = 4;
- x[1].y[2].x[1] = 3;
- x[1].y[2].x[2] = 4;
- x[2].y[1].x[1] = 3;
- x[2].y[1].x[2] = 4;
- x[2].y[2].x[1] = 3;
- x[2].y[2].x[2] = 4;
-
+ constant Real x[1].y[1].x[1](start = 1) = 3;
+ constant Real x[1].y[1].x[2](start = 2) = 4;
+ constant Real x[1].y[2].x[1](start = 1) = 3;
+ constant Real x[1].y[2].x[2](start = 2) = 4;
+ constant Real x[2].y[1].x[1](start = 1) = 3;
+ constant Real x[2].y[1].x[2](start = 2) = 4;
+ constant Real x[2].y[2].x[1](start = 1) = 3;
+ constant Real x[2].y[2].x[2](start = 2) = 4;
 end ModificationTests.ArrayModifications32;
 ")})));
 end ArrayModifications32;
@@ -1537,24 +1371,14 @@ model ArrayModifications33
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle",
 			flatModel="
 fclass ModificationTests.ArrayModifications33
- Real x[1].y[1].x[1];
- Real x[1].y[1].x[2];
- Real x[1].y[2].x[1];
- Real x[1].y[2].x[2];
- Real x[2].y[1].x[1];
- Real x[2].y[1].x[2];
- Real x[2].y[2].x[1];
- Real x[2].y[2].x[2];
-equation
- x[1].y[1].x[1] = 1;
- x[1].y[1].x[2] = 2;
- x[1].y[2].x[1] = 3;
- x[1].y[2].x[2] = 4;
- x[2].y[1].x[1] = 1;
- x[2].y[1].x[2] = 2;
- x[2].y[2].x[1] = 3;
- x[2].y[2].x[2] = 4;
-
+ constant Real x[1].y[1].x[1] = 1;
+ constant Real x[1].y[1].x[2] = 2;
+ constant Real x[1].y[2].x[1] = 3;
+ constant Real x[1].y[2].x[2] = 4;
+ constant Real x[2].y[1].x[1] = 1;
+ constant Real x[2].y[1].x[2] = 2;
+ constant Real x[2].y[2].x[1] = 3;
+ constant Real x[2].y[2].x[2] = 4;
 end ModificationTests.ArrayModifications33;
 ")})));
 end ArrayModifications33;
@@ -1577,24 +1401,14 @@ model ArrayModifications34
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle",
 			flatModel="
 fclass ModificationTests.ArrayModifications34
- Real x[1].y[1].x[1](start = 1);
- Real x[1].y[1].x[2](start = 2);
- Real x[1].y[2].x[1](start = 3);
- Real x[1].y[2].x[2](start = 4);
- Real x[2].y[1].x[1](start = 1);
- Real x[2].y[1].x[2](start = 2);
- Real x[2].y[2].x[1](start = 3);
- Real x[2].y[2].x[2](start = 4);
-equation
- x[1].y[1].x[1] = 3;
- x[1].y[1].x[2] = 4;
- x[1].y[2].x[1] = 3;
- x[1].y[2].x[2] = 4;
- x[2].y[1].x[1] = 3;
- x[2].y[1].x[2] = 4;
- x[2].y[2].x[1] = 3;
- x[2].y[2].x[2] = 4;
-
+ constant Real x[1].y[1].x[1](start = 1) = 3;
+ constant Real x[1].y[1].x[2](start = 2) = 4;
+ constant Real x[1].y[2].x[1](start = 3) = 3;
+ constant Real x[1].y[2].x[2](start = 4) = 4;
+ constant Real x[2].y[1].x[1](start = 1) = 3;
+ constant Real x[2].y[1].x[2](start = 2) = 4;
+ constant Real x[2].y[2].x[1](start = 3) = 3;
+ constant Real x[2].y[2].x[2](start = 4) = 4;
 end ModificationTests.ArrayModifications34;
 ")})));
 end ArrayModifications34;
@@ -1665,24 +1479,14 @@ model ArrayModifications37
 			description="Modifications to arrays: inferring each: 3 levels deep, binding exp on middle",
 			flatModel="
 fclass ModificationTests.ArrayModifications37
- Real x[1].y[1].x[1];
- Real x[1].y[1].x[2];
- Real x[1].y[2].x[1];
- Real x[1].y[2].x[2];
- Real x[2].y[1].x[1];
- Real x[2].y[1].x[2];
- Real x[2].y[2].x[1];
- Real x[2].y[2].x[2];
-equation
- x[1].y[1].x[1] = 1;
- x[1].y[1].x[2] = 2;
- x[1].y[2].x[1] = 1;
- x[1].y[2].x[2] = 2;
- x[2].y[1].x[1] = 1;
- x[2].y[1].x[2] = 2;
- x[2].y[2].x[1] = 1;
- x[2].y[2].x[2] = 2;
-
+ constant Real x[1].y[1].x[1] = 1;
+ constant Real x[1].y[1].x[2] = 2;
+ constant Real x[1].y[2].x[1] = 1;
+ constant Real x[1].y[2].x[2] = 2;
+ constant Real x[2].y[1].x[1] = 1;
+ constant Real x[2].y[1].x[2] = 2;
+ constant Real x[2].y[2].x[1] = 1;
+ constant Real x[2].y[2].x[2] = 2;
 end ModificationTests.ArrayModifications37;
 ")})));
 end ArrayModifications37;
@@ -1865,12 +1669,8 @@ model ArrayModifications45
 			description="Modifications to arrays: inferring each: attribute",
 			flatModel="
 fclass ModificationTests.ArrayModifications45
- Real x[1](start = 0);
- Real x[2](start = 0);
-equation
- x[1] = 1;
- x[2] = 2;
-
+ constant Real x[1](start = 0) = 1;
+ constant Real x[2](start = 0) = 2;
 end ModificationTests.ArrayModifications45;
 ")})));
 end ArrayModifications45;
@@ -1889,19 +1689,40 @@ model ArrayModifications46
 			description="Modifications to arrays: inferring each: binding expression",
 			flatModel="
 fclass ModificationTests.ArrayModifications46
- Real y[1].x[1];
- Real y[1].x[2];
- Real y[2].x[1];
- Real y[2].x[2];
-equation
- y[1].x[1] = 1;
- y[1].x[2] = 2;
- y[2].x[1] = 1;
- y[2].x[2] = 2;
-
+ constant Real y[1].x[1] = 1;
+ constant Real y[1].x[2] = 2;
+ constant Real y[2].x[1] = 1;
+ constant Real y[2].x[2] = 2;
 end ModificationTests.ArrayModifications46;
 ")})));
 end ArrayModifications46;
+
+
+model ArrayModifications47
+    model A
+        Real x;
+    end A;
+    
+    model B
+        Real y;
+    end B;
+    
+    A a[2](x = b.y);
+    B b[2](y = {1, 2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayModifications47",
+			description="Dotted name as modifier to array of components",
+			flatModel="
+fclass ModificationTests.ArrayModifications47
+ Real a[1].x = b[1].y;
+ Real a[2].x = b[2].y;
+ Real b[1].y = 1;
+ Real b[2].y = 2;
+end ModificationTests.ArrayModifications47;
+")})));
+end ArrayModifications47;
 
 
 
@@ -1989,6 +1810,141 @@ end TypeModifications4;
 
 
 
+model TypeModifications5
+    type T = Real[3](min={1,2,3});
+    T a = 4 * ones(3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TypeModifications5",
+			description="Array-valued annotations on types: basic test",
+			flatModel="
+fclass ModificationTests.TypeModifications5
+ constant ModificationTests.TypeModifications5.T a[1](min = 1) = 4;
+ constant ModificationTests.TypeModifications5.T a[2](min = 2) = 4;
+ constant ModificationTests.TypeModifications5.T a[3](min = 3) = 4;
+
+public
+ type ModificationTests.TypeModifications5.T = Real;
+end ModificationTests.TypeModifications5;
+")})));
+end TypeModifications5;
+
+
+
+model TypeModifications6
+    type T = Real[3](min={0.1,0.2,0.3});
+    
+    record R
+        T x;
+	    T y;
+    end R;
+    
+    R z(x = ones(3), y(each min = 0.4) = ones(3));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TypeModifications6",
+			description="Array-valued annotations on types: in array",
+			flatModel="
+fclass ModificationTests.TypeModifications6
+ constant ModificationTests.TypeModifications6.T z.x[1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications6.T z.x[2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications6.T z.x[3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[1](each min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[2](each min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[3](each min = 0.4) = 1;
+
+public
+ record ModificationTests.TypeModifications6.R
+  ModificationTests.TypeModifications6.T x[3];
+  ModificationTests.TypeModifications6.T y[3];
+ end ModificationTests.TypeModifications6.R;
+
+ type ModificationTests.TypeModifications6.T = Real;
+end ModificationTests.TypeModifications6;
+")})));
+end TypeModifications6;
+
+
+
+model TypeModifications7
+    type T = Real[3](min={0.1,0.2,0.3});
+    
+    T[2] x = ones(2,3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TypeModifications7",
+			description="Array-valued annotations on types: in record",
+			flatModel="
+fclass ModificationTests.TypeModifications7
+ constant ModificationTests.TypeModifications7.T x[1,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications7.T x[1,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications7.T x[1,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications7.T x[2,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications7.T x[2,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications7.T x[2,3](min = 0.3) = 1;
+
+public
+ type ModificationTests.TypeModifications7.T = Real;
+end ModificationTests.TypeModifications7;
+")})));
+end TypeModifications7;
+
+
+
+model TypeModifications8
+    type T = Real[3](min={0.1,0.2,0.3});
+    
+    record R
+        T[2] x;
+    end R;
+    
+    R[4] y(x = ones(4,2,3));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="TypeModifications8",
+			description="Array-valued annotations on types: array of records",
+			flatModel="
+fclass ModificationTests.TypeModifications8
+ constant ModificationTests.TypeModifications8.T y[1].x[1,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[1,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[1,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,1](min = 0.1) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,2](min = 0.2) = 1;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,3](min = 0.3) = 1;
+
+public
+ record ModificationTests.TypeModifications8.R
+  ModificationTests.TypeModifications8.T x[2,3];
+ end ModificationTests.TypeModifications8.R;
+
+ type ModificationTests.TypeModifications8.T = Real;
+end ModificationTests.TypeModifications8;
+")})));
+end TypeModifications8;
+
+
 model ConstMod1
 	record A
 		Real x;
@@ -2008,12 +1964,340 @@ model ConstMod1
 	
 	package F
 		extends D;
-		redeclare replaceable package E = C constrainedby A;
+		redeclare replaceable package E = C constrainedby B;
 	end F;
 	
 	Real z = F.E.y.x;
 end ConstMod1;
 
+
+
+model ModificationLevel1
+	model A
+		Real x(start = 0.1) = 0;
+		Real y = 0;
+	end A;
+	
+	model B = A(y(start = 0.2));
+	
+	model C
+		A a(y(start = 0.3));
+		B b;
+	end C;
+	
+	model D
+		C c1;
+		C c2(b(x(start = 0.4)));
+	end D;
+	
+	A a(y(start = 0.5));
+	B b;
+	C c;
+	D d(c1(a(x(start = 0.6))));
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ModificationLevel1",
+			description="Test calculation of modification levels",
+			methodName="attributeLevels",
+			methodResult="
+Variables:
+  a.x(start:4=0.1)
+  a.y(start:3=0.5)
+  b.x(start:5=0.1)
+  b.y(start:3=0.2)
+  c.a.x(start:5=0.1)
+  c.a.y(start:4=0.3)
+  c.b.x(start:6=0.1)
+  c.b.y(start:3=0.2)
+  d.c1.a.x(start:3=0.6)
+  d.c1.a.y(start:5=0.3)
+  d.c1.b.x(start:7=0.1)
+  d.c1.b.y(start:3=0.2)
+  d.c2.a.x(start:6=0.1)
+  d.c2.a.y(start:5=0.3)
+  d.c2.b.x(start:4=0.4)
+  d.c2.b.y(start:3=0.2)
+")})));
+end ModificationLevel1;
+
+
+model ModificationLevel2
+    model A
+        Real x(start = 0.1) = 0;
+        Real y = 0;
+    end A;
+    
+    model B = A;
+	
+	model C
+		B b;
+	end C;
+	
+	model D
+		C c;
+	end D;
+
+    A a(y(start = 0.5));
+    D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="ModificationLevel2",
+			description="Test calculation of modification levels for simple short class decl",
+			methodName="attributeLevels",
+			methodResult="
+Variables:
+  a.x(start:4=0.1)
+  a.y(start:3=0.5)
+  d.c.b.x(start:7=0.1)
+  d.c.b.y
+")})));
+end ModificationLevel2;
+
+
+model StartPropagation1
+    Real x(start = 1);
+    Real y(stateSelect = StateSelect.prefer);
+equation
+    x = y;
+    der(y) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation1",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation1
+ Real y(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ y = 1;
+equation
+ der(y) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation1;
+")})));
+end StartPropagation1;
+
+
+model StartPropagation2
+    Real x(start = 1);
+    Real y(start = 2, stateSelect = StateSelect.prefer);
+equation
+    x = y;
+    der(y) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation2",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation2
+ Real y(start = 2,stateSelect = StateSelect.prefer);
+initial equation 
+ y = 2;
+equation
+ der(y) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation2;
+")})));
+end StartPropagation2;
+
+
+model StartPropagation3
+	model A
+		Real x(start = 1);
+	end A;
+	
+    A a1(x(start = 2));
+    A a2(x(stateSelect = StateSelect.prefer));
+equation
+    a1.x = a2.x;
+    der(a2.x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation3",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation3
+ Real a2.x(stateSelect = StateSelect.prefer,start = 2);
+initial equation 
+ a2.x = 2;
+equation
+ a2.der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation3;
+")})));
+end StartPropagation3;
+
+
+model StartPropagation4
+    Real x(stateSelect = StateSelect.prefer);
+    Real y(start = 1);
+    Real z(start = 2);
+equation
+    x = y;
+    z = y;
+    der(x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation4",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation4
+ Real x(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ x = 1;
+equation
+ der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end ModificationTests.StartPropagation4;
+")})));
+end StartPropagation4;
+
+
+model StartPropagation5
+    model A
+        Real x(start = 1);
+    end A;
+    
+	type B = Real(start = 2);
+	
+	A a;
+	B b(stateSelect = StateSelect.prefer);
+equation
+    a.x = b;
+    der(b) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation5",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation5
+ ModificationTests.StartPropagation5.B b(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ b = 1;
+equation
+ der(b) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation5.B = Real(start = 2);
+end ModificationTests.StartPropagation5;
+")})));
+end StartPropagation5;
+
+
+model StartPropagation6
+    type A = Real(start = 1);
+    
+    Real x(stateSelect = StateSelect.prefer);
+    A a;
+equation
+    x = a;
+    der(x) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation6",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation6
+ Real x(stateSelect = StateSelect.prefer,start = 1);
+initial equation 
+ x = 1;
+equation
+ der(x) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation6.A = Real(start = 1);
+end ModificationTests.StartPropagation6;
+")})));
+end StartPropagation6;
+
+
+model StartPropagation7
+    type A = Real(start = 1);
+	type B = Real(start = 2);
+	    
+    A a(stateSelect = StateSelect.prefer);
+    B b;
+equation
+    a = b;
+    der(a) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation7",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation7
+ ModificationTests.StartPropagation7.A a(stateSelect = StateSelect.prefer);
+initial equation 
+ a = 1;
+equation
+ der(a) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation7.A = Real(start = 1);
+ type ModificationTests.StartPropagation7.B = Real(start = 2);
+end ModificationTests.StartPropagation7;
+")})));
+end StartPropagation7;
+
+
+model StartPropagation8
+    model A
+        Real x(start = 1);
+    end A;
+    
+    type B = Real(start = 2);
+    
+    A a;
+    B b(stateSelect = StateSelect.prefer);
+equation
+    a.x = -b;
+    der(b) = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="StartPropagation8",
+			description="",
+			flatModel="
+fclass ModificationTests.StartPropagation8
+ ModificationTests.StartPropagation8.B b(stateSelect = StateSelect.prefer,start = - 1);
+initial equation 
+ b = - 1;
+equation
+ der(b) = 1;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+ type ModificationTests.StartPropagation8.B = Real(start = 2);
+end ModificationTests.StartPropagation8;
+")})));
+end StartPropagation8;
 
 
 end ModificationTests;

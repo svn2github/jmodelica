@@ -15,15 +15,23 @@
    <feature url="features/org.jmodelica.ide.graphical_0.0.1.jar" id="org.jmodelica.ide.graphical" version="0.0.1">
       <category name="org.jmodelica.ide.category"/>
    </feature>
+   <feature url="features/org.jmodelica.devel.feature_0.1.0.a1.jar" id="org.jmodelica.devel.feature" version="0.1.0.a1">
+      <category name="org.jmodelica.devel.category"/>
+   </feature>
+   <category-def name="org.jmodelica.ide.category" label="JModelica.org">
    <feature url="features/org.jmodelica.ide.outline_1.0.0.jar" id="org.jmodelica.ide.outline" version="1.0.0">
       <category name="org.jmodelica.ide.category"/>
    </feature>
    <feature url="features/org.jmodelica.ide.textual_1.0.0.jar" id="org.jmodelica.ide.textual" version="1.0.0">
       <category name="org.jmodelica.ide.category"/>
    </feature>
-   <category-def name="org.jmodelica.ide.category" label="JModelica">
       <description>
-         JModelica plugins
+         JModelica.org plugins
+      </description>
+   </category-def>
+   <category-def name="org.jmodelica.devel.category" label="JModelica.org Developer Support">
+      <description>
+         Support plugins for developers of JModelica.org
       </description>
    </category-def>
 </site>

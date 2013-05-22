@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2009 Modelon AB
+	Copyright (C) 2009-2013 Modelon AB
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,14 +26,11 @@ model SizeExp1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SizeExp1",
+			name="Size_SizeExp1",
 			description="Size operator: first dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp1
- Real x;
-equation
- x = 2;
-
+ constant Real x = 2;
 end ArrayBuiltins.Size.SizeExp1;
 ")})));
 end SizeExp1;
@@ -44,14 +41,11 @@ model SizeExp2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SizeExp2",
+			name="Size_SizeExp2",
 			description="Size operator: second dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp2
- Real x;
-equation
- x = 3;
-
+ constant Real x = 3;
 end ArrayBuiltins.Size.SizeExp2;
 ")})));
 end SizeExp2;
@@ -62,14 +56,11 @@ model SizeExp3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SizeExp3",
+			name="Size_SizeExp3",
 			description="Size operator: without dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp3
- Real x[1];
-equation
- x[1] = 2;
-
+ constant Real x[1] = 2;
 end ArrayBuiltins.Size.SizeExp3;
 ")})));
 end SizeExp3;
@@ -80,16 +71,12 @@ model SizeExp4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SizeExp4",
+			name="Size_SizeExp4",
 			description="Size operator: without dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp4
- Real x[1];
- Real x[2];
-equation
- x[1] = 2;
- x[2] = 3;
-
+ constant Real x[1] = 2;
+ constant Real x[2] = 3;
 end ArrayBuiltins.Size.SizeExp4;
 ")})));
 end SizeExp4;
@@ -101,15 +88,12 @@ model SizeExp5
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SizeExp5",
+			name="Size_SizeExp5",
 			description="Size operator: using parameter",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp5
  parameter Integer p = 1 /* 1 */;
- Real x;
-equation
- x = 2;
-
+ constant Real x = 2;
 end ArrayBuiltins.Size.SizeExp5;
 ")})));
 end SizeExp5;
@@ -256,16 +240,12 @@ model FillExp1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="FillExp1",
+			name="Fill_FillExp1",
 			description="Fill operator: one dim",
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp1
- Real x[1];
- Real x[2];
-equation
- x[1] = 1 + 2;
- x[2] = 1 + 2;
-
+ constant Real x[1] = 3;
+ constant Real x[2] = 3;
 end ArrayBuiltins.Fill.FillExp1;
 ")})));
 end FillExp1;
@@ -276,60 +256,34 @@ model FillExp2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="FillExp2",
+			name="Fill_FillExp2",
 			description="Fill operator: three dims",
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp2
- Real x[1,1,1];
- Real x[1,1,2];
- Real x[1,1,3];
- Real x[1,1,4];
- Real x[1,2,1];
- Real x[1,2,2];
- Real x[1,2,3];
- Real x[1,2,4];
- Real x[1,3,1];
- Real x[1,3,2];
- Real x[1,3,3];
- Real x[1,3,4];
- Real x[2,1,1];
- Real x[2,1,2];
- Real x[2,1,3];
- Real x[2,1,4];
- Real x[2,2,1];
- Real x[2,2,2];
- Real x[2,2,3];
- Real x[2,2,4];
- Real x[2,3,1];
- Real x[2,3,2];
- Real x[2,3,3];
- Real x[2,3,4];
-equation
- x[1,1,1] = 1 + 2;
- x[1,1,2] = 1 + 2;
- x[1,1,3] = 1 + 2;
- x[1,1,4] = 1 + 2;
- x[1,2,1] = 1 + 2;
- x[1,2,2] = 1 + 2;
- x[1,2,3] = 1 + 2;
- x[1,2,4] = 1 + 2;
- x[1,3,1] = 1 + 2;
- x[1,3,2] = 1 + 2;
- x[1,3,3] = 1 + 2;
- x[1,3,4] = 1 + 2;
- x[2,1,1] = 1 + 2;
- x[2,1,2] = 1 + 2;
- x[2,1,3] = 1 + 2;
- x[2,1,4] = 1 + 2;
- x[2,2,1] = 1 + 2;
- x[2,2,2] = 1 + 2;
- x[2,2,3] = 1 + 2;
- x[2,2,4] = 1 + 2;
- x[2,3,1] = 1 + 2;
- x[2,3,2] = 1 + 2;
- x[2,3,3] = 1 + 2;
- x[2,3,4] = 1 + 2;
-
+ constant Real x[1,1,1] = 3;
+ constant Real x[1,1,2] = 3;
+ constant Real x[1,1,3] = 3;
+ constant Real x[1,1,4] = 3;
+ constant Real x[1,2,1] = 3;
+ constant Real x[1,2,2] = 3;
+ constant Real x[1,2,3] = 3;
+ constant Real x[1,2,4] = 3;
+ constant Real x[1,3,1] = 3;
+ constant Real x[1,3,2] = 3;
+ constant Real x[1,3,3] = 3;
+ constant Real x[1,3,4] = 3;
+ constant Real x[2,1,1] = 3;
+ constant Real x[2,1,2] = 3;
+ constant Real x[2,1,3] = 3;
+ constant Real x[2,1,4] = 3;
+ constant Real x[2,2,1] = 3;
+ constant Real x[2,2,2] = 3;
+ constant Real x[2,2,3] = 3;
+ constant Real x[2,2,4] = 3;
+ constant Real x[2,3,1] = 3;
+ constant Real x[2,3,2] = 3;
+ constant Real x[2,3,3] = 3;
+ constant Real x[2,3,4] = 3;
 end ArrayBuiltins.Fill.FillExp2;
 ")})));
 end FillExp2;
@@ -427,24 +381,16 @@ model FillExp8
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="FillExp8",
+			name="Fill_FillExp8",
 			description="Fill operator: filling with array",
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp8
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
- Real x[3,1];
- Real x[3,2];
-equation
- x[1,1] = 1;
- x[1,2] = 2;
- x[2,1] = 1;
- x[2,2] = 2;
- x[3,1] = 1;
- x[3,2] = 2;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 1;
+ constant Real x[2,2] = 2;
+ constant Real x[3,1] = 1;
+ constant Real x[3,2] = 2;
 end ArrayBuiltins.Fill.FillExp8;
 ")})));
 end FillExp8;
@@ -461,15 +407,12 @@ model MinExp1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MinExp1",
+			name="Min_MinExp1",
 			description="Min operator: 2 scalar args",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp1
  constant Real x = min(1 + 2, 3 + 4);
- Real y;
-equation
- y = 3.0;
-
+ constant Real y = 3.0;
 end ArrayBuiltins.Min.MinExp1;
 ")})));
 end MinExp1;
@@ -481,15 +424,12 @@ model MinExp2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MinExp2",
+			name="Min_MinExp2",
 			description="Min operator: 1 array arg",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp2
  constant Real x = min(min(min(1, 2), 3), 4);
- Real y;
-equation
- y = 1.0;
-
+ constant Real y = 1.0;
 end ArrayBuiltins.Min.MinExp2;
 ")})));
 end MinExp2;
@@ -518,17 +458,12 @@ model MinExp4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MinExp4",
+			name="Min_MinExp4",
 			description="Min operator: booleans",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp4
  constant Boolean x = min(true, false);
- discrete Boolean y;
-initial equation 
- pre(y) = false;
-equation
- y = false;
-
+ constant Boolean y = false;
 end ArrayBuiltins.Min.MinExp4;
 ")})));
 end MinExp4;
@@ -591,15 +526,12 @@ model MinExp8
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MinExp8",
+			name="Min_MinExp8",
 			description="Reduction-expression with min(): constant expression",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp8
  constant Real x = min(min(min(min(min(min(min(min(min(min(min(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
- Real y;
-equation
- y = 1.0;
-
+ constant Real y = 1.0;
 end ArrayBuiltins.Min.MinExp8;
 ")})));
 end MinExp8;
@@ -610,13 +542,11 @@ model MinExp9
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MinExp9",
+			name="Min_MinExp9",
 			description="Reduction-expression with min(): basic test",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp9
- Real x;
-equation
- x = min(min(min(min(min(min(min(min(1 * 2, 2 * 2), 3 * 2), 1 * 3), 2 * 3), 3 * 3), 1 * 5), 2 * 5), 3 * 5);
+ constant Real x = 2;
 end ArrayBuiltins.Min.MinExp9;
 ")})));
 end MinExp9;
@@ -684,15 +614,12 @@ model MaxExp1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MaxExp1",
+			name="Max_MaxExp1",
 			description="Max operator: 2 scalar args",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp1
  constant Real x = max(1 + 2, 3 + 4);
- Real y;
-equation
- y = 7.0;
-
+ constant Real y = 7.0;
 end ArrayBuiltins.Max.MaxExp1;
 ")})));
 end MaxExp1;
@@ -704,15 +631,12 @@ model MaxExp2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MaxExp2",
+			name="Max_MaxExp2",
 			description="Max operator: 1 array arg",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp2
  constant Real x = max(max(max(1, 2), 3), 4);
- Real y;
-equation
- y = 4.0;
-
+ constant Real y = 4.0;
 end ArrayBuiltins.Max.MaxExp2;
 ")})));
 end MaxExp2;
@@ -741,17 +665,12 @@ model MaxExp4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MaxExp4",
+			name="Max_MaxExp4",
 			description="Max operator: booleans",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp4
  constant Boolean x = max(true, false);
- discrete Boolean y;
-initial equation 
- pre(y) = false;
-equation
- y = true;
-
+ constant Boolean y = true;
 end ArrayBuiltins.Max.MaxExp4;
 ")})));
 end MaxExp4;
@@ -813,14 +732,11 @@ model MaxExp8
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="MaxExp8",
+			name="Max_MaxExp8",
 			description="Reduction-expression with max(): constant expression",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp8
- Real x;
-equation
- x = max(max(max(max(max(max(max(max(max(max(max(1.0, 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0), 1.0);
-
+ constant Real x = 1.0;
 end ArrayBuiltins.Max.MaxExp8;
 ")})));
 end MaxExp8;
@@ -837,9 +753,7 @@ model MaxExp9
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
  constant Real x = max(max(max(max(max(max(max(max(max(max(max(1 * 2, 2 * 2), 3 * 2), 4 * 2), 1 * 3), 2 * 3), 3 * 3), 4 * 3), 1 * 5), 2 * 5), 3 * 5), 4 * 5);
- Real y;
-equation
- y = 20.0;
+ constant Real y = 20.0;
 end ArrayBuiltins.Max.MaxExp9;
 ")})));
 end MaxExp9;
@@ -896,15 +810,12 @@ model SumExp1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SumExp1",
+			name="Sum_SumExp1",
 			description="sum() expressions: basic test",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp1
  constant Real x = 1 + 2 + 3 + 4;
- Real y;
-equation
- y = 10.0;
-
+ constant Real y = 10.0;
 end ArrayBuiltins.Sum.SumExp1;
 ")})));
 end SumExp1;
@@ -916,14 +827,12 @@ model SumExp2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SumExp2",
+			name="Sum_SumExp2",
 			description="sum() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
  constant Real x = 1 * 1 + 2 * 1 + 3 * 1 + 1 * 2 + 2 * 2 + 3 * 2 + 1 * 3 + 2 * 3 + 3 * 3;
- Real y;
-equation
- y = 36.0;
+ constant Real y = 36.0;
 end ArrayBuiltins.Sum.SumExp2;
 ")})));
 end SumExp2;
@@ -935,18 +844,14 @@ model SumExp3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SumExp3",
+			name="Sum_SumExp3",
 			description="sum() expressions: reduction-expression over array",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp3
  constant Real x[1] = 1 + 2 + 3 + 1 + 2 + 3 + 1 + 2 + 3;
  constant Real x[2] = 2 + 2 + 2 + 3 + 3 + 3 + 4 + 4 + 4;
- Real y[1];
- Real y[2];
-equation
- y[1] = 18.0;
- y[2] = 27.0;
-
+ constant Real y[1] = 18.0;
+ constant Real y[2] = 27.0;
 end ArrayBuiltins.Sum.SumExp3;
 ")})));
 end SumExp3;
@@ -958,15 +863,12 @@ model SumExp4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SumExp4",
+			name="Sum_SumExp4",
 			description="sum() expressions: over array constructor with iterators",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp4
  constant Real x = 1 + 2 + 2 + 2 + 3 + 2 + 1 + 3 + 2 + 3 + 3 + 3 + 1 + 4 + 2 + 4 + 3 + 4;
- Real y;
-equation
- y = 45.0;
-
+ constant Real y = 45.0;
 end ArrayBuiltins.Sum.SumExp4;
 ")})));
 end SumExp4;
@@ -1038,20 +940,14 @@ model Transpose1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Transpose1",
+			name="Transpose_Transpose1",
 			description="Scalarization of transpose operator: Integer[2,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose1
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
-equation
- x[1,1] = 1;
- x[1,2] = 3;
- x[2,1] = 2;
- x[2,2] = 4;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 3;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 4;
 end ArrayBuiltins.Transpose.Transpose1;
 ")})));
 end Transpose1;
@@ -1062,24 +958,16 @@ model Transpose2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Transpose2",
+			name="Transpose_Transpose2",
 			description="Scalarization of transpose operator: Integer[3,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose2
- Real x[1,1];
- Real x[1,2];
- Real x[1,3];
- Real x[2,1];
- Real x[2,2];
- Real x[2,3];
-equation
- x[1,1] = 1;
- x[1,2] = 3;
- x[1,3] = 5;
- x[2,1] = 2;
- x[2,2] = 4;
- x[2,3] = 6;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 3;
+ constant Real x[1,3] = 5;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 4;
+ constant Real x[2,3] = 6;
 end ArrayBuiltins.Transpose.Transpose2;
 ")})));
 end Transpose2;
@@ -1090,16 +978,12 @@ model Transpose3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Transpose3",
+			name="Transpose_Transpose3",
 			description="Scalarization of transpose operator: Integer[1,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose3
- Real x[1,1];
- Real x[2,1];
-equation
- x[1,1] = 1;
- x[2,1] = 2;
-
+ constant Real x[1,1] = 1;
+ constant Real x[2,1] = 2;
 end ArrayBuiltins.Transpose.Transpose3;
 ")})));
 end Transpose3;
@@ -1110,37 +994,18 @@ model Transpose4
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Transpose4",
+			name="Transpose_Transpose4",
 			description="Scalarization of transpose operator: Integer[2,2,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose4
- discrete Integer x[1,1,1];
- discrete Integer x[1,1,2];
- discrete Integer x[1,2,1];
- discrete Integer x[1,2,2];
- discrete Integer x[2,1,1];
- discrete Integer x[2,1,2];
- discrete Integer x[2,2,1];
- discrete Integer x[2,2,2];
-initial equation 
- pre(x[1,1,1]) = 0;
- pre(x[1,1,2]) = 0;
- pre(x[1,2,1]) = 0;
- pre(x[1,2,2]) = 0;
- pre(x[2,1,1]) = 0;
- pre(x[2,1,2]) = 0;
- pre(x[2,2,1]) = 0;
- pre(x[2,2,2]) = 0;
-equation
- x[1,1,1] = 1;
- x[1,1,2] = 2;
- x[1,2,1] = 5;
- x[1,2,2] = 6;
- x[2,1,1] = 3;
- x[2,1,2] = 4;
- x[2,2,1] = 7;
- x[2,2,2] = 8;
-
+ constant Integer x[1,1,1] = 1;
+ constant Integer x[1,1,2] = 2;
+ constant Integer x[1,2,1] = 5;
+ constant Integer x[1,2,2] = 6;
+ constant Integer x[2,1,1] = 3;
+ constant Integer x[2,1,2] = 4;
+ constant Integer x[2,2,1] = 7;
+ constant Integer x[2,2,2] = 8;
 end ArrayBuiltins.Transpose.Transpose4;
 ")})));
 end Transpose4;
@@ -1203,36 +1068,22 @@ model Transpose8
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Transpose8",
+			name="Transpose_Transpose8",
 			description="Scalarization of transpose operator: access to variable",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose8
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
- Real x[3,1];
- Real x[3,2];
- Real y[1,1];
- Real y[1,2];
- Real y[1,3];
- Real y[2,1];
- Real y[2,2];
- Real y[2,3];
-equation
- x[1,1] = 1;
- x[1,2] = 2;
- x[2,1] = 3;
- x[2,2] = 4;
- x[3,1] = 5;
- x[3,2] = 6;
- y[1,1] = x[1,1] .+ 1;
- y[1,2] = x[2,1] .+ 1;
- y[1,3] = x[3,1] .+ 1;
- y[2,1] = x[1,2] .+ 1;
- y[2,2] = x[2,2] .+ 1;
- y[2,3] = x[3,2] .+ 1;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
+ constant Real x[3,1] = 5;
+ constant Real x[3,2] = 6;
+ constant Real y[1,1] = 2.0;
+ constant Real y[1,2] = 4.0;
+ constant Real y[1,3] = 6.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 5.0;
+ constant Real y[2,3] = 7.0;
 end ArrayBuiltins.Transpose.Transpose8;
 ")})));
 end Transpose8;
@@ -1248,17 +1099,13 @@ model Cross1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Cross1",
+			name="Cross_Cross1",
 			description="cross() operator: Real result",
 			flatModel="
 fclass ArrayBuiltins.Cross.Cross1
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- x[1] = 2 * 6 - 3 * 5;
- x[2] = 3 * 4 - 1.0 * 6;
- x[3] = 1.0 * 5 - 2 * 4;
+ constant Real x[1] = -3;
+ constant Real x[2] = 6.0;
+ constant Real x[3] = -3.0;
 end ArrayBuiltins.Cross.Cross1;
 ")})));
 end Cross1; 
@@ -1377,6 +1224,60 @@ end Cross7;
 end Cross;
 
 
+
+package Skew
+
+model Skew1
+	Real x[3] = {1,2,3};
+    Real y[3,3] = skew(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Skew_Skew1",
+			description="skew() operator: basic test",
+			eliminate_alias_variables=false,
+			flatModel="
+fclass ArrayBuiltins.Skew.Skew1
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real y[1,1] = 0;
+ constant Real y[1,2] = -3.0;
+ constant Real y[1,3] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 0;
+ constant Real y[2,3] = -1.0;
+ constant Real y[3,1] = -2.0;
+ constant Real y[3,2] = 1.0;
+ constant Real y[3,3] = 0;
+end ArrayBuiltins.Skew.Skew1;
+")})));
+end Skew1;
+
+
+model Skew2
+    Real x[3,3] = skew({1,2,3,4});
+    String y[3,3] = skew({"1","2","3"});
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Skew_Skew2",
+			description="skew() operator: bad arg",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1425, column 24:
+  Calling function skew(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1426, column 26:
+  Calling function skew(): types of positional argument 1 and input x are not compatible
+")})));
+end Skew2;
+
+end Skew;
+
+
+
 package OuterProduct
 	
 model OuterProduct1
@@ -1384,23 +1285,16 @@ model OuterProduct1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="OuterProduct1",
+			name="OuterProduct_OuterProduct1",
 			description="outerProduct() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct1
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
- Real x[3,1];
- Real x[3,2];
-equation
- x[1,1] = 1.0 * 4;
- x[1,2] = 1.0 * 5;
- x[2,1] = 2 * 4;
- x[2,2] = 2 * 5;
- x[3,1] = 3 * 4;
- x[3,2] = 3 * 5;
+ constant Real x[1,1] = 4.0;
+ constant Real x[1,2] = 5.0;
+ constant Real x[2,1] = 8;
+ constant Real x[2,2] = 10;
+ constant Real x[3,1] = 12;
+ constant Real x[3,2] = 15;
 end ArrayBuiltins.OuterProduct.OuterProduct1;
 ")})));
 end OuterProduct1; 
@@ -1411,39 +1305,19 @@ model OuterProduct2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="OuterProduct2",
+			name="OuterProduct_OuterProduct2",
 			description="outerProduct() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct2
- discrete Integer x[1,1];
- discrete Integer x[1,2];
- discrete Integer x[1,3];
- discrete Integer x[2,1];
- discrete Integer x[2,2];
- discrete Integer x[2,3];
- discrete Integer x[3,1];
- discrete Integer x[3,2];
- discrete Integer x[3,3];
-initial equation 
- pre(x[1,1]) = 0;
- pre(x[1,2]) = 0;
- pre(x[1,3]) = 0;
- pre(x[2,1]) = 0;
- pre(x[2,2]) = 0;
- pre(x[2,3]) = 0;
- pre(x[3,1]) = 0;
- pre(x[3,2]) = 0;
- pre(x[3,3]) = 0;
-equation
- x[1,1] = 1 * 4;
- x[1,2] = 1 * 5;
- x[1,3] = 1 * 6;
- x[2,1] = 2 * 4;
- x[2,2] = 2 * 5;
- x[2,3] = 2 * 6;
- x[3,1] = 3 * 4;
- x[3,2] = 3 * 5;
- x[3,3] = 3 * 6;
+ constant Integer x[1,1] = 4;
+ constant Integer x[1,2] = 5;
+ constant Integer x[1,3] = 6;
+ constant Integer x[2,1] = 8;
+ constant Integer x[2,2] = 10;
+ constant Integer x[2,3] = 12;
+ constant Integer x[3,1] = 12;
+ constant Integer x[3,2] = 15;
+ constant Integer x[3,3] = 18;
 end ArrayBuiltins.OuterProduct.OuterProduct2;
 ")})));
 end OuterProduct2; 
@@ -1531,32 +1405,20 @@ model ArrayCat1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayCat1",
+			name="Cat_ArrayCat1",
 			description="cat() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat1
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
- Real x[3,1];
- Real x[3,2];
- Real x[4,1];
- Real x[4,2];
- Real x[5,1];
- Real x[5,2];
-equation
- x[1,1] = 1;
- x[1,2] = 2;
- x[2,1] = 3;
- x[2,2] = 4;
- x[3,1] = 5;
- x[3,2] = 6;
- x[4,1] = 7;
- x[4,2] = 8;
- x[5,1] = 9;
- x[5,2] = 0;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
+ constant Real x[3,1] = 5;
+ constant Real x[3,2] = 6;
+ constant Real x[4,1] = 7;
+ constant Real x[4,2] = 8;
+ constant Real x[5,1] = 9;
+ constant Real x[5,2] = 0;
 end ArrayBuiltins.Cat.ArrayCat1;
 ")})));
 end ArrayCat1;
@@ -1567,32 +1429,20 @@ model ArrayCat2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayCat2",
+			name="Cat_ArrayCat2",
 			description="cat() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat2
- Real x[1,1];
- Real x[1,2];
- Real x[1,3];
- Real x[1,4];
- Real x[1,5];
- Real x[2,1];
- Real x[2,2];
- Real x[2,3];
- Real x[2,4];
- Real x[2,5];
-equation
- x[1,1] = 1.0;
- x[1,2] = 2.0;
- x[1,3] = 3;
- x[1,4] = 4;
- x[1,5] = 5;
- x[2,1] = 6;
- x[2,2] = 7;
- x[2,3] = 8;
- x[2,4] = 9;
- x[2,5] = 0;
-
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[1,3] = 3;
+ constant Real x[1,4] = 4;
+ constant Real x[1,5] = 5;
+ constant Real x[2,1] = 6;
+ constant Real x[2,2] = 7;
+ constant Real x[2,3] = 8;
+ constant Real x[2,4] = 9;
+ constant Real x[2,5] = 0;
 end ArrayBuiltins.Cat.ArrayCat2;
 ")})));
 end ArrayCat2;
@@ -1751,24 +1601,16 @@ model ArrayShortCat1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayShortCat1",
+			name="Cat_ArrayShortCat1",
 			description="Shorthand array concatenation operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat1
- Real x[1,1];
- Real x[1,2];
- Real x[1,3];
- Real x[2,1];
- Real x[2,2];
- Real x[2,3];
-equation
- x[1,1] = 1;
- x[1,2] = 2;
- x[1,3] = 3;
- x[2,1] = 4;
- x[2,2] = 5;
- x[2,3] = 6;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[1,3] = 3;
+ constant Real x[2,1] = 4;
+ constant Real x[2,2] = 5;
+ constant Real x[2,3] = 6;
 end ArrayBuiltins.Cat.ArrayShortCat1;
 ")})));
 end ArrayShortCat1;
@@ -1782,30 +1624,19 @@ model ArrayShortCat2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayShortCat2",
+			name="Cat_ArrayShortCat2",
 			description="Shorthand array concatenation operator: different sizes",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat2
- Real x[1,1];
- Real x[1,2];
- Real x[1,3];
- Real x[2,1];
- Real x[2,2];
- Real x[2,3];
- Real x[3,1];
- Real x[3,2];
- Real x[3,3];
-equation
- x[1,1] = 1;
- x[1,2] = 2;
- x[1,3] = 3;
- x[2,1] = 4;
- x[3,1] = 7;
- x[2,2] = 5;
- x[2,3] = 6;
- x[3,2] = 8;
- x[3,3] = 9;
-
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[1,3] = 3;
+ constant Real x[2,1] = 4;
+ constant Real x[2,2] = 5;
+ constant Real x[2,3] = 6;
+ constant Real x[3,1] = 7;
+ constant Real x[3,2] = 8;
+ constant Real x[3,3] = 9;
 end ArrayBuiltins.Cat.ArrayShortCat2;
 ")})));
 end ArrayShortCat2;
@@ -1816,28 +1647,18 @@ model ArrayShortCat3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayShortCat3",
+			name="Cat_ArrayShortCat3",
 			description="Shorthand array concatenation operator: more than 2 dimensions",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat3
- Real x[1,1,1,1];
- Real x[1,1,2,1];
- Real x[1,2,1,1];
- Real x[1,2,2,1];
- Real x[2,1,1,1];
- Real x[2,1,2,1];
- Real x[2,2,1,1];
- Real x[2,2,2,1];
-equation
- x[1,1,1,1] = 1;
- x[1,1,2,1] = 2;
- x[1,2,1,1] = 3;
- x[1,2,2,1] = 4;
- x[2,1,1,1] = 5;
- x[2,1,2,1] = 6;
- x[2,2,1,1] = 7;
- x[2,2,2,1] = 8;
-
+ constant Real x[1,1,1,1] = 1;
+ constant Real x[1,1,2,1] = 2;
+ constant Real x[1,2,1,1] = 3;
+ constant Real x[1,2,2,1] = 4;
+ constant Real x[2,1,1,1] = 5;
+ constant Real x[2,1,2,1] = 6;
+ constant Real x[2,2,1,1] = 7;
+ constant Real x[2,2,2,1] = 8;
 end ArrayBuiltins.Cat.ArrayShortCat3;
 ")})));
 end ArrayShortCat3;
@@ -1886,23 +1707,16 @@ model ArrayEnd1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayEnd1",
+			name="End_ArrayEnd1",
 			description="end operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.End.ArrayEnd1
- Real x[1];
- Real x[2];
- Real x[3];
- Real x[4];
- Real y[1];
- Real y[2];
-equation
- x[1] = 1;
- x[2] = 2;
- x[3] = 3;
- x[4] = 4;
- y[1] = x[2] * 2;
- y[2] = x[3] * 2;
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real x[4] = 4;
+ constant Real y[1] = 4.0;
+ constant Real y[2] = 6.0;
 end ArrayBuiltins.End.ArrayEnd1;
 ")})));
 end ArrayEnd1;
@@ -1932,7 +1746,7 @@ model ArrayEnd3
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="ArrayEnd3",
+			name="End_ArrayEnd3",
 			description="End operator: nestled array subscripts",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1941,27 +1755,172 @@ fclass ArrayBuiltins.End.ArrayEnd3
  constant Integer x1[2] = 2;
  constant Integer x1[3] = 3;
  constant Integer x1[4] = 4;
- Real x2[1];
- Real x2[2];
- Real x2[3];
- Real x2[4];
- Real x2[5];
- Real y[1];
- Real y[2];
-equation
- x2[1] = 5;
- x2[2] = 6;
- x2[3] = 7;
- x2[4] = 8;
- x2[5] = 9;
- y[1] = x2[3];
- y[2] = x2[2];
-
+ constant Real x2[1] = 5;
+ constant Real x2[2] = 6;
+ constant Real x2[3] = 7;
+ constant Real x2[4] = 8;
+ constant Real x2[5] = 9;
+ constant Real y[1] = 7.0;
+ constant Real y[2] = 6.0;
 end ArrayBuiltins.End.ArrayEnd3;
 ")})));
 end ArrayEnd3;
 
 end End;
+
+
+
+package DimensionConvert
+
+model Scalar1
+	Real[1,1,1] x = {{{1}}};
+	Real y = scalar(x) + 1;
+	Real z = scalar({{{{2}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Scalar1",
+			description="Scalar operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Scalar1
+ constant Real x[1,1,1] = 1;
+ constant Real y = 2.0;
+ constant Real z = 2;
+end ArrayBuiltins.DimensionConvert.Scalar1;
+")})));
+end Scalar1;
+
+model Scalar2
+    Real[1,1,2] x = {{{1,2}}};
+    Real y = scalar(x) + 1;
+    Real z = scalar({{{{3},{4}}}});
+	Real w = scalar(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Scalar2",
+			description="Scalar operator: bad size",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1795, column 21:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1796, column 21:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1797, column 18:
+  Calling function scalar(): types of positional argument 1 and input A are not compatible
+")})));
+end Scalar2;
+
+
+model Vector1
+    Real[1,1,1] x = {{{1}}};
+    Real[1] y = vector(x) .+ 1;
+    Real[1] z = vector(2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Vector1",
+			description="Vector operator: scalar arg",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Vector1
+ constant Real x[1,1,1] = 1;
+ constant Real y[1] = 2.0;
+ constant Real z[1] = 2;
+end ArrayBuiltins.DimensionConvert.Vector1;
+")})));
+end Vector1;
+
+model Vector2
+    Real[2] x = vector({1,2});
+    Real[2] y = vector({{1},{2}});
+    Real[2] z = vector({{1,2}});
+    Real[2] w = vector({{{{1}},{{2}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Vector2",
+			description="Vector operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Vector2
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real y[1] = 1;
+ constant Real y[2] = 2;
+ constant Real z[1] = 1;
+ constant Real z[2] = 2;
+ constant Real w[1] = 1;
+ constant Real w[2] = 2;
+end ArrayBuiltins.DimensionConvert.Vector2;
+")})));
+end Vector2;
+
+model Vector3
+    Real[2] x = vector({{1,2},{3,4}});
+    Real[2] y = vector({{{{{1},{2}}},{{{3},{4}}}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Vector3",
+			description="Vector operator: bad size",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2069, column 24:
+  Calling function vector(): types of positional argument 1 and input A are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2070, column 24:
+  Calling function vector(): types of positional argument 1 and input A are not compatible
+")})));
+end Vector3;
+
+
+model Matrix1
+	Real[1,1] x = matrix(1);
+    Real[2,1] y = matrix({1,2});
+    Real[2,2] z = matrix({{1,2},{3,4}});
+    Real[2,2] w = matrix({{{1},{2}},{{3},{4}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DimensionConvert_Matrix1",
+			description="Matrix operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.DimensionConvert.Matrix1
+ constant Real x[1,1] = 1;
+ constant Real y[1,1] = 1;
+ constant Real y[2,1] = 2;
+ constant Real z[1,1] = 1;
+ constant Real z[1,2] = 2;
+ constant Real z[2,1] = 3;
+ constant Real z[2,2] = 4;
+ constant Real w[1,1] = 1;
+ constant Real w[1,2] = 2;
+ constant Real w[2,1] = 3;
+ constant Real w[2,2] = 4;
+end ArrayBuiltins.DimensionConvert.Matrix1;
+")})));
+end Matrix1;
+
+model Matrix2
+    Real[1,2] z = matrix({{{1,2},{3,4}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DimensionConvert_Matrix2",
+			description="Matrix operator: bad size",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2132, column 26:
+  Calling function matrix(): types of positional argument 1 and input A are not compatible
+")})));
+end Matrix2;
+
+end DimensionConvert;
+
 
 
 model Linspace1
@@ -1973,15 +1932,10 @@ model Linspace1
 			description="Linspace operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Linspace1
- Real x[1];
- Real x[2];
- Real x[3];
- Real x[4];
-equation
- x[1] = 1 + 0 * (3 - 1) / 3;
- x[2] = 1 + 1 * (3 - 1) / 3;
- x[3] = 1 + 2 * (3 - 1) / 3;
- x[4] = 1 + 3 * (3 - 1) / 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 1.6666666666666665;
+ constant Real x[3] = 2.333333333333333;
+ constant Real x[4] = 3.0;
 end ArrayBuiltins.Linspace1;
 ")})));
 end Linspace1;
@@ -1999,18 +1953,12 @@ model Linspace2
 			description="Linspace operator: using parameter component as n",
 			flatModel="
 fclass ArrayBuiltins.Linspace2
- Real a;
- Real b;
+ constant Real a = 1;
+ constant Real b = 2;
  parameter Integer c = 3 /* 3 */;
- Real x[1];
- Real x[2];
- Real x[3];
-equation
- a = 1;
- b = 2;
- x[1] = a + 0 * (b - a) / 2;
- x[2] = a + 1 * (b - a) / 2;
- x[3] = a + 2 * (b - a) / 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 1.5;
+ constant Real x[3] = 2.0;
 end ArrayBuiltins.Linspace2;
 ")})));
 end Linspace2;
@@ -2094,9 +2042,9 @@ fclass ArrayBuiltins.Linspace6
  parameter Real a[2].x;
  parameter Real a[3].x;
 parameter equation
- a[1].x = b + 0 * (c - b) / 2;
- a[2].x = b + 1 * (c - b) / 2;
- a[3].x = b + 2 * (c - b) / 2;
+ a[1].x = b + 0 * ((c - b) / 2);
+ a[2].x = b + 1 * ((c - b) / 2);
+ a[3].x = b + 2 * ((c - b) / 2);
 end ArrayBuiltins.Linspace6;
 ")})));
 end Linspace6;
@@ -2114,11 +2062,7 @@ model NdimsExp1
 			flatModel="
 fclass ArrayBuiltins.NdimsExp1
  constant Integer n = 2;
- discrete Integer x;
-initial equation 
- pre(x) = 0;
-equation
- x = 2 * 2;
+ constant Integer x = 4;
 end ArrayBuiltins.NdimsExp1;
 ")})));
 end NdimsExp1;
@@ -2170,9 +2114,7 @@ model ArrayIfExp2
 			flatModel="
 fclass ArrayBuiltins.ArrayIfExp2
  constant Real a = 6;
- Real b;
-equation
- b = 6.0;
+ constant Real b = 6.0;
 end ArrayBuiltins.ArrayIfExp2;
 ")})));
 end ArrayIfExp2;
@@ -2186,18 +2128,18 @@ model ArrayIfExp3
 equation
     y = if useTableA then tableA[1, 1] else tableB[1, 1];
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ArrayIfExp3",
-            description="Eliminate branches causing index out of bounds",
-            eliminate_alias_variables=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayIfExp3",
+			description="Eliminate branches causing index out of bounds",
+			eliminate_alias_variables=false,
+			flatModel="
 fclass ArrayBuiltins.ArrayIfExp3
  parameter Real tableB[1,1] = 1.0 /* 1.0 */;
  parameter Real tableB[1,2] = 1.0 /* 1.0 */;
  parameter Boolean useTableA = false /* false */;
- Real y;
-equation
+ parameter Real y;
+parameter equation
  y = tableB[1,1];
 end ArrayBuiltins.ArrayIfExp3;
 ")})));
@@ -2279,6 +2221,59 @@ end Identity4;
 
 
 
+model Diagonal1
+	Real x[2,2] = diagonal({1,2});
+    Integer y[3,3] = diagonal({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Diagonal1",
+			description="diagonal() operator: basic test",
+			flatModel="
+fclass ArrayBuiltins.Diagonal1
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 0;
+ constant Real x[2,1] = 0;
+ constant Real x[2,2] = 2;
+ constant Integer y[1,1] = 1;
+ constant Integer y[1,2] = 0;
+ constant Integer y[1,3] = 0;
+ constant Integer y[2,1] = 0;
+ constant Integer y[2,2] = 2;
+ constant Integer y[2,3] = 0;
+ constant Integer y[3,1] = 0;
+ constant Integer y[3,2] = 0;
+ constant Integer y[3,3] = 3;
+end ArrayBuiltins.Diagonal1;
+")})));
+end Diagonal1;
+
+
+model Diagonal2
+    Real x[2,2] = diagonal({{1,2},{3,4}});
+    Real y[:,:] = diagonal(1);
+    Boolean z[2,2] = diagonal({true,true});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Diagonal2",
+			description="diagonal() operator: wrong type of arg",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2508, column 28:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2509, column 28:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2510, column 31:
+  Calling function diagonal(): types of positional argument 1 and input v are not compatible
+")})));
+end Diagonal2;
+
+
+
 model ScalarSize1
   Real x[1] = cat(1, {1}, size(Modelica.Constants.pi));
 
@@ -2322,16 +2317,10 @@ model NoEventArray1
 			description="noEvent() for Real array",
 			flatModel="
 fclass ArrayBuiltins.NoEventArray1
- Real x[1];
- Real x[2];
- Real y[1];
- Real y[2];
-equation
- x[1] = 1;
- x[2] = 2;
- y[1] = noEvent(x[1]);
- y[2] = noEvent(x[2]);
-
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayBuiltins.NoEventArray1;
 ")})));
 end NoEventArray1;
@@ -2375,15 +2364,10 @@ model NoEventRecord1
 			description="",
 			flatModel="
 fclass ArrayBuiltins.NoEventRecord1
- Real x.a;
- Real x.b;
- Real y.a;
- Real y.b;
-equation
- x.a = 1;
- x.b = 2;
- y.a = noEvent(x.a);
- y.b = noEvent(x.b);
+ constant Real x.a = 1;
+ constant Real x.b = 2;
+ constant Real y.a = 1.0;
+ constant Real y.b = 2.0;
 
 public
  record ArrayBuiltins.NoEventRecord1.A
@@ -2414,24 +2398,12 @@ model PreTest1
 			description="pre(): basic test",
 			flatModel="
 fclass ArrayBuiltins.PreTest1
- discrete Integer x;
- Real y;
- discrete Integer x2[1];
- discrete Integer x2[2];
- Real y2[1];
- Real y2[2];
-initial equation 
- pre(x) = 0;
- pre(x2[1]) = 0;
- pre(x2[2]) = 0;
-equation
- x = 1;
- y = pre(x);
- x2[1] = 1;
- x2[2] = 1;
- y2[1] = pre(x2[1]);
- y2[2] = pre(x2[2]);
-
+ constant Integer x = 1;
+ constant Real y = 1;
+ constant Integer x2[1] = 1;
+ constant Integer x2[2] = 1;
+ constant Real y2[1] = 1;
+ constant Real y2[2] = 1;
 end ArrayBuiltins.PreTest1;
 ")})));
 end PreTest1;
@@ -2479,31 +2451,18 @@ fclass ArrayBuiltins.VectorizedAbsTest
  constant Real d[1,2] = abs(2.0);
  constant Real d[2,1] = abs(3.0);
  constant Real d[2,2] = abs(-4.0);
- Real x[1,1];
- Real x[1,2];
- Real x[2,1];
- Real x[2,2];
- Real y[1,1];
- Real y[1,2];
- Real y[2,1];
- Real y[2,2];
- Real z[1,1];
- Real z[1,2];
- Real z[2,1];
- Real z[2,2];
-equation
- x[1,1] = -1.0;
- x[1,2] = 2.0;
- x[2,1] = 3.0;
- x[2,2] = -4.0;
- y[1,1] = 1.0;
- y[1,2] = 2.0;
- y[2,1] = 3.0;
- y[2,2] = 4.0;
- z[1,1] = abs(x[1,1]);
- z[1,2] = abs(x[1,2]);
- z[2,1] = abs(x[2,1]);
- z[2,2] = abs(x[2,2]);
+ constant Real x[1,1] = -1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = -4.0;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
+ constant Real z[1,1] = 1.0;
+ constant Real z[1,2] = 2.0;
+ constant Real z[2,1] = 3.0;
+ constant Real z[2,2] = 4.0;
 end ArrayBuiltins.VectorizedAbsTest;
 ")})));
 end VectorizedAbsTest;
@@ -2519,20 +2478,12 @@ model VectorizedSmoothTest
 			description="",
 			flatModel="
 fclass ArrayBuiltins.VectorizedSmoothTest
- Real x[1];
- Real x[2];
- Real x[3];
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x[1] = 1;
- x[2] = 2;
- x[3] = 3;
- y[1] = smooth(2, x[1]);
- y[2] = smooth(2, x[2]);
- y[3] = smooth(2, x[3]);
-
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
+ constant Real y[3] = 3.0;
 end ArrayBuiltins.VectorizedSmoothTest;
 ")})));
 end VectorizedSmoothTest;
@@ -2563,37 +2514,12 @@ model NonVectorizedSalarization1
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedSalarization1
- Real x[1];
- Real x[2];
- Real x[3];
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x[1] = 1;
- x[2] = 2;
- x[3] = 3;
- ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedSalarization1.f1({x[1], x[2], x[3]});
-
-public
- function ArrayBuiltins.NonVectorizedSalarization1.f1
-  input Real[3] x1;
-  output Real[3] y1;
- algorithm
-  y1[1] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[1];
-  y1[2] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[2];
-  y1[3] := ArrayBuiltins.NonVectorizedSalarization1.f2(x1) * x1[3];
-  return;
- end ArrayBuiltins.NonVectorizedSalarization1.f1;
-
- function ArrayBuiltins.NonVectorizedSalarization1.f2
-  input Real[3] x2;
-  output Real y2;
- algorithm
-  y2 := x2[1] + x2[2] + x2[3];
-  return;
- end ArrayBuiltins.NonVectorizedSalarization1.f2;
-
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real y[1] = 6.0;
+ constant Real y[2] = 12.0;
+ constant Real y[3] = 18.0;
 end ArrayBuiltins.NonVectorizedSalarization1;
 ")})));
 end NonVectorizedSalarization1;
@@ -2623,42 +2549,12 @@ model NonVectorizedSalarization2
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedSalarization2
- Real x[1];
- Real x[2];
- Real x[3];
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x[1] = 1;
- x[2] = 2;
- x[3] = 3;
- ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedSalarization2.f1({x[1], x[2], x[3]});
-
-public
- function ArrayBuiltins.NonVectorizedSalarization2.f1
-  input Real[:] x1;
-  output Real[size(x1, 1)] y1;
- algorithm
-  for i1 in 1:size(y1, 1) loop
-   y1[i1] := ArrayBuiltins.NonVectorizedSalarization2.f2(x1) * x1[i1];
-  end for;
-  return;
- end ArrayBuiltins.NonVectorizedSalarization2.f1;
-
- function ArrayBuiltins.NonVectorizedSalarization2.f2
-  input Real[:] x2;
-  output Real y2;
-  Real temp_1;
- algorithm
-  temp_1 := 0.0;
-  for i1 in 1:size(x2, 1) loop
-   temp_1 := temp_1 + x2[i1];
-  end for;
-  y2 := temp_1;
-  return;
- end ArrayBuiltins.NonVectorizedSalarization2.f2;
-
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real y[1] = 6.0;
+ constant Real y[2] = 12.0;
+ constant Real y[3] = 18.0;
 end ArrayBuiltins.NonVectorizedSalarization2;
 ")})));
 end NonVectorizedSalarization2;
@@ -2672,6 +2568,8 @@ model NonVectorizedSalarization3
 		TransformCanonicalTestCase(
 			name="NonVectorizedSalarization3",
 			description="Test of accesses that should be kept without indices during scalarization",
+			variability_propagation=false,
+			inline_functions="none",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedSalarization3
  Real x[1];
@@ -2714,6 +2612,24 @@ public
 end ArrayBuiltins.NonVectorizedSalarization3;
 ")})));
 end NonVectorizedSalarization3;
+
+
+model InfArgsWithNamed
+	Real x[2,2] = ones(2, 2, xxx = 3);
+equation
+	assert(false, "qwerty", yyy = 3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InfArgsWithNamed",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 2720, column 27:
+  Calling function ones(): no input matching named argument xxx found
+")})));
+end InfArgsWithNamed;
 
 
 end ArrayBuiltins;

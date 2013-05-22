@@ -26,24 +26,24 @@ def run_demo(with_plots=True):
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     class_name = 'ExtFunctions.addTwo'
-    mofile = curr_dir+'/files/ExtFunctions.mo'
+    mofile = os.path.join(curr_dir, 'files', 'ExtFunctions.mo')
     
+    # Compile and load model
     fmu_name = compile_fmu(class_name, mofile)
     model = load_fmu(fmu_name)
 
-    #simulate
+    # Simulate
     res = model.simulate()
     
+    # Load result data
     sim_a = res['a']
     sim_b = res['b']
     sim_c = res['c']
     t     = res['time']
 
-    assert N.abs(sim_a[-1] - 1) < 1e-6
-     
-    assert N.abs(sim_b[-1] - 2) < 1e-6
-    
-    assert N.abs(sim_c[-1] - 3) < 1e-6
+    assert N.abs(res.final('a') - 1) < 1e-6
+    assert N.abs(res.final('b') - 2) < 1e-6
+    assert N.abs(res.final('c') - 3) < 1e-6
 
     if with_plots:
         fig = p.figure()

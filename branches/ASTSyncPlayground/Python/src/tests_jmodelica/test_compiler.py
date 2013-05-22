@@ -32,15 +32,6 @@ from pymodelica import compile_jmu
 from pymodelica import compile_fmu
 import pymodelica as pym
 
-mc = ModelicaCompiler()
-ModelicaCompiler.set_log_level(ModelicaCompiler.LOG_ERROR)
-mc.set_boolean_option('state_start_values_fixed',True)
-
-oc = OptimicaCompiler()
-OptimicaCompiler.set_log_level(OptimicaCompiler.LOG_ERROR)
-oc.set_boolean_option('state_start_values_fixed',True)
-
-jm_home = pym.environ['JMODELICA_HOME']
 
 class Test_Compiler:
     """ This class tests the compiler module. """
@@ -50,31 +41,26 @@ class Test_Compiler:
         """
         Sets up the test class.
         """
-        pass
-        
-    def setUp(self):
-        """
-        Sets up the test case.
-        """
-        self.fpath_mc = os.path.join(get_files_path(), 'Modelica', 
+        cls.mc = ModelicaCompiler()
+        cls.oc = OptimicaCompiler()
+        cls.jm_home = pym.environ['JMODELICA_HOME']        
+        cls.fpath_mc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack_no_opt.mo')
-        self.cpath_mc = "Pendulum_pack.Pendulum"
-
-        self.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
+        cls.cpath_mc = "Pendulum_pack.Pendulum"
+        cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack.mop')
-        self.cpath_oc = "Pendulum_pack.Pendulum_Opt"
-
+        cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
+            
     @testattr(stddist = True)
     def test_compile_JMU(self):
         """
         Test that it is possible to compile a JMU from a .mo file with 
         ModelicaCompiler.
         """
-        mc.compile_JMU(self.cpath_mc, [self.fpath_mc], '.')
+        Test_Compiler.mc.compile_JMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], '.')
         
-        fname = self.cpath_mc.replace('.','_',1)
-        assert os.access(fname+'.jmu',os.F_OK) == True, \
-               fname+'.jmu'+" was not created."
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.jmu',os.F_OK) == True, fname+'.jmu'+" was not created."
         os.remove(fname+'.jmu')
 
     @testattr(stddist = True)
@@ -82,22 +68,21 @@ class Test_Compiler:
         """
         Test that it is possible to compile a JMU from a .mop file with 
         OptimicaCompiler. 
-        """
-            
-        oc.compile_JMU(self.cpath_oc, [self.fpath_oc], '.')
+        """     
+        Test_Compiler.oc.compile_JMU(Test_Compiler.cpath_oc, [Test_Compiler.fpath_oc], '.')
         
-        fname = self.cpath_oc.replace('.','_',1)
+        fname = Test_Compiler.cpath_oc.replace('.','_',1)
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."
         os.remove(fname+'.jmu')
                
     @testattr(stddist = True)
-    def test_compile_JMU_fnc(self):
+    def test_compile_jmu(self):
         """
         Test that it is possible to compile a JMU from a .mop file with 
         pymodelica.compile_jmu.
         """
-        jmuname = compile_jmu(self.cpath_oc, self.fpath_oc)
+        jmuname = compile_jmu(Test_Compiler.cpath_oc, Test_Compiler.fpath_oc)
 
         assert os.access(jmuname, os.F_OK) == True, \
                jmuname+" was not created."
@@ -109,20 +94,20 @@ class Test_Compiler:
         Test that it is possible to compile an FMU from a .mo file with 
         ModelicaCompiler.
         """ 
-        mc.compile_FMU(self.cpath_mc, [self.fpath_mc], 'fmume', '.')
+        Test_Compiler.mc.compile_FMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'fmume', '.')
         
-        fname = self.cpath_mc.replace('.','_',1)
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
                fname+'.fmu'+" was not created."
         os.remove(fname+'.fmu')
                
     @testattr(stddist = True)
-    def test_optimica_compile_FMU_fnc(self):
+    def test_compile_fmu_mop(self):
         """
         Test that it is possible to compile an FMU from a .mop file with 
         pymodelica.compile_fmu.
         """
-        fmuname = compile_fmu(self.cpath_mc, self.fpath_oc)
+        fmuname = compile_fmu(Test_Compiler.cpath_mc, Test_Compiler.fpath_oc)
 
         assert os.access(fmuname, os.F_OK) == True, \
                fmuname+" was not created."
@@ -130,173 +115,146 @@ class Test_Compiler:
 
     @testattr(stddist = True)
     def test_stepbystep(self):
-        """ Test that it is possible to compile (compiler.py) step-by-step. """
-        sourceroot = mc.parse_model(self.fpath_mc)
-        icd = mc.instantiate_model(sourceroot, self.cpath_mc)
-        fclass = mc.flatten_model(icd)
-        mc.generate_code(fclass)
+        """ Test that it is possible to compile step-by-step with ModelicaCompiler. """
+        sourceroot = Test_Compiler.mc.parse_model(Test_Compiler.fpath_mc)
+        icd = Test_Compiler.mc.instantiate_model(sourceroot, Test_Compiler.cpath_mc)
+        fclass = Test_Compiler.mc.flatten_model(icd)
+        Test_Compiler.mc.generate_code(fclass)
 
     @testattr(stddist = True)
     def test_optimica_stepbystep(self):
-        """ Test that it is possible to compile (optimicacompiler.py) step-by-step. """
-        sourceroot = oc.parse_model(self.fpath_oc)
-        icd = oc.instantiate_model(sourceroot, self.cpath_oc)
-        fclass = oc.flatten_model(icd)
-        oc.generate_code(fclass)
+        """ Test that it is possible to compile step-by-step with OptimicaCompiler. """
+        sourceroot = Test_Compiler.oc.parse_model(Test_Compiler.fpath_oc)
+        icd = Test_Compiler.oc.instantiate_model(sourceroot, Test_Compiler.cpath_oc)
+        fclass = Test_Compiler.oc.flatten_model(icd)
+        Test_Compiler.oc.generate_code(fclass)
 
     @testattr(stddist = True)
     def test_compiler_error(self):
         """ Test that a CompilerError is raised if compilation errors are found in the model."""
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
-        nose.tools.assert_raises(pym.compiler_wrappers.CompilerError, mc.compile_JMU, cl, [path], '.')
-        nose.tools.assert_raises(pym.compiler_wrappers.CompilerError, oc.compile_JMU, cl, [path], '.')
+        nose.tools.assert_raises(pym.compiler_wrappers.CompilerError, Test_Compiler.mc.compile_JMU, cl, [path], '.')
+        nose.tools.assert_raises(pym.compiler_wrappers.CompilerError, Test_Compiler.oc.compile_JMU, cl, [path], '.')
 
     @testattr(stddist = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
-        nose.tools.assert_raises(pym.compiler_wrappers.ModelicaClassNotFoundError, mc.compile_JMU, errorcl, [self.fpath_mc], '.')
-        nose.tools.assert_raises(pym.compiler_wrappers.OptimicaClassNotFoundError, oc.compile_JMU, errorcl, [self.fpath_oc], '.')
+        nose.tools.assert_raises(pym.compiler_wrappers.ModelicaClassNotFoundError, Test_Compiler.mc.compile_JMU, errorcl, [self.fpath_mc], '.')
+        nose.tools.assert_raises(pym.compiler_wrappers.OptimicaClassNotFoundError, Test_Compiler.oc.compile_JMU, errorcl, [self.fpath_oc], '.')
 
     @testattr(stddist = True)
     def test_IO_error(self):
         """ Test that an IOError is raised if the model file is not found. """
         errorpath = os.path.join(get_files_path(), 'Modelica','NonExistingModel.mo')
-        nose.tools.assert_raises(IOError, mc.compile_JMU, self.cpath_mc, [errorpath], '.')
-        nose.tools.assert_raises(IOError, oc.compile_JMU, self.cpath_oc, [errorpath], '.')
+        nose.tools.assert_raises(IOError, Test_Compiler.mc.compile_JMU, Test_Compiler.cpath_mc, [errorpath], '.')
+        nose.tools.assert_raises(IOError, Test_Compiler.oc.compile_JMU, Test_Compiler.cpath_oc, [errorpath], '.')
 
     @testattr(stddist = True)
     def test_setget_modelicapath(self):
         """ Test modelicapath setter and getter. """
-        newpath = os.path.join(jm_home,'ThirdParty','MSL')
-        mc.set_modelicapath(newpath)
-        nose.tools.assert_equal(mc.get_modelicapath(),newpath)
-        nose.tools.assert_equal(oc.get_modelicapath(),newpath)
+        newpath = os.path.join(Test_Compiler.jm_home,'ThirdParty','MSL')
+        Test_Compiler.mc.set_modelicapath(newpath)
+        nose.tools.assert_equal(Test_Compiler.mc.get_modelicapath(),newpath)
+        nose.tools.assert_equal(Test_Compiler.oc.get_modelicapath(),newpath)
     
-
-    @testattr(stddist = True)
-    def test_setget_XML_tpl(self):
-        """ Test XML template setter and getter. """
-        newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmodelica_model_description.tpl')
-        mc.set_XML_tpl(newtemplate)
-        nose.tools.assert_equal(mc.get_XML_tpl(), newtemplate)
-    
-    @testattr(stddist = True)
-    def test_setget_cTemplate(self):
-        """ Test c template setter and getter. """
-        newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_modelica_template.c')
-        mc.set_cTemplate(newtemplate)
-        nose.tools.assert_equal(mc.get_cTemplate(), newtemplate)
-
-    @testattr(stddist = True)
-    def test_setget_cTemplate(self):
-        """ Test c template setter and getter. """
-        newtemplate = os.path.join(jm_home, 'CodeGenTemplates','jmi_optimica_template.c')
-        oc.set_cTemplate(newtemplate)
-        nose.tools.assert_equal(oc.get_cTemplate(), newtemplate)
-
     @testattr(stddist = True)
     def test_parse_multiple(self):
         """ Test that it is possible to parse two model files. """
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
-        oc.parse_model([lib, opt])
+        Test_Compiler.oc.parse_model([lib, opt])
 
     @testattr(stddist = True)
     def test_compile_multiple(self):
         """ Test that it is possible to compile two model files. """
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
-        oc.compile_JMU('CSTR2_Opt', [lib,opt], '.')
+        Test_Compiler.oc.compile_JMU('CSTR2_Opt', [lib,opt], '.')
 
     @testattr(stddist = True)
     def test_setget_boolean_option(self):
         """ Test boolean option setter and getter. """
         option = 'halt_on_warning'
-        value = mc.get_boolean_option(option)
+        value = Test_Compiler.mc.get_boolean_option(option)
         # change value of option
-        mc.set_boolean_option(option, not value)
-        nose.tools.assert_equal(mc.get_boolean_option(option), not value)
+        Test_Compiler.mc.set_boolean_option(option, not value)
+        nose.tools.assert_equal(Test_Compiler.mc.get_boolean_option(option), not value)
         # option should be of type bool
-        assert isinstance(mc.get_boolean_option(option), bool)
+        assert isinstance(Test_Compiler.mc.get_boolean_option(option), bool)
         # reset to original value
-        mc.set_boolean_option(option, value)
+        Test_Compiler.mc.set_boolean_option(option, value)
     
     @testattr(stddist = True)
     def test_setget_boolean_option_error(self):
         """ Test that boolean option getter raises the proper error. """
         option = 'nonexist_boolean'
         #try to get an unknown option
-        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, mc.get_boolean_option, option)
+        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, Test_Compiler.mc.get_boolean_option, option)
 
-# There are no integer options yet
-#    @testattr(stddist = True)
-#    def test_setget_integer_option(self):
-#        """ Test integer option setter and getter. """
-#        option = 'integer_testoption'
-#        setvalue = 10
-#        # create new option
-#        mc.set_integer_option(option, setvalue)
-#        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
-#        # change value of option
-#        setvalue = 100
-#        mc.set_integer_option(option, setvalue)
-#        nose.tools.assert_equal(mc.get_integer_option(option), setvalue)
-#        # option should be of type int
-#        assert isinstance(mc.get_integer_option(option),int)
+    @testattr(stddist = True)
+    def test_setget_integer_option(self):
+        """ Test integer option setter and getter. """
+        option = 'nle_solver_log_level'
+        default_value = Test_Compiler.mc.get_integer_option(option)
+        new_value = 1
+        # change value of option
+        Test_Compiler.mc.set_integer_option(option, new_value)
+        nose.tools.assert_equal(Test_Compiler.mc.get_integer_option(option), new_value)
+        # option should be of type int
+        assert isinstance(Test_Compiler.mc.get_integer_option(option),int)
+        # reset to original value
+        Test_Compiler.mc.set_integer_option(option, default_value)
     
     @testattr(stddist = True)
     def test_setget_integer_option_error(self):
         """ Test that integer option getter raises the proper error. """
         option = 'nonexist_integer'
         #try to get an unknown option
-        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, mc.get_integer_option, option) 
+        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, Test_Compiler.mc.get_integer_option, option) 
 
-# There are no real options yet
-#    @testattr(stddist = True)
-#    def test_setget_real_option(self):
-#        """ Test real option setter and getter. """
-#        option = 'real_testoption'
-#        setvalue = 10.0
-#        # create new option
-#        mc.set_real_option(option, setvalue)
-#        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
-#        # change value of option
-#        setvalue = 100.0
-#        mc.set_real_option(option, setvalue)
-#        nose.tools.assert_equal(mc.get_real_option(option), setvalue)
-#        # option should be of type float
-#        assert isinstance(mc.get_real_option(option),float)
+    @testattr(stddist = True)
+    def test_setget_real_option(self):
+        """ Test real option setter and getter. """
+        option = 'events_tol_factor'
+        default_value = Test_Compiler.mc.get_real_option(option)
+        new_value = 1.0e-5
+        # change value of option
+        Test_Compiler.mc.set_real_option(option, new_value)
+        nose.tools.assert_equal(Test_Compiler.mc.get_real_option(option), new_value)
+        # option should be of type int
+        assert isinstance(Test_Compiler.mc.get_real_option(option),float)
+        # reset to original value
+        Test_Compiler.mc.set_real_option(option, default_value)
     
     @testattr(stddist = True)
     def test_setget_real_option_error(self):
         """ Test that real option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
-        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, mc.get_real_option, option)
+        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, Test_Compiler.mc.get_real_option, option)
 
     @testattr(stddist = True)
     def test_setget_string_option(self):
         """ Test string option setter and getter. """
         option = 'extra_lib_dirs'
-        value = mc.get_string_option(option)
+        default_value = Test_Compiler.mc.get_string_option(option)
         setvalue = 'option 1'
         # change value of option
-        mc.set_string_option(option, setvalue)
-        nose.tools.assert_equal(mc.get_string_option(option), setvalue)
+        Test_Compiler.mc.set_string_option(option, setvalue)
+        nose.tools.assert_equal(Test_Compiler.mc.get_string_option(option), setvalue)
         # option should be of type str
-        assert isinstance(mc.get_string_option(option),basestring)
+        assert isinstance(Test_Compiler.mc.get_string_option(option),basestring)
         # reset to original value
-        mc.set_string_option(option, value)
+        Test_Compiler.mc.set_string_option(option, default_value)
     
     @testattr(stddist = True)
     def test_setget_string_option_error(self):
         """ Test that string option getter raises the proper error. """
         option = 'nonexist_real'
         #try to get an unknown option
-        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, 
-            mc.get_string_option, option)
+        nose.tools.assert_raises(pym.compiler_wrappers.UnknownOptionError, Test_Compiler.mc.get_string_option, option)
             
     @testattr(stddist = True)
     def test_compile_no_mofile(self):
@@ -305,12 +263,7 @@ class Test_Compiler:
         MODELICAPATH) works.
         """
         cpath = "Modelica.Electrical.Analog.Examples.CauerLowPassAnalog"
-
-        # Turn off structural analysis since the problem is of high index
-        mc.set_boolean_option("enable_structural_diagnosis",False)    
-        mc.compile_JMU(cpath, [], '.')
-        mc.set_boolean_option("enable_structural_diagnosis",True)    
-        
+        Test_Compiler.mc.compile_JMU(cpath, [], '.')        
         fname = cpath.replace('.','_')
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."

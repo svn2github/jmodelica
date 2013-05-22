@@ -15,6 +15,7 @@
 */
 
 import java.util.LinkedHashSet;
+import java.util.BitSet;
 //import org.jmodelica.modelica.compiler.AliasManager.AliasVariable;
 
 /**
@@ -29,7 +30,7 @@ aspect AliasVariables {
 	 * 
 	 * @return True if alias, else false.
 	 */
-	syn lazy boolean FAbstractVariable.isAlias() = false; 
+	syn boolean FAbstractVariable.isAlias() = false; 
 	eq FVariable.isAlias() = aliasVariable() != null; 
 	
 	/**
@@ -75,7 +76,7 @@ aspect AliasVariables {
 	 */
 	syn boolean FAbstractVariable.isNegated() = false;
 	
-	eq FVariable.isNegated(){
+	eq FVariable.isNegated() {
 		AliasManager aliasManager = myFClass().getAliasManager();
 		AliasManager.AliasVariable alias = aliasManager.getAliasVariable(this);
 		AliasManager.AliasSet aliasSet = alias.getSet();
@@ -84,6 +85,27 @@ aspect AliasVariables {
 		} else {
 			AliasManager.AliasVariable iav = aliasSet.getIterationVariable();
 			return (alias.isNegated() != iav.isNegated());
+		}
+	}
+	
+	/**
+	 * Set each attribute of this variable to the most relevant version from the 
+	 * variables of the alias set.
+	 * 
+	 * What is most relevant depends on the attribute, see respective subclass of 
+	 * AliasManager.AttributePropagator.
+	 */
+	public void FVariable.propagateAttributesFromAlias() {
+		AliasManager.AliasSet aliasSet = myFClass().getAliasManager().getAliasSet(this);
+		if (aliasSet != null) {
+			AliasManager.AliasVariable myAv = aliasSet.getIterationVariable();
+			if (myAv.getFVariable() == this) {
+				AliasManager.AttributePropagatorMap map = new AliasManager.AttributePropagatorMap(myAv);
+				for (AliasManager.AliasVariable av : aliasSet) 
+					if (av.getFVariable() != this) 
+						map.addAlias(av);
+				map.propagate();
+			}
 		}
 	}
 		
@@ -257,7 +279,7 @@ aspect AliasVariables {
 		 * @param neg True if the alias variable is negated, otherwise false.
 		 */
 		private void add(AliasSet set, FVariable fv, boolean neg) {
-			set.add(new AliasVariable(fv, neg));
+			set.add(new AliasVariable(fv, neg, variableMap));
 		}
 		
 		/**
@@ -270,19 +292,19 @@ aspect AliasVariables {
 		private void join(FVariable fvA, FVariable fvB, boolean negate) {
 			AliasSet set = new AliasSet();
 			aliasSets.add(set);
-			set.add(new AliasVariable(fvA, false));
-			set.add(new AliasVariable(fvB, negate));
+			set.add(new AliasVariable(fvA, false, variableMap));
+			set.add(new AliasVariable(fvB, negate, variableMap));
 		}
 		
 		/**
-		 * \brief Print the alias sets.
+		 * \brief Print the alias sets, with start attributes.
 		 * 
 		 * @return A string containing the alias sets.
 		 */
 		public String printAliasSets() {
 			StringBuilder str = new StringBuilder();
 			for (AliasSet aliasSet : aliasSets) {
-				str.append(aliasSet +"\n");
+				str.append(aliasSet.toStringWithStart() +"\n");
 			}
 			return str.toString();		
 		}
@@ -321,13 +343,13 @@ aspect AliasVariables {
 			 * @param newAlias Alias variable to add
 			 */
 			private void add(AliasVariable newAlias) {
-				boolean newAliasIsManualIteration = newAlias.getFVariable().getManualIterationVariable();
+				boolean newAliasIsManualIteration = newAlias.getFVariable().getHGTType() == FClass.HGTVariableType.COMPONENT;
 				if (isManualIteration && !newAliasIsManualIteration) {
-					newAlias.getFVariable().setManualIterationVariable(true);
+					newAlias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
 				} else if (!isManualIteration && newAliasIsManualIteration) {
 					isManualIteration = true;
 					for (AliasVariable alias : aliases)
-						alias.getFVariable().setManualIterationVariable(true);
+						alias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
 				}
 				newAlias.setSet(this);
 				aliases.add(newAlias);
@@ -363,17 +385,26 @@ aspect AliasVariables {
 			
 			@Override
 			public String toString() {
+				return toString(false);
+			}
+			
+			public String toStringWithStart() {
+				return toString(true);
+			}
+			
+			private String toString(boolean withStart) {
+				String sep = withStart ? ", " : ",";
 				StringBuilder str = new StringBuilder();
 				str.append("{");
 				
-				AliasVariable iterationAlias = getIterationVariable();
-				str.append(iterationAlias);
+				AliasVariable iteration = getIterationVariable();
+				str.append(iteration.toString(withStart));
 				
 				for (AliasVariable alias : aliases) {
-					if (alias == iterationAlias)
+					if (alias == iteration)
 						continue;
-					str.append(',');
-					str.append(alias);
+					str.append(sep);
+					str.append(alias.toString(withStart));
 				}
 				str.append("}");
 				return str.toString();
@@ -407,7 +438,7 @@ aspect AliasVariables {
 		 * AliasVariable implements the Comparable interface and objects of the 
 		 * class are used in the alias sets.
 		 */
-		public class AliasVariable {
+		public static class AliasVariable {
 			
 			// The FVariable
 			private FVariable fv;
@@ -420,10 +451,11 @@ aspect AliasVariables {
 			/**
 			 * \brief Constructor.
 			 * 
-			 * @param fv An FVariable.
-			 * @param negated True if the alias is negated, otherwise false.
+			 * @param fv           An FVariable.
+			 * @param negated      True if the alias is negated, otherwise false.
+			 * @param variableMap  Map to add the new AliasVariable to.
 			 */
-			private AliasVariable(FVariable fv,boolean negated) {
+			private AliasVariable(FVariable fv, boolean negated, Map<FVariable, AliasVariable> variableMap) {
 				this.fv = fv;
 				this.negated = negated;
 				variableMap.put(fv, this);
@@ -469,10 +501,161 @@ aspect AliasVariables {
 			
 			@Override
 			public String toString() {
+				return toString(false);
+			}
+			
+			protected String toString(boolean withStart) {
+				StringBuilder buf = new StringBuilder();
 				if (isNegated())
-					return '-' + getFVariable().name();
+					buf.append('-');
+				FVariable fv = getFVariable();
+				buf.append(fv.name());
+				if (withStart && fv.startAttributeSet()) {
+					buf.append("(start=");
+					buf.append(fv.startAttributeCValue());
+					buf.append(")");
+				}
+				return buf.toString();
+			}
+			
+		}
+		
+		
+		public static class AttributePropagatorMap {
+
+			private Map<String, AttributePropagator> map;
+			private AliasVariable target;
+
+			public AttributePropagatorMap(AliasVariable av) {
+				map = new LinkedHashMap<String,AttributePropagator>();
+				target = av;
+				addAlias(av);
+			}
+
+			public void propagate() {
+				List<FAttribute> l = new List<FAttribute>();
+				for (AttributePropagator ap : map.values())
+					ap.propagate(l);
+				target.getFVariable().setFAttributeList(l);
+			}
+			
+			public void addAlias(AliasVariable av) {
+				FVariable fv = av.getFVariable();
+				boolean neg = av.isNegated();
+				for (FAttribute attr : fv.getFAttributes())
+					addAttribute(attr, fv, neg);
+				if (fv.myFDerivedType() != null)
+					for (FAttribute attr : fv.myFDerivedType().getFAttributes())
+						addTypeAttribute(attr, fv, neg);
+			}
+			
+			private void addAttribute(FAttribute attr, FVariable fv, boolean neg) {
+				get(attr.name()).addAttribute(attr, neg);
+			}
+
+			private void addTypeAttribute(FAttribute attr, FVariable fv, boolean neg) {
+				AttributePropagator ap = get(attr.name());
+				if (!ap.lastIsInFV(fv))
+					ap.addAttribute(attr, neg);
+			}
+
+			private AttributePropagator get(String name) {
+				AttributePropagator ap = map.get(name);
+				if (ap == null) {
+					ap = createAttributePropagator(name);
+					map.put(name, ap);
+				}
+				return ap;
+			}
+
+			private AttributePropagator createAttributePropagator(String name) {
+				// TODO: add support for more attributes
+				if (name.equals(FAttribute.START))
+					return new StartAttributePropagator();
 				else
-					return getFVariable().name();
+					return new OtherAttributePropagator(name);
+			}
+
+			private abstract class AttributePropagator {
+
+				protected ArrayList<FAttribute> list = new ArrayList<FAttribute>();
+				protected BitSet neg = new BitSet();
+
+				public void addAttribute(FAttribute attr, boolean neg) {
+					this.neg.set(list.size(), neg);
+					list.add(attr);
+				}
+
+				public boolean lastIsInFV(FVariable fv) {
+					int n = list.size();
+					return n > 0 && list.get(n - 1).isInFV(fv);
+				}
+				
+				public abstract void propagate(List<FAttribute> l);
+
+			}
+			
+			/**
+			 * Used for attributes that are not specifically handled.
+			 * 
+			 * Only adds back the attribute from the target variable, if any.
+			 */
+			private class OtherAttributePropagator extends AttributePropagator {
+
+				private String name;
+
+				public OtherAttributePropagator(String name) {
+					this.name = name;
+				}
+
+				public void propagate(List<FAttribute> l) {
+					if (list.size() > 0 && list.get(0).isInFV(target.getFVariable())) 
+						l.add(list.get(0));
+				}
+				
+			}
+			
+			/**
+			 * Propagates start attribute. Selects the attribute that was set 
+			 * "closest to the user".
+			 * 
+			 * Selects the value with lowest level among attributes set on variables, 
+			 * or if no such are found the first found from a type. 
+			 */
+			private class StartAttributePropagator extends AttributePropagator {
+				
+				private final static int NO_KIND   = 0;
+				private final static int TYPE_KIND = 1;
+				private final static int FV_KIND   = 2;
+
+				public void propagate(List<FAttribute> l) {
+					FAttribute sel = null;
+					int selKind = NO_KIND;
+					int selLevel = 0;
+					int selIndex = 0;
+					int curIndex = 0;
+					for (FAttribute attr : list) {
+						int curKind = attr.isInFV() ? FV_KIND : TYPE_KIND;
+						int curLevel = attr.getLevel();
+						if (curKind > selKind || (curKind == FV_KIND && curLevel < selLevel)) {
+							sel = attr;
+							selKind = curKind;
+							selLevel = curLevel;
+							selIndex = curIndex;
+						}
+						curIndex++;
+					}
+					// Don't add attributes from own type
+					FVariable targetFV = target.getFVariable();
+					if (sel == null || (selKind == TYPE_KIND && targetFV.findAttribute(FAttribute.START) == sel))
+						return;
+					if (!sel.isInFV(targetFV))
+						sel = sel.fullCopy();
+					if (neg.get(selIndex) != target.isNegated() && sel.hasValue())
+						sel.setValue(sel.getValue().createNegated());
+					l.add(sel);
+				}
+				
 			}
 			
 		}
@@ -514,8 +697,12 @@ aspect AliasVariables {
 		// 4. Variables with StateSelect-information
 		if (isReal() && ((FRealVariable)this).stateSelectAttributeSet()) 
 			return score;
-		score--;		
-				
+		score--;
+		
+		if (getHGTType() == FClass.HGTVariableType.PAIR || getHGTType() == FClass.HGTVariableType.COMPONENT)
+			return score;
+		score--;
+		
 		// 5. start attribute set
 		if (startAttributeSet())
 			return score;

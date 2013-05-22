@@ -125,9 +125,9 @@
 #define fmiGetStateValueReferences    fmiFullName(_fmiGetStateValueReferences)
 #define fmiTerminate                  fmiFullName(_fmiTerminate)
 
-#define fmiGetJacobian        		  fmiFullName(_fmiGetJacobian)
+#define fmiGetJacobian                fmiFullName(_fmiGetJacobian)
 #define fmiGetDirectionalDerivative   fmiFullName(_fmiGetDirectionalDerivative)
-#define fmiGetPartialDerivatives	  fmiFullName(_fmiGetPartialDerivatives)
+#define fmiGetPartialDerivatives      fmiFullName(_fmiGetPartialDerivatives)
 
 /* Version number */
 #define fmiVersion "1.0"

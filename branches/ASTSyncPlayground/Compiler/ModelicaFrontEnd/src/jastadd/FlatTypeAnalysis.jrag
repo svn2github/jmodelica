@@ -102,9 +102,12 @@ aspect FlatTypeAnalysis {
 	
 	eq InstRecord.type() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-		if (isArray() && getNumInstComponentDecl() == 0)
-			return myInstClass().recordType().sizedType(size());
-		InstComponentDecl root = isArray() ? getInstComponentDecl(0) : this;
+		InstComponentDecl root = this;
+		for (int i = 0; i < ndims(); i++) {
+			if (root.getNumInstComponentDecl() == 0)
+				return myInstClass().recordType().sizedType(size());
+			root = root.getInstComponentDecl(0);
+		}
 		for (InstComponentDecl icd : root.allInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(size(), myInstClass().qualifiedName(), new List(), null);
@@ -115,7 +118,7 @@ aspect FlatTypeAnalysis {
 	
 	syn lazy FRecordType InstClassDecl.recordType() {
 		TreeSet<FRecordComponentType> comps = new TreeSet<FRecordComponentType>();
-		for (InstComponentDecl icd : getInstComponentDecls()) 
+		for (InstComponentDecl icd : allInstComponentDecls()) 
 			comps.add(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
 		FRecordType type = new FRecordType(Size.SCALAR, qualifiedName(), new List(), null);
 		for (FRecordComponentType comp : comps)
@@ -164,10 +167,15 @@ aspect FlatTypeAnalysis {
 	syn lazy FType FAbstractEquation.type() = fUnknownType();
 	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
 	
-	syn boolean FAbstractEquation.isReal() = type().isReal();
+	syn lazy FType FStatement.type() = fUnknownType();
+	eq FAssignStmt.type() = getRight().type().numericPromotion(getLeft().type());
+	
+	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
+	//       over *any* reals. Probably needs refactoring.
+	syn boolean FAbstractEquation.isReal()    = type().isReal();
 	syn boolean FAbstractEquation.isInteger() = type().isInteger();
 	syn boolean FAbstractEquation.isBoolean() = type().isBoolean();
-	syn boolean FAbstractEquation.isString() = type().isString();
+	syn boolean FAbstractEquation.isString()  = type().isString();
 
 	eq FFunctionCallEquation.isReal() {
 		for (FFunctionCallLeft l : getLefts()) {
@@ -213,6 +221,38 @@ aspect FlatTypeAnalysis {
 		return true;
 	}
 	
+	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	// TODO: isInteger(), etc. for algorithm
+	
+	syn boolean FStatement.assignsOnlyReals() = true;
+	eq FAssignStmt.assignsOnlyReals()         = getRight().type().onlyContainsReal();
+	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
+	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
+	eq FIfStmt.assignsOnlyReals()             = 
+		super.assignsOnlyReals() && statementsAssignsOnlyReals(getElseStmts());
+	eq FIfWhenStmt.assignsOnlyReals() {
+		for (FIfWhenClause s : getFIfWhenClauses())
+			if (!s.assignsOnlyReals())
+				return false;
+		return true;
+	}
+	eq FFunctionCallStmt.assignsOnlyReals() {
+		for (FFunctionCallLeft l : getLefts()) 
+			if (l.hasFExp()) 
+				if (!l.getFExp().type().onlyContainsReal()) 
+					return false;
+		return true;
+	}
+	
+	syn boolean FIfWhenClause.assignsOnlyReals() = FStatement.statementsAssignsOnlyReals(getFStatements());
+	
+	public static boolean FStatement.statementsAssignsOnlyReals(Iterable<? extends FStatement> stmts) {
+		for (FStatement s : stmts)
+			if (!s.assignsOnlyReals())
+				return false;
+		return true;
+	}
+	
 	syn boolean FRelExp.isRealComparison() = getRight().type().numericPromotion(getLeft().type()).isReal();
 	syn boolean FRelExp.isIntegerComparison() = getRight().type().numericPromotion(getLeft().type()).isInteger();
 	syn boolean FRelExp.isBooleanComparison() = getRight().type().numericPromotion(getLeft().type()).isBoolean();
@@ -236,6 +276,8 @@ aspect FlatTypeAnalysis {
 	eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type());
 	
 	eq FUnaryBuiltIn.type() = getFExp().type();
+	
+	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
 	
 	eq FDotDivExp.type() {
 		FType t = super.type();
@@ -313,6 +355,7 @@ aspect FlatTypeAnalysis {
 			getFExp().type().arrayType(size());
 	
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
+	eq FSkew.type()  = getFExp().type().arrayType(size());
 
 	eq FOuterProduct.type() { 
 		if (getX().ndims() != 1 || getY().ndims() != 1)
@@ -420,6 +463,10 @@ aspect FlatTypeAnalysis {
 	
 	eq FSmoothExp.type() = getFExp().type();
 	
+	// TODO: Maybe there should be a special type for "no return value"
+	eq FConnectionsOp.type() = null;
+	eq FConnBoolOp.type()    = fBooleanScalarType();
+	
 	/**
 	 * The scalar type of the expression.
 	 * 
@@ -516,6 +563,7 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return fIntegerArrayType(size());
 	}
+	eq FDiagonal.type() = getFExp().type().arrayType(size());
 	
 	eq FSubscriptedExp.type() = getFExp().type().sizedType(size());
 
@@ -592,9 +640,11 @@ aspect InstBindingType {
 		FType res = icm.type();
 		InstNode decl = icm.myInstNode();
 		if (decl == this)
-			return res.arrayType(size());  // TODO: Take care of scalars as well
-		if (icm.getEach() || !enclosedBy(decl)) 
+			return res.sizedType(size());
+		if (icm.getEach()) 
 			return res;
+		else if (!enclosedBy(decl))
+			return res.sizedType(res.size().expand(decl.size()));
 		else
 			return expandBindingType(res.arrayType(size()), decl);
 	}
@@ -842,6 +892,8 @@ aspect FTypeEquivalent {
 		typeMatches(type, false, allowUnknown);
 	eq FEnumType.equivalentTo(FType type, boolean allowUnknown) = 
 		typeMatches(type, false, allowUnknown);
+    eq FExternalObjectType.equivalentTo(FType type, boolean allowUnknown) = 
+            type.isExternalObject() && dimensionCompatible(type, allowUnknown);
  
 }
 
@@ -924,6 +976,43 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isNumericArray()    = isNumeric() && isArray();
 	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
 	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
+	
+	syn boolean FType.containsReal() = isReal();
+	eq FRecordType.containsReal() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsReal())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsInteger() = isInteger();
+	eq FRecordType.containsInteger() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsInteger())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsBoolean() = isBoolean();
+	eq FRecordType.containsBoolean() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsBoolean())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsRecord() = isRecord();
+	syn boolean FType.containsEnum() = isEnum();
+	eq FRecordType.containsEnum() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsEnum())
+				return true;
+		return false;
+	}
+	syn boolean FType.containsExternalObject() = isExternalObject();
+	eq FRecordType.containsExternalObject() {
+		for (FRecordComponentType component : getComponents())
+			if (component.getFType().containsExternalObject())
+				return true;
+		return false;
+	}
 	
 	// For type comparisons ending with "or records of such types"
 	public abstract class FType {
@@ -1130,4 +1219,38 @@ aspect InstClassRestriction {
 	}
 	eq InstSimpleShortClassDecl.isExternalObject() = false;
 	
+}
+
+aspect ExternalObjectTypes {
+    
+    syn boolean FExp.isConstructorCall()    = false;
+    eq InstFunctionCall.isConstructorCall() = getName().myInstClassDecl().isConstructor();
+    eq FFunctionCall.isConstructorCall()    = myFFunctionDecl().isConstructor();
+    syn boolean FExp.isDestructorCall()     = false;
+    eq InstFunctionCall.isDestructorCall()  = getName().myInstClassDecl().isDestructor();
+    eq FFunctionCall.isDestructorCall()     = myFFunctionDecl().isDestructor();
+    
+    syn boolean InstClassDecl.isDestructor()  = name().equals("destructor") && inExternalObject();
+    syn boolean FFunctionDecl.isDestructor()  = false;
+    eq FDestructorDecl.isDestructor()         = true;
+    syn boolean InstClassDecl.isConstructor() = name().equals("constructor") && inExternalObject();
+    syn boolean FFunctionDecl.isConstructor() = false;
+    eq FConstructorDecl.isConstructor()       = true;
+
+    syn boolean FExternalObjectVariable.hasConstructorCall(Index i) {
+        if (hasBindingExp()) {
+            FExp exp = (i == Index.NULL) ? getBindingExp() : getBindingExp().getArray().get(i);
+            return exp.isConstructorCall();
+        } else {
+            return hasParameterEquation() && parameterEquation().hasConstructorCall(i);
+        }
+        
+    }
+    syn boolean FAbstractEquation.hasConstructorCall(Index i) = false;
+    eq FEquation.hasConstructorCall(Index i) {
+        FExp exp = getRight();
+        if (i != Index.NULL)
+            exp = exp.getArray().get(i);
+        return exp.isConstructorCall();
+    }
 }

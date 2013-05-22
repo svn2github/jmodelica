@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011 Modelon AB
+    Copyright (C) 2011-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ package FunctionInlining
 		TransformCanonicalTestCase(
 			name="BasicInline1",
 			description="Most basic inlining case",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline1
@@ -67,6 +68,7 @@ end FunctionInlining.BasicInline1;
 		TransformCanonicalTestCase(
 			name="BasicInline2",
 			description="More complicated inlining case with only assignments and constant argument",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline2
@@ -104,6 +106,7 @@ end FunctionInlining.BasicInline2;
 		TransformCanonicalTestCase(
 			name="BasicInline3",
 			description="More complicated inlining case with only assignments and continous argument",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -149,6 +152,7 @@ end FunctionInlining.BasicInline3;
 		TransformCanonicalTestCase(
 			name="BasicInline4",
 			description="Test of alias elimination after inlining",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline4
@@ -182,6 +186,7 @@ end FunctionInlining.BasicInline4;
 		TransformCanonicalTestCase(
 			name="BasicInline6",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline6
@@ -239,6 +244,7 @@ end FunctionInlining.BasicInline6;
 		TransformCanonicalTestCase(
 			name="BasicInline7",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -249,7 +255,7 @@ fclass FunctionInlining.BasicInline7
  Real temp_4;
  Real temp_7;
 equation
- x = temp_4 + temp_4 * 2 + temp_7 + temp_7 * 2;
+ x = temp_4 + temp_4 * 2 + (temp_7 + temp_7 * 2);
  y = 1;
  temp_1 = y;
  temp_4 = temp_1;
@@ -289,6 +295,7 @@ end FunctionInlining.BasicInline7;
 		TransformCanonicalTestCase(
 			name="BasicInline8",
 			description="Inlining function with both function calls and arrays",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline8
@@ -353,6 +360,7 @@ end FunctionInlining.BasicInline8;
 		TransformCanonicalTestCase(
 			name="BasicInline9",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -391,6 +399,7 @@ end FunctionInlining.BasicInline9;
 		TransformCanonicalTestCase(
 			name="BasicInline10",
 			description="Using array indices",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline10
@@ -427,6 +436,7 @@ end FunctionInlining.BasicInline10;
 		TransformCanonicalTestCase(
 			name="BasicInline11",
 			description="Function call as array index",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -483,6 +493,7 @@ end FunctionInlining.BasicInline11;
 		TransformCanonicalTestCase(
 			name="BasicInline13",
 			description="Inlining of function using enumeration",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline13
@@ -522,6 +533,7 @@ end FunctionInlining.BasicInline13;
 		TransformCanonicalTestCase(
 			name="RecordInline1",
 			description="Inlining function taking constant record arg",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline1
@@ -559,6 +571,7 @@ end FunctionInlining.RecordInline1;
 		TransformCanonicalTestCase(
 			name="RecordInline2",
 			description="Inlining function returning recor, constant args",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline2
@@ -607,6 +620,7 @@ end FunctionInlining.RecordInline2;
 		TransformCanonicalTestCase(
 			name="RecordInline3",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline3
@@ -645,6 +659,7 @@ end FunctionInlining.RecordInline3;
 		TransformCanonicalTestCase(
 			name="RecordInline4",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline4
@@ -658,7 +673,7 @@ equation
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = integer(y[4]) + y[1] + y[2] + y[3];
+ x = integer(y[4]) + (y[1] + y[2] + y[3]);
 
 public
  record FunctionInlining.RecordInline4.R
@@ -691,6 +706,7 @@ end FunctionInlining.RecordInline4;
 		TransformCanonicalTestCase(
 			name="RecordInline5",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline5
@@ -742,6 +758,7 @@ end FunctionInlining.RecordInline5;
 		TransformCanonicalTestCase(
 			name="RecordInline6",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline6
@@ -789,6 +806,7 @@ end FunctionInlining.RecordInline6;
 		TransformCanonicalTestCase(
 			name="RecordInline7",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline7
@@ -812,7 +830,7 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- x.b = 3 + temp_5 - temp_5;
+ x.b = 3 + (temp_5 - temp_5);
  temp_5 = integer(y[4]);
 
 public
@@ -849,6 +867,7 @@ end FunctionInlining.RecordInline7;
 		TransformCanonicalTestCase(
 			name="RecordInline8",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline8
@@ -899,6 +918,7 @@ end FunctionInlining.RecordInline8;
 		TransformCanonicalTestCase(
 			name="RecordInline9",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline9
@@ -956,6 +976,7 @@ end FunctionInlining.RecordInline9;
 		TransformCanonicalTestCase(
 			name="RecordInline10",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline10
@@ -1007,6 +1028,7 @@ end FunctionInlining.RecordInline10;
 		TransformCanonicalTestCase(
 			name="RecordInline11",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline11
@@ -1071,6 +1093,7 @@ end FunctionInlining.RecordInline11;
 		TransformCanonicalTestCase(
 			name="UninlinableFunction1",
 			description="Make sure that only unused functions are removed",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1148,6 +1171,7 @@ end FunctionInlining.UninlinableFunction1;
 		TransformCanonicalTestCase(
 			name="IfStatementInline1",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfStatementInline1
@@ -1185,6 +1209,7 @@ end FunctionInlining.IfStatementInline1;
 		TransformCanonicalTestCase(
 			name="IfStatementInline2",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1230,6 +1255,7 @@ end FunctionInlining.IfStatementInline2;
 		TransformCanonicalTestCase(
 			name="IfStatementInline3",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1269,6 +1295,7 @@ end FunctionInlining.IfStatementInline3;
 		TransformCanonicalTestCase(
 			name="IfStatementInline4",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1303,6 +1330,7 @@ end FunctionInlining.IfStatementInline4;
 		TransformCanonicalTestCase(
 			name="ForStatementInline1",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			eliminate_alias_variables=false,
 			flatModel="
@@ -1318,10 +1346,10 @@ equation
  v = 3;
  z = 0 + temp_3 * temp_3 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
  temp_1 = v;
- temp_3 = 1 + 0 * (temp_1 - 1) / 3;
- temp_5 = 1 + 1 * (temp_1 - 1) / 3;
- temp_7 = 1 + 2 * (temp_1 - 1) / 3;
- temp_9 = 1 + 3 * (temp_1 - 1) / 3;
+ temp_3 = 1 + 0 * ((temp_1 - 1) / 3);
+ temp_5 = 1 + 1 * ((temp_1 - 1) / 3);
+ temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
+ temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;
@@ -1344,6 +1372,7 @@ end FunctionInlining.ForStatementInline1;
 		TransformCanonicalTestCase(
 			name="ForStatementInline2",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline2
@@ -1374,6 +1403,7 @@ end FunctionInlining.ForStatementInline2;
 		TransformCanonicalTestCase(
 			name="ForStatementInline3",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline3
@@ -1408,6 +1438,7 @@ end FunctionInlining.ForStatementInline3;
 		TransformCanonicalTestCase(
 			name="ForStatementInline4",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline4
@@ -1442,6 +1473,7 @@ end FunctionInlining.ForStatementInline4;
 		TransformCanonicalTestCase(
 			name="ForStatementInline5",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline5
@@ -1490,6 +1522,7 @@ end FunctionInlining.ForStatementInline5;
 		TransformCanonicalTestCase(
 			name="ForStatementInline6",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline6
@@ -1527,6 +1560,7 @@ end FunctionInlining.ForStatementInline6;
 		TransformCanonicalTestCase(
 			name="ForStatementInline7",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline7
@@ -1566,6 +1600,7 @@ end FunctionInlining.ForStatementInline7;
 		TransformCanonicalTestCase(
 			name="ForStatementInline8",
 			description="",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ForStatementInline8
@@ -1606,6 +1641,7 @@ end FunctionInlining.ForStatementInline8;
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline1",
 			description="Inlining function call using multiple outputs",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.MultipleOutputsInline1
@@ -1655,6 +1691,7 @@ end FunctionInlining.MultipleOutputsInline1;
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline2",
 			description="Inlining function call using multiple (but not all) outputs",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.MultipleOutputsInline2
@@ -1722,6 +1759,7 @@ end FunctionInlining.MultipleOutputsInline2;
 		TransformCanonicalTestCase(
 			name="MultipleOutputsInline3",
 			description="Inlining function call using multiple (but not all) outputs",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.MultipleOutputsInline3
@@ -1776,6 +1814,7 @@ end FunctionInlining.MultipleOutputsInline3;
 		TransformCanonicalTestCase(
 			name="IfEquationInline1",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline1
@@ -1809,6 +1848,7 @@ end FunctionInlining.IfEquationInline1;
 		TransformCanonicalTestCase(
 			name="IfEquationInline2",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline2
@@ -1845,6 +1885,7 @@ end FunctionInlining.IfEquationInline2;
 		TransformCanonicalTestCase(
 			name="IfEquationInline3",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline3
@@ -1882,6 +1923,7 @@ end FunctionInlining.IfEquationInline3;
 		TransformCanonicalTestCase(
 			name="IfEquationInline4",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline4
@@ -1920,6 +1962,7 @@ end FunctionInlining.IfEquationInline4;
 		TransformCanonicalTestCase(
 			name="IfEquationInline5",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline5
@@ -1958,6 +2001,7 @@ end FunctionInlining.IfEquationInline5;
 		TransformCanonicalTestCase(
 			name="IfEquationInline6",
 			description="Test inlining of function calls in if equations",
+			variability_propagation=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.IfEquationInline6
@@ -1971,6 +2015,59 @@ equation
 end FunctionInlining.IfEquationInline6;
 ")})));
     end IfEquationInline6;
+
+
+model IfEquationInline7
+    record R
+        Real p;
+    end R;
+    
+    function f1
+        input Real p;
+        output R r;
+    algorithm
+        r := R(p);
+    end f1;
+    
+    function f2
+        input R r;
+        output Real x;
+    algorithm
+        x := r.p;
+    end f2;
+    
+    Real x;
+    Real y;
+equation
+    if time > 0 then
+        x = 4;
+        y = 2;
+    else
+        x = f2(f1(time));
+        time = y + 1;
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationInline7",
+			description="Check that temporary equations are removed properly within if equations",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.IfEquationInline7
+ Real x;
+ Real y;
+equation
+ x = if time > 0 then 4 else time;
+ 0.0 = if time > 0 then y - 2 else time - (y + 1);
+
+public
+ record FunctionInlining.IfEquationInline7.R
+  Real p;
+ end FunctionInlining.IfEquationInline7.R;
+
+end FunctionInlining.IfEquationInline7;
+")})));
+end IfEquationInline7;
     
     
     
@@ -2000,6 +2097,7 @@ end FunctionInlining.IfEquationInline6;
 		TransformCanonicalTestCase(
 			name="TrivialInline1",
 			description="Test inlining of trivial functions - 2 outputs",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline1
@@ -2040,6 +2138,7 @@ end FunctionInlining.TrivialInline1;
 		TransformCanonicalTestCase(
 			name="TrivialInline2",
 			description="Test inlining of trivial functions - 2 outputs, one used",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline2
@@ -2082,6 +2181,7 @@ end FunctionInlining.TrivialInline2;
 		TransformCanonicalTestCase(
 			name="TrivialInline3",
 			description="Test inlining of trivial functions - record output, record constructor",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline3
@@ -2132,6 +2232,7 @@ end FunctionInlining.TrivialInline3;
 		TransformCanonicalTestCase(
 			name="TrivialInline4",
 			description="Test inlining of trivial functions - record constructor, separate assignments",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline4
@@ -2176,6 +2277,7 @@ end FunctionInlining.TrivialInline4;
 		TransformCanonicalTestCase(
 			name="TrivialInline5",
 			description="Test inlining of trivial functions - array, unknown size",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline5
@@ -2225,6 +2327,7 @@ end FunctionInlining.TrivialInline5;
 		TransformCanonicalTestCase(
 			name="TrivialInline6",
 			description="Test inlining of trivial functions - function calling function",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline6
@@ -2271,6 +2374,7 @@ end FunctionInlining.TrivialInline6;
 		TransformCanonicalTestCase(
 			name="TrivialInline7",
 			description="Test inlining of trivial functions - function calling function, 2 outputs",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline7
@@ -2308,6 +2412,7 @@ end FunctionInlining.TrivialInline7;
         TransformCanonicalTestCase(
             name="TrivialInline8",
             description="Test inlining of trivial functions - array, known size",
+			variability_propagation=false,
             inline_functions="trivial",
             flatModel="
 fclass FunctionInlining.TrivialInline8
@@ -2352,6 +2457,7 @@ end FunctionInlining.TrivialInline8;
 		TransformCanonicalTestCase(
 			name="TrivialInline9",
 			description="Test inlining of trivial functions - non-trivial function",
+			variability_propagation=false,
 			inline_functions="trivial",
 			flatModel="
 fclass FunctionInlining.TrivialInline9
@@ -2375,6 +2481,109 @@ public
 end FunctionInlining.TrivialInline9;
 ")})));
     end TrivialInline9;
+
+
+model TrivialInline10
+    record R
+        Real a;
+        Real b[2];      
+    end R;
+    
+    function f
+        input Real c;
+        output R d;
+    algorithm
+        d := R(c, {1,2});
+    end f;
+    
+    R x = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TrivialInline10",
+            description="Test that assigning an entire record at once works in trivial inlining mode",
+            variability_propagation=false,
+			inline_functions="trivial",
+            flatModel="
+fclass FunctionInlining.TrivialInline10
+ Real x.a;
+ Real x.b[1];
+ Real x.b[2];
+equation
+ x.a = 1;
+ x.b[1] = 1;
+ x.b[2] = 2;
+
+public
+ record FunctionInlining.TrivialInline10.R
+  Real a;
+  Real b[2];
+ end FunctionInlining.TrivialInline10.R;
+
+end FunctionInlining.TrivialInline10;
+")})));
+end TrivialInline10;
+
+
+model EmptyArray
+    function f
+        input Real d[:,:];
+        output Real e;
+    algorithm
+        e := sum(size(d));
+    end f;
+    
+    parameter Real a[:, :] = fill(0.0,0,2);
+    Real x = f(a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EmptyArray",
+			description="Test inlining of functions with empty arrays",
+			variability_propagation=false,
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.EmptyArray
+ Real x;
+equation
+ x = 2;
+end FunctionInlining.EmptyArray;
+")})));
+end EmptyArray;
+
+
+model BindingExpInRecord
+    function f
+        input Real i;
+        output Real[2] o = { i, -i };
+    algorithm
+    end f;
+    
+    record A
+        parameter Real[2] x = f(1);
+    end A;
+    
+    A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="BindingExpInRecord",
+			description="Check that inlining function only used in declaration of record class doesn't cause crash",
+			variability_propagation=false,
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.BindingExpInRecord
+ parameter Real a.x[1] = 1 /* 1 */;
+ parameter Real a.x[2] = -1 /* -1 */;
+
+public
+ record FunctionInlining.BindingExpInRecord.A
+  parameter Real x[2];
+ end FunctionInlining.BindingExpInRecord.A;
+
+end FunctionInlining.BindingExpInRecord;
+")})));
+end BindingExpInRecord;
 
 	
 end FunctionInlining;

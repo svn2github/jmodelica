@@ -261,7 +261,7 @@ aspect XMLCodeGen {
 		p.print(myOutputs(), str, indent2);
 		p.print(myInputs(), str, indent2);
 		p.print(myProtected(), str, indent2);
-		p.print(getFAlgorithmBlock(), str, indent2);
+		p.print(getFAlgorithm(), str, indent2);
 		close_XML(str, indent);
     }
     
@@ -297,7 +297,7 @@ aspect XMLCodeGen {
 
 	
     //-------------------- Algorithms ---------------------------
-    public void FAlgorithmBlock.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FAlgorithm.prettyPrint_XML(Printer p, PrintStream str, String indent) {
 		open_XML(str, indent);
 		p.print(getFStatements(), str, p.indent(indent));
 		close_XML(str, indent);
@@ -488,10 +488,12 @@ aspect XMLCodeGen {
 		
 		str.println(indent + "<" + namespace + ":" + tag + ">");
 		
-		for (FSubscript s : this.getFSubscriptList())
+		for (FSubscript s : this.getFSubscriptList()) {
 			s.prettyPrint_XML(str,p.indent(indent+"\t"));
+		}
 		
 		str.println(indent + "</" + namespace + ":" + tag + ">");
+		
 	}
     
 	public void FSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
@@ -514,6 +516,19 @@ aspect XMLCodeGen {
 		str.println(indent + "</" + namespace + ":" + tag +  ">");
 			
 	}
+
+	public void FIntegerSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+		String namespace = "exp";
+		String tag = this.xmlTag();
+		
+		str.println(indent + "<" + namespace + ":" + tag +  ">");
+		
+		FIntegerLitExp fi = new FIntegerLitExp(getValue());
+		fi.prettyPrint_XML(str,p.indent(indent));
+		str.println(indent + "</" + namespace + ":" + tag +  ">");
+			
+	}
+
 	
 }//aspect end
 
@@ -588,7 +603,7 @@ aspect XMLTagBinding{
         //functions
         eq FFunctionDecl.xmlTag() = "Function";
         eq FFunctionCallLeft.xmlTag() = "OutputArgument";
-        eq FAlgorithmBlock.xmlTag() = "Algorithm";
+        eq FAlgorithm.xmlTag() = "Algorithm";
         eq FBreakStmt.xmlTag() = "Break";
         eq FReturnStmt.xmlTag() = "Return";
         eq FAssignStmt.xmlTag() = "Assign";
@@ -605,6 +620,7 @@ aspect XMLTagBinding{
         eq FArraySubscripts.xmlTag() = "ArraySubscripts";
         eq FColonSubscript.xmlTag() = "UndefinedDimension";
         eq FExpSubscript.xmlTag() = "IndexExpression";
+        eq FIntegerSubscript.xmlTag() = "IndexExpression";
         
         eq InstForStmt.xmlTag() = "For";
         eq InstAssignStmt.xmlTag() = "Assign";
@@ -618,7 +634,7 @@ aspect XMLTagBinding{
     	eq FAbstractEquation.xmlNamespace() = "equ";
     	eq FFunctionVariable.xmlNamespace() = "fun";
     	eq FFunctionDecl.xmlNamespace()     = "fun";
-    	eq FAlgorithmBlock.xmlNamespace()   = "fun";
+    	eq FAlgorithm.xmlNamespace()        = "fun";
     	eq FStatement.xmlNamespace()        = "fun";
     	eq FFunctionCallLeft.xmlNamespace() = parentXmlNamespace();
     	

@@ -46,14 +46,13 @@
 
         <listitem>
           <para>Functions with array inputs with sizes declared as ':' are
-          only partially supported (there are some specific operations on such
+          only partially supported (there are some operations on such
           functions that aren't supported).</para>
         </listitem>
 
         <listitem>
-          <para>Partial support for external functions, record, Boolean,
-          enumeration and String arguments and return values are not
-          supported.</para>
+          <para>Partial support for external functions; record arguments and
+          return values are not supported.</para>
         </listitem>
 
         <listitem>
@@ -64,7 +63,7 @@
 
                 <td>cardinality()</td>
 
-                <td>reinit(x, expr)</td>
+                <td>String(...)</td>
               </tr>
 
               <tr>
@@ -72,7 +71,7 @@
 
                 <td>scalar(A)</td>
 
-                <td>String(...)</td>
+                <td>div(x,y)</td>
               </tr>
 
               <tr>
@@ -80,7 +79,7 @@
 
                 <td>vector(A)</td>
 
-                <td>div(x,y)</td>
+                <td>mod(x,y)</td>
               </tr>
 
               <tr>
@@ -88,7 +87,7 @@
 
                 <td>matrix(A)</td>
 
-                <td>mod(x,y)</td>
+                <td>rem(x,y)</td>
               </tr>
 
               <tr>
@@ -96,21 +95,13 @@
 
                 <td>diagonal(v)</td>
 
-                <td>rem(x,y)</td>
-              </tr>
-
-              <tr>
-                <td>sample(start, interval)</td>
-
-                <td>product(...)</td>
-
                 <td>ceil(x)</td>
               </tr>
 
               <tr>
                 <td>edge(b)</td>
 
-                <td>outerProduct(v1, v2)</td>
+                <td>product(...)</td>
 
                 <td>floor(x)</td>
               </tr>
@@ -121,6 +112,27 @@
                 <td>symmetric(A)</td>
 
                 <td>integer(x)</td>
+              </tr>
+
+              <tr>
+                <td>reinit(x, expr)</td>
+              </tr>
+            </informaltable></para>
+        </listitem>
+
+        <listitem>
+          <para>The following built-in functions are only supported in
+          FMUs:<informaltable border="1" frame="void" width="25%">
+              <tr>
+                <td>sample(start,interval)</td>
+              </tr>
+
+              <tr>
+                <td>pre(y)</td>
+              </tr>
+
+              <tr>
+                <td>initial()</td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -154,8 +166,8 @@
     </listitem>
 
     <listitem>
-      <para>The JModelica.org Model Interface (JMI) has the following
-      Limitations:</para>
+      <para>The following limitations applies to JMUs compiled with
+      JModelica.org:</para>
 
       <itemizedlist>
         <listitem>
@@ -168,15 +180,15 @@
         </listitem>
 
         <listitem>
-          <para>The interface does not yet comply with FMI
-          specification</para>
+          <para>The interface for interacting with JMUs does not comply with
+          FMI specification</para>
         </listitem>
       </itemizedlist>
     </listitem>
 
     <listitem>
-      <para>The JModelica.org FMI Model Interface (FMI) has the following
-      Limitations:</para>
+      <para>The following limitations applies to FMUs compiled with
+      JModelica.org:</para>
 
       <itemizedlist>
         <listitem>
@@ -185,7 +197,7 @@
         </listitem>
 
         <listitem>
-          <para>Options for setting and getting string variables does not
+          <para>Options for setting and getting string variables do not
           work</para>
         </listitem>
       </itemizedlist>

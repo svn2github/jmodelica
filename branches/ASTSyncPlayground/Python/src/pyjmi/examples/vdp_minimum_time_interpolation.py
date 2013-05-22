@@ -43,15 +43,15 @@ def run_demo(with_plots=True):
     opts["result_mode"] = "element_interpolation"
     
     res = vdp.optimize(options=opts)
-
+    
     # Extract variable profiles
-    x1=res['x1']
-    x2=res['x2']
-    u=res['u']
-    tf=res['finalTime']
-    t=res['time']
-
-    assert N.abs(tf - 2.2811587) < 1e-3
+    x1 = res['x1']
+    x2 = res['x2']
+    u = res['u']
+    tf = res['finalTime']
+    t = res['time']
+    
+    assert N.abs(res.final('finalTime') - 2.2811587) < 1e-3
     
     if with_plots:
         # Plot

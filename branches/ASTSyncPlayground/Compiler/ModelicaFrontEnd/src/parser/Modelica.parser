@@ -145,6 +145,12 @@
 	    lineBreakMap = map;
 	}
 
+	private FormattingInfo formatting;
+	
+	public void setFormattingInfo(FormattingInfo formatting) {
+		this.formatting = formatting;
+	}
+
 :};
  
 SourceRoot source_root
@@ -166,6 +172,7 @@ StoredDefinition stored_definition
     = within? base_class_decl_list {:
         StoredDefinition def = new StoredDefinition(within, base_class_decl_list);
         def.setLineBreakMap(lineBreakMap);
+        def.setFormatting(formatting);
     	return def; 
     :}
     | error {: 
@@ -1075,7 +1082,7 @@ Exp primary =
   | STRING.s               {: return new StringLitExp(s); :}
   | access_expression   {: return access_expression; :}
   | der_expression      {: return der_expression; :}
-  | LPAREN exp.a RPAREN {: a.addParenthesis(LPAREN, RPAREN);
+  | LPAREN exp.a RPAREN {: formatting.addParenthesis(LPAREN, RPAREN);
 						   return a; :}
   | function_call        {: return function_call; :}
   | LBRACK matrix RBRACK {: return matrix; :}

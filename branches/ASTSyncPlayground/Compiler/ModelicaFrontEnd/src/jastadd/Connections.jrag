@@ -17,8 +17,12 @@
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Queue;
+import java.util.ArrayDeque;
+import java.util.PriorityQueue;
 
 aspect Connections {
 
@@ -39,6 +43,7 @@ aspect Connections {
 		
 		for (ConnectionSet set : l) 
 			set.generateEquations(getFEquationBlock(0));
+		connectionSetManager.generateEqualityConstraints(this);
 		connectionSetManager.disconnectFromInstanceTree();
 	}
 		
@@ -77,27 +82,63 @@ aspect Connections {
 			}
 		}
 	}
+	
+	/**
+	 * Check if this expression is multiplied with the given variable.
+	 */
+	inh boolean FExp.isMultipliedWith(FVariable v);
+	eq BaseNode.getChild().isMultipliedWith(FVariable v)   = false;
+	eq FDotMulExp.getRight().isMultipliedWith(FVariable v) = getLeft().isMultiplicationOf(v) || isMultipliedWith(v);
+	eq FDotMulExp.getLeft().isMultipliedWith(FVariable v)  = getRight().isMultiplicationOf(v) || isMultipliedWith(v);
+	
+	/**
+	 * Check if this expression is an access to v or a multiplication where one of the 
+	 * multiplicands is an access to v.
+	 */
+	syn boolean FExp.isMultiplicationOf(FVariable v) = false;
+	eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
+	eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
+		getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
 
 	rewrite FActualStream {
 		when (rewriteStreams) to FExp {
-			// 1) Get the stream variable name prefix
-			FQName var_name = ((FIdUseExp)getFExp()).getFIdUse().getFQName();
-			FQName prefix = var_name.copyPrefix();
+			// Get the stream variable name prefix
+			FQName varName = ((FIdUseExp) getFExp()).getFIdUse().getFQName();
+			FQName prefix = varName.copyPrefix();
 			ArrayList<ConnectionSetEntry> cses = 
 				myFClass().getConnectionSetManager().getFlowVariables(prefix.name());
-			if (cses.size()==1) { // This condition should be checked earlier
-				// 2) Get the name of the flow variable of the connector,
-				//    there should only be one.
-				FQName flow_var_name = cses.get(0).getFQName();
-				// 3) Generate the expression
-				FInStream then_exp = new FInStream(var_name.createFIdUseExp());
-				then_exp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
-				FIdUseExp else_exp = var_name.createFIdUseExp();
-				FGtExp guard = new FGtExp(flow_var_name.createFIdUseExp(),new FRealLitExp(0));
-				FIfExp if_exp = new FIfExp(guard,then_exp,else_exp);
-				return new FNoEventExp(if_exp);
+			if (cses.size() == 1) {
+				// Get the name of the single flow variable of the connector, then get the variables.
+				FQName flowVarName = cses.get(0).getFQName();
+				FRealVariable var = (FRealVariable) lookupFV(varName);
+				FRealVariable flowVar = (FRealVariable) lookupFV(flowVarName);
+				
+				// Decide what parts are valid
+				boolean constant = flowVar.isConstant();
+				double min = constant ? flowVar.ceval().realValue() : flowVar.minAttribute();
+				double max = constant ? min : flowVar.maxAttribute();
+				boolean badMinMax = min > max;
+				boolean thenValid = badMinMax || max > 0.0;
+				boolean elseValid = badMinMax || min < 0.0 || 
+						(min == 0.0 && thenValid && !isMultipliedWith(flowVar));
+				
+				// Generate the expression
+				FExp res = null, elseExp = null;
+				FInStream thenExp = null;
+				if (thenValid) {
+					res = thenExp = new FInStream(var.createUseExp());
+					thenExp.rewriteStreams = true; // Enable further rewrite of the inStream operator.
+				}
+				if (elseValid) 
+					res = elseExp = var.createUseExp();
+				if (thenValid && elseValid) {
+					FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
+					res = new FNoEventExp(new FIfExp(guard, thenExp, elseExp));
+				}
+				return res;
 			}
-			throw new UnsupportedOperationException("Rewriting actualStream() for '" + var_name.name() + 
+			// There should already have been an error message in this case, so we should never come here.
+			throw new UnsupportedOperationException("Rewriting actualStream() for '" + varName.name() + 
 					"': found " + cses.size() + " matching flow variables");
 		}
 	}
@@ -325,10 +366,18 @@ aspect Connections {
 	public class ConnectionSetManager {
 	
 		private ArrayList<ConnectionSet> list = new ArrayList<ConnectionSet>();
+		private ArrayList<EqualityConstraintConnection> equalityConstraints = new ArrayList<EqualityConstraintConnection>();
 		private Map<ConnectionSetEntry, ConnectionSet> entryMap = new HashMap<ConnectionSetEntry, ConnectionSet>();
+		private OverconstrainedConnectionGraph graph = null;
 		
 		public ArrayList<ConnectionSet> getConnectionSetList() {
 			return list;
+		}
+		
+		public OverconstrainedConnectionGraph getGraph() {
+			if (graph == null) 
+				graph = new OverconstrainedConnectionGraph();
+			return graph;
 		}
 			
 		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
@@ -341,8 +390,12 @@ aspect Connections {
 			}
 		}
 		
-		public void addVars(InstComponentDecl var1, boolean outside1, FQName namePrefix1,
-		                    InstComponentDecl var2, boolean outside2, FQName namePrefix2) {
+		/**
+		 * Add vars to connection sets.
+		 * 
+		 * Filters out parameters and constants.
+		 */
+		public void addVars(ConnectionSetEntry cse1, ConnectionSetEntry cse2) {
 
 //			log.debug("ConnectionSetManager.addVars");
 		
@@ -350,11 +403,9 @@ aspect Connections {
 //		    System.out.println(namePrefix2.name()+" . "+var2.name() + " outside: " + outside2);
 		
 			// Don't add parameters or constants to connection set
-			if (var1.variability().parameterOrLess() || var2.variability().parameterOrLess()) 
+			// TODO: Add them, but generate asserts instead of equations
+			if (cse1.getVar().variability().parameterOrLess() || cse2.getVar().variability().parameterOrLess()) 
 				return;
-			
-			ConnectionSetEntry cse1 = new ConnectionSetEntry(var1, outside1, namePrefix1);
-			ConnectionSetEntry cse2 = new ConnectionSetEntry(var2, outside2, namePrefix2);	
 
 			ConnectionSet setA = getConnectionSet(cse1);
 			ConnectionSet setB = getConnectionSet(cse2);
@@ -369,6 +420,10 @@ aspect Connections {
 			} else if (setA == null && setB == null) {
 				join(cse1, cse2);
 			}
+		}
+		
+		public void addEqualityConstraint(ConnectionSetEntry cse1, ConnectionSetEntry cse2, FQName prefix) {
+			equalityConstraints.add(new EqualityConstraintConnection(cse1, cse2, prefix));
 		}
 		
 		private void join(ConnectionSetEntry entryA, ConnectionSetEntry entryB) {
@@ -420,6 +475,13 @@ aspect Connections {
 		public void disconnectFromInstanceTree() {
 			for (ConnectionSet set : list)
 				set.disconnectFromInstanceTree();
+			graph.disconnectFromInstanceTree();
+			equalityConstraints = null;
+		}
+		
+		public void generateEqualityConstraints(FClass fc) {
+			for (EqualityConstraintConnection ecc : equalityConstraints)
+				ecc.generate(fc);
 		}
 		
 		public String printConnectionSets() {
@@ -554,20 +616,28 @@ aspect Connections {
 	}
 	
 	
-	public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm) {
+	/**
+	 * Connect the variables referenced in a connect or branch statement in the connection set manager.
+	 * 
+	 * @param right   the other access
+	 * @param prefix  the prefix to use when flattening names
+	 * @param csm     the connection set manager to add variables to
+	 * @param source  the originating connect or branch statement
+	 */
+	public void InstAccess.connectTo(InstAccess right, FQName prefix, ConnectionSetManager csm, ConnectionEdge source) {
 		FQName leftName  = flattenAndResolveIndices(prefix);
 		FQName rightName = right.flattenAndResolveIndices(prefix);
 		
 		boolean leftOutside  = isOutsideConnector();
 		boolean rightOutside = right.isOutsideConnector();
+		InstComponentDecl leftComp  = lookupEvaluatingIndices();
+		InstComponentDecl rightComp = right.lookupEvaluatingIndices();
 		
-		if (isArray()) {
+		if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
 			Indices leftInd = indices();
 			Indices rightInd = right.indices();
 			Iterator<Index> leftIter = leftInd.iterator();
 			Iterator<Index> rightIter = rightInd.iterator();
-			InstComponentDecl leftComp  = lookupEvaluatingIndices();
-			InstComponentDecl rightComp = right.lookupEvaluatingIndices();
 			while (leftIter.hasNext()) {
 				Index leftI = leftInd.translate(leftIter.next());
 				Index rightI = rightInd.translate(rightIter.next());
@@ -575,31 +645,61 @@ aspect Connections {
 				FQName rightCellName = rightName.copyReplacingSubscripts(rightI);
 				InstComponentDecl leftCompCell = leftComp.findCell(leftI, leftI.ndims() - leftComp.ndims());
 				InstComponentDecl rightCompCell = rightComp.findCell(rightI, rightI.ndims() - rightComp.ndims());
-				leftCompCell.connectTo(leftOutside, leftCellName, rightCompCell, rightOutside, rightCellName, csm);
+				ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftCompCell, leftOutside, leftCellName);
+				ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightCompCell, rightOutside, rightCellName);	
+				leftCompCell.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
 			}
 		} else {
-			InstComponentDecl leftComp  = lookupEvaluatingIndices();
-			InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-			leftComp.connectTo(leftOutside, leftName, rightComp, rightOutside, rightName, csm);
+			ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftComp, leftOutside, leftName);
+			ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightComp, rightOutside, rightName);	
+			leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, true);
 		}
 	}
 	
-	public void InstComponentDecl.connectTo(boolean leftOutside, FQName leftName, 
-			InstComponentDecl rightComp, boolean rightOutside, FQName rightName, ConnectionSetManager csm) {
-		SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
-		for (InstComponentDecl leftComp2 : containedInstComponents()) {
-			InstComponentDecl rightComp2 = rightChildren.tailSet(leftComp2).first();
-			FQName leftName2  = leftComp2.flattenedAccess(leftName);
-			FQName rightName2 = rightComp2.flattenedAccess(rightName);
-			leftComp2.connectTo(leftOutside, leftName2, rightComp2, rightOutside, rightName2, csm);
+	/**
+	 * Connect the variables referenced in a connect or branch statement in the connection set manager.
+	 * 
+	 * @param left        describes current part of the left access
+	 * @param right       describes current part of the right access
+	 * @param prefix      the prefix to use when flattening names
+	 * @param csm         the connection set manager to add variables to
+	 * @param source      the originating connect or branch statement
+	 * @param buildGraph  if true, pass instances of overconstrained types to overconstrained connection graph
+	 */
+	public void InstComponentDecl.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
+			FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
+		if (buildGraph && isOverconstrainedConnection(right.getVar())) {
+			csm.getGraph().addConnection(left, right, prefix, source);
+		} else {
+			SortedSet<InstComponentDecl> rightChildren = right.getVar().containedInstComponents();
+			for (InstComponentDecl leftComp : containedInstComponents()) {
+				InstComponentDecl rightComp = rightChildren.tailSet(leftComp).first();
+				FQName leftName  = leftComp.flattenedAccess(left.getFQName());
+				FQName rightName = rightComp.flattenedAccess(right.getFQName());
+				ConnectionSetEntry leftEntry = new ConnectionSetEntry(leftComp, left.isOutside(), leftName);
+				ConnectionSetEntry rightEntry = new ConnectionSetEntry(rightComp, right.isOutside(), rightName);	
+				leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+			}
 		}
 	}
 
-	public void InstPrimitive.connectTo(boolean leftOutside, FQName leftName, 
-			InstComponentDecl rightComp, boolean rightOutside, FQName rightName, ConnectionSetManager csm) {
-		csm.addVars(this, leftOutside, leftName, rightComp, rightOutside, rightName);
+	public void InstPrimitive.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
+			FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
+		if (buildGraph && isOverconstrainedConnection(right.getVar())) {
+			csm.getGraph().addConnection(left, right, prefix, source);
+		} else {
+			csm.addVars(left, right);
+		}
 	}
 	
+	syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
+		isOverconstrainedType() && right.isOverconstrainedType();
+	
+	/**
+	 * Retrieve the specific cell for a given index from an array component.
+	 * 
+	 * The dimension of i that refers to the children of this component is given by j.
+	 */
 	syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) = 
 		(j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCell(i, j + 1) : this;
 	eq InstPrimitive.findCell(Index i, int j) = this;
@@ -609,18 +709,61 @@ aspect Connections {
 	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
 	
 	
-	public void FAbstractEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm) { }
-	
-	public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
-		try {
-			if (getTest().ceval().booleanValue())
-				for (FAbstractEquation equ : getFAbstractEquations())
-				    equ.buildConnectionSets(prefix, csm);
-		} catch (ConstantEvaluationException e) {
-		}
+	/**
+	 * Traverse tree and build connection sets and overconstranined connection graph from relevant constructs.
+	 * 
+	 * @param prefix   the prefix to use when flattening names
+	 * @param csm      the connection set manager to add variables to
+	 * @param connect  if false, then we are in a dead branch, and shouldn't change sets or graph
+	 */
+	public void ASTNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		for (ASTNode n : this) 
+			n.buildConnectionSets(prefix, csm, connect);
 	}
 	
-	public void InstForClauseE.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
+	public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		prefix = getFQName();
+		for (FAbstractEquation ae : getFAbstractEquations()) 
+		   ae.buildConnectionSets(prefix, csm, connect);
+		getInstComponentDeclList().buildConnectionSets(prefix, csm, connect);
+		getInstExtendsList().buildConnectionSets(prefix, csm, connect);
+	}
+	
+	public void InstComponentDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (useInFlattening()) 
+			super.buildConnectionSets(prefix, csm, connect);
+	}
+	
+	public void InstAssignable.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (useInFlattening() && hasBindingFExp())
+			getBindingFExp().buildConnectionSets(prefix, csm, connect);
+		super.buildConnectionSets(prefix, csm, connect);
+	}
+	
+	public void InstPrimitive.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (useInFlattening() && isFlow()) {
+			FQName name = flattenedAccess(getFQNamePrefix());
+			csm.addInsideFlowVar(this, name);
+		}
+		super.buildConnectionSets(prefix, csm, connect);
+	}
+	
+	public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		boolean all = true;
+		boolean test = false;
+		try {
+			test = getTest().ceval().booleanValue();
+			all = false;
+		} catch (ConstantEvaluationException e) {
+		}
+		getTest().buildConnectionSets(prefix, csm, connect);
+		for (FAbstractEquation equ : getFAbstractEquations())
+		    equ.buildConnectionSets(prefix, csm, (all || test) && connect);
+		if (hasElse())
+			getElse().buildConnectionSets(prefix, csm, (all || !test) && connect);
+	}
+	
+	public void InstForClauseE.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
 		Indices indices = Indices.create(getInstForIndexs());
 		for (Index i : indices) {
 			int j = 0;
@@ -630,16 +773,552 @@ aspect Connections {
 				j++;
 			}
 			for (FAbstractEquation equ : getFAbstractEquations())
-			    equ.buildConnectionSets(prefix, csm);
+			    equ.buildConnectionSets(prefix, csm, connect);
+		}
+		for (InstForIndex fi : getInstForIndexs()) {
+			fi.getInstPrimitive().setEvaluationValue(null, null);
+			fi.buildConnectionSets(prefix, csm, connect);
 		}
 	}
 	
-	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm) {
-		if (!getConnector1().isDisabled() && !getConnector2().isDisabled()) {
+	public void FConnectClause.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (!getConnector1().isDisabled() && !getConnector2().isDisabled() && connect) {
 			InstAccess left  = getConnector1().getInstAccess();
 			InstAccess right = getConnector2().getInstAccess();
-			left.connectTo(right, prefix, csm);
+			left.connectTo(right, prefix, csm, this);
 		}
 	}
 
+}
+
+aspect OverconstrainedConnections {
+	
+	public void FConnBranch.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (connect) {
+			InstAccess left  = ((FInstAccessExp) getA()).getInstAccess();
+			InstAccess right = ((FInstAccessExp) getB()).getInstAccess();
+			left.connectTo(right, prefix, csm, this);
+		}
+	}
+	
+	public void FConnRoot.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (connect)
+			csm.getGraph().addRoot(variableA());
+	}
+	
+	public void FConnPotentialRoot.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		if (connect) {
+			int prio = hasPriority() ? getPriority().ceval().intValue() : 0;
+			csm.getGraph().addPotentialRoot(variableA(), prio);
+		}
+	}
+	
+	public void FConnBoolOp.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+		connectionGraph = csm.getGraph();
+	}
+	
+	/**
+	 * Get the variable referenced by child A.
+	 * 
+	 * Assumes A is an FInstAccessExp.
+	 */
+	syn InstComponentDecl FConnectionsOp.variableA() = 
+			((FInstAccessExp) getA()).getInstAccess().myInstComponentDecl();
+	
+	
+	/**
+	 * Represents a broken branch in the overconstrained connection graph.
+	 * 
+	 * Generates a call to the relevant equalityConstraint() function.
+	 */
+	public class EqualityConstraintConnection {
+		
+		private ConnectionSetEntry cse1;
+		private ConnectionSetEntry cse2;
+		private FQName prefix;
+		
+		public EqualityConstraintConnection(ConnectionSetEntry cse1, ConnectionSetEntry cse2, FQName prefix) {
+			this.cse1 = cse1;
+			this.cse2 = cse2;
+			this.prefix = prefix;
+		}
+		
+		/**
+		 * Generate the equalityConstraint() call.
+		 */
+		public void generate(FClass fc) {
+			InstClassDecl func = cse1.getVar().equalityConstraint();
+			func.flattenFunction(fc);
+			Size s = func.myOutputs().get(0).size();
+			FFunctionCall right = new FFunctionCall();
+			right.setName(new FQNameString(func.qualifiedName()).createFIdUse());
+			right.addArg(cse1.getFQName().createFIdUseExp());
+			right.addArg(cse2.getFQName().createFIdUseExp());
+			right.setSizes(new Size[] { s.flatten(prefix, right) });
+			FAbstractEquation eqn;
+			if (!s.isUnknown() && s.numElements() == 0) 
+				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);
+			else
+				eqn = new FEquation(s.createZeroFExp(), right);
+			fc.getFEquationBlock(0).addFAbstractEquation(eqn);
+		}
+		
+	}
+	
+	/**
+	 * Check if an assignable is of an overconstrained connection type.
+	 */
+	syn boolean InstComponentDecl.isOverconstrainedType() = equalityConstraint() != null;
+	
+	/**
+	 * Name of equality constraint function.
+	 */
+	public static final String InstAssignable.EQUALITY_CONSTRAINT_NAME = "equalityConstraint";
+	
+	/**
+	 * Get the equality constraint function for this type, if any.
+	 */
+	syn InstClassDecl InstComponentDecl.equalityConstraint()  = null;
+	syn lazy InstClassDecl InstAssignable.equalityConstraint() {
+		InstClassDecl res = memberInstClass(EQUALITY_CONSTRAINT_NAME);
+		if (res == null)
+			res = myInstClass().memberInstClass(EQUALITY_CONSTRAINT_NAME);
+		if (res != null)
+			res = res.actualInstClass();
+		if (res != null && !res.isEqualityConstraint(type()))
+			res = null;
+		return res;
+	}
+	
+	/**
+	 * Check if this is an equality constraint function for the given type.
+	 */
+	syn boolean InstClassDecl.isEqualityConstraint(FType type) {
+		ArrayList<InstComponentDecl> inputs = myInputs();
+		ArrayList<InstComponentDecl> outputs = myOutputs();
+		return isFunction() && 
+				inputs.size() == 2 && 
+				inputs.get(0).type().typeCompatible(type, true) && 
+				inputs.get(1).type().typeCompatible(type, true) && 
+				outputs.size() == 1 && 
+				outputs.get(0).ndims() == 1 && 
+				outputs.get(0).type().isReal();
+	}
+	
+	/**
+	 * The source node for an edge in the overconstrained connection graph.
+	 */
+	public interface ConnectionEdge {
+		
+		/**
+		 * Does this node represent a breakable branch in the overconstrained connection graph?
+		 */
+		public boolean isBreakable();
+		
+	}
+	
+	FConnectClause implements ConnectionEdge;
+	FConnBranch implements ConnectionEdge;
+	
+	syn boolean FConnectClause.isBreakable() = true;
+	syn boolean FConnBranch.isBreakable()    = false;
+	
+	/**
+	 * Describes a system of overconstrained connenctions.
+	 * 
+	 * Will break loops in the graph to form spanning trees.
+	 */
+	public class OverconstrainedConnectionGraph {
+		
+		/**
+		 * The calculated values for operators that depend on the graph for a specific component.
+		 */
+		public static class OpsResult {
+			
+			/** The result for the Connections.isRoot() operator. */
+			public boolean isRoot;
+			/** The result for the Connections.rooted() operator. */
+			public boolean rooted;
+			
+			public OpsResult(boolean isRoot, boolean rooted) {
+				this.isRoot = isRoot;
+				this.rooted = rooted;
+			}
+			
+		}
+		
+		private Collection<Edge> edges = new ArrayList<Edge>();
+		private Collection<Node> nodes = new ArrayList<Node>();
+		private Map<InstComponentDecl,Node> nodeMap = new HashMap<InstComponentDecl,Node>();
+		private Map<String,OpsResult> opsMap;
+		
+		/**
+		 * Add a connection to the graph.
+		 * 
+		 * @param left    describes one end of connection
+		 * @param right   describes other end of connection
+		 * @param prefix  the prefix to use when flattening names
+		 * @param source  the originating connect or branch statement
+		 */
+		public void addConnection(ConnectionSetEntry left, ConnectionSetEntry right, FQName prefix, ConnectionEdge source) {
+			Node leftNode = getNode(left.getVar());
+			Node rightNode = getNode(right.getVar());
+			edges.add(new Edge(source, leftNode, rightNode, left, right, prefix));
+		}
+		
+		/**
+		 * Mark a component as a root in the graph.
+		 */
+		public void addRoot(InstComponentDecl var) {
+			getNode(var).setRoot();
+		}
+		
+		/**
+		 * Mark a component as a potential root with the given priority in the graph.
+		 */
+		public void addPotentialRoot(InstComponentDecl var, int priority) {
+			getNode(var).setPotentialRoot(priority);
+		}
+		
+		/**
+		 * Convert graph to a set of spanning trees.
+		 * 
+		 * See Modelica Language Specification 3.3, section 9.4.2.
+		 */
+		public void buildTrees(ConnectionSetManager csm) {
+			// Collect roots
+			Collection<Node> roots = new PriorityQueue<Node>();
+			for (Node n : nodes)
+				if (n.canBeRoot())
+					roots.add(n);
+			
+			// Select roots among unbreakable sub-graphs
+			java.util.List<Node> selected = new ArrayList<Node>(roots.size());
+			for (Node root : roots) {
+				if (!root.visited) {
+					root.markSelectedRoot(root);
+					selected.add(root);
+				}
+			}
+			
+			// Clear visited for next step
+			for (Node n : nodes)
+				n.visited = false;
+			for (Edge e : edges)
+				e.visited = false;
+			
+			// Create trees
+			for (Node root : selected) {
+				Queue<Node> work = new ArrayDeque<Node>();
+				work.add(root);
+				root.level = 0;
+				for (Node n = work.poll(); n != null; n = work.poll()) {
+					n.buildTree(work, csm);
+				}
+			}
+			
+			// Check for unconnected nodes (with visited = false) - gives error
+			// TODO
+			
+			// Build map for dependents
+			opsMap = new HashMap<String,OpsResult>();
+			for (Node n : nodes) 
+				opsMap.put(n.flatName(), n.opsResult());
+		}
+		
+		/**
+		 * Check if conversion to spanning trrees is finished.
+		 */
+		public boolean builtTreesDone() {
+			return opsMap != null;
+		}
+		
+		/**
+		 * Find the result for operators that depend on the graph for the given access.
+		 */
+		public OpsResult ops(FExp e) {
+			OpsResult res = null;
+			if (e.isInstAccess()) {
+				InstComponentDecl var = ((FInstAccessExp) e).getInstAccess().myInstComponentDecl();
+				Node n = getNode(var);
+				res = (n == null) ? null : n.opsResult();
+			} else {
+				res = opsMap.get(((FIdUseExp) e).getFIdUse().name());
+			}
+			return (res == null) ? new OpsResult(false, false) : res;
+		}
+		
+		/**
+		 * Remove all references to the instance tree, and discard information that is no longer needed.
+		 */
+		public void disconnectFromInstanceTree() {
+			edges = null;
+			nodes = null;
+			nodeMap = null;
+		}
+
+		/**
+		 * Find, or if neccessary create, the node for a given component.
+		 */
+		private Node getNode(InstComponentDecl var) {
+			Node res = nodeMap.get(var);
+			if (res == null) {
+				res = new Node(var);
+				nodeMap.put(var, res);
+				nodes.add(res);
+			}
+			return res;
+		}
+		
+		/**
+		 * An edge in the graph.
+		 */
+		private static class Edge {
+			
+			/** Visited flag used in traversals. */
+			public boolean visited;
+
+			private ConnectionEdge source;
+			private Node n1;
+			private Node n2;
+			private ConnectionSetEntry cse1;
+			private ConnectionSetEntry cse2;
+			private FQName prefix;
+			private boolean broken;
+			
+			/**
+			 * Create a new edge.
+			 * 
+			 * The edge is undirected, use of "first" and "second" below is purely to tell them apart.
+			 * 
+			 * @param source  the originating connect or branch statement
+			 * @param n1      first end of the edge
+			 * @param n2      second end of the edge
+			 * @param cse1    describes first end of edge in terms of the connection set manager
+			 * @param cse2    describes second end of edge in terms of the connection set manager
+			 * @param prefix  the prefix to use when flattening names
+			 */
+			public Edge(ConnectionEdge source, Node n1, Node n2, ConnectionSetEntry cse1, ConnectionSetEntry cse2, FQName prefix) {
+				this.source = source;
+				this.n1 = n1;
+				this.n2 = n2;
+				n1.addEdge(this);
+				n2.addEdge(this);
+				broken = false;
+				if (isBreakable()) {
+					this.cse1 = cse1;
+					this.cse2 = cse2;
+					this.prefix = prefix;
+				}
+			}
+			
+			/**
+			 * Check if this is a breakable edge (a connect() statement).
+			 */
+			public boolean isBreakable() {
+				return source.isBreakable();
+			}
+			
+			/**
+			 * Get the other end of the edge.
+			 * 
+			 * Assumes that n is one of the ends.
+			 */
+			public Node other(Node n) {
+				return (n == n1) ? n2 : n1;
+			}
+			
+			/**
+			 * Checks if the given node is the edge corresponding to the left argument of a 
+			 * connect or branch.
+			 */
+			public boolean isLeft(Node n) {
+				return n == n1;
+			}
+			
+			/**
+			 * Break this edge.
+			 * 
+			 * @throws UnsupportedOperationException  if the edge isn't breakable
+			 */
+			public void breakEdge() {
+				if (!isBreakable())
+					throw new UnsupportedOperationException();
+				broken = true;
+			}
+			
+			/**
+			 * Check if edge is broken.
+			 */
+			public boolean isBroken() {
+				return broken;
+			}
+			
+			/**
+			 * Add edge to connection sets, either as normal connections or as equalityConstraint() calls.
+			 */
+			public void connect(ConnectionSetManager csm) {
+				if (isBreakable()) {
+					if (isBroken())
+						csm.addEqualityConstraint(cse1, cse2, prefix);
+					else
+						cse1.getVar().connectTo(cse1, cse2, prefix, csm, source, false);
+				}
+			}
+			
+		}
+		
+		/**
+		 * A node in the graph.
+		 */
+		private static class Node implements Comparable<Node> {
+			
+			/** Visited flag used in traversals. */
+			public boolean visited = false;
+			/** Depth of this node from root of tree. Depth 0 is the root. */
+			public int level = -1;
+			
+			private static final int DEFINITE_ROOT = -1;
+			private static final int NOT_ROOT      = Integer.MAX_VALUE;
+			
+			private InstComponentDecl var;
+			private int rootPriority;
+			private Collection<Edge> edges;
+			private Node selectedRoot;
+			
+			public Node(InstComponentDecl var) {
+				this.var = var;
+				rootPriority = NOT_ROOT;
+				edges = new ArrayList<Edge>();
+				selectedRoot = null;
+			}
+			
+			public int compareTo(Node other) {
+				return rootPriority - other.rootPriority;
+			}
+			
+			public void addEdge(Edge e) {
+				edges.add(e);
+			}
+			
+			/**
+			 * Check if this node is declared either root or potential root.
+			 */
+			public boolean canBeRoot() {
+				return rootPriority != NOT_ROOT;
+			}
+			
+			/**
+			 * Check if this node was selected as a root during conversion to spanning trees.
+			 * 
+			 * Returns false before conversion.
+			 */
+			public boolean isSelectedRoot() {
+				return level == 0;
+			}
+			
+			/**
+			 * The flattened name of the node, as a String.
+			 */
+			public String flatName() {
+				return var.getFQName().name();
+			}
+			
+			/**
+			 * Mark this node as a potential root with the given priority.
+			 */
+			public void setPotentialRoot(int priority) {
+				if (rootPriority < NOT_ROOT && rootPriority != priority) {
+					// Error - trying to set root in different ways
+				}
+				if (rootPriority > priority)
+					rootPriority = priority;
+			}
+			
+			/**
+			 * Mark this node as a definite root.
+			 */
+			public void setRoot() {
+				setPotentialRoot(DEFINITE_ROOT);
+			}
+			
+			/**
+			 * Calculate the results of isRoot() and rooted() when applied to this node.
+			 */
+			public OpsResult opsResult() {
+				Node other = null;
+				for (Edge e : edges)
+					if (e.isLeft(this) && !e.isBreakable())
+						other = e.other(this);
+				boolean rooted = other != null && level < other.level;
+				return new OpsResult(isSelectedRoot(), rooted);
+			}
+			
+			/** 
+			 * Traversal method for building the spanning trees.
+			 */
+			public void buildTree(Queue<Node> work, ConnectionSetManager csm) {
+				for (Edge e : edges) 
+					if (!e.visited) 
+						buildTreeVisit(e, work, csm);
+			}
+			
+			/** 
+			 * Traversal method for decending into unbreakable subgraphs when building the spanning trees.
+			 */
+			private void buildTreeForUnbreakable(Queue<Node> work, ConnectionSetManager csm) {
+				for (Edge e : edges) 
+					if (!e.visited && !e.isBreakable()) 
+						buildTreeVisit(e, work, csm);
+			}
+			
+			/**
+			 * Visit a specific edge during traversal for building the spanning trees.
+			 */
+			private void buildTreeVisit(Edge e, Queue<Node> work, ConnectionSetManager csm) {
+				e.visited = true;
+				Node n = e.other(this);
+				if (n.visited) {
+					e.breakEdge();
+				} else if (n.selectedRoot != selectedRoot) {
+					if (n.selectedRoot != null && n.selectedRoot.rootPriority == DEFINITE_ROOT)
+						e.breakEdge();
+					else
+						n.selectedRoot = selectedRoot;
+				}
+				n.visited = true;
+				e.connect(csm);
+				if (!e.isBroken()) {
+					n.level = level + 1;
+					work.add(n);
+					n.buildTreeForUnbreakable(work, csm);
+				}
+			}
+
+			/**
+			 * Set the selected root of this subgraph.
+			 */
+			public void markSelectedRoot(Node root) {
+				visited = true;
+				selectedRoot = root;
+				if (root != this && rootPriority == DEFINITE_ROOT) {
+					// Error - more than one definite root in unbreakable subgraph
+				}
+				
+				for (Edge e : edges) {
+					if (!e.visited && !e.isBreakable()) {
+						e.visited = true;
+						Node n = e.other(this);
+						if (n.visited) {
+							// Error - unbreakable loop
+						}
+						n.markSelectedRoot(root);
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
 }

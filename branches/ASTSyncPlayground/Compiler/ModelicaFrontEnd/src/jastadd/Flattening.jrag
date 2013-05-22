@@ -61,7 +61,7 @@ aspect Flattening {
 	 */
     public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
     	
-    	InstClassDecl icd = simpleLookupInstClassDecl(className);
+    	InstClassDecl icd = lookupInstClassQualified(className);
     	if (!icd.isUnknown()) {
     		icd.flattenInstClassDecl(fc);
     	} else {
@@ -74,22 +74,24 @@ aspect Flattening {
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
     	beginStep("flattenInstClassDecl()");
 		fc.setFQName(new FQNameString(qualifiedName()));
-		fc.addFEquationBlock(new FEquationBlock(new List()));			
-		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) {
-		   ae.flatten(prefix, fc);
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		}
-		getInstComponentDeclList().flatten(fc);
-		getInstExtendsList().flatten(fc);
+		fc.addFEquationBlock(new FEquationBlock(new List()));
+		buildConnectionSets(fc);
+		flatten(fc);
 		fc.removeUniqueFVariableSet();
 		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
+		fc.createExperiment(annotation("experiment"));
     	endStep("flattenInstClassDecl()");
     }
     
+
+	public void InstSimpleShortClassDecl.flattenInstClassDecl(FClass fc) {
+		actualInstClass().flattenInstClassDecl(fc);
+		fc.setFQName(new FQNameString(qualifiedName()));
+	}
+
     /**
      * Delegate for adding extra flattening code to top-level model.
      */
@@ -183,18 +185,18 @@ aspect Flattening {
 	
 	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
 		if (fc.lookupFunc(qualifiedName()) == null) {	
-	   		FFunctionDecl ffd = new FFunctionDecl();
+	   		FFunctionDecl ffd = createFFunctionDecl();
 	   		ffd.setFQName(new FQNameString(qualifiedName()));
 	   		
 	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
 			
-	   		FAlgorithmBlock fab = findFunctionAlgorithm();
-	   		fab = (fab == null) ? new FAlgorithmBlock(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
+	   		FAlgorithm fab = findFunctionAlgorithm();
+	   		fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
 			InstExternal ie = findFunctionExternal();
 			if (ie != null)
 				fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
 			fab.ensureReturn();
-			ffd.setFAlgorithmBlock(fab);
+			ffd.setFAlgorithm(fab);
 			
 			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
 			if (der != null)
@@ -208,10 +210,23 @@ aspect Flattening {
 		}
 	}
 	
-	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+        if (isConstructor())
+            return new FConstructorDecl();
+        if (isDestructor())
+            return new FDestructorDecl();
+	    return new FFunctionDecl();
+	}
+	
+	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
 		AnnotationNode functionDer = annotation("derivative");
 		if (!functionDer.exists() && ie != null) 
 			functionDer = ie.annotation("derivative");
+		return functionDer;
+	}
+	
+	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+		AnnotationNode functionDer = derivativeAnnotation(ie);
 		
 		if (functionDer.exists()) {
 			String functionDerName = functionDer.string();
@@ -296,14 +311,14 @@ aspect Flattening {
    				icd.flattenInFunction(ffd, fc, false, null);
 	}
 	
-	syn FAlgorithmBlock InstNode.findFunctionAlgorithm() {
+	syn FAlgorithm InstNode.findFunctionAlgorithm() {
 		if (getNumFAbstractEquation() > 0) {
 			FAbstractEquation equ = getFAbstractEquation(0);
-			if (equ instanceof FAlgorithmBlock)
-				return (FAlgorithmBlock) equ;
+			if (equ instanceof FAlgorithm)
+				return (FAlgorithm) equ;
 		} else {
 			for (InstExtends ie : getInstExtendss()) {
-				FAlgorithmBlock tmp = ie.findFunctionAlgorithm();
+				FAlgorithm tmp = ie.findFunctionAlgorithm();
 				if (tmp != null) 
 					return tmp;
 			}
@@ -401,7 +416,7 @@ aspect Flattening {
 		return fullCopy();
 	}
 	
-	public void FAlgorithmBlock.ensureReturn() {
+	public void FAlgorithm.ensureReturn() {
 		int num = getNumFStatement();
 		if (num == 0 || !(getFStatement(num - 1) instanceof FReturnStmt)) 
 			addFStatement(new FReturnStmt());
@@ -566,21 +581,29 @@ aspect Flattening {
 	
 	public void InstNode.flatten(FClass fc) {
 		FQName prefix = getFQName();
-		for (FAbstractEquation ae : getFAbstractEquations()) {
+		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.flatten(prefix, fc);
-		   ae.buildConnectionSets(prefix, fc.getConnectionSetManager());
-		}
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 	}
 	
+	/**
+	 * Check if this component should be considered during flattening.
+	 */
+	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
+	
 	public void InstComponentDecl.flatten(FClass fc) {
-		if (!isDisabled()  && !(isOuter() && !isInner())) {
+		if (useInFlattening()) 
 			super.flatten(fc);
-		}
 	}
 	
-	public void InstClassDecl.flatten(FClass fc) {}
+	public void InstClassDecl.buildConnectionSets(FClass fc) {
+		ConnectionSetManager csm = fc.getConnectionSetManager();
+		buildConnectionSets(new FQNameEmpty(), csm, true);
+		csm.getGraph().buildTrees(csm);
+	}
+	
+//	public void InstClassDecl.flatten(FClass fc) {}
 	
 	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc) {}
 	
@@ -595,13 +618,9 @@ aspect Flattening {
 	}
 	
 	public void InstPrimitive.flatten(FClass fc) {
-		if (!isDisabled() && !(isOuter() && !isInner())) {
+		if (useInFlattening()) {
 			fc.addUniqueFVariable(createFVariable());
 			myInstClass().addFDerivedType(fc);
-			if (isFlow()) {
-				FQName name = flattenedAccess(getFQNamePrefix());
-				fc.getConnectionSetManager().addInsideFlowVar(this, name);
-			}
 		}
 	}
 	
@@ -643,6 +662,10 @@ aspect Flattening {
 		}
 	}
 	
+	public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
+		actualInstClass().flattenEnum(fc);
+	}
+	
 	public abstract FVariable InstAssignable.createEmptyFVariable();
 	
 	public FVariable InstPrimitive.createEmptyFVariable() {
@@ -659,7 +682,7 @@ aspect Flattening {
 
 	public FEnumVariable InstEnum.createEmptyFVariable() {
 		FEnumVariable fv = new FEnumVariable();
-		fv.setEnum(new FQNameString(myInstClass().qualifiedName()));
+		fv.setEnum(new FQNameString(myInstClass().actualInstClass().qualifiedName()));
 		return fv;
 	}	
 	
@@ -717,7 +740,7 @@ aspect Flattening {
 			if (create && list.getNumChild() > 0) {
 				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
 						new FIdDecl(new FQNameString(icd.name())), 
-						new Opt(), true, new Opt(), new Opt(), list);
+						new Opt(), true, 0, new Opt(), new Opt(), list);
 				attr.add(a);
 			}
 		}
@@ -733,6 +756,10 @@ aspect Flattening {
 			FType baseType = primitiveScalarType().fullCopy();
 			fc.addFDerivedType(new FDerivedType(qualifiedName(), baseType, attr));
 		}
+	}
+	
+	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+		actualInstClass().addFDerivedType(fc);
 	}
 	
 	public FVariable InstAssignable.createFVariable() {
@@ -752,7 +779,7 @@ aspect Flattening {
 		
 		addAttributesToFV(fv.getFAttributes());
 		if (myInstClass().extendsPrimitive())
-			fv.setDerivedType(myInstClass().qualifiedName());
+			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 		
 		FExp e = flattenBindingFExp();
 		if (e != null)
@@ -766,10 +793,8 @@ aspect Flattening {
 		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 		if (root().options.getBooleanOption("enable_hand_guided_tearing") && iterationNode.exists()) {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
-			if (enabledNode.exists()) {
-				fv.setManualIterationVariable(containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue());
-			} else {
-				fv.setManualIterationVariable(true);
+			if (!enabledNode.exists() || containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue()) {
+				fv.setHGTType(FClass.HGTVariableType.COMPONENT);
 			}
 		}
 		
@@ -852,7 +877,7 @@ aspect Flattening {
 	 * Will not create new nodes unless necessary.
 	 */
 	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
-	eq FArray.splitArrayExp(int index)         = getFExp(index - 1);
+	eq FArray.splitArrayExp(int index)         = isIterArray() ? super.splitArrayExp(index) : getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
@@ -896,13 +921,13 @@ aspect Flattening {
 	eq FQNameString.splitArrayAccess(int index) {
 		FQNameFull res = new FQNameFull(getName());
 		int i = res.getNumFQNamePart();
-		res.setFQNamePart(res.getFQNamePart(i).splitArrayAccess(index, ndims()), i);
+		res.setFQNamePart(res.getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
 		return res;
 	}
 	eq FQNameFull.splitArrayAccess(int index) {
 		FQNameFull res = fullCopy();
 		int i = getNumFQNamePart();
-		res.setFQNamePart(getFQNamePart(i).splitArrayAccess(index, ndims()), i);
+		res.setFQNamePart(getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
 		return res;
 	}
 	
@@ -921,6 +946,7 @@ aspect Flattening {
 		FQNamePartArray res = fullCopy();
 		res.parent = parent; // Hack to allow lookups of uses from specifyNext()
 		res.getFArraySubscripts().specifyNext(index);
+		res.parent = null;
 		return res;
 	}
 	
@@ -928,8 +954,8 @@ aspect Flattening {
 	
 	eq InstDot.splitArrayAccess(int index) {
 		InstDot res = fullCopy();
-		for (int i = 0, n = res.getNumInstAccess(); i < n; i++) {
-			InstAccess ia = res.getInstAccess(i);
+		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
+			InstAccess ia = getInstAccess(i);
 			if (ia.isArray()) {
 				res.setInstAccess(ia.splitArrayAccess(index), i);
 				i = n;
@@ -963,9 +989,10 @@ aspect Flattening {
 	}
 	
 	syn FSubscript FSubscript.specify(int index);
-	eq FExpSubscript.specify(int index)     = this; // TODO: add array index to expression
+	eq FExpSubscript.specify(int index)     = 
+		new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
 	eq FIntegerSubscript.specify(int index) = this;
-	eq FColonSubscript.specify(int index)   = new FExpSubscript(new FIntegerLitExp(index));
+	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**
@@ -1065,7 +1092,7 @@ aspect Flattening {
 			if (!attr_set && (cls || !im.isOnPrimitiveTypeDecl())) {
 				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
 				FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
-				FAttribute a = new FAttribute(typeName, name, true);
+				FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
 				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
 				if (getInstModification().hasInstValueMod()) {
@@ -1102,6 +1129,17 @@ aspect Flattening {
 		return flattened;
 	}
 	
+	syn FNominal FNominal.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	eq InstNominal.flatten(FQName prefix) {  
+		if (hasEnabled()) {
+			if (!getEnabled().ceval().booleanValue())
+				return null;
+		}
+		return new FNominal(getValue().flatten(prefix));
+	}
+	
     /**
      * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
@@ -1130,7 +1168,8 @@ aspect Flattening {
 			InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
 			FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
 			
-			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
+					new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
 		}
 	}
 	
@@ -1214,6 +1253,11 @@ aspect FlatExpressions {
 			if (flatten != null)
 				flattened.setResidual(flatten);
 		}
+		if (hasNominal()) {
+			FNominal flatten = getNominal().flatten(prefix);
+			if (flatten != null)
+				flattened.setNominal(flatten);
+		}
 		return flattened;
 	}
 
@@ -1227,6 +1271,8 @@ aspect FlatExpressions {
 			if (feqn != null)
 				eqns.add(feqn);
 		}
+		if (eqns.getNumChild() == 0)
+			return null;
 		return new FForClauseE(forIndex, eqns);
 	}
 
@@ -1239,13 +1285,20 @@ aspect FlatExpressions {
 			if (feqn != null)
 				res.addFAbstractEquation(feqn);
 		}
+		if (res.getNumFAbstractEquation() == 0)
+			return null;
 		return res;
 	}
 
 	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
 		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
-		if (hasElse())
-			res.setElse(getElse().flattenEqn(prefix, fc));
+		if (res == null)
+			return null;
+		if (hasElse()) {
+			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
+			if (elseRes != null)
+				res.setElse(elseRes);
+		}
 		res.setTest(getTest().flatten(prefix));
 		return res;
 	}
@@ -1255,6 +1308,8 @@ aspect FlatExpressions {
 	}
 	
 	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
+		if (ignoreInFlattening())
+			return null;
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
@@ -1265,9 +1320,9 @@ aspect FlatExpressions {
 		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
 	}
 
-	public FAlgorithmBlock FAlgorithmBlock.flattenEqn(FQName prefix, FClass fc) {
+	public FAlgorithm FAlgorithm.flattenEqn(FQName prefix, FClass fc) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-		return new FAlgorithmBlock(l);
+		return new FAlgorithm(l);
 	}
 	
 	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
@@ -1400,7 +1455,13 @@ aspect FlatExpressions {
 		InstAccess ia = getInstAccess();
 		if (ia.isAssignable()) {
 			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
-			if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
+			InstComponentDecl bindingOf = findComponentWithThisBindingExp();
+			if (inFunction() && bindingOf != null && bindingOf.isInput() && var.isInput() && 
+					var.containingEntity() == bindingOf.containingEntity()) {
+				int i = var.containingEntity().myInputs().indexOf(var);
+				int d = findDepthOfNestledFunctionCalls();
+				return new FArgumentExp(i, d);
+			} else if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
 				try {
 					if (!var.size().isEmpty()) {
 						// Check if we have non-constant array subscripts
@@ -1448,6 +1509,55 @@ aspect FlatExpressions {
 		}
 	}
 	
+	/**
+	 * Check if this access is in the binding expression of an input to a function, 
+	 * and refers to an input in the same function.
+	 */
+	syn boolean FInstAccessExp.inDefaultArgument() {
+		InstComponentDecl target = getInstAccess().myInstComponentDecl();
+		InstComponentDecl holder = findComponentWithThisBindingExp();
+		return inFunction() && !target.isUnknown() && holder != null && 
+				target.containingEntity() == holder.containingEntity();
+	}
+	
+	/**
+	 * Find the component that has this expression as a part of its binding expression, if any.
+	 */
+	inh InstComponentDecl FInstAccessExp.findComponentWithThisBindingExp();
+	eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
+	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;
+	
+	/**
+	 * Find the depth of nestled function calls in this expression.
+	 */
+	inh int FExp.findDepthOfNestledFunctionCalls();
+	eq InstModification.getChild().findDepthOfNestledFunctionCalls() = 0;
+	eq InstNode.getChild().findDepthOfNestledFunctionCalls()         = 0;
+	eq FClass.getChild().findDepthOfNestledFunctionCalls()           = 0;
+	eq FFunctionCall.getChild().findDepthOfNestledFunctionCalls()    = 1 + findDepthOfNestledFunctionCalls();
+	eq InstFunctionCall.getChild().findDepthOfNestledFunctionCalls() = 1 + findDepthOfNestledFunctionCalls();
+	
+	/**
+	 * Get the referenced argument.
+	 */
+	syn FExp FArgumentExp.copiedFExp() = findArgOfNestledFunctionCall(getIndex(), getDepth());
+	
+	/**
+	 * Find argument nr <code>index</code> in a surrounding function call, <code>depth</code> calls up.
+	 */
+	inh FExp FArgumentExp.findArgOfNestledFunctionCall(int index, int depth);
+	inh FExp FFunctionCall.findArgOfNestledFunctionCall(int index, int depth);
+	eq FFunctionCall.getChild().findArgOfNestledFunctionCall(int index, int depth) = 
+		(depth == 0) ? getArg(index) : findArgOfNestledFunctionCall(index, depth - 1);
+	eq InstNode.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	eq FlatRoot.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	
+	// TODO: Handle FArgumentExp all the way to C code generation or generate a temporary variable instead
+	rewrite FArgumentExp { 
+		to FExp copiedFExp().fullCopy();
+	} 
+
 	private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
 	private int InstClassDecl.nextTempVarIndex = 1;
 	
@@ -1506,7 +1616,7 @@ aspect FlatExpressions {
 	 * The list will be populated when expressions in the function are flattened.
 	 */
 	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-		new HashSet<InstAssignable>();
+		new LinkedHashSet<InstAssignable>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();
@@ -1798,18 +1908,21 @@ aspect FlatExpressions {
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
 	
-	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { return null; }
-	
-	// These used to delegate to standard implementation for FExp.flatten(FQName).
-	public FScalar FScalar.flatten(FQName prefix) { return null; }
+	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
 	
 	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FOuterProduct FOuterProduct.flatten(FQName prefix) { return new FOuterProduct(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	                     
+	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
+	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
+		FConnBoolOp res = createNode(getA().flatten(prefix));
+		res.connectionGraph = connectionGraph;
+		return res;
+	}
+
 	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
-	
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
@@ -1916,6 +2029,10 @@ aspect FlatExpressions {
 	public FExp InstFunctionArgument.flatten(FQName prefix) {
 		return getFExp().flatten(prefix);
 	}
+
+	public FExp InstDefaultArgument.flatten(FQName prefix) {
+		return getFExp().flatten(getFExp().retrieveFQName());
+	}
 	
 	public abstract FForIndex CommonForIndex.flatten(FQName prefix);
 	
@@ -1967,7 +2084,7 @@ aspect InstantiatedExpressions {
 
 	public FAbstractEquation Equation.instantiate() {
 		return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
-				getLeft().instantiate(), getRight().instantiate()));
+				buildNominalOpt(), getLeft().instantiate(), getRight().instantiate()));
 	}
 	
 	private Opt<FQName> Equation.buildNameOpt() {
@@ -2006,6 +2123,24 @@ aspect InstantiatedExpressions {
 				residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
 		}
 		return new Opt<FResidual>(residual);
+	}
+	
+	/**
+	 * Builds a FNominal instance for "this" equation.  
+	 */
+	private Opt<FNominal> Equation.buildNominalOpt() {
+		AnnotationNode nominalNode = annotation().vendorNode().forPath("nominal");
+		if (!nominalNode.exists())
+			return new Opt<FNominal>();
+		InstNominal nominal = new InstNominal();
+		Exp enabledExp = nominalNode.forPath("enabled").exp();
+		if (enabledExp != null)
+			nominal.setEnabled(enabledExp.instantiate());
+		Exp valueExp = nominalNode.exp();
+		if (valueExp == null)
+			nominal.error("Nominal value is missing from nominal annotation");
+		nominal.setValue(valueExp.instantiate());
+		return new Opt<FNominal>(nominal);
 	}
 	
 	public FAbstractEquation ConnectClause.instantiate() {
@@ -2065,9 +2200,9 @@ aspect InstantiatedExpressions {
 		return new FFunctionCallLeft(id);
 	}
 	
-	public FAlgorithmBlock Algorithm.instantiate() {
+	public FAlgorithm Algorithm.instantiate() {
 		List l = Statement.instantiateStatementList(getStatements());
-		return copyLocationTo(new FAlgorithmBlock(equationType(), l));
+		return copyLocationTo(new FAlgorithm(equationType(), l));
 	}
 	
 	public InstExternal ExternalClause.instantiate() {

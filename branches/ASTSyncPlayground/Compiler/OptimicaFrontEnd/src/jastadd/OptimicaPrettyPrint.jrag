@@ -156,7 +156,7 @@ aspect FlatOptimicaPrettyPrint {
 //    		if (block_index != 0)
 //    			b.printBlockComment(block_index, str);
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {

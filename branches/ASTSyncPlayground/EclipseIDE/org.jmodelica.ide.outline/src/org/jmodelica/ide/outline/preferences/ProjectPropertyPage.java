@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.Preferences;
+import org.jmodelica.ide.compiler.ModelicaPreferences;
 
 public class ProjectPropertyPage extends PropertyPage {
 
@@ -33,7 +33,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
 		IProject proj = getProject();
-		settings.setLibraryPaths(Preferences.get(proj, LIBRARIES_ID));
+		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(proj, LIBRARIES_ID));
 		return settings.createControl(parent);
 	}
 
@@ -45,7 +45,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	public boolean performOk() {
 		IProject proj = getProject();
 		try {
-			Preferences.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
+			ModelicaPreferences.INSTANCE.set(proj, LIBRARIES_ID, settings.getLibraryPaths());
 			proj.build(IncrementalProjectBuilder.FULL_BUILD, null);
 		} catch (CoreException e) {
 		}
@@ -56,7 +56,7 @@ public class ProjectPropertyPage extends PropertyPage {
 	protected void performDefaults() {
 		// TODO: We should remember default status, and save by removing the
 		// property for this project - will cause preference to be used
-		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
+		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(LIBRARIES_ID));
 		super.performDefaults();
 	}
 }

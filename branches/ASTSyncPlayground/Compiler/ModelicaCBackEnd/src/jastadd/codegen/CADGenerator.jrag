@@ -77,10 +77,9 @@ public class CADGenerator extends CGenerator {
 					e.genTempForFunc_CAD(i,"",genPrinter,null);
 					i += e.numScalarEquations();
 				}
-				i=0;
+				Enumerator enumerator = new Enumerator();
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_CAD(i,INDENT,genPrinter);				
-					i += e.numScalarEquations();
+					e.genResidual_CAD(enumerator, INDENT, genPrinter, null, null);
 				}
 			}
 		}
@@ -138,12 +137,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
-				int block_counter = 0;
+				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-				 	block.genBlockResidualFunction_CAD(block_counter,false,"  ",genPrinter); 
-				  	if (!block.isSolvable()) {
-				  		block_counter++;
-				  	}				  
+					block.genBlockResidualFunction_CAD(false, "", genPrinter); 
 				}
 			}
 		}
@@ -161,12 +157,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if ( shouldGenerateBlockJacobians(fclass)) {
-				int block_counter = 0;
+				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_CAD(block_counter,true,"  ",genPrinter); 
-				  	if (!block.isSolvable()) {
-				  		block_counter++;
-				  	}
+					block.genBlockResidualFunction_CAD(true, "", genPrinter); 
 				}
 				
 			}
@@ -186,16 +179,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
-			
-				
-				int block_counter = 0;
-
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-					if (!block.isSolvable()) {
-						block.genBlockAddCall_C(block_counter, true, false," ",genPrinter);
-						block_counter++;
-					}
-				}
+				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter);
 			}
 		}
 	}
@@ -212,15 +198,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
-				
-				int block_counter = 0;
-
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					if (!block.isSolvable()) {
-						block.genBlockAddCall_C(block_counter, true, true," ",genPrinter);
-						block_counter++;
-					}
-				}				
+				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter);
 			}
 		}
 	}
@@ -246,39 +226,6 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 
-	/**
-	 * Generates code for solving the BLT blocks in the initialization system using CAD
-	 * See fmi_me_modelica_template, not needed as of revision 3657
-	 */
-	class DAETag_CAD_ode_initialization extends DAETag {
-		
-		public DAETag_CAD_ode_initialization(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_ode_initialization","C: Solve the initialization system",
-			  myGenerator,fclass);
-		}
-
-		public void generate(PrintStream genPrinter) {
-			if (shouldGenerateODEJacobians(fclass)) {
-				//genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				genPrinter.print("\n/******** Start declarations *******/\n");
-				fclass.getDAEInitBLT().genVarDecls_CAD(genPrinter, INDENT);
-				genPrinter.print("\n  jmi_real_t** dz = jmi->dv;\n");
-				genPrinter.print("/******** End declarations *********/\n");
-				fclass.getDAEInitBLT().genFuncCall_CAD(genPrinter, INDENT);
-				//genPrinter.print("  memcpy((*dz), (*dv), (jmi->n_v)*sizeof(jmi_real_t));\n");			
-				int block_counter = 0;
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlock_CAD(block_counter,true,"  ",genPrinter);                                        
-                    if (!block.isSolvable()) {
-						block_counter++;
-                    }
-				}
-			}
-		}
-	}
-	
-	
-	
 	class DAETag_C_ODESparsity extends DAETag {
 		
 		public DAETag_C_ODESparsity(AbstractGenerator myGenerator, 
@@ -587,7 +534,7 @@ public class CADGenerator extends CGenerator {
 				}
 
 				col_offs += fclass.numRealInputs();
-				for (int j=0; j<fclass.numAlgebraicRealVariables(); j++) {
+				for (int j=0; j<fclass.numAlgebraicContinousRealVariables(); j++) {
 					for (int k=0; k<sp_w[j].size(); k++) {
 						str_row.append(sp_w[j].get(k).intValue());
 						str_col.append(j + col_offs);

@@ -28,91 +28,111 @@ from pyjmi import JMUModel
 
 def run_demo(with_plots=True):
     """
-    Blood Glucose model
+    Optimization of a model that predicts the blood glucose levels of a 
+    type-I diabetic. The objective is to predict the relationship between 
+    insulin injection and blood glucose levels.
+    
+    Reference:
+    S. M. Lynch and B. W. Bequette, Estimation based Model Predictive Control of Blood Glucose in 
+    Type I Diabetes: A Simulation Study, Proc. 27th IEEE Northeast Bioengineering Conference, IEEE, 2001.
+    
+    S. M. Lynch and B. W. Bequette, Model Predictive Control of Blood Glucose in type I Diabetics 
+    using Subcutaneous Glucose Measurements, Proc. ACC, Anchorage, AK, 2002.
     """
     
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    jmu = compile_jmu("JMExamples_opt.BloodGlucose_opt_scaled",(curr_dir+"/files/JMExamples_opt.mop", curr_dir+"/files/JMExamples.mo"))
+    jmu = compile_jmu("JMExamples_opt.BloodGlucose_opt_scaled",
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     bg = JMUModel(jmu)
     res = bg.optimize()
-	
-    jmu_final = compile_jmu("JMExamples_opt.BloodGlucose_opt_scaled_final",(curr_dir+"/files/JMExamples_opt.mop", curr_dir+"/files/JMExamples.mo"))
+
+    jmu_final = compile_jmu("JMExamples_opt.BloodGlucose_opt_scaled_final",
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
     bg_final = JMUModel(jmu_final)
     res_final = bg_final.optimize()
 
     # Extract variable profiles
-    G	= res['bc.G']
-    X	= res['bc.X']
-    I	= res['bc.I']
-    D	= res['bc.D']
-    t	= res['time']
-	
-	# Extract variable profiles of final result
-    G_final	= res_final['bc.G']
-    X_final	= res_final['bc.X']
-    I_final	= res_final['bc.I']
-    D_final	= res_final['bc.D']
-    
-    print "t = ", repr(N.array(t))
-    print "G = ", repr(N.array(G))
-    print "X = ", repr(N.array(X))
-    print "I = ", repr(N.array(I))
-    print "D = ", repr(N.array(D))
+    G = res['bc.G']
+    X = res['bc.X']
+    I = res['bc.I']
+    D = res['bc.D']
+    t = res['time']
 
+    # Extract variable profiles of final result
+    G_final = res_final['bc.G']
+    X_final = res_final['bc.X']
+    I_final = res_final['bc.I']
+    D_final = res_final['bc.D']
+
+    assert N.abs(res.final('bc.G') - 4.98964)       < 1e-4
+    assert N.abs(res.final('bc.D') - 2.0)           < 1e-4
+    assert N.abs(res_final.final('bc.G') - 4.99975) < 1e-4
+    assert N.abs(res_final.final('bc.D') - 1.93274) < 1e-4
+    
     if with_plots:
-        # Plot
         plt.figure()
+        
         plt.subplot(2,2,1)
-        plt.plot(t,G)
+        plt.plot(t, G)
         plt.title('Plasma Glucose Conc.')
         plt.grid(True)
-        plt.ylabel('G')
+        plt.ylabel('Plasma Glucose Conc. (mmol/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,2)
-        plt.plot(t,X)
-        plt.title('Plasma Glucose Conc.')
+        plt.plot(t, X)
+        plt.title('Plasma Insulin Conc.')
         plt.grid(True)
-        plt.ylabel('X')
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,3)
         plt.plot(t,I)
-        plt.title('Plasma Glucose Conc.')
+        plt.title('Plasma Insulin Conc.')
         plt.grid(True)
-        plt.ylabel('I')
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,4)
         plt.plot(t,D)
-        plt.title('Input')
+        plt.title('Insulin Infusion')
         plt.grid(True)
-        plt.ylabel('D')
-        
-		
+        plt.ylabel('Insulin Infusion')
         plt.xlabel('time')
+
         plt.show()
-		
-		# Plot for final result
+
         plt.figure()
+        
         plt.subplot(2,2,1)
         plt.plot(t,G_final)
-        plt.title('Plasma Glucose Conc.')
+        plt.title('Plasma Glucose Conc. final')
         plt.grid(True)
-        plt.ylabel('G_final')
+        plt.ylabel('Plasma Glucose Conc. (mmol/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,2)
         plt.plot(t,X_final)
-        plt.title('Plasma Glucose Conc.')
+        plt.title('Plasma Insulin Conc. final')
         plt.grid(True)
-        plt.ylabel('X_final')
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,3)
         plt.plot(t,I_final)
-        plt.title('Plasma Glucose Conc.')
+        plt.title('Plasma Insulin Conc. final')
         plt.grid(True)
-        plt.ylabel('I_final')
+        plt.ylabel('Plasma Insulin Conc. (mu/L)')
+        plt.xlabel('time')
+        
         plt.subplot(2,2,4)
         plt.plot(t,D_final)
-        plt.title('Input')
+        plt.title('Insulin Infusion final')
         plt.grid(True)
-        plt.ylabel('D_final')
-        
-		
+        plt.ylabel('Insulin Infusion')
         plt.xlabel('time')
+        
         plt.show()
 
 if __name__ == "__main__":

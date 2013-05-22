@@ -21,6 +21,7 @@
 %header {:
  package org.jmodelica.modelica.parser;
  import org.jmodelica.modelica.compiler.*;
+ import org.jmodelica.util.formattedPrint.FormattingInfo;
  import java.io.*;
  import java.util.Collection;
  import java.util.Map;

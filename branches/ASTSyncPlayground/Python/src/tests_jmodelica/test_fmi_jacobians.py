@@ -269,6 +269,26 @@ class Test_FMI_Jaobians_functions:
         m.set_debug_logging(True)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0 
+
+    
+    @testattr(stddist = True)
+    def test_smooth(self):
+        cname = "JacGenTests.SmoothTest1"
+        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0 
+
+    
+    @testattr(stddist = True)
+    def test_not(self):
+        cname = "JacGenTests.NotTest1"
+        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0 
     
     
 class Test_FMI_Jaobians_Whencases:
@@ -388,7 +408,7 @@ class Test_FMI_Jaobians_Ifcases:
         m.simulate(final_time=2)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
-        m.simulate(final_time=4)
+        m.simulate(final_time=4, options={'initialize':False})
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
@@ -421,6 +441,15 @@ class Test_FMI_Jaobians_Ifcases:
         m.simulate(final_time=2)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
+
+    def test_IfEquation4(self):
+        cname = "JacGenTests.JacTestIfEquation4"
+        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0 
+
 ##
 ##Raised the following error
 ##CcodeCompilationError: 
@@ -504,8 +533,6 @@ class Test_FMI_Jaobians_Functions:
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
-
-
     @testattr(stddist = True)
     def test_Function7(self):
         cname = "JacGenTests.JacTestFunction7"
@@ -523,6 +550,17 @@ class Test_FMI_Jaobians_Functions:
         'eliminate_alias_variables':False,'fmi_version':2.0})
         m = FMUModel2(fn)
         m.set_debug_logging(True)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0
+
+    @testattr(stddist = True)
+    def test_DiscreteFunction1(self):
+        cname = "JacGenTests.JacTestDiscreteFunction1"
+        fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
+        'eliminate_alias_variables':False,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        m.initialize(relativeTolerance=1e-11)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
 
@@ -646,6 +684,18 @@ class Test_FMI_Jaobians_Unsolved_blocks:
         fn = compile_fmu(cname,self.fname,compiler_options={'enable_tearing':True,
             'equation_sorting':True,'eliminate_alias_variables':False,
             'generate_ode_jacobian':True,'fmi_version':2.0})
+        m = FMUModel2(fn)
+        m.set_debug_logging(True)
+        m.initialize(relativeTolerance=1e-11)
+        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
+        assert n_errs ==0       
+        
+    @testattr(stddist = True)
+    def test_local_loop_1(self):
+        cname = "TearingTests.TearingTest1"
+        fn = compile_fmu(cname,os.path.join(path_to_mofiles,'TearingTests.mo'),compiler_options={'enable_tearing':True,
+            'equation_sorting':True,'eliminate_alias_variables':False,
+            'generate_ode_jacobian':True,'fmi_version':2.0, "local_iteration_in_tearing":True})
         m = FMUModel2(fn)
         m.set_debug_logging(True)
         m.initialize(relativeTolerance=1e-11)

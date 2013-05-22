@@ -179,14 +179,14 @@
  *
  *     \f$ F(p,v,d) = 0 \f$
  *
- *	For details on the functions included in the DAE interface, see the <a href="group__DAE.html">DAE functions documentation. </a>
+ *  For details on the functions included in the DAE interface, see the <a href="group__DAE.html">DAE functions documentation. </a>
  *
  *    \subsection Init The DAE initialization interface
  *
- *	 The DAE initialization interface is defined by the functions \f$F_0(p,v)\f$ and \f$F_1(p,v)\f$ where
+ *   The DAE initialization interface is defined by the functions \f$F_0(p,v)\f$ and \f$F_1(p,v)\f$ where
  *
- *	  \f$  F_0(p,v,d) = 0 \f$<br>
- *	  \f$  F_1(p,v,d) = 0 \f$
+ *    \f$  F_0(p,v,d) = 0 \f$<br>
+ *    \f$  F_1(p,v,d) = 0 \f$
  *
  *   \f$F_0\f$ represents the DAE system augmented with additional initial equations
  *   and start values that are fixed. \f$F_1\f$ on the other hand contains equations for
@@ -195,7 +195,7 @@
  *
  *   In addition, a residual function for dependent parameters is provided
  *
- *	  \f$  F_p(p) = 0 \f$
+ *    \f$  F_p(p) = 0 \f$
  *
  *   The iteration variables of this system are the elements in the \f$p_d^r\f$,
  *   \f$p_d^i\f$, \f$p_d^b\f$ vectors.
@@ -340,15 +340,15 @@ extern "C" {
 
 /** \brief Evaluate derivatives w.r.t. all variables, \f$z\f$.*/
 #define JMI_DER_ALL (JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
-	JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
-	JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P)
+    JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
+    JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P)
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$p\f$.*/
 #define JMI_DER_ALL_P JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$v\f$.*/
 #define JMI_DER_ALL_V JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
-	JMI_DER_T
+    JMI_DER_T
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$q\f$.*/
 #define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
@@ -371,17 +371,33 @@ extern "C" {
 #define JMI_BLOCK_MAX 32
 #define JMI_BLOCK_NOMINAL 64
 #define JMI_BLOCK_EVALUATE_JACOBIAN 128
+#define JMI_BLOCK_EQUATION_NOMINAL 256
+#define JMI_BLOCK_VALUE_REFERENCE 512
+
+#define JMI_REL_GT 0
+#define JMI_REL_GEQ 2
+#define JMI_REL_LT 4
+#define JMI_REL_LEQ 8
 
 #define JMI_CONSTANT_VARIABILITY 0
 #define JMI_PARAMETER_VARIABILITY 1
 #define JMI_DISCRETE_VARIABILITY 2
 #define JMI_CONTINUOUS_VARIABILITY 4
 
+#define JMI_ODE_OK 0
+#define JMI_ODE_EVENT 1
+#define JMI_ODE_ERROR -1
+
  typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER,
      JMI_KINSOL_SOLVER,
      JMI_LINEAR_SOLVER
  } jmi_block_solvers_t;
+
+ typedef enum {
+     JMI_ODE_CVODE,
+     JMI_ODE_EULER
+ } jmi_ode_solvers_t;
 
 /* @} */
 
@@ -497,11 +513,11 @@ int jmi_delete(jmi_t* jmi);
  *
  */
 int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
-		int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
-		int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
-		int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
-		int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
-		int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
+        int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
+        int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
+        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
+        int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
+        int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
 
 /**
  * \brief Get the offsets for the variable types in the \f$z\f$ vector.
@@ -553,25 +569,25 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
  * @return Error code.
  */
 int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
-		int* offs_real_pi, int* offs_real_pd,
-		int* offs_integer_ci, int* offs_integer_cd,
-		int* offs_integer_pi, int* offs_integer_pd,
-		int* offs_boolean_ci, int* offs_boolean_cd,
-		int* offs_boolean_pi, int* offs_boolean_pd,
-		int* offs_real_dx, int* offs_real_x, int* offs_real_u,
-		int* offs_real_w, int *offs_t,
-		int* offs_real_dx_p, int* offs_real_x_p,
-		int* offs_real_u_p, int* offs_real_w_p,
-		int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
-		int* offs_boolean_d, int* offs_boolean_u,
-		int* offs_sw, int* offs_sw_init,
-		int* offs_guards_sw, int* offs_guards_init,
-		int* offs_pre_real_dx, int* offs_pre_real_x, int* offs_pre_real_u,
-		int* offs_pre_real_w,
-		int* offs_pre_real_d, int* offs_pre_integer_d, int* offs_pre_integer_u,
-		int* offs_pre_boolean_d, int* offs_pre_boolean_u,
-		int* offs_pre_sw, int* offs_pre_sw_init,
-		int* offs_pre_guards_sw, int* offs_pre_guards_init);
+        int* offs_real_pi, int* offs_real_pd,
+        int* offs_integer_ci, int* offs_integer_cd,
+        int* offs_integer_pi, int* offs_integer_pd,
+        int* offs_boolean_ci, int* offs_boolean_cd,
+        int* offs_boolean_pi, int* offs_boolean_pd,
+        int* offs_real_dx, int* offs_real_x, int* offs_real_u,
+        int* offs_real_w, int *offs_t,
+        int* offs_real_dx_p, int* offs_real_x_p,
+        int* offs_real_u_p, int* offs_real_w_p,
+        int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
+        int* offs_boolean_d, int* offs_boolean_u,
+        int* offs_sw, int* offs_sw_init,
+        int* offs_guards_sw, int* offs_guards_init,
+        int* offs_pre_real_dx, int* offs_pre_real_x, int* offs_pre_real_u,
+        int* offs_pre_real_w,
+        int* offs_pre_real_d, int* offs_pre_integer_d, int* offs_pre_integer_u,
+        int* offs_pre_boolean_d, int* offs_pre_boolean_u,
+        int* offs_pre_sw, int* offs_pre_sw_init,
+        int* offs_pre_guards_sw, int* offs_pre_guards_init);
 
 /**
  * \brief Copy variable values to the pre vector.
@@ -996,7 +1012,7 @@ int jmi_ode_df_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  *
  */
 int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
-		                  int *mask, int* row, int* col);
+                          int *mask, int* row, int* col);
 
 /**
  * \brief This helper function computes the number of columns and the number of non zero
@@ -1012,7 +1028,7 @@ int jmi_ode_df_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *df_n_cols, int *df_n_nz);
+        int *df_n_cols, int *df_n_nz);
 
 /**
  * \brief Evaluate the ODE derivatives.
@@ -1166,7 +1182,7 @@ int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz);
  *
  */
 int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
-		                  int *mask, int* row, int* col);
+                          int *mask, int* row, int* col);
 
 /**
  * \brief This helper function computes the number of columns and the number of non zero
@@ -1182,7 +1198,7 @@ int jmi_dae_dF_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the directional derivative of the DAE residual function.
@@ -1221,6 +1237,20 @@ int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
 
 /**
+ * \brief Evaluate the adjusted DAE event indicator residuals.
+ *
+ * This method perturbes the event indicator functions based on the
+ * relation operator (>,>=,<,<=) and the current value of the event
+ * indicator with an epsilon (jmi->events_epsilon)
+ *
+ * @param jmi A jmi_t struct.
+ * @param res (Output) The event indicator residuals.
+ * @return Error code.
+ *
+ */
+int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res);
+
+/**
  * \brief Compare the evaluated CAD derivative with the FD evaluation
  *
  * @param jmi A jmi_t struct.
@@ -1230,7 +1260,7 @@ int jmi_dae_R(jmi_t* jmi, jmi_real_t* res);
  *                         be evaluated. The constants JMI_DER_DX, JMI_DER_X etc are used
  *                         to set this argument.
  * @param screen_use Set the flag to JMI_DER_CHECK_SCREEN_ON to print the result of the comparasion on the screen
- *		       or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
+ *             or JMI_DER_CHECK_SCREEN_OFF to return -1 if the comparasion failes. 
  * @param mask This argument is a vector containing ones for the Jacobian columns that
  *             should be included in the Jacobian and zeros for those which should not.
  *             The size of this vector is the same as the z vector.
@@ -1265,7 +1295,7 @@ int jmi_dae_derivative_checker(jmi_t* jmi, int sparsity, int independent_vars, i
  *
  */
 int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
-		int* n_eq_R0);
+        int* n_eq_R0);
 
 /**
  * \brief Evaluate the \f$F_0\f$ residual function of the initialization system.
@@ -1336,7 +1366,7 @@ int jmi_init_dF0_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the \f$F_1\f$ residual function of the initialization system.
@@ -1407,7 +1437,7 @@ int jmi_init_dF1_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the \f$F_p\f$ residual function of the initialization system.
@@ -1478,7 +1508,7 @@ int jmi_init_dFp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the dependent parameters.
@@ -1541,7 +1571,7 @@ int jmi_init_R0(jmi_t* jmi, jmi_real_t* res);
  *
  */
 int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
-		                              double final_time, int final_time_free);
+                                      double final_time, int final_time_free);
 
 /**
  * \brief Get the optimization interval.
@@ -1557,7 +1587,7 @@ int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_t
  *
  */
 int jmi_opt_get_optimization_interval(jmi_t *jmi, double *start_time, int *start_time_free,
-		                              double *final_time, int *final_time_free);
+                                      double *final_time, int *final_time_free);
 
 /**
  * \brief Specify optimization parameters of the model.
@@ -1609,7 +1639,7 @@ int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices);
  *
  */
 int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_J, int* n_eq_L, int* n_eq_Ffdp,
-		int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
+        int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq);
 
 /**
  * \brief Evaluate the \f$F_{fdp}\f$ residual function.
@@ -1680,7 +1710,7 @@ int jmi_opt_dFfdp_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dFfdp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the penalty function \f$J\f$.
@@ -1754,7 +1784,7 @@ int jmi_opt_dJ_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dJ_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dJ_n_cols, int *dJ_n_nz);
+        int *dJ_n_cols, int *dJ_n_nz);
 
 /**
  * \brief Evaluate the Lagrange integrand cost \f$L\f$.
@@ -1830,7 +1860,7 @@ int jmi_opt_dL_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dL_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dL_n_cols, int *dL_n_nz);
+        int *dL_n_cols, int *dL_n_nz);
 
 /**
  * \brief Evaluate the residual of the equality path constraints \f$C_{eq}\f$.
@@ -1906,7 +1936,7 @@ int jmi_opt_dCeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dCeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the residual of the inequality path constraints \f$C_{ineq}\f$.
@@ -1982,7 +2012,7 @@ int jmi_opt_dCineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dCineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the residual of the equality point constraints \f$H_{eq}\f$.
@@ -2058,7 +2088,7 @@ int jmi_opt_dHeq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dHeq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /**
  * \brief Evaluate the residual of the inequality point constraints \f$H_{ineq}\f$.
@@ -2134,7 +2164,7 @@ int jmi_opt_dHineq_nz_indices(jmi_t* jmi, int eval_alg, int independent_vars,
  *
  */
 int jmi_opt_dHineq_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars, int *mask,
-		int *dF_n_cols, int *dF_n_nz);
+        int *dF_n_cols, int *dF_n_nz);
 
 /* @} */
 
@@ -2170,7 +2200,7 @@ void jmi_print_summary(jmi_t *jmi);
  * values.
  */
 void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
-		jmi_real_t *y);
+        jmi_real_t *y);
 
 /**
  * \brief Check if there is support for CppAD derivatives or not.
@@ -2200,6 +2230,9 @@ int jmi_with_cad_derivatives(jmi_t* jmi);
  * @param jmi A jmi_t struct.
  */
 int jmi_set_start_values(jmi_t *jmi);
+
+int jmi_write_back_to_z_val(jmi_t* jmi);
+int jmi_write_back_to_z(jmi_t* jmi);
 
 /* @} */
 

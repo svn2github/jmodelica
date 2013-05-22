@@ -20,8 +20,9 @@
 import os
 import nose
 
+from collections import OrderedDict
 import numpy as N
-import pylab as P
+from scipy.io.matlab.mio import loadmat
 
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
@@ -34,7 +35,17 @@ try:
 except (NameError, ImportError):
     pass
 
+from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+#Check to see if pyfmi is installed so that we also catch the error generated
+#from that package
+try:
+    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+except ImportError:
+    VariableNotFoundError = jmiVariableNotFoundError
+
 path_to_mos = os.path.join(get_files_path(), 'Modelica')
+path_to_data = os.path.join(get_files_path(), 'Data')
 
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
@@ -102,12 +113,23 @@ class TestLocalDAECollocator:
         compile_fmux(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
-                                 'ParameterEstimation_1.mop')
+                                    'ParameterEstimation_1.mop')
         class_path = "ParEst.SecondOrder"
         compile_fmu(class_path, pe_file_path)
         
         class_path = "ParEst.ParEstCasADi"
         compile_fmux(class_path, pe_file_path)
+        
+        qt_file_path = os.path.join(get_files_path(), 'Modelica',
+                                    'QuadTankPack.mop')
+        class_path = "QuadTankPack.Sim_QuadTank"
+        compile_fmu(class_path, qt_file_path)
+        
+        class_path = "QuadTankPack.QuadTank_ParEstCasADi"
+        compile_fmux(class_path, qt_file_path)
+        
+        class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
+        compile_fmux(class_path, qt_file_path)
     
     def setUp(self):
         """Load the test models."""
@@ -173,6 +195,17 @@ class TestLocalDAECollocator:
         fmux_second_order_par_est = "ParEst_ParEstCasADi.fmux"
         self.model_second_order_par_est = CasadiModel(
             fmux_second_order_par_est, verbose=False)
+        
+        fmu_qt_sim = "QuadTankPack_Sim_QuadTank.fmu"
+        self.model_qt_sim = load_fmu(fmu_qt_sim)
+        
+        fmux_qt_par_est = "QuadTankPack_QuadTank_ParEstCasADi.fmux"
+        self.model_qt_par_est = CasadiModel(fmux_qt_par_est, verbose=False)
+        
+        fmux_qt_par_est_degenerate = \
+                "QuadTankPack_QuadTank_ParEstCasADi_Degenerate.fmux"
+        self.model_qt_par_est_degenerate = CasadiModel(
+                fmux_qt_par_est_degenerate, verbose=False)
         
         self.algorithm = "LocalDAECollocationAlg"
     
@@ -260,6 +293,7 @@ class TestLocalDAECollocator:
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
@@ -275,6 +309,11 @@ class TestLocalDAECollocator:
         
         # Test with eliminated continuity and derivative variables
         opts['eliminate_der_var'] = True
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -303,21 +342,23 @@ class TestLocalDAECollocator:
                   "cstr_nom_traj_result.txt")
         
         # Optimize using only initial trajectories
-        opts['n_e'] = 75
-        opts['n_cp'] = 4
+        n_e = 75
+        n_cp = 4
+        opts['n_e'] = n_e
+        opts['n_cp'] = n_cp
         opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         col = res.solver
         xx_init = col.get_xx_init()
-        N.testing.assert_allclose(
-                xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [1., 1.])
+        N.testing.assert_equal(sum(xx_init == 1.),
+                               (n_e * n_cp + 1) * 3 + 2 * n_e)
         
         # Test with eliminated continuity variables
         opts['eliminate_cont_var'] = True
@@ -328,6 +369,80 @@ class TestLocalDAECollocator:
         opts['eliminate_der_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    
+    @testattr(casadi = True)
+    def test_nominal_traj_mode(self):
+        """Test nominal_traj_mode on the CSTR."""
+        model = self.model_cstr_lagrange
+        
+        # References values
+        cost_ref = 1.8549259545339369e3
+        u_norm_ref = 3.0455503580669716e2
+        
+        # Get nominal and initial trajectories
+        opts = model.optimize_options(self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        try:
+            os.remove("cstr_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
+                  "cstr_nom_traj_result.txt")
+        
+        # Time-variant
+        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Affine
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Linear
+        opts['nominal_traj_mode'] = {'_default_mode': 'linear'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Attribute
+        opts['nominal_traj_mode'] = {'_default_mode': 'attribute'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check impossible time-variant scaling
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.der(c)': 'time-variant'}
+        N.testing.assert_raises(CasadiCollocatorException, model.optimize,
+                                self.algorithm, opts)
+        
+        # Check changing one variable
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.c': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Check alias variables
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'cstr.Tc': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'u': 'time-variant'}
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        opts['nominal_traj_mode'] = {'_default_mode': 'affine',
+                                     'asdf': 'time-variant'}
+        N.testing.assert_raises(XMLException, model.optimize, self.algorithm,
+                                opts)
     
     @testattr(casadi = True)
     def test_cstr(self):
@@ -374,44 +489,44 @@ class TestLocalDAECollocator:
                           1.17283905, 1.03631145, 1.0549561, 0.94827652,
                           1.0317119, 1.04010453, 1.08012155])
         t_meas = N.linspace(0., 10., num=len(y_meas))
+        data = N.vstack([t_meas, y_meas])
         
-        # Parameter estimation data
+        # Measurement data
         Q = N.array([[1.]])
-        measured_variables=['y']
-        data = N.hstack([N.transpose(N.array([t_meas])),
-                         N.transpose(N.array([y_meas]))])
-        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        unconstrained=OrderedDict()
+        unconstrained['y'] = data
+        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
         # Optimize without scaling
         opts = model.optimize_options(self.algorithm)
-        opts['parameter_estimation_data'] = par_est_data
+        opts['measurement_data'] = measurement_data
         opts['variable_scaling'] = False
         res = model.optimize(self.algorithm, opts)
         
-        w_unscaled = res['w']
-        z_unscaled = res['z']
+        w_unscaled = res.final('w')
+        z_unscaled = res.final('z')
         N.testing.assert_allclose(w_unscaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_unscaled, z_ref, 1e-2)
         
         # Optimize with scaling
         opts['variable_scaling'] = True
         res = model.optimize(self.algorithm, opts)
-        w_scaled = res['w']
-        z_scaled = res['z']
+        w_scaled = res.final('w')
+        z_scaled = res.final('z')
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
     
     @testattr(casadi = True)
     def test_parameter_estimation_traj(self):
         """
-        Test parameter estimation with and without given trajectories.
+        Test estimation with and without initial and nominal trajectories.
         """
         sim_model = self.model_second_order
         opt_model = self.model_second_order_par_est
         
         # Simulate with initial guesses
-        sim_model.set('w', 2.)
-        sim_model.set('z', 1.)
+        sim_model.set('w', 1.3)
+        sim_model.set('z', 0.3)
         sim_res = sim_model.simulate(final_time=15.)
         
         # Reference values
@@ -423,22 +538,22 @@ class TestLocalDAECollocator:
                           1.17283905, 1.03631145, 1.0549561, 0.94827652,
                           1.0317119, 1.04010453, 1.08012155])
         t_meas = N.linspace(0., 10., num=len(y_meas))
+        data = N.vstack([t_meas, y_meas])
         
-        # Parameter estimation data
+        # Measurement data
         Q = N.array([[1.]])
-        measured_variables=['y']
-        data = N.hstack([N.transpose(N.array([t_meas])),
-                         N.transpose(N.array([y_meas]))])
-        par_est_data = ParameterEstimationData(Q, measured_variables, data)
+        unconstrained = OrderedDict()
+        unconstrained['y'] = data
+        measurement_data = MeasurementData(unconstrained=unconstrained, Q=Q)
         
-        # Optimize without trajectories
+        # Optimize without scaling
         opts = opt_model.optimize_options(self.algorithm)
-        opts['parameter_estimation_data'] = par_est_data
+        opts['measurement_data'] = measurement_data
         opt_res = opt_model.optimize(self.algorithm, opts)
         
         # Assert results
-        w = opt_res['w']
-        z = opt_res['z']
+        w = opt_res.final('w')
+        z = opt_res.final('z')
         N.testing.assert_allclose(w, w_ref, 1e-2)
         N.testing.assert_allclose(z, z_ref, 1e-2)
         
@@ -446,10 +561,366 @@ class TestLocalDAECollocator:
         opts['init_traj'] = sim_res.result_data
         opts['nominal_traj'] = sim_res.result_data
         traj_res = opt_model.optimize(self.algorithm, opts)
-        w_traj = traj_res['w']
-        z_traj = traj_res['z']
+        w_traj = traj_res.final('w')
+        z_traj = traj_res.final('z')
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_unconstrained(self):
+        """
+        Test parameter estimation for the quad tank with unconstrained inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.diag([1., 1., 10., 10.])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u1'] = data_u1
+        unconstrained['u2'] = data_u2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained)
+        
+        # Unconstrained
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['init_traj'] = sim_res.result_data
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, options=opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Unconstrained with nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, options=opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_eliminated(self):
+        """
+        Test parameter estimation for the quad tank with eliminated inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        opt_model_2 = self.model_qt_par_est_degenerate
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.diag([1., 1.])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        eliminated['u2'] = data_u2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        
+        # Eliminated
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 30
+        opts['init_traj'] = sim_res.result_data
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-3)
+        
+        # Eliminated with nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-3)
+        
+        # Inconsistent bound on eliminated input
+        opt_model.set_min('u1', 5.1)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model.optimize, self.algorithm, opts)
+        opt_model.set_min('u1', -N.inf)
+        
+        # Point constraint on eliminated input
+        opts2 = opt_model_2.optimize_options()
+        opts2['n_e'] = 30
+        opts2['init_traj'] = sim_res.result_data
+        opts2['measurement_data'] = measurement_data
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model_2.optimize, self.algorithm, opts2)
+        
+        # Eliminate state
+        Q = N.array([[1.]])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        eliminated['u2'] = data_u2
+        eliminated['qt.x2'] = data_x2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['measurement_data'] = measurement_data
+        N.testing.assert_raises(VariableNotFoundError,
+                                opt_model.optimize, self.algorithm, opts)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_constrained(self):
+        """
+        Test parameter estimation for the quad tank with constrained inputs.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.diag([1., 1., 10., 10.])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        constrained = OrderedDict()
+        constrained['u1'] = data_u1
+        constrained['u2'] = data_u2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           constrained=constrained)
+        
+        # Constrained
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 30
+        opts['init_traj'] = sim_res.result_data
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-3)
+        
+        # Constrained with nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-3)
+        
+        # Inconsistent bound on constrained input
+        opt_model.set_min('u1', 5.1)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model.optimize, self.algorithm, opts)
+        opt_model.set_min('u1', -N.inf)
+        
+        # Constrain state
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        constrained = OrderedDict()
+        constrained['u1'] = data_u1
+        constrained['u2'] = data_u2
+        constrained['qt.x2'] = data_x2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           constrained=constrained)
+        opts['measurement_data'] = measurement_data
+        N.testing.assert_raises(VariableNotFoundError,
+                                opt_model.optimize, self.algorithm, opts)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_semi_eliminated(self):
+        """
+        Test parameter estimation for the quad tank with 1 eliminated input.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.diag([1., 1., 10.])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u1 = N.vstack([t_meas, u1])
+        data_u2 = N.vstack([t_meas, u2])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u1'] = data_u1
+        eliminated = OrderedDict()
+        eliminated['u2'] = data_u2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        
+        # Eliminate u2
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['init_traj'] = sim_res.result_data
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u2 with nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u1
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u2'] = data_u2
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['nominal_traj'] = None
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Eliminate u1 with nominal trajectories
+        opts['nominal_traj'] = sim_res.result_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+    
+    @testattr(casadi = True)
+    def test_qt_par_est_user_interpolator(self):
+        """
+        Test parameter estimation for the quad tank with user-defined function.
+        """
+        data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
+        sim_model = self.model_qt_sim
+        opt_model = self.model_qt_par_est
+        a_ref = [0.02656702, 0.02713898]
+        
+        # Extract data series
+        t_meas = data['t'][6000::100, 0] - 60
+        y1_meas = data['y1_f'][6000::100, 0]/100
+        y2_meas = data['y2_f'][6000::100, 0]/100
+        y3_meas = data['y3_d'][6000::100, 0]/100
+        y4_meas = data['y4_d'][6000::100, 0]/100
+        u1 = data['u1_d'][6000::100, 0]
+        u2 = data['u2_d'][6000::100, 0]
+        
+        # Simulate
+        u = N.transpose(N.vstack((t_meas, u1, u2)))
+        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                     final_time=60.)
+        
+        # Create measurement data
+        Q = N.diag([1., 1., 10.])
+        data_x1 = N.vstack([t_meas, y1_meas])
+        data_x2 = N.vstack([t_meas, y2_meas])
+        data_u2 = N.vstack([t_meas, u2])
+        linear_u1 = TrajectoryLinearInterpolation(t_meas,
+                                                  u1.reshape([-1, 1]))
+        user_u1 = linear_u1.eval
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        unconstrained['u2'] = data_u2
+        eliminated = OrderedDict()
+        eliminated['u1'] = user_u1
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        
+        # Semi-eliminated with user-defined interpolation function
+        opts = opt_model.optimize_options()
+        opts['n_e'] = 60
+        opts['measurement_data'] = measurement_data
+        opt_res = opt_model.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-4)
+        
+        # Inconsistent bounds on eliminated input with user-defined function
+        opt_model.set_min('u1', 5.1)
+        N.testing.assert_raises(CasadiCollocatorException,
+                                opt_model.optimize, self.algorithm, opts)
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):
@@ -639,7 +1110,7 @@ class TestLocalDAECollocator:
         assert_results(res_renaming, cost_ref, u_norm_ref)
 
         assert(repr(res_renaming.solver.get_equality_constraint()[10]) ==
-                "Matrix<SX>((der_x1_1_1-((((1-(x2_1_1*x2_1_1))*x1_1_1)" +
+                "Matrix<SX>((der_x1_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
                 "-x2_1_1)+u_1_1)))")
         assert(repr(res_renaming.solver.get_equality_constraint()[20]) ==
                 "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
@@ -696,6 +1167,31 @@ class TestLocalDAECollocator:
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
                                   rtol=0, atol=1e-5)
+    
+    @testattr(casadi = True)
+    def test_result_file_name(self):
+        """
+        Test different result file names.
+        """
+        model = self.model_vdp_bounds_lagrange
+        
+        # Default file name
+        try:
+            os.remove("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm)
+        assert(os.path.exists("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt"))
+        
+        # Custom file name
+        opts = model.optimize_options(self.algorithm)
+        opts['result_file_name'] = "vdp_custom_file_name.txt"
+        try:
+            os.remove("vdp_custom_file_name.txt")
+        except OSError:
+            pass
+        model.optimize(self.algorithm, opts)
+        assert(os.path.exists("vdp_custom_file_name.txt"))
     
     @testattr(casadi = True)
     def test_result_mode(self):
@@ -950,7 +1446,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # Expanded MX with exact Hessian and eliminated variables
@@ -970,7 +1466,7 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         sol_without = res.times['sol']
-        nose.tools.assert_true(sol_with < 0.8 * sol_without)
+        nose.tools.assert_true(sol_with < 0.9 * sol_without)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian and eliminated variables
@@ -1046,7 +1542,7 @@ class TestLocalDAECollocator:
         # Simulate
         opt_input = opt_res.solver.get_opt_input()
         res = model.simulate(start_time=0., final_time=150., input=opt_input)
-        N.testing.assert_allclose([res["T"][-1], res["c"][-1]],
+        N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.62140206, 345.22510435], rtol=1e-5)
 
 class TestPseudoSpectral:
@@ -1085,37 +1581,28 @@ class TestPseudoSpectral:
         opts['discr'] = "LG"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGR points
         opts['discr'] = "LGR"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGL points
         opts['discr'] = "LGL"
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
     
     @testattr(casadi = True)
     def test_two_state_init_traj(self):
@@ -1136,39 +1623,30 @@ class TestPseudoSpectral:
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGL points
         opts['discr'] = "LGL"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
         
         #Test LGR points
         opts['discr'] = "LGR"
         opts['init_traj'] = ResultDymolaTextual("TwoState_result.txt")
         res = self.model_two_state.optimize(algorithm="CasadiPseudoSpectralAlg",
                                             options=opts)
-        y1 = res["y1"]
-        y2 = res["y2"]
-        u = res["u"]
-        time = res["time"]
-        nose.tools.assert_almost_equal(y1[-1], 0.5000000000, places=5)
-        nose.tools.assert_almost_equal(y2[-1], 1.124170946790, places=5)
-        nose.tools.assert_almost_equal(u[-1], 0.498341205247, places=5)
+
+        nose.tools.assert_almost_equal(res.final("y1"), 0.5000000000, places=5)
+        nose.tools.assert_almost_equal(res.final("y2"), 1.124170946790, places=5)
+        nose.tools.assert_almost_equal(res.final("u"), 0.498341205247, places=5)
     
     @testattr(casadi = True)
     def test_doubleintegrator(self):
@@ -1229,22 +1707,19 @@ class TestPseudoSpectral:
         opts['discr'] = "LG"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         
         #Test LGR points
         opts['discr'] = "LGR"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         
         #Test LGL points
         opts['discr'] = "LGL"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
-        cost = res["cost"]
-        nose.tools.assert_almost_equal(cost[-1], 2.3463724e1, places=1)
+        nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         """
         opts['n_e'] = 20
         opts['n_cp'] = 6

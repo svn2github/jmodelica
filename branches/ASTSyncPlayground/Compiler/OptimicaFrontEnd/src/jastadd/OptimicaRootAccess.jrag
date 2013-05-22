@@ -41,6 +41,7 @@ aspect OptimicaRootAccess {
     	org.jmodelica.optimica.parser.OptimicaParser parser = 
     		new org.jmodelica.optimica.parser.OptimicaParser();
         parser.setLineBreakMap(scanner.getLineBreakMap());
+        parser.setFormattingInfo(scanner.getFormattingInfo());
 		return parser;
     }
     

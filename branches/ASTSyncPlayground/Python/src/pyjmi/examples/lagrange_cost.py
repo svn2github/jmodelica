@@ -34,10 +34,10 @@ def run_demo(with_plots=True):
 
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
-    n_e = 50 # Number of elements
-    hs = N.ones(n_e)*1./n_e # Equidistant point
-    n_cp = 3 # Number of collocation points
-    b_f = 3*N.ones(10) # Blocking factors
+    n_e = 50                  # Number of elements
+    hs = N.ones(n_e)*1./n_e   # Equidistant point
+    n_cp = 3                  # Number of collocation points
+    b_f = 3*N.ones(10)        # Blocking factors
 
     jmu_name = compile_jmu("LagrangeCost.OptTest", 
         curr_dir+"/files/LagrangeCost.mop")
@@ -50,10 +50,9 @@ def run_demo(with_plots=True):
     u = res['sys.u']
     t = res['time']
 
-    assert N.abs(x1[-1] - 0.20172085497700001) < 1e-3  
+    assert N.abs(res.final('sys.x[1]') - 0.20172085497700001) < 1e-3  
 
     if with_plots:
-        
         plt.figure(1)
         plt.clf()
         plt.subplot(211)

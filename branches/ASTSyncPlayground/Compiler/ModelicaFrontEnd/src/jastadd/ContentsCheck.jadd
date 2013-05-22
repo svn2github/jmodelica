@@ -29,7 +29,7 @@ aspect ContentCheck {
 			error("Equations are not allowed in functions");
 	}
 	
-	public void FAlgorithmBlock.contentCheck() {}
+	public void FAlgorithm.contentCheck() {}
 	
 	public void InstDerExp.contentCheck() {
 		if (inFunction()) {
@@ -92,6 +92,10 @@ aspect ContentCheck {
 			if (target.isConstructor() || target.isDestructor())
 				error("Constructors and destructors for ExternalObjects can not be used directly");
 		}
+	}
+	
+	public void FConnRootedDep.contentCheck() {
+		warning("The rooted() operator has been deprecated in favor of Connections.rooted()");
 	}
 	
 	public void InstClassDecl.contentCheck() {

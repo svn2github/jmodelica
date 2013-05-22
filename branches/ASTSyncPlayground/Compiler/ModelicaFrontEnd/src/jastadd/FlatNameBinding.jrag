@@ -26,6 +26,7 @@ aspect FlatNameBinding {
 	inh FAbstractVariable FAbstractVariable.lookupFV(FQName fqn);
 	inh FAbstractVariable FAbstractVariable.lookupDerFV(FQName fqn);
 	inh FAbstractVariable FRecordDecl.lookupFV(FQName fqn);
+	inh FAbstractVariable FActualStream.lookupFV(FQName fqn);
 	
 	syn FAbstractVariable FIdUse.myFV() = lookupFV(getFQName());
 	syn lazy FAbstractVariable FIdUseExp.myFV() = getFIdUse().myFV();
@@ -321,7 +322,7 @@ aspect FlatNameBinding {
 		
 	}
 	
-	public class FAbstractVariable implements FlatVariableMap.HierarchicalMapNode {}
+	FAbstractVariable implements FlatVariableMap.HierarchicalMapNode;
 	
 	public FAbstractVariable FAbstractVariable.lookupHierarchical(FQName name, int part, boolean outermost) {
 		return (outermost || name.numParts() <= part) ? this : null;
@@ -396,6 +397,7 @@ aspect ParameterEquations {
 	eq FForIndex.getChild().parameterEquation()           = null;
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
 	eq FRecordDecl.getChild().parameterEquation()         = null;
+    eq FClass.getDummyVariable().parameterEquation()      = null;
 	
 	syn lazy Map<FAbstractVariable,FAbstractEquation> FClass.parameterEquationsMap() {
 		Map<FAbstractVariable,FAbstractEquation> map = new HashMap<FAbstractVariable,FAbstractEquation>();

@@ -53,7 +53,7 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
     
     # Compile the stationary initialization model into a JMU
-    jmu_name = compile_jmu("CSTR.CSTR_Init", curr_dir+"/files/CSTR.mop")
+    jmu_name = compile_jmu("CSTR.CSTR_Init", os.path.join(curr_dir, "files", "CSTR.mop"))
 
     # Load a JMUModel instance
     init_model = JMUModel(jmu_name)
@@ -90,7 +90,7 @@ def run_demo(with_plots=True):
     print('c = %f' % c_0_B)
     print('T = %f' % T_0_B)
     
-    jmu_name = compile_jmu("CSTR.CSTR_Opt_MPC", curr_dir+"/files/CSTR.mop")
+    jmu_name = compile_jmu("CSTR.CSTR_Opt_MPC", os.path.join(curr_dir, "files", "CSTR.mop"))
 
     cstr = JMUModel(jmu_name)
 
@@ -102,12 +102,12 @@ def run_demo(with_plots=True):
     cstr.set('cstr.T_init',T_0_A)
     
     # Initialize the mesh
-    n_e = 50 # Number of elements 
-    hs = N.ones(n_e)*1./n_e # Equidistant points
-    n_cp = 3; # Number of collocation points in each element
+    n_e = 50                 # Number of elements 
+    hs = N.ones(n_e)*1./n_e  # Equidistant points
+    n_cp = 3;                # Number of collocation points in each element
 
     # Create an NLP object
-    # The lenght of the optimization interval is 50s and the
+    # The length of the optimization interval is 50s and the
     # number of elements is 50, which gives a blocking factor
     # vector of 2*ones(n_e/2) to match the sampling interval
     # of 2s.
@@ -119,8 +119,8 @@ def run_demo(with_plots=True):
    
     nlp_ipopt.opt_coll_ipopt_set_int_option("max_iter",500)
 
-    h = 2. # Sampling interval
-    T_final = 180. # Final time of simulation
+    h = 2.           # Sampling interval
+    T_final = 180.   # Final time of simulation
     t_mpc = N.linspace(0,T_final,T_final/h+1)
     n_samples = N.size(t_mpc)
 
@@ -132,7 +132,7 @@ def run_demo(with_plots=True):
     cstr.set('cstr.T_init',T_0_A)
     
     # Compile the simulation model into a DLL
-    jmu_name = compile_jmu("CSTR.CSTR", curr_dir+"/files/CSTR.mop")
+    jmu_name = compile_jmu("CSTR.CSTR", os.path.join(curr_dir, "files", "CSTR.mop"))
     
     # Load a model instance into Python
     sim_model = JMUModel(jmu_name)
@@ -140,12 +140,11 @@ def run_demo(with_plots=True):
     sim_model.set('c_init',c_0_A)
     sim_model.set('T_init',T_0_A)
     
-    
     global cstr_mod
     global cstr_sim
     
-    cstr_mod = JMIDAE(sim_model) #Create an Assimulo problem
-    cstr_sim = IDA(cstr_mod) #Create an IDA solver
+    cstr_mod = JMIDAE(sim_model) # Create an Assimulo problem
+    cstr_sim = IDA(cstr_mod)     # Create an IDA solver
     
     i = 0
     
@@ -171,17 +170,18 @@ def run_demo(with_plots=True):
         res = ResultDymolaTextual('CSTR_CSTR_Opt_MPC_result.txt')
         
         # Extract variable profiles
-        c_res=res.get_variable_data('cstr.c')
-        T_res=res.get_variable_data('cstr.T')
-        Tc_res=res.get_variable_data('cstr.Tc')
+        c_res = res.get_variable_data('cstr.c')
+        T_res = res.get_variable_data('cstr.T')
+        Tc_res = res.get_variable_data('cstr.Tc')
         
         # Get the first Tc sample
         Tc_ctrl = Tc_res.x[0]
         
         # Set the value to the model
         sim_model.set('Tc',Tc_ctrl)
-      
-        cstr_sim.simulate(t_mpc[i+1]) #Simulate
+        
+        # Simulate
+        cstr_sim.simulate(t_mpc[i+1])
         
         t_T_sim = cstr_sim.t_sol
         
@@ -195,11 +195,9 @@ def run_demo(with_plots=True):
             plt.figure(4)
             plt.subplot(3,1,1)
             plt.plot(t_T_sim,N.array(cstr_sim.y_sol)[:,0],'b')
-            #plt.show()
             
             plt.subplot(3,1,2)
             plt.plot(t_T_sim,N.array(cstr_sim.y_sol)[:,1],'b')
-            #plt.show()
         
             if t_mpc[i]==0:
                 plt.subplot(3,1,3)
@@ -214,10 +212,10 @@ def run_demo(with_plots=True):
         Tc_ctrl_old = Tc_ctrl
             
         i = i+1
-        if with_plots:
-            pass
-            #plt.show()
 
+    assert N.abs(Tc_ctrl - 279.097186038194)                      < 1e-6
+    assert N.abs(N.array(cstr_sim.y_sol)[:,0][-1] - 350.89028563) < 1e-6
+    assert N.abs(N.array(cstr_sim.y_sol)[:,1][-1] - 283.15229948) < 1e-6
 
     if with_plots:
         plt.figure(4)

@@ -183,8 +183,7 @@ equation
     connect(prbs2.y,qt.u2);
 end QuadTank_ParEst;
 
-optimization QuadTank_ParEstCasADi (objective=1,
-                                             startTime=0,finalTime=60)
+optimization QuadTank_ParEstCasADi(startTime=0, finalTime=60)
     
     // Initial tank levels
 	parameter Modelica.SIunits.Length x1_0 = 0.06255;

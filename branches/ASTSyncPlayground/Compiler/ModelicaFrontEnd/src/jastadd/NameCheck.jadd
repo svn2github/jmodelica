@@ -33,8 +33,8 @@ aspect InstanceNameCheck {
 	public void InstComponentAccess.nameCheck() {
     	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
-       		error("The component "+qualifiedName()+" is undeclared");
-		if (!inConnectClause() && myInstComponentDecl().hasConditionalAttribute()) {
+       		error("Cannot find component declaration for "+qualifiedName());
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
 			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
 		}
     }
@@ -42,8 +42,8 @@ aspect InstanceNameCheck {
 	public void InstComponentArrayAccess.nameCheck() {
     	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
-       		error("The component "+qualifiedName()+" is undeclared");
-		if (!inConnectClause() && myInstComponentDecl().hasConditionalAttribute()) {
+       		error("Cannot find component declaration for "+qualifiedName());
+		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
 			error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
 		}
     }
@@ -52,7 +52,7 @@ aspect InstanceNameCheck {
     	//log.debug("InstClassAccess.nameCheck(): " + name() + " " + myInstClassDecl().name());
 		if (myInstClassDecl().isUnknown()) {
 			//getParent().dumpTree("");
-			error("The class "+qualifiedName()+" is undeclared");
+			error("Cannot find class declaration for "+qualifiedName());
 		}
     }
 

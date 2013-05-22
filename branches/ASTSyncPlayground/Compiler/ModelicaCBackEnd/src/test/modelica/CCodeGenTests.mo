@@ -31,6 +31,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest1",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -67,6 +68,7 @@ end CCodeGenTest1;
 			name="CCodeGenTest2",
 			description="Test of code generation",
 			automatic_add_initial_equations=false,
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -108,6 +110,7 @@ $C_DAE_initial_guess_equation_residuals$
 		CCodeGenTestCase(
 			name="CCodeGenTest3",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="$C_DAE_initial_dependent_parameter_residuals$",
 			generatedCode="
     (*res)[0] = _p1_2 * _p1_2 - (_p2_0);
@@ -126,10 +129,11 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest4",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide(AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
 ")})));
 end CCodeGenTest4;
 
@@ -146,10 +150,11 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest5",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_3 - (_der_x_4);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, _one_0, JMI_TRUE, JMI_FALSE), JMI_TRUE, _x_2, COND_EXP_EQ(COND_EXP_LE(_time, _two_1, JMI_TRUE, JMI_FALSE), JMI_TRUE, (- AD_WRAP_LITERAL(2)) * _x_2, AD_WRAP_LITERAL(3) * _x_2)) - (_y_3);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, _one_0, JMI_TRUE, JMI_FALSE), JMI_TRUE, _x_2, COND_EXP_EQ(COND_EXP_LE(_time, _two_1, JMI_TRUE, JMI_FALSE), JMI_TRUE, (- AD_WRAP_LITERAL(2)) * _x_2, AD_WRAP_LITERAL(3) * _x_2))) - (_y_3);
 ")})));
 end CCodeGenTest5;
 
@@ -170,17 +175,17 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest6",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="
 $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
          generatedCode="
-    (*res)[0] = _one_1 - (_time);
-    (*res)[1] = _two_2 - (_time);
+    (*res)[0] = _time - (_one_1);
+    (*res)[1] = _time - (_two_2);
 
-    (*res)[0] = _one_1 - (_time);
-    (*res)[1] = _two_2 - (_time);
-    (*res)[2] = _p_0 - (_one_1);
+    (*res)[0] = _time - (_one_1);
+    (*res)[1] = _time - (_two_2);
 ")})));
 end CCodeGenTest6;
 
@@ -197,13 +202,14 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest7",
 			description="Test of code generation. Verify that no event indicators are generated from relational expressions inside noEvent operators.",
+			variability_propagation=false,
 			template="
 $C_DAE_equation_residuals$
 $C_DAE_event_indicator_residuals$
 ",
 			generatedCode="
     (*res)[0] = _y_2 - (_der_x_3);
-    (*res)[1] = COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7)))))) - (_y_2);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7))))))) - (_y_2);
 
 ")})));
 end CCodeGenTest7;
@@ -222,6 +228,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest8",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = COND_EXP_EQ(_sw(0), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1) - (_x_0);
@@ -236,7 +243,7 @@ model CCodeGenTest9
   Real z(start=0);
 initial equation
    x = noEvent(if time>=1 then (-1 + y) else  (- y));
-   y = noEvent(z + x +(if z>=-1.5 then -3 else 3));
+   y = 2 * noEvent(z + x +(if z>=-1.5 then -3 else 3));
    z = -y  - x + (if y>=0.5 then -1 else 1);
 equation
    der(x) = -x;
@@ -247,6 +254,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest9",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -255,8 +263,8 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[0] = - _x_0 - (_der_x_3);
     (*res)[1] = - _y_1 - (_der_y_4);
     (*res)[2] = - _z_2 - (_der_z_5);
-    (*res)[3] = COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1) - (_x_0);
-    (*res)[4] = _z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - AD_WRAP_LITERAL(1.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(3)) - (_y_1);
+    (*res)[3] = (COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1)) - (_x_0);
+    (*res)[4] = 2 * (_z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, - AD_WRAP_LITERAL(1.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, - AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(3))) - (_y_1);
     (*res)[5] = - _y_1 - _x_0 + COND_EXP_EQ(_sw_init(0), JMI_TRUE, - AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(1)) - (_z_2);
 
     (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
@@ -280,6 +288,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest10",
 			description="Test of code generation",
+			variability_propagation=false,
 			template="
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -307,11 +316,12 @@ model CCodeGenTest11
 		CCodeGenTestCase(
 			name="CCodeGenTest11",
 			description="C code generation: the '<>' operator",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = 1 - (_x_0);
     (*res)[1] = 2 - (_y_1);
-    (*res)[2] = COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(COND_EXP_EQ(_x_0, _y_1, JMI_FALSE, JMI_TRUE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CCodeGenTest11;
 
@@ -325,6 +335,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenTest12",
 			description="C code generation: test that x^2 is represented by x*x in the generated code.",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow((_x_0 - 0.3),0.3) + (1.0 * ((_x_0 - 0.3)) * ((_x_0 - 0.3)) * ((_x_0 - 0.3))) - (_der_x_1);
@@ -354,6 +365,7 @@ model CCodeGenTest13
 		CCodeGenTestCase(
 			name="CCodeGenTest13",
 			description="Code generation for enumerations: variable aliases",
+			variability_propagation=false,
 			template="$C_variable_aliases$",
 			generatedCode="
 #define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
@@ -397,6 +409,7 @@ equation
 			generate_ode=true,
 			generate_dae=false,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="$C_ode_derivatives$",
 			generatedCode="
     JMI_ARRAY_STATIC(tmp_1, 2, 1)
@@ -436,6 +449,7 @@ equation
 			generate_dae=false,
 			equation_sorting=true,
 			generate_only_initial_system=true,
+			variability_propagation=false,
 			template="
 $C_ode_derivatives$
 $C_ode_guards$
@@ -444,7 +458,7 @@ $C_DAE_event_indicator_residuals$
 $C_ode_initialization$
 ",
 			generatedCode="
-  model_ode_initialize(jmi);
+  ef=model_ode_initialize(jmi);
 
   model_ode_guards_init(jmi);
 
@@ -454,7 +468,7 @@ $C_ode_initialization$
     model_ode_guards(jmi);
   _x2_1 = 1;
   _x1_0 = 0;
-  _der_x1_5 = (1 - (1.0 * (_x2_1) * (_x2_1))) * _x1_0- _x2_1 + _p_3 * _u_2;
+  _der_x1_5 = (1 - (1.0 * (_x2_1) * (_x2_1))) * _x1_0 + (- _x2_1) + _p_3 * _u_2;
   _der_x2_6 = _x1_0;
   _w_4 = _x1_0 + _x2_1;
 ")})));
@@ -477,6 +491,7 @@ equation
 			generate_dae=false,
 			equation_sorting=true,
 			generate_only_initial_system=true,
+			variability_propagation=false,
 			template="
 $n_event_indicators$
 $n_initial_event_indicators$
@@ -509,6 +524,7 @@ model CCodeGenTest17
 		CCodeGenTestCase(
 			name="CCodeGenTest17",
 			description="Test the compiler code generation for functions with parameter input",
+			variability_propagation=false,
 			template="$C_set_start_values$",
 			generatedCode="
     JMI_ARRAY_STATIC(tmp_1, 1, 1)
@@ -528,11 +544,12 @@ model CLogExp1
 		CCodeGenTestCase(
 			name="CLogExp1",
 			description="C code generation for logical operators: and",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_AND(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CLogExp1;
 
@@ -546,11 +563,12 @@ model CLogExp2
 		CCodeGenTestCase(
 			name="CLogExp2",
 			description="C code generation for logical operators: or",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
     (*res)[1] = JMI_FALSE - (_y_1);
-    (*res)[2] = COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_z_2);
+    (*res)[2] = (COND_EXP_EQ(LOG_EXP_OR(_x_0, _y_1),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_z_2);
 ")})));
 end CLogExp2;
 
@@ -563,10 +581,11 @@ model CLogExp3
 		CCodeGenTestCase(
 			name="CLogExp3",
 			description="C code generation for logical operators: not",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(LOG_EXP_NOT(_x_0),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0))) - (_y_1);
 ")})));
 end CLogExp3;
 
@@ -605,6 +624,7 @@ equation
 		CCodeGenTestCase(
 			name="CCodeGenDiscreteVariables1",
 			description="Test C code generation of discrete variables.",
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -657,6 +677,7 @@ model CCodeGenParameters1
 			description="Make sure scaling is applied properly when setting to parameter values",
 			generate_dae=true,
 			enable_variable_scaling=true,
+			variability_propagation=false,
 			template="
 $C_DAE_initial_dependent_parameter_assignments$
 $C_set_start_values$
@@ -685,6 +706,7 @@ model CCodeGenUniqueNames
 			description="Test that unique names are generated for each variable",
 			enable_structural_diagnosis=false,
 			index_reduction=false,
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -711,12 +733,13 @@ model CCodeGenDotOp
 		CCodeGenTestCase(
 			name="CCodeGenDotOp",
 			description="C code generation of dot operators (.+, .*, etc)",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
-    (*res)[0] = jmi_divide(_y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
-    (*res)[1] = jmi_divide(_y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"Divide by zero: y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
-    (*res)[2] = jmi_divide(_y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"Divide by zero: y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
-    (*res)[3] = jmi_divide(_y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"Divide by zero: y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
+    (*res)[0] = jmi_divide_logged(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
+    (*res)[1] = jmi_divide_logged(jmi, _y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"Divide by zero: y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
+    (*res)[2] = jmi_divide_logged(jmi, _y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"Divide by zero: y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
+    (*res)[3] = jmi_divide_logged(jmi, _y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"Divide by zero: y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
     (*res)[4] = 1 - (_y_1_1_4);
     (*res)[5] = 2 - (_y_1_2_5);
     (*res)[6] = 3 - (_y_2_1_6);
@@ -737,6 +760,7 @@ model CCodeGenMinMax
 		CCodeGenTestCase(
 			name="CCodeGenMinMax",
 			description="C code generation of min() and max()",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = 1 - (_x_1_1_0);
@@ -819,6 +843,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest1",
 			description="Test of code generation",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -858,6 +884,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest2",
 			description="C code gen: functions: using multiple outputs",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -905,6 +933,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest3",
 			description="C code gen: functions: two calls to same function",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -949,6 +979,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest4",
 			description="C code gen: functions: calls to two functions",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1010,6 +1042,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest5",
 			description="C code gen: functions: fewer components assigned than outputs",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1059,6 +1093,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest6",
 			description="C code gen: functions: one output skipped",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1106,6 +1142,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest7",
 			description="C code gen: functions: no components assigned",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1146,6 +1184,8 @@ model CFunctionTest8
 		CCodeGenTestCase(
 			name="CFunctionTest8",
 			description="C code gen: functions: function calling other function",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1201,6 +1241,8 @@ model CFunctionTest9
 		CCodeGenTestCase(
 			name="CFunctionTest9",
 			description="C code gen: functions:",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1242,6 +1284,8 @@ model CFunctionTest10
 		CCodeGenTestCase(
 			name="CFunctionTest10",
 			description="C code gen: functions: no inputs",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1279,6 +1323,8 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest11",
 			description="C code gen: functions: no outputs",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1316,6 +1362,8 @@ w=f(z);
 			name="CFunctionTest12",
 			description="C code gen: function and variable scaling",
 			enable_variable_scaling=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1381,6 +1429,8 @@ equation
 			description="C code gen: solved function call equation",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1459,6 +1509,8 @@ equation
 			description="C code gen: unsolved function call equation",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1516,6 +1568,8 @@ model CForLoop1
 		CCodeGenTestCase(
 			name="CForLoop1",
 			description="C code generation for for loops: range exp",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CForLoop1_f_def(jmi_ad_var_t* o_o) {
@@ -1561,6 +1615,8 @@ model CForLoop2
 		CCodeGenTestCase(
 			name="CForLoop2",
 			description="C code generation for for loops: generic exp",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CForLoop2_f_def(jmi_ad_var_t* o_o) {
@@ -1608,6 +1664,8 @@ model CArrayInput1
 		CCodeGenTestCase(
 			name="CArrayInput1",
 			description="C code generation: array inputs to functions: basic test",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1656,6 +1714,8 @@ model CArrayInput2
 		CCodeGenTestCase(
 			name="CArrayInput2",
 			description="C code generation: array inputs to functions: expressions around call",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1704,6 +1764,8 @@ model CArrayInput3
 		CCodeGenTestCase(
 			name="CArrayInput3",
 			description="C code generation: array inputs to functions: nestled calls",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1773,6 +1835,8 @@ model CArrayInput4
 		CCodeGenTestCase(
 			name="CArrayInput4",
 			description="C code generation: array inputs to functions: in assign statement",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1844,6 +1908,8 @@ model CArrayInput5
 		CCodeGenTestCase(
 			name="CArrayInput5",
 			description="C code generation: array inputs to functions: function call stmt",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -1923,6 +1989,8 @@ model CArrayInput6
 		CCodeGenTestCase(
 			name="CArrayInput6",
 			description="C code generation: array inputs to functions: if statement",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2015,6 +2083,8 @@ model CArrayInput7
 		CCodeGenTestCase(
 			name="CArrayInput7",
 			description="C code generation: array inputs to functions: while stmt",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2093,6 +2163,8 @@ model CArrayInput8
 		CCodeGenTestCase(
 			name="CArrayInput8",
 			description="C code generation: array inputs to functions: for stmt",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2173,6 +2245,8 @@ model CArrayOutputs1
 		CCodeGenTestCase(
 			name="CArrayOutputs1",
 			description="C code generation: array outputs from functions: in equation",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2218,6 +2292,8 @@ equation
 		CCodeGenTestCase(
 			name="CArrayOutputs2",
 			description="C code generation: array outputs from functions: in expression in equation",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2269,6 +2345,8 @@ model CArrayOutputs3
 		CCodeGenTestCase(
 			name="CArrayOutputs3",
 			description="C code generation: array outputs from functions: in expression in function",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2339,6 +2417,8 @@ model CArrayOutputs4
 		CCodeGenTestCase(
 			name="CArrayOutputs4",
 			description="C code generation: array outputs from functions: function call statement",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2413,6 +2493,8 @@ model CArrayOutputs5
 		CCodeGenTestCase(
 			name="CArrayOutputs5",
 			description="C code generation: array outputs from functions: passing input array",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -2477,6 +2559,7 @@ model CAbsTest1
 		CCodeGenTestCase(
 			name="CAbsTest1",
 			description="C code generation for abs() operator",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = jmi_abs(_y_1) - (_x_0);
@@ -2500,6 +2583,8 @@ model CUnknownArray1
 		CCodeGenTestCase(
 			name="CUnknownArray1",
 			description="C code generation for unknown array sizes: basic test",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a, jmi_array_t* o_a) {
@@ -2538,6 +2623,8 @@ model CUnknownArray2
 		CCodeGenTestCase(
 			name="CUnknownArray2",
 			description="C code generation for unknown array sizes: array constructor * array with unknown size",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
@@ -2609,6 +2696,8 @@ model CUnknownArray3
 		CCodeGenTestCase(
 			name="CUnknownArray3",
 			description="Passing array return value of unknown size directly to other function",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CUnknownArray3_f1_def(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
@@ -2689,6 +2778,7 @@ equation
 		CCodeGenTestCase(
 			name="CRecordDecl1",
 			description="C code generation for records: structs: basic test",
+			variability_propagation=false,
 			template="$C_records$",
 			generatedCode="
 typedef struct _A_0_r {
@@ -2720,6 +2810,7 @@ equation
 		CCodeGenTestCase(
 			name="CRecordDecl2",
 			description="C code generation for records: structs: nested records",
+			variability_propagation=false,
 			template="$C_records$",
 			generatedCode="
 typedef struct _B_0_r {
@@ -2750,6 +2841,7 @@ equation
 		CCodeGenTestCase(
 			name="CRecordDecl3",
 			description="C code generation for records: structs: array in record",
+			variability_propagation=false,
 			template="$C_records$",
 			generatedCode="
 typedef struct _A_0_r {
@@ -2781,6 +2873,7 @@ equation
 		CCodeGenTestCase(
 			name="CRecordDecl4",
 			description="C code generation for records: structs: array of records",
+			variability_propagation=false,
 			template="$C_records$",
 			generatedCode="
 typedef struct _B_0_r {
@@ -2817,6 +2910,8 @@ model CRecordDecl5
 		CCodeGenTestCase(
 			name="CRecordDecl5",
 			description="C code generation for records: declarations: basic test",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl5_f_def(jmi_ad_var_t* o_o) {
@@ -2864,6 +2959,8 @@ model CRecordDecl6
 		CCodeGenTestCase(
 			name="CRecordDecl6",
 			description="C code generation for records: declarations: nestled records",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl6_f_def(jmi_ad_var_t* o_o) {
@@ -2908,6 +3005,8 @@ model CRecordDecl7
 		CCodeGenTestCase(
 			name="CRecordDecl7",
 			description="C code generation for records: declarations: array in record",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl7_f_def(jmi_ad_var_t* o_o) {
@@ -2958,6 +3057,8 @@ model CRecordDecl8
 		CCodeGenTestCase(
 			name="CRecordDecl8",
 			description="C code generation for records: declarations: array of records",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl8_f_def(jmi_ad_var_t* o_o) {
@@ -3016,6 +3117,8 @@ model CRecordDecl9
 		CCodeGenTestCase(
 			name="CRecordDecl9",
 			description="C code generation for records: outputs: basic test",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3066,6 +3169,8 @@ model CRecordDecl10
 		CCodeGenTestCase(
 			name="CRecordDecl10",
 			description="C code generation for records: outputs: nested arrays",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3115,6 +3220,8 @@ model CRecordDecl11
 		CCodeGenTestCase(
 			name="CRecordDecl11",
 			description="C code generation for records: outputs: array in record",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3171,6 +3278,8 @@ model CRecordDecl12
 		CCodeGenTestCase(
 			name="CRecordDecl12",
 			description="C code generation for records: outputs: array of records",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3253,6 +3362,8 @@ model CRecordDecl13
 		CCodeGenTestCase(
 			name="CRecordDecl13",
 			description="C code generation for records: inputs: basic test",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3309,6 +3420,8 @@ model CRecordDecl14
 		CCodeGenTestCase(
 			name="CRecordDecl14",
 			description="C code generation for records: inputs: nested records",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3362,6 +3475,8 @@ model CRecordDecl15
 		CCodeGenTestCase(
 			name="CRecordDecl15",
 			description="C code generation for records: inputs: array in record",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3421,6 +3536,8 @@ model CRecordDecl16
 		CCodeGenTestCase(
 			name="CRecordDecl16",
 			description="C code generation for records: inputs: array of records",
+			variability_propagation=false,
+			inline_functions="none",
 			template="
 $C_function_headers$
 $C_functions$
@@ -3481,6 +3598,7 @@ model CRecordDecl17
 		CCodeGenTestCase(
 			name="CRecordDecl17",
 			description="Test that a default field is created for an empty record.",
+			variability_propagation=false,
 			template="$C_records$",
 			generatedCode=
 "typedef struct _A_0_r {
@@ -3512,6 +3630,7 @@ model CRecordDecl18
 		CCodeGenTestCase(
 			name="CRecordDecl18",
 			description="Array of records in subcomponent",
+			variability_propagation=false,
 			template="$C_variable_aliases$",
 			generatedCode="
 #define _b_c_a_1_r_0 ((*(jmi->z))[jmi->offs_real_w+0])
@@ -3526,6 +3645,7 @@ model RemoveCopyright
 		CCodeGenTestCase(
 			name="RemoveCopyright",
 			description="Test that licence tag is filtered out",
+			variability_propagation=false,
 			template="/* test copyright blurb */ test",
 			generatedCode="
 test
@@ -3543,6 +3663,7 @@ model ExtStmtInclude1
 		CCodeGenTestCase(
 			name="ExtStmtInclude1",
 			description="Test that include statement is inserted properly.",
+			variability_propagation=false,
 			template="$external_func_includes$",
 			generatedCode="
 #include \"extFunc.h\"
@@ -3564,6 +3685,7 @@ model ExtStmtInclude2
 		CCodeGenTestCase(
 			name="ExtStmtInclude2",
 			description="Test that include statements are inserted properly.",
+			variability_propagation=false,
 			template="$external_func_includes$",
 			generatedCode="
 #include \"extFunc2.h\"
@@ -3586,6 +3708,7 @@ model SimpleExternal1
 		CCodeGenTestCase(
 			name="SimpleExternal1",
 			description="External C function (undeclared), one scalar input, one scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3629,6 +3752,7 @@ model SimpleExternal2
 		CCodeGenTestCase(
 			name="SimpleExternal2",
 			description="External C function (undeclared), two scalar inputs, one scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3670,6 +3794,7 @@ model SimpleExternal3
 		CCodeGenTestCase(
 			name="SimpleExternal3",
 			description="External C function (declared with return), one scalar input, one scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3711,6 +3836,7 @@ model SimpleExternal4
 		CCodeGenTestCase(
 			name="SimpleExternal4",
 			description="External C function (declared without return), one scalar input, one scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3750,6 +3876,7 @@ model SimpleExternal5
 		CCodeGenTestCase(
 			name="SimpleExternal5",
 			description="External C function (undeclared), scalar input, no output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3780,6 +3907,7 @@ model SimpleExternal6
 		CCodeGenTestCase(
 			name="SimpleExternal6",
 			description="External C function (declared), scalar input, no output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3814,6 +3942,7 @@ model SimpleExternal7
 		CCodeGenTestCase(
 			name="SimpleExternal7",
 			description="External C function (declared without return), two scalar inputs, one scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3859,6 +3988,7 @@ model SimpleExternal8
 		CCodeGenTestCase(
 			name="SimpleExternal8",
 			description="External C function (declared without return), two scalar inputs, two scalar outputs.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3906,6 +4036,7 @@ model SimpleExternal9
 		CCodeGenTestCase(
 			name="SimpleExternal9",
 			description="External C function (declared with return), two scalar inputs, two scalar outputs (one in return stmt, one in fcn stmt).",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3955,6 +4086,7 @@ model SimpleExternal10
 		CCodeGenTestCase(
 			name="SimpleExternal10",
 			description="External C function (declared with return), two scalar inputs, three scalar outputs (one in return stmt, two in fcn stmt).",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4000,6 +4132,7 @@ model IntegerExternal1
 		CCodeGenTestCase(
 			name="IntegerExternal1",
 			description="External C function (undeclared), one scalar Integer input, one scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4043,6 +4176,7 @@ model IntegerExternal2
 		CCodeGenTestCase(
 			name="IntegerExternal2",
 			description="External C function (undeclared), one scalar Real input, one scalar Integer output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4084,6 +4218,7 @@ model IntegerExternal3
 		CCodeGenTestCase(
 			name="IntegerExternal3",
 			description="External C function (declared), one scalar Real input, one scalar Integer output in func stmt.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4132,6 +4267,7 @@ model IntegerExternal4
 		CCodeGenTestCase(
 			name="IntegerExternal4",
 			description="External C function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4184,6 +4320,7 @@ model ExternalLiteral1
 		CCodeGenTestCase(
 			name="ExternalLiteral1",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4227,6 +4364,7 @@ model ExternalLiteral2
 		CCodeGenTestCase(
 			name="ExternalLiteral2",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4266,6 +4404,7 @@ model ExternalLiteral3
 		CCodeGenTestCase(
 			name="ExternalLiteral3",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -4309,6 +4448,8 @@ model IntegerInFunc1
 		CCodeGenTestCase(
 			name="IntegerInFunc1",
 			description="Using Integer variable in function",
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_IntegerInFunc1_f_def(jmi_ad_var_t i_v, jmi_array_t* a_a, jmi_ad_var_t* x_o) {
@@ -4337,6 +4478,7 @@ model IfExpInParExp
 		CCodeGenTestCase(
 			name="IfExpInParExp",
 			description="Test that relational expressions in parameter expressions are treated correctly",
+			variability_propagation=false,
 			template="$C_DAE_initial_dependent_parameter_residuals$",
 			generatedCode="
     (*res)[0] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_r_1_1);
@@ -4354,6 +4496,7 @@ model CIntegerExp1
 		CCodeGenTestCase(
 			name="CIntegerExp1",
 			description="Test that exponential expressions with integer exponents are properly transformed",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
@@ -4368,6 +4511,7 @@ model CIntegerExp2
 		CCodeGenTestCase(
 			name="CIntegerExp2",
 			description="Test that exponential expressions with integer exponents are properly transformed",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0 / (10) / (10) / (10) / (10)) - (_x_0);
@@ -4382,6 +4526,7 @@ model CIntegerExp3
 		CCodeGenTestCase(
 			name="CIntegerExp3",
 			description="Test that exponential expressions with integer exponents are properly transformed",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0) - (_x_0);
@@ -4396,6 +4541,7 @@ model CIntegerExp4
 		CCodeGenTestCase(
 			name="CIntegerExp4",
 			description="Test that exponential expressions with integer exponents are properly transformed",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow(10,10) - (_x_0);
@@ -4410,6 +4556,7 @@ model CIntegerExp5
 		CCodeGenTestCase(
 			name="CIntegerExp5",
 			description="Test that exponential expressions with integer exponents are properly transformed",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow(10,(- 10)) - (_x_0);
@@ -4425,6 +4572,7 @@ model ModelIdentifierTest
 		CCodeGenTestCase(
 			name="ModelIdentifierTest",
 			description="",
+			variability_propagation=false,
 			template="$C_model_id$",
 			generatedCode="
 CCodeGenTests_ModelIdentifierTest
@@ -4438,6 +4586,7 @@ model GUIDTest1
 		CCodeGenTestCase(
 			name="GUIDTest1",
 			description="",
+			variability_propagation=false,
 			template="$C_guid$",
 			generatedCode="
 \"c143b522ea1fdf6db1132a647457c83a\"
@@ -4451,6 +4600,7 @@ model GUIDTest2
 		CCodeGenTestCase(
 			name="GUIDTest2",
 			description="",
+			variability_propagation=false,
 			template="$C_guid$",
 			generatedCode="
 \"ff13c7197701d1a1e9559970770f01f0\"
@@ -4488,6 +4638,8 @@ model DependentParametersWithScalingTest1
 			name="DependentParametersWithScalingTest1",
 			description="",
 			enable_variable_scaling=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_DAE_initial_dependent_parameter_assignments$",
 			generatedCode="
     JMI_RECORD_STATIC(R_0_r, tmp_1)
@@ -4532,6 +4684,7 @@ end when;
 			description="Test of code generation of when clauses.",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_ode_guards$
                    $C_ode_derivatives$ 
@@ -4621,6 +4774,7 @@ equation
 			equation_sorting=true,
 			description="Test that samplers are not duplicated in the function tha computes the next time event.",
 			generate_ode=true,
+			variability_propagation=false,
 			template="
 $C_ode_guards$
                    $C_ode_time_events$" ,
@@ -4670,6 +4824,7 @@ equation
 			description="Test code generation of samplers",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_ode_time_events$ 
                    $C_ode_derivatives$ 
@@ -4683,12 +4838,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -4696,12 +4851,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -4714,13 +4869,13 @@ $C_ode_time_events$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-  _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\"));
+    _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _x_0 = pre_x_0 + 1;
   } else {
   _x_0 = pre_x_0;
   }
-  _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide(AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\"));
+    _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _y_1 = pre_y_1 + 1;
   } else {
@@ -4768,6 +4923,7 @@ equation
 			description="Test code generation of samplers",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
@@ -4779,6 +4935,11 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[1] = 11;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
@@ -4868,6 +5029,7 @@ equation
 			description="Test code generation of samplers",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_init_blocks_residual_functions$
 $C_ode_derivatives$
@@ -4879,6 +5041,11 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[1] = 11;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = pre_x_c_3;
     x[1] = _x_c_3;
@@ -4961,6 +5128,7 @@ model WhenEqu6
 			description="Test code generation when equations with function calls.",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_init_blocks_residual_functions$
                    $C_ode_derivatives$ 
@@ -5007,6 +5175,7 @@ equation
 			name="NoDAEGenerationTest1",
 			description="Test that no DAE is generated if the corresponding option is set to false.",
 			generate_dae=false,
+			variability_propagation=false,
 			template="
 $C_DAE_equation_residuals$
                    $C_DAE_initial_equation_residuals$
@@ -5030,6 +5199,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			enable_tearing=false,
+			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -5042,6 +5212,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 1;
+    x[1] = 0;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_1;
     x[1] = _x_0;
@@ -5068,6 +5244,12 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 1;
+    x[1] = 0;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_1;
     x[1] = _x_0;
@@ -5121,6 +5303,7 @@ der(x1) = -x1 + z1;
 			description="Test generation of equation blocks",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -5133,6 +5316,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 6;
+    x[1] = 5;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z2_2_4;
     x[1] = _z2_1_3;
@@ -5158,6 +5347,10 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 4;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z1_2;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -5175,6 +5368,10 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 4;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z1_2;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -5191,6 +5388,12 @@ static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 6;
+    x[1] = 5;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z2_2_4;
     x[1] = _z2_1_3;
@@ -5271,6 +5474,7 @@ equation
 			description="Test of code generation of blocks",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -5283,6 +5487,16 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 7;
+    x[1] = 10;
+    x[2] = 8;
+    x[3] = 4;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
+    (*res)[2] = 1;
+    (*res)[3] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _a_4;
     x[1] = _sa_7;
@@ -5332,6 +5546,16 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 7;
+    x[1] = 10;
+    x[2] = 8;
+    x[3] = 4;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
+    (*res)[2] = 1;
+    (*res)[3] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _a_4;
     x[1] = _sa_7;
@@ -5386,7 +5610,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /**** Other variables ***/
   _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
 
-    model_ode_guards(jmi);
+      model_ode_guards(jmi);
   _der_dummy_12 = 1;
   _u_6 = 2 * sin(_time);
   pre_mode_10 = 2;
@@ -5396,6 +5620,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   _dummy_11 = 0.0;
   pre_startFor_8 = JMI_FALSE;
   pre_startBack_9 = JMI_FALSE;
+
 ")})));
 end BlockTest3;
 
@@ -5414,52 +5639,61 @@ equation
 			description="Test that min, max, and nominal attributes are correctly generated",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[0] = 5.0;
-    x[2] = 8.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[1] = 3.0;
-    x[2] = 4.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[0] = -2.0;
-    x[2] = 5.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1;
-    init_with_ubound(x[0],-2.0, \"Resetting initial value for y\");
-    x[1] = _x_0;
-    init_with_lbound(x[1],3.0, \"Resetting initial value for x\");
-    x[2] = _z_2;
-    init_with_bounds(x[2],4.0, 5.0, \"Resetting initial value for z\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 3 * 1.0;
-    residual[1] = - (- 1.0);
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 1.0;
-    residual[5] = - 1.0;
-    residual[6] = - 1.0;
-    residual[7] = 0.0;
-    residual[8] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_ubound(x[0],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[1],3.0, \"Out of bound for variable x\");
-    check_bounds(x[2],4.0, 5.0, \"Out of bounds for variable z\");
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  (*res)[0] = _x_0 + 3 * _y_1 + _z_2 - (5);
-  (*res)[1] = _x_0 - _y_1 - (3);
-  (*res)[2] = _x_0 + _y_1 - (_z_2);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1 = x[0];
-    _x_0 = x[1];
-    _z_2 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[0] = 5;
+        x[2] = 8;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[1] = 3;
+        x[2] = 4;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[0] = -2;
+        x[2] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+        x[1] = 0;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        init_with_ubound(x[0], -2, \"Resetting initial value for variable y\");
+        x[1] = _x_0;
+        init_with_lbound(x[1], 3, \"Resetting initial value for variable x\");
+        x[2] = _z_2;
+        init_with_bounds(x[2], 4, 5, \"Resetting initial value for variable z\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 3 * 1.0;
+        residual[1] = - (- 1.0);
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 1.0;
+        residual[5] = - 1.0;
+        residual[6] = - 1.0;
+        residual[7] = 0.0;
+        residual[8] = 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_ubound(x[0], -2, \"Out of bounds for variable y\");
+        _y_1 = x[0];
+        check_lbound(x[1], 3, \"Out of bounds for variable x\");
+        _x_0 = x[1];
+        check_bounds(x[2], 4, 5, \"Out of bounds for variable z\");
+        _z_2 = x[2];
+        (*res)[0] = _x_0 + 3 * _y_1 + _z_2 - (5);
+        (*res)[1] = _x_0 - _y_1 - (3);
+        (*res)[2] = _x_0 + _y_1 - (_z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
 }
 
 ")})));
@@ -5482,58 +5716,65 @@ model BlockTest5
 			description="Test of min and max for iteration varaibles.",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 16.0;
-    x[2] = 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -2.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],16.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-2.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],1.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 1.0;
-    residual[1] = 0.0;
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 3 * 1.0;
-    residual[5] = - (- 1.0);
-    residual[6] = - 1.0;
-    residual[7] = - 1.0;
-    residual[8] = - 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],16.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-2.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],1.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
-  (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[1] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 16.0;
+        x[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[1] = -2;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+        x[1] = 3;
+        x[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2_2;
+        init_with_lbound(x[0], 16.0, \"Resetting initial value for variable x[2]\");
+        x[1] = _y_3;
+        init_with_ubound(x[1], -2, \"Resetting initial value for variable y\");
+        x[2] = _x_1_1;
+        init_with_lbound(x[2], 1, \"Resetting initial value for variable x[1]\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 1.0;
+        residual[1] = 0.0;
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 3 * 1.0;
+        residual[5] = - (- 1.0);
+        residual[6] = - 1.0;
+        residual[7] = - 1.0;
+        residual[8] = - 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_lbound(x[0], 16.0, \"Out of bounds for variable x[2]\");
+        _x_2_2 = x[0];
+        check_ubound(x[1], -2, \"Out of bounds for variable y\");
+        _y_3 = x[1];
+        check_lbound(x[2], 1, \"Out of bounds for variable x[1]\");
+        _x_1_1 = x[2];
+        (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+        (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+        (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_2_2 = x[0];
+        _y_3 = x[1];
+        _x_1_1 = x[2];
+    }
+    return 0;
 }
 
 ")})));
 end BlockTest5;
 
 model BlockTest6
- 
-
   function f1
     input Real x;
 	output Real y=0;
@@ -5567,50 +5808,59 @@ model BlockTest6
 			description="Test of min, max and nominal attributes in blocks",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-    x[1] = 5.0;
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-    x[0] = 12.0;
-    x[2] = 6.0;
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-    x[1] = -6.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _x_2_2;
-    init_with_lbound(x[0],12.0, \"Resetting initial value for x[2]\");
-    x[1] = _y_3;
-    init_with_ubound(x[1],-6.0, \"Resetting initial value for y\");
-    x[2] = _x_1_1;
-    init_with_lbound(x[2],6.0, \"Resetting initial value for x[1]\");
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-    residual[0] = - 1.0;
-    residual[1] = 0.0;
-    residual[2] = - 1.0;
-    residual[3] = - 1.0;
-    residual[4] = - 3 * 1.0;
-    residual[5] = - (- 1.0);
-    residual[6] = - 1.0;
-    residual[7] = - 1.0;
-    residual[8] = - 1.0;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    check_lbound(x[0],12.0, \"Out of bound for variable x[2]\");
-    check_ubound(x[1],-6.0, \"Out of bounds for variable y\");
-    check_lbound(x[2],6.0, \"Out of bound for variable x[1]\");
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-  (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
-  (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _x_2_2 = x[0];
-    _y_3 = x[1];
-    _x_1_1 = x[2];
-  }
-  return 0;
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[1] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 12.0;
+        x[2] = 6.0;
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+        x[1] = -6.0;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 4;
+        x[1] = 5;
+        x[2] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+        (*res)[2] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_2_2;
+        init_with_lbound(x[0], 12.0, \"Resetting initial value for variable x[2]\");
+        x[1] = _y_3;
+        init_with_ubound(x[1], -6.0, \"Resetting initial value for variable y\");
+        x[2] = _x_1_1;
+        init_with_lbound(x[2], 6.0, \"Resetting initial value for variable x[1]\");
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        residual[0] = - 1.0;
+        residual[1] = 0.0;
+        residual[2] = - 1.0;
+        residual[3] = - 1.0;
+        residual[4] = - 3 * 1.0;
+        residual[5] = - (- 1.0);
+        residual[6] = - 1.0;
+        residual[7] = - 1.0;
+        residual[8] = - 1.0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        check_lbound(x[0], 12.0, \"Out of bounds for variable x[2]\");
+        _x_2_2 = x[0];
+        check_ubound(x[1], -6.0, \"Out of bounds for variable y\");
+        _y_3 = x[1];
+        check_lbound(x[2], 6.0, \"Out of bounds for variable x[1]\");
+        _x_1_1 = x[2];
+        (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
+        (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+        (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_2_2 = x[0];
+        _y_3 = x[1];
+        _x_1_1 = x[2];
+    }
+    return 0;
 }
 
 ")})));
@@ -5643,6 +5893,7 @@ p*A*y = y;
 			description="Test of min, max and nominal attributes in blocks",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -5655,6 +5906,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 6;
+    x[1] = 5;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2_5;
     x[1] = _x_1_4;
@@ -5666,8 +5923,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
-  (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
-  (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
+    (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
+    (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
@@ -5680,6 +5937,12 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 8;
+    x[1] = 7;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_2_7;
     x[1] = _y_1_6;
@@ -5691,8 +5954,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
-  (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
-  (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
+    (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
+    (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
@@ -5705,6 +5968,12 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 10;
+    x[1] = 9;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z_2_9;
     x[1] = _z_1_8;
@@ -5716,8 +5985,8 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
-  (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
-  (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
+    (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
+    (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
@@ -5730,6 +5999,12 @@ static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 12;
+    x[1] = 11;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _w_2_11;
     x[1] = _w_1_10;
@@ -5741,8 +6016,8 @@ static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
-  (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
-  (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
+    (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
+    (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
@@ -5756,6 +6031,12 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 6;
+    x[1] = 5;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2_5;
     x[1] = _x_1_4;
@@ -5767,8 +6048,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
-  (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
-  (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
+    (*res)[0] = 4 - (3 * _x_1_4 + 4 * _x_2_5);
+    (*res)[1] = 3 - (1 * _x_1_4 + 2 * _x_2_5);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _x_2_5 = x[0];
     _x_1_4 = x[1];
@@ -5781,6 +6062,12 @@ static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 8;
+    x[1] = 7;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _y_2_7;
     x[1] = _y_1_6;
@@ -5792,8 +6079,8 @@ static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
-  (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
-  (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
+    (*res)[0] = _y_2_7 - (_p_12 * _A_2_1_2 * _y_1_6 + _p_12 * _A_2_2_3 * _y_2_7);
+    (*res)[1] = _y_1_6 - (_p_12 * _A_1_1_0 * _y_1_6 + _p_12 * _A_1_2_1 * _y_2_7);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _y_2_7 = x[0];
     _y_1_6 = x[1];
@@ -5806,6 +6093,12 @@ static int dae_init_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 10;
+    x[1] = 9;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _z_2_9;
     x[1] = _z_1_8;
@@ -5817,8 +6110,8 @@ static int dae_init_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
-  (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
-  (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
+    (*res)[0] = _z_2_9 + 2 - ((_d_13 + 1) * _A_2_1_2 * _z_1_8 + (_d_13 + 1) * _A_2_2_3 * _z_2_9);
+    (*res)[1] = _z_1_8 + 2 - ((_d_13 + 1) * _A_1_1_0 * _z_1_8 + (_d_13 + 1) * _A_1_2_1 * _z_2_9);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _z_2_9 = x[0];
     _z_1_8 = x[1];
@@ -5831,6 +6124,12 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 12;
+    x[1] = 11;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _w_2_11;
     x[1] = _w_1_10;
@@ -5842,8 +6141,8 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
-  (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
-  (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
+    (*res)[0] = _w_2_11 + 3 - ((_x_1_4 + 1) * _A_2_1_2 * _w_1_10 + (_x_1_4 + 1) * _A_2_2_3 * _w_2_11);
+    (*res)[1] = _w_1_10 + 3 - ((_x_1_4 + 1) * _A_1_1_0 * _w_1_10 + (_x_1_4 + 1) * _A_1_2_1 * _w_2_11);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
     _w_2_11 = x[0];
     _w_1_10 = x[1];
@@ -5863,6 +6162,409 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
  jmi_dae_init_add_equation_block(*jmi,dae_init_block_3,NULL,2,0,JMI_CONTINUOUS_VARIABILITY,JMI_LINEAR_SOLVER,3 );
 ")})));
 end BlockTest7;
+
+model BlockTest8
+    Real a;
+    Real b;
+    Boolean d;
+equation
+    a = 1 - b;
+    a = b * (if d then 1 else 2);
+    d = b < 0;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="BlockTest8",
+			description="Test of mixed non-solved equation block",
+			generate_ode=true,
+			equation_sorting=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+$C_dae_init_add_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+        x[1] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_1;
+        x[1] = _a_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_1 = x[0];
+        _a_0 = x[1];
+        (*res)[0] = _b_1 * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
+        (*res)[1] = 1 - _b_1 - (_a_0);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+        _d_2 = _sw(0);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_1 = x[0];
+        _a_0 = x[1];
+    }
+    return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+        x[1] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_1;
+        x[1] = _a_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_1 = x[0];
+        _a_0 = x[1];
+        (*res)[0] = _b_1 * COND_EXP_EQ(_d_2, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_a_0);
+        (*res)[1] = 1 - _b_1 - (_a_0);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+        _d_2 = _sw(0);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_1 = x[0];
+        _a_0 = x[1];
+    }
+    return 0;
+}
+
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 2, 1, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 0);
+
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 2, 1, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 0);
+
+")})));
+end BlockTest8;
+
+model Algorithm1
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := 5;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm1",
+			description="C code generation of algorithms",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = 5;
+    _y_1 = _x_0 + 2;
+")})));
+end Algorithm1;
+
+
+model Algorithm2
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := 5;
+ x := x + 2;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm2",
+			description="C code generation of algorithms",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = 5;
+    _x_0 = _x_0 + 2;
+    _y_1 = _x_0 + 2;
+")})));
+end Algorithm2;
+
+
+model Algorithm3
+ Real x;
+ Real y;
+equation
+ y = x + 2;
+algorithm
+ x := y;
+ x := x * 2;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm3",
+			description="C code generation of algorithms - in block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+    }
+    return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+    }
+    return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+")})));
+end Algorithm3;
+
+
+model Algorithm4
+    Real x, y, z;
+equation
+    y + x + z = 3;
+algorithm
+    y:= x*2 + 2;
+    z:= y + x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm4",
+			description="C code generation of algorithms - in block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+        x[2] = _z_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _y_1 - x[1];
+        _y_1 = x[1];
+        (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+        x[1] = 1;
+        x[2] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        x[1] = _y_1;
+        x[2] = _z_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = _x_0 - x[0];
+        _x_0 = x[0];
+        (*res)[1] = _y_1 - x[1];
+        _y_1 = x[1];
+        (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+        _y_1 = x[1];
+        _z_2 = x[2];
+    }
+    return 0;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+")})));
+end Algorithm4;
+
+
+model Algorithm5
+ Real x;
+algorithm
+ while x < 1 loop
+  while x < 2 loop
+   while x < 3 loop
+    x := x + 1;
+   end while;
+  end while;
+ end while;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm5",
+			description="C code generation of algorithm with while loops",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    while (COND_EXP_LT(_x_0, 1, JMI_TRUE, JMI_FALSE)) {
+        while (COND_EXP_LT(_x_0, 2, JMI_TRUE, JMI_FALSE)) {
+            while (COND_EXP_LT(_x_0, 3, JMI_TRUE, JMI_FALSE)) {
+                _x_0 = _x_0 + 1;
+            }
+        }
+    }
+")})));
+end Algorithm5;
+
+
+model Algorithm6
+ Real x;
+algorithm
+ for i in {1, 2, 4}, j in 1:3 loop
+  x := x + i * j;
+ end for;
+end Algorithm6;
+
 
 model OutputTest1
 
@@ -5993,6 +6695,7 @@ cos(w_other_3_1)*4*(w_other_3_2) + (w_other_3_3) + 4*(x_4) - sin(x_4) + (x_3) + 
 			description="Test of code generation of output value references.",
 			generate_ode=true,
 			equation_sorting=true,
+			variability_propagation=false,
 			template="
 $n_outputs$
 				   $C_DAE_output_vrefs$
@@ -6019,6 +6722,7 @@ equation
 		CCodeGenTestCase(
 			name="StartValues1",
 			description="",
+			variability_propagation=false,
 			template="$C_set_start_values$",
 			generatedCode="
 _y_1 = (2);
@@ -6049,6 +6753,7 @@ equation
 		CCodeGenTestCase(
 			name="StartValues2",
 			description="",
+			variability_propagation=false,
 			template="$C_set_start_values$",
 			generatedCode="
     _pr_0 = (1.5);
@@ -6080,6 +6785,7 @@ model ExternalArray1
 		CCodeGenTestCase(
 			name="ExternalArray1",
 			description="External C function (undeclared) with one dim array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6121,6 +6827,7 @@ model ExternalArray2
 		CCodeGenTestCase(
 			name="ExternalArray2",
 			description="External C function (undeclared) with two dim array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6163,6 +6870,7 @@ model ExternalArray3
 		CCodeGenTestCase(
 			name="ExternalArray3",
 			description="External C function (undeclared) with two dim and unknown no of elements array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6206,6 +6914,7 @@ model ExternalArray4
 		CCodeGenTestCase(
 			name="ExternalArray4",
 			description="External C function (undeclared) with one dim array input, one dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6244,6 +6953,7 @@ model ExternalArray5
 		CCodeGenTestCase(
 			name="ExternalArray5",
 			description="External C function (undeclared) with two dim array input, two dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6282,6 +6992,7 @@ model ExternalArray6
 		CCodeGenTestCase(
 			name="ExternalArray6",
 			description="External C function (undeclared) with two dim and unknown no of elements array input, two dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6319,6 +7030,7 @@ model IntegerExternalArray1
 		CCodeGenTestCase(
 			name="IntegerExternalArray1",
 			description="External C function (undeclared) with one dim Integer array input, scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6363,6 +7075,7 @@ model IntegerExternalArray2
 		CCodeGenTestCase(
 			name="IntegerExternalArray2",
 			description="External C function (undeclared) with two dim Integer array input, scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6407,6 +7120,7 @@ model IntegerExternalArray3
 		CCodeGenTestCase(
 			name="IntegerExternalArray3",
 			description="External C function (undeclared) with one scalar Real input, one dim array Integer output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6449,6 +7163,7 @@ model IntegerExternalArray4
 		CCodeGenTestCase(
 			name="IntegerExternalArray4",
 			description="External C function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6496,6 +7211,7 @@ model SimpleExternalFortran1
 		CCodeGenTestCase(
 			name="SimpleExternalFortran1",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6540,6 +7256,7 @@ model SimpleExternalFortran2
 		CCodeGenTestCase(
 			name="SimpleExternalFortran2",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6582,6 +7299,7 @@ model SimpleExternalFortran3
 		CCodeGenTestCase(
 			name="SimpleExternalFortran3",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6624,6 +7342,7 @@ model SimpleExternalFortran4
 		CCodeGenTestCase(
 			name="SimpleExternalFortran4",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6665,6 +7384,7 @@ model SimpleExternalFortran5
 		CCodeGenTestCase(
 			name="SimpleExternalFortran5",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6697,6 +7417,7 @@ model SimpleExternalFortran6
 		CCodeGenTestCase(
 			name="SimpleExternalFortran6",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6733,6 +7454,7 @@ model SimpleExternalFortran7
 		CCodeGenTestCase(
 			name="SimpleExternalFortran7",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6780,6 +7502,7 @@ model SimpleExternalFortran8
 		CCodeGenTestCase(
 			name="SimpleExternalFortran8",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6829,6 +7552,7 @@ model SimpleExternalFortran9
 		CCodeGenTestCase(
 			name="SimpleExternalFortran9",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6880,6 +7604,7 @@ model SimpleExternalFortran10
 		CCodeGenTestCase(
 			name="SimpleExternalFortran10",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6926,6 +7651,7 @@ model IntegerExternalFortran1
 		CCodeGenTestCase(
 			name="IntegerExternalFortran1",
 			description="External Fortran function, one scalar Integer input, one scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -6970,6 +7696,7 @@ model IntegerExternalFortran2
 		CCodeGenTestCase(
 			name="IntegerExternalFortran2",
 			description="",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7012,6 +7739,7 @@ model IntegerExternalFortran3
 		CCodeGenTestCase(
 			name="IntegerExternalFortran3",
 			description="External Fortran function (declared), one scalar Real input, one scalar Integer output in func stmt.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7061,6 +7789,7 @@ model IntegerExternalFortran4
 		CCodeGenTestCase(
 			name="IntegerExternalFortran4",
 			description="External Fortran function (declared), two scalar Integer inputs, two scalar Integer outputs (one in return, one in func stmt.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7113,6 +7842,7 @@ model ExternalArrayFortran1
 		CCodeGenTestCase(
 			name="ExternalArrayFortran1",
 			description="External Fortan function with one dim array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7156,6 +7886,7 @@ model ExternalArrayFortran2
 		CCodeGenTestCase(
 			name="ExternalArrayFortran2",
 			description="External Fortan function with two dim array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7203,6 +7934,7 @@ model ExternalArrayFortran3
 		CCodeGenTestCase(
 			name="ExternalArrayFortran3",
 			description="External Fortran function with two dim and unknown no of elements array input, scalar output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7251,6 +7983,7 @@ model ExternalArrayFortran4
 		CCodeGenTestCase(
 			name="ExternalArrayFortran4",
 			description="External Fortran function with one dim array input, one dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7291,6 +8024,7 @@ model ExternalArrayFortran5
 		CCodeGenTestCase(
 			name="ExternalArrayFortran5",
 			description="External Fortran function with two dim array input, two dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7338,6 +8072,7 @@ model ExternalArrayFortran6
 		CCodeGenTestCase(
 			name="ExternalArrayFortran6",
 			description="External Fortran function with two dim and unknown no of elements array input, two dim array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7383,6 +8118,7 @@ model IntegerExternalArrayFortran1
 		CCodeGenTestCase(
 			name="IntegerExternalArrayFortran1",
 			description="External Fortran function (undeclared) with one dim Integer array input, scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7428,6 +8164,7 @@ model IntegerExternalArrayFortran2
 		CCodeGenTestCase(
 			name="IntegerExternalArrayFortran2",
 			description="External Fortran function (undeclared) with two dim Integer array input, scalar Real output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7473,6 +8210,7 @@ model IntegerExternalArrayFortran3
 		CCodeGenTestCase(
 			name="IntegerExternalArrayFortran3",
 			description="External Fortran function (undeclared) with one scalar Real input, one dim array Integer output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7516,6 +8254,7 @@ model IntegerExternalArrayFortran4
 		CCodeGenTestCase(
 			name="IntegerExternalArrayFortran4",
 			description="External Fortran function (undeclared) with one 2-dim Integer array input, one 2-dim Integer array output.",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7548,16 +8287,17 @@ end IntegerExternalArrayFortran4;
 
 model Smooth1
   Real y = time - 2;
-  Real x = smooth(2, if y < 0 then 0 else y ^ 3);
+  Real x = smooth(0, if y < 0 then 0 else y ^ 3);
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="Smooth1",
 			description="",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _time - 2 - (_y_0);
-    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(0), (1.0 * (_y_0) * (_y_0) * (_y_0))) - (_x_1);
+    (*res)[1] = (COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(0), (1.0 * (_y_0) * (_y_0) * (_y_0)))) - (_x_1);
 ")})));
 end Smooth1;
 
@@ -7570,6 +8310,7 @@ model CFloor1
 		CCodeGenTestCase(
 			name="CFloor1",
 			description="C code generation for floor() operator",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = floor(_x_0) - (_y_1);
@@ -7604,6 +8345,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			enable_tearing=true,
+			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -7611,6 +8353,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 12;
+    x[1] = 13;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _i2_6;
     x[1] = _i3_7;
@@ -7619,7 +8367,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     _i3_7 = x[1];
   _i1_5 = _i2_6 + _i3_7;
   _u1_1 = _R1_9 * _i1_5;
-  _u2_2 = jmi_divide((- _u0_0 + _u1_1),(- 1.0),\"Divide by zero: (- u0 + u1) / (- 1.0)\");
+  _u2_2 = jmi_divide_logged(jmi, (- _u0_0 + _u1_1),(- 1.0),\"Divide by zero: (- u0 + u1) / (- 1.0)\");
   (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
   (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -7654,6 +8402,8 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			enable_tearing=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -7662,6 +8412,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 0;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _x_2;
   } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
@@ -7708,6 +8462,8 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			enable_tearing=true,
+			variability_propagation=false,
+			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -7721,6 +8477,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   if (evaluation_mode==JMI_BLOCK_NOMINAL) {
   } else  if (evaluation_mode==JMI_BLOCK_MIN) {
   } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 5;
+    x[1] = 0;
+    x[2] = 1;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 1;
+    (*res)[1] = 1;
+    (*res)[2] = 1;
   } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
     x[0] = _f_5;
     x[1] = _a_0;
@@ -7748,6 +8512,138 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end RecordTearingTest1;
 
+model LocalLoopTearingTest1
+	Real a, b, c;
+equation
+	20 = c * a;
+	23 = c * b;
+	c = a + b;
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="LocalLoopTearingTest1",
+			description="Tests generation of local loops in torn blocks",
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			enable_hand_guided_tearing=true,
+			local_iteration_in_tearing=true,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_1 = x[0];
+        (*res)[0] = _c_2 * _b_1 - (23);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_1 = x[0];
+    }
+    return 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _c_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _c_2 = x[0];
+        jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+        _a_0 = jmi_divide_logged(jmi, (- _c_2 + _b_1),(- 1.0),\"Divide by zero: (- c + b) / (- 1.0)\");
+        (*res)[0] = _c_2 * _a_0 - (20);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _c_2 = x[0];
+    }
+    return 0;
+}
+
+
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 0);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_KINSOL_SOLVER, 1);
+
+")})));
+end LocalLoopTearingTest1;
+
+model NominalTest1
+	Real x[2], y[2];
+	parameter Boolean pEnabled = true;
+	parameter Real pValues[2] = {2,3};
+equation
+	x = y .+ 1;
+	y = x .- 1 annotation(__Modelon(nominal(enabled=pEnabled)=pValues));
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="NominalTest1",
+			description="Test code generation of nominal annotation",
+			generate_ode=true,
+			equation_sorting=true,
+			enable_tearing=true,
+			variability_propagation=false,
+			template="$C_dae_blocks_residual_functions$",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+  jmi_real_t** res = &residual;
+  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
+  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
+  } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 5;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+    (*res)[0] = 2.0;
+  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_1_2;
+  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
+    _y_1_2 = x[0];
+  _x_1_0 = _y_1_2 + 1;
+  (*res)[0] = _x_1_0 - 1 - (_y_1_2);
+  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    _y_1_2 = x[0];
+  }
+  return 0;
+}
+
+static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+  jmi_real_t** res = &residual;
+  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
+  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
+  } else if (evaluation_mode==JMI_BLOCK_MAX) {
+  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
+    x[0] = 6;
+  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
+      (*res)[0] = 3.0;
+  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
+    x[0] = _y_2_3;
+  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
+    _y_2_3 = x[0];
+  _x_2_1 = _y_2_3 + 1;
+  (*res)[0] = _x_2_1 - 1 - (_y_2_3);
+  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+    _y_2_3 = x[0];
+  }
+  return 0;
+}
+
+")})));
+end NominalTest1;
+
 model MathSolve
 	Real a[2,2] = [1,2;3,4];
     Real b[2] = {-2,3};
@@ -7759,6 +8655,7 @@ equation
 		CCodeGenTestCase(
 			name="MathSolve",
 			description="Using MSL function Modelica.Math.Matrices.solve",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7851,6 +8748,7 @@ equation
 		CCodeGenTestCase(
 			name="MathSolve2",
 			description="Using MSL function Modelica.Math.Matrices.solve",
+			variability_propagation=false,
 			template="
 $C_function_headers$
 $C_functions$
@@ -7988,6 +8886,7 @@ equation
 		CCodeGenTestCase(
 			name="TestExtObject1",
 			description="",
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_function_headers$
@@ -8061,6 +8960,7 @@ equation
 		CCodeGenTestCase(
 			name="TestExtObject2",
 			description="",
+			variability_propagation=false,
 			template="
 $C_variable_aliases$
 $C_function_headers$
@@ -8148,6 +9048,7 @@ equation
 		CCodeGenTestCase(
 			name="TestExtObject3",
 			description="",
+			variability_propagation=false,
 			template="
 $C_set_start_values$
 $C_DAE_initial_dependent_parameter_assignments$
@@ -8209,6 +9110,7 @@ equation
 		CCodeGenTestCase(
 			name="TestExtObject4",
 			description="Arrays of external objects",
+			variability_propagation=false,
 			template="$C_destruct_external_object$",
 			generatedCode="
     if (_myEOs_1_1 != NULL) {
@@ -8225,20 +9127,73 @@ equation
     }
 ")})));
 end TestExtObject4;
+    
+
+model TestExtObject5
+    ExtObject a = ExtObject();
+    ExtObject b = a; 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObject5",
+			description="Test that destructor calls are only generated for external objects with constructor calls",
+			variability_propagation=false,
+			template="$C_destruct_external_object$",
+			generatedCode="
+    if (_a_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_a_0);
+        _a_0 = NULL;
+    }
+")})));
+end TestExtObject5;
+
+
+model TestExtObject6
+    ExtObject eo1 = ExtObject();
+    ExtObject myEOs[2] = { ExtObject(), eo1 };
+    Real y[2];
+equation
+    for i in 1:2 loop
+        y[i] = useMyEO(myEOs[i]);
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObject6",
+			description="Test that destructor calls are only generated for external objects with constructor calls",
+			variability_propagation=false,
+			template="$C_destruct_external_object$",
+			generatedCode="
+    if (_eo1_0 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_eo1_0);
+        _eo1_0 = NULL;
+    }
+    if (_myEOs_1_1 != NULL) {
+        func_CCodeGenTests_ExtObject_destructor_def(_myEOs_1_1);
+        _myEOs_1_1 = NULL;
+    }
+")})));
+end TestExtObject6;
 
 
 model TestRuntimeOptions1
     Real x = 1;
 
-	annotation(__JModelica(UnitTesting(tests={ 
+	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRuntimeOptions1",
 			description="Testing generation of runtime options map",
 			generate_ode=true,
 			generate_runtime_option_parameters=true,
+			variability_propagation=false,
 			template="$C_runtime_option_map$",
 			generatedCode="
 const char *fmi_runtime_options_map_names[] = {
+    \"_block_jacobian_check\",
+    \"_block_jacobian_check_tol\",
+    \"_cs_rel_tol\",
+    \"_cs_solver\",
+    \"_cs_step_size\",
     \"_enforce_bounds\",
     \"_events_default_tol\",
     \"_events_tol_factor\",
@@ -8253,17 +9208,20 @@ const char *fmi_runtime_options_map_names[] = {
     \"_use_Brent_in_1d\",
     \"_use_automatic_scaling\",
     \"_use_jacobian_scaling\",
+    \"_use_manual_equation_scaling\",
     NULL
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870919, 0, 1, 268435461, 536870920, 2, 268435462, 3, 4, 536870921,
-    536870922, 536870923, 536870924, 536870925, 0
+    536870923, 0, 1, 268435464, 2, 536870924, 3, 4, 268435465, 536870925,
+    5, 268435466, 6, 7, 536870926, 536870927, 536870928, 536870929, 536870930, 536870931,
+    0
 };
 
-const int fmi_runtime_options_map_length = 14;
+const int fmi_runtime_options_map_length = 20;
 ")})));
 end TestRuntimeOptions1;
+
 
 
 model TestEmptyArray1
@@ -8272,6 +9230,7 @@ model TestEmptyArray1
 		output Real e;
 	algorithm
 		e := sum(size(d));
+		e := e + 1;
 	end f;
 	
 	parameter Real a[:, :] = fill(0.0,0,2);
@@ -8283,7 +9242,8 @@ model TestEmptyArray1
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestEmptyArray1",
-			description="",
+			description="Test handling of empty arrays",
+			variability_propagation=false,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     JMI_ARRAY_STATIC(tmp_1, 0, 2)
@@ -8292,5 +9252,200 @@ model TestEmptyArray1
     (*res)[1] = 1 - (_y_3);
 ")})));
 end TestEmptyArray1;
+
+model TestRelationalOp1
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp1",
+			description="Test correct generation of all four relational operators",
+			variability_propagation=false,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp1;
+
+model TestRelationalOp2
+
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = if y<=0 then 0 else 1;
+ der(v2) = if y<0 then 0 else 1;
+ der(v3) = if y>=0 then 0 else 1;
+ der(v4) = if y>0 then 0 else 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp2",
+			description="Test correct generation of all four relational operators",
+			variability_propagation=false,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 4;
+static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+")})));
+end TestRelationalOp2;
+
+model TestRelationalOp3
+Real v1(start=-1);
+Real v2(start=-1);
+Real v3(start=-1);
+Real v4(start=-1);
+Real y(start=1);
+Integer i(start=0);
+Boolean up(start=true);
+initial equation
+ v1 = if time>=0 and time<=3 then 0 else 0;
+ v2 = if time>0 then 0 else 0;
+ v3 = if time<=0 and time <= 2 then 0 else 0;
+ v4 = if time<0 then 0 else 0;
+equation
+when sample(0.1,1) then
+  i = if up then pre(i) + 1 else pre(i) - 1;
+  up = if pre(i)==2 then false else if pre(i)==-2 then true else pre(up);
+  y = i;
+end when;
+ der(v1) = y;
+ der(v2) = y;
+ der(v3) = y;
+ der(v4) = y;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp3",
+			description="Test generation of all four relational operators.",
+			variability_propagation=false,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 6;
+static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
+
+static const int N_relations = 0;
+static const int DAE_relations[1]= {-1};
+")})));
+end TestRelationalOp3;
+
+model TestRelationalOp4
+  parameter Real p1 = 1;
+  parameter Real p2 = if p1 >=1 then 1 else 2;
+  Real x;
+  Real y;
+  Real z;
+  Real w;
+  Real r;
+  discrete Real q1;
+  discrete Real q2;
+initial equation
+  x = if time>=4 then 1 else 2;
+  y = if noEvent(time>=2) then 2 else 5;
+  z = if p1<=5 then 1 else 6;
+equation
+  der(x) = if time>=1 then 1 else 0; 
+  der(y) = if noEvent(time>=1) then 1 else 0; 
+  der(z) = if p1>=1 then 1 else 0; 
+  der(w) = if 2>=1 then 1 else 0; 
+  der(r) = if y>=3 then 1.0 else 0.0; 
+  when x>=0.1 then 
+    q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1);
+    q2 = if w>=0.5 then pre(q2) else 2*pre(q2); 
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp4",
+			description="Test correct event generation.",
+			variability_propagation=false,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$",
+			generatedCode="
+static const int N_initial_relations = 1;
+static const int DAE_initial_relations[1]= {JMI_REL_GEQ};
+
+static const int N_relations = 3;
+static const int DAE_relations[3]= {JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ};
+")})));
+
+end TestRelationalOp4;
+
+model TestRelationalOp5
+  Real x;
+  Real y;
+  Real z;
+equation
+  der(x) = smooth(0,if x>=0 then x else 0); 
+  der(y) = smooth(1,if y>=0 then y^2 else 0); 
+  der(z) = smooth(2,if z>=0 then z^3 else 0); 
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestRelationalOp5",
+			description="Test correct event generation in smooth operators.",
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="$C_DAE_initial_relations$
+                                  $C_DAE_relations$
+                                  $C_ode_derivatives$",
+			generatedCode="
+static const int N_initial_relations = 0;
+static const int DAE_initial_relations[1]= {-1};
+
+static const int N_relations = 1;
+static const int DAE_relations[1]= {JMI_REL_GEQ};
+
+      model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_3 = (COND_EXP_EQ(_sw(0), JMI_TRUE, _x_0, AD_WRAP_LITERAL(0)));
+    _der_y_4 = (COND_EXP_EQ(COND_EXP_GE(_y_1, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_y_1) * (_y_1)), AD_WRAP_LITERAL(0)));
+    _der_z_5 = (COND_EXP_EQ(COND_EXP_GE(_z_2, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_z_2) * (_z_2) * (_z_2)), AD_WRAP_LITERAL(0)));
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+")})));
+
+end TestRelationalOp5;
+
 
 end CCodeGenTests;

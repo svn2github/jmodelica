@@ -2,8 +2,8 @@ package JMExamples_opt
 
 	optimization BangControl_opt (objective = finalTime,
                             startTime = 0,
-                            finalTime(free=true,min=0))                
-      extends JMExamples.BangControl.BangControl(x1(fixed=true),x2(fixed=true));     
+                            finalTime(free=true,min=0))
+      extends JMExamples.BangControl.BangControl(x1(fixed=true),x2(fixed=true));
 														  
    equation
    constraint
@@ -206,7 +206,7 @@ package JMExamples_opt
                             startTime = 0,
                             finalTime = 1)
                             
-      extends JMExamples.ContState.ContState(x1(fixed=true),x2(fixed=true),p);														
+      extends JMExamples.ContState.ContState(x1(fixed=true),x2(fixed=true),p);
 	  Real J(fixed=true);     
 														  
    equation
@@ -238,7 +238,7 @@ package JMExamples_opt
   end Distillation1_opt;
   
   
-  optimization Distillation1_opt2(objective = cost(finalTime), startTime=0, finalTime=50)	
+  optimization Distillation1_opt2(objective = cost(finalTime), startTime=0, finalTime=50)
 	extends JMExamples.Distillation.Distillation1Inputder(rr(min=1,max=5));
 
     Real cost(start = 0);
@@ -252,13 +252,16 @@ package JMExamples_opt
 	rr<=5;
   end Distillation1_opt2;
   
-  optimization Distillation4_opt(
+  optimization Distillation4_Opt_Lagrange(
       objectiveIntegrand=(d.Temp[28] - d.T_14_ref)^2 +
                          (d.Temp[14] - d.T_28_ref)^2 +
                          (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
                          (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2,
       startTime=0, finalTime=3000)
-    JMExamples.Distillation.Distillation4 d(Dist(min=0), Bott(min=0));
+    
+    import SI = Modelica.SIunits;
+    
+    JMExamples.Distillation.Distillation4 d;
     
     Modelica.Blocks.Interfaces.RealInput Q_elec;
     Modelica.Blocks.Interfaces.RealInput Vdot_L1;
@@ -268,144 +271,34 @@ package JMExamples_opt
     connect(Q_elec, d.Q_elec);
     connect(Vdot_L1, d.Vdot_L1);
   
-  end Distillation4_opt;
-   
-   optimization FlightPath_opt (objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 100)
-                            
-      extends JMExamples.FlightPath.FlightPath(x1(fixed=true),x2(fixed=true),x3(fixed=true));														
-	  Real J(fixed=true);     
-														  
-   equation
-	  der(J) = x3^2;	  
-   constraint
-	  x1 >= 92;
-	  x1 <= 170;
-	  x2 >= -20*3.14159/180;
-	  x2 <= 25*3.14159/180;
-	  x3 >= -150;
-	  x3 <= 150;
-	  u  >= 60e3;
-	  u  <= 120e3;
-	  v  >= -150;
-	  v  <= 150;
-   end FlightPath_opt;
-   
-   
-   optimization Greenhouse_opt (objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 48)
-                            
-      extends JMExamples.Greenhouse.Greenhouse(x1(fixed=true),x2(fixed=true),x3(fixed=true),sun,temp);														
-	  Real J(fixed=true);     
-														  
-   equation
-	  der(J) = x3-pWc*x1;	  
-   constraint
-	  u  >= 0;
-	  u  <= 10;
-   end Greenhouse_opt;
-   
-   
-    optimization Helicopter (objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 30)
-                            
-      extends JMExamples.Helicopter.Helicopter(te(fixed=true),tr(fixed=true),
-	  tp(fixed=true),dte(fixed=true),dtr(fixed=true),dtp(fixed=true));														
-	  Real J(fixed=true);     
-				
-	//  if time>=7 and time<=15 then
-	//	u = 0;
-	//  elseif time>=22 
-	//    u = 0;
-	//  end if;
-	  
-	//  if time>=15 then
-	// 	u1 = 0;
-	//  end if;
-				
-    equation
-	  der(J) = tp;
-    constraint
-      -0.5<= te;
-	  te  <= 0.6;
-	  -1  <= tp;
-	  tp  <= 1;
-    end Helicopter;
-   
-   
-    optimization HelicopterDer (objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 30)
+  end Distillation4_Opt_Lagrange;
+  
+  optimization Distillation4_Opt_Mayer(objective=cost(finalTime),
+      startTime=0, finalTime=3000)
+    
+    JMExamples.Distillation.Distillation4 d(Dist(min=0), Bott(min=0));
+    
+    Real cost(start=0, fixed=true);
+    
+    Modelica.Blocks.Interfaces.RealInput Q_elec;
+    Modelica.Blocks.Interfaces.RealInput Vdot_L1;
+  
+  equation
+    
+    der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
+                (d.Temp[14] - d.T_28_ref)^2 +
+                (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
+                (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
+    connect(Q_elec, d.Q_elec);
+    connect(Vdot_L1, d.Vdot_L1);
+  
+  end Distillation4_Opt_Mayer;
       
-      extends JMExamples.Helicopter.HelicopterDer(te(fixed=true),tr(fixed=true),
-	  tp(fixed=true),dte(fixed=true),dtr(fixed=true),dtp(fixed=true),Vf(fixed=true),
-	  Vb(fixed=true),dVb,dVf);														
-	  Real J(fixed=true);  
-	  //Real u;
-	  //Real u1;
-	
-    equation
-	  //der(J) = dVf^2 + dVb^2 + (te-u)^2 + (tr-3)^2;
-	  //u = noEvent(if (time<=22.5 and time>=15) or time<=7.5 then 0.3 else 0);
-	  //u1= noEvent(if time<=15 then 3 else 0);
-	  
-	  der(J) = noEvent(if time<=7.5 then (te-0.3)^2 + (tr-3)^2
-			elseif (time>=7.5 and time<=15) then te^2 + (tr-3)^2
-			elseif (time>=15 and time<=22.5) then (te-0.3)^2 + tr^2
-			else te^2 + tr^2);
-	  
-    constraint
-      -0.5<= te;
-	  te  <= 0.6;
-	  -1  <= tp;
-	  tp  <= 1;
-    end HelicopterDer;
-   
-   
-   	optimization MarinePopulation_opt (objective = sum(sum((mp.y[j](tm[i])-ym[i,j])^2 for i in 1:21) for j in 1:8),
-                            startTime = 0,
-                            finalTime = 20)
-	
-		JMExamples.MarinePopulation.MarinePopulation mp(y(each fixed=true),
-		g(each free=true), m(each free=true));
-		
-		//parameter
-		parameter Real ym[21,8]=
-	  {{ 20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000},
-	   { 12445, 15411, 13040, 13338, 13484, 8426, 6615, 4022},
-	   {  7705, 13074, 14623, 11976, 12453, 9272, 6891, 5020},
-	   {  4664,  8579, 12434, 12603, 11738, 9710, 6821, 5722},
-	   {  2977,  7053, 11219, 11340, 13665, 8534, 6242, 5695},
-	   {  1769,  5054, 10065, 11232, 12112, 9600, 6647, 7034},
-	   {   943,  3907,  9473, 10334, 11115, 8826, 6842, 7348},
-	   {   581,  2624,  7421, 10297, 12427, 8747, 7199, 7684},
-	   {   355,  1744,  5369,  7748, 10057, 8698, 6542, 7410},
-	   {   223,  1272,  4713,  6869,  9564, 8766, 6810, 6961},
-	   {   137,   821,  3451,  6050,  8671, 8291, 6827, 7525},
-	   {    87,   577,  2649,  5454,  8430, 7411, 6423, 8388},
-	   {    49,   337,  2058,  4115,  7435, 7627, 6268, 7189},
-	   {    32,   228,  1440,  3790,  6474, 6658, 5859, 7467},
-	   {    17,   168,  1178,  3087,  6524, 5880, 5562, 7144},
-	   {    11,    99,   919,  2596,  5360, 5762, 4480, 7256},
-	   {     7,    65,   647,  1873,  4556, 5058, 4944, 7538},
-	   {     4,    44,   509,  1571,  4009, 4527, 4233, 6649},
-	   {     2,    27,   345,  1227,  3677, 4229, 3805, 6378},
-	   {     1,    20,   231,   934,  3197, 3695, 3159, 6454},
-	   {     1,    12,   198,   707,  2562, 3163, 3232, 5566}};
-		parameter Real tm[21]= 0:20;
-					
-	equation 
-	end MarinePopulation_opt;
-	
-	
 	optimization MoonLander_opt (objective = J(finalTime),
                             startTime = 0,
                             finalTime = 1.5)
                             
-      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));														
+      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));
 	  Real J(fixed=true);     
 														  
    equation
@@ -429,7 +322,7 @@ package JMExamples_opt
                             startTime = 0,
                             finalTime(free=true,min=0))
                             
-      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));														  
+      extends JMExamples.MoonLander.MoonLander(h(fixed=true),v(fixed=true),m(fixed=true));
 														  
    equation
    constraint
@@ -445,150 +338,7 @@ package JMExamples_opt
 	  h(finalTime) = 0;
 	  v(finalTime) = 0;
    end MoonLander_opttime;
-   
-   
-    model PenicillinPlant_Init
-	  extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=false),S1(fixed=false),P1(fixed=false),V1(fixed=false));
-	initial equation
-	  der(X1) = 0;
-      der(S1) = 0;
-	  der(P1) = 0;
-      der(V1) = 0;
-	end PenicillinPlant_Init;
-	
-	
-	model PenicillinPlant_Init_opt
-	  JMExamples.PenicillinPlant.PenicillinPlant1 pp;
-	  Real cost(start=0,fixed=true);
-	  Real u = du1_ref;
-	  parameter Real X1_ref = 1;
-	  parameter Real S1_ref = 0.5;
-	  parameter Real P1_ref = 0;
-	  parameter Real V1_ref = 150;
-	  parameter Real u1_ref = 0.03;
-	  parameter Real du1_ref = 5e-2;
-	equation
-	  pp.du1 = du1_ref; 
-	  der(cost) = (X1_ref-pp.X1)^2 + (S1_ref-pp.S1)^2 +(P1_ref-pp.P1)^2 +
-	  (V1_ref-pp.V1)^2 +(u1_ref-pp.u1)^2 +(du1_ref-pp.du1)^2;
-	end PenicillinPlant_Init_opt;
-	
-	
-	optimization PenicillinPlant_opt(objective= cost(finalTime),
-                      startTime=0.0,
-                      finalTime=150)
-					  
-	  input Real u(start = 5e-2,initialGuess=5e-2)=pp.du1; 	
-	  JMExamples.PenicillinPlant.PenicillinPlant1 pp(X1(initialGuess=1),S1(initialGuess=0.5),
-	  P1(initialGuess=0),V1(initialGuess=150),u1(initialGuess=0.03),du1(initialGuess=5e-4));
-	  
-	  Real cost(start=0,fixed=true,initialGuess=100);
-	  parameter Real X1_ref = 1;
-	  parameter Real S1_ref = 0.5;
-	  parameter Real P1_ref = 0;
-	  parameter Real V1_ref = 150;
-	  parameter Real u1_ref = 0.03;
-	  parameter Real du1_ref = 5e-2;
-	equation
-	  der(cost) = (X1_ref-pp.X1)^2 + (S1_ref-pp.S1)^2 +(P1_ref-pp.P1)^2 +
-	  (V1_ref-pp.V1)^2 +(u1_ref-pp.u1)^2 +(du1_ref-pp.du1)^2;
-	constraint
-	  pp.X1 >= 0;
-	  pp.S1 >= 0;
-	  pp.V1 >= 150;
-	  pp.u1 <=1;
-	  pp.u1 >=0;
-	end PenicillinPlant_opt;
-   
-   
-   optimization PenicillinPlant_opt1 (objective = -P1(finalTime),
-                            startTime = 0,
-                            finalTime = 75)
-                            
-      extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=true),S1(fixed=true),P1(fixed=true),V1(fixed=true),miu1,u1);														
-	  //Real J(fixed=true);     
-														  
-   equation 
-	  //der(J) = 0.001*du1^2;	
-   constraint
-      0  <= X1;
-	  X1 <= 3.7;
-	  0  <= S1;
-	  S1 <= 100;
-	  0  <= P1;
-	  P1 <= 5;
-	  1  <= V1;
-	  V1 <= 300;
-	  0  <= u1;
-	  u1 <= 1;
-   end PenicillinPlant_opt1;
-   
-   optimization PenicillinPlant_opt2 (objective = -P2(finalTime),
-                            startTime = 0,
-                            finalTime = 75)
-                            
-      extends JMExamples.PenicillinPlant.PenicillinPlant2(X2(fixed=true),S2(fixed=true),P2(fixed=true),V2(fixed=true),miu2,u2);														
-	  //Real J(fixed=true);     
-														  
-   equation 
-	    //der(J) = 0.001*du2^2;
-   constraint
-      0  <= X2;
-	  X2 <= 3.7;
-	  0  <= S2;
-	  S2 <= 100;
-	  0  <= P2;
-	  P2 <= 5;
-	  1  <= V2;
-	  V2 <= 300;
-	  0  <= u2;
-	  u2 <= 0.03;
-   end PenicillinPlant_opt2;
-   
-   
-   optimization PenicillinPlant_opttime (objective = finalTime,
-                            startTime = 0,
-                            finalTime(free=true,min=0))              
-      extends JMExamples.PenicillinPlant.PenicillinPlant1(X1(fixed=true),S1(fixed=true),P1(fixed=true),V1(fixed=true),miu1,u1);	   
-														  
-   equation 	
-   constraint
-      0  <= X1;
-	  X1 <= 3.7;
-	  X1(finalTime) = 3.7;
-	  0  <= S1;
-	  S1 <= 0.5;
-	  0  <= P1;
-	  P1 <= 5;
-	  1  <= V1;
-	  V1 <= 300;
-	  0  <= u1;
-	  u1 <= 1;
-   end PenicillinPlant_opttime;
-   
-   
-   optimization Polyeth_opt(objective = J(finalTime),
-                            startTime = 0,
-                            finalTime = 36000)
-        
-	  input Real u(start = 1/1800,initialGuess=0.0004)=poly.Fc; 
-      JMExamples.Polyeth.PolyethInput poly(In_con(fixed=true),M1_con(fixed=true),Y1(fixed=true),
-	  Y2(fixed=true),T(fixed=true),Tw(free=true),Tg(free=true),Fc(initialGuess=0.0004));														
-	  Real J(fixed=true); 
-	  parameter Real Tw_ref = 295;
-	  parameter Real Tg_ref = 295;
-	  parameter Real Fc_ref = 1/2400;
-														  
-   equation 
-	  der(J) = (Tw_ref-poly.Tw)^2 + (Tg_ref-poly.Tg)^2 + (Fc_ref-u)^2;
-   constraint
-	  290  <= poly.Tg;
-	  poly.Tg <= 310;
-	  0  <= u;
-	  u <= 5;
-	end Polyeth_opt;
-	
-	
+
 	optimization Robertson
 		parameter Real p1(free=true)=0.040;
 		parameter Real p2(free=true)=1.0e4;

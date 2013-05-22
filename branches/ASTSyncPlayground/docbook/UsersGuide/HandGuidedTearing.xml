@@ -10,18 +10,18 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Hand Guided Tearing</title>
 
-  <para>The JModelica.org compiler have extended support hand guided tearing.
-  This page explains how to use it.</para>
+  <para>The JModelica.org compiler has extended support for hand guided
+  tearing and this chapter explains how to use it.</para>
 
   <sect1>
     <title>Options flags</title>
 
-    <para>There are several options flags that controls the behaviour of the
-    tearing algorithm.</para>
+    <para>There are several compiler option flags that control the behaviour
+    of the tearing algorithm.</para>
 
     <variablelist>
       <varlistentry>
-        <term>equation_sorting</term>
+        <term><literal>equation_sorting</literal></term>
 
         <listitem>
           <para>If this option is true (default is false), equations are
@@ -30,34 +30,35 @@
       </varlistentry>
 
       <varlistentry>
-        <term>enable_tearing</term>
+        <term><literal>enable_tearing</literal></term>
 
         <listitem>
           <para>If this option is set to true (default is false), tearing of
           equation systems is enabled. This option requires that
-          equation_sorting equals true.</para>
+          <literal>equation_sorting</literal> equals true.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term>enable_hand_guided_tearing</term>
+        <term><literal>enable_hand_guided_tearing</literal></term>
 
         <listitem>
           <para>If this option is set to true (default is false), hand guided
           tearing annotations are parsed and will have precedence during
-          tearing. This option requires that enable_tearing equals
-          true.</para>
+          tearing. This option requires that <literal>enable_tearing</literal>
+          equals true.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term>merge_blt_blocks</term>
+        <term><literal>merge_blt_blocks</literal></term>
 
         <listitem>
           <para>If this option is set to true (default is false), BLT blocks
           will be merged so that all hand guided tearing equations and
           variables reside inside the same BLT block. This option requires
-          that enable_hand_guided_tearing equals true.</para>
+          that <literal>enable_hand_guided_tearing</literal> equals
+          true.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -66,7 +67,7 @@
   <sect1>
     <title>Identification of equations</title>
 
-    <para>In some situations is is necessary to identify an equation so that
+    <para>In some situations, it is necessary to identify an equation so that
     it can be referenced.</para>
 
     <sect2>
@@ -89,7 +90,7 @@
     </sect2>
   </sect1>
 
-  <sect1>
+  <sect1 xml:id="hgt_sec_spec">
     <title>Specification of hand guided tearing</title>
 
     <para>There are two ways to use hand guided tearing in
@@ -106,7 +107,7 @@
       </listitem>
     </itemizedlist>
 
-    <sect2>
+    <sect2 xml:id="hgt_sec_bias">
       <title>Bias the automatic tearing algorithm</title>
 
       <para>There are two ways to bias the automatic tearing:</para>
@@ -123,10 +124,10 @@
         </listitem>
       </itemizedlist>
 
-      <sect3>
-        <title>Specifying equation as residual equation</title>
+      <sect3 xml:id="hgt_sec_eq_as_reseq">
+        <title>Specify an equation as residual equation</title>
 
-        <para>By marking the equation as residual equation it will be more
+        <para>By marking an equation as residual equation it will be more
         prioritized during automatic tearing.</para>
 
         <sect4>
@@ -142,7 +143,8 @@
   ")"
 ")"</programlisting>
 
-          <para>Where ResidualEquation has the following format</para>
+          <para>Where <literal>ResidualEquation</literal> has the following
+          format</para>
 
           <programlisting>record ResidualEquation
   Boolean enabled = true;
@@ -157,17 +159,17 @@ end ResidualEquation;</programlisting>
       </sect3>
 
       <sect3>
-        <title>Specifying variable as iteration variable</title>
+        <title>Specify a variable as iteration variable</title>
 
-        <para>By marking the variable as iteration variable it will be
+        <para>By marking a variable as iteration variable it will be
         prioritized during automatic tearing.</para>
 
         <sect4>
           <title>Syntax</title>
 
           <para>It is possible to place annotations for iteration variable in
-          the annotation block for a variable. The syntax for iteration
-          variable annotation has the following syntax:</para>
+          the annotation block for a variable. The iteration variable
+          annotation has the following syntax:</para>
 
           <programlisting>"annotation" "("
   "__Modelon" "("
@@ -175,7 +177,8 @@ end ResidualEquation;</programlisting>
   ")"
 ")"</programlisting>
 
-          <para>Where IterationVariable can be described as:</para>
+          <para>Where <literal>IterationVariable</literal> can be described
+          as:</para>
 
           <programlisting>record IterationVariable
   Boolean enabled = true;
@@ -200,10 +203,10 @@ end IterationVariable;</programlisting>
       before any automatic tearing comes into play. The pairs are also torn
       without any regard for solvability of the system. This means that if the
       user specifies to many pairs, they will all be used and the torn block
-      becomes unnecessarily complex If the final system is unsolvable after
+      becomes unnecessarily complex. If the final system is unsolvable after
       all pairs are torn, the automatic algorithm will kick in and finalize
       the tearing. During automatic tearing it is still possible to bias the
-      algorithm as specified in section xxx.</para>
+      algorithm as specified in <xref linkend="hgt_sec_bias"/>.</para>
 
       <para>There are two ways to specify hand guided tearing pairs.</para>
 
@@ -218,7 +221,7 @@ end IterationVariable;</programlisting>
       </itemizedlist>
 
       <sect3>
-        <title>Specifying tearing pairs on component level</title>
+        <title>Specify tearing pairs on component level</title>
 
         <para>Tearing pairs can be specified in the annotation for the
         equation that should become residual equation. This type of hand
@@ -239,16 +242,18 @@ end IterationVariable;</programlisting>
   ")"
 ")"</programlisting>
 
-          <para>Where ResidualEquation has the following format:</para>
+          <para>Where <literal>ResidualEquation</literal> has the following
+          format:</para>
 
           <programlisting>record ResidualEquation
   Boolean enabled = true;
   Real iterationVariable;
 end ResidualEquation;</programlisting>
 
-          <para>NOTE: This syntax has similar syntax as specifying equation as
-          residual equation (link). However when the iterationVariable field
-          is specified it is turned into a residual pair.</para>
+          <para>NOTE: This syntax has similar syntax as specifying an equation
+          as residual equation, see <xref linkend="hgt_sec_eq_as_reseq"/>.
+          However when the <literal>iterationVariable</literal> field is
+          specified it is turned into a residual pair.</para>
         </sect4>
 
         <sect4>
@@ -267,7 +272,7 @@ end A;</programlisting>
       </sect3>
 
       <sect3>
-        <title>Specifying tearing pairs on system level</title>
+        <title>Specify tearing pairs on system level</title>
 
         <para>Tearing pairs on system level are necessary when the residual
         equation and iteration variable are located in different name scopes.
@@ -290,7 +295,7 @@ end A;</programlisting>
   ")"
 ")"</programlisting>
 
-          <para>Where Pair has the following format:</para>
+          <para>Where <literal>Pair</literal> has the following format:</para>
 
           <programlisting>record Pair
   Boolean enabled = true;

@@ -6,7 +6,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.compiler.Preferences;
+import org.jmodelica.ide.compiler.ModelicaPreferences;
 
 public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenchPreferencePage {
 	
@@ -17,13 +17,13 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	protected Control createContents(Composite parent) {
 		settings = new ModelicaSettingsControl();
-		settings.setLibraryPaths(Preferences.get(LIBRARIES_ID));
+		settings.setLibraryPaths(ModelicaPreferences.INSTANCE.get(LIBRARIES_ID));
 		return settings.createControl(parent);
 	}
 
 	private String defaults(String key) {
-		Preferences.clear(key);
-		return Preferences.get(key);
+		ModelicaPreferences.INSTANCE.clear(key);
+		return ModelicaPreferences.INSTANCE.get(key);
 	}
 
 	public void init(IWorkbench workbench) {}
@@ -38,7 +38,7 @@ public class ModelicaPreferencePage extends PreferencePage  implements IWorkbenc
 	@Override
 	public boolean performOk() {
 		// TODO: for a value that is still default, do Preferences.clear() instead
-		Preferences.set(LIBRARIES_ID, settings.getLibraryPaths());
+		ModelicaPreferences.INSTANCE.set(LIBRARIES_ID, settings.getLibraryPaths());
 		return super.performOk();
 	}
 }

@@ -67,8 +67,8 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
-    realtype kin_ftol;		       /**< \brief Tolerance for F */
-    realtype kin_stol;		       /**< \brief Tolerance for Step-size */
+    realtype kin_ftol;             /**< \brief Tolerance for F */
+    realtype kin_stol;             /**< \brief Tolerance for Step-size */
     
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
@@ -77,9 +77,9 @@ struct jmi_kinsol_solver_t {
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
 
-	char equed;						/**< \brief Type of Jac scaling used */
-	realtype* rScale;				/**< \brief Row scale factors */
-	realtype* cScale;				/**< \brief Column scale factors */
+    char equed;                     /**< \brief Type of Jac scaling used */
+    realtype* rScale;               /**< \brief Row scale factors */
+    realtype* cScale;               /**< \brief Column scale factors */
     
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
@@ -88,6 +88,7 @@ struct jmi_kinsol_solver_t {
     int num_bounds;
     int* bound_vindex;             /**< \brief variable index for a bound */
     int* bound_kind;               /**< \brief +1 for max, -1 for min */    
+    int* bound_limiting;           /**< \brief 1 if bound is limitng stepsize, 0 otherwise*/    
     realtype* bounds;              /**< \brief bound vals */
     realtype* active_bounds;
     
@@ -105,12 +106,12 @@ extern void dgecon_(char *norm, int *n, double *a, int *lda, double *anorm, doub
              double *work, int *iwork, int *info);
 
 extern int dgeequ_(int *m, int *n, double *a, int *
-	lda, double *r__, double *c__, double *rowcnd, double 
-	*colcnd, double *amax, int *info);
+    lda, double *r__, double *c__, double *rowcnd, double 
+    *colcnd, double *amax, int *info);
 
 extern int dlaqge_(int *m, int *n, double *a, int *
-	lda, double *r__, double *c__, double *rowcnd, double 
-	*colcnd, double *amax, char *equed);
+    lda, double *r__, double *c__, double *rowcnd, double 
+    *colcnd, double *amax, char *equed);
 
 
 #ifdef JMI_AD_NONE_AND_CPP

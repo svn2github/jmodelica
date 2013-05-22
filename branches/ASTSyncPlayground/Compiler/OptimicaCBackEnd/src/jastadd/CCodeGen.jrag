@@ -56,6 +56,8 @@ aspect OptimicaCCodeGen {
 		str.print(");\n");
 	}
 	
+	eq FTimed.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
+	eq FOptParameter.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
 }
 
 

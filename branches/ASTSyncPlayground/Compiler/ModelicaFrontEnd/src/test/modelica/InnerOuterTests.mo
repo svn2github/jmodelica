@@ -1,3 +1,19 @@
+/*
+    Copyright (C) 2011-2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package InnerOuterTests
 model InnerOuterTest1
 model A 
@@ -26,7 +42,6 @@ equation
  b.T0 = time;
  b.a1.z = sin(b.T0);
  b.a2.z = sin(b.T0);
-
 end InnerOuterTests.InnerOuterTest1;
 ")})));
 end InnerOuterTest1;
@@ -81,27 +96,22 @@ fclass InnerOuterTests.InnerOuterTest2
  Real i.TI;
  Real i.e.TI;
  Real i.e.f.TI;
- Real i.e.f.g.TI;
+ constant Real i.e.f.g.TI = 5;
  Real i.e.f.g.h.a.x;
- Real i.e.f.g.h.a.b.TI;
- Real i.e.f.g.h.a.b.c.TI;
+ constant Real i.e.f.g.h.a.b.TI = 1;
+ constant Real i.e.f.g.h.a.b.c.TI = 2;
  Real i.e.f.g.h.a.b.c.d.x;
  Real i.a.x;
- Real i.a.b.TI;
- Real i.a.b.c.TI;
+ constant Real i.a.b.TI = 1;
+ constant Real i.a.b.c.TI = 2;
  Real i.a.b.c.d.x;
 equation
  i.TI = 2 * time;
  i.e.TI = 4 * time;
  i.e.f.TI = 5 * time;
- i.e.f.g.TI = 5;
  i.e.f.g.h.a.x = i.e.f.TI * 2;
- i.e.f.g.h.a.b.TI = 1;
- i.e.f.g.h.a.b.c.TI = 2;
  i.e.f.g.h.a.b.c.d.x = 3 * i.e.f.TI;
  i.a.x = i.TI * 2;
- i.a.b.TI = 1;
- i.a.b.c.TI = 2;
  i.a.b.c.d.x = 3 * i.TI;
 end InnerOuterTests.InnerOuterTest2;
 ")})));
@@ -258,19 +268,13 @@ model InnerOuterTest7
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest7
- Real d.a.x;
- Real d.a.y;
- Real d.c.a.x;
- Real d.c.a.y;
- Real d.c.z;
-equation
- d.a.x = 6;
- d.a.y = 9;
- d.c.a.x = 6;
- d.c.a.y = 9;
- d.c.z = d.c.a.x;
+ constant Real d.a.x = 6;
+ constant Real d.a.y = 9;
+ constant Real d.c.a.x = 6;
+ constant Real d.c.a.y = 9;
+ constant Real d.c.z = 6.0;
 end InnerOuterTests.InnerOuterTest7;
-	")})));
+")})));
 end InnerOuterTest7;
 	
 model InnerOuterTest8
@@ -304,15 +308,96 @@ model InnerOuterTest8
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest8
- Real d.c.a.x;
- Real d.c.a.y;
- Real d.c.z;
-equation
- d.c.a.x = 6;
- d.c.a.y = 9;
- d.c.z = d.c.a.x;
-end InnerOuterTests.InnerOuterTest8;	 
-	")})));
+ constant Real d.c.a.x = 6;
+ constant Real d.c.a.y = 9;
+ constant Real d.c.z = 6.0;
+end InnerOuterTests.InnerOuterTest8;
+")})));
 end InnerOuterTest8;
+
+
+model InnerOuterTest9
+    outer parameter Real T = 5;
+    Real x = T * 23;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest9",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 319, column 21:
+  Cannot find inner declaration for outer T
+")})));
+end InnerOuterTest9;
+
+
+model InnerOuterTest10
+    outer constant Real T = 5;
+    constant Real x = T * 23;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest10",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 336, column 22:
+  Cannot find inner declaration for outer T
+")})));
+end InnerOuterTest10;
+
+
+model InnerOuterTest11
+    model B
+        Real x;
+    end B;
+    
+    outer B b;
+    
+    Real y = b.x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuterTest11",
+			description="Missing inner declaration",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
+Semantic error at line 356, column 10:
+  Cannot find inner declaration for outer b
+")})));
+end InnerOuterTest11;
+
+
+model InnerOuterTest12
+    model A
+        parameter Integer b = 2;
+    end A;
+    
+    inner A c(b = 1);
+    
+    model D
+        outer A c;
+        parameter Integer e = c.b;
+        Real x[e] = zeros(e);
+    end D;
+    
+    D f;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InnerOuterTest12",
+			description="Constant evaluation of inner/outer",
+			flatModel="
+fclass InnerOuterTests.InnerOuterTest12
+ parameter Integer c.b = 1 /* 1 */;
+ parameter Integer f.e = c.b;
+ Real f.x[1] = zeros(f.e);
+end InnerOuterTests.InnerOuterTest12;
+")})));
+end InnerOuterTest12;
 
 end InnerOuterTests;

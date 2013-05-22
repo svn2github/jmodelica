@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.jmodelica.util.NotNullPrintStream;
 
+aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
 	class Printer {
@@ -45,6 +46,10 @@ import org.jmodelica.util.NotNullPrintStream;
   		public String op(FBinExp e) { return e.op(); }
   		
 	}
+	
+}
+
+aspect PrettyPrint {
 
 	// select first variant
 	class PrettyPrinter extends Printer {
@@ -67,8 +72,29 @@ import org.jmodelica.util.NotNullPrintStream;
  			node._dumpTree(this, str, indent); 
  		}
 	}
-
-aspect PrettyPrint {
+	
+	/**
+	 * Wraps a prettyPrint() call to be deferred until the sting is needed.
+	 */
+	public class PrettyPrintDelegate {
+		private ASTNode n;
+		private String i;
+		
+		public PrettyPrintDelegate(ASTNode node) {
+			this(node, "");
+		}
+		
+		public PrettyPrintDelegate(ASTNode node, String indent) {
+			n = node;
+			i = indent;
+		}
+		
+		public String toString() {
+			return n.prettyPrint(i);
+		}
+	}
+	
+	static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
 	
 	public void ASTNode._dumpTree(PrintStream str, String indent) {
  		_dumpTree(new DumpTreePrinter(),str,indent);
@@ -94,7 +120,7 @@ aspect PrettyPrint {
 	}
 
 	public void ASTNode.prettyPrint(PrintStream str,String indent) {
- 		prettyPrint(new PrettyPrinter(),str,indent);
+ 		prettyPrint(prettyPrinter,str,indent);
 	}
 	
 	
@@ -121,7 +147,7 @@ aspect PrettyPrint {
 	public String List.toString() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		PrintStream str = new PrintStream(os);
-		prettyPrintWithSep(new PrettyPrinter(), str, "", ", ");
+		prettyPrintWithSep(prettyPrinter, str, "", ", ");
 		return os.toString();
 	}
 	
@@ -865,7 +891,7 @@ aspect FlatPrettyPrint {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {
@@ -1021,7 +1047,7 @@ aspect FlatPrettyPrint {
     public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent) {
     	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
-    	p.print(getFAlgorithmBlock(), str, indent);
+    	p.print(getFAlgorithm(), str, indent);
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
@@ -1218,7 +1244,7 @@ aspect FlatPrettyPrint {
    		p.print(getCall(), str, indent);
 	}
 	
-	public void FAlgorithmBlock.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
@@ -1416,12 +1442,10 @@ aspect FlatPrettyPrint {
 	 * Used if precedence is equal for node and its parent.
 	 */
 	inh boolean FExp.shouldhaveParenthesis();
-	eq BaseNode.getChild().shouldhaveParenthesis()   = false;
-	eq FDotDivExp.getRight().shouldhaveParenthesis() = true;
-	eq FDotPowExp.getLeft().shouldhaveParenthesis()  = true;
-	eq FDotSubExp.getRight().shouldhaveParenthesis() = true;
-	eq FRelExp.getRight().shouldhaveParenthesis()    = true;
-	eq FNegExp.getFExp().shouldhaveParenthesis()      = true;
+	eq BaseNode.getChild().shouldhaveParenthesis()  = false;
+	eq FBinExp.getRight().shouldhaveParenthesis()   = true;
+	eq FDotPowExp.getLeft().shouldhaveParenthesis() = true;
+	eq FNegExp.getFExp().shouldhaveParenthesis()    = true;
 	
 	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		int myPrecedence = precedence();
@@ -1444,37 +1468,6 @@ aspect FlatPrettyPrint {
 		str.print(":");
 	}
 	
-	protected void FDotAddExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		if(!(getRight() instanceof FNegExp))
-			str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotSubExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotMulExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotDivExp.prettyPrintExp(Printer p, PrintStream str, String indent){
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));	
-		p.print(getRight(),str,indent);
-	}
-		
-	protected void FDotPowExp.prettyPrintExp(Printer p, PrintStream str, String indent){
-		p.print(getLeft(),str,indent);
-		str.print(p.op(this));
-		p.print(getRight(),str,indent);
-	}
-		
 	protected void FNegExp.prettyPrintExp(Printer p,PrintStream str, String indent){
 		str.print("- ");
 		p.print(getFExp(),str,indent);
@@ -1490,9 +1483,9 @@ aspect FlatPrettyPrint {
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 	}
 	
-	protected void FBoolBinExp.prettyPrintExp(Printer p,PrintStream str, String indent) {
+	protected void FBinExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		p.print(getLeft(),str,indent);
-		str.print(op());
+		str.print(p.op(this));
 		p.print(getRight(),str,indent);
 	}
 	
@@ -1711,56 +1704,74 @@ aspect FlatPrettyPrint {
 		str.print(SEP);
 		super.prettyPrintArguments(p, str, indent);
 	}
+	
+	protected void FConnPotentialRoot.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+		super.prettyPrintArguments(p, str, indent);
+		if (hasPriority()) {
+			str.print(SEP);
+			str.print("priority=");
+			p.print(getPriority(), str, indent);
+		}
+	}
 
 	syn String FBuiltInFunctionCall.builtInName();
-	eq FRecordConstructor.builtInName() = getRecord().name();
-	eq FSinExp.builtInName()         = "sin";
-	eq FCosExp.builtInName()         = "cos";
-	eq FTanExp.builtInName()         = "tan";
-	eq FAsinExp.builtInName()        = "asin";
-	eq FAcosExp.builtInName()        = "acos";
-	eq FAtanExp.builtInName()        = "atan";
-	eq FAtan2Exp.builtInName()       = "atan2";
-	eq FSinhExp.builtInName()        = "sinh";
-	eq FCoshExp.builtInName()        = "cosh";
-	eq FTanhExp.builtInName()        = "tanh";
-	eq FExpExp.builtInName()         = "exp";
-	eq FLogExp.builtInName()         = "log";
-	eq FLog10Exp.builtInName()       = "log10";
-	eq FSqrtExp.builtInName()        = "sqrt";
-	eq FIntegerExp.builtInName()     = "integer";
-	eq FEnumIntegerExp.builtInName() = "Integer";
-	eq FFloorExp.builtInName()       = "floor";
-	eq FStringExp.builtInName()      = "String";
-	eq FScalar.builtInName()         = "scalar";
-	eq FTranspose.builtInName()      = "transpose";
-	eq FCross.builtInName()          = "cross";
-	eq FOuterProduct.builtInName()   = "outerProduct";
-	eq FNdimsExp.builtInName()       = "ndims";
-	eq FSizeExp.builtInName()        = "size";
-	eq FNoEventExp.builtInName()     = "noEvent";
-	eq FSmoothExp.builtInName()      = "smooth";
-	eq FPreExp.builtInName()         = "pre";
-	eq FSampleExp.builtInName()      = "sample";
-	eq FInitialExp.builtInName()     = "initial";
-	eq FTerminalExp.builtInName()    = "terminal";
-	eq FIdentity.builtInName()       = "identity";
-	eq FOnes.builtInName()           = "ones";
-	eq FZeros.builtInName()          = "zeros";
-	eq FFillExp.builtInName()        = "fill";
-	eq FAbstractCat.builtInName()    = "cat";
-	eq FParseArray.builtInName()     = "array";
-	eq FAbsExp.builtInName()         = "abs";
-	eq FMinExp.builtInName()         = "min";
-	eq FMaxExp.builtInName()         = "max";
-	eq FSumExp.builtInName()         = "sum";
-	eq FLinspace.builtInName()       = "linspace";
-	eq FInStream.builtInName()       = "inStream";
-	eq FActualStream.builtInName()   = "actualStream";
-	
+	eq FRecordConstructor.builtInName()  = getRecord().name();
 	eq FUnsupportedBuiltIn.builtInName() = getName();
-	
-	
+	eq FSinExp.builtInName()             = "sin";
+	eq FCosExp.builtInName()             = "cos";
+	eq FTanExp.builtInName()             = "tan";
+	eq FAsinExp.builtInName()            = "asin";
+	eq FAcosExp.builtInName()            = "acos";
+	eq FAtanExp.builtInName()            = "atan";
+	eq FAtan2Exp.builtInName()           = "atan2";
+	eq FSinhExp.builtInName()            = "sinh";
+	eq FCoshExp.builtInName()            = "cosh";
+	eq FTanhExp.builtInName()            = "tanh";
+	eq FExpExp.builtInName()             = "exp";
+	eq FLogExp.builtInName()             = "log";
+	eq FLog10Exp.builtInName()           = "log10";
+	eq FSqrtExp.builtInName()            = "sqrt";
+	eq FIntegerExp.builtInName()         = "integer";
+	eq FEnumIntegerExp.builtInName()     = "Integer";
+	eq FFloorExp.builtInName()           = "floor";
+	eq FStringExp.builtInName()          = "String";
+	eq FScalarExp.builtInName()          = "scalar";
+	eq FVectorExp.builtInName()          = "vector";
+	eq FMatrixExp.builtInName()          = "matrix";
+	eq FTranspose.builtInName()          = "transpose";
+	eq FCross.builtInName()              = "cross";
+	eq FSkew.builtInName()               = "skew";
+	eq FOuterProduct.builtInName()       = "outerProduct";
+	eq FNdimsExp.builtInName()           = "ndims";
+	eq FSizeExp.builtInName()            = "size";
+	eq FNoEventExp.builtInName()         = "noEvent";
+	eq FSmoothExp.builtInName()          = "smooth";
+	eq FPreExp.builtInName()             = "pre";
+	eq FSampleExp.builtInName()          = "sample";
+	eq FInitialExp.builtInName()         = "initial";
+	eq FTerminalExp.builtInName()        = "terminal";
+	eq FIdentity.builtInName()           = "identity";
+	eq FDiagonal.builtInName()           = "diagonal";
+	eq FOnes.builtInName()               = "ones";
+	eq FZeros.builtInName()              = "zeros";
+	eq FFillExp.builtInName()            = "fill";
+	eq FAbstractCat.builtInName()        = "cat";
+	eq FParseArray.builtInName()         = "array";
+	eq FAbsExp.builtInName()             = "abs";
+	eq FMinExp.builtInName()             = "min";
+	eq FMaxExp.builtInName()             = "max";
+	eq FSumExp.builtInName()             = "sum";
+	eq FLinspace.builtInName()           = "linspace";
+	eq FInStream.builtInName()           = "inStream";
+	eq FActualStream.builtInName()       = "actualStream";
+	eq FConnBranch.builtInName()         = "Connections.branch";
+	eq FConnRoot.builtInName()           = "Connections.root";
+	eq FConnPotentialRoot.builtInName()  = "Connections.potentialRoot";
+	eq FConnIsRoot.builtInName()         = "Connections.isRoot";
+	eq FConnRooted.builtInName()         = "Connections.rooted";
+	eq FConnRootedDep.builtInName()      = "rooted";
+
+
 	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
@@ -1816,6 +1827,10 @@ aspect FlatPrettyPrint {
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
+	protected void FArgumentExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		p.print(copiedFExp(), str, indent);
+	}
+	
 	syn String FTypePrefixInputOutput.toString();
 	eq FInput.toString() = "input";
 	eq FOutput.toString()= "output";
@@ -1824,6 +1839,12 @@ aspect FlatPrettyPrint {
 	eq FDiscrete.toString() = "discrete ";
 	eq FConstant.toString() = "constant ";
 	eq FContinuous.toString() = "";	
+	
+	syn String FTypePrefixVariability.toStringLiteral();
+	eq FParameter.toStringLiteral() = "Parameter";
+	eq FDiscrete.toStringLiteral() = "Discrete";
+	eq FConstant.toStringLiteral() = "Constant";
+	eq FContinuous.toStringLiteral() = "Continuous";
 	
 	syn String Restriction.toString();
 	eq Model.toString() = "model";
@@ -1962,7 +1983,7 @@ aspect PrettyPrint_MC {
 	    boolean wroteEquation = false;
 	    for (FEquationBlock b : getFEquationBlocks()) {
 	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithmBlock) {
+	    		if (e instanceof FAlgorithm) {
 	    			p.print(e, str, indent);
 	    			wroteEquation = false;
 	    		} else {

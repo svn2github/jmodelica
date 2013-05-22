@@ -1,7 +1,7 @@
 model must_initialize
 
     // The states
-    Real x(start=0);
+    output Real x(start=0);
     Real y(start=5);
 
   equation

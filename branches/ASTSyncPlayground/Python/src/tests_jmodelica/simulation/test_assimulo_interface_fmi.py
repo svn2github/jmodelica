@@ -39,7 +39,162 @@ except (NameError, ImportError):
     logging.warning('Could not load Assimulo module. Check pyfmi.check_packages()')
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
+path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
+path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_mos  = os.path.join(get_files_path(), 'Modelica')
+
+
+def input_linear(t):
+    if t < 0.5:
+        return t
+    elif t < 1.0:
+        return 0.5
+    elif t < 1.5:
+        return t-0.5
+    elif t < 2.0:
+        return 2.5-t
+    elif t < 2.5:
+        return 0.5
+    else:
+        return 3.0-t
+        
+input_object = (["u"],input_linear)
+
+class Test_Events:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'EventIter.mo')
+
+        compile_fmu("EventIter.EventInfiniteIteration1", file_name)
+        compile_fmu("EventIter.EventInfiniteIteration2", file_name)
+        compile_fmu("EventIter.EventInfiniteIteration3", file_name)
+    
+    @testattr(stddist = True)
+    def test_event_infinite_iteration_1(self):
+        model = load_fmu("EventIter_EventInfiniteIteration1.fmu")
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_event_infinite_iteration_2(self):
+        model = load_fmu("EventIter_EventInfiniteIteration2.fmu")
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(assimulo = True)
+    def test_event_infinite_iteration_3(self):
+        model = load_fmu("EventIter_EventInfiniteIteration3.fmu")
+        nose.tools.assert_raises(FMUException, model.simulate)
+
+class Test_Relations:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'RelationTests.mo')
+
+        compile_fmu("RelationTests.RelationLE", file_name)
+        compile_fmu("RelationTests.RelationGE", file_name)
+        compile_fmu("RelationTests.RelationLEInv", file_name)
+        compile_fmu("RelationTests.RelationGEInv", file_name)
+        compile_fmu("RelationTests.RelationLEInit", file_name)
+        compile_fmu("RelationTests.RelationGEInit", file_name)
+        compile_fmu("RelationTests.TestRelationalOp1", file_name)
+        
+    @testattr(assimulo = True)
+    def test_relation_le(self):
+        model = load_fmu("RelationTests_RelationLE.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_leinv(self):
+        model = load_fmu("RelationTests_RelationLEInv.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_ge(self):
+        model = load_fmu("RelationTests_RelationGE.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_geinv(self):
+        model = load_fmu("RelationTests_RelationGEInv.fmu")
+        opts = model.simulate_options()
+        opts["CVode_options"]["maxh"] = 0.001
+        res = model.simulate(final_time=3.5, input=input_object,options=opts)
+        
+        nose.tools.assert_almost_equal(N.interp(0.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(2.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.25,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.75,res["time"],res["y"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(0.75,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_not_almost_equal(N.interp(2.25,res["time"],res["x"]),0.5,places=2)
+        nose.tools.assert_almost_equal(N.interp(1.5,res["time"],res["y"]),0.5,places=2)
+        
+    @testattr(assimulo = True)
+    def test_relation_leinit(self):
+        model = load_fmu("RelationTests_RelationLEInit.fmu")
+        
+        res = model.simulate(final_time=0.1)
+        
+        nose.tools.assert_almost_equal(res.initial("x"),1.0,places=3)
+        nose.tools.assert_almost_equal(res.initial("y"),0.0,places=3)
+        
+    @testattr(assimulo = True)
+    def test_relation_geinit(self):
+        model = load_fmu("RelationTests_RelationGEInit.fmu")
+        
+        res = model.simulate(final_time=0.1)
+        
+        nose.tools.assert_almost_equal(res.initial("x"),0.0,places=3)
+        nose.tools.assert_almost_equal(res.initial("y"),1.0,places=3)
+
+    @testattr(assimulo = True)
+    def test_relation_op_1(self):
+        model = load_fmu("RelationTests_TestRelationalOp1.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(N.interp(3.00,res["time"],res["der(v1)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(3.40,res["time"],res["der(v1)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(8.00,res["time"],res["der(v1)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(8.25,res["time"],res["der(v1)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(4.00,res["time"],res["der(v2)"]),1.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(4.20,res["time"],res["der(v2)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
+        nose.tools.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
 
 class Test_FMI_ODE:
     """
@@ -61,8 +216,8 @@ class Test_FMI_ODE:
         """
         Load the test model.
         """
-        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus)
-        self._dq = load_fmu('dq.fmu',path_to_fmus)
+        self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        self._dq = load_fmu('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
@@ -77,16 +232,12 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=10)
         
-        x = res['x']
-        y = res['y']
-        z = res['z']
-        
-        nose.tools.assert_almost_equal(x[0] ,1.000000000)
-        nose.tools.assert_almost_equal(x[-1],-2.000000000)
-        nose.tools.assert_almost_equal(y[0] ,-1.000000000)
-        nose.tools.assert_almost_equal(y[-1],-1.000000000)
-        nose.tools.assert_almost_equal(z[0] ,1.000000000)
-        nose.tools.assert_almost_equal(z[-1],4.000000000)
+        nose.tools.assert_almost_equal(res.initial('x') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-2.000000000)
+        nose.tools.assert_almost_equal(res.initial('y') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('y'),-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('z'),4.000000000)
         
     @testattr(assimulo = True)
     def test_no_state2(self):
@@ -97,10 +248,8 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=10)
         
-        x = res['x']
-        
-        nose.tools.assert_almost_equal(x[0] ,-1.000000000)
-        nose.tools.assert_almost_equal(x[-1],-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
     
     @testattr(assimulo = True)
     def test_result_name_file(self):
@@ -248,27 +397,21 @@ class Test_FMI_ODE:
         """
         This tests a simulation of a Pendulum with dynamic state selection.
         """
-        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=10)
     
-        x1_sim = res['x']
-        x2_sim = res['y']
+        nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
+        nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
+        nose.tools.assert_almost_equal(res.final('x'), 0.290109468, 4)
+        nose.tools.assert_almost_equal(res.final('y'), -0.956993467, 4)
         
-        nose.tools.assert_almost_equal(x1_sim[0], 1.000000, 4)
-        nose.tools.assert_almost_equal(x2_sim[0], 0.000000, 4)
-        nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 4)
-        nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 4)
-        
-        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus)
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=10, options={'ncp':1000})
     
-        x1_sim = res['x']
-        x2_sim = res['y']
-        
-        nose.tools.assert_almost_equal(x1_sim[0], 1.000000, 4)
-        nose.tools.assert_almost_equal(x2_sim[0], 0.000000, 4)
+        nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
+        nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
         #nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
         #nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
     
@@ -277,7 +420,7 @@ class Test_FMI_ODE:
         """
         This tests a simulation with an event of terminate simulation.
         """
-        model = load_fmu('Robot.fmu', path_to_fmus)
+        model = load_fmu('Robot.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -289,7 +432,7 @@ class Test_FMI_ODE:
         """
         This tests a FMU with typeDefinitions including StringType and BooleanType
         """
-        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus)
+        model = load_fmu('Robot_Dym74FD01.fmu', path_to_fmus_me1)
         
         res = model.simulate(final_time=2.0)
         solver = res.solver
@@ -321,14 +464,10 @@ class Test_FMI_ODE:
 
         sim_res = model.simulate(final_time=10)
 
-        x = sim_res['x']
-        y = sim_res['y']
-        z = sim_res['z']
-        
-        nose.tools.assert_almost_equal(x[0], 2.00000, 4)
-        nose.tools.assert_almost_equal(x[-1], 10.000000, 4)
-        nose.tools.assert_almost_equal(y[-1], 3.0000000, 4)
-        nose.tools.assert_almost_equal(z[-1], 2.0000000, 4)
+        nose.tools.assert_almost_equal(sim_res.initial('x'), 2.00000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('x'), 10.000000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('y'), 3.0000000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('z'), 2.0000000, 4)
         
         fmu_name = compile_fmu('EventIter.EventStartIter', os.path.join(path_to_mos,'EventIter.mo'))
         
@@ -336,34 +475,28 @@ class Test_FMI_ODE:
 
         sim_res = model.simulate(final_time=10)
 
-        x = sim_res['x']
-        y = sim_res['y']
-        z = sim_res['z']
-        
-        nose.tools.assert_almost_equal(x[0], 1.00000, 4)
-        nose.tools.assert_almost_equal(y[0], -1.00000, 4)
-        nose.tools.assert_almost_equal(z[0], 1.00000, 4)
-        nose.tools.assert_almost_equal(x[-1], -2.000000, 4)
-        nose.tools.assert_almost_equal(y[-1], -1.0000000, 4)
-        nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
+        nose.tools.assert_almost_equal(sim_res.initial('x'), 1.00000, 4)
+        nose.tools.assert_almost_equal(sim_res.initial('y'), -1.00000, 4)
+        nose.tools.assert_almost_equal(sim_res.initial('z'), 1.00000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('x'), -2.000000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('y'), -1.0000000, 4)
+        nose.tools.assert_almost_equal(sim_res.final('z'), 4.0000000, 4)
     
     @testattr(assimulo = True)
     def test_changed_starttime(self):
         """
         This tests a simulation with different start time.
         """
-        bounce = FMUModel('bouncingBall.fmu', path_to_fmus)
+        bounce = FMUModel('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize()
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
         res = bounce.simulate(start_time=2.,final_time=5.,options=opts)
-        height = res['h']
-        time = res['time']
 
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.98048862,4)
-        nose.tools.assert_almost_equal(time[-1],5.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.98048862,4)
+        nose.tools.assert_almost_equal(res.final('time'),5.000000,5)
         
     
     @testattr(assimulo = True)
@@ -372,21 +505,19 @@ class Test_FMI_ODE:
         This tests the basic simulation and writing.
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize()
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
         res = bounce.simulate(final_time=3., options=opts)
-        height = res['h']
-        time = res['time']
         
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(time[-1],3.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
+        nose.tools.assert_almost_equal(res.final('time'),3.000000,5)
         
         #Writing after
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         bounce.initialize()
         opt = bounce.simulate_options()
         opt['continuous_output'] = False
@@ -395,24 +526,18 @@ class Test_FMI_ODE:
         opt["CVode_options"]["atol"] = 1e-6
         res = bounce.simulate(final_time=3., options=opt)
         
-        height = res['h']
-        time = res['time']
-        
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(time[-1],3.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
+        nose.tools.assert_almost_equal(res.final('time'),3.000000,5)
         
         #Test with predefined FMUModel
-        model = load_fmu(os.path.join(path_to_fmus,'bouncingBall.fmu'))
+        model = load_fmu(os.path.join(path_to_fmus_me1,'bouncingBall.fmu'))
         #model.initialize()
         res = model.simulate(final_time=3.,options=opts)
 
-        height = res['h']
-        time = res['time']
-
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(time[-1],3.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
+        nose.tools.assert_almost_equal(res.final('time'),3.000000,5)
 
 
     @testattr(assimulo = True)
@@ -421,36 +546,31 @@ class Test_FMI_ODE:
         This test the default values of the simulation using simulate.
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
         res = bounce.simulate(final_time=3., options=opts)
 
-        height = res['h']
-        time = res['time']
-        
         nose.tools.assert_almost_equal(res.solver.rtol, 1e-4, 6)
         assert res.solver.iter == 'Newton'
         
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
-        nose.tools.assert_almost_equal(time[-1],3.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
+        nose.tools.assert_almost_equal(res.final('time'),3.000000,5)
         
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         #bounce.initialize(options={'initialize':False})
         res = bounce.simulate(final_time=3.,
             options={'initialize':True,'CVode_options':{'iter':'FixedPoint','rtol':1e-6,'atol':1e-6}})
-        height = res['h']
-        time = res['time']
     
         nose.tools.assert_almost_equal(res.solver.rtol, 0.00000100, 7)
         assert res.solver.iter == 'FixedPoint'
         
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.98018113,5)
-        nose.tools.assert_almost_equal(time[-1],3.000000,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.98018113,5)
+        nose.tools.assert_almost_equal(res.final('time'),3.000000,5)
 
     @testattr(assimulo = True)
     def test_reset(self):
@@ -459,18 +579,15 @@ class Test_FMI_ODE:
         FMUs)
         """
         #Writing continuous
-        bounce = load_fmu('bouncingBall.fmu', path_to_fmus)
+        bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         opts = bounce.simulate_options()
         opts["CVode_options"]["rtol"] = 1e-4
         opts["CVode_options"]["atol"] = 1e-6
         #bounce.initialize()
         res = bounce.simulate(final_time=3., options=opts)
-
-        height = res['h']
-        time = res['time']
         
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
         
         bounce.reset()
         #bounce.initialize()
@@ -479,11 +596,8 @@ class Test_FMI_ODE:
         
         res = bounce.simulate(final_time=3.,options=opts)
 
-        height = res['h']
-        time = res['time']
-        
-        nose.tools.assert_almost_equal(height[0],1.000000,5)
-        nose.tools.assert_almost_equal(height[-1],-0.9804523,5)
+        nose.tools.assert_almost_equal(res.initial('h'),1.000000,5)
+        nose.tools.assert_almost_equal(res.final('h'),-0.9804523,5)
     
 class Test_ODE_JACOBIANS1:
     
@@ -502,7 +616,6 @@ class Test_ODE_JACOBIANS1:
         
         m_furuta = FMUModel2('Furuta.fmu')
         
-        m_furuta.initialize()
         print "Starting simulation"
         
         opts = m_furuta.simulate_options()
@@ -512,6 +625,7 @@ class Test_ODE_JACOBIANS1:
         A,B,C,D,n_err1 = m_furuta.check_jacobians()
         
         opts['with_jacobian'] = False
+        opts['initialize'] = False
         res = m_furuta.simulate(final_time=100, options=opts)
         
         A,B,C,D,n_err2 = m_furuta.check_jacobians()
@@ -557,8 +671,6 @@ class Test_ODE_JACOBIANS3:
         
         m_distlib1 = FMUModel2('DISTLib_Examples_Simulation.fmu')
         m_distlib2 = FMUModel2('DISTLib_Examples_Simulation.fmu')
-        m_distlib1.initialize()
-        m_distlib2.initialize()
         
         opts = m_distlib1.simulate_options()
         opts['with_jacobian'] = True

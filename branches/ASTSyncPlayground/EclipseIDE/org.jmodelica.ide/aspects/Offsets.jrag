@@ -31,6 +31,14 @@ aspect Offset {
 			return -1;
 		}
     }
+
+	protected int Root.createOffset(int location) {
+		return -1;
+	}
+
+	protected int InstRoot.createOffset(int location) {
+		return -1;
+	}
 	
 	/**
 	 * Gets offset of the beginning or end of a line.

@@ -172,16 +172,10 @@ class Test_JMI_DAE:
         
         res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj))
         
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
     
     @testattr(assimulo = True) 
@@ -222,15 +216,18 @@ class Test_JMI_DAE:
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
         """
-        temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
+        pass #DEPRECATED
         
-        nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
-        nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
+        #temp_g = self.DISC.g(2.,[1.,2.],[2.,0],[0,0])
+        #nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
+        #nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
     
     @testattr(assimulo = True) 
     def test_g_adjust(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
+        """
+        pass #DEPRECATED
         """
         self.DISC.eps = 2.0
 
@@ -243,6 +240,7 @@ class Test_JMI_DAE:
         
         nose.tools.assert_almost_equal(temp_g_adjust[0], -2.429203, 5)
         nose.tools.assert_almost_equal(temp_g_adjust[1], 3.141592, 5)
+        """
         
     @testattr(assimulo = True) 
     def test_init(self):
@@ -293,6 +291,9 @@ class Test_JMI_DAE:
         """
         This tests JMUs with event iteration (JModelica.org).
         """
+        #DEPRECATED!
+        pass
+        """
         jmu_name = compile_jmu('EventIter.EventMiddleIter', os.path.join(path_to_mos,'EventIter.mo'))
 
         model = JMUModel(jmu_name)
@@ -324,6 +325,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(x[-1], -2.000000, 4)
         nose.tools.assert_almost_equal(y[-1], -1.0000000, 4)
         nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
+        """
 
     @testattr(assimulo = True) 
     def test_j(self):
@@ -491,16 +493,10 @@ class Test_JMI_DAE:
         
         res = dInput.simulate(final_time=10, input=(['u1','u2'],u_traj))
         
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
         #TEST REVERSE ORDER OF INPUT
         
@@ -514,16 +510,10 @@ class Test_JMI_DAE:
         
         res = dInput.simulate(final_time=10, input=(['u2','u1'],u_traj))
         
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
 
     @testattr(assimulo = True)
     def test_double_input_with_function(self):
@@ -544,17 +534,11 @@ class Test_JMI_DAE:
             return N.array([N.cos(t),N.sin(t)])
         
         res = dInput.simulate(final_time=10, input=(['u1','u2'],func))
-        
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
         #TEST REVERSE ORDER OF INPUT
         
@@ -565,17 +549,11 @@ class Test_JMI_DAE:
             return [N.sin(t),N.cos(t)]
         
         res = dInput.simulate(final_time=10, input=(['u2','u1'],func))
-        
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
         
 class Test_JMI_DAE_Sens:
@@ -842,14 +820,10 @@ class Test_JMI_DAE_Sens:
         #Value used when IDA estimates the tolerances on the parameters
         #qt_sim.pbar = qt_mod.p0 
 
-        dx1da1 = res['dx1/da1']
-        dx1da2 = res['dx1/da2']
-        dx4da1 = res['dx4/da1']
-
-        nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
-        nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
-        nose.tools.assert_almost_equal(res["u1"][-1], u1[-1], 4)
-        nose.tools.assert_almost_equal(res["u2"][-1], u2[-1], 4)
+        nose.tools.assert_almost_equal(res.initial('dx1/da2'), 0.000000, 4)
+        nose.tools.assert_almost_equal(res.final('dx1/da2'), 0.00000, 4)
+        nose.tools.assert_almost_equal(res.final("u1"), u1[-1], 4)
+        nose.tools.assert_almost_equal(res.final("u2"), u2[-1], 4)
 
     @testattr(assimulo = True)
     def test_input_simulation_high_level(self):
@@ -887,14 +861,10 @@ class Test_JMI_DAE_Sens:
         #Value used when IDA estimates the tolerances on the parameters
         #qt_sim.pbar = qt_mod.p0 
 
-        dx1da1 = res['dx1/da1']
-        dx1da2 = res['dx1/da2']
-        dx4da1 = res['dx4/da1']
-
-        nose.tools.assert_almost_equal(dx1da2[0], 0.000000, 4)
-        nose.tools.assert_almost_equal(dx1da2[-1], 0.00000, 4)
-        nose.tools.assert_almost_equal(res["u1"][-1], u1[-1], 4)
-        nose.tools.assert_almost_equal(res["u2"][-1], u2[-1], 4)
+        nose.tools.assert_almost_equal(res.initial('dx1/da2'), 0.000000, 4)
+        nose.tools.assert_almost_equal(res.final('dx1/da2'), 0.00000, 4)
+        nose.tools.assert_almost_equal(res.final("u1"), u1[-1], 4)
+        nose.tools.assert_almost_equal(res.final("u2"), u2[-1], 4)
         
     @testattr(assimulo = True)
     def test_jac(self):
@@ -968,16 +938,10 @@ class Test_JMI_DAE_Sens:
         res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
                                     options=opts)
         
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
         
     @testattr(assimulo = True)
@@ -1003,16 +967,10 @@ class Test_JMI_DAE_Sens:
         res = self.m_INPUT.simulate(final_time=10, input=(['u1','u2'],u_traj),
                                     options=opts)
         
-        r1=res['u1']
-        r2=res['u2']
-        t1=res['time']
-        
-        #P.plot(t1,r1,t1,r2)
-        #P.show()
-        nose.tools.assert_almost_equal(r1[0], 1.000000000, 3)
-        nose.tools.assert_almost_equal(r2[0], 0.000000000, 3)
-        nose.tools.assert_almost_equal(r1[-1], -0.839071529, 3)
-        nose.tools.assert_almost_equal(r2[-1], -0.544021110, 3)
+        nose.tools.assert_almost_equal(res.initial('u1'), 1.000000000, 3)
+        nose.tools.assert_almost_equal(res.initial('u2'), 0.000000000, 3)
+        nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
+        nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
 
     @testattr(assimulo = True)
     def test_scaling(self):

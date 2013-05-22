@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -255,9 +255,7 @@ model LongIntConst1
 			description="",
 			flatModel="
 fclass ForbiddenOperationsTests.LongIntConst1
- Real x;
-equation
- x = 1.0E12;
+ constant Real x = 1.0E12;
 
 end ForbiddenOperationsTests.LongIntConst1;
 ")})));
