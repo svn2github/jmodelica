@@ -207,6 +207,7 @@ public class MunkresProblem {
 	private long originalCost[][];
 	private int n;
 	private int m;
+	private int k;
 	private long cost[][];
 	private boolean rowCover[];
 	private boolean columnCover[];
@@ -232,6 +233,7 @@ public class MunkresProblem {
 	public MunkresProblem(long[][] cost) {
 		n = cost.length;
 		m = cost[0].length;
+		k = (n < m) ? n : m;
 		originalCost = new long[n][m];	
 		this.cost = new long[n][m];		
 		rowCover = new boolean[n];
@@ -273,7 +275,7 @@ public class MunkresProblem {
 					//System.out.println("Step: COVER_MATCHED_COLUMNS");
 					int nbrMatchedColumns = coverMatchedColumns();
 					//System.out.println(this);
-					if (nbrMatchedColumns == n) {
+					if (nbrMatchedColumns == k) {
 						done = true;
 					}
 					break;
