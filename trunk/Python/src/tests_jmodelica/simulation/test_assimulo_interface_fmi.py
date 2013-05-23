@@ -340,23 +340,6 @@ class Test_FMI_ODE:
         assert time == None
         #Further testing of the time event function is needed.
         
-    @testattr(assimulo = True)
-    def test_handle_result(self):
-        """
-        This tests the functionality of the handle result method.
-        """
-        t = 1.0
-        y = N.array([1.0,1.0])
-        
-        solver = lambda x:1
-        solver.continuous_output = False
-        
-        assert len(self._bounceSim._sol_real) == 0
-        self._bounceSim.write_cont = False
-        self._bounceSim.handle_result(solver,t,y)
-        
-        assert len(self._bounceSim._sol_real) == 1
-        
         
     @testattr(assimulo = True)
     def test_handle_event(self):
@@ -520,7 +503,6 @@ class Test_FMI_ODE:
         bounce = load_fmu('bouncingBall.fmu', path_to_fmus_me1)
         bounce.initialize()
         opt = bounce.simulate_options()
-        opt['continuous_output'] = False
         opt['initialize']=False
         opt["CVode_options"]["rtol"] = 1e-4
         opt["CVode_options"]["atol"] = 1e-6

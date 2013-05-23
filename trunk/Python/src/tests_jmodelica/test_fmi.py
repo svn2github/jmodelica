@@ -30,6 +30,7 @@ from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
+from pyfmi.common.io import ResultHandler
 
 path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
@@ -173,7 +174,53 @@ class Test_FMUModelCS1:
         self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
         self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
         #self.rlc_square.initialize()
-
+    
+    @testattr(fmi = True)
+    def test_custom_result_handler(self):
+        model = self.rlc
+        
+        class A:
+            pass
+        class B(ResultHandler):
+            def get_result(self):
+                return None
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "hejhej"
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handling"] = "custom"
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handler"] = A()
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handler"] = B()
+        res = model.simulate(options=opts)
+    
+    @testattr(fmi = True)
+    def test_filter(self):
+        model = self.rlc
+        
+        opts = model.simulate_options()
+        opts["filter"] = "resistor.*"
+        res = model.simulate(final_time=0.1)
+        nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
+        data = res["resistor.v"]
+        
+        model.reset()
+        opts = model.simulate_options()
+        opts["filter"] = "resistor.*"
+        opts["result_handling"] = "memory"
+        res = model.simulate(final_time=0.1)
+        nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
+        data = res["resistor.v"]
+        
+        model.reset()
+        opts = model.simulate_options()
+        opts["filter"] = ["resistor.*", "capacitor.v"]
+        res = model.simulate(final_time=0.1)
+        data = res["capacitor.v"]
+        data = res["resistor.v"]
+        
+    
     @testattr(stddist = True)
     def test_simulation_no_state(self):
         model = self.no_state3
@@ -421,18 +468,66 @@ class Test_FMUModelME1:
         """
         Sets up the test class.
         """
+        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
         depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
 
     def setUp(self):
         """
         Sets up the test case.
         """
+        self.rlc  = load_fmu('RLC_Circuit.fmu')
         self._bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
         self._dq = load_fmu('dq.fmu',path_to_fmus_me1)
         self._bounce.initialize()
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
+    
+    @testattr(assimulo = True)
+    def test_custom_result_handler(self):
+        model = self.rlc
+        
+        class A:
+            pass
+        class B(ResultHandler):
+            def get_result(self):
+                return None
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "hejhej"
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handling"] = "custom"
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handler"] = A()
+        nose.tools.assert_raises(Exception, model.simulate, options=opts)
+        opts["result_handler"] = B()
+        res = model.simulate(options=opts)
+        
+    
+    @testattr(assimulo = True)
+    def test_filter(self):
+        model = self.rlc
+        
+        opts = model.simulate_options()
+        opts["filter"] = "resistor.*"
+        res = model.simulate(final_time=0.1)
+        nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
+        data = res["resistor.v"]
+        
+        model.reset()
+        opts = model.simulate_options()
+        opts["filter"] = "resistor.*"
+        opts["result_handling"] = "memory"
+        res = model.simulate(final_time=0.1)
+        nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
+        data = res["resistor.v"]
+        
+        model.reset()
+        opts = model.simulate_options()
+        opts["filter"] = ["resistor.*", "capacitor.v"]
+        res = model.simulate(final_time=0.1)
+        data = res["capacitor.v"]
+        data = res["resistor.v"]
 
     @testattr(assimulo = True)
     def test_log_file_name(self):
