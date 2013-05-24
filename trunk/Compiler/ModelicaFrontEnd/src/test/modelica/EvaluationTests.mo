@@ -909,5 +909,24 @@ x = if a[1,1] > a[1,2] then true else false;
 end ParameterEval1;
 
 
+model EvaluateAnnotation
+	parameter Real a = 1.0;
+	parameter Real b = a annotation(Evaluate=true);
+	Real c = a + b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="EvaluateAnnotation",
+			description="Check that annotation(Evaluate=true) is honored",
+			flatModel="
+fclass EvaluationTests.EvaluateAnnotation
+ parameter Real a = 1.0 /* 1.0 */;
+ parameter Real b = 1.0 /* 1.0 */;
+ Real c = 1.0 + 1.0;
+end EvaluationTests.EvaluateAnnotation;
+")})));
+end EvaluateAnnotation;
+
+
 
 end EvaluationTests;

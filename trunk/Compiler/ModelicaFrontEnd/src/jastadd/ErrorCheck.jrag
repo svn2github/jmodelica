@@ -795,6 +795,10 @@ aspect InstanceErrorCheck {
 					warning("The %s %s does not have a binding expression", type, qualifiedName());
 				}
     		}
+    		
+    		// Mark parameters with Evaluate=true as structural
+    		if (isParameter() && annotation().forPath("Evaluate").bool()) 
+    			markAsStructuralParameter();
 			
 			// Check array indices
 			getClassName().collectErrors();
