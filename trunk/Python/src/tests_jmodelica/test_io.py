@@ -28,7 +28,7 @@ from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
 from pymodelica.common.io import ResultDymolaTextual, ResultWriterDymola
 from pyjmi.common.io import VariableNotTimeVarying
-from pyfmi.common.io import ResultWriterDymola as fmi_ResultWriterDymola
+from pyfmi.common.io import ResultHandlerFile as fmi_ResultHandlerFile
 from pyjmi.jmi import JMUModel
 from pyjmi.optimization import ipopt
 from pyfmi.fmi import FMUModel, load_fmu
@@ -218,11 +218,13 @@ class test_ResultWriterDymola:
         """Tests the work flow of write_header, write_point, write_finalize."""
         
         
-        bouncingBall = fmi_ResultWriterDymola(self._bounce)
+        bouncingBall = fmi_ResultHandlerFile(self._bounce)
         
-        bouncingBall.write_header()
-        bouncingBall.write_point()
-        bouncingBall.write_finalize()
+        bouncingBall.set_options(self._bounce.simulate_options())
+        bouncingBall.simulation_start()
+        bouncingBall.initialize_complete()
+        bouncingBall.integration_point()
+        bouncingBall.simulation_end()
         
         res = ResultDymolaTextual('bouncingBall_result.txt')
         

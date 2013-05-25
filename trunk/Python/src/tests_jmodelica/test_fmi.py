@@ -923,13 +923,6 @@ class TestDiscreteVariableRefs(object):
         self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True, 'generate_runtime_option_parameters':False})
         self.model = FMUModelME1(self.fmu_name)
 
-    @testattr(stddist = True)
-    def test_vars_model(self):
-       """
-       Test that the value references are correct
-       """
-       nose.tools.assert_equal(self.model._save_real_variables_val[0],2)
-
 class TestDependentParameters(object):
     """
     Test that dependent variables are recomputed when an independent varaible is set.
