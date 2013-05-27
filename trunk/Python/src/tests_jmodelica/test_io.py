@@ -26,7 +26,7 @@ import nose
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_jmu
-from pymodelica.common.io import ResultDymolaTextual, ResultWriterDymola
+from pyfmi.common.io import ResultDymolaTextual, ResultWriterDymola, JIOError
 from pyjmi.common.io import VariableNotTimeVarying
 from pyfmi.common.io import ResultHandlerFile as fmi_ResultHandlerFile
 from pyjmi.jmi import JMUModel
@@ -148,6 +148,10 @@ class TestIO:
         
         assert res.is_negated('der(y)') == False
         assert res.is_negated('y') == False
+        
+    @testattr(stddist = True)
+    def test_wrong_result_file(self):
+        nose.tools.assert_raises(JIOError, ResultDymolaTextual,os.path.join(get_files_path(),"Results","Incorrect_number_of_lines.txt"))
         
     @testattr(assimulo = True)
     def test_get_column(self):
