@@ -3640,6 +3640,28 @@ model CRecordDecl18
 end CRecordDecl18;
 
 
+model CRecordDecl19
+    record R
+        Real[2] x;
+    end R;
+    
+    parameter Real[2] p = {1,2};
+    R r(x(start=p));
+equation
+    der(r.x) = p;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CRecordDecl19",
+            description="Start value for array member of record",
+            template="$C_DAE_initial_guess_equation_residuals$",
+            generatedCode="
+   (*res)[0] = _p_1_0 - _r_x_1_2;
+   (*res)[1] = _p_2_1 - _r_x_2_3;
+")})));
+end CRecordDecl19;
+
+
 model RemoveCopyright
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(

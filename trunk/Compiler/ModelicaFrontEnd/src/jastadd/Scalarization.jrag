@@ -514,7 +514,7 @@ aspect Scalarization {
 			if (val.ndims() < i.ndims() || isInternal())
 				val = val.scalarize(Collections.<String,FExp>emptyMap());
 			else
-				val = val.splitArrayExp(i).unboundCopy();
+				val = val.dynamicFExp(val.splitArrayExp(i).unboundCopy()).scalarize(Collections.<String,FExp>emptyMap());
 			res.setValue(val);
 		}
 		res.setAttributeSet(getAttributeSet());
