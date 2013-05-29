@@ -12,6 +12,7 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
 import org.jmodelica.ide.sync.ASTPathPart;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.ListenerObject;
 import org.jmodelica.ide.sync.LocalRootNode;
@@ -19,6 +20,7 @@ import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
 import org.jmodelica.modelica.compiler.InstClassDecl;
 import org.jmodelica.modelica.compiler.SourceRoot;
+import org.jmodelica.modelica.compiler.StoredDefinition;
 
 public class GraphicalCacheRegistry implements IASTChangeListener {
 	private GraphicalEditorInput input;
@@ -27,6 +29,7 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	private IFile theFile;
 	private int myListenerId;
 	private Stack<ASTPathPart> myListenPath = new Stack<ASTPathPart>();
+	private StoredDefinition def;
 
 	public GraphicalCacheRegistry() {
 	}
@@ -39,9 +42,9 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 		return dp;
 	}
 
-	private void removeAsListener() {
-		ModelicaASTRegistry.getInstance().removeListener(theFile, myListenPath,
-				this);
+	public void removeAsListener() {
+		ChangePropagationController.getInstance().removeListener(this, theFile,
+				myListenPath);
 	}
 
 	public void setInput(GraphicalEditorInput input) {
@@ -61,23 +64,22 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	private void registerAsListener() {
 		ListenerObject listObj = new ListenerObject(this,
 				IASTChangeListener.GRAPHICAL_LISTENER, myListenerId);
-		ModelicaASTRegistry.getInstance().addListener(theFile, null, listObj);
+		ChangePropagationController.getInstance().addListener(listObj, theFile,
+				myListenPath);
 	}
 
 	private void createClassDiagramProxyCache(IFile theFile, String className) {
 		GlobalRootNode gRoot = (GlobalRootNode) ModelicaASTRegistry
 				.getInstance().doLookup(input.getProject());
 		SourceRoot root = gRoot.getSourceRoot();
+		def = ModelicaASTRegistry.getInstance().getLatestDef(theFile);
 		synchronized (root.state()) {
 			InstClassDecl icd = root.getProgram().getInstProgramRoot()
 					.syncSimpleLookupInstClassDecl(input.getClassName());
 			if (icd == null)
 				System.err
 						.println("Graphical Editor could not find input class\n");
-			long time = System.currentTimeMillis();
 			dp = new ClassDiagramProxy(theFile, icd);
-			time = System.currentTimeMillis() - time;
-			System.out.println("Rebuilt graphical cache, took " + time + "ms");
 			myListenPath = ModelicaASTRegistry.getInstance().createDefPath(
 					icd.getClassDecl());
 		}
@@ -91,8 +93,6 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 			createNewGraphicalUpdaterThread();
 		} else if (e.getType() == IASTChangeEvent.FILE_RECOMPILED) {
 			createNewAskToRebuildThread();
-			// TODO Re-register listener after file recompiles, since listen
-			// path has changed?
 		}
 	}
 
@@ -128,8 +128,7 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 		synchronized (sroot.state()) {
 			try {
 				theFile.setContents(new ByteArrayInputStream(
-						ModelicaASTRegistry.getInstance().getLatestDef(theFile)
-								.prettyPrintFormatted().getBytes()), false,
+						def.prettyPrintFormatted().getBytes()), false,
 						true, monitor);
 				UniqueIDGenerator.getInstance().setLastSaveGraphical();
 			} catch (CoreException e) {

@@ -25,7 +25,6 @@ public class ClassOutlineCacheInitialNoLibsTask extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
 				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
@@ -34,8 +33,6 @@ public class ClassOutlineCacheInitialNoLibsTask extends OutlineCacheJob {
 			cachedNode = ASTNodeCacheFactory.cacheNode(sroot, null, cache);
 			cacheChildren(sroot, cachedNode, initialTreeCacheDepth);
 		}
-		System.out.println("ClassOutlinePage initial caching (no Libs) took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 		IASTChangeEvent event = new EventCachedInitialNoLibs(cachedNode);
 		listener.astChanged(event);
 	}

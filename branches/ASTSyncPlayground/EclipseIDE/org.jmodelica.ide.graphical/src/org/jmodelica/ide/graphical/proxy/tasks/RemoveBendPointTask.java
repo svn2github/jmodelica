@@ -25,7 +25,6 @@ public class RemoveBendPointTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -51,7 +50,5 @@ public class RemoveBendPointTask extends AbstractAestheticModificationTask {
 						.println("Unable to remove line point, point is missing from pointlist, someone probably swapped it already!");
 			}
 		}
-		System.out.println("RemoveBendPointTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

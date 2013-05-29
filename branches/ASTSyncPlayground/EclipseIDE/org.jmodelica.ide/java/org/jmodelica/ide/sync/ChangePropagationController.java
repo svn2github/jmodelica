@@ -1,6 +1,5 @@
 package org.jmodelica.ide.sync;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -10,9 +9,12 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 public class ChangePropagationController {
 	private static ChangePropagationController controller;
 
-	// Each file has a Tree where listeners register against the file ast nodes.
-	// TODO synchronize when handling listeners
-	private HashMap<IFile, LibraryNode> listenerTrees = new HashMap<IFile, LibraryNode>();
+	// Each file has a Tree where listeners register against the file AST nodes.
+	private HashMap<IFile, ListenerTreeNode> listenerTrees = new HashMap<IFile, ListenerTreeNode>();
+
+	private boolean builderIsActive = false;
+
+	private WorkspaceListener workspaceListener;
 
 	private ChangePropagationController() {
 	}
@@ -23,20 +25,14 @@ public class ChangePropagationController {
 		return controller;
 	}
 
-	public void addListener(ListenerObject listObj, IFile file,
-			Stack<String> nodePath) {
-		LibraryNode root = listenerTrees.get(file);
+	public synchronized void addListener(ListenerObject listObj, IFile file,
+			Stack<ASTPathPart> nodePath) {
+		ListenerTreeNode root = listenerTrees.get(file);
 		if (root == null) {
-			root = new LibraryNode(null);
+			root = new ListenerTreeNode(null);
 			listenerTrees.put(file, root);
 		}
-		Stack<String> copy = new Stack<String>();
-		if (nodePath != null) {
-			copy.setSize(nodePath.size());
-			Collections.copy(copy, nodePath);
-		}
-		LibraryVisitor visitor = new LibraryVisitor();
-		visitor.addListener(root, copy, listObj);
+		ListenerTreeHandler.addListener(root, nodePath, listObj);
 	}
 
 	/**
@@ -49,28 +45,50 @@ public class ChangePropagationController {
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
 			Stack<ASTPathPart> nodePath) {
-		LibraryNode libroot = listenerTrees.get(file);
+		ListenerTreeNode libroot = listenerTrees.get(file);
 		if (libroot != null) {
-			LibraryVisitor visitor = new LibraryVisitor();
-			Stack<ASTPathPart> copy = new Stack<ASTPathPart>();
-			copy.setSize(nodePath.size());
-			Collections.copy(copy, nodePath);
-			visitor.handleChangedNode(file, changeType, libroot, copy);
+			ListenerTreeHandler.handleChangedNode(file, changeType, libroot,
+					nodePath);
 		}
 	}
 
-	public boolean removeListener(IASTChangeListener listener, IFile file,
-			Stack<ASTPathPart> nodePath) {
-		LibraryNode root = listenerTrees.get(file);
-		if (root != null) {
-			Stack<ASTPathPart> copy = new Stack<ASTPathPart>();
-			if (nodePath != null) {
-				copy.setSize(nodePath.size());
-				Collections.copy(copy, nodePath);
+	public synchronized boolean removeListener(IASTChangeListener listener,
+			IFile file, Stack<ASTPathPart> nodePath) {
+		if (file != null) {
+			ListenerTreeNode root = listenerTrees.get(file);
+			if (root != null) {
+				boolean result = ListenerTreeHandler.removeListener(root,
+						nodePath, listener);
+				if (result)
+					System.out
+							.println("Successfully removed listener from file "
+									+ file.getName());
+				else
+					System.out.println("Failed to remove listener from file "
+							+ file.getName());
 			}
-			LibraryVisitor visitor = new LibraryVisitor();
-			return visitor.removeListener(root, copy, listener);
 		}
 		return false;
+	}
+
+	/**
+	 * Set when ModelicaBuilder is active, (i.e. when Eclipse
+	 * "Build automatically" is set).
+	 */
+	public synchronized void setBuilderIsActive() {
+		if (workspaceListener != null) {
+			workspaceListener.dispose();
+			workspaceListener = null;
+		}
+		builderIsActive = true;
+	}
+
+	/**
+	 * Check if ModelicaBuilder is active.
+	 */
+	public synchronized void isBuilderActive() {
+		if (!builderIsActive) {
+			workspaceListener = new WorkspaceListener();
+		}
 	}
 }

@@ -4,6 +4,7 @@ import org.jastadd.ed.core.Builder;
 import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.IGlobalRootRegistry;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
 
@@ -12,6 +13,7 @@ public class ModelicaBuilder extends Builder {
 
 	public ModelicaBuilder() {
 		super();
+		ChangePropagationController.getInstance().setBuilderIsActive();
 	}
 
 	@Override
@@ -23,10 +25,9 @@ public class ModelicaBuilder extends Builder {
 	protected ICompiler createCompiler() {
 		return new ModelicaEclipseCompiler();
 	}
-	
+
 	@Override
-	protected boolean shouldWeRecompile(){
+	protected boolean shouldWeRecompile() {
 		return UniqueIDGenerator.getInstance().needWeRecompile();
 	}
-
 }

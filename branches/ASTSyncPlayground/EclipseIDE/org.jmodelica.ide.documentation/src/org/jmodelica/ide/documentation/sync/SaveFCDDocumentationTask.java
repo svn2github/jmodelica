@@ -35,6 +35,5 @@ public class SaveFCDDocumentationTask extends AbstractDocumentationTask {
 		FullClassDecl fcd = (FullClassDecl) ModelicaASTRegistry.getInstance()
 				.resolveSourceASTPath(def, classASTPath);
 		Generator.genDocWizardPerformFinish(fcd, rootPath, sroot, checkBoxes);
-		System.err.println("Successfully saved documentation?");
 	}
 }

@@ -14,13 +14,13 @@ public class LocalRootNode implements ILocalRootNode {
 
 	@Override
 	public boolean correspondsTo(ILocalRootNode node) {
-		return getFile().equals(node.getFile()); // TODO works?
+		return getFile().equals(node.getFile());
 	}
 
 	@Override
 	public void discardFromTree() {
-		// TODO Auto-generated method stub
-
+		System.err
+				.println("LocalRootNode->discardFromTree() should never be called.");
 	}
 
 	@Override
@@ -34,25 +34,27 @@ public class LocalRootNode implements ILocalRootNode {
 
 	@Override
 	public IASTNode getChild(int i) {
-		// TODO Auto-generated method stub
+		System.err.println("LocalRootNode->getChild() should never be called.");
 		return null;
 	}
 
 	@Override
 	public int getNumChild() {
-		// TODO Auto-generated method stub
+		System.err
+				.println("LocalRootNode->getNumChild() should never be called.");
 		return 0;
 	}
 
 	@Override
 	public IASTNode getParent() {
-		// TODO Auto-generated method stub
+		System.err
+				.println("LocalRootNode->getParent() should never be called.");
 		return null;
 	}
 
 	@Override
 	public void setFile(IFile file) {
-		// TODO Auto-generated method stub
+		System.err.println("LocalRootNode->setFile() should never be called.");
 	}
 
 	public StoredDefinition getDef() {

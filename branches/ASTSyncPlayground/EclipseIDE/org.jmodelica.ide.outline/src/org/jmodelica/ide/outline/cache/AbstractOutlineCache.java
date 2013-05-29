@@ -9,8 +9,8 @@ import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.IOutlineCache;
 import org.jmodelica.ide.outline.OutlineUpdateWorker;
 import org.jmodelica.ide.sync.CachedASTNode;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
-import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
 import org.jmodelica.ide.sync.tasks.ITaskObject;
 
@@ -39,8 +39,8 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 			if (registerASTListener) {
 				ListenerObject listObj = new ListenerObject(this,
 						IASTChangeListener.OUTLINE_LISTENER, listenerID);
-				ModelicaASTRegistry.getInstance().addListener(file, null,
-						listObj);
+				ChangePropagationController.getInstance().addListener(listObj,
+						file, null);
 			}
 		}
 	}
@@ -65,7 +65,8 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	}
 
 	public void dispose() {
-		ModelicaASTRegistry.getInstance().removeListener(myFile, null, this);
+		ChangePropagationController.getInstance().removeListener(this, myFile,
+				null);
 	}
 
 	/**

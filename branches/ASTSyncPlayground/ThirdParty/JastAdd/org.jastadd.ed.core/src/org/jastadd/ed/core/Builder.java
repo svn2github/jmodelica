@@ -105,6 +105,7 @@ public abstract class Builder extends IncrementalProjectBuilder {
 				if (resource instanceof IFile) {
 					if (shouldWeRecompile())
 						compileFile(resource);
+					else
 					return false;
 				}
 				break;
@@ -189,5 +190,9 @@ public abstract class Builder extends IncrementalProjectBuilder {
 		ErrorMarker.removeAll(file, IError.MARKER_ID);
 		ErrorMarker.addAll(file, errors, IError.MARKER_ID);
 	}
+
+	/**
+	 * We don't need to recompile ast if the graphical editor saved to file.
+	 */
 	protected abstract boolean shouldWeRecompile();
 }

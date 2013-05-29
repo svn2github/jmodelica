@@ -25,7 +25,6 @@ public class ExplorerOutlineCacheFileChildrenTask extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		ICachedOutlineNode toReturn = null;
 		ArrayList<ICachedOutlineNode> children = new ArrayList<ICachedOutlineNode>();
 		SourceRoot root = ((GlobalRootNode) ModelicaASTRegistry.getInstance()
@@ -44,9 +43,6 @@ public class ExplorerOutlineCacheFileChildrenTask extends OutlineCacheJob {
 			}
 		}
 		toReturn.setOutlineChildren(children);
-		System.out.println("CacheFileChildren from ExplorerOutline took: "
-				+ (System.currentTimeMillis() - time) + "ms for nbrchildren:"
-				+ children.size() + " in file:" + file.getName());
 		IASTChangeEvent event = new EventCachedFileChildren(file, toReturn);
 		listener.astChanged(event);
 	}

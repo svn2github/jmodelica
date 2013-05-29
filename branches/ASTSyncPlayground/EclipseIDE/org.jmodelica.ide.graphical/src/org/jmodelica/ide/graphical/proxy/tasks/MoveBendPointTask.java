@@ -31,7 +31,6 @@ public class MoveBendPointTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -56,7 +55,5 @@ public class MoveBendPointTask extends AbstractAestheticModificationTask {
 						.println("Unable to redo move line point, oldpoint is missing from pointlist, someone probably swapped it already!");
 			}
 		}
-		System.out.println("MoveBendPointTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

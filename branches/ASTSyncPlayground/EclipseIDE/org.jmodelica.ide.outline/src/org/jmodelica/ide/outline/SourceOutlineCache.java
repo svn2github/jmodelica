@@ -6,6 +6,7 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
+import org.jmodelica.ide.outline.cache.EventCachedChildren;
 import org.jmodelica.ide.outline.cache.EventCachedInitial;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
 import org.jmodelica.ide.outline.cache.tasks.SourceOutlineCacheInitialTask;
@@ -34,7 +35,7 @@ public class SourceOutlineCache extends AbstractOutlineCache {
 
 	@Override
 	public void astChanged(IASTChangeEvent e) {
-		if (e instanceof EventCachedInitial) {
+		if (e instanceof EventCachedChildren || e instanceof EventCachedInitial) {
 			super.astChanged(e);
 		} else if (e.getType() == IASTChangeEvent.FILE_RECOMPILED) {
 			createInitialCache();

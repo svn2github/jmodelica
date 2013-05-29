@@ -4,16 +4,16 @@ import java.util.ArrayList;
 
 import org.jastadd.ed.core.model.IASTChangeListener;
 
-public class LibraryNode {
-	private ArrayList<LibraryNode> children = new ArrayList<LibraryNode>();
+public class ListenerTreeNode {
+	private ArrayList<ListenerTreeNode> children = new ArrayList<ListenerTreeNode>();
 	private String id;
 	private ArrayList<ListenerObject> listeners = new ArrayList<ListenerObject>();
 
-	public LibraryNode(String id) {
+	public ListenerTreeNode(String id) {
 		this.id = id;
 	}
 
-	public void addChild(LibraryNode node) {
+	public void addChild(ListenerTreeNode node) {
 		this.children.add(node);
 	}
 
@@ -21,7 +21,7 @@ public class LibraryNode {
 		return id;
 	}
 
-	public ArrayList<LibraryNode> getChildren() {
+	public ArrayList<ListenerTreeNode> getChildren() {
 		return children;
 	}
 

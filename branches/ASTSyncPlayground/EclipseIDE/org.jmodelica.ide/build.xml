@@ -62,7 +62,6 @@
 	<condition property="core_dir" value="../${jastadd.project}" else="${jastadd_dir}/org.jastadd.ed.core">
 		<available file="../${jastadd.project}" type="dir" property="" />
 	</condition>
-	<echo message="COREEE: ${core_dir}"/>
 	<property name="site_dir" value="../site" />
 
 	<property name="core_java_dir" value="${core_dir}/src" />
@@ -94,7 +93,6 @@
 
 	<property name="ide_aspects" value="aspects" />
 	<property name="ide_core_aspects" value="${core_dir}/src" />
-	<echo message="COREASPECTS: ${ide_core_aspects}$"/>
 	<property name="modelica_frontend_aspects" value="${modelica_frontend_dir}/jastadd" />
 	<property name="modelica_compiler_aspects" value="${modelica_compiler_dir}/jastadd" />
 	<property name="modelica_cbackend_aspects" value="${modelica_cbackend_dir}/jastadd" />

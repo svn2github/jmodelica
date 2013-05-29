@@ -120,7 +120,6 @@ public class Util {
 
 	public static void openAndSelect(IWorkbenchPage page, Object elem) {
 		if (elem instanceof CachedASTNode) {
-			System.err.println("openAndSelect...");
 			CachedASTNode node = (CachedASTNode) elem;
 			IEditorPart editor = null;
 			try {

@@ -6,7 +6,6 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.GlobalRootRegistry;
-import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -23,29 +22,11 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	}
 
 	public static synchronized ModelicaASTRegistry getInstance() {
-		if (registry == null)
+		if (registry == null) {
 			registry = new ModelicaASTRegistry();
-		return registry;
-	}
-
-	public void addListener(IFile file, Stack<String> nodePath,
-			ListenerObject listObj) {
-		ChangePropagationController.getInstance().addListener(listObj, file,
-				nodePath);
-	}
-
-	public boolean removeListener(IFile file, Stack<ASTPathPart> nodePath,
-			IASTChangeListener listener) {
-		boolean result = false;
-		if (file != null) {
-			result = ChangePropagationController.getInstance().removeListener(
-					listener, file, nodePath);
-			String msg = result ? "successfully" : "failed to";
-			System.out.println("ModelicaASTRegistry " + msg
-					+ " unregistered listener: " + listener.toString()
-					+ ", for file:" + file.getName() + " " + nodePath);
+			ChangePropagationController.getInstance().isBuilderActive();
 		}
-		return result;
+		return registry;
 	}
 
 	/**
@@ -187,6 +168,8 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * Finds the index of this node at its parent.
 	 */
 	private int findIndex(ASTNode<?> node) {
+		if (node.getParent() == null)
+			return 0;
 		return node.getParent().getIndexOfChild(node);
 	}
 
@@ -211,7 +194,11 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * Find the latest StoredDefinition for the given IFile.
 	 */
 	public StoredDefinition getLatestDef(IFile theFile) {
-		return ((LocalRootNode) doLookup(theFile)[0]).getDef();
+		SourceRoot sroot = ((GlobalRootNode)doLookup(theFile.getProject())).getSourceRoot();
+		for (StoredDefinition def : sroot.getProgram().getUnstructuredEntitys())
+			if (def.getFile().equals(theFile))
+				return def;
+		return null;
 	}
 
 	/**

@@ -214,8 +214,6 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		if (fProjectASTMap.containsKey(project)) {
 			projectNode = fProjectASTMap.get(project);
 		} else {
-			System.out.println("Compiler compiling project: "
-					+ project.getName());
 			projectNode = createCompiler().compile(project);
 			doUpdate(project, projectNode);
 		}
@@ -257,7 +255,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 					ASTChangeEvent evt = new ASTChangeEvent(
 							ASTChangeEvent.POST_REMOVE,
 							ASTChangeEvent.FILE_LEVEL, projectNode, null,
-							projectDelta);// TODO fix null
+							projectDelta);
 					notifyListeners(evt);
 					result = true;
 				}
@@ -293,7 +291,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 			projectDelta.setStatus(IASTDelta.REMOVED);
 			ASTChangeEvent evt = new ASTChangeEvent(ASTChangeEvent.POST_REMOVE,
 					ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
-					projectDelta);// TODO fix null
+					projectDelta);
 			notifyListeners(evt);
 			result = true;
 		}
@@ -331,9 +329,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 					ASTChangeEvent evt = new ASTChangeEvent(
 							ASTChangeEvent.POST_UPDATE,
 							ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
-							projectDelta);// TODO
-											// fix
-											// null
+							projectDelta);
 					notifyListeners(evt);
 					result = true;
 					break;
@@ -372,7 +368,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 				ASTChangeEvent evt = new ASTChangeEvent(
 						ASTChangeEvent.POST_UPDATE,
 						ASTChangeEvent.PROJECT_LEVEL, projectNode, null,
-						projectDelta);// TODO fix null
+						projectDelta);
 				notifyListeners(evt);
 			} finally {
 				lock.release();
@@ -465,10 +461,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 		 * projectDelta.setStatus(IASTDelta.ADDED);
 		 */
 		ASTChangeEvent evt = new ASTChangeEvent(ASTChangeEvent.POST_ADDED,
-				ASTChangeEvent.PROJECT_LEVEL, newNode, null, null);// projectDelta);
-																	// TODO fix
-																	// null
-
+				ASTChangeEvent.PROJECT_LEVEL, newNode, null, null);
 		notifyListeners(evt);
 	}
 
@@ -506,7 +499,7 @@ public abstract class GlobalRootRegistry implements IGlobalRootRegistry {
 				doUpdate(file, fileNode);
 			}
 		} else {
-			System.out.println("Compiler could NOT compile file: "
+			System.err.println("Compiler could not compile file: "
 					+ file.getName());
 		}
 	}

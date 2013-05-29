@@ -19,8 +19,8 @@ import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialNoLibsTask;
 import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.CachedASTNode;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
-import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
 public class ClassOutlineCache extends AbstractOutlineCache {
 	protected ArrayList<EventCachedInitialNoLibs> eventCachedInitialNoLibs = new ArrayList<EventCachedInitialNoLibs>();
@@ -36,8 +36,7 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 	}
 
 	@Override
-	public void fetchChildren(Stack<ASTPathPart> nodePath,
-			Object task) {
+	public void fetchChildren(Stack<ASTPathPart> nodePath, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this);
 		ASTRegTaskBucket.getInstance().addTask(job);
@@ -59,17 +58,18 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 		}
 	}
 
-
 	public void addFileListener(IFile file) {
 		ListenerObject listObj = new ListenerObject(this,
 				IASTChangeListener.OUTLINE_LISTENER, listenerID);
-		ModelicaASTRegistry.getInstance().addListener(file, null, listObj);
+		ChangePropagationController.getInstance().addListener(listObj, file,
+				null);
 	}
-	
+
 	public void removeFileListener(IFile file) {
-		ModelicaASTRegistry.getInstance().removeListener(file, null, this);		
+		ChangePropagationController.getInstance().removeListener(this, file,
+				null);
 	}
-	
+
 	protected void handleCachedInitialNoLibsEvent() {
 		if (!eventCachedInitialNoLibs.isEmpty()) {
 			EventCachedInitialNoLibs event = eventCachedInitialNoLibs.remove(0);

@@ -34,7 +34,6 @@ public class InstanceOutlineCacheChildrenTask extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		ArrayList<ICachedOutlineNode> toReturn = new ArrayList<ICachedOutlineNode>();
 		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
 				.getInstance().doLookup(file.getProject());
@@ -50,8 +49,6 @@ public class InstanceOutlineCacheChildrenTask extends OutlineCacheJob {
 				toReturn.add(ASTNodeCacheFactory.cacheNode((ASTNode<?>) obj,
 						task.node, cache));
 		}
-		System.out.println("CacheChildren from InstanceOutline took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 		IASTChangeEvent event = new EventCachedChildren(toReturn, task);
 		listener.astChanged(event);
 	}

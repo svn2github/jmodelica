@@ -34,11 +34,4 @@ public class InstanceError extends InstanceProblem {
 	public String getSeverityString() {
 		return "Error";
 	}
-
-	@Override
-	public int getStartLine() {
-		// TODO Auto-generated method stub
-		return start;
-	}
-
 }

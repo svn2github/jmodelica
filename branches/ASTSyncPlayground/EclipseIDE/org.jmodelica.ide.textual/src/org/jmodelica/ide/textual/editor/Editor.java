@@ -56,6 +56,7 @@ import org.jmodelica.ide.folding.AnnotationDrawer;
 import org.jmodelica.ide.helpers.EditorFile;
 import org.jmodelica.ide.helpers.EditorWithFile;
 import org.jmodelica.ide.helpers.ICurrentClassListener;
+import org.jmodelica.ide.helpers.Util;
 import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.outline.InstanceOutlinePage;
 import org.jmodelica.ide.outline.SourceOutlinePage;
@@ -117,12 +118,8 @@ public class Editor extends AbstractDecoratedTextEditor implements
 		toggleAnnotationsAction = new ToggleAnnotationsAction(this);
 		fPartitioner = new FastPartitioner(new Modelica32PartitionScanner(),
 				Modelica32PartitionScanner.LEGAL_PARTITIONS);
-		editable = nextEditable;
+		editable = !Util.nextReadOnly();
 		nextEditable = true;
-	}
-
-	public static void nextReadOnly(boolean readOnly) {
-		nextEditable = !readOnly;
 	}
 
 	/**

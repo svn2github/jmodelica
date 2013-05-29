@@ -24,7 +24,6 @@ public class RotateComponentTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -42,7 +41,5 @@ public class RotateComponentTask extends AbstractAestheticModificationTask {
 									.getRotation()
 									+ angle);
 		}
-		System.out.println("RotateComponentTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

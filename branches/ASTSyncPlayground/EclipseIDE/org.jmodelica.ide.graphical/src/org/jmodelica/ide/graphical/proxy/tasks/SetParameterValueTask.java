@@ -29,7 +29,6 @@ public class SetParameterValueTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -52,7 +51,5 @@ public class SetParameterValueTask extends AbstractAestheticModificationTask {
 		}
 		ChangePropagationController.getInstance().handleNotifications(
 				GRAPHICAL_AESTHETIC, theFile, componentASTPath);
-		System.out.println("SetParameterValueTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

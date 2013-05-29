@@ -63,7 +63,11 @@ public abstract class InstanceProblem implements IError {
 	public int getLine() {
 		return line;
 	}
-
+	
+	public int getStartLine() {
+		return start;
+	}
+	
 	public String getMessage() {
 		return msg;
 	}

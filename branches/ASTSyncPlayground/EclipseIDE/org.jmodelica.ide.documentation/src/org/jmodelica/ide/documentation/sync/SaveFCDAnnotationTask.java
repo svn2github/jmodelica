@@ -68,7 +68,6 @@ public class SaveFCDAnnotationTask extends AbstractDocumentationTask {
 				}
 			});
 		}
-		System.err.println("Successfully saved annotationString?");
 	}
 
 	protected StoredDefinition getDefinition() {

@@ -8,6 +8,7 @@ import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
+import org.jmodelica.ide.outline.cache.EventCachedChildren;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
 import org.jmodelica.ide.outline.cache.tasks.ExplorerOutlineCacheFileChildrenTask;
@@ -24,6 +25,11 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 	protected void createInitialCache() {
 	}
 
+	public void fetchChildren(IFile file, Stack<ASTPathPart> nodePath, Object task){
+		myFile = file;
+		fetchChildren(nodePath, task);
+	}
+	
 	public void fetchChildren(Stack<ASTPathPart> nodePath, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this);
@@ -52,6 +58,8 @@ public class ExplorerOutlineCache extends AbstractOutlineCache {
 					handleCachedFileChildrenEvent();
 				}
 			});
+		} else if (e instanceof EventCachedChildren) {
+			super.astChanged(e);
 		} else if (e.getType() == IASTChangeEvent.FILE_RECOMPILED) {
 			fetchFileChildren(e.getFile());
 		}

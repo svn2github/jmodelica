@@ -36,8 +36,8 @@ import org.jmodelica.ide.helpers.ICachedOutlineNode;
 import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 import org.jmodelica.ide.outline.cache.CachedContentProvider;
 import org.jmodelica.ide.outline.cache.EventCachedFileChildren;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
-import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
 public class ExplorerContentProvider extends CachedContentProvider implements
 		IResourceChangeListener, IResourceDeltaVisitor, IASTChangeListener {
@@ -61,8 +61,20 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 			} else {
 				children = super.getChildren(astCacheMap.get(file));
 			}
-		} else {
-			children = super.getChildren(parentElement);
+		} else if (parentElement instanceof ICachedOutlineNode) {
+			ICachedOutlineNode node = (ICachedOutlineNode) parentElement;
+			if (node.childrenAlreadyCached()) {
+				return node.cachedOutlineChildren();
+			} else {
+				Object tmp = node.getParent();
+				while (!(tmp instanceof IFile)) {
+					if (tmp instanceof ICachedOutlineNode) {
+						tmp = ((ICachedOutlineNode) tmp).getParent();
+					}
+				}
+				cache.fetchChildren((IFile) tmp, node.getASTPath(),
+						new ChildrenTask(viewer, node));
+			}
 		}
 		return children;
 	}
@@ -85,8 +97,10 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 		if (element instanceof IFile) {
 			IFile file = (IFile) element;
 			if (!astCacheMap.containsKey(file)) {
-				ModelicaASTRegistry.getInstance().addListener(file, null,
-						new ListenerObject(cache, OUTLINE_LISTENER));
+				ChangePropagationController.getInstance()
+						.addListener(
+								new ListenerObject(cache, OUTLINE_LISTENER),
+								file, null);
 				cache.fetchFileChildren(file);
 				astCacheMap.put(file, null);
 				return true;
@@ -149,11 +163,12 @@ public class ExplorerContentProvider extends CachedContentProvider implements
 					cache.fetchFileChildren(file);
 				}
 				if (delta.getKind() == IResourceDelta.ADDED)
-					ModelicaASTRegistry.getInstance().addListener(file, null,
-							new ListenerObject(cache, OUTLINE_LISTENER));
+					ChangePropagationController.getInstance().addListener(
+							new ListenerObject(cache, OUTLINE_LISTENER), file,
+							null);
 				if (delta.getKind() == IResourceDelta.REMOVED)
-					ModelicaASTRegistry.getInstance().removeListener(file,
-							null, cache);
+					ChangePropagationController.getInstance().removeListener(
+							cache, file, null);
 			}
 			return false;
 		}

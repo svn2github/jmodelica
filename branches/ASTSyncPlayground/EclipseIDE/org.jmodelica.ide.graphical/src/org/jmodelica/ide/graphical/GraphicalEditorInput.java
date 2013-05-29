@@ -29,7 +29,7 @@ public class GraphicalEditorInput implements IEditorInput, IPersistableElement {
 	}
 
 	public GraphicalEditorInput(CachedClassDecl classDecl, boolean editIcon) {
-		this(classDecl.name(), classDecl.containingFileName(), editIcon);
+		this(classDecl.qualifiedName(), classDecl.containingFileName(), editIcon);
 	}
 
 	public String getClassName() {

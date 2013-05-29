@@ -31,7 +31,6 @@ public class AddBendPointTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -55,7 +54,5 @@ public class AddBendPointTask extends AbstractAestheticModificationTask {
 			line.getPoints().add(index, new Point(x, y));
 			line.pointsChanged();
 		}
-		System.out.println("AddBendPointTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

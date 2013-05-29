@@ -26,7 +26,6 @@ public class InstanceOutlineCacheInitialTask extends OutlineCacheJob {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		GlobalRootNode root = (GlobalRootNode) ModelicaASTRegistry
 				.getInstance().doLookup(file.getProject());
 		SourceRoot sroot = root.getSourceRoot();
@@ -54,8 +53,6 @@ public class InstanceOutlineCacheInitialTask extends OutlineCacheJob {
 			}
 		}
 		toReturn.setOutlineChildren(children);
-		System.out.println("Cache initial from InstanceOutline took:"
-				+ (System.currentTimeMillis() - time) + "ms");
 		IASTChangeEvent event = new EventCachedInitial(toReturn);
 		listener.astChanged(event);
 	}

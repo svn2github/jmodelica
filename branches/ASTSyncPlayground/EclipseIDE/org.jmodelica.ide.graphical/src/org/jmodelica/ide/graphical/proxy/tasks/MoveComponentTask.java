@@ -27,7 +27,6 @@ public class MoveComponentTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -41,7 +40,5 @@ public class MoveComponentTask extends AbstractAestheticModificationTask {
 			cd.syncGetPlacement().getTransformation()
 					.setOrigin(new Point(destX, destY));
 		}
-		System.out.println("MoveComponentTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

@@ -64,7 +64,6 @@ public class GenDocWizard extends Wizard {
 		SaveFCDDocumentationTask task = new SaveFCDDocumentationTask(file,
 				rootPath, checkBoxes, classASTPath);
 		ASTRegTaskBucket.getInstance().addTask(task);
-		System.err.println("GENDOCWIZ finished...\n");
 		return true;
 	}
 

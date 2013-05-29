@@ -86,7 +86,7 @@ public class GoToWYSIWYGTask extends AbstractDocumentationTask {
 					.toString());
 			myListener.astChanged(event);
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

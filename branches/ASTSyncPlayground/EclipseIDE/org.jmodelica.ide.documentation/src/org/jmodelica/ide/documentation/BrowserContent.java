@@ -179,8 +179,6 @@ public class BrowserContent implements LocationListener, MouseListener,
 	 *            declaration.
 	 */
 	private void saveNewInformationAnnotation(String newVal) {
-		System.err.println("Saving info annotation, histindex="
-				+ history.get(histIndex));
 		SaveFCDAnnotationTask task = new SaveFCDAnnotationTask(
 				SaveFCDAnnotationTask.TYPE_INFORMATION, newVal,
 				history.get(histIndex), file);
@@ -433,8 +431,6 @@ public class BrowserContent implements LocationListener, MouseListener,
 			if (event.getSetHistory())
 				history.add(event.getHistoryObject());
 		} else if (e instanceof GoToWYSIWYGEvent) {
-			System.err.println("BrowserContent GOTOWYSIWYGEVENT!");
-
 			GoToWYSIWYGEvent event = (GoToWYSIWYGEvent) e;
 			editing = true;
 			browser.setUrl(event.getFileUrl());

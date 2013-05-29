@@ -224,7 +224,7 @@ public class ModelicaEclipseCompiler implements ICompiler {
 			} catch (IOException e) {
 			}
 		}
-		if (sRoot.getProgram().getNumUnstructuredEntity() > 1)
+		if (sRoot != null && sRoot.getProgram().getNumUnstructuredEntity() > 1)
 			System.err
 					.println("PARSING OF FILE RESULTED IN MORE THAN 1 STOREDDEF BUT ONLY ONE WAS KEPT, NEED FIXING");
 		return new LocalRootNode(def);

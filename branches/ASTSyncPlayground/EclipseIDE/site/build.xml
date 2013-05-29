@@ -30,8 +30,8 @@
 	<property name="bin_dir" value="bin" />
 	<property name="output_dir" location="site" />
 	
-	<!-- TODO! Set to your Eclipse path -->
-	<property name="eclipse_path" value="../../../program_files/eclipse" />
+	<!-- TODO! Set to your Eclipse path 
+	<property name="eclipse_path" value="../../../program_files/eclipse" />-->
 
 	
 	<property name="site_file" location="site.xml" />

@@ -10,6 +10,7 @@ import org.jastadd.ed.core.model.IASTChangeListener;
 import org.jastadd.ed.core.model.node.LocalRootHandle;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.ide.helpers.EditorFile;
+import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 
@@ -22,16 +23,16 @@ public class GlobalCompilationResult extends CompilationResult {
 	public GlobalCompilationResult(EditorFile ef, Editor editor) {
 
 		editorFile = ef;
-
-		ModelicaASTRegistry registry = ModelicaASTRegistry.getInstance();
 		key = ef.toRegistryKey();
 		project = ef.iFile().getProject();
 
 		if (project != null)
-			root = registry.getLatestDef(editorFile.iFile());
+			root = ModelicaASTRegistry.getInstance().getLatestDef(
+					editorFile.iFile());
 		ListenerObject listObj = new ListenerObject(editor,
 				IASTChangeListener.TEXTEDITOR_LISTENER);
-		registry.addListener(editorFile.iFile(), null, listObj);
+		ChangePropagationController.getInstance().addListener(listObj,
+				editorFile.iFile(), null);
 	}
 
 	public void update(IProject projChanged, String keyChanged) {
@@ -46,7 +47,8 @@ public class GlobalCompilationResult extends CompilationResult {
 	}
 
 	public void dispose(Editor editor) {
-		ModelicaASTRegistry.getInstance().removeListener(editor);
+		ChangePropagationController.getInstance().removeListener(editor,
+				editorFile.iFile(), null);
 	}
 
 	public void recompileLocal(IDocument doc, IFile file) {

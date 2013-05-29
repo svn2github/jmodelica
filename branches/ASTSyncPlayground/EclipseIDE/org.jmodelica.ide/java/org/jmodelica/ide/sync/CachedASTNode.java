@@ -35,8 +35,8 @@ public class CachedASTNode implements ICachedOutlineNode {
 		if (node instanceof BaseNode)
 			this.icon = ((BaseNode) node).icon();
 		myASTPath = ModelicaASTRegistry.getInstance().createPath(node);
-		hasVisibleChildren = node.hasVisibleChildren();// TODO?
-		containingFileName = node.containingFileName(); // TODO fix this smarter
+		hasVisibleChildren = node.hasVisibleChildren();
+		containingFileName = node.containingFileName();
 		text = node.contentOutlineLabel();
 		selectionNodeOffset = node.getSelectionNode().offset();
 		selectionNodeLength = node.getSelectionNode().length();
@@ -90,10 +90,6 @@ public class CachedASTNode implements ICachedOutlineNode {
 		return image;
 	}
 
-	/*
-	 * TODO faster than caching default for each node - but always same image.
-	 * Maybe better to eval for each node?
-	 */
 	private Image defaultIcon() {
 		return ImageLoader.getFrequentImage(ImageLoader.GENERIC_CLASS_IMAGE);
 	}

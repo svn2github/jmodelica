@@ -19,11 +19,4 @@ public class InstanceWarning extends InstanceProblem {
 	public String getSeverityString() {
 		return "Warning";
 	}
-
-	@Override
-	public int getStartLine() {
-		// TODO Auto-generated method stub
-		return start;
-	}
-
 }

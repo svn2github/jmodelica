@@ -333,20 +333,17 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	}
 
 	public void flushInst() {
-		long start = System.currentTimeMillis();	
-		//  List<Object> selectedModels = new ArrayList<Object>(); for (EditPart
-		//  o : (List<EditPart>) getGraphicalViewer() .getSelectedEditParts()) {
-		//  selectedModels.add(o.getModel()); }
-		 
+		// List<Object> selectedModels = new ArrayList<Object>(); for (EditPart
+		// o : (List<EditPart>) getGraphicalViewer() .getSelectedEditParts()) {
+		// selectedModels.add(o.getModel()); }
+
 		dp = cacheRegistry.getClassDiagramProxy();
 		setContent();
-		
-		//  for (Object selectedModel : selectedModels) { EditPart part =
-		//  (EditPart) getGraphicalViewer()
+
+		// for (Object selectedModel : selectedModels) { EditPart part =
+		// (EditPart) getGraphicalViewer()
 		// .getEditPartRegistry().get(selectedModel); if (part != null)
-		//  getGraphicalViewer().getSelectionManager() .appendSelection(part); } 
-		System.out.println("Graphical editor flush took: "
-				+ (System.currentTimeMillis() - start) + "ms");
+		// getGraphicalViewer().getSelectionManager() .appendSelection(part); }
 	}
 
 	/**
@@ -357,16 +354,14 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 	 *           .syncSimpleLookupInstClassDecl(input.getClassName());
 	 * 
 	 *           if (dp.equals(icd)) { // TODO wont notice changes from event
-	 *           via // // compare??? // System.out.println("NODIFF!!!!!!!!!!");
-	 *           return Status.OK_STATUS; } if (getCommandStack().isDirty()) {
-	 *           ASTDirty = true; if
+	 *           via // return Status.OK_STATUS; } if
+	 *           (getCommandStack().isDirty()) { ASTDirty = true; if
 	 *           (getSite().getWorkbenchWindow().getActivePage()
 	 *           .getActiveEditor() == Editor.this) showSourceChangeDialog();
 	 *           return Status.OK_STATUS; } dp.setInstClassDecl(icd);
 	 * 
 	 *           new UIJob("Refresh Diagram") {
 	 * @Override public IStatus runInUIThread(IProgressMonitor monitor) {
-	 *           System.out.println("Refresh diagram job");
 	 *           getCommandStack().markSaveLocation(); ASTDirty = false;
 	 *           setContent(); return Status.OK_STATUS; } }.schedule(); return
 	 *           Status.OK_STATUS; } }.schedule(); }
@@ -482,5 +477,11 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 		CompileFileTask job = new CompileFileTask(input.getSourceFileName(),
 				input.getProject());
 		ASTRegTaskBucket.getInstance().addTask(job);
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		cacheRegistry.removeAsListener();
 	}
 }

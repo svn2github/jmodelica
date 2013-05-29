@@ -66,7 +66,6 @@ public class ASTRegModificationHandler {
 	}
 
 	private void removeConnection(RemoveConnectionTask task) {
-		long time = System.currentTimeMillis();
 		Stack<ASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
@@ -114,16 +113,12 @@ public class ASTRegModificationHandler {
 		}
 		ChangePropagationController.getInstance().handleNotifications(
 				ASTChangeEvent.POST_ADDED, task.getFile(), astPath);
-		System.out
-				.println("ModelicaASTRegVisitor: removing connectclause took: "
-						+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	/**
 	 * Adds an ConnectionClause Equation to its ClassDecl.
 	 */
 	private void addConnection(AddConnectionTask task) {
-		long time = System.currentTimeMillis();
 		Stack<ASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
@@ -167,8 +162,6 @@ public class ASTRegModificationHandler {
 		}
 		ChangePropagationController.getInstance().handleNotifications(
 				ASTChangeEvent.POST_ADDED, task.getFile(), astPath);
-		System.out.println("ModelicaASTRegVisitor: adding connectclause took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	/**
@@ -204,7 +197,6 @@ public class ASTRegModificationHandler {
 	 * Add a ComponentDecl to a ClassDecl.
 	 */
 	private void addComponent(AddComponentTask task) {
-		long time = System.currentTimeMillis();
 		IFile file = task.getFile();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(file
 				.getProject());
@@ -237,9 +229,6 @@ public class ASTRegModificationHandler {
 			ChangePropagationController.getInstance().handleNotifications(
 					ASTChangeEvent.POST_ADDED, file, task.getClassASTPath());
 		}
-		System.out
-				.println("ModelicaAstReg: AddJob+handling/starting notification threads took: "
-						+ (System.currentTimeMillis() - time) + "ms");
 	}
 
 	private void flushInstRoot(SourceRoot sroot) {
@@ -261,7 +250,6 @@ public class ASTRegModificationHandler {
 	 * Removes a ComponentDecl from its ClassDecl.
 	 */
 	private void removeComponent(RemoveComponentTask task) {
-		long time = System.currentTimeMillis();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
@@ -271,9 +259,24 @@ public class ASTRegModificationHandler {
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
 					def, task.getClassASTPath());
 
+			/**System.out.println("cached 100000...");
+			long time2 = System.currentTimeMillis();
+			ComponentDecl cd=null;
+			for (int i = 0; i < 100000; i++)*/
 			ComponentDecl cd = (ComponentDecl) registry.resolveSourceASTPath(
 					def, task.getComponentASTPath());
-
+			if (cd == null)
+				System.out.println("FAILED TO RESOLVE");
+			/**long time2end = System.currentTimeMillis();
+			System.out.println("cached 100000 took "+(time2end-time2)+" ms");
+			
+			System.out.println("linear 100000...");
+			long time3 = System.currentTimeMillis();
+			for (int i = 0; i < 100000; i++)
+			cd = (ComponentDecl) registry.resolveSourceASTPath2(
+					def, task.getComponentASTPath());
+			long time3end = System.currentTimeMillis();
+			System.out.println("linear 100000 took "+(time2end-time2)+" ms");*/
 			// For undo command of graph ed (queue add job containing component
 			// info)
 			AbstractModificationTask undo = new AddComponentTask(
@@ -301,8 +304,5 @@ public class ASTRegModificationHandler {
 					ASTChangeEvent.POST_REMOVE, task.getFile(),
 					task.getClassASTPath());
 		}
-		System.out
-				.println("ModelicaAstReg: RemoveJob+handling/starting notification threads took: "
-						+ (System.currentTimeMillis() - time) + "ms");
 	}
 }

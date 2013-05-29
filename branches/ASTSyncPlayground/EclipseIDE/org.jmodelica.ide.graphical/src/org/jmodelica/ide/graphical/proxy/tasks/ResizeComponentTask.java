@@ -33,7 +33,6 @@ public class ResizeComponentTask extends AbstractAestheticModificationTask {
 
 	@Override
 	public void doJob() {
-		long time = System.currentTimeMillis();
 		StoredDefinition def = ModelicaASTRegistry.getInstance().getLatestDef(
 				theFile);
 		synchronized (def.state()) {
@@ -47,7 +46,5 @@ public class ResizeComponentTask extends AbstractAestheticModificationTask {
 			cd.syncGetPlacement().getTransformation()
 					.setExtent(new Extent(new Point(x, y), new Point(x2, y2)));
 		}
-		System.out.println("ResizeComponentTask took: "
-				+ (System.currentTimeMillis() - time) + "ms");
 	}
 }
