@@ -3651,18 +3651,34 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Return a string representation on the form "[i1, i2, i3]".
+		 * \brief Return a string representation on the form "[i1,i2,i3]".
 		 */
 		public String toString() {
-			return Arrays.toString(index);
+			return buildString(new StringBuilder("[")).append(']').toString();
 		}
 		
 		/**
-		 * \brief Return a string representation on the form "i1, i2, i3".
+		 * \brief Return a string representation on the form "i1,i2,i3".
 		 */
 		public String toUnclosedString() {
-			String tmp = toString();
-			return tmp.substring(1, tmp.length() - 1);
+			return buildString(new StringBuilder()).toString();
+		}
+		
+		/**
+		 * Internal implementation of toString methods.
+		 * 
+		 * Note that this must give the same result as a prettyPrint() on an equivalent 
+		 * FArraySubscripts, or inlining breaks.
+		 */
+		private StringBuilder buildString(StringBuilder buf) {
+			boolean sep = false;
+			for (int i : index) {
+				if (sep)
+					buf.append(',');
+				buf.append(i);
+				sep = true;
+			}
+			return buf;
 		}
 		
 		

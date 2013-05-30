@@ -512,6 +512,61 @@ public
 end FunctionInlining.BasicInline13;
 ")})));
     end BasicInline13;
+	
+	
+	model MatrixInline1
+		function f
+			input Real[2,2] a;
+            input Real[2,2] b;
+			output Real[2,2] c;
+		algorithm
+			c := a + b;
+		end f;
+		
+		parameter Real[2,2] p = [1,2; 3,4];
+        Real[2,2] x = p .+ time;
+        Real[2,2] y = p * time;
+		Real[2,2] z = f(x, y);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MatrixInline1",
+			description="Inline function with matrix as input and output",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.MatrixInline1
+ parameter Real p[1,1] = 1 /* 1 */;
+ parameter Real p[1,2] = 2 /* 2 */;
+ parameter Real p[2,1] = 3 /* 3 */;
+ parameter Real p[2,2] = 4 /* 4 */;
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[2,1];
+ Real y[2,2];
+ Real z[1,1];
+ Real z[1,2];
+ Real z[2,1];
+ Real z[2,2];
+equation
+ x[1,1] = p[1,1] .+ time;
+ x[1,2] = p[1,2] .+ time;
+ x[2,1] = p[2,1] .+ time;
+ x[2,2] = p[2,2] .+ time;
+ y[1,1] = p[1,1] * time;
+ y[1,2] = p[1,2] * time;
+ y[2,1] = p[2,1] * time;
+ y[2,2] = p[2,2] * time;
+ z[1,1] = x[1,1] + y[1,1];
+ z[1,2] = x[1,2] + y[1,2];
+ z[2,1] = x[2,1] + y[2,1];
+ z[2,2] = x[2,2] + y[2,2];
+end FunctionInlining.MatrixInline1;
+")})));
+	end MatrixInline1;
     
     
     model RecordInline1
