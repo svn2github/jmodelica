@@ -1137,7 +1137,7 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
- constant Real y = -0.0;
+ constant Real y = 0.0;
  parameter Real p(start = 3) = 5 /* 5 */;
 end TransformCanonicalTests.AliasTest30;
 ")})));
@@ -1209,7 +1209,7 @@ equation
 			description="Test so that start values are printed correcly in alias set",
 			methodResult="
 Alias sets:
-{b(start=8.0), a(start=1.0)}
+{b(start=8.0), a(start=1)}
 1 variables can be eliminated
 ")})));
   end AliasTest33;
@@ -1568,7 +1568,7 @@ equation
  2.0 + v3 + v4 + v6 = 1;
  2.0 + v3 + v4 = 1;
  2.0 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 + 0.0 = 1;
+ v5 + v6 + v8 + v7 = 1;
  v5 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
@@ -4204,7 +4204,7 @@ Solved block of 1 variables:
 Computed variable:
   der(x)
 Solution:
-  (- x) / (- 1.0 - (- 1.0) + (- 1.0) * (- 1.0) * (- 1.0))
+  (- x) / (- 1.0 - (- 1.0) + (- 1.0))
 -------------------------------
 ")})));
 end SolveEqTest8;
@@ -4428,12 +4428,12 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z + 0.8414709848078965
-  x1 - x2 = z * 1.0
-  x2 = 1.0 * z + 1 + 1.0
+  x1 - x2 = z
+  x2 = z + 1 + 1.0
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, (- 1.0 * 1.0), - 1.0|
-  |0.0, - 1.0 * 1.0, 1.0|
+  |1.0, - 1.0, - 1.0|
+  |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest4;
@@ -4499,7 +4499,7 @@ Equations:
   x2 = z + p
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, (- 1.0 * p), - 1.0|
+  |1.0, (- p), - 1.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
@@ -4535,8 +4535,8 @@ Continuous equations:
 Discrete equations:
   d = b < 0
 Jacobian:
-  |(- 1.0 * (if d then 1 else 2)), 1.0|
-  |- (- 1.0), 1.0|
+  |(- (if d then 1 else 2)), 1.0|
+  |1.0, 1.0|
 -------------------------------
 ")})));
 end BlockTest7;
