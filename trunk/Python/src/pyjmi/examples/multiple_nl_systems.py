@@ -39,10 +39,8 @@ def run_demo(with_plots=True,with_loganalysis=True,nb_blocks=10):
 	init_model = load_fmu(fmu_name)
 	init_model.set_debug_logging(True)
 	init_model.set('n',nb_blocks)
-	# Initialize
-	init_model.initialize()
+    
 	# Simulate
-	#grab.grab("res_out.txt", init_model.simulate(0.0,1000.0))
 	res = init_model.simulate(0.0,60.0)
 
 	vin = res['V.p.v']
