@@ -74,7 +74,6 @@ aspect VariabilityPropagation {
 			beginStep("variabilityPropagationIfSet()");
 			variabilityPropagation();
 			enableConstantFolding();
-			root().flushAllRecursiveClearFinal(); // Enable expression rewrites
 			endStep("variabilityPropagationIfSet()");
 		}
 	}
@@ -96,7 +95,7 @@ aspect VariabilityPropagation {
 		}
 
 		// Work
-		while (!worklist.isEmpty()) {
+		while(!worklist.isEmpty()) {
 			FAbstractEquation equation = worklist.iterator().next();
 			equation.variabilityPropagation(worklist, parameterEquations);
 			worklist.remove(equation);

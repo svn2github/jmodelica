@@ -822,45 +822,40 @@ aspect Derivatives {
 }
 
  aspect ExpressionSimplification {
-	 
-	/**
-	 * Is this expression a literal zero?
-	 */
-	syn boolean FExp.isLiteralZero() = 
-		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 0.0;
-	
-	/**
-	 * Is this expression a literal one?
-	 */
-	syn boolean FExp.isLiteralOne() = 
-		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 1.0;
 
-
- 	rewrite FDotMulExp {
-		when (getLeft().isLiteralZero())  to FExp getLeft();
-		when (getLeft().isLiteralOne())   to FExp getRight();
-		when (getRight().isLiteralZero()) to FExp getRight();
-		when (getRight().isLiteralOne())  to FExp getLeft();
+/*
+ 	rewrite FMulExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return getRight();
+			}
 	}
 
- 	rewrite FDotDivExp {
-		when (getLeft().isLiteralZero() && ndims() == 0) to FExp getLeft();
-		when (getRight().isLiteralOne())                 to FExp getLeft();
+ 	rewrite FMulExp {
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
+			}
+	}
+*/
+/* 
+ 	rewrite FSubExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return new FNegExp(getRight());
+			}
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
+			}
 	}
 
- 	rewrite FDotSubExp {
-		when (getLeft().isLiteralZero())  to FExp getRight().makeNegated();
-		when (getRight().isLiteralZero()) to FExp getLeft();
+ 	rewrite FAddExp {
+		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
+				return getRight();
+			}
+		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
+				return getLeft();
+			}
 	}
+*/
 
- 	rewrite FDotAddExp {
-		when (getLeft().isLiteralZero())  to FExp getRight();
-		when (getRight().isLiteralZero()) to FExp getLeft();
-	}
- 	
- 	rewrite FNegExp {
- 		when (getFExp().isLiteralZero())    to FExp getFExp();
- 		when (getFExp() instanceof FNegExp) to FExp getFExp().makeNegated();
- 	}
+
  
  }

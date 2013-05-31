@@ -615,27 +615,6 @@ public class OptionRegistry {
 			createBooleanOption(o.key, o.type, o.desc, bv(o.val));
 		}
 	}
-
-	private String unknownOptionMessage(String key) {
-		String[] parts = key.split("_");
-		for (int i = 0; i < parts.length; i++)
-			parts[i] = parts[i].replaceAll("(ion|ing|s|e)$", "");
-		String best = null;
-		int bestScore = 0;
-		for (String name : optionsMap.keySet()) {
-			int score = 0;
-			for (String part : parts)
-				if (name.contains(part))
-					score++;
-			if (score > bestScore) {
-				best = name;
-				bestScore = score;
-			}
-		}
-		return (best == null) ? 
-				String.format("Unknown option \"%s\"", key) : 
-				String.format("Unknown option \"%s\", did you mean \"%s\"?", key, best);
-	}
 	
 	private static int iv(Object o) {
 		return ((Integer) o).intValue();
@@ -702,7 +681,7 @@ public class OptionRegistry {
 			throw new UnknownOptionException("Option: " + key + " is not of integer type");
 		if (allowMissing)
 			return null;
-		throw new UnknownOptionException(unknownOptionMessage(key));
+		throw new UnknownOptionException("Unknown option: " + key);
 	}
 	
 	protected void createStringOption(String key, String description, String defaultValue, String[] vals) {
@@ -749,7 +728,7 @@ public class OptionRegistry {
 			throw new UnknownOptionException("Option: " + key + " is not of string type");
 		if (allowMissing)
 			return null;
-		throw new UnknownOptionException(unknownOptionMessage(key));
+		throw new UnknownOptionException("Unknown option: " + key);
 	}
 	
 	protected void createRealOption(String key, String description, double defaultValue) {
@@ -804,7 +783,7 @@ public class OptionRegistry {
 			throw new UnknownOptionException("Option: " + key + " is not of real type");
 		if (allowMissing)
 			return null;
-		throw new UnknownOptionException(unknownOptionMessage(key));
+		throw new UnknownOptionException("Unknown option: " + key);
 	}
 	
 	protected void createBooleanOption(String key, String description, boolean defaultValue) {
@@ -851,13 +830,13 @@ public class OptionRegistry {
 			throw new UnknownOptionException("Option: " + key + " is not of boolean type");
 		if (allowMissing)
 			return null;
-		throw new UnknownOptionException(unknownOptionMessage(key));
+		throw new UnknownOptionException("Unknown option: " + key);
 	}
 	
 	public String getDescription(String key){
 		Option o = optionsMap.get(key);
 		if(o == null) {
-			throw new UnknownOptionException(unknownOptionMessage(key));
+			throw new UnknownOptionException("Unknown option: "+key);
 		}
 		return o.getDescription();
 	}
