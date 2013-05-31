@@ -669,7 +669,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
     @testattr(stddist = True)
     def test_Unsolved_blocks_torn_1(self):
         cname = "JacGenTests.Unsolved_blocks_torn_1"
-        fn = compile_fmu(cname,self.fname,compiler_options={'enable_tearing':True,
+        fn = compile_fmu(cname,self.fname,compiler_options={'automatic_tearing':True,
             'equation_sorting':True,'eliminate_alias_variables':False,
             'generate_ode_jacobian':True,'fmi_version':2.0})
         m = FMUModel2(fn)
@@ -681,7 +681,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
     @testattr(stddist = True)
     def test_Unsolved_blocks_torn_2(self):
         cname = "JacGenTests.Unsolved_blocks_torn_2"
-        fn = compile_fmu(cname,self.fname,compiler_options={'enable_tearing':True,
+        fn = compile_fmu(cname,self.fname,compiler_options={'automatic_tearing':True,
             'equation_sorting':True,'eliminate_alias_variables':False,
             'generate_ode_jacobian':True,'fmi_version':2.0})
         m = FMUModel2(fn)
@@ -693,7 +693,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
     @testattr(stddist = True)
     def test_local_loop_1(self):
         cname = "TearingTests.TearingTest1"
-        fn = compile_fmu(cname,os.path.join(path_to_mofiles,'TearingTests.mo'),compiler_options={'enable_tearing':True,
+        fn = compile_fmu(cname,os.path.join(path_to_mofiles,'TearingTests.mo'),compiler_options={'automatic_tearing':True,
             'equation_sorting':True,'eliminate_alias_variables':False,
             'generate_ode_jacobian':True,'fmi_version':2.0, "local_iteration_in_tearing":True})
         m = FMUModel2(fn)

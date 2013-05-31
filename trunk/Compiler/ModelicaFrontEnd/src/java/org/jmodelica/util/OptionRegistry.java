@@ -85,17 +85,17 @@ public class OptionRegistry {
 			 false, 
 			 "If this option is set to true (default is false), equations that can be solved with local fixed" +
 			 "point iteration will be considered solved."),
-		ENABLE_TEARING
-			("enable_tearing", 
+		AUTOMATIC_TEARING
+			("automatic_tearing", 
 			 compiler, 
 			 false, 
-			 "If this option is set to true (default is false), tearing of equation systems is enabled."),
-		ENABLE_HAND_GUIDED_TEARING 
-			("enable_hand_guided_tearing", 
+			 "If this option is set to true (default is false), automatic tearing of equation systems is performed."),
+		HAND_GUIDED_TEARING 
+			("hand_guided_tearing", 
 			 compiler, 
 			 false, 
-			 "If this option is set to true (default is false), hand guided tearing annotations are parsed " +
-			 "and will have precedence during tearing."),
+			 "If this option is set to true (default is false), hand guided tearing annotations are parsed and " +
+			 "hand guided of equation system is performed"),
 		MERGE_BLT_BLOCKS
 			("merge_blt_blocks", 
 			 compiler, 

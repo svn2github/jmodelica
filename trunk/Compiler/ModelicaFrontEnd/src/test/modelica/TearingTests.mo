@@ -41,7 +41,7 @@ equation
 			name="Test1",
 			description="Test of tearing",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -114,7 +114,7 @@ equation
 			name="WarningTest1",
 			description="",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			errorMessage="
 2 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
@@ -150,7 +150,7 @@ equation
 			name="WarningTest2",
 			description="",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
@@ -185,7 +185,7 @@ equation
 			equation_sorting=true,
 			variability_propagation=false,
 			inline_functions="none",
-			enable_tearing=true,
+			automatic_tearing=true,
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
@@ -235,7 +235,7 @@ equation
 			name="RecordTearingTest2",
 			description="Test of record tearing",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			inline_functions="none",
 			methodName="printDAEBLT",
 			methodResult="
@@ -279,7 +279,7 @@ equation
 			name="RecordTearingTest3",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
@@ -319,7 +319,7 @@ equation
 			name="RecordTearingTest4",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
@@ -365,7 +365,7 @@ equation
 			name="RecordTearingTest5",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			inline_functions="none",
 			description="Test of record tearing",
 			methodResult="
@@ -416,8 +416,8 @@ equation
 			name="HandGuidedTearing1",
 			description="Test of hand guided tearing",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -490,8 +490,8 @@ equation
 			name="HandGuidedTearing2",
 			description="Test of hand guided tearing",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -565,8 +565,8 @@ equation
 			name="HandGuidedTearing3",
 			description="Test of hand guided tearing",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -641,8 +641,8 @@ equation
 			name="HandGuidedTearing4",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing, unmatched variable and equation",
 			methodResult="
 -------------------------------
@@ -717,8 +717,8 @@ equation
 			name="HandGuidedTearing5",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing, unmatched variable and equation, alias variable",
 			methodResult="
 -------------------------------
@@ -792,8 +792,8 @@ equation
 			name="HandGuidedTearing6",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to true",
 			methodResult="
 -------------------------------
@@ -866,8 +866,8 @@ equation
 			name="HandGuidedTearing7",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to false",
 			methodResult="
 -------------------------------
@@ -942,8 +942,8 @@ equation
 			name="HandGuidedTearing8",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to true through a parameter",
 			methodResult="
 -------------------------------
@@ -1017,8 +1017,8 @@ equation
 			name="HandGuidedTearing9",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with enable set to false through a parameter",
 			methodResult="
 -------------------------------
@@ -1092,21 +1092,21 @@ equation
 		ErrorTestCase(
 			name="HandGuidedTearing10",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables and only one equation, should give error.",
 			errorMessage="
 1 errors found:
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 0, column 0:
-  Unable to perform hand guided tearing on this block. The number of unmatched equations is unequal to the number of unmatched variables.
-Unmatched equations(1):
-  u1 = R1 * i1
+  Unable to apply hand-guided tearing selections on block 2. The number of unmatched hand guided equations and variables are not equal.
+  Unmatched hand guided equations(1):
+    u1 = R1 * i1
 
-Unmatched variables(2):
-  i3
-  i2
+  Unmatched hand guided variables(2):
+    i3
+    i2
 ")})));
 end HandGuidedTearing10;
 
@@ -1136,8 +1136,8 @@ equation
 			name="HandGuidedTearing11",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables",
 			methodResult="
 -------------------------------
@@ -1212,8 +1212,8 @@ equation
 			name="HandGuidedTearing12",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables",
 			methodResult="
 -------------------------------
@@ -1289,8 +1289,8 @@ equation
 			name="HandGuidedTearing13",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables, set through parameter",
 			methodResult="
 -------------------------------
@@ -1366,8 +1366,8 @@ equation
 			name="HandGuidedTearing14",
 			methodName="printDAEBLT",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			description="Test of hand guided tearing with annotation on two iteration variables, set through parameter",
 			methodResult="
 -------------------------------
@@ -1435,8 +1435,8 @@ equation
 			name="HandGuidedTearing15",
 			description="Test of hand guided tearing of vectors and indices whit no annotation, base case.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -1525,10 +1525,10 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing16",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -1619,8 +1619,8 @@ equation
 			name="HandGuidedTearing17",
 			description="Test of hand guided tearing of vectors and indices with handguided annotation and blt merge.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1695,10 +1695,10 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing18",
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			description="Test of hand guided tearing with pairs defined on system level.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1751,10 +1751,10 @@ model HandGuidedTearing19
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing19",
-			description="Test of hand guided tearing with pairs defiend on system level, but in sub class.",
+			description="Test of hand guided tearing with pairs defined on system level, but in sub class.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1807,10 +1807,10 @@ model HandGuidedTearing20
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing20",
-			description="Test of hand guided tearing with pairs defiend on system level and in sub class.",
+			description="Test of hand guided tearing with pairs defined on system level and in sub class.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1866,10 +1866,10 @@ model HandGuidedTearing21
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing21",
-			description="Test of hand guided tearing with pairs defiend on system level and sub class.",
+			description="Test of hand guided tearing with pairs defined on system level and sub class.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1925,10 +1925,10 @@ model HandGuidedTearing22
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing22",
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			description="Test of hand guided tearing with pairs defined on system level.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -1984,10 +1984,10 @@ model HandGuidedTearing23
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing23",
-			description="Test of hand guided tearing with pairs defiend on system level.",
+			description="Test of hand guided tearing with pairs defined on system level.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			merge_blt_blocks=true,
 			methodName="printDAEBLT",
 			methodResult="
@@ -2025,10 +2025,10 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing24",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2116,10 +2116,10 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing25",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2209,10 +2209,10 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing26",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2307,10 +2307,10 @@ equation
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing27",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2406,10 +2406,10 @@ model HandGuidedTearing28
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing28",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2514,10 +2514,10 @@ model HandGuidedTearing29
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing29",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2604,10 +2604,10 @@ annotation(
 	__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="HandGuidedTearing30",
-			description="Test of hand guided tearing of vectors and indices with handguided annotation.",
+			description="Test of hand guided tearing of vectors and indices with hand guided annotation.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2637,8 +2637,8 @@ annotation(
 			name="HandGuidedTearing31",
 			description="Test of hand guided tearing and alias elimination.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -2682,8 +2682,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError1",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2718,8 +2718,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError2",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2766,8 +2766,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError3",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2802,8 +2802,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError4",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2840,8 +2840,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError5",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2875,8 +2875,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError6",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2909,8 +2909,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError7",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2942,8 +2942,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingError8",
 			description="Test hand guided tearing errors",
 			errorMessage="
@@ -2963,6 +2963,41 @@ Semantic error at line 8708, column 53:
 ")})));
 end HandGuidedTearingError8;
 
+model HandGuidedTearingError9
+  Real u0,u1,u2,u3,uL;
+  Real i0,i1,i2,i3,iL;
+  parameter Real R1 = 1;
+  parameter Real R2 = 1;
+  parameter Real R3 = 1;
+  parameter Real L = 1;
+equation
+  u0 = sin(time);
+  u1 = R1*i1 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
+  u2 = R2*i2;
+  u3 = R3*i3;
+  uL = L*der(iL);
+  u0 = u1 + u3;
+  uL = u1 + u2;
+  u2 = u3;
+  i0 = i1 + iL;
+  i1 = i2 + i3;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="HandGuidedTearingError9",
+			description="Test of hand guided tearing error when hgt is unable to solve the block",
+			equation_sorting=true,
+			hand_guided_tearing=true,
+			errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
+Semantic error at line 0, column 0:
+  Hand guided tearing selections in block 2 does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.
+")})));
+
+end HandGuidedTearingError9;
+
 model HandGuidedTearingWarning1
 	Real x(start=1), y(start=2), z;
 equation
@@ -2973,8 +3008,8 @@ equation
 	__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			name="HandGuidedTearingWarning1",
 			description="Test hand guided tearing warnings",
 			errorMessage="
@@ -2999,8 +3034,8 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			local_iteration_in_tearing=true,
 			name="TearingLocalLoopTest1",
 			methodName="printDAEBLT",

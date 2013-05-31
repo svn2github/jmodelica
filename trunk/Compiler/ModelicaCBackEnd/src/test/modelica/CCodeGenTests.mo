@@ -5220,7 +5220,6 @@ equation
 			description="Test code generation of systems of equations.",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
@@ -8366,7 +8365,7 @@ equation
 			description="Test code generation of torn blocks",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
@@ -8423,7 +8422,7 @@ equation
 			description="Test code generation of torn blocks",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			variability_propagation=false,
 			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
@@ -8483,7 +8482,7 @@ equation
 			description="",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			variability_propagation=false,
 			inline_functions="none",
 			template="$C_dae_blocks_residual_functions$",
@@ -8546,8 +8545,8 @@ equation
 			description="Tests generation of local loops in torn blocks",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			local_iteration_in_tearing=true,
 			template="
 $C_dae_blocks_residual_functions$
@@ -8617,7 +8616,7 @@ equation
 			description="Test code generation of nominal annotation",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="

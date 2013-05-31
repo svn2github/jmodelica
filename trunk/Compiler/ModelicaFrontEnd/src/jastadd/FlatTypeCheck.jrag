@@ -59,7 +59,7 @@ aspect FlatTypeCheck {
     		}
     	}
 	
-		if (root().options.getBooleanOption("enable_hand_guided_tearing")) {
+		if (root().options.getBooleanOption("hand_guided_tearing")) {
 			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {

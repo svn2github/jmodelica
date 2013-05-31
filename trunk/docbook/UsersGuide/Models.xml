@@ -481,13 +481,13 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>enable_hand_guided_tearing</literal></entry>
+                  <entry><literal>hand_guided_tearing</literal></entry>
 
                   <entry><literal>boolean / true</literal></entry>
 
                   <entry>If this option is set to <literal>true</literal>,
-                  hand guided tearing annotations are parsed and will have
-                  precedence during tearing..</entry>
+                  hand guided tearing annotations are parsed and hand guided
+                  tearing is performed.</entry>
                 </row>
 
                 <row>
@@ -500,12 +500,12 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>enable_tearing</literal></entry>
+                  <entry><literal>automatic_tearing</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
 
                   <entry>If this option is set to <literal>true</literal>,
-                  tearing of equation systems is enabled.</entry>
+                  automatic tearing of equation systems is performed.</entry>
                 </row>
 
                 <row>

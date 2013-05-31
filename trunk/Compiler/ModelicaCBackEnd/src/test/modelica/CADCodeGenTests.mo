@@ -495,7 +495,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 ",
@@ -530,7 +529,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 ",
@@ -566,7 +564,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 ",
@@ -2615,7 +2612,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -2733,7 +2729,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -2834,7 +2829,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -3074,7 +3068,7 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -3455,8 +3449,8 @@ equation
 			description="Tests generation of local loops in torn blocks",
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			local_iteration_in_tearing=true,
 			generate_block_jacobian=true,
 			template="
@@ -3934,7 +3928,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -4071,7 +4064,7 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			template="$CAD_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
@@ -4135,7 +4128,6 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
@@ -4336,7 +4328,7 @@ equation
 			fmi_version=2.0,
 			generate_ode=true,
 			equation_sorting=true,
-			enable_tearing=true,
+			automatic_tearing=true,
 			template="$CAD_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {

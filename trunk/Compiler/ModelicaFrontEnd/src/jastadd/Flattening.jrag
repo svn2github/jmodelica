@@ -793,7 +793,7 @@ aspect Flattening {
 		fv.setFQName(getFQName());
 		
 		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
-		if (root().options.getBooleanOption("enable_hand_guided_tearing") && iterationNode.exists()) {
+		if (root().options.getBooleanOption("hand_guided_tearing") && iterationNode.exists()) {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (!enabledNode.exists() || containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue()) {
 				fv.setHGTType(FClass.HGTVariableType.COMPONENT);
@@ -1151,7 +1151,7 @@ aspect Flattening {
 	}
 	
 	protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
-		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
 			return;
 		getInstComponentDecls().createAndFlattenResidualPairs(fc);
 		FQName prefix = getFQName();
@@ -2107,7 +2107,7 @@ aspect InstantiatedExpressions {
 	 * Builds a FResidual instance for "this" equation.  
 	 */
 	private Opt<FResidual> Equation.buildResidualOpt() {
-		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
 			return new Opt<FResidual>();
 		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
 		if (!residualNode.exists())

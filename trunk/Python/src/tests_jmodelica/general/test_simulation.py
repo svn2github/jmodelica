@@ -525,7 +525,7 @@ class TestTearing1(SimulationTest):
             'TearingTests.mo',
             'TearingTests.TearingTest1',
             format='fmu',
-            options={"enable_tearing":True})
+            options={"automatic_tearing":True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -546,7 +546,7 @@ class TestTearing2(SimulationTest):
             'TearingTests.mo',
             'TearingTests.Electro',
             format='fmu',
-            options={"enable_tearing":True,"eliminate_alias_variables":False})
+            options={"automatic_tearing":True,"eliminate_alias_variables":False})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -567,7 +567,7 @@ class TestTearing2(SimulationTest):
 #            'TearingTests.mo',
 #            'TearingTests.NonLinear.MultiSystems',
 #            format='fmu',
-#            options={"enable_tearing":True})
+#            options={"automatic_tearing":True})
 #
 #    @testattr(assimulo = True)
 #    def setUp(self):
@@ -589,7 +589,7 @@ class TestLocalLoop1(SimulationTest):
             'TearingTests.mo',
             'TearingTests.TearingTest1',
             format='fmu',
-            options={"enable_tearing":True,"local_iteration_in_tearing":True})
+            options={"automatic_tearing":True,"local_iteration_in_tearing":True})
 
     @testattr(assimulo = True)
     def setUp(self):

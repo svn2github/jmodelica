@@ -239,8 +239,8 @@ equation
 			name="Tearing",
 			description="This tests that we do not propagate variability to tearing variables.",
 			equation_sorting=true,
-			enable_tearing=true,
-			enable_hand_guided_tearing=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
 			flatModel="
 fclass VariabilityPropagationTests.Tearing
  Real u0;

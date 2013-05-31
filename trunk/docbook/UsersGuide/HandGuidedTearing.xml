@@ -30,23 +30,23 @@
       </varlistentry>
 
       <varlistentry>
-        <term><literal>enable_tearing</literal></term>
+        <term><literal>automatic_tearing</literal></term>
 
         <listitem>
-          <para>If this option is set to true (default is false), tearing of
-          equation systems is enabled. This option requires that
+          <para>If this option is set to true (default is false), automatic
+          tearing of equation systems is performed. This option requires that
           <literal>equation_sorting</literal> equals true.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><literal>enable_hand_guided_tearing</literal></term>
+        <term><literal>hand_guided_tearing</literal></term>
 
         <listitem>
           <para>If this option is set to true (default is false), hand guided
-          tearing annotations are parsed and will have precedence during
-          tearing. This option requires that <literal>enable_tearing</literal>
-          equals true.</para>
+          tearing annotations are parsed and hand guided of equation system is
+          performed. This option requires that
+          <literal>equation_sorting</literal> equals true.</para>
         </listitem>
       </varlistentry>
 
@@ -57,8 +57,7 @@
           <para>If this option is set to true (default is false), BLT blocks
           will be merged so that all hand guided tearing equations and
           variables reside inside the same BLT block. This option requires
-          that <literal>enable_hand_guided_tearing</literal> equals
-          true.</para>
+          that <literal>hand_guided_tearing</literal> equals true.</para>
         </listitem>
       </varlistentry>
     </variablelist>

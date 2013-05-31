@@ -197,7 +197,7 @@ aspect Types {
   }
   }
 	public void InstNode.typeCheckSystemResiduals() {
-		if (!root().options.getBooleanOption("enable_hand_guided_tearing"))
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
 			return;
 		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
 			if (!pair.name().equals("Pair"))
