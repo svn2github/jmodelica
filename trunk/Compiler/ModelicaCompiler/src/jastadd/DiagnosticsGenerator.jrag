@@ -395,7 +395,7 @@ public class DiagnosticsGenerator {
 				ind++;
 			}
 			out.println("}</p>");
-			if (fc.root().options.getBooleanOption("enable_tearing")) {
+			if (fc.root().options.getBooleanOption("automatic_tearing") || fc.root().options.getBooleanOption("hand_guided_tearing")) {
 				unsolvedDAEInitBlockSizes = fc.getDAEInitBLT().unsolvedBlockIterationSizes();
 				unsolvedDAEBlockSizes = fc.getDAEBLT().unsolvedBlockIterationSizes();
 				out.print("<p>Number of unsolved equation blocks in DAE initialization system after tearing: " + 
