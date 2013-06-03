@@ -943,7 +943,7 @@ model ArrayTest36
 			description="",
 			flatModel="
 fclass ArrayTests.General.ArrayTest36
- parameter Real c[1].b = 1 * 1 /* 1 */;
+ parameter Real c[1].b = 1 /* 1 */;
  parameter Real c[2].b = 2 * 2 /* 4 */;
  parameter Real c[3].b = 3 * 3 /* 9 */;
 end ArrayTests.General.ArrayTest36;
@@ -4281,8 +4281,8 @@ fclass ArrayTests.Algebra.Neg.ArrayNeg3
  constant Integer x[2] = 0;
  constant Integer x[3] = 1;
  constant Integer y[1] = - 1;
- constant Integer y[2] = - 0;
- constant Integer y[3] = - (- 1);
+ constant Integer y[2] = 0;
+ constant Integer y[3] = 1;
 end ArrayTests.Algebra.Neg.ArrayNeg3;
 ")})));
 end ArrayNeg3;
@@ -4932,8 +4932,8 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  parameter Real D[2,1] = 2 /* 2 */;
  parameter Real D[2,2] = 4 /* 4 */;
 equation
- y[1] = 0.0 + (D[1,1] * u[1] + D[1,2] * u[2]);
- y[2] = 0.0 + (D[2,1] * u[1] + D[2,2] * u[2]);
+ y[1] = D[1,1] * u[1] + D[1,2] * u[2];
+ y[2] = D[2,1] * u[1] + D[2,2] * u[2];
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
@@ -5419,7 +5419,7 @@ constant Real testConst[2] = { 1, 2 };
 
 
 model ArrayConst1
-	Real x[2] = { 1 / testConst[i] for i in 1:2 };
+	Real x[2] = { 1.0 / testConst[i] for i in 1:2 };
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(

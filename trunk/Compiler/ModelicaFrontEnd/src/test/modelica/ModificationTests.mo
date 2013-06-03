@@ -1211,8 +1211,8 @@ model ArrayModifications27
 			description="Modifications to arrays: arrays of composites: array expression attribute on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications27
- constant Real x[1].yb[1](start = 1 * 10 + 2 * 30) = 1;
- constant Real x[1].yb[2](start = 1 * 20 + 2 * 40) = 2;
+ constant Real x[1].yb[1](start = 10 + 2 * 30) = 1;
+ constant Real x[1].yb[2](start = 20 + 2 * 40) = 2;
  constant Real x[2].yb[1](start = 3 * 10 + 4 * 30) = 3;
  constant Real x[2].yb[2](start = 3 * 20 + 4 * 40) = 4;
 end ModificationTests.ArrayModifications27;
@@ -1235,8 +1235,8 @@ model ArrayModifications28
 			description="Modifications to arrays: arrays of composites: array expression (with constants) attribute on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications28
- constant Real x[1].yb[1](start = 1.0 * 10.0 + 2.0 * 30.0) = 1;
- constant Real x[1].yb[2](start = 1.0 * 20.0 + 2.0 * 40.0) = 2;
+ constant Real x[1].yb[1](start = 10.0 + 2.0 * 30.0) = 1;
+ constant Real x[1].yb[2](start = 20.0 + 2.0 * 40.0) = 2;
  constant Real x[2].yb[1](start = 3.0 * 10.0 + 4.0 * 30.0) = 3;
  constant Real x[2].yb[2](start = 3.0 * 20.0 + 4.0 * 40.0) = 4;
  constant Real y[1,1] = 1;
