@@ -37,7 +37,7 @@ import atexit
 from lxml import etree
 
 from pyjmi.common import xmlparser
-from pyjmi.common.core import BaseModel, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
+from pyjmi.common.core import ModelBase, unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
 
 from pyjmi.common.io import ResultDymolaTextual, ResultDymolaBinary
 from pyjmi.common.core import TrajectoryLinearInterpolation
@@ -352,7 +352,7 @@ def der_name(name):
 #                        HIGH LEVEL INTERFACE
 # ================================================================
 
-class JMUModel(BaseModel):
+class JMUModel(ModelBase):
     """ 
     High-level interface to a JMIModel. 
     """
