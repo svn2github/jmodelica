@@ -20,8 +20,8 @@ import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.documentation.commands.NavigationProvider;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.StoredDefinition;
 
@@ -128,7 +128,7 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 	 * @param fcd
 	 */
 	public void generateDocumentation(IFile file,
-			Stack<ASTPathPart> classASTPath) {
+			Stack<IASTPathPart> classASTPath) {
 		browserContent.generateDocumentation(file, classASTPath);
 	}
 
@@ -138,7 +138,7 @@ public class DocumentationEditor extends EditorPart implements ISaveablePart2 {
 	 * @param fcd
 	 */
 	public void generateDocumentation(String filePath,
-			Stack<ASTPathPart> classASTPath) {
+			Stack<IASTPathPart> classASTPath) {
 		IFile aFile = input.getFileFromPath(filePath);
 		browserContent.generateDocumentation(aFile, classASTPath);
 	}

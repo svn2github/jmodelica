@@ -3,11 +3,11 @@ package org.jmodelica.ide.graphical.proxy;
 import java.util.List;
 import java.util.Stack;
 
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
 import org.jmodelica.icons.primitives.Color;
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.ConnectClause;
 
@@ -17,7 +17,7 @@ public class ConnectionProxy extends Observable implements Observer {
 	private ConnectorProxy source;
 	private ConnectorProxy target;
 	private boolean connected = true;
-	private Stack<ASTPathPart> astPath;
+	private Stack<IASTPathPart> astPath;
 	private Line syncGetConnectionLine;
 
 	public ConnectionProxy(ConnectorProxy source, ConnectorProxy target,
@@ -72,7 +72,7 @@ public class ConnectionProxy extends Observable implements Observer {
 		}
 	}
 
-	public Stack<ASTPathPart> getASTPath() {
+	public Stack<IASTPathPart> getASTPath() {
 		return astPath;
 	}
 

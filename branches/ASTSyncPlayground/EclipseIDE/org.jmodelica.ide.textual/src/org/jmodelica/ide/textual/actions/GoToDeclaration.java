@@ -1,11 +1,11 @@
 package org.jmodelica.ide.textual.actions;
 
 import org.eclipse.jface.action.Action;
+import org.jastadd.ed.core.model.IASTEditor;
 import org.jmodelica.ide.IDEConstants;
 import org.jmodelica.ide.OffsetDocument;
 import org.jmodelica.ide.helpers.EclipseUtil;
 import org.jmodelica.ide.helpers.Maybe;
-import org.jmodelica.ide.helpers.hooks.IASTEditor;
 import org.jmodelica.ide.namecomplete.Lookup;
 import org.jmodelica.ide.textual.editor.Editor;
 import org.jmodelica.modelica.compiler.ASTNode;

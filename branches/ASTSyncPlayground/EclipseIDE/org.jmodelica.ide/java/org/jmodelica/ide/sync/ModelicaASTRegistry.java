@@ -6,6 +6,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.ICompiler;
 import org.jastadd.ed.core.model.GlobalRootRegistry;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.compiler.ModelicaEclipseCompiler;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.InstNode;
@@ -34,7 +35,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * given InstProgramRoot. Needed if Instance Outline should have expandable
 	 * nodes.
 	 */
-	public InstNode resolveInstanceASTPath(Stack<ASTPathPart> nodePath,
+	public InstNode resolveInstanceASTPath(Stack<IASTPathPart> nodePath,
 			InstNode root) {
 		if (nodePath.size() == 0)
 			return root;
@@ -60,7 +61,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	/**
 	 * debug
 	 */
-	public void printPath(Stack<ASTPathPart> nodePath) {
+	public void printPath(Stack<IASTPathPart> nodePath) {
 		String priint = "";
 		for (int i = 0; i < nodePath.size(); i++)
 			priint = nodePath.get(i).id() + " " + priint;
@@ -73,7 +74,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * 
 	 * @return Found node, or SourceRoot if path was empty.
 	 */
-	public ASTNode<?> resolveSourceASTPath(Stack<ASTPathPart> nodePath,
+	public ASTNode<?> resolveSourceASTPath(Stack<IASTPathPart> nodePath,
 			ASTNode<?> root) {
 		String sought = "";
 		String next = "";
@@ -127,8 +128,8 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * Used to create AST paths for Instance Outline & MSL components in Package
 	 * Explorer.
 	 */
-	public Stack<ASTPathPart> createPath(ASTNode<?> node) {
-		Stack<ASTPathPart> nodePath = new Stack<ASTPathPart>();
+	public Stack<IASTPathPart> createPath(ASTNode<?> node) {
+		Stack<IASTPathPart> nodePath = new Stack<IASTPathPart>();
 		ASTNode<?> tmp = node;
 		if (node instanceof InstNode) {
 			while (tmp != null && !(tmp instanceof InstProgramRoot)) {
@@ -152,8 +153,8 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * Creates the AST identifier path from an AST node to its parent
 	 * StoredDefinition.
 	 */
-	public Stack<ASTPathPart> createDefPath(ASTNode<?> node) {
-		Stack<ASTPathPart> nodePath = new Stack<ASTPathPart>();
+	public Stack<IASTPathPart> createDefPath(ASTNode<?> node) {
+		Stack<IASTPathPart> nodePath = new Stack<IASTPathPart>();
 		ASTNode<?> tmp = node;
 		while (tmp != null && !(tmp instanceof StoredDefinition)) {
 			ASTPathPart part = new ASTPathPart(createIdentifier(tmp),
@@ -206,7 +207,7 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 	 * returns the found AST node.
 	 */
 	public ASTNode<?> resolveSourceASTPath(StoredDefinition def,
-			Stack<ASTPathPart> astPath) {
+			Stack<IASTPathPart> astPath) {
 		ASTNode<?> tmp = def;
 		for (int i = astPath.size() - 1; i >= 0; i--) {
 			int index = astPath.get(i).index();
@@ -241,34 +242,6 @@ public class ModelicaASTRegistry extends GlobalRootRegistry {
 						.equals(string))
 					return tmp.getChild(index + count);
 		}
-		return null;
-	}
-
-	public ASTNode<?> resolveSourceASTPath2(StoredDefinition def,
-			Stack<ASTPathPart> astPath) {
-		ASTNode<?> tmp = def;
-		for (int i = astPath.size() - 1; i >= 0; i--) {
-			int index = astPath.get(i).index();
-			if (astPath.get(i).id().substring(0, 5).equals("List:")) {
-				tmp = tmp.getChild(index);
-			} else {
-				tmp = findChild2(tmp, index, astPath.get(i).id());
-				if (tmp == null)
-					return null;
-			}
-		}
-		return tmp;
-	}
-
-	/**
-	 * Find the sought child node. Start at cached index, continue with closest
-	 * neighbours and outwards.
-	 */
-	private ASTNode<?> findChild2(ASTNode<?> tmp, int index, String string) {
-		int numChild = tmp.getNumChild();
-		for (int i = 0; i < numChild; i++)
-			if (createIdentifier(tmp.getChild(i)).equals(string))
-				return tmp.getChild(i);
 		return null;
 	}
 }

@@ -3,17 +3,18 @@ package org.jmodelica.ide.sync.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.sync.ASTPathPart;
 
 public class AddComponentTask extends AbstractModificationTask {
 
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> classASTPath;
 	private Placement placement;
 	private String componentName;
 	private String className;
 
-	public AddComponentTask(IFile file, Stack<ASTPathPart> classASTPath,
+	public AddComponentTask(IFile file, Stack<IASTPathPart> classASTPath,
 			String className, String componentName, Placement placement,
 			int undoActionId) {
 		super(file, undoActionId);
@@ -45,7 +46,7 @@ public class AddComponentTask extends AbstractModificationTask {
 		return className;
 	}
 
-	public Stack<ASTPathPart> getClassASTPath() {
+	public Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 }

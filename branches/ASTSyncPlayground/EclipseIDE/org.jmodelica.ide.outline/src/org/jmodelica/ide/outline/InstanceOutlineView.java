@@ -16,7 +16,7 @@
 package org.jmodelica.ide.outline;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.ide.helpers.hooks.IASTEditor;
+import org.jastadd.ed.core.model.IASTEditor;
 
 public class InstanceOutlineView extends OutlineView {
 

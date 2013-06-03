@@ -3,7 +3,7 @@ package org.jmodelica.ide.outline.cache;
 import java.util.ArrayList;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.outline.OutlineUpdateWorker.ChildrenTask;
 
 public class EventCachedChildren extends ASTChangeEvent {

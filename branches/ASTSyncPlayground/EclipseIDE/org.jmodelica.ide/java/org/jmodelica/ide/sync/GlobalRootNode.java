@@ -8,6 +8,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.jastadd.ed.core.model.IASTChangeEvent;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jastadd.ed.core.model.node.IASTNode;
 import org.jastadd.ed.core.model.node.IGlobalRootNode;
 import org.jastadd.ed.core.model.node.ILocalRootNode;
@@ -90,7 +91,7 @@ public class GlobalRootNode implements IGlobalRootNode {
 		root.getProgram().getInstProgramRoot().components();
 		ChangePropagationController.getInstance().handleNotifications(
 				IASTChangeEvent.FILE_RECOMPILED, newNode.getFile(),
-				new Stack<ASTPathPart>());
+				new Stack<IASTPathPart>());
 	}
 
 	public void addFiles(

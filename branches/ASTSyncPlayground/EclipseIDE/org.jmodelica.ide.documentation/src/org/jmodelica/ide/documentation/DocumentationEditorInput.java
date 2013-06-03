@@ -10,18 +10,18 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
 
 public class DocumentationEditorInput implements IEditorInput,
 		IPersistableElement {
 	private IProject project;
 	private String filePath;
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> classASTPath;
 	private boolean genDoc;
 	private IFile file;
 
 	public DocumentationEditorInput(String filePath,
-			Stack<ASTPathPart> classASTPath, boolean genDoc) {
+			Stack<IASTPathPart> classASTPath, boolean genDoc) {
 		this.genDoc = genDoc;
 		this.filePath = filePath;
 		this.classASTPath = classASTPath;
@@ -30,14 +30,14 @@ public class DocumentationEditorInput implements IEditorInput,
 	}
 
 	public DocumentationEditorInput(String filePath,
-			Stack<ASTPathPart> classASTPath, IProject iProject) {
+			Stack<IASTPathPart> classASTPath, IProject iProject) {
 		this.filePath = filePath;
 		this.classASTPath = classASTPath;
 		file = getFileFromPath(filePath);
 		project = iProject;
 	}
 
-	public Stack<ASTPathPart> getClassASTPath() {
+	public Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 

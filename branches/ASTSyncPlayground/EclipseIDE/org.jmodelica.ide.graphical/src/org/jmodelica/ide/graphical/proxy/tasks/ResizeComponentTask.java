@@ -3,9 +3,9 @@ package org.jmodelica.ide.graphical.proxy.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.coord.Extent;
 import org.jmodelica.icons.coord.Point;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ComponentDecl;
@@ -14,14 +14,14 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class ResizeComponentTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
-	private Stack<ASTPathPart> componentASTPath;
+	private Stack<IASTPathPart> componentASTPath;
 	private double x;
 	private double y;
 	private double x2;
 	private double y2;
 
 	public ResizeComponentTask(IFile theFile,
-			Stack<ASTPathPart> componentASTPath, double x, double y, double x2,
+			Stack<IASTPathPart> componentASTPath, double x, double y, double x2,
 			double y2) {
 		this.theFile = theFile;
 		this.componentASTPath = componentASTPath;

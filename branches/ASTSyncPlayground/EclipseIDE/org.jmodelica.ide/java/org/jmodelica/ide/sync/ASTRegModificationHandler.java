@@ -4,10 +4,11 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.ASTChangeEvent;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.ide.sync.tasks.AbstractModificationTask;
 import org.jmodelica.ide.sync.tasks.AddComponentTask;
 import org.jmodelica.ide.sync.tasks.AddConnectionTask;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.ide.sync.tasks.RemoveComponentTask;
 import org.jmodelica.ide.sync.tasks.RemoveConnectionTask;
 import org.jmodelica.ide.sync.tasks.UndoTask;
@@ -66,7 +67,7 @@ public class ASTRegModificationHandler {
 	}
 
 	private void removeConnection(RemoveConnectionTask task) {
-		Stack<ASTPathPart> astPath = task.getClassASTPath();
+		Stack<IASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
@@ -106,9 +107,7 @@ public class ASTRegModificationHandler {
 			// continue...
 
 			fcd.removeEquation(connectClause);
-			fcd.flushCache();
-			fcd.classes();
-			fcd.components();
+			flushClassDeclCache(fcd);
 			flushInstRoot(sroot);
 		}
 		ChangePropagationController.getInstance().handleNotifications(
@@ -119,7 +118,7 @@ public class ASTRegModificationHandler {
 	 * Adds an ConnectionClause Equation to its ClassDecl.
 	 */
 	private void addConnection(AddConnectionTask task) {
-		Stack<ASTPathPart> astPath = task.getClassASTPath();
+		Stack<IASTPathPart> astPath = task.getClassASTPath();
 		GlobalRootNode root = (GlobalRootNode) registry.doLookup(task.getFile()
 				.getProject());
 		SourceRoot sroot = root.getSourceRoot();
@@ -155,9 +154,7 @@ public class ASTRegModificationHandler {
 			ASTRegModificationUndoer.getInstance().addUndoAddJob(undo);
 			// continue...
 
-			fcd.flushCache();
-			fcd.classes();
-			fcd.components();
+			flushClassDeclCache(fcd);
 			flushInstRoot(sroot);
 		}
 		ChangePropagationController.getInstance().handleNotifications(
@@ -216,15 +213,6 @@ public class ASTRegModificationHandler {
 			ASTRegModificationUndoer.getInstance().addUndoAddJob(undo);
 			// continue...
 
-			/**
-			 * System.out.println(sroot.getProgram().getUnstructuredEntity(0)
-			 * .getNodeName() + ":" +
-			 * sroot.getProgram().getUnstructuredEntity(0).outlineId());
-			 * System.out.println(def.getNodeName() + ":" + def.outlineId());
-			 * System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&add");
-			 * 
-			 * recursivePrint(sroot, "");
-			 */
 			flushInstRoot(sroot);
 			ChangePropagationController.getInstance().handleNotifications(
 					ASTChangeEvent.POST_ADDED, file, task.getClassASTPath());
@@ -238,14 +226,6 @@ public class ASTRegModificationHandler {
 		iRoot.components();
 	}
 
-	// debug
-	/**
-	 * private void recursivePrint(ASTNode<?> node, String indent) { if (!(node
-	 * instanceof Opt)) System.out.println(indent + node.getNodeName() + ":" +
-	 * node.outlineId()); for (int i = 0; i < node.getNumChild(); i++)
-	 * recursivePrint(node.getChild(i), indent + " "); }
-	 */
-
 	/**
 	 * Removes a ComponentDecl from its ClassDecl.
 	 */
@@ -258,25 +238,9 @@ public class ASTRegModificationHandler {
 					.getLatestDef(task.getFile());
 			FullClassDecl fcd = (FullClassDecl) registry.resolveSourceASTPath(
 					def, task.getClassASTPath());
-
-			/**System.out.println("cached 100000...");
-			long time2 = System.currentTimeMillis();
-			ComponentDecl cd=null;
-			for (int i = 0; i < 100000; i++)*/
 			ComponentDecl cd = (ComponentDecl) registry.resolveSourceASTPath(
 					def, task.getComponentASTPath());
-			if (cd == null)
-				System.out.println("FAILED TO RESOLVE");
-			/**long time2end = System.currentTimeMillis();
-			System.out.println("cached 100000 took "+(time2end-time2)+" ms");
-			
-			System.out.println("linear 100000...");
-			long time3 = System.currentTimeMillis();
-			for (int i = 0; i < 100000; i++)
-			cd = (ComponentDecl) registry.resolveSourceASTPath2(
-					def, task.getComponentASTPath());
-			long time3end = System.currentTimeMillis();
-			System.out.println("linear 100000 took "+(time2end-time2)+" ms");*/
+
 			// For undo command of graph ed (queue add job containing component
 			// info)
 			AbstractModificationTask undo = new AddComponentTask(
@@ -287,22 +251,18 @@ public class ASTRegModificationHandler {
 			// continue...
 
 			fcd.removeComponentDecl(cd);
-			fcd.flushCache();
-			fcd.components();
-			fcd.classes();
+			flushClassDeclCache(fcd);
 			flushInstRoot(sroot);
 
-			/**
-			 * System.out.println(sroot.getProgram().getUnstructuredEntity(0)
-			 * .getNodeName() + ":" +
-			 * sroot.getProgram().getUnstructuredEntity(0).outlineId());
-			 * System.out.println(def.getNodeName() + ":" + def.outlineId());
-			 * System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55");
-			 * recursivePrint(sroot, "");
-			 */
 			ChangePropagationController.getInstance().handleNotifications(
 					ASTChangeEvent.POST_REMOVE, task.getFile(),
 					task.getClassASTPath());
 		}
+	}
+
+	private void flushClassDeclCache(FullClassDecl fcd) {
+		fcd.flushCache();
+		fcd.components();
+		fcd.classes();
 	}
 }

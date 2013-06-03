@@ -8,12 +8,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.jmodelica.ide.helpers.OutlineCacheJob;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.ide.sync.tasks.AbstractDocumentationTask;
 import org.jmodelica.ide.sync.tasks.AbstractModificationTask;
 import org.jmodelica.ide.sync.tasks.CompileFileTask;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.ide.sync.tasks.NotifyGraphicalTask;
 import org.jmodelica.ide.sync.tasks.NotifyOutlineTask;
 

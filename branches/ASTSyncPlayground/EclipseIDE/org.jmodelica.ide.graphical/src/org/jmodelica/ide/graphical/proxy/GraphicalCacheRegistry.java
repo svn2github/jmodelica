@@ -10,8 +10,8 @@ import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.graphical.GraphicalEditorInput;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.ListenerObject;
@@ -28,7 +28,7 @@ public class GraphicalCacheRegistry implements IASTChangeListener {
 	private IASTChangeListener myGraphicalEditorListener;
 	private IFile theFile;
 	private int myListenerId;
-	private Stack<ASTPathPart> myListenPath = new Stack<ASTPathPart>();
+	private Stack<IASTPathPart> myListenPath = new Stack<IASTPathPart>();
 	private StoredDefinition def;
 
 	public GraphicalCacheRegistry() {

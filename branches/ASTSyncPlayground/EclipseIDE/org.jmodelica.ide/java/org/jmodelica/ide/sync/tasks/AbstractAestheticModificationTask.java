@@ -1,5 +1,7 @@
 package org.jmodelica.ide.sync.tasks;
 
+import org.jastadd.ed.core.model.ITaskObject;
+
 
 /**
  * Used by for tasks that do not require the graphical editor to refresh cache.

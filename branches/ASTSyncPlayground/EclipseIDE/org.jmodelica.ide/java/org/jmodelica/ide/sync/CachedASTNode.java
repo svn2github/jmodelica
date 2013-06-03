@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import org.eclipse.swt.graphics.Image;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.IOutlineCache;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.icons.Icon;
 import org.jmodelica.icons.drawing.AWTIconDrawer;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
-import org.jmodelica.ide.helpers.IOutlineCache;
 import org.jmodelica.ide.helpers.ImageLoader;
 import org.jmodelica.ide.helpers.SWTIconDrawer;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.BaseNode;
 
 public class CachedASTNode implements ICachedOutlineNode {
-	protected Stack<ASTPathPart> myASTPath;
+	protected Stack<IASTPathPart> myASTPath;
 	private ArrayList<ICachedOutlineNode> outlineChildren = new ArrayList<ICachedOutlineNode>();
 	protected Icon icon;
 	private Image image;
@@ -50,7 +51,7 @@ public class CachedASTNode implements ICachedOutlineNode {
 		return parent;
 	}
 
-	public Stack<ASTPathPart> getASTPath() {
+	public Stack<IASTPathPart> getASTPath() {
 		return myASTPath;
 	}
 

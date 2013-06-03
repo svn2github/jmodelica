@@ -1,8 +1,9 @@
-package org.jmodelica.ide.helpers;
+package org.jmodelica.ide.sync;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
+import org.jastadd.ed.core.model.IOutlineCache;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public abstract class OutlineCacheJob implements ITaskObject {
 	protected IASTChangeListener listener;

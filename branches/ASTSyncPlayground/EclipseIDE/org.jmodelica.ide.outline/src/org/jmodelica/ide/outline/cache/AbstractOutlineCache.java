@@ -5,14 +5,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
-import org.jmodelica.ide.helpers.IOutlineCache;
+import org.jastadd.ed.core.model.IOutlineCache;
+import org.jastadd.ed.core.model.ITaskObject;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.outline.OutlineUpdateWorker;
 import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
 
 public abstract class AbstractOutlineCache implements IOutlineCache,
 		IASTChangeListener {
@@ -99,10 +99,10 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	public CachedASTNode getCache() {
 		return myCache;
 	}
-
+	
 	/**
 	 * Create an {@link ITaskObject} caching the initial cache for the file of
-	 * this cache.
+	 * this cache. Call method setFile() before this method.
 	 * 
 	 * @param root
 	 *            The node to cache.
@@ -110,5 +110,5 @@ public abstract class AbstractOutlineCache implements IOutlineCache,
 	 *            For parent reference.
 	 * @return A node containing the cache to display in the outline.
 	 */
-	protected abstract void createInitialCache();
+	 protected abstract void createInitialCache();
 }

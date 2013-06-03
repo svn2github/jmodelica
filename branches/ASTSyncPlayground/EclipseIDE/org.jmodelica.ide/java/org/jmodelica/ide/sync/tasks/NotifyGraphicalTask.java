@@ -5,16 +5,17 @@ import java.util.Stack;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public class NotifyGraphicalTask implements ITaskObject {
-	private Stack<ASTPathPart> changedPath;
+	private Stack<IASTPathPart> changedPath;
 	private IASTChangeListener listener;
 	private int graphicalEditorID;
 	private int astChangeEventType;
 
 	public NotifyGraphicalTask(int astChangeEventType,
-			IASTChangeListener listener, Stack<ASTPathPart> changedPath,
+			IASTChangeListener listener, Stack<IASTPathPart> changedPath,
 			int graphicalEditorID) {
 		this.astChangeEventType = astChangeEventType;
 		this.changedPath = changedPath;
@@ -38,7 +39,7 @@ public class NotifyGraphicalTask implements ITaskObject {
 		listener.astChanged(event);
 	}
 
-	public Stack<ASTPathPart> getChangedPath() {
+	public Stack<IASTPathPart> getChangedPath() {
 		return changedPath;
 	}
 

@@ -45,6 +45,8 @@ import org.eclipse.ui.progress.UIJob;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
 import org.jmodelica.ide.graphical.actions.OpenComponentAction;
@@ -58,11 +60,9 @@ import org.jmodelica.ide.graphical.proxy.ClassDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentDiagramProxy;
 import org.jmodelica.ide.graphical.proxy.ComponentProxy;
 import org.jmodelica.ide.graphical.proxy.GraphicalCacheRegistry;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.UniqueIDGenerator;
 import org.jmodelica.ide.sync.tasks.CompileFileTask;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.ide.sync.tasks.NotifyGraphicalTask;
 
 public class Editor extends GraphicalEditor implements IASTChangeListener,
@@ -390,7 +390,7 @@ public class Editor extends GraphicalEditor implements IASTChangeListener,
 				getCommandStack().flush();
 				NotifyGraphicalTask job = new NotifyGraphicalTask(
 						ITaskObject.PRIORITY_HIGH, cacheRegistry,
-						new Stack<ASTPathPart>(), 0);
+						new Stack<IASTPathPart>(), 0);
 				ASTRegTaskBucket.getInstance().addTask(job);
 				return Status.OK_STATUS;
 			}

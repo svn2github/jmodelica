@@ -1,6 +1,6 @@
 package org.jmodelica.ide.sync;
 
-import org.jmodelica.ide.helpers.IOutlineCache;
+import org.jastadd.ed.core.model.IOutlineCache;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 

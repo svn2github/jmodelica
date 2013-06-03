@@ -6,9 +6,9 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.helpers.LoadedLibraries;
-import org.jmodelica.ide.helpers.OutlineCacheJob;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedInitial;
 import org.jmodelica.ide.sync.ASTNodeCacheFactory;
@@ -16,6 +16,7 @@ import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
+import org.jmodelica.ide.sync.OutlineCacheJob;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.SourceRoot;
 
@@ -53,7 +54,7 @@ public class ClassOutlineCacheInitialTask extends OutlineCacheJob {
 					children.add(cachedChild);
 				} else if (obj instanceof LoadedLibraries) {
 					LoadedLibraries lib = (LoadedLibraries) obj;
-					Stack<ASTPathPart> astPath = ModelicaASTRegistry.getInstance()
+					Stack<IASTPathPart> astPath = ModelicaASTRegistry.getInstance()
 							.createPath(node);
 					astPath.add(new ASTPathPart(lib.getText(),0));
 					lib.setASTPath(astPath);

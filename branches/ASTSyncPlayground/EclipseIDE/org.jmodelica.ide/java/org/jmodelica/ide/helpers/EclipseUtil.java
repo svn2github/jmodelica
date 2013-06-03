@@ -16,8 +16,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.jastadd.ed.core.model.IASTEditor;
 import org.jmodelica.ide.IDEConstants;
-import org.jmodelica.ide.helpers.hooks.IASTEditor;
 
 public class EclipseUtil {
 

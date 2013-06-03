@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.sync.tasks.NotifyGraphicalTask;
 import org.jmodelica.ide.sync.tasks.NotifyOutlineTask;
 
@@ -23,7 +24,7 @@ public class ListenerObject {
 	}
 
 	public void doUpdate(IFile file, int astChangeEventType,
-			Stack<ASTPathPart> changedPath) {
+			Stack<IASTPathPart> changedPath) {
 		if (listenerType == IASTChangeListener.GRAPHICAL_LISTENER) {
 			NotifyGraphicalTask ug = new NotifyGraphicalTask(
 					astChangeEventType, listener, changedPath, listenerID);

@@ -1,6 +1,7 @@
 package org.jmodelica.ide.sync.tasks;
 
 import org.eclipse.core.resources.IProject;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.ide.sync.GlobalRootNode;
 import org.jmodelica.ide.sync.LocalRootNode;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;

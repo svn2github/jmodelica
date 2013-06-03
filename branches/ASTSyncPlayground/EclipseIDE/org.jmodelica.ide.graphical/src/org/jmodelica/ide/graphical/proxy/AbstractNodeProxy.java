@@ -4,22 +4,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.primitives.GraphicItem;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstExtends;
 import org.jmodelica.modelica.compiler.InstNode;
 
 public abstract class AbstractNodeProxy extends Observable {
 
-	protected abstract Stack<ASTPathPart> getASTPath();
+	protected abstract Stack<IASTPathPart> getASTPath();
 
 	abstract protected Map<String, ComponentProxy> getComponentMap();
 
 	abstract protected void setParameterValue(
-			Stack<ASTPathPart> componentASTPath, Stack<String> path,
+			Stack<IASTPathPart> componentASTPath, Stack<String> path,
 			String value);
 
 	protected abstract String buildDiagramName();

@@ -18,6 +18,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.ui.PlatformUI;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.documentation.commands.NavigationProvider;
 import org.jmodelica.ide.documentation.sync.ASTCommunicationHandler;
 import org.jmodelica.ide.documentation.sync.GoToWYSIWYGEvent;
@@ -26,7 +27,6 @@ import org.jmodelica.ide.documentation.sync.RenderClassDeclEvent;
 import org.jmodelica.ide.documentation.sync.RenderClassDeclTask;
 import org.jmodelica.ide.documentation.sync.SaveFCDAnnotationTask;
 import org.jmodelica.ide.documentation.wizard.GenDocWizard;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 
 public class BrowserContent implements LocationListener, MouseListener,
@@ -65,7 +65,7 @@ public class BrowserContent implements LocationListener, MouseListener,
 	 *            just directly presented in the browser.
 	 */
 	public BrowserContent(DocumentationEditor editor,
-			Stack<ASTPathPart> classASTPath, IFile file, Browser browser,
+			Stack<IASTPathPart> classASTPath, IFile file, Browser browser,
 			NavigationProvider navProv, boolean genDoc) {
 		tinymcePath = this.getClass().getProtectionDomain().getCodeSource()
 				.getLocation()
@@ -101,7 +101,7 @@ public class BrowserContent implements LocationListener, MouseListener,
 	 *            The FullClassDecl
 	 */
 	public void generateDocumentation(IFile file,
-			Stack<ASTPathPart> classASTPath) {
+			Stack<IASTPathPart> classASTPath) {
 		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench()
 				.getActiveWorkbenchWindow().getShell(), new GenDocWizard(file,
 				classASTPath));

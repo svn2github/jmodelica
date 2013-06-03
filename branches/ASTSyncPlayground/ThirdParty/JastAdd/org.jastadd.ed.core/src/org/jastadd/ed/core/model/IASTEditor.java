@@ -1,11 +1,11 @@
-package org.jmodelica.ide.helpers.hooks;
+package org.jastadd.ed.core.model;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.jmodelica.modelica.compiler.ClassDecl;
+import org.jastadd.ed.core.model.node.IASTNode;
 
 public interface IASTEditor {
 
-	ClassDecl getClassContainingCursor();
+	IASTNode getClassContainingCursor();
 	IContentOutlinePage getInstanceOutlinePage();
 	IContentOutlinePage getSourceOutlinePage();
 	boolean selectNode(boolean notNull, String containingFileName,

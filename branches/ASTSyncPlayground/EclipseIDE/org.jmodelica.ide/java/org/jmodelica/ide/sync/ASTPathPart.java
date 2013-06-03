@@ -1,6 +1,8 @@
 package org.jmodelica.ide.sync;
 
-public class ASTPathPart {
+import org.jastadd.ed.core.model.IASTPathPart;
+
+public class ASTPathPart implements IASTPathPart {
 	private String id;
 	private int index;
 

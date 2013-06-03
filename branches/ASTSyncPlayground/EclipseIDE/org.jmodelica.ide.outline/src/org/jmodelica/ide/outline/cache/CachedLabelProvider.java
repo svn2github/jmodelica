@@ -2,7 +2,7 @@ package org.jmodelica.ide.outline.cache;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 
 public class CachedLabelProvider extends LabelProvider {
 

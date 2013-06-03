@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.progress.UIJob;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.outline.cache.CachedOutlinePage;
 
 public class OutlineUpdateWorker {

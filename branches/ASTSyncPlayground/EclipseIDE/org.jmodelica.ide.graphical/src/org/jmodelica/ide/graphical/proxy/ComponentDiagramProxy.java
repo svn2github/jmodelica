@@ -3,10 +3,10 @@ package org.jmodelica.ide.graphical.proxy;
 import java.util.List;
 import java.util.Stack;
 
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.primitives.GraphicItem;
-import org.jmodelica.ide.sync.ASTPathPart;
 
 public class ComponentDiagramProxy extends AbstractDiagramProxy {
 
@@ -17,7 +17,7 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	protected Stack<ASTPathPart> getASTPath() {
+	protected Stack<IASTPathPart> getASTPath() {
 		return component.getASTPath();
 	}
 
@@ -54,7 +54,7 @@ public class ComponentDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	protected void setParameterValue(Stack<ASTPathPart> componentASTPath,
+	protected void setParameterValue(Stack<IASTPathPart> componentASTPath,
 			Stack<String> path, String value) {
 		component.setParameterValue(componentASTPath, path, value);
 	}

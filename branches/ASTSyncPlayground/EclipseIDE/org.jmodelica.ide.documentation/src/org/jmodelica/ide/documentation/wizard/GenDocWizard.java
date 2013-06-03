@@ -5,13 +5,13 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.wizard.Wizard;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.documentation.sync.SaveFCDDocumentationTask;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 
 public class GenDocWizard extends Wizard {
 	private IFile file;
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> classASTPath;
 	private GenDocWizardPage pageOne;
 	public static final String PAGE_ONE = "PAGE_ONE";
 	public static final String COMMENT = "comment";
@@ -34,7 +34,7 @@ public class GenDocWizard extends Wizard {
 	 * @param footer
 	 *            Optional footer at the end of the HTML document
 	 */
-	public GenDocWizard(IFile file, Stack<ASTPathPart> classASTPath) {
+	public GenDocWizard(IFile file, Stack<IASTPathPart> classASTPath) {
 		super();
 		this.setWindowTitle("Documentation Generation");
 		this.file = file;

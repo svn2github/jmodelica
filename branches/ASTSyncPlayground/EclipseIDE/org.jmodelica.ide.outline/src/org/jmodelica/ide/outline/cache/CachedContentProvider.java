@@ -4,7 +4,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.outline.OutlineUpdateWorker;
 
 public class CachedContentProvider implements ITreeContentProvider {

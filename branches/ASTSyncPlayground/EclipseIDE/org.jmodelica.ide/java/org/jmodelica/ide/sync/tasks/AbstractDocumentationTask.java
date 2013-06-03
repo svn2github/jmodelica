@@ -2,6 +2,7 @@ package org.jmodelica.ide.sync.tasks;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public abstract class AbstractDocumentationTask implements ITaskObject {
 	protected IASTChangeListener myListener;

@@ -3,15 +3,16 @@ package org.jmodelica.ide.sync.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public class RemoveComponentTask extends AbstractModificationTask {
 
-	private Stack<ASTPathPart> componentASTPath;
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> componentASTPath;
+	private Stack<IASTPathPart> classASTPath;
 
-	public RemoveComponentTask(IFile file, Stack<ASTPathPart> componentASTPath,
-			Stack<ASTPathPart> classASTPath, int undoActionId) {
+	public RemoveComponentTask(IFile file, Stack<IASTPathPart> componentASTPath,
+			Stack<IASTPathPart> classASTPath, int undoActionId) {
 		super(file, undoActionId);
 		this.componentASTPath = componentASTPath;
 		this.classASTPath = classASTPath;
@@ -27,11 +28,11 @@ public class RemoveComponentTask extends AbstractModificationTask {
 		return 0;
 	}
 
-	public Stack<ASTPathPart> getComponentASTPath() {
+	public Stack<IASTPathPart> getComponentASTPath() {
 		return componentASTPath;
 	}
 
-	public Stack<ASTPathPart> getClassASTPath() {
+	public Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 }

@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public class NotifyOutlineTask implements ITaskObject {
 	private IASTChangeListener listener;

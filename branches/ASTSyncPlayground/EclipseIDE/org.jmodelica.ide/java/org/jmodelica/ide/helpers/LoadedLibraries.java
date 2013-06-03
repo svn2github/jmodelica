@@ -5,8 +5,9 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.graphics.Image;
-import org.jmodelica.ide.helpers.IOutlineCache;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.IOutlineCache;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.modelica.compiler.ASTNode;
 import org.jmodelica.modelica.compiler.ClassDecl;
 import org.jmodelica.modelica.compiler.LibNode;
@@ -20,7 +21,7 @@ public class LoadedLibraries implements ICachedOutlineNode {
 	protected SourceRoot parent;
 	private Object[] cachedOutlineChildren;
 	private ICachedOutlineNode cachedParent;
-	private Stack<ASTPathPart> astPath;
+	private Stack<IASTPathPart> astPath;
 	private IOutlineCache cache;
 
 	public LoadedLibraries(SourceRoot root) {
@@ -145,11 +146,11 @@ public class LoadedLibraries implements ICachedOutlineNode {
 	}
 
 	@Override
-	public Stack<ASTPathPart> getASTPath() {
+	public Stack<IASTPathPart> getASTPath() {
 		return astPath;
 	}
 
-	public void setASTPath(Stack<ASTPathPart> path) {
+	public void setASTPath(Stack<IASTPathPart> path) {
 		astPath = path;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
 
 public class ListenerTreeHandler {
 	/**
@@ -14,7 +15,7 @@ public class ListenerTreeHandler {
 	 * @param nodePath
 	 */
 	public static void handleChangedNode(IFile file, int astChangeEventType,
-			ListenerTreeNode root, Stack<ASTPathPart> nodePath) {
+			ListenerTreeNode root, Stack<IASTPathPart> nodePath) {
 		ArrayList<ListenerObject> affectedListeners = new ArrayList<ListenerObject>();
 		getAllAffectedListeners(nodePath.size() - 1, root, nodePath,
 				affectedListeners);
@@ -23,7 +24,7 @@ public class ListenerTreeHandler {
 		}
 	}
 
-	private static ListenerTreeNode resolvePath(Stack<ASTPathPart> nodePath,
+	private static ListenerTreeNode resolvePath(Stack<IASTPathPart> nodePath,
 			ListenerTreeNode root) {
 		if (nodePath == null || nodePath.isEmpty()) {
 			return root;
@@ -31,7 +32,7 @@ public class ListenerTreeHandler {
 		return resolvePath(nodePath, root, nodePath.size() - 1);
 	}
 
-	private static ListenerTreeNode resolvePath(Stack<ASTPathPart> nodePath,
+	private static ListenerTreeNode resolvePath(Stack<IASTPathPart> nodePath,
 			ListenerTreeNode root, int index) {
 		String id = nodePath.get(index).id();
 		// We don't care 'bout list nodes
@@ -44,7 +45,7 @@ public class ListenerTreeHandler {
 	}
 
 	private static ListenerTreeNode resolvePathCreate(
-			Stack<ASTPathPart> nodePath, ListenerTreeNode root, int index) {
+			Stack<IASTPathPart> nodePath, ListenerTreeNode root, int index) {
 		String id = nodePath.get(index).id();
 		// We don't care 'bout list nodes
 		if (id.substring(0, 5).equals("List:"))
@@ -78,7 +79,7 @@ public class ListenerTreeHandler {
 	 * @param astChangeListenerType
 	 */
 	public static void addListener(ListenerTreeNode root,
-			Stack<ASTPathPart> nodePath, ListenerObject listObj) {
+			Stack<IASTPathPart> nodePath, ListenerObject listObj) {
 		if (nodePath == null || nodePath.size() == 0) {
 			root.addListener(listObj);
 		} else {
@@ -98,7 +99,7 @@ public class ListenerTreeHandler {
 	 * @return
 	 */
 	public static void getAllAffectedListeners(int index,
-			ListenerTreeNode node, Stack<ASTPathPart> nodePath,
+			ListenerTreeNode node, Stack<IASTPathPart> nodePath,
 			ArrayList<ListenerObject> listenerlist) {
 		if (index > 0) { // Collect listeners of nodes along path
 			collectVisitorsAndMoveOn(index, node, nodePath, listenerlist);
@@ -118,7 +119,7 @@ public class ListenerTreeHandler {
 	 * @return
 	 */
 	private static void collectVisitorsAndMoveOn(int index,
-			ListenerTreeNode node, Stack<ASTPathPart> nodePath,
+			ListenerTreeNode node, Stack<IASTPathPart> nodePath,
 			ArrayList<ListenerObject> listenerlist) {
 		String soughtNodeId = nodePath.get(index).id();
 		if (soughtNodeId.substring(0, 5).equals("List:")) {
@@ -152,7 +153,7 @@ public class ListenerTreeHandler {
 	}
 
 	public static boolean removeListener(ListenerTreeNode root,
-			Stack<ASTPathPart> nodePath, IASTChangeListener listener) {
+			Stack<IASTPathPart> nodePath, IASTChangeListener listener) {
 		ListenerTreeNode node = resolvePath(nodePath, root);
 		if (node == null)
 			return false;

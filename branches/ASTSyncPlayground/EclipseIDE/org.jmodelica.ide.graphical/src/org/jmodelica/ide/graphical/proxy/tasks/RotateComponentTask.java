@@ -3,7 +3,7 @@ package org.jmodelica.ide.graphical.proxy.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ComponentDecl;
@@ -12,11 +12,11 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class RotateComponentTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
-	private Stack<ASTPathPart> componentASTPath;
+	private Stack<IASTPathPart> componentASTPath;
 	private double angle;
 
 	public RotateComponentTask(IFile theFile,
-			Stack<ASTPathPart> componentASTPath, double angle) {
+			Stack<IASTPathPart> componentASTPath, double angle) {
 		this.theFile = theFile;
 		this.componentASTPath = componentASTPath;
 		this.angle = angle;

@@ -7,9 +7,9 @@ import java.util.Stack;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.modelica.compiler.ConnectClause;
 import org.jmodelica.modelica.compiler.FAbstractEquation;
 import org.jmodelica.modelica.compiler.FConnectClause;
@@ -23,7 +23,7 @@ public abstract class AbstractDiagramProxy extends AbstractNodeProxy {
 	private Map<String, ComponentProxy> componentMap = new HashMap<String, ComponentProxy>();
 
 	@Override
-	protected abstract Stack<ASTPathPart> getASTPath();
+	protected abstract Stack<IASTPathPart> getASTPath();
 
 	@Override
 	protected String buildDiagramName() {

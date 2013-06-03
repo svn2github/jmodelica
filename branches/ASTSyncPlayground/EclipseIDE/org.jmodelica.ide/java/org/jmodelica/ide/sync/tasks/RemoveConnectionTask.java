@@ -3,15 +3,16 @@ package org.jmodelica.ide.sync.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 
 public class RemoveConnectionTask extends AbstractModificationTask {
 
-	private Stack<ASTPathPart> classASTPath;
-	private Stack<ASTPathPart> connectClauseASTPath;
+	private Stack<IASTPathPart> classASTPath;
+	private Stack<IASTPathPart> connectClauseASTPath;
 
-	public RemoveConnectionTask(IFile file, Stack<ASTPathPart> classASTPath,
-			Stack<ASTPathPart> connectClauseASTPath, int undoActionId) {
+	public RemoveConnectionTask(IFile file, Stack<IASTPathPart> classASTPath,
+			Stack<IASTPathPart> connectClauseASTPath, int undoActionId) {
 		super(file, undoActionId);
 		this.classASTPath = classASTPath;
 		this.connectClauseASTPath = connectClauseASTPath;
@@ -30,11 +31,11 @@ public class RemoveConnectionTask extends AbstractModificationTask {
 		return ITaskObject.PRIORITY_HIGHEST;
 	}
 
-	public Stack<ASTPathPart> getConnectionClauseASTPath() {
+	public Stack<IASTPathPart> getConnectionClauseASTPath() {
 		return connectClauseASTPath;
 	}
 
-	public Stack<ASTPathPart> getClassASTPath() {
+	public Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 }

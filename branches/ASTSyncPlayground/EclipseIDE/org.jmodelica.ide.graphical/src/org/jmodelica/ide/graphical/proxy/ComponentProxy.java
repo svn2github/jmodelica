@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.Observable;
 import org.jmodelica.icons.Observer;
@@ -13,7 +14,6 @@ import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.coord.Transformation;
 import org.jmodelica.icons.primitives.GraphicItem;
 import org.jmodelica.ide.graphical.util.Transform;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.modelica.compiler.InstComponentDecl;
 import org.jmodelica.modelica.compiler.InstExtends;
@@ -27,7 +27,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 
 	private String componentName;
 	private AbstractNodeProxy parent;
-	private Stack<ASTPathPart> astPath;
+	private Stack<IASTPathPart> astPath;
 	private Placement cachedPlacement;
 	private Layer cachedIconLayer;
 	List<ParameterProxy> parameters = new ArrayList<ParameterProxy>();
@@ -90,7 +90,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	public Stack<ASTPathPart> getASTPath() {
+	public Stack<IASTPathPart> getASTPath() {
 		return astPath;
 	}
 
@@ -194,7 +194,7 @@ public class ComponentProxy extends AbstractNodeProxy implements Observer {
 	}
 
 	@Override
-	protected void setParameterValue(Stack<ASTPathPart> componentASTPath,
+	protected void setParameterValue(Stack<IASTPathPart> componentASTPath,
 			Stack<String> path, String value) {
 		path.push(componentName);
 		getParent().setParameterValue(astPath, path, value);

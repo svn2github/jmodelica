@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.ITaskObject;
 import org.jmodelica.icons.Layer;
 import org.jmodelica.icons.coord.Placement;
 import org.jmodelica.icons.primitives.GraphicItem;
@@ -15,11 +17,9 @@ import org.jmodelica.ide.graphical.proxy.tasks.RemoveBendPointTask;
 import org.jmodelica.ide.graphical.proxy.tasks.ResizeComponentTask;
 import org.jmodelica.ide.graphical.proxy.tasks.RotateComponentTask;
 import org.jmodelica.ide.graphical.proxy.tasks.SetParameterValueTask;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.tasks.AddComponentTask;
 import org.jmodelica.ide.sync.tasks.AddConnectionTask;
-import org.jmodelica.ide.sync.tasks.ITaskObject;
 import org.jmodelica.ide.sync.tasks.RemoveComponentTask;
 import org.jmodelica.ide.sync.tasks.RemoveConnectionTask;
 import org.jmodelica.modelica.compiler.InstClassDecl;
@@ -31,7 +31,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	public static final Object FLUSH_CONTENTS = new String("Flush contents now");
 
 	private IFile theFile;
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> classASTPath;
 	private Layer cacheDiagramLayer;
 	private String syncGetClassIconName;
 	private List<ComponentProxy> components = new ArrayList<ComponentProxy>();
@@ -56,16 +56,16 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 		return graphics;
 	}
 
-	protected Stack<ASTPathPart> getClassASTPath() {
+	protected Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 
-	public void setClassASTPath(Stack<ASTPathPart> classASTPath) {
+	public void setClassASTPath(Stack<IASTPathPart> classASTPath) {
 		this.classASTPath = classASTPath;
 	}
 
 	@Override
-	protected Stack<ASTPathPart> getASTPath() {
+	protected Stack<IASTPathPart> getASTPath() {
 		return null;
 	}
 
@@ -131,7 +131,7 @@ public class ClassDiagramProxy extends AbstractDiagramProxy {
 	}
 
 	@Override
-	public void setParameterValue(Stack<ASTPathPart> componentASTPath,
+	public void setParameterValue(Stack<IASTPathPart> componentASTPath,
 			Stack<String> path, String value) {
 		ITaskObject job = new SetParameterValueTask(theFile, componentASTPath,
 				path, value);

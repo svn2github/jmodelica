@@ -6,6 +6,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.ide.sync.ASTPathPart;
 
 public class DocumentationEditorInputFactory implements IElementFactory {
@@ -23,7 +24,7 @@ public class DocumentationEditorInputFactory implements IElementFactory {
 		String classASTPathString = memento.getString(TAG_CLASSASTPATH);
 		String[] indexes = classASTIndexesString.split("#");
 		String[] ids = classASTPathString.split("#");
-		Stack<ASTPathPart> classASTPath = new Stack<ASTPathPart>();
+		Stack<IASTPathPart> classASTPath = new Stack<IASTPathPart>();
 		for (int i = 0; i < ids.length; i++) {
 			String id = ids[i];
 			int index = Integer.parseInt(indexes[i]);
@@ -46,7 +47,7 @@ public class DocumentationEditorInputFactory implements IElementFactory {
 		memento.putString(TAG_PROJECT, input.getProject().getFullPath()
 				.toString());
 		memento.putString(TAG_FILEPATH, input.getFilePath());
-		Stack<ASTPathPart> classASTPath = input.getClassASTPath();
+		Stack<IASTPathPart> classASTPath = input.getClassASTPath();
 		StringBuilder ids = new StringBuilder();
 		StringBuilder indexes = new StringBuilder();
 		for (int i = 0; i < classASTPath.size(); i++) {

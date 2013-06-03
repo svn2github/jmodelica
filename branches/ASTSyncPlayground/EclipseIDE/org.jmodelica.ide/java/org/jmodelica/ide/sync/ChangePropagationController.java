@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.IASTChangeListener;
+import org.jastadd.ed.core.model.IASTPathPart;
 
 public class ChangePropagationController {
 	private static ChangePropagationController controller;
@@ -26,7 +27,7 @@ public class ChangePropagationController {
 	}
 
 	public synchronized void addListener(ListenerObject listObj, IFile file,
-			Stack<ASTPathPart> nodePath) {
+			Stack<IASTPathPart> nodePath) {
 		ListenerTreeNode root = listenerTrees.get(file);
 		if (root == null) {
 			root = new ListenerTreeNode(null);
@@ -44,7 +45,7 @@ public class ChangePropagationController {
 	 * @param nodePath
 	 */
 	public synchronized void handleNotifications(int changeType, IFile file,
-			Stack<ASTPathPart> nodePath) {
+			Stack<IASTPathPart> nodePath) {
 		ListenerTreeNode libroot = listenerTrees.get(file);
 		if (libroot != null) {
 			ListenerTreeHandler.handleChangedNode(file, changeType, libroot,
@@ -53,7 +54,7 @@ public class ChangePropagationController {
 	}
 
 	public synchronized boolean removeListener(IASTChangeListener listener,
-			IFile file, Stack<ASTPathPart> nodePath) {
+			IFile file, Stack<IASTPathPart> nodePath) {
 		if (file != null) {
 			ListenerTreeNode root = listenerTrees.get(file);
 			if (root != null) {

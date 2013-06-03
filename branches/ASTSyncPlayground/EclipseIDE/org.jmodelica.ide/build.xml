@@ -92,7 +92,7 @@
 	<property name="parser_dir" value="${modelica_frontend_dir}/parser" />
 
 	<property name="ide_aspects" value="aspects" />
-	<property name="ide_core_aspects" value="${core_dir}/src" />
+	<property name="ide_core_aspects" value="${core_dir}/spec" />
 	<property name="modelica_frontend_aspects" value="${modelica_frontend_dir}/jastadd" />
 	<property name="modelica_compiler_aspects" value="${modelica_compiler_dir}/jastadd" />
 	<property name="modelica_cbackend_aspects" value="${modelica_cbackend_dir}/jastadd" />

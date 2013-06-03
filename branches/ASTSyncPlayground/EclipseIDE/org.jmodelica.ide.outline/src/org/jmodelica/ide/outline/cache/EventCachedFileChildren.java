@@ -3,7 +3,7 @@ package org.jmodelica.ide.outline.cache;
 import org.eclipse.core.resources.IFile;
 import org.jastadd.ed.core.model.ASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeEvent;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 
 public class EventCachedFileChildren extends ASTChangeEvent implements
 		IASTChangeEvent {

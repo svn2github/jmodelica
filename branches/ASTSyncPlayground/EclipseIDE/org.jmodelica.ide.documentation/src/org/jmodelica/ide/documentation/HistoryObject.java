@@ -2,16 +2,16 @@ package org.jmodelica.ide.documentation;
 
 import java.util.Stack;
 
-import org.jmodelica.ide.sync.ASTPathPart;
+import org.jastadd.ed.core.model.IASTPathPart;
 
 public class HistoryObject {
 	public static final int TYPE_CLASS = 0;
 	public static final int TYPE_URL = 1;
-	private Stack<ASTPathPart> classASTPath;
+	private Stack<IASTPathPart> classASTPath;
 	private String externalURL;
 	private int type;
 
-	public HistoryObject(int type, Stack<ASTPathPart> classASTPath) {
+	public HistoryObject(int type, Stack<IASTPathPart> classASTPath) {
 		this.classASTPath = classASTPath;
 		this.type = type;
 	}
@@ -20,7 +20,7 @@ public class HistoryObject {
 		this.externalURL = externalURL;
 	}
 
-	public Stack<ASTPathPart> getClassASTPath() {
+	public Stack<IASTPathPart> getClassASTPath() {
 		return classASTPath;
 	}
 

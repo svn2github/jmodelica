@@ -7,8 +7,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 import org.jastadd.ed.core.model.IASTChangeEvent;
 import org.jastadd.ed.core.model.IASTChangeListener;
-import org.jmodelica.ide.helpers.ICachedOutlineNode;
-import org.jmodelica.ide.helpers.OutlineCacheJob;
+import org.jastadd.ed.core.model.IASTPathPart;
+import org.jastadd.ed.core.model.node.ICachedOutlineNode;
 import org.jmodelica.ide.outline.cache.AbstractOutlineCache;
 import org.jmodelica.ide.outline.cache.EventCachedChildren;
 import org.jmodelica.ide.outline.cache.EventCachedInitial;
@@ -16,11 +16,11 @@ import org.jmodelica.ide.outline.cache.EventCachedInitialNoLibs;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheChildrenTask;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialTask;
 import org.jmodelica.ide.outline.cache.tasks.ClassOutlineCacheInitialNoLibsTask;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ASTRegTaskBucket;
 import org.jmodelica.ide.sync.CachedASTNode;
 import org.jmodelica.ide.sync.ChangePropagationController;
 import org.jmodelica.ide.sync.ListenerObject;
+import org.jmodelica.ide.sync.OutlineCacheJob;
 
 public class ClassOutlineCache extends AbstractOutlineCache {
 	protected ArrayList<EventCachedInitialNoLibs> eventCachedInitialNoLibs = new ArrayList<EventCachedInitialNoLibs>();
@@ -36,7 +36,7 @@ public class ClassOutlineCache extends AbstractOutlineCache {
 	}
 
 	@Override
-	public void fetchChildren(Stack<ASTPathPart> nodePath, Object task) {
+	public void fetchChildren(Stack<IASTPathPart> nodePath, Object task) {
 		OutlineCacheJob job = new ClassOutlineCacheChildrenTask(this, nodePath,
 				myFile, (OutlineUpdateWorker.ChildrenTask) task, this);
 		ASTRegTaskBucket.getInstance().addTask(job);

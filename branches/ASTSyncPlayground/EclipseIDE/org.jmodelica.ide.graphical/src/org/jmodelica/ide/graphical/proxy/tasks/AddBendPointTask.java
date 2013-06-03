@@ -3,9 +3,9 @@ package org.jmodelica.ide.graphical.proxy.tasks;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IFile;
+import org.jastadd.ed.core.model.IASTPathPart;
 import org.jmodelica.icons.coord.Point;
 import org.jmodelica.icons.primitives.Line;
-import org.jmodelica.ide.sync.ASTPathPart;
 import org.jmodelica.ide.sync.ModelicaASTRegistry;
 import org.jmodelica.ide.sync.tasks.AbstractAestheticModificationTask;
 import org.jmodelica.modelica.compiler.ConnectClause;
@@ -14,13 +14,13 @@ import org.jmodelica.modelica.compiler.StoredDefinition;
 public class AddBendPointTask extends AbstractAestheticModificationTask {
 
 	private IFile theFile;
-	private Stack<ASTPathPart> connectClauseASTPath;
+	private Stack<IASTPathPart> connectClauseASTPath;
 	private int index;
 	private double x;
 	private double y;
 
 	public AddBendPointTask(IFile theFile,
-			Stack<ASTPathPart> connectClauseASTPath, int index, double x,
+			Stack<IASTPathPart> connectClauseASTPath, int index, double x,
 			double y) {
 		this.theFile = theFile;
 		this.connectClauseASTPath = connectClauseASTPath;
