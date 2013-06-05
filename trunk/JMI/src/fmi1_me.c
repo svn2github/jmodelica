@@ -579,7 +579,11 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     /* Initialization is now complete, but we also need to handle events
      * at the start of the integration.
      */
-    fmi1_me_event_update(c, fmiFalse, eventInfo);
+    retval = fmi1_me_event_update(c, fmiFalse, eventInfo);
+    if(retval == fmiError) {
+        jmi_log_comment(jmi->log, logError, "Event iteration failed during the initialization.");
+        return fmiError;
+    }
 
     /*
     //Set the final switches (if any)
