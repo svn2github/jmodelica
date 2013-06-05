@@ -3877,6 +3877,41 @@ end RecordTests.RecordParam6;
 end RecordParam6;
 
 
+model RecordParam7
+    record A
+        Integer n;
+    end A;
+    
+    record B
+        extends A;
+    end B;
+    
+    parameter B b = B(2);
+    Real x[b.n] = time * ones(b.n);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordParam7",
+			description="Variability calculation for records involving inheritance",
+			flatModel="
+fclass RecordTests.RecordParam7
+ parameter Integer b.n = 2 /* 2 */;
+ Real x[1];
+ Real x[2];
+equation
+ x[1] = time;
+ x[2] = time;
+
+public
+ record RecordTests.RecordParam7.B
+  discrete Integer n;
+ end RecordTests.RecordParam7.B;
+
+end RecordTests.RecordParam7;
+")})));
+end RecordParam7;
+
+
 model RecordMerge1
     record R1
         Real x;

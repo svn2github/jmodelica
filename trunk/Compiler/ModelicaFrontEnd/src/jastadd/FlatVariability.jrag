@@ -142,11 +142,14 @@ aspect FlatVariability {
     	return overrideVariability(var);
     }
     
-    inh TypePrefixVariability InstComponentDecl.overrideVariability(TypePrefixVariability var);
+    inh TypePrefixVariability InstNode.overrideVariability(TypePrefixVariability var);
     eq InstNode.getChild().overrideVariability(TypePrefixVariability var)      = var;
     eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
+    eq InstExtends.getChild().overrideVariability(TypePrefixVariability var)   = overrideVariability(var);
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
-    	var.combineDown(definedVariability());
+        	var.combineDown(definedVariability());
+    eq InstComponentDecl.getInstExtends().overrideVariability(TypePrefixVariability var) =
+        	var.combineDown(definedVariability());
     
     /* Using combinedVariability() for constant & parameter to avoid circular dependency.
      * It can only differ from variability() when combinedVariability() gives continuous. */

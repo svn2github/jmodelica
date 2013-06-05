@@ -1353,9 +1353,9 @@ aspect ConstantEvaluation {
    * \brief Perform constant evaluation of an access to a record member.
    */
   syn CValue FIdUse.cevalRecordMember(FQName name) {
-	  if (name.numParts() <= 1)
+	  if (name.numDots() < 1)
 		  return CValue.UNKNOWN;
-	  String last = name.lastPartName();
+	  String last = name.lastActualPartName();
 	  FQName prefix = name.copyPrefix();
 	  FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
 	  CValue res = var.inRecord() ? cevalRecordMember(prefix) : var.ceval();
