@@ -415,6 +415,12 @@ class Test_FMUModelCS1:
     def test_exception_output_derivatives(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
+    
+    @testattr(windows = True)
+    def test_default_simulation_stop_time(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
+        res = model.simulate()
+        assert N.abs(1.5 - res.final('time')) < 1e-4
 
     @testattr(assimulo = True)
     def test_multiple_loadings_and_simulations(self):
