@@ -1873,21 +1873,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
         >>> opts = my_model.optimize_options()
         >>> opts['n_e'] = 100
-        
-    In addition, CasADi options can be provided in the options
-    casadi_options_f and casadi_options_g for the NLP objective and constraint
-    functions respectively. For a complete list of CasADi options, please
-    consult the CasADi documentation.
-    
-    See
-    http://casadi.sourceforge.net/api/html/d2/d58/classCasADi_1_1SXFunction.html
-    for SX and
-    http://casadi.sourceforge.net/api/html/dc/d0b/classCasADi_1_1MXFunction.html
-    for MX graphs.
-    
-    CasADi options are set using the syntax for dictionaries::
-
-        >>> opts['casadi_options_g']['numeric_jacobian'] = True
     
     IPOPT options can be provided in the option IPOPT_options. Since CasADi's
     IPOPT interface is used for this algorithm, which includes more options
@@ -1924,8 +1909,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'eliminate_der_var': False,
                 'eliminate_cont_var': False,
                 'measurement_data': None,
-                'casadi_options_f': {"name": "NLP objective function"},
-                'casadi_options_g': {"name": "NLP constraint function"},
                 'IPOPT_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)

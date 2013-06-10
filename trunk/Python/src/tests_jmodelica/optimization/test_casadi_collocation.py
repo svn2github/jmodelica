@@ -1484,28 +1484,6 @@ class TestLocalDAECollocator:
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
-        
-    @testattr(casadi = True)
-    def test_casadi_option(self):
-        """
-        Test the CasADi option numeric_jacobian.
-        """
-        model = self.model_vdp_bounds_mayer
-        
-        # References values
-        cost_ref = 3.17619580332244e0
-        u_norm_ref = 2.8723837585e-1
-        
-        # numeric_jacobian = True
-        opts = model.optimize_options(self.algorithm)
-        opts['casadi_options_g']['numeric_jacobian'] = True
-        res = model.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
-        
-        # numeric_jacobian = False
-        opts['casadi_options_g']['numeric_jacobian'] = False
-        res = model.optimize(self.algorithm, opts)
-        assert_results(res, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
     def test_ipopt_statistics(self):

@@ -134,12 +134,6 @@ class CasadiCollocator(object):
         """
         return casadi.SXMatrix()
         
-    def get_constraint_fcn(self):
-        """
-        Gets the constraint CasADi function.
-        """
-        return self.c_fcn
-        
     def get_equality_constraint(self):
         """
         Get the equality constraint h(x) = 0.0
@@ -747,8 +741,7 @@ class LocalDAECollocator(CasadiCollocator):
         self._create_nlp_variables()
         self._rename_variables()
         self._create_constraints()
-        self._create_constraint_function()
-        self._create_cost_function()
+        self._create_cost()
         self._compute_bounds_and_init()
         self._create_solver()
     
@@ -2221,36 +2214,9 @@ class LocalDAECollocator(CasadiCollocator):
             self.c_i = c_i
         self.time = N.array(time)
         
-    def _create_constraint_function(self):
+    def _create_cost(self):
         """
-        Create constraint function.
-        """
-        # Concatenate constraints
-        c = casadi.vertcat([self.get_equality_constraint(),
-                            self.get_inequality_constraint()])
-        
-        # Create constraint function
-        if self.graph == 'MX':
-            c_fcn = casadi.MXFunction([self.get_xx()], [c])
-        elif self.graph == 'SX':
-            c_fcn = casadi.SXFunction([self.get_xx()], [c])
-        else:
-            raise ValueError('Unknown CasADi graph %s.' % self.graph)
-            
-        # Set user provided options and initialize
-        for (k, v) in self.casadi_options_g.iteritems():
-            c_fcn.setOption(k, v)
-        c_fcn.init()
-            
-        # Save constraint function as data attribute
-        self.c_fcn = c_fcn
-        
-    def _create_cost_function(self):
-        """
-        Create the cost function.
-        
-        If parameter estimation data is available, the cost function will be
-        based on that. Otherwise the cost function will be a Bolza functional.
+        Define the cost.
         """
         # Retrieve collocation variables
         if self.eliminate_der_var:
@@ -2426,22 +2392,6 @@ class LocalDAECollocator(CasadiCollocator):
                             self.var_map[i][k]['dx'])
                     length_cost += (h_i ** (1 + a) * integrand * self.pol.w[k])
             self.cost += c * length_cost
-
-        # Define NLP objective function based on graph
-        if self.graph == "MX":
-            cost_fcn = casadi.MXFunction([self.xx], [self.cost])
-        elif self.graph == "SX":
-            cost_fcn = casadi.SXFunction([self.xx], [self.cost])
-        else:
-            raise ValueError("Unknown CasADi graph %s." % graph)
-        
-        # Set user provided options and initialize
-        for (k, v) in self.casadi_options_f.iteritems():
-            cost_fcn.setOption(k, v)
-        cost_fcn.init()
-        
-        # Save cost function as data attribute
-        self.cost_fcn = cost_fcn
     
     def _compute_bounds_and_init(self):
         """
@@ -2643,7 +2593,22 @@ class LocalDAECollocator(CasadiCollocator):
         self.xx_init = xx_init
     
     def _create_solver(self):
-        self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
+        # Concatenate constraints
+        constraints = casadi.vertcat([self.get_equality_constraint(),
+                                      self.get_inequality_constraint()])
+        
+        # Define NLP function based on graph
+        if self.graph == "MX":
+            nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
+                                    casadi.nlpOut(f=self.cost, g=constraints))
+        elif self.graph == "SX":
+            nlp = casadi.SXFunction(casadi.nlpIn(x=self.xx),
+                                    casadi.nlpOut(f=self.cost, g=constraints))
+        else:
+            raise ValueError("Unknown CasADi graph %s." % graph)
+        
+        # Create solver object        
+        self.solver = casadi.IpoptSolver(nlp)
     
     def get_equality_constraint(self):
         return self.c_e
