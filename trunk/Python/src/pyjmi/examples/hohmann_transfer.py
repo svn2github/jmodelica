@@ -97,12 +97,12 @@ def run_demo(with_plots=True):
         plt.plot(xE,yE,label="Earth")
 
         # Plot Orbits
-        r = res["rStart"]
+        r = res.final("rStart")
         xS = r*N.cos(N.linspace(0,2*N.pi,200))
         yS = r*N.sin(N.linspace(0,2*N.pi,200))
         plt.plot(xS,yS,label="Low Orbit")
 
-        r = res["rFinal"]
+        r = res.final("rFinal")
         xSE = r*N.cos(N.linspace(0,2*N.pi,200))
         ySE = r*N.sin(N.linspace(0,2*N.pi,200))
         plt.plot(xSE,ySE,label="High Orbit")

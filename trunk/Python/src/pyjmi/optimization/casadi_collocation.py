@@ -468,7 +468,7 @@ class CasadiCollocator(object):
         stats = self.solver.getStats()
         return_status = stats['return_status']
         nbr_iter = stats['iter_count']
-        objective = float(self.solver.output(casadi.NLP_COST))
+        objective = float(self.solver.output(casadi.NLP_SOLVER_F))
         total_exec_time = stats['t_mainloop']
         return (return_status, nbr_iter, objective, total_exec_time)
     
@@ -486,11 +486,11 @@ class CasadiCollocator(object):
         self.solver.init()
         
         # Initial condition
-        self.solver.setInput(self.get_xx_init(),casadi.NLP_X_INIT)
+        self.solver.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
         
         # Bounds on x
-        self.solver.setInput(self.get_xx_lb(),casadi.NLP_LBX)
-        self.solver.setInput(self.get_xx_ub(),casadi.NLP_UBX)
+        self.solver.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
+        self.solver.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
         
         # Bounds on the constraints
         n_h = self.get_equality_constraint().numel()
@@ -501,8 +501,8 @@ class CasadiCollocator(object):
         self.glub = hublb + gub
         self.gllb = hublb + glb
         
-        self.solver.setInput(self.gllb,casadi.NLP_LBG)
-        self.solver.setInput(self.glub,casadi.NLP_UBG)
+        self.solver.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
+        self.solver.setInput(self.glub, casadi.NLP_SOLVER_UBG)
         
         """
         print "Optimal control problem: "
@@ -522,7 +522,7 @@ class CasadiCollocator(object):
         self.solver.solve()
         
         # Get the result
-        nlp_opt = N.array(self.solver.output(casadi.NLP_X_OPT))
+        nlp_opt = N.array(self.solver.output(casadi.NLP_SOLVER_X))
         self.nlp_opt = nlp_opt.reshape(-1)
         sol_time = time.clock() - t0
         return sol_time
@@ -3220,11 +3220,7 @@ class PseudoSpectral(CasadiCollocator):
         self.c_fcn.init()
         
         # Create solver
-        if self.get_hessian() is None:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
-        else:
-            self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn,
-                                             self.get_hessian())
+        self.solver = casadi.IpoptSolver(self.get_cost(), self.c_fcn)
         
         self._modify_init()
     

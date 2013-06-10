@@ -50,7 +50,7 @@ path_to_data = os.path.join(get_files_path(), 'Data')
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
     """Helper function for asserting optimization results."""
-    cost = float(res.solver.solver.output(casadi.NLP_COST))
+    cost = float(res.solver.solver.output(casadi.NLP_SOLVER_F))
     u = res[input_name]
     u_norm = N.linalg.norm(u) / N.sqrt(len(u))
     N.testing.assert_allclose(cost, cost_ref, cost_rtol)
@@ -1010,12 +1010,12 @@ class TestLocalDAECollocator:
         
         # Without exact Hessian
         opts = model.optimize_options(self.algorithm)
-        opts['IPOPT_options']['generate_hessian'] = False
+        opts['IPOPT_options']['hessian_approximation'] = "limited-memory"
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # With exact Hessian
-        opts['IPOPT_options']['generate_hessian'] = True
+        opts['IPOPT_options']['hessian_approximation'] = "exact"
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
@@ -1435,7 +1435,7 @@ class TestLocalDAECollocator:
         
         # SX with exact Hessian and eliminated variables
         opts['graph'] = "SX"
-        opts['IPOPT_options']['generate_hessian'] = True
+        opts['IPOPT_options']['hessian_approximation'] = "exact"
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
@@ -1443,7 +1443,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # SX without exact Hessian and eliminated variables
-        opts['IPOPT_options']['generate_hessian'] = False
+        opts['IPOPT_options']['hessian_approximation'] = "limited-memory"
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -1453,9 +1453,8 @@ class TestLocalDAECollocator:
         
         # Expanded MX with exact Hessian and eliminated variables
         opts['graph'] = "MX"
-        opts['IPOPT_options']['expand_f'] = True
-        opts['IPOPT_options']['expand_g'] = True
-        opts['IPOPT_options']['generate_hessian'] = True
+        opts['IPOPT_options']['expand'] = True
+        opts['IPOPT_options']['hessian_approximation'] = "exact"
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
@@ -1463,7 +1462,7 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # Expanded MX without exact Hessian and eliminated variables
-        opts['IPOPT_options']['generate_hessian'] = False
+        opts['IPOPT_options']['hessian_approximation'] = "limited-memory"
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)
@@ -1472,16 +1471,15 @@ class TestLocalDAECollocator:
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX with exact Hessian and eliminated variables
-        opts['IPOPT_options']['expand_f'] = False
-        opts['IPOPT_options']['expand_g'] = False
-        opts['IPOPT_options']['generate_hessian'] = True
+        opts['IPOPT_options']['expand'] = False
+        opts['IPOPT_options']['hessian_approximation'] = "exact"
         opts['eliminate_der_var'] = True
         opts['eliminate_cont_var'] = True
         res = model.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
         
         # MX without exact Hessian and eliminated variables
-        opts['IPOPT_options']['generate_hessian'] = True
+        opts['IPOPT_options']['hessian_approximation'] = "exact"
         opts['eliminate_der_var'] = False
         opts['eliminate_cont_var'] = False
         res = model.optimize(self.algorithm, opts)

@@ -628,10 +628,10 @@ class CollocationLagrangePolynomialsResult(JMResultBase):
         self.times = times
 
         # Print times
-        print("\nTotal time: %.3f seconds" % times['tot'])
-        print("Initialization time: %.3f seconds" % times['init'])
-        print("Solution time: %.3f seconds" % times['sol'])
-        print("Post-processing time: %.3f seconds" % times['post_processing'])
+        print("\nTotal time: %.2f seconds" % times['tot'])
+        print("Initialization time: %.2f seconds" % times['init'])
+        print("Solution time: %.2f seconds" % times['sol'])
+        print("Post-processing time: %.2f seconds" % times['post_processing'])
 
 class CollocationLagrangePolynomialsAlgOptions(OptionBase):
     """
@@ -1264,10 +1264,8 @@ class CasadiPseudoSpectralAlg(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        try:
-            self.nlp.ipopt_solve()
-        finally:
-            self._write_result()
+        self.nlp.ipopt_solve()
+        self._write_result()
         
     def _write_result(self):
         """
@@ -1892,23 +1890,15 @@ class LocalDAECollocationAlgOptions(OptionBase):
         >>> opts['casadi_options_g']['numeric_jacobian'] = True
     
     IPOPT options can be provided in the option IPOPT_options. Since CasADi's
-    IPOPT interface is used for this algorithm, please see the documentation
-    for Casadi's IpoptSolver class for a complete list of IPOPT options, which
-    is available at
+    IPOPT interface is used for this algorithm, which includes more options
+    than just the original IPOPT options, please see the documentation for
+    Casadi's IpoptSolver class for a complete list of the available IPOPT
+    options, which is available at
     http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html
-    
-    IPOPT options available via CasADi that are not a part of the original
-    IPOPT which are of particular interest are 'generate_hessian', which
-    computes the Hessian of the Lagrangian instead of using BFGS, and
-    'expand_f' as well as 'expand_g', which expand the NLP functions from MX
-    into SX if an MX graph is used.
-    
-    The default IPOPT options are given by CasADi, with the exception of
-    "generate_hessian", which is True rather than False.
     
     IPOPT options are set using the syntax for dictionaries::
         
-        >>> opts['IPOPT_options']['expand_f'] = True
+        >>> opts['IPOPT_options']['max_iter'] = 500
     """
     
     def __init__(self, *args, **kw):
@@ -1936,7 +1926,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'measurement_data': None,
                 'casadi_options_f': {"name": "NLP objective function"},
                 'casadi_options_g': {"name": "NLP constraint function"},
-                'IPOPT_options': {'generate_hessian': True}}
+                'IPOPT_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
@@ -1983,7 +1973,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         self.times = times
         
         # Print times
-        print("\nTotal time: %.3f seconds" % times['tot'])
-        print("Initialization time: %.3f seconds" % times['init'])
-        print("Solution time: %.3f seconds" % times['sol'])
-        print("Post-processing time: %.3f seconds" % times['post_processing'])
+        print("\nTotal time: %.2f seconds" % times['tot'])
+        print("Initialization time: %.2f seconds" % times['init'])
+        print("Solution time: %.2f seconds" % times['sol'])
+        print("Post-processing time: %.2f seconds" % times['post_processing'])
