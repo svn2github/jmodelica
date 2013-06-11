@@ -650,41 +650,243 @@ Returns::
         by:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:mover> <m:mi>c</m:mi> <m:mo>.</m:mo>
-          </m:mover> <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mfrac> <m:mrow> <m:msub>
-          <m:mi>F</m:mi> <m:mn>0</m:mn> </m:msub> <m:mfenced separators="">
-          <m:msub> <m:mi>c</m:mi> <m:mn>0</m:mn> </m:msub> <m:mo>-</m:mo>
-          <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mfenced> </m:mrow> <m:mi>V</m:mi> </m:mfrac>
-          <m:mo>-</m:mo> <m:msub> <m:mi>k</m:mi> <m:mn>0</m:mn> </m:msub>
-          <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> <m:msup> <m:mi>e</m:mi> <m:mrow> <m:mo>-</m:mo>
-          <m:mi>EdivR</m:mi> <m:mo>/</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:msup> </m:mtd>
-          </m:mtr> <m:mtr> <m:mtd columnalign="right"> <m:mover>
-          <m:mi>T</m:mi> <m:mo>.</m:mo> </m:mover> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mtd> <m:mtd columnalign="left"> <m:mo>=</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>F</m:mi> <m:mn>0</m:mn> </m:msub>
-          <m:mfenced separators=""> <m:msub> <m:mi>T</m:mi> <m:mn>0</m:mn>
-          </m:msub> <m:mo>-</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mfenced> </m:mrow> <m:mi>V</m:mi>
-          </m:mfrac> <m:mo>-</m:mo> <m:mfrac> <m:mrow> <m:mrow> <m:mi>d</m:mi>
-          <m:mi>H</m:mi> </m:mrow> <m:msub> <m:mi>k</m:mi> <m:mn>0</m:mn>
-          </m:msub> <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> </m:mrow> <m:mrow> <m:mi>ρ</m:mi> <m:msub>
-          <m:mi>C</m:mi> <m:mi>p</m:mi> </m:msub> </m:mrow> </m:mfrac>
-          <m:msup> <m:mi>e</m:mi> <m:mrow> <m:mo>-</m:mo> <m:mi>EdivR</m:mi>
-          <m:mo>/</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:msup> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:mn>2</m:mn> <m:mi>U</m:mi> </m:mrow> <m:mrow>
-          <m:mi>r</m:mi> <m:mi>ρ</m:mi> <m:msub> <m:mi>C</m:mi> <m:mi>p</m:mi>
-          </m:msub> </m:mrow> </m:mfrac> <m:mfenced separators=""> <m:mrow>
-          <m:mi>T</m:mi> <m:mi>c</m:mi> </m:mrow> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> <m:mo>-</m:mo> <m:mi>T</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mfenced> </m:mtd>
-          </m:mtr> </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>c</m:mi>
+
+                    <m:mo>.</m:mo>
+                  </m:mover>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>c</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>c</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msub>
+                    <m:mi>k</m:mi>
+
+                    <m:mn>0</m:mn>
+                  </m:msub>
+
+                  <m:mi>c</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mover>
+                    <m:mi>T</m:mi>
+
+                    <m:mo>.</m:mo>
+                  </m:mover>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>F</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mfenced separators="">
+                        <m:msub>
+                          <m:mi>T</m:mi>
+
+                          <m:mn>0</m:mn>
+                        </m:msub>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>T</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mi>V</m:mi>
+                  </m:mfrac>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mrow>
+                        <m:mi>d</m:mi>
+
+                        <m:mi>H</m:mi>
+                      </m:mrow>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>0</m:mn>
+                      </m:msub>
+
+                      <m:mi>c</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:msup>
+                    <m:mi>e</m:mi>
+
+                    <m:mrow>
+                      <m:mo>-</m:mo>
+
+                      <m:mi>EdivR</m:mi>
+
+                      <m:mo>/</m:mo>
+
+                      <m:mi>T</m:mi>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:mi>t</m:mi>
+                      </m:mfenced>
+                    </m:mrow>
+                  </m:msup>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>U</m:mi>
+                    </m:mrow>
+
+                    <m:mrow>
+                      <m:mi>r</m:mi>
+
+                      <m:mi>ρ</m:mi>
+
+                      <m:msub>
+                        <m:mi>C</m:mi>
+
+                        <m:mi>p</m:mi>
+                      </m:msub>
+                    </m:mrow>
+                  </m:mfrac>
+
+                  <m:mfenced separators="">
+                    <m:mrow>
+                      <m:mi>T</m:mi>
+
+                      <m:mi>c</m:mi>
+                    </m:mrow>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+
+                    <m:mo>-</m:mo>
+
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mfenced>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>This tutorial will cover the following topics:</para>
@@ -846,38 +1048,193 @@ print('T = %f' % T_0_B)
           by:</para>
 
           <informalequation>
-            <m:math display="block" overflow="scroll"><m:mtable> <m:mtr>
-            <m:mtd columnalign="right"/> <m:mtd columnalign="left"> <m:msub>
-            <m:mi mathvariant="normal">min</m:mi> <m:mrow> <m:mi>u</m:mi>
-            <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mrow>
-            </m:msub> <m:munderover> <m:mo>∫</m:mo> <m:mn>0</m:mn>
-            <m:mn>150</m:mn> </m:munderover> <m:msup> <m:mfenced close=")"
-            open="(" separators=""> <m:msup> <m:mi>c</m:mi> <m:mrow>
-            <m:mi>r</m:mi> <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow> </m:msup>
-            <m:mo>-</m:mo> <m:mi>c</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-            <m:mi>t</m:mi> </m:mfenced> </m:mfenced> <m:mn>2</m:mn> </m:msup>
-            <m:mo>+</m:mo> <m:msup> <m:mfenced close=")" open="("
-            separators=""> <m:msup> <m:mi>T</m:mi> <m:mrow> <m:mi>r</m:mi>
-            <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow> </m:msup> <m:mo>-</m:mo>
-            <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-            </m:mfenced> </m:mfenced> <m:mn>2</m:mn> </m:msup> <m:mo>+</m:mo>
-            <m:msup> <m:mfenced close=")" open="(" separators=""> <m:msubsup>
-            <m:mi>T</m:mi> <m:mi>c</m:mi> <m:mrow> <m:mi>r</m:mi>
-            <m:mi>e</m:mi> <m:mi>f</m:mi> </m:mrow> </m:msubsup>
-            <m:mo>-</m:mo> <m:msub> <m:mi>T</m:mi> <m:mi>c</m:mi> </m:msub>
-            <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mfenced>
-            <m:mn>2</m:mn> </m:msup> <m:mrow> <m:mi>d</m:mi> <m:mi>t</m:mi>
-            </m:mrow> </m:mtd> </m:mtr> <m:mtr> <m:mtd columnalign="right"/>
-            <m:mtd columnalign="left"> <m:mstyle mathvariant="normal">
-            <m:mi>subject</m:mi> <m:mo> </m:mo> <m:mo> </m:mo> <m:mi>to</m:mi>
-            </m:mstyle> </m:mtd> </m:mtr> <m:mtr> <m:mtd columnalign="right"/>
-            <m:mtd columnalign="left"> <m:mn>230</m:mn> <m:mo>≤</m:mo>
-            <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-            </m:mfenced> <m:mo>≤</m:mo> <m:mn>370</m:mn> </m:mtd> </m:mtr>
-            <m:mtr> <m:mtd columnalign="right"/> <m:mtd columnalign="left">
-            <m:mi>T</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-            </m:mfenced> <m:mo>≤</m:mo> <m:mn>350</m:mn> </m:mtd> </m:mtr>
-            </m:mtable> <m:mspace linebreak="newline"/></m:math>
+            <m:math display="block" overflow="scroll">
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd columnalign="right"/>
+
+                  <m:mtd columnalign="left">
+                    <m:msub>
+                      <m:mi mathvariant="normal">min</m:mi>
+
+                      <m:mrow>
+                        <m:mi>u</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mrow>
+                    </m:msub>
+
+                    <m:munderover>
+                      <m:mo>∫</m:mo>
+
+                      <m:mn>0</m:mn>
+
+                      <m:mn>150</m:mn>
+                    </m:munderover>
+
+                    <m:msup>
+                      <m:mfenced close=")" open="(" separators="">
+                        <m:msup>
+                          <m:mi>c</m:mi>
+
+                          <m:mrow>
+                            <m:mi>r</m:mi>
+
+                            <m:mi>e</m:mi>
+
+                            <m:mi>f</m:mi>
+                          </m:mrow>
+                        </m:msup>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>c</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+
+                      <m:mn>2</m:mn>
+                    </m:msup>
+
+                    <m:mo>+</m:mo>
+
+                    <m:msup>
+                      <m:mfenced close=")" open="(" separators="">
+                        <m:msup>
+                          <m:mi>T</m:mi>
+
+                          <m:mrow>
+                            <m:mi>r</m:mi>
+
+                            <m:mi>e</m:mi>
+
+                            <m:mi>f</m:mi>
+                          </m:mrow>
+                        </m:msup>
+
+                        <m:mo>-</m:mo>
+
+                        <m:mi>T</m:mi>
+
+                        <m:mo>⁡</m:mo>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+
+                      <m:mn>2</m:mn>
+                    </m:msup>
+
+                    <m:mo>+</m:mo>
+
+                    <m:msup>
+                      <m:mfenced close=")" open="(" separators="">
+                        <m:msubsup>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>c</m:mi>
+
+                          <m:mrow>
+                            <m:mi>r</m:mi>
+
+                            <m:mi>e</m:mi>
+
+                            <m:mi>f</m:mi>
+                          </m:mrow>
+                        </m:msubsup>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>T</m:mi>
+
+                          <m:mi>c</m:mi>
+                        </m:msub>
+
+                        <m:mfenced>
+                          <m:mi>t</m:mi>
+                        </m:mfenced>
+                      </m:mfenced>
+
+                      <m:mn>2</m:mn>
+                    </m:msup>
+
+                    <m:mrow>
+                      <m:mi>d</m:mi>
+
+                      <m:mi>t</m:mi>
+                    </m:mrow>
+                  </m:mtd>
+                </m:mtr>
+
+                <m:mtr>
+                  <m:mtd columnalign="right"/>
+
+                  <m:mtd columnalign="left">
+                    <m:mstyle mathvariant="normal">
+                      <m:mi>subject</m:mi>
+
+                      <m:mo> </m:mo>
+
+                      <m:mo> </m:mo>
+
+                      <m:mi>to</m:mi>
+                    </m:mstyle>
+                  </m:mtd>
+                </m:mtr>
+
+                <m:mtr>
+                  <m:mtd columnalign="right"/>
+
+                  <m:mtd columnalign="left">
+                    <m:mn>230</m:mn>
+
+                    <m:mo>≤</m:mo>
+
+                    <m:mi>u</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+
+                    <m:mo>≤</m:mo>
+
+                    <m:mn>370</m:mn>
+                  </m:mtd>
+                </m:mtr>
+
+                <m:mtr>
+                  <m:mtd columnalign="right"/>
+
+                  <m:mtd columnalign="left">
+                    <m:mi>T</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+
+                    <m:mo>≤</m:mo>
+
+                    <m:mn>350</m:mn>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+
+              <m:mspace linebreak="newline"/>
+            </m:math>
           </informalequation>
 
           <para>and is expressed in Optimica format in the class
@@ -1259,53 +1616,241 @@ plt.show()
         optimization problem:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:munder>
-          <m:mi>min</m:mi> <m:mrow> <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:munder> <m:msub>
-          <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> <m:mspace
-          linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:munder>
+              <m:mi>min</m:mi>
+
+              <m:mrow>
+                <m:mi>u</m:mi>
+
+                <m:mo>⁡</m:mo>
+
+                <m:mfenced>
+                  <m:mi>t</m:mi>
+                </m:mfenced>
+              </m:mrow>
+            </m:munder>
+
+            <m:msub>
+              <m:mi>t</m:mi>
+
+              <m:mi>f</m:mi>
+            </m:msub>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>subject to the Van der Pol dynamics:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>1</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mfenced separators="">
-          <m:mn>1</m:mn> <m:mo>-</m:mo> <m:msubsup> <m:mi>x</m:mi>
-          <m:mn>2</m:mn> <m:mn>2</m:mn> </m:msubsup> </m:mfenced> <m:msub>
-          <m:mi>x</m:mi> <m:mn>1</m:mn> </m:msub> <m:mo>-</m:mo> <m:msub>
-          <m:mi>x</m:mi> <m:mn>2</m:mn> </m:msub> <m:mo>+</m:mo>
-          <m:mi>u</m:mi> <m:mi>,</m:mi> <m:mspace width="1em"/> <m:msub>
-          <m:mi>x</m:mi> <m:mn>1</m:mn> </m:msub> <m:mfenced> <m:mn>0</m:mn>
-          </m:mfenced> <m:mo>=</m:mo> <m:mn>0</m:mn> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>2</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:msub> <m:mi>x</m:mi>
-          <m:mn>1</m:mn> </m:msub> <m:mi>,</m:mi> <m:mspace width="1em"/>
-          <m:msub> <m:mi>x</m:mi> <m:mn>2</m:mn> </m:msub> <m:mfenced>
-          <m:mn>0</m:mn> </m:mfenced> <m:mo>=</m:mo> <m:mn>0</m:mn> </m:mtd>
-          </m:mtr> </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mfenced separators="">
+                    <m:mn>1</m:mn>
+
+                    <m:mo>-</m:mo>
+
+                    <m:msubsup>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>2</m:mn>
+
+                      <m:mn>2</m:mn>
+                    </m:msubsup>
+                  </m:mfenced>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mo>-</m:mo>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mi>u</m:mi>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+
+                  <m:mfenced>
+                    <m:mn>0</m:mn>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>and the constraints:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:mi>x</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
-          <m:msub> <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:mfenced>
-          </m:mtd> <m:mtd columnalign="left"> <m:mo>=</m:mo> <m:mn>1</m:mn>
-          <m:mi>,</m:mi> <m:mspace width="1em"/> <m:mi>v</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:msub> <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub>
-          </m:mfenced> <m:mo>=</m:mo> <m:mn>0</m:mn> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:mi>v</m:mi> <m:mo>⁡</m:mo>
-          <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>≤</m:mo> <m:mn>0.5</m:mn> <m:mi>,</m:mi>
-          <m:mspace width="1em"/> <m:mo>-</m:mo> <m:mn>1</m:mn> <m:mo>≤</m:mo>
-          <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
-          </m:mfenced> <m:mo>≤</m:mo> <m:mn>1</m:mn> </m:mtd> </m:mtr>
-          </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>x</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mn>1</m:mn>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:mi>v</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:msub>
+                      <m:mi>t</m:mi>
+
+                      <m:mi>f</m:mi>
+                    </m:msub>
+                  </m:mfenced>
+
+                  <m:mo>=</m:mo>
+
+                  <m:mn>0</m:mn>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:mi>v</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>≤</m:mo>
+
+                  <m:mn>0.5</m:mn>
+
+                  <m:mi>,</m:mi>
+
+                  <m:mspace width="1em"/>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mn>1</m:mn>
+
+                  <m:mo>≤</m:mo>
+
+                  <m:mi>u</m:mi>
+
+                  <m:mo>⁡</m:mo>
+
+                  <m:mfenced>
+                    <m:mi>t</m:mi>
+                  </m:mfenced>
+
+                  <m:mo>≤</m:mo>
+
+                  <m:mn>1</m:mn>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>This problem is encoded in the following Optimica
@@ -1419,62 +1964,395 @@ plt.show()
         equations:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mtable> <m:mtr> <m:mtd
-          columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>1</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>1</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>1</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:msub> <m:mi>a</m:mi> <m:mn>3</m:mn> </m:msub> <m:msub>
-          <m:mi>A</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfrac> <m:msqrt>
-          <m:mrow> <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub>
-          <m:mi>x</m:mi> <m:mn>3</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>γ</m:mi> <m:mn>1</m:mn> </m:msub>
-          <m:msub> <m:mi>k</m:mi> <m:mn>1</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>1</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>2</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>2</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>2</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:msub> <m:mi>a</m:mi> <m:mn>4</m:mn> </m:msub> <m:msub>
-          <m:mi>A</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msqrt>
-          <m:mrow> <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub>
-          <m:mi>x</m:mi> <m:mn>4</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo>
-          <m:mfrac> <m:mrow> <m:msub> <m:mi>γ</m:mi> <m:mn>2</m:mn> </m:msub>
-          <m:msub> <m:mi>k</m:mi> <m:mn>2</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>2</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>3</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>3</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>3</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>3</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:mrow> <m:mfenced separators=""> <m:mn>1</m:mn> <m:mo>-</m:mo>
-          <m:msub> <m:mi>γ</m:mi> <m:mn>2</m:mn> </m:msub> </m:mfenced>
-          <m:msub> <m:mi>k</m:mi> <m:mn>2</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>3</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>2</m:mn> </m:msub> </m:mtd> </m:mtr> <m:mtr>
-          <m:mtd columnalign="right"> <m:msub> <m:mover> <m:mi>x</m:mi>
-          <m:mo>.</m:mo> </m:mover> <m:mn>4</m:mn> </m:msub> </m:mtd> <m:mtd
-          columnalign="left"> <m:mo>=</m:mo> <m:mo>-</m:mo> <m:mfrac> <m:msub>
-          <m:mi>a</m:mi> <m:mn>4</m:mn> </m:msub> <m:msub> <m:mi>A</m:mi>
-          <m:mn>4</m:mn> </m:msub> </m:mfrac> <m:msqrt> <m:mrow>
-          <m:mn>2</m:mn> <m:mi>g</m:mi> </m:mrow> <m:msub> <m:mi>x</m:mi>
-          <m:mn>4</m:mn> </m:msub> </m:msqrt> <m:mo>+</m:mo> <m:mfrac>
-          <m:mrow> <m:mfenced separators=""> <m:mn>1</m:mn> <m:mo>-</m:mo>
-          <m:msub> <m:mi>γ</m:mi> <m:mn>1</m:mn> </m:msub> </m:mfenced>
-          <m:msub> <m:mi>k</m:mi> <m:mn>1</m:mn> </m:msub> </m:mrow> <m:msub>
-          <m:mi>A</m:mi> <m:mn>4</m:mn> </m:msub> </m:mfrac> <m:msub>
-          <m:mi>u</m:mi> <m:mn>1</m:mn> </m:msub> </m:mtd> </m:mtr>
-          </m:mtable> <m:mspace linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mtable>
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>1</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:msub>
+                        <m:mi>γ</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>2</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>3</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>2</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>3</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+
+              <m:mtr>
+                <m:mtd columnalign="right">
+                  <m:msub>
+                    <m:mover>
+                      <m:mi>x</m:mi>
+
+                      <m:mo>.</m:mo>
+                    </m:mover>
+
+                    <m:mn>4</m:mn>
+                  </m:msub>
+                </m:mtd>
+
+                <m:mtd columnalign="left">
+                  <m:mo>=</m:mo>
+
+                  <m:mo>-</m:mo>
+
+                  <m:mfrac>
+                    <m:msub>
+                      <m:mi>a</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msqrt>
+                    <m:mrow>
+                      <m:mn>2</m:mn>
+
+                      <m:mi>g</m:mi>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>x</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:msqrt>
+
+                  <m:mo>+</m:mo>
+
+                  <m:mfrac>
+                    <m:mrow>
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msub>
+                          <m:mi>γ</m:mi>
+
+                          <m:mn>1</m:mn>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>k</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mrow>
+
+                    <m:msub>
+                      <m:mi>A</m:mi>
+
+                      <m:mn>4</m:mn>
+                    </m:msub>
+                  </m:mfrac>
+
+                  <m:msub>
+                    <m:mi>u</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
+                </m:mtd>
+              </m:mtr>
+            </m:mtable>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>Where the parameter values are given in <xref
@@ -2004,15 +2882,57 @@ plt.show()
         by the expression:</para>
 
         <informalequation>
-          <m:math display="block" overflow="scroll"><m:mrow> <m:mi>C</m:mi>
-          <m:mi>O</m:mi> <m:mi>V</m:mi> </m:mrow> <m:mfenced> <m:msup>
-          <m:mi>p</m:mi> <m:mo>*</m:mo> </m:msup> </m:mfenced> <m:mo>=</m:mo>
-          <m:msubsup> <m:mover> <m:mi>σ</m:mi> <m:mo>ˆ</m:mo> </m:mover>
-          <m:mi>ε</m:mi> <m:mn>2</m:mn> </m:msubsup> <m:msup> <m:mfenced
-          close=")" open="(" separators=""> <m:msup> <m:mi>J</m:mi>
-          <m:mi>T</m:mi> </m:msup> <m:mi>J</m:mi> </m:mfenced> <m:mrow>
-          <m:mo>-</m:mo> <m:mn>1</m:mn> </m:mrow> </m:msup> <m:mspace
-          linebreak="newline"/></m:math>
+          <m:math display="block" overflow="scroll">
+            <m:mrow>
+              <m:mi>C</m:mi>
+
+              <m:mi>O</m:mi>
+
+              <m:mi>V</m:mi>
+            </m:mrow>
+
+            <m:mfenced>
+              <m:msup>
+                <m:mi>p</m:mi>
+
+                <m:mo>*</m:mo>
+              </m:msup>
+            </m:mfenced>
+
+            <m:mo>=</m:mo>
+
+            <m:msubsup>
+              <m:mover>
+                <m:mi>σ</m:mi>
+
+                <m:mo>ˆ</m:mo>
+              </m:mover>
+
+              <m:mi>ε</m:mi>
+
+              <m:mn>2</m:mn>
+            </m:msubsup>
+
+            <m:msup>
+              <m:mfenced close=")" open="(" separators="">
+                <m:msup>
+                  <m:mi>J</m:mi>
+
+                  <m:mi>T</m:mi>
+                </m:msup>
+
+                <m:mi>J</m:mi>
+              </m:mfenced>
+
+              <m:mrow>
+                <m:mo>-</m:mo>
+
+                <m:mn>1</m:mn>
+              </m:mrow>
+            </m:msup>
+
+            <m:mspace linebreak="newline"/>
+          </m:math>
         </informalequation>
 
         <para>where <emphasis>J</emphasis> is the Jacobian of the error
@@ -2325,7 +3245,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>init_traj</entry>
+              <entry><literal>init_traj</literal></entry>
 
               <entry>None</entry>
 
@@ -2334,7 +3254,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>variable_scaling</entry>
+              <entry><literal>variable_scaling</literal></entry>
 
               <entry>True</entry>
 
@@ -2344,7 +3264,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>nominal_traj</entry>
+              <entry><literal>nominal_traj</literal></entry>
 
               <entry>None</entry>
 
@@ -2354,7 +3274,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>nominal_traj_mode</entry>
+              <entry><literal>nominal_traj_mode</literal></entry>
 
               <entry>{"_default_mode": "linear"}</entry>
 
@@ -2370,7 +3290,7 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry>result_file_name</entry>
+              <entry><literal>result_file_name</literal></entry>
 
               <entry>""</entry>
 
@@ -2492,24 +3412,6 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>casadi_options_f</literal></entry>
-
-              <entry>CasADi defaults</entry>
-
-              <entry>CasADi options for evaluation of objective function. See
-              CasADi documentation for available options.</entry>
-            </row>
-
-            <row>
-              <entry><literal>casadi_options_g</literal></entry>
-
-              <entry>CasADi defaults</entry>
-
-              <entry>CasADi options for evaluation of constraint function. See
-              CasADi documentation for available options.</entry>
-            </row>
-
-            <row>
               <entry><literal>IPOPT_options</literal></entry>
 
               <entry>IPOPT defaults</entry>
@@ -2522,11 +3424,17 @@ opts? # View the help text</programlisting>
       </table>
 
       <para>A few of the options are experimental, so changing default values
-      should be done with some care. The three last options,
-      <literal>casadi_options_f</literal>, <literal>casadi_options_g</literal>
-      and IPOPT_options, serve as interfaces for setting options in CasADi and
-      IPOPT. For example, to set the maximum number of iterations in IPOPT,
-      the following syntax can be used.</para>
+      should be done with some care. The last option,
+      <literal>IPOPT_options</literal>, serves as an interface for setting
+      options in IPOPT. Note that this option utilizes CasADi's IPOPT
+      interface, which includes more options than just the original IPOPT
+      options. Thus, please see the documentation for CasADi's IpoptSolver
+      class for a complete list of the available IPOPT options, which is
+      available at
+      http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html.
+      To exemplify the usage of this algorithm option, setting the maximum
+      number of iterations in IPOPT can be done using the following
+      syntax.</para>
 
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
@@ -2538,7 +3446,7 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       entire NLP, whereas the JMI algorithm only constructs graphs for
       evaluation of residuals, leading to very fast function evaluations. The
       second is that second-order derivatives are computed using automatic
-      differentation, whereas the JMI algorithm instead uses a quasi-Newton
+      differentiation, whereas the JMI algorithm instead uses a quasi-Newton
       method, which affects convergence speed and robustness. This feature can
       be disabled by setting the IPOPT option
       <literal>generate_hessian</literal> to <literal>False</literal>, in
@@ -3329,9 +4237,9 @@ opts["link_options"] = [(1,"vy","dy1"),(1,"vx","dx1")] # Allow for discontinuiti
 res_opt = model.optimize(algorithm="CasadiPseudoSpectralAlg",options=opts)
     
 # Get results
-dx1,dy1,dx2,dy2 = res_opt["dx1"],      res_opt["dy1"],    res_opt["dx2"],res_opt["dy2"]
-r1,r2,my        = res_opt["rStart"],   res_opt["rFinal"], res_opt["my"]
-tf,t1           = res_opt["time"][-1], res_opt["t1"]</programlisting>
+dx1,dy1,dx2,dy2 = res_opt.final("dx1"), res_opt.final("dy1"), res_opt.final("dx2"), res_opt.final("dy2")
+r1,r2,my        = res_opt.final("rStart"), res_opt.final("rFinal"), res_opt.final("my")
+tf,t1           = res_opt.final("time"), res_opt.final("t1")</programlisting>
 
         <para>The above code performs the optimization and also retrieves the
         values used to verify the solution.</para>
@@ -3382,12 +4290,12 @@ yE = r*N.sin(N.linspace(0,2*N.pi,200))
 plt.plot(xE,yE,label="Earth")
 
 # Plot Orbits
-r = res["rStart"]
+r = res.final("rStart")
 xS = r*N.cos(N.linspace(0,2*N.pi,200))
 yS = r*N.sin(N.linspace(0,2*N.pi,200))
 plt.plot(xS,yS,label="Low Orbit")
 
-r = res["rFinal"]
+r = res.final("rFinal")
 xSE = r*N.cos(N.linspace(0,2*N.pi,200))
 ySE = r*N.sin(N.linspace(0,2*N.pi,200))
 plt.plot(xSE,ySE,label="High Orbit")
@@ -3476,17 +4384,25 @@ plt.show()</programlisting>
     rotating in the horizontal plane and a pendulum which is free to rotate in
     the vertical plane. The construction has two degrees of freedom, the angle
     of the arm, <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation>, and the angle of the pendulum, <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation>. Copy the file
     <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FMUs/Furuta.fmu</filename>
     to your working directory. <emphasis role="bold">Note that this the
     Furuta.fmu file is currently only supported on Windows.</emphasis>
     Measurement data for <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation> is available in the file
     <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FurutaData.mat</filename>.
     Copy this file to your working directory as well. These measurements will
@@ -3532,16 +4448,24 @@ plt.show ()
 
     <para>This code should generate <xref linkend="opt-fig-furuta-meas"/>
     showing the measurements of <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation>.</para>
 
     <figure xml:id="opt-fig-furuta-meas">
       <title>Measurements of <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> for the Furuta pendulum.</title>
 
       <mediaobject>
@@ -3583,9 +4507,13 @@ plt.show ()
 
     <figure xml:id="opt-fig-furuta-meas-nomsim">
       <title>Measurements and model simulation result for <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> when using nominal parameter values in the Furuta
       pendulum model.</title>
 
@@ -3604,16 +4532,26 @@ plt.show ()
     <itemizedlist>
       <listitem>
         <para><inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>c</m:mi> <m:mi>arm</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>c</m:mi>
+
+                <m:mi>arm</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>: arm friction coefficient (nominal value
         0.012)</para>
       </listitem>
 
       <listitem>
         <para><inlineequation>
-            <m:math display="inline"><m:msub> <m:mi>c</m:mi> <m:mi>pend</m:mi>
-            </m:msub></m:math>
+            <m:math display="inline">
+              <m:msub>
+                <m:mi>c</m:mi>
+
+                <m:mi>pend</m:mi>
+              </m:msub>
+            </m:math>
           </inlineequation>: pendulum friction coefficient (nominal value
         0.002)</para>
       </listitem>
@@ -3630,31 +4568,86 @@ plt.show ()
       </inlinemediaobject></para>
 
     <para>where <inlineequation>
-        <m:math display="inline"><m:msub> <m:mi>t</m:mi> <m:mi>i</m:mi>
-        </m:msub></m:math>
+        <m:math display="inline">
+          <m:msub>
+            <m:mi>t</m:mi>
+
+            <m:mi>i</m:mi>
+          </m:msub>
+        </m:math>
       </inlineequation>, i = 1,2,...,M, are the measurement time points and
     <inlineequation>
-        <m:math display="inline"><m:msup> <m:mrow> <m:mo>[</m:mo> <m:mtable>
-        <m:mtr> <m:mtd> <m:msub> <m:mi>c</m:mi> <m:mi>arm</m:mi> </m:msub>
-        </m:mtd> <m:mtd> <m:msub> <m:mi>c</m:mi> <m:mi>pend</m:mi> </m:msub>
-        </m:mtd> </m:mtr> </m:mtable> <m:mo>]</m:mo> </m:mrow> <m:mi>T</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mrow>
+              <m:mo>[</m:mo>
+
+              <m:mtable>
+                <m:mtr>
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>c</m:mi>
+
+                      <m:mi>arm</m:mi>
+                    </m:msub>
+                  </m:mtd>
+
+                  <m:mtd>
+                    <m:msub>
+                      <m:mi>c</m:mi>
+
+                      <m:mi>pend</m:mi>
+                    </m:msub>
+                  </m:mtd>
+                </m:mtr>
+              </m:mtable>
+
+              <m:mo>]</m:mo>
+            </m:mrow>
+
+            <m:mi>T</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> is the parameter vector. <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>φ</m:mi> <m:mi>meas</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>φ</m:mi>
+
+            <m:mi>meas</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>θ</m:mi> <m:mi>meas</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>θ</m:mi>
+
+            <m:mi>meas</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> are the measurements of <inlineequation>
-        <m:math display="inline"><m:mi>φ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>φ</m:mi>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:mi>θ</m:mi></m:math>
+        <m:math display="inline">
+          <m:mi>θ</m:mi>
+        </m:math>
       </inlineequation>, respectively, and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>φ</m:mi> <m:mi>sim</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>φ</m:mi>
+
+            <m:mi>sim</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> and <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>θ</m:mi> <m:mi>sim</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>θ</m:mi>
+
+            <m:mi>sim</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation> are the corresponding simulation results. Now, add
     code defining a starting point for the algorithm (use the nominal
     parameter values) as well as lower and upper bounds for the
@@ -3664,8 +4657,13 @@ x0 = N.array([0.012,0.002])*1e3
 lb = N.zeros (2)
 ub = (x0 + 1e-2)*1e3
 </programlisting>Note that the values are scaled with a factor <inlineequation>
-        <m:math display="inline"><m:msup> <m:mi>10</m:mi> <m:mi>3</m:mi>
-        </m:msup></m:math>
+        <m:math display="inline">
+          <m:msup>
+            <m:mi>10</m:mi>
+
+            <m:mi>3</m:mi>
+          </m:msup>
+        </m:math>
       </inlineequation>. This is done to get a more appropriate variable size
     for the algorithm to work with. After the optimization is done, the
     obtained result is scaled back again. In this calibration problem, we
@@ -3798,9 +4796,13 @@ plt.show ()
 
     <figure xml:id="opt-fig-furuta-opt">
       <title>Measurements and model simulation results for <inlineequation>
-          <m:math display="inline"><m:mi>φ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>φ</m:mi>
+          </m:math>
         </inlineequation> and <inlineequation>
-          <m:math display="inline"><m:mi>θ</m:mi></m:math>
+          <m:math display="inline">
+            <m:mi>θ</m:mi>
+          </m:math>
         </inlineequation> with nominal and optimal parameters in the model of
       the Furuta pendulum.</title>
 

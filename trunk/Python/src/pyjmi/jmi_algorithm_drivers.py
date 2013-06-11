@@ -1877,7 +1877,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
     IPOPT options can be provided in the option IPOPT_options. Since CasADi's
     IPOPT interface is used for this algorithm, which includes more options
     than just the original IPOPT options, please see the documentation for
-    Casadi's IpoptSolver class for a complete list of the available IPOPT
+    CasADi's IpoptSolver class for a complete list of the available IPOPT
     options, which is available at
     http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html
     
