@@ -45,6 +45,7 @@ ME1 = 'bouncingBall.fmu'
 CS1 = 'bouncingBall.fmu'
 CoupledME2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME2.fmu'
 CoupledCS2 = 'Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS2.fmu'
+Robot = 'Modelica_Mechanics_MultiBody_Examples_Systems_RobotR3_fullRobot_ME2.fmu'
 
 
 class Test_FMUModelCS2:
@@ -235,7 +236,7 @@ class Test_FMUModelCS2:
         self._bounce.reset_slave()
 
         for i in range(5):
-            res=self._bounce.simulate(start_time=0.1, final_time=1.0)
+            res=self._bounce.simulate(start_time=0.1, final_time=1.0, options={'ncp':500})
             sim_time = res['time']
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)
@@ -243,6 +244,7 @@ class Test_FMUModelCS2:
             assert sim_time.all() <= sim_time[-1] + 1e+4  #Give it some marginal
             height = res['HIGHT']
             assert height.all() >= -1e-4 #The height of the ball should be non-negative
+            nose.tools.assert_almost_equal(res.final('HIGHT'), 0.63489609999, 4)
             if i>0: #check that the results stays the same
                 diff = height_old - height
                 nose.tools.assert_almost_equal(diff[-1],0.0)
@@ -657,7 +659,7 @@ class Test_FMUModelME2:
         bounce.reset()
 
         for i in range(5):
-            res=bounce.simulate(start_time=0.1, final_time=1.0)
+            res=bounce.simulate(start_time=0.1, final_time=1.0, options={'ncp':500})
             sim_time = res['time']
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)
@@ -665,6 +667,7 @@ class Test_FMUModelME2:
             assert sim_time.all() <= sim_time[-1] + 1e+4  #Give it some marginal
             height = res['HIGHT']
             assert height.all() >= -1e-4 #The height of the ball should be non-negative
+            nose.tools.assert_almost_equal(res.final('HIGHT'), 0.6269474005, 4)
             if i>0: #check that the results stays the same
                 diff = height_old - height
                 nose.tools.assert_almost_equal(diff[-1],0.0)
@@ -712,5 +715,9 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(abs(diff2), 0.0000, 2)
         nose.tools.assert_almost_equal(abs(diff3), 0.0000, 2)
         nose.tools.assert_almost_equal(abs(diff4), 0.0000, 2)
+
+        #Try simualte the robot
+        robot = load_fmu2(Robot, path_to_fmus_me2)
+        result = robot.simulate()
 
 
