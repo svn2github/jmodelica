@@ -2484,13 +2484,6 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 		String buildPlatform = ModelicaCompiler.getPlatform();
 		String make = getMake(buildPlatform);
 		
-		// If ext_libs contains 'Lapack' (with capital "L"), substitute this 
-		// with 'lapack'.
-		// TODO: Remove this fix when issue has been fixed in MSL.
-		if (ext_libs.remove("Lapack")) {
-			ext_libs.add("lapack");
-		}
-		
 		Map<String, String> vars = new HashMap<String, String>();
 		addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
 		addBuildPlatformMakeVars(vars, buildPlatform);
