@@ -117,7 +117,7 @@ public class XMLGenerator extends GenericGenerator {
 			//genPrinter.print("description=\"String\" ");
 			//genPrinter.print("author=\"String\" ");
 			//genPrinter.print("version=\"0.0\" ");
-			//genPrinter.print("generationTool=\"normalizedString\" ");
+			genPrinter.print("generationTool=\"JModelica.org\" ");
 			// Todays date for now
 			SimpleDateFormat dateformat = new SimpleDateFormat(df);
 			genPrinter.print("generationDateAndTime=\""+dateformat.format(new Date())+"\" ");
