@@ -17,20 +17,22 @@
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ArrayList;
-  
-  class Problem implements Comparable {
+
+import org.jmodelica.util.XMLUtil;
+
+class Problem implements Comparable {
     public int compareTo(Object o) {
-      if(o instanceof Problem) {
-        Problem other = (Problem)o;
-        if(!fileName.equals(other.fileName))
-          return fileName.compareTo(other.fileName);
-        if(!(beginLine == other.beginLine))
-          return beginLine > other.beginLine? 1 : -1;
-        if(!(beginColumn == other.beginColumn))
-          return beginColumn > other.beginColumn? 1 : -1;          
-        return message.compareTo(other.message);
-      }
-      return 0;
+        if(o instanceof Problem) {
+            Problem other = (Problem)o;
+            if(!fileName.equals(other.fileName))
+                return fileName.compareTo(other.fileName);
+            if(!(beginLine == other.beginLine))
+                return beginLine > other.beginLine? 1 : -1;
+            if(!(beginColumn == other.beginColumn))
+                return beginColumn > other.beginColumn? 1 : -1;
+            return message.compareTo(other.message);
+        }
+        return 0;
     }
     public enum Severity { ERROR, WARNING }
     public enum Kind { OTHER, LEXICAL, SYNTACTIC, SEMANTIC, COMPLIANCE }
@@ -52,17 +54,18 @@ import java.util.ArrayList;
     public Kind kind() { return kind; }
     
     public Problem(String fileName, String message) {
-      this.fileName = fileName;
-      this.message = message;
+        this.fileName = fileName;
+        this.message = message;
     }
     public Problem(String fileName, String message, Severity severity) {
-      this(fileName, message);
-      this.severity = severity;
+        this(fileName, message);
+        this.severity = severity;
     }
     public Problem(String fileName, String message, Severity severity, Kind kind) {
         this(fileName, message, severity);
         this.kind = kind;
-    }    
+    }
+    
     public Problem(String fileName, String message, Severity severity, Kind kind, int beginLine, int beginColumn) {
         this(fileName, message, severity);
         this.kind = kind;
@@ -71,38 +74,60 @@ import java.util.ArrayList;
     }
     
     public boolean isTestError(boolean checkAll) {
-    	return checkAll || (severity == Severity.ERROR && kind != Kind.COMPLIANCE);
+        return checkAll || (severity == Severity.ERROR && kind != Kind.COMPLIANCE);
     }
-  
+    
     public boolean equals(Object o) {
-    	return (o instanceof Problem) && (compareTo(o) == 0);
+        return (o instanceof Problem) && (compareTo(o) == 0);
     }
     
     private static String name(Object o) {
-		String name = o.toString();
-		return name.charAt(0) + name.substring(1).toLowerCase();
+        String name = o.toString();
+        return name.charAt(0) + name.substring(1).toLowerCase();
     }
-  
+    
     public String toString() {
-    	String kindStr = (kind == Kind.OTHER) ? "At " : name(kind) + " error at ";
-    	return name(severity) + ": in file '" + fileName + "':\n" + 
-    			kindStr + "line " + beginLine + ", column " + beginColumn + ":\n" + 
-    			"  " + message;
+        String kindStr = (kind == Kind.OTHER) ? "At " : name(kind) + " error at ";
+        return name(severity) + ": in file '" + fileName + "':\n" + 
+                kindStr + "line " + beginLine + ", column " + beginColumn + ":\n" + 
+                "  " + message;
     }
-  }
-  
-  
-  /**
-   * \brief Common super class for all JModelica exceptions.
-   */
-  public class ModelicaException extends Exception {
-	  public ModelicaException() {
-	  }
-	  
-	  public ModelicaException(String message) {
-		  super(message);
-	  }
-  }
+    
+    public String toXML() {
+        return String.format(
+                "<n:%s>\n" +
+                "    <a:kind value=\"%s\" />\n" +
+                "    <a:file value=\"%s\" />\n" +
+                "    <a:line value=\"%d\" />\n" +
+                "    <a:column value=\"%d\" />\n" +
+                "    <a:message value=\"%s\" />\n" +
+                "</n:%1$s>",
+                XMLUtil.escape(name(severity)),
+                XMLUtil.escape(kind.toString().toLowerCase()),
+                XMLUtil.escape(fileName),
+                beginLine, beginColumn,
+                XMLUtil.escape(message)
+        );
+    }
+}
+
+
+/**
+ * \brief Common super class for all JModelica exceptions.
+ */
+public class ModelicaException extends Exception {
+    
+    public ModelicaException() {
+    }
+    
+    public ModelicaException(String message) {
+        super(message);
+    }
+    
+    public ModelicaException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
   
   /**
    * Exception containing a list of compiler errors/warnings. 
@@ -192,6 +217,23 @@ import java.util.ArrayList;
 		  for (Problem p : warnings) {
 			  str.append(p);
 			  str.append("\n\n");
+		  }
+		  str.deleteCharAt(str.length() - 1);
+		  return str.toString();
+	  }
+	  
+	  /**
+	   * Convert to xml error message.
+	   */
+	  public String getXMLMessage() {
+		  StringBuilder str = new StringBuilder();
+		  for (Problem p : errors) {
+			  str.append(p.toXML());
+			  str.append("\n");
+		  }
+		  for (Problem p : warnings) {
+			  str.append(p.toXML());
+			  str.append("\n");
 		  }
 		  str.deleteCharAt(str.length() - 1);
 		  return str.toString();

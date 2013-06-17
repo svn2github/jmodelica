@@ -59,6 +59,7 @@ import org.jmodelica.util.ModelicaLogger;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.XMLUtil;
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -867,6 +868,7 @@ public class ModelicaCompiler {
 	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
+			log.raw("<n:Compilation>");
 			// set invokegc if set
 			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
 			
@@ -895,11 +897,42 @@ public class ModelicaCompiler {
 			packUnit(className, compileTo, unitType);
 			deleteOutDir();
 			ASTNode.endStep("packUnit()");
+		} catch (CompilerException e) {
+			log.raw(e.getXMLMessage());
+		} catch (Throwable t) {
+			StringBuilder sb = new StringBuilder();
+			for (StackTraceElement trace : t.getStackTrace()) {
+				sb.append(trace.getClassName());
+				sb.append('.');
+				sb.append(trace.getMethodName());
+				sb.append('(');
+				if (trace.getFileName() == null) {
+					sb.append("Unknown Source");
+				} else {
+					sb.append(trace.getFileName());
+					if (trace.getLineNumber() >= 0) {
+						sb.append(':');
+						sb.append(trace.getLineNumber());
+					}
+				}
+				sb.append(")\n");
+			}
+			log.raw(
+					"<n:Exception>\n" +
+					"    <a:kind value=\"%s\" />\n" +
+					"    <a:message value=\"%s\" />\n" +
+					"    <a:stacktrace value=\"%s\" />\n" +
+					"</n:Exception>",
+					XMLUtil.escape(t.getClass().getName()),
+					XMLUtil.escape(t.getMessage()),
+					XMLUtil.escape(sb.toString())
+			);
 		} finally {
 			log.debug("Time useage and memory usage change during compilation steps:");
 			ASTNode.getStepInfo().logReport();
 			if (options.getBooleanOption("debug_csv_step_info"))
 				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
+			log.raw("</n:Compilation>");
 		}
 	}
 	
@@ -1269,9 +1302,7 @@ public class ModelicaCompiler {
 			throw ce;
 		} else {
 			// there are only warnings and halt_on_warning = false so just send them to logger
-			log.warning("------- Compiler Warnings -------");
-			log.warning(ce.getMessage());
-			log.warning("---------------------------------");
+			log.raw(ce.getXMLMessage());
 		}
 	}
 	
@@ -1512,10 +1543,26 @@ public class ModelicaCompiler {
 	}
 	
 	/**
+	 * This is required for JPype since it is not possible to invoke static
+	 * methods using an class instance.
+	 */
+	public void setStreamLoggerStaticCall(OutputStream stream) {
+		setStreamLogger(stream);
+	}
+	
+	/**
 	 * Close and disconnect any stream connected to the stream logger.
 	 */
 	public static void closeStreamLogger() {
 		ModelicaLoggers.closeStreamLogger(STREAM_LOG_NAME);
+	}
+	
+	/**
+	 * This is required for JPype since it is not possible to invoke static
+	 * methods using an class instance.
+	 */
+	public void closeStreamLoggerStaticCall() {
+		closeStreamLogger();
 	}
 	
 	/**
@@ -1999,7 +2046,7 @@ public class ModelicaCompiler {
 		     * This implementation delegates to the selected Logger.
 		     */
 		    public void log(Level level, String message) {
-		    	logger.log(level, message);
+		    	logger.log(level, XMLUtil.escape(message));
 		    }
 		    
 		    /**
@@ -2013,6 +2060,29 @@ public class ModelicaCompiler {
 		    	if (getLevel().intValue() <= level.intValue())
 		    		log(level, String.format(format, args));
 		    }
+		    
+		    /**
+		     * Log <code>message</code> without any log level check.
+		     * 
+		     * @param message message to log
+		     */
+		    @Override
+		    public void raw(String message) {
+		        logger.log(Level.SEVERE, message);
+		    }
+		    
+		    /**
+		     * Build message using <code>format</code> as format string and 
+		     * output without any log level check.
+		     * 
+		     * @param message message to log
+		     * @param args list of arguments to formatter
+		     */
+		    @Override
+		    public void raw(String format, Object ... args) {
+		        raw(String.format(format, args));
+		    }
+
 		    
 		    /**
 		     * \brief Get the current log level.
@@ -2031,7 +2101,7 @@ public class ModelicaCompiler {
 		    public void setLevel(Level lv) { 
 		    	logger.setLevel(lv);
 		    }
-			
+		    
 		}
 	}
 }

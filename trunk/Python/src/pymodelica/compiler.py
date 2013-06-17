@@ -25,7 +25,8 @@ import os
 import sys
 import platform
 import logging
-from subprocess import check_call, STDOUT
+from subprocess import Popen, PIPE
+from compiler_logging import CompilerLogHandler
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
@@ -119,7 +120,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             
     Returns::
     
-        Name of the FMU which has been created.
+        A compilation result, represents the name of the FMU which has been
+        created and a list of warnings that was raised.
+    
     """
     return _compile_unit(class_name, file_name, compiler, target, 
                 compiler_options, compile_to, compiler_log_level,
@@ -196,7 +199,9 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             
     Returns::
     
-        Name of the FMUX which has been created.
+        A compilation result, represents the name of the FMUX which has been
+        created and a list of warnings that was raised.
+    
     """
     return _compile_unit(class_name, file_name, compiler, 'fmux', 
                 compiler_options, compile_to, compiler_log_level,
@@ -280,7 +285,9 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             
     Returns::
     
-        Name of the JMU which has been created.
+        A compilation result, represents the name of the JMU which has been
+        created and a list of warnings that was raised.
+    
     """
     return _compile_unit(class_name, file_name, compiler, 'jmu', 
                 compiler_options, compile_to, compiler_log_level,
@@ -306,18 +313,18 @@ def _compile_unit(class_name, file_name, compiler, target,
         
         # compile unit in java
         if (target.find('fmume') >= 0 or target.find('fmucs') >= 0): 
-            comp.compile_FMU(class_name, file_name, target, compile_to)
+            warnings = comp.compile_FMU(class_name, file_name, target, compile_to)
         elif target.find('jmu') >= 0:
-            comp.compile_JMU(class_name, file_name, compile_to)
+            warnings = comp.compile_JMU(class_name, file_name, compile_to)
         elif target.find('fmux') >= 0:
-            comp.compile_FMUX(class_name, file_name, compile_to)
+            warnings = comp.compile_FMUX(class_name, file_name, compile_to)
         else:
             raise Exception("Model unit (FMU/JMU/FMUX) could not be extracted from the target: %s" %(target))
     else:
-        compile_separate_process(class_name, file_name, compiler, target, compiler_options, 
+        warnings = compile_separate_process(class_name, file_name, compiler, target, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
 
-    return os.path.join(compile_to, _get_unit_name_from_target(class_name, target))
+    return CompilerResult(os.path.join(compile_to, _get_unit_name_from_target(class_name, target)), warnings)
 
 def compile_separate_process(class_name, file_name=[], compiler='auto', target='fmume', compiler_options={}, 
                              compile_to='.', compiler_log_level='warning', jvm_args=''):
@@ -326,44 +333,50 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     Requires environment variable SEPARATE_PROCESS_JVM to be set, otherwise defaults
     to JAVA_HOME.
     
-    class_name -- 
-        The name of the model class.
-        
-    file_name -- 
-        A path (string) or paths (list of strings) to model files and/or 
-        libraries. Supports only be .mo files.
-        Default: Empty list.
-        
-    compiler -- 
-        The compiler used to compile the model. The different options are:
-          - 'auto': the compiler is selected automatically depending on 
-             file ending
-          - 'modelica': the ModelicaCompiler is used
-          - 'optimica': the OptimicaCompiler is used
-        Default: 'auto'
-        
-    target --
-        Compiler target. Valid options are 'fmume', 'fmucs', 'fmux' or 'jmu'.
-        Default: 'fmume'
-        
-    compiler_options --
-        Options for the compiler.
-        Default: Empty dict.
-        
-    compile_to --
-        Specify location of the compiled FMU. Directory will be created if 
-        it does not exist.
-        Default: Current directory.
-
-    compiler_log_level --
-        Set the log level for the compiler. Valid options are 'warning'/'w', 
-        'error'/'e' or 'info'/'i'.
-        Default: 'warning'
+    Parameters::
     
-    jvm_args --
-        String of arguments to be passed to the JVM when compiling in a 
-        separate process.
-        Default: Empty string
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries. Supports only be .mo files.
+            Default: Empty list.
+            
+        compiler -- 
+            The compiler used to compile the model. The different options are:
+              - 'auto': the compiler is selected automatically depending on 
+                 file ending
+              - 'modelica': the ModelicaCompiler is used
+              - 'optimica': the OptimicaCompiler is used
+            Default: 'auto'
+            
+        target --
+            Compiler target. Valid options are 'fmume', 'fmucs', 'fmux' or 'jmu'.
+            Default: 'fmume'
+            
+        compiler_options --
+            Options for the compiler.
+            Default: Empty dict.
+            
+        compile_to --
+            Specify location of the compiled FMU. Directory will be created if 
+            it does not exist.
+            Default: Current directory.
+        
+        compiler_log_level --
+            Set the log level for the compiler. Valid options are 'warning'/'w', 
+            'error'/'e' or 'info'/'i'.
+            Default: 'warning'
+        
+        jvm_args --
+            String of arguments to be passed to the JVM when compiling in a 
+            separate process.
+            Default: Empty string
+        
+    Returns::
+    
+        A list of warnings given by the compiler
     """
     JVM_PATH = _get_separate_JVM()
         
@@ -397,8 +410,14 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
     else:
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
-        
-    check_call(cmd, stderr=STDOUT)
+    
+    process = Popen(cmd, stderr=PIPE)
+    log = CompilerLogHandler()
+    log.start(process.stderr);
+    try:
+        process.wait();
+    finally:
+        return log.end();
 
 def _gen_compiler_options(compiler_options):
     """
@@ -596,3 +615,32 @@ def _get_platform():
         _platform = _platform + '64'
     
     return _platform
+
+class CompilerResult(str):
+    """
+    This class is returned after a successful compilation. The class extends
+    the native python string class, so it is possible to manipulate this object
+    as an string. The string equals the name of the generated object. It is also
+    possible to retreive warnings that was given during compilation.
+    """
+    def __new__(cls, fmuName, warnings):
+        """
+        Creates a new result object.
+        
+        Parameters:
+            fmuName --
+                The name of the generated fmu.
+            
+            warnings --
+                A list of compilation warnings.
+        """
+        obj = str.__new__(cls, fmuName)
+        obj.warnings = warnings
+        return obj
+    
+    def get_warnings(self):
+        """
+        Returns the list of warnings.
+        """
+        return self.warnings
+

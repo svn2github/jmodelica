@@ -13,7 +13,7 @@ import java.util.logging.Level;
  */
 public class ModelicaLogger {
     /**
-     * \brief Log <code>message</code> on log level <code>level</code>.
+     * Log <code>message</code> on log level <code>level</code>.
      * 
      * This implementation discards all messages.
      * 
@@ -28,6 +28,26 @@ public class ModelicaLogger {
      * Uses {@link #log(Level, String)} to log message.
      */
     public void log(Level level, String format, Object... args) {}
+    
+    /**
+     * Log <code>message</code> without any log level check.
+     * 
+     * @param message message to log
+     */
+    public void raw(String message) {
+        log(Level.ALL, message);
+    }
+    
+    /**
+     * Build message using <code>format</code> as format string and 
+     * output without any log level check.
+     * 
+     * @param message message to log
+     * @param args list of arguments to formatter
+     */
+    public void raw(String format, Object ... args) {
+        log(Level.ALL, format, args);
+    }
     
     /**
      * \brief Get the current log level.
@@ -143,7 +163,7 @@ public class ModelicaLogger {
 				if (nlpos == n - 1 && buf[nlpos] == R) {
 					lastR = true;
 					nlpos = -1;
-				} else if (nlpos > 0) {
+				} else if (nlpos >= 0) {
 					log(level, new String(buf, start, nlpos - start));
 					start = nlpos + 1;
 					if (start < n && buf[start] == N && buf[start - 1] == R)

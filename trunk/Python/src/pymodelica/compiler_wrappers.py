@@ -22,7 +22,9 @@ import jpype
 
 import pymodelica as pym
 from compiler_interface import *
+from compiler_logging import CompilerLogHandler, LogHandlerThread
 from pymodelica.common.core import list_to_string
+from compiler_exceptions import *
 
 
 class ModelicaCompiler(object):
@@ -373,11 +375,17 @@ class ModelicaCompiler(object):
             compile_to --
                 Specify location of the compiled JMU. Directory will be created 
                 if it does not exist.
+            
+        Returns::
+        
+            A list of warnings given by the compiler
         """
+        log = JPypeCompilerLogHandler()
+        log.start(self._compiler)
         try:
             self._compiler.compileJMU(class_name, file_name, compile_to)
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
+        finally:
+            return log.end(self._compiler)
         
     def compile_FMU(self, class_name, file_name, target, compile_to):
         """
@@ -404,11 +412,17 @@ class ModelicaCompiler(object):
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
                 if it does not exist.
+        
+        Returns::
+        
+            A list of warnings given by the compiler
         """
+        log = JPypeCompilerLogHandler()
+        log.start(self._compiler)
         try:
             self._compiler.compileFMU(class_name, file_name, target, compile_to)
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
+        finally:
+            return log.end(self._compiler)
 
     def compile_FMUX(self, class_name, file_name, compile_to):
         """
@@ -427,11 +441,17 @@ class ModelicaCompiler(object):
             compile_to --
                 Specify location of the compiled FMUX. Directory will be created 
                 if it does not exist.
+        
+        Returns::
+        
+            A list of warnings given by the compiler
         """
+        log = JPypeCompilerLogHandler()
+        log.start(self._compiler)
         try:
             self._compiler.compileFMUX(class_name, file_name, compile_to)
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
+        finally:
+            return log.end(self._compiler)
 
     def parse_model(self,model_file_name):   
         """ 
@@ -722,112 +742,53 @@ class OptimicaCompiler(ModelicaCompiler):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-class JError(Exception):
-    """ 
-    Base class for exceptions specific to this module.
+class JPypeCompilerLogHandler(CompilerLogHandler):
     """
+    Internal class that extends teh CompilerLogHandler. This class handles
+    logging when the interation with the compiler is done through a JPype.
+    """
+    def _create_log_handler_thread(self, stream):
+        return JPypeLogHandlerThread(stream)
     
-    def __init__(self, message):
-        """ 
-        Create new error with a specific message. 
-        
-        Parameters::
-        
-            message --
-                The error message.
-        """
-        self.message = message
-        
-    def __str__(self):
-        """ 
-        Print error message when class instance is printed.
-         
-        Override the general-purpose special method such that a string 
-        representation of an instance of this class will be the error message.
-        
-        Returns::
-        
-            The error message.
-        """
-        return self.message
-
-class ModelicaClassNotFoundError(JError):
-    """ 
-    Class for errors raised if the Modelica model class to be compiled can not 
-    be found.
-    """
-    pass
-
-class OptimicaClassNotFoundError(JError):
-    """ 
-    Class for a errors raised if the Optimica model class to be compiled can not 
-    be found.
-    """ 
-    pass
-
-
-class CompilerError(JError):
-    """ 
-    Class representing a compiler error. Raised if there were one or more errors 
-    found during compilation of the model. If there are several errors in one 
-    model, they are collected and presented in one CompilerError.
-    """
-
-    def __init__(self, errors, compliance_errors, warnings):
-        """ 
-        Create CompilerError with a list of error messages. 
-        """
-        self.compliance_errors = compliance_errors
-        self.warnings = warnings
-        self.errors = errors
-        
-    def __str__(self):
-        """ 
-        Print error messages.
-         
-        Override the general-purpose special method such that a string 
-        representation of an instance of this class will a string representation
-        of the error messages.
-        """
+    def start(self, _compiler):
+        PipedOutputStream = jpype.JClass("java.io.PipedOutputStream")
+        PipedInputStream = jpype.JClass("java.io.PipedInputStream")
+        InputStreamReader = jpype.JClass("java.io.InputStreamReader")
+        BufferedReader = jpype.JClass("java.io.BufferedReader")
+        pos = PipedOutputStream()
+        _compiler.setStreamLoggerStaticCall(pos)
+        stream = BufferedReader(InputStreamReader(PipedInputStream(pos)))
+        CompilerLogHandler.start(self, stream)
     
-        problems = '\n' + str(len(self.errors)) + ' error(s), ' + \
-            str(len(self.compliance_errors)) + ' compliance error(s) and ' + \
-            str(len(self.warnings)) + ' warning(s) found:\n\n' 
-        for e in self.errors:
-            problems = problems + e + "\n\n"
-        for ec in self.compliance_errors:
-            problems = problems + ec + "\n\n"
-        for w in self.warnings:
-            problems = problems + w + "\n\n"
-        
-        return problems
+    def end(self, _compiler):
+        _compiler.closeStreamLoggerStaticCall()
+        return CompilerLogHandler.end(self)
 
-class CcodeCompilationError(JError):
-    """ 
-    Class for errors thrown when compiling a binary file from c code.
+class JPypeLogHandlerThread(LogHandlerThread):
     """
-    pass
+    Internal class that extends teh LogHandlerThread. This class handles
+    logging when the interation with the compiler is done through a JPype.
+    """
+    def __init__(self, stream):
+        LogHandlerThread.__init__(self, JPypeStreamConverter(stream))
+    def run(self):
+        jpype.attachThreadToJVM();
+        LogHandlerThread.run(self);
 
-class XPathExpressionError(JError):
-    """ 
-    Class representing errors in XPath expressions. 
+class JPypeStreamConverter():
     """
-    pass
-
-class ParserConfigurationError(JError):
-    """ 
-    Class for errors thrown when configuring XML parser. 
+    Internal class that converts from an Java stream to something that
+    works with python.
     """
-    pass
-
-class SAXError(JError):
-    """ 
-    Class representing a SAX error. 
-    """
-    pass
-
-class UnknownOptionError(JError):
-    """ 
-    Class for error thrown when trying to access unknown compiler option. 
-    """
-    pass
+    def __init__(self, stream):
+        self.stream = stream;
+        self.readBufferSize = 1024
+        self.readBuffer = jpype.JArray(jpype.JChar, 1)(self.readBufferSize)
+    def read(self, num = -1):
+        limit = self.readBufferSize
+        if num >= 0 and num < self.readBufferSize:
+            limit = num
+        numRead = self.stream.read(self.readBuffer, 0, limit)
+        if numRead == -1:
+            return ''
+        return ''.join(self.readBuffer[:numRead])
