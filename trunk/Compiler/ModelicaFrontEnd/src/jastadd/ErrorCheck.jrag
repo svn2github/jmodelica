@@ -846,25 +846,33 @@ aspect InstanceErrorCheck {
 			getClassName().collectErrors();
 			getLocalFArraySubscriptsOpt().collectErrors();
 			
-			// Check if the expressions of the attributes can be evaluated
-			// Note that this check has to be done locally in the
-			// context of an InstAssignable node in order to avoid
-			// evaluation of all value modifications also for non
-			// parameters.
-			for (InstModification im : totalMergedEnvironment()) {
-				// Only check attributes, value modifications are checked above
-				if (im instanceof InstComponentModification) {
-					InstComponentModification icm = (InstComponentModification)im;
-					if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
-						FExp val_mod = icm.getInstModification().instValueMod();
-						if (val_mod.variability().lessOrEqual(fConstant())) {
-							val_mod.checkConstantExpression("attribute", icm.getName().name());
-						} else if (!val_mod.variability().lessOrEqual(fParameter())) {
-							val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s",icm.getName().name(),val_mod);
-						}
-						if (val_mod.isCircular())
-							error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", icm.getName().name(), val_mod);
-					}
+			// Check attributes for primitive variables
+			checkAttributes();
+		}
+	}
+	
+	public void InstAssignable.checkAttributes() {}
+	
+	public void InstPrimitive.checkAttributes() {
+		// Check if the expressions of the attributes can be evaluated
+		// Note that this check has to be done locally in the
+		// context of an InstAssignable node in order to avoid
+		// evaluation of all value modifications also for non
+		// parameters.
+		for (InstModification im : totalMergedEnvironment()) {
+			// Only check attributes, value modifications are checked above
+			if (im instanceof InstComponentModification) {
+				InstComponentModification icm = (InstComponentModification)im;
+				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
+					FExp val_mod = icm.getInstModification().instValueMod();
+					if (val_mod.variability().lessOrEqual(fConstant())) 
+						val_mod.checkConstantExpression("attribute", icm.getName().name());
+					else if (!val_mod.variability().lessOrEqual(fParameter())) 
+						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
+								icm.getName().name(), val_mod);
+					if (val_mod.isCircular())
+						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
+								icm.getName().name(), val_mod);
 				}
 			}
 		}

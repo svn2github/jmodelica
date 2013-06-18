@@ -614,18 +614,67 @@ model RecordBinding5
  
  A x(a = 1, b = "foo");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordBinding5",
-			description="Records: wrong type of binding exp of component",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordBinding5",
+            description="Records: wrong type of binding exp of component",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
 Semantic error at line 507, column 8:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
+
+
+model RecordBinding6
+ record A
+  Real a;
+ end A;
+ 
+ A x(a = y);
+ Real y = time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding6",
+			description="Modification on record member with non-parameter expression",
+			flatModel="
+fclass RecordTests.RecordBinding6
+ Real x.a;
+equation
+ x.a = time;
+
+public
+ record RecordTests.RecordBinding6.A
+  Real a;
+ end RecordTests.RecordBinding6.A;
+
+end RecordTests.RecordBinding6;
+")})));
+end RecordBinding6;
+
+
+model RecordBinding7
+ record A
+  Real a;
+ end A;
+ 
+ A x(a(start = y));
+ Real y = time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RecordBinding7",
+			description="Modification on attribute or record member with non-parameter expression",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
+Semantic error at line 664, column 16:
+  Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: y
+")})));
+end RecordBinding7;
 
 
 
