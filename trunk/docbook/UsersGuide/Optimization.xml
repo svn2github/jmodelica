@@ -2707,8 +2707,8 @@ res = qt_par_est.optimize(options=opt_opts)
         and print them to the console:</para>
 
         <programlisting language="python"># Extract optimal values of parameters
-a1_opt = res["qt.a1"]
-a2_opt = res["qt.a2"]
+a1_opt = res.final("qt.a1")
+a2_opt = res.final("qt.a2")
 
 # Print optimal parameter values
 print('a1: ' + str(a1_opt*1e4) + 'cm^2')
@@ -2805,10 +2805,10 @@ res_opt2 = qt_par_est2.optimize(options=opt_opts)
         <para>Next, we print the optimal parameter values:</para>
 
         <programlisting language="python"># Get optimal parameter values
-a1_opt2 = res_opt2["qt.a1"]
-a2_opt2 = res_opt2["qt.a2"]
-a3_opt2 = res_opt2["qt.a3"]
-a4_opt2 = res_opt2["qt.a4"]
+a1_opt2 = res_opt2.final("qt.a1")
+a2_opt2 = res_opt2.final("qt.a2")
+a3_opt2 = res_opt2.final("qt.a3")
+a4_opt2 = res_opt2.final("qt.a4")
 
 # Print optimal parameter values 
 print('a1:' + str(a1_opt2*1e4) + 'cm^2')
@@ -3071,10 +3071,10 @@ sigma_a2 = N.sqrt(P[1,1])
 sigma_a3 = N.sqrt(P[2,2])
 sigma_a4 = N.sqrt(P[3,3])
 
-print "a1: " + str(sens_res['a1']) + ", standard deviation: " + str(sigma_a1)
-print "a2: " + str(sens_res['a2']) + ", standard deviation: " + str(sigma_a2)
-print "a3: " + str(sens_res['a3']) + ", standard deviation: " + str(sigma_a3)
-print "a4: " + str(sens_res['a4']) + ", standard deviation: " + str(sigma_a4)
+print "a1: " + str(sens_res.final('a1')) + ", standard deviation: " + str(sigma_a1)
+print "a2: " + str(sens_res.final('a2')) + ", standard deviation: " + str(sigma_a2)
+print "a3: " + str(sens_res.final('a3')) + ", standard deviation: " + str(sigma_a3)
+print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_a4)
 </programlisting>
 
         <para>You should now see the standard deviations for the estimated
