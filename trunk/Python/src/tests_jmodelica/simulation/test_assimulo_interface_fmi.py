@@ -435,6 +435,14 @@ class Test_FMI_ODE:
         opts["sensitivities"] = ["hej", "hopp"]
         
         nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
+        
+    @testattr(windows = True)
+    def test_assert_raises_sensitivity_without_jmodelica(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu", path_to_fmus_me1)
+        opts = model.simulate_options()
+        opts["sensitivities"] = ["J1.w"]
+        
+        nose.tools.assert_raises(Exception,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
 
     @testattr(assimulo = True)
     def test_event_iteration(self):
