@@ -599,19 +599,27 @@ class ModelicaCompiler(object):
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
 
-            compliance_errors = []
             errors = []
             warnings = []
             while itr.hasNext():
-                p = str(itr.next())
-                if p.count('Compliance error')>0:
-                    compliance_errors.append(p)
-                elif p.count('Warning')>0:
-                    warnings.append(p)
+                problem = itr.next()
+                if str(problem.severity()).lower() == 'warning':
+                    warnings.append(CompilationWarning( \
+                        str(problem.kind()).lower(), \
+                        problem.fileName(), \
+                        problem.beginLine(), \
+                        problem.beginColumn(), \
+                        problem.message() \
+                    ))
                 else:
-                    errors.append(p)
-                    
-            raise CompilerError(errors,compliance_errors,warnings)
+                    errors.append(CompilationError( \
+                        str(problem.kind()).lower(), \
+                        problem.fileName(), \
+                        problem.beginLine(), \
+                        problem.beginColumn(), \
+                        problem.message() \
+                    ))
+            raise CompilerError(errors, warnings)
         
         if ex.javaClass() is ModelicaClassNotFoundException:
             raise ModelicaClassNotFoundError(

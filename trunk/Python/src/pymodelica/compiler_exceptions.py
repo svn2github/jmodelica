@@ -72,7 +72,35 @@ class CompilerError(JError):
         """
         self.warnings = warnings
         self.errors = errors
+    
+    def get_compliance_errors(self):
+        """
+        Convenience method that only return compliance errors.
         
+        Returns::
+        
+            Compliance errors.
+        """
+        errors = []
+        for error in self.errors:
+            if error.kind == 'compliance':
+                errors.append(error)
+        return errors
+    
+    def get_noncompliance_errors(self):
+        """
+        Convenience method that only return noncompliance errors.
+        
+        Returns::
+        
+            Noncompliance errors.
+        """
+        errors = []
+        for error in self.errors:
+            if error.kind != 'compliance':
+                errors.append(error)
+        return errors
+    
     def __str__(self):
         """ 
         Print error and warning messages.
@@ -85,7 +113,7 @@ class CompilerError(JError):
         problems = '\n' + str(len(self.errors)) + ' error(s) and ' + \
             str(len(self.warnings)) + ' warning(s) found:\n\n' 
         for problem in self.warnings + self.errors:
-            problems += problem + '\n'
+            problems += str(problem) + '\n'
         return problems
 
 class CcodeCompilationError(JError):
