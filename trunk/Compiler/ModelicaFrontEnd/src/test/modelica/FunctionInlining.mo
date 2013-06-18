@@ -210,7 +210,7 @@ equation
  temp_6 = y[1] .+ 2;
  temp_8 = y[2] .+ 2;
  temp_10 = y[3] .+ 2;
- temp_18 = y[1] * temp_6 + y[2] * temp_8 + y[3] * temp_10;
+ temp_18 = 0.0 + y[1] * temp_6 + y[2] * temp_8 + y[3] * temp_10;
 end FunctionInlining.BasicInline6;
 ")})));
     end BasicInline6;
@@ -315,9 +315,9 @@ fclass FunctionInlining.BasicInline8
  Real temp_136;
  Real temp_159;
 equation
- x[1] = (y[1] * temp_40 + y[2] * (y[2] .+ 1) + y[3] * (y[3] .+ 1)) * (y[1] + temp_40) + (temp_59 * temp_63 + temp_60 * (temp_60 .+ 1) + temp_61 * (temp_61 .+ 1)) * (temp_59 + temp_63);
- x[2] = (y[1] * (y[1] .+ 1) + y[2] * temp_88 + y[3] * (y[3] .+ 1)) * (y[2] + temp_88) + (temp_59 * (temp_59 .+ 1) + temp_60 * temp_111 + temp_61 * (temp_61 .+ 1)) * (temp_60 + temp_111);
- x[3] = (y[1] * (y[1] .+ 1) + y[2] * (y[2] .+ 1) + y[3] * temp_136) * (y[3] + temp_136) + (temp_59 * (temp_59 .+ 1) + temp_60 * (temp_60 .+ 1) + temp_61 * temp_159) * (temp_61 + temp_159);
+ x[1] = (0.0 + y[1] * temp_40 + y[2] * (y[2] .+ 1) + y[3] * (y[3] .+ 1)) * (y[1] + temp_40) + (0.0 + temp_59 * temp_63 + temp_60 * (temp_60 .+ 1) + temp_61 * (temp_61 .+ 1)) * (temp_59 + temp_63);
+ x[2] = (0.0 + y[1] * (y[1] .+ 1) + y[2] * temp_88 + y[3] * (y[3] .+ 1)) * (y[2] + temp_88) + (0.0 + temp_59 * (temp_59 .+ 1) + temp_60 * temp_111 + temp_61 * (temp_61 .+ 1)) * (temp_60 + temp_111);
+ x[3] = (0.0 + y[1] * (y[1] .+ 1) + y[2] * (y[2] .+ 1) + y[3] * temp_136) * (y[3] + temp_136) + (0.0 + temp_59 * (temp_59 .+ 1) + temp_60 * (temp_60 .+ 1) + temp_61 * temp_159) * (temp_61 + temp_159);
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
@@ -751,7 +751,7 @@ end FunctionInlining.RecordInline4;
             input Real c;
             output R d;
         algorithm
-            d := R({2,3,4} * c, 2);
+            d := R({1,2,3} * c, 2);
         end f;
         
 		Real y = 1;
@@ -774,9 +774,9 @@ initial equation
  x.pre(b) = 0;
 equation
  y = 1;
- x.a[1] = 2 * y;
- x.a[2] = 3 * y;
- x.a[3] = 4 * y;
+ x.a[1] = 1 * y;
+ x.a[2] = 2 * y;
+ x.a[3] = 3 * y;
  x.b = 2;
 
 public
@@ -821,7 +821,7 @@ fclass FunctionInlining.RecordInline6
  Real x;
 equation
  y = 1;
- x = y + 2 * y + 3 * y + y * 4;
+ x = 1 * y + 2 * y + 3 * y + y * 4;
 
 public
  record FunctionInlining.RecordInline6.R
@@ -1038,7 +1038,7 @@ fclass FunctionInlining.RecordInline10
  Real x;
  Real y;
 equation
- x = y + 2 * y + 3 * y + integer(5 - y);
+ x = 1 * y + 2 * y + 3 * y + integer(5 - y);
  y = 1;
 
 public
@@ -1090,7 +1090,7 @@ fclass FunctionInlining.RecordInline11
  Real x;
  Real y;
 equation
- x = y + 2 * y + 3 * y + integer(5 - y);
+ x = 1 * y + 2 * y + 3 * y + integer(5 - y);
  y = 1;
 
 public
@@ -1393,14 +1393,16 @@ fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
  Real temp_1;
+ Real temp_3;
  Real temp_5;
  Real temp_7;
  Real temp_9;
 equation
  v = 3;
- z = 1 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
+ z = 0 + temp_3 * temp_3 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
  temp_1 = v;
- temp_5 = 1 + (temp_1 - 1) / 3;
+ temp_3 = 1 + 0 * ((temp_1 - 1) / 3);
+ temp_5 = 1 + 1 * ((temp_1 - 1) / 3);
  temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
  temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
@@ -1468,7 +1470,7 @@ equation
  v[1] = 1;
  v[2] = 2;
  v[3] = 3;
- z = v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
+ z = 0 + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
 end FunctionInlining.ForStatementInline3;
 ")})));
     end ForStatementInline3;
@@ -1544,7 +1546,7 @@ equation
  v[2] = 2;
  v[3] = 3;
  z = noEvent(if v[3] > 2 then temp_12 else temp_12 + v[3]);
- temp_6 = noEvent(if v[1] > 2 then v[1] * v[1] else 0);
+ temp_6 = noEvent(if v[1] > 2 then 0 + v[1] * v[1] else 0);
  temp_7 = noEvent(if v[1] > 2 then temp_6 else temp_6 + v[1]);
  temp_9 = noEvent(if v[2] > 2 then temp_7 + v[2] * v[2] else temp_7);
  temp_10 = noEvent(if v[2] > 2 then temp_9 else temp_9 + v[2]);
@@ -1626,8 +1628,8 @@ equation
  v[1] = 1;
  v[2] = 2;
  v[3] = 3;
- z = temp_12 + temp_12 + 3 * temp_12 + 4 * temp_12;
- temp_12 = v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
+ z = 0 + temp_12 + temp_12 + 3 * temp_12 + 4 * temp_12;
+ temp_12 = 0.0 + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
 end FunctionInlining.ForStatementInline7;
 ")})));
     end ForStatementInline7;
@@ -1665,7 +1667,7 @@ equation
  v[1] = 1;
  v[2] = 2;
  v[3] = 3;
- z = v[1] * v[1] + v[1] * v[2] + v[1] * v[3] + v[2] * v[1] + v[2] * v[2] + v[2] * v[3] + v[3] * v[1] + v[3] * v[2] + v[3] * v[3];
+ z = 0 + v[1] * v[1] + v[1] * v[2] + v[1] * v[3] + v[2] * v[1] + v[2] * v[2] + v[2] * v[3] + v[3] * v[1] + v[3] * v[2] + v[3] * v[3];
 end FunctionInlining.ForStatementInline8;
 ")})));
     end ForStatementInline8;

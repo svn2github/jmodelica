@@ -3899,8 +3899,8 @@ fclass RecordTests.RecordParam7
  Real x[1];
  Real x[2];
 equation
- x[1] = time;
- x[2] = time;
+ x[1] = time * 1;
+ x[2] = time * 1;
 
 public
  record RecordTests.RecordParam7.B

@@ -2845,17 +2845,4 @@ aspect AritmeticTransformations {
 		return getFExp().fullCopy();
 	}
 	
-	/**
-	 * Return this expression negated.
-	 * 
-	 * Does not copy expression.
-	 */
-	public FExp FExp.makeNegated() {
-		return new FNegExp(this);
-	}
-	
-	public FExp FNegExp.makeNegated() {
-		return getFExp();
-	}
-	
 }
