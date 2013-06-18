@@ -207,9 +207,7 @@ public class OptionRegistry {
 			("fmi_version", 
 			 compiler, 
 			 1.0, 
-			 "If this option is true the model description part of the XML variables file " + 
-			 "will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
-			 "validate with FMI schema the option generate_xml_equations must also be false."),
+			 "Version of FMU."),
 		VAR_SCALE 
 			("enable_variable_scaling", 
 			 compiler, 
