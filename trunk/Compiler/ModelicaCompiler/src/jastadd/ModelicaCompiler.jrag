@@ -944,15 +944,18 @@ public class ModelicaCompiler {
 	 * @param unitType "JMU" or "FMU".
 	 */
 	protected void packUnit(String className, String path, String unitType) throws PackingFailedException {
-		File dirPath = new File(path);
-		if (!dirPath.isDirectory()) 
-			dirPath.mkdirs();
-		
-		String mMangledName = FClass.convertClassNameToUnderscore(className);
+		File unitFile = new File(path);
+		if (unitFile.isDirectory()) { 
+			String mMangledName = FClass.convertClassNameToUnderscore(className);
+			unitFile = new File(unitFile, mMangledName + "." + getUnitSuffix(unitType));
+		} else {
+			File dirPath = unitFile.getParentFile();
+			if (dirPath != null && !dirPath.isDirectory())
+				unitFile.getParentFile().mkdirs();
+		}
 		
 		// Create the new archive
 		int BUFFER_SIZE = 2048;
-        File unitFile = new File(dirPath, mMangledName + "." + getUnitSuffix(unitType));
 		try {
 			hookCheckAbort();
 			FileOutputStream dest = new FileOutputStream(unitFile);
@@ -1820,19 +1823,20 @@ public class ModelicaCompiler {
 		int arg = programarguments.size();
 		String[] name = splitFiles(args[arg]);
 		String cl = (args.length > arg+1) ? args[arg+1] : null;
+		String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
 		
 		// Compile model
 		try {
 			if (programarguments.containsKey("parse"))
 				parseFiles(name);
 			else if (programarguments.containsKey("fmume") || programarguments.containsKey("fmu"))
-				compileFMUME(cl, name);
+				compileFMUME(cl, name, compileTo);
 			else if (programarguments.containsKey("fmucs"))
-				compileFMUCS(cl, name);
+				compileFMUCS(cl, name, compileTo);
 			else if (programarguments.containsKey("fmux"))
-			    compileFMUX(cl, name);
+			    compileFMUX(cl, name, compileTo);
 			else
-				compileJMU(cl, name);
+				compileJMU(cl, name, compileTo);
 		} catch (CcodeCompilationException ce) {
 			log.error(ce.getMessage());
 			System.exit(1);

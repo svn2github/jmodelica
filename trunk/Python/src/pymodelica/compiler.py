@@ -93,8 +93,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled FMU. Directory will be created if 
-            it does not exist.
+            Specify target file or directory. If file, any intermediate directories 
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -173,8 +173,8 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled FMUX. Directory will be created if 
-            it does not exist.
+            Specify target file or directory. If file, any intermediate directories 
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
 
         compiler_log_level --
@@ -258,8 +258,8 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled JMU. Directory will be created if 
-            it does not exist.
+            Specify target file or directory. If file, any intermediate directories 
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
             
         compiler_log_level --
@@ -360,8 +360,8 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             Default: Empty dict.
             
         compile_to --
-            Specify location of the compiled FMU. Directory will be created if 
-            it does not exist.
+            Specify target file or directory. If file, any intermediate directories 
+            will be created if they don't exist. If directory, the path given must exist.
             Default: Current directory.
         
         compiler_log_level --
@@ -401,15 +401,17 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     PLATFORM = "-platform=" + _get_platform()
     
+    OUT = "-out=" + compile_to 
+    
     MODEL_FILES = ",".join(file_name)
     
     MODELICA_CLASS = class_name
         
     # create cmd
     if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()
