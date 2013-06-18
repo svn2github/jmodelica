@@ -61,7 +61,7 @@ _defaults = [('IPOPT_HOME','',True),
              ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
              ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
              ('JPYPE_JVM',jpype.getDefaultJVMPath(),True),
-             ('JVM_ARGS','-Xmx512m',False)]
+             ('JVM_ARGS','-Xmx700m',False)]
 
 if sys.platform == 'win32':
     _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))
