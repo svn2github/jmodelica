@@ -323,8 +323,11 @@ def _compile_unit(class_name, file_name, compiler, target,
     else:
         warnings = compile_separate_process(class_name, file_name, compiler, target, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
-
-    return CompilerResult(os.path.join(compile_to, _get_unit_name_from_target(class_name, target)), warnings)
+        
+    if os.path.isdir(compile_to):
+        return CompilerResult(os.path.join(compile_to, _get_unit_name_from_target(class_name, target)), warnings)
+    else:
+        return CompilerResult(compile_to, warnings)
 
 def compile_separate_process(class_name, file_name=[], compiler='auto', target='fmume', compiler_options={}, 
                              compile_to='.', compiler_log_level='warning', jvm_args=''):
