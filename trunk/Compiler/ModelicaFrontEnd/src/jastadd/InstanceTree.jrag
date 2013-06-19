@@ -949,42 +949,40 @@ aspect InstanceTreeConstruction {
 		return icd;
 	}
 
-	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr);
+	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(
+			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr);
 
-	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                 ComponentDecl originalDecl, InstComponentRedeclare icr) {
+	public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(
+			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
 		Opt fas_opt = new Opt();
-		if (replacingDecl.hasVarArraySubscripts()) {
-			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(),0);
-		}		
+		if (replacingDecl.hasVarArraySubscripts()) 
+			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(), 0);
 		Opt cond_attr_opt = new Opt();
-		if (replacingDecl.hasConditionalAttribute()) {
-			cond_attr_opt.setChild(replacingDecl.getConditionalAttribute().getExp().instantiate(),0);
-		}
+		if (replacingDecl.hasConditionalAttribute()) 
+			cond_attr_opt.setChild(replacingDecl.getConditionalAttribute().getExp().instantiate(), 0);
 
-		if (!extendsPrimitive()){
-			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),cond_attr_opt,originalDecl,icr);
-			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
+		if (isOrExtendsPrimitive()) {
+			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
+					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setLocation(originalDecl);
 			return icd;
 		} else {
-			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(),fas_opt,replacingDecl,new Opt(),new Opt(),cond_attr_opt,originalDecl,icr);
-			if (originalDecl.hasModification()) //TODO: should this really be originalDecl
+			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
+					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
 				icd.setInstModification(originalDecl.getModification().newInstModification());
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setLocation(originalDecl);
 			return icd;
-
 		}
 	}
 
 	// This cannot be done.
-	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(ComponentDecl replacingDecl,
-	                                                                        ComponentDecl originalDecl, 
-	                                                                        InstComponentRedeclare icr) {
+	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(
+			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -1536,8 +1534,13 @@ aspect InstanceAST_API {
 	}
 	eq InstExtends.extendsPrimitive() {
 		InstClassDecl icd = myInstClass();
-		return !isRecursive() && (icd.isPrimitive() || icd.extendsPrimitive());
+		return !isRecursive() && icd.isOrExtendsPrimitive();
 	}
+	
+	/**
+	 * Check if this node is, is of, or extends a primitive type.
+	 */
+	syn boolean InstNode.isOrExtendsPrimitive() = isPrimitive() || extendsPrimitive();
 	
 	/**
 	 * Check if this class is or extends an enumeration.

@@ -3085,6 +3085,27 @@ end RedeclareTests.RedeclareTest32;
 end RedeclareTest32;
 
 
+model RedeclareTest33
+	model A
+		replaceable Boolean a;
+		Real x = if a then time else -time;
+	end A;
+	
+	A a(redeclare Boolean a = time < 3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest33",
+			description="Replacing primitive variable",
+			flatModel="
+fclass RedeclareTests.RedeclareTest33
+ discrete Boolean a.a = time < 3;
+ Real a.x = if a.a then time else - time;
+end RedeclareTests.RedeclareTest33;
+")})));
+end RedeclareTest33;
+
+
 
 model RedeclareElement1
   model A
