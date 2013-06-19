@@ -35,6 +35,7 @@ class ModelicaCompiler(object):
     LOG_ERROR = ModelicaCompilerInterface.ERROR
     LOG_WARNING = ModelicaCompilerInterface.WARNING
     LOG_INFO = ModelicaCompilerInterface.INFO
+    LOG_DEBUG = ModelicaCompilerInterface.DEBUG
     
     jm_home = pym.environ['JMODELICA_HOME']
 
@@ -56,31 +57,11 @@ class ModelicaCompiler(object):
         self._compiler = pym._create_compiler(ModelicaCompilerInterface, options)
             
     @classmethod
-    def set_log_level(self,level):
-        """ 
-        Set the level of log messages. Valid options are 
-        ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING and 
-        ModelicaCompiler.LOG_INFO. They will print, errors only, both errors and 
-        warnings and all log messages respectively.
-        
-        Parameters::
-        
-            level --
-                Level of log messages to set. Valid options are 
-                ModelicaCompiler.LOG_ERROR, ModelicaCompiler.LOG_WARNING and 
-                ModelicaCompiler.LOG_INFO.
-        """
+    def _set_log_level(cls, level):
         ModelicaCompilerInterface.setLogLevel(ModelicaCompilerInterface.log, level)
 
     @classmethod
-    def get_log_level(self):
-        """ 
-        Get the current level of log messages set. 
-        
-        Returns::
-        
-            The current level of log messages.
-        """
+    def _get_log_level(cls):
         return ModelicaCompilerInterface.getLogLevel(ModelicaCompilerInterface.log)
     
     
@@ -116,18 +97,46 @@ class ModelicaCompiler(object):
                 Should be of the following types: boolean, string, integer, \
                 float or list" %key)
 
-    def set_compiler_log_level(self, compiler_log_level):
+    @classmethod
+    def set_compiler_log_level(cls, log_level):
+        """ 
+        Set the level of log messages. 
+        
+        Valid options are: 
+         - ModelicaCompiler.LOG_ERROR, 
+         - ModelicaCompiler.LOG_WARNING
+         - ModelicaCompiler.LOG_INFO
+         - ModelicaCompiler.LOG_DEBUG.
+        
+        Parameters::
+        
+            level --
+                Level of log messages to set.
+        """
         # set compiler log level
-        if compiler_log_level.lower().startswith('w'):
-            self.set_log_level(ModelicaCompiler.LOG_WARNING)
-        elif compiler_log_level.lower().startswith('e'):
-            self.set_log_level(ModelicaCompiler.LOG_ERROR)
-        elif compiler_log_level.lower().startswith('i'):
-            self.set_log_level(ModelicaCompiler.LOG_INFO)
+        if log_level.lower().startswith('w'):
+            cls._set_log_level(ModelicaCompiler.LOG_WARNING)
+        elif log_level.lower().startswith('e'):
+            cls._set_log_level(ModelicaCompiler.LOG_ERROR)
+        elif log_level.lower().startswith('i'):
+            cls._set_log_level(ModelicaCompiler.LOG_INFO)
+        elif log_level.lower().startswith('d'):
+            cls._set_log_level(ModelicaCompiler.LOG_DEBUG)
         else:
-            logging.warning("Invalid compiler_log_level: "+str(compiler_log_level) + 
+            logging.warning("Invalid compiler_log_level: "+str(log_level) + 
             " using level 'warning' instead.")
+            cls._set_log_level(ModelicaCompiler.LOG_WARNING)
 
+    @classmethod
+    def get_compiler_log_level(cls):
+        """ 
+        Get the current level of log messages set. 
+        
+        Returns::
+        
+            The current level of log messages.
+        """
+        return cls._get_log_level()
         
     def get_modelicapath(self):
         """ 
