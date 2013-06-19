@@ -32,6 +32,8 @@ equation
 			name="CCodeGenTest1",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -69,6 +71,8 @@ end CCodeGenTest1;
 			description="Test of code generation",
 			automatic_add_initial_equations=false,
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -111,6 +115,8 @@ $C_DAE_initial_guess_equation_residuals$
 			name="CCodeGenTest3",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_initial_dependent_parameter_residuals$",
 			generatedCode="
     (*res)[0] = _p1_2 * _p1_2 - (_p2_0);
@@ -130,6 +136,8 @@ equation
 			name="CCodeGenTest4",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
@@ -151,6 +159,8 @@ equation
 			name="CCodeGenTest5",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_3 - (_der_x_4);
@@ -203,6 +213,8 @@ equation
 			name="CCodeGenTest7",
 			description="Test of code generation. Verify that no event indicators are generated from relational expressions inside noEvent operators.",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_DAE_equation_residuals$
 $C_DAE_event_indicator_residuals$
@@ -229,6 +241,8 @@ equation
 			name="CCodeGenTest8",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = COND_EXP_EQ(_sw(0), JMI_TRUE, - AD_WRAP_LITERAL(1) + _y_1, - _y_1) - (_x_0);
@@ -255,6 +269,8 @@ equation
 			name="CCodeGenTest9",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -289,6 +305,8 @@ equation
 			name="CCodeGenTest10",
 			description="Test of code generation",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_DAE_initial_equation_residuals$
 $C_DAE_initial_event_indicator_residuals$
@@ -317,6 +335,8 @@ model CCodeGenTest11
 			name="CCodeGenTest11",
 			description="C code generation: the '<>' operator",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = 1 - (_x_0);
@@ -336,6 +356,8 @@ equation
 			name="CCodeGenTest12",
 			description="C code generation: test that x^2 is represented by x*x in the generated code.",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow((_x_0 - 0.3),0.3) + (1.0 * ((_x_0 - 0.3)) * ((_x_0 - 0.3)) * ((_x_0 - 0.3))) - (_der_x_1);
@@ -545,6 +567,8 @@ model CLogExp1
 			name="CLogExp1",
 			description="C code generation for logical operators: and",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
@@ -564,6 +588,8 @@ model CLogExp2
 			name="CLogExp2",
 			description="C code generation for logical operators: or",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
@@ -582,6 +608,8 @@ model CLogExp3
 			name="CLogExp3",
 			description="C code generation for logical operators: not",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = JMI_TRUE - (_x_0);
@@ -625,6 +653,8 @@ equation
 			name="CCodeGenDiscreteVariables1",
 			description="Test C code generation of discrete variables.",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -707,6 +737,8 @@ model CCodeGenUniqueNames
 			enable_structural_diagnosis=false,
 			index_reduction=false,
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_DAE_equation_residuals$
@@ -734,6 +766,8 @@ model CCodeGenDotOp
 			name="CCodeGenDotOp",
 			description="C code generation of dot operators (.+, .*, etc)",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = jmi_divide_logged(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
@@ -761,6 +795,8 @@ model CCodeGenMinMax
 			name="CCodeGenMinMax",
 			description="C code generation of min() and max()",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = 1 - (_x_1_1_0);
@@ -845,6 +881,8 @@ equation
 			description="Test of code generation",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -886,6 +924,8 @@ equation
 			description="C code gen: functions: using multiple outputs",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -935,6 +975,8 @@ equation
 			description="C code gen: functions: two calls to same function",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -981,6 +1023,8 @@ equation
 			description="C code gen: functions: calls to two functions",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1044,6 +1088,8 @@ equation
 			description="C code gen: functions: fewer components assigned than outputs",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1095,6 +1141,8 @@ equation
 			description="C code gen: functions: one output skipped",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1144,6 +1192,8 @@ equation
 			description="C code gen: functions: no components assigned",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1186,6 +1236,8 @@ model CFunctionTest8
 			description="C code gen: functions: function calling other function",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1286,6 +1338,8 @@ model CFunctionTest10
 			description="C code gen: functions: no inputs",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1325,6 +1379,8 @@ equation
 			description="C code gen: functions: no outputs",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1364,6 +1420,8 @@ w=f(z);
 			enable_variable_scaling=true,
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1666,6 +1724,8 @@ model CArrayInput1
 			description="C code generation: array inputs to functions: basic test",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1716,6 +1776,8 @@ model CArrayInput2
 			description="C code generation: array inputs to functions: expressions around call",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -1766,6 +1828,8 @@ model CArrayInput3
 			description="C code generation: array inputs to functions: nestled calls",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2247,6 +2311,8 @@ model CArrayOutputs1
 			description="C code generation: array outputs from functions: in equation",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2294,6 +2360,8 @@ equation
 			description="C code generation: array outputs from functions: in expression in equation",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2347,6 +2415,8 @@ model CArrayOutputs3
 			description="C code generation: array outputs from functions: in expression in function",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2419,6 +2489,8 @@ model CArrayOutputs4
 			description="C code generation: array outputs from functions: function call statement",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2495,6 +2567,8 @@ model CArrayOutputs5
 			description="C code generation: array outputs from functions: passing input array",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -2560,6 +2634,8 @@ model CAbsTest1
 			name="CAbsTest1",
 			description="C code generation for abs() operator",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = jmi_abs(_y_1) - (_x_0);
@@ -2779,6 +2855,8 @@ equation
 			name="CRecordDecl1",
 			description="C code generation for records: structs: basic test",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_records$",
 			generatedCode="
 typedef struct _A_0_r {
@@ -2811,6 +2889,8 @@ equation
 			name="CRecordDecl2",
 			description="C code generation for records: structs: nested records",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_records$",
 			generatedCode="
 typedef struct _B_0_r {
@@ -2842,6 +2922,8 @@ equation
 			name="CRecordDecl3",
 			description="C code generation for records: structs: array in record",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_records$",
 			generatedCode="
 typedef struct _A_0_r {
@@ -2874,6 +2956,8 @@ equation
 			name="CRecordDecl4",
 			description="C code generation for records: structs: array of records",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_records$",
 			generatedCode="
 typedef struct _B_0_r {
@@ -2912,6 +2996,8 @@ model CRecordDecl5
 			description="C code generation for records: declarations: basic test",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl5_f_def(jmi_ad_var_t* o_o) {
@@ -2961,6 +3047,8 @@ model CRecordDecl6
 			description="C code generation for records: declarations: nestled records",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl6_f_def(jmi_ad_var_t* o_o) {
@@ -3059,6 +3147,8 @@ model CRecordDecl8
 			description="C code generation for records: declarations: array of records",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_functions$",
 			generatedCode="
 void func_CCodeGenTests_CRecordDecl8_f_def(jmi_ad_var_t* o_o) {
@@ -3119,6 +3209,8 @@ model CRecordDecl9
 			description="C code generation for records: outputs: basic test",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3171,6 +3263,8 @@ model CRecordDecl10
 			description="C code generation for records: outputs: nested arrays",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3222,6 +3316,8 @@ model CRecordDecl11
 			description="C code generation for records: outputs: array in record",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3280,6 +3376,8 @@ model CRecordDecl12
 			description="C code generation for records: outputs: array of records",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3364,6 +3462,8 @@ model CRecordDecl13
 			description="C code generation for records: inputs: basic test",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3422,6 +3522,8 @@ model CRecordDecl14
 			description="C code generation for records: inputs: nested records",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3477,6 +3579,8 @@ model CRecordDecl15
 			description="C code generation for records: inputs: array in record",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3538,6 +3642,8 @@ model CRecordDecl16
 			description="C code generation for records: inputs: array of records",
 			variability_propagation=false,
 			inline_functions="none",
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_function_headers$
 $C_functions$
@@ -3631,6 +3737,8 @@ model CRecordDecl18
 			name="CRecordDecl18",
 			description="Array of records in subcomponent",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_variable_aliases$",
 			generatedCode="
 #define _b_c_a_1_r_0 ((*(jmi->z))[jmi->offs_real_w+0])
@@ -4501,6 +4609,8 @@ model IfExpInParExp
 			name="IfExpInParExp",
 			description="Test that relational expressions in parameter expressions are treated correctly",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_initial_dependent_parameter_residuals$",
 			generatedCode="
     (*res)[0] = COND_EXP_EQ(COND_EXP_LE(AD_WRAP_LITERAL(1), _N_0, JMI_TRUE, JMI_FALSE),JMI_TRUE,AD_WRAP_LITERAL(1.0),AD_WRAP_LITERAL(2.0)) - (_r_1_1);
@@ -4519,6 +4629,8 @@ model CIntegerExp1
 			name="CIntegerExp1",
 			description="Test that exponential expressions with integer exponents are properly transformed",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0 * (10) * (10) * (10) * (10)) - (_x_0);
@@ -4534,6 +4646,8 @@ model CIntegerExp2
 			name="CIntegerExp2",
 			description="Test that exponential expressions with integer exponents are properly transformed",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0 / (10) / (10) / (10) / (10)) - (_x_0);
@@ -4549,6 +4663,8 @@ model CIntegerExp3
 			name="CIntegerExp3",
 			description="Test that exponential expressions with integer exponents are properly transformed",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = (1.0) - (_x_0);
@@ -4564,6 +4680,8 @@ model CIntegerExp4
 			name="CIntegerExp4",
 			description="Test that exponential expressions with integer exponents are properly transformed",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow(10,10) - (_x_0);
@@ -4579,6 +4697,8 @@ model CIntegerExp5
 			name="CIntegerExp5",
 			description="Test that exponential expressions with integer exponents are properly transformed",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = pow(10,(- 10)) - (_x_0);
@@ -8315,6 +8435,8 @@ model Smooth1
 			name="Smooth1",
 			description="",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _time - 2 - (_y_0);
@@ -8332,6 +8454,8 @@ model CFloor1
 			name="CFloor1",
 			description="C code generation for floor() operator",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = floor(_x_0) - (_y_1);
@@ -8908,6 +9032,8 @@ equation
 			name="TestExtObject1",
 			description="",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_function_headers$
@@ -8982,6 +9108,8 @@ equation
 			name="TestExtObject2",
 			description="",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="
 $C_variable_aliases$
 $C_function_headers$
@@ -9265,6 +9393,8 @@ model TestEmptyArray1
 			name="TestEmptyArray1",
 			description="Test handling of empty arrays",
 			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     JMI_ARRAY_STATIC(tmp_1, 0, 2)

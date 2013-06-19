@@ -311,6 +311,7 @@ end EnumerationTests.EnumerationTest12;
 		FClassMethodTestCase(
 			name="FlatAPIEnum1",
 			description="FlatAPI for enumerations: diagnostics",
+			equation_sorting=false,
 			methodName="diagnostics",
 			methodResult="
 Diagnostics for flattened class EnumerationTests.FlatAPIEnum1

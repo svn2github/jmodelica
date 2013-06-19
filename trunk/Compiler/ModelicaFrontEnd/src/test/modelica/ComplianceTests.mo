@@ -48,6 +48,8 @@ Integer i=1;
 		ComplianceErrorTestCase(
 			name="IntegerVariable_ComplErr",
 			description="Compliance error for integer variables",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 87, column 9:
@@ -63,6 +65,8 @@ model BooleanVariable_ComplErr
 		ComplianceErrorTestCase(
 			name="BooleanVariable_ComplErr",
 			description="Compliance error for boolean variables",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 103, column 10:
@@ -79,6 +83,8 @@ model EnumVariable_ComplErr
 		ComplianceErrorTestCase(
 			name="EnumVariable_ComplErr",
 			description="Compliance error for enumeration variables",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 103, column 10:
@@ -418,6 +424,8 @@ end when;
 		ComplianceErrorTestCase(
 			name="HybridNonFMU1",
 			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 11 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':

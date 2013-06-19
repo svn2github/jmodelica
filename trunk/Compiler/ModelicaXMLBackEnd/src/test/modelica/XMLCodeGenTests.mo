@@ -144,6 +144,7 @@ model XMLCodeGenTest2
 		XMLCodeGenTestCase(
 			name="XMLCodeGenTest2",
 			description="Start attribute of independent parameters.",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 <ScalarVariable name=\"b1\" valueReference=\"536870916\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
@@ -267,6 +268,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="EnumerationTest2",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -293,6 +295,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="EnumerationTest3",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -318,6 +321,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="EnumerationTest4",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -348,6 +352,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest1",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -383,6 +388,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest2",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -414,6 +420,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest3",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -459,6 +466,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest4",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -492,6 +500,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest5",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 		<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
@@ -568,6 +577,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest6",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
@@ -657,6 +667,7 @@ end XMLCodeGenTest2;
 		XMLCodeGenTestCase(
 			name="VariableSortingTest7",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 		<ScalarVariable name=\"a.b.c.y[1]\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"alias\" >
@@ -734,6 +745,7 @@ equation
 			description="",
 			equation_sorting=true,
 			eliminate_alias_variables=false,
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 		<ScalarVariable name=\"u[1]\" valueReference=\"6\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
@@ -894,6 +906,7 @@ equation
 		XMLCodeGenTestCase(
 			name="NonConstantStart1",
 			description="Check that only constant start valued are included in XML file",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
         <ScalarVariable name=\"a[1]\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
@@ -933,6 +946,7 @@ equation
 		XMLCodeGenTestCase(
 			name="FixedAndStart1",
 			description="Check that neither start nor fixed are generated when start is converted to an initial equation.",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -959,6 +973,7 @@ equation
 		XMLCodeGenTestCase(
 			name="FixedAndStart2",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 
@@ -993,6 +1008,7 @@ equation
 		XMLCodeGenTestCase(
 			name="FixedAndStart3",
 			description="",
+			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
 

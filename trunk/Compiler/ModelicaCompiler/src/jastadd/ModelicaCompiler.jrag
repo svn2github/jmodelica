@@ -178,7 +178,7 @@ public class ModelicaCompiler {
 
 	public void defaultOptionsFMUME() {
 		setBooleanOption("generate_ode", true);
-		setBooleanOption("generate_dae", false);	
+		setBooleanOption("generate_dae", false);
 		setBooleanOption("equation_sorting", true);
 		setBooleanOption("generate_fmi_me_xml", true);
 		setBooleanOption("generate_fmi_cs_xml", false);
@@ -195,7 +195,21 @@ public class ModelicaCompiler {
 	}
 	
 	public void defaultOptionsFMUX() {
+		setBooleanOption("generate_ode", false);
+		setBooleanOption("generate_dae", true);
+		setBooleanOption("equation_sorting", false);
+		setBooleanOption("generate_fmi_me_xml", false);
+		setBooleanOption("generate_fmi_cs_xml", false);
     	setBooleanOption("generate_xml_equations", true);
+	}
+	
+	public void defaultOptionsJMU() {
+		setBooleanOption("generate_ode", false);
+		setBooleanOption("generate_dae", true);
+		setBooleanOption("equation_sorting", false);
+		setBooleanOption("generate_fmi_me_xml", false);
+		setBooleanOption("generate_fmi_cs_xml", false);
+		setBooleanOption("generate_xml_equations", false);
 	}
 	
 	public void defaultTemplatePathsJMU() {
@@ -721,6 +735,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileJMU(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		defaultOptionsJMU();
 		defaultTemplatePathsJMU();
 		compileUnit(className, fileName, "jmu", compileTo, "JMU");
 	}
@@ -1828,15 +1843,15 @@ public class ModelicaCompiler {
 		// Compile model
 		try {
 			if (programarguments.containsKey("parse"))
-				parseFiles(name);
-			else if (programarguments.containsKey("fmume") || programarguments.containsKey("fmu"))
-				compileFMUME(cl, name, compileTo);
+				parseFiles(name);	
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name, compileTo);
 			else if (programarguments.containsKey("fmux"))
 			    compileFMUX(cl, name, compileTo);
-			else
+			else if (programarguments.containsKey("jmu"))
 				compileJMU(cl, name, compileTo);
+			else
+				compileFMUME(cl, name, compileTo);
 		} catch (CcodeCompilationException ce) {
 			log.error(ce.getMessage());
 			System.exit(1);

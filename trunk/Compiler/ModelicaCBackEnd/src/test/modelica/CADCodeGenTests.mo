@@ -2544,6 +2544,7 @@ equation
 			description="",
 			variability_propagation=false,
 			generate_ode_jacobian=true,
+			equation_sorting=false,
 			template="
 $CAD_ode_derivatives$
 $CAD_function_headers$

@@ -111,8 +111,8 @@ public class OptionRegistry {
 		GEN_DAE
 			("generate_dae", 
 			 compiler, 
-			 true, 
-			 "If this option is set to true (default is true), code for solving DAEs are generated."),
+			 false, 
+			 "If this option is set to true (default is false), code for solving DAEs are generated."),
 		GEN_DAE_JAC
 			("generate_dae_jacobian", 
 			 compiler, 
@@ -132,8 +132,8 @@ public class OptionRegistry {
 		GEN_ODE
 			("generate_ode", 
 			 compiler, 
-			 false, 
-			 "If this option is set to true (default is false), code for solving ODEs are generated. "),
+			 true, 
+			 "If this option is set to true (default is true), code for solving ODEs are generated. "),
 		GEN_MOF_FILES
 			("generate_mof_files", 
 			 compiler, 
@@ -187,21 +187,21 @@ public class OptionRegistry {
 		EQU_SORT
 			("equation_sorting", 
 			 compiler, 
-			 false, 
-			 "If this option is true (default is false), equations are sorted using the BLT algorithm."),
+			 true, 
+			 "If this option is true (default is true), equations are sorted using the BLT algorithm."),
 		XML_FMI_ME
 			("generate_fmi_me_xml", 
 			 compiler, 
-			 false, 
-			 "If this option is true the model description part of the XML variables file " + 
-			 "will be FMI for model exchange compliant. Default is false. To generate an XML which will " + 
+			 true, 
+			 "If this option is true (default is true) the model description part of the XML variables file " + 
+			 "will be FMI for model exchange compliant. To generate an XML which will " + 
 			 "validate with FMI schema the option generate_xml_equations must also be false."),
 		XML_FMI_CS 
 			("generate_fmi_cs_xml", 
 			 compiler, 
 			 false, 
-			 "If this option is true the model description part of the XML variables file " + 
-			 "will be FMI for co simulation compliant. Default is false. To generate an XML which will " + 
+			 "If this option is true (default is false) the model description part of the XML variables file " + 
+			 "will be FMI for co simulation compliant. To generate an XML which will " + 
 			 "validate with FMI schema the option generate_xml_equations must also be false."),
 		FMI_VER 
 			("fmi_version", 

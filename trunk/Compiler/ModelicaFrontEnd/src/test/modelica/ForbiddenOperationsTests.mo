@@ -159,6 +159,8 @@ equation
 		ComplianceErrorTestCase(
 			name="IfEquTest_ComplErr",
 			description="",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
