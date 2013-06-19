@@ -187,10 +187,16 @@ class _BaseSimOptTest:
         (t1, t2) = (max(ans.t[0], res.t[0]), min(ans.t[-1], res.t[-1]))
 
         # Remove values outside overlap
-        time = filter((lambda t: t >= t1 and t <= t2), time)
+        #time = filter((lambda t: t >= t1 and t <= t2), time) #This is not a good approach
+        time = filter((lambda t: t >= t1 and t <= t2), res.t)
 
         # Check error for each time point
-        for t in time:
+        for i,t in enumerate(time):
+            try:
+                if time[i-1]==t or t==time[i+1]: #Necessary in case of jump discontinuities! For instance if there is a result at t_e^- and t_e^+
+                    continue
+            except IndexError:
+                pass
             ans_x = _trajectory_eval(ans, ans_t, t)
             res_x = _trajectory_eval(res, res_t, t)
             (rel, abs) = _error(ans_x, res_x)

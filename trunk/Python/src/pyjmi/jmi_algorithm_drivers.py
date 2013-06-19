@@ -308,7 +308,7 @@ class AssimuloAlgOptions(OptionBase):
             file name that is based on the name of the model class.
             Default: Empty string
             
-        continuous_output --
+        report_continuously --
             Specifies if the result should be written to file at each result
             point. This is necessary is some cases.
             Default: False
@@ -373,7 +373,7 @@ class AssimuloAlgOptions(OptionBase):
             'initialize':True,
             'write_scaled_result':False,
             'result_file_name':'',
-            'continuous_output':False,
+            'report_continuously':False,
             'IDA_options':{'atol':1.0e-6,'rtol':1.0e-6,
                            'maxord':5,'sensitivity':False,
                            'suppress_alg':False, 'suppress_sens':True},
@@ -519,12 +519,12 @@ class AssimuloAlg(AlgorithmBase):
         self.sensitivity = self.solver_options.get('sensitivity',False)
         #self.solver_options.pop('sensitivity',False)
 
-        # continuous_output is currently crucial when solving sensitivity problems
+        # report_continuously is currently crucial when solving sensitivity problems
         if self.sensitivity:
-            if not self.options["continuous_output"]:
-                self.options["continuous_output"] = True
-                logging.warning("Continuous output is necessary when solving sensitivity problems, "
-                                "setting continuous_output to True.")
+            if not self.options["report_continuously"]:
+                self.options["report_continuously"] = True
+                logging.warning("Reporting continuously is necessary when solving sensitivity problems, "
+                                "setting report_continuously to True.")
                 
         if self.sensitivity and self.solver_options['maxord']==5:
             logging.warning("Maximum order when using IDA for simulating "
@@ -536,7 +536,7 @@ class AssimuloAlg(AlgorithmBase):
         Helper functions that sets options for the solver.
         """
         #Continouous output
-        self.simulator.continuous_output = self.options["continuous_output"]
+        self.simulator.report_continuously = self.options["report_continuously"]
         
         #loop solver_args and set properties of solver
         for k, v in self.solver_options.iteritems():
@@ -578,7 +578,7 @@ class AssimuloAlg(AlgorithmBase):
         
             The AssimuloSimResult object.
         """
-        if not self.simulator.continuous_output:
+        if not self.simulator.report_continuously:
             write_data(self.simulator,self.write_scaled_result, self.result_file_name)
         #write_data(self.simulator,self.write_scaled_result,self.result_file_name)
         # load result file

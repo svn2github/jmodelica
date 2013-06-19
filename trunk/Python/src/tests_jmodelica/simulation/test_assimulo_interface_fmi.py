@@ -211,6 +211,7 @@ class Test_FMI_ODE:
 
         _ex1_name = compile_fmu("NoState.Example1", file_name)
         _ex2_name = compile_fmu("NoState.Example2", file_name)
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
         
     def setUp(self):
         """
@@ -222,6 +223,46 @@ class Test_FMI_ODE:
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
+    
+    @testattr(assimulo = True)
+    def test_cc_with_cvode(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        
+    @testattr(assimulo = True)
+    def test_cc_with_radau(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "Radau5ODE"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+    
+    @testattr(assimulo = True)
+    def test_cc_with_dopri(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "Dopri5"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        
+    @testattr(assimulo = True)
+    def test_cc_with_rodas(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "RodasODE"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
     
     @testattr(assimulo = True)
     def test_no_state1(self):
@@ -353,7 +394,7 @@ class Test_FMI_ODE:
         solver.t = 1.0
         solver.y = y
         solver.y_sol = [y]
-        solver.continuous_output = False
+        solver.report_continuously = False
         
         self._bounceSim.initialize(solver)
         self._bounceSim.handle_event(solver, None)
@@ -376,7 +417,7 @@ class Test_FMI_ODE:
         #Further testing of the completed step function is needed.
         
     @testattr(windows = True)
-    def test_simulation_completed_step(self):
+    def test_simulation_completed_step_cvode(self):
         """
         This tests a simulation of a Pendulum with dynamic state selection.
         """
@@ -395,8 +436,60 @@ class Test_FMI_ODE:
     
         nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
         nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
-        #nose.tools.assert_almost_equal(x1_sim[-1], 0.290109468, 5)
-        #nose.tools.assert_almost_equal(x2_sim[-1], -0.956993467, 5)
+        
+    @testattr(windows = True)
+    def test_simulation_completed_step_radau(self):
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        opts = model.simulate_options()
+        opts["solver"] = "Radau5ODE"
+        res = model.simulate(final_time=10, options=opts)
+    
+        assert N.abs(res.final('y')+0.956993467) < 1e-2
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        res = model.simulate(final_time=10, options={'ncp':1000})
+
+        assert N.abs(res.final('y')+0.956993467) < 1e-2
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+    @testattr(windows = True)
+    def test_simulation_completed_step_dopri(self):
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        opts = model.simulate_options()
+        opts["solver"] = "Dopri5"
+        res = model.simulate(final_time=10, options=opts)
+    
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        res = model.simulate(final_time=10, options={'ncp':1000})
+
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+    
+    @testattr(windows = True)
+    def test_simulation_completed_step_rodas(self):
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        opts = model.simulate_options()
+        opts["solver"] = "RodasODE"
+        res = model.simulate(final_time=10, options=opts)
+    
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        res = model.simulate(final_time=10, options={'ncp':1000})
+
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
     
     @testattr(windows = True)
     def test_terminate_simulation(self):

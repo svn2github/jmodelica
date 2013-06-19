@@ -641,7 +641,7 @@ class Test_FMUModelME2:
         opts['initialize'] = False
         coupled.initialize(tolControlled=False)
         res=coupled.simulate(options=opts)
-        assert len(res['time']) == 253
+        assert len(res['time']) > 250
 
     @testattr(windows = True)
     def test_simulate(self):
