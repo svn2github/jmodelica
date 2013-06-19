@@ -32,6 +32,7 @@ aspect InstLookupComponents {
 
 	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponent(name);
 	
+	eq InstReplacingRecord.getOriginalInstComponent().lookupInstComponent(String name)    = lookupInstComponent(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
 	eq InstNormalExtends.getInstClassModification().lookupInstComponent(String name)      = lookupInstComponent(name);

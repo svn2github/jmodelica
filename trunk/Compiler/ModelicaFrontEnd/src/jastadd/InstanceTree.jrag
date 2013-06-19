@@ -212,18 +212,22 @@ aspect Environments {
 		
 	}
  	
-	eq InstReplacingComposite.localInstModifications() {
+	eq InstReplacingRecord.localInstModifications()    = calcLocalInstModForRedeclaringComponent(getOriginalInstComponent());
+	eq InstReplacingComposite.localInstModifications() = calcLocalInstModForRedeclaringComponent(getOriginalInstComponent());
+	
+	syn ArrayList<InstModification> InstComponentDecl.calcLocalInstModForRedeclaringComponent(
+			InstComponentDecl originalInst) {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
 		// If there is a constraining clase, return its modifications
-		if (getOriginalInstComponent().hasInstConstraining()) {
-		  if (getOriginalInstComponent().getInstConstraining().hasInstClassModification()) {
-			l.add(getOriginalInstComponent().getInstConstraining().getInstClassModification());
+		if (originalInst.hasInstConstraining()) {
+		  if (originalInst.getInstConstraining().hasInstClassModification()) {
+			l.add(originalInst.getInstConstraining().getInstClassModification());
           }
         } else {
             // If no constraining clause, use the original declaration 
             // and return its modifiers
-     		if (getOriginalInstComponent().hasInstModification())
-				l.add(getOriginalInstComponent().getInstModification());     
+     		if (originalInst.hasInstModification())
+				l.add(originalInst.getInstModification());     
         }
         l.addAll(myInstClass().classInstModifications());
 		return l;
@@ -969,6 +973,14 @@ aspect InstanceTreeConstruction {
 			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
 			icd.setLocation(originalDecl);
 			return icd;
+		} else if (isRecord()) {
+			InstReplacingRecord icd = new InstReplacingRecord(replacingDecl.newInstClassAccess(), 
+					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
+			if (originalDecl.hasModification()) //TODO: should this really be originalDecl?
+				icd.setInstModification(originalDecl.getModification().newInstModification());
+			icd.setInstConstrainingOpt(originalDecl.newInstConstrainingComponentOpt());
+			icd.setLocation(originalDecl);
+			return icd;
 		} else {
 			InstReplacingComposite icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
 					fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
@@ -1175,41 +1187,24 @@ aspect InstanceTreeConstruction {
 		return getClassRedeclare().getBaseClassDecl().newInstClassDecl();
 	}
 
-	syn lazy InstComponentDecl InstComponentRedeclare.getInstComponentDecl() {
-	    // TODO: Check if the component is redeclared. Really...?
-    	// -> Yes: Create an InstReplacingComponent component
-    	// -> No: Create an InstComponent 
-		return new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), this);
-	}
+	syn lazy InstComponentDecl InstComponentRedeclare.getInstComponentDecl() =
+		new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), this);
 
-	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent()  {
-		// TODO: Check if the component is redeclared. Really...?
-    	// -> Yes: Create an InstReplacingComponent component
-    	// -> No: Create an InstComponent 
-    	return new InstCreateComponentDecl(getOriginalDecl(), this);
-	}
+	syn lazy InstComponentDecl InstReplacingRecord.getOriginalInstComponent() =
+    	new InstCreateComponentDecl(getOriginalDecl(), this);
+
+	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent() =
+    	new InstCreateComponentDecl(getOriginalDecl(), this);
 
 
-	syn lazy InstClassDecl InstReplacingShortClassDecl.getOriginalInstClass() {
-		// TODO: Check if the component is redeclared. Really...?
-    	// -> Yes: Create an InstReplacingComponent component
-    	// -> No: Create an InstComponent 
-		return getOriginalClassDecl().newInstClassDecl();
-	}
+	syn lazy InstClassDecl InstReplacingShortClassDecl.getOriginalInstClass() =
+		getOriginalClassDecl().newInstClassDecl();
 
-	syn lazy InstClassDecl InstReplacingSimpleShortClassDecl.getOriginalInstClass() {
-		// TODO: Check if the component is redeclared. Really...?
-    	// -> Yes: Create an InstReplacingComponent component
-    	// -> No: Create an InstComponent 
-		return getOriginalClassDecl().newInstClassDecl();
-	}
+	syn lazy InstClassDecl InstReplacingSimpleShortClassDecl.getOriginalInstClass() =
+		getOriginalClassDecl().newInstClassDecl();
 
-	syn lazy InstClassDecl InstReplacingFullClassDecl.getOriginalInstClass() {
-		// TODO: Check if the component is redeclared. Really...?
-    	// -> Yes: Create an InstReplacingComponent component
-    	// -> No: Create an InstComponent 
-		return getOriginalClassDecl().newInstClassDecl();
-	}
+	syn lazy InstClassDecl InstReplacingFullClassDecl.getOriginalInstClass() =
+		getOriginalClassDecl().newInstClassDecl();
 
 	/**
 	 * Returns the FExp associated with this argument, if any.
@@ -1993,9 +1988,23 @@ aspect InstanceDumpTree {
 	   return str.toString();	
 	}
 	
+	public String InstReplacingRecord.toString(String indent) {
+	   StringBuilder str = new StringBuilder();
+	   str.append(indent+"InstReplacingRecord:\n");
+	   str.append(indent+" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
+	   str.append(indent+" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
+       str.append(indent+ " "+getClassName().toString());
+	   appendEnvironment(str, indent);
+	   //str.append(" Declared type:\n");
+	   //str.append(declaredType().toString());
+	   //str.append(" Constraining type:\n");
+	   //str.append(constrainingType().toString());
+	   return str.toString();	
+	}
+	
 	public String InstReplacingComposite.toString(String indent) {
 	   StringBuilder str = new StringBuilder();
-	   str.append(indent+"InstReplacingComponent:\n");
+	   str.append(indent+"InstReplacingComposite:\n");
 	   str.append(indent+" Replacing decl: " + getComponentDecl().prettyPrint("") + "\n");
 	   str.append(indent+" Original decl:  " + getOriginalDecl().prettyPrint("") + "\n");
        str.append(indent+ " "+getClassName().toString());
