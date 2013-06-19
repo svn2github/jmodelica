@@ -243,7 +243,7 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'jmu',target="fmume"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'fmu',target="fmume"):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 

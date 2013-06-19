@@ -45,7 +45,7 @@ class TestRLCSquareCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',format='fmu',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -62,7 +62,7 @@ class TestRLCSquareCSModified(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',format='fmu',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -83,7 +83,7 @@ class TestRLCCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit',format='fmu',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit',target="fmucs")
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -101,7 +101,7 @@ class TestWriteScaledResult(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'ScaledResult.mop', 'ScaledResult.Scaled1',
+                'ScaledResult.mop', 'ScaledResult.Scaled1', format='jmu',
                     options={"enable_variable_scaling":True})
 
     @testattr(assimulo = True)
@@ -203,7 +203,7 @@ class TestEnumerations(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Enumerations.mo', 'Enumerations.Enumeration1')
+            'Enumerations.mo', 'Enumerations.Enumeration1', format='jmu')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -229,7 +229,7 @@ class TestHybrid1(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu2',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -249,7 +249,7 @@ class TestHybrid2(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu3',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -269,7 +269,7 @@ class TestHybrid3(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu5',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -289,7 +289,7 @@ class TestHybrid4(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu8',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -309,7 +309,7 @@ class TestHybrid5(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu9',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -328,7 +328,7 @@ class TestHybrid6(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.WhenEqu10',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -347,7 +347,7 @@ class TestHybrid7(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'HybridTests.mo', 'HybridTests.ZeroOrderHold1',
-            options={'compliance_as_warning':True},format='fmu')
+            options={'compliance_as_warning':True})
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -365,8 +365,7 @@ class TestHybrid8(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'HybridTests.mo', 'HybridTests.WhenEqu11',
-            format='fmu')
+            'HybridTests.mo', 'HybridTests.WhenEqu11')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -384,7 +383,7 @@ class TestInputInitializationFMU(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'InputInitialization.mo', 'InputInitialization',format='fmu')
+            'InputInitialization.mo', 'InputInitialization')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -403,7 +402,7 @@ class TestIndexReduction1FMU(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Pendulum_pack_no_opt.mo', 'Pendulum_pack.PlanarPendulum',format='fmu')
+            'Pendulum_pack_no_opt.mo', 'Pendulum_pack.PlanarPendulum')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -422,7 +421,7 @@ class TestIndexReduction2FMU(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'IndexReductionTests.mo', 'IndexReductionTests.Mechanical1',format='fmu')
+            'IndexReductionTests.mo', 'IndexReductionTests.Mechanical1')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -440,7 +439,7 @@ class TestIndexReduction3FMU(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'IndexReductionTests.mo', 'IndexReductionTests.Electrical1',format='fmu')
+            'IndexReductionTests.mo', 'IndexReductionTests.Electrical1')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -459,8 +458,7 @@ class TestCoupledClutches(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'Empty.mo',
-            'Modelica.Mechanics.Rotational.Examples.CoupledClutches',
-            format='fmu')
+            'Modelica.Mechanics.Rotational.Examples.CoupledClutches')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -481,8 +479,7 @@ class TestDiode(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'Diode.mo',
-            'Diode',
-            format='fmu')
+            'Diode')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -502,8 +499,7 @@ class TestFriction(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'Friction.mo',
-            'Friction',
-            format='fmu')
+            'Friction')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -524,7 +520,6 @@ class TestTearing1(SimulationTest):
         SimulationTest.setup_class_base(
             'TearingTests.mo',
             'TearingTests.TearingTest1',
-            format='fmu',
             options={"automatic_tearing":True})
 
     @testattr(assimulo = True)
@@ -545,7 +540,6 @@ class TestTearing2(SimulationTest):
         SimulationTest.setup_class_base(
             'TearingTests.mo',
             'TearingTests.Electro',
-            format='fmu',
             options={"automatic_tearing":True,"eliminate_alias_variables":False})
 
     @testattr(assimulo = True)
@@ -588,7 +582,6 @@ class TestLocalLoop1(SimulationTest):
         SimulationTest.setup_class_base(
             'TearingTests.mo',
             'TearingTests.TearingTest1',
-            format='fmu',
             options={"automatic_tearing":True,"local_iteration_in_tearing":True})
 
     @testattr(assimulo = True)
@@ -608,8 +601,7 @@ class TestQR1(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'QRTests.mo',
-            'QRTests.QR1',
-            format='fmu')
+            'QRTests.QR1')
 
     @testattr(assimulo = True)
     def setUp(self):
@@ -628,8 +620,7 @@ class TestQR2(SimulationTest):
     def setUpClass(cls):
         SimulationTest.setup_class_base(
             'QRTests.mo',
-            'QRTests.QR2',
-            format='fmu')
+            'QRTests.QR2')
 
     @testattr(assimulo = True)
     def setUp(self):
