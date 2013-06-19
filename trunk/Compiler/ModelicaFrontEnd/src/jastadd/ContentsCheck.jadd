@@ -178,6 +178,7 @@ aspect ContentCheck {
 	 */
 	syn boolean FAbstractEquation.mayContainConnect() = false;
 	eq InstForClauseE.mayContainConnect()             = true;
+	eq FElseEquation.mayContainConnect()              = true;
 	eq FIfEquation.mayContainConnect()                = 
 		getTest().variability().parameterOrLess() && getTest().canCeval();
 	

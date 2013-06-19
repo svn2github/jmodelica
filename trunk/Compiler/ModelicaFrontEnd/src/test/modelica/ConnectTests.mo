@@ -1083,6 +1083,65 @@ end ConnectTests.ConnectTest22;
 end ConnectTest22;
 
 
+model ConnectTest23
+    Real x[4];
+	Real y[4];
+	Real z[4];
+equation
+	x = 1:4;
+	z = 5:8;
+	for i in 1:4 loop
+		if i < 3 then
+			connect(x[i], y[i]);
+        else
+            connect(z[i], y[i]);
+		end if;
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest23",
+			description="Connect clauses in if with parameter test",
+			flatModel="
+fclass ConnectTests.ConnectTest23
+ Real x[4];
+ Real y[4];
+ Real z[4];
+equation
+ x[1:4] = 1:4;
+ z[1:4] = 5:8;
+ x[1] = y[1];
+ x[2] = y[2];
+ y[3] = z[3];
+ y[4] = z[4];
+end ConnectTests.ConnectTest23;
+")})));
+end ConnectTest23;
+
+
+model ConnectTest24
+	Real x;
+	Real y = time;
+equation
+	if time < 2 then
+        x = y + 2;
+    else
+        connect(x,y);
+	end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectTest24",
+			description="Connect clause in else branch of if with non-parameter test",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1129, column 9:
+  Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
+")})));
+end ConnectTest24;
+
+
 model Electrical
   
   connector Pin "Pin of an electrical component" 
