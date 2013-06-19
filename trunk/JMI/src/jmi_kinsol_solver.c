@@ -425,20 +425,13 @@ static int jmi_kinsol_init_bounds(jmi_block_residual_t * block) {
     return 0;
 }
 
-static int get_print_level(jmi_t *jmi) {
-    int log_level = jmi->options.log_level;
-    if (log_level <= 2) return 0;
-    else if (log_level <= 4) return log_level-2;
-    else return 3;
-}
-
 static int jmi_kinsol_init(jmi_block_residual_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_t * jmi = block->jmi;
     int ef;
     struct KINMemRec * kin_mem = solver->kin_mem; 
 
-    KINSetPrintLevel(solver->kin_mem, get_print_level(jmi));
+    KINSetPrintLevel(solver->kin_mem, (jmi->options.log_level<=3)? jmi->options.log_level: 3);
     
     /* set tolerances */
     if((block->n > 1) || !jmi->options.use_Brent_in_1d_flag) {
@@ -959,7 +952,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     KINSetNoResMon(solver->kin_mem,1);
 
     /*Verbosity*/
-    KINSetPrintLevel(solver->kin_mem, get_print_level(jmi));
+    KINSetPrintLevel(solver->kin_mem, jmi->options.nle_solver_log_level);
     
     /*Error function*/
     KINSetErrHandlerFn(solver->kin_mem, kin_err, block);
