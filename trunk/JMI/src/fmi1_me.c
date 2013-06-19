@@ -1675,9 +1675,6 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_enforce_bounds");
     if(index)
         op->enforce_bounds_flag = (int)z[index]; 
-    index = get_option_index("_nle_solver_log_level");
-    if(index)
-        op->nle_solver_log_level = (int)z[index];   
     index = get_option_index("_use_jacobian_scaling");
     if(index)
         op->use_jacobian_scaling_flag = (int)z[index]; 

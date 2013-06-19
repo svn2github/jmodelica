@@ -1671,7 +1671,6 @@ int jmi_with_cad_derivatives(jmi_t* jmi)
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->log_level = 3 ; /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
     op->enforce_bounds_flag = 1; /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    op->nle_solver_log_level = 0; /**< \brief Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity*/
     op->use_jacobian_scaling_flag = 0;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
     op->use_automatic_scaling_flag = 1;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
     op->rescale_each_step_flag = 0;

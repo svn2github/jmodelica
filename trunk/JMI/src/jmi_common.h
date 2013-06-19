@@ -687,7 +687,6 @@ int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
 typedef struct jmi_options_t {
     int log_level; /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
     int enforce_bounds_flag; /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    int nle_solver_log_level; /**< \brief Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity*/
     int use_jacobian_scaling_flag;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
     int use_automatic_scaling_flag;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
     int rescale_each_step_flag;  /**< \brief If scaling should be updated at every step (only active if use_automatic_scaling_flag is set) */
