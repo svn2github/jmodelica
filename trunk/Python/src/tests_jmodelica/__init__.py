@@ -23,6 +23,7 @@ This __init__.py file holds functions used to load
 import os
 import sys
 import os, os.path
+import shutil
 
 __all__ = ['general', 'initialization', 'optimization', 'simulation', 
            'test_compiler', 'test_core', 'test_examples_casadi', 
@@ -36,10 +37,13 @@ if sys.platform == 'win32':
 else:
     _p = os.path.join(os.environ['HOME'],'jmodelica.org','tests')
 
-if not os.path.exists(_p):
-    try:
-        os.mkdir(_p)
-    except Exception:
+   
+if os.path.exists(_p):
+    shutil.rmtree(_p)
+ 
+try:
+    os.mkdir(_p)
+except Exception:
         _p = ""
 if _p:
     os.chdir(_p)
