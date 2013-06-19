@@ -188,20 +188,19 @@ end TransformCanonicalTests.TransformCanonicalTest5;
 			description="Built-in functions.",
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest6
- parameter Real p1 = sin(1) /* 0.8414709848078965 */;
- parameter Real p2 = cos(1) /* 0.5403023058681398 */;
- parameter Real p3 = tan(1) /* 1.5574077246549023 */;
- parameter Real p4 = asin(0.3) /* 0.3046926540153975 */;
- parameter Real p5 = acos(0.3) /* 1.2661036727794992 */;
- parameter Real p6 = atan(0.3) /* 0.2914567944778671 */;
- parameter Real p7 = atan2(0.3, 0.5) /* 0.5404195002705842 */;
- parameter Real p8 = sinh(1) /* 1.1752011936438014 */;
- parameter Real p9 = cosh(1) /* 1.543080634815244 */;
- parameter Real p10 = tanh(1) /* 0.7615941559557649 */;
- parameter Real p11 = exp(1) /* 2.7182818284590455 */;
- parameter Real p12 = log(1) /* 0.0 */;
- parameter Real p13 = log10(1) /* 0.0 */;
-
+ parameter Real p1 = 0.8414709848078965 /* 0.8414709848078965 */;
+ parameter Real p2 = 0.5403023058681398 /* 0.5403023058681398 */;
+ parameter Real p3 = 1.5574077246549023 /* 1.5574077246549023 */;
+ parameter Real p4 = 0.3046926540153975 /* 0.3046926540153975 */;
+ parameter Real p5 = 1.2661036727794992 /* 1.2661036727794992 */;
+ parameter Real p6 = 0.2914567944778671 /* 0.2914567944778671 */;
+ parameter Real p7 = 0.5404195002705842 /* 0.5404195002705842 */;
+ parameter Real p8 = 1.1752011936438014 /* 1.1752011936438014 */;
+ parameter Real p9 = 1.543080634815244 /* 1.543080634815244 */;
+ parameter Real p10 = 0.7615941559557649 /* 0.7615941559557649 */;
+ parameter Real p11 = 2.7182818284590455 /* 2.7182818284590455 */;
+ parameter Real p12 = 0.0 /* 0.0 */;
+ parameter Real p13 = 0.0 /* 0.0 */;
 end TransformCanonicalTests.TransformCanonicalTest6;
 ")})));
   end TransformCanonicalTest6;
@@ -4681,17 +4680,8 @@ model StringFuncTest
 			description="Test that string parameters and string parameters goes through front-end.",
 			flatModel="
 fclass TransformCanonicalTests.StringFuncTest
- parameter String p1 = TransformCanonicalTests.StringFuncTest.f(\"a\") /* \"a\" */;
+ parameter String p1 = \"a\" /* \"a\" */;
  parameter String p2 = \"a\" /* \"a\" */;
-public
- function TransformCanonicalTests.StringFuncTest.f
-  input String s;
-  output String t;
- algorithm
-  t := s;
-  return;
- end TransformCanonicalTests.StringFuncTest.f;
-
 end TransformCanonicalTests.StringFuncTest;
 ")})));
 

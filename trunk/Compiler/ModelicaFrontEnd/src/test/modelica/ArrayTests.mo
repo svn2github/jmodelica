@@ -943,9 +943,9 @@ model ArrayTest36
 			description="",
 			flatModel="
 fclass ArrayTests.General.ArrayTest36
- parameter Real c[1].b = 1 * 1 /* 1 */;
- parameter Real c[2].b = 2 * 2 /* 4 */;
- parameter Real c[3].b = 3 * 3 /* 9 */;
+ parameter Real c[1].b = 1 /* 1 */;
+ parameter Real c[2].b = 4 /* 4 */;
+ parameter Real c[3].b = 9 /* 9 */;
 end ArrayTests.General.ArrayTest36;
 ")})));
 end ArrayTest36;

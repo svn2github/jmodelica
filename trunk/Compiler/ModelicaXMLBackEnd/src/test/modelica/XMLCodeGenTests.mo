@@ -81,6 +81,27 @@ algorithm
 ")})));
 end XMLExtFuncAnnotations2;
 
+model XMLExtFunc1
+	function F
+		input Real x;
+		output Real y;
+		external;
+	end F;
+	
+	parameter Real p = F(2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="XMLExtFunc1",
+			description="External function call binding expression",
+			template="$XML_variables$",
+			generatedCode="
+		<ScalarVariable name=\"p\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+")})));
+end XMLExtFunc1;
+
 
   model XMLCodeGenTest1
   	parameter Real rp1=1;

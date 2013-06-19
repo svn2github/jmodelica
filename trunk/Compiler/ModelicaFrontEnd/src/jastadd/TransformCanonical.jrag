@@ -4139,9 +4139,37 @@ aspect ParameterSorting {
 	 */
 	public void FClass.sortDependentParameters() {
 		beginStep("sortDependentParameters()");
-
+		
+		// Check that all independet parameters can be evaluated.
+		for (FVariable var : getFVariables()) {
+			FTypePrefixVariability variability = var.variability();
+			if (variability.parameterVariability()) {
+				if (var.hasBindingExp() && !var.getBindingExp().isLiteralExp() && !var.isExternalObject()) {
+					try {
+						var.setBindingExp(var.getBindingExp().ceval().buildLiteral());
+					} catch (ConstantEvaluationException e) {
+						getFParameterEquations().add(new FEquation(var.createUseExp(), var.getBindingExp()));
+						var.removeBindingExp();
+					}
+				}
+			}
+		}
 		// Get the list of parameter equations and set up preliminary data.
 		ArrayList<FAbstractEquation> eqns = getFParameterEquations().toArrayList();
+		
+		// Check if there is any dependent parameters that can be made independent.
+		Iterator<FAbstractEquation> it = eqns.iterator();
+		while (it.hasNext()) {
+			FAbstractEquation eqn = it.next();
+			if (eqn != null && eqn.isIndependentParameterEquation()) {
+				try {
+					eqn.revertToBindingExp();
+					it.remove();
+				} catch (ConstantEvaluationException e) {
+					// Doh, we were unable to evaluate the expression
+				}
+			}
+		}
 		int n_eqns = eqns.size();
 		List<FVariable> vars = getFVariables();
 		int n_vars = getNumFVariable();
@@ -4150,104 +4178,90 @@ aspect ParameterSorting {
 		for (FVariable fv : vars)
 			fv.parameterEquation();  // Calculate these before changing anything
 		
-		// If there is nothing to do, return.
-		if (n_eqns > 0) {
-			
-			// Set up data structures for the adjacency graph.
-			ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
-			ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
-			for (int i = 0; i < n_eqns; i++) {
-				toNodes.add(new HashSet<FAbstractEquation>());
-				fromNodes.add(new HashSet<FAbstractEquation>());
-			}
-			
-			// For each equation
-			for (FAbstractEquation eqn : eqns) {
-				// Retrieve all variables referenced in right hand side
-				Set<FVariable> deps = eqn.referencedFVariablesInRHS();
-				// Build the actual adjacency graph.
-				for (FVariable fv : deps) {
-					FAbstractEquation depEqn = fv.parameterEquation();
-					if (depEqn != null && depEqn.sortingIndex >= 0) {
-						toNodes.get(depEqn.sortingIndex).add(eqn);		
-						fromNodes.get(eqn.sortingIndex).add(depEqn);
-					}
-				}
-			}	
-					
-			// Sort using algorithm described at
-			// http://en.wikipedia.org/wiki/Topological_sorting
-			List<FAbstractEquation> L = new List<FAbstractEquation>();
-			Queue<FAbstractEquation> S = 
-				new java.util.concurrent.ArrayBlockingQueue<FAbstractEquation>(n_eqns);
-			
-			// Add all nodes without incoming edges to S
-			for (int i = 0; i < n_eqns; i++) 
-				if (fromNodes.get(i).isEmpty()) 
-					S.add(eqns.get(i));
-			
-			// Repeat while S is not empty
-			int si = 0;
-			int n_indep = 0;
-			while (S.size() > 0) {
-				// Remove a node n from S
-				FAbstractEquation n = S.remove();
-				// Take care of n
-				if (n.isIndependentParameterEquation()) {
-					/* This equation should be the binding expression of an independent parameter.
-					 * There are several ways this could happen, e.g. using iteration expressions.
-					 * These could be removed from list before sorting, but this way is simpler. */ 
-					n.revertToBindingExp();
-					n_indep++;
-				} else {
-					// Insert n into L
-					L.add(n);
-				}
-				// For each node m with an edge e from n to m (in original order)
-				Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
-				nodes.addAll(toNodes.get(n.sortingIndex));
-				for (FAbstractEquation m : nodes) {
-					// Remove edge e from fromNodes
-					fromNodes.get(m.sortingIndex).remove(n);
-					// If m has no incoming edges add m to S
-					if (fromNodes.get(m.sortingIndex).isEmpty()) 
-						S.add(m);
-				}
-				// Remove e from toNodes
-				toNodes.get(n.sortingIndex).clear();
-				// Done with n - update sortingIndex
-				n.sortingIndex = si++;
-			}
-			
-			// Not possible to find an ordering without cycles?
-			if (L.getNumChild() != eqns.size() - n_indep) {
-				cyclicParameters = true;
-			} else {
-			
-				// Replace old parameter equation list
-				setFParameterEquationList(L);
-				
-				// Rearrange parameters in same order as parameter equations
-				ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
-				ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
-				for (int i = 0; i < n_vars; i++) {
-					FVariable fv = vars.getChild(i);
-					if (fv.hasParameterEquation()) {
-						depParams.add(fv);
-						depParamIndices.add(new Integer(i));
-					}
-				}
-				FVariable.sortParameters(depParams);
-				for (int i = 0; i < depParams.size(); i++)
-					vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 		
-				// Flush AST since the structure has changed.
-				flush();
-				
-				// Remove any binding expressions of variables with parameter equations
-				for (FAbstractEquation eqn : L)
-					eqn.removeBindingExpOfAssignedVars();
+		// Set up data structures for the adjacency graph.
+		ArrayList<HashSet<FAbstractEquation>> toNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		ArrayList<HashSet<FAbstractEquation>> fromNodes = new ArrayList<HashSet<FAbstractEquation>>(n_eqns);
+		for (int i = 0; i < n_eqns; i++) {
+			toNodes.add(new HashSet<FAbstractEquation>());
+			fromNodes.add(new HashSet<FAbstractEquation>());
+		}
+		
+		// For each equation
+		for (FAbstractEquation eqn : eqns) {
+			// Retrieve all variables referenced in right hand side
+			Set<FVariable> deps = eqn.referencedFVariablesInRHS();
+			// Build the actual adjacency graph.
+			for (FVariable fv : deps) {
+				FAbstractEquation depEqn = fv.parameterEquation();
+				if (depEqn != null && depEqn.sortingIndex >= 0) {
+					toNodes.get(depEqn.sortingIndex).add(eqn);		
+					fromNodes.get(eqn.sortingIndex).add(depEqn);
+				}
 			}
+		}	
+				
+		// Sort using algorithm described at
+		// http://en.wikipedia.org/wiki/Topological_sorting
+		List<FAbstractEquation> L = new List<FAbstractEquation>();
+		Queue<FAbstractEquation> S = new ArrayDeque<FAbstractEquation>();
+		
+		// Add all nodes without incoming edges to S
+		for (int i = 0; i < n_eqns; i++) 
+			if (fromNodes.get(i).isEmpty()) 
+				S.add(eqns.get(i));
+		
+		// Repeat while S is not empty
+		int si = 0;
+		int n_indep = 0;
+		while (S.size() > 0) {
+			// Remove a node n from S
+			FAbstractEquation n = S.remove();
+			L.add(n);
+			// For each node m with an edge e from n to m (in original order)
+			Set<FAbstractEquation> nodes = FAbstractEquation.sortingSet();
+			nodes.addAll(toNodes.get(n.sortingIndex));
+			for (FAbstractEquation m : nodes) {
+				// Remove edge e from fromNodes
+				fromNodes.get(m.sortingIndex).remove(n);
+				// If m has no incoming edges add m to S
+				if (fromNodes.get(m.sortingIndex).isEmpty()) 
+					S.add(m);
+			}
+			// Remove e from toNodes
+			toNodes.get(n.sortingIndex).clear();
+			// Done with n - update sortingIndex
+			n.sortingIndex = si++;
+		}
+		
+		// Not possible to find an ordering without cycles?
+		if (L.getNumChild() != eqns.size() - n_indep) {
+			cyclicParameters = true;
+		} else {
+		
+			// Replace old parameter equation list
+			setFParameterEquationList(L);
+			
+			// Rearrange parameters in same order as parameter equations
+			ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
+			ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
+			for (int i = 0; i < n_vars; i++) {
+				FVariable fv = vars.getChild(i);
+				if (fv.hasParameterEquation()) {
+					depParams.add(fv);
+					depParamIndices.add(new Integer(i));
+				}
+			}
+			FVariable.sortParameters(depParams);
+			for (int i = 0; i < depParams.size(); i++)
+				vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
+	
+			// Flush AST since the structure has changed.
+			flush();
+			
+			// Remove any binding expressions of variables with parameter equations
+			for (FAbstractEquation eqn : L)
+				eqn.removeBindingExpOfAssignedVars();
 		}
 
 		endStep("sortDependentParameters()");
@@ -4308,9 +4322,9 @@ aspect ParameterSorting {
 	 * Convert this parameter equation to a binding expression.
 	 */
 	public void FAbstractEquation.revertToBindingExp() {}
-	public void FEquation.revertToBindingExp() {
+	public void FEquation.revertToBindingExp() throws ConstantEvaluationException {
 		FVariable fv = (FVariable) ((FIdUseExp) getLeft()).getFIdUse().myFV();
-		fv.setBindingExp(getRight());
+		fv.setBindingExp(getRight().ceval().buildLiteral());
 	}
 
 }

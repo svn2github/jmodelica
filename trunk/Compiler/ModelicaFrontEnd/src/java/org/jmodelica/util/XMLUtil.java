@@ -9,6 +9,8 @@ public class XMLUtil {
 	
 	private static Pattern escapePattern = Pattern.compile("[\"&'<>]");
 	public static String escape(String message) {
+		if (message == null)
+			return message;
 		Matcher matcher = escapePattern.matcher(message);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {

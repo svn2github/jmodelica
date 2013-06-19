@@ -657,8 +657,8 @@ model String2
 			flatModel="
 fclass ComplianceTests.String2
  parameter String a = \"1\" /* \"1\" */;
- parameter String b = \"1\" + \"2\" /* \"12\" */;
- parameter String c = \"12\" + \"3\" /* \"123\" */;
+ parameter String b = \"12\" /* \"12\" */;
+ parameter String c = \"123\" /* \"123\" */;
 end ComplianceTests.String2;
 ")})));
 end String2;
