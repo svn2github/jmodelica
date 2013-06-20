@@ -35,7 +35,10 @@ def run_demo(with_plots=True):
 
     model = load_fmu(fmu_name)
     
-    res = model.simulate(final_time=10, options={'solver':'CVode'})
+    opts = model.simulate_options()
+    opts["CVode_options"]["rtol"] = 1e-6
+    
+    res = model.simulate(final_time=10, options=opts)
 
     assert N.abs(res.final('x1') - 7.34186386e-01) < 1e-3
     assert N.abs(res.final('x2') + 1.58202722)    < 1e-3

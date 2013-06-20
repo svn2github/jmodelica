@@ -42,6 +42,7 @@ def run_demo(with_plots=True):
     # Set options
     opts = model.simulate_options()
     opts['ncp'] = 500
+    opts["CVode_options"]["rtol"] = 1e-6
     
     # Simulate
     res = model.simulate(final_time=5, options=opts)

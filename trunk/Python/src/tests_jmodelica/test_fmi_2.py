@@ -483,9 +483,9 @@ class Test_FMUModelME2:
 
         [rtol,atol] = bounce.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
-        nose.tools.assert_almost_equal(atol[1],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
+        nose.tools.assert_almost_equal(atol[1],0.0000010)
 
         [rtol,atol] = coupled.get_tolerances()
 
@@ -657,9 +657,14 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(sim_time[0], 0.0)
         nose.tools.assert_almost_equal(sim_time[-1], 1.0)
         bounce.reset()
+        
+        opts = bounce.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["atol"] = 1e-6
+        opts["ncp"] = 500
 
         for i in range(5):
-            res=bounce.simulate(start_time=0.1, final_time=1.0, options={'ncp':500})
+            res=bounce.simulate(start_time=0.1, final_time=1.0, options=opts)
             sim_time = res['time']
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)

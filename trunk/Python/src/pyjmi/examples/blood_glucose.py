@@ -46,7 +46,10 @@ def run_demo(with_plots=True):
         os.path.join(curr_dir, 'files', 'JMExamples.mo'))
     bg = load_fmu(fmu_name1)
     
-    res = bg.simulate(final_time=400)
+    opts = bg.simulate_options()
+    opts["CVode_options"]["rtol"] = 1e-6
+    
+    res = bg.simulate(final_time=400, options=opts)
 
     # Extract variable profiles
     G = res['G']

@@ -725,14 +725,14 @@ class Test_FMUModelME1:
         """
         [rtol,atol] = self._bounce.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
-        nose.tools.assert_almost_equal(atol[1],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
+        nose.tools.assert_almost_equal(atol[1],0.0000010)
 
         [rtol,atol] = self._dq.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
 
     @testattr(fmi = True)
     def test_event_indicators(self):

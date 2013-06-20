@@ -229,6 +229,7 @@ class Test_FMI_ODE:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "CVode"
+        opts["CVode_options"]["rtol"] = 1e-6
         
         res = model.simulate(final_time=1.5,options=opts)
         
@@ -259,6 +260,7 @@ class Test_FMI_ODE:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "RodasODE"
+        opts["RodasODE_options"]["rtol"] = 1e-6
         
         res = model.simulate(final_time=1.5,options=opts)
         

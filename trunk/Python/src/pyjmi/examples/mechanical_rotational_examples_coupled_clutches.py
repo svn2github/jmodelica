@@ -39,8 +39,9 @@ def run_demo(with_plots=True):
     # Get options
     opts = model.simulate_options()
 
-    # Set absolute tolerance
+    # Set tolerances
     opts['CVode_options']['atol'] = 1e-6
+    opts['CVode_options']['rtol'] = 1e-6
 
     # Load result file
     res = model.simulate(final_time=3., options=opts)
