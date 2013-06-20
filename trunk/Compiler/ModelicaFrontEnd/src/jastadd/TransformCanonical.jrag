@@ -640,8 +640,19 @@ aspect TransformCanonical {
 			for (SimpleEquationBlock block : blocks)
 				if (block.mergeBlock(b))
 					return;
+			if (!isLinear())
+				b.checkStartValues();
 			blocks.add(b);
 		}	
+		
+		/**
+		 * Returns true if the block is linear.
+		 * 
+		 * @return boolean True if linear
+		 */
+		public boolean isLinear() {
+			return false;
+		}
 		
 		@Override
 		public Collection<FVariable> activeVariables() {
@@ -731,7 +742,12 @@ aspect TransformCanonical {
 				row++;
 			}
 		}
-
+		
+		@Override
+		public boolean isLinear() {
+			return true;
+		}
+		
 		public FTypePrefixVariability variability() {
 			return blockVariability;	
 		}
@@ -883,6 +899,11 @@ aspect TransformCanonical {
 		}
 		
 		@Override
+		public boolean isLinear() {
+			return true;
+		}
+		
+		@Override
 		public FTypePrefixVariability variability() {
 			return blockVariability;	
 		}
@@ -947,6 +968,13 @@ aspect TransformCanonical {
 		public void prettyPrintActiveVariables(PrintStream str) {
 			prettyPrintActiveVariables(str, false);
 		}
+		
+		/**
+		 * This method is call on blocks that are used in iterations. This
+		 * method should check the start values of its variable and verify
+		 * that a start value is set.
+		 */
+		public void checkStartValues() {}
 
 		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
 			for (FVariable fv : activeVariables()) {
@@ -1049,6 +1077,10 @@ aspect TransformCanonical {
 		
 		public UnsolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
 			super(eqn, fv);
+		}
+		
+		@Override
+		public void checkStartValues() {
 			fv.warnStartAttributeNotSet();
 		}
 		
@@ -1075,9 +1107,13 @@ aspect TransformCanonical {
 		
 		public NumericallySolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
 			super(eqn, fv);
-			fv.warnStartAttributeNotSet();
 		}
 
+		@Override
+		public void checkStartValues() {
+			fv.warnStartAttributeNotSet();
+		}
+		
 		@Override
 		public boolean isSolvable() {
 			return true;
@@ -1172,9 +1208,14 @@ aspect TransformCanonical {
 		
 		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables) {
 			super(eqn, activeVariables);
-			for (FVariable var : activeVariables)
+		}
+		
+		@Override
+		public void checkStartValues() {
+			for (FVariable var : activeVars)
 				var.warnStartAttributeNotSet();
 		}
+		
 
 		@Override
 		public boolean isSolvable() {
@@ -1323,6 +1364,7 @@ aspect TransformCanonical {
 		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
+			aeb.checkStartValues();
 			unsolvedBlocks.add(aeb);
 		}
 		
