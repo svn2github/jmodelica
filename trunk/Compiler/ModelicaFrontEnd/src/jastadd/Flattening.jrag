@@ -1527,6 +1527,7 @@ aspect FlatExpressions {
 	 */
 	inh InstComponentDecl FInstAccessExp.findComponentWithThisBindingExp();
 	eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+	eq InstAssignable.getBindingFExp().findComponentWithThisBindingExp()      = this;
 	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
 	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;
 	

@@ -677,6 +677,55 @@ Semantic error at line 664, column 16:
 end RecordBinding7;
 
 
+model RecordBinding8
+	record A
+		Real a;
+		Real b;
+	end A;
+	
+	function f
+		input Real x;
+		output A y;
+	algorithm
+		y := A(x, x*x);
+	end f;
+	
+	Real[2] x = time * (1:2);
+    A[2] y1 = { A(x[i], time) for i in 1:2 };
+    A[2] y2 = { f(x[1]), f(x[2]) };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding8",
+			description="Generating binding equations for records with array binding expressions that cannot be split",
+			inline_functions="trivial",
+			flatModel="
+fclass RecordTests.RecordBinding8
+ Real y1[1].b;
+ Real y1[2].b;
+ Real y2[1].a;
+ Real y2[1].b;
+ Real y2[2].a;
+ Real y2[2].b;
+equation
+ y2[1].a = time * 1;
+ y2[2].a = time * 2;
+ y1[1].b = time;
+ y1[2].b = time;
+ y2[1].b = y2[1].a * y2[1].a;
+ y2[2].b = y2[2].a * y2[2].a;
+
+public
+ record RecordTests.RecordBinding8.A
+  Real a;
+  Real b;
+ end RecordTests.RecordBinding8.A;
+
+end RecordTests.RecordBinding8;
+")})));
+end RecordBinding8;
+
+
 
 model RecordArray1
  record A

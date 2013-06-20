@@ -2698,8 +2698,18 @@ aspect TransformCanonical {
 	syn boolean FExp.canExtractRecordComponents()      = false;
 	eq FIdUseExp.canExtractRecordComponents()          = true;
 	eq FRecordConstructor.canExtractRecordComponents() = true;
-	eq FArray.canExtractRecordComponents()             = true;
-	eq FAbstractCat.canExtractRecordComponents()       = true;
+	eq FArray.canExtractRecordComponents() {
+		for (FExp e : childFExps())
+			if (!e.canExtractRecordComponents())
+				return false;
+		return true;
+	}
+	eq FAbstractCat.canExtractRecordComponents(){
+		for (FExp e : childFExps())
+			if (!e.canExtractRecordComponents())
+				return false;
+		return true;
+	}
 	
 	/**
 	 * \brief Create an FExp that represents a specific component of this record expression.
