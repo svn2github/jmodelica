@@ -366,7 +366,7 @@ aspect StructuralParams {
 	}
 	
 	public void InstAssignable.markAsStructuralParameter() {
-		if (isStructuralParam || !isParameter() || inFunction())
+		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
 		isStructuralParam = true;
 		// Flush cache for variability()

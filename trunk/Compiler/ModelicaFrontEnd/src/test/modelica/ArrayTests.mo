@@ -5205,6 +5205,39 @@ end ArrayTests.For.ForInitial1;
 ")})));
 end ForInitial1;
 
+
+model ForStructural1
+	parameter Boolean[2] p = {true, false};
+	Real[2] x;
+equation
+	for i in 1:2 loop
+		if p[i] then
+			x[i] = time;
+        else
+            x[i] = 1;
+		end if;
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="For_ForStructural1",
+			description="Check that for indices aren't converted to structural parameters",
+			flatModel="
+fclass ArrayTests.For.ForStructural1
+ parameter Boolean p[2] = {true, false} /* { true, false } */;
+ Real x[2];
+equation
+ for i in 1:2 loop
+  if ({true, false})[i] then
+   x[i] = time;
+  else
+   x[i] = 1;
+  end if;
+ end for;
+end ArrayTests.For.ForStructural1;
+")})));
+end ForStructural1;
+
 end For;
 
 
