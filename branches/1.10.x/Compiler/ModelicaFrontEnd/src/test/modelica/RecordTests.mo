@@ -2191,6 +2191,43 @@ end RecordTests.RecordScalarize24;
 ")})));
 end RecordScalarize24;
 
+
+model RecordScalarize25
+	type A = enumeration(a1, a2);
+	
+	record B
+		Real x;
+		A y;
+	end B;
+	
+	B b(x = time, y = if b.x < 3 then A.a1 else A.a2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize25",
+			description="Scalarization of enumeration variable in record",
+			flatModel="
+fclass RecordTests.RecordScalarize25
+ Real b.x;
+ discrete RecordTests.RecordScalarize25.A b.y;
+initial equation 
+ b.pre(y) = false;
+equation
+ b.x = time;
+ b.y = if b.x < 3 then RecordTests.RecordScalarize25.A.a1 else RecordTests.RecordScalarize25.A.a2;
+
+public
+ record RecordTests.RecordScalarize25.B
+  Real x;
+  discrete RecordTests.RecordScalarize25.A y;
+ end RecordTests.RecordScalarize25.B;
+
+ type RecordTests.RecordScalarize25.A = enumeration(a1, a2);
+
+end RecordTests.RecordScalarize25;
+")})));
+end RecordScalarize25;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 
