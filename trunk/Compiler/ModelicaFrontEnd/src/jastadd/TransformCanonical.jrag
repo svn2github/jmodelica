@@ -3843,8 +3843,6 @@ aspect IfEquations {
 	
 	private boolean FIfEquation.eliminateIfEquation = false;
 	private boolean FIfExp.eliminateIfEquation = false;
-	
-	protected boolean FIfWhenElseEquation.hasEliminatedIfBranches = false;
 
 	// TODO: not needed, since structural parameters are replaced 
 	protected boolean FIfWhenElseEquation.eliminateOnParamTest = false;
@@ -3862,26 +3860,34 @@ aspect IfEquations {
 		getTest().isConstantExp() || getTest().isParameterExp() && eliminateOnParamTest;
 	
 	rewrite FIfEquation {
-		when (eliminateIfEquation && !hasEliminatedIfBranches) to FIfWhenElseEquation {
-			hasEliminatedIfBranches = true;
-			if (!shouldEliminateIf())
-				return this;
-			else if (getTest().ceval().booleanValue())
-				return new FElseEquation(getType(), getFAbstractEquations());
-			else if (hasElse())
-				return getElse();
-			else
-				return new FElseEquation(getType(), new List());
+		when (eliminateIfEquation) to FIfWhenElseEquation {
+			eliminateIfEquation = false;
+			
+			if (shouldEliminateIf()) {
+				try {
+					if (getTest().ceval().booleanValue())
+						return new FElseEquation(getType(), getFAbstractEquations());
+					else if (hasElse())
+						return getElse();
+					else
+						return new FElseEquation(getType(), new List());
+				} catch (ConstantEvaluationException e) {}
+			}
+			
+			return this;
 		}	
 	}
 	
 	rewrite FIfExp {
 		when (eliminateIfEquation) to FExp {
 			eliminateIfEquation = false;
-			if (getIfExp().isConstantExp()) 
-				return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
-			else
-				return this;
+			
+			try {
+				if (getIfExp().isConstantExp()) 
+					return getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+			} catch (ConstantEvaluationException e) {}
+			
+			return this;
 		}
 	}
 

@@ -2487,7 +2487,7 @@ aspect FlatAlgorithmAPI {
 	eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
 	eq FExp.getChild().useIsAssignment()             = false;
 	eq FStatement.getChild().useIsAssignment()       = false;
-	eq FAlgorithm.getChild().useIsAssignment()  = false;
+	eq FAlgorithm.getChild().useIsAssignment()       = false;
 	eq Root.getChild().useIsAssignment()             = false;
 	
 	private String FAlgorithm.functionName = null;
