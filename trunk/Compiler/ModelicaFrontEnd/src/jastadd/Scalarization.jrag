@@ -498,7 +498,13 @@ aspect Scalarization {
 				fv.addFAttribute(a.copyForCell(myCell));
 		return fv;
 	}
-		
+
+	public FEnumVariable FEnumVariable.copyForName(FQName name) {
+		FEnumVariable fv = (FEnumVariable) super.copyForName(name);
+		fv.setEnum(getEnum().fullCopy());
+		return fv;
+	}
+
 	/**
 	 * Create a copy of the attibute with dimensions removed from all array expressions according 
 	 * to an index.
