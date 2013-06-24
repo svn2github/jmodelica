@@ -3482,7 +3482,11 @@ aspect TransformCanonical {
 	 * Check if this is a temporary variable that should be eliminated.
 	 */
 	syn boolean FVariable.shouldEliminateTemporary() = 
-		isTemporary() && nonDefiningUses().size() <= 1 && definingUses().size() <= 1 && !usedAsFunctionCallLeft();
+		isTemporary() && 
+		nonDefiningUses().size() <= 1 && 
+		definingUses().size() <= 1 && 
+		!usedAsFunctionCallLeft() && 
+		(definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents());
 	
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
@@ -4680,7 +4684,7 @@ aspect FunctionInlining {
 		private List<FAbstractEquation> normalEqns;
 		private List<FAbstractEquation> paramEqns;
 		
-		private Map<String,FVariable> replMap;
+		private Map<String,FExp> replMap;
 		private FlatVariableMap lookupMap;
 		private Map<String,Size> sizeMap;
 		
@@ -4740,7 +4744,7 @@ aspect FunctionInlining {
 		 * @return  the map to use for lookups in the function during inlining.
 		 */
 		public FlatVariableMap startFunction(FFunctionDecl f) {
-			replMap = new HashMap<String,FVariable>();
+			replMap = new HashMap<String,FExp>();
 			lookupMap = new FlatVariableMap();
 			sizeMap = new HashMap<String,Size>();
 			func = f;
@@ -4752,13 +4756,24 @@ aspect FunctionInlining {
 		}
 
 		/**
-		 * Get the temporary variable that represents a specific variable of the function 
+		 * Get the expression to use for a specific variable of the function 
 		 * currently being inlined.
 		 * 
 		 * @param name  the name of the variable
 		 */
-		public FVariable getReplacementVar(String name) {
+		public FExp getReplacementExp(String name) {
 			return replMap.get(name);
+		}
+
+		/**
+		 * Set the expression to use for a specific variable of the function 
+		 * currently being inlined.
+		 * 
+		 * @param name  the name of the variable
+		 * @param exp   the expression to use
+		 */
+		public void setReplacementExp(String name, FExp exp) {
+			replMap.put(name, exp);
 		}
 		
 		/**
@@ -4784,17 +4799,24 @@ aspect FunctionInlining {
 		 * 
 		 * @param oldName  the name of the variable that was assigned in the function
 		 * @param value    the right-hand side of the equation
+		 * @param noEvent  if true, make sure no events are generated for the equation
 		 */
-		public void addVarAndEqn(String oldName, FExp value) {
+		public void addVarAndEqn(String oldName, FExp value, boolean noEvent) {
 			FTypePrefixVariability variability = value.variability().fullCopy();
-			FVariable var = addVar(oldName, variability, value.type());
-			
-			if (variability.constantVariability()) {
-				var.setBindingExp(value.ceval().buildLiteral());
+			if (value.type().addVarInInline()) {
+				FVariable var = addVar(oldName, variability, value.type());
+				if (variability.constantVariability()) {
+					value = value.ceval().buildLiteral();
+					var.setBindingExp(value);
+					replMap.put(oldName, value);
+				} else {
+					if (noEvent)
+						value = value.preventEvents();
+					FEquation eqn = new FEquation(new FNormalEquation(), var.createUseExp(), value);
+					addEquation(eqn, variability);
+				}
 			} else {
-				value = value.preventEvents();
-				FEquation eqn = new FEquation(new FNormalEquation(), var.createUseExp(), value);
-				addEquation(eqn, variability);
+				replMap.put(oldName, value);
 			}
 		}
 
@@ -4859,33 +4881,40 @@ aspect FunctionInlining {
 			vars.add(var);
 			vars.getChild(vars.getNumChild() - 1);
 			
-			replMap.put(oldName, var);
 			setSizeOf(oldName, type.size());
 			lookupMap.addVariable(var);
 			fc.variablesMap().addVariable(var);
+			replMap.put(oldName, var.createUseExp());
 			return var;
 		}
 		
 	}
 	
 	
-	public void FExp.addInliningVarsAndEqns(FunctionInliner fi, String oldName) {
-		fi.addVarAndEqn(oldName, this);
+	public void FExp.addInliningVarsAndEqns(FunctionInliner fi, String oldName, boolean noEvent) {
+		fi.addVarAndEqn(oldName, this, noEvent);
 	}
 	
-	public void FArray.addInliningVarsAndEqns(FunctionInliner fi, String oldName) {
+	public void FArray.addInliningVarsAndEqns(FunctionInliner fi, String oldName, boolean noEvent) {
 		fi.setSizeOf(oldName, size());
 		Array arr = getArray();
 		for (Index i : indices())
-			arr.get(i).addInliningVarsAndEqns(fi, oldName + i);
+			arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
 	}
 	
-	public void FRecordConstructor.addInliningVarsAndEqns(FunctionInliner fi, String oldName) {
+	public void FRecordConstructor.addInliningVarsAndEqns(FunctionInliner fi, String oldName, boolean noEvent) {
 		oldName += ".";
 		Iterator<FExp> exps = getArgs().iterator();
 		for (FRecordComponentType part : ((FRecordType) type()).getComponents())
-			exps.next().addInliningVarsAndEqns(fi, oldName + part.getName());
+			exps.next().addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
 	}
+	
+	
+	/**
+	 * Should expressions of this type generate new varriables during inlining?
+	 */
+	syn boolean FType.addVarInInline()      = true;
+	eq FExternalObjectType.addVarInInline() = false;
 	
 	
 	/**
@@ -4909,8 +4938,10 @@ aspect FunctionInlining {
 	public FExp FIdUseExp.createInlineVars(
 			FunctionInliner fi, FExp bExp, FTypePrefixVariability variability) {
 		FVariable var = fi.addVar(scalarName(), variability, type());
-		if (bExp != null)
+		if (bExp != null) {
 			var.setBindingExp(bExp);
+			fi.setReplacementExp(scalarName(), bExp);
+		}
 		return var.createUseExp();
 	}
 	
@@ -4943,7 +4974,7 @@ aspect FunctionInlining {
 	 * Encapsulate any event-generating expressions in noEvent().
 	 */
 	public FExp FExp.preventEvents() {
-		if (generatesEvents()) {
+		if (eventGenerating()) {
 			FNoEventExp res = new FNoEventExp();
 			replaceMe(res);
 			res.setFExp(this);
@@ -4959,23 +4990,79 @@ aspect FunctionInlining {
 		return this;
 	}
 	
-	public FExp FIdUseExp.preventEvents() {
-		// TODO: traverse expressions in subscripts
-		return this;
-	}
-	
 	public FExp FFunctionCall.preventEvents() {
 		for (FExp e : getArgs())
 			e.preventEvents();
 		return this;
 	}
 	
+	public FExp FIdUseExp.preventEvents() {
+		getFIdUse().getFQName().preventEvents();
+		return this;
+	}
+
+	/**
+	 * Encapsulate any event-generating expressions in noEvent().
+	 */
+	public void FQName.preventEvents() {}
+	public void FQNameFull.preventEvents() {
+		for (FQNamePart part : getFQNameParts())
+			if (part.hasFArraySubscripts())
+				for (FSubscript s : part.getFArraySubscripts().getFSubscripts())
+					s.preventEvents();
+	}
+	
+	/**
+	 * Encapsulate any event-generating expressions in noEvent().
+	 */
+	public void FSubscript.preventEvents() {}
+	public void FExpSubscript.preventEvents() {
+		getFExp().preventEvents();
+	}
+	
 	/**
 	 * Check if this expression generates events.
+	 * 
+	 * Does not consider subexpressions.
 	 */
-	syn boolean FExp.generatesEvents() = false;
-	eq FIfExp.generatesEvents()        = true;
+	syn boolean FExp.eventGenerating() = false;
+	eq FIfExp.eventGenerating()        = true;
+	eq FRelExp.eventGenerating()       = getLeft().isContinuousExp() || getRight().isContinuousExp();
 	// TODO: support more event-generating expressions
+	
+	/**
+	 * Check if this expression or any subexpressions can cause events. 
+	 */
+	syn boolean FExp.generatesEvents() {
+		if (eventGenerating())
+			return true;
+		for (FExp e : childFExps())
+			if (e.generatesEvents())
+				return true;
+		return false;
+	}
+	eq FNoEventExp.generatesEvents() = false;
+	eq FIdUseExp.generatesEvents()   = getFIdUse().getFQName().generatesEvents();
+	
+	syn boolean FQName.generatesEvents() = false;
+	eq FQNameFull.generatesEvents() {
+		for (FQNamePart part : getFQNameParts())
+			if (part.hasFArraySubscripts())
+				for (FSubscript s : part.getFArraySubscripts().getFSubscripts())
+					if (s.generatesEvents())
+						return true;
+		return false;
+	}
+	
+	syn boolean FSubscript.generatesEvents() = false;
+	eq FExpSubscript.generatesEvents()       = getFExp().generatesEvents();
+	
+	/**
+	 * Check if this equation can cause events. 
+	 */
+	syn boolean FAbstractEquation.generatesEvents() = false;
+	eq FEquation.generatesEvents()                  = getLeft().generatesEvents() || getRight().generatesEvents();
+	eq FFunctionCallEquation.generatesEvents()      = getCall().generatesEvents();
 	
 	/**
 	 * Check if an equation contains any calls to functions that we can inline.
@@ -5088,8 +5175,8 @@ aspect FunctionInlining {
 	
 	public void FExp.createInliningOutputEquations(
 			ArrayList<FEquation> list, FunctionInliner fi, FQName name, FEquationType type) {
-		FVariable var = fi.getReplacementVar(name.scalarName());
-		FExp right = (var != null) ? var.createInlineUseFExp() : type().zeroLiteral();
+		FExp right = fi.getReplacementExp(name.scalarName());
+		right = (right == null) ? type().zeroLiteral() : right.fullCopy();
 		list.add(new FEquation(type.fullCopy(), this, right));
 	}
 	
@@ -5123,8 +5210,7 @@ aspect FunctionInlining {
 	public void FFunctionCall.inlineFunctions(FunctionInliner fi) {
 		if (isInlinableFunctionCall(fi)) {
 			inline(fi);
-			FVariable var = fi.getReplacementVar(myOutputs().get(0).name());
-			replaceMe(var.createInlineUseFExp());
+			replaceMe(fi.getReplacementExp(myOutputs().get(0).name()).fullCopy());
 		} else {
 			super.inlineFunctions(fi);
 		}
@@ -5410,10 +5496,10 @@ aspect FunctionInlining {
 	}
 	
 	inh boolean FIdUse.inForLoop();
-	eq FForStmt.getForStmt().inForLoop()      = true;
+	eq FForStmt.getForStmt().inForLoop() = true;
 	eq FAlgorithm.getChild().inForLoop() = false;
-	eq FlatRoot.getChild().inForLoop()        = false;
-	eq InstRoot.getChild().inForLoop()        = false;
+	eq FlatRoot.getChild().inForLoop()   = false;
+	eq InstRoot.getChild().inForLoop()   = false;
 	
 	
 	/**
@@ -5470,7 +5556,7 @@ aspect FunctionInlining {
 		
 		ArrayList<FFunctionVariable> inp = myInputs();
 		for (int i = 0; i < inp.size(); i++) 
-			args.getChild(i).addInliningVarsAndEqns(fi, inp.get(i).name());
+			args.getChild(i).addInliningVarsAndEqns(fi, inp.get(i).name(), false);
 		
 		ArrayList<FFunctionVariable> outp = myOutputs();
 		for (FFunctionVariable fv : outp) 
@@ -5503,7 +5589,7 @@ aspect FunctionInlining {
 		FIdUse left = getLeft().fullCopy();
 		left = ((FIdUseExp) getRight().dynamicFExp(new FIdUseExp(left))).getFIdUse();
 		left.replaceReferencesInSubscripts(fi);
-		right.addInliningVarsAndEqns(fi, left.scalarName());
+		right.addInliningVarsAndEqns(fi, left.scalarName(), true);
 	}
 
 	public void FFunctionCallStmt.inline(FunctionInliner fi) {
@@ -5727,15 +5813,9 @@ aspect FunctionInlining {
 	
 	public FExp FIdUseExp.replaceReferences(FunctionInliner fi) {
 		replaceReferencesInSubscripts(fi);
-		FVariable var = fi.getReplacementVar(scalarName());
-		FExp exp;
-		if (var != null) {
-			exp = dynamicFExp(var.createUseExp());
-			if (var.isConstant()) {
-				try {
-					exp = exp.ceval().buildLiteral();
-				} catch (ConstantEvaluationException e) {}
-			}
+		FExp exp = fi.getReplacementExp(scalarName());
+		if (exp != null) {
+			exp = dynamicFExp(exp.fullCopy());
 		} else {
 			if (fi.isReplacementVar(name())) {
 				exp = this;
