@@ -1104,6 +1104,81 @@ end FunctionInlining.RecordInline11;
     end RecordInline11;
 	
 	
+	model ExternalInline1
+		class O
+			extends ExternalObject;
+            function constructor
+                output O o;
+                external "C";
+            end constructor;
+            function destructor
+                input O o;
+                external "C";
+            end destructor;
+		end O;
+		
+		function f
+			input O o;
+			input Real y;
+			output Real x;
+			external "C";
+		end f;
+		
+		function g
+			input Real y;
+			input O o;
+			output Real x;
+		algorithm
+			x := y + f(o, y);
+		end g;
+		
+		O o1 = O();
+		Real x = g(time, o1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ExternalInline1",
+			description="Inlining function with external object",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.ExternalInline1
+ parameter FunctionInlining.ExternalInline1.O o1 = FunctionInlining.ExternalInline1.O.constructor() /* (unknown value) */;
+ Real x;
+ Real temp_1;
+equation
+ x = temp_1 + FunctionInlining.ExternalInline1.f(o1, temp_1);
+ temp_1 = time;
+
+public
+ function FunctionInlining.ExternalInline1.O.destructor
+  input ExternalObject o;
+ algorithm
+  external \"C\" destructor(o);
+  return;
+ end FunctionInlining.ExternalInline1.O.destructor;
+
+ function FunctionInlining.ExternalInline1.O.constructor
+  output ExternalObject o;
+ algorithm
+  external \"C\" o = constructor();
+  return;
+ end FunctionInlining.ExternalInline1.O.constructor;
+
+ function FunctionInlining.ExternalInline1.f
+  input ExternalObject o;
+  input Real y;
+  output Real x;
+ algorithm
+  external \"C\" x = f(o, y);
+  return;
+ end FunctionInlining.ExternalInline1.f;
+
+ type FunctionInlining.ExternalInline1.O = ExternalObject;
+end FunctionInlining.ExternalInline1;
+")})));
+	end ExternalInline1;
+	
+	
 	model UninlinableFunction1
 		function f1
 			input Real x1;
@@ -1365,6 +1440,73 @@ equation
 end FunctionInlining.IfStatementInline4;
 ")})));
     end IfStatementInline4;
+	
+	
+	model IfStatementInline5
+        function f
+			input Boolean test;
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+	        if test then
+                y := x;
+            end if;
+        end f;
+        
+		Real v = time + 1;
+        Real z = f(time > 3, v);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline5",
+			description="Event-generating argument to inlined function",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfStatementInline5
+ Real v;
+ Real z;
+ discrete Boolean temp_1;
+initial equation 
+ pre(temp_1) = false;
+equation
+ v = time + 1;
+ z = noEvent(if temp_1 then v else v + 1);
+ temp_1 = time > 3;
+end FunctionInlining.IfStatementInline5;
+")})));
+	end IfStatementInline5;
+    
+    
+    model IfStatementInline6
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            if x > 2 then
+                y := x;
+            else
+                y := 1;
+            end if;
+        end f;
+
+        Real z = f(if time > 3 then time else 3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfStatementInline6",
+			description="Event-generating argument to inlined function",
+			inline_functions="all",
+			flatModel="
+fclass FunctionInlining.IfStatementInline6
+ Real z;
+ Real temp_1;
+equation
+ z = noEvent(if temp_1 > 2 then noEvent(if temp_1 > 2 then temp_1 else 0.0) else 1);
+ temp_1 = if time > 3 then time else 3;
+end FunctionInlining.IfStatementInline6;
+")})));
+    end IfStatementInline6;
     
     
     model ForStatementInline1
