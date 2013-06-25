@@ -363,6 +363,8 @@ aspect Scalarization {
 	 */
 	public void FVariable.scalarRecordFVariables(
 			List<FVariable> vars, FQName prefix, FVariable last, FExp bexp) {
+		if (bexp == null && hasBindingExp() && (isConstant() || isIndependentParameter()))
+			bexp = getBindingExp();
 		if (isArray()) {
 			FExp nbexp = null;
 			for (Index i : scalarizationIndices(last)) {
@@ -392,8 +394,6 @@ aspect Scalarization {
 		Map<String,FExp> im = Collections.emptyMap();
 		if (bexp != null)
 			fv.setBindingExp(bexp.scalarizeExp(im));
-		else if (fv.hasBindingExp() && (isConstant() || isIndependentParameter()))
-			fv.setBindingExp(getBindingExp().scalarizeExp(im));
 		else
 			fv.setBindingExpOpt(new Opt());
 		fv.inheritFrom(last);
