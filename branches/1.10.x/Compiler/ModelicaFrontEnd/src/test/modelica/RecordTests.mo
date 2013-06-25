@@ -2228,6 +2228,37 @@ end RecordTests.RecordScalarize25;
 ")})));
 end RecordScalarize25;
 
+
+model RecordScalarize26
+	record R
+	    parameter Real x[2] = { 1, 2 };
+	    Real y;
+	end R;
+	
+	R r(y = time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize26",
+			description="Scalarization of array with binding expression in record declaration",
+			flatModel="
+fclass RecordTests.RecordScalarize26
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+ Real r.y;
+equation
+ r.y = time;
+
+public
+ record RecordTests.RecordScalarize26.R
+  parameter Real x[2];
+  Real y;
+ end RecordTests.RecordScalarize26.R;
+
+end RecordTests.RecordScalarize26;
+")})));
+end RecordScalarize26;
+
 // TODO: Add more complicated combinations of arrays, records and modifiers
 
 
