@@ -3313,6 +3313,17 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>print_condition_numbers</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>Prints the condition numbers of the Jacobian of the
+              constraints and of the simplified KKT matrix at the initial and
+              optimal points. Note that this is only feasible for very small
+              problems.</entry>
+            </row>
+
+            <row>
               <entry><literal>result_mode</literal></entry>
 
               <entry>'collocation_points'</entry>

@@ -1761,7 +1761,17 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Specifies the name of the file where the result is written. Setting
             this option to an empty string results in a default file name that
             is based on the name of the model class.
+
+            Type: str
             Default: ""
+
+        print_condition_numbers --
+            Prints the condition numbers of the Jacobian of the constraints and
+            of the simplified KKT matrix at the initial and optimal points.
+            Note that this is only feasible for very small problems.
+
+            Type: bool
+            Default: False
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
@@ -1902,6 +1912,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'nominal_traj_mode': {"_default_mode": "linear"},
                 'result_file_name': "",
                 'write_scaled_result': False,
+                'print_condition_numbers': False,
                 'result_mode': "collocation_points",
                 'n_eval_points': 20,
                 'blocking_factors': None,
@@ -1960,3 +1971,201 @@ class LocalDAECollocationAlgResult(JMResultBase):
         print("Initialization time: %.2f seconds" % times['init'])
         print("Solution time: %.2f seconds" % times['sol'])
         print("Post-processing time: %.2f seconds" % times['post_processing'])
+
+        # Print condition numbers
+        if self.options['print_condition_numbers']:
+            J_init_cond = N.linalg.cond(self.get_J("init"))
+            J_opt_cond = N.linalg.cond(self.get_J("opt"))
+            KKT_init_cond = N.linalg.cond(self.get_KKT("init"))
+            KKT_opt_cond = N.linalg.cond(self.get_KKT("opt"))
+            print("\nJacobian condition number at the initial guess: %.3g" %
+                  J_init_cond)
+            print("Jacobian condition number at the optimum: %.3g" %
+                  J_opt_cond)
+            print("KKT matrix condition number at the initial guess: %.3g" %
+                  KKT_init_cond)
+            print("KKT matrix condition number at the optimum: %.3g" %
+                  KKT_opt_cond)
+    
+    def get_J(self, point="fcn"):
+        """
+        Get the Jacobian of the constraints.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+        """
+        J_fcn = self.solver.solver.jacG()
+        if point == "fcn":
+            return J_fcn
+        elif point == "init":
+            J_fcn.setInput(self.solver.xx_init, 0)
+        elif point == "opt":
+            J_fcn.setInput(self.solver.primal_opt, 0)
+        elif point == "sym":
+            return J_fcn.eval([self.solver.xx, 0])[0]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        J_fcn.setInput([], 1)
+        J_fcn.evaluate()
+        return J_fcn.output(0).toArray()
+    
+    def get_H(self, point="fcn"):
+        """
+        Get the Hessian of the Lagrangian.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        H_fcn = self.solver.solver.hessLag()
+        if point == "fcn":
+            return H_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            sigma = self._compute_sigma()
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput([], 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "opt":
+            x = self.solver.primal_opt
+            sigma = self._compute_sigma()
+            dual = self.solver.dual_opt
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput([], 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "sym":
+            nu = casadi.ssym("nu", self.solver.c_e.numel())
+            sigma = casadi.ssym("sigma")
+            lam = casadi.ssym("lambda", self.solver.c_i.numel())
+            dual = casadi.vertcat([nu, lam])
+            return [H_fcn.eval([self.solver.xx, 0, sigma, dual])[0], sigma,
+                    dual]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        H_fcn.evaluate()
+        return H_fcn.output(0).toArray()
+
+    def get_KKT(self, point="fcn"):
+        """
+        Get the KKT matrix.
+
+        This only constructs the simple KKT system [H, J^T; J, 0]; not the full
+        KKT system used by IPOPT. However, if the problem has no inequality
+        constraints (including bounds), they coincide.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        if point == "fcn" or point == "sym":
+            x = self.solver.xx
+            J = self.get_J("sym")
+            [H, sigma, dual] = self.get_H("sym")
+            zeros = N.zeros([dual.numel(), dual.numel()])
+            KKT = casadi.blockcat([[H, J.T], [J, zeros]])
+            if point == "sym":
+                return KKT
+            else:
+                KKT_fcn = casadi.SXFunction([x, [], sigma, dual], [KKT])
+                return KKT_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+        elif point == "opt":
+            x = self.solver.primal_opt
+            dual = self.solver.dual_opt
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        sigma = self._compute_sigma()
+        J = self.get_J(point)
+        H = self.get_H(point)
+        zeros = N.zeros([len(dual), len(dual)])
+        KKT = N.bmat([[H, J.T], [J, zeros]])
+        return KKT
+
+    def _compute_sigma(self):
+        """
+        Computes the objective scaling factor sigma.
+        """
+        grad_fcn = self.solver.solver.gradF()
+        grad_fcn.setInput(self.solver.xx_init, 0)
+        grad_fcn.setInput([], 1)
+        grad_fcn.evaluate()
+        grad = grad_fcn.output(0).toArray()
+        sigma_inv = N.linalg.norm(grad, N.inf)
+        if sigma_inv < 1000.:
+            return 1.
+        else:
+            return 1. / sigma_inv
