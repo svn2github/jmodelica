@@ -1530,7 +1530,7 @@ class LocalDAECollocator(CasadiCollocator):
                                           "identically zero.")
                                     d = 1.
                                 else:
-                                    d = traj_max
+                                    d = max([abs(traj_max), abs(traj_min)])
                                 e = 0.
                             else:
                                 d = traj_max - traj_min
