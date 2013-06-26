@@ -1512,8 +1512,6 @@ class TestLocalDAECollocator:
         """
         Test the input interpolator for simulation purposes
         """
-        pass
-        """
         model = self.model_cstr
         model_opt = self.model_cstr_extends
         model.set(['c_init', 'T_init'], model_opt.get(['c_init', 'T_init']))
@@ -1531,7 +1529,6 @@ class TestLocalDAECollocator:
         res = model.simulate(start_time=0., final_time=150., input=opt_input, options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.62140206, 345.22510435], rtol=1e-5)
-        """
 
     @testattr(casadi = True)
     def test_matrix_evaluations(self):
