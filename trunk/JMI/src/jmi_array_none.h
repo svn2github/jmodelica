@@ -74,7 +74,7 @@ struct _jmi_dynamic_list {
 /* Record array creation macro */
 #define JMI_RECORD_ARRAY_STATIC(type, arr, name, ne, nd) \
     int name##_size[nd];\
-    type name##_var[ne];\
+    type name##_var[(ne == 0) ? 1 : ne];\
     arr name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
     arr* name = &name##_obj;
 
