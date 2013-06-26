@@ -2259,6 +2259,7 @@ aspect CCodeGen {
 	}	
 
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent);
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 			if (startAttributeSet()) {

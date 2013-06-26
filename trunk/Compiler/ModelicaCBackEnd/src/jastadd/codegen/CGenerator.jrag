@@ -219,10 +219,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(PrintStream genPrinter) {
+			for (FRealVariable fv : fclass.realVariables())
+				if (!fv.fixedAttribute())
+					fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			Enumerator enumerator = new Enumerator();
 			for (FRealVariable fv : fclass.realVariables())
-				if (!(fv.fixedAttribute() ))
-					fv.genStartAttributeResidual_C(enumerator, "   ", genPrinter);
+				if (!fv.fixedAttribute())
+					fv.genStartAttributeResidual_C(enumerator, INDENT, genPrinter);
 		}
 	
 	}

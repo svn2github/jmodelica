@@ -1600,8 +1600,10 @@ model CFunctionTest15
     parameter Real p2 = f(p1);
     parameter Real p3 = f(p1 .+ p2);
 	Real z(start=f(p1 .+ p3));
+    Real w(start=f(p1 .+ p2));
 equation
 	der(z) = -z;
+	der(w) = -w;
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -1610,9 +1612,11 @@ equation
 			template="
 $C_set_start_values$
 $C_DAE_initial_dependent_parameter_assignments$
+$C_DAE_initial_guess_equation_residuals$
 ",
 			generatedCode="
     JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     _p1_1_0 = (1);
     _p1_2_1 = (2);
     model_init_eval_parameters(jmi);
@@ -1620,18 +1624,34 @@ $C_DAE_initial_dependent_parameter_assignments$
     jmi_array_ref_1(tmp_1, 1) = _p1_1_0 + _p3_3;
     jmi_array_ref_1(tmp_1, 2) = _p1_2_1 + _p3_3;
     _z_4 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_1));
-    _der_z_5 = (0.0);
-
-    JMI_ARRAY_STATIC(tmp_2, 2, 1)
-    JMI_ARRAY_STATIC(tmp_3, 2, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
-    jmi_array_ref_1(tmp_2, 1) = _p1_1_0;
-    jmi_array_ref_1(tmp_2, 2) = _p1_2_1;
-    _p2_2 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_2));
+    jmi_array_ref_1(tmp_2, 1) = _p1_1_0 + _p2_2;
+    jmi_array_ref_1(tmp_2, 2) = _p1_2_1 + _p2_2;
+    _w_5 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_2));
+    _der_z_6 = (0.0);
+    _der_w_7 = (0.0);
+
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    JMI_ARRAY_STATIC(tmp_4, 2, 1)
     JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
-    jmi_array_ref_1(tmp_3, 1) = _p1_1_0 + _p2_2;
-    jmi_array_ref_1(tmp_3, 2) = _p1_2_1 + _p2_2;
-    _p3_3 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_3));
+    jmi_array_ref_1(tmp_3, 1) = _p1_1_0;
+    jmi_array_ref_1(tmp_3, 2) = _p1_2_1;
+    _p2_2 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_3));
+    JMI_ARRAY_STATIC_INIT_1(tmp_4, 2)
+    jmi_array_ref_1(tmp_4, 1) = _p1_1_0 + _p2_2;
+    jmi_array_ref_1(tmp_4, 2) = _p1_2_1 + _p2_2;
+    _p3_3 = (func_CCodeGenTests_CFunctionTest15_f_exp(tmp_4));
+
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _p1_1_0 + _p3_3;
+    jmi_array_ref_1(tmp_1, 2) = _p1_2_1 + _p3_3;
+    (*res)[0] = func_CCodeGenTests_CFunctionTest15_f_exp(tmp_1) - _z_4;
+    JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+    jmi_array_ref_1(tmp_2, 1) = _p1_1_0 + _p2_2;
+    jmi_array_ref_1(tmp_2, 2) = _p1_2_1 + _p2_2;
+    (*res)[1] = func_CCodeGenTests_CFunctionTest15_f_exp(tmp_2) - _w_5;
 ")})));
 end CFunctionTest15;
 
