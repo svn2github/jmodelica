@@ -726,6 +726,71 @@ end RecordTests.RecordBinding8;
 end RecordBinding8;
 
 
+model RecordBinding9
+    record A
+        constant Real a = 1;
+        Real b;
+    end A;
+    
+    parameter A x(b = 2);
+    parameter A y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding9",
+			description="Record containing constant as binding expression",
+			flatModel="
+fclass RecordTests.RecordBinding9
+ constant Real x.a = 1;
+ parameter Real x.b = 2 /* 2 */;
+ constant Real y.a = 1;
+ parameter Real y.b;
+parameter equation
+ y.b = x.b;
+
+public
+ record RecordTests.RecordBinding9.A
+  constant Real a;
+  Real b;
+ end RecordTests.RecordBinding9.A;
+
+end RecordTests.RecordBinding9;
+")})));
+end RecordBinding9;
+
+
+model RecordBinding10
+    record A
+        constant Real a = 1;
+        Real b;
+    end A;
+    
+    A x(b = time);
+    A y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding10",
+			description="Record containing constant as binding expression",
+			flatModel="
+fclass RecordTests.RecordBinding10
+ constant Real x.a = 1;
+ constant Real y.a = 1;
+ Real y.b;
+equation
+ y.b = time;
+
+public
+ record RecordTests.RecordBinding10.A
+  constant Real a;
+  Real b;
+ end RecordTests.RecordBinding10.A;
+
+end RecordTests.RecordBinding10;
+")})));
+end RecordBinding10;
+
+
 
 model RecordArray1
  record A
