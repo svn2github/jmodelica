@@ -2616,8 +2616,10 @@ aspect TransformCanonical {
 			List<FAttribute> attrs = selectFAttributeList(attr);
 			FQName name = createNameForBindingEquation(prefix, attr);
 			for (FVariable comp : myFRecordDecl().getFVariables()) {
-				FAttribute cAttr = findMatching(attrs, comp.name());
-				comp.genBindingEquations(fc, name, cAttr, param || isParameter());
+				if (!comp.isConstant()) {
+					FAttribute cAttr = findMatching(attrs, comp.name());
+					comp.genBindingEquations(fc, name, cAttr, param || isParameter());
+				}
 			}
 		}
 	}
@@ -2644,9 +2646,11 @@ aspect TransformCanonical {
 			List<FAttribute> attrs = selectFAttributeList(attr);
 			FQName name = createNameForBindingEquation(prefix, attr);
 			for (FVariable comp : myFRecordDecl().getFVariables()) {
-				FAttribute cAttr = findMatching(attrs, comp.name());
-				FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
-				comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, param || isParameter());
+				if (!comp.isConstant()) {
+					FAttribute cAttr = findMatching(attrs, comp.name());
+					FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
+					comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, param || isParameter());
+				}
 			}
 		} else {
 			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
