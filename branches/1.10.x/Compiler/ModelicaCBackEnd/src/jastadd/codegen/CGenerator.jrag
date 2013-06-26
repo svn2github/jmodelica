@@ -913,25 +913,30 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			for(FVariable fv : fclass.independentConstants()) {
+			for (FVariable fv : fclass.independentConstants()) 
+				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FVariable fv : fclass.dependentConstants()) 
+				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FVariable fv : fclass.independentParameters()) 
+				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FVariable fv : fclass.variables()) 
+				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FVariable fv : fclass.discretePreVariables()) 
+				fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			
+			for (FVariable fv : fclass.independentConstants()) 
 				fv.genStartValue_C(INDENT, genPrinter);
-			}
-			for(FVariable fv : fclass.dependentConstants()) {
+			for (FVariable fv : fclass.dependentConstants()) 
 				fv.genStartValue_C(INDENT, genPrinter);
-			}
-			for(FVariable fv : fclass.independentParameters()) {
+			for (FVariable fv : fclass.independentParameters()) 
 				fv.genStartValue_C(INDENT, genPrinter);
-			}
 			genPrinter.print(INDENT + "model_init_eval_parameters(jmi);\n");
-			for(FVariable fv : fclass.variables()) {
+			for (FVariable fv : fclass.variables()) 
 				fv.genStartValue_C(INDENT, genPrinter);
-			}
-			for(FVariable fv : fclass.discretePreVariables()) {
+			for (FVariable fv : fclass.discretePreVariables()) 
 				fv.genStartValue_C(INDENT, genPrinter);
-			}
-			if (!fclass.externalObjectVariables().isEmpty()) {
+			if (!fclass.externalObjectVariables().isEmpty()) 
 			    genPrinter.print(INDENT + "jmi->indep_extobjs_initialized = 1;\n");
-			}
 		}
 	}
 	

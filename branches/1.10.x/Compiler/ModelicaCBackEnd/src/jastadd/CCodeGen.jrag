@@ -2319,8 +2319,7 @@ aspect CCodeGen {
 	}
 	
 	public void FVariable.genStartValue_C(String indent, PrintStream str) {
-		genVarDecls_C(printer_C, str, printer_C.indent(indent));
-		genTempVars_C(printer_C, str, printer_C.indent(indent));
+		genTempVars_C(printer_C, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
