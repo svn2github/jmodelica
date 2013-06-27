@@ -36,6 +36,7 @@ import numpy as N
     
 from pyjmi.optimization.polynomial import *
 from pyjmi.common import xmlparser
+from pyjmi.common.xmlparser import XMLException
 from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
@@ -150,6 +151,18 @@ class CasadiCollocator(object):
                 v - Value of the option (int, double, string)
         """
         self.solver.setOption(k,v)
+
+    def _get_xml_variable_by_name(self, name):
+        """
+        Helper function for getting an XML variable by name.
+
+        This method does not really belong here...
+        """
+        variables = self.model.xmldoc.get_model_variables()
+        for var in variables:
+            if var.get_name() == name:
+                return var
+        raise XMLException("Could not find XML variable with name: %s" % name)
     
     def export_result_dymola(self, file_name='', format='txt', 
                              write_scaled_result=False):
@@ -337,20 +350,58 @@ class CasadiCollocator(object):
                         n_parameters += 1
                         params += [name]
                         f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                    elif aliases[i][1] == 1: # alias
-                        f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                    else: # negated alias
-                        f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+                    else: # alias
+                        if aliases[i][1] == 1:
+                            neg = 1
+                        else:
+                            neg = -1 # negated alias
+                        var = self._get_xml_variable_by_name(name[1])
+                        if var.get_alias():
+                            # Check whether the alias has the same variability
+                            var_ali = md.get_aliases_for_variable(name[1])[0]
+                            for aliass in var_ali:
+                                aliass_var = \
+                                    self._get_xml_variable_by_name(aliass)
+                                if not aliass_var.get_alias():
+                                    variab = aliass_var.get_variability()
+                                    if (variab != xmlparser.PARAMETER and
+                                        variab != xmlparser.CONSTANT):
+                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                                name[1] +'\n')
+                                    else:
+                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                                name[1] +'\n')
+                        else:
+                            f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                    name[1] +'\n')
                 else:
                     if aliases[i][1] == 0: # noalias
-                        cnt_2 = cnt_2 + 1   
+                        cnt_2 = cnt_2 + 1
                         f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                    elif aliases[i][1] == 1: # alias
-                        f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                    else: #neg alias
-                        f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                
-                    
+                    else: # alias
+                        if aliases[i][1] == 1:
+                            neg = 1
+                        else:
+                            neg = -1 # negated alias
+                        var = self._get_xml_variable_by_name(name[1])
+                        if var.get_alias():
+                            # Check whether the alias has the same variability
+                            var_ali = md.get_aliases_for_variable(name[1])[0]
+                            for aliass in var_ali:
+                                aliass_var = \
+                                    self._get_xml_variable_by_name(aliass)
+                                if not aliass_var.get_alias():
+                                    variab = aliass_var.get_variability()
+                                    if (variab == xmlparser.PARAMETER or
+                                        variab == xmlparser.CONSTANT):
+                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                                name[1] +'\n')
+                                    else:
+                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                                name[1] +'\n')
+                        else:
+                            f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                    name[1] +'\n')
             f.write('\n')
             
             # Write data
