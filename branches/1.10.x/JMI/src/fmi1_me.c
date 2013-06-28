@@ -362,7 +362,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     jmi_real_t* switchesR;   /* Switches */
     jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* switches;
-    jmi_real_t* sw_temp;
+    jmi_real_t* sw_temp = 0;
     jmi_real_t* b_mode;
     fmi_t* fmi;
     jmi_t* jmi;
@@ -504,6 +504,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Initialization failed.");
+        ((fmi_t*)c) -> fmi_functions.freeMemory(sw_temp);
         return fmiError;
     }
     
@@ -519,6 +520,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 
         if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Initialization failed.");
+            ((fmi_t*)c) -> fmi_functions.freeMemory(sw_temp);
             return fmiError;
         }
         
@@ -534,6 +536,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         if(iter >= max_iterations){
             jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point iteration "
                          "due to too many iterations at> t:%g <(initialization).>", jmi_get_t(jmi)[0]);
+            ((fmi_t*)c) -> fmi_functions.freeMemory(sw_temp);
             return fmiError;
         }
     }
@@ -912,6 +915,7 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
             h = 0.000001;
         }
         (*(jmi->z))[offs+i] += h;
+        jmi->block_level = 0; /* to recover from errors */        
         jmi->dae->ode_derivatives(jmi);
         if(dependents&FMI_DERIVATIVES){
             for(j = 0; j < jmi->n_real_dx; j++){
@@ -928,6 +932,8 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
         }
         
         (*(jmi->z))[offs+i] -= 2*h;
+        jmi->block_level = 0; /* to recover from errors */
+        
         jmi->dae->ode_derivatives(jmi);
         k = 0;
         if(dependents&FMI_DERIVATIVES){
@@ -1033,6 +1039,8 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
             } else {
                 jmi->cached_block_jacobians = 1;
             }
+            jmi->block_level = 0; /* to recover from errors */
+            
             jmi->dae->ode_derivatives_dir_der(jmi);
             /* Extract Jacobian values */
             for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
@@ -1091,6 +1099,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
         /*For every x and/or u variable...*/
         for(i = 0; i < nvvr; i++){
             (*dv)[i+offs] = 1;
+            jmi->block_level = 0; /* to recover from errors */
 
             /*Evaluate directional derivative*/
             jmi->dae->ode_derivatives_dir_der(jmi);
@@ -1646,8 +1655,8 @@ extern const int fmi_runtime_options_map_vrefs[];
 extern const int fmi_runtime_options_map_length;
 
 int compare_option_names(const void* a, const void* b) {
-    const char** sa = a;
-    const char** sb = b;
+    const char** sa = (const char**)a;
+    const char** sb = (const char**)b;
     return strcmp(*sa, *sb);
 }
 

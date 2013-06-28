@@ -72,7 +72,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
-    b->ipiv = (int*)calloc(n,sizeof(int));
+	b->ipiv = (int*)calloc(2*n+1,sizeof(int));
     b->init = 1;
       
     b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -93,7 +93,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
         b->delete_solver = jmi_kinsol_solver_delete;
     }
         break;
-        
+
     case JMI_SIMPLE_NEWTON_SOLVER: {
         b->solver = 0;
         b->solve = jmi_simple_newton_solve;
@@ -137,6 +137,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     jmi_real_t h;
 
     c0 = clock();
+
+    jmi->block_level++;
     
     if(block->init) {
         int i;
@@ -180,9 +182,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                             (maxi * mini < 0) && 
                             /* almost symmetric range */
                             (fabs(nomi) < 1e-2*maxi ))
-                        /* take 1% of max  */                        
+                        /* take 1% of max  */
                         nomi = 1e-2*maxi;
-                        
+
                      block->nominal[i] = nomi;
                 }
                 else if(hasSpecificMin)
@@ -206,13 +208,15 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             }
             block->x[i] = initi;
         }
+        free(real_vrs);
+        /*        block->F(block->jmi,block->x, block->res, JMI_BLOCK_EVALUATE); */
     }
-    
+        
     /*
      * A proper local even iteration should problably be done here.
      * Right now event handling at top level will iterate.
      */
-    if (jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE) {
+    if (((jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE)) && (jmi->block_level == 1)) {
         jmi_log_node_t top_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockEventIterations",
                                       "<Starting block (local) event iteration at> t:%E <in> block:%d", 
                                       jmi_get_t(jmi)[0], block->index);
@@ -226,7 +230,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0);
             nbr_sw = nR0;
             mode_sw = 0; /* INITIALIZE MODE */
-        }else{
+        }
+        else{
             jmi_dae_get_sizes(jmi, &nF, &nR);
             nbr_sw = nR;
             mode_sw = 1; /* NOT INITIALIZE MODE */
@@ -251,9 +256,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_log_node_t iter_node;
             iter += 1;
 
-#if 0            
-            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "<Initial iteration> iter:%d <at> t:%E", 
-                                          iter, jmi_get_t(jmi)[0]);
+#if 0
+            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "<Initial iteration> block:%d iter:%d <at> t:%E", 
+                                          block->index, iter, jmi_get_t(jmi)[0]);
             
 
             /* Evaluate the block to update dependent variables if any */
@@ -267,27 +272,27 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
             jmi_write_back_to_z_val(jmi);
             
-                        jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
-                        jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
-                        jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
+            jmi_log_reals(jmi->log, logInfo, "ivs", block->x, block->n);
+            jmi_log_reals(jmi->log, logInfo, "switches", switches, nbr_sw);
+            jmi_log_reals(jmi->log, logInfo, "booleans", booleans, jmi->n_boolean_d);
             
             /* Check for consistency */
             if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-                            jmi_log_fmt(jmi->log, logInfo, "<Found consistent switched state before solving at> t:%g",
-                                        jmi_get_t(jmi)[0]);
+                jmi_log_fmt(jmi->log, logInfo, "<Found consistent switched state before solving at> t:%g",
+                            jmi_get_t(jmi)[0]);
             }
             else {
                 /* Check for infinite loop */
                 if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                                    jmi_log_fmt(jmi->log, logError, "<Detected infinite loop in fixed point iteration at> "
-                                                "t:%g", jmi_get_t(jmi)[0]);
-                                    jmi_log_leave(jmi->log, iter_node);
-                                    break;
+                    jmi_log_fmt(jmi->log, logError, "<Detected infinite loop in fixed point iteration at> "
+                                "t:%g", jmi_get_t(jmi)[0]);
+                    jmi_log_leave(jmi->log, iter_node);
+                    break;
                 }
                 if(iter >= nbr_allocated_iterations){
-                                    jmi_log_fmt(jmi->log, logError, "<Failed to converge during initial fixed point iteration due to too many iterations at> t:%E", jmi_get_t(jmi)[0]);
-                                    jmi_log_leave(jmi->log, iter_node);
-                                    break;
+                    jmi_log_fmt(jmi->log, logError, "<Failed to converge during initial fixed point iteration due to too many iterations at> t:%E", jmi_get_t(jmi)[0]);
+                    jmi_log_leave(jmi->log, iter_node);
+                    break;
                 }
 
                 /* Store the new switches */
@@ -450,11 +455,11 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                         jmi_get_t(jmi)[0]);
             ef = 1; /* Return flag */
         }
-        
         jmi_log_leave(jmi->log, top_node);
     }else{
         ef = block->solve(block);
     }
+    jmi->block_level--;
 
     if(block->init) {
         /* 
@@ -607,6 +612,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->nominal);
     free(b->message_buffer);
     free(b->initial);
+    free(b->value_references);
     /* clean up the solver.*/
     b->delete_solver(b);
 
@@ -622,6 +628,7 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     int n_x;
     /* int nrhs = 1; */
     int ef;
+
     INFO = 0;
     n_x = current_block->n;
     
@@ -635,6 +642,25 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
 
     ef = current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_INITIALIZE);
 
+    /* Now we evaluate the system matrix of the linear system. */
+    if (!current_block->jmi->cached_block_jacobians==1) {
+        jmi_real_t* store_dz = jmi->dz[0]; 
+        jmi->dz_active_index++;
+        jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+        jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+
+        for (i=0;i<jmi->n_v;i++) {
+            jmi->dz_active_variables[0][i] = 0;
+        }
+        /* Evaluate Jacobian */
+        current_block->evaluate_jacobian(current_block, current_block->jac);
+        jmi->dz_active_index--;
+        jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+        jmi->dz[0] = store_dz;
+        /* Factorize Jacobian */
+        dgetrf_(&n_x, &n_x, current_block->jac, &n_x, current_block->ipiv, &INFO);
+    }
+
     /* Evaluate the right hand side of the linear system we would like to solve. This is
            done by evaluating the AD function with a seed vector dv (corresponding to
            inputs and states - which are known) and the entries of dz (corresponding
@@ -644,22 +670,32 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
            current_block->dv, where the right hand side is stored. */
     ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
 
-    /* Now we evaluate the system matrix of the linear system. */
-    if (!current_block->jmi->cached_block_jacobians==1) {
-        /* Evaluate Jacobian */
-        current_block->evaluate_jacobian(current_block, current_block->jac);
-        /* Factorize Jacobian */
-        dgetrf_(&n_x, &n_x, current_block->jac, &n_x, current_block->ipiv, &INFO);
-    }
-
+    /* Perform a back-solve */
     trans = 'N'; /* No transposition */
     i = 1; /* One rhs to solve for */
-
-    /* Perform a back-solve */
     dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
 
     /* Write back results into the global dz vector. */
+/*    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+*/
     ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
-
+  /*   ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dx, JMI_BLOCK_EVALUATE_INACTIVE);
+   dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+ */
+#if 0
+    if(jmi->dz_active_index) {
+        jmi_real_t* active_dz = jmi->dz_active_variables_buf[jmi->dz_active_index-1];
+        jmi_real_t* store_dz = jmi->dz[0]; 
+        jmi->dz[0] = active_dz;
+        ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
+        /* Perform a back-solve */
+        dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
+        /* Write back results into the global dz vector. */
+        ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
+        jmi->dz[0] = store_dz; 
+    }
+#endif
+    
     return ef;
 }

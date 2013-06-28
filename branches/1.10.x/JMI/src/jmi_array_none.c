@@ -59,3 +59,16 @@ TRANSPOSE_FUNC(jmi_matrix_to_fortran_int, jmi_ad_var_t, jmi_int_t, 1)
 TRANSPOSE_FUNC(jmi_matrix_from_fortran_int, jmi_int_t, jmi_ad_var_t, 0)
 COPY_FUNC(jmi_copy_matrix_to_int, jmi_ad_var_t, jmi_int_t)
 COPY_FUNC(jmi_copy_matrix_from_int, jmi_int_t, jmi_ad_var_t)
+
+void jmi_dynamic_free(jmi_dynamic_list* jmi_dynamic_first) {
+    jmi_dynamic_list* jmi_dynamic_prev;
+    jmi_dynamic_list* jmi_dynamic_cur;
+    for (jmi_dynamic_prev = jmi_dynamic_first, jmi_dynamic_cur = jmi_dynamic_prev->next;
+        jmi_dynamic_cur;
+        jmi_dynamic_prev = jmi_dynamic_cur, jmi_dynamic_cur = jmi_dynamic_cur->next) {
+        free(jmi_dynamic_prev->data);
+        free(jmi_dynamic_prev);
+    }
+    free(jmi_dynamic_prev->data);
+    free(jmi_dynamic_prev);
+}

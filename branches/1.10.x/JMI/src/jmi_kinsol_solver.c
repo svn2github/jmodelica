@@ -17,6 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
+#include <time.h>
+
 #include <sundials/sundials_math.h>
 #include <sundials/sundials_direct.h>
 #include <nvector/nvector_serial.h>
@@ -100,6 +102,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 
     /*Evaluate the residual*/
     ret = block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
+    
     if(ret) {
         jmi_log_node(block->jmi->log, logWarning, "Warning", "errorCode: %d <returned from> block: %d", 
                      ret, block->index);
@@ -226,6 +229,14 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     }
     if (block->dF) {
         /* utilize directional derivatives to calculate Jacobian */
+        jmi_t* jmi = block->jmi;
+        jmi_real_t* store_dz = jmi->dz[0]; 
+        jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+        jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+
+        for (i=0;i<jmi->n_v;i++) {
+            jmi->dz_active_variables[0][i] = 0;
+        }
         for(i = 0; i < N; i++){ 
             block->x[i] = Ith(u,i);
         }
@@ -240,6 +251,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
             J->cols[i] = &(J->data)[i*N];
             block->dx[i] = 0;
         }
+        jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
+        jmi->dz[0] = store_dz;
         
     }
     
@@ -362,7 +375,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
     if ((block->jmi->options.log_level >= 5) &&
         (((strcmp("KINSolInit",function)==0) ||
-          (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
+          (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0)))
+    {
         jmi_log_fmt(log, logInfo, "iteration_index:%d", nniters);
         jmi_log_reals(log, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
         jmi_log_fmt(log, logInfo, "scaled_residual_norm:%E", kin_mem->kin_fnorm);
@@ -906,12 +920,12 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     solver->J_scale = NewDenseMat(n ,n);
 
     solver->equed = 'N';
-    solver->rScale = (realtype*)calloc(n,sizeof(realtype));
-    solver->cScale = (realtype*)calloc(n,sizeof(realtype));
+    solver->rScale = (realtype*)calloc(n+1,sizeof(realtype));
+    solver->cScale = (realtype*)calloc(n+1,sizeof(realtype));
 
-    solver->lapack_work = (realtype*)calloc(4*n,sizeof(realtype));
-    solver->lapack_iwork = (int *)calloc(n, sizeof(int));
-    solver->lapack_ipiv = (int *)calloc(n, sizeof(int));
+    solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
+    solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
+    solver->lapack_ipiv = (int *)calloc(n+2, sizeof(int));
 
     /* Initialize scaling to 1.0 - defaults */
     N_VConst_Serial(1.0,solver->kin_y_scale);
@@ -986,7 +1000,8 @@ void jmi_kinsol_solver_delete(jmi_block_residual_t* block) {
     free(solver->cScale);
     free(solver->rScale);
     free(solver->lapack_work);
-    free(solver->lapack_iwork);    
+    free(solver->lapack_iwork);
+    free(solver->lapack_ipiv);
     
     if(solver->num_bounds > 0) {
         free(solver->bound_vindex);
