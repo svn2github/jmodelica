@@ -196,9 +196,13 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
     jmi_->indep_extobjs_initialized = 0;
     jmi_->dep_extobjs_initialized = 0;
-
-    jmi_->dz_active_variables = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
-    *(jmi_->dz_active_variables) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+    jmi_->block_level = 0;
+    jmi_->dz_active_index = 0;
+    for (i=0;i<JMI_ACTIVE_VAR_BUFS_NUM;i++) {
+        jmi_->dz_active_variables_buf[i] = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+    }
+    
+    jmi_->dz_active_variables[0] = jmi_->dz_active_variables_buf[0];
 
     jmi_->variable_scaling_factors = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
     jmi_->scaling_method = JMI_SCALING_NONE;
@@ -210,8 +214,11 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     }
 
     for (i=0;i<jmi_->n_v;i++) {
+        int j;
         (*(jmi_->dz))[i] = 0;
-        (*(jmi_->dz_active_variables))[i] = 0;
+        for (j=0; j<JMI_ACTIVE_VAR_BUFS_NUM; j++) {
+            jmi_->dz_active_variables_buf[j][i] = 0;
+        }
     }
 
     jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
@@ -302,8 +309,9 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->dz);
     free(jmi->initial_relations);
     free(jmi->relations);
-    free(*(jmi->dz_active_variables));
-    free(jmi->dz_active_variables);
+    for(i=0; i<JMI_ACTIVE_VAR_BUFS_NUM; i++) {
+        free(jmi->dz_active_variables_buf[i]);
+    }
     free(jmi->variable_scaling_factors);
     free(jmi->tp);
     free(jmi->ext_objs);
@@ -457,7 +465,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
-
+    jmi->block_level = 0; /* to recover from errors */
     return_status = jmi->dae->ode_derivatives(jmi);
 
     if((jmi->options.log_level >= 5)) {
@@ -482,7 +490,8 @@ int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t *dv) {
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
-
+    jmi->block_level = 0; /* to recover from errors */
+    
     return_status = jmi->dae->ode_derivatives_dir_der(jmi);
 
     return return_status;

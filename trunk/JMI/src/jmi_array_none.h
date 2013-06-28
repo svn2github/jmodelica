@@ -172,7 +172,7 @@ struct _jmi_dynamic_list {
 /* Dynamic array initialization macros */
 #define JMI_RECORD_ARRAY_DYNAMIC_INIT_1(type, name, ne, d1) \
     name##_obj.size = name##_size;\
-    name##_obj.var = (type*) malloc((int) ((ne) * sizeof(type)));\
+    name##_obj.var = (type*) calloc((int) (ne), sizeof(type));\
     JMI_DYNAMIC_ADD_POINTER(name##_obj.var)\
     name##_obj.num_elems = (int) (ne);\
     name##_size[0] = (int) (d1);
@@ -353,7 +353,7 @@ struct _jmi_dynamic_list {
 #define JMI_INT_ARRAY_DYNAMIC_INIT_25(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25) \
     JMI_RECORD_ARRAY_DYNAMIC_INIT_25(jmi_int_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25)
 
-
+#if 0
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
     jmi_dynamic_list* jmi_dynamic_prev;\
@@ -375,6 +375,33 @@ struct _jmi_dynamic_list {
         free(jmi_dynamic_cur->data);\
     }\
     free(jmi_dynamic_prev);
+
+#else
+
+/* Macro for declaring dynamic list variable - should be called at beginning of function */
+#define JMI_DYNAMIC_INIT() \
+    jmi_dynamic_list* jmi_dynamic_first = 0;\
+    jmi_dynamic_list* jmi_dynamic_last = 0;
+
+/* Macro for adding a pointer to dynamic list - only for use in other macros */
+#define JMI_DYNAMIC_ADD_POINTER(pointer) \
+    do { \
+       if(jmi_dynamic_first) {\
+          jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
+          jmi_dynamic_last = jmi_dynamic_last->next;\
+       }\
+       else jmi_dynamic_last = jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
+       jmi_dynamic_last->data = pointer; \
+    } while(0);
+
+/* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
+#define JMI_DYNAMIC_FREE() \
+    if(jmi_dynamic_first) jmi_dynamic_free(jmi_dynamic_first);
+
+/* Clean up the linked list */
+void jmi_dynamic_free(jmi_dynamic_list* jmi_dynamic_first);
+
+#endif
 
 /* Record array access macros */
 #define jmi_array_rec_1(arr, i1) (&((arr)->var[(int) _JMI_ARR_I_1(arr, i1)]))
