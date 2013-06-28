@@ -256,6 +256,16 @@ class Test_FMI_ODE:
         assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
         
     @testattr(assimulo = True)
+    def test_cc_with_lsodar(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "LSODAR"
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-3
+        
+    @testattr(assimulo = True)
     def test_cc_with_rodas(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
@@ -452,7 +462,8 @@ class Test_FMI_ODE:
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
-        res = model.simulate(final_time=10, options={'ncp':1000})
+        opts["ncp"] = 1000
+        res = model.simulate(final_time=10, options=opts)
 
         assert N.abs(res.final('y')+0.956993467) < 1e-2
         assert N.abs(res.final('x')-0.290109468) < 1e-1
@@ -470,7 +481,8 @@ class Test_FMI_ODE:
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
-        res = model.simulate(final_time=10, options={'ncp':1000})
+        opts["ncp"] = 1000
+        res = model.simulate(final_time=10, options=opts)
 
         assert N.abs(res.final('y')+0.956993467) < 1e-1
         assert N.abs(res.final('x')-0.290109468) < 1e-1
@@ -488,7 +500,27 @@ class Test_FMI_ODE:
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
-        res = model.simulate(final_time=10, options={'ncp':1000})
+        opts["ncp"] = 1000
+        res = model.simulate(final_time=10, options=opts)
+
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+    @testattr(windows = True)
+    def test_simulation_completed_step_lsodar(self):
+        model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        opts = model.simulate_options()
+        opts["solver"] = "LSODAR"
+        res = model.simulate(final_time=10, options=opts)
+    
+        assert N.abs(res.final('y')+0.956993467) < 1e-1
+        assert N.abs(res.final('x')-0.290109468) < 1e-1
+        
+        model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
+        
+        opts["ncp"] = 1000
+        res = model.simulate(final_time=10, options=opts)
 
         assert N.abs(res.final('y')+0.956993467) < 1e-1
         assert N.abs(res.final('x')-0.290109468) < 1e-1
