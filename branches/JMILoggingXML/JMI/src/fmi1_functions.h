@@ -142,6 +142,9 @@ typedef fmiStatus (*fmi1_get_jacobian_ft) (fmiComponent c, int independents, int
 typedef fmiStatus (*fmi1_get_directional_derivative_ft) (fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]);
 typedef fmiStatus (*fmi1_get_partial_derivatives_ft) (fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D);
 
+#ifndef _WIN32
+#define DllExport
+#endif
 
 #endif
 #endif

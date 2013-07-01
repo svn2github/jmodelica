@@ -26,7 +26,7 @@ import sys as S
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
-from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu, FMUModelCS2, FMUModelME2, load_fmu2, PyEventInfo
+from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu, FMUModelCS2, FMUModelME2, PyEventInfo
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
@@ -153,17 +153,17 @@ class Test_FMUModelCS1:
         self.simple_input2 = load_fmu("Inputs_SimpleInput2.fmu")
         self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
         #self.rlc_square.initialize()
-    
+
     @testattr(fmi = True)
     def test_custom_result_handler(self):
         model = self.rlc
-        
+
         class A:
             pass
         class B(ResultHandler):
             def get_result(self):
                 return None
-        
+
         opts = model.simulate_options()
         opts["result_handling"] = "hejhej"
         nose.tools.assert_raises(Exception, model.simulate, options=opts)
@@ -173,17 +173,17 @@ class Test_FMUModelCS1:
         nose.tools.assert_raises(Exception, model.simulate, options=opts)
         opts["result_handler"] = B()
         res = model.simulate(options=opts)
-    
+
     @testattr(fmi = True)
     def test_filter(self):
         model = self.rlc
-        
+
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
         res = model.simulate(final_time=0.1)
         nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
         data = res["resistor.v"]
-        
+
         model.reset()
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
@@ -191,15 +191,15 @@ class Test_FMUModelCS1:
         res = model.simulate(final_time=0.1)
         nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
         data = res["resistor.v"]
-        
+
         model.reset()
         opts = model.simulate_options()
         opts["filter"] = ["resistor.*", "capacitor.v"]
         res = model.simulate(final_time=0.1)
         data = res["capacitor.v"]
         data = res["resistor.v"]
-        
-    
+
+
     @testattr(stddist = True)
     def test_simulation_no_state(self):
         model = self.no_state3
@@ -394,7 +394,7 @@ class Test_FMUModelCS1:
     def test_exception_output_derivatives(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
         nose.tools.assert_raises(FMUException, model.get_output_derivatives, "u",1)
-    
+
     @testattr(windows = True)
     def test_default_simulation_stop_time(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
@@ -467,17 +467,17 @@ class Test_FMUModelME1:
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
-    
+
     @testattr(assimulo = True)
     def test_custom_result_handler(self):
         model = self.rlc
-        
+
         class A:
             pass
         class B(ResultHandler):
             def get_result(self):
                 return None
-        
+
         opts = model.simulate_options()
         opts["result_handling"] = "hejhej"
         nose.tools.assert_raises(Exception, model.simulate, options=opts)
@@ -487,18 +487,18 @@ class Test_FMUModelME1:
         nose.tools.assert_raises(Exception, model.simulate, options=opts)
         opts["result_handler"] = B()
         res = model.simulate(options=opts)
-        
-    
+
+
     @testattr(assimulo = True)
     def test_filter(self):
         model = self.rlc
-        
+
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
         res = model.simulate(final_time=0.1)
         nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
         data = res["resistor.v"]
-        
+
         model.reset()
         opts = model.simulate_options()
         opts["filter"] = "resistor.*"
@@ -506,7 +506,7 @@ class Test_FMUModelME1:
         res = model.simulate(final_time=0.1)
         nose.tools.assert_raises(Exception, res.result_data.get_variable_data("capacitor.v"))
         data = res["resistor.v"]
-        
+
         model.reset()
         opts = model.simulate_options()
         opts["filter"] = ["resistor.*", "capacitor.v"]
@@ -725,14 +725,14 @@ class Test_FMUModelME1:
         """
         [rtol,atol] = self._bounce.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
-        nose.tools.assert_almost_equal(atol[1],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
+        nose.tools.assert_almost_equal(atol[1],0.0000010)
 
         [rtol,atol] = self._dq.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
 
     @testattr(fmi = True)
     def test_event_indicators(self):
@@ -1022,43 +1022,122 @@ class Test_SetDependentParameterError:
 
 class Test_load_fmu2:
     """
-    This test the functionality of load_fmu2 method.
+    This test the functionality of load_fmu method.
     """
 
     @testattr(windows = True)
     def test_raise_exception(self):
         """
-        This method tests the error-handling of load_fmu2
+        This method tests the error-handling of load_fmu
         """
-        #nose.tools.assert_raises(FMUException, load_fmu2, 'not_a_fmu.txt', path_to_fmus)          #loading non-fmu file
-        nose.tools.assert_raises(FMUException, load_fmu2, 'not_existing_file.fmu', path_to_fmus_me2)  #loading non-existing file
-        #nose.tools.assert_raises(FMUException, load_fmu2, 'not_a_.fmu', path_to_fmus)             #loading a non-real fmu
-        nose.tools.assert_raises(FMUException, load_fmu2, fmu=ME2, path=path_to_fmus_me2, kind='Teo') #loading fmu with wrong argument
-        nose.tools.assert_raises(FMUException, load_fmu2, fmu=ME1, path=path_to_fmus_me1, kind='CS')  #loading ME1-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu2, fmu=CS1, path=path_to_fmus_cs1, kind='ME')  #loading CS1-model as ME-model
-        nose.tools.assert_raises(FMUException, load_fmu2, fmu=ME2, path=path_to_fmus_me2, kind='CS')  #loading ME2-model as a CS-model
-        nose.tools.assert_raises(FMUException, load_fmu2, fmu=CS2, path=path_to_fmus_cs2, kind='ME')  #loading CS2-model as ME-model
+        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_fmu.txt', path_to_fmus)          #loading non-fmu file
+        nose.tools.assert_raises(FMUException, load_fmu, 'not_existing_file.fmu', path_to_fmus_me2)  #loading non-existing file
+        #nose.tools.assert_raises(FMUException, load_fmu, 'not_a_.fmu', path_to_fmus)             #loading a non-real fmu
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='Teo') #loading fmu with wrong argument
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME1, path=path_to_fmus_me1, kind='CS')  #loading ME1-model as a CS-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS1, path=path_to_fmus_cs1, kind='ME')  #loading CS1-model as ME-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=ME2, path=path_to_fmus_me2, kind='CS')  #loading ME2-model as a CS-model
+        nose.tools.assert_raises(FMUException, load_fmu, fmu=CS2, path=path_to_fmus_cs2, kind='ME')  #loading CS2-model as ME-model
 
     @testattr(windows = True)
     def test_correct_loading(self):
         """
         This method tests the correct loading of FMUs
         """
-        model = load_fmu2(fmu = ME1, path = path_to_fmus_me1, kind = 'auto') #loading ME1-model correct
+        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'auto') #loading ME1-model correct
         assert isinstance(model, FMUModelME1)
-        model = load_fmu2(fmu = ME1, path = path_to_fmus_me1, kind = 'ME')   #loading ME1-model correct
+        model = load_fmu(fmu = ME1, path = path_to_fmus_me1, kind = 'ME')   #loading ME1-model correct
         assert isinstance(model, FMUModelME1)
-        model = load_fmu2(fmu = CS1, path = path_to_fmus_cs1, kind = 'auto') #loading CS1-model correct
+        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'auto') #loading CS1-model correct
         assert isinstance(model, FMUModelCS1)
-        model = load_fmu2(fmu = CS1, path = path_to_fmus_cs1, kind = 'CS')   #loading CS1-model correct
+        model = load_fmu(fmu = CS1, path = path_to_fmus_cs1, kind = 'CS')   #loading CS1-model correct
         assert isinstance(model, FMUModelCS1)
 
-        model = load_fmu2(fmu = ME2, path = path_to_fmus_me2, kind = 'Auto') #loading ME2-model correct
+        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'Auto') #loading ME2-model correct
         assert isinstance(model, FMUModelME2)
-        model = load_fmu2(fmu = ME2, path = path_to_fmus_me2, kind = 'me')   #loading ME2-model correct
+        model = load_fmu(fmu = ME2, path = path_to_fmus_me2, kind = 'me')   #loading ME2-model correct
         assert isinstance(model, FMUModelME2)
-        model = load_fmu2(fmu = CS2, path = path_to_fmus_cs2, kind = 'AUTO') #loading CS2-model correct
+        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'AUTO') #loading CS2-model correct
         assert isinstance(model, FMUModelCS2)
-        model = load_fmu2(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
+        model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
         assert isinstance(model, FMUModelCS2)
+
+class Test_RaisesIfNonConverge:
+    """
+    Test that exception is raised if NLE solver does not converge
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('InitTest1.fmu')
+
+    @testattr(fmi = True)
+    def test_get_raises(self):
+        """
+        Test that expeptions are thrown when equation becomes non-solvable.
+        """
+        m = self.m
+        m.set('_log_level',5)
+        m.set_fmil_log_level(5)
+        m.set('_nle_solver_log_level',3)
+
+        m.set('u1',3)
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.set('y1',0.)
+
+        m.initialize()
+
+        print "model initialized"
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.set('u1',4)
+
+        print "Inpu1t set"
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.get_derivatives()
+
+        print "Set initial valu1e of y1"
+        m.set('y1',0.5)
+
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        print "Set bad initial valu1e of p"
+        m.set('p',0.5)
+        nose.tools.assert_raises(FMUException,m.get, 'x1')
+
+        print "Set good p"
+        m.set('p',4)
+        print 'x1 = ' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        print "Set large p & u1"
+        m.set('p',1e300)
+        m.set('u1',1e300)
+        nose.tools.assert_raises(FMUException,m.get, 'z1')
 

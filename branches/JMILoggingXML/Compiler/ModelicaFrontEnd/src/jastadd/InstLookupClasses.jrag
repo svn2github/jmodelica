@@ -24,6 +24,7 @@ aspect InstLookupClasses {
     eq InstClassDecl.lookupInstClassRedirect(String name)                   = actualInstClass().genericLookupInstClass(name);
     eq InstEnumClassDecl.lookupInstClassRedirect(String name)               = lookupInstBuiltInClass(name);
     eq InstReplacingComposite.lookupInstClassRedirect(String name)          = lookupInstClass(name);
+    eq InstReplacingRecord.lookupInstClassRedirect(String name)             = lookupInstClass(name);
     eq InstReplacingPrimitive.lookupInstClassRedirect(String name)          = lookupInstClass(name);
     eq InstExtends.lookupInstClassRedirect(String name)                     = genericLookupInstClassInExtends(name);
     syn InstClassDecl InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
@@ -73,9 +74,11 @@ aspect InstLookupClasses {
 	eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingFullClassDecl.getOriginalInstClass().lookupInstClass(String name)        = lookupInstClass(name);
 	
+	eq InstReplacingRecord.getOriginalInstComponent().lookupInstClass(String name)    = lookupInstClass(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
 	eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstClass(String name) = lookupInstClass(name);
   
+	eq InstReplacingRecord.getClassName().lookupInstClass(String name)    = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	

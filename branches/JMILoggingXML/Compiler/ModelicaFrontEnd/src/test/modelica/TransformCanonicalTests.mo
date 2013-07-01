@@ -3747,6 +3747,49 @@ end TransformCanonicalTests.IfEqu24;
 ")})));
 end IfEqu24;
 
+model IfEqu25
+	function f
+		input Real x;
+		output Real y;
+		external "C" y = sin(x);
+	end f;
+	
+	Real x;
+	Real y;
+equation
+	if f(2) > 0 then
+		x = time;
+    else
+        x = 2;
+	end if;
+	y = if f(2) > 0 then x else x * x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu25",
+			description="Check that if elimination handles tests with external functions",
+			flatModel="
+fclass TransformCanonicalTests.IfEqu25
+ Real x;
+ Real y;
+equation
+ x = if TransformCanonicalTests.IfEqu25.f(2) > 0 then time else 2;
+ y = if TransformCanonicalTests.IfEqu25.f(2) > 0 then x else x * x;
+
+public
+ function TransformCanonicalTests.IfEqu25.f
+  input Real x;
+  output Real y;
+ algorithm
+  external \"C\" y = sin(x);
+  return;
+ end TransformCanonicalTests.IfEqu25.f;
+
+end TransformCanonicalTests.IfEqu25;
+")})));
+end IfEqu25;
+
+
 model IfExpLeft1
 	Real x;
 equation

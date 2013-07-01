@@ -36,6 +36,7 @@ import numpy as N
     
 from pyjmi.optimization.polynomial import *
 from pyjmi.common import xmlparser
+from pyjmi.common.xmlparser import XMLException
 from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
@@ -150,6 +151,18 @@ class CasadiCollocator(object):
                 v - Value of the option (int, double, string)
         """
         self.solver.setOption(k,v)
+
+    def _get_xml_variable_by_name(self, name):
+        """
+        Helper function for getting an XML variable by name.
+
+        This method does not really belong here...
+        """
+        variables = self.model.xmldoc.get_model_variables()
+        for var in variables:
+            if var.get_name() == name:
+                return var
+        raise XMLException("Could not find XML variable with name: %s" % name)
     
     def export_result_dymola(self, file_name='', format='txt', 
                              write_scaled_result=False):
@@ -337,20 +350,58 @@ class CasadiCollocator(object):
                         n_parameters += 1
                         params += [name]
                         f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                    elif aliases[i][1] == 1: # alias
-                        f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                    else: # negated alias
-                        f.write('1 -%d 0 -1 # ' % cnt_1 + name[1] +'\n')
+                    else: # alias
+                        if aliases[i][1] == 1:
+                            neg = 1
+                        else:
+                            neg = -1 # negated alias
+                        var = self._get_xml_variable_by_name(name[1])
+                        if var.get_alias():
+                            # Check whether the alias has the same variability
+                            var_ali = md.get_aliases_for_variable(name[1])[0]
+                            for aliass in var_ali:
+                                aliass_var = \
+                                    self._get_xml_variable_by_name(aliass)
+                                if not aliass_var.get_alias():
+                                    variab = aliass_var.get_variability()
+                                    if (variab != xmlparser.PARAMETER and
+                                        variab != xmlparser.CONSTANT):
+                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                                name[1] +'\n')
+                                    else:
+                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                                name[1] +'\n')
+                        else:
+                            f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                    name[1] +'\n')
                 else:
                     if aliases[i][1] == 0: # noalias
-                        cnt_2 = cnt_2 + 1   
+                        cnt_2 = cnt_2 + 1
                         f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                    elif aliases[i][1] == 1: # alias
-                        f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                    else: #neg alias
-                        f.write('2 -%d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                
-                    
+                    else: # alias
+                        if aliases[i][1] == 1:
+                            neg = 1
+                        else:
+                            neg = -1 # negated alias
+                        var = self._get_xml_variable_by_name(name[1])
+                        if var.get_alias():
+                            # Check whether the alias has the same variability
+                            var_ali = md.get_aliases_for_variable(name[1])[0]
+                            for aliass in var_ali:
+                                aliass_var = \
+                                    self._get_xml_variable_by_name(aliass)
+                                if not aliass_var.get_alias():
+                                    variab = aliass_var.get_variability()
+                                    if (variab == xmlparser.PARAMETER or
+                                        variab == xmlparser.CONSTANT):
+                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
+                                                name[1] +'\n')
+                                    else:
+                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                                name[1] +'\n')
+                        else:
+                            f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
+                                    name[1] +'\n')
             f.write('\n')
             
             # Write data
@@ -393,16 +444,16 @@ class CasadiCollocator(object):
         u_opt = N.empty([len(t_opt), self.model.get_n_u()])
         p_opt  = N.empty(self.model.get_n_p())
 
-        p_opt[:] = self.nlp_opt[self.get_var_indices()['p_opt']][:, 0]
+        p_opt[:] = self.primal_opt[self.get_var_indices()['p_opt']][:, 0]
 
         cnt = 0
         var_indices = self.get_var_indices()
         for i in xrange(1, self.n_e + 1):
             for k in self.time_points[i].keys():
-                dx_opt[cnt, :] = self.nlp_opt[var_indices[i][k]['dx']][:, 0]
-                x_opt[cnt, :] = self.nlp_opt[var_indices[i][k]['x']][:, 0]
-                u_opt[cnt, :] = self.nlp_opt[var_indices[i][k]['u']][:, 0]
-                w_opt[cnt, :] = self.nlp_opt[var_indices[i][k]['w']][:, 0]
+                dx_opt[cnt, :] = self.primal_opt[var_indices[i][k]['dx']][:, 0]
+                x_opt[cnt, :] = self.primal_opt[var_indices[i][k]['x']][:, 0]
+                u_opt[cnt, :] = self.primal_opt[var_indices[i][k]['u']][:, 0]
+                w_opt[cnt, :] = self.primal_opt[var_indices[i][k]['w']][:, 0]
                 cnt += 1
         return (t_opt, dx_opt, x_opt, u_opt, w_opt, p_opt)
     
@@ -498,26 +549,15 @@ class CasadiCollocator(object):
         self.solver.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver.setInput(self.glub, casadi.NLP_SOLVER_UBG)
         
-        """
-        print "Optimal control problem: "
-        print self.ocp
-        
-        print "NLP X: ", len(self.get_xx()), self.get_xx()
-        print "NLP X UB: ", len(self.get_xx_ub()), self.get_xx_ub()
-        print "NLP X LB: ", len(self.get_xx_lb()), self.get_xx_lb()
-        
-        print "Equality constraints: ", len(h), h
-        print "Inequality constraints: ", len(g), g
-        
-        print "Cost functional: ", self.get_cost()
-        """
         # Solve the problem
         t0 = time.clock()
         self.solver.solve()
         
         # Get the result
-        nlp_opt = N.array(self.solver.output(casadi.NLP_SOLVER_X))
-        self.nlp_opt = nlp_opt.reshape(-1)
+        primal_opt = N.array(self.solver.output(casadi.NLP_SOLVER_X))
+        self.primal_opt = primal_opt.reshape(-1)
+        dual_opt = N.array(self.solver.output(casadi.NLP_SOLVER_LAM_G))
+        self.dual_opt = dual_opt.reshape(-1)
         sol_time = time.clock() - t0
         return sol_time
 
@@ -1541,7 +1581,7 @@ class LocalDAECollocator(CasadiCollocator):
                                           "identically zero.")
                                     d = 1.
                                 else:
-                                    d = traj_max
+                                    d = max([abs(traj_max), abs(traj_min)])
                                 e = 0.
                             else:
                                 d = traj_max - traj_min
@@ -2643,11 +2683,11 @@ class LocalDAECollocator(CasadiCollocator):
                 invariant_e = self._invariant_e
         
         # Get copy of solution
-        nlp_opt = copy.copy(self.nlp_opt)
+        primal_opt = copy.copy(self.primal_opt)
         
         # Get element lengths
         if self.hs == "free":
-            self.h_opt = N.hstack([N.nan, nlp_opt[var_indices['h'][1:]]])
+            self.h_opt = N.hstack([N.nan, primal_opt[var_indices['h'][1:]]])
             h_scaled = self.horizon * self.h_opt
         else:
             h_scaled = self.horizon * N.array(self.h)
@@ -2691,7 +2731,7 @@ class LocalDAECollocator(CasadiCollocator):
         var_opt['p_opt'] = N.empty(self.model.get_n_p())
         
         # Get optimal parameter values and rescale
-        p_opt = nlp_opt[self.get_var_indices()['p_opt']].reshape(-1)
+        p_opt = primal_opt[self.get_var_indices()['p_opt']].reshape(-1)
         if self.variable_scaling and not self.write_scaled_result:
             if self.nominal_traj is None:
                 p_opt *= sf['p_opt']
@@ -2716,7 +2756,7 @@ class LocalDAECollocator(CasadiCollocator):
                             vr = var.getValueReference()
                             (ind, _) = vr_map[vr]
                             global_ind = var_indices[i][k][var_type][ind]
-                            xx_i_k = nlp_opt[global_ind]
+                            xx_i_k = primal_opt[global_ind]
                             if self.nominal_traj is None:
                                 xx_i_k *= sf[var_type][ind]
                             else:
@@ -2727,7 +2767,7 @@ class LocalDAECollocator(CasadiCollocator):
                                     d = invariant_d[sf_index]
                                     e = invariant_e[sf_index]
                                     xx_i_k = d * xx_i_k + e
-                            nlp_opt[global_ind] = xx_i_k
+                            primal_opt[global_ind] = xx_i_k
                     
                     # Treat state derivatives separately
                     if not self.eliminate_der_var:
@@ -2737,7 +2777,7 @@ class LocalDAECollocator(CasadiCollocator):
                         for vr in sorted(name_dict):
                             (ind, _) = vr_map[vr]
                             global_ind = var_indices[i][k]["dx"][ind]
-                            xx_i_k = nlp_opt[global_ind]
+                            xx_i_k = primal_opt[global_ind]
                             if self.nominal_traj is None:
                                 xx_i_k *= sf["dx"][ind]
                             else:
@@ -2748,7 +2788,7 @@ class LocalDAECollocator(CasadiCollocator):
                                     d = invariant_d[sf_index]
                                     e = invariant_e[sf_index]
                                     xx_i_k = d * xx_i_k + e
-                            nlp_opt[global_ind] = xx_i_k
+                            primal_opt[global_ind] = xx_i_k
                         t_index += 1
         
         # Rescale continuity variables
@@ -2756,8 +2796,8 @@ class LocalDAECollocator(CasadiCollocator):
             not self.write_scaled_result):
             for i in xrange(1, self.n_e):
                 k = self.n_cp + self.is_gauss
-                x_i_k = nlp_opt[var_indices[i][k]['x']]
-                nlp_opt[var_indices[i + 1][0]['x']] = x_i_k
+                x_i_k = primal_opt[var_indices[i][k]['x']]
+                primal_opt[var_indices[i + 1][0]['x']] = x_i_k
         if (self.is_gauss and self.variable_scaling and 
             not self.eliminate_cont_var and not self.write_scaled_result):
             if self.quadrature_constraint:
@@ -2765,23 +2805,23 @@ class LocalDAECollocator(CasadiCollocator):
                     # Evaluate x_{i, n_cp + 1} based on quadrature
                     x_i_np1 = 0
                     for k in xrange(1, self.n_cp + 1):
-                        dx_i_k = nlp_opt[var_indices[i][k]['dx']]
+                        dx_i_k = primal_opt[var_indices[i][k]['dx']]
                         x_i_np1 += self.pol.w[k] * dx_i_k
-                    x_i_np1 = (nlp_opt[var_indices[i][0]['x']] + 
+                    x_i_np1 = (primal_opt[var_indices[i][0]['x']] + 
                                self.horizon * self.h[i] * x_i_np1)
                     
                     # Rescale x_{i, n_cp + 1}
-                    nlp_opt[var_indices[i][self.n_cp + 1]['x']] = x_i_np1
+                    primal_opt[var_indices[i][self.n_cp + 1]['x']] = x_i_np1
             else:
                 for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
                     x_i_np1 = 0
                     for k in xrange(self.n_cp + 1):
-                        x_i_k = nlp_opt[var_indices[i][k]['x']]
+                        x_i_k = primal_opt[var_indices[i][k]['x']]
                         x_i_np1 += x_i_k * self.pol.eval_basis(k, 1, True)
                     
                     # Rescale x_{i, n_cp + 1}
-                    nlp_opt[var_indices[i][self.n_cp + 1]['x']] = x_i_np1
+                    primal_opt[var_indices[i][self.n_cp + 1]['x']] = x_i_np1
         
         # Get solution trajectories
         t_index = 0
@@ -2789,7 +2829,7 @@ class LocalDAECollocator(CasadiCollocator):
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     for var_type in var_types:
-                        xx_i_k = nlp_opt[var_indices[i][k][var_type]]
+                        xx_i_k = primal_opt[var_indices[i][k][var_type]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     var_opt['elim_u'][t_index, :] = var_map[i][k]['elim_u']
                     t_index += 1
@@ -2798,7 +2838,7 @@ class LocalDAECollocator(CasadiCollocator):
                 t_index = 0
                 i = 1
                 k = 0
-                dx_i_k = nlp_opt[var_indices[i][k]['dx']]
+                dx_i_k = primal_opt[var_indices[i][k]['dx']]
                 var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
                 t_index += 1
                 
@@ -2807,7 +2847,7 @@ class LocalDAECollocator(CasadiCollocator):
                     for k in xrange(1, self.n_cp + 1):
                         dx_i_k = 0
                         for l in xrange(self.n_cp + 1):
-                            x_i_l = nlp_opt[var_indices[i][l]['x']]
+                            x_i_l = primal_opt[var_indices[i][l]['x']]
                             dx_i_k += (1. / h_scaled[i] * x_i_l * 
                                        self.pol.eval_basis_der(
                                                l, self.pol.p[k]))
@@ -2822,7 +2862,7 @@ class LocalDAECollocator(CasadiCollocator):
                         # Evaluate xx_i_tau based on polynomial xx^i
                         xx_i_tau = 0
                         for k in xrange(not cont[var_type], self.n_cp + 1):
-                            xx_i_k = nlp_opt[var_indices[i][k][var_type]]
+                            xx_i_k = primal_opt[var_indices[i][k][var_type]]
                             xx_i_tau += xx_i_k * self.pol.eval_basis(
                                     k, tau, cont[var_type])
                         var_opt[var_type][t_index, :] = xx_i_tau.reshape(-1)
@@ -2838,7 +2878,7 @@ class LocalDAECollocator(CasadiCollocator):
                     # Derivatives
                     dx_i_tau = 0
                     for k in xrange(self.n_cp + 1):
-                        x_i_k = nlp_opt[var_indices[i][k]['x']]
+                        x_i_k = primal_opt[var_indices[i][k]['x']]
                         dx_i_tau += (1. / h_scaled[i] * x_i_k * 
                                      self.pol.eval_basis_der(k, tau))
                     var_opt['dx'][t_index, :] = dx_i_tau.reshape(-1)
@@ -2849,7 +2889,7 @@ class LocalDAECollocator(CasadiCollocator):
             i = 1
             k = 0
             for var_type in var_types:
-                xx_i_k = nlp_opt[var_indices[i][k][var_type]]
+                xx_i_k = primal_opt[var_indices[i][k][var_type]]
                 var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
             var_opt['elim_u'][t_index, :] = var_map[i][k]['elim_u']
             t_index += 1
@@ -2860,7 +2900,7 @@ class LocalDAECollocator(CasadiCollocator):
             if self.discr == "LGR":
                 for i in xrange(1, self.n_e + 1):
                     for var_type in var_types:
-                        xx_i_k = nlp_opt[var_indices[i][k][var_type]]
+                        xx_i_k = primal_opt[var_indices[i][k][var_type]]
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     u_i_k = var_map[i][k]['elim_u']
                     var_opt[var_type][t_index, :] = u_i_k.reshape(-1)
@@ -2871,7 +2911,7 @@ class LocalDAECollocator(CasadiCollocator):
                         # Evaluate xx_{i, n_cp + 1} based on polynomial xx_i
                         xx_i_k = 0
                         for l in xrange(1, self.n_cp + 1):
-                            xx_i_l = nlp_opt[var_indices[i][l][var_type]]
+                            xx_i_l = primal_opt[var_indices[i][l][var_type]]
                             xx_i_k += xx_i_l * self.pol.eval_basis(l, 1, False)
                         var_opt[var_type][t_index, :] = xx_i_k.reshape(-1)
                     # Evaluate u_{i, n_cp + 1} based on polynomial u_i
@@ -2886,7 +2926,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Handle states separately
             t_index = 1
             for i in xrange(1, self.n_e + 1):
-                x_i_k = nlp_opt[var_indices[i][k]['x']]
+                x_i_k = primal_opt[var_indices[i][k]['x']]
                 var_opt['x'][t_index, :] = x_i_k.reshape(-1)
                 t_index += 1
             
@@ -2896,7 +2936,7 @@ class LocalDAECollocator(CasadiCollocator):
                 t_index = 0
                 i = 1
                 k = 0
-                dx_i_k = nlp_opt[var_indices[i][k]['dx']]
+                dx_i_k = primal_opt[var_indices[i][k]['dx']]
                 var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
                 t_index += 1
                 
@@ -2905,7 +2945,7 @@ class LocalDAECollocator(CasadiCollocator):
                 for i in xrange(1, self.n_e + 1):
                     dx_i_k = 0
                     for l in xrange(self.n_cp + 1):
-                        x_i_l = nlp_opt[var_indices[i][l]['x']]
+                        x_i_l = primal_opt[var_indices[i][l]['x']]
                         dx_i_k += (1. / h_scaled[i] * x_i_l * 
                                    self.pol.eval_basis_der(l, 1.))
                     var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
@@ -2928,7 +2968,7 @@ class LocalDAECollocator(CasadiCollocator):
             u_opt = N.empty([self.n_e * self.n_cp + 1, self.model.get_n_u()])
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
-                    unelim_u_i_k = nlp_opt[var_indices[i][k]['unelim_u']]
+                    unelim_u_i_k = primal_opt[var_indices[i][k]['unelim_u']]
                     u_opt[t_index, self._unelim_input_indices] = \
                         unelim_u_i_k.reshape(-1)
                     elim_u_i_k = self.var_map[i][k]['elim_u']
@@ -3745,25 +3785,25 @@ class PseudoSpectral(CasadiCollocator):
         p_opt  = N.zeros(self.model.get_n_p())
         
         ts = [i[0] for i in self.get_time_points()]
-        self.nlp_opt = self.nlp_opt.reshape([-1, 1])
+        self.primal_opt = self.primal_opt.reshape([-1, 1])
 
         if (self.options['free_phases'] and len(PHASE) > 1) and self.md.get_opt_finaltime_free():
             input_t = [self.vars[i]['t'] for i in PHASE]
             tfcn = casadi.SXFunction([casadi.vertcat(input_t)],[casadi.vertcat(ts)])
             tfcn.init()
-            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
+            input_res = [self.primal_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE]
             tfcn.setInput(N.array(input_res).flatten())
         elif (self.options['free_phases'] and len(PHASE) > 1):
             input_t = [self.vars[i]['t'] for i in PHASE[:-1]]
             tfcn = casadi.SXFunction([casadi.vertcat(input_t)],[casadi.vertcat(ts)])
             tfcn.init()
-            input_res = [self.nlp_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
+            input_res = [self.primal_opt[self.var_indices[i][DISCR[-1]]['t']][0] for i in PHASE[:-1]]
             tfcn.setInput(N.array(input_res).flatten())
         elif self.md.get_opt_finaltime_free():
             input_t = self.vars[PHASE[-1]]['t']
             tfcn = casadi.SXFunction([[input_t]],[ts])
             tfcn.init()
-            tfcn.setInput(self.nlp_opt[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
+            tfcn.setInput(self.primal_opt[self.var_indices[PHASE[-1]][DISCR[-1]]['t']])
         else:
             tfcn = casadi.SXFunction([[]],[ts])
             tfcn.init()
@@ -3775,28 +3815,28 @@ class PseudoSpectral(CasadiCollocator):
         cnt = 0
         for time,i,j in self.get_time_points():
             #t_opt[cnt] = t
-            x_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['x']][:,0]
+            x_opt[cnt,:]  = self.primal_opt[self.get_var_indices()[i][j]['x']][:,0]
             
             if j==0 and DISCR[0] != COLLO[0]:
-                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,-1.0)*self.primal_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
                 dx_coeff = [lagrange_derivative_eval(AROOT,ind,-1.0) for ind in range(len(APPRO))]
-                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
-                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,-1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.primal_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,-1.0)*self.primal_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
                 cnt = cnt + 1
                 continue
             if j==DISCR[-1] and DISCR[-1] != COLLO[-1]:
-                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
+                u_opt[cnt,:] = [sum([lagrange_eval(ROOTS,ind,1.0)*self.primal_opt[self.get_var_indices()[i][l]['u']][k,0] for ind,l in enumerate(COLLO)]) for k in range(self.model.get_n_u())]
                 dx_coeff = [lagrange_derivative_eval(AROOT,ind,1.0) for ind in range(len(APPRO))]
-                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
-                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,1.0)*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([dx_coeff[ind]*self.primal_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
+                #dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([lagrange_derivative_eval(AROOT,ind,1.0)*self.primal_opt[self.get_var_indices()[i][l]['x']][k,0] for ind,l in enumerate(APPRO)]) for k in range(self.model.get_n_x())]
                 cnt = cnt + 1
                 continue
             
-            u_opt[cnt,:]  = self.nlp_opt[self.get_var_indices()[i][j]['u']][:,0]
-            dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([DIFFM[j-COLLO[0],l]*self.nlp_opt[self.get_var_indices()[i][l]['x']][k,0] for l in APPRO]) for k in range(self.model.get_n_x())]
+            u_opt[cnt,:]  = self.primal_opt[self.get_var_indices()[i][j]['u']][:,0]
+            dx_opt[cnt,:] = [N.array(2.0)/(t_opt[(i)*len(DISCR)-1]-t_opt[(i-1)*len(DISCR)])*sum([DIFFM[j-COLLO[0],l]*self.primal_opt[self.get_var_indices()[i][l]['x']][k,0] for l in APPRO]) for k in range(self.model.get_n_x())]
             cnt = cnt + 1
             
-        p_opt[:] = self.nlp_opt[self.get_var_indices()[0][0]['p']][:,0]
+        p_opt[:] = self.primal_opt[self.get_var_indices()[0][0]['p']][:,0]
 
         return (t,dx_opt,x_opt,u_opt,w_opt,p_opt)
         

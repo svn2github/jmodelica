@@ -2259,6 +2259,7 @@ aspect CCodeGen {
 	}	
 
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
+		genTempVars_C(printer_C, str, indent);
 		if (!(this instanceof FDerivativeVariable)) {
 			str.print(indent + "(*res)[" + enumerator.next() + "] = ");
 			if (startAttributeSet()) {
@@ -2319,8 +2320,7 @@ aspect CCodeGen {
 	}
 	
 	public void FVariable.genStartValue_C(String indent, PrintStream str) {
-		genVarDecls_C(printer_C, str, printer_C.indent(indent));
-		genTempVars_C(printer_C, str, printer_C.indent(indent));
+		genTempVars_C(printer_C, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;

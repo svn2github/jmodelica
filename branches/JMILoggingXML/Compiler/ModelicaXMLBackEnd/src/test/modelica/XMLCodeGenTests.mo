@@ -1126,4 +1126,20 @@ model Experiment2
 ")})));
 end Experiment2;
 
+model SpecialCharacter1
+ Real xy = 1 "x & y";
+
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="SpecialCharacter1",
+			description="Test that the special character ampersand is generated correctly in the XML code.",
+			template="$XML_variables$",
+			generatedCode="
+
+		<ScalarVariable name=\"xy\" valueReference=\"0\" description=\"x &amp; y\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+		</ScalarVariable>
+")})));
+end SpecialCharacter1;
+
 end XMLCodeGenTests;

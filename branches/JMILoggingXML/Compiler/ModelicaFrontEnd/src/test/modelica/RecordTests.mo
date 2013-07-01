@@ -677,6 +677,120 @@ Semantic error at line 664, column 16:
 end RecordBinding7;
 
 
+model RecordBinding8
+	record A
+		Real a;
+		Real b;
+	end A;
+	
+	function f
+		input Real x;
+		output A y;
+	algorithm
+		y := A(x, x*x);
+	end f;
+	
+	Real[2] x = time * (1:2);
+    A[2] y1 = { A(x[i], time) for i in 1:2 };
+    A[2] y2 = { f(x[1]), f(x[2]) };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding8",
+			description="Generating binding equations for records with array binding expressions that cannot be split",
+			inline_functions="trivial",
+			flatModel="
+fclass RecordTests.RecordBinding8
+ Real y1[1].b;
+ Real y1[2].b;
+ Real y2[1].a;
+ Real y2[1].b;
+ Real y2[2].a;
+ Real y2[2].b;
+equation
+ y2[1].a = time * 1;
+ y2[2].a = time * 2;
+ y1[1].b = time;
+ y1[2].b = time;
+ y2[1].b = y2[1].a * y2[1].a;
+ y2[2].b = y2[2].a * y2[2].a;
+
+public
+ record RecordTests.RecordBinding8.A
+  Real a;
+  Real b;
+ end RecordTests.RecordBinding8.A;
+
+end RecordTests.RecordBinding8;
+")})));
+end RecordBinding8;
+
+
+model RecordBinding9
+    record A
+        constant Real a = 1;
+        Real b;
+    end A;
+    
+    parameter A x(b = 2);
+    parameter A y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding9",
+			description="Record containing constant as binding expression",
+			flatModel="
+fclass RecordTests.RecordBinding9
+ constant Real x.a = 1;
+ parameter Real x.b = 2 /* 2 */;
+ constant Real y.a = 1;
+ parameter Real y.b;
+parameter equation
+ y.b = x.b;
+
+public
+ record RecordTests.RecordBinding9.A
+  constant Real a;
+  Real b;
+ end RecordTests.RecordBinding9.A;
+
+end RecordTests.RecordBinding9;
+")})));
+end RecordBinding9;
+
+
+model RecordBinding10
+    record A
+        constant Real a = 1;
+        Real b;
+    end A;
+    
+    A x(b = time);
+    A y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding10",
+			description="Record containing constant as binding expression",
+			flatModel="
+fclass RecordTests.RecordBinding10
+ constant Real x.a = 1;
+ constant Real y.a = 1;
+ Real y.b;
+equation
+ y.b = time;
+
+public
+ record RecordTests.RecordBinding10.A
+  constant Real a;
+  Real b;
+ end RecordTests.RecordBinding10.A;
+
+end RecordTests.RecordBinding10;
+")})));
+end RecordBinding10;
+
+
 
 model RecordArray1
  record A
@@ -2141,6 +2255,74 @@ public
 end RecordTests.RecordScalarize24;
 ")})));
 end RecordScalarize24;
+
+
+model RecordScalarize25
+	type A = enumeration(a1, a2);
+	
+	record B
+		Real x;
+		A y;
+	end B;
+	
+	B b(x = time, y = if b.x < 3 then A.a1 else A.a2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize25",
+			description="Scalarization of enumeration variable in record",
+			flatModel="
+fclass RecordTests.RecordScalarize25
+ Real b.x;
+ discrete RecordTests.RecordScalarize25.A b.y;
+initial equation 
+ b.pre(y) = false;
+equation
+ b.x = time;
+ b.y = if b.x < 3 then RecordTests.RecordScalarize25.A.a1 else RecordTests.RecordScalarize25.A.a2;
+
+public
+ record RecordTests.RecordScalarize25.B
+  Real x;
+  discrete RecordTests.RecordScalarize25.A y;
+ end RecordTests.RecordScalarize25.B;
+
+ type RecordTests.RecordScalarize25.A = enumeration(a1, a2);
+
+end RecordTests.RecordScalarize25;
+")})));
+end RecordScalarize25;
+
+
+model RecordScalarize26
+	record R
+	    parameter Real x[2] = { 1, 2 };
+	    Real y;
+	end R;
+	
+	R r(y = time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordScalarize26",
+			description="Scalarization of array with binding expression in record declaration",
+			flatModel="
+fclass RecordTests.RecordScalarize26
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+ Real r.y;
+equation
+ r.y = time;
+
+public
+ record RecordTests.RecordScalarize26.R
+  parameter Real x[2];
+  Real y;
+ end RecordTests.RecordScalarize26.R;
+
+end RecordTests.RecordScalarize26;
+")})));
+end RecordScalarize26;
 
 // TODO: Add more complicated combinations of arrays, records and modifiers
 

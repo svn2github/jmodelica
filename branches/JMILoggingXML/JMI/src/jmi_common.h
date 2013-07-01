@@ -1310,7 +1310,11 @@ struct jmi_t{
     jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
     jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
     jmi_real_t **dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
-    jmi_real_t **dz_active_variables;    /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
+    int dz_active_index;            /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
+    int block_level;                /**< \brief Block level for nested equation blocks. Currently 0 or 1. */
+    jmi_real_t *dz_active_variables[1];	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
+#define JMI_ACTIVE_VAR_BUFS_NUM 3
+    jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM]; /**< \brief  This vector is the buffer used by dz_active_variables */
     void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
     int indep_extobjs_initialized;      /** <\brief Flag indicating if initialization of independent external objects have been done. */
         int dep_extobjs_initialized;        /** <\brief Flag indicating if initialization of dependent external objects have been done. */

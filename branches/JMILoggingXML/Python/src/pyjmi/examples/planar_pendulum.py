@@ -37,9 +37,13 @@ def run_demo(with_plots=True):
 
     # Load model
     model = load_fmu(fmu_name)
-
+    
+    # Options
+    opts = model.simulate_options()
+    opts["CVode_options"]["rtol"] = 1e-6
+    
     # Load result file
-    res = model.simulate(final_time=10.)
+    res = model.simulate(final_time=10., options=opts)
 
     x = res['x']
     st = res['st']

@@ -131,7 +131,7 @@ class TestWriteScaledResult(OptimizationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base(
+        OptimizationTest.setup_class_base(
                 'ScaledResult.mop', 'ScaledResult.Scaled2',
                     options={"enable_variable_scaling":True})
 

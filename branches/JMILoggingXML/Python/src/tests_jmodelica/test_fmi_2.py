@@ -26,7 +26,7 @@ import sys as S
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
-from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu, FMUModelCS2, FMUModelME2, load_fmu2, PyEventInfo
+from pyfmi.fmi import FMUModel, FMUException, FMUModelME1, FMUModelCS1, load_fmu, FMUModelCS2, FMUModelME2, PyEventInfo
 import pyfmi.fmi_algorithm_drivers as ad
 from pyfmi.common.core import get_platform_dir
 from pyjmi.log import parse_jmi_log, gather_solves
@@ -58,7 +58,7 @@ class Test_FMUModelCS2:
         """
         Test the method __init__ in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
 
         assert self._bounce.get_identifier() == 'BouncingBall2'
         nose.tools.assert_raises(FMUException, FMUModelCS2, fmu=ME2, path=path_to_fmus_me2)
@@ -77,7 +77,7 @@ class Test_FMUModelCS2:
         """
         Test the method instantiate_slave in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
         self._bounce.initialize()
 
         self._bounce.reset_slave() #Test multiple instantiation
@@ -90,8 +90,8 @@ class Test_FMUModelCS2:
         """
         Test the method initialize in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
 
         for i in range(10):
             self._bounce.initialize(relTol = 10**-i)  #Initialize multiple times with different relTol
@@ -123,9 +123,9 @@ class Test_FMUModelCS2:
         """
         Test the method reset_slave in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
         self._bounce.initialize()
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
         self._coupledCS2.initialize()
 
         self._bounce.reset_slave()
@@ -139,7 +139,7 @@ class Test_FMUModelCS2:
         """
         Test the time in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
         self._bounce.initialize()
 
         assert self._bounce._get_time() == 0.0
@@ -158,9 +158,9 @@ class Test_FMUModelCS2:
         """
         Test the method do_step in FMUModelCS2
         """
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
         self._bounce.initialize()
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
         self._coupledCS2.initialize()
 
         new_step_size = 1e-1
@@ -193,7 +193,7 @@ class Test_FMUModelCS2:
         """
 
         #Do the setUp
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
 
         nose.tools.assert_raises(FMUException, self._coupledCS2.set_input_derivatives, 'J1.phi', 1.0, 0) #this is nou an input-variable
         nose.tools.assert_raises(FMUException, self._coupledCS2.set_input_derivatives, 'J1.phi', 1.0, 1)
@@ -204,7 +204,7 @@ class Test_FMUModelCS2:
         """
         Test the method get_output_derivatives in FMUModelCS2
         """
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
         self._coupledCS2.initialize()
 
         self._coupledCS2.do_step(0.0, 0.02)
@@ -225,8 +225,8 @@ class Test_FMUModelCS2:
         Test the main features of the method simulate() in FMUmodelCS2
         """
         #Set up for simulation
-        self._bounce=load_fmu2(CS2, path_to_fmus_cs2, False)
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._bounce=load_fmu(CS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
 
         #Try simulate the bouncing ball
         res=self._bounce.simulate()
@@ -260,7 +260,7 @@ class Test_FMUModelCS2:
 
 
         for i in range(10):
-            self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+            self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
             res_coupled = self._coupledCS2.simulate(start_time=0.0, final_time=2.0)
             sim_time_coupled = res_coupled['time']
             nose.tools.assert_almost_equal(sim_time_coupled[0], 0.0)
@@ -281,9 +281,9 @@ class Test_FMUModelCS2:
             self._coupledCS2.reset_slave()
 
         #Compare to something we know is correct
-        cs1_model = load_fmu2('Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu',path_to_fmus_cs1, False)
+        cs1_model = load_fmu('Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu',path_to_fmus_cs1, False)
         res1 = cs1_model.simulate(final_time=10, options={'result_file_name':'result1'})
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
         res2 = self._coupledCS2.simulate(final_time=10, options={'result_file_name':'result2'})
         diff1 = res1.final("J1.w") - res2.final("J1.w")
         diff2 = res1.final("J2.w") - res2.final("J2.w")
@@ -300,7 +300,7 @@ class Test_FMUModelCS2:
         Test the method simultaion_options in FMUModelCS2
         """
         #Do the setUp
-        self._coupledCS2 = load_fmu2(CoupledCS2, path_to_fmus_cs2, False)
+        self._coupledCS2 = load_fmu(CoupledCS2, path_to_fmus_cs2, False)
 
         #Test the result file
         res=self._coupledCS2.simulate()
@@ -333,8 +333,8 @@ class Test_FMUModelME2:
         """
         Test the method __init__ in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         assert bounce.get_identifier() == 'BouncingBall2'
         nose.tools.assert_raises(FMUException, FMUModelME2, fmu=CS2, path=path_to_fmus_cs2, enable_logging=False)
@@ -353,8 +353,8 @@ class Test_FMUModelME2:
         """
         Test the method instantiate_model in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         for i in range(5):
             name1 = 'model1' + str(i)
@@ -367,8 +367,8 @@ class Test_FMUModelME2:
         """
         Test the method initialize in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         coupled.initialize(tolControlled=False)
         nose.tools.assert_almost_equal(coupled.time, 0.0)
@@ -385,8 +385,8 @@ class Test_FMUModelME2:
         """
         Test the method reset in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         bounce.initialize()
         coupled.initialize(tolControlled=False)
@@ -402,7 +402,7 @@ class Test_FMUModelME2:
         """
         Test the method terminate in FMUModelME2
         """
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
         coupled.initialize(tolControlled=False)
         coupled.terminate()
 
@@ -411,8 +411,8 @@ class Test_FMUModelME2:
         """
         Test the method get/set_time in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         coupled.reset()
         assert coupled.time is None
@@ -431,7 +431,7 @@ class Test_FMUModelME2:
         """
         Test the method get_event_info in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
 
         bounce.initialize()
         event = bounce.get_event_info()
@@ -449,9 +449,9 @@ class Test_FMUModelME2:
         """
         Test the method get_event_indicators in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
 
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
         bounce.initialize()
         coupled.initialize(tolControlled=False)
 
@@ -476,16 +476,16 @@ class Test_FMUModelME2:
         """
         Test the method get_tolerances in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
         bounce.initialize()
         coupled.initialize(tolControlled=False)
 
         [rtol,atol] = bounce.get_tolerances()
 
-        assert rtol == 0.000001
-        nose.tools.assert_almost_equal(atol[0],0.000000010)
-        nose.tools.assert_almost_equal(atol[1],0.000000010)
+        assert rtol == 0.0001
+        nose.tools.assert_almost_equal(atol[0],0.0000010)
+        nose.tools.assert_almost_equal(atol[1],0.0000010)
 
         [rtol,atol] = coupled.get_tolerances()
 
@@ -511,8 +511,8 @@ class Test_FMUModelME2:
         """
         Test the method get/set_continuous_states in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         bounce.initialize()
         coupled.initialize(tolControlled=False)
@@ -553,8 +553,8 @@ class Test_FMUModelME2:
         """
         Test the method get_derivatives in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         bounce.initialize()
         coupled.initialize(tolControlled=False)
@@ -584,9 +584,9 @@ class Test_FMUModelME2:
         """
         Test the method get_directional_derivative in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
 
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         bounce.initialize()
         coupled.initialize(tolControlled=False)
@@ -616,7 +616,7 @@ class Test_FMUModelME2:
         """
         Test the method simulate_options in FMUModelME2
         """
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         opts=coupled.simulate_options()
         assert opts['initialize']
@@ -641,15 +641,15 @@ class Test_FMUModelME2:
         opts['initialize'] = False
         coupled.initialize(tolControlled=False)
         res=coupled.simulate(options=opts)
-        assert len(res['time']) == 253
+        assert len(res['time']) > 250
 
     @testattr(windows = True)
     def test_simulate(self):
         """
         Test the method simulate in FMUModelME2
         """
-        bounce = load_fmu2(ME2, path_to_fmus_me2, False)
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2)
+        bounce = load_fmu(ME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2)
 
         #Try simulate the bouncing ball
         res=bounce.simulate()
@@ -658,8 +658,13 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(sim_time[-1], 1.0)
         bounce.reset()
 
+        opts = bounce.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["atol"] = 1e-6
+        opts["ncp"] = 500
+
         for i in range(5):
-            res=bounce.simulate(start_time=0.1, final_time=1.0, options={'ncp':500})
+            res=bounce.simulate(start_time=0.1, final_time=1.0, options=opts)
             sim_time = res['time']
             nose.tools.assert_almost_equal(sim_time[0], 0.1)
             nose.tools.assert_almost_equal(sim_time[-1],1.0)
@@ -703,9 +708,9 @@ class Test_FMUModelME2:
             coupled.reset()
 
         #Compare to something we know is correct
-        me1_model = load_fmu2('Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu',path_to_fmus_me1, False)
+        me1_model = load_fmu('Modelica_Mechanics_Rotational_Examples_CoupledClutches_ME.fmu',path_to_fmus_me1, False)
         res1 = me1_model.simulate(final_time=2., options={'result_file_name':'result1'})
-        coupled = load_fmu2(CoupledME2, path_to_fmus_me2, False)
+        coupled = load_fmu(CoupledME2, path_to_fmus_me2, False)
         res2 = coupled.simulate(final_time=2., options={'result_file_name':'result2'})
         diff1 = res1.final("J1.w") - res2.final("J1.w")
         diff2 = res1.final("J2.w") - res2.final("J2.w")
@@ -717,7 +722,7 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(abs(diff4), 0.0000, 2)
 
         #Try simualte the robot
-        robot = load_fmu2(Robot, path_to_fmus_me2)
+        robot = load_fmu(Robot, path_to_fmus_me2)
         result = robot.simulate()
 
 

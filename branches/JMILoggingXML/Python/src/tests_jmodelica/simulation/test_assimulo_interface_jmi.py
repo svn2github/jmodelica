@@ -721,7 +721,7 @@ class Test_JMI_DAE_Sens:
 
         #Store data continuous during the simulation, important when solving a 
         #problem with sensitivites.
-        qt_sim.continuous_output = True 
+        qt_sim.report_continuously = True 
             
         #Value used when IDA estimates the tolerances on the parameters
         qt_sim.pbar = qt_mod.p0 
@@ -813,7 +813,7 @@ class Test_JMI_DAE_Sens:
         
         ##Store data continuous during the simulation, important when solving a 
         ##problem with sensitivites. FIXED INTERNALLY
-        opts['continuous_output']=True
+        opts['report_continuously']=True
         
         res = model.simulate(final_time=60, input=input_object, options=opts)
 
@@ -854,7 +854,7 @@ class Test_JMI_DAE_Sens:
         
         ##Store data continuous during the simulation, important when solving a 
         ##problem with sensitivites. FIXED INTERNALLY
-        opts['continuous_output']=True
+        opts['report_continuously']=True
         
         res = model.simulate(final_time=60, input=input_object, options=opts)
 
@@ -1048,7 +1048,7 @@ class Test_JMI_DAE_Sens:
         opts = model.simulate_options()
         
         opts['IDA_options']['sensitivity'] = True
-        opts['continuous_output'] = True
+        opts['report_continuously'] = True
         
         res = model.simulate(options=opts)
         

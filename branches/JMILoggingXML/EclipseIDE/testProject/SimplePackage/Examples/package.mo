@@ -1,3 +1,0 @@
-package Examples
-
-end Examples;

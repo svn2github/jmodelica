@@ -887,7 +887,7 @@ class JMIDAESens(Implicit_Problem):
         """
         Post processing (stores the time points and the sensitivity result).
         """
-        if solver.continuous_output:
+        if solver.report_continuously:
             if self._write_header:
                 self._write_header = False
                 self.export.write_header(file_name=self.result_file_name)
@@ -923,7 +923,7 @@ class JMIDAESens(Implicit_Problem):
                 self._sens_matrix[i] += [solver.interpolate_sensitivity(t, 0, i)]
     
     def finalize(self, solver):
-        if solver.continuous_output:
+        if solver.report_continuously:
             self.export.write_finalize()
     
     def get_sens_result(self):

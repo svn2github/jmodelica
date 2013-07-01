@@ -106,7 +106,9 @@ InstArrayComponentDecl   : InstComponentDecl ::= <Index:int>;
 InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
-// TODO: InstReplacingAssignable/Record?
+InstReplacingRecord      : InstRecord    ::= <OriginalDecl:ComponentDecl>
+                                             /OriginalInstComponent:InstComponentDecl/ 
+                                             <InstComponentRedeclare:InstComponentRedeclare>;
 InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;

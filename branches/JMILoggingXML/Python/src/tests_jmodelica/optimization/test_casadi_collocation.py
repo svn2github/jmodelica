@@ -222,7 +222,11 @@ class TestLocalDAECollocator:
         u_traj = N.transpose(N.vstack((t, u)))
         
         # Generate initial trajectories
-        init_res = model.simulate(final_time=300, input=('Tc', u_traj))
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
+        init_res = model.simulate(final_time=300, input=('Tc', u_traj),
+                                  options=opts)
         
         # Optimize
         opts = model_opt.optimize_options(self.algorithm)
@@ -232,7 +236,7 @@ class TestLocalDAECollocator:
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [435.4425832, 333.42862629])
+                [435.4425832, 333.42862629],rtol=1e-5)
     
     @testattr(casadi = True)
     def test_init_traj_opt(self):
@@ -1519,9 +1523,61 @@ class TestLocalDAECollocator:
         
         # Simulate
         opt_input = opt_res.solver.get_opt_input()
-        res = model.simulate(start_time=0., final_time=150., input=opt_input)
+        opts = model.simulate_options()
+        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
+        res = model.simulate(start_time=0., final_time=150., input=opt_input, options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.62140206, 345.22510435], rtol=1e-5)
+
+    @testattr(casadi = True)
+    def test_matrix_evaluations(self):
+        """
+        Test evaluating NLP matrices.
+        """
+        model = self.model_cstr_lagrange
+
+        # References values
+        cost_ref = 1.852527678e3
+        u_norm_ref = 3.045679e2
+
+        # Solve
+        opts = model.optimize_options()
+        opts['n_e'] = 20
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
+
+        # Compute Jacobian condition numbers
+        J_init = res.get_J("init")
+        J_init_cond = N.linalg.cond(J_init)
+        N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
+        J_opt = res.get_J("opt")
+        J_opt_cond = N.linalg.cond(J_opt)
+        N.testing.assert_allclose(J_opt_cond, 2.47e6, rtol=1e-2)
+
+        # Compute Hessian norms
+        H_init = res.get_H("init")
+        H_init_norm = N.linalg.norm(H_init)
+        N.testing.assert_allclose(H_init_norm, 4.36e3, rtol=1e-2)
+        H_opt = res.get_H("opt")
+        H_opt_norm = N.linalg.norm(H_opt)
+        N.testing.assert_allclose(H_opt_norm, 1.47e5, rtol=1e-2)
+
+        # Compute KKT condition numbers
+        KKT_init = res.get_KKT("init")
+        KKT_init_cond = N.linalg.cond(KKT_init)
+        N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
+        KKT_opt = res.get_KKT("opt")
+        KKT_opt_cond = N.linalg.cond(KKT_opt)
+        N.testing.assert_allclose(KKT_opt_cond, 9.34e9, rtol=1e-2)
+
+        # Obtain symbolic matrices and matrix functions
+        res.get_J("sym")
+        res.get_J("fcn")
+        res.get_H("sym")
+        res.get_H("fcn")
+        res.get_KKT("sym")
+        res.get_KKT("fcn")
 
 class TestPseudoSpectral:
     
@@ -1694,10 +1750,12 @@ class TestPseudoSpectral:
         nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
         
         #Test LGL points
+        """
         opts['discr'] = "LGL"
         res = self.model_vdp.optimize(algorithm="CasadiPseudoSpectralAlg",
                                       options=opts)
         nose.tools.assert_almost_equal(res.final("cost"), 2.3463724e1, places=1)
+        """
         """
         opts['n_e'] = 20
         opts['n_cp'] = 6

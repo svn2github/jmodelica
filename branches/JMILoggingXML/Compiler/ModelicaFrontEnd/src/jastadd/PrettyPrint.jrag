@@ -536,9 +536,11 @@ aspect PrettyPrint {
 	}
 
 	public void ConstrainingClause.prettyPrint(Printer p, PrintStream str, String indent) {
-       str.print(" constrainedby " + getAccess().name() +" ");
-       if (hasClassModification())
+       str.print(" constrainedby " + getAccess().name());
+       if (hasClassModification()) {
+    	   str.print(' ');
 	       p.print(getClassModification(),str,indent);
+       }
 
 	}
 

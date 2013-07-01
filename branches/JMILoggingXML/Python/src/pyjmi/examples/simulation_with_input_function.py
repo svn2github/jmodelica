@@ -38,9 +38,13 @@ def run_demo(with_plots=True):
 
     # Load the dynamic library and XML data
     model = load_fmu(fmu_name)
+    
+    opts = model.simulate_options()
+    opts["CVode_options"]["rtol"] = 1e-6
+    opts["ncp"] = 3000
 
     res = model.simulate(final_time=30, input=('u',N.cos),
-        options={'ncp':3000})
+        options=opts)
     
     x1_sim = res['x1']
     x2_sim = res['x2']

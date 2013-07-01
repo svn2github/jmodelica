@@ -1,5 +1,0 @@
-/*
-Adds proxy node to Modelica AST
-*/
-
-Proxy   ::= <SourceRoot:SourceRoot> Node:StoredDefinition*;

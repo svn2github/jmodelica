@@ -86,7 +86,7 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 71, column 8:
-  'redeclare A b' is not a subtype of 'replaceable B b'
+  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx2_Err;
  
@@ -171,7 +171,7 @@ model RedeclareTestOx4_Err "Redeclare deeper into instance hierarchy."
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 159, column 10:
-  'redeclare A b' is not a subtype of 'replaceable B b'
+  In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx4_Err;
  
@@ -294,7 +294,7 @@ end RedeclareTestOx6_Err;
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 276, column 10:
-  'redeclare replaceable A a' is not a subtype of 'replaceable B a'
+  In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a'
 ")})));
 end RedeclareTestOx65_Err;
  
@@ -414,7 +414,7 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 399, column 8:
-  'redeclare A c' is not a subtype of 'replaceable C c constrainedby B '
+  In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B'
 ")})));
 end RedeclareTestOx9_Err;
 
@@ -453,7 +453,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 450, column 10:
-  In the declaration 'replaceable B b constrainedby C ', the declared class is not a subtype of the constraining class
+  In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
  /*
@@ -599,7 +599,7 @@ Semantic error at line 431, column 32:
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 601, column 69:
-  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx115_Err;
 
@@ -650,7 +650,7 @@ Semantic error at line 470, column 58:
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 651, column 32:
-  'redeclare replaceable C c constrainedby A ' is not a subtype of 'replaceable B c'
+  In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx116_Err;
  /*
@@ -765,7 +765,7 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 752, column 10:
-  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_14_Err;
 
@@ -806,7 +806,7 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 790, column 10:
-  In the declaration 'redeclare replaceable B c constrainedby C ', the declared class is not a subtype of the constraining class
+  In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_15_Err;
 
@@ -847,7 +847,7 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 837, column 10:
-  'redeclare replaceable A c' is not a subtype of 'redeclare replaceable B c constrainedby B '
+  In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B'
 ")})));
 end RedeclareTest_Constr_16_Err;
 
@@ -888,7 +888,7 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
 1 error(s) found...
 In file 'src/test/modelica/RedeclareTests.mo':
 Semantic error at line 884, column 34:
-  'redeclare replaceable B c' is not a subtype of 'redeclare replaceable C c constrainedby C '
+  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
 
@@ -932,7 +932,7 @@ Semantic error at line 940, column 20:
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 940, column 38:
-  'redeclare replaceable B c' is not a subtype of 'replaceable C c constrainedby C '
+  In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_18_Err;
 
@@ -3104,6 +3104,39 @@ fclass RedeclareTests.RedeclareTest33
 end RedeclareTests.RedeclareTest33;
 ")})));
 end RedeclareTest33;
+
+
+model RedeclareTest34
+    record A
+        parameter Real a = 1;
+        replaceable parameter B b;
+    end A;
+
+    record B
+        parameter Real c = 2;
+    end B;
+
+    record C
+        extends A(a = 3, redeclare parameter D b(c = 4));
+    end C;
+		
+    record D
+        extends B(c = 5);
+    end D;
+
+    model E
+        replaceable parameter A d;
+        Real x;
+    equation
+        x = d.a;
+    end E;
+
+	model F
+        E e(redeclare parameter C d(a = 6));
+    end F;
+	
+	F f;
+end RedeclareTest34;
 
 
 
