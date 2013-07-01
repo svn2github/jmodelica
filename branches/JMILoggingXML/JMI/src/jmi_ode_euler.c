@@ -21,6 +21,7 @@
 #include "jmi_ode_euler.h"
 #include "fmi1_cs.h"
 #include "fmi1_me.h"
+#include "jmi_log.h"
 
 int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     int flag = 0;

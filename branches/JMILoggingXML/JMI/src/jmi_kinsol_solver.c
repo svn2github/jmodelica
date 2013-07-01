@@ -368,7 +368,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         jmi_log_fmt(log, logInfo, "scaled_residual_norm:%E", kin_mem->kin_fnorm);
         {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
-            jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, "residuals", jmiLogReal);
+            jmi_log_node_t node = jmi_log_enter_vector_(log, logInfo, "residuals");
             for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
             jmi_log_leave(log, node);
         }
@@ -830,7 +830,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
 
     if (block->jmi->options.log_level >= 5) {
         jmi_log_node_t outer = jmi_log_enter_fmt(jmi->log, logInfo, "ScalingUpdated", "block:%d", block->index);
-        jmi_log_node_t inner = jmi_log_enter_vector_(jmi->log, logInfo, "scaling", jmiLogReal);
+        jmi_log_node_t inner = jmi_log_enter_vector_(jmi->log, logInfo, "scaling");
         realtype* res = scale_ptr;
         for (i=0;i<N;i++) jmi_log_real_(jmi->log, 1/res[i]);
         jmi_log_leave(jmi->log, inner);
