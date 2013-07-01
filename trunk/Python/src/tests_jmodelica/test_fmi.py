@@ -1126,9 +1126,18 @@ class Test_RaisesIfNonConverge:
         print 'y1' + str(m.get('y1'))
         print 'z1' + str(m.get('z1'))
 
-        print "Set initial valu1e of p"
+        print "Set bad initial valu1e of p"
         m.set('p',0.5)
         nose.tools.assert_raises(FMUException,m.get, 'x1')
-        nose.tools.assert_raises(FMUException,m.get, 'y1')
+
+        print "Set good p"
+        m.set('p',4)
+        print 'x1 = ' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        print "Set large p & u1"
+        m.set('p',1e300)
+        m.set('u1',1e300)
         nose.tools.assert_raises(FMUException,m.get, 'z1')
 

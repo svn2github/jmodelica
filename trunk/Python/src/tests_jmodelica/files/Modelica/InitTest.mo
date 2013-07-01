@@ -11,7 +11,7 @@ model InitTest1
   Real x1,y1,z1;
   Real x2,y2,z2,w2;
   input Real u1;
-  parameter Real p = 4;
+  input Real p = 4;
 initial equation
  der(x1) = if time>=1 then 1 elseif time>=2 then 3 else 5;
 equation
