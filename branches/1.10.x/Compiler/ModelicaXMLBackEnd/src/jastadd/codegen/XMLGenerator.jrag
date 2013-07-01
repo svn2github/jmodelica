@@ -86,7 +86,7 @@ public class XMLGenerator extends GenericGenerator {
 		super(expPrinter,escapeCharacter, fclass);
 		
 		illegalCharsSub = new HashMap<Character,String>();
-		illegalCharsSub.put('&',"&amp");
+		illegalCharsSub.put('&',"&amp;");
 		illegalCharsSub.put('<',"&lt;");
 		illegalCharsSub.put('>',"&gt;");
 		illegalCharsSub.put('"', "&quot;");
