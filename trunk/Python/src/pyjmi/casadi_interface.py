@@ -593,8 +593,7 @@ class CasadiModel(ModelBase):
         for i in xrange(len(pd_vals)):
             p = self._parameters[i]
             name = p.getName()
-            if not name == "startTime" and not name == "finalTime":
-                pd += [(name, p.getValueReference(), pd_vals[i])]
+            pd += [(name, p.getValueReference(), pd_vals[i])]
         return pd
     
     def get_sf(self, update_sf=True):
