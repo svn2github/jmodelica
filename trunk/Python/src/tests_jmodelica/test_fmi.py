@@ -1062,3 +1062,73 @@ class Test_load_fmu2:
         model = load_fmu(fmu = CS2, path = path_to_fmus_cs2, kind = 'cs')   #loading CS2-model correct
         assert isinstance(model, FMUModelCS2)
 
+class Test_RaisesIfNonConverge:
+    """
+    Test that exception is raised if NLE solver does not converge
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        m =  compile_fmu('InitTest1',os.path.join(path_to_mofiles,'InitTest.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu('InitTest1.fmu')
+
+    @testattr(fmi = True)
+    def test_get_raises(self):
+        """
+        Test that expeptions are thrown when equation becomes non-solvable.
+        """
+        m = self.m
+        m.set('_log_level',5)
+        m.set_fmil_log_level(5)
+        m.set('_nle_solver_log_level',3)
+
+        m.set('u1',3)
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.set('y1',0.)
+
+        m.initialize()
+
+        print "model initialized"
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.set('u1',4)
+
+        print "Inpu1t set"
+
+        print 'u1' + str(m.get('u1'))
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        m.get_derivatives()
+
+        print "Set initial valu1e of y1"
+        m.set('y1',0.5)
+
+        print 'x1' + str(m.get('x1'))
+        print 'y1' + str(m.get('y1'))
+        print 'z1' + str(m.get('z1'))
+
+        print "Set initial valu1e of p"
+        m.set('p',0.5)
+        nose.tools.assert_raises(FMUException,m.get, 'x1')
+        nose.tools.assert_raises(FMUException,m.get, 'y1')
+        nose.tools.assert_raises(FMUException,m.get, 'z1')
+
