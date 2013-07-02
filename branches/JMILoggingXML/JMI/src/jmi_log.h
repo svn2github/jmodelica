@@ -63,7 +63,10 @@ extern "C" {
 #endif
 
 
+/** \brief Allocate and intialize a log, with output to `jmi` */
 jmi_log_t *jmi_log_init(jmi_t *jmi);
+
+/** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
 
 
