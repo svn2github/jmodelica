@@ -27,20 +27,20 @@
 
       <itemizedlist>
         <listitem>
-          <para>The source AST results from parsing of the Modelica or
-          Optimica source code. This AST shares the structure of the source
-          code, and consists of a hierarchy consisting of Java objects
-          corresponding to class and component declarations, equations and
-          algorithms. The source AST can also be used for unparsing, i.e.,
+          <para>The <emphasis>source AST</emphasis> results from parsing of
+          the Modelica or Optimica source code. This AST shares the structure
+          of the source code, and consists of a hierarchy consisting of Java
+          objects corresponding to class and component declarations, equations
+          and algorithms. The source AST can also be used for unparsing, i.e.,
           pretty printing of the source code.</para>
         </listitem>
 
         <listitem>
-          <para>The instance AST represents a particular model instance.
-          Typically, the user selects a class to instantiate, and the compiler
-          then computes the corresponding instance AST. The instance AST
-          differs from the source AST in that in the former case, all
-          components are expanded down to variables of primitive type. An
+          <para>The <emphasis>instance AST</emphasis> represents a particular
+          model instance. Typically, the user selects a class to instantiate,
+          and the compiler then computes the corresponding instance AST. The
+          instance AST differs from the source AST in that in the former case,
+          all components are expanded down to variables of primitive type. An
           important feature of the instance AST is that it is used to
           represent modification environments; merging of modifications takes
           place in the instance AST. As a consequence, all analysis, such as
@@ -49,12 +49,12 @@
         </listitem>
 
         <listitem>
-          <para>The flat AST represents the flat Modelica model. Once the
-          instance AST has been computed, the flat AST is computed simply by
-          traversing the instance AST and collecting all variables of
-          primitive type, all equations and all algorithms. The flat AST is
-          then used, after some transformations, as a basis for code
-          generation.</para>
+          <para>The <emphasis>flat AST</emphasis> represents the flat Modelica
+          model. Once the instance AST has been computed, the flat AST is
+          computed simply by traversing the instance AST and collecting all
+          variables of primitive type, all equations and all algorithms. The
+          flat AST is then used, after some transformations, as a basis for
+          code generation.</para>
         </listitem>
       </itemizedlist>
 
@@ -246,22 +246,22 @@ num_classes = count_classes(modelica,0)
       to:</para>
 
       <programlisting>The package Modelica.UsersGuide has 39 hierachically contained classes
-The package Modelica.Blocks has 345 hierachically contained classes
+The package Modelica.Blocks has 343 hierachically contained classes
 The package Modelica.ComplexBlocks has 44 hierachically contained classes
 The package Modelica.StateGraph has 66 hierachically contained classes
-The package Modelica.Electrical has 981 hierachically contained classes
-The package Modelica.Magnetic has 167 hierachically contained classes
-The package Modelica.Mechanics has 546 hierachically contained classes
-The package Modelica.Fluid has 694 hierachically contained classes
-The package Modelica.Media has 1110 hierachically contained classes
+The package Modelica.Electrical has 992 hierachically contained classes
+The package Modelica.Magnetic has 174 hierachically contained classes
+The package Modelica.Mechanics has 558 hierachically contained classes
+The package Modelica.Fluid has 687 hierachically contained classes
+The package Modelica.Media has 1791 hierachically contained classes
 The package Modelica.Thermal has 95 hierachically contained classes
-The package Modelica.Math has 162 hierachically contained classes
+The package Modelica.Math has 166 hierachically contained classes
 The package Modelica.ComplexMath has 31 hierachically contained classes
 The package Modelica.Utilities has 97 hierachically contained classes
 The package Modelica.Constants has 0 hierachically contained classes
 The package Modelica.Icons has 32 hierachically contained classes
-The package Modelica.SIunits has 580 hierachically contained classes
-The package Modelica has 5005 hierachically contained classes
+The package Modelica.SIunits has 584 hierachically contained classes
+The package Modelica has 5715 hierachically contained classes
 </programlisting>
 
       <para>Take some time to ponder the results and make sure that you
@@ -468,7 +468,7 @@ except:
 print("Number of differentiated variables: %d" \
        % filter_flat_model.numDifferentiatedRealVariables())
 print("Number of algebraic variables:      %d" \
-       % filter_flat_model.numAlgebraicRealVariables())
+       % filter_flat_model.numAlgebraicContinousRealVariables())
 print("Number of equations:                %d" \
        % filter_flat_model.numEquations())
 print("Number of initial equations:        %d" \
