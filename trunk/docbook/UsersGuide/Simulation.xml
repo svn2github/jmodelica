@@ -16,7 +16,7 @@
 
     <para>JModelica.org supports simulation of models described in the
     Modelica language and models following the FMI standard, see <xref
-    linkend="intr_sec_tech" /> in <xref linkend="ch_intro" />. The simulation
+    linkend="intr_sec_tech"/> in <xref linkend="ch_intro"/>. The simulation
     environment uses <link
     xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link> as standard
     which is a standalone Python package for solving ordinary differential and
@@ -26,14 +26,14 @@
     JModelica.org: either as a Functional Mock-Up Unit (FMU) or as a
     JModelica.org Model Unit (JMU). In the former case, the model is converted
     into an Ordinary Differential Equation (ODE), whereas in the latter case,
-    the model is simulated as a Differential Algebraic Equation (DAE). The
-    default, and recommended, means to simulate models is to use FMUs, since
-    this approach provides better performance, more a more robust
-    initialization mechanism, and significantly better support for hybrid
-    systems. Simulation of JMUs may still be useful, however, in some
-    optimization applications where simulation of the model as a DAE/JMU, is
-    an important prerequisite for optimization by means of the collocation
-    algorithms.</para>
+    the model is simulated as a Differential Algebraic Equation (DAE).
+    <emphasis role="bold">The default, and recommended, means to simulate
+    models is to use FMUs, since this approach provides better performance, a
+    more robust initialization mechanism, and significantly better support for
+    hybrid systems.</emphasis> Simulation of JMUs may still be useful,
+    however, in some optimization applications where simulation of the model
+    as a DAE/JMU, is an important prerequisite for optimization by means of
+    the collocation algorithms.</para>
 
     <para>Loading and simulation of FMUs has additionally been made available
     as a separate Python package, PyFMI.</para>
@@ -92,7 +92,7 @@ vdp = load_fmu(fmu_name)
     a binary, which is then loaded when the <literal>vdp</literal> object is
     created. This object represents the compiled model, an FMU, and is used to
     invoke the simulation algorithm (for more information about model
-    creations and options, see <xref linkend="ch_models" />):</para>
+    creations and options, see <xref linkend="ch_models"/>):</para>
 
     <programlisting language="python">res = vdp.simulate(final_time=10)
 </programlisting>
@@ -120,7 +120,7 @@ plt.xlabel('Time (s)')
 plt.show()
 </programlisting>
 
-    <para>In <xref linkend="sim_fig_vdp_res" /> the simulation result is
+    <para>In <xref linkend="sim_fig_vdp_res"/> the simulation result is
     shown.</para>
 
     <figure xml:id="sim_fig_vdp_res">
@@ -128,7 +128,7 @@ plt.show()
 
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/vdp_result.svg" scale="70"></imagedata>
+          <imagedata fileref="images/vdp_result.svg" scale="70"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -146,26 +146,32 @@ plt.show()
       </listitem>
 
       <listitem>
-        <para><literal>FMUModelME1 / FMUModelCS1 (located in
+        <para><literal>FMUModelME1 / FMUModelME2 (located in
+        pyfmi)</literal></para>
+      </listitem>
+
+      <listitem>
+        <para><literal>FMUModelCS1 / FMUModelCS2 (located in
         pyfmi)</literal></para>
       </listitem>
     </itemizedlist>
 
     <para>The difference between the two are that <literal>JMUModel</literal>
     supports compiled models from JModelica.org (extension .jmu) while the
-    <literal>FMUModelME1 / FMUModelCS1</literal> supports compiled models from
+    <literal>FMUModelME* / FMUModelCS*</literal> supports compiled models from
     other simulation/modelling tools that follow the FMI standard (extension
-    .fmu) (either Model exchange FMUs or Co-Simulation FMUs). For more
-    information about compiling a model in JModelica.org see <xref
-    linkend="ch_models" />.</para>
+    .fmu) (either Model exchange FMUs or Co-Simulation FMUs). The support is
+    both for FMI version 1 and FMI version 2 (beta4). For more information
+    about compiling a model in JModelica.org see <xref
+    linkend="ch_models"/>.</para>
 
     <para>The simulation method is the preferred method for simulation of
     models and which by default is connected to the Assimulo simulation
     package but can also be connected to other simulation platforms. The
-    simulation method for <literal>FMUModelME1 / FMUModelCS1</literal> is
+    simulation method for <literal>FMUModelME* / FMUModelCS*</literal> is
     defined as:</para>
 
-    <programlisting language="python">class FMUModel(...)
+    <programlisting language="python">class FMUModel(ME/CS)(...)
     ...
     def simulate(self,
              start_time=0.0,
@@ -177,14 +183,14 @@ plt.show()
 
     <para>And used in the following way:</para>
 
-    <programlisting language="python">res = FMUModel(ME/CS)1.simulate() # Using default values
+    <programlisting language="python">res = FMUModel(ME/CS)*.simulate() # Using default values
 </programlisting>
 
     <para>The only difference between the simulation method in
-    <literal>JMUModel</literal> compared to <literal>FMUModelME1</literal> is
+    <literal>JMUModel</literal> compared to <literal>FMUModelME*</literal> is
     that the algorithm is <literal>AssimuloAlg</literal>. They are although
     both connected to the Assimulo package and able to use its solvers. For
-    <literal>FMUModelCS1</literal>, the FMU contains the solver and is thus
+    <literal>FMUModelCS*</literal>, the FMU contains the solver and is thus
     used (although using the same interface).</para>
 
     <section>
@@ -195,7 +201,7 @@ plt.show()
       version, a convenience method, <literal>load_fmu</literal> has been
       created. This method is the preferred access point for loading an FMU
       and will return an instance of the appropriate underlying
-      <literal>FMUModel(CS/ME)1</literal> class.</para>
+      <literal>FMUModel(CS/ME)*</literal> class.</para>
 
       <programlisting>model = load_fmu("myFMU.fmu")</programlisting>
     </section>
@@ -211,7 +217,7 @@ plt.show()
       to Assimulo is supported and connected through the algorithm
       <literal>AssimuloAlg</literal> for <literal>JMUModel</literal> and
       <literal>AssimuloFMIAlg</literal> for
-      <literal>FMUModelME1</literal>.</para>
+      <literal>FMUModelME*</literal>.</para>
 
       <section>
         <title>Input</title>
@@ -301,11 +307,11 @@ input_object = (['u1','u2'],input_function)
    ...
 </programlisting>
 
-        <para>In <xref linkend="sim_table_gen_Jalg" /> the general options for
+        <para>In <xref linkend="sim_table_gen_Jalg"/> the general options for
         the AssimuloAlg algorithm are described while in <xref
-        linkend="sim_table_ida" /> a selection of the different solver
+        linkend="sim_table_ida"/> a selection of the different solver
         arguments for the DAE solver IDA is shown. In <xref
-        linkend="sim_table_cvode" /> a selection of solver arguments for the
+        linkend="sim_table_cvode"/> a selection of solver arguments for the
         ODE solver CVode is shown. More information regarding the solver
         options can be found here, http://www.jmodelica.org/assimulo.</para>
 
@@ -553,12 +559,12 @@ opts['ncp'] = 1000       # Changing the number of communication points.
       </section>
 
       <section>
-        <title>Options for FMUModelME1</title>
+        <title>Options for FMUModelME1 and FMUModelME2</title>
 
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting language="python">opts = FMUModelME1.simulate_options()
+        <programlisting language="python">opts = FMUModelME*.simulate_options()
 </programlisting>
 
         <para>which returns the default options for the default algorithm.
@@ -573,12 +579,12 @@ opts['ncp'] = 1000       # Changing the number of communication points.
    ...
 </programlisting>
 
-        <para>In <xref linkend="sim_table_gen_Falg" /> the general options for
+        <para>In <xref linkend="sim_table_gen_Falg"/> the general options for
         the AssimuloFMIAlg algorithm are described while in <xref
-        linkend="sim_table_cvodeFMI" /> a selection of the different solver
+        linkend="sim_table_cvodeFMI"/> a selection of the different solver
         arguments for the ODE solver CVode is shown. Note that there are minor
         differences in the tolerances compared to the options described in
-        <xref linkend="sim_table_cvode" />. More information regarding the
+        <xref linkend="sim_table_cvode"/>. More information regarding the
         solver options can be found here,
         http://www.jmodelica.org/assimulo.</para>
 
@@ -602,8 +608,10 @@ opts['ncp'] = 1000       # Changing the number of communication points.
 
                 <entry>'CVode'</entry>
 
-                <entry>Specifies the simulation method that is to be
-                used.</entry>
+                <entry>Specifies the simulation method that is to be used.
+                Currently supported solvers are, CVode, Radau5ODE,
+                RungeKutta34, Dopri5, RodasODE, LSODAR, ExplicitEuler.
+                Although the recommended solver is "CVode".</entry>
               </row>
 
               <row>
@@ -646,6 +654,30 @@ opts['ncp'] = 1000       # Changing the number of communication points.
                 result is written. Setting this option to an empty string
                 results in a default file name that is based on the name of
                 the model class.</entry>
+              </row>
+
+              <row>
+                <entry>filter</entry>
+
+                <entry>None</entry>
+
+                <entry>A filter for choosing which variables to actually store
+                result for. The syntax can be found in <link
+                xlink:href="???">http://en.wikipedia.org/wiki/Glob_%28programming%29</link>
+                . An example is filter = "*der" , store all variables ending
+                with 'der' and filter = ["*der*", "summary*"], store all
+                variables with "der" in the name and all variables starting
+                with "summary".</entry>
+              </row>
+
+              <row>
+                <entry>result_handling</entry>
+
+                <entry>"file"</entry>
+
+                <entry>Specifies how the result should be handled. Either
+                stored to file or stored in memory. One can also use a custom
+                handler. Available options: "file", "memory", "custom"</entry>
               </row>
             </tbody>
           </tgroup>
@@ -757,12 +789,12 @@ opts['ncp'] = 1000        # Changing the number of communication points.
       </section>
 
       <section>
-        <title>Options for FMUModelCS1</title>
+        <title>Options for FMUModelCS1 and FMUModelCS2</title>
 
         <para>The options attribute are where options to the specified
         algorithm are stored and are preferably used together with:</para>
 
-        <programlisting>opts = FMUModelME1.simulate_options()</programlisting>
+        <programlisting>opts = FMUModelCS*.simulate_options()</programlisting>
 
         <para>which returns the default options for the default algorithm.
         Information about the available options can be viewed by typing help
@@ -773,7 +805,7 @@ opts['ncp'] = 1000        # Changing the number of communication points.
    
    ...</programlisting>
 
-        <para>In <xref linkend="sim_table_FMICSAlg" /> the general options for
+        <para>In <xref linkend="sim_table_FMICSAlg"/> the general options for
         the FMICSAlg algorithm are described.</para>
 
         <table xml:id="sim_table_FMICSAlg">
@@ -831,6 +863,30 @@ opts['ncp'] = 1000        # Changing the number of communication points.
                 results in a default file name that is based on the name of
                 the model class.</entry>
               </row>
+
+              <row>
+                <entry>filter</entry>
+
+                <entry>None</entry>
+
+                <entry>A filter for choosing which variables to actually store
+                result for. The syntax can be found in <link
+                xlink:href="???">http://en.wikipedia.org/wiki/Glob_%28programming%29</link>
+                . An example is filter = "*der" , store all variables ending
+                with 'der' and filter = ["*der*", "summary*"], store all
+                variables with "der" in the name and all variables starting
+                with "summary".</entry>
+              </row>
+
+              <row>
+                <entry>result_handling</entry>
+
+                <entry>"file"</entry>
+
+                <entry>Specifies how the result should be handled. Either
+                stored to file or stored in memory. One can also use a custom
+                handler. Available options: "file", "memory", "custom"</entry>
+              </row>
             </tbody>
           </tgroup>
         </table>
@@ -855,7 +911,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
       <para>This can be done for all the variables, parameters and constants
       defined in the model and is the preferred way of retrieving the result.
       There are however some more options available in the result object, see
-      <xref linkend="sim_table_result" />.</para>
+      <xref linkend="sim_table_result"/>.</para>
 
       <table xml:id="sim_table_result">
         <title>Result Object</title>
@@ -955,7 +1011,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
       <para>This example will demonstrate how a model with two inputs with
       data from a matlab-file can be simulated. The model to be simulated is a
       quadruple tank connected to two pumps, which also are the inputs to the
-      model. The model is depicted in <xref linkend="sim_fig_quadtank" /> and
+      model. The model is depicted in <xref linkend="sim_fig_quadtank"/> and
       in the code below the corresponding Modelica code is listed.</para>
 
       <figure xml:id="sim_fig_quadtank">
@@ -964,7 +1020,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/qt_schematic.png" scalefit="1"
-                       width="40%"></imagedata>
+                       width="40%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1100,8 +1156,8 @@ plt.xlabel('t[s]')
 plt.show()
 </programlisting>
 
-      <para>In <xref linkend="sim_fig_qt_x" /> the result of the tank levels
-      are shown and in <xref linkend="sim_fig_qt_u" /> the input signals are
+      <para>In <xref linkend="sim_fig_qt_x"/> the result of the tank levels
+      are shown and in <xref linkend="sim_fig_qt_u"/> the input signals are
       shown.</para>
 
       <figure xml:id="sim_fig_qt_x">
@@ -1109,7 +1165,7 @@ plt.show()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/quadtank_x.svg" scale="70"></imagedata>
+            <imagedata fileref="images/quadtank_x.svg" scale="70"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1119,7 +1175,7 @@ plt.show()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/quadtank_u.svg" scale="70"></imagedata>
+            <imagedata fileref="images/quadtank_u.svg" scale="70"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1129,7 +1185,7 @@ plt.show()
       <title>Simulation of a discontinuous system</title>
 
       <para>The model which is to be simulated is an electric circuit. The
-      model is depicted in <xref linkend="sim_fig_rlc" /> and consists of
+      model is depicted in <xref linkend="sim_fig_rlc"/> and consists of
       resistances, inductors and a capacitor. The circuit is connected to a
       voltage source which generates a square-wave with an amplitude of 1.0
       and a frequency of 0.6 Hz. The model is also available from the examples
@@ -1140,7 +1196,7 @@ plt.show()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/RLC.png" scalefit="1" width="60%"></imagedata>
+            <imagedata fileref="images/RLC.png" scalefit="1" width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1199,7 +1255,7 @@ plt.show()
 </programlisting>
 
       <para>The simulation result is shown in <xref
-      linkend="sim_fig_rlc_res" />.</para>
+      linkend="sim_fig_rlc_res"/>.</para>
 
       <figure xml:id="sim_fig_rlc_res">
         <title>Simulation result</title>
@@ -1207,7 +1263,7 @@ plt.show()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/Result_RLC.svg" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1223,7 +1279,7 @@ plt.show()
       demonstrate this feature, we consider the model
       <filename>Modelica.Mechanics.Rotational.Examples.First</filename> from
       the Modelica Standard library, see <xref
-      linkend="rotational_first_diagram" />. The model is of high index since
+      linkend="rotational_first_diagram"/>. The model is of high index since
       there are two rotating inertias connected with a rigid gear.</para>
 
       <figure xml:id="rotational_first_diagram">
@@ -1232,7 +1288,7 @@ plt.show()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/rotational_first_diagram.png"
-                       scalefit="1" width="60%"></imagedata>
+                       scalefit="1" width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1294,7 +1350,7 @@ plt.show()
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/rotational_first.svg" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1393,14 +1449,14 @@ P.show()
 </programlisting>
 
       <para>You should now see a plot similar to that in <xref
-      linkend="sim_fig_psweep" />.</para>
+      linkend="sim_fig_psweep"/>.</para>
 
       <figure xml:id="sim_fig_psweep">
         <title>Simulation result-phase plane</title>
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/vdp_pp.svg" scalefit="1" width="60%"></imagedata>
+            <imagedata fileref="images/vdp_pp.svg" scalefit="1" width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1492,7 +1548,7 @@ plt.legend(('dy1/dp1', 'dy2/dp1', 'dy3/dp1'))
 plt.show()
 </programlisting>
 
-      <para>In <xref linkend="sim_fig_sens" /> the sensitivities are
+      <para>In <xref linkend="sim_fig_sens"/> the sensitivities are
       plotted.</para>
 
       <figure xml:id="sim_fig_sens">
@@ -1500,7 +1556,7 @@ plt.show()
 
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/robertson_sens.svg" scale="70"></imagedata>
+            <imagedata fileref="images/robertson_sens.svg" scale="70"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -1525,7 +1581,7 @@ plt.show()
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/bounc_eq.png" scale="100"></imagedata>
+            <imagedata fileref="images/bounc_eq.png" scale="100"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -1534,7 +1590,7 @@ plt.show()
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/event_eq.png"></imagedata>
+            <imagedata fileref="images/event_eq.png"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -1543,7 +1599,7 @@ plt.show()
 
       <para><inlinemediaobject>
           <imageobject>
-            <imagedata fileref="images/event_handle.png"></imagedata>
+            <imagedata fileref="images/event_handle.png"/>
           </imageobject>
         </inlinemediaobject></para>
 
@@ -1758,7 +1814,7 @@ P.show()
           <mediaobject>
             <imageobject>
               <imagedata fileref="images/bouncing_nativ.svg" scalefit="1"
-                         width="60%"></imagedata>
+                         width="60%"/>
             </imageobject>
           </mediaobject>
         </figure>
@@ -1825,7 +1881,7 @@ P.show()</programlisting>
         <mediaobject>
           <imageobject>
             <imagedata fileref="images/bouncing_ball_cs.svg" scalefit="1"
-                       width="60%"></imagedata>
+                       width="60%"/>
           </imageobject>
         </mediaobject>
       </figure>
