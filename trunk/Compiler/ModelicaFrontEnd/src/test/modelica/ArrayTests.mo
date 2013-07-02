@@ -298,9 +298,13 @@ end ArrayTests.General.ArrayTest9;
 fclass ArrayTests.General.ArrayTest95
  parameter Integer n[1].n2 = 2 /* 2 */;
  parameter Integer n[1].m.n1 = 3 /* 3 */;
+ parameter Real n[1].m.x;
  parameter Integer n[2].n2 = 2 /* 2 */;
  parameter Integer n[2].m.n1 = 4 /* 4 */;
-
+ parameter Real n[2].m.x;
+parameter equation
+ n[1].m.x = n[1].m.n1;
+ n[2].m.x = n[2].m.n1;
 end ArrayTests.General.ArrayTest95;
 ")})));
       end ArrayTest95;

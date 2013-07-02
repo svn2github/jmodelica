@@ -1169,8 +1169,10 @@ end AliasTest31;
 model AliasTest32
   Integer a = 42;
   Real b;
+  Integer c;
 equation
   a = b;
+  b = c;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
@@ -1181,7 +1183,7 @@ equation
 Alias sets:
 0 variables can be eliminated
 ")})));
-  end AliasTest32;
+end AliasTest32;
 
 model AliasTest33
   function f1

@@ -3177,7 +3177,7 @@ aspect TransformCanonical {
 	 * @param sign  alias sign is multiplied with this - useful for e.g. 0 = x + y
 	 */
 	public static AliasPair ASTNode.aliasVariables(FExp e1, FExp e2, int sign) {
-		if (e1.canBeAlias() && e2.canBeAlias() && e1.type().typeCompatible(e2.type())) {   // x = y, etc.
+		if (e1.canBeAlias() && e2.canBeAlias() && e1.type().typeAliasCompatible(e2.type())) {   // x = y, etc.
 			FVariable fv1 = e1.variableThatCanBeAlias();
 			FVariable fv2 = e2.variableThatCanBeAlias();
 			boolean negated = e1.aliasSign() * e2.aliasSign() * sign < 0;

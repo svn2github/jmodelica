@@ -1254,3 +1254,8 @@ aspect ExternalObjectTypes {
         return exp.isConstructorCall();
     }
 }
+
+aspect AliasTypes {
+	syn boolean FType.typeAliasCompatible(FType type) = typeCompatible(type);
+	eq FRealType.typeAliasCompatible(FType type) = type.isReal() && typeCompatible(type);
+}
