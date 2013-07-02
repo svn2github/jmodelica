@@ -20,6 +20,7 @@
 #include <jmi.h>
 #include <jmi_block_residual.h>
 #include <fmi1_me.h>
+#include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaTables.h"
 

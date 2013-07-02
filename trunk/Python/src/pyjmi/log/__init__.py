@@ -22,4 +22,4 @@ The JModelica Python log analysis toolkit.
 from parser import parse_jmi_log
 from jmi_log import gather_solves
 
-__all__=['lexer','parser','prettyprinter','tree']
+__all__=['parser','tree']
