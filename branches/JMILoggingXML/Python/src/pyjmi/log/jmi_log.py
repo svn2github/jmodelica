@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-Utilities to postprocess and analyze JMI logs
+Utilities to postprocess and analyze JModelica FMU logs
 """
 
-def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, namednode):
-    name, node = namednode.name, namednode.value
-    if name == 'JacobianUpdated':
+def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, node):
+    type = node.type
+    if type == 'JacobianUpdated':
         block = node.block
         jacs[block] = node.jacobian
         jacs_updated[block] = True
-    elif name == 'ScalingUpdated':
+    elif type == 'ScalingUpdated':
         block = node.block
         scalings[block] = node.scaling
         scalings_updated[block] = True
@@ -41,13 +41,13 @@ def gather_solves(log):
     scalings = {}
     scalings_updated = {}
 
-    solves = log.children('EquationSolve')    
+    solves = log.find('EquationSolve')    
     for solve in solves:
         block_solves = []
 
-        for bl_node in solve.children(('NewtonSolve', 'JacobianUpdated', 'ScalingUpdated')):
-            if bl_node.name == 'NewtonSolve':
-                block_solve = bl_node.value
+        for bl_node in solve.find(('NewtonSolve', 'JacobianUpdated', 'ScalingUpdated')):
+            if bl_node.type == 'NewtonSolve':
+                block_solve = bl_node
                 block_solves.append(block_solve)
                 block_solve['iterations'] = iterations = []
 
@@ -57,10 +57,10 @@ def gather_solves(log):
                 block_solve['initial_residual_scaling_updated'] = scalings_updated[block_index]
                 scalings_updated[block_index] = False
 
-                for it_node in block_solve.children(('KinsolInfo', 'JacobianUpdated', 'ScalingUpdated')):
-                    if it_node.name == 'KinsolInfo':
-                        if 'iteration_index' in it_node.value:
-                            iteration = it_node.value
+                for it_node in block_solve.find(('KinsolInfo', 'JacobianUpdated', 'ScalingUpdated')):
+                    if it_node.type == 'KinsolInfo':
+                        if 'iteration_index' in it_node:
+                            iteration = it_node
 
                             if block_index in jacs:
                                 iteration['jacobian'] = jacs[block_index]
@@ -71,7 +71,7 @@ def gather_solves(log):
                                 iteration['residual_scaling_updated'] = scalings_updated[block_index]
                             scalings_updated[block_index] = False
                             
-                            iterations.append(it_node.value)
+                            iterations.append(it_node)
                     else:
                         update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, it_node)
             else:
