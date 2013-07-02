@@ -191,12 +191,13 @@ plt.show()
         multiple phases using a pseudospectral method. It is implemented in
         Python, uses CasADi for computing function derivatives and IPOPT for
         solving the resulting NLP. Use this algorithm if your model is a
-        continuous time ODE that contains multiple phases.</para>
+        continuous time ODE that contains multiple phases. Use this algorithm
+        with caution as it is experimental.</para>
       </listitem>
 
       <listitem>
         <para><emphasis role="bold">Derivative free calibration and
-        optimization of ODEs with JMUs.</emphasis> This algorithm solves
+        optimization of ODEs with FMUs.</emphasis> This algorithm solves
         parameter optimization and model calibration problems and is based on
         FMUs. The algorithm is implemented in Python and relies on a
         Nelder-Mead derivative free optimization algorithm. Use this method if
@@ -3835,18 +3836,6 @@ res = model.optimize(algorithm="CasadiPseudoSpectral")
     similar fashion.</para>
 
     <section>
-      <title>CasADi</title>
-
-      <para><link
-      xlink:href="https://github.com/casadi/casadi/wiki">CasADi</link> is a
-      "minimalistic computer algebra system implementing automatic
-      differentiation". It is used here to discretize the problem and to
-      provide the necessary derivations, while also provide a direct
-      connection to IPOPT and is required in order to use these optimization
-      methods.</para>
-    </section>
-
-    <section>
       <title>Options</title>
 
       <para>Options can be viewed and set via the options dictionary which can
@@ -4201,13 +4190,13 @@ end HohmannTransfer;</programlisting>
         <programlisting language="python">import numpy as N
 import matplotlib.pyplot as plt
 
-from pymodelica import compile_jmu
-from pyjmi import JMUModel
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
 
 from pymodelica import compile_fmux
 from pyjmi import CasadiModel
 
-jmu_name  = compile_jmu("Orbital","Hohmann.mop")
+jmu_name  = compile_fmu("Orbital","Hohmann.mop")
 comp_opts = {"normalize_minimum_time_problems": False}
 fmux_name = compile_fmux("HohmannTransfer", "Hohmann.mop", compiler_options=comp_opts)
 </programlisting>
@@ -4260,7 +4249,7 @@ tf,t1           = res_opt.final("time"), res_opt.final("t1")</programlisting>
         that we are staying in the targeted orbit.</para>
 
         <programlisting language="python"># Verify solution by simulation
-model = JMUModel(jmu_name)
+model = load_fmu(fmu_name)
     
 # Simulation of Phase 1
 res = model.simulate(final_time=t1,options={'ncp':100,'solver':"CVode"})
@@ -4271,7 +4260,7 @@ x_phase_1,y_phase_1 = res["x"], res["y"]
 model.set("vx",dx1+res["vx"][-1])
 model.set("vy",dy1+res["vy"][-1])
 
-res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"CVode"})
+res = model.simulate(start_time=t1,final_time=tf,options={'ncp':100,'solver':"CVode","initialize":False})
 
 x_phase_2,y_phase_2 = res["x"], res["y"]
 
@@ -4279,7 +4268,7 @@ x_phase_2,y_phase_2 = res["x"], res["y"]
 model.set("vx",dx2+res["vx"][-1])
 model.set("vy",dy2+res["vy"][-1])
 
-res = model.simulate(start_time=tf,final_time=tf*2,options={'ncp':100,'solver':"CVode"})
+res = model.simulate(start_time=tf,final_time=tf*2,options={'ncp':100,'solver':"CVode","initialize":False})
 
 x_phase_3,y_phase_3 = res["x"], res["y"]</programlisting>
 
