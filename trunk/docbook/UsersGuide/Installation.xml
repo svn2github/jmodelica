@@ -94,8 +94,7 @@
               </listitem>
 
               <listitem>
-                <para><link
-                xlink:href="https://www.modelica.org/libraries/Modelica">MSL
+                <para><link xlink:href="https://www.modelica.org/">MSL
                 (Modelica Standard Library)</link></para>
               </listitem>
 
@@ -192,7 +191,7 @@
       <procedure>
         <step>
           <para>Download a <link
-          xlink:href="http://www.jmodelica.org/page/12">JModelica.org Windows
+          xlink:href="http://www.jmodelica.org/binary">JModelica.org Windows
           binary installer</link> and save the executable file somewhere on
           your computer.</para>
         </step>
@@ -230,18 +229,18 @@
 
       <para>Test the installation by starting a IPython or pylab shell from
       the JModelica.org start menu and run a few examples. Starting the Python
-      session from the start menu will set all the environment variables
-      required to run the JModelica.org Python interface.<programlisting
-      language="python"># Run the VDP example and plot results
-from pyjmi.examples import vdp
-vdp.run_demo()
+      session from the Windows start menu will set all the environment
+      variables required to run the JModelica.org Python
+      interface.<programlisting language="python"># Import all examples from the pyjmi package
+from pyjmi.examples import *
+
+# Run the VDP_sim example and plot results.
+VDP_sim.run_demo()
 
 # Run the CSTR example and plot results
-from pyjmi.examples import cstr
 cstr.run_demo()
 
 # Run the CSTR example using CasADi and plot results
-from pyjmi.examples import cstr_casadi
 cstr_casadi.run_demo()</programlisting></para>
     </section>
 

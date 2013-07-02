@@ -63,8 +63,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
     dict.
     
     The compiler target is 'fmume' by default which means that the shared 
-    file contains the FMI for Model Exchange API. This is currently the only 
-    target that is possible to use.
+    file contains the FMI for Model Exchange API. Setting this parameter to 
+    'fmucs' will generate an FMU containing the FMI for Co-Simulation API.
     
     Parameters::
     
@@ -73,7 +73,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             
         file_name -- 
             A path (string) or paths (list of strings) to model files and/or 
-            libraries. Supports only be .mo files.
+            libraries.
             Default: Empty list.
             
         compiler -- 
@@ -85,7 +85,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: 'auto'
             
         target --
-            Compiler target.
+            Compiler target. Possible values are 'fmume' or 'fmucs'.
             Default: 'fmume'
             
         compiler_options --
@@ -161,7 +161,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             
         file_name -- 
             A path (string) or paths (list of strings) to model files and/or 
-            libraries. Supports both be .mo and .mop files.
+            libraries.
             Default: Empty list.
             
         compiler -- 
@@ -244,7 +244,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             
         file_name -- 
             A path (string) or paths (list of strings) to model files and/or 
-            libraries. Supports both be .mo and .mop files.
+            libraries.
             Default: Empty list.
             
         compiler -- 

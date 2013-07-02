@@ -24,26 +24,26 @@
 
     <para><itemizedlist>
         <listitem>
-          <para><literal>PyModelica</literal> - Compile Modelica and Optimica
-          code into model units (FMUs and JMUs, see <xref
-          linkend="ch_models"/> for more information).</para>
+          <para><emphasis role="bold">PyModelica</emphasis> Interface to the
+          compilers. Compile Modelica and Optimica code into model units, FMUs
+          and JMUs. See <xref linkend="ch_models"/> for more
+          information.</para>
         </listitem>
 
         <listitem>
-          <para><literal>PyFMI</literal> - Work with models that have been
-          compiled into FMUs (Functional Mock-up Units). Perform simulations,
-          parameter manipulation, plot results etc.</para>
+          <para><emphasis role="bold">PyFMI</emphasis> Work with models that
+          have been compiled into FMUs (Functional Mock-up Units), perform
+          simulations, parameter manipulation, plot results etc. See <xref
+          linkend="ch_simulation"/> for more information.</para>
         </listitem>
 
         <listitem>
-          <para><literal>PyJMI</literal> - Work with models that have been
-          compiled into JMUs. Perform simulations, solve optimization
-          problems, parameter manipulation, plot results etc.</para>
+          <para><emphasis role="bold">PyJMI</emphasis> Work with models that
+          have been compiled into JMUs. This package is mainly used for
+          solving optimization problems. See <xref linkend="ch_optimization"/>
+          for more information.</para>
         </listitem>
       </itemizedlist></para>
-
-    <para>The Python packages will be further presented in the following
-    chapters.</para>
   </section>
 
   <section xml:id="gs_sec_starting_a_python_session">
@@ -55,7 +55,7 @@
     <section>
       <title>Windows</title>
 
-      <para>If you are running Windows, three different Python shells are
+      <para>If you are on Windows, there are three different Python shells are
       available under the JModelica.org start menu.<itemizedlist>
           <listitem>
             <para><emphasis role="bold">Python</emphasis> - Normal command
@@ -73,7 +73,8 @@
             also loads the numeric computation environment <link
             xlink:href="http://www.scipy.org/PyLab">PyLab</link>.</para>
           </listitem>
-        </itemizedlist></para>
+        </itemizedlist>It is recommended to use either the IPython or pylab
+      shell.</para>
     </section>
 
     <section>
@@ -98,7 +99,7 @@
     subdirectory <filename>files</filename>. The following code demonstrates
     how to run such an example. First a Python session must be started, see
     <xref linkend="gs_sec_starting_a_python_session"/> above. The example
-    scripts are preferably run in the pylab python shell.</para>
+    scripts are preferably run in the pylab Python shell.</para>
 
     <para>The following code will run the RLC example and plot some
     results.</para>
@@ -116,8 +117,8 @@ RLC.run_demo()</programlisting></para>
   <section>
     <title>Check your installation</title>
 
-    <para>The JModelica.org Python packages requires some additional Python
-    packages in order to run correctly. Use the function
+    <para>The JModelica.org Python packages require some third party Python
+    packages in order to run. Use the function
     <literal>&lt;package&gt;.check_packages()</literal>, where
     <literal>&lt;package&gt;</literal> is either
     <literal>pymodelica</literal>, <literal>pyfmi</literal> or
@@ -161,7 +162,7 @@ setuptools.................... 0.6
     <title>Redefining the JModelica.org environment</title>
 
     <para>When importing <literal>pyjmi</literal> or
-    <literal>pymodelica</literal> in Python the script
+    <literal>pymodelica</literal> in Python, the script
     <filename>startup.py</filename> is run which sets the environment used by
     JModelica.org for the current Python session. For example, the environment
     variable <literal>JMODELICA_HOME</literal> points at the JModelica.org
@@ -190,7 +191,7 @@ setuptools.................... 0.6
     <section>
       <title>Example redefining IPOPT_HOME</title>
 
-      <para>The following step-by-step procedure will redefine the
+      <para>The following step-by-step procedure will show how to redefine the
       JModelica.org environment variable <literal>IPOPT_HOME</literal>:</para>
 
       <orderedlist>

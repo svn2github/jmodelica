@@ -22,8 +22,8 @@
     transfer where industrially relevant problems can inspire new research and
     where state of the art algorithms can be propagated form academia into
     industrial use. JModelica.org is a result of research at the Department of
-    Automatic Control, Lund University, <citation>Jak2007</citation>and is now
-    maintained and developed by Modelon AB in collaboration with
+    Automatic Control, Lund University, <citation>Jak2007</citation> and is
+    now maintained and developed by Modelon AB in collaboration with
     academia.</para>
   </section>
 
@@ -77,26 +77,26 @@
     executables/dlls integrate seamlessly with Python and Numpy.</para>
 
     <para>JModelica.org offers strong support for the <link
-    xlink:href="http://www.functional-mockup-interface.org/">Functional
-    Mock-up Interface</link> (FMI) standard. FMI specifies a format for
-    exchange of compiled dynamic models and it is supported by a large number
-    of modeling and simulation tools, including established Modelica tools
-    such as Dymola, OpenModelica, and SimulationX. FMI defines a model
-    execution interface consisting of a set of C-function signatures for
-    handling the communication between the model and a simulation environment.
-    Models are presented as ODEs with time, state and step events. FMI also
-    specifies that all information related to a model, except the equations,
-    should be stored in an XML formated text-file. The format is specified in
-    the standard and specifically contains information about the variables,
-    names, identifiers, types and start attributes. A model is distributed in
-    a zip-file with the extension '.fmu', these zip-files containing the
-    models are called FMUs (Functional Mock-up Units). FMI 1.0 specifies two
-    types of FMUs, either Model Exchange or Co-Simulation, the difference
+    xlink:href="https://www.fmi-standard.org/">Functional Mock-up
+    Interface</link> (FMI) standard. FMI specifies a format for exchange of
+    compiled dynamic models and it is supported by a large number of modeling
+    and simulation tools, including established Modelica tools such as Dymola,
+    OpenModelica, and SimulationX. FMI defines a model execution interface
+    consisting of a set of C-function signatures for handling the
+    communication between the model and a simulation environment. Models are
+    presented as ODEs with time, state and step events. FMI also specifies
+    that all information related to a model, except the equations, should be
+    stored in an XML formated text-file. The format is specified in the
+    standard and specifically contains information about the variables, names,
+    identifiers, types and start attributes. A model is distributed in a
+    zip-file with the extension '.fmu', these zip-files containing the models
+    are called FMUs (Functional Mock-up Units). FMI version1.0 specifies two
+    types of FMUs, either Model Exchange or Co-Simulation. The difference
     between them is that in a Co-Simulation FMU, the integrator for solving
     the system is contained in the model while in an Model Exchange FMU, an
     external integrator is needed to solve the system. The JModelica.org
-    compiler support export of FMUs and FMUs can be imported into Python using
-    the Python packages included in the platform.</para>
+    compiler supports export of FMUs and FMUs can be imported into Python
+    using the Python packages included in the platform.</para>
   </section>
 
   <section xml:id="intro_sec_architecture">
