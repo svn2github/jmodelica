@@ -63,59 +63,45 @@
 
                 <td>cardinality()</td>
 
-                <td>String(...)</td>
-              </tr>
-
-              <tr>
                 <td>semiLinear(...)</td>
-
-                <td>scalar(A)</td>
-
-                <td>div(x,y)</td>
               </tr>
 
               <tr>
+                <td>div(x,y)</td>
+
                 <td>Subtask.decouple(v)</td>
 
-                <td>vector(A)</td>
+                <td>floor(x)</td>
+              </tr>
 
+              <tr>
                 <td>mod(x,y)</td>
+
+                <td>String(...)</td>
+
+                <td>reinit(x, expr)</td>
               </tr>
 
               <tr>
                 <td>delay(...)</td>
 
-                <td>matrix(A)</td>
-
                 <td>rem(x,y)</td>
+
+                <td>integer(x)</td>
               </tr>
 
               <tr>
                 <td>terminal()</td>
 
-                <td>diagonal(v)</td>
-
                 <td>ceil(x)</td>
+
+                <td>symmetric(A)</td>
               </tr>
 
               <tr>
                 <td>edge(b)</td>
 
                 <td>product(...)</td>
-
-                <td>floor(x)</td>
-              </tr>
-
-              <tr>
-                <td>skew(x)</td>
-
-                <td>symmetric(A)</td>
-
-                <td>integer(x)</td>
-              </tr>
-
-              <tr>
-                <td>reinit(x, expr)</td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -145,11 +131,6 @@
         <listitem>
           <para>Stream connections with more than two connectors are not
           supported.</para>
-        </listitem>
-
-        <listitem>
-          <para>Mapping of models to execution environments (Modelica Language
-          Specification, chapter 16)</para>
         </listitem>
       </itemizedlist>
     </listitem>
