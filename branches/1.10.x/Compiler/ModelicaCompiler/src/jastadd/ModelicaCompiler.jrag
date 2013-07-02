@@ -883,7 +883,7 @@ public class ModelicaCompiler {
 	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
-			log.raw("<n:Compilation>");
+			log.raw("<Compilation>");
 			// set invokegc if set
 			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
 			
@@ -933,11 +933,11 @@ public class ModelicaCompiler {
 				sb.append(")\n");
 			}
 			log.raw(
-					"<n:Exception>\n" +
-					"    <a:kind value=\"%s\" />\n" +
-					"    <a:message value=\"%s\" />\n" +
-					"    <a:stacktrace value=\"%s\" />\n" +
-					"</n:Exception>",
+					"<Exception>\n" +
+					"    <value name=\"kind\">%s</value>\n" +
+					"    <value name=\"message\">%s</value>\n" +
+					"    <value name=\"stacktrace\">%s</value>\n" +
+					"</Exception>",
 					XMLUtil.escape(t.getClass().getName()),
 					XMLUtil.escape(t.getMessage()),
 					XMLUtil.escape(sb.toString())
@@ -947,7 +947,7 @@ public class ModelicaCompiler {
 			ASTNode.getStepInfo().logReport();
 			if (options.getBooleanOption("debug_csv_step_info"))
 				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
-			log.raw("</n:Compilation>");
+			log.raw("</Compilation>");
 		}
 	}
 	
