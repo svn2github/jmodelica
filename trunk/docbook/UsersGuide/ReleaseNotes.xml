@@ -30,6 +30,15 @@
           </listitem>
 
           <listitem>
+            <para>Improved variable scaling in the CasADi collocation</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved handling of measurement data in the CasADi
+            collocation</para>
+          </listitem>
+
+          <listitem>
             <para>Improved logging from compilers</para>
           </listitem>
 
@@ -173,7 +182,24 @@ print r.warnings</programlisting>
     <section>
       <title>Optimization</title>
 
-      <para/>
+      <section>
+        <title>Improved variable scaling</title>
+
+        <para>The variable scaling performed based on nominal trajectories for
+        the CasADi collocation has been improved and can now be set
+        individually for each variable. It also has a more robust default
+        behavior.</para>
+      </section>
+
+      <section>
+        <title>Improved handling of measurement data</title>
+
+        <para>The old class <literal>ParameterEstimationData</literal> for the
+        CasADi collocation has been replaced by
+        <literal>MeasurementData</literal>. The new class can also be used for
+        optimal control, and not only parameter estimation, and also offers
+        additional strategies in the handling of the data.</para>
+      </section>
     </section>
 
     <section>
@@ -1580,12 +1606,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
