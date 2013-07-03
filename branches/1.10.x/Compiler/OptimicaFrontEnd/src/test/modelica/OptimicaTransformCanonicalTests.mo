@@ -629,7 +629,6 @@ equation
 Free independent parameters:
 p1
 Free dependent parameters:
-x
 ")})));
 end DepParTest1;
 
@@ -650,8 +649,6 @@ equation
 Free independent parameters:
 p1
 Free dependent parameters:
-p2
-x
 ")})));
 end DepParTest2;
 
@@ -677,9 +674,6 @@ equation
 Free independent parameters:
 p2
 Free dependent parameters:
-x
-m.p1
-m.x
 ")})));
 end DepParTest3;
 
@@ -707,10 +701,29 @@ Free independent parameters:
 p2
 Free dependent parameters:
 m.p1
-x
 m.x
 ")})));
 end DepParTest4;
+
+optimization VariabilityPropagation1
+	parameter Real a(free=true);
+	parameter Real b = a + 1;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="VariabilityPropagation1",
+			description="Test so that variability propagation of free parameters is prevented",
+			flatModel="
+optimization OptimicaTransformCanonicalTests.VariabilityPropagation1
+ parameter Real a(free = true);
+ Real b;
+ parameter Real startTime = 0.0 /* 0.0 */;
+ parameter Real finalTime = 1.0 /* 1.0 */;
+equation
+ b = a + 1;
+constraint 
+end OptimicaTransformCanonicalTests.VariabilityPropagation1;
+")})));
+end VariabilityPropagation1;
 
 
 end OptimicaTransformCanonicalTests;

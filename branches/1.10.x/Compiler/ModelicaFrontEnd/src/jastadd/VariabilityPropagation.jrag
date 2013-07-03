@@ -64,7 +64,8 @@ aspect VariabilityPropagation {
 			&& getHGTType() != FClass.HGTVariableType.PAIR;
 	eq FDerivativeVariable.canPropagate() = false;
 	
-	
+	// Hook for checks that are needed in optimica
+	syn boolean FEquation.canPropagate(FVariable var, FExp solution) = true;
 	
 	/**
 	 * Runs variability propagation if option is set.
@@ -148,6 +149,10 @@ aspect VariabilityPropagation {
 		solution = solution(fVariable.name());
 		
 		if (!solution.isValidExp()) {
+			return;
+		}
+		
+		if (!canPropagate(fVariable, solution)) {
 			return;
 		}
 		

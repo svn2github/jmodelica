@@ -238,3 +238,14 @@ aspect NormalizeFinalTimeProblems {
 	}
 }
 
+aspect OptimicaVariabilityPropagation {
+	
+	refine VariabilityPropagation eq FEquation.canPropagate(FVariable var, FExp solution) {
+		for (FVariable expVar : solution.referencedFVariablesInFExp())
+			if (expVar.freeAttribute())
+				return false;
+		return true;
+	}
+	
+}
+
