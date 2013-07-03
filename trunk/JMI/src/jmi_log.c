@@ -771,9 +771,3 @@ void jmi_log_real_matrix(log_t *log, category_t c, const char *name, const jmi_r
     }
     jmi_log_leave(log, node);
 }
-
-
-/* Catch invocations of old logging function; something seems to require it? */
-void jmi_log(jmi_t *jmi, jmi_log_category_t category, const char* message) {
-    jmi_log_node(jmi->log, category, "oldlog", "message: %s", message);
-}
