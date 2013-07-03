@@ -86,10 +86,25 @@ class ContentHandler(sax.ContentHandler):
     def get_root(self):
         return self.nodes[0].nodes[0]
 
+    def take_chars(self):
+        chars = "".join(self.chars)
+        self.chars = []
+        return chars
+
+    def create_comment(self):
+        if len(self.chars) > 0:
+            comment = self.take_chars().strip()  # want to remove at least a final newline
+            if comment != '':
+                self.nodes[-1].add(Comment(comment))
+
+# sax.ContentHandler callbacks:
+
     def characters(self, content):
         self.chars.append(content)
 
     def startElement(self, type, attrs):
+        self.create_comment()
+        
         key = attrs.get('name')
 
         self.chars = []
@@ -110,10 +125,11 @@ class ContentHandler(sax.ContentHandler):
     def endElement(self, type):        
         # todo: verify name matching?
         if self.leafparser is not None:
-            node = self.leafparser("".join(self.chars))
+            node = self.leafparser(self.take_chars())
             self.nodes[-1].add(node, self.leafkey)
             self.leafparser = self.leafkey = None
         else:
+            self.create_comment()
             self.nodes.pop()
 
 def create_parser():
