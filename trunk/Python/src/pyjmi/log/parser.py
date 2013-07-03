@@ -124,7 +124,10 @@ def create_parser():
     parser.setContentHandler(handler)
     return parser, handler
 
-def parse(filename):
+def parse_xml_log(filename):
+    """
+    Parse a pure XML JMI log as created by extract_jmi_log, return the root node.
+    """
     parser, handler = create_parser()
     parser.parse(filename)
     return handler.get_root()
@@ -132,12 +135,24 @@ def parse(filename):
 # Support routines to parse JMI logs
 
 def parse_jmi_log(filename, modulename = 'Model'):
+    """
+    Parse the XML contents of a JMI log and return the root node.
+
+    modulename selects the module as recorded in the beginning of each line by
+    FMI Library.
+    """
     parser, handler = create_parser()
     filter_jmi_log(parser.feed, filename, modulename)
     parser.close()
     return handler.get_root()
 
 def extract_jmi_log(destfilename, filename, modulename = 'Model'):
+    """
+    Extract the XML contents of a JMI log and write as a new file destfilename.
+
+    modulename selects the module as recorded in the beginning of each line by
+    FMI Library.
+    """
     f = open(destfilename, 'w')
     filter_jmi_log(f.write, filename, modulename)
     f.close()
