@@ -470,7 +470,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
     
-    if(jmi->options.use_automatic_scaling_flag || jmi->options.use_manual_scaling_flag)
+    if(jmi->options.iteration_variable_scaling_mode)
     {
         /* 
             Set variable scaling based on nominal values.          
@@ -676,7 +676,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     DenseCopy(solver->J, solver->J_LU);
 
     /* Equillibrate if corresponding option is set */
-    if((N>1) && block->jmi->options.use_jacobian_scaling_flag) {
+    if((N>1) && block->jmi->options.use_jacobian_equilibration_flag) {
         int info;
         double rowcnd, colcnd, amax;
         dgeequ_(&N, &N, solver->J_LU->data, &N, solver->rScale, solver->cScale, 
@@ -802,16 +802,15 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
     realtype* scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
     realtype* col_ptr;
     realtype* scaled_col_ptr;
-    int use_scaling_flag = block->jmi->options.use_automatic_scaling_flag
-            || block->jmi->options.use_manual_scaling_flag;
+    int use_scaling_flag = block->jmi->options.residual_equation_scaling_mode;
 
     solver->kin_scale_update_time = curtime;  
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
-    if(block->jmi->options.use_automatic_scaling_flag 
+    if((block->jmi->options.residual_equation_scaling_mode != jmi_residual_scaling_none)
             || block->jmi->options.nle_solver_check_jac_cond_flag){
 
-        if(block->jmi->options.use_automatic_scaling_flag) {
+        if(block->jmi->options.residual_equation_scaling_mode == jmi_residual_scaling_auto) {
             /* Zero out the scales initially. */
             N_VConst_Serial(0,solver->kin_f_scale);
         }
@@ -832,7 +831,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
                 realtype fscale;
                 fscale = dres * x;
                 scaled_col_ptr[j] = fscale;
-                if(block->jmi->options.use_automatic_scaling_flag) {
+                if(block->jmi->options.residual_equation_scaling_mode == jmi_residual_scaling_auto) {
                     scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
                 }
             }
@@ -840,7 +839,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
     }
     
     /* Read manual scaling from annotations and put them in scale_ptr*/
-    if(block->jmi->options.use_manual_scaling_flag){
+    if(block->jmi->options.residual_equation_scaling_mode == jmi_residual_scaling_manual){
         block->F(jmi,dummy,scale_ptr,JMI_BLOCK_EQUATION_NOMINAL) ;
     }
     
@@ -979,6 +978,9 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     
     /* Allow long steps */
     KINSetMaxNewtonStep(solver->kin_mem, 1);
+    
+    /* Max number of iters */
+    KINSetNumMaxIters(solver->kin_mem, jmi->options.nle_solver_max_iter);
     
     /* Disable residual monitoring (since inexact solution is given sometimes by 
     the linear solver) */

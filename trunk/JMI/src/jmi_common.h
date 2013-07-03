@@ -683,12 +683,37 @@ int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
             int *dF_n_cols, int *dF_n_nz);
 
+typedef enum jmi_residual_equation_scaling_mode_t {
+    jmi_residual_scaling_none = 0,
+    jmi_residual_scaling_auto = 1,
+    jmi_residual_scaling_manual = 2
+} jmi_residual_equation_scaling_mode_t;
+
+
+typedef enum jmi_iteration_var_scaling_mode_t {
+    jmi_iter_var_scaling_none = 0,
+    jmi_iter_var_scaling_nominal = 1,
+    jmi_iter_var_scaling_heuristics = 2
+} jmi_iteration_var_scaling_mode_t;
+
+typedef enum jmi_block_solver_experimental_mode_t {
+    jmi_block_solver_experimental_none = 0,
+    jmi_block_solver_experimental_steepest_descent = 1,
+    jmi_block_solver_experimental_converge_switches_first = 2
+} jmi_block_solver_experimental_mode_t;
+
 /**< \brief Run-time options. */
 typedef struct jmi_options_t {
     int log_level; /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
     int enforce_bounds_flag; /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    int use_jacobian_scaling_flag;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
-    int use_automatic_scaling_flag;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
+    int use_jacobian_equilibration_flag;  /**< \brief If jacobian equlibration should be used in equation block solvers */
+    
+    jmi_residual_equation_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
+    jmi_iteration_var_scaling_mode_t iteration_variable_scaling_mode; /**< \brief  "Iteration variables scaling mode in equation block solvers:"+
+            "0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc." */
+    int block_solver_experimental_mode; /**< \brief  Activate experimental features of equation block solvers */
+    int nle_solver_max_iter; /**< \brief Maximum number of iterations for the equation block solver before failure */
+
     int rescale_each_step_flag;  /**< \brief If scaling should be updated at every step (only active if use_automatic_scaling_flag is set) */
     int rescale_after_singular_jac_flag;  /**< \brief If scaling should be updated after singular jac was detected (only active if use_automatic_scaling_flag is set) */
     int use_Brent_in_1d_flag;  /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
@@ -698,7 +723,7 @@ typedef struct jmi_options_t {
     double nle_solver_tol_factor;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     double events_default_tol;  /**< \brief Default tolerance for the event iterations. */        
     double events_tol_factor;   /**< \brief Tolerance safety factor for the event iterations. */
-    int use_manual_scaling_flag; /**< \brief If equations should be scaled using annotations in equation block solvers */
+
     int block_jacobian_check; /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
     double block_jacobian_check_tol; /**< \brief Tolerance for block jacobian comparison */
     int cs_solver; /**< \brief Option for changing the internal CS solver */

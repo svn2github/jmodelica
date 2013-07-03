@@ -145,11 +145,18 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_real_t* real_vrs = (jmi_real_t*)calloc(block->n,sizeof(jmi_real_t));
         /* Initialize the work vectors */
         for(i=0; i < block->n; ++i) {
-            block->nominal[i] = BIG_REAL;
+            if(jmi->options.iteration_variable_scaling_mode == jmi_iter_var_scaling_heuristics) {
+                block->nominal[i] = BIG_REAL;
+            }
+            else {
+                block->nominal[i] = 1.0;
+            }
             block->max[i] = BIG_REAL;
             block->min[i] = -block->max[i];
         }
-        block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
+        if(jmi->options.iteration_variable_scaling_mode != jmi_iter_var_scaling_none) {
+            block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
+        }
         block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
         block->F(jmi,block->max,block->res,JMI_BLOCK_MAX);
         block->F(jmi,block->initial,block->res,JMI_BLOCK_INITIALIZE);

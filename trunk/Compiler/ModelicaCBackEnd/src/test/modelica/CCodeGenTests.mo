@@ -9386,34 +9386,39 @@ model TestRuntimeOptions1
 const char *fmi_runtime_options_map_names[] = {
     \"_block_jacobian_check\",
     \"_block_jacobian_check_tol\",
+    \"_block_solver_experimental_mode\",
     \"_cs_rel_tol\",
     \"_cs_solver\",
     \"_cs_step_size\",
     \"_enforce_bounds\",
     \"_events_default_tol\",
     \"_events_tol_factor\",
+    \"_iteration_variable_scaling\",
     \"_log_level\",
     \"_nle_solver_check_jac_cond\",
     \"_nle_solver_default_tol\",
     \"_nle_solver_log_level\",
+    \"_nle_solver_max_iter\",
     \"_nle_solver_min_tol\",
     \"_nle_solver_tol_factor\",
     \"_rescale_after_singular_jac\",
     \"_rescale_each_step\",
+    \"_residual_equation_scaling\",
     \"_use_Brent_in_1d\",
     \"_use_automatic_scaling\",
+    \"_use_jacobian_equilibration\",
     \"_use_jacobian_scaling\",
     \"_use_manual_equation_scaling\",
     NULL
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870923, 0, 1, 268435464, 2, 536870924, 3, 4, 268435465, 536870925,
-    5, 268435466, 6, 7, 536870926, 536870927, 536870928, 536870929, 536870930, 536870931,
-    0
+    536870927, 0, 268435464, 1, 268435465, 2, 536870928, 3, 4, 268435466,
+    268435467, 536870929, 5, 268435468, 268435469, 6, 7, 536870930, 536870931, 268435470,
+    536870932, 536870933, 536870934, 536870935, 536870936, 0
 };
 
-const int fmi_runtime_options_map_length = 20;
+const int fmi_runtime_options_map_length = 25;
 ")})));
 end TestRuntimeOptions1;
 

@@ -1671,8 +1671,11 @@ int jmi_with_cad_derivatives(jmi_t* jmi)
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->log_level = 3 ; /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
     op->enforce_bounds_flag = 1; /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    op->use_jacobian_scaling_flag = 0;  /**< \brief If jacobian rows/columns should be automatically scaled in equation block solvers */
-    op->use_automatic_scaling_flag = 1;  /**< \brief If equations and variables should be automatically scaled in equation block solvers */
+    op->use_jacobian_equilibration_flag = 0; 
+    op->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
+    op->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+    op->block_solver_experimental_mode = 0;
+    op->nle_solver_max_iter = 100;
     op->rescale_each_step_flag = 0;
     op->rescale_after_singular_jac_flag = 0;
     op->use_Brent_in_1d_flag = 0;  /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */

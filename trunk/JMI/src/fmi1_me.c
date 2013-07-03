@@ -1677,6 +1677,8 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     jmi_t* jmi = fmi->jmi;
     jmi_real_t* z = jmi_get_z(jmi);
     int index;
+    int index1;
+    int index2;
     jmi_options_t* op = &fmi->jmi->options;
     index = get_option_index("_log_level");
     if(index)
@@ -1684,12 +1686,42 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_enforce_bounds");
     if(index)
         op->enforce_bounds_flag = (int)z[index]; 
-    index = get_option_index("_use_jacobian_scaling");
+    
+    index = get_option_index("_use_jacobian_equilibration");
+    index1 = get_option_index("_use_jacobian_scaling");
+    if(index || index1 ){
+        int fl, fl1;
+        fl = fl1 = op->use_jacobian_equilibration_flag;
+        if(index) fl = (int)z[index]; 
+        if(index1) fl1 = (int)z[index1];
+        
+        op->use_jacobian_equilibration_flag = fl || fl1; 
+    }
+    
+    index = get_option_index("_residual_equation_scaling");
+    index1 = get_option_index("_use_automatic_scaling");
+    index2 = get_option_index("_use_manual_equation_scaling");
+    if(index || index1 || index2) {
+        /* to support deprecation: non-default setting given precendence*/
+        if(index2 && (int)z[index2]) {
+            op->residual_equation_scaling_mode = jmi_residual_scaling_manual;
+        }
+        else if(index1 && !(int)z[index1]){
+            op->residual_equation_scaling_mode = jmi_residual_scaling_none;
+        }
+        else if(index && ((int)z[index] != jmi_residual_scaling_auto)) {
+            op->residual_equation_scaling_mode = (int)z[index];
+        }
+        else
+            op->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+    }
+    index = get_option_index("_nle_solver_max_iter");
     if(index)
-        op->use_jacobian_scaling_flag = (int)z[index]; 
-    index = get_option_index("_use_automatic_scaling");
+        op->nle_solver_max_iter = (int)z[index];
+    index = get_option_index("_block_solver_experimental_mode");
     if(index)
-        op->use_automatic_scaling_flag = (int)z[index]; 
+        op->block_solver_experimental_mode  = (int)z[index];
+    
     index = get_option_index("_rescale_each_step");
     if(index)
         op->rescale_each_step_flag = (int)z[index]; 
@@ -1717,9 +1749,6 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_events_tol_factor");
     if(index)
         op->events_tol_factor = z[index];
-    index = get_option_index("_use_manual_equation_scaling");
-    if(index)
-        op->use_manual_scaling_flag = z[index]; 
     index = get_option_index("_block_jacobian_check");
     if(index)
         op->block_jacobian_check = z[index]; 
