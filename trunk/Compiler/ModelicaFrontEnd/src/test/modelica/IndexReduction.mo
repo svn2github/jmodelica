@@ -179,8 +179,8 @@ fclass IndexReduction.IndexReduction2_Mechanical
 initial equation 
  inertia2.phi = 0;
  inertia2.w = 0;
- inertia3.w = 0;
  spring.phi_rel = 0;
+ inertia3.w = 0;
 parameter equation
  inertia1.J = Jmotor;
  idealGear.ratio = ratio;

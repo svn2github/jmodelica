@@ -500,8 +500,8 @@ fclass FunctionInlining.BasicInline13
  discrete FunctionInlining.BasicInline13.E p1;
  discrete FunctionInlining.BasicInline13.E p2;
 initial equation 
- pre(p1) = false;
- pre(p2) = false;
+ pre(p1) = FunctionInlining.BasicInline13.E.a;
+ pre(p2) = FunctionInlining.BasicInline13.E.a;
 equation
  p1 = FunctionInlining.BasicInline13.E.b;
  p2 = noEvent(if p1 == FunctionInlining.BasicInline13.E.a then FunctionInlining.BasicInline13.E.b else FunctionInlining.BasicInline13.E.c);

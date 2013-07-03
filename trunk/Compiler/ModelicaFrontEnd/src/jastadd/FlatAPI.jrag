@@ -1087,6 +1087,10 @@ aspect FlatAPI {
 	syn boolean FAbstractVariable.isDiscreteVariable() = false;
 	syn lazy boolean FVariable.isDiscreteVariable()    = myFClass().discreteVariables().contains(this);
 
+	syn boolean FAbstractVariable.isAlgebraicContinousRealVariable() = false;
+	syn lazy boolean FVariable.isAlgebraicContinousRealVariable()    =
+			myFClass().algebraicContinousRealVariables().contains(this);
+
 	inh FVariable FExp.inBindingExp();
 	eq FVariable.getBindingExp().inBindingExp() = this;
 	eq Root.getChild().inBindingExp() = null; 
@@ -1471,15 +1475,9 @@ aspect Attributes {
 	// fixed attribute
 	syn boolean FVariable.fixedAttributeSet()           = attributeSet(FAttribute.FIXED);
 	syn FExp    FVariable.fixedAttributeExp()           = attributeExp(FAttribute.FIXED);
-	// TODO: merge these? we can override with unknown or something for strings
-	syn CValue  FRealVariable.fixedAttributeCValue()    = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
-	syn CValue  FIntegerVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
-	syn CValue  FBooleanVariable.fixedAttributeCValue() = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
-	syn CValue  FEnumVariable.fixedAttributeCValue()    = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
-	syn boolean FRealVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();
-	syn boolean FIntegerVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
-	syn boolean FBooleanVariable.fixedAttribute()       = fixedAttributeCValue().booleanValue();	
-	syn boolean FEnumVariable.fixedAttribute()          = fixedAttributeCValue().booleanValue();	
+	syn CValue  FVariable.fixedAttributeCValue()        = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
+	eq          FStringVariable.fixedAttributeCValue()  = CValue.UNKNOWN;
+	syn boolean FVariable.fixedAttribute()              = fixedAttributeCValue().booleanValue();
 		
 	// Nominal attribute
 	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);

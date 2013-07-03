@@ -2276,7 +2276,7 @@ fclass RecordTests.RecordScalarize25
  Real b.x;
  discrete RecordTests.RecordScalarize25.A b.y;
 initial equation 
- b.pre(y) = false;
+ b.pre(y) = RecordTests.RecordScalarize25.A.a1;
 equation
  b.x = time;
  b.y = if b.x < 3 then RecordTests.RecordScalarize25.A.a1 else RecordTests.RecordScalarize25.A.a2;
