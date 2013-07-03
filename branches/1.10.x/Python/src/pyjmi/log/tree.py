@@ -27,11 +27,11 @@ class Comment(object):
     text -- the comment text without enclosing braces {}
     """
     def __init__(self, text):
-        assert isinstance(text, str)
+        assert isinstance(text, basestring)
         self.text = text
 
     def __repr__(self):
-        return "{" + self.text + "}"
+        return '<Comment: ' + self.text + '>'
 
 class Node(object):
     """Log node.
