@@ -1173,7 +1173,7 @@ rlc_circuit.set(vars, values)
     order to facilitate localization of errors. There are three mechanisms for
     generating such diagnostics: dumping of debug information to the system
     output, generation of HTML code that can be viewed with a standard web
-    browser or logs in .csv format from the non-linear solver.</para>
+    browser or logs in XML format from the non-linear solver.</para>
 
     <section>
       <title>Compiler info in system output</title>
@@ -1384,72 +1384,109 @@ Equations:
     <section>
       <title>Debugging nonlinear systems</title>
 
-      <para>By setting the log level of the nonlinear solver to 3, the solver
-      will generate a file <literal>nle_solver_log.csv</literal> with
-      information on the convergence of all non-linear blocks in the working
-      directory. The log level can be set in several ways, e.g.:</para>
+      <para>Many events that occur inside of an FMU can generate log messages.
+      A destination log file name can be supplied when loading an FMU:
+      (otherwise a default name will be generated based on the FMU
+      name)</para>
 
-      <para><programlisting>...
+      <programlisting>...
 # Load model
-model = load_fmu(FMU)
+model = load_fmu(fmu_name, log_file_name='MyLog.txt')
+...</programlisting>
 
-model.set("_nle_solver_log_level",3)
-...
-</programlisting>The file contains info on all blocks listed as
-      <emphasis>Unsolvable</emphasis> or <emphasis>Torn</emphasis> blocks in
-      the BLT diagnostics part of the HTML diagnostics, with block 0 in
-      <literal>nle_solver_log.csv</literal> corresponding to the first
-      <emphasis>Torn</emphasis> block in the HTML diagnostics. For each block
-      the information on the iteration variables (IVs) and residuals are
-      reported as in the following example:</para>
+      <para>How much information that ends up in the log file depends on the
+      <literal>log_level</literal> setting. The following generates as much
+      log output as possible:</para>
 
-      <para><table>
-          <title>Example of an iteration in nle_solver_log.csv for a block.
-          This example shows iteration 1 of block 2 of a system, this
-          particular block has two IVs and residuals</title>
+      <programlisting>...
+model.set_debug_logging(True)
+model.set('_log_level', 6)
+model.set_fmil_log_level(5)
+...</programlisting>
 
-          <tgroup cols="7">
-            <tbody>
-              <row>
-                <entry>Block:</entry>
+      <para>Information is logged in XML format, which ends up mixed with FMI
+      Library output in the resulting log file. Example: (the following
+      examples are based on the example
+      <filename>pyjmi.examples.logger_example</filename>.)</para>
 
-                <entry>2</entry>
+      <programlisting>...
+FMIL: module = FMICAPI, log level = 5: Calling fmiInitialize
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK] &lt;EquationSolve&gt;Model equations evaluation invoked at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]   &lt;BlockEventIterations&gt;Starting block (local) event iteration at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;in&lt;value name="block"&gt;0&lt;/value&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]     &lt;vector name="ivs"&gt;        0.0000000000000000E+00,         0.0000000000000000E+00,         0.0000000000000000E+00&lt;/vector&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]     &lt;vector name="switches"&gt;        0.0000000000000000E+00,         0.0000000000000000E+00,         0.0000000000000000E+00,         0.0000000000000000E+00&lt;/vector&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]     &lt;vector name="booleans"&gt;&lt;/vector&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]     &lt;BlockIteration&gt;Local iteration&lt;value name="iter"&gt;1&lt;/value&gt;at&lt;value name="t"&gt;        0.0000000000000000E+00&lt;/value&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       &lt;JacobianUpdated&gt;&lt;value name="block"&gt;0&lt;/value&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         &lt;matrix name="jacobian"&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0000000000000000E+00,         4.0000000000000000E+00,         0.0000000000000000E+00;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0000000000000000E+00,        -1.0000000000000000E+00,        -1.0000000000000000E+00;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0000000000000000E+00,         1.0000000000000000E+00,        -1.0000000000000000E+00;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         &lt;/matrix&gt;
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       &lt;/JacobianUpdated&gt;
+...</programlisting>
 
-                <entry>Iteration:</entry>
+      <para>The log can be inspected manually, using general purpose XML
+      tools, or parsed using the tools in <literal>pyjmi.log</literal>. A pure
+      XML file that can be read by XML tools can be extracted with</para>
 
-                <entry>1</entry>
+      <programlisting># Extract the log file XML contents into a pure XML file
+pyjmi.log.extract_jmi_log(dest_xml_file_name, log_file_name)</programlisting>
 
-                <entry>IVs:</entry>
+      <para>The XML contents in the log file can also be parsed
+      directly:</para>
 
-                <entry>2.0</entry>
+      <programlisting># Parse the entire XML log
+log = pyjmi.log.parse_jmi_log(log_file_name)</programlisting>
 
-                <entry>3.4</entry>
-              </row>
+      <para><literal>log</literal> will correspond to the top level log node,
+      containing all other nodes. Log nodes have two kinds of children: named
+      (with a <literal>name</literal> attribute in the XML file) and unnamed
+      (without).</para>
 
-              <row>
-                <entry>Block:</entry>
+      <itemizedlist>
+        <listitem>
+          <para>Named children are accessed by indexing with a string:
+          <literal>node['t']</literal>, or simply dot notation:
+          <literal>node.t</literal>.</para>
+        </listitem>
 
-                <entry>2</entry>
+        <listitem>
+          <para>Unnamed children are accessed as a list
+          <literal>node.nodes</literal>, or by iterating over the node.</para>
+        </listitem>
+      </itemizedlist>
 
-                <entry>Norm:</entry>
+      <para>There is also a convenience function
+      <literal>gather_solves</literal> to extract common information about
+      equation solves in the log. This function collects nodes of certain
+      types from the log and annotates some of them with additional named
+      children. The following example is from
+      pyjmi.examples.logger_example:</para>
 
-                <entry>0.707</entry>
+      <programlisting># Parse the entire XML log
+log = pyjmi.log.parse_jmi_log(log_file_name)
+# Gather information pertaining to equation solves
+solves = gather_solves(log)
 
-                <entry>Residuals:</entry>
-
-                <entry>0.5</entry>
-
-                <entry>0.5</entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </table>The <emphasis>IVs</emphasis> correspond to the
-      <emphasis>Tearing variables</emphasis> and the
-      <emphasis>Residuals</emphasis> correspond to the <emphasis>Residual
-      equations</emphasis>. They are both reported in the same order, i.e. the
-      first IV and Residual in <literal>nle_solver_log.csv</literal>
-      correspond to the first tearing variable and residual equation in the
-      HTML diagnostics.</para>
+print
+print 'Number of solver invocations:',                      len(solves)
+print 'Time of first solve:',                               solves[0].t
+print 'Number of block solves in first solver invocation:', len(solves[0].block_solves)
+print 'Names of iteration variables in first block solve:', solves[0].block_solves[0].variables
+print 'Min bounds in first block solve:',                   solves[0].block_solves[0].min
+print 'Max bounds in first block solve:',                   solves[0].block_solves[0].max
+print 'Initial residual scaling in first block solve:',     solves[0].block_solves[0].initial_residual_scaling
+print 'Number of iterations in first block solve:',         len(solves[0].block_solves[0].iterations)
+print
+print 'First iteration in first block solve: '
+print '  Iteration variables:',              solves[0].block_solves[0].iterations[0].ivs
+print '  Scaled residuals:',                 solves[0].block_solves[0].iterations[0].residuals
+print '  Jacobian:\n',                       solves[0].block_solves[0].iterations[0].jacobian
+print '  Jacobian updated in iteration:',    solves[0].block_solves[0].iterations[0].jacobian_updated
+print '  Residual scaling factors:',         solves[0].block_solves[0].iterations[0].residual_scaling
+print '  Residual scaling factors_updated:', solves[0].block_solves[0].iterations[0].residual_scaling_updated
+print '  Scaled residual norm:',             solves[0].block_solves[0].iterations[0].scaled_residual_norm</programlisting>
     </section>
   </section>
 </chapter>

@@ -30,7 +30,7 @@ def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, node):
         scalings_updated[block] = True
 
 def gather_solves(log):
-    """Attempts to emulate the old structured log.
+    """Gather information about equation solves from a parsed JMI log.
 
     Takes a log root node and returns a list of solves, marked up with a block_solves list.
     Each block_solve is marked up with an iterations list and initial_residual_scaling.
