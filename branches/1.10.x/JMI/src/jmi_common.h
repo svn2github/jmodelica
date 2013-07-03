@@ -711,19 +711,27 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
 
 #define check_lbound(x, xmin, message) \
     if(jmi->options.enforce_bounds_flag && (x < xmin)) \
-        { jmi_log(jmi, logInfo, message); return 1; }
+        { jmi_log_node(jmi->log, logInfo, "LBoundExceeded", "message:%s", \
+                       message);                                        \
+            return 1; }
 
 #define check_ubound(x, xmax, message) \
     if(jmi->options.enforce_bounds_flag && (x > xmax)) \
-        { jmi_log(jmi, logInfo, message); return 1; }
+        { jmi_log_node(jmi->log, logInfo, "UBoundExceeded", "message:%s", \
+                       message);                                        \
+            return 1; }
 
 #define init_with_lbound(x, xmin, message) \
     if(jmi->options.enforce_bounds_flag && (x < xmin)) \
-        { jmi_log(jmi, logInfo, message); x = xmin; }
+        { jmi_log_node(jmi->log, logInfo, "LBoundSaturation", "message:%s", \
+                       message); \
+            x = xmin; }
 
 #define init_with_ubound(x, xmax, message) \
     if(jmi->options.enforce_bounds_flag && (x > xmax)) \
-         { jmi_log(jmi, logInfo, message); x = xmax; }
+        { jmi_log_node(jmi->log, logInfo, "UBoundSaturation", "message:%s", \
+                       message);                                        \
+            x = xmax; }
 
 #define check_bounds(x, xmin, xmax, message) \
     check_lbound(x, xmin, message)\
