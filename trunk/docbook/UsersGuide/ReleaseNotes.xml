@@ -11,6 +11,190 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.10</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Export of FMUs for Co-Simulation</para>
+          </listitem>
+
+          <listitem>
+            <para>Import of FMU 2.0b4 in PyFMI</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved log format for FMUs</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved logging from compilers</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved Modelica compliance</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <para>The following compliance improvements have been made:<itemizedlist>
+          <listitem>
+            <para>The following operators are now supported:<itemizedlist>
+                <listitem>
+                  <para>smooth()</para>
+                </listitem>
+
+                <listitem>
+                  <para>skew(x)</para>
+                </listitem>
+
+                <listitem>
+                  <para>scalar(A)</para>
+                </listitem>
+
+                <listitem>
+                  <para>vector(A)</para>
+                </listitem>
+
+                <listitem>
+                  <para>matrix(A)</para>
+                </listitem>
+
+                <listitem>
+                  <para>diagonal(v)</para>
+                </listitem>
+              </itemizedlist></para>
+          </listitem>
+        </itemizedlist>Also many bug fixes and performance improvements have
+      been made.</para>
+
+      <section>
+        <title>Improved logging</title>
+
+        <para/>
+      </section>
+    </section>
+
+    <section>
+      <title>FMI</title>
+
+      <section>
+        <title>Export of FMUs for Co-Simulation</title>
+
+        <para/>
+      </section>
+
+      <section>
+        <title>Import of FMU version 2.0b4</title>
+
+        <para/>
+      </section>
+    </section>
+
+    <section>
+      <title>Python</title>
+
+      <section>
+        <title>Improved result data access</title>
+
+        <para>Modified handling of simulation and optimization results to
+        facilitate post processing of results such as plotting. Accessing
+        variables and parameters from results will always return a vector of
+        size equal to the time vector, in this way it is possible to write
+        e.g.: </para>
+
+        <para><programlisting># Simulate
+res = fmu.simulate()
+# Get result vectors
+x1 = res['x1']  # Variable
+p1 = res['p1]   # Parameter
+t = res['time']
+# Plot
+plot(t, x1, t, p1)
+</programlisting>Also, the base result class (<literal>JMResultBase</literal>)
+        has two new functions, <literal>initial</literal> and
+        <literal>final</literal>, which will always return initial and final
+        value of the simulation/optimization as scalar values.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Bengt-Arne Andersson</para>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Toivo Henningsson</para>
+
+      <para>Jonathan Kämpe</para>
+
+      <para>Björn Lennernäs</para>
+
+      <para>John Lindskog</para>
+
+      <para>Fredrik Magnusson</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Iakov Nakhimovski</para>
+
+      <para>Jon Sten</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Sofia Gedda</para>
+
+        <para>Petter Lindgren</para>
+
+        <para>Tobias Mattsson</para>
+
+        <para>Lennart Moraeus</para>
+
+        <para>Philip Nilsson</para>
+
+        <para>Patrik Meijer</para>
+
+        <para>Kristina Olsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+
+        <para>Jonas Rosenqvist</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.9.1</title>
 
     <para>This release contains a bug fix which eliminates a dependency on
@@ -1351,41 +1535,12 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
