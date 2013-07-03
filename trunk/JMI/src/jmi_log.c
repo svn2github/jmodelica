@@ -231,11 +231,9 @@ struct jmi_log_t {
 
     frame_t *frames;
     int topindex;  /**< \brief  Index of the top frame in frames. */
-    int lineindex; /**< \brief  Index of the last frame that doesn't start on the current line. */
     int alloced_frames;
     int id_counter;
 
-    int indent;
     BOOL outstanding_comma;
 };
 
@@ -322,26 +320,31 @@ static void emit(log_t *log) {
     buf_t *buf = bufof(log);
     force_commas(log);
     if (!isempty(buf)) {
-        /* todo: don't alloc/free each time! */
-        char *msg2 = (char *)malloc(buf->len + log->indent + 1);
-        memset(msg2, ' ', log->indent);
-        strcpy(msg2+log->indent, buf->msg);
-
-        /* jmi_log(log, log->c, buf->msg); */
-        _emit(log, log->c, msg2);
+        _emit(log, log->c, buf->msg);
         clear(buf);
-
-        free(msg2);
     }
-    log->indent = current_indent_of(log);
-    log->lineindex = log->topindex;
 }
 
-/** \brief Set the current logging category; emit a log message if it was changed. */
+/** \brief Add indentation to the current line if it is empty.
+ *  Should be called before adding something to the start of a line with a
+ *  buffer*() function, either directly or by invoking set_category().
+ */
+static void indent_line(log_t *log) {
+    buf_t *buf = bufof(log);
+    if (isempty(buf)) {
+        int i;
+        int indent = current_indent_of(log);
+        for (i=0; i < indent; i++) buffer_raw_char(buf, ' ');
+    }
+}
+
+/** \brief Set the current logging category; emit a log message if it was changed.
+  * Also calls indent_line().
+  */
 static void set_category(log_t *log, category_t c) {
-    force_commas(log);
     if (log->c != c) emit(log);
     log->c = c;
+    indent_line(log);
 }
 
 
@@ -393,8 +396,6 @@ static void init_log(log_t *log, jmi_t *jmi) {
 
     log->outstanding_comma = FALSE;
     push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
-    log->lineindex = 0;
-    log->indent = current_indent_of(log);
 }
 
 static void delete_log(log_t *log) {
@@ -408,22 +409,15 @@ static void delete_log(log_t *log) {
 
 /** \brief Leave the top frame without printing any logging errors. */
 static BOOL _leave_frame_(log_t *log) {
-    int indent;
-    buf_t   *buf = bufof(log);
     frame_t *top = topof(log);
-    BOOL same_line = log->lineindex < log->topindex;
 
     log->next_name = NULL;
     log->leafdim = -1;
-    if (log->lineindex > log->topindex) log->lineindex = log->topindex;
 
     if (!can_pop(log)) return FALSE;
     --(log->topindex);
 
     if (emitted_category(log, top->c)) {
-        indent = current_indent_of(log);
-        if (log->indent > indent) log->indent = indent;
-
         cancel_commas(log);
         set_category(log, top->c);
         buffer_endtag(bufof(log), top->type);
@@ -476,12 +470,13 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     close_leaf(log);
     log->next_name = NULL;
 
-    push_frame(log, c, type, leafdim);
     if (emitted_category(log, c)) {
         set_category(log, c);
         buffer_starttag(bufof(log), type, name, name_end);
     }
     cancel_commas(log);
+
+    push_frame(log, c, type, leafdim);
     return node_from_top(log);
 }
 
@@ -500,6 +495,7 @@ void jmi_log_label_(jmi_log_t *log, jmi_log_node_t node, const char *name) {
 
 /** Log a value. */
 static void log_value_(log_t *log, const char *value) {    
+    indent_line(log);
     force_commas(log);
     buffer_text(bufof(log), value);
     defer_comma(log);
@@ -507,6 +503,7 @@ static void log_value_(log_t *log, const char *value) {
 
 /** Log a string. */
 static void log_string_literal_(log_t *log, const char *value) {    
+    indent_line(log);
     force_commas(log);
     buffer_string_literal(bufof(log), value);
     defer_comma(log);
@@ -524,6 +521,7 @@ static void log_vref_(log_t *log, char t, int vref) {
     buf_t *buf = bufof(log);
     char tmp[128];
 
+    indent_line(log);
     force_commas(log);
     buffer_char(buf, '"'); buffer_raw_char(buf, '#');
 
@@ -713,7 +711,6 @@ void jmi_log_string_(log_t *log, const char *x) { log_string_literal_(log, x); }
 
 void jmi_log_real_(log_t *log, jmi_real_t x) {
     char buf[128];
-    char *rep;
     sprintf(buf, "%30.16E", x);
     log_value_(log, buf);
 }
