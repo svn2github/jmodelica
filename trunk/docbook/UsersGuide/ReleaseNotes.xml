@@ -70,14 +70,19 @@
                 </listitem>
               </itemizedlist></para>
           </listitem>
+
+          <listitem>
+            <para>Improved handling of unmatched HGT. All unmatched iteration
+            variables and residual equations are now paired and treated the
+            same way as regular HGT pairs.</para>
+          </listitem>
+
+          <listitem>
+            <para>Improvements have been made to analytical jacobians. Notably
+            full support for functions and bug fixes.</para>
+          </listitem>
         </itemizedlist>Also many bug fixes and performance improvements have
       been made.</para>
-
-      <section>
-        <title>Improved logging</title>
-
-        <para/>
-      </section>
 
       <section>
         <title>Export of FMUs for Co-Simulation</title>
@@ -87,7 +92,7 @@
         via an option to the <literal>compile_fmu</literal> method. The
         internal solver in the co-simulation FMU is CVode from the Sundials
         suite and there is also an explicit Euler method. The choice of the
-        solver can be changed via a parameter in the FMU. </para>
+        solver can be changed via a parameter in the FMU.</para>
       </section>
     </section>
 
@@ -115,6 +120,22 @@ plot(t, x1, t, p1)
         has two new functions, <literal>initial</literal> and
         <literal>final</literal>, which will always return initial and final
         value of the simulation/optimization as scalar values.</para>
+      </section>
+
+      <section>
+        <title>Improved error handling</title>
+
+        <para>Improved error handling of compiler problems (exceptions, errors
+        and warnings). Problems are now given in the same way as regardless if
+        JPype or separate process is used when compiling. Additionally errors
+        and warning are now returned as python objects to facilitate easier
+        post processing of compiler problems. It is also possible to retrieve
+        warnings from the return result of <literal>compile_fmu</literal>,
+        <literal>compile_jmu</literal> and <literal>compile_fmux</literal>,
+        e.g.:</para>
+
+        <programlisting>r = compile_fmu('Test', 'test.mo')
+print r.warnings</programlisting>
       </section>
     </section>
 
@@ -1559,41 +1580,12 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
