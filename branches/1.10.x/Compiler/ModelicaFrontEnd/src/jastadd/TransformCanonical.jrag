@@ -1856,50 +1856,19 @@ aspect TransformCanonical {
 
 		// Add initial equations if needed
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
-			List<FAbstractEquation> l = new List<FAbstractEquation>();
-			for (FAbstractEquation e : initialEquations()) {
-				l.add(e);
-			}
-
 			for (Var var : g.getUnmatchedVariables()) {	
 				FVariable fv = var.getVariable();
-				FEquation fe = null;
-				if (fv.isReal() && fv.isContinuous()) {
-					fe = new FEquation(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy())),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0));
-				} else if (fv.isReal() && fv.isDiscrete()) {
-					fe = new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0));
-				} else if (fv.isInteger()) {
-					fe = new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0));
-				}
-				if (fv.isBoolean()) {
-					fe = new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse());
-				}
-				if (fv.isString()) {
-					fe = new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FStringLitExp(""));
-				}
-				if (fv.isEnum()) {
-					fe = new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse());
-				}
-				l.add(fe);
+				FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
+				if (fv.isDiscrete())
+					lhs = new FPreExp(lhs);
+				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+				FEquation fe = new FEquation(lhs, rhs);
+				addFInitialEquation(fe);
 				
-				eqn = g.addEquation("eq_"+(g.getEquations().size() + 1),fe);
-				v = g.getVariable(var.getName());     
-				g.addEdge(eqn,v); 
+				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe);
+				v = g.getVariable(var.getName());
+				g.addEdge(eqn,v);
 			}
-	
-			setFInitialEquationList(l);	
 			root().flushAllRecursive();
 
 			g.maximumMatching(false);	
@@ -3043,55 +3012,26 @@ aspect TransformCanonical {
 	public void FClass.genInitialEquations() {
 		beginStep("genInitialEquations()");
 		// TODO: Isn't there always a value for fv.startAttributeExp() now?
-		if (!root().options.getBooleanOption("state_initial_equations")) {
-			for (FRealVariable fv : differentiatedRealVariables()) {
-				if (fv.fixedAttribute() ||
-						(root().options.getBooleanOption("state_start_values_fixed") 
-								&& fv.startAttributeSet())) {
-					addFInitialEquation(new FEquation(new FIdUseExp(
-							new FIdUse(fv.getFQName().fullCopy())),
-							fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
-				}	
+		for (FVariable fv : variables()) {
+			boolean generate = false;
+			if (!root().options.getBooleanOption("state_initial_equations") &&
+					fv.isDifferentiatedVariable() && (fv.fixedAttribute() ||
+					root().options.getBooleanOption("state_start_values_fixed")))
+				generate = true;
+			else if (!root().options.getBooleanOption("state_initial_equations") &&
+					fv.isAlgebraicContinousRealVariable() && fv.fixedAttribute())
+				generate = true;
+			else if (fv.isDiscrete() && !fv.isString() && fv.fixedAttribute())
+				generate = true;
+			
+			if (generate) {
+				FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
+				if (fv.isDiscrete())
+					lhs = new FPreExp(lhs);
+				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+				addFInitialEquation(new FEquation(lhs, rhs));
 			}
-			for (FRealVariable fv : algebraicContinousRealVariables()) {
-				if (fv.fixedAttribute()) {
-					addFInitialEquation(new FEquation(new FIdUseExp(
-							new FIdUse(fv.getFQName().fullCopy())),
-							fv.startAttributeSet()? fv.startAttributeExp(): new FRealLitExp(0.0)));
-				}	
-			}
 		}
-//		log.debug(prettyPrint(""));
-		for (FRealVariable fv : discreteRealVariables()) {
-			if (fv.fixedAttribute()) {
-				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0)));
-			}	
-		}
-		for (FIntegerVariable fv : discreteIntegerVariables()) {
-			if (fv.fixedAttribute()) {
-				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FIntegerLitExp(0)));
-			}	
-		}
-		for (FBooleanVariable fv : discreteBooleanVariables()) {
-			if (fv.fixedAttribute()) {
-				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse()));
-			}	
-		}		
-		for (FEnumVariable fv : discreteEnumVariables()) {
-			if (fv.fixedAttribute()) {
-				addFInitialEquation(new FEquation(new FPreExp(new FIdUseExp(
-						new FIdUse(fv.getFQName().fullCopy()))),
-						fv.startAttributeSet()? fv.startAttributeExp(): new FBooleanLitExpFalse()));
-			}	
-		}		
-
-		//flush();
 		root().flushAllRecursive();
 		endStep("genInitialEquations()");
 	}

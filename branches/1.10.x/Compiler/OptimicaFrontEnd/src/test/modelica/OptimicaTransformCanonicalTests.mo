@@ -198,10 +198,10 @@ optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTi
  Real x[2](start = 1,fixed = true);
  Real y;
  input Real u;
- parameter Real A[1,1] = - 1 /* -1 */;
+ parameter Real A[1,1] = -1 /* -1 */;
  parameter Real A[1,2] = 0 /* 0 */;
  parameter Real A[2,1] = 1 /* 1 */;
- parameter Real A[2,2] = - 1 /* -1 */;
+ parameter Real A[2,2] = -1 /* -1 */;
  parameter Real B[1] = 1 /* 1 */;
  parameter Real B[2] = 2 /* 2 */;
  parameter Real C[1] = 1 /* 1 */;
@@ -212,9 +212,9 @@ optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTi
  Real der(x[2]);
  Real der(cost);
 initial equation 
+ cost = 0;
  x[1] = 1;
  x[2] = 1;
- cost = 0;
 equation
  der(x[1]) = A[1,1] * x[1] + A[1,2] * x[2] + B[1] * u;
  der(x[2]) = A[2,1] * x[1] + A[2,2] * x[2] + B[2] * u;
@@ -261,10 +261,10 @@ optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTi
  Real x[2](start = 1,fixed = true);
  Real y;
  input Real u;
- parameter Real A[1,1] = - 1 /* -1 */;
+ parameter Real A[1,1] = -1 /* -1 */;
  parameter Real A[1,2] = 0 /* 0 */;
  parameter Real A[2,1] = 1 /* 1 */;
- parameter Real A[2,2] = - 1 /* -1 */;
+ parameter Real A[2,2] = -1 /* -1 */;
  parameter Real B[1] = 1 /* 1 */;
  parameter Real B[2] = 2 /* 2 */;
  parameter Real C[1] = 1 /* 1 */;
@@ -275,9 +275,9 @@ optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTi
  Real der(x[2]);
  Real der(cost);
 initial equation 
+ cost = 0;
  x[1] = 1;
  x[2] = 1;
- cost = 0;
 equation
  der(x[1]) = A[1,1] * x[1] + A[1,2] * x[2] + B[1] * u;
  der(x[2]) = A[2,1] * x[1] + A[2,2] * x[2] + B[2] * u;

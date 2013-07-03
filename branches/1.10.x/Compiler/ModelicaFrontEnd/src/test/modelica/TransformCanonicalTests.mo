@@ -2003,8 +2003,8 @@ fclass TransformCanonicalTests.InitialEqTest14
  discrete Real m.x2(start = 2);
 initial equation 
  m.pre(x1) = 1;
- m.pre(i1) = 4;
  m.pre(b1) = false;
+ m.pre(i1) = 4;
  m.t = 0;
  m.pre(x2) = 2;
 equation
@@ -2095,6 +2095,28 @@ end TransformCanonicalTests.InitialEqTest16;
 ")})));
 end InitialEqTest16;
 
+model InitialEqTest17
+	type A = enumeration(a, b);
+	A x = if time < 2 then A.a else A.b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest17",
+			description="Tests so that initial equations are added propperly for enum types",
+			flatModel="
+fclass TransformCanonicalTests.InitialEqTest17
+ discrete TransformCanonicalTests.InitialEqTest17.A x;
+initial equation 
+ pre(x) = TransformCanonicalTests.InitialEqTest17.A.a;
+equation
+ x = if time < 2 then TransformCanonicalTests.InitialEqTest17.A.a else TransformCanonicalTests.InitialEqTest17.A.b;
+
+public
+ type TransformCanonicalTests.InitialEqTest17.A = enumeration(a, b);
+
+end TransformCanonicalTests.InitialEqTest17;
+")})));
+end InitialEqTest17;
 
 
 model ParameterDerivativeTest
