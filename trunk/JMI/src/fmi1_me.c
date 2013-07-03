@@ -1765,4 +1765,8 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     if(index)
         op->cs_step_size = z[index]; 
     
+/*    op->block_solver_experimental_mode = 
+            jmi_block_solver_experimental_steepest_descent_first|
+            jmi_block_solver_experimental_converge_switches_first;
+   op->log_level = 5; */
 }

@@ -673,6 +673,8 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(ret != 0 ) return ret;
     
+    if(solver->use_steepest_descent_flag) return ret;
+
     DenseCopy(solver->J, solver->J_LU);
 
     /* Equillibrate if corresponding option is set */
@@ -751,7 +753,20 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             bd[i] *= solver->rScale[i];
         }
     }
-    if(solver->J_is_singular_flag) {
+    if(solver->use_steepest_descent_flag) {
+        realtype **jac = solver->J->cols;
+        int N = block->n;
+        int j;
+        
+        for (i=0;i<N;i++) {
+            bd[i] = 0;
+            for (j=0;j<N;j++){
+                bd[i] += jac[i][j] * xd[j];
+            }
+        }
+        N_VScale(ONE, b, x);
+    }
+    else if(solver->J_is_singular_flag) {
         /* solve the regularized problem */
         
         realtype** jac = solver->J->cols;
@@ -769,14 +784,13 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     else {
         N_VScale(ONE, b, x);
         i = 1;
-        dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);        
+        dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
     }
     
     if(ret) return ret;
     
     if((solver->equed == 'C') || (solver->equed == 'B')) {
         int i;
-        realtype* xd = N_VGetArrayPointer(x);
         for(i = 0; i < block->n; i++) {
             xd[i] *= solver->cScale[i];
         }
@@ -849,6 +863,11 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
             if(scale_ptr[i] < tol) {
                 scale_ptr[i] = 1/tol; /* Singular Jacobian? */
                 jmi_log_node(block->jmi->log, logWarning, "Warning", "<Using maximum scaling factor in> block: %d, "
+                             "equation: %d <Consider rescaling in the model or tighter tolerance.>", block->index, i);
+            }
+            else if(scale_ptr[i] > 1/tol) {
+                scale_ptr[i] = tol;
+                jmi_log_node(block->jmi->log, logWarning, "Warning", "<Using minimal scaling factor in> block: %d, "
                              "equation: %d <Consider rescaling in the model or tighter tolerance.>", block->index, i);
             }
             else
@@ -1088,6 +1107,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, const jmi_l
 int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     int flag;
     jmi_kinsol_solver_t* solver = block->solver;
+    jmi_t* jmi = block->jmi;
     realtype curtime = *(jmi_get_t(block->jmi));
     long int nniters = 0;
     int flagNonscaled;
@@ -1108,7 +1128,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
      * This is needed if the user has changed initial guesses in between calls to
      * Kinsol.
      */
-    flag = block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+    flag = block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
     if(flag) {        
         jmi_log_node(log, logWarning, "Error", "errorCode: %d <returned from> block: %d "
                      "<when reading initial guess.>", flag, block->index);
@@ -1116,13 +1136,20 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     }
 
     /* update the scaling only once per time step */
-    if(block->init || (block->jmi->options.rescale_each_step_flag && (curtime > solver->kin_scale_update_time))) {
+    if(block->init || (jmi->options.rescale_each_step_flag && (curtime > solver->kin_scale_update_time))) {
         jmi_update_f_scale(block);
     }
-     
+    
+    if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
+        solver->use_steepest_descent_flag = 1;
+    }
+            
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
+    if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
+        solver->use_steepest_descent_flag = 0;
+    }
     if(flag != KIN_SUCCESS) {
         if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
@@ -1141,8 +1168,9 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
 
         }
     }
-    /* TODO: Is Brent called even if Kinsol succeeded? Shouldn't this be in an else if?*/
-    if((block->n == 1) && block->jmi->options.use_Brent_in_1d_flag) {
+    
+    /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
+    if((block->n == 1) && jmi->options.use_Brent_in_1d_flag) {
         jmi_log_node(log, logInfo, "Brent", "<Trying Brent's method in> block: %d", block->index);
         if(( solver->f_pos_min_1d != BIG_REAL) &&
                 ( solver->f_neg_max_1d != -BIG_REAL)) {
@@ -1158,12 +1186,24 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             jmi_log_node(log, logError, "Error", "<Could neither iterate to required accuracy "
                          "nor bracket the root of 1D equation in> block: %d", block->index);
         }
-    } /* First time scaling is always recomputed - initial guess may be "far away" and give bad scaling 
-        TODO: we should probably rescale after event as well.
+    } 
+    
+    if((jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_steepest_descent) &&
+        (flag != KIN_SUCCESS)) {
+        /* try to solve with steepest descent instead */
+        solver->use_steepest_descent_flag = 1;
+        flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+        if(flag == KIN_INITIAL_GUESS_OK) {
+            flag = KIN_SUCCESS;
+        }
+        solver->use_steepest_descent_flag = 0;
+    }
+    
+    /* First time scaling is always recomputed - initial guess may be "far away" and give bad scaling 
+       TODO: we should probably rescale after event as well.
     */
-    else if(block->init || (flag != KIN_SUCCESS)) {
+    if(block->init || (flag != KIN_SUCCESS)) {
         jmi_log_node(log, logInfo, "Rescaling", "<Attempting rescaling in> block:%d", block->index);
-        /* This is the first call or we're failing: make sure scaling was appropriate*/
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);

@@ -73,6 +73,7 @@ struct jmi_kinsol_solver_t {
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
     int J_is_singular_flag;         /**< \brief A flag indicating that J is singular. Regularized JTJ is setup */
+    int use_steepest_descent_flag;  /**< \brief A flag indicating that steepest descent and not Newton direction should be used */
     int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */

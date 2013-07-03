@@ -698,8 +698,9 @@ typedef enum jmi_iteration_var_scaling_mode_t {
 
 typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_none = 0,
-    jmi_block_solver_experimental_steepest_descent = 1,
-    jmi_block_solver_experimental_converge_switches_first = 2
+    jmi_block_solver_experimental_converge_switches_first = 1,
+    jmi_block_solver_experimental_steepest_descent = 2,
+    jmi_block_solver_experimental_steepest_descent_first = 4
 } jmi_block_solver_experimental_mode_t;
 
 /**< \brief Run-time options. */
