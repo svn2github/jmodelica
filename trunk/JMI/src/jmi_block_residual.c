@@ -676,26 +676,7 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
 
     /* Write back results into the global dz vector. */
-/*    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
-*/
     ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
-  /*   ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dx, JMI_BLOCK_EVALUATE_INACTIVE);
-   dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
-    ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
- */
-#if 0
-    if(jmi->dz_active_index) {
-        jmi_real_t* active_dz = jmi->dz_active_variables_buf[jmi->dz_active_index-1];
-        jmi_real_t* store_dz = jmi->dz[0]; 
-        jmi->dz[0] = active_dz;
-        ef |= current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_EVALUATE_INACTIVE);
-        /* Perform a back-solve */
-        dgetrs_(&trans, &n_x, &i, current_block->jac, &n_x, current_block->ipiv, current_block->dv, &n_x, &INFO);
-        /* Write back results into the global dz vector. */
-        ef |= current_block->dF(jmi, current_block->x, current_block->dx, current_block->res, current_block->dv, JMI_BLOCK_WRITE_BACK);
-        jmi->dz[0] = store_dz; 
-    }
-#endif
     
     return ef;
 }
