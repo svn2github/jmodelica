@@ -42,18 +42,20 @@
 #define _JMI_LOG_H
 
 #include "jmi_common.h"  /* for jmi_t */
-#include "jmi_util.h"    /* for jmi_log_category_t */
 
 
-typedef int BOOL;
-/* enum {FALSE=0, TRUE=1}; */
+/**
+ * \brief Types of log messages.
+ */
+typedef enum {
+    logError,
+    logWarning,
+    logInfo
+} jmi_log_category_t;
 
 typedef struct {
-    int outer_id;
     int inner_id;
 } jmi_log_node_t;
-
-typedef enum { jmiLogAny, jmiLogString, jmiLogReal, jmiLogInt, jmiLogBool, jmiLogVref, jmiLogNamed } jmi_log_type_t;
 
 
 #ifdef __cplusplus
@@ -61,17 +63,20 @@ extern "C" {
 #endif
 
 
+/** \brief Allocate and intialize a log, with output to `jmi` */
 jmi_log_t *jmi_log_init(jmi_t *jmi);
+
+/** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
 
 
 /* Row primitives */
 
-/** \brief Enter a new log node with given category and name. */
-jmi_log_node_t jmi_log_enter(    jmi_log_t *log, jmi_log_category_t c, const char *name);
+/** \brief Enter a new log node with given category and type. */
+jmi_log_node_t jmi_log_enter(    jmi_log_t *log, jmi_log_category_t c, const char *type);
 
-/** \brief Enter a new log node with given category and name, then call jmi_log_fmt with the remaining parameters. */
-jmi_log_node_t jmi_log_enter_fmt(jmi_log_t *log, jmi_log_category_t c, const char *name, const char* fmt, ...);
+/** \brief Enter a new log node with given category and type, then call jmi_log_fmt with the remaining parameters. */
+jmi_log_node_t jmi_log_enter_fmt(jmi_log_t *log, jmi_log_category_t c, const char *type, const char* fmt, ...);
 
 /** \brief Leave the current log node, as returned by the `jmi_log_enterXXX` functions. */
 void jmi_log_leave(jmi_log_t *log, jmi_log_node_t node);
@@ -80,7 +85,7 @@ void jmi_log_leave(jmi_log_t *log, jmi_log_node_t node);
 void jmi_log_unwind(jmi_log_t *log, jmi_log_node_t node);
 
 /** \brief Create a new log node with contents given by invoking jmi_log_fmt. */
-void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *name, const char* fmt, ...);
+void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const char* fmt, ...);
 
 
 /** \brief Log comments and scalar attributes according to the format string `fmt`.
@@ -114,9 +119,6 @@ void jmi_log_reals(jmi_log_t *log, jmi_log_category_t c, const char *name, const
 /** \brief Log a vector of `n` ints. */
 void jmi_log_ints( jmi_log_t *log, jmi_log_category_t c, const char *name, const int *data, int n);
 
-/** \brief Log a vector of `n` booleans. */
-void jmi_log_bools(jmi_log_t *log, jmi_log_category_t c, const char *name, const BOOL *data, int n);
-
 /** \brief Log a vector of `n` variable references of type `t`, which should be one of `ribs`. */
 void jmi_log_vrefs(jmi_log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
 
@@ -130,12 +132,14 @@ void jmi_log_emit(jmi_log_t *log);
 
 /* Subrow primitives. End in _ since they don't emit a log message. */
 
+/** \brief Supply a name for the next child of `node`. `name` must remain valid until the next `enter` call. */
+void jmi_log_label_(jmi_log_t *log, jmi_log_node_t node, const char *name);
 
-/** \brief Enter a new log node with given category and name, without ending the line. */
-jmi_log_node_t jmi_log_enter_(jmi_log_t *log, jmi_log_category_t c, const char *name);
+/** \brief Enter a new log node with given category and type, without ending the line. */
+jmi_log_node_t jmi_log_enter_(jmi_log_t *log, jmi_log_category_t c, const char *type);
 
 /** \brief Enter a new log node that is a vector of the given element type, without ending the line. */
-jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_category_t c, const char *name, jmi_log_type_t eltype);
+jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_category_t c, const char *name);
 
 /** \brief Leave the current log node, as returned by the `jmi_log_enterXXX` functions, without ending the line. */
 void jmi_log_leave_(jmi_log_t *log, jmi_log_node_t node);
@@ -156,9 +160,6 @@ void jmi_log_real_(  jmi_log_t *log, jmi_real_t x);
 
 /** \brief Log an int value, without ending the line. */
 void jmi_log_int_(   jmi_log_t *log, int x);
-
-/** \brief Log a boolean value, without ending the line. */
-void jmi_log_bool_(  jmi_log_t *log, BOOL x);
 
 /** \brief Log a value reference of type `t` (one of `ribs`), without ending the line. */
 void jmi_log_vref_(  jmi_log_t *log, char t, int vref);

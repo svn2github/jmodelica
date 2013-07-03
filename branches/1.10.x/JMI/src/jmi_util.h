@@ -217,15 +217,6 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
 
-/**
- * \brief Types of log messages.
- */
-typedef enum {
-    logError,
-    logWarning,
-    logInfo
-} jmi_log_category_t;
-
 #ifdef __cplusplus
 }
 #endif

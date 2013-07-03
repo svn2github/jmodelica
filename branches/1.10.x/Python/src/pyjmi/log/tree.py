@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-Tree representation for the new FMU log format
+Tree representation for the new JModelica FMU log format
 
-Each node is represented as a NamedNode, Comment, string or list
+Each node is represented as a Node, Comment, or leaf (other types)
 """
 
 class Comment(object):
@@ -33,59 +33,39 @@ class Comment(object):
     def __repr__(self):
         return "{" + self.text + "}"
 
-class NamedNode(object):
-    """Named log node.
+class Node(object):
+    """Log node.
 
     Attributes:
-    name  -- a string
-    value -- a list for long nodes `name( ... )name`
-             a value for short nodes `name=value`
-    """    
-    def __init__(self, name, value):
-        assert isinstance(name, str)
-        self.name = name
-        self.value = value
+    type  -- a string
+    nodes -- a list of child nodes, in order
+    """
+
+    def __init__(self, type):
+        assert isinstance(type, basestring)
+        self.type  = type
+        self.nodes = []
+        self.dict  = {}
+
+    def add(self, node, key=None):
+        if key is None:
+            self.nodes.append(node)
+        else:
+            if key in self.dict:
+                # Duplicate attribute value ==> record no value. (should not happen)
+                # consider: Is None the best to use for this?
+                self.dict[key] = None
+            else:
+                self.dict[key] = node
 
     def __repr__(self):
-        return self.name + "( " + repr(self.value) + " )"
-
-    def children(self, names):
-        if isinstance(names, str):
-            return [self.value] if self.name == names else find_children(self.value, names)
-        else:
-            return [self] if self.name in names else find_children(self.value, names)
+        return ('<' + self.type + ' node with ' + repr(len(self.nodes))
+                + ' subnodes, and named subnodes ' + repr(self.dict.keys()) + '>')
 
 
-class NodeList(object):
-    """List of log nodes"""
-    def __init__(self, nodes = None):
-        if nodes is None:
-            nodes = []
-        self.list = nodes
-
-        self.dict = {}
-        for node in nodes:
-            self.add_dict_node(node)
-
-    def add_dict_node(self, node):
-        if not isinstance(node, NamedNode):
-            return
-        key = node.name
-        if key in self.dict:
-            # ambiguous ==> record no value. todo: Is None the best to use for this?
-            self.dict[key] = None
-        else:
-            self.dict[key] = node.value
-
-    def __repr__(self):
-        return '<NodeList with subnode names ' + repr(self.dict.keys()) + '>'
-
-
-    # todo: remove?
     def __iter__(self):
         return iter(self.nodes)
 
- 
     def __contains__(self, key):
         return key in self.dict
 
@@ -98,15 +78,15 @@ class NodeList(object):
     def __setitem__(self, key, value):
          self.dict[key] = value
     
-    def children(self, name):
-        nodes = []
-        for node in self.list:
-            nodes.extend(find_children(node, name))
-        return nodes    
+    def find(self, types):
+        if isinstance(types, basestring):
+            types = [types]
 
-
-def find_children(node, name):
-    if isinstance(node, (NodeList, NamedNode)):
-        return node.children(name)
-    else:
-        return []
+        nodes = []        
+        for node in self.nodes:
+            if isinstance(node, Node):
+                if node.type in types:
+                    nodes.append(node)
+                else:
+                    nodes.extend(node.find(types))
+        return nodes
