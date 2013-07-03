@@ -808,34 +808,6 @@ class Test_FMUModelME1:
         assert self._dq.get_name() == 'dq'
 
     @testattr(fmi = True)
-    def test_debug_logging(self):
-        """
-        This test the attribute debugging.
-        """
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=False)
-        model.initialize()
-        try:
-            model.initialize()
-        except FMUException:
-            pass
-        assert len(model.get_log()) == 1 #Get the current log (empty)
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=False)
-        model.initialize()
-        model.set_debug_logging(True) #Activates the logging
-        try:
-            model.initialize()
-        except FMUException:
-            pass
-        assert len(model.get_log()) > 0 #Get the current log (empty)
-        model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=True)
-        model.initialize()
-        try:
-            model.initialize()
-        except FMUException:
-            pass
-        assert len(model.get_log()) > 0 #Get the current log (empty)
-
-    @testattr(fmi = True)
     def test_get_fmi_options(self):
         """
         Test that simulate_options on an FMU returns the correct options
