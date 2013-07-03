@@ -78,21 +78,16 @@
 
         <para/>
       </section>
-    </section>
-
-    <section>
-      <title>FMI</title>
 
       <section>
         <title>Export of FMUs for Co-Simulation</title>
 
-        <para/>
-      </section>
-
-      <section>
-        <title>Import of FMU version 2.0b4</title>
-
-        <para/>
+        <para>Export of FMUs for Co-Simulation version 1.0 is now supported.
+        Specifying a co-simulation FMU instead of a model exchange FMU is done
+        via an option to the <literal>compile_fmu</literal> method. The
+        internal solver in the co-simulation FMU is CVode from the Sundials
+        suite and there is also an explicit Euler method. The choice of the
+        solver can be changed via a parameter in the FMU. </para>
       </section>
     </section>
 
@@ -106,7 +101,7 @@
         facilitate post processing of results such as plotting. Accessing
         variables and parameters from results will always return a vector of
         size equal to the time vector, in this way it is possible to write
-        e.g.: </para>
+        e.g.:</para>
 
         <para><programlisting># Simulate
 res = fmu.simulate()
@@ -126,7 +121,32 @@ plot(t, x1, t, p1)
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <section>
+        <title>Support for FMU version 2.0b4</title>
+
+        <para>Added support for simulation of models following the FMI version
+        2.0 beta 4, both model exchange FMUs and co-simulation FMUs.</para>
+      </section>
+
+      <section>
+        <title>Result filter</title>
+
+        <para>Added an option to the simulation method for filtering which
+        variables are stored. This is especially useful in case of large
+        models with many variables as just selecting a subset of variables to
+        store can speed up the simulation. Additionally there is now the
+        option to store the result directly in the memory instead of writing
+        the result to file.</para>
+      </section>
+
+      <section>
+        <title>Improved solver support</title>
+
+        <para>Improvements on the solvers has been made resulting in that
+        simulation of Model Exchange FMUs can now be performed by a number of
+        solvers. See the simulation options for the supported solvers. For
+        example there is now an Radau5 solver.</para>
+      </section>
     </section>
 
     <section>
@@ -144,6 +164,8 @@ plot(t, x1, t, p1)
 
       <para>Tove Bergdahl</para>
 
+      <para>Emil Fredriksson</para>
+
       <para>Magnus Gäfvert</para>
 
       <para>Toivo Henningsson</para>
@@ -159,6 +181,8 @@ plot(t, x1, t, p1)
       <para>Jesper Mattsson</para>
 
       <para>Iakov Nakhimovski</para>
+
+      <para>Teo Nilsson</para>
 
       <para>Jon Sten</para>
 
@@ -1535,12 +1559,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
