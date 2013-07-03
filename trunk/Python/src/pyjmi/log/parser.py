@@ -129,25 +129,31 @@ def parse(filename):
     parser.parse(filename)
     return handler.get_root()
 
-# Support routines to lex JMI logs
+# Support routines to parse JMI logs
 
 def parse_jmi_log(filename, modulename = 'Model'):
     parser, handler = create_parser()
-    parser.feed('<Log>')
-    parse_jmi_log_lines(parser, filename, modulename)
-    parser.feed('</Log>')
+    filter_jmi_log(parser.feed, filename, modulename)
     parser.close()
     return handler.get_root()
 
-def parse_jmi_log_lines(parser, filename, modulename):
+def extract_jmi_log(destfilename, filename, modulename = 'Model'):
+    f = open(destfilename, 'w')
+    filter_jmi_log(f.write, filename, modulename)
+    f.close()
+
+def filter_jmi_log(write, filename, modulename = 'Model'):
+    write('<Log>\n')
+
     pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\]'
     pre_pattern = re.compile(pre_re)
 
     f = open(filename, 'r')
-
     for line in f:
         m = pre_pattern.match(line)
         if m is not None:
             # log_level, category, fmu_status = m.groups()
-            parser.feed(line[m.end():])
+            write(line[m.end():])
     f.close()
+
+    write('</Log>\n')
