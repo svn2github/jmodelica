@@ -818,7 +818,7 @@ class Test_FMUModelME1:
             model.initialize()
         except FMUException:
             pass
-        assert len(model.get_log()) == 0 #Get the current log (empty)
+        assert len(model.get_log()) == 1 #Get the current log (empty)
         model = FMUModelME1('bouncingBall.fmu',path_to_fmus_me1,enable_logging=False)
         model.initialize()
         model.set_debug_logging(True) #Activates the logging
