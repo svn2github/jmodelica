@@ -219,6 +219,8 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
         atol_nv[0] = 0.01*integrator->rtol*1.0;
     }
 
+    free(nominal);
+
     cvode_mem = CVodeCreate(integrator->lmm,integrator->iter);
     if(!cvode_mem){
         jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to allocate the CVODE struct.>");
