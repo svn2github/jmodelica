@@ -252,7 +252,7 @@ static void leave_(log_t *log, node_t node);
 static void log_value_(log_t *log, const char *value);
 static void log_comment_(log_t *log, category_t c, const char *msg);
 static void log_vref_(log_t *log, char t, int vref);
-static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap);
+static void log_fmt_(log_t *log, node_t node, category_t c, const char *fmt, va_list ap);
 
 
 static void defer_comma(  log_t *log) { log->outstanding_comma = TRUE; }
@@ -470,6 +470,12 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     close_leaf(log);
     log->next_name = NULL;
 
+    if (name != NULL) {
+        /* A named node may be no more severe than its parent */
+        category_t pc = topof(log)->c;
+        if (c < pc) c = pc; /* Smaller = more severe */
+    }
+
     if (emitted_category(log, c)) {
         set_category(log, c);
         buffer_starttag(bufof(log), type, name, name_end);
@@ -480,16 +486,21 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     return node_from_top(log);
 }
 
-void jmi_log_label_(jmi_log_t *log, jmi_log_node_t node, const char *name) {
+static BOOL ok_label_parent(jmi_log_t *log, jmi_log_node_t node) {
     if (topof(log)->id != node.inner_id) {
         logging_error(log, "jmi_log_label_: trying to name a child not of the current node.");
         /* todo: leave nodes until node becomes current? */
+        return FALSE;
     }
     else if (log->leafdim >= 0) {
         logging_error(log, "jmi_log_label_: trying to name a child of a leaf node.");
-        return;
+        return FALSE;
     }
-    else log->next_name = name;
+    else return TRUE;
+}
+
+void jmi_log_label_(jmi_log_t *log, jmi_log_node_t node, const char *name) {
+    if (ok_label_parent(log, node)) log->next_name = name;
 }
 
 
@@ -563,19 +574,25 @@ node_t jmi_log_enter_(log_t *log, category_t c, const char *type) {
     return enter_(log, c, type, -1, log->next_name, NULL);
 }
 
-static node_t enter_value_(log_t *log, category_t c, 
+static node_t enter_value_(log_t *log, node_t node, category_t c, 
                             const char *name, const char *name_end) {
+    if (!ok_label_parent(log, node)) { name = name_end = NULL; }
     return enter_(log, c, "value", 0, name, name_end);
 }
 /* could be exported */
-static node_t jmi_log_enter_value_(log_t *log, category_t c, const char *name) {
-    return enter_value_(log, c, name, NULL);
+static node_t jmi_log_enter_value_(log_t *log, node_t node, category_t c, 
+                                   const char *name) {
+    return enter_value_(log, node, c, name, NULL);
 }
-node_t jmi_log_enter_vector_(log_t *log, category_t c, const char *name) {
+node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c, 
+                             const char *name) {
+    if (!ok_label_parent(log, node)) { name = NULL; }
     return enter_(log, c, "vector", 1, name, NULL);
 }
 /* could be exported if we also export an interface to begin a new row. */
-static node_t jmi_log_enter_matrix_(log_t *log, category_t c, const char *name) {
+static node_t jmi_log_enter_matrix_(log_t *log, node_t node, category_t c, 
+                                    const char *name) {
+    if (!ok_label_parent(log, node)) { name = NULL; }
     return enter_(log, c, "matrix", 2, name, NULL);
 }
 
@@ -594,7 +611,7 @@ static BOOL contains(const char *chars, char c) {
 
 static INLINE BOOL is_name_char(char c) { return isalnum(c) || c == '_'; }
 
-static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
+static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, va_list ap) {
     buf_t *buf = bufof(log);
 
     close_leaf(log);
@@ -626,7 +643,7 @@ static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
                 char f = *(fmt++);
                 if (!contains("diueEfFgGs", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
                 
-                node = enter_value_(log, c, name_start, name_end);
+                node = enter_value_(log, parent, c, name_start, name_end);
 
                 /* todo: consider: what if jmi_real_t is not double? */
                 if      (contains("diu", f))    jmi_log_int_(   log, va_arg(ap, int));
@@ -643,7 +660,7 @@ static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
                 if (*(fmt++) != 'd') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
                 if (*(fmt++) != '#') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
                 
-                node = enter_value_(log, c, name_start, name_end);
+                node = enter_value_(log, parent, c, name_start, name_end);
                 jmi_log_vref_(log, t, va_arg(ap, int));
                 leave_(log, node);
             }
@@ -657,18 +674,18 @@ static void log_fmt_(log_t *log, category_t c, const char *fmt, va_list ap) {
 
  /* Functions that involve log_fmt */
 
-void jmi_log_fmt_(log_t *log, category_t c, const char *fmt, ...) {
+void jmi_log_fmt_(log_t *log, node_t node, category_t c, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    log_fmt_(log, c, fmt, ap);
+    log_fmt_(log, node, c, fmt, ap);
     va_end(ap);
 }
 
-void jmi_log_fmt(log_t *log, category_t c, const char *fmt, ...) {
+void jmi_log_fmt(log_t *log, node_t node, category_t c, const char *fmt, ...) {
     va_list ap;
     if (!emitted_category(log, c)) return;
     va_start(ap, fmt);
-    log_fmt_(log, c, fmt, ap);
+    log_fmt_(log, node, c, fmt, ap);
     va_end(ap);
     emit(log);
 }
@@ -678,7 +695,7 @@ jmi_log_node_t jmi_log_enter_fmt(log_t *log, jmi_log_category_t c, const char *t
     node_t node = jmi_log_enter_(log, c, type); 
 
     va_start(ap, fmt);
-    log_fmt_(log, c, fmt, ap);
+    log_fmt_(log, node, c, fmt, ap);
     va_end(ap);
     
     emit(log);
@@ -692,7 +709,7 @@ void jmi_log_node(log_t *log, category_t c, const char *type, const char* fmt, .
     node = jmi_log_enter_(log, c, type); 
 
     va_start(ap, fmt);
-    log_fmt_(log, c, fmt, ap);
+    log_fmt_(log, node, c, fmt, ap);
     va_end(ap);
     
     leave_(log, node); emit(log);
@@ -726,38 +743,38 @@ void jmi_log_vref_(log_t *log, char t, int vref) { log_vref_(log, t, vref); }
 
  /* Row primitives */
 
-void jmi_log_reals(log_t *log, category_t c, const char *name, const jmi_real_t *data, int n) {
+void jmi_log_reals(log_t *log, node_t parent, category_t c, const char *name, const jmi_real_t *data, int n) {
     int k;
     node_t node;
     if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_vector_(log, logInfo, name);
+    node = jmi_log_enter_vector_(log, parent, c, name);
     for (k=0; k < n; k++) jmi_log_real_(log, data[k]);
     jmi_log_leave(log, node);
 }
 
-void jmi_log_ints(log_t *log, category_t c, const char *name, const int *data, int n) {
+void jmi_log_ints(log_t *log, node_t parent, category_t c, const char *name, const int *data, int n) {
     int k;
     node_t node;
     if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_vector_(log, logInfo, name);
+    node = jmi_log_enter_vector_(log, parent, c, name);
     for (k=0; k < n; k++) jmi_log_int_(log, data[k]);
     jmi_log_leave(log, node);
 }
 
-void jmi_log_vrefs(log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
+void jmi_log_vrefs(log_t *log, node_t parent, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n) {
     int k;
     node_t node;
     if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_vector_(log, logInfo, name);
+    node = jmi_log_enter_vector_(log, parent, c, name);
     for (k=0; k < n; k++) jmi_log_vref_(log, t, vrefs[k]);
     jmi_log_leave(log, node);    
 }
 
-void jmi_log_real_matrix(log_t *log, category_t c, const char *name, const jmi_real_t *data, int m, int n) {
+void jmi_log_real_matrix(log_t *log, node_t parent, category_t c, const char *name, const jmi_real_t *data, int m, int n) {
     int k, l;
     node_t node;
     if (!emitted_category(log, c)) return;
-    node = jmi_log_enter_matrix_(log, c, name);
+    node = jmi_log_enter_matrix_(log, parent, c, name);
     emit(log);
     for (l=0; l < m; l++) {
         for (k=0; k < n; k++) {
