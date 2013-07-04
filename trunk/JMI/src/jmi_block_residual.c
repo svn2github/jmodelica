@@ -272,6 +272,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 if(ef != 0) {
                     jmi_log_fmt(jmi->log, iter_node, logError, "<Problem calling residual function> block:%d iter:%d <at> t:%E", 
                                 block->index, iter, jmi_get_t(jmi)[0]);
+                    jmi_log_leave(jmi->log, iter_node);
                     break;
                 }
                 
@@ -281,7 +282,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 jmi_write_back_to_z(jmi);
                 
                 ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-                if(ef != 0) break;
+                if(ef != 0) { jmi_log_leave(jmi->log, iter_node); break; }
                 jmi_write_back_to_z_val(jmi);
                 
                 jmi_log_reals(jmi->log, iter_node, logInfo, "ivs", block->x, block->n);
@@ -325,7 +326,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                                           iter, jmi_get_t(jmi)[0]);
             /* Solve block */
             ef = block->solve(block); 
-            if (ef!=0){ break; }
+            if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
             jmi_write_back_to_z_val(jmi);
             
             retval = jmi_evaluate_switches(jmi,switches,mode_sw);
@@ -421,7 +422,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
                 jmi_write_back_to_z_val(jmi);
                 
-                ef = block->solve(block); if (ef!=0){ break; }
+                ef = block->solve(block); if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
                 jmi_write_back_to_z_val(jmi);
                 
                 memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
@@ -470,7 +471,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         }
         
         if(converged==0){
-            jmi_log_fmt(jmi->log, top_node, logError, "<Failed to find an consistent solution in event iteration at> t:%g",
+            jmi_log_fmt(jmi->log, top_node, logError, "<Failed to find a consistent solution in event iteration at> t:%g",
                         jmi_get_t(jmi)[0]);
             ef = 1; /* Return flag */
         }
