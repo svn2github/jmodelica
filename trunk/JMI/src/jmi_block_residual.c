@@ -225,7 +225,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
      */
     if (((jmi->atInitial == JMI_TRUE || jmi->atEvent == JMI_TRUE)) && (jmi->block_level == 1)) {
         jmi_log_node_t top_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockEventIterations",
-                                      "<Starting block (local) event iteration at> t:%E <in> block:%d", 
+                                      "Starting block (local) event iteration at <t:%E> in <block:%d>",
                                       jmi_get_t(jmi)[0], block->index);
 
         /*ITERATION */
@@ -264,13 +264,13 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 jmi_log_node_t iter_node;
                 iter += 1;
     
-                iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "SwitchIteration", "<Local iteration> iter:%d <at> t:%E", 
+                iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "SwitchIteration", "Local iteration <iter:%d> at <t:%E>",
                                               iter, jmi_get_t(jmi)[0]);
                 
                 /* Evaluate the block to update dependent variables if any */
                 ef = block->F(jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
                 if(ef != 0) {
-                    jmi_log_fmt(jmi->log, iter_node, logError, "<Problem calling residual function> block:%d iter:%d <at> t:%E", 
+                    jmi_log_fmt(jmi->log, iter_node, logError, "Problem calling residual function <block:%d, iter:%d> at <t:%E>",
                                 block->index, iter, jmi_get_t(jmi)[0]);
                     jmi_log_leave(jmi->log, iter_node);
                     break;
@@ -291,20 +291,20 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 
                 /* Check for consistency */
                 if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-                    jmi_log_fmt(jmi->log, iter_node, logInfo, "<Found consistent switched state before solving at> t:%g",
+                    jmi_log_fmt(jmi->log, iter_node, logInfo, "Found consistent switched state before solving at <t:%g>",
                                 jmi_get_t(jmi)[0]);
                     break;
                 }
                 else {
                     /* Check for infinite loop */
                     if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                        jmi_log_fmt(jmi->log, iter_node, logError, "<Detected infinite loop in fixed point iteration at> "
-                                    "t:%g", jmi_get_t(jmi)[0]);
+                        jmi_log_fmt(jmi->log, iter_node, logError, "Detected infinite loop in fixed point iteration at "
+                                    "<t:%g>", jmi_get_t(jmi)[0]);
                         jmi_log_leave(jmi->log, iter_node);
                         break;
                     }
                     if(iter >= nbr_allocated_iterations){
-                        jmi_log_fmt(jmi->log, iter_node, logError, "<Failed to converge during switches iteration due to too many iterations at> t:%E", jmi_get_t(jmi)[0]);
+                        jmi_log_fmt(jmi->log, iter_node, logError, "Failed to converge during switches iteration due to too many iterations at <t:%E>", jmi_get_t(jmi)[0]);
                         jmi_log_leave(jmi->log, iter_node);
                         break;
                     }
@@ -322,7 +322,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             jmi_log_node_t iter_node;
             iter += 1;
 
-            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "<Local iteration> iter:%d <at> t:%E", 
+            iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", "Local iteration <iter:%d> at <t:%E>",
                                           iter, jmi_get_t(jmi)[0]);
             /* Solve block */
             ef = block->solve(block); 
@@ -342,8 +342,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             /* Check for consistency */
             if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-                jmi_log_fmt(jmi->log, iter_node, logInfo, "<Found consistent solution using fixed point iteration at> "
-                            "t:%E", jmi_get_t(jmi)[0]);
+                jmi_log_fmt(jmi->log, iter_node, logInfo, "Found consistent solution using fixed point iteration at "
+                            "<t:%E>", jmi_get_t(jmi)[0]);
 
                 converged = 1;
                 jmi_log_leave(jmi->log, iter_node);
@@ -352,16 +352,16 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             /* Check for infinite loop */
             if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                jmi_log_fmt(jmi->log, iter_node, logInfo, "<Detected infinite loop in fixed point iteration at> "
-                            "t:%g, <switching to enchanced fixed point iteration...>", jmi_get_t(jmi)[0]);
+                jmi_log_fmt(jmi->log, iter_node, logInfo, "Detected infinite loop in fixed point iteration at "
+                            "<t:%g>, switching to enchanced fixed point iteration...", jmi_get_t(jmi)[0]);
                 jmi_log_leave(jmi->log, iter_node);
                 break;
             }
 
             /* Store the new switches */
             if(iter >= nbr_allocated_iterations){
-                jmi_log_fmt(jmi->log, iter_node, logInfo, "<Failed to converge during fixed point iteration due to too many "
-                            "iterations, at> t:%E, <switching to enhanced fixed point iteration...>",
+                jmi_log_fmt(jmi->log, iter_node, logInfo, "Failed to converge during fixed point iteration due to too many "
+                            "iterations, at <t:%E>, switching to enhanced fixed point iteration...",
                             jmi_get_t(jmi)[0]);
                 jmi_log_leave(jmi->log, iter_node);
                 break;
@@ -378,7 +378,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         /* ENHANCED FIXED POINT ITERATION */
         if (converged==0 && ef==0){
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(jmi->log, logInfo, "EnhancedBlockIterations",
-                                          "<Starting enhanced block iteration at> t:%E", jmi_get_t(jmi)[0]);
+                                          "Starting enhanced block iteration at <t:%E>", jmi_get_t(jmi)[0]);
 
             bool_old = (jmi_real_t*)calloc(nbr_allocated_iterations*nbr_bool, sizeof(jmi_real_t));
             sw_old = (jmi_real_t*)calloc(nbr_allocated_iterations*nbr_sw, sizeof(jmi_real_t));
@@ -405,7 +405,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             iter = 0;
             while (1 && ef==0){
                 jmi_log_node_t iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "BlockIteration", 
-                                               "<Enhanced block iteration> iter:%d <at> t:%g", 
+                                               "Enhanced block iteration <iter:%d> at <t:%g>",
                                                iter, jmi_get_t(jmi)[0]);
 
                 iter += 1;
@@ -434,8 +434,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 
                 /* Check for consistency */
                 if (jmi_compare_switches(&sw_old[(iter-1)*nbr_sw],switches,nbr_sw) && jmi_compare_switches(&bool_old[(iter-1)*nbr_bool],booleans,nbr_bool)){
-                    jmi_log_fmt(jmi->log, iter_node, logInfo, "<Found consistent solution using enhanced fixed point iteration at> "
-                                "t:%E", jmi_get_t(jmi)[0]);
+                    jmi_log_fmt(jmi->log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration at "
+                                "<t:%E>", jmi_get_t(jmi)[0]);
                     converged = 1;
                     jmi_log_leave(jmi->log, iter_node);
                     break;
@@ -443,16 +443,16 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 
                 /* Check for infinite loop */
                 if (jmi_check_infinite_loop(sw_old,switches,nbr_sw,iter)){
-                    jmi_log_fmt(jmi->log, iter_node, logError, "<Detected infinite loop in enhanced fixed point iteration at> "
-                                "t:%g", jmi_get_t(jmi)[0]);
+                    jmi_log_fmt(jmi->log, iter_node, logError, "Detected infinite loop in enhanced fixed point iteration at "
+                                "<t:%g>", jmi_get_t(jmi)[0]);
                     jmi_log_leave(jmi->log, iter_node);
                     break;
                 }
                 
                 /* Store the new switches */
                 if(iter >= nbr_allocated_iterations){
-                    jmi_log_fmt(jmi->log, iter_node, logWarning, "<Failed to converged during enhanced fixed point iteration "
-                                "due to too many iterations at> t:%E", jmi_get_t(jmi)[0]);
+                    jmi_log_fmt(jmi->log, iter_node, logWarning, "Failed to converge during enhanced fixed point iteration "
+                                "due to too many iterations at <t:%E>", jmi_get_t(jmi)[0]);
                     jmi_log_leave(jmi->log, iter_node);
                     break;
                 }
@@ -471,7 +471,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         }
         
         if(converged==0){
-            jmi_log_fmt(jmi->log, top_node, logError, "<Failed to find a consistent solution in event iteration at> t:%g",
+            jmi_log_fmt(jmi->log, top_node, logError, "Failed to find a consistent solution in event iteration at <t:%g>",
                         jmi_get_t(jmi)[0]);
             ef = 1; /* Return flag */
         }

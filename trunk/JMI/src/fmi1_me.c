@@ -115,29 +115,29 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
-        jmi_log_fmt(jmi->log, node, logInfo, "num_nonzeros: %d <in Jacobian A>", jmi->color_info_A->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "num_colors: %d <in Jacobian A>", jmi->color_info_A->n_groups);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian A", jmi->color_info_A->n_nz);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian A", jmi->color_info_A->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_B != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_B");
-        jmi_log_fmt(jmi->log, node, logInfo, "num_nonzeros: %d <in Jacobian B>", jmi->color_info_B->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "num_colors: %d <in Jacobian B>", jmi->color_info_B->n_groups);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian B", jmi->color_info_B->n_nz);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian B", jmi->color_info_B->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_C != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_C");
-        jmi_log_fmt(jmi->log, node, logInfo, "num_nonzeros: %d <in Jacobian C>", jmi->color_info_C->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "num_colors: %d <in Jacobian C>", jmi->color_info_C->n_groups);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian C", jmi->color_info_C->n_nz);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian C", jmi->color_info_C->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
     if (jmi->color_info_D != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_D");
-        jmi_log_fmt(jmi->log, node, logInfo, "num_nonzeros: %d <in Jacobian D>", jmi->color_info_D->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "num_colors: %d <in Jacobian D>", jmi->color_info_D->n_groups);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian D", jmi->color_info_D->n_nz);
+        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian D", jmi->color_info_D->n_groups);
         jmi_log_leave(jmi->log, node);
     }
 
@@ -1407,7 +1407,7 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
     retval = jmi_ode_derivatives(jmi);
 
     top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
-                                 "<Starting global event iteration at> t:%E", jmi_get_t(jmi)[0]);
+                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
 
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
@@ -1429,7 +1429,7 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
         iter += 1;
         
         iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
-                                      "<Global iteration> iter:%d, <at> t:%E", iter, jmi_get_t(jmi)[0]);
+                                      "Global iteration <iter:%d>, at <t:%E>", iter, jmi_get_t(jmi)[0]);
         
         /* Evaluate and turn the switches */
         retval = jmi_evaluate_switches(jmi,switches,1);
@@ -1619,9 +1619,9 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
         if (nniters > 0) {
             /* Output to logger */
             jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "initialization");
-            jmi_log_fmt(jmi->log, node, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
+            jmi_log_fmt(jmi->log, node, logInfo, "<block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
                         block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            jmi_log_fmt(jmi->log, node, logInfo, "time_spent: %f", block->time_spent);
+            jmi_log_fmt(jmi->log, node, logInfo, "<time_spent: %f>", block->time_spent);
             jmi_log_leave(jmi->log, node);
         }
     }
@@ -1636,9 +1636,9 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
             /* Output to logger */
             /* NB: Exactly the same code as above. Todo: factor out? */
             jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "dae_blocks");
-            jmi_log_fmt(jmi->log, node, logInfo, "block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d", 
+            jmi_log_fmt(jmi->log, node, logInfo, "<block: %d, size: %d, nniters: %d, nbcalls: %d, njevals: %d, nfevals: %d>", 
                         block->index, block->n, (int)nniters, (int)block->nb_calls, (int)block->nb_jevals, (int)block->nb_fevals);
-            jmi_log_fmt(jmi->log, node, logInfo, "time_spent: %f", block->time_spent);
+            jmi_log_fmt(jmi->log, node, logInfo, "<time_spent: %f>", block->time_spent);
             jmi_log_leave(jmi->log, node);            
         }
     }
