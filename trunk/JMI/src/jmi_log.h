@@ -46,6 +46,7 @@
 
 /**
  * \brief Types of log messages.
+ * Higher value = less severe
  */
 typedef enum {
     logError,
@@ -107,23 +108,27 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *  The values for consecutive attributes should be supplied as additional arguments.
  * 
  */
-void jmi_log_fmt(jmi_log_t *log, jmi_log_category_t c, const char *fmt, ...);
+void jmi_log_fmt(jmi_log_t *log, jmi_log_node_t node, jmi_log_category_t c, const char *fmt, ...);
 
 /** \brief Log a comment inside the current node. */
 void jmi_log_comment(jmi_log_t *log, jmi_log_category_t c, const char *msg);
 
 
 /** \brief Log a vector of `n` reals. */
-void jmi_log_reals(jmi_log_t *log, jmi_log_category_t c, const char *name, const jmi_real_t *data, int n);
+void jmi_log_reals(jmi_log_t *log,  jmi_log_node_t node,
+                   jmi_log_category_t c, const char *name, const jmi_real_t *data, int n);
 
 /** \brief Log a vector of `n` ints. */
-void jmi_log_ints( jmi_log_t *log, jmi_log_category_t c, const char *name, const int *data, int n);
+void jmi_log_ints( jmi_log_t *log, jmi_log_node_t node,
+                   jmi_log_category_t c, const char *name, const int *data, int n);
 
 /** \brief Log a vector of `n` variable references of type `t`, which should be one of `ribs`. */
-void jmi_log_vrefs(jmi_log_t *log, jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
+void jmi_log_vrefs(jmi_log_t *log, jmi_log_node_t node,
+                   jmi_log_category_t c, const char *name, char t, const int *vrefs, int n);
 
 /** \brief Log a matrix of `m x n` reals, stored in column major order. */
-void jmi_log_real_matrix(jmi_log_t *log, jmi_log_category_t c, const char *name, const jmi_real_t *data, int m, int n);
+void jmi_log_real_matrix(jmi_log_t *log, jmi_log_node_t node,
+                         jmi_log_category_t c, const char *name, const jmi_real_t *data, int m, int n);
 
 
 /** \brief Emit the current accumulated log line to the logger callback. */
@@ -139,14 +144,16 @@ void jmi_log_label_(jmi_log_t *log, jmi_log_node_t node, const char *name);
 jmi_log_node_t jmi_log_enter_(jmi_log_t *log, jmi_log_category_t c, const char *type);
 
 /** \brief Enter a new log node that is a vector of the given element type, without ending the line. */
-jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_category_t c, const char *name);
+jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_node_t node,
+                                     jmi_log_category_t c, const char *name);
 
 /** \brief Leave the current log node, as returned by the `jmi_log_enterXXX` functions, without ending the line. */
 void jmi_log_leave_(jmi_log_t *log, jmi_log_node_t node);
 
 
 /** \brief Log comments and scalar attributes according like jmi_log_fmt, without ending the line. */
-void jmi_log_fmt_(jmi_log_t *log, jmi_log_category_t c, const char *fmt, ...);
+void jmi_log_fmt_(jmi_log_t *log,  jmi_log_node_t node,
+                  jmi_log_category_t c, const char *fmt, ...);
 
 /** \brief Log a comment inside the current node, without ending the line. */
 void jmi_log_comment_(jmi_log_t *log, jmi_log_category_t c, const char *msg);
