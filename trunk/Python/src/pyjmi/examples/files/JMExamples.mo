@@ -1811,16 +1811,18 @@ Simulation time: 7200s
     model Distillation4
       import SI = Modelica.SIunits;
     // Inputs
-      Modelica.Blocks.Interfaces.RealInput Q_elec(start=Q_elec_ref, min=0)
+      // Modelica.Blocks.Interfaces.RealInput Q_elec(start=Q_elec_ref, min=0)
+      Modelica.Blocks.Interfaces.RealInput Q_elec(start=Q_elec_ref)
         "Input 1: Heat Input to the Reboiler from an Electric Heater Q_elec = u(1,1)";
-      Modelica.Blocks.Interfaces.RealInput Vdot_L1(start=Vdot_L1_ref, min=0)
+      // Modelica.Blocks.Interfaces.RealInput Vdot_L1(start=Vdot_L1_ref, min=0)
+      Modelica.Blocks.Interfaces.RealInput Vdot_L1(start=Vdot_L1_ref)
         "Input 2: Flow Rate of the Recycled Distillate Vdot_L1 = u(2,1)";
     // Parameters - Steady-state reference values
-      parameter Real Q_elec_ref = 2.45e3;
+      parameter Real Q_elec_ref = 2.5e3;
       parameter SI.VolumeFlowRate Vdot_L1_ref = 4.3/1000/3600;
       constant Real absolute_zero = -273.15;
-      parameter Real T_14_ref = 88 - absolute_zero;
-      parameter Real T_28_ref = 70 - absolute_zero;
+      parameter Real T_14_ref = 92.974795 - absolute_zero; // Moritz has 88
+      parameter Real T_28_ref = 74.221284 - absolute_zero; // Moritz has 70
     // Parameters - Nominal Operating Conditions
       parameter SI.VolumeFlowRate Vdot_Feed =  14.0 / 3600 / 1000
         "Feed Flowrate (m^3/sec)";
@@ -2010,9 +2012,9 @@ Simulation time: 7200s
       Real dPsat_A_dTemp[42](each start=3e5);
       Real dPsat_B_dTemp[42](each start=9e4);
       Real h_dot[42];
-      SI.MolarFlowRate Dist "Distillate Molar Flowrate Flowrate";
-      SI.MolarFlowRate Bott "Determine the Bottoms Molar Flow Rate";
-      SI.Temp_K Temp_dot[42] "help variables";
+      SI.MolarFlowRate Dist(min=0) "Distillate Molar Flowrate Flowrate";
+      SI.MolarFlowRate Bott(min=0) "Determine the Bottoms Molar Flow Rate";
+      Real Temp_dot[42] "help variables";
       Real ent_term_A[42](each max=1) "help variables for vapor enthalpies";
       Real ent_term_B[42](each max=1) "help variables for vapor enthalpies";
     equation
@@ -2183,18 +2185,8 @@ Simulation time: 7200s
       Distillation4 d(xA(each fixed=false), V(each fixed=false),
                       Temp(each fixed=false));
     equation
-      der(d.Q_elec) = 0;
-      der(d.Vdot_L1) = 0;
-    initial equation
-      for i in 1:41 loop
-        der(d.xA[i]) = 0;
-        der(d.V[i]) = 0;
-        der(d.Temp[i]) = 0;
-      end for;
-      der(d.xA[42]) = 0;
-      der(d.Temp[42]) = 0;
-      d.Temp[14] = d.T_28_ref;
-      d.Temp[28] = d.T_14_ref;
+      d.Q_elec = d.Q_elec_ref;
+      d.Vdot_L1 = d.Vdot_L1_ref;
     end Distillation4Init;
 
     model Distillation4Breakdown
@@ -2208,15 +2200,14 @@ Simulation time: 7200s
 
     model Distillation4Reference
       Distillation4 d;
-      
+
       constant Real time_constant = 35;
-      
+
       Real cost(start=0, fixed=true);
       Real Q_elec;
       Real Vdot_L1;
-    
+
     equation
-      
       der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
                 (d.Temp[14] - d.T_28_ref)^2 +
                 (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
@@ -2225,31 +2216,30 @@ Simulation time: 7200s
       Vdot_L1 = (1 - time_constant / 2 / (time_constant + 5000)) *
                 d.Vdot_L1_ref +
                 time_constant / 2 * d.Vdot_L1_ref / (time_constant + time);
-      
+
       connect(Q_elec, d.Q_elec);
       connect(Vdot_L1, d.Vdot_L1);
-    
+
     end Distillation4Reference;
-    
+
     model Distillation4Reference_Constant_Input
       Distillation4 d;
-      
+
       Real cost(start=0, fixed=true);
       Real Q_elec;
       Real Vdot_L1;
-    
+
     equation
-      
       der(cost) = (d.Temp[28] - d.T_14_ref)^2 +
                 (d.Temp[14] - d.T_28_ref)^2 +
                 (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
                 (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2;
       Q_elec = d.Q_elec_ref;
       Vdot_L1 = d.Vdot_L1_ref;
-      
+
       connect(Q_elec, d.Q_elec);
       connect(Vdot_L1, d.Vdot_L1);
-    
+
     end Distillation4Reference_Constant_Input;
 
     package Examples

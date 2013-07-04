@@ -253,13 +253,11 @@ package JMExamples_opt
   end Distillation1_opt2;
   
   optimization Distillation4_Opt_Lagrange(
-      objectiveIntegrand=(d.Temp[28] - d.T_14_ref)^2 +
-                         (d.Temp[14] - d.T_28_ref)^2 +
-                         (0.05 * (d.Q_elec - d.Q_elec_ref))^2 +
-                         (0.05 * (d.Vdot_L1 - d.Vdot_L1_ref))^2,
-      startTime=0, finalTime=3000)
-    
-    import SI = Modelica.SIunits;
+      objectiveIntegrand=((d.Temp[28] - d.T_14_ref) / d.T_14_ref)^2 +
+                         ((d.Temp[14] - d.T_28_ref) / d.T_28_ref)^2 +
+                         (0.02 * (d.Q_elec - d.Q_elec_ref) / d.Q_elec_ref)^2 +
+                         (0.015 * (d.Vdot_L1 - d.Vdot_L1_ref) / d.Vdot_L1_ref)^2,
+      startTime=0, finalTime=4000)
     
     JMExamples.Distillation.Distillation4 d;
     
