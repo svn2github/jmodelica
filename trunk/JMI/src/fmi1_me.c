@@ -1574,6 +1574,8 @@ fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nomina
         ones[i]=1.0;
     }
     memcpy (x_nominal, ones, nx*sizeof(fmiReal));
+
+    ((fmi_t*)c) -> fmi_functions.freeMemory(ones);
     return fmiOK;
 }
 
