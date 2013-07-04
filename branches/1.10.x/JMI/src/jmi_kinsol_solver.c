@@ -278,7 +278,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     }
 
     if((block->jmi->options.log_level >= 6)) {
-        jmi_log_node_t node = jmi_log_enter_fmt(block->jmi->log, logInfo, "JacobianUpdated", "block:%d", block->index);
+        jmi_log_node_t node = jmi_log_enter_fmt(block->jmi->log, logInfo, "JacobianUpdated", "<block:%d>", block->index);
         jmi_log_real_matrix(block->jmi->log, node, logInfo, "jacobian", J->data, N, N);
         jmi_log_leave(block->jmi->log, node);
     }
@@ -308,10 +308,10 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 
         {
             jmi_log_node_t node = jmi_log_enter(jmi->log, category, "KinsolError");
-            jmi_log_fmt(jmi->log, node, category, "<Error occured in> function: %s <at> t: %f <when solving> block: %d",
+            jmi_log_fmt(jmi->log, node, category, "Error occured in <function: %s> at <t: %f> when solving <block: %d>",
                         function, *(jmi_get_t(jmi)), block->index);
-            jmi_log_fmt(jmi->log, node, category, "msg: %s", msg);
-            jmi_log_fmt(jmi->log, node, category, "functionNorm: %g, scaledStepLength: %g, tolerance: %g",
+            jmi_log_fmt(jmi->log, node, category, "<msg: %s>", msg);
+            jmi_log_fmt(jmi->log, node, category, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
                         fnorm, snorm, solver->kin_stol);
             jmi_log_leave(jmi->log, node);
         }
@@ -359,8 +359,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     jmi_log_t *log = block->jmi->log;
     
     jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
-    jmi_log_fmt(log, topnode, logInfo, "calling_function:%s", function);
-    jmi_log_fmt(log, topnode, logInfo, "message:%s", msg);
+    jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
+    jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
     
         /* Get the number of iterations */
         KINGetNumNonlinSolvIters(kin_mem, &nniters);
@@ -377,9 +377,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         (((strcmp("KINSolInit",function)==0) ||
           (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0)))
     {
-        jmi_log_fmt(log, topnode, logInfo, "iteration_index:%d", nniters);
+        jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
         jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
-        jmi_log_fmt(log, topnode, logInfo, "scaled_residual_norm:%E", kin_mem->kin_fnorm);
+        jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
         {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "residuals");
@@ -575,8 +575,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         for (i=0; i < solver->num_bounds; i++) {
             int index = solver->bound_vindex[i]; /* variable index */
             if (solver->bound_limiting[index] != 0) {
-                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "max: #r%d#", block->value_references[index]);
-                else                            jmi_log_fmt_(log, node, logInfo, "min: #r%d#", block->value_references[index]);
+                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "<max: #r%d#>", block->value_references[index]);
+                else                            jmi_log_fmt_(log, node, logInfo, "<min: #r%d#>", block->value_references[index]);
             }
         }
         jmi_log_leave(log, node);
@@ -587,8 +587,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         for (i=0; i < solver->num_bounds; i++) {
             int index = solver->bound_vindex[i]; /* variable index */
             if (solver->active_bounds[index] != 0) {
-                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "max: #r%d#", block->value_references[index]);
-                else                            jmi_log_fmt_(log, node, logInfo, "min: #r%d#", block->value_references[index]);
+                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "<max: #r%d#>", block->value_references[index]);
+                else                            jmi_log_fmt_(log, node, logInfo, "<min: #r%d#>", block->value_references[index]);
             }
         }
         jmi_log_leave(log, node);
@@ -843,7 +843,7 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
     solver->kin_ftol = tol;
 
     if (block->jmi->options.log_level >= 5) {
-        jmi_log_node_t outer = jmi_log_enter_fmt(jmi->log, logInfo, "ScalingUpdated", "block:%d", block->index);
+        jmi_log_node_t outer = jmi_log_enter_fmt(jmi->log, logInfo, "ScalingUpdated", "<block:%d>", block->index);
         jmi_log_node_t inner = jmi_log_enter_vector_(jmi->log, outer, logInfo, "scaling");
         realtype* res = scale_ptr;
         for (i=0;i<N;i++) jmi_log_real_(jmi->log, 1/res[i]);
@@ -1024,7 +1024,7 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_residual_t * block,
     if((block->jmi->options.log_level >= 5)) {
         jmi_log_t *log = block->jmi->log;
         *destnode = jmi_log_enter_fmt(log, logInfo, "NewtonSolve", 
-                                      "<Newton solver invoked for> block:%d", block->index);
+                                      "Newton solver invoked for <block:%d>", block->index);
         jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
         jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
@@ -1066,8 +1066,8 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_residual_t * block, const jmi_l
     if((block->jmi->options.log_level >= 5)) {
         jmi_log_t *log = block->jmi->log;
         const char *flagname = kinsol_flag_to_name(flag);
-        if (flagname != NULL) jmi_log_fmt(log, *node, logInfo, "<Newton solver finished with> kinsol_exit_flag:%s", flagname);
-        else jmi_log_fmt(log, *node, logInfo, "<Newton solver finished with unrecognized> kinsol_exit_flag:%d", flag);
+        if (flagname != NULL) jmi_log_fmt(log, *node, logInfo, "Newton solver finished with <kinsol_exit_flag:%s>", flagname);
+        else jmi_log_fmt(log, *node, logInfo, "Newton solver finished with unrecognized <kinsol_exit_flag:%d>", flag);
         jmi_log_leave(log, *node);
     }
 }

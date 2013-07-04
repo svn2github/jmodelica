@@ -459,7 +459,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
 
     if((jmi->options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
-                                 "<Model equations evaluation invoked at> t:%E", t[0]);
+                                 "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
     for (i=0;i<jmi->n_z;i++) {
@@ -469,9 +469,8 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     return_status = jmi->dae->ode_derivatives(jmi);
 
     if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi->log, node, logInfo, "<Model equations evaluation finished>");
+        jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
-/*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
     }
 
     /* Write back evaluation result */
@@ -528,15 +527,14 @@ int jmi_ode_initialize(jmi_t* jmi) {
 
     if((jmi->options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
-                                 "<Model equations evaluation invoked at> t:%E", t[0]);
+                                 "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
     return_status = jmi->dae->ode_initialize(jmi);
 
     if((jmi->options.log_level >= 5)) {
-        jmi_log_fmt(jmi->log, node, logInfo, "<Model equations evaluation finished>");
+        jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
-/*        jmi_log_leave_fmt(jmi, node, "<Model equations evaluation finished>");*/
     }
 
     /* Write back evaluation result */

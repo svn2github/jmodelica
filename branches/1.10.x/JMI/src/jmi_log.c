@@ -613,63 +613,66 @@ static INLINE BOOL is_name_char(char c) { return isalnum(c) || c == '_'; }
 
 static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, va_list ap) {
     buf_t *buf = bufof(log);
+    BOOL incomment = TRUE;
 
     close_leaf(log);
     if (!emitted_category(log, c)) return;
     set_category(log, c);
     while (*fmt != 0) {
         char ch = *fmt;
-        if (ch == '<') {
-            /* Copy comments verbatim */
-            ++fmt;
-            while ((*fmt != 0) && (*fmt != '>')) buffer_text_char(buf, *(fmt++));
+        if (incomment) {
+            if (ch == '<') incomment = FALSE;
+            else           buffer_text_char(buf, ch); /* copy comment char */
             ++fmt;
         }
-        else if (is_name_char(ch)) {
-            /* Try to log an attribute */
-            node_t node;
-            const char *name_end;
-            const char *name_start = fmt;
-
-            while (is_name_char(*fmt)) ++fmt;
-            name_end = fmt;
-            if (name_end == name_start) { logging_error(log, "jmi_log_fmt: expected attribute name."); break; }
-            while (isspace(*fmt)) ++fmt;
-            if (*(fmt++) != ':') { logging_error(log, "jmi_log_fmt: expected ':'"); break; }            
-            while (isspace(*fmt)) ++fmt;
+        else {  /* !incomment */
+            if      (ch == '>') { ++fmt; incomment = TRUE; }
+            else if (isspace(ch) || ch == ',') ++fmt;
+            else if (is_name_char(ch)) {
+                /* Try to log an attribute */
+                node_t node;
+                const char *name_end;
+                const char *name_start = fmt;
+                
+                while (is_name_char(*fmt)) ++fmt;
+                name_end = fmt;
+                if (name_end == name_start) { logging_error(log, "jmi_log_fmt: expected attribute name."); break; }
+                while (isspace(*fmt)) ++fmt;
+                if (*(fmt++) != ':') { logging_error(log, "jmi_log_fmt: expected ':'"); break; }            
+                while (isspace(*fmt)) ++fmt;
             
-            ch = *(fmt++);
-            if (ch == '%') {
-                char f = *(fmt++);
-                if (!contains("diueEfFgGs", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
-                
-                node = enter_value_(log, parent, c, name_start, name_end);
-
-                /* todo: consider: what if jmi_real_t is not double? */
-                if      (contains("diu", f))    jmi_log_int_(   log, va_arg(ap, int));
-                else if (contains("eEfFgG", f)) jmi_log_real_(  log, va_arg(ap, double));
-                else if (f == 's')              jmi_log_string_(log, va_arg(ap, const char *));
-                else { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
-
-                leave_(log, node);
+                ch = *(fmt++);
+                if (ch == '%') {
+                    char f = *(fmt++);
+                    if (!contains("diueEfFgGs", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
+                    
+                    node = enter_value_(log, parent, c, name_start, name_end);
+                    
+                    /* todo: consider: what if jmi_real_t is not double? */
+                    if      (contains("diu", f))    jmi_log_int_(   log, va_arg(ap, int));
+                    else if (contains("eEfFgG", f)) jmi_log_real_(  log, va_arg(ap, double));
+                    else if (f == 's')              jmi_log_string_(log, va_arg(ap, const char *));
+                    else { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
+                    
+                    leave_(log, node);
+                }
+                else if (ch == '#') {
+                    char t = *(fmt++);
+                    if (!contains("ribs", t)) { logging_error(log, "jmi_log_fmt: unknown vref type"); break; }
+                    if (*(fmt++) != '%') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
+                    if (*(fmt++) != 'd') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
+                    if (*(fmt++) != '#') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
+                    
+                    node = enter_value_(log, parent, c, name_start, name_end);
+                    jmi_log_vref_(log, t, va_arg(ap, int));
+                    leave_(log, node);
+                }
+                else { logging_error(log, "jmi_log_fmt: expected '%' or '#'"); break; }
             }
-            else if (ch == '#') {
-                char t = *(fmt++);
-                if (!contains("ribs", t)) { logging_error(log, "jmi_log_fmt: unknown vref type"); break; }
-                if (*(fmt++) != '%') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
-                if (*(fmt++) != 'd') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
-                if (*(fmt++) != '#') { logging_error(log, "jmi_log_fmt: expected '#<type>%d#'"); break; }
-                
-                node = enter_value_(log, parent, c, name_start, name_end);
-                jmi_log_vref_(log, t, va_arg(ap, int));
-                leave_(log, node);
-            }
-            else { logging_error(log, "jmi_log_fmt: expected '%' or '#'"); break; }
-
+            else { logging_error(log, "jmi_log_fmt: unknown format character"); break; }
         }
-        else if (isspace(ch) || ch == ',') ++fmt;
-        else { logging_error(log, "jmi_log_fmt: unknown format character"); break; }
     }
+    if (!incomment) logging_error(log, "jmi_log_fmt: format string ended while inside angle brackets.");
 }
 
  /* Functions that involve log_fmt */
