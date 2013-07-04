@@ -36,6 +36,7 @@ path_to_fmus = os.path.join(get_files_path(), 'FMUs')
 path_to_fmus_me1 = os.path.join(path_to_fmus,"ME1.0")
 path_to_fmus_cs1 = os.path.join(path_to_fmus,"CS1.0")
 path_to_mofiles = os.path.join(get_files_path(), 'Modelica')
+path_to_fmu_logs = os.path.join(get_files_path(), 'FMU_logs')
 
 path_to_fmus_me2 = os.path.join(path_to_fmus,"ME2.0")
 path_to_fmus_cs2 = os.path.join(path_to_fmus,"CS2.0")
@@ -955,6 +956,51 @@ class Test_Logger:
 
         assert len(d)==8, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
+
+    @testattr(fmi = True)
+    def test_parse_log_file(self):
+        """
+        Test that a pregenerated log file is parsable
+        """
+
+        log = parse_jmi_log(os.path.join(path_to_fmu_logs, 'LoggerTest_log.txt'))
+
+        assert log.nodes[0].t == 0.0
+        
+        d = gather_solves(log)
+
+        assert len(d)==8, "Unexpected number of solver invocations"
+        assert d[0].t==0.0
+        assert len(d[0].block_solves)==4, "Unexpected number of block solves in first iteration"
+
+        vars = d[0].block_solves[0].variables
+        assert len(vars)==3
+        assert all(vars==N.asarray(['x1', 'z1', 'y1']))
+        
+        assert N.array_equiv( d[0].block_solves[0].min,
+                              N.asarray([-1.7976931348623157E+308, -1.7976931348623157E+308, -1.7976931348623157E+308]) )
+        assert N.array_equiv( d[0].block_solves[0].max,
+                              N.asarray([ 1.7976931348623157E+308,  1.7976931348623157E+308,  1.7976931348623157E+308]) )
+        assert N.array_equiv( d[0].block_solves[0].initial_residual_scaling,
+                              N.asarray([4.0, 1.0, 1.0]) )
+        assert len(d[0].block_solves[0].iterations)==12
+
+        assert N.array_equiv( d[0].block_solves[0].iterations[0].ivs,
+                              N.asarray([0.0,  0.0,  1.4901161193847656E-08]) )
+        assert N.array_equiv( d[0].block_solves[0].iterations[0].residuals,
+                              N.asarray([-1.25, 1.1999999985098839E+01, 2.9999999850988388E+00]) )
+        
+        assert N.array_equiv( d[0].block_solves[0].iterations[0].jacobian,
+                              N.asarray([[-1.0,  4.0,  0.0],
+                                         [-1.0, -1.0, -1.0],
+                                         [-1.0,  1.0, -1.0]]) )
+
+        assert d[0].block_solves[0].iterations[0].jacobian_updated==True
+        assert N.array_equiv( d[0].block_solves[0].iterations[0].residual_scaling,
+                              N.asarray([ 4.0,  1.0,  1.0]) )
+        assert d[0].block_solves[0].iterations[0].residual_scaling_updated==False
+        nose.tools.assert_almost_equal( d[0].block_solves[0].iterations[0].scaled_residual_norm,
+                                        1.2432316741177614E+01 )
 
 
 class Test_SetDependentParameterError:

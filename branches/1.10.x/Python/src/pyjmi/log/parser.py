@@ -28,7 +28,7 @@ from tree import *
 
 floatingpoint_re = "^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$"
 integer_re       = "^[0-9]+$"
-quoted_string_re = "^'(?:[^']|'')*'$"
+quoted_string_re = '^"(?:[^"]|"")*"$'
 
 integer_pattern       = re.compile(integer_re)
 floatingpoint_pattern = re.compile(floatingpoint_re)
@@ -48,9 +48,9 @@ def parse_value(text):
     elif floatingpoint_pattern.match(text):
         return float(text)
     elif quoted_string_pattern.match(text):
-        return text[1:-1]
+        return text[1:-1].replace('""','"')
     else:
-        assert "'" not in text
+        assert '"' not in text
         return text
 
 def parse_vector(text):
