@@ -92,20 +92,19 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
 /** \brief Log comments and scalar attributes according to the format string `fmt`.
  *    
  *  The format string can contain
- *  * Comments, between angle brackets `<>`.
- *  * Scalar attributes in the form `<name>:%<format>`, where
- *      * `<name>` is an identifier and
- *      * `format` is one of the printf format characters
+ *  * Comments, verbatim
+ *  * Scalar attributes between angle brackets, in the form `<` *name* `:%` *format* `>` (e.g. `<t:%e>`, where
+ *      * *name* is an identifier and
+ *      * *format* is one of the printf format characters
  *          `diu` for `int`, 
  *          `eEfFgG` for `jmi_real_t`, or
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;
  *        a default format is used for all reals, etc.
- *  * Scalar attributes with a variable reference as value, in the form `<name>:#<type>%d#`,
- *    where `<type>` is one of the characters `ribs`.
- *  * Whitespace and commas, which are ignored.
+ *  * Scalar attributes with a variable reference as value, in the form `<` *name* `:#` *type* `%d#>`
+ *    (e.g. `<var:#r%d#>`), where `<type>` is one of the characters `ribs`.
  * 
- *  The values for consecutive attributes should be supplied as additional arguments.
+ *  The values for consecutive attributes should be supplied as additional arguments, just like for `printf`.
  * 
  */
 void jmi_log_fmt(jmi_log_t *log, jmi_log_node_t node, jmi_log_category_t c, const char *fmt, ...);
