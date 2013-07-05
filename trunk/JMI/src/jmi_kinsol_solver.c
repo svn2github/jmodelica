@@ -57,21 +57,21 @@ int brentf(realtype y, realtype* f, void* problem_data) {
 
     /* Check that arguments are valid */
     if ((y- y) != 0) {
-        jmi_log_node(block->jmi->log, logWarning, "Warning", "<Not a number in arguments to> block: %d", block->index);
+        jmi_log_node(block->jmi->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", block->index);
         return -1;
     }
 
     /*Evaluate the residual*/
     ret = block->F(block->jmi,&y,f,JMI_BLOCK_EVALUATE);
     if(ret) {
-        jmi_log_node(block->jmi->log, logWarning, "Warning", "errorCode: %d <returned from> block: %d", ret, block->index);
+        jmi_log_node(block->jmi->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", ret, block->index);
         return ret;
     }
     /* Check that outputs are valid */    
     {
         realtype v = *f;
         if (v- v != 0) {
-            jmi_log_node(block->jmi->log, logWarning, "Warning", "<Not a number in output from> block: %d", block->index);
+            jmi_log_node(block->jmi->log, logWarning, "Warning", "Not a number in output from <block: %d>", block->index);
             ret = 1;
         }
     }
@@ -94,7 +94,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     for (i=0;i<n;i++) {
         /* Unrecoverable error*/
         if (Ith(yy,i)- Ith(yy,i) != 0) {
-            jmi_log_node(block->jmi->log, logWarning, "Warning", "<Not a number in arguments to> block: %d", 
+            jmi_log_node(block->jmi->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", 
                          block->index);
             return -1;
         }
@@ -104,7 +104,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     ret = block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
     
     if(ret) {
-        jmi_log_node(block->jmi->log, logWarning, "Warning", "errorCode: %d <returned from> block: %d", 
+        jmi_log_node(block->jmi->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", 
                      ret, block->index);
         return ret;
     }
@@ -116,7 +116,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         /* Recoverable error*/
         if (v- v != 0) {
             jmi_log_node(block->jmi->log, logWarning, "Warning", 
-                         "<Not a number in> output: %d <from> block: %d", i, block->index);
+                         "Not a number in <output: %d> from <block: %d>", i, block->index);
             ret = 1;
 #if 0           
             block->F(block->jmi,y,f,JMI_BLOCK_EVALUATE);
@@ -265,14 +265,14 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
                     realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
                     if (rel_error >= block->jmi->options.block_jacobian_check_tol) {
                         jmi_log_node(block->jmi->log, logError, "JacobianCheck",
-                                     "j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e", 
+                                     "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
                                      j, i, a_val, fd_val, rel_error);
                     }
                 }
             }
         } else {
             jmi_log_node(block->jmi->log, logError, "JacobianCheck", 
-                         "<No block jacobian specified, unable to do jacobian check>");
+                         "No block jacobian specified, unable to do jacobian check");
         }
         free(jac_fd);
     }
@@ -393,7 +393,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
 void jmi_kinsol_error_handling(jmi_t* jmi, int flag){
     if (flag != 0) {
-        jmi_log_node(jmi->log, logError, "KinsolError", "<KINSOL returned with> kinsol_flag: %s", KINGetReturnFlagName(flag));
+        jmi_log_node(jmi->log, logError, "KinsolError", "KINSOL returned with <kinsol_flag: %s>", KINGetReturnFlagName(flag));
     }
 }
 
@@ -493,15 +493,15 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     /* evaluate the function at initial */
     ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
     if(ef) {
-        jmi_log_node(jmi->log, logError, "Error", "<Residual function evaluation failed at initial point for>"
-                     "block: %d", block->index);
+        jmi_log_node(jmi->log, logError, "Error", "Residual function evaluation failed at initial point for"
+                     "<block: %d>", block->index);
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
     /* evaluate Jacobian at initial */
     if(jmi_kin_lsetup(kin_mem)) {
         ef = 1;
-        jmi_log_node(jmi->log, logError, "Error", "<Jacobian evaluation failed at initial point for>"
-                     "block: %d", block->index);
+        jmi_log_node(jmi->log, logError, "Error", "Jacobian evaluation failed at initial point for"
+                     "<block: %d>", block->index);
     }
     return ef;
 }
@@ -696,8 +696,8 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(info != 0 ) {
         solver->J_is_singular_flag = 1;
-        jmi_log_node(jmi->log, logWarning, "Warning", "<Singular Jacobian detected when factorizing in linear solver. "
-                     "Will try to regularize the equations in> block: %d", block->index);
+        jmi_log_node(jmi->log, logWarning, "Warning", "Singular Jacobian detected when factorizing in linear solver. "
+                     "Will try to regularize the equations in <block: %d>", block->index);
         jmi_kinsol_reg_matrix(block);
         dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
     }
@@ -862,13 +862,13 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
         for(i = 0; i < N; i++) {
             if(scale_ptr[i] < tol) {
                 scale_ptr[i] = 1/tol; /* Singular Jacobian? */
-                jmi_log_node(block->jmi->log, logWarning, "Warning", "<Using maximum scaling factor in> block: %d, "
-                             "equation: %d <Consider rescaling in the model or tighter tolerance.>", block->index, i);
+                jmi_log_node(block->jmi->log, logWarning, "Warning", "Using maximum scaling factor in <block: %d>, "
+                             "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->index, i);
             }
             else if(scale_ptr[i] > 1/tol) {
                 scale_ptr[i] = tol;
-                jmi_log_node(block->jmi->log, logWarning, "Warning", "<Using minimal scaling factor in> block: %d, "
-                             "equation: %d <Consider rescaling in the model or tighter tolerance.>", block->index, i);
+                jmi_log_node(block->jmi->log, logWarning, "Warning", "Using minimal scaling factor in <block: %d>, "
+                             "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->index, i);
             }
             else
                 scale_ptr[i] = 1/scale_ptr[i];
@@ -902,18 +902,18 @@ static void jmi_update_f_scale(jmi_block_residual_t *block) {
         dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
         if(info > 0) {
             jmi_log_node(jmi->log, logWarning, "SingularJacobian",
-                         "<Singular Jacobian detected when checking condition number in> block:%d <Solver may fail to converge.>", block->index);
+                         "Singular Jacobian detected when checking condition number in <block:%d> Solver may fail to converge.", block->index);
         }
         else {
             dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
             
             if(tol * Jcond < UNIT_ROUNDOFF) {
                 jmi_log_node(jmi->log, logWarning, "IllConditionedJacobian",
-                             "JacobianInverseConditionEstimate:%E <Solver may fail to converge.>", Jcond);
+                             "<JacobianInverseConditionEstimate:%E> Solver may fail to converge.", Jcond);
             }
             else {
                 jmi_log_node(jmi->log, logInfo, "JacobianCondition",
-                             "JacobianInverseConditionEstimate:%E", Jcond);
+                             "<JacobianInverseConditionEstimate:%E>", Jcond);
             }
         }
     }
@@ -1132,8 +1132,8 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
      */
     flag = block->F(jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
     if(flag) {        
-        jmi_log_node(log, logWarning, "Error", "errorCode: %d <returned from> block: %d "
-                     "<when reading initial guess.>", flag, block->index);
+        jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
+                     "when reading initial guess.", flag, block->index);
         return flag;
     }
 
@@ -1164,8 +1164,8 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm < solver->kin_stol) {
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "<Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in> block: %d, <continuing>", block->index);*/
+                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
+                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->index);*/
             }
 
         }
@@ -1173,7 +1173,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     
     /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
     if((block->n == 1) && jmi->options.use_Brent_in_1d_flag) {
-        jmi_log_node(log, logInfo, "Brent", "<Trying Brent's method in> block: %d", block->index);
+        jmi_log_node(log, logInfo, "Brent", "Trying Brent's method in <block: %d>", block->index);
         if(( solver->f_pos_min_1d != BIG_REAL) &&
                 ( solver->f_neg_max_1d != -BIG_REAL)) {
             
@@ -1185,8 +1185,8 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             }                
         }
         if(flag != KIN_SUCCESS) {
-            jmi_log_node(log, logError, "Error", "<Could neither iterate to required accuracy "
-                         "nor bracket the root of 1D equation in> block: %d", block->index);
+            jmi_log_node(log, logError, "Error", "Could neither iterate to required accuracy "
+                         "nor bracket the root of 1D equation in <block: %d>", block->index);
         }
     } 
     
@@ -1205,13 +1205,13 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
        TODO: we should probably rescale after event as well.
     */
     if(block->init || (flag != KIN_SUCCESS)) {
-        jmi_log_node(log, logInfo, "Rescaling", "<Attempting rescaling in> block:%d", block->index);
+        jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%d>", block->index);
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
         if(flagNonscaled < 0) {
-            jmi_log_node(log, logWarning, "Warning", "<The equations with initial scaling didn't converge to a "
-                         "solution in> block: %d", block->index);
+            jmi_log_node(log, logWarning, "Warning", "The equations with initial scaling didn't converge to a "
+                         "solution in <block: %d>", block->index);
         }
         /* Update the scaling  */
         jmi_update_f_scale(block);
@@ -1225,16 +1225,16 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "<Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in> block: %d, <continuing>", block->index);*/
+                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
+                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->index);*/
             }
         }
         if(flag != KIN_SUCCESS) {
             if (flagNonscaled == 0) {
-                jmi_log_node(log, logError, "Error", "<The equations with initial scaling solved fine, "
-                             "re-scaled equations failed in> block: %d", block->index); 
+                jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
+                             "re-scaled equations failed in <block: %d>", block->index); 
             } else {
-                jmi_log_node(log, logError, "Error", "<Could not converge after re-scaling equations in> block: %d",
+                jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %d>",
                              block->index); 
             }
 #ifdef JMI_KINSOL_PRINT_ON_FAIL

@@ -65,11 +65,11 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
         info = block->F(jmi,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
         if(info) {
             if(block->init) {
-                jmi_log_node(jmi->log, logError, "Error", "<Failed in Jacobian calculation for block: %d>", 
+                jmi_log_node(jmi->log, logError, "Error", "Failed in Jacobian calculation for <block: %d>", 
                              block->index);
             }
             else {
-                jmi_log_node(jmi->log, logWarning, "Warning", "<Failed in Jacobian calculation for block: %d>", 
+                jmi_log_node(jmi->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %d>", 
                              block->index);
             }
             return -1;
@@ -96,11 +96,11 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
         dgetrf_(&n_x, &n_x, solver->factorization, &n_x, solver->ipiv, &info);
         if(info) {
             if(block->init) {
-                jmi_log_node(jmi->log, logError, "Error", "<Singular Jacobian detected for> block: %d", 
+                jmi_log_node(jmi->log, logError, "Error", "Singular Jacobian detected for <block: %d>", 
                              block->index);
             }
             else {
-                jmi_log_node(jmi->log, logWarning, "Warning", "<Singular Jacobian detected for> block: %d", 
+                jmi_log_node(jmi->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d>", 
                              block->index);
             }
             return -1;
@@ -128,10 +128,10 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
     info = block->F(block->jmi,block->initial, block->res, JMI_BLOCK_EVALUATE);
     if(info) {
         if(block->init) {
-            jmi_log_node(jmi->log, logError, "Error", "<Failed to evaluate equations in> block: %d", block->index);
+            jmi_log_node(jmi->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->index);
         }
         else {
-            jmi_log_node(jmi->log, logWarning, "Warning", "<Failed to evaluate equations in> block: %d", block->index);
+            jmi_log_node(jmi->log, logWarning, "Warning", "Failed to evaluate equations in <block: %d>", block->index);
         }
         return -1;
     }
@@ -150,7 +150,7 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
 
     if(info) {
         /* can only be "bad param" -> internal error */
-        jmi_log_node(jmi->log, logError, "Error", "<Internal error when solving> block: %d", block->index);
+        jmi_log_node(jmi->log, logError, "Error", "Internal error when solving <block: %d>", block->index);
         return -1;
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {
