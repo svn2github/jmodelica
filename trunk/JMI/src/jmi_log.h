@@ -21,21 +21,34 @@
     \brief Logging utilities for the JMI runtime.
 
     Logs are composed of nested log nodes.
-    Nodes can contain either
-     * Other nodes, or
-     * a matrix or vector of scalar values, or
-     * a single scalar value.
+    Depending on their type, nodes can contain either
+     * a single scalar value, (type: `value`)
+     * a vector of scalar values, (type: `vector`)
+     * a matrix of scalar values, (type: `matrix`) or
+     * other nodes. (all other types, preferably with initial capital letter)
 
     Every log entry has an associated log category, described by the jmi_log_category_t type.
     Log calls either take a category (`logError`, `logWarning`, or `logInfo`), 
     or use the category of the current node.
 
-    Nodes are entered with one of the functions jmi_log_enter, jmi_log_enter_fmt, and jmi_log_enter_,
-    and must be left in the corresponding order with jmi_log_leave or jmi_log_leave_,
-    supplying the jmi_log_node_t that was returned when the node was entered.
+    Nodes are entered with one of the functions `jmi_log_enter`, `jmi_log_enter_fmt`, and `jmi_log_enter_`,
+    and must be left in reverse order (innermost first) with `jmi_log_leave` or `jmi_log_leave_`,
+    supplying the `jmi_log_node_t` that was returned when the node was entered.
     This is to keep track of that log nodes don't become unbalanced. If an unbalance is detected,
-    jmi_log_leave will emit a warning comment to the log, and attempt leave the specified node.
-
+    `jmi_log_leave` will emit a warning comment to the log, and attempt leave the specified node.
+    
+    Apart from its type, a node may have a name, which is expected to be unique among its siblings.
+    To help ensure that named nodes are not created by code that does not know if siblings with the
+    same name already exist, the parent node is required as an argument to all calls that create named nodes.
+    Named nodes may not have a more severe log category than their parents.
+    
+    Logging functions come in two flavors; row primitives and subrow primitives.
+    The former will cause a new log message line to be sent to the log;
+    the latter allow to build a line incrementally before emitting it. It can
+    then be emitted to the log by a call to `jmi_log_emit` or a row primitive.
+    Row primitives should be used when possible. A common use for subrow
+    primitives is to log a vector that does not exist in memory, by
+    incrementally feeding the elements.
 */    
 
 #ifndef _JMI_LOG_H
