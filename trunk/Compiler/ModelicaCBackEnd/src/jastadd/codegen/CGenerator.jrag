@@ -403,7 +403,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode") && !fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
+			if (fclass.root().options.getBooleanOption("generate_ode") && !CADGenerator.shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
 					block.genBlockAddCall_C(false, false, ASTNode.printer_C.indent(""), genPrinter);
@@ -460,7 +460,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode") && !fclass.root().options.getBooleanOption("generate_ode_jacobian")) {
+			if (fclass.root().options.getBooleanOption("generate_ode") && !CADGenerator.shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
 					block.genBlockAddCall_C(false, true, ASTNode.printer_C.indent(""), genPrinter);
