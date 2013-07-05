@@ -415,15 +415,6 @@ y = init_result['y']
                 <entry>Flag indicating whether the problem should be treated
                 as sparse (True) or dense (False).</entry>
               </row>
-
-              <row>
-                <entry>verbosity</entry>
-
-                <entry>0</entry>
-
-                <entry>An integer regulating the level of output from KINSOL.
-                Further explained in <xref linkend="sec_verbosity"/>.</entry>
-              </row>
             </tbody>
           </tgroup>
         </table>
@@ -502,15 +493,18 @@ y = init_result['y']
           <title xml:id="sec_verbosity">Verbosity of KINSOL</title>
 
           <para>There are four different levels of verbosity in KINSOL with 0
-          being "silent" and 3 being the "loudest". What is output is reviewed
-          in <xref linkend="verbosity"/>.</para>
+          being silent and 3 being the most verbose. The verbosity level is
+          controlled by the FMU log level. <xref linkend="verbosity"/>
+          describes what is output.</para>
 
           <table xml:id="verbosity">
             <title>Verbosity levels in KINSOL</title>
 
-            <tgroup cols="2">
+            <tgroup cols="3">
               <thead>
                 <row>
+                  <entry align="center">FMU log level</entry>
+
                   <entry align="center">Verbosity level</entry>
 
                   <entry align="center">Output</entry>
@@ -519,12 +513,16 @@ y = init_result['y']
 
               <tbody>
                 <row>
+                  <entry>&lt;= 2</entry>
+
                   <entry>0</entry>
 
                   <entry>No information displayed.</entry>
                 </row>
 
                 <row>
+                  <entry>3</entry>
+
                   <entry>1</entry>
 
                   <entry>In each nonlinear iteration the following information
@@ -535,6 +533,8 @@ y = init_result['y']
                 </row>
 
                 <row>
+                  <entry>4</entry>
+
                   <entry>2</entry>
 
                   <entry>Level 1 output as well as the Euclidian and in finity
@@ -543,6 +543,8 @@ y = init_result['y']
                 </row>
 
                 <row>
+                  <entry>&gt;= 5</entry>
+
                   <entry>3</entry>
 
                   <entry>Level 2 output plus additional values used by the
