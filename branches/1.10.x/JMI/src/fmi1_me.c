@@ -215,13 +215,13 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
 
         if (index>=((fmi_t *)c)->jmi->offs_real_pd && index<((fmi_t *)c)->jmi->offs_integer_ci) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Real dependent parameter> variable: #r%d#", vr[i]);
+                         "Cannot set Real dependent parameter <variable: #r%d#>", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_real_ci && index<((fmi_t *)c)->jmi->offs_real_pi) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Real constant> variable: #r%d#", vr[i]);
+                         "Cannot set Real constant <variable: #r%d#>", vr[i]);
             return fmiError;
         }
 
@@ -261,13 +261,13 @@ fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], siz
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_pd && index<((fmi_t *)c)->jmi->offs_boolean_ci) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Integer dependent parameter> variable: #i%d#", vr[i]);
+                         "Cannot set Integer dependent parameter <variable: #i%d#>", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_integer_ci && index<((fmi_t *)c)->jmi->offs_integer_pi) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Integer constant> variable: #i%d#", vr[i]);
+                         "Cannot set Integer constant <variable: #i%d#>", vr[i]);
             return fmiError;
         }
 
@@ -307,13 +307,13 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_pd && index<((fmi_t *)c)->jmi->offs_real_dx) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Boolean dependent parameter> variable: #b%d#", vr[i]);
+                         "Cannot set Boolean dependent parameter <variable: #b%d#>", vr[i]);
             return fmiError;
         }
 
         if (index>=((fmi_t *)c)->jmi->offs_boolean_ci && index<((fmi_t *)c)->jmi->offs_boolean_pi) {
             jmi_log_node(((fmi_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "<Cannot set Boolean constant> variable: #b%d#", vr[i]);
+                         "Cannot set Boolean constant <variable: #b%d#>", vr[i]);
             return fmiError;
         }
 
@@ -534,8 +534,8 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point iteration "
-                         "due to too many iterations at> t:%g <(initialization).>", jmi_get_t(jmi)[0]);
+            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
+                         "due to too many iterations at <t:%g> (initialization).", jmi_get_t(jmi)[0]);
             ((fmi_t*)c) -> fmi_functions.freeMemory(sw_temp);
             return fmiError;
         }
@@ -640,7 +640,7 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
     if (((fmi_t *)c)->jmi->recomputeVariables==1) {
         fmiInteger retval = jmi_ode_derivatives(((fmi_t *)c)->jmi);
         if(retval != 0) {
-            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "<Evaluating the derivatives failed at> t:%g",
+            jmi_log_node(((fmi_t *)c)->jmi->log, logError, "Error", "Evaluating the derivatives failed at <t:%g>",
                          jmi_get_t(((fmi_t *)c)->jmi)[0]);
             return fmiError;
         }
@@ -734,10 +734,10 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
 
     /*
     if (fmi -> fmi_logging_on) {
-        jmi_log_node(jmi->log, logInfo, "size_of_A", "m: %d, n:%d", nx, nx);
-        jmi_log_node(jmi->log, logInfo, "size_of_B", "m: %d, n:%d", nx, nu);
-        jmi_log_node(jmi->log, logInfo, "size_of_C", "m: %d, n:%d", ny, nx);
-        jmi_log_node(jmi->log, logInfo, "size_of_D", "m: %d, n:%d", ny, nu);
+        jmi_log_node(jmi->log, logInfo, "size_of_A", "<m: %d, n:%d>", nx, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_B", "<m: %d, n:%d>", nx, nu);
+        jmi_log_node(jmi->log, logInfo, "size_of_C", "<m: %d, n:%d>", ny, nx);
+        jmi_log_node(jmi->log, logInfo, "size_of_D", "<m: %d, n:%d>", ny, nu);
     }
      */
 
@@ -1483,8 +1483,8 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
         
         /* No convergence under the allowed number of iterations. */
         if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "Error", "<Failed to converge during global fixed point "
-                         "iteration due to too many iterations at> t:%E",jmi_get_t(jmi)[0]);
+            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point "
+                         "iteration due to too many iterations at <t:%E>",jmi_get_t(jmi)[0]);
             jmi_log_unwind(jmi->log, top_node);
             return fmiError;
         }

@@ -435,7 +435,7 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
     
     for (i = 0; i < nvr; i++) {
         if (order[i] < 1 || order[i] > FMI1_CS_MAX_INPUT_DERIVATIVES) {
-            jmi_log_node(jmi->log, logError, "SetInputDerivativeFailed", "<Failed to set the input derivative, un-supported order:> order:%d",order[i]);
+            jmi_log_node(jmi->log, logError, "SetInputDerivativeFailed", "Failed to set the input derivative, un-supported order: <order:%d>",order[i]);
             return fmiError;
         }
         found_input = fmiFalse;

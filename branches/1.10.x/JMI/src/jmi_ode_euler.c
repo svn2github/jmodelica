@@ -122,14 +122,14 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
         /* After each step call completed integrator step */
         flag = fmi1_cs_completed_integrator_step((fmiComponent)fmi1_cs, &step_event);
         if (flag != fmiOK) {
-            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "<Failed to complete an integrator step. "
-                     "Returned with> error_flag: %d", flag);
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logError, "Error", "Failed to complete an integrator step. "
+                     "Returned with <error_flag: %d>", flag);
             return JMI_ODE_ERROR;
         }
         
         /* Handle events */
         if (zero_crossning_event || step_event == fmiTrue) {
-            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logInfo, "EulerEvent", "<An event was detected at> t:%g", tcur);
+            jmi_log_node(fmi1_cs_get_jmi_t_log(fmi1_cs), logInfo, "EulerEvent", "An event was detected at <t:%g>", tcur);
             return JMI_ODE_EVENT;
         }
 
