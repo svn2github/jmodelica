@@ -44,8 +44,8 @@
       export of FMUs for Model Exchange (FMU-ME) and export of FMUs for
       Co-Simulation (FMU-CS). The generated FMU can be loaded in an
       <literal>FMUModel(ME/CS)1</literal> object in Python and then be used
-      for simulation purposes. Optimica models can not be compiled into FMUs.
-      </para>
+      for simulation purposes. Optimica models can not be compiled into
+      FMUs.</para>
 
       <para>JMUs are created by compiling Modelica or Optimica models with
       JModelica.org. The JMU can then be loaded in a
@@ -173,7 +173,7 @@ mo_file = 'myModelFile.mo'
 my_fmu = compile_fmu(model_name, mo_file, target='fmucs')
 </programlisting></para>
 
-      <para> In a Co-Simulation FMU, the integrator for solving the system is
+      <para>In a Co-Simulation FMU, the integrator for solving the system is
       contained in the model. With an FMU-CS exported with JModelica.org, two
       different solvers are supported: CVode and Explicit Euler.</para>
     </section>
@@ -1467,7 +1467,7 @@ log = pyjmi.log.parse_jmi_log(log_file_name)</programlisting>
       <programlisting># Parse the entire XML log
 log = pyjmi.log.parse_jmi_log(log_file_name)
 # Gather information pertaining to equation solves
-solves = gather_solves(log)
+solves = pyjmi.log.gather_solves(log)
 
 print
 print 'Number of solver invocations:',                      len(solves)
