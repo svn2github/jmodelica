@@ -980,6 +980,8 @@ aspect CADCodeGen {
 		str.print(indent);
 		str.println("jmi_real_t** res = &residual;");
 		str.print(indent);
+		str.println("int ef = 0;");
+		str.print(indent);
 		str.println("jmi_real_t** dF = &dRes;");
 		str.print(indent);
 		str.println("jmi_real_t** dz;");
@@ -1058,7 +1060,7 @@ aspect CADCodeGen {
 		str.print(indent);
 		str.println("}");
 		str.print(indent);
-		str.println("return 0;");
+		str.println("return ef;");
 		str.print(outerIndent);
 		str.println("}");
 		str.println();
@@ -1223,7 +1225,7 @@ aspect CADCodeGen {
 	@Override
 	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sjmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+		str.format("%sef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
 	}
 	
 	/**

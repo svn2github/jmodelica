@@ -1562,7 +1562,8 @@ aspect CCodeGen {
 		String nextIndent = ASTNode.printer_C.indent(indent);
 		str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
 				outerIndent, (inInitial? "init_": ""), residualBlockNumber_C());
-		str.print(indent + "jmi_real_t** res = &residual;\n");	
+		str.print(indent + "jmi_real_t** res = &residual;\n");
+		str.print(indent + "int ef = 0;\n");
 		genVarDecls_C(str, indent, null);
 
 		// Nominal values
@@ -1613,7 +1614,7 @@ aspect CCodeGen {
 			fv.genBlockResidualWriteback_C(nextIndent, str, solverArrayMap);
 
 		str.print(indent + "}\n");
-		str.print(indent + "return 0;\n");
+		str.print(indent + "return ef;\n");
 		str.print(outerIndent + "}\n\n");
 	}
 	
@@ -1821,7 +1822,7 @@ aspect CCodeGen {
 	
 	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sjmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+		str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
