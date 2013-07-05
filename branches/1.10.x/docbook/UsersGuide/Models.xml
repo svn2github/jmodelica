@@ -1381,7 +1381,7 @@ Equations:
       graph.</para>
     </section>
 
-    <section>
+    <section xml:id="sec_models_debug_nonlinear">
       <title>Debugging nonlinear systems</title>
 
       <para>Many events that occur inside of an FMU can generate log messages.
