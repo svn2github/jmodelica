@@ -734,14 +734,14 @@ Solved variables:
   u1
   i1
 Iteration variables:
-  i3()
+  i4()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * i4
   u0 = u1 + u2
-  i1 = i2 + i3
+  i1 = i2 + i4
 Residual equations:
- Iteration variables: i3
+ Iteration variables: i4
   u1 = R1 * i1
  Iteration variables: i2
   u2 = R2 * i2
