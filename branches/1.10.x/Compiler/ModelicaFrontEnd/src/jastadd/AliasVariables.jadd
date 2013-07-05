@@ -326,9 +326,6 @@ aspect AliasVariables {
 			// List of aliases
 			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
 			
-			// If this set is marked as manual tearing
-			private boolean isManualIteration = false;
-			
 			/**
 			 * Private constructor
 			 */
@@ -347,19 +344,10 @@ aspect AliasVariables {
 			
 			/**
 			 * Adds a new alias variable to this set.
-			 * Manual tearing is also propagated if necessary.
 			 * 
 			 * @param newAlias Alias variable to add
 			 */
 			private void add(AliasVariable newAlias) {
-				boolean newAliasIsManualIteration = newAlias.getFVariable().getHGTType() == FClass.HGTVariableType.COMPONENT;
-				if (isManualIteration && !newAliasIsManualIteration) {
-					newAlias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
-				} else if (!isManualIteration && newAliasIsManualIteration) {
-					isManualIteration = true;
-					for (AliasVariable alias : aliases)
-						alias.getFVariable().setHGTType(FClass.HGTVariableType.COMPONENT);
-				}
 				newAlias.setSet(this);
 				aliases.add(newAlias);
 			}
