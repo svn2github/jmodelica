@@ -146,6 +146,24 @@ plot(t, x1, t, p1)
         <programlisting>r = compile_fmu('Test', 'test.mo')
 print r.warnings</programlisting>
       </section>
+
+      <section>
+        <title>Parsing of FMU log files</title>
+
+        <para>FMUs and JMUs created with JModelica.org now produce logs in a
+        structured XML format, which can be parsed using tools in
+        <literal>pyjmi.log</literal>:</para>
+
+        <programlisting>from pyjmi.log import parse_jmi_log, gather_solves
+...
+model = load_fmu(fmu_name, log_file_name='MyLog.txt')
+# simulate model...
+
+log = pyjmi.log.parse_jmi_log('MyLog.txt')
+solves = gather_solves(log)
+print 'Number of solver invocations:', len(solves)
+print 'Time of first solve:', solves[0].t</programlisting>
+      </section>
     </section>
 
     <section>
@@ -219,8 +237,6 @@ print r.warnings</programlisting>
 
       <para>Jonathan Kämpe</para>
 
-      <para>Björn Lennernäs</para>
-
       <para>John Lindskog</para>
 
       <para>Fredrik Magnusson</para>
@@ -241,6 +257,8 @@ print r.warnings</programlisting>
         <title>Previous contributors</title>
 
         <para>Sofia Gedda</para>
+
+        <para>Björn Lennernäs</para>
 
         <para>Petter Lindgren</para>
 
