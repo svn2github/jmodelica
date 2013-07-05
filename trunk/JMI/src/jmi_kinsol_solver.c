@@ -573,27 +573,39 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 
     if (block->jmi->options.log_level >= 5 && limitingBounds) {
         /* Print limiting bounds */
-        jmi_log_node_t node = jmi_log_enter_(log, logInfo, "LimitationBounds");
-        for (i=0; i < solver->num_bounds; i++) {
-            int index = solver->bound_vindex[i]; /* variable index */
-            if (solver->bound_limiting[index] != 0) {
-                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "<max: #r%d#>", block->value_references[index]);
-                else                            jmi_log_fmt_(log, node, logInfo, "<min: #r%d#>", block->value_references[index]);
+        jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "LimitationBounds");
+        int kind;
+        for (kind=1; kind >= -1; kind -= 2) {
+            jmi_log_node_t inner = jmi_log_enter_vector_(log, outer, logInfo, 
+                                                         kind==1 ? "max" : "min");            
+            for (i=0; i < solver->num_bounds; i++) {
+                int index = solver->bound_vindex[i]; /* variable index */
+                if (solver->bound_limiting[index] != 0
+                    && solver->bound_kind[i] == kind) {
+                    jmi_log_vref_(log, 'r', block->value_references[index]);
+                }
             }
+            jmi_log_leave(log, inner);
         }
-        jmi_log_leave(log, node);
+        jmi_log_leave(log, outer);
     }
     if (block->jmi->options.log_level >= 5 && activeBounds) {        
         /* Print active bounds*/
-        jmi_log_node_t node = jmi_log_enter_(log, logInfo, "ActiveBounds");
-        for (i=0; i < solver->num_bounds; i++) {
-            int index = solver->bound_vindex[i]; /* variable index */
-            if (solver->active_bounds[index] != 0) {
-                if (solver->bound_kind[i] == 1) jmi_log_fmt_(log, node, logInfo, "<max: #r%d#>", block->value_references[index]);
-                else                            jmi_log_fmt_(log, node, logInfo, "<min: #r%d#>", block->value_references[index]);
+        jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "ActiveBounds");
+        int kind;
+        for (kind=1; kind >= -1; kind -= 2) {
+            jmi_log_node_t inner = jmi_log_enter_vector_(log, outer, logInfo, 
+                                                         kind==1 ? "max" : "min");            
+            for (i=0; i < solver->num_bounds; i++) {
+                int index = solver->bound_vindex[i]; /* variable index */
+                if (solver->active_bounds[index] != 0
+                    && solver->bound_kind[i] == kind) {
+                    jmi_log_vref_(log, 'r', block->value_references[index]);
+                }
             }
+            jmi_log_leave(log, inner);
         }
-        jmi_log_leave(log, node);
+        jmi_log_leave(log, outer);
     }
 
     max_step_ratio *= MAX_NETON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
