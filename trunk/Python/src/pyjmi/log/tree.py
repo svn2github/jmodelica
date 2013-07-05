@@ -79,6 +79,11 @@ class Node(object):
          self.dict[key] = value
     
     def find(self, types):
+        """
+        Return a list of children with the given type(s), in order.
+
+        types may be a string or list of strings.
+        """
         if isinstance(types, basestring):
             types = [types]
 
