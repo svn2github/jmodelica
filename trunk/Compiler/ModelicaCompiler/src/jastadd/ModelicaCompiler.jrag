@@ -1535,11 +1535,12 @@ public class ModelicaCompiler {
 	 * 
 	 * Retains the current log level.
 	 */
-	public static void setLogger(ModelicaLogger log) {
+	public static void setLogger(ModelicaLogger newLog) {
 		Level l = (log == null) ? null : log.getLevel();
-		ModelicaCompiler.log = log;
+		log = newLog;
+		ASTNode.log = newLog;
 		if (l != null)
-			log.setLevel(l);
+			newLog.setLevel(l);
 	}
 	
 	/**
@@ -1997,10 +1998,10 @@ public class ModelicaCompiler {
 				l.removeHandler(h);
 			StreamHandler sh = new StreamHandler(stream, new ConsoleFormatter());
 			l.addHandler(sh);
-			l.setLevel(Level.WARNING);
 			
 			ModelicaLogger ml = logs.get(name);
 			if (ml == null) {
+				l.setLevel(Level.WARNING);
 				ml = new LoggerInModelicaLogger(l);
 				logs.put(name, ml);
 			}
