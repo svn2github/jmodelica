@@ -229,9 +229,9 @@ end ArrayTests.General.ArrayTest7;
 			flatModel="
 fclass ArrayTests.General.ArrayTest8
  parameter Integer m[1].n = 1 /* 1 */;
- Real m[1].x[1] = ones(m[1].n);
+ Real m[1].x[1] = ones(1);
  parameter Integer m[2].n = 2 /* 2 */;
- Real m[2].x[2] = ones(m[2].n);
+ Real m[2].x[2] = ones(2);
 
 end ArrayTests.General.ArrayTest8;
 ")})));

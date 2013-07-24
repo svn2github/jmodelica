@@ -1020,8 +1020,8 @@ model FixedAndStart3
   parameter Integer N1 = 2;
   parameter Integer N2 = 1;
   parameter Integer N3 = N1 + N2;
-  parameter Boolean b[N3] = array((if i<=N2 then false else true) for i in 1:N3);
-  Real x[N3](each start=1, fixed=b);
+  parameter Boolean b[3] = array((if i<=N2 then false else true) for i in 1:3);
+  Real x[3](each start=1, fixed=b);
 equation
   der(x) = -x;
 

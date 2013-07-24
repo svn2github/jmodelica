@@ -219,11 +219,9 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
  parameter Integer p1 = 2 /* 2 */;
- parameter Integer p2;
+ parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
  constant Real y = 2;
-parameter equation
- p2 = p1;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;

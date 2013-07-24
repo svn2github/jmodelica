@@ -1118,12 +1118,10 @@ model IfExpType1
 			flatModel="
 fclass TypeTests.IfExpType1
  parameter Integer n = 3 /* 3 */;
- parameter Integer m.n;
+ parameter Integer m.n = 3 /* 3 */;
  constant Real m.y[1] = 1;
  constant Real m.y[2] = 2;
  constant Real m.y[3] = 3;
-parameter equation
- m.n = n;
 end TypeTests.IfExpType1;
 ")})));
 end IfExpType1;
@@ -1215,16 +1213,16 @@ model IfExpType5
 		TransformCanonicalTestCase(
 			name="IfExpType5",
 			description="If expression with branches with different array sizes, using function call",
+			variability_propagation=false,
 			flatModel="
 fclass TypeTests.IfExpType5
  parameter Integer n = 3 /* 3 */;
- parameter Integer m.n;
- parameter Real m.y[1];
- parameter Real m.y[2];
- parameter Real m.y[3];
-parameter equation
- m.n = n;
- ({m.y[1], m.y[2], m.y[3]}) = TypeTests.IfExpType5.F(3, 5, n);
+ parameter Integer m.n = 3 /* 3 */;
+ Real m.y[1];
+ Real m.y[2];
+ Real m.y[3];
+equation
+ ({m.y[1], m.y[2], m.y[3]}) = TypeTests.IfExpType5.F(3, 5, 3);
 
 public
  function TypeTests.IfExpType5.F

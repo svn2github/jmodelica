@@ -160,7 +160,7 @@ public class ModelicaLogger {
 				for (int i = start; nlpos < 0 && i < n; i++)
 					if (buf[i] == N || buf[i] == R)
 						nlpos = i;
-				if (nlpos == n - 1 && buf[nlpos] == R) {
+				if (nlpos == n - 1 && buf[nlpos] == R && (start > 0 || n < buf.length)) {
 					lastR = true;
 					nlpos = -1;
 				} else if (nlpos >= 0) {

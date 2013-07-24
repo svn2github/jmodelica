@@ -2095,9 +2095,9 @@ fclass ArrayBuiltins.ArrayIfExp1
  Real x[2](start = 1);
  Real x[3](start = 1);
 equation
- der(x[1]) = if time >= 3 then (A[1,1] * x[1] + A[1,2] * x[2] + A[1,3] * x[3]) / N else ((- A[1,1]) * x[1] + (- A[1,2]) * x[2] + (- A[1,3]) * x[3]) / N;
- der(x[2]) = if time >= 3 then (A[2,1] * x[1] + A[2,2] * x[2] + A[2,3] * x[3]) / N else ((- A[2,1]) * x[1] + (- A[2,2]) * x[2] + (- A[2,3]) * x[3]) / N;
- der(x[3]) = if time >= 3 then (A[3,1] * x[1] + A[3,2] * x[2] + A[3,3] * x[3]) / N else ((- A[3,1]) * x[1] + (- A[3,2]) * x[2] + (- A[3,3]) * x[3]) / N;
+ der(x[1]) = if time >= 3 then (A[1,1] * x[1] + A[1,2] * x[2] + A[1,3] * x[3]) / 3 else ((- A[1,1]) * x[1] + (- A[1,2]) * x[2] + (- A[1,3]) * x[3]) / 3;
+ der(x[2]) = if time >= 3 then (A[2,1] * x[1] + A[2,2] * x[2] + A[2,3] * x[3]) / 3 else ((- A[2,1]) * x[1] + (- A[2,2]) * x[2] + (- A[2,3]) * x[3]) / 3;
+ der(x[3]) = if time >= 3 then (A[3,1] * x[1] + A[3,2] * x[2] + A[3,3] * x[3]) / 3 else ((- A[3,1]) * x[1] + (- A[3,2]) * x[2] + (- A[3,3]) * x[3]) / 3;
 end ArrayBuiltins.ArrayIfExp1;
 ")})));
 end ArrayIfExp1;

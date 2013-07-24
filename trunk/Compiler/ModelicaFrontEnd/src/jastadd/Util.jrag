@@ -2161,7 +2161,7 @@ aspect FlatFunctionUtils {
       */
      inh boolean FQName.inFunction();
      inh boolean InstFunctionArgument.inFunction();
-     inh boolean InstAssignable.inFunction();
+     inh boolean InstComponentDecl.inFunction();
      inh boolean InstExternal.inFunction();
      inh boolean InstAccess.inFunction();
      inh boolean FExp.inFunction();

@@ -394,8 +394,8 @@ model InnerOuterTest12
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest12
  parameter Integer c.b = 1 /* 1 */;
- parameter Integer f.e = c.b;
- Real f.x[1] = zeros(f.e);
+ parameter Integer f.e = 1 /* 1 */;
+ Real f.x[1] = zeros(1);
 end InnerOuterTests.InnerOuterTest12;
 ")})));
 end InnerOuterTest12;

@@ -6991,7 +6991,7 @@ fclass FunctionTests.InputAsArraySize3
  Real x[2];
  Real x[3];
 equation
- ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize3.f(n);
+ ({x[1],x[2],x[3]}) = FunctionTests.InputAsArraySize3.f(3);
 
 public
  function FunctionTests.InputAsArraySize3.f

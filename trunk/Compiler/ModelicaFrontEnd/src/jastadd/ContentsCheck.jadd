@@ -98,6 +98,11 @@ aspect ContentCheck {
 		warning("The rooted() operator has been deprecated in favor of Connections.rooted()");
 	}
 	
+	public void InstComponentDecl.contentCheck() {
+		if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
+			getFArraySubscripts().markAsStructuralParameter();
+	}
+	
 	public void InstClassDecl.contentCheck() {
 		if (isExternalObject()) {
 			checkContentsOKInExternalObject();
@@ -338,6 +343,16 @@ aspect StructuralParams {
 		markUsesAsStructuralParameter();
 	}
 	
+	public void FArraySubscripts.markAsStructuralParameter() {
+		for (FSubscript s : getFSubscripts())
+			s.markAsStructuralParameter();
+	}
+	
+	public void FSubscript.markAsStructuralParameter() {}
+	public void FExpSubscript.markAsStructuralParameter() {
+		getFExp().markAsStructuralParameter();
+	}
+
 	
 	public void ASTNode.markUsesAsStructuralParameter() {
 		for (ASTNode n : this)
