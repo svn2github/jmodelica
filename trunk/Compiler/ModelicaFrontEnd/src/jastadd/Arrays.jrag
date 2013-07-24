@@ -2385,7 +2385,7 @@ aspect ArrayHelpers {
 		 */
 		public boolean isEmpty() {
 			for (int i = 0; i < size.length; i++)
-				if (size[i] == 0)
+				if (read(i) == 0)
 					return true;
 			return false;
 		}
@@ -3581,12 +3581,16 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Creates a new Index that describes the last <code>ndims() - level</code>
-		 *        dimensions of this Index.
+		 * Returns an Index that describes the last <code>ndims() - level</code> dimensions 
+		 * of this Index.
 		 * 
 		 * @param level  the first index to copy. Must be between 0 and ndims(), inclusive.
 		 */
 		public Index subIndex(int level) {
+			if (level == 0)
+				return this;
+			if (level == index.length)
+				return NULL;
 			Index copy = new Index(index.length - level);
 			System.arraycopy(index, level, copy.index, 0, copy.index.length);
 			return copy;
@@ -3638,12 +3642,15 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * \brief Return an Index that is the result of appending <code>i</code>
-		 *        to this Index.
+		 * Returns an Index that is the result of appending <code>i</code> to this Index.
 		 * 
 		 * @param i  the Index to append.
 		 */
 		public Index expand(Index i) {
+			if (index.length == 0)
+				return i;
+			if (i.index.length == 0)
+				return this;
 			Index expanded = new Index(index.length + i.index.length);
 			System.arraycopy(index, 0, expanded.index, 0, index.length);
 			System.arraycopy(i.index, 0, expanded.index, index.length, i.index.length);
@@ -3871,12 +3878,12 @@ aspect ArrayHelpers {
 		 * \brief Calculate the internal index in an Array that spans this Indices.
 		 */
 		protected int internal(Index i) {
-			if (i.ndims() != ndims)
-				throw new UnsupportedOperationException("Index dimensions does not match.");
+			if (i.ndims() > ndims)
+				throw new UnsupportedOperationException("Too many dimensions in Index.");
 			int[] index = i.index();
 			int res = 0;
 			for (int j = 0; j < ndims; j++)
-				res = res * size.get(j) + index[j] - 1;
+				res = res * size.get(j) + (j < index.length ? index[j] - 1 : 0);
 			return res;
 		}
 		

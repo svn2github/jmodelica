@@ -4196,4 +4196,201 @@ end RecordTests.RecordMerge1;
 end RecordMerge1;
 
 
+model RecordEval1
+    record A
+        Real x;
+        Real y;
+    end A;
+    
+    parameter A a(x = 1, y = 2);
+    
+    Real z[2] = { i * time for i in a.x:a.y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval1",
+			description="Test that evaluation before scalarization of record variable without binding expression works",
+			flatModel="
+fclass RecordTests.RecordEval1
+ parameter Real a.x = 1 /* 1 */;
+ parameter Real a.y = 2 /* 2 */;
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = 1 * time;
+ z[2] = 2 * time;
+
+public
+ record RecordTests.RecordEval1.A
+  Real x;
+  Real y;
+ end RecordTests.RecordEval1.A;
+
+end RecordTests.RecordEval1;
+")})));
+end RecordEval1;
+
+
+model RecordEval2
+    record A
+        Real x = 1;
+        Real y = 2;
+    end A;
+    
+    parameter A a;
+    
+    Real z[2] = { i * time for i in a.x:a.y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval2",
+			description="Test that evaluation before scalarization of record variable without binding expression works",
+			flatModel="
+fclass RecordTests.RecordEval2
+ parameter Real a.x = 1 /* 1 */;
+ parameter Real a.y = 2 /* 2 */;
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = 1 * time;
+ z[2] = 2 * time;
+
+public
+ record RecordTests.RecordEval2.A
+  Real x;
+  Real y;
+ end RecordTests.RecordEval2.A;
+
+end RecordTests.RecordEval2;
+")})));
+end RecordEval2;
+
+
+model RecordEval3
+    record A
+        Real x;
+        Real y;
+    end A;
+    
+    parameter A a[2](x = {1, 3}, each y = 2);
+    
+    Real z[2] = { i * time for i in a[1].x:a[2].y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval3",
+			description="Test that evaluation before scalarization of record variable without binding expression works",
+			flatModel="
+fclass RecordTests.RecordEval3
+ parameter Real a[1].x = 1 /* 1 */;
+ parameter Real a[1].y = 2 /* 2 */;
+ parameter Real a[2].x = 3 /* 3 */;
+ parameter Real a[2].y = 2 /* 2 */;
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = 1 * time;
+ z[2] = 2 * time;
+
+public
+ record RecordTests.RecordEval3.A
+  Real x;
+  Real y;
+ end RecordTests.RecordEval3.A;
+
+end RecordTests.RecordEval3;
+")})));
+end RecordEval3;
+
+
+model RecordEval4
+    record A
+        Real x = 1;
+        Real y = 2;
+    end A;
+    
+    parameter A a[2];
+    
+    Real z[2] = { i * time for i in a[1].x:a[2].y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval4",
+			description="Test that evaluation before scalarization of record variable without binding expression works",
+			flatModel="
+fclass RecordTests.RecordEval4
+ parameter Real a[1].x = 1 /* 1 */;
+ parameter Real a[1].y = 2 /* 2 */;
+ parameter Real a[2].x = 1 /* 1 */;
+ parameter Real a[2].y = 2 /* 2 */;
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = 1 * time;
+ z[2] = 2 * time;
+
+public
+ record RecordTests.RecordEval4.A
+  Real x;
+  Real y;
+ end RecordTests.RecordEval4.A;
+
+end RecordTests.RecordEval4;
+")})));
+end RecordEval4;
+
+
+model RecordEval5
+    record A
+        Real x[2];
+        Real y = 2;
+    end A;
+	
+	record B
+		A a[2];
+	end B;
+    
+    parameter B b[2](a(x = {{{1,2},{3,4}},{{5,6},{7,8}}}));
+    
+    Real z[2] = { i * time for i in b[1].a[1].x[1]:b[2].a[2].y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval5",
+			description="Test that evaluation before scalarization of record variable without binding expression works",
+			flatModel="
+fclass RecordTests.RecordEval5
+ parameter Real b[1].a[1].x[1] = 1 /* 1 */;
+ parameter Real b[1].a[1].x[2] = 2 /* 2 */;
+ parameter Real b[1].a[1].y = 2 /* 2 */;
+ parameter Real b[1].a[2].x[1] = 3 /* 3 */;
+ parameter Real b[1].a[2].x[2] = 4 /* 4 */;
+ parameter Real b[1].a[2].y = 2 /* 2 */;
+ parameter Real b[2].a[1].x[1] = 5 /* 5 */;
+ parameter Real b[2].a[1].x[2] = 6 /* 6 */;
+ parameter Real b[2].a[1].y = 2 /* 2 */;
+ parameter Real b[2].a[2].x[1] = 7 /* 7 */;
+ parameter Real b[2].a[2].x[2] = 8 /* 8 */;
+ parameter Real b[2].a[2].y = 2 /* 2 */;
+ Real z[1];
+ Real z[2];
+equation
+ z[1] = 1 * time;
+ z[2] = 2 * time;
+
+public
+ record RecordTests.RecordEval5.A
+  Real x[2];
+  Real y;
+ end RecordTests.RecordEval5.A;
+
+ record RecordTests.RecordEval5.B
+  RecordTests.RecordEval5.A a[2];
+ end RecordTests.RecordEval5.B;
+
+end RecordTests.RecordEval5;
+")})));
+end RecordEval5;
+
+
 end RecordTests;

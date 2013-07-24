@@ -84,7 +84,7 @@ aspect ConstantEvaluation {
 	 * \brief CValue represents a constant value and serves as the super class 
 	 * for constant value classes of the primitive types.
 	 */
-	public abstract class CValue implements Iterable<CValue> {
+	public abstract class CValue implements Iterable<CValue>, Cloneable {
 		
 		/**
 		 * \brief An unknown value.
@@ -101,6 +101,17 @@ aspect ConstantEvaluation {
 		 * \brief Default constructor.
 		 */
 	    protected CValue() {
+	    }
+	    
+	    /**
+	     * Copy this constant value.
+	     */
+	    public CValue clone() {
+	    	try {
+				return (CValue) super.clone();
+			} catch (CloneNotSupportedException e) {
+				return null;
+			}
 	    }
 	    
 	    /**
@@ -235,7 +246,20 @@ aspect ConstantEvaluation {
          */
         public CValueArray array() {
         	throw new ConstantEvaluationException(this, "use this as array: ");
-        }      
+        }
+        
+        /**
+         * Expand this CValue so that it represents an array of the given size, 
+         * duplicating values as needed.
+         */
+        public CValue expandArray(Size s) {
+        	if (s == Size.SCALAR)
+        		return this;
+        	CValueArray res = new CValueArray(s);
+        	while (!res.isFilled())
+        		res.addCell(this);
+        	return res;
+        }
  	   
         /**
          * \brief Check if this is a record.
@@ -602,6 +626,14 @@ aspect ConstantEvaluation {
 			for (int i = 0; i < values.length; i++)
 				values[i] = UNKNOWN;
     	}
+	    
+	    public CValue clone() {
+	    	CValueArray res = (CValueArray) super.clone();
+	    	res.values = new CValue[values.length];
+	    	for (int i = 0; i < values.length; i++) 
+				res.values[i] = values[i].clone();
+	    	return res;
+	    }
     	
     	public boolean isArray() {
     		return true;
@@ -616,6 +648,23 @@ aspect ConstantEvaluation {
         	return this;
         }      
         
+        /**
+         * Expand this CValue so that it represents an array of the given size, 
+         * duplicating values as needed.
+         */
+        public CValue expandArray(Size s) {
+        	if (s.ndims() == indices.ndims())
+        		return this;
+        	if (s.ndims() < indices.ndims())
+        		throw new ConstantEvaluationException(this, "contract array to size " + s + ": "); 
+        	
+        	CValueArray res = new CValueArray(s);
+        	while (!res.isFilled())
+        		for (CValue v : values)
+        			res.addCell(v);
+        	return res;
+        }
+ 	   
         /**
          * \brief Set the value of a specific cell of an array constant value.
          */
@@ -648,6 +697,20 @@ aspect ConstantEvaluation {
         	if (!indices.isValid(i))
         		return UNKNOWN;
         	return values[i.internal(indices)];
+        }
+        
+        /**
+         * Get the part of this array corresponding to the given index.
+         */
+        public CValue getPart(Index i) {
+        	if (i == Index.NULL)
+        		return this;
+        	if (indices.ndims() == i.ndims())
+        		return getCell(i);
+        	
+        	CValueArray res = new CValueArray(size().contract(i.ndims(), 0));
+        	System.arraycopy(values, indices.internal(i), res.values, 0, res.values.length);
+        	return res;
         }
         
         /**
@@ -785,7 +848,7 @@ aspect ConstantEvaluation {
     public class CValueRecord extends CValue {
     	
     	protected String name;
-    	protected String[] members;
+    	protected Map<String,Integer> members;
     	protected CValue[] values;
     	
     	/**
@@ -796,12 +859,20 @@ aspect ConstantEvaluation {
     	public CValueRecord(FRecordType type) {
     		name = type.getName();
     		int n = type.getNumComponent();
-    		members = new String[n];
+    		members = new HashMap<String,Integer>(n * 4 / 3 + 1);
     		values = new CValue[n];
     		int i = 0;
     		for (FRecordComponentType mtype : type.getComponents())
-    			members[i++] = mtype.getName();
+    			members.put(mtype.getName(), i++);
     	}
+	    
+	    public CValueRecord clone() {
+	    	CValueRecord res = (CValueRecord) super.clone();
+	    	res.values = new CValue[values.length];
+	    	for (int i = 0; i < values.length; i++) 
+				res.values[i] = values[i].clone();
+	    	return res;
+	    }
   	   
         /**
          * \brief Check if this is a record.
@@ -823,11 +894,18 @@ aspect ConstantEvaluation {
          * \brief Get the internal index for a given member.
          */
         protected int index(String name) {
-        	int i = 0;
-        	for (; i < members.length && !members[i].equals(name); i++);
-        	if (i >= members.length)
+        	Integer i = members.get(name);
+         	if (i == null)
         		throw new ConstantEvaluationException(this, "find record member '" + name + "'");
-        	return i;
+        	return i.intValue();
+        }
+        
+        /**
+         * Get a map from member names to an index that can be used in the index 
+         * versions of methods.
+         */
+        public Map<String,Integer> members() {
+        	return members;
         }
         
         /**
@@ -851,8 +929,7 @@ aspect ConstantEvaluation {
          * \brief Get the value of a specific member of a record constant value.
          */
         public CValue getMember(String name) {
-        	CValue res = values[index(name)];
-        	return res == null ? UNKNOWN : res;
+        	return getMember(index(name));
         }
         
         /**
@@ -1579,9 +1656,9 @@ aspect ConstantEvaluation {
    *  @return The constant value.
    */
   syn CValue FAbstractVariable.ceval() = CValue.UNKNOWN;
-  eq FFunctionVariable.ceval()   = evaluationValue();
+  eq FFunctionVariable.ceval()         = evaluationValue();
   eq FVariable.ceval() {
-	  if (!isConstant() && !isParameter()) {
+	  if (!isConstant() && !isParameter() && !inRecord()) {
 		  return CValue.UNKNOWN;
 	  } else {
 		  CValue val;
@@ -1592,7 +1669,7 @@ aspect ConstantEvaluation {
 		  else if (hasBindingExp())
 			  val = getBindingExp().ceval();
 		  else
-			  val = startAttributeCValue();
+			  val = defaultCValue();
 		  if (isReal())
 			  val = val.convertReal();
 		  return val;
@@ -1608,23 +1685,27 @@ aspect ConstantEvaluation {
 	 * FVariable is not a constant or a parameter, or if it has no binding
 	 * expressions, then a CValueUnknown object is returned.
 	 * 
+	 * This version only evaluates a specific cell in an array, and returns 
+	 * the value for that specific cell.
+	 * 
 	 *  @return The constant value.
 	 */
 	syn CValue FAbstractVariable.ceval(Index i) = CValue.UNKNOWN;
-	eq FFunctionVariable.ceval(Index i)   = evaluationValue().array().getCell(i);
+	eq FFunctionVariable.ceval(Index i)         = evaluationValue().array().getCell(i);
 	eq FVariable.ceval(Index i) {
-		if (!isConstant() && !isParameter()) {
+		if (!isConstant() && !isParameter() && !inRecord()) {
 			return CValue.UNKNOWN;
 		} else {
 			CValue val;
 			if (isForIndex())
-				val = evaluationValue().array().getCell(i);
+				val = evaluationValue();
 			else if (hasParameterEquation())
 				val = parameterEquation().cevalParameter(this, i);
 			else if (hasBindingExp())
 				val = getBindingExp().ceval(i);
 			else
-				val = startAttributeCValue().array().getCell(i);
+				val = startAttributeCValue();
+			val = val.array().getCell(i);
 			if (isReal())
 				val = val.convertReal();
 			return val;
@@ -1685,6 +1766,70 @@ aspect ConstantEvaluation {
 			  return res;
 	  }
 	  return null;
+  }
+  
+  /**
+   * Constant eval for variables without any binding expression, or binding equation.
+   * Uses the start value for non-records.
+   */
+  syn CValue FVariable.defaultCValue() = startAttributeCValue();
+  eq FRecordVariable.defaultCValue() {
+	  if (isArray()) {
+		  CValueArray res = new CValueArray(size());
+		  for (Index i : indices())
+			  res.setCell(i, defaultCValueCell(i));
+		  return res;
+	  } else {
+		  return defaultCValueCell(Index.NULL);
+	  }
+  }
+  
+  /**
+   * Constant eval for variables without any binding expression, or binding equation.
+   * Uses the start value for non-records.
+   */
+  syn CValue FVariable.defaultCValueCell(Index i) = startAttributeCValue();
+  eq FRecordVariable.defaultCValueCell(Index i) {
+	  CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
+	  FRecordDecl rec = myFRecordDecl();
+	  for (int j = 0, n = rec.getNumFVariable(); j < n; j++) 
+		  res.setMember(j, rec.getFVariable(j).ceval());
+	  for (FAttribute a : getFAttributes())
+		  a.applyToCValue(res, i);
+	  return res;
+  }
+  
+  /**
+   * Apply any binding expressions for record members to a record CValue.
+   */
+  public void FAttribute.applyToCValue(CValueRecord rec, Index i) {
+	  if (rec.members().containsKey(name())) {
+		  int j = rec.members().get(name());
+		  if (hasValue()) {
+			  CValue val = getValue().ceval();
+			  if (i != Index.NULL && rec.getMember(j).size().ndims() + i.ndims() == val.size().ndims())
+				  val = val.array().getPart(i);
+			  rec.setMember(j, val);
+		  } else {
+			  rec.getMember(j).applyAttributes(getFAttributes(), i);
+		  }
+	  }
+  }
+  
+  /**
+   * Apply attributes in attrs to any records in this value.
+   */
+  public void CValue.applyAttributes(List<FAttribute> attrs, Index i) {}
+  
+  public void CValueArray.applyAttributes(List<FAttribute> attrs, Index i) {
+	  if (values.length > 0 && values[0].isRecord()) 
+		  for (Index j : indices) 
+			  getCell(j).applyAttributes(attrs, i.expand(j));
+  }
+  
+  public void CValueRecord.applyAttributes(List<FAttribute> attrs, Index i) {
+	  for (FAttribute a : attrs)
+		  a.applyToCValue(this, i);
   }
   
   

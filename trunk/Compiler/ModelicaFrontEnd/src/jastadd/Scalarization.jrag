@@ -235,7 +235,7 @@ aspect Scalarization {
 		// (except in reduction-expressions, and they are handled elsewhere)
 		if (isRecord()) {
 			FExp bexp = hasBindingExp() ? getBindingExp() : null;
-			scalarRecordFVariables(vars, new FQNameEmpty(), null, bexp);
+			scalarRecordFVariables(vars, new FQNameEmpty(), null, bexp, Index.NULL, false, Collections.<BindingExpSource>emptyList());
 		} else if (isArray()) {
 			for (Index i : indices()) 
 				vars.addChild(createScalarFVariable(i));
@@ -355,41 +355,56 @@ aspect Scalarization {
 	/**
 	 * \brief Generate scalar FVariables for this record or record component.
 	 * 
-	 * @param vars    the list of FVariables to add the variables to
-	 * @param prefix  add this as a prefix to the name
-	 * @param last    an FVariable containing the attributes, variability, 
-	 *                etc inherited from the surrounding record
-	 * @param bexp    binding expression inherited from surrounding record
+	 * @param vars     the list of FVariables to add the variables to
+	 * @param prefix   add this as a prefix to the name
+	 * @param last     an FVariable containing the attributes, variability, 
+	 *                 etc inherited from the surrounding record
+	 * @param bexp     binding expression inherited from surrounding record
+	 * @param bi       index of part of binding expression to use
+	 * @param inParam  this variable is within a constant or parameter record
+	 * @param attrs    attributes to search for modifications, before searching in this variable
 	 */
 	public void FVariable.scalarRecordFVariables(
-			List<FVariable> vars, FQName prefix, FVariable last, FExp bexp) {
-		if (bexp == null && hasBindingExp() && (isConstant() || isIndependentParameter()))
+			List<FVariable> vars, FQName prefix, FVariable last, FExp bexp, Index bi, 
+			boolean inParam, java.util.List<BindingExpSource> attrs) {
+		inParam = (inParam || isConstant() || isParameter()) && !isDependentParameter();
+		if (bexp == null && hasBindingExp() && inParam && getBindingExp().isConstantExp()) {
 			bexp = getBindingExp();
+			bi = Index.NULL;
+		}
 		if (isArray()) {
 			FExp nbexp = null;
 			for (Index i : scalarizationIndices(last)) {
-				if (bexp != null)
-					nbexp = bexp.getArray().get(i);
+				if (bexp != null) {
+					Index nbi = bi.expand(i);
+					nbi = nbi.subIndex(nbi.ndims() - bexp.ndims());
+					nbexp = bexp.getArray().get(nbi);
+				}
 				FQName name = prefix.copyAndAppend(getFQName(), i.createFArraySubscripts());
-				scalarRecordCellFVariables(vars, name, last, nbexp, i);
+				scalarRecordCellFVariables(vars, name, last, nbexp, i, inParam, attrs);
 			}
 		} else {
 			FQName name = prefix.copyAndAppend(getFQName());
-			scalarRecordCellFVariables(vars, name, last, bexp, Index.NULL);
+			if (bexp != null && bexp.isArray())
+				bexp = bexp.getArray().get(bi);
+			scalarRecordCellFVariables(vars, name, last, bexp, Index.NULL, inParam, attrs);
 		}
 	}
 	
 	/**
 	 * \brief Generate scalar FVariables for a single array cell of this record or record component.
 	 * 
-	 * @param vars  the list of FVariables to add the variables to
-	 * @param name  the name of the new variable
-	 * @param last  an FVariable containing the attributes, variability, etc inherited from surrounding record
-	 * @param bexp  binding expression inherited from surrounding record or array
-	 * @param i     the index of this scalar variable in an array, or Index.NULL for scalar components
+	 * @param vars     the list of FVariables to add the variables to
+	 * @param name     the name of the new variable
+	 * @param last     an FVariable containing the attributes, variability, etc inherited from surrounding record
+	 * @param bexp     binding expression inherited from surrounding record or array
+	 * @param i        the index of this scalar variable in an array, or Index.NULL for scalar components
+	 * @param inParam  this variable is within a constant or parameter record
+	 * @param attrs    attributes to search for modifications, before searching in this variable
 	 */
 	public void FVariable.scalarRecordCellFVariables(
-			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i) {
+			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i, 
+			boolean inParam, java.util.List<BindingExpSource> attrs) {
 		FVariable fv = copyForName(name);
 		Map<String,FExp> im = Collections.emptyMap();
 		if (bexp != null)
@@ -402,19 +417,74 @@ aspect Scalarization {
 	}
 	
 	public void FRecordVariable.scalarRecordCellFVariables(
-			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i) {
+			List<FVariable> vars, FQName name, FVariable last, FExp bexp, Index i, 
+			boolean inParam, java.util.List<BindingExpSource> attrs) {
 		FVariable tmp = (FVariable) fullCopy();
 		myFClass().addDummyVariable(tmp);
 		tmp.inheritFrom(last);
-		FExp nbexp = null;
 		Map<String, FExp> emptyIndexMap = Collections.emptyMap();
 		for (FVariable comp : myFRecordDecl().getFVariables()) {
-			if (bexp != null)
+			java.util.List<BindingExpSource> nAttrs = Collections.emptyList();
+			FExp nbexp = null;
+			Index nbi = Index.NULL;
+			if (bexp != null) {
 				nbexp = bexp.scalarRecordFExp(emptyIndexMap, new FQNameString(comp.name()));
-			else
-				nbexp = attributeExp(comp.name());
-			comp.scalarRecordFVariables(vars, name, tmp, nbexp);
+			} else {
+				ArrayList<BindingExpSource> foundAttr = new ArrayList<BindingExpSource>();
+				String cName = comp.name();
+				for (BindingExpSource bes : attrs)
+					bes.addIfMatching(foundAttr, cName, i);
+				BindingExpSource.addIfMatching(foundAttr, this, cName, i);
+				for (int j = 0; nbexp == null && j < foundAttr.size(); j++) {
+					nbexp = foundAttr.get(j).getFExp();
+					if (nbexp != null)
+						nbi = foundAttr.get(j).getI();
+				}
+				if (nbexp == null)
+					nAttrs = foundAttr;
+			}
+			comp.scalarRecordFVariables(vars, name, tmp, nbexp, nbi, inParam, nAttrs);
 		}
+	}
+	
+	/**
+	 * Used to hold information on available candidates for binding expression when scalarizing 
+	 * records.
+	 */
+	public class BindingExpSource {
+		
+		private FAttribute attr;
+		private Index index;
+		
+		private BindingExpSource(FAttribute a, Index i) {
+			attr = a;
+			index = i;
+		}
+		
+		private static void addIfExists(
+				java.util.List<BindingExpSource> attrs, FAttribute a, Index i) {
+			if (a != null)
+				attrs.add(new BindingExpSource(a, i));
+		}
+		
+		public static void addIfMatching(
+				java.util.List<BindingExpSource> attrs, FVariable fv, String name, Index i) {
+			addIfExists(attrs, fv.findAttribute(name), i);
+		}
+		
+		public void addIfMatching(
+				java.util.List<BindingExpSource> attrs, String name, Index i) {
+			addIfExists(attrs, attr.findAttribute(name), index.expand(i));
+		}
+		
+		public FExp getFExp() {
+			return attr.hasValue() ? attr.getValue() : null;
+		}
+		
+		public Index getI() {
+			return index;
+		}
+		
 	}
 	
 	/**
@@ -549,13 +619,26 @@ aspect Scalarization {
 			la.add(a.scalarize(i));            // TODO: really send i here?
 		FAttribute res = new FAttribute(getType().fullCopy(), getName().fullCopy(), 
 				new Opt(), getAttributeSet(), getLevel(), new Opt(), getFFinalOpt().fullCopy(), la);
-		if (hasValue()) {
-			FExp v = getValue();
-			if (v.isArray())
-				v = v.getArray().get(i);
-			res.setValue(v.scalarize(Collections.<String,FExp>emptyMap()));
-		}
+		if (hasValue()) 
+			res.setValue(scalarizeValue(i));
 		return res;
+	}
+	
+	/**
+	 * Scalarize the value of this attribute, picking out the specific element from an array 
+	 * expression.
+	 * 
+	 * Returns null if attribute has no value.
+	 */
+	public FExp FAttribute.scalarizeValue(Index i) {
+		if (!hasValue()) 
+			return null;
+		FExp v = getValue();
+		if (v.isArray()) {
+			i = i.subIndex(i.ndims() - v.ndims());
+			v = v.getArray().get(i);
+		}
+		return v.scalarize(Collections.<String,FExp>emptyMap());
 	}
 	
 	/**
