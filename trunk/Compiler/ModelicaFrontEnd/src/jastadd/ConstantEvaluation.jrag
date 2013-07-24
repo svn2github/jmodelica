@@ -17,6 +17,7 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+import org.jmodelica.util.BinaryOperation;
 
 /**
  * \brief Provides methods to evaluate flat constant 
@@ -278,14 +279,33 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Reduce an array of constant boolean values to a single boolean.
+         * Reduce an array to a single value.
+         * 
+         * For a scalar, returns itself. For an empty array, returns zero.
+         * 
+         * @param op    the operation to use to combine two values
+         * @param zero  the start value
+         */
+        public CValue reduce(BinaryOperation<CValue> op, CValue zero) {
+        	return this;
+        }
+        
+        /**
+         * Reduce an array of constant boolean values to a single boolean that is the logical 
+         * or of the array.
          * 
          * Used for the test expression of while statements. For scalar constant values, 
          * just returns the boolean value.
          */
-        public boolean reduceBoolean() {
-        	return booleanValue();
+        public boolean reduceBooleanOr() {
+        	return reduce(OR_OPERATION, CValueBoolean.FALSE).booleanValue();
         }
+        
+        private static final BinaryOperation<CValue> OR_OPERATION = new BinaryOperation<CValue>() {
+        	public CValue op(CValue x, CValue y) {
+        		return (x.booleanValue() || y.booleanValue()) ? CValueBoolean.TRUE : CValueBoolean.FALSE;
+        	}
+        };
 		
 		/**
 		 * \brief Returns the array size of this constant value.
@@ -714,15 +734,17 @@ aspect ConstantEvaluation {
         }
         
         /**
-         * \brief Reduce an array of constant boolean values to a single boolean.
+         * Reduce an array to a single value.
          * 
-         * Used for the test expression of while statements.
+         * For a scalar, returns itself. For an empty array, returns zero.
+         * 
+         * @param op    the operation to use to combine two values
+         * @param zero  the start value
          */
-        public boolean reduceBoolean() {
-        	boolean res = false;
+        public CValue reduce(BinaryOperation<CValue> op, CValue zero) {
         	for (CValue val : values)
-        		res = res || val.booleanValue();
-        	return res;
+        		zero = op.op(zero, val);
+        	return zero;
         }
 		
 		/**
@@ -2516,7 +2538,7 @@ aspect ConstantEvaluation {
 
   public int FIfWhenClause.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  CValue test = getTest().ceval();
-	  if (test.reduceBoolean()) {
+	  if (test.reduceBooleanOr()) {
 		  int res = getFStatements().evaluateList(values);
 		  return res | FStatement.EVAL_IFHIT;
 	  }

@@ -41,9 +41,11 @@ aspect OptimicaFlatAPI {
 	syn CValue  FVariable.freeAttributeCValue() = attributeCValueBoolean(FAttribute.FREE, false);
 		
 	/**
-	 * \brief Get the free attribute value.
+	 * Get the free attribute value.
+	 * 
+	 * For an array, this is true if it is true for any cell in the array.
 	 */
-	syn boolean FVariable.freeAttribute()       = freeAttributeCValue().booleanValue();	
+	syn boolean FVariable.freeAttribute()       = freeAttributeCValue().reduceBooleanOr();	
 
 	// === initialGuess ===
 	/**
