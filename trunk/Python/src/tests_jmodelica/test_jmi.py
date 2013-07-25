@@ -1371,7 +1371,7 @@ class TestDependentParameterEvaluation:
     def test_dep_par_1(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar1"
-        z = [ 2.,  2.,  1.,  1.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1., 0., 1.,  0.,  0.]
+        z = [ 1.,  1.,  2.,  2.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1., 0., 1.,  0.,  0.]
         self.run(fpath,cpath,z)
 
     @testattr(stddist = True)
