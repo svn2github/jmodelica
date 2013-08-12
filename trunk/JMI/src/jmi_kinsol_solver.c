@@ -830,15 +830,17 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
 
-    jmi_log_node_t topnode;
-    if(block->jmi->options.log_level >= 5) {
+    {
+        jmi_log_node_t topnode;
+        if(block->jmi->options.log_level >= 5) {
             topnode = jmi_log_enter_(block->jmi->log,logInfo,"StepDirection");
             jmi_log_reals(block->jmi->log, topnode, logInfo, "unbounded_step", xd, block->n);
-    }
-    jmi_kinsol_limit_step(kin_mem, x, b);
-    if(block->jmi->options.log_level >= 5) {
-        jmi_log_reals(block->jmi->log, topnode, logInfo, "bounded_step", xd, block->n);
-        jmi_log_leave(block->jmi->log, topnode);
+        }
+        jmi_kinsol_limit_step(kin_mem, x, b);
+        if(block->jmi->options.log_level >= 5) {
+            jmi_log_reals(block->jmi->log, topnode, logInfo, "bounded_step", xd, block->n);
+            jmi_log_leave(block->jmi->log, topnode);
+        }
     }
     return 0;
 }
