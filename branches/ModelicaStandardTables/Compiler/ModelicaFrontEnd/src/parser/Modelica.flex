@@ -194,7 +194,13 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
   										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
-
+  "operator" {WhiteSpace} "record"  { addWhiteSpaces(yytext());
+  										addLineBreaks(yytext());
+                                        return newSymbol(Terminals.RECORD); }
+  "operator" {WhiteSpace} "function"  { addWhiteSpaces(yytext());
+  										addLineBreaks(yytext()); 
+                                        return newSymbol(Terminals.FUNCTION); }
+                                        
   "end" {WhiteSpace} "for"    { addWhiteSpaces(yytext());
 	  							addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_FOR); }
