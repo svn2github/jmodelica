@@ -541,7 +541,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     
     /* minimal/maximal allowed step multiplier */
     max_step_ratio = 1.0;
-    min_step_ratio = 0.01; /* solver->kin_stol / xnorm; */
+    min_step_ratio = 2*solver->kin_stol;
 
     /* Without logging */
     for(i = 0; i < solver->num_bounds; ++i) {
@@ -553,8 +553,10 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
         realtype step_ratio_i;
         if(    ((kind == 1)&& (pbi >= pi))
-            || ((kind == -1)&& (pbi <= pi)))
+            || ((kind == -1)&& (pbi <= pi))) {
+            solver->bound_limiting[i] = 0 ;
             continue; /* will not cross the bound */
+        }
 
         solver->bound_limiting[i] = 1 ;
         limitingBounds = TRUE ;
@@ -563,8 +565,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             xxd[index] = 0;
-            solver->active_bounds[index] = (kind == 1)? pbi:-pbi ; /* distance to the bound */
-
+            solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; /* distance to the bound */
         }
         else
             max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
@@ -580,7 +581,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                                                          kind==1 ? "max" : "min");            
             for (i=0; i < solver->num_bounds; i++) {
                 int index = solver->bound_vindex[i]; /* variable index */
-                if (solver->bound_limiting[index] != 0
+                if (solver->bound_limiting[i] != 0
                     && solver->bound_kind[i] == kind) {
                     jmi_log_vref_(log, 'r', block->value_references[index]);
                 }
@@ -598,7 +599,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                                                          kind==1 ? "max" : "min");            
             for (i=0; i < solver->num_bounds; i++) {
                 int index = solver->bound_vindex[i]; /* variable index */
-                if (solver->active_bounds[index] != 0
+                
+                if (solver->bound_limiting[i] 
+                    && solver->active_bounds[index] != 0
                     && solver->bound_kind[i] == kind) {
                     jmi_log_vref_(log, 'r', block->value_references[index]);
                 }
@@ -732,6 +735,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     jmi_kinsol_solver_t* solver = block->solver;
     realtype*  bd = N_VGetArrayPointer(b);
     realtype*  xd = N_VGetArrayPointer(x);
+    
     int N = block->n;
     char trans = 'N';
     int ret, i;
@@ -767,9 +771,15 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     }
     if(solver->use_steepest_descent_flag) {
         realtype **jac = solver->J->cols;
+        realtype*  s = N_VGetArrayPointer(solver->kin_f_scale);
         int N = block->n;
         int j;
         
+#if 1
+        /*  Step = Transpose(J) W*W F, 
+            where W is the diagonal matix of residual scaling factors. 
+            W*W F is effectively calculated above in "x" as a part of kin_sfdotJp calculation.
+            Step is saved in "b" and then copied into "x" */
         for (i=0;i<N;i++) {
             bd[i] = 0;
             for (j=0;j<N;j++){
@@ -777,6 +787,18 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             }
         }
         N_VScale(ONE, b, x);
+#else
+        /* Test steepest descent without scaling */
+        for (i=0;i<N;i++) {
+            xd[i] = 0;
+            for (j=0;j<N;j++){
+/*                printf("x[%d] += jac[%d][%d] * b[%d], %g += %g * %g\n",
+                       i,i,j,j,xd[i], jac[i][j], bd[j]);*/
+                xd[i] += jac[i][j] * bd[j];
+            }
+        }
+#endif
+        ret = 0;
     }
     else if(solver->J_is_singular_flag) {
         /* solve the regularized problem */
@@ -808,9 +830,17 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
 
+    jmi_log_node_t topnode;
+    if(block->jmi->options.log_level >= 5) {
+            topnode = jmi_log_enter_(block->jmi->log,logInfo,"StepDirection");
+            jmi_log_reals(block->jmi->log, topnode, logInfo, "unbounded_step", xd, block->n);
+    }
     jmi_kinsol_limit_step(kin_mem, x, b);
-    
-    return 0;        
+    if(block->jmi->options.log_level >= 5) {
+        jmi_log_reals(block->jmi->log, topnode, logInfo, "bounded_step", xd, block->n);
+        jmi_log_leave(block->jmi->log, topnode);
+    }
+    return 0;
 }
 
 /* 
@@ -1155,6 +1185,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     }
     
     if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
+        KINSetNoResMon(solver->kin_mem,0);        
         solver->use_steepest_descent_flag = 1;
     }
             
@@ -1162,6 +1193,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
+        KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;
     }
     if(flag != KIN_SUCCESS) {
@@ -1206,10 +1238,12 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
         (flag != KIN_SUCCESS)) {
         /* try to solve with steepest descent instead */
         solver->use_steepest_descent_flag = 1;
+        KINSetNoResMon(solver->kin_mem,0);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
         if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
         }
+        KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;
     }
     
