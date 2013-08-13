@@ -40,7 +40,7 @@ aspect FlatVariability {
 	
 	
 	/**
-	 * \brief Test if variablilty is at most the same as <code>other</code>.
+	 * \brief Test if variability is at most the same as <code>other</code>.
 	 * 
 	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
 	 */

@@ -879,12 +879,12 @@ model SumExp5
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
-			name="SumExp5",
+			name="Sum_SumExp5",
 			description="sum() expressions: scalar input",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1489, column 15:
+Semantic error at line 878, column 15:
   Calling function sum(): types of positional argument 1 and input A are not compatible
 ")})));
 end SumExp5;
@@ -899,6 +899,23 @@ equation
 	for j in 1:N loop
 		wbar[j] = sum(dMdt[1:j+1]) + dMdt[j] / 2;
 	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Sum_SumExp6",
+			description="",
+			flatModel="
+fclass ArrayBuiltins.Sum.SumExp6
+ parameter Integer N = 3 /* 3 */;
+ constant Real wbar[1] = 3.5;
+ constant Real wbar[2] = 7.0;
+ constant Real wbar[3] = 11.5;
+ constant Real dMdt[1] = 1;
+ constant Real dMdt[2] = 2;
+ constant Real dMdt[3] = 3;
+ constant Real dMdt[4] = 4;
+end ArrayBuiltins.Sum.SumExp6;
+")})));
 end SumExp6;
 
 
@@ -919,17 +936,215 @@ model SumExp8
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="SumExp8",
+			name="Sum_SumExp8",
 			description="sum() expressions: empty array",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp8
  parameter Real x = 0 /* 0 */;
-
 end ArrayBuiltins.Sum.SumExp8;
 ")})));
 end SumExp8;
 
 end Sum;
+
+
+
+package Product
+
+model ProductExp1
+ constant Real x = product({1,2,3,4});
+ Real y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp1",
+			description="product() expressions: basic test",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp1
+ constant Real x = 1 * 2 * 3 * 4;
+ constant Real y = 24.0;
+end ArrayBuiltins.Product.ProductExp1;
+")})));
+end ProductExp1;
+
+model ProductExp2
+ constant Real x = product(i * j for i in 1:3, j in 1:3);
+ Real y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp2",
+			description="product() expressions: reduction-expression",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp2
+ constant Real x = 1 * 1 * (2 * 1) * (3 * 1) * (1 * 2) * (2 * 2) * (3 * 2) * (1 * 3) * (2 * 3) * (3 * 3);
+ constant Real y = 46656.0;
+end ArrayBuiltins.Product.ProductExp2;
+")})));
+end ProductExp2;
+
+model ProductExp3
+ constant Real x[2] = product({i, j} for i in 1:3, j in 2:4);
+ Real y[2] = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp3",
+			description="product() expressions: reduction-expression over array",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp3
+ constant Real x[1] = 1 * 2 * 3 * 1 * 2 * 3 * 1 * 2 * 3;
+ constant Real x[2] = 2 * 2 * 2 * 3 * 3 * 3 * 4 * 4 * 4;
+ constant Real y[1] = 216.0;
+ constant Real y[2] = 13824.0;
+end ArrayBuiltins.Product.ProductExp3;
+")})));
+end ProductExp3;
+
+model ProductExp4
+ constant Real x = product( { {i, j} for i in 1:3, j in 2:4 } );
+ Real y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp4",
+			description="product() expressions: over array constructor with iterators",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp4
+ constant Real x = 1 * 2 * 2 * 2 * 3 * 2 * 1 * 3 * 2 * 3 * 3 * 3 * 1 * 4 * 2 * 4 * 3 * 4;
+ constant Real y = 2985984.0;
+end ArrayBuiltins.Product.ProductExp4;
+")})));
+end ProductExp4;
+
+model ProductExp5
+ Real x = product();
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Product_ProductExp5",
+			description="product() expressions: no input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1005, column 11:
+  Calling function product(): missing argument for required input A
+")})));
+end ProductExp5;
+
+model ProductExp6
+ Real x = product(42);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Product_ProductExp6",
+			description="product() expressions: scalar input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1020, column 19:
+  Calling function product(): types of positional argument 1 and input A are not compatible
+")})));
+end ProductExp6;
+
+model ProductExp7
+ parameter Real x = product(fill(2, 0));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp7",
+			description="product() expressions: empty array",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp7
+ parameter Real x = 1 /* 0 */;
+end ArrayBuiltins.Product.ProductExp7;
+")})));
+end ProductExp7;
+
+model ProductExp8
+     function f
+        input Real[:,:] x1;
+        output Real y;
+    algorithm
+        y := product(x1);
+    end f;
+
+ parameter Real x = f({{1,2},{3,4}});
+    
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp8",
+			description="product() expressions: in a function",
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp8
+ parameter Real x = 24.0 /* 24.0 */;
+end ArrayBuiltins.Product.ProductExp8;
+")})));
+end ProductExp8;
+
+model ProductExp9
+ function f
+        input Real[:,:] x1;
+        input Real[:,:] x2;
+        output Real y;
+    algorithm
+        y := product(x1 + x2);
+    end f;
+ Real[2,2] v1 = {{1,2},{3,4}};
+ Real[2,2] v2 = {{5,6},{7,8}};
+ parameter Real x = f(v1,v2);
+ 
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Product_ProductExp9",
+			description="product() expressions: in a function",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Product.ProductExp9
+ Real v1[1,1];
+ Real v1[1,2];
+ Real v1[2,1];
+ Real v1[2,2];
+ Real v2[1,1];
+ Real v2[1,2];
+ Real v2[2,1];
+ Real v2[2,2];
+ parameter Real x;
+parameter equation
+ x = ArrayBuiltins.Product.ProductExp9.f({{v1[1,1], v1[1,2]}, {v1[2,1], v1[2,2]}}, {{v2[1,1], v2[1,2]}, {v2[2,1], v2[2,2]}});
+equation
+ v1[1,1] = 1;
+ v1[1,2] = 2;
+ v1[2,1] = 3;
+ v1[2,2] = 4;
+ v2[1,1] = 5;
+ v2[1,2] = 6;
+ v2[2,1] = 7;
+ v2[2,2] = 8;
+
+public
+ function ArrayBuiltins.Product.ProductExp9.f
+  input Real[:, :] x1;
+  input Real[:, :] x2;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 1;
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:size(x1, 2) loop
+    temp_1 := temp_1 * (x1[i1,i2] + x2[i1,i2]);
+   end for;
+  end for;
+  y := temp_1;
+  return;
+ end ArrayBuiltins.Product.ProductExp9.f;
+
+end ArrayBuiltins.Product.ProductExp9;
+")})));
+end ProductExp9;
+
+end Product;
 
 
 

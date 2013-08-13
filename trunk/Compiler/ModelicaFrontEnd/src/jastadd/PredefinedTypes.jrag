@@ -365,7 +365,10 @@ aspect PredefinedTypes {
     		+ "  input Real A;\n"      // Type not used
     		+ "  output Real o;\n"     // Type not used
     		+ "end sum;\n"
-    		+ "function product end product;\n"
+    		+ "function product\n"
+    		+ "  input Real A;\n"      // Type not used
+    		+ "  output Real o;\n"     // Type not used
+    		+ "end product;\n"
     		+ "function symmetric end symmetric;\n"
     		+ "function skew\n"
     		+ "  input Real x[3];\n"

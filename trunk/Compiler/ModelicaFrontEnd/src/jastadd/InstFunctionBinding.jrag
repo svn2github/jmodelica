@@ -274,6 +274,7 @@ aspect InstFunctionBinding {
 				map.put("skew",         new BuiltInCreator(false, new FSkew(),           1));
 				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));
 				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
+				map.put("product",      new BuiltInCreator(false, new FProductExp(),     1));
 				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
 				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));

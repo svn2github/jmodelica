@@ -1474,9 +1474,19 @@ FMinExp : FMinMaxExp;
 FMaxExp : FMinMaxExp;
 
 /**
+ * \brief Abstract base class for reduction expressions (sum(), product())
+ */
+abstract FReductionExp : FUnaryBuiltIn;
+
+/**
  * \brief Sum built-in function.
  */
-FSumExp : FUnaryBuiltIn;
+FSumExp : FReductionExp;
+
+/**
+ * \brief Product built-in function.
+ */
+FProductExp : FReductionExp;
 
 /**
  * \brief Common base class for FInStream & FActualStream

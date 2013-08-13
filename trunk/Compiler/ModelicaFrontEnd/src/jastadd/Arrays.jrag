@@ -198,7 +198,7 @@ aspect Arrays {
 		return ndims;
 	}
 	eq FCatExp.ndims()         = getFExp(0).ndims();
-	eq FSumExp.ndims()         = getFExp().isIterExp() ? iterExp().ndims() : 0;
+	eq FReductionExp.ndims()   = getFExp().isIterExp() ? iterExp().ndims() : 0;
 	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
 	eq FIterExp.ndims() {
 		int exp = getFExp().ndims();
@@ -809,7 +809,7 @@ aspect Arrays {
 		}
 	}
 	
-	eq FSumExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
+	eq FReductionExp.size() = getFExp().isIterExp() ? iterExp().size() : Size.SCALAR;
 	
 	eq FIterExp.size() {
 		if (ndims() <= 0)
@@ -1611,16 +1611,16 @@ aspect Arrays {
 		return arr;
 	}
 	
-	eq FSumExp.getArray() {
+	eq FReductionExp.getArray() {
 		if (!isArray())
 			return super.getArray();
 		
 		FIterExp exp = (FIterExp) getFExp();
 		Array arr = new Array(indices());
 		for (Index i : arr.indices())
-			arr.set(i, new FSumExp(exp.extract(i)));
+			arr.set(i, createNode(exp.extract(i)));
 		return arr;
-	}
+	}	
 	
 	public FExp FIterExp.extract(Index i) {
 		FExp exp = getFExp().getArray().get(i).fullCopy();

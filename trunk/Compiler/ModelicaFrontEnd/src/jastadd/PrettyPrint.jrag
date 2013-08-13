@@ -1643,6 +1643,12 @@ aspect FlatPrettyPrint {
 		str.print(")");
 	}
 	
+	protected void FProductExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.print("product(");
+		p.print(getFExp(), str, indent);
+		str.print(")");
+	}
+	
 	protected void FFunctionCall.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
@@ -1671,7 +1677,7 @@ aspect FlatPrettyPrint {
 		str.print(builtInName());
 		str.print("(");
 		prettyPrintArguments(p, str, indent);
-		str.print(")");		
+		str.print(")");
 	}
 	
 	protected static final String FBuiltInFunctionCall.SEP = ", ";
@@ -1763,6 +1769,7 @@ aspect FlatPrettyPrint {
 	eq FMinExp.builtInName()             = "min";
 	eq FMaxExp.builtInName()             = "max";
 	eq FSumExp.builtInName()             = "sum";
+	eq FProductExp.builtInName()         = "product";
 	eq FLinspace.builtInName()           = "linspace";
 	eq FInStream.builtInName()           = "inStream";
 	eq FActualStream.builtInName()       = "actualStream";

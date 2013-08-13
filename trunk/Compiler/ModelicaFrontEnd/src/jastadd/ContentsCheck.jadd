@@ -152,13 +152,12 @@ aspect ContentCheck {
 	}
 	
 	inh boolean FIterExp.iterExpUseOK();
-	eq FExp.getChild().iterExpUseOK()       = false;
-	eq Root.getChild().iterExpUseOK()       = false;
-	eq InstNode.getChild().iterExpUseOK()   = false;
-	eq FArray.getChild().iterExpUseOK()     = true;
-	eq FMinMaxExp.getChild().iterExpUseOK() = true;
-	eq FSumExp.getChild().iterExpUseOK()    = true;
-	// TODO: Add product() when it is implemented
+	eq FExp.getChild().iterExpUseOK()          = false;
+	eq Root.getChild().iterExpUseOK()          = false;
+	eq InstNode.getChild().iterExpUseOK()      = false;
+	eq FArray.getChild().iterExpUseOK()        = true;
+	eq FMinMaxExp.getChild().iterExpUseOK()    = true;
+	eq FReductionExp.getChild().iterExpUseOK() = true;
 	
 	public void FIterExp.contentCheck() {
 		if (!iterExpUseOK())

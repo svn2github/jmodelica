@@ -1859,8 +1859,8 @@ aspect FlatExpressions {
 	   return createNode(l);
 	}
 	
-	public FSumExp FSumExp.flatten(FQName prefix) {
-		return new FSumExp(getFExp().flatten(prefix));
+	public FReductionExp FReductionExp.flatten(FQName prefix) {
+		return (FReductionExp) createNode(getFExp().flatten(prefix));
 	}
 	
 	public FExp FIterExp.flatten(FQName prefix) {

@@ -1334,13 +1334,22 @@ aspect ConstantEvaluation {
 	  }
   }
   
-  eq FSumExp.cevalCalc() {
+  eq FReductionExp.cevalCalc() {
 	  Iterator<FExp> it = getFExp().getArray().iteratorFExp();
-	  CValue sum = type().zeroCValue();
+	  CValue value = reduceStartValue();
 	  while (it.hasNext())
-		  sum = type().add(sum, it.next().ceval());
-	  return sum;
+		  value = reduceOperation(value, it.next().ceval());
+	  return value;
   }
+  
+  syn CValue FReductionExp.reduceStartValue();
+  eq FSumExp.reduceStartValue()     = type().zeroCValue();
+  eq FProductExp.reduceStartValue() = new CValueInteger(1);
+  
+  syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
+  eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
+  eq FProductExp.reduceOperation(CValue leftValue, CValue rightValue) = type().mul(leftValue, rightValue);
+
   
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
