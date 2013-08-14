@@ -1581,13 +1581,7 @@ model FunctionType9
 			description="Function type checks: String literal arg, String input (error for now)",
 			variability_propagation=false,
 			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 52, column 27:
-  String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 53, column 17:
-  String variables are not supported
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Compliance error at line 1303, column 7:
   String variables are not supported
@@ -1604,13 +1598,7 @@ model FunctionType10
 			description="Function type checks: String component arg, String input (error for now)",
 			variability_propagation=false,
 			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 52, column 27:
-  String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 53, column 17:
-  String variables are not supported
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Compliance error at line 1327, column 29:
   String variables are not supported
@@ -1626,13 +1614,7 @@ model FunctionType11
 			description="Function type checks: Integer literal arg, String input",
 			variability_propagation=false,
 			errorMessage="
-4 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 52, column 27:
-  String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 53, column 17:
-  String variables are not supported
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Compliance error at line 1338, column 7:
   String variables are not supported

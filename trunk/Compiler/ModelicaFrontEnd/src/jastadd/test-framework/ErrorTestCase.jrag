@@ -76,7 +76,7 @@ public class ErrorTestCase extends TestCase {
 			String line = origStr.readLine();
 			while (line != null) {
 				line = origStr.readLine();
-				if (line != null && line.contains("Semantic error at line")) {
+				if (line != null && nextLineIsRelevant(line)) {
 					line = origStr.readLine();
 					filteredStr.append(line + "\n");
 				}
@@ -85,6 +85,10 @@ public class ErrorTestCase extends TestCase {
 		}
 		
 		return filteredStr.toString();
+	}
+	
+	protected boolean nextLineIsRelevant(String line) {
+		return line.contains("Semantic error at line");
 	}
 	
 	/**

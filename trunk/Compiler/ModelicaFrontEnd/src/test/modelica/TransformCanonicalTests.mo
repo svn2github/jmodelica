@@ -3528,10 +3528,7 @@ end TransformCanonicalTests.IfEqu17;
 			name="IfEqu18",
 			description="Check that if equations with function call equations and non-param tests are rejected",
 			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Compliance error at line 3263, column 15:
-  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Compliance error at line 3265, column 7:
   If equations that has non-parameter tests and contains function calls using multiple outputs are not supported

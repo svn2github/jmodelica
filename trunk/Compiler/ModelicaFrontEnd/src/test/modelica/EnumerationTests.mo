@@ -158,10 +158,13 @@ end EnumerationTests.EnumerationTest6;
 			name="EnumerationTest7",
 			description="Compliance error for using enumeration as array size",
 			errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
 Compliance error at line 117, column 12:
   Array sizes of Boolean or enumeration type are not supported: A
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
+Compliance error at line 154, column 12:
+  Could not evaluate expression used as structural parameter: A
 ")})));
   end EnumerationTest7;
   

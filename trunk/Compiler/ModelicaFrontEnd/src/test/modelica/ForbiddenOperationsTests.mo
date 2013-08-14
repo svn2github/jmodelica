@@ -162,13 +162,10 @@ equation
 			generate_ode=false,
 			generate_dae=true,
 			errorMessage="
-2 errors found:
+1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Compliance error at line 194, column 10:
-  Boolean variables are not supported, only constants and parameters
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Compliance error at line 196, column 2:
-  If equations are currently only supported with constant or parameter test expressions
+Compliance error at line 148, column 8:
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end IfEquTest_ComplErr;
 

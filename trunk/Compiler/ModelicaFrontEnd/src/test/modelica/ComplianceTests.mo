@@ -52,8 +52,8 @@ Integer i=1;
 			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 87, column 9:
-  Integer variables are not supported, only constants and parameters
+Compliance error at line 42, column 30:
+  Integer variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end IntegerVariable_ComplErr;
 
@@ -69,8 +69,8 @@ model BooleanVariable_ComplErr
 			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 103, column 10:
-  Boolean variables are not supported, only constants and parameters
+Compliance error at line 60, column 30:
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end BooleanVariable_ComplErr;
 
@@ -87,8 +87,8 @@ model EnumVariable_ComplErr
 			generate_dae=true,
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 103, column 10:
-  Enumeration variables are not supported, only constants and parameters
+Compliance error at line 78, column 31:
+  Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end EnumVariable_ComplErr;
 
@@ -177,8 +177,8 @@ equation
 			errorMessage="
 0 error(s), 1 compliance error(s) and 0 warning(s) found:
 Error: in file '/Users/jakesson/svn_projects/JModelica.org/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 176, column 2:
-  Else clauses in when equations are currently not supported	 
+Compliance error at line 167, column 2:
+  Else clauses in when equations are currently not supported
 ")})));
 end ElseWhenEq_ComplErr;
 
@@ -233,7 +233,7 @@ Compliance error at line 215, column 3:
   The rem() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 217, column 3:
-  The floor() function-like operator is not supported
+  The ceil() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 218, column 3:
   The delay() function-like operator is not supported
@@ -260,6 +260,8 @@ model UnsupportedBuiltins3_ComplErr
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins3_ComplErr",
 			description="Compliance error for unsupported builtins",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 8 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -267,13 +269,13 @@ Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 281, column 3:
-  The initial() function-like operator is not supported
+  The initial() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 284, column 3:
-  The sample() function-like operator is not supported
+  The sample() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 285, column 3:
-  The pre() function-like operator is not supported
+  The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 286, column 3:
   The edge() function-like operator is not supported
@@ -365,10 +367,10 @@ model ArrayCellMod_ComplErr
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 361, column 8:
-  Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is scalar
+  Modifiers of specific array elements are not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 364, column 5:
-  Modifiers of specific array elements are not supported
+  Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is scalar
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 364, column 14:
   Modifiers of specific array elements are not supported
@@ -426,19 +428,19 @@ end when;
 11 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 450, column 18:
-  Boolean variables are not supported when compiling JMUs, only constants and parameters
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 451, column 18:
-  Boolean variables are not supported when compiling JMUs, only constants and parameters
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 452, column 18:
-  Boolean variables are not supported when compiling JMUs, only constants and parameters
+  Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 455, column 1:
   When equations are currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 455, column 16:
-  The pre() function-like operator is supported only when compiling FMUs
+  The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 458, column 1:
   When equations are currently only supported when compiling FMUs
@@ -450,13 +452,13 @@ Compliance error at line 464, column 1:
   When equations are currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 464, column 6:
-  The sample() function-like operator is supported only when compiling FMUs
+  The sample() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 465, column 5:
-  The pre() function-like operator is supported only when compiling FMUs
+  The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 466, column 5:
-  The pre() function-like operator is supported only when compiling FMUs
+  The pre() function-like operator is currently only supported when compiling FMUs
 ")})));
 end HybridNonFMU1;
 
@@ -550,6 +552,8 @@ equation
 		ComplianceErrorTestCase(
 			name="HybridNonFMU2",
 			description="",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 7 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
