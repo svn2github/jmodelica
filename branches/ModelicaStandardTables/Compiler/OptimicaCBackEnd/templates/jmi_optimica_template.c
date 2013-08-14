@@ -20,6 +20,8 @@
 #include <jmi.h>
 #include "fmi1_me.h"
 #include "jmi_log.h"
+#include "ModelicaUtilities.h"
+#include "ModelicaStandardTables.h"
 
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$

@@ -22,6 +22,7 @@
 #include "fmi1_me.h"
 #include "jmi_log.h"
 #include "ModelicaUtilities.h"
+#include "ModelicaStandardTables.h"
 
 $external_func_includes$
 
