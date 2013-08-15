@@ -101,7 +101,7 @@ initial equation
 equation
  der(x) = vx;
  der_vx = lambda * x;
- der_2_y + 0 = lambda * y - g;
+ der_2_y = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
@@ -199,7 +199,7 @@ equation
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = inertia3.der(phi);
  inertia3.a = inertia3.der(w);
- inertia3.J * inertia3.a = - spring.flange_b.tau + 0.0;
+ inertia3.J * inertia3.a = - spring.flange_b.tau;
  damper.flange_b.tau = damper.d * damper.w_rel;
  damper.lossPower = damper.flange_b.tau * damper.w_rel;
  damper.phi_rel = fixed.phi0 - inertia2.phi;
@@ -293,7 +293,7 @@ equation
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- der_u0 = 220 * (cos(time * omega) * (1.0 * omega));
+ der_u0 = 220 * (cos(time * omega) * omega);
  der_u1 = R[1] * der_i1;
  der_uL = R[2] * der_i2;
  der_u0 = der_u1 + der_uL;
@@ -482,7 +482,7 @@ initial equation
 equation
  der_x1 + der(x2) = 1;
  x1 + exp(x2 * p * time) = 0;
- der_x1 + exp(x2 * p * time) * (x2 * p * 1.0 + der(x2) * p * time) = 0.0;
+ der_x1 + exp(x2 * p * time) * (x2 * p + der(x2) * p * time) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1006,7 +1006,7 @@ initial equation
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 1;
- 0.0 + der(x2[2]) = 2;
+ der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
  der_x1_1 + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
 
@@ -1076,7 +1076,7 @@ initial equation
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 1;
- 0.0 + der(x2[2]) = 2;
+ der(x2[2]) = 2;
  x1[1] + IndexReduction.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
  der_x1_1 + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), der(x2[2])}) = 0.0;
 

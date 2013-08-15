@@ -463,7 +463,7 @@ public
   output Real c1;
   output Real c2;
  algorithm
-  c1 := 1 * i1;
+  c1 := i1;
   c2 := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation1.f;
@@ -510,7 +510,7 @@ equation
 			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation2
- constant Real z1[1] = 1.0;
+ constant Real z1[1] = 1;
  constant Real z1[2] = 2.0;
  parameter Real z2[1];
  parameter Real z2[2];
@@ -526,7 +526,7 @@ public
   input Real i1;
   output Real[2] c;
  algorithm
-  c[1] := 1 * i1;
+  c[1] := i1;
   c[2] := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.f;
@@ -571,7 +571,7 @@ equation
 			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation3
- constant Real a.a = 3.0;
+ constant Real a.a = 3;
  constant Real a.b = 6.0;
  parameter Real b.a;
  parameter Real b.b;
@@ -585,7 +585,7 @@ public
   output VariabilityPropagationTests.FunctionCallEquation3.A o1;
   output Real o2;
  algorithm
-  o1.a := i * 1;
+  o1.a := i;
   o1.b := i * 2;
   o2 := i * 3;
   return;

@@ -949,12 +949,17 @@ aspect FlatNames {
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
     eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
-    eq InstShortClassDecl.getInstExtends().retrieveFQName()               = retrieveFQName();
+    eq InstValueModification.getChild().retrieveFQName()                  = retrieveFQNameFromModification();
     eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
     eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
     eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
     eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
     eq FClass.getChild().retrieveFQName()                                 = null;
+    
+    inh FQName InstModification.retrieveFQNameFromModification();
+    eq InstClassDecl.getChild().retrieveFQNameFromModification()          = retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQNameFromModification()      = retrieveFQName();
+    eq InstRoot.getChild().retrieveFQNameFromModification()               = new FQNameEmpty();
 
     /**
      * \brief Get a string representation of a prefix of this name.

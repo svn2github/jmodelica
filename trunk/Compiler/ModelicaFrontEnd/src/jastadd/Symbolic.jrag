@@ -822,40 +822,50 @@ aspect Derivatives {
 }
 
  aspect ExpressionSimplification {
+	/**
+	 * Is this expression a literal zero?
+	 */
+	syn boolean FExp.isLiteralZero() = false;
+	eq FLitExp.isLiteralZero() =       type().isNumericScalar() && ceval().realValue() == 0.0;
+	eq FDotAddExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
+	eq FDotSubExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
+	eq FDotMulExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero() || getRightNoTransform().isLiteralZero();
+	eq FDotDivExp.isLiteralZero() =    getLeftNoTransform().isLiteralZero();
+	eq FNegExp.isLiteralZero() =       getFExpNoTransform().isLiteralZero();
+	
+	/**
+	 * Is this expression a literal one?
+	 */
+	syn boolean FExp.isLiteralOne() = false;
+	eq FLitExp.isLiteralOne() =       type().isNumericScalar() && ceval().realValue() == 1.0;
+	eq FDotMulExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
+	eq FDotDivExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
 
-/*
- 	rewrite FMulExp {
-		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
-				return getRight();
-			}
+ 	rewrite FDotMulExp {
+		when (getLeftNoTransform().isLiteralZero())  to FExp getLeft();
+		when (getLeftNoTransform().isLiteralOne())   to FExp getRight();
+		when (getRightNoTransform().isLiteralZero()) to FExp getRight();
+		when (getRightNoTransform().isLiteralOne())  to FExp getLeft();
 	}
 
- 	rewrite FMulExp {
-		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
-				return getLeft();
-			}
-	}
-*/
-/* 
- 	rewrite FSubExp {
-		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
-				return new FNegExp(getRight());
-			}
-		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
-				return getLeft();
-			}
+ 	rewrite FDotDivExp {
+		when (getLeftNoTransform().isLiteralZero() && ndims() == 0) to FExp getLeft();
+		when (getRightNoTransform().isLiteralOne())                 to FExp getLeft();
 	}
 
- 	rewrite FAddExp {
-		when (getLeft().variability().lessOrEqual(fConstant()) && getLeft().ceval().realValue()==0.) to FExp {
-				return getRight();
-			}
-		when (getRight().variability().lessOrEqual(fConstant()) && getRight().ceval().realValue()==0.) to FExp {
-				return getLeft();
-			}
+ 	rewrite FDotSubExp {
+		when (getLeftNoTransform().isLiteralZero())  to FExp getRight().makeNegated();
+		when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
 	}
-*/
 
-
+ 	rewrite FDotAddExp {
+		when (getLeftNoTransform().isLiteralZero())  to FExp getRight();
+		when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
+	}
+ 	
+ 	rewrite FNegExp {
+ 		when (getFExpNoTransform().isLiteralZero())    to FExp getFExp();
+ 		when (getFExpNoTransform() instanceof FNegExp) to FExp getFExp().makeNegated();
+ 	}
  
  }

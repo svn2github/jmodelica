@@ -75,6 +75,18 @@ abstract public class TestAnnotationizerHelper {
 		}
 		
 		/**
+		 * Test regeneration constructor for CAD code generation test.
+		 * 
+		 * Delegates to superclass implementation.
+		 * 
+		 * @param filePath     the path to the Modelica file containing the test model
+		 * @param className    the name of the test model
+		 */
+		public CADCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		/**
 		 * \brief Prints a usage message for this test case type.
 		 */
 		public static void usage(String cl, String extra) {

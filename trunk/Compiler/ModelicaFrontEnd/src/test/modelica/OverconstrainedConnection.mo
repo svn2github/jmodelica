@@ -241,4 +241,26 @@ end OverconstrainedConnection.OverconstrainedCorrect5;
 end OverconstrainedCorrect5;
 
 
+model OverconstrainedCorrect6
+connector C1
+    Real x;
+	flow Real y;
+end C1;
+		C1 c1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OverconstrainedCorrect6",
+			description="",
+			flatModel="
+fclass OverconstrainedConnection.OverconstrainedCorrect6
+ Real c1.x;
+ Real c1.y;
+equation
+ c1.y = 0;
+end OverconstrainedConnection.OverconstrainedCorrect6;
+")})));
+end OverconstrainedCorrect6;
+
+
 end OverconstrainedConnection;

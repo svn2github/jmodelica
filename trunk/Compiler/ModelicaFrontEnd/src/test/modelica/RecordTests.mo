@@ -708,7 +708,7 @@ fclass RecordTests.RecordBinding8
  Real y2[2].a;
  Real y2[2].b;
 equation
- y2[1].a = time * 1;
+ y2[1].a = time;
  y2[2].a = time * 2;
  y1[1].b = time;
  y1[2].b = time;
@@ -4130,8 +4130,8 @@ fclass RecordTests.RecordParam7
  Real x[1];
  Real x[2];
 equation
- x[1] = time * 1;
- x[2] = time * 1;
+ x[1] = time;
+ x[2] = time;
 
 public
  record RecordTests.RecordParam7.B
@@ -4217,7 +4217,7 @@ fclass RecordTests.RecordEval1
  Real z[1];
  Real z[2];
 equation
- z[1] = 1 * time;
+ z[1] = time;
  z[2] = 2 * time;
 
 public
@@ -4252,7 +4252,7 @@ fclass RecordTests.RecordEval2
  Real z[1];
  Real z[2];
 equation
- z[1] = 1 * time;
+ z[1] = time;
  z[2] = 2 * time;
 
 public
@@ -4289,7 +4289,7 @@ fclass RecordTests.RecordEval3
  Real z[1];
  Real z[2];
 equation
- z[1] = 1 * time;
+ z[1] = time;
  z[2] = 2 * time;
 
 public
@@ -4326,7 +4326,7 @@ fclass RecordTests.RecordEval4
  Real z[1];
  Real z[2];
 equation
- z[1] = 1 * time;
+ z[1] = time;
  z[2] = 2 * time;
 
 public
@@ -4375,7 +4375,7 @@ fclass RecordTests.RecordEval5
  Real z[1];
  Real z[2];
 equation
- z[1] = 1 * time;
+ z[1] = time;
  z[2] = 2 * time;
 
 public

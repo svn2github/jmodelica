@@ -752,7 +752,7 @@ model MaxExp9
 			description="Reduction-expression with max(): basic test",
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
- constant Real x = max(max(max(max(max(max(max(max(max(max(max(1 * 2, 2 * 2), 3 * 2), 4 * 2), 1 * 3), 2 * 3), 3 * 3), 4 * 3), 1 * 5), 2 * 5), 3 * 5), 4 * 5);
+ constant Real x = max(max(max(max(max(max(max(max(max(max(max(2, 2 * 2), 3 * 2), 4 * 2), 3), 2 * 3), 3 * 3), 4 * 3), 5), 2 * 5), 3 * 5), 4 * 5);
  constant Real y = 20.0;
 end ArrayBuiltins.Max.MaxExp9;
 ")})));
@@ -831,7 +831,7 @@ model SumExp2
 			description="sum() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
- constant Real x = 1 * 1 + 2 * 1 + 3 * 1 + 1 * 2 + 2 * 2 + 3 * 2 + 1 * 3 + 2 * 3 + 3 * 3;
+ constant Real x = 1 + 2 + 3 + 2 + 2 * 2 + 3 * 2 + 3 + 2 * 3 + 3 * 3;
  constant Real y = 36.0;
 end ArrayBuiltins.Sum.SumExp2;
 ")})));
@@ -961,7 +961,7 @@ model ProductExp1
 			description="product() expressions: basic test",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp1
- constant Real x = 1 * 2 * 3 * 4;
+ constant Real x = 2 * 3 * 4;
  constant Real y = 24.0;
 end ArrayBuiltins.Product.ProductExp1;
 ")})));
@@ -977,7 +977,7 @@ model ProductExp2
 			description="product() expressions: reduction-expression",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp2
- constant Real x = 1 * 1 * (2 * 1) * (3 * 1) * (1 * 2) * (2 * 2) * (3 * 2) * (1 * 3) * (2 * 3) * (3 * 3);
+ constant Real x = 2 * 3 * 2 * (2 * 2) * (3 * 2) * 3 * (2 * 3) * (3 * 3);
  constant Real y = 46656.0;
 end ArrayBuiltins.Product.ProductExp2;
 ")})));
@@ -993,7 +993,7 @@ model ProductExp3
 			description="product() expressions: reduction-expression over array",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp3
- constant Real x[1] = 1 * 2 * 3 * 1 * 2 * 3 * 1 * 2 * 3;
+ constant Real x[1] = 2 * 3 * 2 * 3 * 2 * 3;
  constant Real x[2] = 2 * 2 * 2 * 3 * 3 * 3 * 4 * 4 * 4;
  constant Real y[1] = 216.0;
  constant Real y[2] = 13824.0;
@@ -1011,7 +1011,7 @@ model ProductExp4
 			description="product() expressions: over array constructor with iterators",
 			flatModel="
 fclass ArrayBuiltins.Product.ProductExp4
- constant Real x = 1 * 2 * 2 * 2 * 3 * 2 * 1 * 3 * 2 * 3 * 3 * 3 * 1 * 4 * 2 * 4 * 3 * 4;
+ constant Real x = 2 * 2 * 2 * 3 * 2 * 3 * 2 * 3 * 3 * 3 * 4 * 2 * 4 * 3 * 4;
  constant Real y = 2985984.0;
 end ArrayBuiltins.Product.ProductExp4;
 ")})));
@@ -1310,7 +1310,7 @@ end Transpose;
 package Cross
 	
 model Cross1
- Real x[3] = cross({1.0,2,3}, {4,5,6});
+ Real x[3] = cross({1,2,3}, {4.0,5,6});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -1496,7 +1496,7 @@ end Skew;
 package OuterProduct
 	
 model OuterProduct1
- Real x[3,2] = outerProduct({1.0,2,3}, {4,5});
+ Real x[3,2] = outerProduct({1,2,3}, {4.0,5});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -1505,10 +1505,10 @@ model OuterProduct1
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct1
  constant Real x[1,1] = 4.0;
- constant Real x[1,2] = 5.0;
- constant Real x[2,1] = 8;
+ constant Real x[1,2] = 5;
+ constant Real x[2,1] = 8.0;
  constant Real x[2,2] = 10;
- constant Real x[3,1] = 12;
+ constant Real x[3,1] = 12.0;
  constant Real x[3,2] = 15;
 end ArrayBuiltins.OuterProduct.OuterProduct1;
 ")})));
@@ -2147,7 +2147,7 @@ model Linspace1
 			description="Linspace operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Linspace1
- constant Real x[1] = 1.0;
+ constant Real x[1] = 1;
  constant Real x[2] = 1.6666666666666665;
  constant Real x[3] = 2.333333333333333;
  constant Real x[4] = 3.0;
@@ -2166,14 +2166,22 @@ model Linspace2
 		TransformCanonicalTestCase(
 			name="Linspace2",
 			description="Linspace operator: using parameter component as n",
+			variability_propagation=false,
+			eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Linspace2
- constant Real a = 1;
- constant Real b = 2;
+ Real a;
+ Real b;
  parameter Integer c = 3 /* 3 */;
- constant Real x[1] = 1.0;
- constant Real x[2] = 1.5;
- constant Real x[3] = 2.0;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ a = 1;
+ b = 2;
+ x[1] = a;
+ x[2] = a + (b - a) / 2;
+ x[3] = a + 2 * ((b - a) / 2);
 end ArrayBuiltins.Linspace2;
 ")})));
 end Linspace2;
@@ -2247,7 +2255,7 @@ model Linspace6
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Linspace6",
-			description="",
+			description="Linspace operator: parameter args",
 			flatModel="
 fclass ArrayBuiltins.Linspace6
  parameter Real b = 1.5 /* 1.5 */;
@@ -2257,8 +2265,8 @@ fclass ArrayBuiltins.Linspace6
  parameter Real a[2].x;
  parameter Real a[3].x;
 parameter equation
- a[1].x = b + 0 * ((c - b) / 2);
- a[2].x = b + 1 * ((c - b) / 2);
+ a[1].x = b;
+ a[2].x = b + (c - b) / 2;
  a[3].x = b + 2 * ((c - b) / 2);
 end ArrayBuiltins.Linspace6;
 ")})));

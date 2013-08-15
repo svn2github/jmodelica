@@ -1101,9 +1101,9 @@ fclass FunctionTests.FunctionBinding21
 
 public
  function FunctionTests.FunctionBinding21.e.f2
-  input Real e.a;
-  input Real e.b := e.d;
-  output Real e.c;
+  input Real a;
+  input Real b := e.d;
+  output Real c;
  algorithm
   c := a + b;
   return;
@@ -3295,9 +3295,9 @@ public
   Real[2, 2] x;
  algorithm
   o := 1.0;
-  x[1,1] := 1 * 1 + 2 * 3;
-  x[1,2] := 1 * 2 + 2 * 4;
-  x[2,1] := 3 * 1 + 4 * 3;
+  x[1,1] := 1 + 2 * 3;
+  x[1,2] := 2 + 2 * 4;
+  x[2,1] := 3 + 4 * 3;
   x[2,2] := 3 * 2 + 4 * 4;
   return;
  end FunctionTests.ArrayExpInFunc2.f;
@@ -3373,9 +3373,9 @@ public
   Real[2, 2] x;
  algorithm
   o := 1.0;
-  x[1,1] := 1 * 1 + 2 * 3;
-  x[1,2] := 1 * 2 + 2 * 4;
-  x[2,1] := 3 * 1 + 4 * 3;
+  x[1,1] := 1 + 2 * 3;
+  x[1,2] := 2 + 2 * 4;
+  x[2,1] := 3 + 4 * 3;
   x[2,2] := 3 * 2 + 4 * 4;
   return;
  end FunctionTests.ArrayExpInFunc4.f;
@@ -3414,7 +3414,7 @@ model ArrayExpInFunc5
 fclass FunctionTests.ArrayExpInFunc5
  Real x;
 equation
- x = FunctionTests.ArrayExpInFunc5.f(1 * 1 + 2 * 2 + 3 * 3);
+ x = FunctionTests.ArrayExpInFunc5.f(1 + 2 * 2 + 3 * 3);
 
 public
  function FunctionTests.ArrayExpInFunc5.f
@@ -3423,7 +3423,7 @@ public
   Real x;
   Real y;
  algorithm
-  (x, y) := FunctionTests.ArrayExpInFunc5.f2(1 * 1 + 2 * 2 + 3 * 3);
+  (x, y) := FunctionTests.ArrayExpInFunc5.f2(1 + 2 * 2 + 3 * 3);
   o := a + x + y;
   return;
  end FunctionTests.ArrayExpInFunc5.f;
@@ -3582,7 +3582,7 @@ public
   o := 1.0;
   for i in 1:3 loop
    x[i] := i;
-   y[1] := 1 * 1;
+   y[1] := 1;
    y[2] := 2 * 2;
    y[3] := 3 * 3;
   end for;
@@ -5999,11 +5999,11 @@ public
  algorithm
   temp_1 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_1 := temp_1 + a[i1] * 1;
+   temp_1 := temp_1 + a[i1];
   end for;
   temp_2 := 0.0;
   for i1 in 1:size(a, 1) loop
-   temp_2 := temp_2 + 0 * a[1];
+   temp_2 := temp_2;
   end for;
   b := temp_1 + temp_2;
   return;
@@ -7299,7 +7299,7 @@ model VectorizedCall3
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.VectorizedCall3
- constant Real v[1,1] = (- 1) * 1;
+ constant Real v[1,1] = - 1;
  constant Real v[1,2] = (- 1) * 2;
  constant Real v[1,3] = (- 1) * 3;
  constant Real v[2,1] = (- 1) * 4;
@@ -7323,9 +7323,9 @@ fclass FunctionTests.VectorizedCall3
  Real z[2,2];
 equation
  z[1,1] = FunctionTests.VectorizedCall3.f({{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}}, {{-1.0, -2.0, -3.0}, {-4.0, -5.0, -6.0}, {-7.0, -8.0, -9.0}});
- z[1,2] = FunctionTests.VectorizedCall3.f({{2 * 1.0, 2 * 2.0, 2 * 3.0}, {2 * 4.0, 2 * 5.0, 2 * 6.0}, {2 * 7.0, 2 * 8.0, 2 * 9.0}}, {{2 * -1.0, 2 * -2.0, 2 * -3.0}, {2 * -4.0, 2 * -5.0, 2 * -6.0}, {2 * -7.0, 2 * -8.0, 2 * -9.0}});
- z[2,1] = FunctionTests.VectorizedCall3.f({{3 * 1.0, 3 * 2.0, 3 * 3.0}, {3 * 4.0, 3 * 5.0, 3 * 6.0}, {3 * 7.0, 3 * 8.0, 3 * 9.0}}, {{3 * -1.0, 3 * -2.0, 3 * -3.0}, {3 * -4.0, 3 * -5.0, 3 * -6.0}, {3 * -7.0, 3 * -8.0, 3 * -9.0}});
- z[2,2] = FunctionTests.VectorizedCall3.f({{4 * 1.0, 4 * 2.0, 4 * 3.0}, {4 * 4.0, 4 * 5.0, 4 * 6.0}, {4 * 7.0, 4 * 8.0, 4 * 9.0}}, {{4 * -1.0, 4 * -2.0, 4 * -3.0}, {4 * -4.0, 4 * -5.0, 4 * -6.0}, {4 * -7.0, 4 * -8.0, 4 * -9.0}});
+ z[1,2] = FunctionTests.VectorizedCall3.f({{2, 2 * 2.0, 2 * 3.0}, {2 * 4.0, 2 * 5.0, 2 * 6.0}, {2 * 7.0, 2 * 8.0, 2 * 9.0}}, {{2 * -1.0, 2 * -2.0, 2 * -3.0}, {2 * -4.0, 2 * -5.0, 2 * -6.0}, {2 * -7.0, 2 * -8.0, 2 * -9.0}});
+ z[2,1] = FunctionTests.VectorizedCall3.f({{3, 3 * 2.0, 3 * 3.0}, {3 * 4.0, 3 * 5.0, 3 * 6.0}, {3 * 7.0, 3 * 8.0, 3 * 9.0}}, {{3 * -1.0, 3 * -2.0, 3 * -3.0}, {3 * -4.0, 3 * -5.0, 3 * -6.0}, {3 * -7.0, 3 * -8.0, 3 * -9.0}});
+ z[2,2] = FunctionTests.VectorizedCall3.f({{4, 4 * 2.0, 4 * 3.0}, {4 * 4.0, 4 * 5.0, 4 * 6.0}, {4 * 7.0, 4 * 8.0, 4 * 9.0}}, {{4 * -1.0, 4 * -2.0, 4 * -3.0}, {4 * -4.0, 4 * -5.0, 4 * -6.0}, {4 * -7.0, 4 * -8.0, 4 * -9.0}});
 
 public
  function FunctionTests.VectorizedCall3.f
@@ -7453,7 +7453,7 @@ fclass FunctionTests.VectorizedCall4
  Real z[2,1];
  Real z[2,2];
 equation
- v2[1,1,1,1] = (- 1) * 1;
+ v2[1,1,1,1] = - 1;
  v2[1,1,1,2] = (- 1) * 2;
  v2[1,1,1,3] = (- 1) * 3;
  v2[1,1,2,1] = (- 1) * 4;
@@ -8092,6 +8092,67 @@ public
 end FunctionTests.ComponentFunc2;
 ")})));
 end ComponentFunc2;
+
+
+model ComponentFunc3
+    model A
+        function f = f2(a = 2);
+        Real x = 1;
+    end A;
+    
+    function f2
+        input Real a;
+        output Real b;
+    algorithm
+        b := a + 1;
+        b := b + a;
+    end f2;
+    
+    A a;
+    Real y = a.f();
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ComponentFunc3",
+			description="",
+			flatModel="
+fclass FunctionTests.ComponentFunc3
+ Real a.x = 1;
+ Real y = FunctionTests.ComponentFunc3.a.f(2);
+
+public
+ function FunctionTests.ComponentFunc3.a.f
+  input Real a := 2;
+  output Real b;
+ algorithm
+  b := a + 1;
+  b := b + a;
+  return;
+ end FunctionTests.ComponentFunc3.a.f;
+
+end FunctionTests.ComponentFunc3;
+")})));
+end ComponentFunc3;
+
+
+model ComponentFunc4
+    model A
+        function f = f2(c = 2);
+        Real x = 1;
+    end A;
+    
+    function f2
+        input Real a;
+        input real c;
+        output Real b;
+    algorithm
+        b := a + 1;
+        b := b + c;
+    end f2;
+    
+    A a;
+    Real y = a.f(a.x);
+end ComponentFunc4;
 
 
 model MinOnInput1

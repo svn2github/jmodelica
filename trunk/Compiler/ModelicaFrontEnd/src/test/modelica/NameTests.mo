@@ -63,7 +63,7 @@ fclass NameTests.NameTest2
  Real a.y;
  Real a.x;
 equation
- a.x = (- 1 / 1) * (1 * 1) - (2 + 1) ^ 3 + a.x ^ (- 3 + 2);
+ a.x = - 1 - (2 + 1) ^ 3 + a.x ^ (- 3 + 2);
  a.b.c.y + 1 = a.b.c.y;
  a.c.y = 0;
  a.b.x = a.b.c.y;

@@ -88,7 +88,6 @@ aspect TransformCanonical {
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		variabilityPropagationIfSet();
-		root().flushAllRecursive();
 		genInitialEquations();
 		sortDependentParameters();
 		addRuntimeOptionParameters();
@@ -3124,9 +3123,9 @@ aspect TransformCanonical {
 			return new AliasPair(fv1, fv2, negated);
 		} else {                                    // 0 = x + y, etc
 			FExp eqZero = null;
-			if (e1.isConstantZero())
+			if (e1.isLiteralZero())
 				eqZero = e2;
-			else if (e2.isConstantZero())
+			else if (e2.isLiteralZero())
 				eqZero = e1;
 			if (eqZero != null)
 				return eqZero.aliasVariables();
@@ -3163,12 +3162,6 @@ aspect TransformCanonical {
 	syn FVariable FExp.variableThatCanBeAlias() = null;
 	eq FIdUseExp.variableThatCanBeAlias()       = (FVariable) myFV();
 	eq FNegExp.variableThatCanBeAlias()         = getFExp().variableThatCanBeAlias();
-	
-	syn boolean FExp.isConstantZero() = 
-		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 0.0;
-	
-//	syn boolean FExp.isConstantOne() = 
-//		isLiteralExp() && type().isNumericScalar() && ceval().realValue() == 1.0;
 	
 	syn boolean FExp.isLiteralExp() = false;
 	eq FLitExp.isLiteralExp()       = true;
@@ -4263,7 +4256,7 @@ aspect ParameterSorting {
 				vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 	
 			// Flush AST since the structure has changed.
-			flush();
+				root().flushAllRecursive();
 			
 			// Remove any binding expressions of variables with parameter equations
 			for (FAbstractEquation eqn : L)
@@ -4478,8 +4471,8 @@ aspect FlushFClass {
 	/**
 	 * \brief Flush all caches, including collection attributes, and also
 	 * flush all children. In addition, the is$final attribute is set to false
-	 * for FIdUseExps and FDerExps in order to enable rewrites of such nodes
-	 * after elimination of alias variables.
+	 * for FExps in order to enable rewrites of such nodes after elimination 
+	 * of alias variables and after function inlining.
 	 */
 	public void ASTNode.flushAllRecursiveClearFinal() {
 		flushAll();
@@ -4489,15 +4482,7 @@ aspect FlushFClass {
 		}
 	}
 	
-	public void FIdUseExp.flushAllRecursiveClearFinal() {
-		flushAll();
-		is$Final = false;
-		for (ASTNode n : noTransform()) {
-			n.flushAllRecursiveClearFinal();
-		}
-	}
-	
-	public void FDerExp.flushAllRecursiveClearFinal() {
+	public void FExp.flushAllRecursiveClearFinal() {
 		flushAll();
 		is$Final = false;
 		for (ASTNode n : noTransform()) {
@@ -4558,7 +4543,7 @@ aspect FunctionInlining {
 		new FunctionInliner(this, opt).inline();
 		root().flushAllRecursive();
 		removeUnusedTemporaries();
-		root().flushAllRecursive();
+		root().flushAllRecursiveClearFinal();
 		endStep("inlineFunctions()");
 	}
 	
