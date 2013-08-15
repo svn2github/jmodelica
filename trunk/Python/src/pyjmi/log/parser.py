@@ -145,7 +145,11 @@ def parse_xml_log(filename):
     Parse a pure XML JMI log as created by extract_jmi_log, return the root node.
     """
     parser, handler = create_parser()
-    parser.parse(filename)
+    try:
+        parser.parse(filename)
+    except sax.SAXException as e:
+        raise Exception('Failed to parse XML JMI log:\n' + e.getMessage())
+        
     return handler.get_root()
 
 # Support routines to parse JMI logs
@@ -158,7 +162,11 @@ def parse_jmi_log(filename, modulename = 'Model'):
     FMI Library.
     """
     parser, handler = create_parser()
-    filter_jmi_log(parser.feed, filename, modulename)
+    try:
+        filter_jmi_log(parser.feed, filename, modulename)
+    except sax.SAXException as e:
+        raise Exception('Failed to parse XML JMI log:\n' + e.getMessage())
+    
     parser.close()
     return handler.get_root()
 
