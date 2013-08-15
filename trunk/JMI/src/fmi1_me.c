@@ -112,6 +112,14 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     /* set start values*/
     jmi_set_start_values(component -> jmi);
     
+    // Log the build date and time of the JMI runtime.
+    // This should be replaced with the JModelica version,
+    // once that becomes available.
+    // Might be better placed in jmi_log_init,
+    // if it gains access to the logger callback?
+    jmi_log_node(jmi->log, logInfo, "JMIRuntime",
+                 "<build_date:%s> <build_time:%s>", __DATE__, __TIME__);
+
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
