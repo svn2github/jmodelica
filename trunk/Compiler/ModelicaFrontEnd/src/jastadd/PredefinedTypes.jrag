@@ -260,7 +260,10 @@ aspect PredefinedTypes {
     		+ "  input Real v;\n"      // Type not used
     		+ "  output Real y;\n"     // Type not used
     		+ "end abs;\n"
-    		+ "function sign end sign;\n"
+    		+ "function sign\n"
+    		+ "  input Real v;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end sign;\n"
     		+ "function sqrt\n"
     		+ "  input Real x;\n"
     		+ "  output Real y;\n"

@@ -2690,6 +2690,42 @@ end ArrayBuiltins.VectorizedAbsTest;
 ")})));
 end VectorizedAbsTest;
 
+model VectorizedSignTest
+    constant Real[2,2] c = {{-1, 2}, {3, -4}};
+    constant Real[2,2] d = sign(c);
+    Real[2,2] x = c;
+    Real[2,2] y = d;
+    Real[2,2] z = sign(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="VectorizedSignTest",
+			description="Test of vectorized sign()",
+			flatModel="
+fclass ArrayBuiltins.VectorizedSignTest
+ constant Real c[1,1] = - 1;
+ constant Real c[1,2] = 2;
+ constant Real c[2,1] = 3;
+ constant Real c[2,2] = - 4;
+ constant Real d[1,1] = sign(-1.0);
+ constant Real d[1,2] = sign(2.0);
+ constant Real d[2,1] = sign(3.0);
+ constant Real d[2,2] = sign(-4.0);
+ constant Real x[1,1] = -1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = -4.0;
+ constant Real y[1,1] = -1.0;
+ constant Real y[1,2] = 1.0;
+ constant Real y[2,1] = 1.0;
+ constant Real y[2,2] = -1.0;
+ constant Real z[1,1] = -1;
+ constant Real z[1,2] = 1;
+ constant Real z[2,1] = 1;
+ constant Real z[2,2] = -1;
+end ArrayBuiltins.VectorizedSignTest;
+")})));
+end VectorizedSignTest;
 
 model VectorizedSmoothTest
     Real x[3] = {1,2,3};

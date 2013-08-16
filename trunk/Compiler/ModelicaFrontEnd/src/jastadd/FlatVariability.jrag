@@ -323,6 +323,9 @@ aspect FlatVariability {
 	
 	eq FFloorExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	
+	eq FSignExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
+	
+	
 	eq FIterExp.expVariability() {
 		FTypePrefixVariability total = size().isEmpty() ? fConstant() : getArray().iteratorFExp().next().variability();
 		for (CommonForIndex ind : getForIndexList())

@@ -276,6 +276,7 @@ aspect InstFunctionBinding {
 				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
 				map.put("product",      new BuiltInCreator(false, new FProductExp(),     1));
 				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
+				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
 				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
 				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),     1));

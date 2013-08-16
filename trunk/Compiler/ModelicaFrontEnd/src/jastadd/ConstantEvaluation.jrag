@@ -1548,7 +1548,8 @@ aspect ConstantEvaluation {
   eq FLog10Exp.cevalCalc() = new CValueReal(Math.log10(getFExp().ceval().realValue()));	  
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   
-  eq FAbsExp.cevalCalc() = type().abs(getFExp().ceval());
+  eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
+  eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
   
   eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
@@ -2700,6 +2701,19 @@ aspect ConstantEvaluation {
 	  new CValueReal(Math.abs(v.realValue()));
   eq FIntegerType.abs(CValue v) = 
 	  new CValueInteger(Math.abs(v.intValue()));
+  
+  /**
+   * \brief Sign expression for constant values.
+   * 
+   * @param v Constant value of operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.sign(CValue v) = 
+	  CValue.UNKNOWN;
+  eq FRealType.sign(CValue v) = 
+	  new CValueReal(Math.signum(v.realValue()));
+  eq FIntegerType.sign(CValue v) = 
+	  new CValueInteger((int) Math.signum(v.intValue()));
 
   /**
    * \brief And expression for constant values.

@@ -87,3 +87,30 @@ class TestNested(SimulationTest):
         """
         self.assert_all_trajectories(['x', 'y'])
 
+class TestSign(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.SignTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_end_value('x[1,1]', -1.0)
+        self.assert_end_value('x[1,2]', 1.0)
+        self.assert_end_value('x[2,1]', 1.0)
+        self.assert_end_value('x[2,2]', -1.0)
+        self.assert_end_value('y', -1.0)
+        self.assert_end_value('z', 0)
+

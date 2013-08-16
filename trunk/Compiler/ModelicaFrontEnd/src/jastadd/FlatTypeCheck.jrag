@@ -695,6 +695,7 @@ aspect FlatTypeCheck {
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
   eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
+  eq FSignExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
   eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
   eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 

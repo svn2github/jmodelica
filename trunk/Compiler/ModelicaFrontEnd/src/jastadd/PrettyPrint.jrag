@@ -1766,6 +1766,7 @@ aspect FlatPrettyPrint {
 	eq FAbstractCat.builtInName()        = "cat";
 	eq FParseArray.builtInName()         = "array";
 	eq FAbsExp.builtInName()             = "abs";
+	eq FSignExp.builtInName()            = "sign";
 	eq FMinExp.builtInName()             = "min";
 	eq FMaxExp.builtInName()             = "max";
 	eq FSumExp.builtInName()             = "sum";

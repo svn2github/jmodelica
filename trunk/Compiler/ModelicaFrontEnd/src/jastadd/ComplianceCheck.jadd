@@ -85,6 +85,10 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The initial() function-like operator is");
 	}
 	
+	public void FSignExp.complianceCheck() {
+		complianceOnlyFMU("The sign() function-like operator is");
+	}
+	
 	public void FFloorExp.complianceCheck() {
 		complianceOnlyFMU("The floor() function-like operator is");
 	}

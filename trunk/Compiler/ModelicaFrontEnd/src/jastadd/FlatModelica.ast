@@ -1274,6 +1274,11 @@ FTerminalExp : FSimulationStateBuiltIn;
 FAbsExp : FVectUnaryBuiltIn;
 
 /**
+ * \brief Sign built-in function.
+ */
+FSignExp : FVectUnaryBuiltIn;
+
+/**
  * \brief Base class for calls to built-in mathematical functions.
  */
 abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;

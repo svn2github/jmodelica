@@ -24,4 +24,20 @@ equation
   y = integer(1.5 + floor(x/2));
 end NestedTest;
 
+model SignTest
+  Real[2,2] a = {{-1,2},{3,-4}} * time;
+  discrete Real b;
+  Real[2,2] x;
+  Real y,z;
+initial equation
+  b = 1;
+equation 
+  x = sign(a);
+  y = sign(-7.9*time);
+  z = sign(2*b);
+  when time > 0.5 then
+    b = 0;
+  end when;
+end SignTest;
+
 end OperatorTests;

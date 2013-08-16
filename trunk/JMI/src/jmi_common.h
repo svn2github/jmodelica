@@ -269,6 +269,12 @@ jmi_ad_var_t jmi_divide_logged(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, c
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v);
 
 /**
+ * Function to get the absolute value.
+ * Is a separate function to avoid evaluating expressions several times.
+ */
+jmi_ad_var_t jmi_sign(jmi_ad_var_t v);
+
+/**
  * Function to get the smaller of two values.
  * Is a separate function to avoid evaluating expressions twice.
  */

@@ -1058,6 +1058,12 @@ aspect CCodeGen {
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
+	
+	public void FSignExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("jmi_sign(");
+		p.print(getFExp(), str, indent);
+		str.print(")");
+	}
 
 	public void FNoEventExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print('(');

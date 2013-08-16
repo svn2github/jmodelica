@@ -203,7 +203,6 @@ end UnsupportedBuiltins1_ComplErr;
 
 model UnsupportedBuiltins2_ComplErr
  equation
-  sign(1);
   String();
   div(1);
   mod();
@@ -218,9 +217,6 @@ model UnsupportedBuiltins2_ComplErr
 			description="Compliance error for unsupported builtins",
 			errorMessage="
 8 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 210, column 3:
-  The sign() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 212, column 3:
   The class String is not a function
@@ -249,6 +245,7 @@ end UnsupportedBuiltins2_ComplErr;
 model UnsupportedBuiltins3_ComplErr
   discrete Real x;
  equation
+  sign(1);
   semiLinear();
   initial();
   sample(1,1);
@@ -265,7 +262,10 @@ model UnsupportedBuiltins3_ComplErr
 			generate_ode=false,
 			generate_dae=true,
 			errorMessage="
-8 errors found:
+9 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 280, column 3:
+  The sign() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported

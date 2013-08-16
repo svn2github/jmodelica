@@ -926,6 +926,7 @@ aspect InheritedFactoryMethods {
 	public FSumExp         FSumExp.createEmptyNode()         { return new FSumExp();         }
 	public FProductExp     FProductExp.createEmptyNode()     { return new FProductExp();     }
 	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
+	public FSignExp        FSignExp.createEmptyNode()        { return new FSignExp();        }
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	

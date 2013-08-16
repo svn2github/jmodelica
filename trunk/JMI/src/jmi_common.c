@@ -50,6 +50,11 @@ jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
     return COND_EXP_GE(v, AD_WRAP_LITERAL(0), v, -v);
 }
 
+jmi_ad_var_t jmi_sign(jmi_ad_var_t v) {
+    return COND_EXP_GT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(1), 
+        COND_EXP_LT(v, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(-1), AD_WRAP_LITERAL(0)));
+}
+
 jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y) {
     return COND_EXP_LT(x, y, x ,y);
 }

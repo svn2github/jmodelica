@@ -473,6 +473,7 @@ aspect FlatTypeAnalysis {
 	 * Base implementation assumes same as argument.
 	 */
 	syn FType FVectUnaryBuiltIn.scalarType() = getFExp().type().scalarType();
+	eq FSignExp.scalarType() = fIntegerScalarType();
 
 	// TODO: expand to handle boolean and enum index
 	eq FEndExp.type() = fIntegerScalarType();
