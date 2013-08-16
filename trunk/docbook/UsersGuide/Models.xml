@@ -737,6 +737,17 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>iteration_variable_scaling</literal></entry>
+
+                  <entry><literal>integer / 1</literal></entry>
+
+                  <entry>Iteration variables scaling mode in equation block
+                  solvers: 0 - no scaling, 1 - scaling based on nominals only
+                  (default), 2 - utilize heuristics to guess nominal based on
+                  min,max,start, etc.</entry>
+                </row>
+
+                <row>
                   <entry><literal>log_level</literal></entry>
 
                   <entry><literal>integer / 3</literal></entry>
@@ -786,7 +797,16 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   <entry>Log level for non-linear equation solver:
                   <literal>0</literal> - no progress messages,
                   <literal>1</literal>,<literal>2</literal>,<literal>3</literal>
-                  - different levels of verbosity.</entry>
+                  - different levels of verbosity</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_max_iter</literal></entry>
+
+                  <entry><literal>integer / 100</literal></entry>
+
+                  <entry> Maximum number of iterations for the equation block
+                  solver before failure.</entry>
                 </row>
 
                 <row>
@@ -843,6 +863,15 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>residual_equation_scaling</literal></entry>
+
+                  <entry><literal>integer/1</literal></entry>
+
+                  <entry>Equations scaling mode in equation block solvers:0-no
+                  scaling,1-automatic scaling,2-manual scaling.</entry>
+                </row>
+
+                <row>
                   <entry><literal>state_initial_equations</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
@@ -865,15 +894,6 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>use_automatic_scaling</literal></entry>
-
-                  <entry><literal>boolean / true</literal></entry>
-
-                  <entry>Enable equations and variables automatic scaling in
-                  equation block solvers.</entry>
-                </row>
-
-                <row>
                   <entry><literal>use_Brent_in_1d</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
@@ -883,13 +903,13 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>use_jacobian_scaling</literal></entry>
+                  <entry><literal>use_jacobian_equilibration</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
 
-                  <entry>Set to <literal>true</literal> if jacobian
-                  rows/columns should be automatically scaled in equation
-                  block solvers.</entry>
+                  <entry>Set to <literal>true</literal> jacobian equilibration
+                  should be utilized in equation block solvers to improve
+                  linear solver accuracy.</entry>
                 </row>
 
                 <row>
