@@ -163,7 +163,8 @@ def parse_jmi_log(filename, modulename = 'Model'):
     """
     parser, handler = create_parser()
     try:
-        filter_jmi_log(parser.feed, filename, modulename)
+        with open(filename, 'r') as f:
+            filter_jmi_log(parser.feed, f, modulename)
     except sax.SAXException as e:
         raise Exception('Failed to parse XML JMI log:\n' + e.getMessage())
     
@@ -177,22 +178,20 @@ def extract_jmi_log(destfilename, filename, modulename = 'Model'):
     modulename selects the module as recorded in the beginning of each line by
     FMI Library.
     """
-    f = open(destfilename, 'w')
-    filter_jmi_log(f.write, filename, modulename)
-    f.close()
+    with open(filename, 'r') as sourcefile:
+        with open(destfilename, 'w') as destfile:
+            filter_jmi_log(destfile.write, sourcefile, modulename)
 
-def filter_jmi_log(write, filename, modulename = 'Model'):
+def filter_jmi_log(write, sourcefile, modulename = 'Model'):
     write('<Log>\n')
 
     pre_re = r'FMIL: module = ' + modulename + r', log level = ([0-9]+): \[([^]]+)\]\[FMU status:([^]]+)\]'
     pre_pattern = re.compile(pre_re)
 
-    f = open(filename, 'r')
-    for line in f:
+    for line in sourcefile:
         m = pre_pattern.match(line)
         if m is not None:
             # log_level, category, fmu_status = m.groups()
             write(line[m.end():])
-    f.close()
 
     write('</Log>\n')
