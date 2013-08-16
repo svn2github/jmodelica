@@ -225,6 +225,8 @@ struct jmi_log_t {
     jmi_t *jmi;
     buf_t buf;
 
+    BOOL filtering_enabled;
+
     category_t c;
     const char *next_name;
     int leafdim;   /**< \brief  -1 when top is not a leaf, otherwise dimension of the leaf. */
@@ -267,7 +269,9 @@ static INLINE int current_indent_of(log_t *log) { return 2*log->topindex; }
 
 static BOOL emitted_category(log_t *log, category_t category) {
     jmi_t *jmi = log->jmi;
-    if((jmi->fmi != NULL) && !jmi->fmi->fmi_logging_on) return FALSE;
+    if ((jmi->fmi != NULL) && !jmi->fmi->fmi_logging_on) return FALSE;
+    if (!log->filtering_enabled) return TRUE;
+
     switch (category) {
     case logError:   break;
     case logWarning: if(jmi->options.log_level < 3) return FALSE; break;
@@ -386,6 +390,9 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
 static void init_log(log_t *log, jmi_t *jmi) {
     log->jmi = jmi;
     init_buffer(bufof(log));
+
+    log->filtering_enabled = TRUE;
+
     log->c = logInfo;
     log->next_name = NULL;
 
@@ -719,9 +726,15 @@ void jmi_log_node(log_t *log, category_t c, const char *type, const char* fmt, .
 }
 
 
- /* Subrow primitives */
+ /* Misc. */
 
 void jmi_log_emit(log_t *log) { emit(log); }
+void jmi_log_set_filtering(jmi_log_t *log, int enabled) {
+    log->filtering_enabled = enabled;
+}
+
+
+ /* Subrow primitives */
 
 void jmi_log_comment_(log_t *log, category_t c, const char *msg) { log_comment_(log, c, msg); }
 void jmi_log_comment(log_t *log, category_t c, const char *msg) { jmi_log_comment_(log, c, msg); emit(log); }

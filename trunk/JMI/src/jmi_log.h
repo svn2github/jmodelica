@@ -146,6 +146,9 @@ void jmi_log_real_matrix(jmi_log_t *log, jmi_log_node_t node,
 /** \brief Emit the current accumulated log line to the logger callback. */
 void jmi_log_emit(jmi_log_t *log);
 
+/** \brief Enable or disable log message filtering by log level/category. Only disable during special circumstances! */
+void jmi_log_set_filtering(jmi_log_t *log, int enabled);
+
 
 /* Subrow primitives. End in _ since they don't emit a log message. */
 

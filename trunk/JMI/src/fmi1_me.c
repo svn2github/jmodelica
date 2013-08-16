@@ -117,8 +117,10 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
        once that becomes available.
        Might be better placed in jmi_log_init,
        if it gains access to the logger callback? */
+    jmi_log_set_filtering(jmi->log, FALSE); /* Allow info message to go through */
     jmi_log_node(jmi->log, logInfo, "JMIRuntime",
                  "<build_date:%s> <build_time:%s>", __DATE__, __TIME__);
+    jmi_log_set_filtering(jmi->log, TRUE);
 
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
