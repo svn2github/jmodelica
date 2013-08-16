@@ -8,6 +8,14 @@ equation
   y = integer(x);
 end IntegerTest;
 
+model CeilTest
+  Real x;
+  Real y;
+equation 
+  x = 4*sin(2*Modelica.Constants.pi*time);
+  y = ceil(x);
+end CeilTest;
+
 model FloorTest
   Real x;
   Real y;

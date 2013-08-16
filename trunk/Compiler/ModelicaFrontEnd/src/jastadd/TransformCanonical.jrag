@@ -6168,4 +6168,10 @@ aspect EventGeneratingExps {
 		guards.addFExp(new FGeqExp(getFExp().fullCopy(), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
 		return guards;
 	}
+	eq FCeilExp.createGuardExp(FVariable var) {
+		FArray guards = new FArray();
+		guards.addFExp(new FLeqExp(getFExp().fullCopy(), new FSubExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FGtExp(getFExp().fullCopy(), new FPreExp(var.createUseExp())));
+		return guards;
+	}
 }

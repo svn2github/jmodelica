@@ -1741,6 +1741,7 @@ aspect FlatPrettyPrint {
 	eq FSqrtExp.builtInName()            = "sqrt";
 	eq FIntegerExp.builtInName()         = "integer";
 	eq FEnumIntegerExp.builtInName()     = "Integer";
+	eq FCeilExp.builtInName()            = "ceil";
 	eq FFloorExp.builtInName()           = "floor";
 	eq FStringExp.builtInName()          = "String";
 	eq FScalarExp.builtInName()          = "scalar";

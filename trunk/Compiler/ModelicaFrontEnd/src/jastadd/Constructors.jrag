@@ -907,6 +907,7 @@ aspect InheritedFactoryMethods {
 	public FSizeExp        FSizeExp.createEmptyNode()        { return new FSizeExp();        }
 	public FIntegerExp     FIntegerExp.createEmptyNode()     { return new FIntegerExp();     }
 	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
+	public FCeilExp        FCeilExp.createEmptyNode()        { return new FCeilExp();       }
 	public FFloorExp       FFloorExp.createEmptyNode()       { return new FFloorExp();       }
 	public FStringExp      FStringExp.createEmptyNode()      { return new FStringExp();      }
 	public FScalarExp      FScalarExp.createEmptyNode()      { return new FScalarExp();      }

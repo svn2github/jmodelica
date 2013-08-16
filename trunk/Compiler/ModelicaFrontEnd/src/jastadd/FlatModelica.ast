@@ -1374,6 +1374,11 @@ abstract FEventGeneratingExp : FUnaryBuiltIn;
 FFloorExp : FEventGeneratingExp;
 
 /**
+ * \brief The ceil() built-in function.
+ */
+FCeilExp : FFloorExp;
+
+/**
  * \brief The integer() built-in function (convert Real to Integer).
  */
 FIntegerExp : FFloorExp;

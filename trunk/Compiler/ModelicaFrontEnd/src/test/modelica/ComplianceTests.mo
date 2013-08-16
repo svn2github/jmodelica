@@ -207,7 +207,6 @@ model UnsupportedBuiltins2_ComplErr
   div(1);
   mod();
   rem(1);
-  ceil();
   delay(1);
   cardinality();
 
@@ -230,9 +229,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 215, column 3:
   The rem() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 217, column 3:
-  The ceil() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 218, column 3:
   The delay() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -246,6 +242,8 @@ model UnsupportedBuiltins3_ComplErr
   discrete Real x;
  equation
   sign(1);
+  ceil(1);
+  floor(1);
   semiLinear();
   initial();
   sample(1,1);
@@ -266,6 +264,12 @@ model UnsupportedBuiltins3_ComplErr
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The sign() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 280, column 3:
+  The ceil() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 280, column 3:
+  The floor() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The semiLinear() function-like operator is not supported

@@ -281,6 +281,7 @@ aspect InstFunctionBinding {
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
 				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),     1));
 				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
+				map.put("ceil",         new BuiltInCreator(false, new FCeilExp(),        1));
 				map.put("floor",        new BuiltInCreator(false, new FFloorExp(),       1));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));

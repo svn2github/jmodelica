@@ -1085,6 +1085,13 @@ aspect CCodeGen {
 		str.print("JMI_FALSE");
 	}
 
+	public void FCeilExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		// Does not work for JMU - we generate an error in the JMU case
+		str.print("ceil(");
+		p.print(getFExp(), str, indent);
+		str.print(")");
+	}
+	
 	public void FFloorExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		// Does not work for JMU - we generate an error in the JMU case
 		str.print("floor(");

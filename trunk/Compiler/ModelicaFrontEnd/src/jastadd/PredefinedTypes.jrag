@@ -257,12 +257,12 @@ aspect PredefinedTypes {
     		+ "function assert end assert;\n"
     		+ "function terminate end terminate;\n"
     		+ "function abs\n"
-    		+ "  input Real v;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
+    		+ "  input Real v;\n"
+    		+ "  output Real y;\n"
     		+ "end abs;\n"
     		+ "function sign\n"
-    		+ "  input Real v;\n"      // Type not used
-    		+ "  output Real y;\n"     // Type not used
+    		+ "  input Real v;\n"
+    		+ "  output Real y;\n"
     		+ "end sign;\n"
     		+ "function sqrt\n"
     		+ "  input Real x;\n"
@@ -271,11 +271,14 @@ aspect PredefinedTypes {
     		+ "function div end div;\n"
     		+ "function mod end mod;\n"
     		+ "function rem end rem;\n"
-    		+ "function ceil end ceil;\n"
     		+ "function floor"
     		+ "  input Real x;\n"
     		+ "  output Real y;\n"
     		+ "end floor;\n"
+    		+ "function ceil"
+    		+ "  input Real x;\n"
+    		+ "  output Real y;\n"
+    		+ "end ceil;\n"
     		+ "function integer"
     		+ "  input Real x;\n"
     		+ "  output Integer y;\n"

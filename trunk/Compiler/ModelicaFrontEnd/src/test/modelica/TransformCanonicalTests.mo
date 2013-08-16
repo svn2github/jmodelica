@@ -5101,6 +5101,31 @@ end TestRuntimeOptions1;
 
 package EventGeneratingExps
 
+model Ceil
+	Real x;
+equation
+	1 + x = 3 + ceil((time * 0.3) + 4.2) * 4;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Ceil",
+			description="Tests extraction of ceil() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Ceil
+ Real x;
+ discrete Real temp_1;
+initial equation 
+ temp_1 = ceil(time * 0.3 + 4.2);
+equation
+ 1 + x = 3 + temp_1 * 4;
+ when {time * 0.3 + 4.2 <= pre(temp_1) - 1, time * 0.3 + 4.2 > pre(temp_1)} then
+  temp_1 = ceil(time * 0.3 + 4.2);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Ceil;
+")})));
+end Ceil;
+
+
 model Floor
 	Real x;
 equation
