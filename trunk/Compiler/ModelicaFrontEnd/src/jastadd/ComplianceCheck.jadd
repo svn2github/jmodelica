@@ -86,12 +86,11 @@ aspect ComplianceCheck {
 	}
 	
 	public void FFloorExp.complianceCheck() {
-		if (!root().options.getBooleanOption("generate_ode") || !getFExp().variability().parameterOrLess())
-			compliance("The floor() function-like operator is currently only supported for parameter expressions, and only when compiling FMUs");
+		complianceOnlyFMU("The floor() function-like operator is");
 	}
 	
 	public void FIntegerExp.complianceCheck() {
-		compliance("The integer() function-like operator is not supported");
+		complianceOnlyFMU("The integer() function-like operator is");
 	}
 	
 	public void FIgnoredBuiltIn.complianceCheck() {

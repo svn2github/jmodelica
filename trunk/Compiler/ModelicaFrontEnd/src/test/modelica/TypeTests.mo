@@ -474,7 +474,16 @@ model IntegerExp2
 			flatModel="
 fclass TypeTests.IntegerExp2
  constant Real x = 1.0;
- constant Integer y = 1;
+ discrete Integer y;
+ discrete Integer temp_1;
+initial equation 
+ temp_1 = integer(x);
+ pre(y) = 0;
+equation
+ y = temp_1;
+ when {x < pre(temp_1), x >= pre(temp_1) + 1} then
+  temp_1 = 1;
+ end when;
 end TypeTests.IntegerExp2;
 ")})));
 end IntegerExp2;

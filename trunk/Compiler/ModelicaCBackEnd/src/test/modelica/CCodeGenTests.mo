@@ -4857,7 +4857,7 @@ end when;
 when y > 2 and z then 
 v = false; 
 end when; 
-when x > 2 then 
+when {x > 2} then 
 z = false; 
 end when; 
 when (time>1 and time<1.1) or  (time>2 and time<2.1) or  (time>3 and time<3.1) then 

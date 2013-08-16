@@ -831,14 +831,23 @@ aspect FlatAPI {
  		guards() when getTest().inEquationSection()
 	to FClass.guardExpInEquations() for myFClass();	
 		
-	syn ArrayList<FExp> FWhenEquation.guards() {
+	syn ArrayList<FExp> FWhenEquation.guards() = getTest().guards();
+			
+	syn ArrayList<FExp> FExp.guards() {
 		ArrayList<FExp> l = new ArrayList<FExp>();
-		if (!getTest().isArray()) {
-			l.add(getTest());
+		if (!isArray()) {
+			l.add(this);
 		} else {
-			for (FExp e : getTest().getArray().iterable()) {
+			for (FExp e : getArray().iterable()) {
 				l.add(e);
 			}
+		}
+		return l;
+	}
+	eq FArray.guards() {
+		ArrayList<FExp> l = new ArrayList<FExp>();
+		for (FExp e : childFExps()) {
+			l.add(e);
 		}
 		return l;
 	}

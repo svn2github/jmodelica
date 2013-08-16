@@ -1359,19 +1359,24 @@ FNdimsExp : FUnaryBuiltIn;
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
 /**
+ * \brief Abstract base class for event generating expressions.
+ */
+abstract FEventGeneratingExp : FUnaryBuiltIn;
+
+/**
+ * The floor() built-in function.
+ */
+FFloorExp : FEventGeneratingExp;
+
+/**
  * \brief The integer() built-in function (convert Real to Integer).
  */
-FIntegerExp : FUnaryBuiltIn;
+FIntegerExp : FFloorExp;
 
 /**
  * \brief The Integer() built-in function (convert enumeration value to Integer).
  */
 FEnumIntegerExp : FUnaryBuiltIn;
-
-/**
- * The floor() built-in function.
- */
-FFloorExp : FUnaryBuiltIn;
 
 /**
  * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).

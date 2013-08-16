@@ -1278,9 +1278,8 @@ aspect ConstantEvaluation {
 	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
   }
   
-  eq FIntegerExp.cevalCalc()     = getFExp().ceval().convertInteger();
-  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
+  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
   

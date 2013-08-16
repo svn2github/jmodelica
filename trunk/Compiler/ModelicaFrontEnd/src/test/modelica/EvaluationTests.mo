@@ -927,6 +927,32 @@ end EvaluationTests.EvaluateAnnotation;
 ")})));
 end EvaluateAnnotation;
 
+model OperatorIntegerEval
+	
+	Integer x = integer(42.9);
 
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="OperatorIntegerEval",
+			description="Evaluation of the integer operator.",
+			variables="x",
+			values="
+42"
+ )})));
+end OperatorIntegerEval;
+
+model OperatorFloorEval
+	
+	Real x = floor(42.9);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="OperatorFloorEval",
+			description="Evaluation of the floor operator.",
+			variables="x",
+			values="
+42.0"
+ )})));
+end OperatorFloorEval;
 
 end EvaluationTests;

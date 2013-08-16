@@ -78,12 +78,12 @@ class _BaseSimOptTest:
         else:
             self.model = load_fmu(self.model_name)
 
-    def run(self):
+    def run(self,cvode_options=None):
         """
         Run simulation and load result. 
         Call this from setUp() or within a test depending if all tests should run simulation.
         """
-        self._run_and_write_data()
+        self._run_and_write_data(cvode_options)
         self.data = ResultDymolaTextual(self.model_name[:-len('.jmu')] + '_result.txt')
 
 
@@ -273,10 +273,11 @@ class SimulationTest(_BaseSimOptTest):
         self.input = input
         self.write_scaled_result = write_scaled_result
         
-    def _run_and_write_data(self):
+    def _run_and_write_data(self, cvode_options):
         """
         Run optimization and write result to file.
         """
+        
         if self.format=='jmu':
             self.model.simulate(start_time=self.start_time,
                                 final_time=self.final_time,
@@ -285,12 +286,15 @@ class SimulationTest(_BaseSimOptTest):
                                          'write_scaled_result':self.write_scaled_result,
                                         'IDA_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
         elif self.format=='fmu':
+            if not cvode_options:
+                cvode_options = {'atol':self.abs_tol,'rtol':self.rel_tol}
+            
             if isinstance(self.model, FMUModelME1):
                 self.model.simulate(start_time=self.start_time,
                                     final_time=self.final_time,
                                     input=self.input,
                                     options={'ncp':self.ncp,
-                                             'CVode_options':{'atol':self.abs_tol,'rtol':self.rel_tol}})
+                                             'CVode_options':cvode_options})
             else:
                 self.model.simulate(start_time=self.start_time,
                                     final_time=self.final_time,
@@ -329,7 +333,7 @@ class OptimizationTest(_BaseSimOptTest):
         #_set_ipopt_options(self.ipopt, options)
 
 
-    def _run_and_write_data(self):
+    def _run_and_write_data(self, cvode_options=None):
         """
         Run optimization and write result to file.
         """

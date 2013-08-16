@@ -112,6 +112,8 @@ model ArrayOfRecords_Warn
 		WarningTestCase(
 			name="ArrayOfRecords_Warn",
 			description="Compliance warning for arrays of records with index variability > parameter",
+			generate_ode=false,
+			generate_dae=true,
 			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -287,7 +289,7 @@ Compliance error at line 288, column 3:
   The terminate() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 289, column 3:
-  The integer() function-like operator is not supported
+  The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins3_ComplErr;
 
@@ -576,7 +578,7 @@ Compliance error at line 541, column 8:
   The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 543, column 6:
-  The floor() function-like operator is currently only supported for parameter expressions, and only when compiling FMUs
+  The floor() function-like operator is currently only supported when compiling FMUs
 ")})));
 end HybridNonFMU2; 
 

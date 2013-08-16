@@ -1078,13 +1078,7 @@ aspect CCodeGen {
 	public void FTerminalExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("JMI_FALSE");
 	}
-	
-	public void FIntegerExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.print("jmi_real_to_integer(");
-		p.print(getFExp(), str, indent);
-		str.print(")");
-	}
-	
+
 	public void FFloorExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		// Does not work for JMU - we generate an error in the JMU case
 		str.print("floor(");

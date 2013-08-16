@@ -723,12 +723,18 @@ fclass FunctionInlining.RecordInline4
  Real y[3];
  Real y[4];
  Real x;
+ discrete Integer temp_6;
+initial equation 
+ temp_6 = integer(y[4]);
 equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = integer(y[4]) + (y[1] + y[2] + y[3]);
+ x = temp_6 + (y[1] + y[2] + y[3]);
+ when {y[4] < pre(temp_6), y[4] >= pre(temp_6) + 1} then
+  temp_6 = integer(y[4]);
+ end when;
 
 public
  record FunctionInlining.RecordInline4.R
@@ -872,7 +878,9 @@ fclass FunctionInlining.RecordInline7
  Real x.a[3];
  discrete Integer x.b;
  discrete Integer temp_5;
+ discrete Integer temp_22;
 initial equation 
+ temp_22 = integer(y[4]);
  x.pre(b) = 0;
  pre(temp_5) = 0;
 equation
@@ -884,7 +892,10 @@ equation
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
  x.b = 3 + (temp_5 - temp_5);
- temp_5 = integer(y[4]);
+ temp_5 = temp_22;
+ when {y[4] < pre(temp_22), y[4] >= pre(temp_22) + 1} then
+  temp_22 = integer(y[4]);
+ end when;
 
 public
  record FunctionInlining.RecordInline7.R
@@ -929,14 +940,19 @@ fclass FunctionInlining.RecordInline8
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
+ discrete Integer temp_7;
 initial equation 
+ temp_7 = integer(5 - y);
  x.pre(b) = 0;
 equation
  y = 1;
  x.a[1] = 2 / y;
  x.a[2] = 3 + y;
  x.a[3] = 4 * y;
- x.b = integer(5 - y);
+ x.b = temp_7;
+ when {5 - y < pre(temp_7), 5 - y >= pre(temp_7) + 1} then
+  temp_7 = integer(5 - y);
+ end when;
 
 public
  record FunctionInlining.RecordInline8.R
@@ -1035,9 +1051,15 @@ end FunctionInlining.RecordInline9;
 fclass FunctionInlining.RecordInline10
  Real x;
  Real y;
+ discrete Integer temp_12;
+initial equation 
+ temp_12 = integer(5 - y);
 equation
- x = y + 2 * y + 3 * y + integer(5 - y);
+ x = y + 2 * y + 3 * y + temp_12;
  y = 1;
+ when {5 - y < pre(temp_12), 5 - y >= pre(temp_12) + 1} then
+  temp_12 = integer(5 - y);
+ end when;
 
 public
  record FunctionInlining.RecordInline10.R
@@ -1087,9 +1109,15 @@ end FunctionInlining.RecordInline10;
 fclass FunctionInlining.RecordInline11
  Real x;
  Real y;
+ discrete Integer temp_12;
+initial equation 
+ temp_12 = integer(5 - y);
 equation
- x = y + 2 * y + 3 * y + integer(5 - y);
+ x = y + 2 * y + 3 * y + temp_12;
  y = 1;
+ when {5 - y < pre(temp_12), 5 - y >= pre(temp_12) + 1} then
+  temp_12 = integer(5 - y);
+ end when;
 
 public
  record FunctionInlining.RecordInline11.R

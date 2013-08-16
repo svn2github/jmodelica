@@ -5098,4 +5098,159 @@ end TransformCanonicalTests.TestRuntimeOptions1;
 end TestRuntimeOptions1;
 
 
+
+package EventGeneratingExps
+
+model Floor
+	Real x;
+equation
+	1 + x = 3 + floor((time * 0.3) + 4.2) * 4;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Floor",
+			description="Tests extraction of floor() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Floor
+ Real x;
+ discrete Real temp_1;
+initial equation 
+ temp_1 = floor(time * 0.3 + 4.2);
+equation
+ 1 + x = 3 + temp_1 * 4;
+ when {time * 0.3 + 4.2 < pre(temp_1), time * 0.3 + 4.2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time * 0.3 + 4.2);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Floor;
+")})));
+end Floor;
+
+model Integer
+	Real x;
+equation
+	x = integer((0.9 + time/10) * 3.14);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Integer",
+			description="Tests extraction of integer() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Integer
+ Real x;
+ discrete Integer temp_1;
+initial equation 
+ temp_1 = integer((0.9 + time / 10) * 3.14);
+equation
+ x = temp_1;
+ when {(0.9 + time / 10) * 3.14 < pre(temp_1), (0.9 + time / 10) * 3.14 >= pre(temp_1) + 1} then
+  temp_1 = integer((0.9 + time / 10) * 3.14);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Integer;
+")})));
+end Integer;
+
+model Nested
+	Real x;
+equation
+	1 + x = integer(3 + floor((time * 0.3) + 4.2) * 4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Nested",
+			description="Tests extraction of nested event generating expressions
+			into when equations.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Nested
+ Real x;
+ discrete Real temp_1;
+ discrete Integer temp_2;
+initial equation 
+ temp_1 = floor(time * 0.3 + 4.2);
+ temp_2 = integer(3 + temp_1 * 4);
+equation
+ 1 + x = temp_2;
+ when {time * 0.3 + 4.2 < pre(temp_1), time * 0.3 + 4.2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time * 0.3 + 4.2);
+ end when;
+ when {3 + temp_1 * 4 < pre(temp_2), 3 + temp_1 * 4 >= pre(temp_2) + 1} then
+  temp_2 = integer(3 + temp_1 * 4);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Nested;
+")})));
+end Nested;
+
+model InFunctionCall
+
+  function f
+    input Real x;
+    output Real y;
+  algorithm
+   y := x;
+   return;
+  end f;
+	
+equation
+	f(integer(0.9 + time/10) * 3.14);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_InFunctionCall",
+			description="Tests event generating expressions in function calls.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
+ discrete Integer temp_1;
+initial equation 
+ temp_1 = integer(0.9 + time / 10);
+equation
+ TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f(temp_1 * 3.14);
+ when {0.9 + time / 10 < pre(temp_1), 0.9 + time / 10 >= pre(temp_1) + 1} then
+  temp_1 = integer(0.9 + time / 10);
+ end when;
+
+public
+ function TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f;
+
+end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
+")})));
+end InFunctionCall;
+
+model InWhenEquations
+	Real x;
+equation
+
+when integer(time*3) > 1 then
+  x = floor(time * 0.3 + 4.2);
+ end when;
+
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_InWhenEquations",
+			description="Tests event generating expressions in a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
+ discrete Real x;
+ discrete Integer temp_1;
+initial equation 
+ temp_1 = integer(time * 3);
+ pre(x) = 0.0;
+equation
+ when temp_1 > 1 then
+  x = floor(time * 0.3 + 4.2);
+ end when;
+ when {time * 3 < pre(temp_1), time * 3 >= pre(temp_1) + 1} then
+  temp_1 = integer(time * 3);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
+")})));
+end InWhenEquations;
+
+end EventGeneratingExps;
+
 end TransformCanonicalTests;

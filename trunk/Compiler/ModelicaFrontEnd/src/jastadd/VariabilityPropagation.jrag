@@ -25,7 +25,7 @@ aspect VariabilityPropagation {
 	 */
 	inh boolean FAbstractEquation.canPropagate();
 	eq Root.getChild().canPropagate() = false;
-	eq FClass.getChild().canPropagate() = true;
+	eq FClass.getFEquationBlock().canPropagate() = true;
 	eq FIfWhenElseEquation.getChild().canPropagate() = false;
 	
 	syn boolean FEquation.canPropagate() =

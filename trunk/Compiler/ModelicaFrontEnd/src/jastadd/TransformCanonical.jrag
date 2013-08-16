@@ -84,6 +84,7 @@ aspect TransformCanonical {
 		functionInliningIfSet();
 		aliasEliminationIfSet();
 		addFDerivativeVariables();
+		extractEventGeneratingExps();
 		addFPreVariables();
         enableIfEquationRewrite();
 		enableWhenEquationRewrite();
@@ -6104,5 +6105,67 @@ aspect ResidualPairPropagation{
 			fae.setResidual(new FResidual(new Opt<FIdUse>(getIterationVariable().fullCopy()), getLevel()));
 			getIterationVariable().myFV().setHGTType(FClass.HGTVariableType.PAIR);
 		}
+	}
+}
+
+
+
+aspect EventGeneratingExps {
+	/**
+	 * Extracts event generating expressions into when equations.
+	 * Replaces the exp with a temp var, introduces an intial equation
+	 * and a when equation for the temp var.
+	 */
+	public void FClass.extractEventGeneratingExps() {
+
+		ArrayList<FEventGeneratingExp> eventExps = collectEventGeneratingExps();
+		Collections.reverse(eventExps);
+		
+		// Calculating type() needs to be done before expressions are changed
+		// in case of nested event generating expressions.
+		ArrayList<FVariable> tempVars = new ArrayList<FVariable>();
+		for (FEventGeneratingExp exp: eventExps) {
+			FVariable tempVar = exp.type().createTempFVariable(
+					new FQNameFull(exp.tempVarName()), FTypePrefixVariability.fDiscrete());
+			tempVars.add(tempVar);
+		}
+		
+		for (int i = 0; i < eventExps.size(); i++) {
+			FEventGeneratingExp exp = eventExps.get(i);
+			FVariable tempVar = tempVars.get(i);
+			
+			addFVariable(tempVar);
+			exp.replaceMe(tempVar.createUseExp());
+			addFInitialEquation(new FEquation(tempVar.createUseExp(), exp.fullCopy()));
+			
+			// Add when equation
+			List<FAbstractEquation> eqList = new List<FAbstractEquation>();
+			eqList.add(new FEquation(tempVar.createUseExp(), exp.fullCopy()));
+			addFEquation(new FWhenEquation(new FNormalEquation(), eqList, 
+					exp.createGuardExp(tempVar), new Opt<FIfWhenElseEquation>()));
+			
+		}
+	}
+		
+	/**
+	 * Collects event generating expressions.
+	 */
+	coll ArrayList<FEventGeneratingExp> FClass.collectEventGeneratingExps() 
+		[new ArrayList<FEventGeneratingExp>()] with add root FClass;
+	FEventGeneratingExp contributes this
+		when inEquationSection() && !inDiscreteLocation() && !getFExp().variability().parameterOrLess() 
+		to FClass.collectEventGeneratingExps()
+		for myFClass();
+	
+	/**
+	 * Creates a guard expression for an event generating expression
+	 * extracted to a when equation.
+	 */
+	syn FExp FEventGeneratingExp.createGuardExp(FVariable var);
+	eq FFloorExp.createGuardExp(FVariable var) {
+		FArray guards = new FArray();
+		guards.addFExp(new FLtExp(getFExp().fullCopy(), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FGeqExp(getFExp().fullCopy(), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		return guards;
 	}
 }
