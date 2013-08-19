@@ -1357,78 +1357,79 @@ class TestNegativeNominalScaling(object):
 
 class TestDependentParameterEvaluation:
 
-    def run(self,fpath,cpath,z):
+    def run(self, fpath, cpath, expected_result):
         """
         Test recomputation of dependent parameters when setting
         independent parameters.
         """
-
         jmu_name = compile_jmu(cpath,fpath)
         model = JMUModel(jmu_name)
-        N.testing.assert_almost_equal(model.z,z)    
+        
+        for k in expected_result.keys():
+            nose.tools.assert_almost_equal(model.get(k), expected_result.get(k))
 
     @testattr(stddist = True)
     def test_dep_par_1(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar1"
-        z = [ 1.,  1.,  2.,  2.,  2.,  2.,  2.,  1.,  1.,  1.,  2.,  2.,  1., 0., 1.,  0.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'i':1,'i2':2,'a[1]':2,'a[2]':2,'b[1]':2,'b[2]':2,'N1':1,'N2':1,'N':2,'r[1]':1,'r[2]':1,'r[3]':2,'b1':1,'b2':0,'b3':1,'b4':0}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_2(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar2"
-        z = [1., 4., 0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0':1, 'p':4}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_3(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar3"
-        z = [  2.,   3.,   4.,   6.,  10.,   0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0[1]':2, 'p0[2]':3, 'p':10}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_4(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar4"
-        z = [ 2.,  3.,  2.,  3.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0[1]':2, 'p0[2]':3, 'p[1]':2, 'p[2]':3}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_5(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar5"
-        z = [ 2.,  3.,  4.,  6.,  4.,  6.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0[1]':2, 'p0[2]':3, 'p[1]':4, 'p[2]':6}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_6(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar6"
-        z =[ 2.,  3.,  4.,  6.,  4.,  6.,  4.,  6.,  4.,  6.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0[1]':2, 'p0[2]':3, 'p1[1]':4, 'p1[2]':6, 'p2[1]':4, 'p2[2]':6}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_7(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar7"
-        z = [ 2.,  3.,  4.,  6.,  4.,  6.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'p0[1]':2, 'p0[2]':3, 'p[1]':4, 'p[2]':6}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_8(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepPar8"
-        z = [ 2.,  1.,  3.,  0.,  1.,  1.,  0.,  0.,  0.,  1.,  1.,  1.,  0., 0.,  0.,  0.,  0.,  0.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'N1':2, 'N2':1, 'N3':3,'b[1]':0, 'b[2]':1, 'b[3]':1, 'x[1]':1, 'x[2]':1,'x[3]':1}
+        self.run(fpath, cpath, expected_result)
 
     @testattr(stddist = True)
     def test_dep_par_9(self):
         fpath = os.path.join(get_files_path(), 'Modelica', "DepParTests.mo")
         cpath = "DepParTests.DepRec1"
-        z = [ 3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  3.,  3.,  4.,  6.,  0.]
-        self.run(fpath,cpath,z)
+        expected_result = {'r[1].x':3, 'r[1].y':3, 'r[2].x':4, 'r[2].y':6, 'r2[1].x':3, 'r2[1].y':3, 'r2[2].x':4, 'r2[2].y':6}
+        self.run(fpath, cpath, expected_result)
 
 class Test_JMU_methods:
     """
