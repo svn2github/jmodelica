@@ -87,3 +87,25 @@ class TestIntegerArg1(SimulationTest):
         Test that results match the expected ones.
         """
         self.assert_end_value('x', 4.0)
+        
+class TestZeroDimArray(SimulationTest):
+    """
+    Test of functions with zero length array argument.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.TestZeroDimArray')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
+        self.run()
+
+    @testattr(assimulo = True)
+    def test_result(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_end_value('y', 1.0)

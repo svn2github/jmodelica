@@ -237,5 +237,19 @@ equation
   x = F({time,time*2});
 end FuncTest1;
 
+model TestZeroDimArray
+  function f
+    input Real[:] x;
+    input Real y;
+    output Real z;
+    algorithm
+        z := y + sum(x);
+  end f;
+
+  parameter Integer n = 0;
+  Real x[n] = (1:n) * time;
+  Real y = f(x, time);
+end TestZeroDimArray;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;
