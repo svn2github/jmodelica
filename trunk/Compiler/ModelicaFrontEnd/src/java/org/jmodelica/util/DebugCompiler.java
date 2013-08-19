@@ -4,10 +4,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -21,7 +19,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
+import org.jmodelica.util.logging.Level;
+import org.jmodelica.util.logging.ModelicaLogger;
 
+@SuppressWarnings("serial")
 public class DebugCompiler extends JFrame {
 
 	private JTextArea code;
@@ -95,7 +96,7 @@ public class DebugCompiler extends JFrame {
 				fs.close();
 				
 				out.reset();
-				ModelicaCompiler.setLogger(out);
+				mc.setLogger(out);
 				mc.compileModel(new String[] { file.getAbsolutePath() }, name);
 				
 				if (deleteAll)
@@ -109,7 +110,7 @@ public class DebugCompiler extends JFrame {
 				ex.printStackTrace();
 				return;
 			}
-			out.log(Level.SEVERE, "*** Compilation sucessful. ***");
+			out.debug("*** Compilation sucessful. ***");
 		}
 
 	}
@@ -119,6 +120,7 @@ public class DebugCompiler extends JFrame {
 		private JTextArea target;
 
 		public OutputHandler(JTextArea target) {
+			super(Level.DEBUG);
 			this.target = target;
 		}
 
@@ -126,15 +128,25 @@ public class DebugCompiler extends JFrame {
 			target.setText("");
 		}
 
-		public void log(Level level, String message) {
+		@Override
+		protected void write(Level level, String message) {
 			target.append(message + "\n");
 		}
-		
+
 		@Override
-		public void log(Level level, String format, Object... args) {
-			target.append(String.format(format, args));
+		protected void write(Level level, Throwable throwable) {
+			write(level, throwable.toString());
 		}
-		
+
+		@Override
+		protected void write(Level level, Problem problem) {
+			write(level, problem.toString());
+		}
+
+		@Override
+		public void close() {
+		}
+
 	}
 
 }

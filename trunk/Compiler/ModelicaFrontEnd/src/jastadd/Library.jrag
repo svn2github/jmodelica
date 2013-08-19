@@ -91,7 +91,7 @@ aspect Library {
 				if (e.getMessage() != null)
 					msg = msg + "   " + e.getMessage();
 				log.error(msg);
-				log.stackTrace(e);
+				log.debug(e);
 				return createErrorStoredDefinition();
 			} 		
 			
@@ -115,7 +115,7 @@ aspect Library {
 				if (e.getMessage() != null)
 					msg = msg + "   " + e.getMessage();
 				log.error(msg);
-				log.stackTrace(e);
+				log.debug(e);
 				return createErrorStoredDefinition();
 			} 
 		}

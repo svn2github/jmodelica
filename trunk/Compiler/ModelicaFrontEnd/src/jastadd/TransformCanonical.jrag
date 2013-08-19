@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Iterator;
+import org.jmodelica.util.ParallelIterable;
 
 
 /* This causes conflicts

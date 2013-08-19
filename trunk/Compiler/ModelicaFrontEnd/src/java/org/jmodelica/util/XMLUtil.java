@@ -33,4 +33,11 @@ public class XMLUtil {
 		return sb.toString();
 	}
 	
+	public static String[] escape(String ... messages) {
+		String[] escaped = new String[messages.length];
+		for (int i = 0; i < messages.length; i++)
+			escaped[i] = escape(messages[i].toString());
+		return escaped;
+	}
+	
 }

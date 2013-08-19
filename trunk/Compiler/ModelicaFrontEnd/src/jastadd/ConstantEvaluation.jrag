@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import org.jmodelica.util.BinaryOperation;
+import org.jmodelica.util.SingleIterator;
+import org.jmodelica.util.ConstArrayIterator;
 
 /**
  * \brief Provides methods to evaluate flat constant 

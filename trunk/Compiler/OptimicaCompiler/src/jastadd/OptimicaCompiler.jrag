@@ -201,7 +201,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		try {
 			oc.setArguments("OptimicaCompiler", args, programarguments);
 		} catch(JModelicaHomeNotFoundException e) {
-			oc.handleException(e);
+			log.error(e);
 		}
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);

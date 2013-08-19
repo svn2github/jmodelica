@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 public class TestSuite {
 	String name;
@@ -132,17 +131,27 @@ public class TestSuite {
 	}
 	
 	private static class SysErrLogger extends ModelicaLogger {
+		public SysErrLogger() {
+			super(Level.WARNING);
+		}
 		
-	    public void log(Level level, String message) {
-	    	if (level.intValue() >= Level.WARNING.intValue())
-	    		System.err.println(message);
-	    }
-	    
-	    public void log(Level level, String format, Object... args) {
-	    	if (level.intValue() >= Level.WARNING.intValue())
-	    		System.err.println(String.format(format, args));
-	    }
+		@Override
+		public void close() {}
 
+		@Override
+		protected void write(Level level, String logMessage) {
+			System.err.println(logMessage);
+		}
+		
+		@Override
+		protected void write(Level level, Throwable throwable) {
+			write(level, throwable.toString());
+		}
+
+		@Override
+		protected void write(Level level, Problem problem) {
+			write(level, problem.toString());
+		}
 	}
 	
 }

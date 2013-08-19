@@ -32,11 +32,6 @@ class ModelicaCompiler(object):
     User class for accessing the Java ModelicaCompiler class. 
     """
     
-    LOG_ERROR = ModelicaCompilerInterface.ERROR
-    LOG_WARNING = ModelicaCompilerInterface.WARNING
-    LOG_INFO = ModelicaCompilerInterface.INFO
-    LOG_DEBUG = ModelicaCompilerInterface.DEBUG
-    
     jm_home = pym.environ['JMODELICA_HOME']
 
     options_file_path = os.path.join(jm_home, 'Options','options.xml')
@@ -55,16 +50,7 @@ class ModelicaCompiler(object):
         options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = pym._create_compiler(ModelicaCompilerInterface, options)
-            
-    @classmethod
-    def _set_log_level(cls, level):
-        ModelicaCompilerInterface.setLogLevel(ModelicaCompilerInterface.log, level)
-
-    @classmethod
-    def _get_log_level(cls):
-        return ModelicaCompilerInterface.getLogLevel(ModelicaCompilerInterface.log)
-    
-    
+        
     def set_options(self, compiler_options):
         """
         Set compiler options. See available options in the file options.xml.
@@ -97,47 +83,20 @@ class ModelicaCompiler(object):
                 Should be of the following types: boolean, string, integer, \
                 float or list" %key)
 
-    @classmethod
-    def set_compiler_log_level(cls, log_level):
+    def set_compiler_logger(self, log_string):
         """ 
-        Set the level of log messages. 
-        
-        Valid options are: 
-         - ModelicaCompiler.LOG_ERROR, 
-         - ModelicaCompiler.LOG_WARNING
-         - ModelicaCompiler.LOG_INFO
-         - ModelicaCompiler.LOG_DEBUG.
+        Set the logger. 
         
         Parameters::
         
-            level --
-                Level of log messages to set.
+            log_string --
+                Configuration string for the logger.
         """
-        # set compiler log level
-        if log_level.lower().startswith('w'):
-            cls._set_log_level(ModelicaCompiler.LOG_WARNING)
-        elif log_level.lower().startswith('e'):
-            cls._set_log_level(ModelicaCompiler.LOG_ERROR)
-        elif log_level.lower().startswith('i'):
-            cls._set_log_level(ModelicaCompiler.LOG_INFO)
-        elif log_level.lower().startswith('d'):
-            cls._set_log_level(ModelicaCompiler.LOG_DEBUG)
-        else:
-            logging.warning("Invalid compiler_log_level: "+str(log_level) + 
-            " using level 'warning' instead.")
-            cls._set_log_level(ModelicaCompiler.LOG_WARNING)
+        try:
+            self._compiler.setLogger(log_string)
+        except IllegalLogStringException as ex:
+            self._handle_exception(ex)
 
-    @classmethod
-    def get_compiler_log_level(cls):
-        """ 
-        Get the current level of log messages set. 
-        
-        Returns::
-        
-            The current level of log messages.
-        """
-        return cls._get_log_level()
-        
     def get_modelicapath(self):
         """ 
         Get the path to Modelica libraries set for this compiler.
@@ -366,6 +325,27 @@ class ModelicaCompiler(object):
         """
         self._compiler.setCTemplate(template)
         
+    def get_warnings(self):
+        """ 
+        Get the warnings that have been collected in the compiler since
+        last call to this method.
+        
+        Returns::
+        
+            A list of warnings
+        """
+        java_warnings = self._compiler.retreiveAndClearWarnings()
+        warnings = []
+        for java_warning in java_warnings:
+            warnings.append(CompilationWarning( \
+                java_warning.kind().toString(), \
+                java_warning.fileName(), \
+                java_warning.beginLine(), \
+                java_warning.beginColumn(), \
+                java_warning.message() \
+            ));
+        return warnings
+
         
     def compile_JMU(self, class_name, file_name, compile_to):
         """
@@ -389,12 +369,13 @@ class ModelicaCompiler(object):
         
             A list of warnings given by the compiler
         """
-        log = JPypeCompilerLogHandler()
-        log.start(self._compiler)
+        self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
             self._compiler.compileJMU(class_name, file_name, compile_to)
-        finally:
-            return log.end(self._compiler)
+            self._compiler.closeLogger()
+        except jpype.JavaException as ex:
+            self._handle_exception(ex)
+        return self.get_warnings()
         
     def compile_FMU(self, class_name, file_name, target, compile_to):
         """
@@ -426,12 +407,13 @@ class ModelicaCompiler(object):
         
             A list of warnings given by the compiler
         """
-        log = JPypeCompilerLogHandler()
-        log.start(self._compiler)
+        self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
             self._compiler.compileFMU(class_name, file_name, target, compile_to)
-        finally:
-            return log.end(self._compiler)
+            self._compiler.closeLogger()
+        except jpype.JavaException as ex:
+            self._handle_exception(ex)
+        return self.get_warnings()
 
     def compile_FMUX(self, class_name, file_name, compile_to):
         """
@@ -455,12 +437,13 @@ class ModelicaCompiler(object):
         
             A list of warnings given by the compiler
         """
-        log = JPypeCompilerLogHandler()
-        log.start(self._compiler)
+        self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
             self._compiler.compileFMUX(class_name, file_name, compile_to)
-        finally:
-            return log.end(self._compiler)
+            self._compiler.closeLogger()
+        except jpype.JavaException as ex:
+            self._handle_exception(ex)
+        return self.get_warnings()
 
     def parse_model(self,model_file_name):   
         """ 
@@ -603,8 +586,7 @@ class ModelicaCompiler(object):
         underlying Java classes might throw. Raises an appropriate Python error 
         or the default JError.
         """
-        if ex.javaClass() is ModelicaCompilerException \
-            or ex.javaClass() is OptimicaCompilerException:
+        if ex.javaClass() is CompilerException:
             arraylist = ex.__javaobject__.getProblems()
             itr = arraylist.iterator()
 
@@ -634,9 +616,9 @@ class ModelicaCompiler(object):
             raise ModelicaClassNotFoundError(
                 str(ex.__javaobject__.getClassName()))
         
-        if ex.javaClass() is OptimicaClassNotFoundException:
-            raise OptimicaClassNotFoundError(
-                str(ex.__javaobject__.getClassName()))
+        if ex.javaClass() is IllegalLogStringException:
+            raise IllegalLogStringError(
+                str(ex.__javaobject__.getMessage()))
         
         if ex.javaClass() is jpype.java.io.FileNotFoundException:
             raise IOError(
@@ -709,34 +691,6 @@ class OptimicaCompiler(ModelicaCompiler):
         
         self._compiler = pym._create_compiler(OptimicaCompilerInterface, options)
 
-    @classmethod
-    def set_log_level(self,level):
-        """ 
-        Set the level of log messages. Valid options are 
-        OptimicaCompiler.LOG_ERROR, OptimicaCompiler.LOG_WARNING and 
-        OptimicaCompiler.LOG_INFO. They will print, errors only, both errors and 
-        warnings and all log messages respectively.
-        
-        Parameters::
-        
-            level --
-                Level of log messages to set. Valid options are 
-                OptimicaCompiler.LOG_ERROR, OptimicaCompiler.LOG_WARNING 
-                and OptimicaCompiler.LOG_INFO.
-        """
-        OptimicaCompilerInterface.setLogLevel(OptimicaCompilerInterface.log, level)
-
-    @classmethod
-    def get_log_level(self):
-        """ 
-        Get the current level of log messages set. 
-        
-        Returns::
-        
-            The current level of log messages.
-        """
-        return OptimicaCompilerInterface.getLogLevel(OptimicaCompilerInterface.log)
-
     def set_boolean_option(self, key, value):
         """ 
         Set the boolean option with key to value. If the option does not exist 
@@ -758,54 +712,3 @@ class OptimicaCompiler(ModelicaCompiler):
             self._compiler.setBooleanOption(key, value)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
-
-class JPypeCompilerLogHandler(CompilerLogHandler):
-    """
-    Internal class that extends teh CompilerLogHandler. This class handles
-    logging when the interation with the compiler is done through a JPype.
-    """
-    def _create_log_handler_thread(self, stream):
-        return JPypeLogHandlerThread(stream)
-    
-    def start(self, _compiler):
-        PipedOutputStream = jpype.JClass("java.io.PipedOutputStream")
-        PipedInputStream = jpype.JClass("java.io.PipedInputStream")
-        InputStreamReader = jpype.JClass("java.io.InputStreamReader")
-        BufferedReader = jpype.JClass("java.io.BufferedReader")
-        pos = PipedOutputStream()
-        _compiler.setStreamLoggerStaticCall(pos)
-        stream = BufferedReader(InputStreamReader(PipedInputStream(pos)))
-        CompilerLogHandler.start(self, stream)
-    
-    def end(self, _compiler):
-        _compiler.closeStreamLoggerStaticCall()
-        return CompilerLogHandler.end(self)
-
-class JPypeLogHandlerThread(LogHandlerThread):
-    """
-    Internal class that extends teh LogHandlerThread. This class handles
-    logging when the interation with the compiler is done through a JPype.
-    """
-    def __init__(self, stream):
-        LogHandlerThread.__init__(self, JPypeStreamConverter(stream))
-    def run(self):
-        jpype.attachThreadToJVM();
-        LogHandlerThread.run(self);
-
-class JPypeStreamConverter():
-    """
-    Internal class that converts from an Java stream to something that
-    works with python.
-    """
-    def __init__(self, stream):
-        self.stream = stream;
-        self.readBufferSize = 1024
-        self.readBuffer = jpype.JArray(jpype.JChar, 1)(self.readBufferSize)
-    def read(self, num = -1):
-        limit = self.readBufferSize
-        if num >= 0 and num < self.readBufferSize:
-            limit = num
-        numRead = self.stream.read(self.readBuffer, 0, limit)
-        if numRead == -1:
-            return ''
-        return ''.join(self.readBuffer[:numRead])

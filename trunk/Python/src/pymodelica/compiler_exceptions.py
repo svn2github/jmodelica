@@ -58,6 +58,12 @@ class OptimicaClassNotFoundError(JError):
     """ 
     pass
 
+class IllegalLogStringError(JError):
+    """ 
+    Class for a errors raised if the log string is invalid
+    not be found.
+    """ 
+    pass
 
 class CompilerError(JError):
     """ 
@@ -184,7 +190,7 @@ class CompilationProblem():
         """
         Prints a nice textural representation of the problem
         """
-        if self.kind == 'other':
+        if self.kind.lower() == 'other':
             kind = 'At'
         else:
             kind = self.kind.title() + ' error at'

@@ -37,11 +37,11 @@ OptionRegistryInterface = org.jmodelica.util.OptionRegistry
 # Exceptions
 UnknownOptionException = jpype.JClass(
     'org.jmodelica.util.OptionRegistry$UnknownOptionException')
+    
+IllegalLogStringException = org.jmodelica.util.IllegalLogStringException
 
-ModelicaCompilerException = org.jmodelica.modelica.compiler.CompilerException
-OptimicaCompilerException = org.jmodelica.optimica.compiler.CompilerException
-ModelicaClassNotFoundException = org.jmodelica.modelica.compiler.ModelicaClassNotFoundException
-OptimicaClassNotFoundException = org.jmodelica.optimica.compiler.ModelicaClassNotFoundException
+CompilerException = org.jmodelica.util.CompilerException
+ModelicaClassNotFoundException = org.jmodelica.util.ModelicaClassNotFoundException
 ModelicaCCodeCompilationException = org.jmodelica.modelica.compiler.CcodeCompilationException
 OptimicaCCodeCompilationException = org.jmodelica.optimica.compiler.CcodeCompilationException
 

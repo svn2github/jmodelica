@@ -98,8 +98,10 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: Current directory.
 
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w', 
-            'error'/'e' or 'info'/'i'.
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+            by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -178,8 +180,10 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: Current directory.
 
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w', 
-            'error'/'e' or 'info'/'i'.
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+            by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -263,8 +267,10 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             Default: Current directory.
             
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w', 
-            'error'/'e' or 'info'/'i'.
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+            by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -309,7 +315,7 @@ def _compile_unit(class_name, file_name, compiler, target,
         comp.set_options(compiler_options)
         
         # set log level
-        comp.set_compiler_log_level(compiler_log_level)
+        comp.set_compiler_logger(compiler_log_level)
         
         # compile unit in java
         if (target.find('fmume') >= 0 or target.find('fmucs') >= 0): 
@@ -368,8 +374,10 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             Default: Current directory.
         
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w', 
-            'error'/'e' or 'info'/'i'.
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+            by appended flag with a colon and file name.
             Default: 'warning'
         
         jvm_args --
@@ -415,7 +423,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     else:
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
-    
+    print(cmd)
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()
     log.start(process.stderr);
@@ -436,17 +444,17 @@ def _gen_compiler_options(compiler_options):
     opts = opts.replace('False', 'false')
     return opts
     
-def _gen_log_level(log_level):
+def _gen_log_level(log_string):
     """
     Helper function. Takes log level as accepted by Python and generates a string
     which is understood by the Java compiler.
     """
-    if log_level[0] in ('i', 'w', 'e', 'd'):
-        return log_level[0]
-    else:
-        logging.warning("Log level %s is not allowed. Using the default log level \"error\" instead." %(log_level))
-        return 'e'
-        
+    if "|stderr" in log_string:
+        raise IllegalLogStringError("Piping compiler log to stderr is not allowed in separate process.")
+    if len(log_string) == 0:
+        log_string = 'w'
+    log_string += ",w|xml|stderr"
+    return log_string
     
 def _get_separate_JVM():
     """

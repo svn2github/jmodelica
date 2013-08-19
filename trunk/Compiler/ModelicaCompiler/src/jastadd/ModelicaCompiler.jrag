@@ -38,14 +38,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-import java.util.logging.StreamHandler;
+import java.util.Stack;
 import java.util.regex.Pattern;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
@@ -55,11 +48,18 @@ import java.util.Iterator;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.jmodelica.util.ModelicaLogger;
+import org.jmodelica.util.logging.ModelicaLogger;
+import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.jmodelica.util.StreamGobbler;
-import org.jmodelica.util.XMLUtil;
+import org.jmodelica.util.SymbolValueFixer;
+import org.jmodelica.util.ModelicaException;
+import org.jmodelica.util.MemorySpider;
+import org.jmodelica.util.CompilerException;
+import org.jmodelica.util.ModelicaClassNotFoundException;
+import org.jmodelica.util.PassAndForget;
+import org.jmodelica.util.IllegalLogStringException;
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -114,28 +114,9 @@ aspect ModelicaCompilerMain {
  * 
  */
 public class ModelicaCompiler {
-	protected static final String CONSOLE_LOG_NAME = ModelicaCompiler.class.getName() + ".console";
-	protected static final String STREAM_LOG_NAME = ModelicaCompiler.class.getName() + ".stream";
-	protected static ModelicaLogger log = ModelicaLoggers.getConsoleLogger(CONSOLE_LOG_NAME);
 	
-	public static final String DEBUG = "d";
-	public static final String INFO = "i";
-	public static final String WARNING = "w";
-	public static final String ERROR = "e";
-	public static final String INHERITED = "inh";
-	protected static final HashMap<String, Level> levels = new HashMap<String, Level>();
-		
-	// This should be two static blocks, but jastadd ignores those, so this is a workaround
-	private static void staticBlocks() {
-		if (levels.isEmpty()) { // Using this as check if this is run already
-			levels.put(DEBUG,   Level.FINE);
-			levels.put(INFO,    Level.INFO);
-			levels.put(WARNING, Level.WARNING);
-			levels.put(ERROR,   Level.SEVERE);
-			ASTNode.log = log;
-		}
-	}
-	public static final String DEFAULT_LEVEL = ERROR;
+	public static final Level DEFAULT_LEVEL = Level.ERROR;
+	protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
 	
 	protected String xmlTpl = null;
 	protected String cTemplatefile = null;
@@ -160,6 +141,7 @@ public class ModelicaCompiler {
 	protected File resourceDir = null;
 	
 	protected String[] targetPlatforms = null;
+	protected Collection<Problem> warnings = new ArrayList<Problem>();
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String cTemplatefile) {
 		this(options);
@@ -168,13 +150,10 @@ public class ModelicaCompiler {
 	}
 	
 	public ModelicaCompiler(OptionRegistry options) {
-		this();
 		this.options = options;
 	}
 	
-	protected ModelicaCompiler() {
-		staticBlocks();
-	}
+	protected ModelicaCompiler() {}
 
 	public void defaultOptionsFMUME() {
 		setBooleanOption("generate_ode", true);
@@ -883,7 +862,6 @@ public class ModelicaCompiler {
 	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		try {
-			log.raw("<Compilation>");
 			// set invokegc if set
 			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
 			
@@ -912,42 +890,11 @@ public class ModelicaCompiler {
 			packUnit(className, compileTo, unitType);
 			deleteOutDir();
 			ASTNode.endStep("packUnit()");
-		} catch (CompilerException e) {
-			log.raw(e.getXMLMessage());
-		} catch (Throwable t) {
-			StringBuilder sb = new StringBuilder();
-			for (StackTraceElement trace : t.getStackTrace()) {
-				sb.append(trace.getClassName());
-				sb.append('.');
-				sb.append(trace.getMethodName());
-				sb.append('(');
-				if (trace.getFileName() == null) {
-					sb.append("Unknown Source");
-				} else {
-					sb.append(trace.getFileName());
-					if (trace.getLineNumber() >= 0) {
-						sb.append(':');
-						sb.append(trace.getLineNumber());
-					}
-				}
-				sb.append(")\n");
-			}
-			log.raw(
-					"<Exception>\n" +
-					"    <value name=\"kind\">%s</value>\n" +
-					"    <value name=\"message\">%s</value>\n" +
-					"    <value name=\"stacktrace\">%s</value>\n" +
-					"</Exception>",
-					XMLUtil.escape(t.getClass().getName()),
-					XMLUtil.escape(t.getMessage()),
-					XMLUtil.escape(sb.toString())
-			);
 		} finally {
 			log.debug("Time useage and memory usage change during compilation steps:");
 			ASTNode.getStepInfo().logReport();
 			if (options.getBooleanOption("debug_csv_step_info"))
 				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
-			log.raw("</Compilation>");
 		}
 	}
 	
@@ -1320,8 +1267,19 @@ public class ModelicaCompiler {
 			throw ce;
 		} else {
 			// there are only warnings and halt_on_warning = false so just send them to logger
-			log.raw(ce.getXMLMessage());
+			log.logCompilerException(ce);
+			// and save to warnings list
+			warnings.addAll(problems);
 		}
+	}
+	
+	/**
+	 * Retreives a list of warnings and clear the internal list.
+	*/
+	public Problem[] retreiveAndClearWarnings() {
+		Problem[] oldWarnings = warnings.toArray(new Problem[warnings.size()]);
+		warnings = new ArrayList<Problem>();
+		return oldWarnings;
 	}
 	
 	/**
@@ -1531,133 +1489,39 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * Use the specified logger.
-	 * 
-	 * Retains the current log level.
+	 * Set the default logger and default level.
 	 */
-	public static void setLogger(ModelicaLogger newLog) {
-		Level l = (log == null) ? null : log.getLevel();
-		log = newLog;
-		ASTNode.log = newLog;
-		if (l != null)
-			newLog.setLevel(l);
-	}
-	
-	/**
-	 * Use the default logger.
-	 * 
-	 * Retains the current log level.
-	 */
-	public static void setDefaultLogger() {
-		setLogger(ModelicaLoggers.getConsoleLogger(CONSOLE_LOG_NAME));
-	}
-	
-	/**
-	 * Create and use a logger that logs to a stream.
-	 * 
-	 * Retains the current log level.
-	 */
-	public static void setStreamLogger(OutputStream stream) {
-		setLogger(ModelicaLoggers.getStreamLogger(STREAM_LOG_NAME, stream));
-	}
-	
-	/**
-	 * This is required for JPype since it is not possible to invoke static
-	 * methods using an class instance.
-	 */
-	public void setStreamLoggerStaticCall(OutputStream stream) {
-		setStreamLogger(stream);
-	}
-	
-	/**
-	 * Close and disconnect any stream connected to the stream logger.
-	 */
-	public static void closeStreamLogger() {
-		ModelicaLoggers.closeStreamLogger(STREAM_LOG_NAME);
-	}
-	
-	/**
-	 * This is required for JPype since it is not possible to invoke static
-	 * methods using an class instance.
-	 */
-	public void closeStreamLoggerStaticCall() {
-		closeStreamLogger();
-	}
-	
-	/**
-	 * Sets logging to the level specified. Valid values are:
-	 * ModelicaCompiler.DEBUG, ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
-	 * 
-	 * Default log level setting is ERROR. Messages will be printed to the
-	 * standard out.
-	 * 
-	 * @param level
-	 *            The level of logging to use as of now.
-	 */
-	public static void setLogLevel(String level) {
-		setLogLevel(log, level);
-	}
-	
-	/**
-	 * Returns the log level that is currently set.
-	 * 
-	 * @return Log level setting for this class.
-	 */
-	public static String getLogLevel() {
-		return getLogLevel(log);
-	}
-	
-	/**
-	 * Sets logging to the level specified. Valid values are:
-	 * ModelicaCompiler.DEBUG, ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
-	 * 
-	 * Default log level setting is ERROR. Messages will be printed to the
-	 * standard out.
-	 * 
-	 * @param level
-	 *            The level of logging to use as of now.
-	 */
-	public static void setLogLevel(ModelicaLogger logger, String level) {
-		if (logger != null) {
-			Level lv = levels.get(level);
-			if (lv == null)
-				lv = levels.get(DEFAULT_LEVEL);
-			log.setLevel(lv);
+	public void setDefaultLogger() {
+		try {
+			setLogger(DEFAULT_LEVEL + "|stdout");
+		} catch (IllegalLogStringException e) {
+			e.printStackTrace(); // Should never happen unless someone made major bobo!
 		}
 	}
 	
 	/**
-	 * Returns the log level that is currently set.
-	 * 
-	 * @return Log level setting for this class.
+	 * Configure logging according to <code>logString</code>.
 	 */
-	public static String getLogLevel(ModelicaLogger logger) {
-		Level lv = logger != null ? logger.getLevel() : null;
-		return lv != null ? lv.toString() : ModelicaCompiler.INHERITED;
+	public void setLogger(String logString) throws IllegalLogStringException {
+		setLogger(ModelicaLogger.createModelicaLoggersFromLogString(logString));
 	}
 	
 	/**
-	 * Sets logging to the level specified. Valid values are:
-	 * ModelicaCompiler.DEBUG, ModelicaCompiler.INFO, ModelicaCompiler.WARNING or ModelicaCompiler.ERROR
-	 * 
-	 * Default log level setting is ERROR. Messages will be printed to the
-	 * standard out.
-	 * 
-	 * @param level
-	 *            The level of logging to use as of now.
+	 * Change logger to <code>logger</code>
 	 */
-	public static void setLogLevel(String logger, String level) {
-		setLogLevel(ModelicaLoggers.getLogger(logger), level);
+	public void setLogger(ModelicaLogger logger) {
+		log.close();
+		log = logger;
+		ASTNode.log = log;
 	}
 	
 	/**
-	 * Returns the log level that is currently set.
-	 * 
-	 * @return Log level setting for this class.
+	 * Close and disconnect all loggers.
 	 */
-	public static String getLogLevel(String logger) {
-		return getLogLevel(ModelicaLoggers.getLogger(logger));
+	public void closeLogger() {
+		log.close();
 	}
+	
 
 	private static String[] convertEnv(Map<String, String> envMap) {
 		String[] res = new String[envMap.size()];
@@ -1723,7 +1587,7 @@ public class ModelicaCompiler {
 			options = new OptionRegistry(optionsfile);
 		} catch(Exception e) {
 			log.warning("The options XML file could not be loaded, using defaults.");
-			log.stackTrace(e);
+			log.debug(e);
 			options = new OptionRegistry();
 		}
 		
@@ -1783,8 +1647,14 @@ public class ModelicaCompiler {
 		String modelicapath = null;
 		
 		//log option
-		String level = programarguments.get("log");
-		setLogLevel(log, (level != null) ? level : ModelicaCompiler.ERROR);
+		try {
+			String logString = programarguments.get("log");
+			setLogger(logString);
+		} catch (IllegalLogStringException e) {
+			log.error(e.getMessage());
+			closeLogger();
+			System.exit(1);
+		}
 		
 		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
@@ -1824,8 +1694,8 @@ public class ModelicaCompiler {
 		// set arguments
 		try {
 			mc.setArguments("ModelicaCompiler", args, programarguments);
-		} catch(JModelicaHomeNotFoundException e) {
-			mc.handleException(e);
+		} catch(Throwable e) {
+			log.error(e);
 		}
 		// Compile model
 		mc.compileModelFromCommandLine(args, programarguments);
@@ -1853,23 +1723,16 @@ public class ModelicaCompiler {
 				compileJMU(cl, name, compileTo);
 			else
 				compileFMUME(cl, name, compileTo);
-		} catch (CcodeCompilationException ce) {
-			log.error(ce.getMessage());
-			System.exit(1);
-		} catch (ModelicaClassNotFoundException e){
-			log.error("Could not find the class "+ cl);
-			System.exit(1);
-		} catch (ModelicaException ce) {
-			log.error(ce.getMessage());
-			System.exit(1);
-		} catch (FileNotFoundException e) {
-			log.error("Could not find file: " + e.getMessage());
-			System.exit(1);
-		} catch (OutOfMemoryError e) {
-			log.error("Out of memory. Please set the memory limit of the JVM higher.");
+		} catch (CompilerException ce) {
+			log.logCompilerException(ce);
+			closeLogger();
 			System.exit(1);
 		} catch (Throwable e) {
-			handleException(e);
+			log.error(e);
+			closeLogger();
+			System.exit(1);
+		} finally {
+			closeLogger();
 		}
 	}
 	
@@ -1882,24 +1745,6 @@ public class ModelicaCompiler {
 			if (!part.equals(""))
 				res.add(part);
 		return res.toArray(new String[res.size()]);
-	}
-		
-	/**
-	 * \brief Log error message for exception and exit.
-	 */
-	protected void handleException(Throwable e, String msg) {
-		if (e.getMessage() != null)
-			msg += ": " + e.getMessage();
-		log.error(msg);
-		log.stackTrace(e);
-		System.exit(1);
-	}
-	
-	/**
-	 * \brief Log error message for exception and exit.
-	 */
-	protected void handleException(Throwable e) {
-		handleException(e, "Unknown program error");
 	}
 
 	/**
@@ -1935,194 +1780,6 @@ public class ModelicaCompiler {
 		}
 		
 		return platform;
-	}
-
-	
-	/**
-	 * Class which can be used to fetch static loggers with different purposes.
-	 * 
-	 * This is an attempt to have a general Logger class which contains loggers
-	 * for different purposes. It is then possible to have each logger specially
-	 * configured for its indended use. Right now there is only one logger class
-	 * which is a console logger. It has a specific loglevel and a certain
-	 * formatting. Another useful logger could be a filelogger which has a
-	 * loglevel and an output formatting which suits logging to file.
-	 * 
-	 */
-	public static class ModelicaLoggers {
-		
-		public static final HashMap<String, ModelicaLogger> logs = new HashMap<String, ModelicaLogger>();
-		
-		/**
-		 * Returns a logger with a certain name which prints logs to the
-		 * console. If the name is encountered for the first time a new logger
-		 * is created, otherwise the already created logger with the specific
-		 * name is returned. The log outputs are formatted to suit a console.
-		 * The default log level is Level.WARNING.
-		 * 
-		 * @param name  The name of the logger.
-		 * @return A logger which prints log messages to the console.
-		 */
-		public static ModelicaLogger getConsoleLogger(String name) {
-			ModelicaLogger ml = logs.get(name);
-			if (ml == null) {
-				Logger l = Logger.getLogger(name);
-				l.setUseParentHandlers(false);
-				ConsoleHandler ch = new ConsoleHandler();
-				// Dont limit log level for handler, we do that in logger
-				ch.setLevel(Level.FINEST);
-				ch.setFormatter(new ConsoleFormatter());
-				l.addHandler(ch);
-				l.setLevel(Level.WARNING);
-				ml = new LoggerInModelicaLogger(l);
-				logs.put(name, ml);
-			}
-			return ml;
-		}
-		
-		/**
-		 * Creates a generic logger that logs to an output stream.
-		 * If the name is encountered for the first time a new logger 
-		 * is created, otherwise the already created logger with the specific
-		 * name is set to use the given stream and returned.
-		 * The default log level is Level.WARNING.
-		 * 
-		 * @param name     the name of the logger
-		 * @param stream   the stream to write to
-		 * @return A logger which prints log messages to an output stream.
-		 */
-		public static ModelicaLogger getStreamLogger(String name, OutputStream stream) {
-			Logger l = Logger.getLogger(name);
-			l.setUseParentHandlers(false);
-			for (Handler h : l.getHandlers())
-				l.removeHandler(h);
-			StreamHandler sh = new StreamHandler(stream, new ConsoleFormatter());
-			l.addHandler(sh);
-			
-			ModelicaLogger ml = logs.get(name);
-			if (ml == null) {
-				l.setLevel(Level.WARNING);
-				ml = new LoggerInModelicaLogger(l);
-				logs.put(name, ml);
-			}
-			return ml;
-		}
-		
-		/**
-		 * Close and disconnect all streams connected to the named logger.
-		 */
-		public static void closeStreamLogger(String name) {
-			if (logs.get(name) != null) {
-				Logger l = Logger.getLogger(name);
-				for (Handler h : l.getHandlers()) {
-					if (h instanceof StreamHandler) {
-						l.removeHandler(h);
-						h.close();
-					}
-				}
-			}
-		}
-		
-		/**
-		 * Returns a previously created logger. If no logger with 
-		 * the specified name exists, <code>null</code> is returned.
-		 * 
-		 * @param name  The name of the logger.
-		 */
-		public static ModelicaLogger getLogger(String name) {
-			return logs.get(name);
-		}
-		
-		/**
-		 * Private formatting helper class for the console logger. Formats
-		 * log messages to suit a console output.
-		 * 
-		 */
-		private static class ConsoleFormatter extends SimpleFormatter {
-			public ConsoleFormatter() {
-				super();
-			}
-			@Override
-			public String format(LogRecord record) {
-				return record.getMessage()+"\n";
-			}
-		
-		}
-		
-		/**
-		 * \brief Wrapper class to make java.util.logging.Logger conform to ModelicaLogger.
-		 */
-		private static class LoggerInModelicaLogger extends ModelicaLogger {
-			
-			private Logger logger;
-			
-			public LoggerInModelicaLogger(Logger logger) {
-				this.logger = logger;
-			}
-			
-		    /**
-		     * \brief Log <code>message</code> on log level <code>level</code>.
-		     * 
-		     * This implementation delegates to the selected Logger.
-		     */
-		    public void log(Level level, String message) {
-		    	logger.log(level, XMLUtil.escape(message));
-		    }
-		    
-		    /**
-		     * \brief Log <code>format</code> on log level <code>level</code>
-		     * with parameters <code>args</code>.
-		     * 
-		     * This implementation delegates to the selected Logger.
-		     */
-		    @Override
-		    public void log(Level level, String format, Object... args) {
-		    	if (getLevel().intValue() <= level.intValue())
-		    		log(level, String.format(format, args));
-		    }
-		    
-		    /**
-		     * Log <code>message</code> without any log level check.
-		     * 
-		     * @param message message to log
-		     */
-		    @Override
-		    public void raw(String message) {
-		        logger.log(Level.SEVERE, message);
-		    }
-		    
-		    /**
-		     * Build message using <code>format</code> as format string and 
-		     * output without any log level check.
-		     * 
-		     * @param message message to log
-		     * @param args list of arguments to formatter
-		     */
-		    @Override
-		    public void raw(String format, Object ... args) {
-		        raw(String.format(format, args));
-		    }
-
-		    
-		    /**
-		     * \brief Get the current log level.
-		     * 
-		     * This implementation delegates to the selected Logger.
-		     */
-		    public Level getLevel() { 
-		    	return logger.getLevel(); 
-		    }
-		    
-		    /**
-		     * \brief Set the current log level.
-		     * 
-		     * This implementation delegates to the selected Logger.
-		     */
-		    public void setLevel(Level lv) { 
-		    	logger.setLevel(lv);
-		    }
-		    
-		}
 	}
 }
 

@@ -16,7 +16,6 @@
 
 import java.util.Collection;
 import java.lang.reflect.Method;
-import org.jmodelica.util.*;
 
 public class EvalTestCase extends TestCase {
 	private String[] values = new String[0];

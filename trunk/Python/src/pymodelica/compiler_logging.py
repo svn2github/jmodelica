@@ -40,7 +40,6 @@ class LogErrorParser(xml.sax.ContentHandler):
         self.node = None
         self.state = None
         self.attribute = None
-        self.lastWasNode = False
     def startElement(self, name, attrs):
         if self.state == 'error' or self.state == 'warning' or \
                 self.state == 'exception':
@@ -57,31 +56,21 @@ class LogErrorParser(xml.sax.ContentHandler):
             elif name == "Exception":
                 self.state = 'exception'
                 self.node = {'type':'exception'}
-        self.lastWasNode = True
 
     def endElement(self, name):
         if self.state == 'error' and name == "Error" or \
                 self.state == 'warning' and name == "Warning" or \
                 self.state == 'exception' and name == "Exception":
             problem = self._construct_problem_node(self.node)
-            print problem
             self.problems.append(problem)
             self.state = None
             self.node = None
         elif name == 'value':
             self.attribute = None
-        self.lastWasNode = True
     
     def characters(self, content):
-        if self.state is None:
-            if self.lastWasNode and content[0] == '\r':
-                content = content[1:]
-            if self.lastWasNode and content[0] == '\n':
-                content = content[1:]
-            sys.stdout.write(content)
         if self.node is not None and self.attribute is not None:
             self.node[self.attribute] += content;
-        self.lastWasNode = False
     
     def _construct_problem_node(self, node):
         if node['type'] == 'exception':
@@ -114,17 +103,11 @@ class LogHandlerThread(Thread):
 
     def run(self):
         """
-        The thread.run() method that delegates to a SAX parser. The thread will
-        read the rest of the output if the SAX parser should fail.
+        The thread.run() method that delegates to a SAX parser. 
         """
         try:
             xml.sax.parse(self.stream, LogErrorParser(self.problems))
         except:
-            #Something has gone wrong, lets read the remaining compiler output
-            data = self.stream.read()
-            while data is None or data != '':
-                sys.stdout.write(data)
-                data = self.stream.read()
             raise
 
 class CompilerLogHandler:
@@ -205,11 +188,8 @@ class CompilerLogHandler:
         
         exception = exceptions[0]
         
-        if exception.kind == 'org.jmodelica.modelica.compiler.ModelicaClassNotFoundException':
+        if exception.kind == 'org.jmodelica.util.ModelicaClassNotFoundException':
             raise ModelicaClassNotFoundError(exception.message)
-        
-        if exception.kind == 'org.jmodelica.optimica.compiler.ModelicaClassNotFoundException':
-            raise OptimicaClassNotFoundError(exception.message)
         
         if exception.kind == 'java.io.FileNotFoundException':
             raise IOError(exception.message)

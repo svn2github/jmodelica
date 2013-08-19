@@ -170,9 +170,9 @@ class Test_Compiler:
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
         errorcl = 'NonExisting.Class'
         nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, Test_Compiler.mc.compile_JMU, errorcl, [self.fpath_mc], '.')
-        nose.tools.assert_raises(pym.compiler_exceptions.OptimicaClassNotFoundError, Test_Compiler.oc.compile_JMU, errorcl, [self.fpath_oc], '.')
+        nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, Test_Compiler.oc.compile_JMU, errorcl, [self.fpath_oc], '.')
         nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, pym.compile_fmu, errorcl, self.fpath_mc, separate_process=True)
-        nose.tools.assert_raises(pym.compiler_exceptions.OptimicaClassNotFoundError, pym.compile_jmu, errorcl, self.fpath_oc, separate_process=True)
+        nose.tools.assert_raises(pym.compiler_exceptions.ModelicaClassNotFoundError, pym.compile_jmu, errorcl, self.fpath_oc, separate_process=True)
 
     @testattr(stddist = True)
     def test_IO_error(self):

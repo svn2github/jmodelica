@@ -16,7 +16,6 @@
 
 import java.util.Collection;
 import java.lang.reflect.Method;
-import org.jmodelica.util.*;
 
 public class FClassMethodTestCase extends TestCase {
 	private String output = "";

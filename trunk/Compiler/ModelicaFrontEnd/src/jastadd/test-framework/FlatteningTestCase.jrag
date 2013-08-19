@@ -16,7 +16,6 @@
 
 
 import java.util.Collection;
-import org.jmodelica.util.*;
 
 /**
  * @author jakesson
