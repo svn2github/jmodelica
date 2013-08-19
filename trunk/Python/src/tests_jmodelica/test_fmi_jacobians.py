@@ -636,7 +636,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
     def test_Unsolved_blocks4(self):
         cname = "JacGenTests.Unsolved_blocks4"
         fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-          'eliminate_alias_variables':False,'fmi_version':2.0})
+          'eliminate_alias_variables':False,'fmi_version':2.0, 'inline_functions':'none'})
         m = FMUModel2(fn)
         m.set_debug_logging(True)
         m.initialize(relativeTolerance=1e-11)
@@ -647,7 +647,7 @@ class Test_FMI_Jaobians_Unsolved_blocks:
     def test_Unsolved_blocks5(self):
         cname = "JacGenTests.Unsolved_blocks5"
         fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True, \
-          'eliminate_alias_variables':False,'fmi_version':2.0})
+          'eliminate_alias_variables':False,'fmi_version':2.0, 'inline_functions':'none'})
         m = FMUModel2(fn)
         m.set_debug_logging(True)
         m.initialize(relativeTolerance=1e-11)

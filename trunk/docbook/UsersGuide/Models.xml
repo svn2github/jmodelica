@@ -728,7 +728,7 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 <row>
                   <entry><literal>inline_functions</literal></entry>
 
-                  <entry><literal>string / "none"</literal></entry>
+                  <entry><literal>string / "trivial"</literal></entry>
 
                   <entry>Perform function inlining on model after flattening
                   (allowed values are "<literal>none</literal>",
