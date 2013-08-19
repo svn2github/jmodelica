@@ -423,7 +423,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     else:
         cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
-    print(cmd)
+    
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()
     log.start(process.stderr);

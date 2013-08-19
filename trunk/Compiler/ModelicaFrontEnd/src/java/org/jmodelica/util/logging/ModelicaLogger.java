@@ -290,6 +290,12 @@ public abstract class ModelicaLogger {
 		}
 		if (loggers.size() == 0)
 			loggers.add(new StreamingLogger(Level.ERROR, System.out));
+		// Step 3. Create TeeLogger if necessary
+		ModelicaLogger logger;
+		if (loggers.size() == 1)
+			logger = loggers.get(0);
+		else
+			logger =  new TeeLogger(loggers.toArray(new ModelicaLogger[loggers.size()]));
 		if (problems.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Invalid log string, the following problems was found:\n");
@@ -298,13 +304,9 @@ public abstract class ModelicaLogger {
 				sb.append(problem);
 				sb.append('\n');
 			}
-			throw new IllegalLogStringException(sb.toString());
+			throw new IllegalLogStringException(sb.toString(), logger);
 		}
-		// Step 3. Create TeeLogger if necessary
-		if (loggers.size() == 1)
-			return loggers.get(0);
-		else
-			return new TeeLogger(loggers.toArray(new ModelicaLogger[loggers.size()]));
+		return logger;
 	}
 	
 	private static class LoggerProps {

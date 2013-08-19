@@ -1650,6 +1650,7 @@ public class ModelicaCompiler {
 			String logString = programarguments.get("log");
 			setLogger(logString);
 		} catch (IllegalLogStringException e) {
+			setLogger(e.getLogger());
 			log.error(e.getMessage());
 			closeLogger();
 			System.exit(1);
