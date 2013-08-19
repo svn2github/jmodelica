@@ -113,7 +113,7 @@ import beaver.Scanner;
   protected int matchOffset() { return yychar; }
   protected int matchLength() { return yylength(); }
   
-  public Symbol nextToken() throws IOException, Scanner.Exception {
+  public Symbol nextToken() throws java.io.IOException, Scanner.Exception {
     Symbol res = null;
     while (res == null)
       res = nextTokenInner();
