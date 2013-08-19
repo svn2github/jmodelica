@@ -762,7 +762,6 @@ class Test_ODE_JACOBIANS2:
 
     @testattr(assimulo = True)
     def test_ode_simulation_NonLinear(self):
-        
         m_nonlin = FMUModel2('NonLinear_MultiSystems.fmu')
         
         m_nonlin.initialize()
@@ -810,7 +809,6 @@ class Test_ODE_JACOBIANS4:
         fn_nonlinIO = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
         
     def setUp(self):
-        
         pass       
         
     @testattr(assimulo = True)

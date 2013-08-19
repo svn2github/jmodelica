@@ -292,6 +292,7 @@
 
 #include "jmi_common.h"
 #include "jmi_util.h"
+#include "jmi_global.h"
 
 /* @{ */
 

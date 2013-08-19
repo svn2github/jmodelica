@@ -484,6 +484,15 @@ aspect FlatTypeCheck {
     	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
     }     
   }
+ 
+  public void FAssert.typeCheck() {
+	  if (hasLevel()) {
+		  if (getLevel().isParameterExp())
+			  getLevel().markAsStructuralParameter();
+		  else if (!getLevel().isConstantExp())
+			  error("Level of assert() must be constant or parameter");
+	  }
+  }
   
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
   eq FIgnoredBuiltIn.builtInHasOutput() = false;

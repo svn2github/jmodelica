@@ -230,6 +230,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
 
+    jmi_->terminate = 0;
+
     return 0;
 }
 
@@ -255,7 +257,14 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
     if (func->F(jmi, func->ad->F_z_dependent)!=0) {
       return -1;
     }
+
+    jmi_set_current(jmi);
+    if (jmi_try(jmi)) {
+		jmi_set_current(NULL);
+		return -1;
+    }
     func->ad->F_z_tape = new jmi_ad_tape_t(*jmi->z,*func->ad->F_z_dependent);
+	jmi_set_current(NULL);
 
     func->ad->tape_initialized = true;
 
@@ -1295,7 +1304,7 @@ int jmi_init_eval_parameters(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    return_status = jmi->init->eval_parameters(jmi);
+    return_status = jmi_generic_func(jmi, jmi->init->eval_parameters);
 
     // Write back evaluation result
     if (return_status==0) {

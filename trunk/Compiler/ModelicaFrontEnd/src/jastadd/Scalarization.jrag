@@ -2277,7 +2277,10 @@ aspect Scalarization {
 		return new FFunctionCall(getName().fullCopy(), args, getSizes()); 
 	}
 	
-	public FExp FTimeExp.scalarizeExp(Map<String,FExp> indexMap) { return new FTimeExp(); }
+	public FAssert FAssert.scalarizeExp(Map<String,FExp> indexMap) {
+		Opt level = hasLevel() ? new Opt(getLevel().scalarize(indexMap)) : new Opt();
+		return new FAssert(getTest().scalarize(indexMap), getMsg().scalarize(indexMap), level);
+	}
 	
 	public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return mySize().isUnknown() ? createFSizeExp() : mySize().createFExp(0);

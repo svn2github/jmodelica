@@ -250,7 +250,7 @@ model UnsupportedBuiltins3_ComplErr
   pre(x);
   edge();
   reinit(1);
-  terminate();
+  terminate("");
   integer(1);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -290,72 +290,12 @@ Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
-  The terminate() function-like operator is not supported
+  The terminate() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 289, column 3:
   The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins3_ComplErr;
-
-
-model UnsupportedBuiltins4_Warn
-equation
- assert(1);
- terminal();
-
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="UnsupportedBuiltins4_Warn",
-			description="Warnings for ignored builtins",
-			errorMessage="
-2 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 294, column 2:
-  The assert() function-like operator is not supported, and is currently ignored
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 294, column 2:
-  The assert() function-like operator is not supported, and is currently evaluated to false
-  ")})));
-end UnsupportedBuiltins4_Warn;
-
-
-model UnsupportedBuiltins5_Err
-  Real a;
-  Real b;
- equation
-  (a, b) = assert(1);
-  a = assert(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnsupportedBuiltins5_Err",
-			description="Ignored builtins can't have outputs",
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 313, column 12:
-  Too many components assigned from function call: assert() has 0 output(s)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 314, column 3:
-  Function assert() has no outputs, but is used in expression
-")})));
-end UnsupportedBuiltins5_Err;
-
-
-model UnsupportedBuiltins6
-equation
- assert(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="UnsupportedBuiltins6",
-			description="Check that ignored built-ins aren't printed and doesn't cause exceptions",
-			flatModel="
-fclass ComplianceTests.UnsupportedBuiltins6
-
-end ComplianceTests.UnsupportedBuiltins6;
-")})));
-end UnsupportedBuiltins6;
 
 
 model ArrayCellMod_ComplErr
@@ -373,13 +313,13 @@ model ArrayCellMod_ComplErr
 3 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Semantic error at line 361, column 8:
-  Modifiers of specific array elements are not supported
+  Modifiers of specific array elements are not allowed
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 364, column 5:
+Semantic error at line 364, column 5:
   Array size mismatch in declaration of b, size of declaration is [2] and size of binding expression is scalar
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 364, column 14:
-  Modifiers of specific array elements are not supported
+Semantic error at line 364, column 14:
+  Modifiers of specific array elements are not allowed
 ")})));
 end ArrayCellMod_ComplErr;
 
