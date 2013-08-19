@@ -2875,6 +2875,8 @@ end NonVectorizedSalarization3;
 
 model InfArgsWithNamed
 	Real x[2,2] = ones(2, 2, xxx = 3);
+equation
+	assert(false, "qwerty", yyy = 3);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(

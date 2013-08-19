@@ -277,28 +277,4 @@ At line 300, column 14:
 end LongIntConst2;
 
 
-model TerminateInFunc
-	function f
-		output Real x;
-	algorithm
-		terminate("");
-		x := 1;
-	end f;
-	
-	Real x = f();
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TerminateInFunc",
-			description="",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 287, column 3:
-  The terminate() statement is not allowed in functions
-")})));
-end TerminateInFunc;
-
-
-
 end ForbiddenOperationsTests;

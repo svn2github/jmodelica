@@ -74,12 +74,11 @@ Comment = {TraditionalComment} | {EndOfLineComment}
 TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
 
-Token   = {ID} | {UNSIGNED_INTEGER} | {Operator}
+Token   = {STRING} | {ID} | {UNSIGNED_INTEGER} | {Operator}
 Discard = {Comment} | {WhiteSpace}
 
 %%
 
-{STRING}            { return yytext().replaceAll("\r\n|\r", "\n"); }
 {Token}             { return yytext(); }
 {UNSIGNED_NUMBER}   { return Double.toString(Double.parseDouble(yytext())); }
 {Discard}           { }

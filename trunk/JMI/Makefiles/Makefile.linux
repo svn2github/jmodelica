@@ -113,7 +113,7 @@ CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 CFLAGS = -g
 CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) -fPIC
 
-SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined -pthread
+SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
@@ -152,7 +152,7 @@ fmume:
 
 fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXTERNAL_LIBS) $(LIBS_FMUME) $(EXT_LIB_DIRS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME)
 	$(RM) $(OBJS)
 
 fmucs:
@@ -160,7 +160,7 @@ fmucs:
 
 fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXTERNAL_LIBS) $(LIBS_FMUCS)  $(EXT_LIB_DIRS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS) 
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)

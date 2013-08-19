@@ -254,8 +254,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->log = jmi_log_init(jmi_);
 
-    jmi_->terminate = 0;
-
     jmi_->is_initialized = 0;
 
     return 0;
@@ -324,31 +322,12 @@ int jmi_delete(jmi_t* jmi){
 }
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
-    int return_status;
-
-    if (jmi_current_is_set()) {
-    	return_status = func->F(jmi, &res);
-    } else {
-    	jmi_set_current(jmi);
-		if (jmi_try(jmi))
-			return_status = -1;
-		else
-			return_status = func->F(jmi, &res);
-		jmi_set_current(NULL);
-    }
-    return return_status;
+    return func->F(jmi,&res);
 }
 
 int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
              jmi_real_t *dF, jmi_real_t* dv) {
-	int return_status;
-	jmi_set_current(jmi);
-	if (jmi_try(jmi))
-		return_status = -1;
-	else
-		return_status = func->cad_dir_dF(jmi, &res, &dF, &dv);
-    jmi_set_current(NULL);
-    return return_status;
+    return func->cad_dir_dF(jmi, &res, &dF, &dv);   
 }
 
 int jmi_ode_f(jmi_t* jmi) {
@@ -487,7 +466,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
     jmi->block_level = 0; /* to recover from errors */
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
+    return_status = jmi->dae->ode_derivatives(jmi);
 
     if((jmi->options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
@@ -512,7 +491,7 @@ int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t *dv) {
     }
     jmi->block_level = 0; /* to recover from errors */
     
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+    return_status = jmi->dae->ode_derivatives_dir_der(jmi);
 
     return return_status;
 }
@@ -524,7 +503,7 @@ int jmi_ode_outputs(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_outputs);
+    return_status = jmi->dae->ode_outputs(jmi);
 
     /* Write back evaluation result */
     if (return_status==0) {
@@ -551,7 +530,7 @@ int jmi_ode_initialize(jmi_t* jmi) {
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_initialize);
+    return_status = jmi->dae->ode_initialize(jmi);
 
     if((jmi->options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
@@ -575,7 +554,7 @@ int jmi_ode_guards(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_guards);
+    return_status = jmi->dae->ode_guards(jmi);
 
     /* Write back evaluation result */
     if (return_status==0) {
@@ -594,7 +573,7 @@ int jmi_ode_guards_init(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    return_status = jmi_generic_func(jmi, jmi->dae->ode_guards_init);
+    return_status = jmi->dae->ode_guards_init(jmi);
 
     /* Write back evaluation result */
     if (return_status==0) {
@@ -613,12 +592,7 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    jmi_set_current(jmi);
-    if (jmi_try(jmi))
-		return_status = -1;
-	else
-		return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
-    jmi_set_current(NULL);
+    return_status = jmi->dae->ode_next_time_event(jmi, nextTime);
 
     return return_status;
 }
@@ -1006,7 +980,7 @@ int jmi_init_eval_parameters(jmi_t* jmi) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
-    return_status = jmi_generic_func(jmi, jmi->init->eval_parameters);
+    return_status = jmi->init->eval_parameters(jmi);
 
     /* Write back evaluation result */
     if (return_status==0) {

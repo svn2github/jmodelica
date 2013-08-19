@@ -1264,19 +1264,9 @@ abstract FSimulationStateBuiltIn : FNoArgBuiltIn;
 FInitialExp : FSimulationStateBuiltIn;
 
 /**
- * Terminal built-in function.
+ * Initial built-in function.
  */
 FTerminalExp : FSimulationStateBuiltIn;
-
-/**
- * Terminate built-in function.
- */
-FTerminate : FUnaryBuiltIn;
-
-/**
- * Assert built-in function.
- */
-FAssert : FBuiltInFunctionCall ::= Test:FExp Msg:FExp [Level:FExp];
 
 /**
  * \brief Abs built-in function.

@@ -25,9 +25,9 @@ endif
 CC=gcc
 
 DIR=../Library/$(PLATFORM)
-INC=-I../Include -I$(JMODELICA_HOME)/include
+INC=../Include
 
-all : add_shared add_static array_shared array_static use_modelica_error
+all : add_shared add_static array_shared array_static
 
 add_shared: $(PREF)addNumbers.$(SUFF) lib_dir
 	mv $< $(DIR)
@@ -47,15 +47,11 @@ ext_objects: libextObjects.a lib_dir
 	mv $< $(DIR)
 
 
-use_modelica_error: libuseModelicaError.a lib_dir
-	mv $< $(DIR)
-
-
 lib_dir:
 	mkdir -p $(DIR)
 
 %.o: %.c
-	$(CC) -c -fPIC $(INC) $< -o $@
+	$(CC) -c -fPIC -I$(INC) $< -o $@
 
 $(PREF)%.$(SUFF): %.o
 	$(CC) $(SHARED_FLAGS)$@ -o $@ $^
@@ -66,4 +62,4 @@ lib%.a: %.o
 clean:
 	rm -rf $(DIR) *.o
 
-.PHONY: lib_dir all clean add_shared add_static array_shared array_static use_modelica_error
+.PHONY: lib_dir all clean add_shared add_static array_shared array_static

@@ -108,7 +108,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libModelicaExternalC_la_LIBADD =
 am__libModelicaExternalC_la_SOURCES_DIST = ModelicaUtilities.h \
-	ModelicaUtilities.c jmi_global.h jmi_global.c \
+	ModelicaUtilities.c \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
 	ModelicaTables_JM.c jmtables.h jmtables.c
@@ -116,7 +116,6 @@ am__libModelicaExternalC_la_SOURCES_DIST = ModelicaUtilities.h \
 @WITH_TABLES_TRUE@	libModelicaExternalC_la-jmtables.lo
 am_libModelicaExternalC_la_OBJECTS =  \
 	libModelicaExternalC_la-ModelicaUtilities.lo \
-	libModelicaExternalC_la-jmi_global.lo \
 	libModelicaExternalC_la-ModelicaInternal.lo \
 	libModelicaExternalC_la-ModelicaStrings.lo $(am__objects_1)
 libModelicaExternalC_la_OBJECTS =  \
@@ -140,14 +139,13 @@ libfmi_cs_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libfmi_cs_la_CFLAGS) \
 	$(CFLAGS) $(libfmi_cs_la_LDFLAGS) $(LDFLAGS) -o $@
 libjmi_la_LIBADD =
-am_libjmi_la_OBJECTS = libjmi_la-jmi_common.lo libjmi_la-jmi.lo \
-	libjmi_la-jmi_global.lo libjmi_la-jmi_simple_newton.lo \
-	libjmi_la-jmi_block_residual.lo libjmi_la-jmi_kinsol_solver.lo \
-	libjmi_la-jmi_linear_solver.lo libjmi_la-jmi_ode_solver.lo \
-	libjmi_la-jmi_ode_cvode.lo libjmi_la-jmi_ode_euler.lo \
-	libjmi_la-jmi_array_none.lo libjmi_la-jmi_util.lo \
-	libjmi_la-jmi_log.lo libjmi_la-kinpinv.lo \
-	libjmi_la-kinsol_jmod.lo
+am_libjmi_la_OBJECTS = libjmi_la-jmi.lo libjmi_la-jmi_common.lo \
+	libjmi_la-jmi_simple_newton.lo libjmi_la-jmi_block_residual.lo \
+	libjmi_la-jmi_kinsol_solver.lo libjmi_la-jmi_linear_solver.lo \
+	libjmi_la-jmi_ode_solver.lo libjmi_la-jmi_ode_cvode.lo \
+	libjmi_la-jmi_ode_euler.lo libjmi_la-jmi_array_none.lo \
+	libjmi_la-jmi_util.lo libjmi_la-jmi_log.lo \
+	libjmi_la-kinpinv.lo libjmi_la-kinsol_jmod.lo
 libjmi_la_OBJECTS = $(am_libjmi_la_OBJECTS)
 libjmi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjmi_la_CFLAGS) \
@@ -176,7 +174,6 @@ libjmi_algorithm_cppad_la_LINK = $(LIBTOOL) --tag=CC \
 @COMPILE_WITH_CPPAD_TRUE@	$(libdir)
 libjmi_cppad_la_LIBADD =
 am_libjmi_cppad_la_OBJECTS = libjmi_cppad_la-jmi_common.lo \
-	libjmi_cppad_la-jmi_global.lo \
 	libjmi_cppad_la-jmi_block_residual.lo \
 	libjmi_cppad_la-jmi_cppad.lo libjmi_cppad_la-jmi_util.lo \
 	libjmi_cppad_la-jmi_log.lo libjmi_cppad_la-kinpinv.lo \
@@ -249,12 +246,12 @@ DIST_SOURCES = $(am__libModelicaExternalC_la_SOURCES_DIST) \
 	$(libjmi_solver_cppad_la_SOURCES)
 am__include_HEADERS_DIST = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	fmiCSFunctions.h fmiCSPlatformTypes.h fmi1_me.h fmi1_cs.h \
-	ModelicaUtilities.h jmi_common.h jmi_global.h \
-	jmi_simple_newton.h jmi_block_residual.h jmi_kinsol_solver.h \
-	jmi_linear_solver.h jmi_init_opt.h jmi_opt_coll.h \
-	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
-	jmi_array_cppad.h jmi_util.h jmi_log.h jmi_ode_solver.h \
-	jmi_ode_cvode.h jmi_ode_euler.h fmi1_functions.h fmi1_types.h \
+	ModelicaUtilities.h jmi_common.h jmi_simple_newton.h \
+	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
+	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
+	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
+	jmi_util.h jmi_log.h jmi_ode_solver.h jmi_ode_cvode.h \
+	jmi_ode_euler.h fmi1_functions.h fmi1_types.h \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 	$(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
@@ -422,10 +419,8 @@ libjmi_la_SOURCES = jmi.h \
                     fmi1_functions.h \
                     fmi1_types.h \
                     jmi_common.h \
-                    jmi_common.c \
                     jmi.c \
-                    jmi_global.h \
-                    jmi_global.c \
+                    jmi_common.c \
                     jmi_simple_newton.h \
                     jmi_simple_newton.c \
                     jmi_block_residual.h \
@@ -506,7 +501,7 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 #                                   ModelicaUtilities.h \
 #                                   ModelicaUtilities.c
 libModelicaExternalC_la_SOURCES = ModelicaUtilities.h \
-	ModelicaUtilities.c jmi_global.h jmi_global.c \
+	ModelicaUtilities.c \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c \
 	$(am__append_4)
@@ -533,8 +528,6 @@ libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_common.h \
-                    jmi_global.h \
-                    jmi_global.c \
                     jmi_block_residual.h \
                     jmi_block_residual.c \
                     jmi_cppad.cpp\
@@ -574,12 +567,12 @@ libjmi_solver_cppad_la_LDFLAGS = -no-undefined -static-libtool-libs -g -I$(SUNDI
 #libjmi_cppad_la_LDFLAGS = -no-undefined 
 include_HEADERS = jmi.h fmiModelFunctions.h fmiModelTypes.h \
 	fmiCSFunctions.h fmiCSPlatformTypes.h fmi1_me.h fmi1_cs.h \
-	ModelicaUtilities.h jmi_common.h jmi_global.h \
-	jmi_simple_newton.h jmi_block_residual.h jmi_kinsol_solver.h \
-	jmi_linear_solver.h jmi_init_opt.h jmi_opt_coll.h \
-	jmi_opt_coll_radau.h jmi_array_common.h jmi_array_none.h \
-	jmi_array_cppad.h jmi_util.h jmi_log.h jmi_ode_solver.h \
-	jmi_ode_cvode.h jmi_ode_euler.h fmi1_functions.h fmi1_types.h \
+	ModelicaUtilities.h jmi_common.h jmi_simple_newton.h \
+	jmi_block_residual.h jmi_kinsol_solver.h jmi_linear_solver.h \
+	jmi_init_opt.h jmi_opt_coll.h jmi_opt_coll_radau.h \
+	jmi_array_common.h jmi_array_none.h jmi_array_cppad.h \
+	jmi_util.h jmi_log.h jmi_ode_solver.h jmi_ode_cvode.h \
+	jmi_ode_euler.h fmi1_functions.h fmi1_types.h \
 	$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaTables.h \
 	$(abs_top_srcdir)/external/Assimulo/src/lib/kinpinv.h \
 	$(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
@@ -679,7 +672,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaStrings.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaTables_JM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-ModelicaUtilities.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-jmi_global.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libModelicaExternalC_la-jmtables.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_cs_la-fmi1_cs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfmi_cs_la-kinpinv.Plo@am__quote@
@@ -696,7 +688,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_block_residual.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_cppad.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_global.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-jmi_util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_cppad_la-kinpinv.Plo@am__quote@
@@ -705,7 +696,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_array_none.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_block_residual.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_global.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_kinsol_solver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_linear_solver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjmi_la-jmi_log.Plo@am__quote@
@@ -753,13 +743,6 @@ libModelicaExternalC_la-ModelicaUtilities.lo: ModelicaUtilities.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ModelicaUtilities.c' object='libModelicaExternalC_la-ModelicaUtilities.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -c -o libModelicaExternalC_la-ModelicaUtilities.lo `test -f 'ModelicaUtilities.c' || echo '$(srcdir)/'`ModelicaUtilities.c
-
-libModelicaExternalC_la-jmi_global.lo: jmi_global.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -MT libModelicaExternalC_la-jmi_global.lo -MD -MP -MF $(DEPDIR)/libModelicaExternalC_la-jmi_global.Tpo -c -o libModelicaExternalC_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libModelicaExternalC_la-jmi_global.Tpo $(DEPDIR)/libModelicaExternalC_la-jmi_global.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_global.c' object='libModelicaExternalC_la-jmi_global.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -c -o libModelicaExternalC_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
 
 libModelicaExternalC_la-ModelicaInternal.lo: $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libModelicaExternalC_la_CFLAGS) $(CFLAGS) -MT libModelicaExternalC_la-ModelicaInternal.lo -MD -MP -MF $(DEPDIR)/libModelicaExternalC_la-ModelicaInternal.Tpo -c -o libModelicaExternalC_la-ModelicaInternal.lo `test -f '$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c
@@ -831,13 +814,6 @@ libfmi_cs_la-kinsol_jmod.lo: $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libfmi_cs_la_CFLAGS) $(CFLAGS) -c -o libfmi_cs_la-kinsol_jmod.lo `test -f '$(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.c
 
-libjmi_la-jmi_common.lo: jmi_common.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_common.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_common.Tpo -c -o libjmi_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-jmi_common.Tpo $(DEPDIR)/libjmi_la-jmi_common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_common.c' object='libjmi_la-jmi_common.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c
-
 libjmi_la-jmi.lo: jmi.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi.Tpo -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-jmi.Tpo $(DEPDIR)/libjmi_la-jmi.Plo
@@ -845,12 +821,12 @@ libjmi_la-jmi.lo: jmi.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi.lo `test -f 'jmi.c' || echo '$(srcdir)/'`jmi.c
 
-libjmi_la-jmi_global.lo: jmi_global.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_global.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_global.Tpo -c -o libjmi_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-jmi_global.Tpo $(DEPDIR)/libjmi_la-jmi_global.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_global.c' object='libjmi_la-jmi_global.lo' libtool=yes @AMDEPBACKSLASH@
+libjmi_la-jmi_common.lo: jmi_common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_common.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_common.Tpo -c -o libjmi_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_la-jmi_common.Tpo $(DEPDIR)/libjmi_la-jmi_common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_common.c' object='libjmi_la-jmi_common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -c -o libjmi_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c
 
 libjmi_la-jmi_simple_newton.lo: jmi_simple_newton.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_la_CFLAGS) $(CFLAGS) -MT libjmi_la-jmi_simple_newton.lo -MD -MP -MF $(DEPDIR)/libjmi_la-jmi_simple_newton.Tpo -c -o libjmi_la-jmi_simple_newton.lo `test -f 'jmi_simple_newton.c' || echo '$(srcdir)/'`jmi_simple_newton.c
@@ -984,13 +960,6 @@ libjmi_cppad_la-jmi_common.lo: jmi_common.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_common.c' object='libjmi_cppad_la-jmi_common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-jmi_common.lo `test -f 'jmi_common.c' || echo '$(srcdir)/'`jmi_common.c
-
-libjmi_cppad_la-jmi_global.lo: jmi_global.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-jmi_global.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-jmi_global.Tpo -c -o libjmi_cppad_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjmi_cppad_la-jmi_global.Tpo $(DEPDIR)/libjmi_cppad_la-jmi_global.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jmi_global.c' object='libjmi_cppad_la-jmi_global.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -c -o libjmi_cppad_la-jmi_global.lo `test -f 'jmi_global.c' || echo '$(srcdir)/'`jmi_global.c
 
 libjmi_cppad_la-jmi_block_residual.lo: jmi_block_residual.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjmi_cppad_la_CFLAGS) $(CFLAGS) -MT libjmi_cppad_la-jmi_block_residual.lo -MD -MP -MF $(DEPDIR)/libjmi_cppad_la-jmi_block_residual.Tpo -c -o libjmi_cppad_la-jmi_block_residual.lo `test -f 'jmi_block_residual.c' || echo '$(srcdir)/'`jmi_block_residual.c

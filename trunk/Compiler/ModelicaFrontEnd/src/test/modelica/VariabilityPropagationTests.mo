@@ -174,7 +174,6 @@ end VariabilityPropagationTests.Output;
 ")})));
 end Output;
 
-
 model Output2
 	output Real a;
 	Real b;
@@ -215,7 +214,6 @@ public
 end VariabilityPropagationTests.Output2;
 ")})));
 end Output2;
-
 
 model Tearing
   Real u0,u1,u2,u3,uL;
@@ -272,7 +270,6 @@ equation
 end VariabilityPropagationTests.Tearing;
 ")})));
 end Tearing;
-
 
 model Der1
 	Real x1,x2;
@@ -337,7 +334,6 @@ end VariabilityPropagationTests.WhenEq1;
 ")})));
 end WhenEq1;
 
-
 model IfEq1
 	constant Real p1 = 4;
 	Real x1,x2;
@@ -361,7 +357,6 @@ fclass VariabilityPropagationTests.IfEq1
 end VariabilityPropagationTests.IfEq1;
 ")})));
 end IfEq1;
-
 
 model IfEq2
 	constant Real c1 = 4;
@@ -398,7 +393,6 @@ end VariabilityPropagationTests.IfEq2;
 ")})));
 end IfEq2;
 
-
 model FunctionCall1
 	Real c_out;
     function f
@@ -418,7 +412,6 @@ fclass VariabilityPropagationTests.FunctionCall1
 end VariabilityPropagationTests.FunctionCall1;
 ")})));
 end FunctionCall1;
-
 
 model FunctionCallEquation1
 	Real x1,x2;
@@ -488,7 +481,6 @@ end VariabilityPropagationTests.FunctionCallEquation1;
 ")})));
 end FunctionCallEquation1;
 
-
 model FunctionCallEquation2
 	Real z1[2];
 	Real z2[2];
@@ -551,7 +543,6 @@ end VariabilityPropagationTests.FunctionCallEquation2;
 ")})));
 end FunctionCallEquation2;
 
-
 model FunctionCallEquation3
 	A a;
 	A b;
@@ -609,7 +600,6 @@ end VariabilityPropagationTests.FunctionCallEquation3;
 ")})));
 end FunctionCallEquation3;
 
-
 model FunctionCallEquation4
 	Real a[2,2];
 	constant Real b[2] = {1,2};
@@ -646,9 +636,7 @@ public
   Integer info;
  algorithm
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
-  assert(info == 0, \"Solving a linear system of equations with function
-\\\"Matrices.solve\\\" is not possible, because the system has either
-no or infinitely many solutions (A is singular).\");
+  ();
   return;
  end Modelica.Math.Matrices.solve;
 
@@ -682,7 +670,6 @@ end VariabilityPropagationTests.FunctionCallEquation4;
 ")})));
 end FunctionCallEquation4;
 
-
 model FunctionCallEquation5
 	constant Real a[2,2] = {{1,2},{3,4}};
 	
@@ -714,7 +701,6 @@ end VariabilityPropagationTests.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
 
-
 model ConstantRecord1
 	record A
 		Real a[:];
@@ -743,7 +729,6 @@ public
 end VariabilityPropagationTests.ConstantRecord1;
 ")})));
 end ConstantRecord1;
-
 
 model ConstantStartFunc1
 	function f

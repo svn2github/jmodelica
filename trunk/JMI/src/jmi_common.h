@@ -30,8 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <setjmp.h>
-/*#include <sundials/sundials_types.h>*/
+#include <sundials/sundials_types.h>
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -253,19 +252,15 @@ extern "C" {
 #endif /* JMI_AD_NONE_AND_CPP */
 
 /**
- * Function to wrap division and report errors to the log, for use in functions.
+ * Function to wrap division and report errors.
+ * Use jmi_divide_logged below instead if jmi is available.
  */
-jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
+jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]);
 
 /**
- * Function to wrap division and report errors to the log, for use in equations.
+ * Function to wrap division and report errors to the log.
  */
-jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
-
-/**
- * Set the terminate flag and log message.
- */
-void jmi_flag_termination(jmi_t *jmi, const char* msg);
+jmi_ad_var_t jmi_divide_logged(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]);
 
 /**
  * Function to get the absolute value.
@@ -715,8 +710,8 @@ typedef struct jmi_options_t {
     int use_jacobian_equilibration_flag;  /**< \brief If jacobian equlibration should be used in equation block solvers */
     
     jmi_residual_equation_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
-    jmi_iteration_var_scaling_mode_t iteration_variable_scaling_mode; /**< \brief Iteration variables scaling mode in equation block solvers:
-            0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc. */
+    jmi_iteration_var_scaling_mode_t iteration_variable_scaling_mode; /**< \brief  "Iteration variables scaling mode in equation block solvers:"+
+            "0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc." */
     int block_solver_experimental_mode; /**< \brief  Activate experimental features of equation block solvers */
     int nle_solver_max_iter; /**< \brief Maximum number of iterations for the equation block solver before failure */
 
@@ -784,7 +779,7 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
  * pointer to a jmi_func_ad_t struct containing AD data (if compiled
  * with AD support).
  */
-struct jmi_func_t {
+struct jmi_func_t{
     jmi_residual_func_t F;  /**< \brief Pointer to a function for evaluation of \f$F(z)\f$. */
     jmi_jacobian_func_t sym_dF; /**< \brief Pointer to a function for evaluation of the symbolic Jacobian of \f$F(z)\f$. */
     jmi_directional_der_residual_func_t cad_dir_dF; /**< \brief Pointer to a function for evaluation of the directional AD derivative of the function */
@@ -805,7 +800,7 @@ struct jmi_func_t {
 /**
  * \brief Contains result of a graph coloring.
  */
-struct jmi_color_info {
+struct jmi_color_info{
     int* sparse_repr;
     int* offs;
     int n_colors;
@@ -834,7 +829,7 @@ struct jmi_simple_color_info_t {
  * The struct jmi_func_ad_t contains a tape and associated sparsity
  * information for a particular jmi_func_t struct.
  */
-struct jmi_func_ad_t {
+struct jmi_func_ad_t{
     jmi_ad_var_vec_p F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
     jmi_ad_tape_p F_z_tape;         /**< \brief An AD tape. */
     int tape_initialized;           /**< \brief Flag to indicate if the other fields are initialized. 0 if uninitialized and 1 if initialized. */
@@ -1215,11 +1210,12 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
  * to represent the DAE, DAE initialization and Optimization
  * interfaces.
  */
-struct jmi_t {
-    jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
+struct jmi_t{
+  jmi_dae_t* dae;                        /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
     jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
-    fmi_t* fmi;                          /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
+        /* never used: fmiCallbackFunctions* user_func;*/     /**< \brief fmiCallbackFunctions, user provided. */
+        fmi_t*      fmi;                     /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
     int n_real_ci;                       /**< \brief Number of independent constants. */
     int n_real_cd;                       /**< \brief Number of dependent constants. */
@@ -1276,7 +1272,7 @@ struct jmi_t {
     int n_z;                             /**< \brief Number of elements in \f$z\f$. */
     
     int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
-    int n_dae_init_blocks;               /**< \brief Number of initial BLT blocks. */
+    int n_dae_init_blocks;           /**< \brief Number of initial BLT blocks. */
     
     jmi_real_t *tp;                      /**< \brief Time point values in the normalized interval [0..1]. A value \f$\leq 0\f$ corresponds to the initial time and a value \f$\geq 1\f$ corresponds to the final time. */
 
@@ -1318,27 +1314,27 @@ struct jmi_t {
     int offs_sw;                         /**< \brief  Offset of the first switching function in the DAE \f$F\f$ */
     int offs_sw_init;                    /**< \brief  Offset of the first switching function in the DAE initialization system \f$F_0\f$ */
 
-    int offs_guards;                     /**< \brief  Offset of the first guard \f$F\f$ */
-    int offs_guards_init;                /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
+    int offs_guards;                         /**< \brief  Offset of the first guard \f$F\f$ */
+    int offs_guards_init;                    /**< \brief  Offset of the first guard in the DAE initialization system \f$F_0\f$ */
 
-    int offs_pre_real_dx;                /**< \brief  Offset of the pre derivative real vector in \f$z\f$. */
-    int offs_pre_real_x;                 /**< \brief  Offset of the pre differentiated real variable vector in \f$z\f$. */
-    int offs_pre_real_u;                 /**< \brief  Offset of the pre input real vector in \f$z\f$. */
-    int offs_pre_real_w;                 /**< \brief  Offset of the pre algebraic real variables vector in \f$z\f$. */
+    int offs_pre_real_dx;                    /**< \brief  Offset of the pre derivative real vector in \f$z\f$. */
+    int offs_pre_real_x;                     /**< \brief  Offset of the pre differentiated real variable vector in \f$z\f$. */
+    int offs_pre_real_u;                     /**< \brief  Offset of the pre input real vector in \f$z\f$. */
+    int offs_pre_real_w;                     /**< \brief  Offset of the pre algebraic real variables vector in \f$z\f$. */
 
-    int offs_pre_real_d;                 /**< \brief  Offset of the pre discrete real variable vector in \f$z\f$. */
+    int offs_pre_real_d;                     /**< \brief  Offset of the pre discrete real variable vector in \f$z\f$. */
 
-    int offs_pre_integer_d;              /**< \brief  Offset of the pre discrete integer variable vector in \f$z\f$. */
-    int offs_pre_integer_u;              /**< \brief  Offset of the pre input integer vector in \f$z\f$. */
+    int offs_pre_integer_d;                  /**< \brief  Offset of the pre discrete integer variable vector in \f$z\f$. */
+    int offs_pre_integer_u;                  /**< \brief  Offset of the pre input integer vector in \f$z\f$. */
 
-    int offs_pre_boolean_d;              /**< \brief  Offset of the pre discrete boolean variable vector in \f$z\f$. */
-    int offs_pre_boolean_u;              /**< \brief  Offset of the pre input boolean vector in \f$z\f$. */
+    int offs_pre_boolean_d;                  /**< \brief  Offset of the pre discrete boolean variable vector in \f$z\f$. */
+    int offs_pre_boolean_u;                  /**< \brief  Offset of the pre input boolean vector in \f$z\f$. */
 
-    int offs_pre_sw;                     /**< \brief  Offset of the first pre switching function in the DAE \f$F\f$ */
-    int offs_pre_sw_init;                /**< \brief  Offset of the first pre switching function in the DAE initialization system \f$F_0\f$ */
+    int offs_pre_sw;                         /**< \brief  Offset of the first pre switching function in the DAE \f$F\f$ */
+    int offs_pre_sw_init;                    /**< \brief  Offset of the first pre switching function in the DAE initialization system \f$F_0\f$ */
 
-    int offs_pre_guards;                 /**< \brief  Offset of the first pre guard \f$F\f$ */
-    int offs_pre_guards_init;            /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
+    int offs_pre_guards;                         /**< \brief  Offset of the first pre guard \f$F\f$ */
+    int offs_pre_guards_init;                    /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
 
     int offs_p;                          /**< \brief  Offset of the \f$p\f$ vector in \f$z\f$. */
     int offs_v;                          /**< \brief  Offset of the \f$v\f$ vector in \f$z\f$. */
@@ -1348,43 +1344,40 @@ struct jmi_t {
     jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
     jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
     jmi_real_t **dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
-    int dz_active_index;                 /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
-    int block_level;                     /**< \brief Block level for nested equation blocks. Currently 0 or 1. */
+    int dz_active_index;            /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
+    int block_level;                /**< \brief Block level for nested equation blocks. Currently 0 or 1. */
     jmi_real_t *dz_active_variables[1];	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
 #define JMI_ACTIVE_VAR_BUFS_NUM 3
-    jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM];  /**< \brief  This vector is the buffer used by dz_active_variables */
-    void** ext_objs;                     /**< \brief This vector contains the external object pointers. */
-    int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
-    int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
+    jmi_real_t *dz_active_variables_buf[JMI_ACTIVE_VAR_BUFS_NUM]; /**< \brief  This vector is the buffer used by dz_active_variables */
+    void** ext_objs;                    /**< \brief This vector contains the external object pointers. */
+    int indep_extobjs_initialized;      /** <\brief Flag indicating if initialization of independent external objects have been done. */
+        int dep_extobjs_initialized;        /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
     int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
     jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
     jmi_block_residual_t** dae_init_block_residuals;  /**< \brief A vector of function pointers to DAE initialization equation blocks */
-    int cached_block_jacobians;                       /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
+    int cached_block_jacobians;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 
-    jmi_int_t n_initial_relations;       /**< \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
-    jmi_int_t* initial_relations;        /**< \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
-    jmi_int_t n_relations;               /**< \brief Number of relational operators used in the event indicators for the DAE system */
-    jmi_int_t* relations;                /**< \brief Kind of relational operators used in the event indicators for the DAE system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
+    jmi_int_t n_initial_relations; /** \brief Number of relational operators used in the event indicators for the initialization system. There should be the same number of initial relations as there are event indicators */
+    jmi_int_t* initial_relations; /** \brief Kind of relational operators used in the event indicators for the initialization system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
+    jmi_int_t n_relations; /** \brief Number of relational operators used in the event indicators for the DAE system */
+    jmi_int_t* relations; /** \brief Kind of relational operators used in the event indicators for the DAE system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
 
-    jmi_ad_var_t atEvent;                /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
-    jmi_ad_var_t atInitial;              /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
+    jmi_ad_var_t atEvent;                                      /** \brief A boolean variable indicating if the model equations are evaluated at an event.*/
+    jmi_ad_var_t atInitial;                                    /** \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
-    jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
+    jmi_int_t is_initialized; /** Flag to keep track of if the initial equations have been solved. */
 
-    jmi_simple_color_info_t* color_info_A;  /**< \brief CPR coloring info for the ODE Jacobian A */
-    jmi_simple_color_info_t* color_info_B;  /**< \brief CPR coloring info for the ODE Jacobian B */
-    jmi_simple_color_info_t* color_info_C;  /**< \brief CPR coloring info for the ODE Jacobian C */
-    jmi_simple_color_info_t* color_info_D;  /**< \brief CPR coloring info for the ODE Jacobian D */
+    jmi_simple_color_info_t* color_info_A; /** \brief CPR coloring info for the ODE Jacobian A */
+    jmi_simple_color_info_t* color_info_B; /** \brief CPR coloring info for the ODE Jacobian B */
+    jmi_simple_color_info_t* color_info_C; /** \brief CPR coloring info for the ODE Jacobian C */
+    jmi_simple_color_info_t* color_info_D; /** \brief CPR coloring info for the ODE Jacobian D */
 
-    jmi_options_t options;               /**< \brief Runtime options */
-    jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
-    jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
-    jmi_log_t *log;                      /**< \brief Struct containing the structured logger. */
-
-    jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
-    int terminate;                       /**< \brief Flag to trigger termination of the simulation. */
+    jmi_options_t options; /** \brief Runtime options */
+    jmi_real_t events_epsilon; /** \brief Value used to adjust the event indicator functions */
+    jmi_int_t recomputeVariables; /** \brief Dirty flag indicating when equations should be resolved. */
+    jmi_log_t *log; /**< \brief Struct containing the structured logger. */
 };
 
 /**
@@ -1393,7 +1386,7 @@ struct jmi_t {
  * Contains one jmi_func_t struct representing the DAE residual
  * function.
  */
-struct jmi_dae_t {
+struct jmi_dae_t{
     jmi_func_t* F;                           /**< \brief  A jmi_func_t struct representing the DAE residual \f$F\f$. */
     jmi_func_t* R;                           /**< \brief  A jmi_func_t struct representing the DAE event indicator function \f$R\f$. */
     jmi_generic_func_t ode_derivatives;      /**< \brief A function pointer to a function for evaluating the ODE derivatives. */
@@ -1408,7 +1401,7 @@ struct jmi_dae_t {
 /**
  * \brief A struct containing a DAE initialization system.
  */
-struct jmi_init_t {
+struct jmi_init_t{
     jmi_func_t* F0;                      /**< \brief  A jmi_func_t struct representing \f$F_0\f$. */
     jmi_func_t* F1;                      /**< \brief  A jmi_func_t struct representing \f$F_1\f$. */
     jmi_func_t* Fp;                      /**< \brief  A jmi_func_t struct representing \f$F_p\f$. */
@@ -1421,7 +1414,7 @@ struct jmi_init_t {
  * interval definition and optimization parameters for an optimization
  * problem.
  */
-struct  jmi_opt_t {
+struct  jmi_opt_t{
     jmi_func_t* Ffdp;                     /**< \brief  Function pointer to the free dependent parameters residual function. */
     jmi_func_t* J;                        /**< \brief  Function pointer to the cost function. */
     jmi_func_t* L;                        /**< \brief  Function pointer to the Lagrange integrand. */

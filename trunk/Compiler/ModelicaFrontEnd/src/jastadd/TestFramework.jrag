@@ -83,7 +83,7 @@ aspect TestFramework {
 					
 					// TODO: Use type() and ceval() instead.
 					if (attr.isStringValue()) {
-						String val = attr.string();
+						String val = attr.string().replace("\\\"", "\"");
 						if (isOpt) {
 							tc.setStringOption(attrName, val);
 						} else {

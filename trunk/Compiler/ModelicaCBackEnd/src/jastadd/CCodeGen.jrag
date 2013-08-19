@@ -845,14 +845,7 @@ aspect CCodeGen {
 	public void FFunctionCallStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			genTempVars_C(p, str, indent);
-			p.print(getCall(), str, indent);
-		}
-	}
-	
-	public void FFunctionCallEquation.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (!getCall().isIgnored()) {
-			genTempVars_C(p, str, indent);
-			p.print(getCall(), str, indent);
+			p.print(getCall(), str, "");
 		}
 	}
 
@@ -1021,27 +1014,6 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
-	public void FTerminate.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print("jmi_flag_termination(jmi, ");
-		p.print(getFExp(), str, indent);
-		str.print(");\n");
-	}
-	
-	public void FAssert.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		str.print("if (");
-		p.print(getTest(), str, indent);
-		str.print(" == JMI_FALSE) {\n");
-		str.print(p.indent(indent));
-		str.print("jmi_assert_failed(");
-		p.print(getMsg(), str, indent);
-		boolean warning = hasLevel() && getLevel().ceval().intValue() == 2;
-		str.format(", JMI_ASSERT_%s);\n", warning ? "WARNING" : "ERROR");
-		str.print(indent);
-		str.print("}\n");
-	}
-	
 	public void FExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {}
 	
 	public void FIdUseExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {
@@ -1060,15 +1032,15 @@ aspect CCodeGen {
 
 	public void FDotDivExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		if (inFunction()) {
-			str.format("jmi_divide_function(\"%s\", ", containingFFunctionDecl().name());
+			str.print("jmi_divide(");
 		} else {
-			str.print("jmi_divide_equation(jmi, ");
+			str.print("jmi_divide_logged(jmi, ");
 		}
 		p.print(getLeft(),str,indent);
 		str.print(","); 
 		p.print(getRight(),str,indent);
 		str.print(","); 
-		str.print("\""+prettyPrint("")+"\")");
+		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
 	}
 	
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -1559,7 +1531,6 @@ aspect CCodeGen {
 	public boolean SolvedScalarEquationBlock.genRequiresBlockResidualFunction_C()       { return false; }
 	public boolean SolvedFunctionCallEquationBlock.genRequiresBlockResidualFunction_C() { return false; }
 	public boolean SolvedAlgorithmBlock.genRequiresBlockResidualFunction_C()            { return false; }
-	public boolean MetaEquationBlock.genRequiresBlockResidualFunction_C()               { return false; }
 	public boolean WhenEquationBlock.genRequiresBlockResidualFunction_C()               { return false; }
 	
 	private int AbstractEquationBlock.residualBlockNumber_C = -1;
@@ -1969,11 +1940,6 @@ aspect CCodeGen {
 			for (FFunctionCallLeft l : equation().getLefts()) 
 				l.genWriteBackAssignment_C(str, indent, null);
 		}
-	}
-
-	public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-	    equation().genTempVars_C(ASTNode.printer_C, str, indent);
-		equation().prettyPrint_C(ASTNode.printer_C, str, indent);
 	}
 
 	public void WhenEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {

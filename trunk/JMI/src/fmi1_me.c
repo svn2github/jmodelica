@@ -778,7 +778,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
             d0 = clock();
             fmiFlag = setMatrixElement(A,row+1,col+1,jac[row + col*nx]);
             d1 = clock();
-            setElementTime += ((fmiReal)(d1-d0))/(CLOCKS_PER_SEC);
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
             if (fmiFlag > fmiWarning) {
                 jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix A");
                 fmi -> fmi_functions.freeMemory(jac);
@@ -800,7 +800,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
             d0 = clock();
             fmiFlag = setMatrixElement(B,row+1,col+1,jac[row + col*nx]);
             d1 = clock();
-            setElementTime += ((fmiReal)(d1-d0))/(CLOCKS_PER_SEC);
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
             if (fmiFlag > fmiWarning) {
                 jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix B");
                 fmi -> fmi_functions.freeMemory(jac);
@@ -822,7 +822,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
             d0 = clock();
             fmiFlag = setMatrixElement(C,row + 1, col + 1, jac[row+col*ny]);
             d1 = clock();
-            setElementTime += ((fmiReal)(d1-d0))/(CLOCKS_PER_SEC);
+            setElementTime += ((realtype)(d1-d0))/(CLOCKS_PER_SEC);
             if (fmiFlag > fmiWarning) {
                 jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix C");
                 fmi -> fmi_functions.freeMemory(jac);
@@ -844,7 +844,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
             d0 = clock();
             fmiFlag = setMatrixElement(D,row + 1, col + 1,jac[row + col*ny]);
             d1 = clock();
-            setElementTime += ((fmiReal) ((long)(d1-d0))/(CLOCKS_PER_SEC));
+            setElementTime += ((realtype) ((long)(d1-d0))/(CLOCKS_PER_SEC));
             if (fmiFlag > fmiWarning) {
                 jmi_log_comment(jmi->log, logError, "setMatrixElement failed to update matrix D");
                 fmi -> fmi_functions.freeMemory(jac);
@@ -856,7 +856,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     fmi -> fmi_functions.freeMemory(jac);
 
     c1 = clock();
-    /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    /*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     /*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
     return fmiOK;
 }
@@ -926,7 +926,7 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
         }
         (*(jmi->z))[offs+i] += h;
         jmi->block_level = 0; /* to recover from errors */        
-        jmi_generic_func(jmi, jmi->dae->ode_derivatives);
+        jmi->dae->ode_derivatives(jmi);
         if(dependents&FMI_DERIVATIVES){
             for(j = 0; j < jmi->n_real_dx; j++){
                 z1[k] = (*(jmi->z))[jmi->offs_real_dx+j];
@@ -944,7 +944,7 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
         (*(jmi->z))[offs+i] -= 2*h;
         jmi->block_level = 0; /* to recover from errors */
         
-        jmi_generic_func(jmi, jmi->dae->ode_derivatives);
+        jmi->dae->ode_derivatives(jmi);
         k = 0;
         if(dependents&FMI_DERIVATIVES){
             for(j = 0; j < jmi->n_real_dx; j++){
@@ -1051,7 +1051,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
             }
             jmi->block_level = 0; /* to recover from errors */
             
-            jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+            jmi->dae->ode_derivatives_dir_der(jmi);
             /* Extract Jacobian values */
             for (j=0;j<jmi->color_info_A->n_cols_in_group[i];j++) {
                 for (k=jmi->color_info_A->col_start_index[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j]];
@@ -1069,7 +1069,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
         }
         c1 = clock();
 
-        /*printf("Jac A eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+        /*printf("Jac A eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
 
     } else {
 
@@ -1112,7 +1112,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
             jmi->block_level = 0; /* to recover from errors */
 
             /*Evaluate directional derivative*/
-            jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+            jmi->dae->ode_derivatives_dir_der(jmi);
 
             /*Jacobian elements ddx/dx and/or ddx/du*/
             if(dependents&FMI_DERIVATIVES){
@@ -1180,7 +1180,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     
     c1 = clock();
 
-    /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    /*printf("Jac eval call: %f\n", ((realtype) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     return fmiOK;
 }
 
@@ -1196,7 +1196,7 @@ fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueRefer
     for (i=0;i<nvvr;i++) {
         (*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
     }
-    jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+    jmi->dae->ode_derivatives_dir_der(jmi);
     for (i=0;i<nzvr;i++) {
         dz[i] = (*dz_)[get_index_from_value_ref(z_vref[i])];
     }
@@ -1412,8 +1412,6 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
     eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
     eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
     
-    jmi->terminate = 0; /* Reset terminate flag. */
-
     max_iterations = 30; /* Maximum number of event iterations */
 
     retval = jmi_ode_derivatives(jmi);
@@ -1435,7 +1433,7 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
 
     /* Iterate */
     iter = 0;
-    while (eventInfo->iterationConverged == fmiFalse) {
+    while ((eventInfo->iterationConverged)==fmiFalse){
         jmi_log_node_t iter_node;
 
         iter += 1;
@@ -1489,12 +1487,12 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
         /* Copy new values to pre values */
         jmi_copy_pre_values(jmi);
 
-        if (intermediateResults) {
+        if (intermediateResults){
             break;
         }
         
         /* No convergence under the allowed number of iterations. */
-        if (iter >= max_iterations) {
+        if(iter >= max_iterations){
             jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point "
                          "iteration due to too many iterations at <t:%E>",jmi_get_t(jmi)[0]);
             jmi_log_unwind(jmi->log, top_node);
@@ -1538,7 +1536,7 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
          */
         retval = jmi_ode_guards(jmi);
 
-        if (retval != 0) { /* Error check */
+        if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
             jmi_log_unwind(jmi->log, top_node);
             return fmiError;
@@ -1546,9 +1544,6 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
 
         jmi_log_leave(jmi->log, final_node);
     }
-
-	/* If everything went well, check if termination of simulation was requested. */
-	eventInfo->terminateSimulation = jmi->terminate ? fmiTrue : fmiFalse;
 
     fmi->fmi_functions.freeMemory(event_indicators);
     fmi->fmi_functions.freeMemory(sw_temp);

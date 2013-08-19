@@ -101,8 +101,8 @@ class _BaseSimOptTest:
         Assert that all given variables match expected intial values loaded by a call to 
         load_expected_data().
           variables -  list of the names of the variables to test
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         self._assert_all_spec_values(variables, 0, rel_tol, abs_tol)
 
@@ -112,8 +112,8 @@ class _BaseSimOptTest:
         Assert that all given variables match expected end values loaded by a call to 
         load_expected_data().
           variables -  list of the names of the variables to test
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         self._assert_all_spec_values(variables, -1, rel_tol, abs_tol)
 
@@ -125,8 +125,8 @@ class _BaseSimOptTest:
           variables -  list of the names of the variables to test
           same_span -  if True, require that the paths span the same time interval
                        if False, only compare overlapping part, default True
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         for var in variables:
             expected = self.expected.get_variable_data(var)
@@ -139,8 +139,8 @@ class _BaseSimOptTest:
         Assert that the inital value for a simulation variable matches expected value. 
           variable  -  the name of the variable
           value     -  the expected value
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         self._assert_value(variable, value, 0, rel_tol, abs_tol)
 
@@ -150,8 +150,8 @@ class _BaseSimOptTest:
         Assert that the end result for a simulation variable matches expected value. 
           variable  -  the name of the variable
           value     -  the expected value
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         self._assert_value(variable, value, -1, rel_tol, abs_tol)
 
@@ -163,8 +163,8 @@ class _BaseSimOptTest:
           expected  -  the expected trajectory
           same_span -  if True, require that the paths span the same time interval
                        if False, only compare overlapping part, default True
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         if rel_tol is None:
             rel_tol = self.rel_tol
@@ -210,8 +210,8 @@ class _BaseSimOptTest:
         load_expected_data(), for a given index in the value arrays.
           variables -  list of the names of the variables to test
           index     -  the index in the array holding the values, 0 is initial, -1 is end
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         for var in variables:
             value = self.expected.get_variable_data(var)[index]
@@ -224,29 +224,17 @@ class _BaseSimOptTest:
           variable  -  the name of the variable
           value     -  the expected value
           index     -  the index in the array holding the values, 0 is initial, -1 is end
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
-        """
-        res = self.data.get_variable_data(variable)
-        msg = 'error of %s at index %i is too large' % (variable, index)
-        self.assert_equals(msg, res.x[index], value, rel_tol = None, abs_tol = None)
-
-
-    def assert_equals(self, message, actual, expected, rel_tol = None, abs_tol = None):
-        """
-        Assert that a specific value matches expected value. 
-          actual    -  the expected value
-          expected  -  the expected value
-          message   -  the error message to use if values does not match
-          rel_tol   -  the relative error tolerance, defaults to the value set with setup_base()
-          abs_tol   -  the absolute error tolerance, defaults to the value set with setup_base()
+          rel_tol -  the relative error tolerance, defaults to the value set with setup_base()
+          abs_tol -  the absolute error tolerance, defaults to the value set with setup_base()
         """
         if rel_tol is None:
             rel_tol = self.rel_tol
         if abs_tol is None:
             abs_tol = self.abs_tol
-        (rel, abs) = _error(actual, expected)
-        assert (rel <= rel_tol or abs <= abs_tol), '%s (rel=%f, abs=%f)' % (message, rel, abs)
+        res = self.data.get_variable_data(variable)
+        (rel, abs) = _error(value, res.x[index])
+        msg = 'error of %s at index %i is too large (rel=%f, abs=%f)' % (variable, index, rel, abs)
+        assert (rel <= rel_tol or abs <= abs_tol), msg
 
 
 class SimulationTest(_BaseSimOptTest):

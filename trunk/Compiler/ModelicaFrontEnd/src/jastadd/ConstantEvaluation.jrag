@@ -1300,13 +1300,6 @@ aspect ConstantEvaluation {
   eq FConnIsRoot.cevalFromGraph() = connectionGraph.ops(getA()).isRoot;
   eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
 
-  eq FTerminate.cevalCalc() {
-	  throw new ConstantEvaluationException();
-  }
-  eq FAssert.cevalCalc() {
-	  throw new ConstantEvaluationException();
-  }
-
   /**
    * The connections graph to use when constat evaluating a Connections.x() operator with boolean result.
    */

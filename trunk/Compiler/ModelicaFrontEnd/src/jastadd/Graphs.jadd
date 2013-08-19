@@ -194,9 +194,7 @@ public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVari
 	}
 }
 
-public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) {
-	if (numScalarEquations() == 0)
-		return new MetaEquationBlock(this);
+public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
 	if (solvability.isAnalyticallySolvable()) {
 		return new SolvedFunctionCallEquationBlock(this, fvs);
 	} else {
@@ -632,10 +630,6 @@ public class BiPGraph {
 		return vars;
 	}
 	
-	public boolean isComplete() {
-		return getUnmatchedVariables().size() == 0 && getUnmatchedEquations().size() == 0;
-	}
-	
 	public Collection<Eq> getEquations() {
 		return equationMap.values();
 	}
@@ -650,8 +644,7 @@ public class BiPGraph {
 	
 
 	public java.util.List<Eq> getEquations(FAbstractEquation eqn) {
-		java.util.List<Eq> list = equationIndexMap.get(eqn);
-		return (list == null) ? Collections.<Eq>emptyList() : list;
+		return equationIndexMap.get(eqn);
 	}
 
 	public Eq addEquation(String name, FAbstractEquation eqn) {

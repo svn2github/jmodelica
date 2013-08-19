@@ -45,10 +45,8 @@ libjmi_la_SOURCES = jmi.h \
                     fmi1_functions.h \
                     fmi1_types.h \
                     jmi_common.h \
-                    jmi_common.c \
                     jmi.c \
-                    jmi_global.h \
-                    jmi_global.c \
+                    jmi_common.c \
                     jmi_simple_newton.h \
                     jmi_simple_newton.c \
                     jmi_block_residual.h \
@@ -135,8 +133,6 @@ libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
                                    ModelicaUtilities.c \
-                                   jmi_global.h \
-                                   jmi_global.c \
                                    $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaInternal.c \
 	                           $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources/ModelicaStrings.c
 
@@ -169,8 +165,6 @@ libjmi_solver_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_cppad_la_SOURCES = jmi.h \
                     jmi_common.c \
                     jmi_common.h \
-                    jmi_global.h \
-                    jmi_global.c \
                     jmi_block_residual.h \
                     jmi_block_residual.c \
                     jmi_cppad.cpp\
@@ -220,7 +214,6 @@ include_HEADERS = jmi.h \
                   fmi1_cs.h\
                   ModelicaUtilities.h \
                   jmi_common.h \
-                  jmi_global.h \
                   jmi_simple_newton.h \
                   jmi_block_residual.h \
                   jmi_kinsol_solver.h \

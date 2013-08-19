@@ -2270,7 +2270,6 @@ fclass NameTests.ImportTest8
  Modelica.SIunits.Power r.LossPower \"Loss power leaving component via HeatPort\";
  Modelica.SIunits.ThermodynamicTemperature r.T_heatPort \"Temperature of HeatPort\";
 equation
- assert(1 + r.alpha * (r.T_heatPort - r.T_ref) >= 1.0E-15, \"Temperature outside scope of model!\");
  r.R_actual = r.R * (1 + r.alpha * (r.T_heatPort - r.T_ref));
  r.v = r.R_actual * r.i;
  r.LossPower = r.v * r.i;

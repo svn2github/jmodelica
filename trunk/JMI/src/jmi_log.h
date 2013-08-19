@@ -77,10 +77,6 @@ extern "C" {
 #endif
 
 
-#define TRUE  1
-#define FALSE 0
-
-
 /** \brief Allocate and intialize a log, with output to `jmi` */
 jmi_log_t *jmi_log_init(jmi_t *jmi);
 
@@ -91,7 +87,7 @@ void jmi_log_delete(jmi_log_t *log);
 /* Row primitives */
 
 /** \brief Enter a new log node with given category and type. */
-jmi_log_node_t jmi_log_enter(jmi_log_t *log, jmi_log_category_t c, const char *type);
+jmi_log_node_t jmi_log_enter(    jmi_log_t *log, jmi_log_category_t c, const char *type);
 
 /** \brief Enter a new log node with given category and type, then call jmi_log_fmt with the remaining parameters. */
 jmi_log_node_t jmi_log_enter_fmt(jmi_log_t *log, jmi_log_category_t c, const char *type, const char* fmt, ...);
@@ -122,6 +118,7 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *    (e.g. `<var:#r%d#>`), where `<type>` is one of the characters `ribs`.
  * 
  *  The values for consecutive attributes should be supplied as additional arguments, just like for `printf`.
+ * 
  */
 void jmi_log_fmt(jmi_log_t *log, jmi_log_node_t node, jmi_log_category_t c, const char *fmt, ...);
 
