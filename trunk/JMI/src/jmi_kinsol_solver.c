@@ -469,6 +469,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
 
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
+    KINSetNumMaxIters(solver->kin_mem, jmi->options.nle_solver_max_iter);
     
     if(jmi->options.iteration_variable_scaling_mode)
     {
