@@ -94,7 +94,7 @@ class ModelicaCompiler(object):
         """
         try:
             self._compiler.setLogger(log_string)
-        except IllegalLogStringException as ex:
+        except jpype.JavaException as ex:
             self._handle_exception(ex)
 
     def get_modelicapath(self):

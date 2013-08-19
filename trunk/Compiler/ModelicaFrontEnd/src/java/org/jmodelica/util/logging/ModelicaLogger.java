@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.CompilerException;
-import org.jmodelica.util.IllegalLogStringException;
 import org.jmodelica.util.NullStream;
 import org.jmodelica.util.Problem;
 

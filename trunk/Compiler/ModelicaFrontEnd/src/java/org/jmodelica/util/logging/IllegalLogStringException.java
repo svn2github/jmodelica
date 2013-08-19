@@ -1,6 +1,6 @@
-package org.jmodelica.util;
+package org.jmodelica.util.logging;
 
-import org.jmodelica.util.logging.ModelicaLogger;
+import org.jmodelica.util.ModelicaException;
 
 @SuppressWarnings("serial")
 public class IllegalLogStringException extends ModelicaException {

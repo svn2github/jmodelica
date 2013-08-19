@@ -194,6 +194,9 @@ class CompilerLogHandler:
         if exception.kind == 'java.io.FileNotFoundException':
             raise IOError(exception.message)
         
+        if exception.kind == 'org.jmodelica.util.logging.IllegalLogStringException':
+            raise IllegalLogStringError(exception.message)
+        
         if exception.kind == 'org.jmodelica.util.OptionRegistry$UnknownOptionException':
             raise UnknownOptionError(exception.message)
         

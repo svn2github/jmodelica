@@ -59,7 +59,7 @@ import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.CompilerException;
 import org.jmodelica.util.ModelicaClassNotFoundException;
 import org.jmodelica.util.PassAndForget;
-import org.jmodelica.util.IllegalLogStringException;
+import org.jmodelica.util.logging.IllegalLogStringException;
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -1651,7 +1651,7 @@ public class ModelicaCompiler {
 			setLogger(logString);
 		} catch (IllegalLogStringException e) {
 			setLogger(e.getLogger());
-			log.error(e.getMessage());
+			log.error(e);
 			closeLogger();
 			System.exit(1);
 		}
