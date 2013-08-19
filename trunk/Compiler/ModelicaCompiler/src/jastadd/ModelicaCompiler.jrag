@@ -1522,7 +1522,6 @@ public class ModelicaCompiler {
 		log.close();
 	}
 	
-
 	private static String[] convertEnv(Map<String, String> envMap) {
 		String[] res = new String[envMap.size()];
 		int i = 0;

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.CompilerException;
+import org.jmodelica.util.IllegalLogStringException;
 import org.jmodelica.util.NullStream;
 import org.jmodelica.util.Problem;
 
@@ -81,7 +82,7 @@ public abstract class ModelicaLogger {
 			write(level, throwable);
 	}
 	
-	/*
+	/**
 	 * Handle and log problems in an CompilerException.
 	 */
 	public void logCompilerException(CompilerException e) {
@@ -198,16 +199,18 @@ public abstract class ModelicaLogger {
 	/**
 	 * Constructs a modelica logger based on the configuration string
 	 * given by <code>logString</code>. The syntax is:
-	 *   format := <log> ',' <format>
-	 *   format := <log>
-	 *   <log> := <flag> ':' <file> # Writes to the file <file> with the log level <flag>
-	 *   <log> := <flag> '|stdout'  # Writes to stdout with the log level <flag>
-	 *   <log> := <flag> '|stderr'  # Writes to stderr with the log level <flag>
-	 *   <log> := <flag>            # Writes to stdout with the log level <flag>
-	 *   <flag> := 'e' | 'w' | 'i' | 'd'
-	 *   <file> := ...              # Valid output file
+	 *   format := log ',' format
+	 *   format := log
+	 *   log := flag ':' file   # Writes to the file <code>file</code> with the log level <code>flag</code>
+	 *   log := flag '|stdout'  # Writes to stdout with the log level <code>flag</code>
+	 *   log := flag '|stderr'  # Writes to stderr with the log level <code>flag</code>
+	 *   log := flag            # Writes to stdout with the log level <code>flag</code>
+	 *   flag := 'e' | 'w' | 'i' | 'd'
+	 *   file := ...            # Valid output file
+	 *   
+	 *   @throws IllegalLogStringException when invalid log string is supplied
 	 */
-	public static ModelicaLogger createModelicaLoggersFromLogString(String logString) {
+	public static ModelicaLogger createModelicaLoggersFromLogString(String logString) throws IllegalLogStringException {
 		Collection<String> problems = new ArrayList<String>();
 		Map<String, LoggerProps> loggerMap = new HashMap<String, LoggerProps>();
 		if (logString == null)
@@ -295,7 +298,7 @@ public abstract class ModelicaLogger {
 				sb.append(problem);
 				sb.append('\n');
 			}
-			throw new IllegalArgumentException(sb.toString());
+			throw new IllegalLogStringException(sb.toString());
 		}
 		// Step 3. Create TeeLogger if necessary
 		if (loggers.size() == 1)
