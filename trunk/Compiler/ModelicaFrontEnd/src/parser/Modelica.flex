@@ -27,7 +27,7 @@ import beaver.Scanner;
 %class ModelicaScanner
 %extends AbstractModelicaScanner
 %unicode
-%function nextToken
+%function nextTokenInner
 %type Symbol
 %yylexthrow Scanner.Exception
 /* From JFlex manual: "<<EOF>> rules [...] should not be mixed with the %eofval directive." */
@@ -113,6 +113,13 @@ import beaver.Scanner;
   protected int matchOffset() { return yychar; }
   protected int matchLength() { return yylength(); }
   
+  public Symbol nextToken() throws IOException, Scanner.Exception {
+    Symbol res = null;
+    while (res == null)
+      res = nextTokenInner();
+    return res;
+  }
+  
 %}
 
 
@@ -195,23 +202,28 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
 
-  "end" {WhiteSpace} "for"    { addWhiteSpaces(yytext());
-	  							addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "for"    { String s = yytext();
+                                addWhiteSpaces(s);
+	  							addLineBreaks(s); 
                                 return newSymbol(Terminals.END_FOR); }
-  "end" {WhiteSpace} "while"  { addWhiteSpaces(yytext()); 
-	  							addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "while"  { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_WHILE); }
-  "end" {WhiteSpace} "if"     { addWhiteSpaces(yytext());
-	  							addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "if"     { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_IF); }
-  "end" {WhiteSpace} "when"   { addWhiteSpaces(yytext());
-	  							addLineBreaks(yytext()); 
+  "end" {WhiteSpace} "when"   { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
                                 return newSymbol(Terminals.END_WHEN); }
-  "end" {WhiteSpace} {ID}     { addWhiteSpaces(yytext());
-	  							String s = yytext();
-  			                    return newSymbol(Terminals.END_ID, s); }
+  "end" {WhiteSpace} {ID}     { String s = yytext();
+                                addWhiteSpaces(s);
+                                addLineBreaks(s); 
+                                return newSymbol(Terminals.END_ID, s); }
  
-   "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
+  "enumeration"     { return newSymbol(Terminals.ENUMERATION); }
  
   "each"          { return newSymbol(Terminals.EACH); }
   "final"         { return newSymbol(Terminals.FINAL); }   
@@ -247,9 +259,9 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "break"         { return newSymbol(Terminals.BREAK); }
   "return"        { return newSymbol(Terminals.RETURN); }
  
- "connect"        { return newSymbol(Terminals.CONNECT); }
- "time"           { return newSymbol(Terminals.TIME); }
- "der"            { return newSymbol(Terminals.DER); }
+  "connect"       { return newSymbol(Terminals.CONNECT); }
+  "time"          { return newSymbol(Terminals.TIME); }
+  "der"           { return newSymbol(Terminals.DER); }
  
   
   
@@ -265,7 +277,8 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   ","             { return newSymbol(Terminals.COMMA); }
 
 
-  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());return newSymbol(Terminals.PLUS); }  
+  "+"             { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext());
+                    return newSymbol(Terminals.PLUS); }  
   "-"             { return newSymbol(Terminals.MINUS); }
   "*"             { return newSymbol(Terminals.MULT); }
   "/"             { return newSymbol(Terminals.DIV); }
@@ -300,10 +313,13 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   							 if (yytext().charAt(1) == '/') {
   								 numberOfLineBreaks = 0;
   							 }
-                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); }
-  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); }
+                             addFormattingInformation(FormattingItem.Type.COMMENT, yytext(), numberOfLineBreaks); 
+                             return null; }
+  {NonBreakingWhiteSpace}  { addFormattingInformation(FormattingItem.Type.NON_BREAKING_WHITESPACE, yytext()); 
+                             return null; }
   {LineTerminator} 		   { addLineBreak();
-                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); }
+                             addFormattingInformation(FormattingItem.Type.LINE_BREAK, yytext()); 
+                             return null; }
                              
   .|\n                { throw new Exception("Illegal character \""+yytext()+ "\""); }
 }
