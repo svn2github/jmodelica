@@ -174,6 +174,11 @@ extern "C" {
 #endif
 
 /**
+ * \brief Call a jmi_generic_func_t, and handle exceptions and setting the current jmi_t pointer.
+ */
+int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func);
+
+/**
  * \brief Evaluates the switches.
  * 
  * Evaluates the switches. Depending on the mode, it either evaluates

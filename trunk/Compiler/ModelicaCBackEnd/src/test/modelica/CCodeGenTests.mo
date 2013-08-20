@@ -141,7 +141,7 @@ equation
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
     (*res)[0] = _y_1 - (_der_x_2);
-    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\"), JMI_TRUE, JMI_FALSE), JMI_TRUE, sin(_time), _x_0)) - (_y_1);
 ")})));
 end CCodeGenTest4;
 
@@ -747,10 +747,10 @@ model CCodeGenDotOp
 			generate_dae=true,
 			template="$C_DAE_equation_residuals$",
 			generatedCode="
-    (*res)[0] = jmi_divide_logged(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"Divide by zero: y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
-    (*res)[1] = jmi_divide_logged(jmi, _y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"Divide by zero: y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
-    (*res)[2] = jmi_divide_logged(jmi, _y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"Divide by zero: y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
-    (*res)[3] = jmi_divide_logged(jmi, _y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"Divide by zero: y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
+    (*res)[0] = jmi_divide_equation(jmi, _y_1_1_4 * _y_1_1_4,pow((_y_1_1_4 + _y_1_1_4 - 2),_y_1_1_4),\"y[1,1] .* y[1,1] ./ (y[1,1] .+ y[1,1] .- 2) .^ y[1,1]\") - (_x_1_1_0);
+    (*res)[1] = jmi_divide_equation(jmi, _y_1_2_5 * _y_1_2_5,pow((_y_1_2_5 + _y_1_2_5 - 2),_y_1_2_5),\"y[1,2] .* y[1,2] ./ (y[1,2] .+ y[1,2] .- 2) .^ y[1,2]\") - (_x_1_2_1);
+    (*res)[2] = jmi_divide_equation(jmi, _y_2_1_6 * _y_2_1_6,pow((_y_2_1_6 + _y_2_1_6 - 2),_y_2_1_6),\"y[2,1] .* y[2,1] ./ (y[2,1] .+ y[2,1] .- 2) .^ y[2,1]\") - (_x_2_1_2);
+    (*res)[3] = jmi_divide_equation(jmi, _y_2_2_7 * _y_2_2_7,pow((_y_2_2_7 + _y_2_2_7 - 2),_y_2_2_7),\"y[2,2] .* y[2,2] ./ (y[2,2] .+ y[2,2] .- 2) .^ y[2,2]\") - (_x_2_2_3);
     (*res)[4] = 1 - (_y_1_1_4);
     (*res)[5] = 2 - (_y_1_2_5);
     (*res)[6] = 3 - (_y_2_1_6);
@@ -5027,12 +5027,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -5040,12 +5040,12 @@ $C_ode_time_events$
   nextTimeEventTmp = JMI_INF;
   if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
+    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
+    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\") + AD_WRAP_LITERAL(0);
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -5058,13 +5058,13 @@ $C_ode_time_events$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"Divide by zero: 1 / 3\"));
+    _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _x_0 = pre_x_0 + 1;
   } else {
   _x_0 = pre_x_0;
   }
-    _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_logged(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"Divide by zero: 2 / 3\"));
+    _guards(1) = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\"));
   if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
    _y_1 = pre_y_1 + 1;
   } else {
@@ -8582,7 +8582,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     _i3_7 = x[1];
   _i1_5 = _i2_6 + _i3_7;
   _u1_1 = _R1_9 * _i1_5;
-  _u2_2 = jmi_divide_logged(jmi, (- _u0_0 + _u1_1),(- 1.0),\"Divide by zero: (- u0 + u1) / (- 1.0)\");
+  _u2_2 = jmi_divide_equation(jmi, (- _u0_0 + _u1_1),(- 1.0),\"(- u0 + u1) / (- 1.0)\");
   (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
   (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -8785,7 +8785,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _c_2 = x[0];
         ef | = jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-        _a_0 = jmi_divide_logged(jmi, (- _c_2 + _b_1),(- 1.0),\"Divide by zero: (- c + b) / (- 1.0)\");
+        _a_0 = jmi_divide_equation(jmi, (- _c_2 + _b_1),(- 1.0),\"(- c + b) / (- 1.0)\");
         (*res)[0] = _c_2 * _a_0 - (20);
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _c_2 = x[0];
@@ -8894,6 +8894,11 @@ void func_Modelica_Math_Matrices_solve_def(jmi_array_t* A_a, jmi_array_t* b_a, j
         x_a = x_an;
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(A_a, b_a, x_a, &info_v);
+    if (COND_EXP_EQ(info_v, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Solving a linear system of equations with function
+\\\"Matrices.solve\\\" is not possible, because the system has either
+no or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+    }
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -8987,6 +8992,11 @@ void func_Modelica_Math_Matrices_solve2_def(jmi_array_t* A_a, jmi_array_t* B_a, 
         X_a = X_an;
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_def(A_a, B_a, X_a, &info_v);
+    if (COND_EXP_EQ(info_v, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Solving a linear system of equations with function
+\\\"Matrices.solve2\\\" is not possible, because the system has either
+no or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+    }
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -9847,6 +9857,124 @@ jmi_ad_var_t func_CCodeGenTests_StringOperations4_f_exp(char* s_v) {
     _y_0 = func_CCodeGenTests_StringOperations4_f_exp(tmp_1);
 ")})));
 end StringOperations4;
+
+
+model TestTerminate1 // Test C code generation for terminate()
+        Real x(start = 0);
+    equation
+        der(x) = time;
+        when x >= 2 then
+            terminate("X is high enough.");
+        end when;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestTerminate1",
+			description="",
+			template="
+$C_ode_derivatives$
+$C_dae_blocks_residual_functions$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_1 = _time;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _guards(0) = _sw(0);
+     if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+     jmi_flag_termination(jmi, \"X is high enough.\");
+  } else {
+}
+
+")})));
+end TestTerminate1;
+
+/* TODO: Once there is support for if equations containing functions without return values, 
+         add tests of terminate() in if equations. */ 
+
+
+model TestAssert1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 1;
+        assert(x < 3, "x is too high.");
+        assert(y < 4, "y is too high.", AssertionLevel.error);
+        assert(x + y < 5, "sum is a bit high.", AssertionLevel.warning);
+    end f;
+    
+    Real x = time + 1;
+    Real y = f(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestAssert1",
+            description="Test C code generation for assert() in functions",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_TestAssert1_f_def(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = x_v + 1;
+    if (COND_EXP_LT(x_v, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (COND_EXP_LT(y_v, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"y is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (COND_EXP_LT(x_v + y_v, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"sum is a bit high.\", JMI_ASSERT_WARNING);
+    }
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestAssert1_f_exp(jmi_ad_var_t x_v) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_TestAssert1_f_def(x_v, &y_v);
+    return y_v;
+}
+
+")})));
+end TestAssert1;
+
+
+model TestAssert2
+    Real x = time + 1;
+    Real y = x + 1;
+equation
+    assert(x < 3, "x is too high.");
+    assert(y < 4, "y is too high.", AssertionLevel.error);
+    assert(x + y < 5, "sum is a bit high.", AssertionLevel.warning);
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestAssert2",
+			description="Test C code generation for assert() in equations",
+			template="$C_ode_derivatives$",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = _time + 1;
+    _y_1 = _x_0 + 1;
+    if (COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (COND_EXP_LT(_y_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"y is too high.\", JMI_ASSERT_ERROR);
+    }
+    if (COND_EXP_LT(_x_0 + _y_1, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"sum is a bit high.\", JMI_ASSERT_WARNING);
+    }
+")})));
+end TestAssert2;
 
 
 end CCodeGenTests;

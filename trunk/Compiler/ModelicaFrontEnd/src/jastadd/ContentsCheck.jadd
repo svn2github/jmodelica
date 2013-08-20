@@ -33,7 +33,7 @@ aspect ContentCheck {
 	
 	public void InstDerExp.contentCheck() {
 		if (inFunction()) {
-			error("The der() operator may not be used inside functions");
+			error("The der() operator is not allowed in functions");
 		} else {
 			try {
 				getFExp().diff(FExp.TIME);
@@ -41,6 +41,11 @@ aspect ContentCheck {
 				e.generateError();
 			}
 		}
+	}
+	
+	public void FTerminate.contentCheck() {
+		if (inFunction()) 
+			error("The terminate() statement is not allowed in functions");
 	}
 	
 	public void InstExternal.contentCheck() {
@@ -213,6 +218,11 @@ aspect ContentCheck {
 			if (!isBalancedAssignments())
 				error("All branches in when equation must assign the same variables");
 		}
+	}
+	
+	public void InstNamedModification.contentCheck() {
+		if (getName().hasFArraySubscripts())
+			error("Modifiers of specific array elements are not allowed");
 	}
 	
 	public static final String FIfEquation.UNBALANCED_ERROR = 

@@ -262,7 +262,7 @@ aspect TransformCanonical {
 				AbstractEquationBlock eb = fv.myDAEEquationBlock();
 				if (eb!=null && !eb.isVisited()) {
 					eb.setVisited(true);
-					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
 						if (!ebb.isVisited()) {	
 							ebb.setVisited(true);
 							otherBlocks.add(ebb);
@@ -270,6 +270,13 @@ aspect TransformCanonical {
 					}
 					otherBlocks.add(eb);
 				}	
+			}
+			// Add any blocks not visited (generally meta blocks)
+			for (AbstractEquationBlock eb : this) {
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					otherBlocks.add(eb);
+				}
 			}
 			
 			allBlocks.addAll(odeBlocks);
@@ -1019,6 +1026,33 @@ aspect TransformCanonical {
 		}
 		
 	}
+	
+	/**
+	 * An equation that does not affect the values of any variables. 
+	 *
+	 * Examples: asserts, calls to functions without outputs.
+	 */
+	public class MetaEquationBlock extends SimpleEquationBlock {
+
+		public MetaEquationBlock(FAbstractEquation equation) {
+			super(equation);
+		}
+
+		public Collection<FVariable> activeVariables() {
+			return Collections.<FVariable>emptyList();
+		}
+
+		public boolean isSolvable() {
+			return true;
+		}
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Meta equation block:");
+			str.println("Equation:");
+			prettyPrintEquation(str);
+		}
+		
+	}
 
 	/**
 	 * ScalarEquationBlock represents a scalar equation. Base class for
@@ -1664,139 +1698,33 @@ aspect TransformCanonical {
 		}
 	
 		// If no complete matching found, then try index reduction
-		if (g.getUnmatchedVariables().size() > 0 || g.getUnmatchedEquations().size() > 0) {
-			if (root().options.getBooleanOption("index_reduction")) {
-				// Only do index reduction based on real variables and equations
-				g = new BiPGraph();
-				g.addVariables(this, VAR_TYPES_REAL);
-				g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
-				log.info("Index reduction starts");
-				log.info(g);
-				g.maximumMatching(true);	
-				log.info("DAE system real variables only");
-				log.info(g.printMatchingObj());
-
-				IndexReductionResult result = null;
-				try {
-					result = g.reduceIndex(false);
-				} catch (EquationDifferentiationException e) {
-					indexReductionErrors.add(e.getMessage());
-					return; 
-				}
-				
-				if (result != null) {
-					// Add the new equations
-					// Replace selected dummy derivatives with algebraics
-					// Enable rewrite of identifiers? (not necessary?)
-					for (FAbstractEquation fe : result.getEquations()) {
-						addFEquation((FAbstractEquation)fe.fullCopy());
-					}
-					
-					List<FVariable> l = new List<FVariable>();
-					
-					for (FVariable fv : getFVariables()) {
-						if (result.getDummyDerivatives().contains(fv)) {
-							if (fv instanceof FHDerivativeVariable) {
-								FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
-									((FHDerivativeVariable)fv).getOrder());
-								l.add(fdv);
-							} else if (fv instanceof FDerivativeVariable) {
-								FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-								l.add(fdv);					
-							} else {
-								l.add(fv);
-							}
-						} else if (fv instanceof FHDerivativeVariable) {
-						    // Convert higher order derivative variables into
-						    // first order derivatives, generating variables for each step
-						    FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
-						    FQName fqnPrev = fv.getFQName().fullCopy();
-							for (int i = 1; i < fhdv.getOrder(); i++) {
-								FQName fqn = fv.getFQName().createDerPrefixedName(i);
-								l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
-								l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-									fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
-								addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
-								fqnPrev = fqn;
-							}		
-						} else {
-							l.add(fv);
-						}
-					}	
-	
-					setFVariableList(l);		
-	
-					enableFHDerRewrite();
-	
-					// flushAllRecursiveClearFinal must be used here in order to
-					// trigger rewrites of FDerExp -> FDummyDerExp
-					root().flushAllRecursiveClearFinal();
-	
-					aliasEliminationIfSet();
-	
-	 				root().flushAllRecursive();
-	
-					//System.out.println(prettyPrint(""));
-	
-					//dumpTree("");
-	
-					log.info("States:");
-					for (FVariable fv : differentiatedRealVariables()) {
-						log.info(new PrettyPrintDelegate(fv, "  "));
-					}
-				} else {
-					return;
-				}
-				
-				g = new BiPGraph();
-				g.addVariables(this, VAR_TYPES_NORMAL);
-				g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
-
-				log.info(g);
-				g.maximumMatching(true);	
-				log.info("DAE system ");
-				log.info(g.printMatchingObj());
-		
-				daeUnmatchedVariables.clear();
-				for (Var var : g.getUnmatchedVariables()) {
-					daeUnmatchedVariables.add(var.getVariable());
-				}
-
-				daeUnmatchedEquations.clear();
-				for (Eq ee : g.getUnmatchedEquations()) {
-					daeUnmatchedEquations.add(ee.getEquation());
-				}
-		
-				if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
-					return;
-				}
-				
-			} else {
+		if (!g.isComplete()) {
+			g = reduceIndex();
+			if (g == null)
 				return;
-			}
 		} 
 			
 		// Perform BLT
-		if (root().options.getBooleanOption("equation_sorting") && g.getUnmatchedVariables().size()==0 && g.getUnmatchedEquations().size()==0) {	
+		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			
-			if (root().options.getBooleanOption("automatic_tearing") || root().options.getBooleanOption("hand_guided_tearing")){
+			if (root().options.getBooleanOption("automatic_tearing") || root().options.getBooleanOption("hand_guided_tearing")) {
 				try {
 					daeBLT = computeTearings(g);
 				} catch (TearingException e) {
 					return;
 				}
-			}else{
+			} else {
 				daeBLT = g.computeBLT();
 			}
 			for (AbstractEquationBlock eb : daeBLT) {
 				for (FVariable fv : eb.activeVariables()) {
 					daeFVariableEquationBlockMap.put(fv,eb);
 				}
-			}	
-			daeStructuredBLT = new StructuredBLT(this,daeBLT);
+			}
+			for (FAbstractEquation e : equations())
+				if (e.numScalarEquations() == 0)
+					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), Solvability.ANALYTICALLY_SOLVABLE));
+			daeStructuredBLT = new StructuredBLT(this, daeBLT);
 			log.info(daeStructuredBLT);
 			
 			log.info(daeBLT);
@@ -1838,7 +1766,8 @@ aspect TransformCanonical {
 				g.removeEquation(eqq);	
 			}
 			
-			g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", 1);
+			if (!eq_list.isEmpty())
+				g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_", 1);
 		}		
 	
 		log.info(g);
@@ -1888,14 +1817,11 @@ aspect TransformCanonical {
 		}
 
 		// TODO: If no complete matching found, then try index reduction
-		if (g.getUnmatchedVariables().size()>0 || g.getUnmatchedEquations().size()>0) {
+		if (!g.isComplete()) {
 			return;
 		}
 				
-		if (root().options.getBooleanOption("equation_sorting") && 
-			g.getUnmatchedVariables().size()==0 && 
-			g.getUnmatchedEquations().size()==0) {
-		
+		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
 			g.tarjanReset();
 			if (root().options.getBooleanOption("automatic_tearing") || root().options.getBooleanOption("hand_guided_tearing")){
 				try {
@@ -1915,6 +1841,124 @@ aspect TransformCanonical {
 		}
 	}	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * Perform index reduction on model.
+	 * 
+	 * @return  the new graph
+	 */
+	private BiPGraph FClass.reduceIndex() {
+		if (root().options.getBooleanOption("index_reduction")) {
+			// Only do index reduction based on real variables and equations
+			BiPGraph g = new BiPGraph();
+			g.addVariables(this, VAR_TYPES_REAL);
+			g.addEquations(continuousEquations(), VAR_TYPES_REAL, "eq_", 1);
+			log.info("Index reduction starts");
+			log.info(g);
+			g.maximumMatching(true);	
+			log.info("DAE system real variables only");
+			log.info(g.printMatchingObj());
+	
+			IndexReductionResult result = null;
+			try {
+				result = g.reduceIndex(false);
+			} catch (EquationDifferentiationException e) {
+				indexReductionErrors.add(e.getMessage());
+				return null; 
+			}
+			
+			if (result != null) {
+				// Add the new equations
+				// Replace selected dummy derivatives with algebraics
+				// Enable rewrite of identifiers? (not necessary?)
+				for (FAbstractEquation fe : result.getEquations()) {
+					addFEquation((FAbstractEquation)fe.fullCopy());
+				}
+				
+				List<FVariable> l = new List<FVariable>();
+				
+				for (FVariable fv : getFVariables()) {
+					if (result.getDummyDerivatives().contains(fv)) {
+						if (fv instanceof FHDerivativeVariable) {
+							FHDummyDerivativeVariable fdv = new FHDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy(),
+								((FHDerivativeVariable)fv).getOrder());
+							l.add(fdv);
+						} else if (fv instanceof FDerivativeVariable) {
+							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
+							l.add(fdv);					
+						} else {
+							l.add(fv);
+						}
+					} else if (fv instanceof FHDerivativeVariable) {
+					    // Convert higher order derivative variables into
+					    // first order derivatives, generating variables for each step
+					    FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
+					    FQName fqnPrev = fv.getFQName().fullCopy();
+						for (int i = 1; i < fhdv.getOrder(); i++) {
+							FQName fqn = fv.getFQName().createDerPrefixedName(i);
+							l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+							l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+							addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
+							fqnPrev = fqn;
+						}		
+					} else {
+						l.add(fv);
+					}
+				}	
+	
+				setFVariableList(l);		
+	
+				enableFHDerRewrite();
+	
+				// flushAllRecursiveClearFinal must be used here in order to
+				// trigger rewrites of FDerExp -> FDummyDerExp
+				root().flushAllRecursiveClearFinal();
+	
+				aliasEliminationIfSet();
+	
+				root().flushAllRecursive();
+	
+				//System.out.println(prettyPrint(""));
+	
+				//dumpTree("");
+	
+				log.info("States:");
+				for (FVariable fv : differentiatedRealVariables()) {
+					log.info(new PrettyPrintDelegate(fv, "  "));
+				}
+			} else {
+				return null;
+			}
+			
+			g = new BiPGraph();
+			g.addVariables(this, VAR_TYPES_NORMAL);
+			g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
+	
+			log.info(g);
+			g.maximumMatching(true);	
+			log.info("DAE system ");
+			log.info(g.printMatchingObj());
+	
+			daeUnmatchedVariables.clear();
+			for (Var var : g.getUnmatchedVariables()) {
+				daeUnmatchedVariables.add(var.getVariable());
+			}
+	
+			daeUnmatchedEquations.clear();
+			for (Eq ee : g.getUnmatchedEquations()) {
+				daeUnmatchedEquations.add(ee.getEquation());
+			}
+	
+			return g.isComplete() ? g : null;
+		} else {
+			return null;
+		}
+	}
+
 	
 	private static String FQName.derPrefixString = "_der_der_der_der";
 	

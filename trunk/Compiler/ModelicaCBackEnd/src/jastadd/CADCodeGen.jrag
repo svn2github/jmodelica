@@ -265,7 +265,7 @@ aspect CADCodeGen {
 	/**
 	 * Determines if the expression type genereates ad statments
 	 */
-	syn boolean FExp.hasADStatement_CAD()      = true;
+	syn boolean FExp.hasADStatement_CAD()      = type() != null;
 	eq FIdUseExp.hasADStatement_CAD()          = false;
 	eq FLitExp.hasADStatement_CAD()            = false;
 	eq FRangeExp.hasADStatement_CAD()          = false;
@@ -1131,6 +1131,17 @@ aspect CADCodeGen {
 		}
 	}
 	
+	/**
+	 * Generates AD code by calling prettyPrint_CAD for the corresponding equation.
+	 * Note that called methods assumes that variables are already declared.
+	 * 
+	 * For argument descriptions @see FAbstractEquation#genBlock_CAD(int, boolean, String, PrintStream).
+	 */
+	@Override
+	public void MetaEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {
+		equation().genTempVars_CAD(ASTNode.printer_CAD, str, indent);
+	}
+	
 	
 	/**
 	 * Generates AD code by calling genSolvedBlocks which prints AD code for solved blocks.
@@ -1611,6 +1622,11 @@ aspect CADCodeGen {
 	public void FFunctionCall.genTempVars_CAD(Printer p, PrintStream str, String indent) {
 		getArgs().genTempVars_CAD(p, str, indent);
 		genADStatement_CAD(p, str, indent);
+	}
+	
+	public void FAssert.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+		super.genTempVars_CAD(p, str, indent);
+		prettyPrint_C(p, str, indent);
 	}
 	
 	/**
@@ -2322,6 +2338,11 @@ aspect CADCodeGen {
 	}
 	
 	public void FFunctionCallStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+		if (!getCall().isIgnored())
+			genTempVars_CAD(p, str, indent);
+	}
+	
+	public void FFunctionCallEquation.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
 		if (!getCall().isIgnored())
 			genTempVars_CAD(p, str, indent);
 	}

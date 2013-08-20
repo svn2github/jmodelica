@@ -265,6 +265,7 @@ aspect InstFunctionBinding {
 				map.put("sample",       new BuiltInCreator(false, new FSampleExp(),      2));
 				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
 				map.put("terminal",     new BuiltInCreator(false, new FTerminalExp(),    0));
+				map.put("terminate",    new BuiltInCreator(false, new FTerminate(),      1));
 				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
 				map.put("diagonal",     new BuiltInCreator(false, new FDiagonal(),       1));
 				map.put("scalar",       new BuiltInCreator(false, new FScalarExp(),      1));
@@ -298,6 +299,7 @@ aspect InstFunctionBinding {
 				map.put("size",         new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
 				map.put("min",          new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
 				map.put("max",          new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				map.put("assert",       new VarArgsBuiltInCreator(new FAssert(),  2, 3));
 				//       name                                    math       node              # args
 				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
 				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));
@@ -309,19 +311,16 @@ aspect InstFunctionBinding {
 				
 				String[] unsupported = new String[] { 
 						// Ticket 678: Support for array related functions
-						"symmetric", "skew", 
+						"symmetric", 
 						// Ticket 664: Support all function-like operators
 						"div", "mod", "rem", "delay", "cardinality", 
-						"semiLinear", "smooth", "reinit", "terminate"
+						"semiLinear", "reinit"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))
 						map.put(name, new UnsupportedBuiltInCreator(name));
 				
-				String[] ignored = new String[] { 
-						// Ticket 664: Support all function-like operators
-						"assert"
-					};
+				String[] ignored = new String[] {};
 				for (String name : ignored)
 					if (!map.containsKey(name))
 						map.put(name, new IgnoredBuiltInCreator(name));

@@ -26,6 +26,8 @@ from pymodelica import compile_fmu
 from pymodelica.common.core import get_platform_dir, create_temp_dir
 from pyfmi import load_fmu
 from tests_jmodelica import testattr, get_files_path
+from tests_jmodelica.general.base_simul import *
+from assimulo.solvers.sundials import CVodeError
 
 class TestExternalStatic:
 
@@ -34,7 +36,7 @@ class TestExternalStatic:
         """
         Sets up the test class.
         """
-        cls.dir = build_ext('add_static')
+        cls.dir = build_ext('add_static', 'ExtFunctionTests.mo')
         cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
         
     def setUp(self):
@@ -105,7 +107,7 @@ class TestExternalShared:
         """
         Sets up the test class.
         """
-        cls.dir = build_ext('add_shared')
+        cls.dir = build_ext('add_shared', 'ExtFunctionTests.mo')
         cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
         
     def setUp(self):
@@ -137,7 +139,7 @@ class TestExternalObject:
         """
         Sets up the test class.
         """
-        cls.dir = build_ext('ext_objects')
+        cls.dir = build_ext('ext_objects', 'ExtFunctionTests.mo')
         cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
     
     @classmethod
@@ -161,9 +163,99 @@ class TestExternalObject:
              os.remove('test_ext_object.marker')
         else:
             assert False, 'External object destructor not called.'
+
+     
+class TestAssertEqu(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertEqu')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(assimulo = True)
+    def test_simulate(self):
+        try:
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+
+     
+class TestAssertFunc(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.AssertFunc')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        
+    @testattr(assimulo = True)
+    def test_simulate(self):
+        try:
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except CVodeError, e:
+            self.assert_equals('Simulation stopped at wrong time', e.t, 2.0)
+
+     
+class TestTerminateWhen(SimulationTest):
+    
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Asserts.mo',
+            'Asserts.TerminateWhen')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(final_time=3)
+        self.run()
+
+    @testattr(assimulo = True)
+    def test_end_values(self):
+        self.assert_end_value('time', 2.0)
+        self.assert_end_value('x', 2.0)
+
+     
+class TestModelicaError:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.dir = build_ext('use_modelica_error', 'Asserts.mo')
+        cls.fpath = path(cls.dir, 'Asserts.mo')
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestModelicaError.dir, True)
+        
+    @testattr(assimulo = True)
+    def test_simulate(self):
+        cpath = 'Asserts.ModelicaError'
+        fmu_name = compile_fmu(cpath, TestModelicaError.fpath)
+        model = load_fmu(fmu_name)
+        try:
+            model.simulate(final_time = 3)
+            assert False, 'Simulation not stopped by calls to ModelicaError()'
+        except CVodeError, e:
+            assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
 
-def build_ext(target):
+def build_ext(target, mofile):
     """
     Build a library for an external function.
     """
@@ -179,7 +271,7 @@ def build_ext(target):
     src = path(get_files_path(), 'Modelica')
     dst = create_temp_dir()
     shutil.copytree(path(src, 'Resources'), path(dst, 'Resources'))
-    shutil.copy(path(src, 'ExtFunctionTests.mo'), dst)
+    shutil.copy(path(src, mofile), dst)
     old = os.getcwd()
     os.chdir(path(dst, 'Resources', 'src'))
     subprocess.call(cmd, shell=True)

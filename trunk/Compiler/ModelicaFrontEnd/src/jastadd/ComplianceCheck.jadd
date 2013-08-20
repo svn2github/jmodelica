@@ -121,12 +121,10 @@ aspect ComplianceCheck {
 	public void FTerminalExp.complianceCheck() {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
-		
-//	public void FDotAddExp.complianceCheck() {
-//		super.complianceCheck();
-//		if (type().isString() && !variability().parameterOrLess())
-//			compliance("String concatenation is only supported for parameter expressions");
-//	}
+	
+	public void FTerminate.complianceCheck() {
+		complianceOnlyFMU("The terminate() function-like operator is");
+	}
 	
 	public void FStringExp.complianceCheck() {
 		super.complianceCheck();
@@ -159,11 +157,6 @@ aspect ComplianceCheck {
 		super.complianceCheck();
 		if (!variability().lessOrEqual(fParameter()) && !root().options.getBooleanOption("generate_ode"))
 			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
-	}
-	
-	public void InstNamedModification.complianceCheck() {
-		if (getName().hasFArraySubscripts())
-			compliance("Modifiers of specific array elements are not supported");
 	}
 	
 	// This can be removed when a real name collision check is added

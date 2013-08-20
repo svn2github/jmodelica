@@ -23,27 +23,33 @@
  * compiler.
  */
 
-
 #include "jmi.h"
 #include "jmi_log.h"
+#include "jmi_global.h"
 
-jmi_ad_var_t jmi_divide(jmi_ad_var_t num, jmi_ad_var_t den,const char msg[]) {
+
+jmi_ad_var_t jmi_divide_function(const char name[], jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
   if (den==0) {
-    printf("%s", msg);
-    printf("\n");
+      jmi_log_node(jmi_get_current()->log, logWarning, "DivideByZeroInFunc", "<func:%s>", name, "<exp:%s>", msg);
     return (num==0)? 0: ( (num>0)? 1.e20: -1.e20 );
   } else {
     return num/den;
   }
 }
 
-jmi_ad_var_t jmi_divide_logged(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
+jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char msg[]) {
     if (den==0) {
-        jmi_log_node(jmi->log, logWarning, "DivideByZero", "<msg:%s>", msg);
+        jmi_log_node(jmi->log, logWarning, "DivideByZero", "<exp:%s>", msg);
         return (num==0)? 0: ( (num>0)? 1.e20: -1.e20 );
     } else {
         return num/den;
     }
+}
+
+void jmi_flag_termination(jmi_t *jmi, const char* msg) {
+	jmi->terminate = 1;
+	/* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
+	jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
 }
 
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
@@ -147,7 +153,7 @@ int jmi_func_delete(jmi_func_t *func) {
  jmi_func_t. */
 int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
         int independent_vars, int* mask, jmi_real_t* jac) {
-    int i;
+    int i, return_status;
 
     if (func->sym_dF==NULL) {
         return -1;
@@ -155,8 +161,14 @@ int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
-    func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
-    return 0;
+
+	jmi_set_current(jmi);
+	if (jmi_try(jmi))
+		return_status = -1;
+	else
+		return_status = func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
+    jmi_set_current(NULL);
+    return return_status;
 
 }
 
@@ -978,16 +990,14 @@ int jmi_dae_init(jmi_t* jmi,
         jmi_generic_func_t ode_guards_init,
         jmi_next_time_event_func_t ode_next_time_event) {
     
-    int i;
-
     jmi_func_t* jf_F;
     jmi_func_t* jf_R;
     
     /* Create jmi_dae struct */
-    jmi_dae_t* dae = (jmi_dae_t*)calloc(1,sizeof(jmi_dae_t));
+    jmi_dae_t* dae = (jmi_dae_t*) calloc(1, sizeof(jmi_dae_t));
     jmi->dae = dae;
     
-    jmi_func_new(&jf_F,F,n_eq_F,sym_dF,sym_dF_n_nz,sym_dF_row, sym_dF_col,cad_dir_dF,
+    jmi_func_new(&jf_F, F, n_eq_F, sym_dF, sym_dF_n_nz, sym_dF_row, sym_dF_col, cad_dir_dF,
             cad_dF_n_nz, cad_dF_row, cad_dF_col);
 
     jmi->dae->F = jf_F;

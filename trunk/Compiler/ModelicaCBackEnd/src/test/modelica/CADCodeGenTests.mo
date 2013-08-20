@@ -440,7 +440,7 @@ equation
 $C_DAE_equation_directional_derivative$
 ",
 			generatedCode="
-(*res)[0] = jmi_divide_logged(jmi, _x1_1,_x2_2,\"Divide by zero: x1 / x2\") - (_y_0);
+(*res)[0] = jmi_divide_equation(jmi, _x1_1,_x2_2,\"x1 / x2\") - (_y_0);
 (*dF)[0] = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2 * _x2_2) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 (*res)[1] = 1 - (_x1_1);
 (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
@@ -686,7 +686,7 @@ equation
     if (_sw(0)) {
         v_3 = _time;
         d_3 = (*dz)[jmi->offs_t];
-        v_4 = jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+        v_4 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
         if (COND_EXP_LE(v_3, v_4, JMI_TRUE, JMI_FALSE)) {
             v_6 = _time;
             d_6 = (*dz)[jmi->offs_t];
@@ -703,7 +703,7 @@ equation
             } else {
                 v_11 = _time;
                 d_11 = (*dz)[jmi->offs_t];
-                v_12 = jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+                v_12 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
                 v_10 = v_11 - v_12;
                 d_10 = d_11 - AD_WRAP_LITERAL(0);
                 v_9 = sin(v_10);
@@ -777,7 +777,7 @@ equation
         } else {
             v_6 = _time;
             d_6 = (*dz)[jmi->offs_t];
-            v_7 = jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+            v_7 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
             v_5 = v_6 - v_7;
             d_5 = d_6 - AD_WRAP_LITERAL(0);
             v_4 = sin(v_5);
@@ -843,7 +843,7 @@ equation
     if (LOG_EXP_OR(v_1, _b_2)) {
         v_4 = _time;
         d_4 = (*dz)[jmi->offs_t];
-        v_5 = jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+        v_5 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
         if (COND_EXP_LE(v_4, v_5, JMI_TRUE, JMI_FALSE)) {
             v_7 = _time;
             d_7 = (*dz)[jmi->offs_t];
@@ -860,7 +860,7 @@ equation
             } else {
                 v_12 = _time;
                 d_12 = (*dz)[jmi->offs_t];
-                v_13 = jmi_divide_logged(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"Divide by zero: 3.141592653589793 / 2\");
+                v_13 = jmi_divide_equation(jmi, AD_WRAP_LITERAL(3.141592653589793),AD_WRAP_LITERAL(2),\"3.141592653589793 / 2\");
                 v_11 = v_12 - v_13;
                 d_11 = d_12 - AD_WRAP_LITERAL(0);
                 v_10 = sin(v_11);
@@ -3080,7 +3080,6 @@ $CAD_ode_derivatives$
 $CAD_dae_blocks_residual_functions$
 ",
 			generatedCode="
-
 /******** Declarations *******/
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
@@ -3399,7 +3398,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     d_66 = -d_67;
     v_33 = (v_34 + v_66);
     d_33 = d_34 + d_66;
-    _w_ode_1_1_1 = jmi_divide_logged(jmi, v_33,20,\"Divide by zero: (- 1.3 * w_ode_1_2 + (- sin(w_ode_1_2)) + (- (- 2.01) * x_1) + (- sin(x_1)) + (- (- 1.18) * x_1) + (- 1.45 * x_1) + (- 1.09 * ur_2) + (- sin(ur_2)) + (- (- 1.24) * ur_2) + (- 2.16 * ur_3) + (- sin(ur_3))) / 20\");
+    _w_ode_1_1_1 = jmi_divide_equation(jmi, v_33,20,\"(- 1.3 * w_ode_1_2 + (- sin(w_ode_1_2)) + (- (- 2.01) * x_1) + (- sin(x_1)) + (- (- 1.18) * x_1) + (- 1.45 * x_1) + (- 1.09 * ur_2) + (- sin(ur_2)) + (- (- 1.24) * ur_2) + (- 2.16 * ur_3) + (- sin(ur_3))) / 20\");
     (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = (d_33 * 20 - v_33 * AD_WRAP_LITERAL(0)) / (20 * 20);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         v_71 = _w_ode_1_2_2 * 20;
@@ -3521,7 +3520,7 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     v_0 = (v_1 + _b_1);
     d_0 = d_1 + (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
     v_2 = (- 1.0);
-    _a_0 = jmi_divide_logged(jmi, v_0,v_2,\"Divide by zero: (- c + b) / (- 1.0)\");
+    _a_0 = jmi_divide_equation(jmi, v_0,v_2,\"(- c + b) / (- 1.0)\");
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (d_0 * v_2 - v_0 * AD_WRAP_LITERAL(0)) / (v_2 * v_2);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         (*res)[0] = _c_2 * _a_0 - (20);

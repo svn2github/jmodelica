@@ -94,6 +94,8 @@ aspect PredefinedTypes {
         builtInDef += " always \"Do use it as a state.\""; 
         builtInDef += ");\n";
         
+        builtInDef += "type AssertionLevel = enumeration(error, warning);\n"; 
+        
         builtInDef += "partial model ExternalObject\n"; 
         builtInDef += "end ExternalObject;\n"; 
 
@@ -109,7 +111,7 @@ aspect PredefinedTypes {
             //log.debug("Program.getPredefinedTypeList(): Hepp!: " + i);
             FullClassDecl cd = (FullClassDecl)(p.getUnstructuredEntity(0).getElement(i));   
        
-            if (!cd.name().equals("StateSelect")) {
+            if (!cd.name().equals("StateSelect") && !cd.name().equals("AssertionLevel")) {
             	pcd = new PrimitiveClassDecl(new PublicVisibilityType(),
                         new Opt(),
                         new Opt(),
@@ -260,8 +262,14 @@ aspect PredefinedTypes {
     		+ "  output Real y;\n"     // Type not used
     		+ "end change;\n"
     		+ "function reinit end reinit;\n"
-    		+ "function assert end assert;\n"
-    		+ "function terminate end terminate;\n"
+    		+ "function assert\n"
+    		+ "  input Boolean condition;\n"
+    		+ "  input String message;\n"
+    		+ "  input AssertionLevel level = AssertionLevel.error;\n"
+    		+ "end assert;\n"
+    		+ "function terminate\n"
+    		+ "  input String reason;\n"
+    		+ "end terminate;\n"
     		+ "function abs\n"
     		+ "  input Real v;\n"
     		+ "  output Real y;\n"

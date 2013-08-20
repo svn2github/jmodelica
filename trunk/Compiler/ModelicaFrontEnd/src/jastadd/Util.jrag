@@ -2185,6 +2185,16 @@ aspect FlatFunctionUtils {
      eq Root.getChild().inFunction()              = false;
      
      /**
+      * Get the containing FFunctionDecl.
+      * 
+      * Only valid in flat tree.
+      */
+     inh FFunctionDecl FExp.containingFFunctionDecl();
+     eq FFunctionDecl.getChild().containingFFunctionDecl()  = this;
+     eq InstNode.getChild().containingFFunctionDecl()       = null;
+     eq Root.getChild().containingFFunctionDecl()           = null;
+     
+     /**
       * Get the class or component containing this node.
       */
      inh InstNode InstNode.containingEntity();
@@ -2589,6 +2599,7 @@ aspect FlatExpressions {
     
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
+    eq FAssert.getChild().inNoEventExp() = true;
     eq FAlgorithm.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
@@ -2607,12 +2618,13 @@ aspect FlatExpressions {
     eq FlatRoot.getChild().inConnectClause()          = false;
 
     inh boolean FExp.inIfCondition();
-    eq FIfExp.getChild().inIfCondition() = true;
-    eq FAbsExp.getChild().inIfCondition() = true;
+    eq FIfExp.getChild().inIfCondition()            = true;
+    eq FAssert.getTest().inIfCondition()            = true;
+    eq FAbsExp.getChild().inIfCondition()           = true;
     eq FSignExp.getChild().inIfCondition() = true;
     eq FAbstractEquation.getChild().inIfCondition() = false;
-    eq SourceRoot.getChild().inIfCondition() = false;
-    eq FlatRoot.getChild().inIfCondition() = false;
+    eq SourceRoot.getChild().inIfCondition()        = false;
+    eq FlatRoot.getChild().inIfCondition()          = false;
 
     inh boolean FAbstractEquation.inWhen();
     inh boolean FExp.inWhen();

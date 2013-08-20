@@ -21,10 +21,10 @@ Test module for testing the CASADI examples.
 from tests_jmodelica import testattr
 from pyjmi.examples import *
 
-@testattr(casadi = True)
-def test_ccpp():
-    """Run the Combined Cycle Power Plant example."""
-    ccpp.run_demo(False)
+#@testattr(casadi = True)
+#def test_ccpp():
+#    """Run the Combined Cycle Power Plant example."""
+#    ccpp.run_demo(False)
 
 @testattr(casadi = True)
 def test_cstr_casadi():

@@ -124,7 +124,7 @@ CXXFLAGS = -g -DJMI_AD=${JMI_AD}
 # C Compiler options
 CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD)
 
-SHARED_LDFLAGS = -shared 
+SHARED_LDFLAGS = -shared -pthread
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
@@ -157,7 +157,7 @@ fmume:
 
 fmume_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUME) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME) -static-libstdc++
 	$(RM) $(OBJS)
 
 fmucs:
@@ -165,7 +165,7 @@ fmucs:
 
 fmucs_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(LIBS_FMUCS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -static-libstdc++
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS) -static-libstdc++
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)
