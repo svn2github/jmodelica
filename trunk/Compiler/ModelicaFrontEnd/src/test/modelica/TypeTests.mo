@@ -1485,4 +1485,24 @@ end TypeTests.Primitive4;
 end Primitive4;
 
 
+model StringExpType1
+	parameter String a = String({1,2});
+	parameter String b = String("a");
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="StringExpType1",
+			description="",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1439, column 30:
+  Calling function String(): types of positional argument 1 and input x are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1440, column 30:
+  Calling function String(): types of positional argument 1 and input x are not compatible
+")})));
+end StringExpType1;
+
+
 end TypeTests;

@@ -1250,6 +1250,9 @@ aspect FlatNames {
 
     inh int FRecordDecl.recordIndex();
     eq FClass.getFRecordDecl(int i).recordIndex() = i;
+
+    inh int FEnumDecl.enumIndex();
+    eq FClass.getFEnumDecl(int i).enumIndex() = i;
     
     /**
      * Check if this is a simple name, i.e. just a string or empty name.

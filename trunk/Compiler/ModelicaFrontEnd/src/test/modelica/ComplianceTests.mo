@@ -631,30 +631,6 @@ end ComplianceTests.HybridFMU2;
 end HybridFMU2;
 
 
-model String1
-	function f
-		input String s;
-		output Real x;
-	algorithm
-		x := 1;
-		f(s + "123");
-	end f;
-	
-	Real y = f("abc");
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="String1",
-			description="Check that String concatenation is only allowed for parameter expressions",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 628, column 5:
-  String concatenation is only supported for parameter expressions
-")})));
-end String1;
-
-
 model String2
     parameter String a = "1";
     parameter String b = a + "2";

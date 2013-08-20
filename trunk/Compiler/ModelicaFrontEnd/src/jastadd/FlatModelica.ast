@@ -824,6 +824,11 @@ FDotAddExp : FArtmBinExp;
 FAddExp : FDotAddExp;
 
 /**
+ * String concatenation expression.
+ */
+FStringAddExp : FDotAddExp;
+
+/**
  * \brief Element-wise subtraction expression.
  */
 FDotSubExp : FArtmBinExp;

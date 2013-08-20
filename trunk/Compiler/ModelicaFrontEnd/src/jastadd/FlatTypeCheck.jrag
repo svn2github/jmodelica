@@ -693,6 +693,7 @@ aspect FlatTypeCheck {
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
   eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
+  eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
   eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
@@ -722,6 +723,7 @@ aspect FlatTypeCheck {
   eq FScalarExp.getChild().argumentTypeValid(FType type)            = type.isArray() && argumentSizeValid(type.size());
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
   eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
+  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
 
 
   /**

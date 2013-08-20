@@ -2240,6 +2240,8 @@ aspect Scalarization {
 	public FExp FSmoothExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSmoothExp(getOrder().scalarize(indexMap), getFExp().scalarize(indexMap)); }
 	public FExp FSampleExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSampleExp(getOffset().scalarize(indexMap), getInterval().scalarize(indexMap)); }
 	
+	public FExp FStringExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FStringExp(new List(), getValue().scalarize(indexMap)); }
+	
 	public FExp FFunctionCall.scalarizeExp(Map<String,FExp> indexMap) {
 		if (isComposite() && functionCallIsExp())
 			return new FIdUseExp(tempVarName());

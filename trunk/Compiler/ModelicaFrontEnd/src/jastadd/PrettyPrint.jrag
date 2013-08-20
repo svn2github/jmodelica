@@ -1492,24 +1492,25 @@ aspect FlatPrettyPrint {
 	}
 	
 	syn String FBinExp.op();
-	eq FLtExp.op()     = " < ";
-	eq FLeqExp.op()    = " <= ";
-	eq FGtExp .op()    = " > ";
-	eq FGeqExp.op()    = " >= ";
-	eq FEqExp.op()     = " == ";
-	eq FNeqExp.op()    = " <> ";
-	eq FOrExp.op()     = " or ";
-	eq FAndExp.op()    = " and ";
-	eq FAddExp.op()    = " + ";
-	eq FSubExp.op()    = " - ";
-	eq FMulExp.op()    = " * ";
-	eq FDivExp.op()    = " / ";
-	eq FPowExp.op()    = " ^ ";
-	eq FDotAddExp.op() = " .+ ";
-	eq FDotSubExp.op() = " .- ";
-	eq FDotMulExp.op() = " .* ";
-	eq FDotDivExp.op() = " ./ ";
-	eq FDotPowExp.op() = " .^ ";
+	eq FLtExp.op()        = " < ";
+	eq FLeqExp.op()       = " <= ";
+	eq FGtExp .op()       = " > ";
+	eq FGeqExp.op()       = " >= ";
+	eq FEqExp.op()        = " == ";
+	eq FNeqExp.op()       = " <> ";
+	eq FOrExp.op()        = " or ";
+	eq FAndExp.op()       = " and ";
+	eq FAddExp.op()       = " + ";
+	eq FSubExp.op()       = " - ";
+	eq FMulExp.op()       = " * ";
+	eq FDivExp.op()       = " / ";
+	eq FPowExp.op()       = " ^ ";
+	eq FDotAddExp.op()    = " .+ ";
+	eq FDotSubExp.op()    = " .- ";
+	eq FDotMulExp.op()    = " .* ";
+	eq FDotDivExp.op()    = " ./ ";
+	eq FDotPowExp.op()    = " .^ ";
+	eq FStringAddExp.op() = " + ";
 	
 	protected void FNoExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		// Dummy node

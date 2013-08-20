@@ -311,8 +311,8 @@ aspect InstFunctionBinding {
 						// Ticket 678: Support for array related functions
 						"symmetric", "skew", 
 						// Ticket 664: Support all function-like operators
-						"String", "div", "mod", "rem", "delay", "cardinality", 
-						"semiLinear", "terminal", "smooth", "reinit", "terminate"
+						"div", "mod", "rem", "delay", "cardinality", 
+						"semiLinear", "smooth", "reinit", "terminate"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))

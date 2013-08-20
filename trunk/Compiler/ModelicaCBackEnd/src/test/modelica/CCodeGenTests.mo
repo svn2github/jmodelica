@@ -9680,4 +9680,173 @@ static const int DAE_relations[1]= {JMI_REL_GEQ};
 end TestRelationalOp5;
 
 
+model StringOperations1
+	type E = enumeration(a, bb, ccc);
+	
+	function f
+		input String x;
+		output Real y;
+	algorithm
+		y := 1;
+	end f;
+	
+	Real r = time;
+	Boolean b = r < 2;
+	E e = if b then E.bb else E.ccc;
+	Integer i = Integer(e);
+	Real dummy = f("x " + String(r) + " y " + String(b) + " z " + String(e) + " v " + String(i) + " w");
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="StringOperations1",
+			description="Basic test of string concatenation and the String() operator, variable values",
+			inline_functions="none",
+			template="
+$C_enum_strings$
+$C_ode_derivatives$
+",
+			generatedCode="
+char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+
+    char tmp_1[45];
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _r_0 = _time;
+    _b_1 = _sw(0);
+    _e_2 = COND_EXP_EQ(_b_1, JMI_TRUE, AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3));
+    _i_3 = (_e_2);
+    snprintf(tmp_1, 45, \"x %.6g y %s z %s v %d w\", _r_0, COND_EXP_EQ(_b_1, JMI_TRUE, \"true\", \"false\"), E_0_e[(int) _e_2], (int) _i_3);
+    _dummy_4 = func_CCodeGenTests_StringOperations1_f_exp(tmp_1);
+")})));
+end StringOperations1;
+
+
+model StringOperations2
+    type E = enumeration(a, bb, ccc);
+    
+    function f
+        input String x;
+        output Real y;
+    algorithm
+        y := 1;
+    end f;
+    
+    Real dummy = f("x " + String(0.1234567) + " y " + String(true) + " z " + String(E.a) + " v " + String(42) + " w " + String(time));
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="StringOperations2",
+			description="Basic test of string concatenation and the String() operator, constant values",
+            inline_functions="none",
+			template="
+$C_enum_strings$
+$C_ode_derivatives$
+",
+			generatedCode="
+char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+
+    char tmp_1[43];
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    snprintf(tmp_1, 43, \"x 0.123457 y true z a v 42 w %.6g\", _time);
+    _dummy_0 = func_CCodeGenTests_StringOperations2_f_exp(tmp_1);
+")})));
+end StringOperations2;
+
+
+model StringOperations3
+    type E = enumeration(a, bb, ccc);
+    
+    function f
+        input String x;
+        output Real y;
+    algorithm
+        y := 1;
+    end f;
+    
+    constant String s = "x " + String(0.1234567) + " y " + String(true) + " z " + String(E.a) + " v " + String(42) + " w";
+	Real dummy = f(s);
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="StringOperations3",
+			description="Basic test of string concatenation and the String() operator, constant evaluation",
+            inline_functions="none",
+			variability_propagation=false,
+			template="
+$C_enum_strings$
+$C_ode_derivatives$
+",
+			generatedCode="
+char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _dummy_1 = func_CCodeGenTests_StringOperations3_f_exp(\"x 0.123457 y true z a v 42 w\");
+")})));
+end StringOperations3;
+
+
+model StringOperations4
+    function f
+        input String s;
+        output Real x;
+    algorithm
+        x := 1;
+        f(s + "123");
+    end f;
+    
+    Real y = f("abc" + String(time));
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="StringOperations4",
+			description="Basic test of string concatenation and the String() operator, using function inputs",
+            inline_functions="none",
+			variability_propagation=false,
+			template="
+$C_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+void func_CCodeGenTests_StringOperations4_f_def(char* s_v, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t x_v;
+    char tmp_1[16384];
+    x_v = 1;
+    snprintf(tmp_1, 16384, \"%s123\", s_v);
+func_CCodeGenTests_StringOperations4_f_def(tmp_1, NULL);
+    if (x_o != NULL) *x_o = x_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_StringOperations4_f_exp(char* s_v) {
+    jmi_ad_var_t x_v;
+    func_CCodeGenTests_StringOperations4_f_def(s_v, &x_v);
+    return x_v;
+}
+
+
+    char tmp_1[17];
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    snprintf(tmp_1, 17, \"abc%.6g\", _time);
+    _y_0 = func_CCodeGenTests_StringOperations4_f_exp(tmp_1);
+")})));
+end StringOperations4;
+
+
 end CCodeGenTests;

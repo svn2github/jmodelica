@@ -439,6 +439,7 @@ aspect CCodeGen {
 	public static final String ASTNode.C_SUFFIX_DEF      = "def";
 	public static final String ASTNode.C_SUFFIX_EXP      = "exp";
 	public static final String ASTNode.C_SUFFIX_RECORD   = "r";
+	public static final String ASTNode.C_SUFFIX_ENUM     = "e";
 	public static final String ASTNode.C_SUFFIX_INDEX    = "i";
 	public static final String ASTNode.C_SUFFIX_VARIABLE = "v";
 	public static final String ASTNode.C_SUFFIX_ARRAY    = "a";
@@ -1042,6 +1043,115 @@ aspect CCodeGen {
 		str.print(","); 
 		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
 	}
+	
+	// TODO: handle non-ascii & non-printable chars
+	// TODO: support format args
+	
+	public void FStringAddExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print(tempName_C());
+	}
+	
+	public void FStringAddExp.genTempVars_C(Printer p, PrintStream str, String indent) {
+		super.genTempVars_C(p, str, indent);
+		if (isTopStringAdd()) {
+			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
+			genStringParts_C(p, str, indent);
+			str.print(");\n");
+		}
+	}
+	
+	public void FStringAddExp.genVarDecls_C(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_C(p, str, indent);
+		if (isTopStringAdd())
+			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
+	}
+
+	public void FExp.genStringParts_C(Printer p, PrintStream str, String indent) {
+		if (!isConstantExp()) {
+			str.print(", ");
+			FType t = type();
+			if (t.isEnum()) {
+				str.print(t.enumNames_C());
+				str.print("[(int) ");
+				p.print(this, str, indent);
+				str.print("]");
+			} else if (t.isBoolean()) {
+				str.print("COND_EXP_EQ(");
+				p.print(this, str, indent);
+				str.print(", JMI_TRUE, \"true\", \"false\")");
+			} else {
+				if (t.isInteger())
+					str.print("(int) ");
+				p.print(this, str, indent);
+			}
+		}
+	}
+	
+	public void FStringExp.genStringParts_C(Printer p, PrintStream str, String indent) {
+		getValue().genStringParts_C(p, str, indent);
+	}
+
+	public void FStringAddExp.genStringParts_C(Printer p, PrintStream str, String indent) {
+		getLeft().genStringParts_C(p, str, indent);
+		getRight().genStringParts_C(p, str, indent);
+	}
+	
+	/**
+	 * Check if this string concatenation is the top node in an expression consisting of 
+	 * one or more string concatenations, i.e. returns true if parent is not an FStringAddExp.
+	 */
+	inh boolean FStringAddExp.isTopStringAdd();
+	eq FStringAddExp.getChild().isTopStringAdd() = false;
+	eq BaseNode.getChild().isTopStringAdd()      = true;
+	
+	syn int FExp.maxStringLength_C()               = 
+		isConstantExp() ? ceval().stringValue().length() : type().maxStringLength_C();
+	syn lazy int FStringAddExp.maxStringLength_C() = 
+		Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), FStringType.MAX_STRING_LENGTH_C);
+	eq FStringExp.maxStringLength_C()              = 
+		isConstantExp() ? ceval().stringValue().length() : getValue().maxStringLength_C();
+	eq FStringLitExp.maxStringLength_C()           = getString().length();
+	
+	syn int FType.maxStringLength_C()   = 0;
+	eq FIntegerType.maxStringLength_C() = 10;
+	eq FRealType.maxStringLength_C()    = 13;
+	eq FBooleanType.maxStringLength_C() = 5;
+	eq FStringType.maxStringLength_C()  = MAX_STRING_LENGTH_C;
+	eq FEnumType.maxStringLength_C() {
+		int res = 0;
+		for (FEnumLiteralType lit : getFEnumLiteralTypes())
+			res = Math.max(res, lit.getName().length());
+		return res;
+	}
+	
+	public static final int FStringType.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
+	
+	syn String FExp.formatString_C()               = isConstantExp() ? ceval().stringValue() : type().formatString_C();
+	syn lazy String FStringAddExp.formatString_C() = getLeft().formatString_C() + getRight().formatString_C();
+	eq FStringExp.formatString_C()                 = isConstantExp() ? ceval().stringValue() : getValue().formatString_C();
+	eq FStringLitExp.formatString_C()              = getString();
+
+	syn String FType.formatString_C() = "%s";
+	eq FIntegerType.formatString_C()  = "%d";
+	eq FRealType.formatString_C()     = "%.6g";
+
+	
+	public void FEnumDecl.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.format("%schar* %s[] = { ", indent, name_C());
+		boolean first = true;
+		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals()) {
+			str.format(first ? "\"%s\"" : ", \"%s\"", el.name());
+			first = false;
+		}
+		str.print(" };\n");
+	}
+
+	
+	syn String FType.enumNames_C() = null;
+	eq FEnumType.enumNames_C()     = myFEnumDecl().name_C();
+	
+	syn String FEnumDecl.name_C() = getName().getFQName().lastActualPartName() + "_" + enumIndex() + "_" + C_SUFFIX_ENUM;
+
 	
 	public void FIfExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("COND_EXP_EQ(");

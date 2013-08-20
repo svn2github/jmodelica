@@ -762,6 +762,22 @@ public class CGenerator extends GenericGenerator {
 	}
 	
 	/**
+	 * Generates string representations of enumeration literals.
+	 */
+	class DAETag_C_enums_strings extends DAETag {
+		
+		public DAETag_C_enums_strings(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_enum_strings","C: string representations of enumeration literals",
+			  myGenerator,fclass);
+		}
+
+		public void generate(PrintStream genPrinter) {
+			for (FEnumDecl e : fclass.getFEnumDecls())
+				e.prettyPrint_C(genPrinter, "");
+		}
+	}
+	
+	/**
 	 * Generates wrappers for Modelica functions for exporting in a shared library.
 	 */
 	class DAETag_C_export_functions extends DAETag {

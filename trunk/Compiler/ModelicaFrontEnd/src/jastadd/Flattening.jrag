@@ -1899,7 +1899,7 @@ aspect FlatExpressions {
 
 	public FExp FBinExp.flatten(FQName prefix)     { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
 	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
-	public FExp FLitExp.flatten(FQName prefix)     { return (FLitExp) fullCopy(); }
+	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
 	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
 		
 	public FExp                 FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
@@ -1922,8 +1922,13 @@ aspect FlatExpressions {
 		res.connectionGraph = connectionGraph;
 		return res;
 	}
-
+	
 	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
+	public FExp FDotAddExp.flatten(FQName prefix) { 
+		return type().isString() ? 
+				new FStringAddExp(getLeft().flatten(prefix), getRight().flatten(prefix)) : 
+				super.flatten(prefix);
+	}
 	
 	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 

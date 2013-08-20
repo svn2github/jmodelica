@@ -122,10 +122,16 @@ aspect ComplianceCheck {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
 		
-	public void FDotAddExp.complianceCheck() {
+//	public void FDotAddExp.complianceCheck() {
+//		super.complianceCheck();
+//		if (type().isString() && !variability().parameterOrLess())
+//			compliance("String concatenation is only supported for parameter expressions");
+//	}
+	
+	public void FStringExp.complianceCheck() {
 		super.complianceCheck();
-		if (type().isString() && !variability().parameterOrLess())
-			compliance("String concatenation is only supported for parameter expressions");
+		if (getNumFExp() > 0)
+			compliance("Formatting parameters are not supported for the String() operator");
 	}
 		
 	public void InstPrimitive.complianceCheck() {

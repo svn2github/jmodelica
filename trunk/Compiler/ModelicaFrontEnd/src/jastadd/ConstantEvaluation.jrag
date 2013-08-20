@@ -1284,6 +1284,14 @@ aspect ConstantEvaluation {
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
+  eq FStringExp.cevalCalc() {
+	  // TODO: support format args
+	  if (getValue().type().isReal())
+		  return new CValueString(String.format("%.6g", getValue().ceval().realValue()));
+	  else
+		  return getValue().ceval().convertString();
+  }
+  
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
   
   eq FConnectionsOp.cevalCalc() {
@@ -2005,6 +2013,10 @@ aspect ConstantEvaluation {
   
   public void FExp.prepareForFunctionEval() {
 	  super.prepareForFunctionEval();
+	  flushUnknownSizes();
+  }
+  
+  public void FExp.flushUnknownSizes() {
 // Old version - does not work when JastAdd generates one _computes/_value pair for each eq of a lazy attr
 //	  // Flush getArray() - NB: uses internal JastAdd implementation details
 //	  if (size().isUnknown())
@@ -2015,6 +2027,8 @@ aspect ConstantEvaluation {
 		  size().isUnknown();
 	  }
   }
+  
+  public void FFunctionCall.flushUnknownSizes() {}
   
   // TODO: reduce code duplication
   
