@@ -37,6 +37,12 @@ typedef jmi_log_t          log_t;
 typedef int BOOL;
 
 
+static category_t severest(category_t c1, category_t c2) {
+    /* Smaller is more severe. */
+    return c1 <= c2 ? c1 : c2;
+}
+
+
 /** ***************************************************************************
  * \brief Raw character buffer used by jmi_log_t.
  */
@@ -212,6 +218,8 @@ typedef struct {
     int id;
     jmi_log_category_t c;
     const char *type;
+
+    jmi_log_category_t severest_category; /* among the node's contents */
 } frame_t;
 
 static void logging_error(log_t *log, const char *msg);
@@ -228,6 +236,7 @@ struct jmi_log_t {
     BOOL filtering_enabled;
 
     category_t c;
+    category_t severest_category;
     const char *next_name;
     int leafdim;   /**< \brief  -1 when top is not a leaf, otherwise dimension of the leaf. */
 
@@ -280,29 +289,36 @@ static BOOL emitted_category(log_t *log, category_t category) {
     return TRUE;    
 }
 
-static void _emit(log_t *log, jmi_log_category_t category, char* message) {
+static fmiStatus category_to_fmiStatus(category_t c) {
+    switch (c) {
+    case logError:   return fmiError;
+    case logWarning: return fmiWarning;
+    case logInfo:    return fmiOK;
+    default:         return fmiError;
+    }
+}
+
+static const char *category_to_fmiCategory(category_t c) {
+    switch (c) {
+    case logError:   return "ERROR";
+    case logWarning: return "WARNING";
+    case logInfo:    return "INFO";
+    default:         return "UNKNOWN CATEGORY";
+    }
+}
+
+static void _emit(log_t *log, char* message) {
     jmi_t *jmi = log->jmi;
+    category_t category = log->c;
+    category_t severest_category = severest(category, log->severest_category);
+
     if (!emitted_category(log, category)) return;
     if(jmi->fmi) {
-        fmiStatus status;
-        fmiString fmiCategory;
         fmi_t* fmi = jmi->fmi;
-        switch (category) {
-        case logError:
-            status = fmiError;
-            fmiCategory = "ERROR";
-            break;
-        case logWarning:
-            status = fmiWarning;
-            fmiCategory = "WARNING";
-            break;
-        case logInfo:
-            status = fmiOK;
-            fmiCategory = "INFO";
-            break;
-        }
         fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
-                                  status, fmiCategory, message);
+                                  category_to_fmiStatus(category),
+                                  category_to_fmiCategory(severest_category),
+                                  message);
     }
     else {
         switch (category) {
@@ -316,6 +332,20 @@ static void _emit(log_t *log, jmi_log_category_t category, char* message) {
             fprintf(stdout, "%s\n", message);
             break;
         }
+        /*
+        const char *fmiCategory = category_to_fmiCategory(severest_category);
+        switch (category) {
+        case logError:
+            fprintf(stderr, "[%7s] ERROR: %s\n", fmiCategory, message);
+            break;
+        case logWarning:
+            fprintf(stderr, "[%7s] WARNING: %s\n", fmiCategory, message);
+            break;
+        case logInfo:
+            fprintf(stdout, "[%7s] %s\n", fmiCategory, message);
+            break;
+        }
+        */
     }
 }
 
@@ -324,8 +354,9 @@ static void emit(log_t *log) {
     buf_t *buf = bufof(log);
     force_commas(log);
     if (!isempty(buf)) {
-        _emit(log, log->c, buf->msg);
+        _emit(log, buf->msg);
         clear(buf);
+        log->severest_category = logInfo;
     }
 }
 
@@ -342,21 +373,23 @@ static void indent_line(log_t *log) {
     }
 }
 
-/** \brief Set the current logging category; emit a log message if it was changed.
-  * Also calls indent_line().
-  */
-static void set_category(log_t *log, category_t c) {
-    if (log->c != c) emit(log);
-    log->c = c;
-    indent_line(log);
-}
-
 
  /* Frame helpers */
 
 /** \brief Return the top frame. */
 static INLINE frame_t *topof(log_t *log) { return log->frames + log->topindex; } 
 static INLINE BOOL can_pop(log_t *log)   { return log->topindex > 0; } /* always keep one frame */
+
+/** \brief Set the current logging category; emit a log message if it was changed.
+  * Also calls indent_line().
+  */
+static void set_category(log_t *log, category_t c) {
+    frame_t *top = topof(log);
+    if (log->c != c) emit(log);
+    log->c = c;
+    top->severest_category = severest(top->severest_category, c);
+    indent_line(log);
+}
 
 static node_t node_from_top(log_t *log) {
     node_t node;
@@ -378,6 +411,7 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
     top->id   = log->id_counter + log->topindex;
     top->c    = c;
     top->type = type;
+    top->severest_category = c;
 
     log->id_counter += 256;
     log->leafdim     = leafdim;
@@ -393,7 +427,7 @@ static void init_log(log_t *log, jmi_t *jmi) {
 
     log->filtering_enabled = TRUE;
 
-    log->c = logInfo;
+    log->c = log->severest_category = logInfo;
     log->next_name = NULL;
 
     log->alloced_frames = 32;
@@ -417,6 +451,7 @@ static void delete_log(log_t *log) {
 /** \brief Leave the top frame without printing any logging errors. */
 static BOOL _leave_frame_(log_t *log) {
     frame_t *top = topof(log);
+    frame_t *newtop;
 
     log->next_name = NULL;
     log->leafdim = -1;
@@ -424,9 +459,15 @@ static BOOL _leave_frame_(log_t *log) {
     if (!can_pop(log)) return FALSE;
     --(log->topindex);
 
+    newtop = topof(log);
+    newtop->severest_category = severest(newtop->severest_category,
+                                         top->severest_category);
+
     if (emitted_category(log, top->c)) {
         cancel_commas(log);
         set_category(log, top->c);
+        log->severest_category = severest(log->severest_category,
+                                          top->severest_category);
         buffer_endtag(bufof(log), top->type);
     }
     return TRUE;
@@ -480,7 +521,10 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     if (name != NULL) {
         /* A named node may be no more severe than its parent */
         category_t pc = topof(log)->c;
-        if (c < pc) c = pc; /* Smaller = more severe */
+        if (c < pc) {
+            c = pc; /* Smaller = more severe */
+            logging_error(log, "A named node may be no more severe than its parent.");
+        }
     }
 
     if (emitted_category(log, c)) {
