@@ -1756,6 +1756,8 @@ aspect FlatPrettyPrint {
 	eq FNoEventExp.builtInName()         = "noEvent";
 	eq FSmoothExp.builtInName()          = "smooth";
 	eq FPreExp.builtInName()             = "pre";
+	eq FEdgeExp.builtInName()            = "edge";
+	eq FChangeExp.builtInName()          = "change";
 	eq FSampleExp.builtInName()          = "sample";
 	eq FInitialExp.builtInName()         = "initial";
 	eq FTerminalExp.builtInName()        = "terminal";

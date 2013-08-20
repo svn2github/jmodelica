@@ -1280,7 +1280,7 @@ aspect ConstantEvaluation {
 	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
   }
   
-  eq FCeilExp.cevalCalc()        = new CValueInteger(getFExp().ceval().convertInteger().intValue() + 1);
+  eq FCeilExp.cevalCalc()        = new CValueInteger((int) Math.ceil(getFExp().ceval().realValue()));
   eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   
@@ -1356,7 +1356,9 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval() : CValue.UNKNOWN;
+  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval()   : CValue.UNKNOWN;
+  eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
+  eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
   
   /** Decides what initial() is currently evaluated to. */

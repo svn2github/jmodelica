@@ -75,7 +75,7 @@ aspect TransformCanonical {
 	  *  done by both the Modelica and the Optimica compilers.
 	  */
 	public void FClass.transformCanonicalBase() {
-        enableIfEquationElimination();
+		enableIfEquationElimination();
 		addStateInitialEquationsIfSet();
 		genAlgorithmFunctions();
 		genBindingEquations();
@@ -87,7 +87,7 @@ aspect TransformCanonical {
 		addFDerivativeVariables();
 		extractEventGeneratingExps();
 		addFPreVariables();
-        enableIfEquationRewrite();
+		enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		variabilityPropagationIfSet();
 		genInitialEquations();

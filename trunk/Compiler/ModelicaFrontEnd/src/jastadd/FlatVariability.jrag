@@ -380,7 +380,9 @@ aspect FlatVariability {
 	eq FZeros.expVariability()     = fConstant();
 	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()    = getFExp().variability().parameterOrLess() ? getFExp().variability() : fDiscrete();
+	eq FPreExp.expVariability()    = getFExp().variability().combineDown(fDiscrete());
+	eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
+	eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();

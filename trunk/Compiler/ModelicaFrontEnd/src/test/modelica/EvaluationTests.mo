@@ -927,32 +927,116 @@ end EvaluationTests.EvaluateAnnotation;
 ")})));
 end EvaluateAnnotation;
 
-model OperatorIntegerEval
+
+
+package FunctionLikeOperators
+
+model IntegerTest
 	
-	Integer x = integer(42.9);
+	constant Integer x = integer(42.9);
+	constant Integer y = integer(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="OperatorIntegerEval",
+			name="FunctionLikeOperators_IntegerTest",
 			description="Evaluation of the integer operator.",
-			variables="x",
+			variables="
+x
+y
+",
 			values="
-42"
- )})));
-end OperatorIntegerEval;
+42
+42
+")})));
+end IntegerTest;
 
-model OperatorFloorEval
+model FloorTest
 	
-	Real x = floor(42.9);
+	constant Real x = floor(42.9);
+	constant Real y = floor(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="OperatorFloorEval",
+			name="FunctionLikeOperators_FloorTest",
 			description="Evaluation of the floor operator.",
-			variables="x",
+			variables="
+x
+y
+",
 			values="
-42.0"
+42.0
+42.0
+")})));
+end FloorTest;
+
+model CeilTest
+	
+	constant Real x = ceil(42.9);
+	constant Real y = ceil(42.0);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_CeilTest",
+			description="Evaluation of the ceil operator.",
+			variables="
+x
+y
+",
+			values="
+43.0
+42.0
+")})));
+end CeilTest;
+
+model PreTest
+	
+	constant Real x = 42.9;
+	constant Real y = pre(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_PreTest",
+			description="Evaluation of the pre operator.",
+			variables="y",
+			values="42.9"
  )})));
-end OperatorFloorEval;
+end PreTest;
+
+model EdgeTest
+	
+	constant Boolean x1 = true;
+	constant Boolean x2 = true;
+	constant Boolean y1 = edge(x1);
+	constant Boolean y2 = edge(x2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_EdgeTest",
+			description="Evaluation of the edge operator.",
+			variables="
+y1
+y2
+",
+			values="
+false
+false
+")})));
+end EdgeTest;
+
+model ChangeTest
+	
+	constant Real x = 42.9;
+	constant Boolean y = change(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_ChangeTest",
+			description="Evaluation of the change operator.",
+			variables="y",
+			values="false"
+ )})));
+end ChangeTest;
+
+end FunctionLikeOperators;
 
 end EvaluationTests;

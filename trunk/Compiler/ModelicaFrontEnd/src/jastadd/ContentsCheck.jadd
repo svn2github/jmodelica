@@ -81,6 +81,18 @@ aspect ContentCheck {
 		}
 	}
 	
+	public void FEdgeExp.contentCheck() {
+		if (inFunction()) { 
+			error("The edge() operator may not be used inside functions");
+		}
+	}
+	
+	public void FChangeExp.contentCheck() {
+		if (inFunction()) { 
+			error("The change() operator may not be used inside functions");
+		}
+	}
+	
 	public void InstExtends.contentCheck() {
 		if (myInstClass().isExternalObject())
 			error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");

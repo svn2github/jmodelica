@@ -478,11 +478,27 @@ aspect FlatTypeCheck {
   public void FPreExp.typeCheck() {
   	if (!getFExp().isAccess()) {
   		error("Calling function pre(): argument must be variable access");
-  		return;  		
+  		return;
   	}
-    if ((getFExp().isContinuousExp() && !getFExp().inWhen())) {
+    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
     	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
     }     
+  }
+  
+  public void FEdgeExp.typeCheck() {
+    if (!getFExp().isAccess() || !getFExp().type().isBoolean()) {
+      error("Calling function edge(): argument must be a boolean variable access");	
+    }
+  }
+  
+  public void FChangeExp.typeCheck() {
+    if (!getFExp().isAccess()) {
+      error("Calling function change(): argument must be a variable access");
+      return;  		
+    }
+    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
+      error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+    }
   }
   
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
@@ -675,12 +691,14 @@ aspect FlatTypeCheck {
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()               = false;
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
-  eq FPreExp.getChild().argumentDefinedTypeValid()                       = false;
   eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
   eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
   eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
+  eq FPreExp.getChild().argumentDefinedTypeValid()                       = false;
+  eq FEdgeExp.getChild().argumentDefinedTypeValid()                      = false;
+  eq FChangeExp.getChild().argumentDefinedTypeValid()                    = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.

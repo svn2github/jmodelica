@@ -1110,6 +1110,56 @@ Semantic error at line 1148, column 13:
 ")})));
 end PreTest1;
 
+model EdgeTest1
+  Real x (start=3);
+  Boolean x2;
+  Boolean y,y2;
+  Boolean z,z2;
+  
+equation
+  y  = edge(x);
+  y2 = edge(x2);
+  when time>1 then
+    z  = edge(x);
+    z2 = edge(x2);
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="EdgeTest1",
+			description="Testing that input to edge has to be boolean.",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1120, column 8:
+  Calling function edge(): argument must be a boolean variable access
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1123, column 10:
+  Calling function edge(): argument must be a boolean variable access
+")})));
+end EdgeTest1;
+
+model ChangeTest1
+  Real x (start=3);
+  Boolean y;
+  Boolean z;
+equation
+  y = change(x);
+  when time>1 then
+    z = change(x);
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ChangeTest1",
+			description="Testing that continuous variables can be accessed in change expressions inside when clauses.",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1147, column 7:
+  Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses
+")})));
+end ChangeTest1;
 
 model IfExpType1
     model M

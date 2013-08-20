@@ -18,29 +18,6 @@
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
 
-class TestInteger(SimulationTest):
-    """
-    Basic test of Modelica operators.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        SimulationTest.setup_class_base('OperatorTests.mo', 
-            'OperatorTests.IntegerTest')
-
-    @testattr(assimulo = True)
-    def setUp(self):
-        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
-        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
-        self.load_expected_data('OperatorTests_IntegerTest_result.txt')
-
-    @testattr(assimulo = True)
-    def test_trajectories(self):
-        """
-        Test that results match the expected ones.
-        """
-        self.assert_all_trajectories(['x', 'y'])
-
 class TestCeil(SimulationTest):
     """
     Basic test of Modelica operators.
@@ -87,9 +64,32 @@ class TestFloor(SimulationTest):
         """
         self.assert_all_trajectories(['x', 'y'])
 
-class TestNested(SimulationTest):
+class TestInteger(SimulationTest):
     """
     Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.IntegerTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
+        self.load_expected_data('OperatorTests_IntegerTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x', 'y'])
+
+class TestNested(SimulationTest):
+    """
+    Tests nested event generating builtins.
     """
 
     @classmethod
@@ -137,3 +137,48 @@ class TestSign(SimulationTest):
         self.assert_end_value('y', -1.0)
         self.assert_end_value('z', 0)
 
+class TestEdge(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.EdgeTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_EdgeTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x','y'])
+
+class TestChange(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.ChangeTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_ChangeTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x','y'])

@@ -251,8 +251,14 @@ aspect PredefinedTypes {
     		+ "  input Real x;\n"      // Type not used
     		+ "  output Real y;\n"     // Type not used
     		+ "end pre;\n"
-    		+ "function edge end edge;\n"
-    		+ "function change end change;\n"
+    		+ "function edge\n"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end edge;\n"
+    		+ "function change\n"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end change;\n"
     		+ "function reinit end reinit;\n"
     		+ "function assert end assert;\n"
     		+ "function terminate end terminate;\n"
@@ -272,20 +278,20 @@ aspect PredefinedTypes {
     		+ "function mod end mod;\n"
     		+ "function rem end rem;\n"
     		+ "function floor"
-    		+ "  input Real x;\n"
-    		+ "  output Real y;\n"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
     		+ "end floor;\n"
     		+ "function ceil"
-    		+ "  input Real x;\n"
-    		+ "  output Real y;\n"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
     		+ "end ceil;\n"
     		+ "function integer"
-    		+ "  input Real x;\n"
-    		+ "  output Integer y;\n"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Integer y;\n"  // Type not used
     		+ "end integer;\n"
     		+ "function Integer"
     		+ "  input Real x;\n"      // Type not used
-    		+ "  output Integer y;\n"
+    		+ "  output Integer y;\n"  // Type not used
     		+ "end Integer;\n"
     		+ "function String"
     		+ "  input Real x;\n"      // Type not used

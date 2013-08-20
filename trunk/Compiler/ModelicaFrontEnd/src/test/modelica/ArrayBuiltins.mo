@@ -2602,18 +2602,12 @@ end ArrayBuiltins.NoEventRecord1;
 ")})));
 end NoEventRecord1;
 
-
-
 model PreTest1
-	discrete Integer x = 1;
+	parameter Integer x = 1;
 	Real y = pre(x);
-	discrete Integer x2[2] = ones(2);
+	parameter Integer x2[2] = ones(2);
 	Real y2[2] = pre(x2);
-/*equation
-  when time>1 then
-    y = pre(x);
-    y2 = pre(x2);
-  end when;*/
+equation
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -2621,16 +2615,73 @@ model PreTest1
 			description="pre(): basic test",
 			flatModel="
 fclass ArrayBuiltins.PreTest1
- constant Integer x = 1;
- constant Real y = 1;
- constant Integer x2[1] = 1;
- constant Integer x2[2] = 1;
- constant Real y2[1] = 1;
- constant Real y2[2] = 1;
+ parameter Integer x = 1 /* 1 */;
+ parameter Real y;
+ parameter Integer x2[1] = 1 /* 1 */;
+ parameter Integer x2[2] = 1 /* 1 */;
+ parameter Real y2[1];
+ parameter Real y2[2];
+parameter equation
+ y = pre(x);
+ y2[1] = pre(x2[1]);
+ y2[2] = pre(x2[2]);
 end ArrayBuiltins.PreTest1;
 ")})));
 end PreTest1;
 
+model EdgeTest1
+	parameter Boolean x = true;
+	Boolean y = edge(x);
+	parameter Boolean x2[2] = {true,true};
+	Boolean y2[2] = edge(x2);
+equation
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EdgeTest1",
+			description="edge(): basic test",
+			flatModel="
+fclass ArrayBuiltins.EdgeTest1
+ parameter Boolean x = true /* true */;
+ parameter Boolean y;
+ parameter Boolean x2[1] = true /* true */;
+ parameter Boolean x2[2] = true /* true */;
+ parameter Boolean y2[1];
+ parameter Boolean y2[2];
+parameter equation
+ y = x and not pre(x);
+ y2[1] = x2[1] and not pre(x2[1]);
+ y2[2] = x2[2] and not pre(x2[2]);
+end ArrayBuiltins.EdgeTest1;
+")})));
+end EdgeTest1;
+
+model ChangeTest1
+	parameter Real x = 1;
+	Boolean y = change(x);
+	parameter Real x2[2] = ones(2);
+	Boolean y2[2] = change(x2);
+equation
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ChangeTest1",
+			description="change(): basic test",
+			flatModel="
+fclass ArrayBuiltins.ChangeTest1
+ parameter Real x = 1 /* 1 */;
+ parameter Boolean y;
+ parameter Real x2[1] = 1 /* 1 */;
+ parameter Real x2[2] = 1 /* 1 */;
+ parameter Boolean y2[1];
+ parameter Boolean y2[2];
+parameter equation
+ y = x <> pre(x);
+ y2[1] = x2[1] <> pre(x2[1]);
+ y2[2] = x2[2] <> pre(x2[2]);
+end ArrayBuiltins.ChangeTest1;
+")})));
+end ChangeTest1;
 
 model SampleTest1
 	Boolean x = sample(0, 1);

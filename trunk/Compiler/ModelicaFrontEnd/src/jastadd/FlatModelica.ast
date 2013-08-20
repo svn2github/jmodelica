@@ -1249,6 +1249,16 @@ FSmoothExp : FBuiltInFunctionCall ::= Order:FExp FExp;
 FPreExp : FUnaryBuiltIn;
 
 /**
+ * Edge built-in function.
+ */
+FEdgeExp : FUnaryBuiltIn;
+
+/**
+ * Change built-in function.
+ */
+FChangeExp : FUnaryBuiltIn;
+
+/**
  * Sample built-in function.
  */
 FSampleExp : FBuiltInFunctionCall ::= Offset:FExp Interval:FExp;

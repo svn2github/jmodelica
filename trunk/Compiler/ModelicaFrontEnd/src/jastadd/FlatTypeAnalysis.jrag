@@ -276,6 +276,8 @@ aspect FlatTypeAnalysis {
 	eq FAddExp.rawType()           = getLeft().type().typePromotion(getRight().type());
 	
 	eq FUnaryBuiltIn.type() = getFExp().type();
+	eq FEdgeExp.type() = fBooleanType(size());
+	eq FChangeExp.type() = fBooleanType(size());
 	
 	eq FDimensionConvert.type() = getFExp().type().sizedType(size());
 	

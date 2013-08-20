@@ -239,19 +239,20 @@ end UnsupportedBuiltins2_ComplErr;
 
 
 model UnsupportedBuiltins3_ComplErr
-  discrete Real x;
+  parameter Boolean x;
  equation
   sign(1);
+  integer(1);
   ceil(1);
   floor(1);
   semiLinear();
   initial();
   sample(1,1);
   pre(x);
-  edge();
+  edge(x);
+  change(x);
   reinit(1);
   terminate();
-  integer(1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -264,6 +265,9 @@ model UnsupportedBuiltins3_ComplErr
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The sign() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 289, column 3:
+  The integer() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 280, column 3:
   The ceil() function-like operator is currently only supported when compiling FMUs
@@ -284,16 +288,16 @@ Compliance error at line 285, column 3:
   The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 286, column 3:
-  The edge() function-like operator is not supported
+  The edge() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 286, column 3:
+  The change() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
   The terminate() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 289, column 3:
-  The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins3_ComplErr;
 

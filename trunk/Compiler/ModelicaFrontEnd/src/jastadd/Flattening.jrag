@@ -1315,7 +1315,7 @@ aspect FlatExpressions {
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
-		return new FFunctionCallEquation(getType().flatten(prefix), lefts, getCall().flatten(prefix));
+		return new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) getCall().flatten(prefix));
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
@@ -1349,7 +1349,7 @@ aspect FlatExpressions {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft a : getLefts())
 			l.add(a.flatten(prefix));
-		return new FFunctionCallStmt(l, getCall().flatten(prefix));
+		return new FFunctionCallStmt(l, (FAbstractFunctionCall) getCall().flatten(prefix));
 	}
 	
 	public FIfWhenStmt FIfWhenStmt.flatten(FQName prefix) {
@@ -1901,11 +1901,10 @@ aspect FlatExpressions {
 	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
 	public FExp FLitExp.flatten(FQName prefix)     { return (FLitExp) fullCopy(); }
 	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
-	
-	public abstract FAbstractFunctionCall FAbstractFunctionCall.flatten(FQName prefix);
-	public abstract FBuiltInFunctionCall  FBuiltInFunctionCall.flatten(FQName prefix);
-	
-	public FBuiltInFunctionCall FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
+		
+	public FExp                 FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
+	public FExp                 FEdgeExp.flatten(FQName prefix)                  { return new FAndExp(getFExp().flatten(prefix),new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
+	public FExp                 FChangeExp.flatten(FQName prefix)                { return new FNeqExp(getFExp().flatten(prefix),new FPreExp(getFExp().flatten(prefix))); }
 	public FBuiltInFunctionCall FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
 	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
