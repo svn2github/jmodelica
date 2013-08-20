@@ -5221,6 +5221,7 @@ equation
 		TransformCanonicalTestCase(
 			name="EventGeneratingExps_InFunctionCall",
 			description="Tests event generating expressions in function calls.",
+			inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
  discrete Integer temp_1;

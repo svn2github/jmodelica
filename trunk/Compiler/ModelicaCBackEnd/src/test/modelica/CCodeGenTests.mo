@@ -1609,6 +1609,7 @@ equation
 		CCodeGenTestCase(
 			name="CFunctionTest15",
 			description="Declare temp variables for parameters and start values at start of function",
+			inline_functions="none",
 			template="
 $C_set_start_values$
 $C_DAE_initial_dependent_parameter_assignments$
