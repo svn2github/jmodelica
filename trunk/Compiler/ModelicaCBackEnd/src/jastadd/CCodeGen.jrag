@@ -1224,16 +1224,18 @@ aspect CCodeGen {
 	}
 	
 	public void FDivFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("((long)");
 		if (inFunction()) {
-			str.print("(int) jmi_divide(");
+			str.format("jmi_divide_function(\"%s\", ", containingFFunctionDecl().name());
 		} else {
-			str.print("(int) jmi_divide_logged(jmi, ");
+			str.print("jmi_divide_equation(jmi, ");
 		}
 		p.print(getX(),str,indent);
 		str.print(","); 
 		p.print(getY(),str,indent);
 		str.print(","); 
-		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
+		str.print("\""+prettyPrint("")+"\")");
+		str.print(")");
 	}
 
 	public void FCeilFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
