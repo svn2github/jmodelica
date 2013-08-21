@@ -456,7 +456,8 @@ Semantic error at line 450, column 10:
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
- /*
+
+
 model RedeclareTestOx10 "Constraining clause example."
  
  
@@ -501,8 +502,8 @@ fclass RedeclareTests.RedeclareTestOx10
 end RedeclareTests.RedeclareTestOx10;
 ")})));
 end RedeclareTestOx10;
- */
-/*
+
+
 model RedeclareTestOx11_Err "Constraining clause example."
 //  Should give an error message like
 //  Error in redeclaration in component:
@@ -545,16 +546,20 @@ model RedeclareTestOx11_Err "Constraining clause example."
 			name="RedeclareTestOx11_Err",
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
-  2 error(s) found...
-In file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 549, column 32:
-  'redeclare replaceable B c constrainedby A ' is not a subtype of 'replaceable B c'
-Semantic error at line 553, column 32:
-  'redeclare A c' is not a subtype of 'replaceable B c'
+3 errors found:
 
-  ")})));
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 537, column 38:
+  In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 541, column 8:
+  In the declaration 'redeclare D d(redeclare A c)', the replacing class is not a subtype of the constraining class from the declaration 'replaceable D d constrainedby D (redeclare replaceable B c constrainedby A)'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
+Semantic error at line 541, column 22:
+  In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
+")})));
 end RedeclareTestOx11_Err;
- */
+
 
  model RedeclareTestOx115_Err "Constraining clause example."
 /*
@@ -653,7 +658,9 @@ Semantic error at line 651, column 32:
   In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx116_Err;
- /*
+
+
+/* Does not work - the modification of y is reported as an error.
 model RedeclareTestOx12 "Constraining clause example."
  
   model A
@@ -683,7 +690,9 @@ fclass RedeclareTests.RedeclareTestOx12
 end RedeclareTests.RedeclareTestOx12;
 ")})));
 end RedeclareTestOx12;
-*/ 
+*/
+ 
+
 model RedeclareTestOx13 "Constraining clause example."
  
   model A
