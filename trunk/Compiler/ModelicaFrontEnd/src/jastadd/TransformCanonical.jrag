@@ -1665,6 +1665,9 @@ aspect TransformCanonical {
 					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
 	
 	private void FClass.computeMatchingsAndBLTWrapped() {
+        log.info("Flat tree before index reduction and BLT:");
+		log.info(this);
+
 		daeBLT = new BLT();
 		daeStructuredBLT = new StructuredBLT(this);
 		daeInitBLT = new BLT();		
