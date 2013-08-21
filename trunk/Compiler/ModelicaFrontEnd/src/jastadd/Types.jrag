@@ -279,4 +279,13 @@ aspect DerivativeFunctions {
 		return false;
 	}
 	
+	syn boolean FType.shouldBeDifferentiated() =             isReal() || isComposite();
+	syn boolean FAbstractVariable.shouldBeDifferentiated() = false;
+	eq FFunctionVariable.shouldBeDifferentiated() =          !isNoDerivative() && type().shouldBeDifferentiated();
+	eq FVariable.shouldBeDifferentiated() =                  variability().continuousVariability();
+	syn boolean FIdUse.shouldBeDifferentiated() =            myFV().shouldBeDifferentiated();
+	syn boolean FExp.shouldBeDifferentiated() =              type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
+	syn boolean FStatement.shouldBeDifferentiated() =        type().shouldBeDifferentiated();
+	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
+
 }

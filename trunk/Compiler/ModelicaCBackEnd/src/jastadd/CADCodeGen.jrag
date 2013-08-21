@@ -62,16 +62,7 @@ aspect CADCodeGen {
 	public void ASTNode.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
  		prettyPrint_C(p, str, indent);
 	}
-	
-	syn boolean FType.needDerVar_CAD() =             isReal() || isComposite();
-	syn boolean FAbstractVariable.needDerVar_CAD() = false;
-	eq FFunctionVariable.needDerVar_CAD() =          !isNoDerivative() && type().needDerVar_CAD();
-	eq FVariable.needDerVar_CAD() =                  variability().continuousVariability();
-	syn boolean FIdUse.needDerVar_CAD() =            myFV().needDerVar_CAD();
-	syn boolean FExp.needDerVar_CAD() =              type().needDerVar_CAD() && (inFunction() && !isConstantExp() || isContinuousExp());
-	syn boolean FStatement.needDerVar_CAD() =        type().needDerVar_CAD();
-	syn boolean FAbstractEquation.needDerVar_CAD() = variability().continuousVariability();
-	
+		
 	private int FClass.adIndex = 0;
 	
 	//Assign a unique AD-index for each node that is printed
@@ -88,7 +79,7 @@ aspect CADCodeGen {
 	eq FIdUseExp.derName_CAD() {
 		if (inFunction())
 			return getFIdUse().derName_CAD();
-		else if (!needDerVar_CAD())
+		else if (!shouldBeDifferentiated())
 			return "AD_WRAP_LITERAL(0)";
 		else
 			return String.format("%s[jmi_get_index_from_value_ref(%d)-jmi->offs_real_dx]", getSeedName(), myFV().valueReference());
@@ -168,7 +159,7 @@ aspect CADCodeGen {
 	}
 	
 	public String FAbstractVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
-		if (needDerVar_CAD())
+		if (shouldBeDifferentiated())
 			return varName_CAD();
 		else
 			return name_C();
@@ -299,7 +290,7 @@ aspect CADCodeGen {
 	 * Generates der expression or prints reference to evaluated expression
 	 */
 	public void FExp.genDer_CAD(Printer p, PrintStream str, String indent) {
-		if (!needDerVar_CAD())
+		if (!shouldBeDifferentiated())
 			str.print("AD_WRAP_LITERAL(0)");
 		else if (inlineDer_CAD())
 			genDerExp_CAD(p, str, indent);
@@ -320,7 +311,7 @@ aspect CADCodeGen {
 			genVarExp_CAD(p, str, indent);
 			str.print(";\n");
 		}
-		if (needDerVar_CAD() && !inlineDer_CAD()) {
+		if (shouldBeDifferentiated() && !inlineDer_CAD()) {
 			str.print(indent);
 			str.print(derName_CAD());
 			str.print(" = ");
@@ -753,7 +744,7 @@ aspect CADCodeGen {
 		getThenExp().genVar_CAD(p, str, indent);
 		str.print(";\n");
 		
-		if (needDerVar_CAD()) {
+		if (shouldBeDifferentiated()) {
 			str.print(innerIndent);
 			genDer_CAD(p, str, indent);
 			str.print(" = ");
@@ -771,7 +762,7 @@ aspect CADCodeGen {
 		getElseExp().genVar_CAD(p, str, indent);
 		str.print(";\n");
 		
-		if (needDerVar_CAD()) {
+		if (shouldBeDifferentiated()) {
 			str.print(innerIndent);
 			genDer_CAD(p, str, indent);
 			str.print(" = ");
@@ -812,7 +803,7 @@ aspect CADCodeGen {
 			sep = ", ";
 		}
 		for (FExp arg : getArgs()) {
-			if (arg.myCorrespondingInput().needDerVar_CAD()) {
+			if (arg.myCorrespondingInput().shouldBeDifferentiated()) {
 				str.print(sep);
 				arg.genArgument_der_CAD(str);
 				sep = ", ";
@@ -825,7 +816,7 @@ aspect CADCodeGen {
 			for (int i = 0; i < outputs.size(); i++) {
 				str.print(sep);
 				if (i < lefts) {
-					if (outputs.get(i).needDerVar_CAD())
+					if (outputs.get(i).shouldBeDifferentiated())
 						myLefts().get(i).genArgument_var_CAD(str);
 					else
 						myLefts().get(i).genArgument_C(str);
@@ -835,7 +826,7 @@ aspect CADCodeGen {
 				sep = ", ";
 			}
 			for (int i = 0; i < outputs.size(); i++) {
-				if (!outputs.get(i).needDerVar_CAD())
+				if (!outputs.get(i).shouldBeDifferentiated())
 					continue;
 				str.print(sep);
 				if (i < lefts)
@@ -859,11 +850,11 @@ aspect CADCodeGen {
 			}
 			first = true;
 			for (FFunctionVariable output : outputs) {
-				if (!output.needDerVar_CAD())
+				if (!output.shouldBeDifferentiated())
 					continue;
 				str.print(sep);
 				sep = ", ";
-				if (first && needDerVar_CAD()) {
+				if (first && shouldBeDifferentiated()) {
 					str.print("&");
 					genDer_CAD(p, str, indent);
 				} else {
@@ -905,7 +896,7 @@ aspect CADCodeGen {
 	@Override
 	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
-		if(!needDerVar_CAD()){
+		if(!shouldBeDifferentiated()){
 			genResidual_C(enumerator, indent, str, null, null);
 			return;
 		}
@@ -1175,7 +1166,7 @@ aspect CADCodeGen {
 	@Override
 	public void FEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {
 		FExp solution = solution(v.name());
-		if(v.needDerVar_CAD()){
+		if(v.shouldBeDifferentiated()){
 			solution.genTempVars_CAD(printer_CAD, str, indent);
 			str.print(indent + v.name_C() + " = ");
 			solution.genVar_CAD(printer_CAD, str, indent);
@@ -1734,7 +1725,7 @@ aspect CADCodeGen {
 				str.print("jmi_ad_var_t ");
 				str.println(varName_CAD() + ";");
 			}
-			if (needDerVar_CAD() && !inlineDer_CAD()) {
+			if (shouldBeDifferentiated() && !inlineDer_CAD()) {
 				str.print(indent);
 				str.print("jmi_ad_var_t ");
 				str.println(derName_CAD() + ";");
@@ -1774,7 +1765,7 @@ aspect CADCodeGen {
 			str.print(indent);
 			str.print("jmi_ad_var_t ");
 			str.println(varName_CAD() + ";");
-			if (needDerVar_CAD()) {
+			if (shouldBeDifferentiated()) {
 				str.print(indent);
 				str.print("jmi_ad_var_t ");
 				str.println(derName_CAD() + ";");
@@ -1794,7 +1785,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void FFunctionVariable.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
-		if (!needDerVar_CAD()) {
+		if (!shouldBeDifferentiated()) {
 			genVarDecls_C(p, str, indent);
 		} else if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
@@ -2119,7 +2110,7 @@ aspect CADCodeGen {
 	 */
 	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
 		if (hasFExp()) {
-			if (getFExp().needDerVar_CAD()) {
+			if (getFExp().shouldBeDifferentiated()) {
 				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator.copy(), forVariables);
 				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumerator, forVariables);
 			} else {
@@ -2360,7 +2351,7 @@ aspect CADCodeGen {
 		p.print(getRight(), str, indent);
 		str.print(";\n");
 
-		if (needDerVar_CAD()) {
+		if (shouldBeDifferentiated()) {
 			str.print(indent);
 			str.print(getLeft().toString_der_CAD(p));
 			str.print(" = ");
@@ -2420,20 +2411,20 @@ aspect CADCodeGen {
 		for (FFunctionVariable ffv : myInputs()){
 			str.print(sep);
 			sep = ", ";
-			if(ffv.needDerVar_CAD())
+			if(ffv.shouldBeDifferentiated())
 				str.print(ffv.varName_CAD());
 			else
 				str.print(ffv.name_C());
 		}
 		for (FFunctionVariable ffv : myInputs()){
-			if(ffv.needDerVar_CAD()){
+			if(ffv.shouldBeDifferentiated()){
 				str.print(sep);
 				sep = ", ";
 				str.print(ffv.derName_CAD());
 			}
 		}
 		for (FFunctionVariable ffv : myOutputs()){
-			if(ffv.needDerVar_CAD()) {
+			if(ffv.shouldBeDifferentiated()) {
 				str.print(sep);
 				sep = ", ";
 				str.print("&" + ffv.derName_CAD());
@@ -2455,7 +2446,7 @@ aspect CADCodeGen {
 		genNonADFunctionCall_CAD(p, str, indent);
 		
 		for (FFunctionVariable ffv : myOutputs())
-			if(ffv.needDerVar_CAD())
+			if(ffv.shouldBeDifferentiated())
 				str.format("%s%s = 0;\n", indent, ffv.derName_CAD());
 	}
 	
@@ -2469,7 +2460,7 @@ aspect CADCodeGen {
 		for (FFunctionVariable ffv : myInputs()){
 			str.print(sep);
 			sep = ", ";
-			if(ffv.needDerVar_CAD())
+			if(ffv.shouldBeDifferentiated())
 				str.print(ffv.varName_CAD());
 			else
 				str.print(ffv.name_C());
@@ -2477,7 +2468,7 @@ aspect CADCodeGen {
 		for (FFunctionVariable ffv : myOutputs()){
 			str.print(sep);
 			sep = ", ";
-			if(ffv.needDerVar_CAD())
+			if(ffv.shouldBeDifferentiated())
 				str.print("&" + ffv.varName_CAD());
 			else
 				str.print("&" + ffv.name_C());
@@ -2563,7 +2554,7 @@ aspect CADCodeGen {
 	 */
 	public void FunctionReturnDefinition.printReturnWrite_CAD(PrintStream str, String indent) {
 		for (FFunctionVariable v : outputs)
-			if (v.needDerVar_CAD())
+			if (v.shouldBeDifferentiated())
 				v.printReturnWrite_CAD(str, indent);
 			else
 				v.printReturnWrite_C(str, indent);
@@ -2620,14 +2611,14 @@ aspect CADCodeGen {
 		String sep = "";
 		for (FFunctionVariable v : myInputs()) {
 			str.print(sep);
-			if (v.needDerVar_CAD())
+			if (v.shouldBeDifferentiated())
 				v.printArgument_var_CAD(str);
 			else
 				v.printArgument_C(str);
 			sep = ", ";
 		}
 		for (FFunctionVariable v : myInputs()) {
-			if(v.needDerVar_CAD()){
+			if(v.shouldBeDifferentiated()){
 				str.print(sep);
 				v.printArgument_der_CAD(str);
 			}
@@ -2635,7 +2626,7 @@ aspect CADCodeGen {
 		if (returnArgs) {
 			for (FFunctionVariable v : myOutputs()) {
 				str.print(sep);
-				if (v.needDerVar_CAD())
+				if (v.shouldBeDifferentiated())
 					v.printReturnArgument_var_CAD(str);
 				else
 					v.printReturnArgument_C(str);
@@ -2644,7 +2635,7 @@ aspect CADCodeGen {
 		}
 		if (returnArgs) {
 			for (FFunctionVariable v : myOutputs()) {
-				if(v.needDerVar_CAD()){
+				if(v.shouldBeDifferentiated()){
 					str.print(sep);
 					v.printReturnArgument_der_CAD(str);
 					sep = ", ";

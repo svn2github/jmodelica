@@ -807,7 +807,7 @@ aspect Derivatives {
 		int i = 0;
 		for (FExp e : getArgs()) {
 			FFunctionVariable fv = myDecl.getFFunctionVariable(i);
-			if (!fv.isNoDerivative()) 
+			if (fv.shouldBeDifferentiated()) 
 				args.add(e.diff(name));
 			i++;
 		}
