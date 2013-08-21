@@ -57,6 +57,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 		TlsFree(jmi_tls_handle);
 		break;
 	default:
+		break;
 	}
 	return TRUE;
 }
