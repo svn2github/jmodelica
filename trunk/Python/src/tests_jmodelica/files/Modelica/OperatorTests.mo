@@ -1,5 +1,29 @@
 package OperatorTests "Some tests for operators" 
 
+model DivTest
+  Real x;
+  Real y;
+equation 
+  x = div(time*time*10, 2);
+  y = div(time*time*10, -2);
+end DivTest;
+
+model ModTest
+  Real x;
+  Real y;
+equation 
+  x = mod(time*time*10, 2);
+  y = mod(time*time*10, -2);
+end ModTest;
+
+model RemTest
+  Real x;
+  Real y;
+equation 
+  x = rem(time*time*10, 2);
+  y = rem(time*time*10, -2);
+end RemTest;
+
 model CeilTest
   Real x;
   Real y;

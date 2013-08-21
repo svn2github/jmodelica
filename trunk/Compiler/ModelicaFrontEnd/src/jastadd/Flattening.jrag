@@ -1902,6 +1902,16 @@ aspect FlatExpressions {
 	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
 	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
 		
+	public FExp                 FEventGenExp.flatten(FQName prefix)              { return createNode(getX().flatten(prefix)); }
+	public FExp                 FBinEventGenExp.flatten(FQName prefix)           { return createNode(getX().flatten(prefix),getY().flatten(prefix)); }
+	public FExp                 FModFuncExp.flatten(FQName prefix)               {
+		if (type().isInteger()) {
+			return new FSubExp(getX().flatten(prefix), new FMulExp(new FIntegerFuncExp(new FDivExp(getX().flatten(prefix),getY().flatten(prefix))),getY().flatten(prefix)));
+		} else {	
+			return new FSubExp(getX().flatten(prefix), new FMulExp(new FFloorFuncExp(new FDivExp(getX().flatten(prefix),getY().flatten(prefix))),getY().flatten(prefix)));
+		}
+	}
+	public FExp                 FRemFuncExp.flatten(FQName prefix)               { return new FSubExp(getX().flatten(prefix), new FMulExp(new FDivFuncExp(getX().flatten(prefix),getY().flatten(prefix)),getY().flatten(prefix)));}
 	public FExp                 FUnaryBuiltIn.flatten(FQName prefix)             { return createNode(getFExp().flatten(prefix)); }
 	public FExp                 FEdgeExp.flatten(FQName prefix)                  { return new FAndExp(getFExp().flatten(prefix),new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
 	public FExp                 FChangeExp.flatten(FQName prefix)                { return new FNeqExp(getFExp().flatten(prefix),new FPreExp(getFExp().flatten(prefix))); }

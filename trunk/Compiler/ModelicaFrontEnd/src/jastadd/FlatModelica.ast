@@ -1391,22 +1391,42 @@ FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 /**
  * \brief Abstract base class for event generating expressions.
  */
-abstract FEventGeneratingExp : FUnaryBuiltIn;
+abstract FEventGenExp : FBuiltInFunctionCall ::= X:FExp;
 
 /**
- * The floor() built-in function.
+ * \brief Abstract base class for binary event generating expressions.
  */
-FFloorExp : FEventGeneratingExp;
+abstract FBinEventGenExp : FEventGenExp ::= Y:FExp;
+
+/**
+ * \brief The div() built-in function.
+ */
+FDivFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The mod() built-in function.
+ */
+FModFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The rem() built-in function.
+ */
+FRemFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The floor() built-in function.
+ */
+FFloorFuncExp : FEventGenExp;
 
 /**
  * \brief The ceil() built-in function.
  */
-FCeilExp : FFloorExp;
+FCeilFuncExp : FEventGenExp;
 
 /**
  * \brief The integer() built-in function (convert Real to Integer).
  */
-FIntegerExp : FFloorExp;
+FIntegerFuncExp : FFloorFuncExp;
 
 /**
  * \brief The Integer() built-in function (convert enumeration value to Integer).

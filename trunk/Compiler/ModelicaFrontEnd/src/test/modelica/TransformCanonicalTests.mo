@@ -5101,6 +5101,78 @@ end TestRuntimeOptions1;
 
 package EventGeneratingExps
 
+model Div
+	Real x;
+equation
+	x = div(time, 2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Div",
+			description="Tests extraction of div() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Div
+ Real x;
+ discrete Real temp_1;
+initial equation 
+ temp_1 = div(time, 2);
+equation
+ x = temp_1;
+ when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+  temp_1 = div(time, 2);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Div;
+")})));
+end Div;
+
+model Mod
+	Real x;
+equation
+	x = mod(time, 2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Mod",
+			description="Tests extraction of mod() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Mod
+ Real x;
+ discrete Real temp_1;
+initial equation 
+ temp_1 = floor(time / 2);
+equation
+ x = time - temp_1 * 2;
+ when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time / 2);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Mod;
+")})));
+end Mod;
+
+model Rem
+	Real x;
+equation
+	x = rem(time, 2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_Rem",
+			description="Tests extraction of rem() into a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.Rem
+ Real x;
+ discrete Real temp_1;
+initial equation 
+ temp_1 = div(time, 2);
+equation
+ x = time - temp_1 * 2;
+ when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+  temp_1 = div(time, 2);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.Rem;
+")})));
+end Rem;
+
 model Ceil
 	Real x;
 equation
@@ -5250,7 +5322,7 @@ model InWhenEquations
 	Real x;
 equation
 
-when integer(time*3) > 1 then
+when integer(time*3) + noEvent(integer(time*3)) > 1 then
   x = floor(time * 0.3 + 4.2);
  end when;
 
@@ -5267,7 +5339,7 @@ initial equation
  temp_1 = integer(time * 3);
  pre(x) = 0.0;
 equation
- when temp_1 > 1 then
+ when temp_1 + noEvent(integer(time*3)) > 1 then
   x = floor(time * 0.3 + 4.2);
  end when;
  when {time * 3 < pre(temp_1), time * 3 >= pre(temp_1) + 1} then

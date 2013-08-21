@@ -1740,10 +1740,13 @@ aspect FlatPrettyPrint {
 	eq FLogExp.builtInName()             = "log";
 	eq FLog10Exp.builtInName()           = "log10";
 	eq FSqrtExp.builtInName()            = "sqrt";
-	eq FIntegerExp.builtInName()         = "integer";
 	eq FEnumIntegerExp.builtInName()     = "Integer";
-	eq FCeilExp.builtInName()            = "ceil";
-	eq FFloorExp.builtInName()           = "floor";
+	eq FDivFuncExp.builtInName()         = "div";
+	eq FModFuncExp.builtInName()         = "mod";
+	eq FRemFuncExp.builtInName()         = "rem";
+	eq FCeilFuncExp.builtInName()        = "ceil";
+	eq FFloorFuncExp.builtInName()       = "floor";
+	eq FIntegerFuncExp.builtInName()     = "integer";
 	eq FStringExp.builtInName()          = "String";
 	eq FScalarExp.builtInName()          = "scalar";
 	eq FVectorExp.builtInName()          = "vector";

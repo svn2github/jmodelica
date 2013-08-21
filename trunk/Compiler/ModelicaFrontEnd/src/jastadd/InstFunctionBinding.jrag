@@ -278,14 +278,17 @@ aspect InstFunctionBinding {
 				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));
 				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
 				map.put("product",      new BuiltInCreator(false, new FProductExp(),     1));
-				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
-				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
 				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
-				map.put("integer",      new BuiltInCreator(false, new FIntegerExp(),     1));
+				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
+				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
 				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
-				map.put("ceil",         new BuiltInCreator(false, new FCeilExp(),        1));
-				map.put("floor",        new BuiltInCreator(false, new FFloorExp(),       1));
+				map.put("integer",      new BuiltInCreator(false, new FIntegerFuncExp(), 1));
+				map.put("div",          new BuiltInCreator(false, new FDivFuncExp(),     2));
+				map.put("mod",          new BuiltInCreator(false, new FModFuncExp(),     2));
+				map.put("rem",          new BuiltInCreator(false, new FRemFuncExp(),     2));
+				map.put("ceil",         new BuiltInCreator(false, new FCeilFuncExp(),    1));
+				map.put("floor",        new BuiltInCreator(false, new FFloorFuncExp(),   1));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
 				//       name                                         node           # fixed args
@@ -313,8 +316,7 @@ aspect InstFunctionBinding {
 						// Ticket 678: Support for array related functions
 						"symmetric", 
 						// Ticket 664: Support all function-like operators
-						"div", "mod", "rem", "delay", "cardinality", 
-						"semiLinear", "reinit"
+						"delay", "cardinality", "semiLinear", "reinit"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))

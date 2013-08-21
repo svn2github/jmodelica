@@ -320,10 +320,11 @@ aspect FlatVariability {
 	eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
+	eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	
-	eq FFloorExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
-	
-	eq FSignExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
+	eq FEventGenExp.expVariability()    = getX().variability().combineDown(fDiscrete());
+	eq FBinEventGenExp.expVariability() = getX().variability().combine(getY().variability());
+	eq FDivFuncExp.expVariability()     = getX().variability().combine(getY().variability()).combineDown(fDiscrete());
 	
 	
 	eq FIterExp.expVariability() {

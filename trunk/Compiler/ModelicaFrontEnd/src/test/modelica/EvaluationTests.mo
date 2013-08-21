@@ -931,24 +931,94 @@ end EvaluateAnnotation;
 
 package FunctionLikeOperators
 
-model IntegerTest
+model DivTest
 	
-	constant Integer x = integer(42.9);
-	constant Integer y = integer(42.0);
+	constant Real x = div(42.9,3);
+	constant Integer y = div(42,42);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_IntegerTest",
-			description="Evaluation of the integer operator.",
+			name="FunctionLikeOperators_DivTest",
+			description="Evaluation of the div operator.",
 			variables="
 x
 y
 ",
 			values="
-42
-42
+14.0
+1
 ")})));
-end IntegerTest;
+end DivTest;
+
+model ModTest
+	constant Real c1 = 3;
+	constant Real c2 = 1.4;
+	constant Real x = mod(c1,c2);
+	constant Real y = mod(-3.0,1.4);
+	constant Real z = mod(3.0,-1.4);
+	constant Integer a = mod(3,-5);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_ModTest",
+			description="Evaluation of the mod operator.",
+			variables="
+x
+y
+z
+a
+",
+			values="
+0.20000000000000018
+1.1999999999999993
+-1.1999999999999993
+-2
+")})));
+end ModTest;
+
+model RemTest
+	
+	constant Real x = rem(3.0,1.4);
+	constant Real y = rem(-3.0,1.4);
+	constant Real z = rem(3.0,-1.4);
+	constant Integer a = rem(3,-5);
+	
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_RemTest",
+			description="Evaluation of the rem operator.",
+			variables="
+x
+y
+z
+a
+",
+			values="
+0.20000000000000018
+-0.20000000000000018
+0.20000000000000018
+3
+")})));
+end RemTest;
+
+model CeilTest
+	
+	constant Real x = ceil(42.9);
+	constant Real y = ceil(42.0);
+
+	annotation(__JModelica(UnitTesting(tests={
+		EvalTestCase(
+			name="FunctionLikeOperators_CeilTest",
+			description="Evaluation of the ceil operator.",
+			variables="
+x
+y
+",
+			values="
+43.0
+42.0
+")})));
+end CeilTest;
 
 model FloorTest
 	
@@ -969,24 +1039,24 @@ y
 ")})));
 end FloorTest;
 
-model CeilTest
+model IntegerTest
 	
-	constant Real x = ceil(42.9);
-	constant Real y = ceil(42.0);
+	constant Integer x = integer(42.9);
+	constant Integer y = integer(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_CeilTest",
-			description="Evaluation of the ceil operator.",
+			name="FunctionLikeOperators_IntegerTest",
+			description="Evaluation of the integer operator.",
 			variables="
 x
 y
 ",
 			values="
-43.0
-42.0
+42
+42
 ")})));
-end CeilTest;
+end IntegerTest;
 
 model PreTest
 	

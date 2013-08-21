@@ -805,6 +805,8 @@ aspect InheritedFactoryMethods {
 	public abstract FBooleanLitExp            FBooleanLitExp.createEmptyNode();   // No children, but can be useful
 	public abstract FBuiltInFunctionCall      FBuiltInFunctionCall.createEmptyNode();  // Used in BuiltInTranslator 
 	public abstract FUnaryBuiltIn             FUnaryBuiltIn.createEmptyNode();
+	public abstract FEventGenExp              FEventGenExp.createEmptyNode();
+	public abstract FBinEventGenExp           FBinEventGenExp.createEmptyNode();
 	public abstract FMathematicalFunctionCall FMathematicalFunctionCall.createEmptyNode();
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
@@ -910,11 +912,16 @@ aspect InheritedFactoryMethods {
 	// Built-in function calls and function call-like operators
 	public FNdimsExp       FNdimsExp.createEmptyNode()       { return new FNdimsExp();       }
 	public FSizeExp        FSizeExp.createEmptyNode()        { return new FSizeExp();        }
-	public FIntegerExp     FIntegerExp.createEmptyNode()     { return new FIntegerExp();     }
+	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
+	public FSignExp        FSignExp.createEmptyNode()        { return new FSignExp();        }
 	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
-	public FCeilExp        FCeilExp.createEmptyNode()        { return new FCeilExp();       }
-	public FFloorExp       FFloorExp.createEmptyNode()       { return new FFloorExp();       }
 	public FStringExp      FStringExp.createEmptyNode()      { return new FStringExp();      }
+	public FDivFuncExp     FDivFuncExp.createEmptyNode()     { return new FDivFuncExp();     }
+	public FModFuncExp     FModFuncExp.createEmptyNode()     { return new FModFuncExp();     }
+	public FRemFuncExp     FRemFuncExp.createEmptyNode()     { return new FRemFuncExp();     }
+	public FCeilFuncExp    FCeilFuncExp.createEmptyNode()    { return new FCeilFuncExp();    }
+	public FFloorFuncExp   FFloorFuncExp.createEmptyNode()   { return new FFloorFuncExp();   }
+	public FIntegerFuncExp FIntegerFuncExp.createEmptyNode() { return new FIntegerFuncExp(); }
 	public FScalarExp      FScalarExp.createEmptyNode()      { return new FScalarExp();      }
 	public FVectorExp      FVectorExp.createEmptyNode()      { return new FVectorExp();      }
 	public FMatrixExp      FMatrixExp.createEmptyNode()      { return new FMatrixExp();      }
@@ -931,8 +938,6 @@ aspect InheritedFactoryMethods {
 	public FMaxExp         FMaxExp.createEmptyNode()         { return new FMaxExp();         }
 	public FSumExp         FSumExp.createEmptyNode()         { return new FSumExp();         }
 	public FProductExp     FProductExp.createEmptyNode()     { return new FProductExp();     }
-	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
-	public FSignExp        FSignExp.createEmptyNode()        { return new FSignExp();        }
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
 	
@@ -987,6 +992,32 @@ aspect InheritedFactoryMethods {
 	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
 		FUnaryBuiltIn node = createEmptyNode();
 		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FEventGenExp FEventGenExp.createNode(FExp exp) {
+		FEventGenExp node = createEmptyNode();
+		node.setX(exp);
+		return node;
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FEventGenExp FBinEventGenExp.createNode(FExp exp) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FBinEventGenExp FBinEventGenExp.createNode(FExp x, FExp y) {
+		FBinEventGenExp node = createEmptyNode();
+		node.setX(x);
+		node.setY(y);
 		return node;
 	}
 	

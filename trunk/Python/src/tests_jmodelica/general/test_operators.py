@@ -18,6 +18,75 @@
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
 
+class TestDiv(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.DivTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_DivTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x', 'y'])
+
+class TestMod(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.ModTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_ModTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x', 'y'])
+
+class TestRem(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.RemTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_RemTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x', 'y'])
+
 class TestCeil(SimulationTest):
     """
     Basic test of Modelica operators.
@@ -31,7 +100,7 @@ class TestCeil(SimulationTest):
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
-        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_CeilTest_result.txt')
 
     @testattr(assimulo = True)
@@ -54,7 +123,7 @@ class TestFloor(SimulationTest):
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
-        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_FloorTest_result.txt')
 
     @testattr(assimulo = True)
@@ -77,7 +146,7 @@ class TestInteger(SimulationTest):
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
-        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_IntegerTest_result.txt')
 
     @testattr(assimulo = True)
@@ -100,7 +169,7 @@ class TestNested(SimulationTest):
     @testattr(assimulo = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
-        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.01})
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_NestedTest_result.txt')
 
     @testattr(assimulo = True)
@@ -122,7 +191,7 @@ class TestSign(SimulationTest):
 
     @testattr(assimulo = True)
     def setUp(self):
-        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.1)
         self.run()
 
     @testattr(assimulo = True)

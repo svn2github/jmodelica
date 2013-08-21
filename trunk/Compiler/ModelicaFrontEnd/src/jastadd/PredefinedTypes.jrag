@@ -282,9 +282,21 @@ aspect PredefinedTypes {
     		+ "  input Real x;\n"
     		+ "  output Real y;\n"
     		+ "end sqrt;\n"
-    		+ "function div end div;\n"
-    		+ "function mod end mod;\n"
-    		+ "function rem end rem;\n"
+    		+ "function div"
+    		+ "  input Real x1;\n"      // Type not used
+    		+ "  input Real x2;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end div;\n"
+    		+ "function mod"
+    		+ "  input Real x1;\n"      // Type not used
+    		+ "  input Real x2;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end mod;\n"
+    		+ "function rem"
+    		+ "  input Real x1;\n"      // Type not used
+    		+ "  input Real x2;\n"      // Type not used
+    		+ "  output Real y;\n"     // Type not used
+    		+ "end rem;\n"
     		+ "function floor"
     		+ "  input Real x;\n"      // Type not used
     		+ "  output Real y;\n"     // Type not used

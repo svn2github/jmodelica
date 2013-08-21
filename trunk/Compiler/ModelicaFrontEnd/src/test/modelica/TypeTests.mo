@@ -1087,6 +1087,183 @@ Semantic error at line 1120, column 2:
 ")})));
 end WhenType2;
 
+model DivTest1
+  Real aReal = 3;
+  Integer anInt = 3;
+  Real x    = div(aReal,aReal) + div(anInt,aReal) + div(aReal,anInt) + div(anInt,anInt);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DivTest1",
+			description="Testing output types of the div operator.",
+			flatModel="
+fclass TypeTests.DivTest1
+ constant Real aReal = 3;
+ constant Integer anInt = 3;
+ Real x;
+ discrete Integer temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+ discrete Real temp_4;
+initial equation 
+ temp_1 = div(anInt, anInt);
+ temp_2 = div(aReal, anInt);
+ temp_3 = div(anInt, aReal);
+ temp_4 = div(aReal, aReal);
+equation
+ x = temp_4 + temp_3 + temp_2 + temp_1;
+ when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+  temp_1 = 1;
+ end when;
+ when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+  temp_2 = 1.0;
+ end when;
+ when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+  temp_3 = 1.0;
+ end when;
+ when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+  temp_4 = 1.0;
+ end when;
+end TypeTests.DivTest1;
+")})));
+end DivTest1;
+
+model DivTest2
+  Real x    = div(1.,true) + div("hej",2.);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="DivTest2",
+			description="Testing wrong input types of the div operator.",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1107, column 22:
+  Calling function div(): types of positional argument 2 and input x2 are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1107, column 34:
+  Calling function div(): types of positional argument 1 and input x1 are not compatible
+")})));
+end DivTest2;
+
+model ModTest1
+  Real aReal = 3;
+  Integer anInt = 3;
+  Real x    = mod(aReal,aReal) + mod(anInt,aReal) + mod(aReal,anInt) + mod(anInt,anInt);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ModTest1",
+			description="Testing output types of the mod operator.",
+			flatModel="
+fclass TypeTests.ModTest1
+ constant Real aReal = 3;
+ constant Integer anInt = 3;
+ Real x;
+ discrete Integer temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+ discrete Real temp_4;
+initial equation 
+ temp_1 = integer(anInt / anInt);
+ temp_2 = floor(aReal / anInt);
+ temp_3 = floor(anInt / aReal);
+ temp_4 = floor(aReal / aReal);
+equation
+ x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
+ when {anInt / anInt < pre(temp_1), anInt / anInt >= pre(temp_1) + 1} then
+  temp_1 = 1;
+ end when;
+ when {aReal / anInt < pre(temp_2), aReal / anInt >= pre(temp_2) + 1} then
+  temp_2 = 1.0;
+ end when;
+ when {anInt / aReal < pre(temp_3), anInt / aReal >= pre(temp_3) + 1} then
+  temp_3 = 1.0;
+ end when;
+ when {aReal / aReal < pre(temp_4), aReal / aReal >= pre(temp_4) + 1} then
+  temp_4 = 1.0;
+ end when;
+end TypeTests.ModTest1;
+")})));
+end ModTest1;
+
+model ModTest2
+  Real x    = mod(1.,true) + mod("hej",2.);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ModTest2",
+			description="Testing wrong input types of the mod operator.",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1141, column 22:
+  Calling function mod(): types of positional argument 2 and input x2 are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1141, column 34:
+  Calling function mod(): types of positional argument 1 and input x1 are not compatible
+")})));
+end ModTest2;
+
+model RemTest1
+  Real aReal = 3;
+  Integer anInt = 3;
+  Real x    = rem(aReal,aReal) + rem(anInt,aReal) + rem(aReal,anInt) + rem(anInt,anInt);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RemTest1",
+			description="Testing output types of the rem operator.",
+			flatModel="
+fclass TypeTests.RemTest1
+ constant Real aReal = 3;
+ constant Integer anInt = 3;
+ Real x;
+ discrete Integer temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+ discrete Real temp_4;
+initial equation 
+ temp_1 = div(anInt, anInt);
+ temp_2 = div(aReal, anInt);
+ temp_3 = div(anInt, aReal);
+ temp_4 = div(aReal, aReal);
+equation
+ x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
+ when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+  temp_1 = 1;
+ end when;
+ when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+  temp_2 = 1.0;
+ end when;
+ when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+  temp_3 = 1.0;
+ end when;
+ when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+  temp_4 = 1.0;
+ end when;
+end TypeTests.RemTest1;
+")})));
+end RemTest1;
+
+model RemTest2
+  Real x    = rem(1.,true) + rem("hej",2.);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RemTest2",
+			description="Testing wrong input types of the rem operator.",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1175, column 22:
+  Calling function rem(): types of positional argument 2 and input x2 are not compatible
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1175, column 34:
+  Calling function rem(): types of positional argument 1 and input x1 are not compatible
+")})));
+end RemTest2;
+
 model PreTest1
 	Real x (start=3);
         Real y;

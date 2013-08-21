@@ -6160,23 +6160,26 @@ aspect EventGeneratingExps {
 	 * Extracts event generating expressions into when equations.
 	 * Replaces the exp with a temp var, introduces an intial equation
 	 * and a when equation for the temp var.
+	 * 
+	 * After this step, event generating expressions with higher than 
+	 * parameter variability are only allowed in discrete locations.
 	 */
 	public void FClass.extractEventGeneratingExps() {
 
-		ArrayList<FEventGeneratingExp> eventExps = collectEventGeneratingExps();
+		ArrayList<FEventGenExp> eventExps = collectEventGeneratingExps();
 		Collections.reverse(eventExps);
 		
 		// Calculating type() needs to be done before expressions are changed
 		// in case of nested event generating expressions.
 		ArrayList<FVariable> tempVars = new ArrayList<FVariable>();
-		for (FEventGeneratingExp exp: eventExps) {
+		for (FEventGenExp exp: eventExps) {
 			FVariable tempVar = exp.type().createTempFVariable(
 					new FQNameFull(exp.tempVarName()), FTypePrefixVariability.fDiscrete());
 			tempVars.add(tempVar);
 		}
 		
 		for (int i = 0; i < eventExps.size(); i++) {
-			FEventGeneratingExp exp = eventExps.get(i);
+			FEventGenExp exp = eventExps.get(i);
 			FVariable tempVar = tempVars.get(i);
 			
 			addFVariable(tempVar);
@@ -6195,28 +6198,42 @@ aspect EventGeneratingExps {
 	/**
 	 * Collects event generating expressions.
 	 */
-	coll ArrayList<FEventGeneratingExp> FClass.collectEventGeneratingExps() 
-		[new ArrayList<FEventGeneratingExp>()] with add root FClass;
-	FEventGeneratingExp contributes this
-		when inEquationSection() && !inDiscreteLocation() && !getFExp().variability().parameterOrLess() 
+	coll ArrayList<FEventGenExp> FClass.collectEventGeneratingExps() 
+		[new ArrayList<FEventGenExp>()] with add root FClass;
+	FEventGenExp contributes this
+		when inEquationSection() && !inDiscreteLocation() && !inNoEventExp() && !getX().variability().parameterOrLess() 
 		to FClass.collectEventGeneratingExps()
 		for myFClass();
 	
 	/**
 	 * Creates a guard expression for an event generating expression
-	 * extracted to a when equation.
+	 * extracted to a when equation. (Integer inherits from floor.)
 	 */
-	syn FExp FEventGeneratingExp.createGuardExp(FVariable var);
-	eq FFloorExp.createGuardExp(FVariable var) {
+	syn FExp FEventGenExp.createGuardExp(FVariable var);
+	eq FFloorFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(getFExp().fullCopy(), new FPreExp(var.createUseExp())));
-		guards.addFExp(new FGeqExp(getFExp().fullCopy(), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FLtExp(getX().fullCopy(), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FGeqExp(getX().fullCopy(), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
 		return guards;
 	}
-	eq FCeilExp.createGuardExp(FVariable var) {
+	eq FCeilFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLeqExp(getFExp().fullCopy(), new FSubExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
-		guards.addFExp(new FGtExp(getFExp().fullCopy(), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FLeqExp(getX().fullCopy(), new FSubExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FGtExp(getX().fullCopy(), new FPreExp(var.createUseExp())));
 		return guards;
+	}
+	eq FDivFuncExp.createGuardExp(FVariable var) {
+		FArray guards = new FArray();
+		guards.addFExp(new FLtExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FGeqExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		return guards;
+	} 
+	
+	// These two are rewritten to floor and div containing expressions during flattening.
+	eq FModFuncExp.createGuardExp(FVariable var) {
+		throw new UnsupportedOperationException();
+	}
+	eq FRemFuncExp.createGuardExp(FVariable var) {
+		throw new UnsupportedOperationException();
 	}
 }

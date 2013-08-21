@@ -5579,67 +5579,6 @@ end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;
 
-
-model M_OLineExample
-	extends Modelica.Electrical.Analog.Lines.M_OLine;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Other_M_OLineExample",
-			description="Test example that caused infinite loop",
-			errorMessage="
-16 errors found:
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Basic.mo':
-Semantic error at line 610, column 43:
-  Could not evaluate array size expression: dimL
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 161, column 22:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 163, column 26:
-  Array size mismatch in declaration of l, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 166, column 22:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 168, column 26:
-  Array size mismatch in declaration of g, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 171, column 22:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 173, column 26:
-  Array size mismatch in declaration of c, size of declaration is [dim_vector_lgc] and size of binding expression is [10]
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 203, column 25:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 206, column 25:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 208, column 25:
-  Could not evaluate array size expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 272, column 38:
-  Could not evaluate array index expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 273, column 17:
-  Could not evaluate array index expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 274, column 38:
-  Could not evaluate array index expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 275, column 17:
-  Could not evaluate array index expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 288, column 29:
-  Could not evaluate array index expression: dim_vector_lgc
-Error: in file 'C:\\Users\\jesper_026\\workspace\\JModelica\\ThirdParty\\MSL\\Modelica\\Electrical\\Analog\\Lines.mo':
-Semantic error at line 310, column 25:
-  Could not evaluate array size expression: dim_vector_lgc
-")})));
-end M_OLineExample;
-
 end Other;
 
 

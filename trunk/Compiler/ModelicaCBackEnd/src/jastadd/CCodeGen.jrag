@@ -1222,18 +1222,29 @@ aspect CCodeGen {
 	public void FTerminalExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("JMI_FALSE");
 	}
+	
+	public void FDivFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		if (inFunction()) {
+			str.print("(int) jmi_divide(");
+		} else {
+			str.print("(int) jmi_divide_logged(jmi, ");
+		}
+		p.print(getX(),str,indent);
+		str.print(","); 
+		p.print(getY(),str,indent);
+		str.print(","); 
+		str.print("\"Divide by zero: "+prettyPrint("")+"\")");
+	}
 
-	public void FCeilExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		// Does not work for JMU - we generate an error in the JMU case
+	public void FCeilFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("ceil(");
-		p.print(getFExp(), str, indent);
+		p.print(getX(), str, indent);
 		str.print(")");
 	}
 	
-	public void FFloorExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		// Does not work for JMU - we generate an error in the JMU case
+	public void FFloorFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("floor(");
-		p.print(getFExp(), str, indent);
+		p.print(getX(), str, indent);
 		str.print(")");
 	}
 	

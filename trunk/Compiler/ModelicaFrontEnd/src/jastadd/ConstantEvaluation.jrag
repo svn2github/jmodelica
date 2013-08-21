@@ -1281,9 +1281,14 @@ aspect ConstantEvaluation {
 	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
   }
   
-  eq FCeilExp.cevalCalc()        = new CValueInteger((int) Math.ceil(getFExp().ceval().realValue()));
-  eq FFloorExp.cevalCalc()       = getFExp().ceval().convertInteger();
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
+  
+  eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
+  eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
+  eq FRemFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().truncToZero(type().div(getX().ceval(), getY().ceval())), getY().ceval()));
+  eq FCeilFuncExp.cevalCalc()        = type().ceil(getX().ceval());  
+  eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
+  eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
   
   eq FStringExp.cevalCalc() {
 	  // TODO: support format args
@@ -2741,6 +2746,32 @@ aspect ConstantEvaluation {
 	  new CValueReal(Math.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
 	  new CValueInteger((int) Math.signum(v.intValue()));
+  
+  /**
+   * \brief Ceil expression for constant values.
+   * 
+   * @param v Constant value of operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.ceil(CValue v) = 
+	  CValue.UNKNOWN;
+  eq FRealType.ceil(CValue v) = 
+	  new CValueReal(Math.ceil(v.realValue()));
+  eq FIntegerType.ceil(CValue v) = 
+	  new CValueInteger((int) Math.ceil(v.realValue()));
+
+  /**
+   * \brief Truncation to zero for constant values.
+   * 
+   * @param v Constant value of operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.truncToZero(CValue v) = 
+	  CValue.UNKNOWN;
+  eq FRealType.truncToZero(CValue v) = 
+	  v.realValue() < 0 ? ceil(v) : v.convertInteger().convertReal();
+  eq FIntegerType.truncToZero(CValue v) = 
+	  v.realValue() < 0 ? ceil(v) : v.convertInteger();
 
   /**
    * \brief And expression for constant values.

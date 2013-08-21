@@ -220,6 +220,7 @@ aspect Arrays {
 	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
 	
 	eq FUnaryBuiltIn.ndims() = getFExp().ndims();
+	eq FEventGenExp.ndims()  = getX().ndims();
 	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -744,7 +745,7 @@ aspect Arrays {
  			FExp exp = new FSubExp(stop, start);
  			if (hasStep())
  				exp = new FDivExp(exp, step);
- 			exp = new FAddExp(new FIntegerExp(exp), new FIntegerLitExp(1));
+ 			exp = new FAddExp(new FIntegerFuncExp(exp), new FIntegerLitExp(1));
  			exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
  			s.append(dynamicFExp(exp));
 		}
@@ -916,6 +917,7 @@ aspect Arrays {
 	
 	eq FUnaryBuiltIn.size()     = getFExp().size();
 	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
+	eq FEventGenExp.size()      = getX().size();
 	
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
@@ -1673,6 +1675,29 @@ aspect Arrays {
 		Array inner = getFExp().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner.get(i)));
+		return arr;
+	}
+	
+	eq FEventGenExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner = getX().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner.get(i)));
+		return arr;
+	}
+	
+	eq FBinEventGenExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner1 = getX().getArray();
+		Array inner2 = getY().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
 		return arr;
 	}
 	

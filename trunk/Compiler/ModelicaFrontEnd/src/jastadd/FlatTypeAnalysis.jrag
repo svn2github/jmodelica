@@ -332,11 +332,13 @@ aspect FlatTypeAnalysis {
 			return fUnknownType();
 		return fRealArrayType(size());
 	}
-	
-	eq FIntegerExp.type()     = getFExp().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
+
 	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
 	eq FStringExp.type()      = fStringScalarType();
-	eq FFloorExp.type()       = getFExp().type().isNumericScalar() ? fRealScalarType() : fUnknownType();
+	
+	eq FEventGenExp.type()    = getX().type().isNumericScalar() ? fRealScalarType() : fUnknownType();
+	eq FIntegerFuncExp.type() = getX().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
+	eq FBinEventGenExp.type() = getX().type().isRealScalar() || getY().type().isRealScalar() ? fRealScalarType() : fIntegerScalarType(); 
 	
 	syn FType FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() {
