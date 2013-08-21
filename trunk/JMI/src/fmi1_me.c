@@ -110,7 +110,8 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     component -> jmi = jmi;
     
     /* set start values*/
-    jmi_set_start_values(component -> jmi);
+    if (jmi_generic_func(component->jmi, jmi_set_start_values) != 0)
+    	return NULL;
     
     /* Log the build date and time of the JMI runtime.
        This should be replaced with the JModelica version,
