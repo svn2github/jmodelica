@@ -4174,26 +4174,73 @@ fclass RecordTests.RecordMerge1
  Real r2.x;
  Real r2.y;
 equation
- (RecordTests.RecordMerge1.R1(r2.x, r2.y)) = RecordTests.RecordMerge1.F(RecordTests.RecordMerge1.R1(1, 2));
+ (RecordTests.RecordMerge1.R2(r2.x, r2.y)) = RecordTests.RecordMerge1.F(RecordTests.RecordMerge1.R2(1, 2));
 
 public
  function RecordTests.RecordMerge1.F
-  input RecordTests.RecordMerge1.R1 rin;
-  output RecordTests.RecordMerge1.R1 rout;
+  input RecordTests.RecordMerge1.R2 rin;
+  output RecordTests.RecordMerge1.R2 rout;
  algorithm
   rout.x := rin.x;
   rout.y := rin.y;
   return;
  end RecordTests.RecordMerge1.F;
 
- record RecordTests.RecordMerge1.R1
+ record RecordTests.RecordMerge1.R2
   Real x;
   Real y;
- end RecordTests.RecordMerge1.R1;
+ end RecordTests.RecordMerge1.R2;
 
 end RecordTests.RecordMerge1;
 ")})));
 end RecordMerge1;
+
+
+model RecordMerge2
+    record C
+        Real a;
+    end C;
+    
+    record B
+        C b;
+        Real c;
+    end B;
+    
+    record A
+        Real a;
+    end A;
+    
+    B b = B(C(time), time + 1);
+    C c = A(time);
+    
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordMerge2",
+			description="",
+			flatModel="
+fclass RecordTests.RecordMerge2
+ Real b.b.a;
+ Real b.c;
+ Real c.a;
+equation
+ b.b.a = time;
+ b.c = time + 1;
+ c.a = time;
+
+public
+ record RecordTests.RecordMerge2.C
+  Real a;
+ end RecordTests.RecordMerge2.C;
+
+ record RecordTests.RecordMerge2.B
+  RecordTests.RecordMerge2.C b;
+  Real c;
+ end RecordTests.RecordMerge2.B;
+
+end RecordTests.RecordMerge2;
+")})));
+end RecordMerge2;
 
 
 model RecordEval1

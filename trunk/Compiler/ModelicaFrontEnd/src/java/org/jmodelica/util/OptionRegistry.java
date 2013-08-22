@@ -656,10 +656,10 @@ public class OptionRegistry {
 		String best = null;
 		int bestScore = 0;
 		for (String name : optionsMap.keySet()) {
-			int score = 0;
+			int score = -name.split("_").length;
 			for (String part : parts)
 				if (name.contains(part))
-					score++;
+					score += 1000 + part.length() * 10;
 			if (score > bestScore) {
 				best = name;
 				bestScore = score;

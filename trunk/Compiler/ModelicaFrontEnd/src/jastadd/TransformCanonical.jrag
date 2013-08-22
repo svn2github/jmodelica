@@ -3618,11 +3618,6 @@ aspect TransformCanonical {
 				if (type.typeCompatible(distinctTypes.get(i))) {
 					found = true;
 					rec.equivalentRecordGroup = i;
-					if (rec.name().compareTo(keptDecl.get(i).name()) < 0) {
-						keptDecl.get(i).equivalentRecordToKeep = false;
-						rec.equivalentRecordToKeep = true;
-						keptDecl.set(i, rec);
-					}
 				}
 			}
 			if (!found) {
