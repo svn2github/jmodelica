@@ -715,7 +715,7 @@ typedef struct jmi_options_t {
     int use_jacobian_equilibration_flag;  /**< \brief If jacobian equlibration should be used in equation block solvers */
     
     jmi_residual_equation_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
-    jmi_iteration_var_scaling_mode_t iteration_variable_scaling_mode; /**< \brief Iteration variables scaling mode in equation block solvers:
+    int iteration_variable_scaling_mode; /**< \brief Iteration variables scaling mode in equation block solvers:
             0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc. */
     int block_solver_experimental_mode; /**< \brief  Activate experimental features of equation block solvers */
     int nle_solver_max_iter; /**< \brief Maximum number of iterations for the equation block solver before failure */

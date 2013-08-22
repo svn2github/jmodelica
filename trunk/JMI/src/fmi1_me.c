@@ -1739,6 +1739,10 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_block_solver_experimental_mode");
     if(index)
         op->block_solver_experimental_mode  = (int)z[index];
+        
+    index = get_option_index("_iteration_variable_scaling");
+    if(index)
+        op->iteration_variable_scaling_mode = (int)z[index];
     
     index = get_option_index("_rescale_each_step");
     if(index)

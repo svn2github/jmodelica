@@ -72,7 +72,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->jac = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
-	b->ipiv = (int*)calloc(2*n+1,sizeof(int));
+    b->ipiv = (int*)calloc(2*n+1,sizeof(int));
     b->init = 1;
       
     b->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -165,7 +165,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         for (i=0;i<block->n;i++) {
             block->value_references[i] = (int)real_vrs[i];
         }
-
+        
+        
         /* if the nominal is outside min-max -> fix it! */
         for(i=0; i < block->n; ++i) {
             realtype maxi = block->max[i];
@@ -175,9 +176,15 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             booleantype hasSpecificMax = (maxi != BIG_REAL);
             booleantype hasSpecificMin = (mini != -BIG_REAL);
             booleantype nominalOk = TRUE;
-            if((nomi > maxi) || (nomi < mini) || (nomi == BIG_REAL))
-                nominalOk = FALSE;
-
+            
+            if(nomi == BIG_REAL) {
+                nominalOk = FALSE; /* no nominal set and heuristics is activated */
+            } else if((nomi > maxi) || (nomi < mini)) { /* nominal outside min-max */
+                jmi_log_node(block->jmi->log, logWarning, "Warning",
+                    "Nominal value is outside min-max range for the iteration variable."
+                    , block->index, i);
+            }
+            
             if(!nominalOk) {
                 /* fix the nominal value to be inside the allowed range */
                 if((initi > mini) && (initi < maxi) && (initi != 0.0)) {
@@ -218,7 +225,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         free(real_vrs);
         /*        block->F(block->jmi,block->x, block->res, JMI_BLOCK_EVALUATE); */
     }
-        
+    
     /*
      * A proper local even iteration should problably be done here.
      * Right now event handling at top level will iterate.
