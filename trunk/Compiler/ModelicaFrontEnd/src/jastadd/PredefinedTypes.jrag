@@ -321,7 +321,6 @@ aspect PredefinedTypes {
     		+ "function delay end delay;\n"
     		+ "function cardinality end cardinality;\n"
     		+ "function isPresent end isPresent;\n"
-    		+ "function semiLinear end semiLinear;\n"
     		+ "function promote end promote;\n"
     		+ "function ndims\n"
     		+ "  input Real A;\n"      // Type not used
@@ -406,6 +405,12 @@ aspect PredefinedTypes {
     		+ "  input Real x[3];\n"
     		+ "  output Real y[3,3];\n"   // Type not used
     		+ "end skew;\n"
+    		+ "function semiLinear\n"
+    		+ "  input Real v1;\n"     // Type not used
+    		+ "  input Real v2;\n"     // Type not used
+    		+ "  input Real v3;\n"     // Type not used
+    		+ "  output Real o;\n"     // Type not used
+    		+ "end semiLinear;\n"
     		+ "function inStream\n"
     		+ "  input Real v;\n"      // Type not used
     		+ "  output Real o;\n"     // Type not used

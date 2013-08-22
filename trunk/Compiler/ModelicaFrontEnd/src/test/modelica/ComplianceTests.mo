@@ -206,7 +206,6 @@ model UnsupportedBuiltins2_ComplErr
   String();
   delay(1);
   cardinality();
-  semiLinear();
   reinit(1);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -225,9 +224,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 219, column 3:
   The cardinality() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 280, column 3:
-  The semiLinear() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported
 ")})));
@@ -244,6 +240,7 @@ model UnsupportedBuiltins3_ComplErr
   ceil(1);
   floor(1);
   integer(1);
+  semiLinear(1,1,1);
   initial();
   sample(1,1);
   pre(x);
@@ -280,6 +277,9 @@ Compliance error at line 280, column 3:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 289, column 3:
   The integer() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 280, column 3:
+  The semiLinear() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 281, column 3:
   The initial() function-like operator is currently only supported when compiling FMUs

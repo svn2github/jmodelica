@@ -1,5 +1,12 @@
 package OperatorTests "Some tests for operators" 
 
+model SemiLinearTest
+  Real x,y;
+equation
+  x = time*time - 1;
+  y = semiLinear(x,3,-5);
+end SemiLinearTest;
+
 model DivTest
   Real x;
   Real y;

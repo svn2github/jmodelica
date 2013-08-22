@@ -696,6 +696,7 @@ aspect FlatTypeCheck {
   eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FReductionExp.getChild().argumentDefinedTypeValid()                 = false;
+  eq FSemiLinearExp.getChild().argumentDefinedTypeValid()                = false;
   eq FNdimsExp.getChild().argumentDefinedTypeValid()                     = false;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
   eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()               = false;
@@ -719,6 +720,7 @@ aspect FlatTypeCheck {
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
   eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
   eq FReductionExp.getChild().argumentTypeValid(FType type)         = type.ndims() > 0 && type.hasAdd();
+  eq FSemiLinearExp.getChild().argumentTypeValid(FType type)        = type.isNumeric();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnumScalar();
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
   eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;

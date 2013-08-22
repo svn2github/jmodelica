@@ -1549,6 +1549,11 @@ FSumExp : FReductionExp;
 FProductExp : FReductionExp;
 
 /**
+ * \brief SemiLinear built-in function.
+ */
+FSemiLinearExp : FBuiltInFunctionCall ::= X:FExp PosSlope:FExp NegSlope:FExp;
+
+/**
  * \brief Common base class for FInStream & FActualStream
  */
 abstract FStreamBuiltIn : FVectUnaryBuiltIn;

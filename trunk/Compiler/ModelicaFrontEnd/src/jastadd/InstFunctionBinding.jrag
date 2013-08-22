@@ -289,6 +289,7 @@ aspect InstFunctionBinding {
 				map.put("rem",          new BuiltInCreator(false, new FRemFuncExp(),     2));
 				map.put("ceil",         new BuiltInCreator(false, new FCeilFuncExp(),    1));
 				map.put("floor",        new BuiltInCreator(false, new FFloorFuncExp(),   1));
+				map.put("semiLinear",   new BuiltInCreator(false, new FSemiLinearExp(),  3));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
 				//       name                                         node           # fixed args
@@ -316,7 +317,7 @@ aspect InstFunctionBinding {
 						// Ticket 678: Support for array related functions
 						"symmetric", 
 						// Ticket 664: Support all function-like operators
-						"delay", "cardinality", "semiLinear", "reinit"
+						"delay", "cardinality", "reinit"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))

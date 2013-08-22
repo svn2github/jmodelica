@@ -90,6 +90,7 @@ aspect TransformCanonical {
 		enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		variabilityPropagationIfSet();
+		enableSemiLinearRewrite();
 		genInitialEquations();
 		sortDependentParameters();
 		addRuntimeOptionParameters();
@@ -6234,4 +6235,65 @@ aspect EventGeneratingExps {
 	eq FRemFuncExp.createGuardExp(FVariable var) {
 		throw new UnsupportedOperationException();
 	}
+}
+
+aspect SemiLinear {
+	public void FClass.enableSemiLinearRewrite() {
+
+		// Transform equations 0 = semiLinear(0,x,y) into x = y;
+		for (FAbstractEquation equation : getFEquationBlock(0).getFAbstractEquations()) {
+			equation.enableSemiLinearRewrite();
+		}
+		
+		// TODO: Rewrite chained semiLinear equations
+		
+		// Change remaining semiLinear exps to if exps. 
+		HashSet<FSemiLinearExp> exps = collectSemiLinearExps();
+		for (FSemiLinearExp exp: exps) {
+			FExp ifExp = exp.asIfExp();
+			exp.replaceMe(ifExp);
+		}
+	}
+	
+	public void FAbstractEquation.enableSemiLinearRewrite() {}
+	public void FEquation.enableSemiLinearRewrite() {
+		FExp left;
+		FSemiLinearExp right;
+		
+		if (!getLeft().isSemiLinear() && !getRight().isSemiLinear())
+			return;
+		
+		if (getLeft().isSemiLinear()) {
+			right = (FSemiLinearExp) getLeft();
+			left = getRight();
+		} else {
+			left = getLeft();
+			right = (FSemiLinearExp) getRight();
+		}
+		
+		if (left.isZeroLiteral() && right.getX().isZeroLiteral()) {
+			setLeft(right.getPosSlope());
+			setRight(right.getNegSlope());
+		}
+	}
+	
+	syn boolean FExp.isSemiLinear() = false;
+	eq FSemiLinearExp.isSemiLinear() = true;
+	
+	syn FExp FSemiLinearExp.asIfExp() {
+		FIfExp exp = new FIfExp(new FGeqExp(getX(), new FRealLitExp(0)),
+			new FMulExp(getX(),getPosSlope()),
+			new FMulExp(getX(),getNegSlope()));
+		return exp;
+	}
+	
+	/**
+	 * Collects semiLinear expressions.
+	 */
+	coll HashSet<FSemiLinearExp> FClass.collectSemiLinearExps() 
+		[new HashSet<FSemiLinearExp>()] with add root FClass;
+	FSemiLinearExp contributes this
+		when inEquationSection()
+		to FClass.collectSemiLinearExps()
+		for myFClass();
 }

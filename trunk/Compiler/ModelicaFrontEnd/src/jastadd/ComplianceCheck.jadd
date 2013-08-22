@@ -101,6 +101,10 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The " + name() + "() function-like operator is");
 	}
 	
+	public void FSemiLinearExp.complianceCheck() {
+		complianceOnlyFMU("The semiLinear() function-like operator is");
+	}
+	
 	public void FIgnoredBuiltIn.complianceCheck() {
 		warning("The " + getName() + 
 				"() function-like operator is not supported, and is currently ignored");

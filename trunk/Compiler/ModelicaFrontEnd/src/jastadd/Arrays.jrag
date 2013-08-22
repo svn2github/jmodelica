@@ -222,6 +222,8 @@ aspect Arrays {
 	eq FUnaryBuiltIn.ndims() = getFExp().ndims();
 	eq FEventGenExp.ndims()  = getX().ndims();
 	
+	eq FSemiLinearExp.ndims()  = getX().ndims();
+	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
 	
@@ -918,6 +920,7 @@ aspect Arrays {
 	eq FUnaryBuiltIn.size()     = getFExp().size();
 	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
 	eq FEventGenExp.size()      = getX().size();
+	eq FSemiLinearExp.size()    = getX().size();
 	
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
@@ -1698,6 +1701,19 @@ aspect Arrays {
 		Array inner2 = getY().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
+		return arr;
+	}
+	
+	eq FSemiLinearExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner1 = getX().getArray();
+		Array inner2 = getPosSlope().getArray();
+		Array inner3 = getNegSlope().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner1.get(i), inner2.get(i), inner3.get(i)));
 		return arr;
 	}
 	

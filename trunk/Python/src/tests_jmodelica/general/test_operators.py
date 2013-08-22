@@ -18,6 +18,29 @@
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
 
+class TestSemiLinear(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.SemiLinearTest')
+
+    @testattr(assimulo = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
+        self.run()
+        self.load_expected_data('OperatorTests_SemiLinearTest_result.txt')
+
+    @testattr(assimulo = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['x', 'y'])
+
 class TestDiv(SimulationTest):
     """
     Basic test of Modelica operators.

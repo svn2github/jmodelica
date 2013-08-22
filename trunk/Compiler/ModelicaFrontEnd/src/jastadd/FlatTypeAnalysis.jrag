@@ -340,6 +340,8 @@ aspect FlatTypeAnalysis {
 	eq FIntegerFuncExp.type() = getX().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
 	eq FBinEventGenExp.type() = getX().type().isRealScalar() || getY().type().isRealScalar() ? fRealScalarType() : fIntegerScalarType(); 
 	
+	eq FSemiLinearExp.type()  = fRealType(size());
+	
 	syn FType FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() {
 		FRecordType res = getRecord().recordType().fullCopy();

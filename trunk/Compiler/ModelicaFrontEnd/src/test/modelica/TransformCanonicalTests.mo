@@ -5352,4 +5352,64 @@ end InWhenEquations;
 
 end EventGeneratingExps;
 
+model SemiLinear1
+  Real x = semiLinear(sin(time*10),2,-10);
+  Real y = semiLinear(1,2,3);
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="SemiLinear1",
+      description="Basic test of the semiLinear() operator.",
+      flatModel="
+fclass TransformCanonicalTests.SemiLinear1
+  Real x;
+  constant Real y = 2.0;
+equation
+  x = if sin(time*10) >= 0.0 then sin(time*10) * 2 else sin(time*10) * -10;
+end TransformCanonicalTests.SemiLinear1;
+")})));
+end SemiLinear1;
+
+model SemiLinear2
+  Real x[2] = semiLinear({sin(time*10),1},{2,2},{-10,3});
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="SemiLinear2",
+      description="Basic test of the semiLinear() operator.",
+      flatModel="
+fclass TransformCanonicalTests.SemiLinear2
+  Real x[1];
+  constant Real x[2] = 2.0;
+equation
+  x[1] = if sin(time*10) >= 0.0 then sin(time*10) * 2 else sin(time*10) * -10;
+end TransformCanonicalTests.SemiLinear2;
+")})));
+end SemiLinear2;
+
+model SemiLinear3
+  Real x = 0;
+  Real y = 0;
+  Real sa,sb;
+equation
+  sa = time;
+  y = semiLinear(x,sa,sb);
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="SemiLinear3",
+      description="Test of the semiLinear() operator.",
+      flatModel="
+fclass TransformCanonicalTests.SemiLinear3
+  constant Real x = 0;
+  constant Real y = 0;
+  Real sa;
+  Real sb;
+equation
+  sa = time;
+  sa = sb;
+end TransformCanonicalTests.SemiLinear3;
+")})));
+end SemiLinear3;
+
 end TransformCanonicalTests;

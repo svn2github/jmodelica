@@ -1263,9 +1263,11 @@ aspect ConstantEvaluation {
   eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
   
   eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
+  eq FSemiLinearExp.cevalCalc() = type().mul(getX().ceval(),cevalSelectExp().ceval());
   
   syn FExp FIfExp.cevalSelectExp() =
 	  getIfExp().ceval().booleanValue() ? getThenExp() : getElseExp();
+  syn FExp FSemiLinearExp.cevalSelectExp() = type().geq(getX().ceval(), type().zeroCValue()).booleanValue() ? getPosSlope() : getNegSlope();
   
   eq FRecordConstructor.cevalCalc() {
 	  CValueRecord res = new CValueRecord((FRecordType) type());
