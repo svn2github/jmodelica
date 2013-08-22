@@ -53,8 +53,9 @@ def gather_solves(log):
 
                 block_index = block_solve.block
 
-                block_solve['initial_residual_scaling'] = scalings[block_index]
-                block_solve['initial_residual_scaling_updated'] = scalings_updated[block_index]
+                if block_index in scalings:
+                    block_solve['initial_residual_scaling'] = scalings[block_index]
+                    block_solve['initial_residual_scaling_updated'] = scalings_updated[block_index]
                 scalings_updated[block_index] = False
 
                 for it_node in block_solve.find(('KinsolInfo', 'JacobianUpdated', 'ScalingUpdated')):
