@@ -1705,4 +1705,5 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->cs_solver = JMI_ODE_CVODE; /** < \brief Option for changing the internal CS solver. */
     op->cs_rel_tol = 1e-6;         /** < \brief Default tolerance for the adaptive solvers in the CS case. */
     op->cs_step_size = 1e-3;       /** < \brief Default step-size for the non-adaptive solvers in the CS case. */   
+    op->runtime_log_to_file = 0;   /** < \brief Write the runtime log directly to a file as well? */
 }

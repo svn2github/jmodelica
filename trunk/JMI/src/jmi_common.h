@@ -735,6 +735,8 @@ typedef struct jmi_options_t {
     int cs_solver; /**< \brief Option for changing the internal CS solver */
     double cs_rel_tol; /** < \brief Default tolerance for the adaptive solvers in the CS case. */
     double cs_step_size; /** < \brief Default step-size for the non-adaptive solvers in the CS case. */   
+    
+    int runtime_log_to_file; /** < \brief Write the runtime log directly to a file as well? */
 } jmi_options_t;
 
 /**< \brief Initialize run-time options. */

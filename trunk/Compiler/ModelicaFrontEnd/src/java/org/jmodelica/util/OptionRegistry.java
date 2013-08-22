@@ -449,6 +449,12 @@ public class OptionRegistry {
               runtime,
              1e-3,
              "Default step-size for the non-adaptive solvers in the CS case."),
+        RUNTIME_LOG_TO_FILE
+            ("runtime_log_to_file",
+            runtime,
+            false,
+            "Enable to write log messages from the runtime directly to a file, besides passing it to the FMU loader (e.g. FMIL). " +
+            "The log file name is generated based on the FMU name."),
 		;
 					
 		public String key;

@@ -5088,6 +5088,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Boolean _rescale_after_singular_jac = true /* true */;
  parameter Boolean _rescale_each_step = false /* false */;
  parameter Integer _residual_equation_scaling = 1 /* 1 */;
+ parameter Boolean _runtime_log_to_file = false /* false */;
  parameter Boolean _use_Brent_in_1d = false /* false */;
  parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_equilibration = false /* false */;

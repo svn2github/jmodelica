@@ -1782,6 +1782,9 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_cs_step_size");
     if(index)
         op->cs_step_size = z[index]; 
+    index = get_option_index("_runtime_log_to_file");
+    if(index)
+        op->runtime_log_to_file = (int)z[index]; 
     
 /*    op->block_solver_experimental_mode = 
             jmi_block_solver_experimental_steepest_descent_first|
