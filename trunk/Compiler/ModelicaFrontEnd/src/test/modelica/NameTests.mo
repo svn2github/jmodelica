@@ -3349,5 +3349,56 @@ model AssignedInWhenRecursion
     B b[n];
 end AssignedInWhenRecursion;
 
+model WhenInExtendsTest
+	model A	
+		Real x;
+		Real y;
+		Integer i;
+		parameter Boolean b = false;
+	equation
+		i = 1;
+		when initial() then
+			if b then
+				y = 2 + i;
+			else
+				y = 4;
+			end if;
+		end when;
+		when time>=3 then
+	  		x = 3;
+		end when;
+	end A;
+	
+	model B
+		extends A;
+	end B;
+	
+	B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="WhenInExtendsTest",
+			description="",
+			flatModel="
+fclass NameTests.WhenInExtendsTest
+ discrete Real b.x;
+ discrete Real b.y;
+ discrete Integer b.i;
+ parameter Boolean b.b = false /* false */;
+equation
+ b.i = 1;
+ when initial() then
+  if false then
+   b.y = 2 + b.i;
+  else
+   b.y = 4;
+  end if;
+ end when;
+ when time >= 3 then
+  b.x = 3;
+ end when;
+end NameTests.WhenInExtendsTest;
+")})));
+end WhenInExtendsTest;
 
 end NameTests;
