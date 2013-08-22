@@ -1009,11 +1009,13 @@ aspect OverconstrainedConnections {
 			
 			// Create trees
 			for (Node root : selected) {
-				Queue<Node> work = new ArrayDeque<Node>();
-				work.add(root);
-				root.level = 0;
-				for (Node n = work.poll(); n != null; n = work.poll()) {
-					n.buildTree(work, csm);
+				if (!root.visited) {
+					Queue<Node> work = new ArrayDeque<Node>();
+					work.add(root);
+					root.level = 0;
+					root.visited = true;
+					for (Node n = work.poll(); n != null; n = work.poll()) 
+						n.buildTree(work, csm);
 				}
 			}
 			

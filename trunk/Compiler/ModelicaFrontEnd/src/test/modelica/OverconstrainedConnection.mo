@@ -221,7 +221,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="OverconstrainedCorrect5",
-			description="Simple root selection and isRoot()",
+			description="Simple root selection and isRoot(), unbreakable branch",
 			flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect5
  OverconstrainedConnection.T1 c1.t[2];
@@ -246,12 +246,12 @@ connector C1
     Real x;
 	flow Real y;
 end C1;
-		C1 c1;
+	C1 c1;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="OverconstrainedCorrect6",
-			description="",
+			description="Unconnected connector",
 			flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect6
  Real c1.x;
@@ -261,6 +261,44 @@ equation
 end OverconstrainedConnection.OverconstrainedCorrect6;
 ")})));
 end OverconstrainedCorrect6;
+
+
+model OverconstrainedCorrect7
+    C1 c1;
+    C1 c2;
+    constant Boolean c1Root1 = Connections.isRoot(c1.t);
+    constant Boolean c1Root2 = c1Root1;
+    constant Boolean c2Root1 = Connections.isRoot(c2.t);
+    constant Boolean c2Root2 = c2Root1;
+equation
+    connect(c1.t, c2.t);
+    c1.t = c2.t;
+    Connections.root(c1.t);
+    Connections.potentialRoot(c2.t);
+    c1.t[1] = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OverconstrainedCorrect7",
+			description="Simple root selection and isRoot(), breakable branch",
+			flatModel="
+fclass OverconstrainedConnection.OverconstrainedCorrect7
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root2 = true;
+ constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root2 = false;
+equation
+ c1.t[1:2] = c2.t[1:2];
+ c1.t[1] = 0;
+ c1.t[{1, 2}] = c2.t[{1, 2}];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.OverconstrainedCorrect7;
+")})));
+end OverconstrainedCorrect7;
 
 
 end OverconstrainedConnection;
