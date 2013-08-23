@@ -5104,8 +5104,10 @@ package EventGeneratingExps
 
 model Div
 	Real x;
+	Real y[2];
 equation
 	x = div(time, 2);
+	y = div({time,time},2);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5114,13 +5116,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Div
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
 initial equation 
  temp_1 = div(time, 2);
+ temp_2 = div(time, 2);
+ temp_3 = div(time, 2);
 equation
- x = temp_1;
+ x = temp_3;
+ y[1] = temp_2;
+ y[2] = temp_1;
  when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
   temp_1 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+  temp_2 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+  temp_3 = div(time, 2);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Div;
 ")})));
@@ -5128,8 +5144,10 @@ end Div;
 
 model Mod
 	Real x;
+	Real y[2];
 equation
 	x = mod(time, 2);
+	y = mod({time,time},2);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5138,13 +5156,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Mod
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
 initial equation 
  temp_1 = floor(time / 2);
+ temp_2 = floor(time / 2);
+ temp_3 = floor(time / 2);
 equation
- x = time - temp_1 * 2;
+ x = time - temp_3 * 2;
+ y[1] = time - temp_2 * 2;
+ y[2] = time - temp_1 * 2;
  when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
   temp_1 = floor(time / 2);
+ end when;
+ when {time / 2 < pre(temp_2), time / 2 >= pre(temp_2) + 1} then
+  temp_2 = floor(time / 2);
+ end when;
+ when {time / 2 < pre(temp_3), time / 2 >= pre(temp_3) + 1} then
+  temp_3 = floor(time / 2);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Mod;
 ")})));
@@ -5152,8 +5184,10 @@ end Mod;
 
 model Rem
 	Real x;
+	Real y[2];
 equation
 	x = rem(time, 2);
+	y = rem({time,time},2);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5162,13 +5196,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Rem
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
 initial equation 
  temp_1 = div(time, 2);
+ temp_2 = div(time, 2);
+ temp_3 = div(time, 2);
 equation
- x = time - temp_1 * 2;
+ x = time - temp_3 * 2;
+ y[1] = time - temp_2 * 2;
+ y[2] = time - temp_1 * 2;
  when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
   temp_1 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+  temp_2 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+  temp_3 = div(time, 2);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Rem;
 ")})));
@@ -5176,8 +5224,10 @@ end Rem;
 
 model Ceil
 	Real x;
+	Real y[2];
 equation
 	1 + x = 3 + ceil((time * 0.3) + 4.2) * 4;
+	y = ceil({time,time*2});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5186,13 +5236,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Ceil
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
 initial equation 
- temp_1 = ceil(time * 0.3 + 4.2);
+ temp_1 = ceil(time * 2);
+ temp_2 = ceil(time);
+ temp_3 = ceil(time * 0.3 + 4.2);
 equation
- 1 + x = 3 + temp_1 * 4;
- when {time * 0.3 + 4.2 <= pre(temp_1) - 1, time * 0.3 + 4.2 > pre(temp_1)} then
-  temp_1 = ceil(time * 0.3 + 4.2);
+ 1 + x = 3 + temp_3 * 4;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 <= pre(temp_1) - 1, time * 2 > pre(temp_1)} then
+  temp_1 = ceil(time * 2);
+ end when;
+ when {time <= pre(temp_2) - 1, time > pre(temp_2)} then
+  temp_2 = ceil(time);
+ end when;
+ when {time * 0.3 + 4.2 <= pre(temp_3) - 1, time * 0.3 + 4.2 > pre(temp_3)} then
+  temp_3 = ceil(time * 0.3 + 4.2);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Ceil;
 ")})));
@@ -5201,8 +5265,10 @@ end Ceil;
 
 model Floor
 	Real x;
+	Real y[2];
 equation
 	1 + x = 3 + floor((time * 0.3) + 4.2) * 4;
+	y = floor({time,time*2});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5211,13 +5277,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Floor
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
 initial equation 
- temp_1 = floor(time * 0.3 + 4.2);
+ temp_1 = floor(time * 2);
+ temp_2 = floor(time);
+ temp_3 = floor(time * 0.3 + 4.2);
 equation
- 1 + x = 3 + temp_1 * 4;
- when {time * 0.3 + 4.2 < pre(temp_1), time * 0.3 + 4.2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 0.3 + 4.2);
+ 1 + x = 3 + temp_3 * 4;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time * 2);
+ end when;
+ when {time < pre(temp_2), time >= pre(temp_2) + 1} then
+  temp_2 = floor(time);
+ end when;
+ when {time * 0.3 + 4.2 < pre(temp_3), time * 0.3 + 4.2 >= pre(temp_3) + 1} then
+  temp_3 = floor(time * 0.3 + 4.2);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Floor;
 ")})));
@@ -5225,8 +5305,10 @@ end Floor;
 
 model Integer
 	Real x;
+	Real y[2];
 equation
 	x = integer((0.9 + time/10) * 3.14);
+	y = integer({time,time*2});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -5235,13 +5317,27 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.Integer
  Real x;
+ Real y[1];
+ Real y[2];
  discrete Integer temp_1;
+ discrete Integer temp_2;
+ discrete Integer temp_3;
 initial equation 
- temp_1 = integer((0.9 + time / 10) * 3.14);
+ temp_1 = integer(time * 2);
+ temp_2 = integer(time);
+ temp_3 = integer((0.9 + time / 10) * 3.14);
 equation
- x = temp_1;
- when {(0.9 + time / 10) * 3.14 < pre(temp_1), (0.9 + time / 10) * 3.14 >= pre(temp_1) + 1} then
-  temp_1 = integer((0.9 + time / 10) * 3.14);
+ x = temp_3;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
+  temp_1 = integer(time * 2);
+ end when;
+ when {time < pre(temp_2), time >= pre(temp_2) + 1} then
+  temp_2 = integer(time);
+ end when;
+ when {(0.9 + time / 10) * 3.14 < pre(temp_3), (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1} then
+  temp_3 = integer((0.9 + time / 10) * 3.14);
  end when;
 end TransformCanonicalTests.EventGeneratingExps.Integer;
 ")})));

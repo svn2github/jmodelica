@@ -489,23 +489,6 @@ end TypeTests.IntegerExp2;
 end IntegerExp2;
 
 
-model IntegerExp3
- Real y = integer({1.0, 2.0});
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IntegerExp3",
-			description="integer() operator: array arg",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 490, column 19:
-  Calling function integer(): types of positional argument 1 and input x are not compatible
-")})));
-end IntegerExp3;
-
-
-
 model ConstCmpEq
  constant Boolean a = 1 == 2;
  constant Boolean b = 1 == 1;

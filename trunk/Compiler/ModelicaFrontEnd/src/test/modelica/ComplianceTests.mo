@@ -237,9 +237,9 @@ model UnsupportedBuiltins3_ComplErr
   div(1,1);
   mod(1,1);
   rem(1,1);
-  ceil(1);
-  floor(1);
-  integer(1);
+  ceil(1.0);
+  floor(1.0);
+  integer(1.0);
   semiLinear(1,1,1);
   initial();
   sample(1,1);

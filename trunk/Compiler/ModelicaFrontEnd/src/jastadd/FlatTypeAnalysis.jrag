@@ -336,9 +336,9 @@ aspect FlatTypeAnalysis {
 	eq FEnumIntegerExp.type() = getFExp().type().isEnumScalar() ? fIntegerScalarType() : fUnknownType();
 	eq FStringExp.type()      = fStringScalarType();
 	
-	eq FEventGenExp.type()    = getX().type().isNumericScalar() ? fRealScalarType() : fUnknownType();
-	eq FIntegerFuncExp.type() = getX().type().isNumericScalar() ? fIntegerScalarType() : fUnknownType();
-	eq FBinEventGenExp.type() = getX().type().isRealScalar() || getY().type().isRealScalar() ? fRealScalarType() : fIntegerScalarType(); 
+	eq FEventGenExp.type()    = fRealType(size());
+	eq FIntegerFuncExp.type() = fIntegerType(size());
+	eq FBinEventGenExp.type() = getX().type().numericPromotion(getY().type());
 	
 	eq FSemiLinearExp.type()  = fRealType(size());
 	
