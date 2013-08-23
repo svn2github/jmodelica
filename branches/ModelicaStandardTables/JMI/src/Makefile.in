@@ -539,7 +539,7 @@ libModelicaExternalC_la_LDFLAGS = -no-undefined -static-libtool-libs
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/trees.c \
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/uncompr.c \
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/zutil.c
-@WITH_TABLES_TRUE@libModelicaStandardTables_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
+@WITH_TABLES_TRUE@libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force

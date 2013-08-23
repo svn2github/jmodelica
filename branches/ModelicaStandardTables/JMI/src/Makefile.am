@@ -140,7 +140,7 @@ if WITH_TABLES
 libModelicaStandardTables_la_SOURCES = $(MSLCSOURCES)/ModelicaStandardTables.c $(MSLCSOURCES)/ModelicaMatIO.c
 libModelicaStandardTables_la_SOURCES += $(MSLCSOURCES)/zlib/adler32.c $(MSLCSOURCES)/zlib/compress.c $(MSLCSOURCES)/zlib/crc32.c $(MSLCSOURCES)/zlib/deflate.c $(MSLCSOURCES)/zlib/gzclose.c $(MSLCSOURCES)/zlib/gzlib.c $(MSLCSOURCES)/zlib/gzread.c $(MSLCSOURCES)/zlib/gzwrite.c $(MSLCSOURCES)/zlib/infback.c $(MSLCSOURCES)/zlib/inffast.c $(MSLCSOURCES)/zlib/inflate.c $(MSLCSOURCES)/zlib/inftrees.c $(MSLCSOURCES)/zlib/trees.c $(MSLCSOURCES)/zlib/uncompr.c $(MSLCSOURCES)/zlib/zutil.c
 
-libModelicaStandardTables_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
+libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
