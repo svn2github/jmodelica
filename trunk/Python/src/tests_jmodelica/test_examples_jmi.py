@@ -161,4 +161,7 @@ def test_vdp_minimum_time_interpolation():
     """ Test the vdp_minimum_time_interpolation example """
     vdp_minimum_time_interpolation.run_demo(False)
     
-
+@testattr(stddist = True)
+def bounds_kinsol_example():
+    """ Test the bounds_kinsol example."""
+    bounds_kinsol.run_demo(False)

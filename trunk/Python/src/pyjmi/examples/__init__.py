@@ -35,4 +35,4 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'RLC_linearization', 'robertson_fmu','SEIRS', 'simulation_with_input', 
            'simulation_with_input_function', 'SolAng', 'vdp', 'vdp_casadi', 
            'vdp_casadi_ps', 'vdp_minimum_time', 'vdp_pp', 'VDP_sim', 
-           'vdp_minimum_time_interpolation']
+           'vdp_minimum_time_interpolation', 'bounds_kinsol']
