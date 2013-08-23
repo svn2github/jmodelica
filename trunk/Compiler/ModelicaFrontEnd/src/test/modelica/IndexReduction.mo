@@ -1505,6 +1505,55 @@ end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways;
 ")})));
   end IndexReduction32_PlanarPendulum_StatePreferAlways;
 
+  model IndexReduction32_PlanarPendulum_StatePreferNever
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.prefer) "Cartesian x coordinate";
+    Real y(stateSelect=StateSelect.never) "Cartesian x coordinate";
+    Real vx(stateSelect=StateSelect.prefer) "Velocity in x coordinate";
+    Real vy(stateSelect=StateSelect.always) "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction32_PlanarPendulum_StatePreferNever",
+            description="Test of index reduction",
+            flatModel="
+fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
+ Real y(stateSelect = StateSelect.never) \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
+ Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ x = 0.0;
+ vy = 0.0;
+equation
+ der(x) = vx;
+ der_2_x = lambda * x;
+ der(vy) = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * der(x) + 2 * y * vy = 0.0;
+ der_2_y = der(vy);
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * vy * vy) = 0.0;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever;
+")})));
+  end IndexReduction32_PlanarPendulum_StatePreferNever;
+
  model IndexReduction33_Div
   Real x1,x2;
   parameter Real p = 2;

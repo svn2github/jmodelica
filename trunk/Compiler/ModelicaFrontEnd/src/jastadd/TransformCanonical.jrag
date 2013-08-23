@@ -1879,7 +1879,7 @@ aspect TransformCanonical {
 					addFEquation((FAbstractEquation)fe.fullCopy());
 				}
 				
-				List<FVariable> l = new List<FVariable>();
+				Collection<FVariable> l = new ArrayList<FVariable>();
 				
 				for (FVariable fv : getFVariables()) {
 					if (result.getDummyDerivatives().contains(fv)) {
@@ -1891,15 +1891,20 @@ aspect TransformCanonical {
 						} else if (fv instanceof FDerivativeVariable) {
 							FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
 								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-							l.add(fdv);					
+							l.add(fdv);
 						} else {
 							l.add(fv);
 						}
+					} else if (fv instanceof FDerivativeVariable &&
+							((FRealVariable)fv.getMeIntegrated()).stateSelectAttribute() == FRealVariable.StateSelect.NEVER) {
+						FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+								fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
+						l.add(fdv);
 					} else if (fv instanceof FHDerivativeVariable) {
-					    // Convert higher order derivative variables into
-					    // first order derivatives, generating variables for each step
-					    FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
-					    FQName fqnPrev = fv.getFQName().fullCopy();
+						// Convert higher order derivative variables into
+						// first order derivatives, generating variables for each step
+						FHDerivativeVariable fhdv = (FHDerivativeVariable) fv;
+						FQName fqnPrev = fv.getFQName().fullCopy();
 						for (int i = 1; i < fhdv.getOrder(); i++) {
 							FQName fqn = fv.getFQName().createDerPrefixedName(i);
 							l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
@@ -1908,13 +1913,13 @@ aspect TransformCanonical {
 								fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
 							addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
 							fqnPrev = fqn;
-						}		
+						}
 					} else {
 						l.add(fv);
 					}
-				}	
+				}
 	
-				setFVariableList(l);		
+				setFVariableList(new List<FVariable>(l));
 	
 				enableFHDerRewrite();
 	
