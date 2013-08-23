@@ -731,7 +731,6 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
-  eq FScalarExp.getChild().argumentTypeValid(FType type)            = type.isArray() && argumentSizeValid(type.size());
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
   eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();

@@ -2023,9 +2023,6 @@ Semantic error at line 1795, column 21:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 1796, column 21:
   Calling function scalar(): types of positional argument 1 and input A are not compatible
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1797, column 18:
-  Calling function scalar(): types of positional argument 1 and input A are not compatible
 ")})));
 end Scalar2;
 

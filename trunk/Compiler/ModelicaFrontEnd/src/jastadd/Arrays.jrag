@@ -906,6 +906,7 @@ aspect Arrays {
 			return sizeForScalarArg();
 		}
 	}
+	eq FScalarExp.size()        = Size.SCALAR;
 	
 	syn Size FDimensionConvert.sizeForScalarArg();
 	eq FScalarExp.sizeForScalarArg() = Size.SCALAR;

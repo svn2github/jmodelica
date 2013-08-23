@@ -105,6 +105,83 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The semiLinear() function-like operator is");
 	}
 	
+	public void FUnaryBuiltIn.complianceCheck() {
+		super.complianceCheck();
+		if (unknownSizeNotSupported() && inFunction() && getFExp().size().isUnknown()) {
+			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
+		}
+	}
+	
+	public boolean FUnaryBuiltIn.unknownSizeNotSupported() { return false; }
+	public boolean FTranspose.unknownSizeNotSupported()    { return true; }
+	public boolean FScalarExp.unknownSizeNotSupported()    { return true; }
+	public boolean FVectorExp.unknownSizeNotSupported()    { return true; }
+	public boolean FMatrixExp.unknownSizeNotSupported()    { return true; }
+		
+	public void FMinMaxExp.complianceCheck() {
+		super.complianceCheck();
+		if (inFunction() && (getX().size().isUnknown() || (hasY() && getY().size().isUnknown()))) {
+			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
+		}
+	}
+	
+	public void FCatExp.complianceCheck() {
+		super.complianceCheck();
+		if (inFunction()) {
+			for (FExp exp: getFExpList()) {
+				if (exp.size().isUnknown()) {
+					compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
+				}
+			}
+		}
+	}
+	
+	public void InstComponentArrayAccess.complianceCheck() {
+		super.complianceCheck();
+		if (isSlice() && size().isUnknown() && inFunction()) {
+			compliance("Unknown size slice is not supported in functions");
+		}
+	}
+	
+	public void InstForIndex.complianceCheck() {
+		super.complianceCheck();
+		if (hasFExp() && getFExp().size().isUnknown()) {
+			compliance("Unknown size for index is not supported in functions");
+		}
+	}
+	
+	
+	public void InstAssignStmt.complianceCheck() {
+		super.complianceCheck();
+		if (getLeft().size().isUnknown() && !getRight().size().isUnknown()) {
+			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
+		}
+		if (!getLeft().size().isUnknown() && getRight().size().isUnknown()) {
+			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
+		}
+	}
+	
+	public void FLinspace.complianceCheck() {
+		super.complianceCheck();
+		if (inFunction() && getN().ceval().isUnknown()) {
+			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
+		}
+	}
+	
+	public void FIdentity.complianceCheck() {
+		super.complianceCheck();
+		if (inFunction() && getFExp().ceval().isUnknown()) {
+			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
+		}
+	}
+	
+	public void FPowExp.complianceCheck() {
+		super.complianceCheck();
+		if (inFunction() && getLeft().size().isUnknown()) {
+			compliance("Unknown sizes in operator ^ is not supported in functions");
+		}
+	}
+	
 	public void FIgnoredBuiltIn.complianceCheck() {
 		warning("The " + getName() + 
 				"() function-like operator is not supported, and is currently ignored");
