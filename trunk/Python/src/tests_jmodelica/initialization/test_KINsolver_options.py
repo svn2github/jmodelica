@@ -34,16 +34,15 @@ class TestInitOptions:
     @classmethod
     def setUpClass(cls):
         """Sets up the test class."""
-        # Set path to fmu and name for log file
-        
+        fpath = os.path.join(get_files_path(), 'Modelica', 'BouncingBounds.mo')
+        compile_fmu('BouncingBounds', fpath)
         
     def setUp(self):
         """Test setUp. Load the test model."""
         # Load models
         curr_dir = get_files_path()
         self.log_file_name = os.path.join(curr_dir, 'Data', 'test_KINsolver_options_log.txt')
-        self.fmu_path = os.path.join(curr_dir, 'FMUs', 'ME1.0', 'BouncingBounds.fmu')
-        self.model = load_fmu(self.fmu_path, log_file_name=self.log_file_name)
+        self.model = load_fmu('BouncingBounds.fmu', log_file_name=self.log_file_name)
         self.model.set_debug_logging(True)
         self.model.set_fmil_log_level(5)
         self.model.set('_log_level', 5)
@@ -102,18 +101,6 @@ class TestInitOptions:
         solves = gather_solves(log)
         #residual scaling is not loged when turned off.
         nose.tools.assert_false('residual_scaling' in solves[0].block_solves[0].iterations[0])
-        
-    def test_manual_equation_scaling(self):
-        """
-        test if user can set to manual variable scaling.
-        """
-        self.model.set('_use_manual_equation_scaling', True)
-        self.model.initialize()
-        extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
-        log = parse_jmi_log(self.log_file_name)
-        solves = gather_solves(log)
-        nose.tools.assert_true(N.array_equal(solves[0].block_solves[0].iterations[0].residual_scaling,
-                                             N.array([1., 3.])))
     
     def test_max_iter(self):
         """
@@ -190,20 +177,6 @@ class TestInitOptions:
         log = parse_jmi_log(self.log_file_name)
         solves = gather_solves(log)
         N.testing.assert_array_almost_equal(solves[0].block_solves[0].iterations[-1].ivs, N.array([N.sqrt(11), 5. ]))
-    
-    def test_automatic_scaling(self):
-        """
-        test if automatic scaling works.
-        """
-        self.model.set('_use_automatic_scaling', False)
-        self.model.initialize()
-        
-        extract_jmi_log('test_KINsolver_log.xml', self.log_file_name)
-        log = parse_jmi_log(self.log_file_name)
-        solves = gather_solves(log)
-        #residual scaling is not loged when turned off.
-        nose.tools.assert_false('initial_residual_scaling' in solves[0].block_solves[0])
-        nose.tools.assert_false('residual_scaling' in solves[0].block_solves[0].iterations[0])
         
     
         
