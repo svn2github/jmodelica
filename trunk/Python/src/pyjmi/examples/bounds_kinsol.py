@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import os.path
 from pyfmi import load_fmu
 from pymodelica import compile_fmu
 import numpy
@@ -28,10 +28,13 @@ def run_demo(with_plots=True):
     boundaries. The iterations are displaied graphically together with
     the boundaries.
     """
-    
     curr_dir = os.path.dirname(os.path.abspath(__file__));
+    fpath = os.path.join(curr_dir, 'files', 'BoundsDemo.mo')
+    print(fpath)
+    compile_fmu('BoundsDemo', fpath)
+    
     log_file_name='files/bounds_kinsol.txt'
-    m = load_fmu(os.path.join(curr_dir, 'files', 'FMUs', 'bounds_kinsol.fmu'), log_file_name=log_file_name)
+    m = load_fmu('BoundsDemo.fmu', log_file_name=log_file_name)
     
     m.set_debug_logging(True)
     m.set_fmil_log_level(5)
@@ -73,7 +76,7 @@ def run_demo(with_plots=True):
         
         quiverkey(Q,4,8,1,"Iteration without active bounds",coordinates='data',color='k')
     
-    m = load_fmu(os.path.join(curr_dir, 'files', 'FMUs', 'bounds_kinsol.fmu'), log_file_name=log_file_name)
+    m = load_fmu('BoundsDemo.fmu', log_file_name=log_file_name)
     m.set_debug_logging(True)
     m.set_fmil_log_level(5)
     m.set('_log_level',5)
