@@ -5,7 +5,7 @@ package org.jmodelica.util;
  */
   
 @SuppressWarnings("serial")
-public class ModelicaException extends Exception {
+public class ModelicaException extends RuntimeException {
     
     public ModelicaException() {
     }

@@ -278,8 +278,7 @@ public abstract class ModelicaLogger {
 				logger = new StreamingLogger(level, System.err);
 			} else {
 				problems.add(
-						"Unknown pipe log output: '" +
-								target +
+						"Unknown pipe log output: '" + target +
 						"'. Possible values are 'stdout' and 'stderr'.");
 				continue;
 			}

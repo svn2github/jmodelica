@@ -1241,10 +1241,8 @@ public class ModelicaCompiler {
 			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
 		
 		log.info("Checking for errors...");
-		Collection<Problem> problems = ipr.checkErrorsInInstClass(cl);
-		if (problems.size()>0) {
-			handleCompilerProblems(problems);
-		}
+		ipr.checkErrorsInInstClass(cl);
+		handleCompilerWarnings(sr.collectWarnings());
 		
 		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
 		
@@ -1254,22 +1252,13 @@ public class ModelicaCompiler {
 		return icd;
 	}
 	
-	protected void handleCompilerProblems(Collection<Problem> problems) throws CompilerException{
-		if (this.options.getBooleanOption("generate_html_diagnostics") &&
-		    getDiagnosticsGenerator()!=null) {
-			getDiagnosticsGenerator().writeProblems(problems);
-		}
+	protected void handleCompilerWarnings(Collection<Problem> warnings) throws CompilerException {
+		if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+			getDiagnosticsGenerator().writeProblems(warnings);
 		
-		CompilerException ce = new CompilerException(problems);
-		if (ce.shouldStop(options.getBooleanOption("halt_on_warning"))) {
-			// there are errors -> add errors and possible warnings and throw exception or
-			// there are only warnings but compiler option sais throw exception			
-			throw ce;
-		} else {
-			// there are only warnings and halt_on_warning = false so just send them to logger
-			log.logCompilerException(ce);
-			// and save to warnings list
-			warnings.addAll(problems);
+		if (!warnings.isEmpty()) {
+			log.logProblems(warnings);
+			this.warnings.addAll(warnings);
 		}
 	}
 	
@@ -1367,7 +1356,6 @@ public class ModelicaCompiler {
 		ASTNode.endStep("prettyPrintFlat()");
 		
 		dumpMemoryUseFile(fc, "transformed", false);
-		Collection<Problem> problems = fc.errorCheck();
 		
 		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
 			ASTNode.beginStep("writeIterationVariables()");
@@ -1386,13 +1374,12 @@ public class ModelicaCompiler {
 		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
 			ASTNode.beginStep("htmlDiagnostics()");
 			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
-			getDiagnosticsGenerator().writeProblems(problems);
 			getDiagnosticsGenerator().writeDiagnostics(fc);
 			ASTNode.endStep("htmlDiagnostics()");
 		}
 		
-		if (problems.size() > 0) 
-			handleCompilerProblems(problems);
+		fc.errorCheck();
+		handleCompilerWarnings(fc.collectWarnings());
 
 		hookFlatModelChecked(fc);
 		ASTNode.endStep("flattenModel()");
@@ -1724,6 +1711,8 @@ public class ModelicaCompiler {
 			else
 				compileFMUME(cl, name, compileTo);
 		} catch (CompilerException ce) {
+			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+				getDiagnosticsGenerator().writeProblems(ce.getProblems());
 			log.logCompilerException(ce);
 			closeLogger();
 			System.exit(1);

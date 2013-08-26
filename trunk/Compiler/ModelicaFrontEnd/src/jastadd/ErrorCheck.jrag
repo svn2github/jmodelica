@@ -178,6 +178,38 @@ import org.jmodelica.util.Problem;
   
 
 aspect ErrorCheck {
+	
+	public void FClass.breakOnErrors() throws CompilerException {
+		root().breakOnErrors();
+	}
+	
+	public void Root.breakOnErrors() throws CompilerException {
+		if (!errors.isEmpty() || (options.getBooleanOption("halt_on_warning") && !warnings.isEmpty())) {
+		    java.util.Collections.sort(errors);
+		    java.util.Collections.sort(warnings);
+		    
+		    ArrayList<Problem> problems = new ArrayList<Problem>();
+		    problems.addAll(warnings);
+		    problems.addAll(errors);
+		    
+		    errors.clear();
+		    warnings.clear();
+		    
+		    throw new CompilerException(problems);
+		}
+	}
+	
+	public ArrayList<Problem> FClass.collectWarnings() {
+		return root().collectWarnings();
+	}
+	
+	public ArrayList<Problem> Root.collectWarnings() {
+		breakOnErrors();
+	    java.util.Collections.sort(warnings);
+	    ArrayList<Problem> problems = new ArrayList<Problem>(warnings);
+	    warnings.clear();
+	    return problems;
+	}
 
   public ArrayList<Problem> Root.errors = new ArrayList<Problem>();
   public ArrayList<Problem> Root.warnings = new ArrayList<Problem>();
@@ -328,38 +360,10 @@ aspect ErrorCheck {
   }
 
 
-  public Collection<Problem> ASTNode.errorCheck(){
-    ArrayList allErrors = root().errors;
-    ArrayList allWarnings = root().warnings;
-    collectErrors();
-    java.util.Collections.sort(allErrors);
-    java.util.Collections.sort(allWarnings);
-    
-    ArrayList<Problem> problems = new ArrayList<Problem>();
-    problems.addAll(allWarnings);
-    problems.addAll(allErrors);    
-    
-    /*
-    if (!allWarnings.isEmpty()) {
-    	str.append("\n");        	
-    	str.append("Warnings:\n");    
-    	for(Iterator iter = allWarnings.iterator(); iter.hasNext(); ) {
-    		Problem problem = (Problem) iter.next();
-    		str.append(problem+"\n");
-    	}
-    }
-   if(allErrors.isEmpty())
-      return false;
-    str.append("\n");        	
-    str.append(allErrors.size() + " error(s) found...\n");
-    for(Iterator iter = allErrors.iterator(); iter.hasNext(); ) {
-      Problem problem = (Problem)iter.next();
-      str.append(problem+"\n");
-    }
-    */
-    
-    return problems;
-  }
+	public void ASTNode.errorCheck() {
+		collectErrors();
+		root().breakOnErrors();
+	}
 
 /*
     syn lazy FullClassDecl ASTNode.retrieveFullClassDecl(String className) {
@@ -387,12 +391,12 @@ aspect InstanceErrorCheck {
 
 	// We don't want to error check an entire model, just the classes
 	//   that are used. 
-	public Collection<Problem> InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
+	public void InstProgramRoot.checkErrorsInInstClass(String className) throws ModelicaClassNotFoundException{
 		InstClassDecl icd = lookupInstClassQualified(className);
 		if (icd.isUnknown()) 
 			throw new ModelicaClassNotFoundException(className);
 		else
-			return icd.errorCheck();
+			icd.errorCheck();
 	}
 
 	protected boolean BaseNode.errorChecked = false;

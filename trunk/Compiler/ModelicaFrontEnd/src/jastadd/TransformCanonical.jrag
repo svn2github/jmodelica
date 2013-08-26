@@ -1598,8 +1598,6 @@ aspect TransformCanonical {
 		return daeInitBLT;
 	}	
 	
-	public ArrayList<String> FClass.indexReductionErrors = new ArrayList<String>();
-	
 	/**
 	 * The symbolic equation sorting and canonicalization proceeds in the
 	 * following steps:
@@ -1704,6 +1702,7 @@ aspect TransformCanonical {
 		// If no complete matching found, then try index reduction
 		if (!g.isComplete()) {
 			g = reduceIndex();
+			breakOnErrors();
 			if (g == null)
 				return;
 		} 
@@ -1867,7 +1866,7 @@ aspect TransformCanonical {
 			try {
 				result = g.reduceIndex(false);
 			} catch (EquationDifferentiationException e) {
-				indexReductionErrors.add(e.getMessage());
+				error(e.getMessage());
 				return null; 
 			}
 			
@@ -2305,37 +2304,33 @@ aspect TransformCanonical {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
 	
-	syn lazy ArrayList<String> FClass.structuralErrors() {
-		ArrayList<String> structuralErrors = new ArrayList<String>();
+	public void FClass.checkStructure() {
 		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
-		boolean unbalanced = false;
-		StringBuffer err_str = new StringBuffer();
-		if (getDAEUnmatchedVariables().size() > 0 ) {
-			err_str.append("The system is structurally singular. The following varible(s) could not be matched to any equation:\n");
-			for (FVariable fv : getDAEUnmatchedVariables()) {
-				err_str.append("   " + fv.name());
-				err_str.append("\n");
+			boolean unbalanced = false;
+			StringBuffer err_str = new StringBuffer("The system is structurally singular. ");
+			if (getDAEUnmatchedVariables().size() > 0 ) {
+				err_str.append("The following varible(s) could not be matched to any equation:\n");
+				for (FVariable fv : getDAEUnmatchedVariables()) {
+					err_str.append("     " + fv.name());
+					err_str.append("\n");
+				}
+				unbalanced = true;
 			}
-			unbalanced = true;
-		}
-		if (getDAEUnmatchedEquations().size() > 0 ) {
-			if (!unbalanced) {
-				err_str.append("The system is structurally singular. The following equation(s) could not be matched to any variable:\n");
-			} else {
-				err_str.append("\n  The follwowing equation(s) could not be matched to any variable:\n");
+			
+			if (getDAEUnmatchedEquations().size() > 0 ) {
+				if (unbalanced) 
+					err_str.append("\n  ");
+				err_str.append("The following equation(s) could not be matched to any variable:\n");
+				for (FAbstractEquation ee : getDAEUnmatchedEquations()) {
+					err_str.append(ee.prettyPrint("    "));
+					err_str.append("\n");
+				}
+				unbalanced = true;
 			}
-			for (FAbstractEquation ee : getDAEUnmatchedEquations()) {
-				err_str.append("   " + ee.prettyPrint(""));
-				err_str.append("\n");
-			}
-			unbalanced = true;
+			
+			if (unbalanced) 
+				error(err_str.toString());
 		}
-		
-		if (unbalanced) {
-			structuralErrors.add(err_str.toString());
-		}
-		}
-		return structuralErrors;
 	}
 
 	
@@ -3231,28 +3226,21 @@ aspect TransformCanonical {
 	 * \brief Generate alias information and remove alias equations.
 	 */
 	public void FClass.genAlias() {
-		if (aliasManager==null) {
+		if (aliasManager == null) {
 			aliasManager = new AliasManager();
 		}
-		//System.out.println("****************************************");
 		for (FAbstractEquation equation : 
 			getFEquationBlock(0).getFAbstractEquations()) {
 			// Iterate over all equations
 			// If the equation is an alias equation, then register
 			// the alias variables in the alias manager.
-			//System.out.println(equation.prettyPrint(" -- "));
-			// Check all alias equations, also those that that have bee
+			// Check all alias equations, also those that that have been
 			// checked before.
 			equation.aliasClassified = false; 
-			if (equation.isAliasEquation()) {
-				//System.out.println(equation.prettyPrint(" ----- "));
-				AliasPair aliasPair = equation.aliasVariables();
-				aliasManager.addAliasVariables(aliasPair.fv1,
-						aliasPair.fv2, aliasPair.negated);
-				//System.out.println(aliasManager.printAliasSets());
-			}			
-		}	
-		//System.out.println("****************************************");
+			if (equation.isAliasEquation()) 
+				aliasManager.addAliasVariables(equation.aliasVariables());
+		}
+		aliasManager.reportAliasErrors(this);
 		//flush();
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
 	}
@@ -4140,11 +4128,6 @@ aspect IfEquations {
 aspect ParameterSorting {
 
 	/**
-	 * \brief Indicate if there exist cyclic parameter dependencies.
-	 */
-	public boolean FClass.cyclicParameters = false;
-	
-	/**
 	 * \brief Index of equation during equation sorting.
 	 */
 	public int FAbstractEquation.sortingIndex = -1;
@@ -4285,9 +4268,8 @@ aspect ParameterSorting {
 		
 		// Not possible to find an ordering without cycles?
 		if (L.getNumChild() != eqns.size() - n_indep) {
-			cyclicParameters = true;
+			error("The model "+ name() +" contains cyclic parameter dependencies.");
 		} else {
-		
 			// Replace old parameter equation list
 			setFParameterEquationList(L);
 			
@@ -4488,23 +4470,9 @@ aspect TransformCanonicalErrorCheck {
 	}
 	
 	public void FClass.collectErrors() {
-		if (cyclicParameters) {
-			error("The model "+ name() +" contains cyclic parameter dependencies.");
-		}
-		if (getAliasManager().aliasError()) {
-			error(getAliasManager().getAliasErrorMessage());
-		}
-		for (String str : aliasErrors) {
-			error(str);
-		}
-		for (String str : indexReductionErrors) {
-			error(str);
-		}
 		checkDuplicateVariables();
 		checkFClassDimensions();
-		for (String str : structuralErrors()) {
-			error(str);
-		}		
+		checkStructure();
 		checkUnsupportedStreamConnections();
 	}
 }

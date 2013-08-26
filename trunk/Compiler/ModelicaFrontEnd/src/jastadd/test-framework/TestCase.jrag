@@ -320,7 +320,13 @@ abstract public class TestCase {
 		
 		// Instantiate and check for errors
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-	    Collection<Problem> problems = ipr.checkErrorsInInstClass(getClassName());
+		Collection<Problem> problems = null;
+		try {
+			ipr.checkErrorsInInstClass(className);
+			problems = sr.collectWarnings();
+		} catch (CompilerException e) {
+			problems = e.getProblems();
+		}
 		if (testSemanticProblems(problems)) return;
 		
 		
@@ -332,8 +338,13 @@ abstract public class TestCase {
 		
 		
 		// Transform canonical and check for errors again
-	    fc.transformCanonical();
-		problems = fc.errorCheck();
+		try {
+		    fc.transformCanonical();
+			fc.errorCheck();
+			problems = fc.collectWarnings();
+		} catch (CompilerException e) {
+			problems = e.getProblems();
+		}
 		if (testTransformedProblems(problems)) return;
 		
 		

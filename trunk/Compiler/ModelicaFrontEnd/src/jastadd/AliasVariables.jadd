@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.BitSet;
 //import org.jmodelica.modelica.compiler.AliasManager.AliasVariable;
@@ -140,11 +141,8 @@ aspect AliasVariables {
 	 */
 	public class AliasManager {
 	
-		// Alias error message.
-		private String aliasErrorMessage = "";
-
-		// Indicate alias error
-		private boolean aliasErrorFlag = false;
+		// Alias error messages.
+		private Collection<String> aliasErrorMessages = new ArrayList<String>();
 		
 		// A set of alias sets
 		private Set<AliasSet> aliasSets = new LinkedHashSet<AliasSet>();
@@ -153,24 +151,14 @@ aspect AliasVariables {
 		private Map<FVariable, AliasVariable> variableMap = new HashMap<FVariable, AliasVariable>();
 		
 		/**
-		 * \brief Getter for alias error message.
+		 * Report any detected alias errors.
 		 * 
-		 * @return The error message.
+		 * @fc  where to report errors
 		 */
-		public String getAliasErrorMessage() {
-			return aliasErrorMessage;
-		}
-		
-		/**
-		 * \brief Check if there was an alias error.
-		 * 
-		 * The error message can be retrieved by calling the method
-		 * getAliasManagerError.
-		 * 
-		 * @return True if there was an alias error, otherwise false.
-		 */
-		public boolean aliasError() {
-			return aliasErrorFlag;
+		public void reportAliasErrors(FClass fc) {
+			for (String msg : aliasErrorMessages)
+				fc.error(msg);
+			aliasErrorMessages.clear();
 		}
 		
 		/**
@@ -206,6 +194,13 @@ aspect AliasVariables {
 			if (alias == null)
 				return null;
 			return alias.getSet();
+		}
+
+		/**
+		 * \brief Add a pair of alias variables to the alias manager.
+		 */
+		public void addAliasVariables(AliasPair pair) {
+			addAliasVariables(pair.fv1, pair.fv2, pair.negated);
 		}
 
 		/**
@@ -246,6 +241,9 @@ aspect AliasVariables {
 			}
 		}
 		
+		private static final String MERGE_ERROR_MESSAGE = 
+				"Alias error: trying to add the %salias pair (%s,%s%s) to the alias set %s";
+		
 		/**
 		 * Merges two alias variables <code>aliasA</code> and <code>aliasB</code>.
 		 * The implementation also check the rules for a alias set is maintained.
@@ -258,16 +256,13 @@ aspect AliasVariables {
 			AliasSet mergeSet = aliasB.getSet();
 			AliasSet resultSet = aliasA.getSet();
 			if (resultSet == mergeSet) {
-				if (aliasA.isNegated() == aliasB.isNegated() && neg) {
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-					"negated alias pair (" + aliasA.getFVariable().name() + ",-" + 
-					aliasB.getFVariable().name() + ") to the alias set " + resultSet;
-				} else if (aliasA.isNegated() != aliasB.isNegated() && !neg) {
-					aliasErrorFlag = true;
-					aliasErrorMessage = "Alias error: trying to add the " +
-					"alias pair (" + aliasA.getFVariable().name() + "," + 
-					aliasB.getFVariable().name() + ") to the alias set " + resultSet;
+				if ((aliasA.isNegated() == aliasB.isNegated()) == neg) {
+					aliasErrorMessages.add(String.format(MERGE_ERROR_MESSAGE, 
+							neg ? "negated " : "", 
+							aliasA.getFVariable().name(), 
+							neg ? "-" : "", 
+							aliasB.getFVariable().name(), 
+							resultSet)); 
 				}
 				return;
 			}

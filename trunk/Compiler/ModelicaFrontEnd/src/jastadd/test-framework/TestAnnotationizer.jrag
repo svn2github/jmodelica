@@ -478,7 +478,14 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	protected InstClassDecl instantiate() throws Exception {
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
-		handleCompilerProblems(ipr.checkErrorsInInstClass(className));
+		Collection<Problem> problems = null;
+		try {
+			ipr.checkErrorsInInstClass(className);
+			problems = root.collectWarnings();
+		} catch (CompilerException e) {
+			problems = e.getProblems();
+		}
+		handleCompilerProblems(problems);
 		return ipr.lookupInstClassQualified(className);
 	}
 
@@ -496,7 +503,14 @@ abstract public class TestAnnotationizerHelper {
 	 */
 	protected void transformCanonical(FClass fc) throws Exception {
 		fc.transformCanonical();
-		handleCompilerProblems(fc.errorCheck());
+		Collection<Problem> problems = null;
+		try {
+			fc.errorCheck();
+			problems = root.collectWarnings();
+		} catch (CompilerException e) {
+			problems = e.getProblems();
+		}
+		handleCompilerProblems(problems);
 	}
 	
 	/**
