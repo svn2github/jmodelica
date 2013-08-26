@@ -929,16 +929,16 @@ end EvaluateAnnotation;
 
 
 
-package FunctionLikeOperators
+package FunctionLike
 
-model DivTest
-	
+package EventGen
+model DivTest1
 	constant Real x = div(42.9,3);
 	constant Integer y = div(42,42);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_DivTest",
+			name="FunctionLike_EventGen_DivTest1",
 			description="Evaluation of the div operator.",
 			variables="
 x
@@ -948,19 +948,17 @@ y
 14.0
 1
 ")})));
-end DivTest;
+end DivTest1;
 
-model ModTest
-	constant Real c1 = 3;
-	constant Real c2 = 1.4;
-	constant Real x = mod(c1,c2);
+model ModTest1
+	constant Real x = mod(3.0,1.4);
 	constant Real y = mod(-3.0,1.4);
-	constant Real z = mod(3.0,-1.4);
+	constant Real z = mod(3,-1.4);
 	constant Integer a = mod(3,-5);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_ModTest",
+			name="FunctionLike_EventGen_ModTest1",
 			description="Evaluation of the mod operator.",
 			variables="
 x
@@ -974,10 +972,9 @@ a
 -1.1999999999999993
 -2
 ")})));
-end ModTest;
+end ModTest1;
 
-model RemTest
-	
+model RemTest1
 	constant Real x = rem(3.0,1.4);
 	constant Real y = rem(-3.0,1.4);
 	constant Real z = rem(3.0,-1.4);
@@ -985,7 +982,7 @@ model RemTest
 	
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_RemTest",
+			name="FunctionLike_EventGen_RemTest1",
 			description="Evaluation of the rem operator.",
 			variables="
 x
@@ -999,16 +996,15 @@ a
 0.20000000000000018
 3
 ")})));
-end RemTest;
+end RemTest1;
 
 model CeilTest
-	
 	constant Real x = ceil(42.9);
 	constant Real y = ceil(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_CeilTest",
+			name="FunctionLike_EventGen_CeilTest",
 			description="Evaluation of the ceil operator.",
 			variables="
 x
@@ -1021,13 +1017,12 @@ y
 end CeilTest;
 
 model FloorTest
-	
 	constant Real x = floor(42.9);
 	constant Real y = floor(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_FloorTest",
+			name="FunctionLike_EventGen_FloorTest",
 			description="Evaluation of the floor operator.",
 			variables="
 x
@@ -1040,13 +1035,12 @@ y
 end FloorTest;
 
 model IntegerTest
-	
 	constant Integer x = integer(42.9);
 	constant Integer y = integer(42.0);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_IntegerTest",
+			name="FunctionLike_EventGen_IntegerTest",
 			description="Evaluation of the integer operator.",
 			variables="
 x
@@ -1057,15 +1051,16 @@ y
 42
 ")})));
 end IntegerTest;
+end EventGen;
 
+package EventRel
 model PreTest
-	
 	constant Real x = 42.9;
 	constant Real y = pre(x);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_PreTest",
+			name="FunctionLike_EventRel_PreTest",
 			description="Evaluation of the pre operator.",
 			variables="y",
 			values="42.9"
@@ -1073,40 +1068,31 @@ model PreTest
 end PreTest;
 
 model EdgeTest
-	
-	constant Boolean x1 = true;
-	constant Boolean x2 = true;
-	constant Boolean y1 = edge(x1);
-	constant Boolean y2 = edge(x2);
+	constant Boolean x = true;
+	constant Boolean y = edge(x);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_EdgeTest",
+			name="FunctionLike_EventRel_EdgeTest",
 			description="Evaluation of the edge operator.",
-			variables="
-y1
-y2
-",
-			values="
-false
-false
-")})));
+			variables="y",
+			values="false")})));
 end EdgeTest;
 
 model ChangeTest
-	
-	constant Real x = 42.9;
+	constant Boolean x = true;
 	constant Boolean y = change(x);
 
 	annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
-			name="FunctionLikeOperators_ChangeTest",
+			name="FunctionLike_EventRel_ChangeTest",
 			description="Evaluation of the change operator.",
 			variables="y",
 			values="false"
  )})));
 end ChangeTest;
+end EventRel;
 
-end FunctionLikeOperators;
+end FunctionLike;
 
 end EvaluationTests;

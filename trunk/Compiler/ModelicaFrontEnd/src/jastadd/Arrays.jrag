@@ -219,8 +219,9 @@ aspect Arrays {
 	
 	eq FDimensionConvert.ndims() = dimensionsToKeep().length;
 	
-	eq FUnaryBuiltIn.ndims() = getFExp().ndims();
-	eq FEventGenExp.ndims()  = getX().ndims();
+	eq FUnaryBuiltIn.ndims()              = getFExp().ndims();
+	eq FEventGenExp.ndims()               = getX().ndims();
+	eq FMathematicalFunctionCall.ndims()  = getFExp().ndims();
 	
 	eq FSemiLinearExp.ndims()  = getX().ndims();
 	
@@ -918,10 +919,12 @@ aspect Arrays {
 	
 	eq FSmoothExp.size() = getFExp().size();
 	
-	eq FUnaryBuiltIn.size()     = getFExp().size();
-	eq FVectUnaryBuiltIn.size() = getFExp().size().contractRight(ndims());
-	eq FEventGenExp.size()      = getX().size();
-	eq FSemiLinearExp.size()    = getX().size();
+	eq FUnaryBuiltIn.size()             = getFExp().size();
+	eq FVectUnaryBuiltIn.size()         = getFExp().size().contractRight(ndims());
+	
+	eq FEventGenExp.size()              = getX().size();
+	eq FMathematicalFunctionCall.size() = getFExp().size();
+	eq FSemiLinearExp.size()            = getX().size();
 	
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
@@ -1699,6 +1702,29 @@ aspect Arrays {
 		
 		Array arr = new Array(indices());
 		Array inner1 = getX().getArray();
+		Array inner2 = getY().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
+		return arr;
+	}
+	
+	eq FMathematicalFunctionCall.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner = getFExp().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner.get(i)));
+		return arr;
+	}
+	
+	eq FAtan2Exp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner1 = getFExp().getArray();
 		Array inner2 = getY().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner1.get(i), inner2.get(i)));

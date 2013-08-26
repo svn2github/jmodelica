@@ -612,8 +612,7 @@ aspect FlatTypeAnalysis {
 
 	eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
 	eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
-	eq FMathematicalFunctionCall.type() = fRealScalarType();
-	eq FSqrtExp.type() = fRealType(size());
+	eq FMathematicalFunctionCall.type() = fRealType(size());
 	
 	// TODO: expand to handle boolean end enum index
 	syn lazy FType FSubscript.type();

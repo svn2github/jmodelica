@@ -979,15 +979,6 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * Create new node of same class as this, with the specified children.
-	 */
-	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
-		FMathematicalFunctionCall node = createEmptyNode();
-		node.setFExp(exp);
-		return node;
-	}
-	
-	/**
 	 * \Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
@@ -1018,6 +1009,32 @@ aspect InheritedFactoryMethods {
 	public FBinEventGenExp FBinEventGenExp.createNode(FExp x, FExp y) {
 		FBinEventGenExp node = createEmptyNode();
 		node.setX(x);
+		node.setY(y);
+		return node;
+	}
+	
+	/**
+	 * Create new node of same class as this, with the specified children.
+	 */
+	public FMathematicalFunctionCall FMathematicalFunctionCall.createNode(FExp exp) {
+		FMathematicalFunctionCall node = createEmptyNode();
+		node.setFExp(exp);
+		return node;
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FMathematicalFunctionCall FAtan2Exp.createNode(FExp exp) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FMathematicalFunctionCall FAtan2Exp.createNode(FExp x, FExp y) {
+		FAtan2Exp node = createEmptyNode();
+		node.setFExp(x);
 		node.setY(y);
 		return node;
 	}

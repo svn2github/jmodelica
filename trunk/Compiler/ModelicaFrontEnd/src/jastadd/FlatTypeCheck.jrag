@@ -703,6 +703,7 @@ aspect FlatTypeCheck {
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
   eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
   eq FEventGenExp.getChild().argumentDefinedTypeValid()                  = false;
+  eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
   eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
@@ -727,14 +728,15 @@ aspect FlatTypeCheck {
   eq FAbsExp.getChild().argumentTypeValid(FType type)               = type.isNumeric();
   eq FSignExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
   eq FEnumIntegerExp.getChild().argumentTypeValid(FType type)       = type.isEnum();
+  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isReal();
+  eq FBinEventGenExp.getChild().argumentTypeValid(FType type)       = type.isNumeric();
+  eq FMathematicalFunctionCall.getChild().argumentTypeValid(FType type) = type.isNumeric();
   eq FArrayDimAsArgsExp.getFExp().argumentTypeValid(FType type)     = type.isInteger();
   eq FFillExp.getOriginalArg(int i).argumentTypeValid(FType type)   = true;
   eq FMinMaxExp.getOriginalArg(int i).argumentTypeValid(FType type) = 
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FEventGenExp.getChild().argumentTypeValid(FType type)          = type.isReal();
-  eq FBinEventGenExp.getChild().argumentTypeValid(FType type)       = type.isNumeric();
   eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
 
