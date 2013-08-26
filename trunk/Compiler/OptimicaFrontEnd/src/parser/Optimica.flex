@@ -149,6 +149,13 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   										 return newSymbol(Terminals.INITIAL_EQUATION); }  
   "initial" {WhiteSpace} "algorithm"   { addLineBreaks(yytext()); 
   										 return newSymbol(Terminals.INITIAL_ALGORITHM); }
+  "operator" {WhiteSpace} "record"     { addWhiteSpaces(yytext());
+  										 addLineBreaks(yytext());
+                                         return newSymbol(Terminals.RECORD); }
+  "operator" {WhiteSpace} "function"   { addWhiteSpaces(yytext());
+  										 addLineBreaks(yytext()); 
+                                         return newSymbol(Terminals.FUNCTION); }
+  									
 
   "end" {WhiteSpace} "for"    { addLineBreaks(yytext()); 
                                 return newSymbol(Terminals.END_FOR); }

@@ -138,19 +138,6 @@ endif
   	*) \
 	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Tables/lib
-	case $(build) in \
-	*-cygwin*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/win32/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
-  	*-mingw*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/win32/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
-  	*-apple*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/darwin64/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
-  	*) \
-	cp $(abs_top_srcdir)/ThirdParty/Tables/lib/linux$(shell getconf LONG_BIT)/libtblAccess.a $(DESTDIR)$(prefix)/ThirdParty/Tables/lib/  ;; \
-	esac
-	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Tables/include
-	cp $(abs_top_srcdir)/ThirdParty/Tables/include/tblAccess.h $(DESTDIR)$(prefix)/ThirdParty/Tables/include
 	mkdir -p $(DESTDIR)$(prefix)/Options
 	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
