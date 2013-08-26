@@ -244,6 +244,16 @@ aspect InstFunctionBinding {
 			public BuiltInTranslator() {
 				map = new HashMap<String, BuiltInCreator>();
 				//       name                              math       node               # args
+				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
+				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
+				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
+				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
+				map.put("div",          new BuiltInCreator(false, new FDivFuncExp(),     2));
+				map.put("mod",          new BuiltInCreator(false, new FModFuncExp(),     2));
+				map.put("rem",          new BuiltInCreator(false, new FRemFuncExp(),     2));
+				map.put("ceil",         new BuiltInCreator(false, new FCeilFuncExp(),    1));
+				map.put("floor",        new BuiltInCreator(false, new FFloorFuncExp(),   1));
+				map.put("integer",      new BuiltInCreator(false, new FIntegerFuncExp(), 1));
 				map.put("sin",          new BuiltInCreator(true,  new FSinExp(),         1));
 				map.put("cos",          new BuiltInCreator(true,  new FCosExp(),         1));
 				map.put("tan",          new BuiltInCreator(true,  new FTanExp(),         1));
@@ -271,7 +281,6 @@ aspect InstFunctionBinding {
 				map.put("scalar",       new BuiltInCreator(false, new FScalarExp(),      1));
 				map.put("vector",       new BuiltInCreator(false, new FVectorExp(),      1));
 				map.put("matrix",       new BuiltInCreator(false, new FMatrixExp(),      1));
-				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
 				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
 				map.put("skew",         new BuiltInCreator(false, new FSkew(),           1));
@@ -280,15 +289,6 @@ aspect InstFunctionBinding {
 				map.put("product",      new BuiltInCreator(false, new FProductExp(),     1));
 				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
 				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
-				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
-				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
-				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
-				map.put("integer",      new BuiltInCreator(false, new FIntegerFuncExp(), 1));
-				map.put("div",          new BuiltInCreator(false, new FDivFuncExp(),     2));
-				map.put("mod",          new BuiltInCreator(false, new FModFuncExp(),     2));
-				map.put("rem",          new BuiltInCreator(false, new FRemFuncExp(),     2));
-				map.put("ceil",         new BuiltInCreator(false, new FCeilFuncExp(),    1));
-				map.put("floor",        new BuiltInCreator(false, new FFloorFuncExp(),   1));
 				map.put("semiLinear",   new BuiltInCreator(false, new FSemiLinearExp(),  3));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));

@@ -1283,23 +1283,6 @@ aspect ConstantEvaluation {
 	  return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
   }
   
-  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
-  
-  eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
-  eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
-  eq FRemFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().truncToZero(type().div(getX().ceval(), getY().ceval())), getY().ceval()));
-  eq FCeilFuncExp.cevalCalc()        = type().ceil(getX().ceval());  
-  eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
-  eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
-  
-  eq FStringExp.cevalCalc() {
-	  // TODO: support format args
-	  if (getValue().type().isReal())
-		  return new CValueString(String.format((Locale) null, "%.6g", getValue().ceval().realValue()));
-	  else
-		  return getValue().ceval().convertString();
-  }
-  
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
   
   eq FConnectionsOp.cevalCalc() {
@@ -1559,7 +1542,26 @@ aspect ConstantEvaluation {
   // TODO: if caching, use cevalFunction() instead
   eq FFunctionCall.cevalCalc()    = evaluate()[0];
   eq InstFunctionCall.cevalCalc() = hasOutputs() ? evaluate()[0] : CValue.UNKNOWN;
-
+  
+  eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
+  eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
+  eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
+  eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
+  eq FStringExp.cevalCalc() {
+	  // TODO: support format args
+	  if (getValue().type().isReal())
+		  return new CValueString(String.format((Locale) null, "%.6g", getValue().ceval().realValue()));
+	  else
+		  return getValue().ceval().convertString();
+  }
+  
+  eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
+  eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
+  eq FRemFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().truncToZero(type().div(getX().ceval(), getY().ceval())), getY().ceval()));
+  eq FCeilFuncExp.cevalCalc()        = type().ceil(getX().ceval());  
+  eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
+  eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
+  
   eq FSinExp.cevalCalc()   = new CValueReal(Math.sin(getFExp().ceval().realValue()));
   eq FCosExp.cevalCalc()   = new CValueReal(Math.cos(getFExp().ceval().realValue()));
   eq FTanExp.cevalCalc()   = new CValueReal(Math.tan(getFExp().ceval().realValue()));	  
@@ -1574,10 +1576,6 @@ aspect ConstantEvaluation {
   eq FExpExp.cevalCalc()   = new CValueReal(Math.exp(getFExp().ceval().realValue()));
   eq FLogExp.cevalCalc()   = new CValueReal(Math.log(getFExp().ceval().realValue()));
   eq FLog10Exp.cevalCalc() = new CValueReal(Math.log10(getFExp().ceval().realValue()));	  
-  eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
-  
-  eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
-  eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
   
   eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 

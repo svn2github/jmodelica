@@ -2621,7 +2621,7 @@ aspect FlatExpressions {
     eq FIfExp.getChild().inIfCondition()            = true;
     eq FAssert.getTest().inIfCondition()            = true;
     eq FAbsExp.getChild().inIfCondition()           = true;
-    eq FSignExp.getChild().inIfCondition() = true;
+    eq FSignExp.getChild().inIfCondition()          = true;
     eq FAbstractEquation.getChild().inIfCondition() = false;
     eq SourceRoot.getChild().inIfCondition()        = false;
     eq FlatRoot.getChild().inIfCondition()          = false;

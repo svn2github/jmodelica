@@ -1304,6 +1304,56 @@ FAbsExp : FVectUnaryBuiltIn;
 FSignExp : FVectUnaryBuiltIn;
 
 /**
+ * \brief Sqrt built-in function.
+ */
+FSqrtExp : FMathematicalFunctionCall;
+
+/**
+ * \brief The Integer() built-in function (convert enumeration value to Integer).
+ */
+FEnumIntegerExp : FVectUnaryBuiltIn;
+
+/**
+ * \brief Abstract base class for event generating expressions.
+ */
+abstract FEventGenExp : FBuiltInFunctionCall ::= X:FExp;
+
+/**
+ * \brief Abstract base class for binary event generating expressions.
+ */
+abstract FBinEventGenExp : FEventGenExp ::= Y:FExp;
+
+/**
+ * \brief The div() built-in function.
+ */
+FDivFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The mod() built-in function.
+ */
+FModFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The rem() built-in function.
+ */
+FRemFuncExp : FBinEventGenExp;
+
+/**
+ * \brief The floor() built-in function.
+ */
+FFloorFuncExp : FEventGenExp;
+
+/**
+ * \brief The ceil() built-in function.
+ */
+FCeilFuncExp : FEventGenExp;
+
+/**
+ * \brief The integer() built-in function (convert Real to Integer).
+ */
+FIntegerFuncExp : FFloorFuncExp;
+
+/**
  * \brief Base class for calls to built-in mathematical functions.
  */
 abstract FMathematicalFunctionCall : FBuiltInFunctionCall ::= FExp;
@@ -1374,11 +1424,6 @@ FLogExp : FMathematicalFunctionCall;
 FLog10Exp : FMathematicalFunctionCall;
 
 /**
- * \brief Sqrt built-in function.
- */
-FSqrtExp : FMathematicalFunctionCall;
-
-/**
  * \brief Ndims built-in function.
  */
 FNdimsExp : FUnaryBuiltIn;
@@ -1387,51 +1432,6 @@ FNdimsExp : FUnaryBuiltIn;
  * \brief Size built-in function.
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
-
-/**
- * \brief Abstract base class for event generating expressions.
- */
-abstract FEventGenExp : FBuiltInFunctionCall ::= X:FExp;
-
-/**
- * \brief Abstract base class for binary event generating expressions.
- */
-abstract FBinEventGenExp : FEventGenExp ::= Y:FExp;
-
-/**
- * \brief The div() built-in function.
- */
-FDivFuncExp : FBinEventGenExp;
-
-/**
- * \brief The mod() built-in function.
- */
-FModFuncExp : FBinEventGenExp;
-
-/**
- * \brief The rem() built-in function.
- */
-FRemFuncExp : FBinEventGenExp;
-
-/**
- * \brief The floor() built-in function.
- */
-FFloorFuncExp : FEventGenExp;
-
-/**
- * \brief The ceil() built-in function.
- */
-FCeilFuncExp : FEventGenExp;
-
-/**
- * \brief The integer() built-in function (convert Real to Integer).
- */
-FIntegerFuncExp : FFloorFuncExp;
-
-/**
- * \brief The Integer() built-in function (convert enumeration value to Integer).
- */
-FEnumIntegerExp : FUnaryBuiltIn;
 
 /**
  * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).

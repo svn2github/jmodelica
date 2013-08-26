@@ -907,13 +907,13 @@ aspect InheritedFactoryMethods {
 	public FExpExp   FExpExp.createEmptyNode()   { return new FExpExp();   }
 	public FLogExp   FLogExp.createEmptyNode()   { return new FLogExp();   }
 	public FLog10Exp FLog10Exp.createEmptyNode() { return new FLog10Exp(); }
-	public FSqrtExp  FSqrtExp.createEmptyNode()  { return new FSqrtExp();  }
 	
 	// Built-in function calls and function call-like operators
 	public FNdimsExp       FNdimsExp.createEmptyNode()       { return new FNdimsExp();       }
 	public FSizeExp        FSizeExp.createEmptyNode()        { return new FSizeExp();        }
 	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
 	public FSignExp        FSignExp.createEmptyNode()        { return new FSignExp();        }
+	public FSqrtExp        FSqrtExp.createEmptyNode()        { return new FSqrtExp();        }
 	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
 	public FStringExp      FStringExp.createEmptyNode()      { return new FStringExp();      }
 	public FDivFuncExp     FDivFuncExp.createEmptyNode()     { return new FDivFuncExp();     }

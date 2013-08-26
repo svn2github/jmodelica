@@ -2936,5 +2936,325 @@ Semantic error at line 2720, column 27:
 ")})));
 end InfArgsWithNamed;
 
+package FunctionLike
+package NumericConversion
+model Abs
+    Real x = abs(1);
+    Real y[3] = abs({2,3,4});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_NumericConversion_Abs",
+			description="Basic test of abs().",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.NumericConversion.Abs
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x = abs(1);
+ y[1] = abs(2);
+ y[2] = abs(3);
+ y[3] = abs(4);
+end ArrayBuiltins.FunctionLike.NumericConversion.Abs;
+")})));
+end Abs;
+model Sign
+    Real x = sign(1);
+    Real y[3] = sign({2,3,4});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_NumericConversion_Sign",
+			description="Basic test of sign().",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.NumericConversion.Sign
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x = sign(1);
+ y[1] = sign(2);
+ y[2] = sign(3);
+ y[3] = sign(4);
+end ArrayBuiltins.FunctionLike.NumericConversion.Sign;
+")})));
+end Sign;
+model Sqrt
+    Real x = sqrt(1);
+//    Real y[3] = sqrt({2,3,4});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_NumericConversion_Sqrt",
+			description="Basic test of sqrt().",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.NumericConversion.Sqrt
+ Real x;
+equation
+ x = sqrt(1);
+end ArrayBuiltins.FunctionLike.NumericConversion.Sqrt;
+")})));
+end Sqrt;
+model Integer1
+    type E = enumeration(x,a,b,c);
+    Real x = Integer(E.x);
+    Real y[3] = Integer({E.a,E.b,E.c});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_NumericConversion_Integer1",
+			description="Basic test of Integer().",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.NumericConversion.Integer1
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ x = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.x);
+ y[1] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.a);
+ y[2] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.b);
+ y[3] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.c);
+
+public
+ type ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E = enumeration(x, a, b, c);
+
+end ArrayBuiltins.FunctionLike.NumericConversion.Integer1;
+")})));
+end Integer1;
+end NumericConversion;
+
+package EventGenerating
+model Div
+	Real x    = div(time, 2);
+	Real y[2] = div({time,time},2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Div",
+			description="Basic test of div().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Div
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+initial equation 
+ temp_1 = div(time, 2);
+ temp_2 = div(time, 2);
+ temp_3 = div(time, 2);
+equation
+ x = temp_3;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+  temp_1 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+  temp_2 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+  temp_3 = div(time, 2);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Div;
+")})));
+end Div;
+
+model Mod
+	Real x    = mod(time, 2);
+	Real y[2] = mod({time,time},2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Mod",
+			description="Basic test of mod().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Mod
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+initial equation 
+ temp_1 = floor(time / 2);
+ temp_2 = floor(time / 2);
+ temp_3 = floor(time / 2);
+equation
+ x = time - temp_3 * 2;
+ y[1] = time - temp_2 * 2;
+ y[2] = time - temp_1 * 2;
+ when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time / 2);
+ end when;
+ when {time / 2 < pre(temp_2), time / 2 >= pre(temp_2) + 1} then
+  temp_2 = floor(time / 2);
+ end when;
+ when {time / 2 < pre(temp_3), time / 2 >= pre(temp_3) + 1} then
+  temp_3 = floor(time / 2);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Mod;
+")})));
+end Mod;
+
+model Rem
+	Real x    = rem(time, 2);
+	Real y[2] = rem({time,time},2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Rem",
+			description="Basic test of rem().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Rem
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+initial equation 
+ temp_1 = div(time, 2);
+ temp_2 = div(time, 2);
+ temp_3 = div(time, 2);
+equation
+ x = time - temp_3 * 2;
+ y[1] = time - temp_2 * 2;
+ y[2] = time - temp_1 * 2;
+ when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+  temp_1 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+  temp_2 = div(time, 2);
+ end when;
+ when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+  temp_3 = div(time, 2);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Rem;
+")})));
+end Rem;
+
+model Ceil
+	Real x = 4 + ceil((time * 0.3) + 4.2) * 4;
+	Real y[2] = ceil({time,time*2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Ceil",
+			description="Basic test of ceil().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Ceil
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+initial equation 
+ temp_1 = ceil(time * 2);
+ temp_2 = ceil(time);
+ temp_3 = ceil(time * 0.3 + 4.2);
+equation
+ x = 4 + temp_3 * 4;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 <= pre(temp_1) - 1, time * 2 > pre(temp_1)} then
+  temp_1 = ceil(time * 2);
+ end when;
+ when {time <= pre(temp_2) - 1, time > pre(temp_2)} then
+  temp_2 = ceil(time);
+ end when;
+ when {time * 0.3 + 4.2 <= pre(temp_3) - 1, time * 0.3 + 4.2 > pre(temp_3)} then
+  temp_3 = ceil(time * 0.3 + 4.2);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Ceil;
+")})));
+end Ceil;
+
+model Floor
+	Real x = 4 + floor((time * 0.3) + 4.2) * 4;
+	Real y[2] = floor({time,time*2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Floor",
+			description="Basic test of floor().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Floor
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Real temp_1;
+ discrete Real temp_2;
+ discrete Real temp_3;
+initial equation 
+ temp_1 = floor(time * 2);
+ temp_2 = floor(time);
+ temp_3 = floor(time * 0.3 + 4.2);
+equation
+ x = 4 + temp_3 * 4;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
+  temp_1 = floor(time * 2);
+ end when;
+ when {time < pre(temp_2), time >= pre(temp_2) + 1} then
+  temp_2 = floor(time);
+ end when;
+ when {time * 0.3 + 4.2 < pre(temp_3), time * 0.3 + 4.2 >= pre(temp_3) + 1} then
+  temp_3 = floor(time * 0.3 + 4.2);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Floor;
+")})));
+end Floor;
+
+model Integer
+	Real x = integer((0.9 + time/10) * 3.14);
+	Real y[2] = integer({time,time*2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventGenerating_Integer",
+			description="Basic test of integer().",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.EventGenerating.Integer
+ Real x;
+ Real y[1];
+ Real y[2];
+ discrete Integer temp_1;
+ discrete Integer temp_2;
+ discrete Integer temp_3;
+initial equation 
+ temp_1 = integer(time * 2);
+ temp_2 = integer(time);
+ temp_3 = integer((0.9 + time / 10) * 3.14);
+equation
+ x = temp_3;
+ y[1] = temp_2;
+ y[2] = temp_1;
+ when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
+  temp_1 = integer(time * 2);
+ end when;
+ when {time < pre(temp_2), time >= pre(temp_2) + 1} then
+  temp_2 = integer(time);
+ end when;
+ when {(0.9 + time / 10) * 3.14 < pre(temp_3), (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1} then
+  temp_3 = integer((0.9 + time / 10) * 3.14);
+ end when;
+end ArrayBuiltins.FunctionLike.EventGenerating.Integer;
+")})));
+end Integer;
+end EventGenerating;
+
+end FunctionLike;
 
 end ArrayBuiltins;
