@@ -595,84 +595,6 @@ package UnknownArraySizes
 /* Tests compliance errors for array exps 
    of unknown size in functions. #2155 #698 */
 
-model NoError
-  function f
-    input Real x[2,:];
-	Real a[2,size(x,2)];
-	Real s[:];
-    output Real y[size(x,2),2];
-  algorithm
-    a := x;
-	s := size(x);
-  end f;
-  
-  function fwrap
-    input Real x[2,:];
-    output Real y[size(x,2),2];
-  algorithm
-    y := f(x);
-  end fwrap;
-  
-  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}});
-  Real y[4,2] = fwrap({{1,2,3,4},{5,6,7,8}});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="UnknownArraySizes_NoError",
-			description="Test that no errors are given.",
-			flatModel="
-fclass ComplianceTests.UnknownArraySizes.NoError
- parameter Real x[1,1];
- parameter Real x[1,2];
- parameter Real x[2,1];
- parameter Real x[2,2];
- parameter Real x[3,1];
- parameter Real x[3,2];
- parameter Real x[4,1];
- parameter Real x[4,2];
- parameter Real y[1,1];
- parameter Real y[1,2];
- parameter Real y[2,1];
- parameter Real y[2,2];
- parameter Real y[3,1];
- parameter Real y[3,2];
- parameter Real y[4,1];
- parameter Real y[4,2];
-parameter equation
- ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}, {x[3,1], x[3,2]}, {x[4,1], x[4,2]}}) = ComplianceTests.UnknownArraySizes.NoError.f({{1, 2, 3, 4}, {5, 6, 7, 8}});
- ({{y[1,1], y[1,2]}, {y[2,1], y[2,2]}, {y[3,1], y[3,2]}, {y[4,1], y[4,2]}}) = ComplianceTests.UnknownArraySizes.NoError.fwrap({{1, 2, 3, 4}, {5, 6, 7, 8}});
-
-public
- function ComplianceTests.UnknownArraySizes.NoError.f
-  input Real[2, :] x;
-  Real[:,:] a;
-  Real[:] s;
-  output Real[size(x, 2), 2] y;
- algorithm
-  size(a) := {2, size(x, 2)};
-  size(s) := {:};
-  for i1 in 1:size(a, 1) loop
-   for i2 in 1:size(a, 2) loop
-    a[i1,i2] := x[i1,i2];
-   end for;
-  end for;
-  s[1] := 2;
-  s[2] := size(x, 2);
-  return;
- end ComplianceTests.UnknownArraySizes.NoError.f;
-
- function ComplianceTests.UnknownArraySizes.NoError.fwrap
-  input Real[2, :] x;
-  output Real[size(x, 2), 2] y;
- algorithm
-  (y) := ComplianceTests.UnknownArraySizes.NoError.f(x);
-  return;
- end ComplianceTests.UnknownArraySizes.NoError.fwrap;
-
-end ComplianceTests.UnknownArraySizes.NoError;
-")})));
-end NoError;
-
 model Error1
   function f
     input Real x[2,:];
@@ -686,7 +608,10 @@ model Error1
 	known := x; // Assign unknown to known size.
 	x := known; // Assign known to unknown size.
 	
-	for i in x[2,:] loop // In exp array, unknown size.
+	for i in x[2,:] loop // In exp is unknown size array.
+		b[i] := x[i] > 4;
+	end for;
+	for i in 1:size(x,2) loop // Shouldn't trigger, range exp allowed
 		b[i] := x[i] > 4;
 	end for;
 	
@@ -711,13 +636,13 @@ Compliance error at line 685, column 7:
   Unknown size slice is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 686, column 2:
-  Assigning an expression of known size to an operand of unknown size is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 687, column 2:
   Assigning an expression of unknown size to an operand of known size is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 687, column 2:
+  Assigning an expression of known size to an operand of unknown size is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 689, column 6:
-  Unknown size for index is not supported in functions
+  Unknown size array as a for index is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 689, column 11:
   Unknown size slice is not supported in functions

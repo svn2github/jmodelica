@@ -145,8 +145,8 @@ aspect ComplianceCheck {
 	
 	public void InstForIndex.complianceCheck() {
 		super.complianceCheck();
-		if (hasFExp() && getFExp().size().isUnknown()) {
-			compliance("Unknown size for index is not supported in functions");
+		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess()) {
+			compliance("Unknown size array as a for index is not supported in functions");
 		}
 	}
 	
@@ -154,10 +154,10 @@ aspect ComplianceCheck {
 	public void InstAssignStmt.complianceCheck() {
 		super.complianceCheck();
 		if (getLeft().size().isUnknown() && !getRight().size().isUnknown()) {
-			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
+			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
 		}
 		if (!getLeft().size().isUnknown() && getRight().size().isUnknown()) {
-			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
+			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
 		}
 	}
 	
