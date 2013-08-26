@@ -46,7 +46,8 @@ class TestInitOptions:
         self.model.set_debug_logging(True)
         self.model.set_fmil_log_level(5)
         self.model.set('_log_level', 5)
-
+        
+    @testattr(assimulo = True)
     def test_inits(self):
         """
         test if model options are correctly initialized
@@ -59,7 +60,8 @@ class TestInitOptions:
         nose.tools.assert_true(self.model.get('_rescale_after_singular_jac'))
         nose.tools.assert_equals(self.model.get('_block_solver_experimental_mode'), 0)
         nose.tools.assert_equals(self.model.get('_nle_solver_max_iter'), 100)
-
+        
+    @testattr(assimulo = True)
     def test_variable_scaling(self):
         """
         test if user can set variable scaling.
@@ -72,6 +74,7 @@ class TestInitOptions:
         nose.tools.assert_true(N.array_equal(solves[0].block_solves[0].nominal,
                                              N.array([1.,1.])))
         
+    @testattr(assimulo = True)
     def test_equation_scaling(self):
         """
         test if user can set variable scaling.
@@ -102,6 +105,7 @@ class TestInitOptions:
         #residual scaling is not loged when turned off.
         nose.tools.assert_false('residual_scaling' in solves[0].block_solves[0].iterations[0])
     
+    @testattr(assimulo = True)
     def test_max_iter(self):
         """
         test if maxiterations works. error propagation is tested.
@@ -114,7 +118,8 @@ class TestInitOptions:
         self.setUp()
         self.model.set('_nle_solver_max_iter', 30)
         nose.tools.assert_equals(self.model.initialize(), None)
-        
+    
+    @testattr(assimulo = True)    
     def test_debbug_file(self):
         """
         That the correct amount of debug info is created.
@@ -167,6 +172,7 @@ class TestInitOptions:
         solves = gather_solves(log)
         nose.tools.assert_equals(len(solves), 3)
     
+    @testattr(assimulo = True)
     def test_debbug_solution(self):
         """
         That the correct solution is stored in the debug file.
