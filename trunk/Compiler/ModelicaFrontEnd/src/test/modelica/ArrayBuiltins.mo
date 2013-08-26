@@ -3378,6 +3378,58 @@ end Math;
 
 
 
+package Special
+
+model SemiLinear1
+  Real x = semiLinear(sin(time*10),2,-10);
+  Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_Special_SemiLinear1",
+			description="Basic test of the semiLinear() operator.",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.Special.SemiLinear1
+ Real x;
+ Real y[1];
+ Real y[2];
+equation
+ x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[2] = if time >= 0.0 then time * 2 else time * 3;
+end ArrayBuiltins.FunctionLike.Special.SemiLinear1;
+")})));
+end SemiLinear1;
+
+model SemiLinear2
+  Real x = 0;
+  Real y = 0;
+  Real sa,sb;
+equation
+  sa = time;
+  y = semiLinear(x,sa,sb);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_Special_SemiLinear2",
+			description="Test of the semiLinear() operator.",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.Special.SemiLinear2
+ constant Real x = 0;
+ constant Real y = 0;
+ Real sa;
+ Real sb;
+equation
+ sa = time;
+ sa = sb;
+end ArrayBuiltins.FunctionLike.Special.SemiLinear2;
+")})));
+end SemiLinear2;
+
+end Special;
+
+
+
 package EventRel
 
 model NoEventArray1

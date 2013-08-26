@@ -1053,6 +1053,28 @@ y
 end IntegerTest;
 end EventGen;
 
+
+
+package Special
+
+model SemiLinear1
+  Real x = semiLinear(1,2,3);
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="FunctionLike_Special_SemiLinear1",
+      description="Basic test of the semiLinear() operator.",
+      flatModel="
+fclass EvaluationTests.FunctionLike.Special.SemiLinear1
+  constant Real x = 2.0;
+end EvaluationTests.FunctionLike.Special.SemiLinear1;
+")})));
+end SemiLinear1;
+
+end Special;
+
+
+
 package EventRel
 model PreTest
 	constant Real x = 42.9;
