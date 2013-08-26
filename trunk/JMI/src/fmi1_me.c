@@ -113,16 +113,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     if (jmi_generic_func(component->jmi, jmi_set_start_values) != 0)
     	return NULL;
     
-    /* Log the build date and time of the JMI runtime.
-       This should be replaced with the JModelica version,
-       once that becomes available.
-       Might be better placed in jmi_log_init,
-       if it gains access to the logger callback? */
-    jmi_log_set_filtering(jmi->log, FALSE); /* Allow info message to go through */
-    jmi_log_node(jmi->log, logInfo, "JMIRuntime",
-                 "<build_date:%s> <build_time:%s>", __DATE__, __TIME__);
-    jmi_log_set_filtering(jmi->log, TRUE);
-
     /* Print some info about Jacobians, if available. */
     if (jmi->color_info_A != NULL) {
         jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
@@ -1739,7 +1729,7 @@ void fmi_update_runtime_options(fmi_t* fmi) {
     index = get_option_index("_block_solver_experimental_mode");
     if(index)
         op->block_solver_experimental_mode  = (int)z[index];
-        
+    
     index = get_option_index("_iteration_variable_scaling");
     if(index)
         op->iteration_variable_scaling_mode = (int)z[index];

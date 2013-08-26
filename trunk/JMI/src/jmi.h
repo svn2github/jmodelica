@@ -927,6 +927,12 @@ jmi_real_t* jmi_get_variable_scaling_factors(jmi_t* jmi);
 int jmi_get_scaling_method(jmi_t* jmi);
 
 
+/**
+ * \brief Get the name of the model that produced this FMU/JMU.
+ */
+const char *jmi_get_model_identifier();
+
+
 /* @} */
 
 

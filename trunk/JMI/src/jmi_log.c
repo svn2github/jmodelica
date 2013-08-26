@@ -234,6 +234,8 @@ struct jmi_log_t {
     buf_t buf;
 
     BOOL filtering_enabled;
+    FILE *log_file;  /**< \brief Destination for direct file logging, or NULL. */
+    BOOL initialized;
 
     category_t c;
     category_t severest_category;
@@ -254,6 +256,7 @@ static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
 
 /* constructor */
 static void init_log(log_t *log, jmi_t *jmi);
+static void initialize(log_t *log); /* extra initialization */
 
 /* logging primitives */
 static void emit(log_t *log);
@@ -307,46 +310,75 @@ static const char *category_to_fmiCategory(category_t c) {
     }
 }
 
+static void create_log_file_if_needed(log_t *log) {
+    if (log->log_file != NULL) return;
+    if (log->jmi->options.runtime_log_to_file) {
+        /* Create new log file */
+        fmi_t *fmi = log->jmi->fmi;
+        const char *instance_name = fmi ? fmi->fmi_instance_name : "";
+        char filename[1024];
+
+        sprintf(filename, "%s_%s.log", jmi_get_model_identifier(),
+                                       instance_name);
+        /* TODO: fopen returns NULL on error
+           ==> will try to reopen the file at the next emit. Do we want this? 
+           Not an issue if create_log_file_if_needed is only called once.*/
+        log->log_file = fopen(filename, "w");
+    }
+}
+
+static void file_logger(FILE *out, FILE *err, 
+                        category_t category, category_t severest_category, 
+                        const char *message) {
+    switch (category) {
+    case logError:
+        fprintf(err, "<!-- ERROR:   --> %s\n", message);
+        break;
+    case logWarning:
+        fprintf(err, "<!-- WARNING: --> %s\n", message);
+        break;
+    case logInfo:
+        fprintf(out, "%s\n", message);
+        break;
+    }
+
+    /*
+    const char *fmiCategory = category_to_fmiCategory(severest_category);
+    switch (category) {
+    case logError:
+        fprintf(stderr, "[%7s] ERROR: %s\n", fmiCategory, message);
+        break;
+    case logWarning:
+        fprintf(stderr, "[%7s] WARNING: %s\n", fmiCategory, message);
+        break;
+    case logInfo:
+        fprintf(stdout, "[%7s] %s\n", fmiCategory, message);
+        break;
+    }
+    */    
+}
+
 static void _emit(log_t *log, char* message) {
     jmi_t *jmi = log->jmi;
     category_t category = log->c;
     category_t severest_category = severest(category, log->severest_category);
 
     if (!emitted_category(log, category)) return;
-    if(jmi->fmi) {
+    
+    /* create_log_file_if_needed(log); */
+    if (log->log_file) {
+        file_logger(log->log_file, log->log_file, 
+                    category, severest_category, message);
+        fflush(log->log_file);
+    }
+    if (jmi->fmi) {
         fmi_t* fmi = jmi->fmi;
         fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
                                   category_to_fmiStatus(category),
                                   category_to_fmiCategory(severest_category),
                                   message);
     }
-    else {
-        switch (category) {
-        case logError:
-            fprintf(stderr, "ERROR: %s\n", message);
-            break;
-        case logWarning:
-            fprintf(stderr, "WARNING: %s\n", message);
-            break;
-        case logInfo:
-            fprintf(stdout, "%s\n", message);
-            break;
-        }
-        /*
-        const char *fmiCategory = category_to_fmiCategory(severest_category);
-        switch (category) {
-        case logError:
-            fprintf(stderr, "[%7s] ERROR: %s\n", fmiCategory, message);
-            break;
-        case logWarning:
-            fprintf(stderr, "[%7s] WARNING: %s\n", fmiCategory, message);
-            break;
-        case logInfo:
-            fprintf(stdout, "[%7s] %s\n", fmiCategory, message);
-            break;
-        }
-        */
-    }
+    else file_logger(stdout, stderr, category, severest_category, message);
 }
 
 /** \brief Emit the currently buffered log message, if one exists. */
@@ -385,6 +417,15 @@ static INLINE BOOL can_pop(log_t *log)   { return log->topindex > 0; } /* always
   */
 static void set_category(log_t *log, category_t c) {
     frame_t *top = topof(log);
+
+    if (!log->initialized) {
+        /* Hook to do some more initialization once everthing is set up.
+           TODO: call initialize(log) at actual initialization,
+           once everything is set up at that time. */
+        log->initialized = TRUE;
+        initialize(log);
+    }
+
     if (log->c != c) emit(log);
     log->c = c;
     top->severest_category = severest(top->severest_category, c);
@@ -426,6 +467,7 @@ static void init_log(log_t *log, jmi_t *jmi) {
     init_buffer(bufof(log));
 
     log->filtering_enabled = TRUE;
+    log->log_file = NULL;
 
     log->c = log->severest_category = logInfo;
     log->next_name = NULL;
@@ -437,9 +479,26 @@ static void init_log(log_t *log, jmi_t *jmi) {
 
     log->outstanding_comma = FALSE;
     push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
+
+    log->initialized = FALSE;  /* More initialization to do later */
+}
+
+/** Additional log_t initialization */
+static void initialize(log_t *log) {
+    create_log_file_if_needed(log);
+
+    /* Log the build date and time of the JMI runtime.
+       This should be replaced with the JModelica version,
+       once that becomes available.
+     */
+    jmi_log_set_filtering(log, FALSE); /* Allow info message to go through */
+    jmi_log_node(log, logInfo, "JMIRuntime",
+                 "<build_date:%s> <build_time:%s>", __DATE__, __TIME__);
+    jmi_log_set_filtering(log, TRUE);
 }
 
 static void delete_log(log_t *log) {
+    if (log->log_file) fclose(log->log_file);
     delete_buffer(bufof(log));
     free(log->frames);
     free(log);

@@ -348,6 +348,8 @@ $C_set_start_values$
     return 0;
 }
 
+const char *jmi_get_model_identifier() { return "$C_model_id$"; }
+
 #ifdef __cplusplus
 extern "C" {
 #endif
