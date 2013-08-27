@@ -1,0 +1,2186 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.lang.InterruptedException;
+import java.lang.StringBuilder;
+import java.nio.channels.FileChannel;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Stack;
+import java.util.regex.Pattern;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.Set;
+import java.util.Iterator;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.jmodelica.util.logging.ModelicaLogger;
+import org.jmodelica.util.logging.Level;
+import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.util.OptionRegistry.UnknownOptionException;
+import org.jmodelica.util.StreamGobbler;
+import org.jmodelica.util.SymbolValueFixer;
+import org.jmodelica.util.ModelicaException;
+import org.jmodelica.util.MemorySpider;
+import org.jmodelica.util.CompilerException;
+import org.jmodelica.util.ModelicaClassNotFoundException;
+import org.jmodelica.util.PassAndForget;
+import org.jmodelica.util.logging.IllegalLogStringException;
+import org.xml.sax.SAXException;
+
+aspect ModelicaCompilerMain {
+ 
+/**
+ * 
+ * Main compiler class which bundles the tasks needed to compile a Modelica
+ * model.
+ * <p>
+ * There are two usages with this class:
+ * -# Compile in one step either from the command line or by calling the static 
+ * method <compileModel> in your own class.
+ * -# Split compilation into several steps by calling the static methods
+ * in your own class.
+ * <p>
+ * Use (1) for a simple and compact way of compiling a Modelica model. As a
+ * minimum, provide the modelfile name and class name as command line arguments.
+ * Optional arguments are XML template and c template files which are needed for
+ * code generation. If any of these are ommitted no code generation will be
+ * performed.
+ * <p>
+ * Command line example without code generation:<br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1</code>
+ * <p>
+ * Command line example with code generation: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
+ * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
+ * <p>
+ * Logging can be set with the optional argument -log=i, w or e where:
+ * <p>
+ *  - -d : log debug, info, warning and error messages
+ * 	- -i : log info, warning and error messages
+ * 	- -w : log warning and error messages
+ * 	- -e : log error messages only (default if the log option is not used)
+ * <p>
+ * Example with log level set to INFO: <br>
+ * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 
+ * models.model1</code>
+ * <p>
+ * The logs will be printed to standard out.
+ * <p>
+ * 
+ * For method (2), the compilation steps are divided into 4 tasks which can be
+ * used via the methods:
+ * -# parseModel (source code -> attributed source representation)  
+ * -# instantiateModel (source representation -> instance model) 
+ * -# flattenModel (instance model -> flattened model) 
+ * -# generateCode (flattened model -> c code and XML code)
+ * <p>
+ * They must be called in this order. Use provided methods to get/set logging
+ * level.
+ * 
+ */
+public class ModelicaCompiler {
+	
+	public static final Level DEFAULT_LEVEL = Level.ERROR;
+	protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
+	
+	protected String xmlTpl = null;
+	protected String cTemplatefile = null;
+	
+	private OptionRegistry options = null;
+	private DiagnosticsGenerator diagGenerator = null;
+	
+	protected boolean dumpMemoryUse = false;
+	protected int dumpMemoryUseMinSize = 2 * 1024;
+	protected boolean findFlatToInstanceLinks = false;
+	
+	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
+	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
+	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
+	protected IErrorHandler errorHandler = null;
+	
+	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
+	
+	protected File tempDir = null;
+	protected File outDir = null;
+	protected File sourceDir = null;
+	protected File resourceDir = null;
+	
+	protected String[] targetPlatforms = null;
+	protected Collection<Problem> warnings = new ArrayList<Problem>();
+	
+	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String cTemplatefile) {
+		this(options);
+		this.xmlTpl = xmlTpl;
+		this.cTemplatefile = cTemplatefile;
+	}
+	
+	public ModelicaCompiler(OptionRegistry options) {
+		this.options = options;
+	}
+	
+	protected ModelicaCompiler() {}
+
+	public void defaultOptionsFMUME() {
+		setBooleanOption("generate_ode", true);
+		setBooleanOption("generate_dae", false);
+		setBooleanOption("equation_sorting", true);
+		setBooleanOption("generate_fmi_me_xml", true);
+		setBooleanOption("generate_fmi_cs_xml", false);
+		setBooleanOption("generate_xml_equations", false);
+	}
+
+	public void defaultOptionsFMUCS() {
+		setBooleanOption("generate_ode", true);
+		setBooleanOption("generate_dae", false);	
+		setBooleanOption("equation_sorting", true);
+		setBooleanOption("generate_fmi_me_xml", true);
+		setBooleanOption("generate_fmi_cs_xml", true);
+		setBooleanOption("generate_xml_equations", false);
+	}
+	
+	public void defaultOptionsFMUX() {
+		setBooleanOption("generate_ode", false);
+		setBooleanOption("generate_dae", true);
+		setBooleanOption("equation_sorting", false);
+		setBooleanOption("generate_fmi_me_xml", false);
+		setBooleanOption("generate_fmi_cs_xml", false);
+    	setBooleanOption("generate_xml_equations", true);
+	}
+	
+	public void defaultOptionsJMU() {
+		setBooleanOption("generate_ode", false);
+		setBooleanOption("generate_dae", true);
+		setBooleanOption("equation_sorting", false);
+		setBooleanOption("generate_fmi_me_xml", false);
+		setBooleanOption("generate_fmi_cs_xml", false);
+		setBooleanOption("generate_xml_equations", false);
+	}
+	
+	public void defaultTemplatePathsJMU() {
+		File dir = getTemplatesDir();
+		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath(): xmlTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "jmi_modelica_template.c").getPath(): cTemplatefile;
+	}
+	
+	public void defaultTemplatePathsFMUME() {
+		File dir = getTemplatesDir();
+		xmlTpl  = (xmlTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : cTemplatefile;
+	}
+
+	public void defaultTemplatePathsFMUCS() {
+		File dir = getTemplatesDir();
+		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi1_cs_model_description.tpl").getPath() : xmlTpl;
+		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
+	}
+	
+	public void defaultTemplatePathsFMUX() {
+		File dir = getTemplatesDir();
+		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath() : xmlTpl;
+		cTemplatefile = null;
+	}
+
+	/**
+	 * Sets the directory new temporary files are created in. 
+	 * The default value is <code>null</code>, and is interpreted as the current working directory.
+	 */
+	public void setTempFileDir(File temp) {
+		tempDir = temp;
+	}
+	
+	public void setOutDir(File out) {
+		outDir = out;
+		sourceDir = new File(outDir, "sources");
+		resourceDir = new File(outDir, "resources");
+		sourceDir.mkdirs();
+		resourceDir.mkdir();
+	}
+	
+	public void setSubOutDir(String out) {
+		setOutDir(new File(tempDir, out));
+	}
+	
+	public void setRandomOutDir() {
+		try {
+			File out = File.createTempFile("jmc", "out", tempDir);
+			out.delete();
+			setOutDir(out);
+		} catch (IOException e) {
+			// TODO: this should result in an error message about not being able to write to output dir
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteOutDir() {
+		if (outDir != null)
+			recursiveDelete(outDir);
+		outDir = null;
+		sourceDir = null;
+		resourceDir = null;
+	}
+	
+	protected void recursiveDelete(File dir) {
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory())
+				recursiveDelete(f);
+			else
+				f.delete();
+		}
+		dir.delete();
+	}
+	
+	protected static File getTemplatesDir() {
+		return new File(jmodelicaHome, "CodeGenTemplates");
+	}
+	
+	public static CCompilerDelegator getCCompiler() {
+		return cCompiler;
+	}
+	
+	public static void setCCompiler(CCompilerDelegator cCompiler) {
+		ModelicaCompiler.cCompiler = cCompiler;
+	}
+	
+	public static String getJModelicaHome() {
+		return jmodelicaHome;
+	}
+	
+	public static void setJModelicaHome(String jmHome) {
+		jmodelicaHome = jmHome;
+	}
+	
+	public static void addGlobalCompilationHooks(CompilationHooks hooks) {
+		globalHooksList.add(hooks);
+	}
+	
+	public static void removeGlobalCompilationHooks(CompilationHooks hooks) {
+		globalHooksList.remove(hooks);
+	}
+	
+	public void addCompilationHooks(CompilationHooks hooks) {
+		hooksList.add(hooks);
+	}
+	
+	public void removeCompilationHooks(CompilationHooks hooks) {
+		hooksList.remove(hooks);
+	}
+	
+	public IErrorHandler getErrorHandler() {
+		return errorHandler;
+	}
+	
+	/**
+	 * Set the error handler to use for collection errors.
+	 * Passing <code>null</code> resets to default.
+	 */
+	public void setErrorHandler(IErrorHandler eh) {
+		errorHandler = eh;
+	}
+	
+	/**
+	 * Throws a {@link CompilationAbortedException} if any hooks class signals an abort.
+	 */
+	protected void hookCheckAbort() {
+		for (CompilationHooks hooks : hooksList) {
+			if (hooks.shouldAbort()) {
+				log.info("Compilation aborted.");
+				throw new CompilationAbortedException();
+			}
+		}
+	}
+	
+	/**
+	 * Calls the hook to be called after the supplied code files are parsed.
+	 */
+	protected void hookFilesParsed(SourceRoot sr) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.filesParsed(sr);
+	}
+	
+	/**
+	 * Calls the hook to be called after the error checks on the instantiated 
+	 * model are finished without errors.
+	 */
+	protected void hookModelInstantiatied(InstClassDecl icd) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelInstantiatied(icd);
+	}
+	
+	/**
+	 * Calls the hook to be called after the model is flattened.
+	 */
+	protected void hookModelFlattened(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelFlattened(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after transformations are applied to the model.
+	 */
+	protected void hookModelTransformed(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.modelTransformed(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after error checks of the flat model are 
+	 * finished without errors.
+	 */
+	protected void hookFlatModelChecked(FClass fc) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.flatModelChecked(fc);
+	}
+	
+	/**
+	 * Calls the hook to be called after a code generator is created.
+	 */
+	protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeGeneratorCreated(gen);
+	}
+	
+	/**
+	 * Calls the hook to be called after output code is generated.
+	 */
+	protected void hookCodeGenerated(File dir) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeGenerated(dir);
+	}
+	
+	/**
+	 * Calls the hook to be called after the generated C code is compiled.
+	 */
+	protected void hookCodeCompiled() {
+		for (CompilationHooks hooks : hooksList)
+			hooks.codeCompiled();
+	}
+	
+	/**
+	 * Calls the hook to be called after the FMU is packed.
+	 */
+	protected void hookFmuPacked(File path) {
+		for (CompilationHooks hooks : hooksList)
+			hooks.fmuPacked(path);
+	}
+	
+	public String getStringOption(String key) throws UnknownOptionException {
+		return options.getStringOption(key);
+	}
+	
+	public void setStringOption(String key, String value) throws UnknownOptionException {
+		options.setStringOption(key,value);
+	}
+	
+	public int getIntegerOption(String key) throws UnknownOptionException {
+		return options.getIntegerOption(key);
+	}
+	
+	public void setIntegerOption(String key, int value) throws UnknownOptionException {
+		options.setIntegerOption(key, value);
+	}
+	
+	public double getRealOption(String key) throws UnknownOptionException {
+		return options.getRealOption(key);
+	}
+	
+	public void setRealOption(String key, double value) throws UnknownOptionException {
+		options.setRealOption(key, value);
+	}
+	
+	public boolean getBooleanOption(String key) throws UnknownOptionException{
+		return options.getBooleanOption(key);
+	}
+	
+	public void setBooleanOption(String key, boolean value) throws UnknownOptionException {
+		options.setBooleanOption(key, value);
+	}
+
+	public void setDiagnosticsGenerator(DiagnosticsGenerator diagGenerator) {
+		this.diagGenerator = diagGenerator;
+	}
+
+	public DiagnosticsGenerator getDiagnosticsGenerator() {
+		return this.diagGenerator;
+	}
+	
+	public String getOptionDescription(String key) throws UnknownOptionException {
+		return options.getDescription(key);
+	}
+	
+	public boolean willDumpMemoryUse() {
+		return dumpMemoryUse;
+	}
+
+	public void setDumpMemoryUse(boolean dump) {
+		dumpMemoryUse = dump;
+	}
+
+	public void setDumpMemoryUse(boolean dump, int minSize) {
+		dumpMemoryUse = dump;
+		dumpMemoryUseMinSize = minSize;
+	}
+
+	public void setDumpMemoryUse(boolean dump, String minSize) {
+		if (minSize == null || minSize.isEmpty())
+			setDumpMemoryUse(dump);
+		else
+			setDumpMemoryUse(dump, (int) ASTNode.parseMem(minSize));
+	}
+	
+	public boolean willFindFlatToInstanceLinks() {
+		return findFlatToInstanceLinks;
+	}
+
+	public void setFindFlatToInstanceLinks(boolean find) {
+		findFlatToInstanceLinks = find;
+	}
+
+	/**
+	 * Returns the modelicapath attribute set for this compiler instance.
+	 * 
+	 * @return Reference to the modelicapath attribute. 
+	 * 
+	 */
+	public String getModelicapath() {
+		return options.getStringOption("MODELICAPATH");
+	}
+	
+	/**
+	 * Set the modelicapath attribute.
+	 * 
+	 * @param path The new modelicapath.
+	 */
+	public void setModelicapath(String path) {
+		options.addStringOption("MODELICAPATH", path);
+	}
+	
+	/**
+	 * Returns the XML model description template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the XML variables template file path attribute. 
+	 * 
+	 */
+	public String getXMLTpl() {
+		return this.xmlTpl;
+	}
+
+	/**
+	 * Set the XML model description template file path attribute.
+	 * 
+	 * @param template The new XML variables template file path.
+	 */
+	public void setXMLTpl(String template) {
+		this.xmlTpl = template;
+	}
+
+	/**
+	 * Returns the c template file path set for this compiler instance.
+	 * 
+	 * @return Reference to the c template file path attribute. 
+	 * 
+	 */
+	public String getCTemplate() {
+		return this.cTemplatefile;
+	}
+	
+	/**
+	 * Set the c template file path attribute.
+	 * 
+	 * @param template The new c template file path.
+	 */
+	public void setCTemplate(String template) {
+		this.cTemplatefile = template;
+	}
+
+	protected final static int NUM_USED_MEMORY_SLOTS = 6;
+	protected long[] usedMem = new long[NUM_USED_MEMORY_SLOTS];
+	protected int numUsedMemFilled;
+	protected long timeCompilationStarted;
+
+	/**
+	 * \brief Initilize vars gathering debug information about compilation.
+	 * 
+	 * Should be called before compilation process begins.
+	 */
+	protected void resetCompilationInfo() {
+		timeCompilationStarted = System.currentTimeMillis();
+		numUsedMemFilled = 0;
+	}
+	
+	/**
+	 * \brief Log debug information about compilation.
+	 * 
+	 * Should be called after compilation process ends.
+	 */
+	protected void logCompilationInfo() {
+		long time = System.currentTimeMillis() - timeCompilationStarted;
+		double time2 = Math.round(time / 10.0) / 100.0;
+		log.debug("Compilation took " + time2 + " s");
+		
+		noteUsedMemory();  // Needed if an exception occurred
+		int numFinishedSteps = numUsedMemFilled / 2;
+		if (numFinishedSteps > 0) {
+			log.debug("Changes in memory use:");
+			logMemoryUseForStep("parseModel", 0);
+		}
+		if (numFinishedSteps > 1)
+			logMemoryUseForStep("instantiateModel", 1);
+		if (numFinishedSteps > 2)
+			logMemoryUseForStep("flattenModel", 2);
+	}
+	
+	/**
+	 * Log memory change for a single compilation step.
+	 * 
+	 * Called by {@link #logCompilationInfo()}.
+	 * 
+	 * @param name   the name of the step
+	 * @param index  the index of the step (0-2)
+	 */
+	protected void logMemoryUseForStep(String name, int index) {
+		String mem = ASTNode.formatMem((int) (usedMem[2 * index + 1] - usedMem[2 * index]));
+		log.debug(String.format(" %-19s %8s", name + "():", mem));
+	}
+	
+	/**
+	 * \brief Saves away the current amount of memory used.
+	 */
+	protected void noteUsedMemory() {
+		if (numUsedMemFilled < NUM_USED_MEMORY_SLOTS)
+			usedMem[numUsedMemFilled++] = getUsedMemory();
+	}
+	
+	private static final Runtime RUNTIME = Runtime.getRuntime();
+	
+	/**
+	 * Get the amount of memory currently used.
+	 * 
+	 * This includes objects that are no longer reachable but not yet garbage collected.
+	 */
+	public static long getUsedMemory() {
+		return RUNTIME.totalMemory() - RUNTIME.freeMemory();
+	}
+
+	/**
+	 * \brief Save a dump of the memory use of an AST.
+	 * 
+	 * The dump will be saved in a file named <code>"size_" + type + ".txt"</code>.
+	 * 
+	 * @param root   the root of the AST to dump memory use for
+	 * @param type   a one-word description of the tree to dump
+	 * @param count  it node counts should also be generated
+	 */
+	protected void dumpMemoryUseFile(ASTNode root, String type, boolean count) throws FileNotFoundException {
+		dumpMemoryUseFile(root, type, type, count);
+	}
+
+	/**
+	 * \brief Save a dump of the memory use of an AST.
+	 * 
+	 * The dump will be saved in a file named <code>"size_" + name + ".txt"</code>.
+	 * 
+	 * @param root   the root of the AST to dump memory use for
+	 * @param type   a short description of the tree to dump
+	 * @param name   the variable part of the file name
+	 * @param count  it node counts should also be generated
+	 */
+	protected void dumpMemoryUseFile(ASTNode root, String type, String name, boolean count) 
+			throws FileNotFoundException {
+		if (dumpMemoryUse) {
+			String file = "size_" + name + ".txt";
+			log.debug("Dumping " + type + " tree to '" + file + "'...");
+			long time = System.currentTimeMillis();
+			root.dumpMemoryUse(file, true, -1, dumpMemoryUseMinSize);
+			time = Math.round((System.currentTimeMillis() - time) / 1000.0);
+			if (count)
+				root.buildNodeCount();
+			log.debug(" Dumped tree in " + time + "s");
+		}
+	}
+
+	/**
+	 * Save a dump of the node class counts of an AST (or several).
+	 * 
+	 * The dump will be saved in a file named <code>"node_count.txt"</code>.
+	 * 
+	 * @param root  the roots of the ASTs to dump node counts for
+	 */
+	protected void dumpNodeCountFile() 
+			throws FileNotFoundException {
+		if (dumpMemoryUse) {
+			String file = "node_count.txt";
+			log.debug("Dumping node counts to '" + file + "'...");
+			ASTNode.dumpNodeCount(file);
+		}
+	}
+	
+	/**
+	 * Find any links from the flat tree to the instance tree.
+	 */
+	protected void findFlatToInstanceLinks(FClass fc) {
+		if (findFlatToInstanceLinks) {
+			log.warning("Searching memory graph for flat tree for links to instance tree...");
+			new MemorySpider(new MemorySpider.ClassFilteredVisitor<InstRoot>(InstRoot.class) {
+				protected void visitFiltered(InstRoot ir, Stack<MemorySpider.Frame> path) {
+					Root root = null;
+					int first = -1;
+					int last = -1;
+					for (int i = 0; last < 0 && i < path.size(); i++) {
+						Object obj = path.get(i).getObject();
+						if (obj instanceof BaseNode) {
+							BaseNode n = (BaseNode) obj;
+							try {
+								if (first < 0) {
+									root = n.root();
+									first = i;
+								} else if (root != n.root()) {
+									last = i;
+								} else {
+									first = i;
+								}
+							} catch (Exception e) {}
+						}
+					}
+					log.error("Found link to instance tree, starting at: " + path.get(first).name());
+					for (int i = first + 1; i <= last; i++)
+						log.error("  " + path.get(i));
+					throw new IllegalArgumentException();
+				}
+			}).traverse(fc);
+			log.warning("Done.");
+		}
+	}
+	
+	/**
+	 * \brief Compiles a model and creates a JMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a JMU.
+	 * 
+	 * Convenience metod, equivalent to compileJMU(className, fileName, ".").
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 */
+	public void compileJMU(String className, String fileName[]) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		compileJMU(className, fileName, ".");
+	}
+	
+	/**
+	 * \brief Compiles a model and creates a JMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a JMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
+	 */
+	public void compileJMU(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		defaultOptionsJMU();
+		defaultTemplatePathsJMU();
+		compileUnit(className, fileName, "jmu", compileTo, "JMU");
+	}
+
+	/**
+	 * \brief Compiles a model and creates an FMU for Model Exchange.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * Convenience metod, equivalent to compileFMUME(className, fileName, ".").
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 */
+	public void compileFMUME(String className, String fileName[]) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		compileFMU(className, fileName, "fmume", ".");
+	}
+
+	/**
+	 * \brief Compiles a model and creates an FMU for Co-simulation.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * Convenience metod, equivalent to compileFMUCS(className, fileName, ".").
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 */
+	public void compileFMUCS(String className, String fileName[]) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		compileFMU(className, fileName, "fmucs", ".");
+	}
+
+	/**
+	 * \brief Compiles a model and creates an FMU for Model Exchange.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
+	public void compileFMUME(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		compileFMU(className, fileName, "fmume", compileTo);
+	}
+
+	/**
+	 * \brief Compiles a model and creates an FMU for Co-simulation.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
+	public void compileFMUCS(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		compileFMU(className, fileName, "fmucs", compileTo);
+	}
+
+	/**
+	 * \brief Compiles a model and creates an FMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param target The compiler target. Valid options are 'fmume' or 'fmucs'.
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
+	public void compileFMU(String className, String fileName[], String target, String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// Always set certain options when compiling an FMU
+		// First save these options in temp options registry to reset when compiling has finished
+		OptionRegistry tempOptions = new OptionRegistry(options);
+		
+		// use fmi file templates and set the correct options so that XML file will be FMI compliant
+		if (target.equals("fmume")) {
+			defaultOptionsFMUME();
+			defaultTemplatePathsFMUME();	
+			compileUnit(className, fileName, "fmume", compileTo, "FMUME");
+		} else 	if (target.equals("fmucs")) {
+			defaultOptionsFMUCS();
+			defaultTemplatePathsFMUCS();	
+			compileUnit(className, fileName, "fmucs", compileTo, "FMUCS");
+		}		
+		
+		// set back all options
+		options.copyAllOptions(tempOptions);
+	}
+	
+	/**
+	 * \brief Compiles a model and creates an FMUX.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening and XML code 
+	 * generation) and packs the result in a FMUX.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
+	 */
+	public void compileFMUX(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// Always set certain options when compiling an FMUX
+		// First save these options in temp options registry to reset when compiling has finished
+		OptionRegistry tempOptions = new OptionRegistry(options);
+		
+		// use fmi XML file template and set the correct options so that XML file will be FMI compliant
+		defaultOptionsFMUX();
+		defaultTemplatePathsFMUX();	
+		compileUnit(className, fileName, null, compileTo, "FMUX");
+		
+		// set back all options
+		options.copyAllOptions(tempOptions);
+	}
+	
+    /**
+     * \brief Compiles a model and creates an FMUX.
+     * 
+     * Compiles a model (parsing, instantiating, flattening, code generation and 
+     * binary file compilation) and packs the result in a FMUX.
+     * 
+     * Convenience metod, equivalent to compileFMUX(className, fileName, ".").
+     * 
+     * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     */
+    public void compileFMUX(String className, String fileName[]) 
+        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        compileFMUX(className, fileName, ".");
+    }
+
+	/**
+	 * \brief Compiles a JMU, FMU or FMUX (helper function for compileJMU, compileFMU and compileFMUX).
+	 * 
+	 * @param unitType "JMU", "FMUME", "FMUCS" or "FMUX".
+	 */
+	private void compileUnit(String className, String fileName[], String makeTarget, String compileTo, String unitType) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		try {
+			// set invokegc if set
+			StepInfo.GC_BEFORE_MEM = options.getBooleanOption("debug_invoke_gc");
+			
+			// Set output dir
+			if (outDir == null)
+				setRandomOutDir();
+			
+			// compile mo-file + generate code for all templates that are not null
+			FClass fc = compileModel(fileName, className);
+			
+			// compile c code if target is not null
+			hookCheckAbort();
+			if (makeTarget != null) {
+				ASTNode.beginStep("compileCCode()");
+				String cFileName = FClass.convertClassNameToUnderscore(className);
+				CCompilerDelegator ccompiler = getCCompiler();
+				ccompiler.setTargetPlatforms(targetPlatforms);
+				ccompiler.compileCCode(cFileName, makeTarget, outDir, fc.externalLibraries(), fc.externalLibraryDirectories(), fc.externalIncludeDirectories());
+				ccompiler.copySharedLibs(outDir, fc.externalLibraries(), fc.externalLibraryDirectories());
+				ASTNode.endStep("compileCCode()");
+			}
+			hookCodeCompiled();
+			
+			// package JMU
+			ASTNode.beginStep("packUnit()");
+			packUnit(className, compileTo, unitType);
+			deleteOutDir();
+			ASTNode.endStep("packUnit()");
+		} finally {
+			log.debug("Time useage and memory usage change during compilation steps:");
+			ASTNode.getStepInfo().logReport();
+			if (options.getBooleanOption("debug_csv_step_info"))
+				ASTNode.getStepInfo().writeCSVFile(new File(className + ".csv"));
+		}
+	}
+	
+	/**
+	 * \brief Packs either a JMU or FMU (helper function for compileUnit).
+	 * 
+	 * @param className Name of model class that was compiled (will determine file names).
+	 * @param path Location on file system where the packed file should be saved (created if does not exist).
+	 * @param unitType "JMU" or "FMU".
+	 */
+	protected void packUnit(String className, String path, String unitType) throws PackingFailedException {
+		File unitFile = new File(path);
+		if (unitFile.isDirectory()) { 
+			String mMangledName = FClass.convertClassNameToUnderscore(className);
+			unitFile = new File(unitFile, mMangledName + "." + getUnitSuffix(unitType));
+		} else {
+			File dirPath = unitFile.getParentFile();
+			if (dirPath != null && !dirPath.isDirectory())
+				unitFile.getParentFile().mkdirs();
+		}
+		
+		// Create the new archive
+		int BUFFER_SIZE = 2048;
+		try {
+			hookCheckAbort();
+			FileOutputStream dest = new FileOutputStream(unitFile);
+			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+			out.setMethod(ZipOutputStream.DEFLATED);
+			zipDir(outDir, out);
+			out.close();
+		} catch (CompilationAbortedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new PackingFailedException(String.format("Could not write %s to '%s'", unitType, unitFile));
+		} finally {
+		    // remove files
+		    deleteOutDir();
+		}		
+        hookFmuPacked(unitFile.getAbsoluteFile());
+	}
+	
+	protected void parseFiles(String[] paths) {
+		StepInfo.TimeItem time = new StepInfo.TimeItem();
+		time.begin();
+		File[] files = new File[paths.length];
+		for (int i = 0; i < paths.length; i++)
+			files[i] = new File(paths[i]);
+		parseFiles(files, true);
+		time.end();
+		log.info("Total time: " + time);
+	}
+		
+	private void parseFiles(File[] files, boolean all) {
+		for (File file : files) {
+			if (file.isDirectory()) {
+				parseFiles(file.listFiles(), false);
+			} else {
+				String path = file.getPath();
+				try {
+					if (all || hasModelicaFileExt(path)) {
+						parseModel(path);
+						log.info(file + " parsed OK.");
+					}
+				} catch (CompilerException e) {
+					StringBuilder str = new StringBuilder();
+					for (Problem p : e.getErrors()) 
+						log.error(p.toString());
+				} catch (FileNotFoundException e) {
+					log.error("Could not find file: " + e.getMessage());
+				} catch (IOException e) {
+					log.error("Error opening file: " + e.getMessage());
+				} catch (Exception e) {
+					log.error("Parser thew an exception on file " + path + ":\n" + e);
+				}
+			}
+		}
+	}
+	
+	public boolean hasModelicaFileExt(String file) {
+		return file.endsWith(".mo");
+	}
+
+	private static final int ZIP_BUFFER_SIZE = 2048;
+
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 */
+	protected void zipDir(File dir, ZipOutputStream out) {
+		zipDir(dir, out, null);
+	}
+
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 * @param zipDir  directory within the zip file to write to, or <code>null</code> for the root
+	 */
+	protected void zipDir(File dir, ZipOutputStream out, File zipDir) {
+		zipDir(dir, out, zipDir, new byte[ZIP_BUFFER_SIZE]);
+	}
+	
+	/**
+	 * Write all files in a directory and its subdirectories to a zip stream.
+	 * 
+	 * @param dir     directory to zip
+	 * @param out     zip stream to write to
+	 * @param zipDir  directory within the zip file to write to, or <code>null</code> for the root
+	 * @param buffer  buffer to use when writing files
+	 */
+	private void zipDir(File dir, ZipOutputStream out, File zipDir, byte[] buffer) {
+		for (File f : dir.listFiles()) {
+			File fz = new File(zipDir, f.getName());
+			if (f.isDirectory()) {
+				zipDir(f, out, fz, buffer);
+			} else {
+				try {
+					FileInputStream in = new FileInputStream(f);
+					out.putNextEntry(new ZipEntry(fz.getPath()));
+					for (int n; (n = in.read(buffer, 0, buffer.length)) != -1; ) 
+					   out.write(buffer, 0, n);
+					in.close();
+				} catch (FileNotFoundException e) {
+					// Should only occur in weird cases - ignore and skip this file
+				} catch (IOException e) {
+					// TODO: this should result in an error message about failing to zip file
+					e.printStackTrace();
+				}
+	        }
+		}
+	}
+	
+	/**
+	 * Gets the file suffix for a given unit type. 
+	 * 
+	 * Should be updated when new unit types are added.
+	 */
+	protected String getUnitSuffix(String unitType) {
+		// JMU -> jmu, FMUME -> fmu, FMUCS -> fmu, FMUX -> fmux
+		return unitType.equals("FMUX") ? unitType.toLowerCase() : unitType.substring(0, 3).toLowerCase();
+	}
+
+	/**
+	 * Compiles a Modelica model. A model file name and class must be provided.
+	 * Prints an error and returns without completion if, for example, a file 
+	 * can not be found or if the parsing fails. Supports multiple model files.
+	 * 
+	 * @param name
+	 *            Array of model file or library paths.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver
+	 *             exception.)
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to parse, instantiate or flatten is not
+	 *             found.
+	 * 
+	 */
+	public FClass compileModel(String name[], String cl)
+	  throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		log.info("======= Compiling model =======");
+		resetCompilationInfo();
+		
+		OptionRegistry opts = null;
+		FClass fc = null;
+		try {
+
+			// build source tree
+			SourceRoot sr = parseModel(name);
+			opts = sr.options;
+			dumpMemoryUseFile(sr, "source", false);
+
+			if (sr.options.getBooleanOption("generate_html_diagnostics")) {
+				setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
+			}
+
+			// compute instance tree
+			InstClassDecl icl = instantiateModel(sr, cl);
+			
+			// flattening
+			// Throw away source and instance trees when they are not needed any more
+			PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
+			dumpMemoryUseFile(sr, "source and instance", "instance", true);
+			sr = null;
+			icl = null;
+			fc = flattenModel(buf.pass());
+
+			// Generate code 
+			generateCode(fc);
+			dumpMemoryUseFile(fc, "generated", false);
+			
+		} finally {
+//			logCompilationInfo();
+			// The node count requires changing ASTNode.java by hand - see dumpNodeCountFile()
+//			dumpNodeCountFile("node_count.txt");
+		}
+
+		if (opts.getBooleanOption("generate_html_diagnostics")) {
+			getDiagnosticsGenerator().finalize();
+			setDiagnosticsGenerator(null);
+		}
+
+		log.info("====== Model compiled successfully =======");
+		
+		return fc;
+	}
+
+	/**
+	 * 
+	 * Parses a model and returns a reference to the root of the source tree.
+	 * Options related to the compilation are also loaded here and added to the
+	 * source tree representation.
+	 * 
+	 * @param name
+	 *            The name of the model file.
+	 *            
+	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver exception.)
+	 */
+	private SourceRoot parseModel(String name) 
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException{
+	/*
+		if (report.hasErrors()) {
+			CompilerException ce = new CompilerException();
+			for (Problem p : report.getErrors()) {
+				ce.addProblem(p);
+			}
+			throw ce;
+		}
+		*/
+		ParserHandler ph = new ParserHandler();
+		log.info("Parsing " + name + "...");
+		SourceRoot sr;
+		try {
+			sr = ph.parseFile(name);
+			if (errorHandler != null)
+				sr.setErrorHandler(errorHandler);
+		} catch (ParserException e) {
+			e.getProblem().setFileName(name);
+			CompilerException ce = new CompilerException();
+			ce.addProblem(e.getProblem());
+			throw ce;
+		}
+		//loadOptions(sr);
+		for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
+			sd.setFileName(name);
+		}
+		return sr;
+	}
+
+	/**
+	 * 
+	 * Parses a set of files and returns a reference to the root of a source tree
+     * where the content of all files is contained. Each file is parsed using
+     * the parseModel method.
+	 * 
+	 * @param names
+	 *            An array of file names.
+	 *            
+	 * @return The root of the source tree.
+	 * 
+	 * @throws beaver.Parser.Exception
+	 *             If there was a Beaver parsing exception.
+	 * @throws CompilerException
+	 *             If errors have been found during the parsing.
+	 * @throws FileNotFoundException
+	 *             If the model file could not be found.
+	 * @throws IOException
+	 *             If there was an error reading the model file. (Beaver exception.)
+	 */
+	public SourceRoot parseModel(String names[]) 
+	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
+		hookCheckAbort();
+//		noteUsedMemory();
+		ASTNode.beginStep("parseModel()");
+		
+		SourceRoot sr = new SourceRoot(new Program());
+		sr.options.copyAllOptions(this.options);
+		for (String name : names) {
+			if (new File(name).isDirectory()) {
+				if (!sr.getProgram().getLibraryList().addLibrary(name))
+					log.error(String.format("The directory '%s' is not a Modelica library.", name));
+			} else {
+				SourceRoot sr_tmp = parseModel(name);
+				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+					sr.getProgram().addUnstructuredEntity(sd);
+			}
+		}
+		
+		hookFilesParsed(sr);
+//		noteUsedMemory();
+		ASTNode.endStep("parseModel()");
+		
+		return sr;
+	}
+	
+	/**
+	 * 
+	 * Computes a model instance tree from a source tree. Some error checks such
+	 * as type checking is performed during the computation.
+	 * 
+	 * @param sr
+	 *            The reference to the model source root.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * 
+	 * @return The instance node corresponding to the instantiated model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the instantiation.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to instantiate is not found.
+	 */
+	public InstClassDecl instantiateModel(SourceRoot sr, String cl) 
+		throws ModelicaClassNotFoundException, CompilerException {
+		hookCheckAbort();
+		ASTNode.beginStep("instantiateModel()");
+		
+		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+		ipr.options = new OptionRegistry(sr.options);
+		
+		if (sr.options.getBooleanOption("compliance_as_warning"))
+			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
+		
+		log.info("Checking for errors...");
+		ipr.checkErrorsInInstClass(cl);
+		handleCompilerWarnings(sr.collectWarnings());
+		
+		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
+		
+		hookModelInstantiatied(icd);
+		ASTNode.endStep("instantiateModel()");
+		
+		return icd;
+	}
+	
+	protected void handleCompilerWarnings(Collection<Problem> warnings) throws CompilerException {
+		if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+			getDiagnosticsGenerator().writeProblems(warnings);
+		
+		if (!warnings.isEmpty()) {
+			log.logProblems(warnings);
+			this.warnings.addAll(warnings);
+		}
+	}
+	
+	/**
+	 * Retreives a list of warnings and clear the internal list.
+	*/
+	public Problem[] retreiveAndClearWarnings() {
+		Problem[] oldWarnings = warnings.toArray(new Problem[warnings.size()]);
+		warnings = new ArrayList<Problem>();
+		return oldWarnings;
+	}
+	
+	/**
+	 * Computes the flattened model representation from a model instance.
+	 * 
+	 * @param icd
+	 *            A reference to the model instance node.
+	 * 
+	 * @return FClass object representing the flattened model.
+	 * 
+	 * @throws CompilerException
+	 *             If errors have been found during the flattening.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws ModelicaClassNotFoundException
+	 *             If the Modelica class to flatten is not found.
+	 */
+	public FClass flattenModel(InstClassDecl icl) 
+			throws CompilerException, ModelicaClassNotFoundException, IOException {
+		hookCheckAbort();
+		ASTNode.beginStep("flattenModel()");
+		
+		String instName = icl.qualifiedName();
+		File flatFile = new File(sourceDir, instName + ".mof");
+		final FClass fc = FClass.create(icl, flatFile.getPath());
+		
+		ASTNode.beginStep("flatten()");
+		log.info("Flattening model...");
+		icl.flattenInstClassDecl(fc);
+		dumpMemoryUseFile(fc, "flat", true);
+		dumpNodeCountFile();
+		icl = null;
+		ASTNode.endStep("flatten()");
+		
+		findFlatToInstanceLinks(fc);
+		hookModelFlattened(fc);
+		hookCheckAbort();
+		
+		//fc.dumpTree("");
+		// Output the untransformed flattened model
+		ASTNode.beginStep("prettyPrintRawFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating raw .mof file...");
+			PrintStream out = new PrintStream(flatFile);
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... raw .mof file created.");
+		}
+
+		log.info("Raw flattened model:");
+		log.info(fc);
+		ASTNode.endStep("prettyPrintRawFlat()");
+
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
+			getDiagnosticsGenerator().writeRawFlattenedModel(fc);
+			getDiagnosticsGenerator().setModelDiagnosticsBeforeTransform(fc.modelDiagnostics());
+			ASTNode.endStep("htmlDiagnostics()");
+		}
+		
+		fc.transformCanonical();
+		
+		hookModelTransformed(fc);
+		hookCheckAbort();
+		
+		ASTNode.beginStep("prettyPrintFlat()");
+		if (fc.root().options.getBooleanOption("generate_mof_files")) {
+			log.debug("Creating transformed .mof file...");
+			PrintStream out = new PrintStream(new File(sourceDir, instName + "_transformed.mof"));
+			fc.prettyPrint_MC(out, "");
+			out.close();
+			log.debug("... transformed .mof file created.");
+		}
+		
+		log.info("Diagnostics for transformed flattened model:");
+		log.info(new Object() {
+			public String toString() {
+				return fc.diagnostics();
+			};
+		});
+		
+		log.info("Transformed flattened model:");
+		log.info(fc);
+		
+		ASTNode.endStep("prettyPrintFlat()");
+		
+		dumpMemoryUseFile(fc, "transformed", false);
+		
+		if (fc.root().options.getBooleanOption("write_iteration_variables_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_iteration_variables.txt"));
+			fc.getDAEInitBLT().writeIterationVariablesToFile(new File(resourceDir, instName + "_initial_system_iteration_variables.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
+		
+		if (fc.root().options.getBooleanOption("write_tearing_pairs_to_file")) {
+			ASTNode.beginStep("writeIterationVariables()");
+			fc.getDAEBLT().writeTearingPairsToFile(new File(instName + "_tearing_pairs.txt"));
+			fc.getDAEInitBLT().writeTearingPairsToFile(new File(instName + "_initial_system_tearing_pairs.txt"));
+			ASTNode.endStep("writeIterationVariables()");
+		}
+		
+		if (fc.root().options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
+			ASTNode.beginStep("htmlDiagnostics()");
+			getDiagnosticsGenerator().writeTransformedFlattenedModel(fc);
+			getDiagnosticsGenerator().writeDiagnostics(fc);
+			ASTNode.endStep("htmlDiagnostics()");
+		}
+		
+		fc.errorCheck();
+		handleCompilerWarnings(fc.collectWarnings());
+
+		hookFlatModelChecked(fc);
+		ASTNode.endStep("flattenModel()");
+
+		return fc;
+	}
+	
+	/**
+	 * \brief Create a new XMLGenerator object.
+	 * 
+	 * Override for subclasses needing another subclass of XMLGenerator.
+	 */
+	protected XMLGenerator createXMLGenerator(FClass fc) {
+		return new XMLGenerator(new PrettyPrinter(), '$', fc);
+	}
+	
+	/**
+	 * \brief Create a new CGenerator object.
+	 * 
+	 * Override for subclasses needing another subclass of CGenerator.
+	 */
+	protected CGenerator createCGenerator(FClass fc) {
+		return new CADGenerator(new PrettyPrinter(), '$', fc);
+	}
+
+	/**
+	 * \brief get the XML template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getXmlTpl(FClass fc) {
+		return this.xmlTpl;
+	}
+
+	/**
+	 * \brief get the C template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+	protected String getCTemplatefile(FClass fc) {
+		return this.cTemplatefile;
+	}
+	
+	/**
+	 * Generate an output file.
+	 * 
+	 * @param fc    the FClass to generate code for
+	 * @param tmpl  the path to the template
+	 * @param gen   the code generator to use 
+	 * @param dir   the directory to put the output file in
+	 * @param name  the name of the output file
+	 */
+	private void generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name) 
+			throws FileNotFoundException {
+		if (tmpl != null) {
+			hookCheckAbort();
+			hookCodeGeneratorCreated(gen);
+			String output = new File(dir, name).getPath();
+			gen.generate(tmpl, output);
+			log.debug("Generated file '" + output + "'.");
+		}
+	}
+	
+	/**
+	 * 
+	 * Generates XML and c code for a flattened model represented as an instance
+	 * of FClass using template files. The XML variables, XML values and c files
+	 * are given the default names <modelname>.xml, <modelname>_values.xml and 
+	 * <modelname>.c respectively.
+	 * 
+	 * @param fc
+	 *            The FClass instance for which the code generation should be
+	 *            computed.
+	 * @throws FileNotFoundException
+	 *             If either of the three template files can not be found.
+	 */
+	public void generateCode(FClass fc) throws FileNotFoundException {
+		ASTNode.beginStep("generateCode()");
+		log.info("Generating code...");
+		String name = fc.nameUnderscore();
+		
+		generateFile(fc, getXmlTpl(fc),        createXMLGenerator(fc), 
+				outDir,      "modelDescription.xml");
+		generateFile(fc, getCTemplatefile(fc), createCGenerator(fc), 
+				sourceDir,   name + ".c");
+		
+		hookCodeGenerated(outDir);
+		log.debug("... code generated.");
+		ASTNode.endStep("generateCode()");
+	}
+	
+	/**
+	 * Set the default logger and default level.
+	 */
+	public void setDefaultLogger() {
+		try {
+			setLogger(DEFAULT_LEVEL + "|stdout");
+		} catch (IllegalLogStringException e) {
+			e.printStackTrace(); // Should never happen unless someone made major bobo!
+		}
+	}
+	
+	/**
+	 * Configure logging according to <code>logString</code>.
+	 */
+	public void setLogger(String logString) throws IllegalLogStringException {
+		setLogger(ModelicaLogger.createModelicaLoggersFromLogString(logString));
+	}
+	
+	/**
+	 * Change logger to <code>logger</code>
+	 */
+	public void setLogger(ModelicaLogger logger) {
+		log.close();
+		log = logger;
+		ASTNode.log = log;
+	}
+	
+	/**
+	 * Close and disconnect all loggers.
+	 */
+	public void closeLogger() {
+		log.close();
+	}
+	
+	private static String[] convertEnv(Map<String, String> envMap) {
+		String[] res = new String[envMap.size()];
+		int i = 0;
+		for (String key : envMap.keySet())
+			res[i++] = key + '=' + envMap.get(key);
+		return res;
+	}
+	
+	/**
+	 * Executes the given command as a separate process, writing any output to the logger.
+	 */
+	public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
+		try {
+			String[] e = (env != null) ? convertEnv(env) : null;
+			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
+			
+			// Eat any output
+            new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();            
+            new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
+                                   
+            // Wait for process to finish and return result
+            return proc.waitFor();
+            
+		} catch (IOException e) {
+		} catch (InterruptedException e) {
+		}
+		return 1;
+	}
+	
+	protected static Hashtable<String, String> extractProgramArguments(String[] args, int pos) {
+		Hashtable<String, String> programargs = new Hashtable<String,String>();		
+		
+		while(pos < args.length && argumentIsOption(args[pos])) {
+			addOptionToMap(programargs, args[pos]);
+			pos++;
+		}
+		return programargs;
+	}
+
+	private static void addOptionToMap(Hashtable<String, String> programargs, String arg) {
+		String[] parts = arg.trim().substring(1).split("=", 2);
+		programargs.put(parts[0], (parts.length > 1) ? parts[1] : "");
+	}
+
+	private static boolean argumentIsOption(String arg) {
+		return arg.trim().startsWith("-");
+	}
+	
+	private final static Pattern BOOL_PATTERN = Pattern.compile("true|false", Pattern.CASE_INSENSITIVE);
+	
+	private void setOptions(Hashtable<String, String> programarguments) {
+		String filesep = File.separator;
+		String optionsfile = null;
+		//look for options.xml in $JMODELICA_HOME/Options/ and program arguments
+		if (programarguments.get("optfile") != null) {
+			optionsfile = programarguments.get("optfile");
+		} else {
+			optionsfile = jmodelicaHome+filesep+"Options"+filesep+"options.xml";
+		}
+
+		try {
+			options = new OptionRegistry(optionsfile);
+		} catch(Exception e) {
+			log.warning("The options XML file could not be loaded, using defaults.");
+			log.debug(e);
+			options = new OptionRegistry();
+		}
+		
+		String opts = programarguments.get("opt");
+		if (opts != null) {
+			for (String opt : opts.split(",")) {
+				String[] parts = opt.split(":", 2);
+				if (parts.length == 1)
+					options.setBooleanOption(parts[0], true);
+				else if (options.isBooleanOption(parts[0]))
+					options.setBooleanOption(parts[0], Boolean.parseBoolean(parts[1]));
+				else if (options.isRealOption(parts[0]))
+					options.setRealOption(parts[0], Double.parseDouble(parts[1]));
+				else if (options.isIntegerOption(parts[0]))
+					options.setIntegerOption(parts[0], Integer.parseInt(parts[1]));
+				else
+					options.setStringOption(parts[0], parts[1]);
+			}
+		}
+		
+		//add modelicapath to optionregistry
+		String modelicapath = programarguments.get("modelicapath");
+		if (modelicapath == null) {
+			//modelicapath was not set in program arguments -> check envir variable or via JMODELICA_HOME
+			if (System.getenv("MODELICAPATH") != null) { 
+				modelicapath=System.getenv("MODELICAPATH");
+			} else {
+				modelicapath=jmodelicaHome+filesep+"ThirdParty"+filesep+"MSL";
+			}
+		}
+		options.addStringOption("MODELICAPATH", modelicapath);
+	}
+	
+	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
+		throws JModelicaHomeNotFoundException {
+		// check that JMODELICA_HOME exists
+		if (jmodelicaHome == null) 
+			throw new JModelicaHomeNotFoundException("The environment variable JMODELICA_HOME has not been set.");
+		
+		if (args.length < 1) {
+			log.error(compilerName + " expects the command line arguments: \n" +
+					"[<options>] [-fmume|-fmucs|-jmu] <file name> <class name> [<templates>]\n" +
+					" where options could be: \n" +
+					"  -log=<i or w or e> \n" +
+					"  -modelicapath=<path to modelica libraries> \n" +
+					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
+					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
+					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
+					" and templates, if given, should be (in order): \n" + 
+					"  xml model description template \n" +
+					"  c template \n" +
+					" If no target type option is given, -jmu is assumed.");
+			System.exit(1);
+		}
+		
+		int arg = 0;
+		String modelicapath = null;
+		
+		//log option
+		try {
+			String logString = programarguments.get("log");
+			setLogger(logString);
+		} catch (IllegalLogStringException e) {
+			setLogger(e.getLogger());
+			log.error(e);
+			closeLogger();
+			System.exit(1);
+		}
+		
+		setDumpMemoryUse(programarguments.containsKey("dumpmemuse"), programarguments.get("dumpmemuse"));
+		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
+		
+		arg = programarguments.size();
+		if (args.length < arg+2 && !programarguments.containsKey("parse")) {
+			log.error(compilerName + " expects a file name and a class name as command line arguments.");
+			System.exit(1);
+		}
+		if (programarguments.containsKey("parse") && args.length != arg+1) {
+			log.error(compilerName + " -parse expects a list of filenames.");
+			System.exit(1);
+		}
+		
+		// platform argument
+		String platforms = programarguments.get("platform");
+        if (platforms != null) {
+            targetPlatforms =  platforms.split(",");
+        }
+		
+		// set templates and options		
+		if (args.length >= arg+4) {
+			this.xmlTpl = args[arg+2];
+			this.cTemplatefile = args[arg+3];
+		}
+		
+		// set options
+		this.setOptions(programarguments);
+	}
+	
+	public static void main(String[] args) {
+		// TODO: Add a class representing the arguments of the program, with getX methods for arguments.
+		// Get any program options set
+		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
+		// create an empty compiler
+		ModelicaCompiler mc = new ModelicaCompiler();
+		// set arguments
+		try {
+			mc.setArguments("ModelicaCompiler", args, programarguments);
+		} catch(Throwable e) {
+			log.error(e);
+		}
+		// Compile model
+		mc.compileModelFromCommandLine(args, programarguments);
+	}
+	
+	/**
+	 * \brief Compile model given on command line options and print any error messages.
+	 */
+	protected void compileModelFromCommandLine(String[] args, Hashtable<String, String> programarguments) {
+		// Get files and class
+		int arg = programarguments.size();
+		String[] name = splitFiles(args[arg]);
+		String cl = (args.length > arg+1) ? args[arg+1] : null;
+		String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
+		
+		// Compile model
+		try {
+			if (programarguments.containsKey("parse"))
+				parseFiles(name);	
+			else if (programarguments.containsKey("fmucs"))
+				compileFMUCS(cl, name, compileTo);
+			else if (programarguments.containsKey("fmux"))
+			    compileFMUX(cl, name, compileTo);
+			else if (programarguments.containsKey("jmu"))
+				compileJMU(cl, name, compileTo);
+			else
+				compileFMUME(cl, name, compileTo);
+		} catch (CompilerException ce) {
+			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
+				getDiagnosticsGenerator().writeProblems(ce.getProblems());
+			log.logCompilerException(ce);
+			closeLogger();
+			System.exit(1);
+		} catch (Throwable e) {
+			log.error(e);
+			closeLogger();
+			System.exit(1);
+		} finally {
+			closeLogger();
+		}
+	}
+	
+	/**
+	 * Split the argument containing the list of files into an array of filenames.
+	 */
+	protected String[] splitFiles(String arg) {
+		ArrayList<String> res = new ArrayList<String>();
+		for (String part : arg.split(","))
+			if (!part.equals(""))
+				res.add(part);
+		return res.toArray(new String[res.size()]);
+	}
+
+	/**
+	 *     Helper function. Returns string describing the platform on which jmodelica 
+	 *     is run. 
+	 *     
+	 *     Possible return values::
+	 *     win32
+	 *     win64
+	 *     darwin32
+	 *     darwin64
+	 *     linux32
+	 *     linux64
+	 */
+	public static String getPlatform() {
+		String platform = "";
+		
+		String sunPltform = System.getProperty("os.name");
+		if (sunPltform.startsWith("Windows")) {
+			platform = "win";
+		} else if (sunPltform.startsWith("Mac")) {
+			platform = "darwin";
+		} else {
+			// assume linux
+			platform ="linux";
+		}
+		
+		String architecture = System.getProperty("os.arch");
+		if (architecture.endsWith("64")) {
+			platform = platform+"64";
+		} else {
+			platform = platform+"32";
+		}
+		
+		return platform;
+	}
+}
+
+}
+
+aspect CompilationHelpers {
+	
+/**
+ * Interface for hooking into the compilation process.
+ * 
+ * Trees passed as arguments may be altered, but implementer must take care 
+ * not to break compilation in this way.
+ */
+public interface CompilationHooks {
+	/**
+	 * Returns <code>true</code> if the compilation should be aborted.
+	 * 
+	 * May be called at any time, and is guaranteed to be called before each 
+	 * compilation step with a separate method in this interface.
+	 * 
+	 * If compilation is aborted before it is finished, a 
+	 * {@link CompilationAbortedException} is thrown.
+	 */
+	public boolean shouldAbort();
+	
+	/**
+	 * Called after the supplied code files are parsed.
+	 */
+	public void filesParsed(SourceRoot sr);
+	
+	/**
+	 * Called after the error checks on the instantiated model are finished without errors.
+	 * 
+	 * Since the instance tree is built lazily, this step can not be broken up.
+	 */
+	public void modelInstantiatied(InstClassDecl icd);
+	
+	/**
+	 * Called after the model is flattened.
+	 */
+	public void modelFlattened(FClass fc);
+	
+	/**
+	 * Called after transformations are applied to the flat model.
+	 */
+	public void modelTransformed(FClass fc);
+	
+	/**
+	 * Called after error checks of the flat model are finished without errors.
+	 */
+	public void flatModelChecked(FClass fc);
+	
+	/**
+	 * Called after a code generator is created.
+	 * 
+	 * Normally called three times.
+	 */
+	public void codeGeneratorCreated(AbstractGenerator gen);
+	
+	/**
+	 * Called after output code is generated.
+	 */
+	public void codeGenerated(File dir);
+	
+	/**
+	 * Called after the generated C code is compiled.
+	 */
+	public void codeCompiled();
+	
+	/**
+	 * Called after the FMU is packed.
+	 */
+	public void fmuPacked(File path);
+}
+
+public class JModelicaHomeNotFoundException extends Exception {
+	public JModelicaHomeNotFoundException() {
+	}
+	public JModelicaHomeNotFoundException(String msg) {
+		super(msg);
+	}
+}
+
+public class CcodeCompilationException extends RuntimeException {
+	public CcodeCompilationException() {
+	}
+	public CcodeCompilationException(String msg) {
+		super(msg);
+	}
+}
+
+public class PackingFailedException extends ModelicaException {
+    public PackingFailedException() {
+    }
+    public PackingFailedException(String msg) {
+        super(msg);
+    }
+}
+
+/**
+ * Thrown when a compilation is aborted through a CompilationHooks.
+ */
+public class CompilationAbortedException extends RuntimeException {
+	public CompilationAbortedException() {
+	}
+	public CompilationAbortedException(String msg) {
+		super(msg);
+	}
+}
+
+public abstract class CCompilerDelegator {
+	
+	private Map<String, String> env = System.getenv();
+	private String[] targetPlatforms = null;
+	
+	abstract public void compileCCode(String fileName, String target, File workDir, 
+			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
+    
+    abstract protected String[] getDefaultTargetPlatforms();
+    
+    protected String[] getTargetPlatforms() {
+        if (targetPlatforms != null)
+            return targetPlatforms;
+        else
+            return getDefaultTargetPlatforms();
+    }
+	
+	public void setTargetPlatforms(String[] platforms) {
+	    targetPlatforms = platforms;
+	}
+	
+	/**
+	 * Copy shared libs to binaries[\<platform>] folder.
+	 */
+	public void copySharedLibs(File outDir, Set<String> ext_libs, 
+			Set<String> ext_lib_dirs) {
+		for (String platform : getTargetPlatforms()) {
+			StringOperation po = new PlatformDirOperation(platform);
+			StringOperation sh = new SharedLibOperation(platform);
+			for (String dir : ext_lib_dirs) {
+				String dirpath = po.op(dir);
+				for (String lib : ext_libs) {
+					String libname = sh.op(lib);
+					File shlib = new File(dirpath, libname);
+					if (shlib.exists()) {
+						String destfile = "binaries" + File.separator + platform + File.separator + libname; 
+						File destdir = new File(outDir, destfile);
+						try {
+							copyFile(shlib, destdir);
+						} catch (IOException e) {
+							// TODO: this should result in an error message about failing copy shared libs
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Set the environment to pass to any external processes.
+	 */
+	public void setEnv(Map<String, String> env) {
+		this.env = env;
+	}
+	
+	public Map<String, String> getEnv() {
+		return env;
+	}
+	
+	/**
+	 * Format a list of values into space-separated.
+	 */
+	protected String varFromList(Collection<String> list) {
+		return varFromList(list, StringOperation.NULL_OP);
+	}
+	
+	/**
+	 * Format a list of values into a form understood by make (i.e. space-separated).
+	 * 
+	 * Applies op to each value before adding it to the result.
+	 */
+	protected String varFromList(Collection<String> list, StringOperation op) {
+		StringBuilder buf = new StringBuilder();
+		String prefix = "";
+		for (String str : list) {
+			str = op.op(str);
+			if (str != null) {
+				buf.append(prefix);
+				buf.append(str);
+				prefix = " ";
+			}
+		}
+		return (buf.length() == 0) ? null : buf.toString();
+	}
+	
+	protected static interface StringOperation {
+		
+		public static final StringOperation NULL_OP = new StringOperation() {
+			public String op(String str) { return str; }
+		};
+		
+		public String op(String str);
+		
+	}
+	
+	protected static class ChainedOperations implements StringOperation {
+		
+		private StringOperation[] ops;
+		
+		public ChainedOperations(StringOperation... ops) {
+			this.ops = ops;
+		}
+		
+		public String op(String path) {
+			for (StringOperation op : ops)
+				path = op.op(path);
+			return path;
+		}
+		
+	}
+	
+	protected static class QuoteOperation implements StringOperation {
+		
+		private String prefix;
+		
+		public QuoteOperation() {
+			this("");
+		}
+		
+		public QuoteOperation(String prefix) {
+			this.prefix = prefix;
+		}
+		
+		public String op(String path) {
+			if (ModelicaCompiler.getPlatform().startsWith("win")) {
+				return String.format("%s\\\"%s\\\"", prefix, path);
+			} else {
+				return String.format("%s\"%s\"", prefix, path);
+			}		
+		}	
+	}
+	
+	protected static class PlatformDirOperation implements StringOperation {
+		
+		private String platform;
+		
+		public PlatformDirOperation(String platform) {
+			this.platform = platform;
+		}
+		
+		public String op(String path) {
+			File f = new File(path, platform);
+			return f.isDirectory() ? f.getPath() : path;
+		}
+		
+	}
+	
+	protected static class SharedLibOperation implements StringOperation {
+		
+		private String format;
+		
+		public SharedLibOperation(String platform) {
+			if (platform.startsWith("win")) 
+				format = "%s.dll";
+			else if (platform.startsWith("darwin")) 
+				format = "lib%s.dylib";
+			else
+				format = "lib%s.so";
+		}
+		
+		public String op(String library) {
+			return String.format(format, library);
+		}
+
+	}
+	
+	
+	protected static void copyFile(File sourceFile, File destFile) throws IOException {
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
+			long count =0;
+			long size = source.size();                
+			while( (count += destination.transferFrom(source, 0, size-count)) < size);
+		}
+		
+		finally {
+			if(source != null) 
+				source.close();
+			
+			if(destination != null)
+				destination.close();
+		}
+	}
+	
+}
+
+/**
+ * Compiles DLL(s) from generated C code using make.
+ */
+public class GccCompilerDelegator extends CCompilerDelegator {
+
+    public GccCompilerDelegator() {}
+
+	/**
+	 * Get the target platforms to compile for.
+	 */
+	protected String[] getDefaultTargetPlatforms() {
+		return new String[] { ModelicaCompiler.getPlatform() };
+	}
+	
+	/**
+	 * Get the path to the Makefile for the specified target platform.
+	 */
+	protected File getMakefile(String jmodelicaHome, String platform) {
+		return new File(jmodelicaHome, "Makefiles/MakeFile");
+	}
+	
+	/**
+	 * Get the make command to use for the specified build platform.
+	 */
+	protected String getMake(String platform) {
+		if (ModelicaCompiler.getPlatform().startsWith("win")) 
+			return new File(getEnv().get("MINGW_HOME"), "bin/mingw32-make").getPath();
+		else
+			return "make";
+	}
+	
+	protected static final QuoteOperation INC_OP = new QuoteOperation("-I");
+	
+	/**
+	 * Add make variables to set that is valid for all target platforms.
+	 */
+	protected void addFixedMakeVars(Map<String,String> vars, String fileName, String jmodelicaHome, 
+			Set<String> ext_libs, Set<String> ext_incl_dirs) {
+	    String filesep = File.separator;
+		vars.put("FILE_NAME", fileName);
+		vars.put("JMODELICA_HOME", jmodelicaHome);
+		vars.put("CPPAD_HOME", getEnv().get("CPPAD_HOME"));
+		vars.put("IPOPT_HOME", getEnv().get("IPOPT_HOME"));
+		vars.put("SUNDIALS_HOME", getEnv().get("SUNDIALS_HOME"));
+		vars.put("EXT_LIBS", varFromList(ext_libs)!=null? 
+                      (varFromList(ext_libs) + " " + varFromList(ext_libs)): null);
+		vars.put("EXT_INC_DIRS", varFromList(ext_incl_dirs, INC_OP));
+		vars.put("JMTABLES_HOME", jmodelicaHome + filesep + "ThirdParty" + filesep + "Tables");
+	}
+	
+	/**
+	 * Add make variables specific to the build platform.
+	 */
+	protected void addBuildPlatformMakeVars(Map<String,String> vars, String platform) {
+		if (platform.startsWith("win")) {
+			File mingw_bin = new File(getEnv().get("MINGW_HOME"), "bin");
+			vars.put("CXX", new File(mingw_bin, "g++").getPath());
+			vars.put("AR", new File(mingw_bin, "ar").getPath());
+		}
+	}
+	
+	/**
+	 * Add make variables specific to the target platform.
+	 */
+	protected void addTargetPlatformMakeVars(Map<String,String> vars, Set<String> ext_lib_dirs, String platform) {
+		vars.put("PLATFORM", platform);
+		StringOperation libOp = new ChainedOperations(
+				new PlatformDirOperation(platform),
+				new QuoteOperation("-L"));
+		vars.put("EXT_LIB_DIRS", varFromList(ext_lib_dirs, libOp));
+	}
+	
+	/**
+	 * Compile DLL(s) from generated C code.
+	 */
+	public void compileCCode(String fileName, String target, File workDir, 
+			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
+		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
+		String buildPlatform = ModelicaCompiler.getPlatform();
+		String make = getMake(buildPlatform);
+		
+		Map<String, String> vars = new HashMap<String, String>();
+		addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
+		addBuildPlatformMakeVars(vars, buildPlatform);
+		
+		for (String platform : getTargetPlatforms()) {
+			Map<String, String> pVars = new HashMap<String, String>(vars);
+			addTargetPlatformMakeVars(pVars, ext_lib_dirs, platform);
+			
+			File makefile = getMakefile(jmodelicaHome, platform);
+			if (!makefile.exists())
+				throw new CcodeCompilationException("Makefile '" + makefile + "' does not exist.");
+			String[] args = new String[] { make, "-f", makefile.getPath(), target };
+			ArrayList<String> vArgs = new ArrayList<String>(pVars.size());
+			for (Map.Entry<String,String> var : pVars.entrySet())
+				if (var.getValue() != null)
+					vArgs.add(var.getKey() + '=' + var.getValue());
+			String[] cmd = new String[args.length + vArgs.size()];
+			System.arraycopy(args, 0, cmd, 0, args.length);
+			int i = args.length;
+			for (String arg : vArgs)
+				cmd[i++] = arg;
+			
+			if (ModelicaCompiler.loggedProcess(cmd, getEnv(), workDir) != 0) {
+				File sourceDir = new File(workDir, "sources");
+				File cfile = new File(sourceDir, fileName+".c");
+				throw new CcodeCompilationException("Compilation of generated C code failed.\n" +
+						"C file location: "+cfile.getAbsolutePath());
+			}
+		}
+	}
+		
+}
+
+}
