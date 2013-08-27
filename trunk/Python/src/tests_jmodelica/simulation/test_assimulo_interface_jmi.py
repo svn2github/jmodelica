@@ -84,7 +84,7 @@ class Test_JMI_DAE:
         self.DAE = JMIDAE(self.m_DAE)
         self.DISC = JMIDAE(self.m_DISC)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_result_name_file(self):
         """
         Tests user naming of result file (JMIDAE).
@@ -103,7 +103,7 @@ class Test_JMI_DAE:
         assert os.path.exists(res.result_file)
         
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_eps(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.get/set_eps
@@ -118,7 +118,7 @@ class Test_JMI_DAE:
         self.DAE.eps = 10.0
         assert self.DAE.eps == 10.0
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_max_eIteration(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.get/set_max_eIteration
@@ -133,7 +133,7 @@ class Test_JMI_DAE:
         self.DAE.max_eIter = 10
         assert self.DAE.max_eIter == 10
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_check_eIter(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.check_eIter
@@ -160,7 +160,7 @@ class Test_JMI_DAE:
         assert eIter[1] == 0
         assert eIter[2] == 0
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaled_input(self):
         """
         Tests that simulation of scaled input works.
@@ -178,7 +178,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_event_switch(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.event_switch
@@ -195,7 +195,7 @@ class Test_JMI_DAE:
         assert solver.sw[1] == False
         assert solver.sw[2] == False
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_f(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.f
@@ -211,7 +211,7 @@ class Test_JMI_DAE:
         assert temp_f[3] == -2.0
         nose.tools.assert_almost_equal(temp_f[1], -1.158529, 5)
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_g(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
@@ -222,7 +222,7 @@ class Test_JMI_DAE:
         #nose.tools.assert_almost_equal(temp_g[0], -0.429203, 5)
         #nose.tools.assert_almost_equal(temp_g[1], 1.141592, 5)
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_g_adjust(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.g
@@ -242,7 +242,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(temp_g_adjust[1], 3.141592, 5)
         """
         
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_init(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.__init__
@@ -265,7 +265,7 @@ class Test_JMI_DAE:
         assert self.DISC._g_nbr == 2
         assert self.DISC.state_events == self.DISC.g_adjust
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_reset(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.reset
@@ -286,7 +286,7 @@ class Test_JMI_DAE:
        
         assert self.DAE.y0[0] == 0.1
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_event_iteration(self):
         """
         This tests JMUs with event iteration (JModelica.org).
@@ -327,7 +327,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(z[-1], 4.0000000, 4)
         """
 
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_j(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.j
@@ -344,7 +344,7 @@ class Test_JMI_DAE:
         assert temp_j[1,1] == -0.1
         nose.tools.assert_almost_equal(temp_j[1,0], 0.5403023, 5)
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_handle_event(self):
         """
         Tests pyjmi.simulation.assimulo.JMIDAE.handle_event
@@ -369,7 +369,7 @@ class Test_JMI_DAE:
         
         self.DISC.handle_event(solver, [1,1])
 
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_init_mode(self):
         """
         Tests pyjmi.simulation.assimulo.init_mode
@@ -383,7 +383,7 @@ class Test_JMI_DAE:
         assert self.DISC._model.sw[0] == 1
         assert self.DISC._model.sw[1] == 1
     
-    @testattr(assimulo = True) 
+    @testattr(stddist = True) 
     def test_initiate(self):
         """
         Tests pyjmi.simulation.assimulo.initiate
@@ -401,7 +401,7 @@ class Test_JMI_DAE:
         #assert solver.switches[1] == True
         pass
     """
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaled_input(self):
         #This tests simulation with scaled input.
         fpath = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
@@ -436,7 +436,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(res["u"][0], res_scaled["u"][0], 3)
         nose.tools.assert_almost_equal(res["u"][-1], res_scaled["u"][-1], 3)
     """
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_order_input(self):
         """
         This tests that the inputs are sorted in an correct value reference order
@@ -471,7 +471,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(res["T.u_c4"][-1], 4.000000, 3)
         nose.tools.assert_almost_equal(res["T.u_p5"][-1], 5.000000, 3)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_double_input(self):
         """
         This tests double input.
@@ -515,7 +515,7 @@ class Test_JMI_DAE:
         nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
         nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_double_input_with_function(self):
         """
         This tests double input with function.
@@ -609,7 +609,7 @@ class Test_JMI_DAE_Sens:
         #self.DAE = JMIDAESens(self.m_DAE)
         #self.SENS = JMIDAESens(self.m_SENS)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_no_events(self):
         """
         Tests that models containing events cannot be simulated with JMIDAESens.
@@ -619,7 +619,7 @@ class Test_JMI_DAE_Sens:
         opts["IDA_options"]["sensitivity"] = True
         nose.tools.assert_raises(JMIModel_Exception,self.m_DISC.simulate, 0, 1,None,"AssimuloAlg", opts)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_result_name_file(self):
         """
         Tests user naming of result file (JMIDAESens).
@@ -660,7 +660,7 @@ class Test_JMI_DAE_Sens:
         assert res.result_file == "QuadTankSens_result_test.txt"
         assert os.path.exists(res.result_file)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_ordinary_dae(self):
         """
         This tests a simulation using JMIDAESens without any parameters.
@@ -675,7 +675,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(sim.y_sol[-1][0], 0.15420124, 4)
         nose.tools.assert_almost_equal(sim.y_sol[-1][1], 0.11721253, 4)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_p0(self):
         """
         This test that the correct number of parameters are found.
@@ -689,7 +689,7 @@ class Test_JMI_DAE_Sens:
         assert self.SENS._parameter_names[2] == 'a3'
         assert self.SENS._parameter_names[3] == 'a4'
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_input_simulation(self):
         """
         This tests that input simulation works.
@@ -743,7 +743,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(dx1da2.x[0], 0.000000, 4)
         nose.tools.assert_almost_equal(dx1da2.x[-1], 0.00000, 4)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_order_input(self):
         """
         This tests that the inputs are sorted in an correct value reference order
@@ -784,7 +784,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res["T.u_c4"][-1], 4.000000, 3)
         nose.tools.assert_almost_equal(res["T.u_p5"][-1], 5.000000, 3)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_input_simulation_high_level_switched_input(self):
         """
         This tests that input simulation works when using high-level methods
@@ -825,7 +825,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res.final("u1"), u1[-1], 4)
         nose.tools.assert_almost_equal(res.final("u2"), u2[-1], 4)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_input_simulation_high_level(self):
         """
         This tests that input simulation works using high-level methods.
@@ -866,7 +866,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res.final("u1"), u1[-1], 4)
         nose.tools.assert_almost_equal(res.final("u2"), u2[-1], 4)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_jac(self):
         """
         This tests the jacobian for simulation of sensitivites.
@@ -886,7 +886,7 @@ class Test_JMI_DAE_Sens:
         assert res.solver.usejac == True
         assert prob.j == prob.jac
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaling_test_2(self):
         """
         This tests a simulation when scaling is ON and there are input variables
@@ -916,7 +916,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(r1, 5.3287e-8, 2)
         nose.tools.assert_almost_equal(u1, 0.00000, 3)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaled_input(self):
         """
         Tests that simulation of scaled input works.
@@ -944,7 +944,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
         
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaled_input_continuous(self):
         """
         Tests that simulation of scaled input works for writing continuous.
@@ -972,7 +972,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res.final('u1'), -0.839071529, 3)
         nose.tools.assert_almost_equal(res.final('u2'), -0.544021110, 3)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_scaling(self):
         """
         This tests a simulation when scaling is ON and OFF.
@@ -1008,7 +1008,7 @@ class Test_JMI_DAE_Sens:
         nose.tools.assert_almost_equal(res_with_scale['dx1/dk1'][-1], 
                                        res_no_scale['dx1/dk1'][-1], 1)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_alias_variables(self):
         """
         This tests a simulation when there are alias in the sensitivity parameters.

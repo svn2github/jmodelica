@@ -76,20 +76,16 @@ test_set_o="optimica"
 test_set_p="python"
 
 # Standard set of tags
-TAGS="-a stddist -a fmi"
+TAGS="-a stddist"
 if [[ "${IPOPT_HOME}" != "" ]]; then
   TAGS="${TAGS} -a ipopt"
-  if [[ "${SUNDIALS_HOME}" != "" ]]; then
-    TAGS="${TAGS} -a assimulo"
-    if [[ "${SYS}" == Win ]]; then
-      TAGS="${TAGS} -a windows"
-    fi
+  if [[ "${SYS}" == Win ]]; then
+    TAGS="${TAGS} -a windows"
   fi
   if [[ "${SYS}" != Mac ]]; then
     TAGS="${TAGS} -a casadi"
   fi
 fi
-
 
 # Functions for running specific tests
 function modelica_tests() {

@@ -441,7 +441,8 @@ class Test_FMI_Jaobians_Ifcases:
         m.simulate(final_time=2)
         Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
         assert n_errs ==0
-
+        
+    @testattr(stddist = True)
     def test_IfEquation4(self):
         cname = "JacGenTests.JacTestIfEquation4"
         fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})

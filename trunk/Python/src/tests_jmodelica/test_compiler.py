@@ -301,7 +301,7 @@ class Test_Compiler:
                fname+'.jmu'+" was not created."
         os.remove(fname+'.jmu')
 
-    @testattr(ipopt = True)
+    @testattr(stddist = True)
     def TO_ADDtest_MODELICAPATH(self):
         """ Test that the MODELICAPATH is loaded correctly.
     

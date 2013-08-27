@@ -39,13 +39,13 @@ class TestCombiTable1DArray(SimulationTest):
         SimulationTest.setup_class_base(
                 'TablesTests.mo', 'TablesTest.Table1DfromArray', format='fmu')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.01)
         self.run()
         self.load_expected_data('Table1DfromArray_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable1D.y[1]', 'modelicaTable1D.u[1]'])
 
@@ -58,13 +58,13 @@ class TestCombiTable2DArray(SimulationTest):
         SimulationTest.setup_class_base(
                 'TablesTests.mo', 'TablesTest.Table2DfromArray', format='fmu')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.01)
         self.run()
         self.load_expected_data('Table2DfromArray_result.txt')
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable2D.y', 'modelicaTable2D.u1', 'modelicaTable2D.u2'])
        
@@ -82,13 +82,13 @@ class TestCombiTable1DFile(SimulationTest):
     def tearDownClass(cls):
         os.chdir(TestCombiTable1DFile.curr_dir)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.01)
         self.run()
         self.load_expected_data('Table1DfromFile_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable1D.y[1]', 'modelicaTable1D.u[1]'])
       
@@ -107,12 +107,12 @@ class TestCombiTable2DFile(SimulationTest):
     def tearDownClass(cls):
         os.chdir(TestCombiTable2DFile.curr_dir)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step = 0.01)
         self.run()
         self.load_expected_data('Table2DfromFile_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['modelicaTable2D.y', 'modelicaTable2D.u1', 'modelicaTable2D.u2'])

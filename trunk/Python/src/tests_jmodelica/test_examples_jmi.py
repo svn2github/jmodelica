@@ -31,7 +31,7 @@ def test_bang_control():
     """ Test the bang_control example. """    
     bang_control.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_blood_glucose():
     """ Test the blood_glucose example. """    
     blood_glucose.run_demo(False)
@@ -106,7 +106,7 @@ def test_lagrange_cost():
     """ Test the Lagrange cost example """    
     lagrange_cost.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_leadtransport():
     """ Run the Lead example """
     leadtransport.run_demo(False)
@@ -141,7 +141,7 @@ def test_quadtank_static_opt():
     """ Test the quadtank static optimization example """
     quadtank_static_opt.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_rlc_linearization():
     """ Test that linearization of the RLC circuit works. """    
     RLC_linearization.run_demo(False)

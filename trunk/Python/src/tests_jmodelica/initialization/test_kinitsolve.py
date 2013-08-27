@@ -76,7 +76,7 @@ class TestKInitSolve:
         self.x0 = N.array([200., 3.57359316e-02, 446.471014, 100., 1.79867213e-03,453.258466])
         self.w0 = N.array([100., 100., -48.1909])
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_inits(self):
         """
         test if solver is correctly initialized
@@ -88,7 +88,7 @@ class TestKInitSolve:
         nose.tools.assert_equals(self.problem._w_size,3)
         nose.tools.assert_equals(self.problem._mark,12)
     
-    @testattr(assimulo = True)  
+    @testattr(stddist = True)  
     def test_jac_settings(self):
         """
         test if user can set usage of jacobian
@@ -107,7 +107,7 @@ class TestKInitSolve:
         nose.tools.assert_raises(KINSOL_Exception,self.solver.set_jac_usage,N.array([True,False]))
         
         
-    @testattr(assimulo = True)   
+    @testattr(stddist = True)   
     def test_constraint_settings(self):
         """
         test if user can set usage of constraints
@@ -155,7 +155,7 @@ class TestKInitSolve:
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,True)
         nose.tools.assert_raises(JMUAlgebraic_Exception, self.problem.set_constraints_usage,False,[5.,6.])
       
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_guess_constraints(self):
         """
         test if the guessing of constraints works
@@ -174,7 +174,7 @@ class TestKInitSolve:
         nose.tools.assert_equals(constraints[16],1.0)
         nose.tools.assert_equals(constraints[17],-1.0)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_heuristic(self):
         """
         test if heuristic works
@@ -227,7 +227,7 @@ class TestKInitSolve:
         nose.tools.assert_equals(x0_3[17],0.0)
             
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_initialize(self):
         """
         test if the initialize function works
@@ -250,7 +250,7 @@ class TestKInitSolve:
         for pre,calced in zip(self.w0,w):
             nose.tools.assert_almost_equal(pre,calced,6)
             
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_sparse_jac(self):
         """
         Test if the sparse jacobian works

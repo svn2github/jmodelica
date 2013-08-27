@@ -116,7 +116,7 @@ class TestIO:
         # Check that the value of the cost function is correct
         assert N.abs(p_opt[0] - 2.2811587) < 1e-5
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_parameter_alias(self):
         """ Test simulate and write to file when model has parameter alias.
             (Test so that write to file does not crash.)
@@ -126,7 +126,7 @@ class TestIO:
         model = JMUModel('ParameterAlias.jmu')
         model.simulate()
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_result(self):
         """ Test simulate and write to file when model has parameter alias.
             Also tests the methods is_variable and get_column in io.ResultDymolaTextual.
@@ -153,7 +153,7 @@ class TestIO:
     def test_wrong_result_file(self):
         nose.tools.assert_raises(JIOError, ResultDymolaTextual,os.path.join(get_files_path(),"Results","Incorrect_number_of_lines.txt"))
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_get_column(self):
         """
         Test the get_column and get_data_matrix.
@@ -176,7 +176,7 @@ class TestIO:
         
         nose.tools.assert_raises(VariableNotTimeVarying, res.get_column, 'sine.freqHz')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_time_shift(self):
         """
         Test the time shift feature
@@ -217,7 +217,7 @@ class test_ResultWriterDymola:
         self._bounce.initialize()
         self._dq.initialize()
         
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_work_flow(self):
         """Tests the work flow of write_header, write_point, write_finalize."""
         

@@ -24,42 +24,42 @@ from pyfmi.examples import *
 from pyjmi.examples import *
 
 
-@testattr(fmi = True)
+@testattr(stddist = True)
 def test_fmi_bouncing_ball_raw():
     """ Test that the FMI bouncing ball example works """    
     fmi_bouncing_ball_native.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_bouncingball_cs_sim():
     """ Test the FMI Bouncing Ball CS 1.0 example. """    
     fmi_bouncing_ball_cs.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_crane():
     """ Run the PyMBS example """
     crane.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_distillation_fmu():
     """ Test of simulation of the distillation column using the FMU export. """
     distillation_fmu.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_distillation1_fmu():
     """ Test the distillation1_fmu example. """    
     distillation1_fmu.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_distillation2_fmu():
     """ Test the distillation2_fmu example. """    
     distillation2_fmu.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_distillation4_fmu():
     """ Test the distillation4_fmu example. """    
     distillation4_fmu.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_fmi_bouncing_ball():
     """ Test that the FMI bouncing ball using the high-level simulate works. """
     fmi_bouncing_ball.run_demo(False) 
@@ -79,7 +79,7 @@ def test_furuta_dfo():
     """ Test the furuta_dfo example. """
     furuta_dfo.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_extfunctions():
     """ Test of simulation with external functions. """
     extfunctions.run_demo(False)
@@ -94,77 +94,77 @@ def test_extfunctions_matrix():
     """ Test of simulation with external functions using matrix input and output. """
     extFunctions_matrix.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_if_example_1():
     """ Test the if_example_1 example. """    
     if_example_1.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_if_example_2():
     """ Test the if_example_2 example. """    
     if_example_2.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_mechanics_rotational_examples_coupled_clutches():
     """ Run mechanics high index example from MSL """
     mechanical_rotational_examples_coupled_clutches.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_mechanics_rotational_examples_first():
     """ Run mechanics high index example from MSL """
     mechanical_rotational_examples_first.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_planar_pendulum():
     """ Run planar pendulum example """
     planar_pendulum.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_QR():
     """ Test the QR example. """    
     QR.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_qt_par_est_dfo():
     """ Test the qt_par_est_dfo example. """    
     qt_par_est_dfo.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_RLC():
     """ Test the RLC example. """    
     RLC.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_robertson_sensitivity_fmu():
     """ Test the sensitivty example Robertson as an FMU. """
     robertson_fmu.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_SEIRS():
     """ Test the sensitivity example by Niklas, SEIRS. """
     SEIRS.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_simulation_with_input():
     """ Test the simulation_with_input example. """    
     simulation_with_input.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_simulation_with_input_function():
     """ Test the simulation_with_input_function example. """    
     simulation_with_input_function.run_demo(False)
     
-@testattr(ipopt = True)
+@testattr(stddist = True)
 def test_SolAng():
     """ Test the SolAng example """
     SolAng.run_demo(False)
 
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_vdp_pp():
     """ Test the vdp_pp example. """    
     vdp_pp.run_demo(False)
     
-@testattr(assimulo = True)
+@testattr(stddist = True)
 def test_VDP_sim():
     """ Test the VDP_sim example. """    
     VDP_sim.run_demo(False)

@@ -173,11 +173,11 @@ class TestAssertEqu(SimulationTest):
             'Asserts.mo',
             'Asserts.AssertEqu')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(final_time=3)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate(self):
         try:
             self.run()
@@ -194,11 +194,11 @@ class TestAssertFunc(SimulationTest):
             'Asserts.mo',
             'Asserts.AssertFunc')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(final_time=3)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate(self):
         try:
             self.run()
@@ -215,12 +215,12 @@ class TestTerminateWhen(SimulationTest):
             'Asserts.mo',
             'Asserts.TerminateWhen')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(final_time=3)
         self.run()
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_end_values(self):
         self.assert_end_value('time', 2.0)
         self.assert_end_value('x', 2.0)
@@ -243,7 +243,7 @@ class TestModelicaError:
         """
         shutil.rmtree(TestModelicaError.dir, True)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate(self):
         cpath = 'Asserts.ModelicaError'
         fmu_name = compile_fmu(cpath, TestModelicaError.fpath)

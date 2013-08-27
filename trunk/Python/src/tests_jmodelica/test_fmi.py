@@ -52,7 +52,7 @@ class Test_load_fmu:
     This test the functionality of load_fmu method.
     """
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_raise_exception(self):
 
         nose.tools.assert_raises(FMUException, load_fmu, "test.fmu")
@@ -83,12 +83,12 @@ class Test_FMUModelBase:
         """
         self.negated_alias  = load_fmu('NegatedAlias.fmu')
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_initialize_once(self):
         self.negated_alias.initialize()
         nose.tools.assert_raises(FMUException, self.negated_alias.initialize)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_set_get_negated_real(self):
         x,y = self.negated_alias.get("x"),self.negated_alias.get("y")
         nose.tools.assert_almost_equal(x,1.0)
@@ -106,7 +106,7 @@ class Test_FMUModelBase:
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_set_get_negated_integer(self):
         x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,1.0)
@@ -155,7 +155,7 @@ class Test_FMUModelCS1:
         self.input_discontinuity = load_fmu("Inputs_InputDiscontinuity.fmu")
         #self.rlc_square.initialize()
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_custom_result_handler(self):
         model = self.rlc
 
@@ -175,7 +175,7 @@ class Test_FMUModelCS1:
         opts["result_handler"] = B()
         res = model.simulate(options=opts)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_filter(self):
         model = self.rlc
 
@@ -294,21 +294,21 @@ class Test_FMUModelCS1:
         model.do_step(1,0)
         nose.tools.assert_almost_equal(model.get("x"),1.0)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_version(self):
         """
         This tests the (get)-property of version.
         """
         assert self.rlc._get_version() == '1.0'
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_valid_platforms(self):
         """
         This tests the (get)-property of types platform
         """
         assert self.rlc._get_types_platform() == 'standard32'
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_simulation_with_reset_cs_2(self):
         """
         Tests a simulation with reset of an JModelica generated CS FMU.
@@ -321,7 +321,7 @@ class Test_FMUModelCS1:
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] - 0.159255008028) < 1e-3
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_simulation_with_reset_cs_3(self):
         """
         Tests a simulation with reset of an JModelica generated CS FMU
@@ -336,7 +336,7 @@ class Test_FMUModelCS1:
         resistor_v = res2['resistor.v']
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_simulation_using_euler(self):
         """
         Tests a simulation using Euler.
@@ -348,7 +348,7 @@ class Test_FMUModelCS1:
 
         assert N.abs(resistor_v[-1] + 0.233534539103) < 1e-3
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_unknown_solver(self):
         self.rlc.set("_cs_solver",2) #Does not exists
 
@@ -379,8 +379,6 @@ class Test_FMUModelCS1:
         assert N.abs(model.get_default_experiment_stop_time()-1.5) < 1e-4
         assert N.abs(model.get_default_experiment_tolerance()-0.0001) < 1e-4
 
-
-
     @testattr(windows = True)
     def test_types_platform(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches_CS.fmu",path_to_fmus_cs1)
@@ -402,7 +400,7 @@ class Test_FMUModelCS1:
         res = model.simulate()
         assert N.abs(1.5 - res.final('time')) < 1e-4
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_cs1,enable_logging=False)
         res = model.simulate(final_time=1.0)
@@ -413,7 +411,7 @@ class Test_FMUModelCS1:
             res = model.simulate(final_time=1.0)
         assert N.abs(h_res - res.final('h')) < 1e-4
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_log_file_name(self):
         model = load_fmu("bouncingBall.fmu",os.path.join(path_to_fmus,"CS1.0"))
         assert os.path.exists("bouncingBall_log.txt")
@@ -469,7 +467,7 @@ class Test_FMUModelME1:
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_custom_result_handler(self):
         model = self.rlc
 
@@ -489,8 +487,7 @@ class Test_FMUModelME1:
         opts["result_handler"] = B()
         res = model.simulate(options=opts)
 
-
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_filter(self):
         model = self.rlc
 
@@ -515,7 +512,7 @@ class Test_FMUModelME1:
         data = res["capacitor.v"]
         data = res["resistor.v"]
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_log_file_name(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_me1)
         assert os.path.exists("bouncingBall_log.txt")
@@ -546,7 +543,7 @@ class Test_FMUModelME1:
 
         nose.tools.assert_raises(FMUException, self._bounce.get_variable_by_valueref,7)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_multiple_loadings_and_simulations(self):
         model = load_fmu("bouncingBall.fmu",path_to_fmus_me1,enable_logging=False)
         res = model.simulate(final_time=1.0)
@@ -557,18 +554,18 @@ class Test_FMUModelME1:
             res = model.simulate(final_time=1.0)
         assert N.abs(h_res - res.final('h')) < 1e-4
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_init(self):
         """
         This tests the method __init__.
         """
         pass
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_model_types_platfrom(self):
         assert self.dep.model_types_platform == "standard32"
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_boolean(self):
         """
         This tests the functionality of setting/getting fmiBoolean.
@@ -589,7 +586,7 @@ class Test_FMUModelME1:
         assert self.dep.get("b1")
         assert self.dep.get("b2")
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_real(self):
         """
         This tests the functionality of setting/getting fmiReal.
@@ -604,7 +601,7 @@ class Test_FMUModelME1:
         nose.tools.assert_almost_equal(const[0],-9.81000000)
         nose.tools.assert_almost_equal(const[1],0.70000000)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_integer(self):
         """
         This tests the functionality of setting/getting fmiInteger.
@@ -628,7 +625,7 @@ class Test_FMUModelME1:
         self.dep.set("N1", 4.0)
         assert self.dep.get("N1")==4
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_string(self):
         """
         This tests the functionality of setting/getting fmiString.
@@ -636,7 +633,7 @@ class Test_FMUModelME1:
         #Cannot be tested with the current models.
         pass
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_t(self):
         """
         This tests the functionality of setting/getting time.
@@ -652,7 +649,7 @@ class Test_FMUModelME1:
         nose.tools.assert_raises(TypeError, self._bounce._set_time, N.array([1.0,1.0]))
 
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_real_x(self):
         """
         This tests the property of the continuous_states.
@@ -667,7 +664,7 @@ class Test_FMUModelME1:
         nose.tools.assert_almost_equal(self._bounce.continuous_states[1],temp[1])
 
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_real_dx(self):
         """
         This tests the method get_derivative.
@@ -689,7 +686,7 @@ class Test_FMUModelME1:
         real_dx = self._dq.get_derivatives()
         nose.tools.assert_almost_equal(real_dx[0], -5.0000000)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_real_x_nominal(self):
         """
         This tests the (get)-property of nominal_continuous_states.
@@ -703,7 +700,7 @@ class Test_FMUModelME1:
 
         assert nominal[0] == 1.0
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_version(self):
         """
         This tests the (get)-property of version.
@@ -711,7 +708,7 @@ class Test_FMUModelME1:
         assert self._bounce._get_version() == '1.0'
         assert self._dq._get_version() == '1.0'
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_valid_platforms(self):
         """
         This tests the (get)-property of model_types_platform
@@ -719,7 +716,7 @@ class Test_FMUModelME1:
         assert self._bounce.model_types_platform == 'standard32'
         assert self._dq.model_types_platform == 'standard32'
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_get_tolerances(self):
         """
         This tests the method get_tolerances.
@@ -735,7 +732,7 @@ class Test_FMUModelME1:
         assert rtol == 0.0001
         nose.tools.assert_almost_equal(atol[0],0.0000010)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_event_indicators(self):
         """
         This tests the method get_event_indicators.
@@ -749,7 +746,7 @@ class Test_FMUModelME1:
         event_ind = self._bounce.get_event_indicators()
         nose.tools.assert_almost_equal(event_ind[0],5.0000000000)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_update_event(self):
         """
         This tests the functionality of the method event_update.
@@ -773,7 +770,7 @@ class Test_FMUModelME1:
         assert eInfo.iterationConverged == True
         assert eInfo.stateValueReferencesChanged == False
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_get_continuous_value_references(self):
         """
         This tests the functionality of the method get_state_value_references.
@@ -787,7 +784,7 @@ class Test_FMUModelME1:
 
         assert ref[0] == 0
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_ode_get_sizes(self):
         """
         This tests the functionality of the method ode_get_sizes.
@@ -800,7 +797,7 @@ class Test_FMUModelME1:
         assert nCont == 1
         assert nEvent == 0
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_get_name(self):
         """
         This tests the functionality of the method get_name.
@@ -808,7 +805,7 @@ class Test_FMUModelME1:
         assert self._bounce.get_name() == 'bouncingBall'
         assert self._dq.get_name() == 'dq'
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_get_fmi_options(self):
         """
         Test that simulate_options on an FMU returns the correct options
@@ -816,7 +813,7 @@ class Test_FMUModelME1:
         """
         assert isinstance(self._bounce.simulate_options(), ad.AssimuloFMIAlgOptions)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_instantiate_jmu(self):
         """
         Test that FMUModel can not be instantiated with a JMU file.
@@ -932,7 +929,7 @@ class Test_Logger:
         self.m.set('_log_level',6)
         self.m.set_fmil_log_level(5)
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_log_file(self):
         """
         Test that the log file is parsable
@@ -957,7 +954,7 @@ class Test_Logger:
         assert len(d)==8, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_parse_log_file(self):
         """
         Test that a pregenerated log file is parsable
@@ -1021,7 +1018,7 @@ class Test_SetDependentParameterError:
         """
         self.m = load_fmu('DependentParameterTest2.fmu')
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_dependent_parameter_setting(self):
         """
         Test that expeptions are thrown when dependent parameters are set.
@@ -1098,7 +1095,7 @@ class Test_RaisesIfNonConverge:
         """
         self.m = load_fmu('InitTest1.fmu')
 
-    @testattr(fmi = True)
+    @testattr(stddist = True)
     def test_get_raises(self):
         """
         Test that expeptions are thrown when equation becomes non-solvable.

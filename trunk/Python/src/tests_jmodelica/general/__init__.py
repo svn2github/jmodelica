@@ -17,6 +17,5 @@
 
 
 """Tests for the general test package."""
-__all__ = ['base_simul', 'test_extfunctions', 'test_functions', 
+__all__ = ['base_simul', 'test_extfunctions', 'test_functions', 'test_operators', 
            'test_optimization', 'test_simulation', 'test_tables']
-

@@ -28,13 +28,13 @@ class TestSemiLinear(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.SemiLinearTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_SemiLinearTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -51,13 +51,13 @@ class TestDiv(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.DivTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_DivTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -74,13 +74,13 @@ class TestMod(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.ModTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_ModTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -97,13 +97,13 @@ class TestRem(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.RemTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_RemTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -120,13 +120,13 @@ class TestCeil(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.CeilTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_CeilTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -143,13 +143,13 @@ class TestFloor(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.FloorTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_FloorTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -166,13 +166,13 @@ class TestInteger(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.IntegerTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_IntegerTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -189,13 +189,13 @@ class TestNested(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.NestedTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
         self.load_expected_data('OperatorTests_NestedTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -212,12 +212,12 @@ class TestSign(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.SignTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.1)
         self.run()
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -239,13 +239,13 @@ class TestEdge(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.EdgeTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_EdgeTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -262,13 +262,13 @@ class TestChange(SimulationTest):
         SimulationTest.setup_class_base('OperatorTests.mo', 
             'OperatorTests.ChangeTest')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('OperatorTests_ChangeTest_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.

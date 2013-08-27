@@ -28,13 +28,13 @@ class TestFunction1(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.FunctionTest1')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -52,13 +52,13 @@ class TestFunction2(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.FunctionTest2')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=2.0, time_step=0.01)
         self.run()
         self.load_expected_data('FunctionTest1+2_res.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         """
         Test that results match the expected ones.
@@ -76,12 +76,12 @@ class TestIntegerArg1(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.IntegerArg1')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
         self.run()
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_result(self):
         """
         Test that results match the expected ones.
@@ -98,12 +98,12 @@ class TestZeroDimArray(SimulationTest):
         SimulationTest.setup_class_base('FunctionTests.mo', 
             'FunctionTests.TestZeroDimArray')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_result(self):
         """
         Test that results match the expected ones.

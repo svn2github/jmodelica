@@ -135,13 +135,13 @@ class TestWriteScaledResult(OptimizationTest):
                 'ScaledResult.mop', 'ScaledResult.Scaled2',
                     options={"enable_variable_scaling":True})
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def setUp(self):
         self.setup_base(opt_options={'write_scaled_result':True})
         self.run()
         self.load_expected_data('ScaledResult_Scaled2_result.txt')
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'u', 'der(x)'])
 

@@ -463,7 +463,7 @@ class TestModel_VDP:
                 
         assert not all_zeros
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_optimization_cost_eval(self):
         """Test evaluation of optimization cost function."""
         self.vdp = JMUModel("VDP_pack_VDP_Opt.jmu")
@@ -479,7 +479,7 @@ class TestModel_VDP:
         cost = self.vdp.opt_eval_J()
         nose.tools.assert_not_equal(cost, 0)
     
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_optimization_cost_jacobian(self):
         """Test evaluation of optimization cost function jacobian.
         Note:
@@ -1496,7 +1496,7 @@ class Test_JMU_methods:
             os.path.join(get_files_path(), 'Modelica','RLC_Circuit.mo'),
             compiler_options = co)
         
-    @testattr(assimulo = True)
+    @testattr(ipopt = True)
     def test_get_default_options(self):
         """
         Test that simulate/initialize/optimize_options returns an 
@@ -1514,7 +1514,7 @@ class Test_JMU_methods:
         assert isinstance(model.optimize_options(), 
             ad.CollocationLagrangePolynomialsAlgOptions)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_get_specific_option(self):
         """
         Test that it is possible to specify algorithm when getting 

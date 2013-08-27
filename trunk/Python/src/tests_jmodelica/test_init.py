@@ -212,14 +212,14 @@ class Test_init_assimulo:
         self.cpath_rlc = "RLC_Circuit"
         self.model_rlc = JMUModel(Test_init_assimulo.jmu_name)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate(self):
         """ Test the pyjmi.JMUModel.simulate function using all default parameters."""
         sim_res = self.model_rlc.simulate()
         
         assert N.abs(sim_res.final('resistor.v') - 0.138037041741) < 1e-3
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate_set_argument(self):
         """ Test the pyjmi.JMUModel.simulate function and setting an 
         algorithm argument.
@@ -228,9 +228,9 @@ class Test_init_assimulo:
         
         assert N.abs(sim_res.final('resistor.v') - 0.159255008028) < 1e-3
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate_set_probl_arg(self):
-        """ Test that it is possible to set properties in assimulo and 
+        """ Test that it is possible to set properties in Assimulo and 
         that an exception is raised if the argument is invalid. 
         """
         opts = self.model_rlc.simulate_options()
@@ -243,7 +243,7 @@ class Test_init_assimulo:
         nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate,options=opts)
         
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate_invalid_solver_arg(self):
         """ Test that the pyjmi.JMUModel.simulate function raises an exception for an 
             invalid solver argument.
@@ -253,7 +253,7 @@ class Test_init_assimulo:
         nose.tools.assert_raises(InvalidSolverArgumentException,
                                  self.model_rlc.simulate, options=opts)
 
-    @testattr(assimulo = True)
+    @testattr(stddist = True)
     def test_simulate_invalid_solver(self):
         """ Test that the pyjmi.JMUModel.optimize function raises exception 
         for an invalid solver.
@@ -263,25 +263,7 @@ class Test_init_assimulo:
         nose.tools.assert_raises(InvalidAlgorithmOptionException,
                                  self.model_rlc.simulate,options=opts)
     
-    ### TEST IS OBSOLETE, JMUMODELS NO LONGERS SUPPORTS ODES
-    #  
-    #@testattr(assimulo=True)
-    #def test_simulate_w_ode(self):
-    #    """ Test jmodelica.simulate with ODE problem and setting solver 
-    #    options."""
-    #    jmu_name = compile_jmu(self.cpath_vdp, self.fpath_vdp, 
-    #        compiler_options={'state_start_values_fixed':True},target='model')
-    #    model = JMUModel(jmu_name)
-    #    opts = model.simulate_options()
-    #    opts['solver']='CVode'
-    #    sim_res = model.simulate(final_time=20, options=opts)
-    #    x1=sim_res['x1']
-    #    x2=sim_res['x2']
-    #    
-    #    assert N.abs(x1[-1] + 0.736680243) < 1e-5
-    #    assert N.abs(x2[-1] - 1.57833994) < 1e-5
-    
-    @testattr(assimulo=True)
+    @testattr(stddist=True)
     def test_simulate_initialize_arg(self):
         """ Test pyjmi.JMUModel.simulate alg_arg 'initialize'. """
         # This test is built on that simulation without initialization fails.
