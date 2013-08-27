@@ -612,15 +612,20 @@ aspect Derivatives {
 		                               new FPowExp(getFExp().fullCopy(),
 		                               new FIntegerLitExp(2)))));
 	}
-/*
+
 	public FExp FAtan2Exp.diff(String name) {
-	    FExp dummy = dynamicFExp(new FIfExp(new FLeqExp(new FAbsExp(getFExp().fullCopy()),
-	                     new FRealLitExp(1e-20)),new FIntegerLitExp(0),
-	                     new List(),new FAtanExp(new FDivExp(getY().fullCopy(),
-	                     getFExp().fullCopy()))));
-		return dynamicFExp(dummy.diff(name));
+		/* der(atan2(y,x) = (der(y)*x - y*der(x)) / (y*y + x*x) */
+		FExp y = getFExp();
+		FExp x = getY();
+		FExp exp1 = new FSubExp(
+				new FMulExp(y.diff(name), x.fullCopy()),
+				new FMulExp(y.fullCopy(), x.diff(name)));
+		FExp exp2 = new FAddExp(
+				new FMulExp(y.fullCopy(),y.fullCopy()), 
+				new FMulExp(x.fullCopy(),x.fullCopy()));
+		return dynamicFExp(new FDivExp(exp1,exp2));
 	}
-*/
+	
 	public FExp FSinhExp.diff(String name) {
 		return dynamicFExp(new FMulExp(new FCoshExp(getFExp().fullCopy()),
 			getFExp().diff(name)));

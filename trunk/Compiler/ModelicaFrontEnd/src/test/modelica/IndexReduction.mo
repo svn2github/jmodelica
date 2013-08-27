@@ -577,23 +577,38 @@ equation
 end IndexReduction.IndexReduction13_Atan;
 ")})));
   end IndexReduction13_Atan;
-/*
-  model IndexReduction14_Atan2
+
+model IndexReduction14_Atan2
   Real x1,x2,x3;
   parameter Real p = 2;
 equation
   der(x1) + der(x2) = 1;
- x1 + atan2(x2,x3) = 0;
-  
+  der(x3) = time;
+  x1 + atan2(x2,x3) = 0;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="IndexReduction14_Atan2",
             description="Test of index reduction",
             flatModel="
+fclass IndexReduction.IndexReduction14_Atan2
+ Real x1;
+ Real x2;
+ Real x3;
+ parameter Real p = 2 /* 2 */;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+ x3 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ der(x3) = time;
+ x1 + atan2(x2, x3) = 0;
+ der_x1 + (der(x2) * x3 - x2 * der(x3)) / (x2 * x2 + x3 * x3) = 0.0;
+end IndexReduction.IndexReduction14_Atan2;
 ")})));
-  end IndexReduction14_Atan2;
-*/
+end IndexReduction14_Atan2;
+
   model IndexReduction15_Sinh
   Real x1,x2;
   parameter Real p = 2;
