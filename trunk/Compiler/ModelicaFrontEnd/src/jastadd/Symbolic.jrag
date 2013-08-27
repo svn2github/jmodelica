@@ -108,8 +108,12 @@ aspect EquationSolve {
 			if (sol==null) {
 				sol = ee;
 			} else {
-			    sol = new FAddExp(sol,ee);				  	
+			    sol = new FAddExp(sol,ee);
 			}
+		}
+		if (sol==null) { 
+			// No inactive terms
+			sol = new FRealLitExp(0);
 		}
 		
 		FExp mulCoeff = null;
