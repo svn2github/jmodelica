@@ -4109,6 +4109,77 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
 ")})));
 end CADTornRecord1;
 
+model CADTornRecord2
+	function F
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+	algorithm
+		c := a + b;
+		d := c - a;
+	end F;
+	Real x,y;
+	
+	constant Real c1 = 23;
+equation
+	(c1, c1) = F(x,y);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CADCodeGenTestCase(
+			name="CADTornRecord2",
+			description="",
+			inline_functions="none",
+			generate_block_jacobian=true,
+			fmi_version=2.0,
+			generate_ode=true,
+			equation_sorting=true,
+			automatic_tearing=true,
+			template="$CAD_dae_blocks_residual_functions$",
+			generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_der_0;
+    jmi_ad_var_t tmp_var_1;
+    jmi_ad_var_t tmp_der_1;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        x[1] = _x_0;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[0];
+        _y_1 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[1];
+        _x_0 = x[1];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[1];
+    } else {
+        return -1;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        func_CADCodeGenTests_CADTornRecord2_F_der_AD(_x_0, _y_1, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+        (*res)[0] = tmp_var_0 - (_c1_2);
+        (*dF)[0] = tmp_der_0 - (AD_WRAP_LITERAL(0));
+        (*res)[1] = tmp_var_1 - (_c1_2);
+        (*dF)[1] = tmp_der_1 - (AD_WRAP_LITERAL(0));
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+")})));
+end CADTornRecord2;
+
 model CADArray1
 	Real A[2,2] (start={{1,2},{4,5}});
 	Real X[2,2] = {{0,0},{0,0}};

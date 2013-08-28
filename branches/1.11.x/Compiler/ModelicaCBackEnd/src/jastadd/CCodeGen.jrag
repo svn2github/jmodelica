@@ -1941,7 +1941,7 @@ aspect CCodeGen {
 	
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
 			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<FVariable>(activeVars));
+		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
 	}
 	
 	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
@@ -2157,9 +2157,9 @@ aspect CCodeGen {
 		str.print(";\n");		
 	}
 
-	public void FAbstractEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {}
+	public void FAbstractEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {}
 	
-	public void FEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+	public void FEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
 		boolean firstVisit = visited == null || visited.add(this);
 		genTempVars_C(printer_C, str, indent);
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
@@ -2169,15 +2169,16 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 	
-	public void FFunctionCallEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+	public void FFunctionCallEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
 		boolean firstVisit = visited == null || visited.add(this);
 		if (!getCall().isIgnored()) {
 			if (firstVisit) {
 				genTempVars_C(printer_C, str, indent);
 				getCall().prettyPrint_C(str, indent);
 			}
+			Enumerator indexCounter = new Enumerator();
 			for (FFunctionCallLeft l : getLefts())
-				l.genWriteBack_C(str, indent, enumerator, forVariables);
+				l.genWriteBack_C(str, indent, enumerator, forIndices, indexCounter);
 		}
 	}
 
@@ -2310,51 +2311,53 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FFunctionCallLeft.genWriteBack_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FFunctionCallLeft.genWriteBack_C(PrintStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		if (hasFExp()) 
-			getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forVariables);
+			getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
 	}
 	
-	public void FType.genWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FType.genWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBack_C(str, indent, cellName, arr.get(i), enumerator, forVariables);
+				genCellWriteBack_C(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
 			}
 		} else {
-			genCellWriteBack_C(str, indent, name, exp, enumerator, forVariables);
+			genCellWriteBack_C(str, indent, name, exp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
-	public void FType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		exp.genWriteBack_C(str, indent, name, enumerator, forVariables);
+	public void FType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		exp.genWriteBack_C(str, indent, name, enumerator, forIndices, indexCounter);
 	}
 	
-	public void FRecordType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FRecordType.genCellWriteBack_C(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBack_C(str, indent, compName, compExp, enumerator, forVariables);
+			comp.getFType().genWriteBack_C(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
-	public void FExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
-	public void FIdUseExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
-		str.print(indent);
-		str.print("(*res)[");
-		str.print(enumerator.next());
-		str.print("] = ");
-		str.print(name);
-		str.print(" - (");
-		prettyPrint_C(str, "");
-		str.print(");\n");
+	public void FIdUseExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		int index = indexCounter.next();
+		if (forIndices == null || forIndices.contains(index)) {
+			// This variable is in the set of variables to generate code for.
+			str.print(indent);
+			str.print("(*res)[");
+			str.print(enumerator.next());
+			str.print("] = ");
+			str.print(name);
+			str.print(" - (");
+			prettyPrint_C(str, "");
+			str.print(");\n");
+		}
 	}
 	
 	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> forVariables) {

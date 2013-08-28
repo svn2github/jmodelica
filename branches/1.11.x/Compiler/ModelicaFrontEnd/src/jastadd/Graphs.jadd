@@ -53,31 +53,25 @@ public class EquationBlockFactory {
 		return l;
 	}
 
-	public static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve) {
-		return createSimpleEquationBlock(eqns, fvs, solve, false);
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation eqn, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve) {
+		return createSimpleEquationBlock(eqn, fvs, assignedIndices, solve, false);
 	}
 
-	public static SimpleEquationBlock createSimpleEquationBlock(Collection<FAbstractEquation> eqns, Collection<FVariable> fvs, boolean solve, boolean duringTearing) {
-		// Check that the component corresponds to a single equation
-		FAbstractEquation e = eqns.iterator().next();
-		for (FAbstractEquation eqn : eqns) 
-			if (eqn != e) 
-				return null;
-
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve, boolean duringTearing) {
 		// Check if equation is solvable for all active variables (only if we want a solved block)
 		Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
 		for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
 			solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
 		
-		return e.createSimpleEquationBlock(fvs, solvability);
+		return e.createSimpleEquationBlock(fvs, assignedIndices, solvability);
 	}
 	
 	/**
 	 * This method takes an equation and a variable and constructs an equation block.
 	 * If <code>solve</code> is true the equation will be solved for the variable. 
 	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, boolean solve) {
-		return createSimpleEquationBlock(Arrays.asList(equation), Arrays.asList(variable), solve);
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, boolean solve) {
+		return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), solve);
 	}
 
 	/**
@@ -89,19 +83,31 @@ public class EquationBlockFactory {
 	}
 	
 	/**
+	 * This method takes an equation <code>eqn</code> and variable
+	 * <code>var</code> and produces an unsolved block of types
+	 * ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
+		return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
+	}
+	
+	/**
 	 * This method takes a list of Eq objects and create equation blocks
 	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
 	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve, boolean duringTearing) {
-		Collection<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
 		Collection<FVariable> fvs = new ArrayList<FVariable>();
+		Collection<Integer> assignedIndices = new ArrayList<Integer>();
 		
-		for (Eq eqn : component) {
+		FAbstractEquation e = eqns.iterator().next().getEquation();
+		for (Eq eqn : eqns) {
+			if (eqn.getEquation() != e) 
+				return null;
 			fvs.add(eqn.getMatching().getVariable());
-			eqns.add(eqn.getEquation());
+			assignedIndices.add(eqn.groupNumber());
 		} 
 
-		return createSimpleEquationBlock(eqns, fvs, solve, duringTearing);
+		return createSimpleEquationBlock(e, fvs, assignedIndices, solve, duringTearing);
 		
 	}
 
@@ -124,9 +130,9 @@ public class EquationBlockFactory {
 			}	
 		}
 
-		Collection<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();	
+		Collection<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();
 		for (Collection<Eq> s : l) {
-			ls.add(createSimpleEquationBlock(s, false));	
+			ls.add(createSimpleEquationBlock(s, false));
 		}	
 
 		// Check if an equation block is mixed, i.e., contains both continous
@@ -150,13 +156,13 @@ public class EquationBlockFactory {
 		
 		EquationBlock b = null;
 		if (isMixed && isLinear) {
-			b = new MixedLinearEquationBlock(ls);		
+			b = new MixedLinearEquationBlock(ls);
 		} else if (isMixed) {
-			b = new MixedEquationBlock(ls);		
+			b = new MixedEquationBlock(ls);
 		} else if (isLinear) {
 			b = new LinearEquationBlock(ls);
 		} else {
-			b = new EquationBlock(ls);	
+			b = new EquationBlock(ls);
 		}
 		return b;
 	}	
@@ -165,11 +171,11 @@ public class EquationBlockFactory {
 /**
  * Create a simple equation block from a single equation. 
  */
-public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
 	return null;
 }
 
-public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
 	FVariable fv = fvs.iterator().next();
 	if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
 		return new SolvedScalarEquationBlock(this, fv);
@@ -182,11 +188,11 @@ public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVaria
 
 // If equation TODO
 
-public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
 	return new WhenEquationBlock(this);
 }
 
-public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) { 
+public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
 	if (solvability.isAnalyticallySolvable()) {
 		return new SolvedAlgorithmBlock(this, fvs);
 	} else {
@@ -194,13 +200,16 @@ public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVari
 	}
 }
 
-public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Solvability solvability) {
+public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
 	if (numScalarEquations() == 0)
 		return new MetaEquationBlock(this);
+	for (Integer assignedIndex : assignedIndices)
+		if (assignedIndex == null)
+			throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
 	if (solvability.isAnalyticallySolvable()) {
-		return new SolvedFunctionCallEquationBlock(this, fvs);
+		return new SolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
 	} else {
-		return new UnsolvedFunctionCallEquationBlock(this, fvs);
+		return new UnsolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
 	}
 }
 
@@ -601,11 +610,12 @@ public class BiPGraph {
 	}
 	
 	public BiPGraph(Collection<Eq> eqs, Collection<Var> vars) {
-		for (Eq e : eqs) {
-			addEquation(e.getName(), e.getEquation());
+		for (Eq oldE : eqs) {
+			Eq e = addEquation(oldE.getName(), oldE.getEquation());
+			e.groupNumber(oldE.groupNumber());
 		}
-		for (Var v : vars) {
-			addVariable(v.getName(), v.getVariable());
+		for (Var oldV : vars) {
+			addVariable(oldV.getName(), oldV.getVariable());
 		}
 		for (Eq oldE : eqs) {
 			Eq e = getEquation(oldE.getName());
@@ -760,31 +770,33 @@ public class BiPGraph {
 		Eq eqn = null;
 		Var v = null;
 		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
+		Set<FVariable> emptySet = Collections.emptySet();
 		for (FAbstractEquation e : eqns) {
 			int n_eq = e.numScalarEquations();
 			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
 			// For equations that counts as several scalar equations (function calls, algorithms), 
 			// the left hand side variables depends on all the right-hand side ones, 
 			// but not on the other left-hand side ones
-			Map<FVariable, Integer> blockEqLeftVarMap = emptyMap;
+			Set<FVariable> rhsVars = emptySet;
+			Map<FVariable, Integer> lhsVars = emptyMap;
 			if (n_eq > 1) {
+				rhsVars = e.referencedFVariablesInRHS();
+				lhsVars = new HashMap<FVariable, Integer>();
 				int i = 0;
-				blockEqLeftVarMap = new HashMap<FVariable, Integer>();
 				for (FVariable fv : e.referencedFVariablesInLHS()) 
-					blockEqLeftVarMap.put(fv,i++);
-				for (FVariable fv : e.referencedFVariablesInRHS()) 
-					blockEqLeftVarMap.remove(fv);
+					lhsVars.put(fv,i++);
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
 				eqn = addEquation(eqNamePrefix+k, e);
 				groupMembers.add(eqn);
 				k++;
+				eqn.groupNumber(i);
 
 				for (VarType t : variableTypes) {
 					for (FVariable y : t.variables(e)) {
-						Integer pos = blockEqLeftVarMap.get(y);
-						if (pos == null || pos == i) {
+						Integer pos = lhsVars.get(y);
+						if (pos == null || pos == i || rhsVars.contains(y)) {
 							v = getVariable(y.name());
 							addEdge(eqn, v);
 						}
@@ -1136,7 +1148,8 @@ public class BiPGraph {
 								// Loop over all equations in the group 
 								for (Eq groupMemberEquation : ee.getGroupMembers()) {				
 									Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee);
-							
+									eqn.groupNumber(groupMemberEquation.groupNumber());
+									
 									// Add edges
 									for (FVariable fv : deee.variables()) {
 										Var vvv = variableMap.get(fv.name());
@@ -1766,6 +1779,7 @@ public class Eq implements Comparable<Eq> {
 	private boolean visited = false;
 	private int layer = 1000000;
 	private FAbstractEquation eqn;
+	private int groupNumber;
 	private Eq meDifferentiated = null;
 	private Eq meIntegrated = null;
 	private boolean isRes = false;
@@ -1784,7 +1798,7 @@ public class Eq implements Comparable<Eq> {
 	*/
 	private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
 
-	public Eq(String name,FAbstractEquation eqn) {
+	public Eq(String name, FAbstractEquation eqn) {
 		this.name = name;
 		this.eqn = eqn;
 		this.groupMembers.add(this);
@@ -1896,6 +1910,14 @@ public class Eq implements Comparable<Eq> {
 		
 	public void setEquation(FAbstractEquation eqn) {
 		this.eqn = eqn;
+	}
+	
+	public int groupNumber() {
+		return groupNumber;
+	}
+	
+	public void groupNumber(int groupNumber) {
+		this.groupNumber = groupNumber;
 	}
 	
 	public void addAnalyticallySolvableVariable(Var v) {

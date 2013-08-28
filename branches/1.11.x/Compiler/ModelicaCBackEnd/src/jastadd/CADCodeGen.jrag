@@ -887,14 +887,14 @@ aspect CADCodeGen {
 	 *    FFunctionCallEquation so that it may be split into different subblocks.
 	 *    All residual equation for all variales should be genereated if null is specified.
 	 */
-	public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {}
+	public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {}
 		
 	/**
 	 * Generates AD-code for a single equation. 
 	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
 	 */
 	@Override
-	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if(!shouldBeDifferentiated()){
 			genResidual_C(enumerator, indent, str, null, null);
@@ -930,14 +930,15 @@ aspect CADCodeGen {
 	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
 	 */
 	@Override
-	public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+	public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
 			if (firstVisit) {
 				genTempVars_CAD(printer_CAD, str, indent);
 			}
+			Enumerator indexCounter = new Enumerator();
 			for (FFunctionCallLeft l : getLefts())
-				l.genWriteBack_CAD(str, indent, enumerator, forVariables);
+				l.genWriteBack_CAD(str, indent, enumerator, forIndices, indexCounter);
 		}
 	}
 	
@@ -1267,7 +1268,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		equation().genResidual_CAD(enumerator,indent,str, visited, new HashSet<FVariable>(activeVars));
+		equation().genResidual_CAD(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
 	}
 	
 	
@@ -2108,13 +2109,13 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		if (hasFExp()) {
-			if (getFExp().shouldBeDifferentiated()) {
-				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator.copy(), forVariables);
-				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumerator, forVariables);
+			if (getFExp().type().shouldBeDifferentiated()) {
+				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator.copy(), forIndices, indexCounter.copy());
+				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
 			} else {
-				getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forVariables);
+				getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
 			}
 		}
 	}
@@ -2130,17 +2131,17 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBack_var_CAD(str, indent, cellName, arr.get(i), enumerator, forVariables);
+				genCellWriteBack_var_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
 			}
 		} else {
-			genCellWriteBack_var_CAD(str, indent, name, exp, enumerator, forVariables);
+			genCellWriteBack_var_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
@@ -2155,17 +2156,17 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
 			Array arr = exp.getArray();
 			for (Index i : arr.indices()) {
 				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBack_der_CAD(str, indent, cellName, arr.get(i), enumerator, forVariables);
+				genCellWriteBack_der_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
 			}
 		} else {
-			genCellWriteBack_der_CAD(str, indent, name, exp, enumerator, forVariables);
+			genCellWriteBack_der_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
@@ -2177,8 +2178,8 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		exp.genWriteBack_var_CAD(str, indent, name, enumerator, forVariables);
+	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		exp.genWriteBack_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
 	}
 	
 	/**
@@ -2189,11 +2190,11 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FRecordType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FRecordType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genCellWriteBack_var_CAD(str, indent, compName, compExp, enumerator, forVariables);
+			comp.getFType().genCellWriteBack_var_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
@@ -2206,11 +2207,11 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FRecordType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FRecordType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genCellWriteBack_der_CAD(str, indent, compName, compExp, enumerator, forVariables);
+			comp.getFType().genCellWriteBack_der_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
 		}
 	}
 	
@@ -2222,8 +2223,8 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<FVariable> forVariables) {
-		exp.genWriteBack_der_CAD(str, indent, name, enumerator, forVariables);
+	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		exp.genWriteBack_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
 	}
 	
 	
@@ -2235,20 +2236,22 @@ aspect CADCodeGen {
 	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
-	public void FIdUseExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
-		str.print(indent);
-		str.print("(*res)[");
-		str.print(enumerator.next());
-		str.print("] = ");
-		str.print(name);
-		str.print(" - (");
-		str.print(varName_CAD());
-		str.print(");\n");
+	public void FIdUseExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		int index = indexCounter.next();
+		if (forIndices == null || forIndices.contains(index)) {
+			// This variable is in the set of variables to generate code for.
+			str.print(indent);
+			str.print("(*res)[");
+			str.print(enumerator.next());
+			str.print("] = ");
+			str.print(name);
+			str.print(" - (");
+			str.print(varName_CAD());
+			str.print(");\n");
+		}
 	}
 	
 	/**
@@ -2259,20 +2262,21 @@ aspect CADCodeGen {
 	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
+	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
-	public void FIdUseExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
-		str.print(indent);
-		str.print("(*dF)[");
-		str.print(enumerator.next());
-		str.print("] = ");
-		str.print(name);
-		str.print(" - (");
-		str.print(derName_CAD());
-		str.print(");\n");
+	public void FIdUseExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+		int index = indexCounter.next();
+		if (forIndices == null || forIndices.contains(index)) {
+			str.print(indent);
+			str.print("(*dF)[");
+			str.print(enumerator.next());
+			str.print("] = ");
+			str.print(name);
+			str.print(" - (");
+			str.print(derName_CAD());
+			str.print(");\n");
+		}
 	}
 	
 	/*-------------------------------------------------------------------------
