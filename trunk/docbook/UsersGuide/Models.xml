@@ -865,10 +865,21 @@ my_jmu = compile_jmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 <row>
                   <entry><literal>residual_equation_scaling</literal></entry>
 
-                  <entry><literal>integer/1</literal></entry>
+                  <entry><literal>integer / 1</literal></entry>
 
                   <entry>Equations scaling mode in equation block solvers:0-no
                   scaling,1-automatic scaling,2-manual scaling.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>runtime_log_to_file</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Enable to write log messages from the runtime
+                  directly to a file, besides passing it to the FMU loader
+                  (e.g. FMIL). The log file name is generated based on the FMU
+                  name.</entry>
                 </row>
 
                 <row>
