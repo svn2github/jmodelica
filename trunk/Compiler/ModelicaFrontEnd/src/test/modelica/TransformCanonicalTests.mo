@@ -5207,4 +5207,41 @@ end InWhenEquations;
 
 end EventGeneratingExps;
 
+model GetInstanceName
+	model B
+		model C
+			equation
+				Modelica.Utilities.Streams.print("Info from: " + getInstanceName());
+		end C;
+		
+		String s = getInstanceName();
+		C c;
+	end B;
+	
+	B b;
+	String s = getInstanceName();
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="GetInstanceName",
+			description="Tests getInstanceName().",
+			flatModel="
+fclass TransformCanonicalTests.GetInstanceName
+ discrete String b.s = \"GetInstanceName.b\";
+ discrete String s = \"GetInstanceName.\";
+equation
+ Modelica.Utilities.Streams.print(\"Info from: \" + \"GetInstanceName.b.c\", \"\");
+
+public
+ function Modelica.Utilities.Streams.print
+  input String string := \"\";
+  input String fileName := \"\";
+ algorithm
+  external \"C\" ModelicaInternal_print(string, fileName);
+  return;
+ end Modelica.Utilities.Streams.print;
+end TransformCanonicalTests.GetInstanceName;
+")})));
+	
+end GetInstanceName;
+
 end TransformCanonicalTests;

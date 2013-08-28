@@ -292,6 +292,7 @@ aspect InstFunctionBinding {
 				map.put("semiLinear",   new BuiltInCreator(false, new FSemiLinearExp(),  3));
 				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
 				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
+				map.put("getInstanceName", new BuiltInCreator(false, new FGetInstanceName(),   0));
 				//       name                                         node           # fixed args
 				map.put("array",        new InfArgsBuiltInCreator(new FParseArray(), 0));
 				map.put("ones",         new InfArgsBuiltInCreator(new FOnes(),       0));

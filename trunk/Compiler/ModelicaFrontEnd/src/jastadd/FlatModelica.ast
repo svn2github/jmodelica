@@ -1569,6 +1569,12 @@ FInStream : FStreamBuiltIn;
 FActualStream : FStreamBuiltIn;
 
 /**
+ * \brief getInstanceName built-in function.
+ */
+FGetInstanceName : FNoArgBuiltIn;
+
+
+/**
  * \brief Dummy node for unsupported built-in functions.
  */
 FUnsupportedBuiltIn : FBuiltInFunctionCall ::= <Name>;

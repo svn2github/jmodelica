@@ -477,6 +477,7 @@ aspect FlatTypeAnalysis {
 
 	eq FTerminate.type() = null;
 	eq FAssert.type() = null;
+	eq FGetInstanceName.type() = fStringScalarType();
 
 	/**
 	 * The scalar type of the expression.

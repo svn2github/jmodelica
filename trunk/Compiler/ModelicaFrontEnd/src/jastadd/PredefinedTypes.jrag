@@ -419,6 +419,9 @@ aspect PredefinedTypes {
     		+ "  input Real n;\n"      // Type not used
     		+ "  output Real o;\n"     // Type not used
     		+ "end actualStream;\n"
+    		+ "function getInstanceName\n"
+    		+ "  output String o;\n"
+    		+ "end getInstanceName;\n"
     		+ "function sin \"sine\"\n"
     		+ "  input Modelica.SIunits.Angle u;\n"
     		+ "  output Real y;\n"
