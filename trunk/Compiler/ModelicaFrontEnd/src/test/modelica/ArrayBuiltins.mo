@@ -3380,6 +3380,27 @@ end Math;
 
 package Special
 
+model Homotopy
+  Real x = homotopy(sin(time*10),2);
+  Real y[2] = homotopy({sin(time*10),time},{2,2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_Special_Homotopy",
+			description="Basic test of the homotopy() operator.",
+			flatModel="
+fclass ArrayBuiltins.FunctionLike.Special.Homotopy
+  Real x;
+  Real y[1];
+  Real y[2];
+equation
+  x = homotopy(sin(time*10),2);
+  y[1] = homotopy(sin(time*10),2);
+  y[2] = homotopy(time,2);
+end ArrayBuiltins.FunctionLike.Special.Homotopy;
+")})));
+end Homotopy;
+
 model SemiLinear1
   Real x = semiLinear(sin(time*10),2,-10);
   Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});

@@ -1244,6 +1244,12 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+	public void FHomotopyExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("(");
+		p.print(getActual(), str, indent);
+		str.print(")");
+	}
+	
 	public void FFloorFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("floor(");
 		p.print(getX(), str, indent);

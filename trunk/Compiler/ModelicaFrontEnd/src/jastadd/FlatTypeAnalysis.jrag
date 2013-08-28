@@ -340,6 +340,7 @@ aspect FlatTypeAnalysis {
 	eq FIntegerFuncExp.type() = fIntegerType(size());
 	eq FBinEventGenExp.type() = getX().type().numericPromotion(getY().type());
 	
+	eq FHomotopyExp.type()    = getActual().type();
 	eq FSemiLinearExp.type()  = fRealType(size());
 	
 	syn FType FRecordConstructor.type() = getType();

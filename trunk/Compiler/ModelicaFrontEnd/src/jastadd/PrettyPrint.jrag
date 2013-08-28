@@ -1781,6 +1781,7 @@ aspect FlatPrettyPrint {
 	eq FSumExp.builtInName()             = "sum";
 	eq FProductExp.builtInName()         = "product";
 	eq FLinspace.builtInName()           = "linspace";
+	eq FHomotopyExp.builtInName()        = "homotopy";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
 	eq FActualStream.builtInName()       = "actualStream";

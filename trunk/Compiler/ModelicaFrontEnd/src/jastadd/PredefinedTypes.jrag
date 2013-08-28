@@ -405,6 +405,11 @@ aspect PredefinedTypes {
     		+ "  input Real x[3];\n"
     		+ "  output Real y[3,3];\n"   // Type not used
     		+ "end skew;\n"
+    		+ "function homotopy\n"
+    		+ "  input Real v1;\n"     // Type not used
+    		+ "  input Real v2;\n"     // Type not used
+    		+ "  output Real o;\n"     // Type not used
+    		+ "end homotopy;\n"
     		+ "function semiLinear\n"
     		+ "  input Real v1;\n"     // Type not used
     		+ "  input Real v2;\n"     // Type not used

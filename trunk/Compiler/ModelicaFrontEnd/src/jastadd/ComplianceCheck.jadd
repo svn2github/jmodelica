@@ -101,6 +101,11 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The " + name() + "() function-like operator is");
 	}
 	
+	public void FHomotopyExp.complianceCheck() {
+		warning("The homotopy() function like operator is not fully supported."
+				+ " It is replaced with its first argument.");
+	}
+	
 	public void FSemiLinearExp.complianceCheck() {
 		complianceOnlyFMU("The semiLinear() function-like operator is");
 	}

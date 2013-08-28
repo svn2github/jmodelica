@@ -1263,6 +1263,7 @@ aspect ConstantEvaluation {
   eq FLeqExp.cevalCalc() = cevalType().leq(getLeft().ceval(), getRight().ceval());
   
   eq FIfExp.cevalCalc() = cevalSelectExp().ceval();
+  eq FHomotopyExp.cevalCalc()   = getActual().ceval();
   eq FSemiLinearExp.cevalCalc() = type().mul(getX().ceval(),cevalSelectExp().ceval());
   
   syn FExp FIfExp.cevalSelectExp() =

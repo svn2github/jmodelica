@@ -328,6 +328,7 @@ aspect FlatVariability {
 	eq FBinEventGenExp.expVariability() = getX().variability().combine(getY().variability());
 	eq FDivFuncExp.expVariability()     = getX().variability().combine(getY().variability()).combineDown(fDiscrete());
 	
+	eq FHomotopyExp.expVariability()    = getActual().variability();
 	
 	eq FIterExp.expVariability() {
 		FTypePrefixVariability total = size().isEmpty() ? fConstant() : getArray().iteratorFExp().next().variability();

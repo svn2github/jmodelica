@@ -301,6 +301,22 @@ Compliance error at line 288, column 3:
 ")})));
 end UnsupportedBuiltins3_ComplErr;
 
+model UnsupportedBuiltins_WarnErr
+ equation
+  homotopy(1,1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="UnsupportedBuiltins_WarnErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 306, column 3:
+  The homotopy() function like operator is not fully supported. It is replaced with its first argument.
+
+")})));
+end UnsupportedBuiltins_WarnErr;
 
 model ArrayCellMod_ComplErr
  model A

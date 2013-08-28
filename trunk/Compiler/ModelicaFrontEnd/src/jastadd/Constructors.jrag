@@ -938,6 +938,7 @@ aspect InheritedFactoryMethods {
 	public FMaxExp         FMaxExp.createEmptyNode()         { return new FMaxExp();         }
 	public FSumExp         FSumExp.createEmptyNode()         { return new FSumExp();         }
 	public FProductExp     FProductExp.createEmptyNode()     { return new FProductExp();     }
+	public FHomotopyExp    FHomotopyExp.createEmptyNode()    { return new FHomotopyExp();    }
 	public FSemiLinearExp  FSemiLinearExp.createEmptyNode()  { return new FSemiLinearExp();  }
 	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
 	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
@@ -1037,6 +1038,16 @@ aspect InheritedFactoryMethods {
 		FAtan2Exp node = createEmptyNode();
 		node.setFExp(x);
 		node.setY(y);
+		return node;
+	}
+	
+	/**
+	 * \Create new node of same class as this, with the specified children.
+	 */
+	public FHomotopyExp FHomotopyExp.createNode(FExp x, FExp y) {
+		FHomotopyExp node = createEmptyNode();
+		node.setActual(x);
+		node.setSimplified(y);
 		return node;
 	}
 	

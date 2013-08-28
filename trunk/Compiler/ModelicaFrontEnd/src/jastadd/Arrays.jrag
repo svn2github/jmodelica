@@ -223,7 +223,8 @@ aspect Arrays {
 	eq FEventGenExp.ndims()               = getX().ndims();
 	eq FMathematicalFunctionCall.ndims()  = getFExp().ndims();
 	
-	eq FSemiLinearExp.ndims()  = getX().ndims();
+	eq FHomotopyExp.ndims()   = getActual().ndims();
+	eq FSemiLinearExp.ndims() = getX().ndims();
 	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -924,6 +925,7 @@ aspect Arrays {
 	
 	eq FEventGenExp.size()              = getX().size();
 	eq FMathematicalFunctionCall.size() = getFExp().size();
+	eq FHomotopyExp.size()              = getActual().size();
 	eq FSemiLinearExp.size()            = getX().size();
 	
 	eq FArrayDimAsArgsExp.size() {
@@ -1726,6 +1728,18 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		Array inner1 = getFExp().getArray();
 		Array inner2 = getY().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
+		return arr;
+	}
+	
+	eq FHomotopyExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner1 = getActual().getArray();
+		Array inner2 = getSimplified().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
 		return arr;

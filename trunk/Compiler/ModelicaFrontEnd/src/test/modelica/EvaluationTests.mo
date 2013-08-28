@@ -1057,6 +1057,20 @@ end EventGen;
 
 package Special
 
+model Homotopy
+  Real x = homotopy(1,2);
+
+  annotation(__JModelica(UnitTesting(tests={
+    TransformCanonicalTestCase(
+      name="FunctionLike_Special_Homotopy",
+      description="Basic test of the homotopy() operator.",
+      flatModel="
+fclass EvaluationTests.FunctionLike.Special.Homotopy
+  constant Real x = 1;
+end EvaluationTests.FunctionLike.Special.Homotopy;
+")})));
+end Homotopy;
+
 model SemiLinear1
   Real x = semiLinear(1,2,3);
 
