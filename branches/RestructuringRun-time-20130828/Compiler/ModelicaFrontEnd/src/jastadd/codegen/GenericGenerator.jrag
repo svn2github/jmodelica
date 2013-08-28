@@ -1,0 +1,737 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/** \file GenericGenerator.java
+ *  \brief GenericGenerator class.
+ */
+
+import java.io.*;
+
+/**
+ * A generator class containing a basic set of tags which
+ * are not language dependent.
+ * 
+ * This class is also intended as base class for more specialized generators.
+ *
+ */
+public class GenericGenerator extends AbstractGenerator {
+
+	class DAETag_numIndependentConstants extends DAETag {
+		
+		public DAETag_numIndependentConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_ci","Number of independent constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentConstants extends DAETag {
+		
+		public DAETag_numDependentConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_cd","Number of dependent constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentParameters extends DAETag {
+		
+		public DAETag_numIndependentParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_pi","Number of independent parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentParameters extends DAETag {
+		
+		public DAETag_numDependentParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_pd","Number of dependent parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentParameters());
+		}
+	
+	}
+
+	class DAETag_numIndependentRealConstants extends DAETag {
+		
+		public DAETag_numIndependentRealConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_ci","Number of independent real constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentRealConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentRealConstants extends DAETag {
+		
+		public DAETag_numDependentRealConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_cd","Number of dependent real constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentRealConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentRealParameters extends DAETag {
+		
+		public DAETag_numIndependentRealParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_pi","Number of independent real parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentRealParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentRealParameters extends DAETag {
+		
+		public DAETag_numDependentRealParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_pd","Number of dependent real parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentRealParameters());
+		}
+	
+	}
+	
+	class DAETag_numIndependentIntegerConstants extends DAETag {
+		
+		public DAETag_numIndependentIntegerConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_ci","Number of independent integer constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentIntegerConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentEnumConstants extends DAETag {
+		
+		public DAETag_numIndependentEnumConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_ci","Number of independent enum constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentEnumConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentIntegerConstants extends DAETag {
+		
+		public DAETag_numDependentIntegerConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_cd","Number of dependent integer constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentIntegerConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentEnumConstants extends DAETag {
+		
+		public DAETag_numDependentEnumConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_cd","Number of dependent enum constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentEnumConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentIntegerParameters extends DAETag {
+		
+		public DAETag_numIndependentIntegerParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_pi","Number of independent integer parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentIntegerParameters());
+		}
+	
+	}
+
+	class DAETag_numIndependentEnumParameters extends DAETag {
+		
+		public DAETag_numIndependentEnumParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_pi","Number of independent enum parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentEnumParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentIntegerParameters extends DAETag {
+		
+		public DAETag_numDependentIntegerParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_pd","Number of dependent integer parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentIntegerParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentEnumParameters extends DAETag {
+		
+		public DAETag_numDependentEnumParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_pd","Number of dependent enum parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentEnumParameters());
+		}
+	
+	}
+
+	class DAETag_numIndependentBooleanConstants extends DAETag {
+		
+		public DAETag_numIndependentBooleanConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_ci","Number of independent boolean constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentBooleanConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentBooleanConstants extends DAETag {
+		
+		public DAETag_numDependentBooleanConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_cd","Number of dependent boolean constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentBooleanConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentBooleanParameters extends DAETag {
+		
+		public DAETag_numIndependentBooleanParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_pi","Number of independent boolean parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentBooleanParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentBooleanParameters extends DAETag {
+		
+		public DAETag_numDependentBooleanParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_pd","Number of dependent boolean parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentBooleanParameters());
+		}
+	
+	}
+
+	class DAETag_numIndependentStringConstants extends DAETag {
+		
+		public DAETag_numIndependentStringConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_ci","Number of independent string constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentStringConstants());
+		}
+	
+	}
+
+	class DAETag_numDependentStringConstants extends DAETag {
+		
+		public DAETag_numDependentStringConstants(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_cd","Number of dependent string constants",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentStringConstants());
+		}
+	
+	}
+
+	class DAETag_numIndependentStringParameters extends DAETag {
+		
+		public DAETag_numIndependentStringParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_pi","Number of independent string parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIndependentStringParameters());
+		}
+	
+	}
+
+	class DAETag_numDependentStringParameters extends DAETag {
+		
+		public DAETag_numDependentStringParameters(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_pd","Number of dependent string parameters",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDependentStringParameters());
+		}
+	
+	}
+
+	class DAETag_numSwitchingFunctions extends DAETag {
+		
+		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_switches","Number switching functions",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numEventIndicators());
+		}
+	
+	}
+
+	class DAETag_numInitialSwitchingFunctions extends DAETag {
+		
+		public DAETag_numInitialSwitchingFunctions(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_switches","Number switching functions in the initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialEventIndicators());
+		}
+	
+	}
+
+	class DAETag_numGuards extends DAETag {
+		
+		public DAETag_numGuards(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_guards","Number guards",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numGuardExpInEquations());
+		}
+
+	}
+
+	class DAETag_numInitialGuards extends DAETag {
+		
+		public DAETag_numInitialGuards(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_guards_init","Number guards in the initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numGuardExpInInitialEquations());
+		}
+	
+	}
+
+	
+	class DAETag_numAlgebraicContinousRealVariables extends DAETag {
+		
+		public DAETag_numAlgebraicContinousRealVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_w","Number of continous algebraic real variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numAlgebraicContinousRealVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteVariables extends DAETag {
+		
+		public DAETag_numDiscreteVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_d","Number of discrete variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteRealVariables extends DAETag {
+		
+		public DAETag_numDiscreteRealVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_d","Number of discrete real variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteRealVariables());
+		}
+	
+	}
+
+	class DAETag_numOutputs extends DAETag {
+		
+		public DAETag_numOutputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_outputs","Number of output variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numOutputs());
+		}
+	
+	}
+
+	class DAETag_numDiscreteIntegerVariables extends DAETag {
+		
+		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_d","Number of discrete integer variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteIntegerVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteEnumVariables extends DAETag {
+		
+		public DAETag_numDiscreteEnumVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_d","Number of discrete enum variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteEnumVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteBooleanVariables extends DAETag {
+		
+		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_d","Number of discrete boolean variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteBooleanVariables());
+		}
+	
+	}
+
+	class DAETag_numDiscreteStringVariables extends DAETag {
+		
+		public DAETag_numDiscreteStringVariables(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_d","Number of discrete string variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDiscreteStringVariables());
+		}
+	
+	}
+	
+	class DAETag_numInputs extends DAETag {
+		
+		public DAETag_numInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_u","Number of inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInputs());
+		}
+	
+	}
+
+	class DAETag_numRealInputs extends DAETag {
+		
+		public DAETag_numRealInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_real_u","Number of real inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numRealInputs());
+		}
+	
+	}
+
+	class DAETag_numIntegerInputs extends DAETag {
+		
+		public DAETag_numIntegerInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_integer_u","Number of integer inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numIntegerInputs());
+		}
+	
+	}
+
+	class DAETag_numEnumInputs extends DAETag {
+		
+		public DAETag_numEnumInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_enum_u","Number of enum inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numEnumInputs());
+		}
+	
+	}
+
+	class DAETag_numBooleanInputs extends DAETag {
+		
+		public DAETag_numBooleanInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_boolean_u","Number of boolean inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numBooleanInputs());
+		}
+	
+	}
+
+	class DAETag_numStringInputs extends DAETag {
+		
+		public DAETag_numStringInputs(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_string_u","Number of string inputs",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numStringInputs());
+		}
+	
+	}
+	
+    class DAETag_numExternalObjects extends DAETag {
+        
+        public DAETag_numExternalObjects(AbstractGenerator myGenerator, 
+          FClass fclass) {
+            super("n_ext_objs","Number of external objects",
+              myGenerator,fclass);
+        }
+    
+        public void generate(PrintStream genPrinter) {
+            genPrinter.print(fclass.numExternalObjectVariables());
+        }
+    
+    }
+
+	class DAETag_numEquations extends DAETag {
+		
+		public DAETag_numEquations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_equations","Number of equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numScalarEquations());
+		}
+	
+	}
+
+	class DAETag_numEventIndicators extends DAETag {
+		
+		public DAETag_numEventIndicators(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_event_indicators","Number of event indicators in DAE equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				genPrinter.print(fclass.numEventIndicators());
+			} else {
+				genPrinter.print(fclass.numEventIndicators() + fclass.numInitialEventIndicators());
+			}
+		}
+	}
+	
+	class DAETag_numInitialEquations extends DAETag {
+		
+		public DAETag_numInitialEquations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_equations","Number of initial equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialScalarEquations());
+		}
+	
+	}
+
+	class DAETag_numInitialEventIndicators extends DAETag {
+		
+		public DAETag_numInitialEventIndicators(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_event_indicators","Number of event indicators in DAE initialization equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				genPrinter.print(fclass.numInitialEventIndicators());
+			} else {
+				genPrinter.print(0);
+			}			
+		}
+	}
+
+	class DAETag_numInitialGuessEquations extends DAETag {
+		
+		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 
+		  FClass fclass) {
+			super("n_initial_guess_equations","Number of initial guess equations",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numInitialGuessEquations());
+		}
+	
+	}
+
+	class DAETag_numDifferentiatedRealVariables extends DAETag {
+		
+		public DAETag_numDifferentiatedRealVariables(
+		  AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_x","Number of differentiated Real variables",
+			  myGenerator,fclass);
+		}
+	
+		public void generate(PrintStream genPrinter) {
+			genPrinter.print(fclass.numDifferentiatedRealVariables());
+		}
+	
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public GenericGenerator(Printer expPrinter, char escapeCharacter,
+	  FClass fclass) {
+		super(expPrinter,escapeCharacter, fclass);
+	}
+
+}
