@@ -8729,6 +8729,63 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end RecordTearingTest1;
 
+model RecordTearingTest2
+	function F
+		input Real a;
+		input Real b;
+		output Real c;
+		output Real d;
+	algorithm
+		c := a + b;
+		d := c - a;
+	end F;
+	Real x,y;
+	
+	constant Real c1 = 23;
+equation
+	(c1, c1) = F(x,y);
+
+	annotation(__JModelica(UnitTesting(tests={ 
+		CCodeGenTestCase(
+			name="RecordTearingTest2",
+			description="",
+			generate_ode=true,
+			equation_sorting=true,
+			automatic_tearing=true,
+			inline_functions="none",
+			template="$C_dae_blocks_residual_functions$",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        x[1] = _x_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+        func_CCodeGenTests_RecordTearingTest2_F_def(_x_0, _y_1, &tmp_1, &tmp_2);
+        (*res)[0] = tmp_1 - (_c1_2);
+        (*res)[1] = tmp_2 - (_c1_2);
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+    }
+    return ef;
+}
+
+")})));
+end RecordTearingTest2;
+
 model LocalLoopTearingTest1
 	Real a, b, c;
 equation

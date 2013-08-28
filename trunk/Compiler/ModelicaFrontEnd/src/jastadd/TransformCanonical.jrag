@@ -1183,10 +1183,12 @@ aspect TransformCanonical {
 	public abstract class FunctionCallEquationBlock extends SimpleEquationBlock {
 		
 		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
 		
-		public FunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVars) {
+		public FunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVars, Collection<Integer> assignedIndices) {
 			super(eqn);
 			this.activeVars.addAll(activeVars);
+			this.assignedIndices.addAll(assignedIndices);
 		}
 		
 		public FFunctionCallEquation equation() {
@@ -1207,6 +1209,7 @@ aspect TransformCanonical {
 				return false;
 			
 			activeVars.addAll(fceb.activeVars);
+			assignedIndices.addAll(fceb.assignedIndices);
 			return true;
 		}
 		
@@ -1226,8 +1229,8 @@ aspect TransformCanonical {
 	 */
 	public class SolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables) {
-			super(eqn, activeVariables);
+		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(eqn, activeVariables, assignedIndices);
 		}
 		
 		@Override
@@ -1242,8 +1245,8 @@ aspect TransformCanonical {
 	 */
 	public class UnsolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
 		
-		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables) {
-			super(eqn, activeVariables);
+		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(eqn, activeVariables, assignedIndices);
 		}
 		
 		@Override
@@ -1273,14 +1276,15 @@ aspect TransformCanonical {
 		
 			blocks.add(new ArrayList<SimpleEquationBlock>());
 			for (FAbstractEquation eqn : equation().getFAbstractEquations()) {
-				Collection<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
 				Collection<FVariable> fvs = new ArrayList<FVariable>();
-				eqns.add(eqn);
+				Collection<Integer> assignedIndices = new ArrayList<Integer>();
+				int i = 0;
 				for (FIdUseExp e : eqn.simpleLefts()) {
 					fvs.add((FVariable)e.myFV());
+					assignedIndices.add(i++);
 				}
 				fvars.addAll(fvs);
-				blocks.iterator().next().add(EquationBlockFactory.createSimpleEquationBlock(eqns,fvs,true));
+				blocks.iterator().next().add(EquationBlockFactory.createSimpleEquationBlock(eqn, fvs, assignedIndices, true));
 			}
 			
 			// TODO: handle else when clauses 
@@ -1726,7 +1730,7 @@ aspect TransformCanonical {
 			}
 			for (FAbstractEquation e : equations())
 				if (e.numScalarEquations() == 0)
-					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), Solvability.ANALYTICALLY_SOLVABLE));
+					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE));
 			daeStructuredBLT = new StructuredBLT(this, daeBLT);
 			log.info(daeStructuredBLT);
 			
@@ -2067,7 +2071,7 @@ aspect TransformCanonical {
 				varsInBlock.remove(fIterVar);
 				recalculateMatchings = true;
 				log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
-				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), fIterVar, false));
+				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
 			}
 		}
 		if (recalculateMatchings) {
@@ -2085,7 +2089,7 @@ aspect TransformCanonical {
 					log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
 					newGraph.removeEquation(e);
 					newGraph.removeVariable(v);
-					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e.getEquation(), v.getVariable(), false));
+					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
 				}
 				if (eIt.hasNext() || vIt.hasNext()) {
 					StringBuilder sb = new StringBuilder();
@@ -2161,7 +2165,7 @@ aspect TransformCanonical {
 		} else {
 			// Else: Start out by trying to insert residuals that contain
 			// 		 few variables. 
-			java.util.List<FAbstractEquation> residuals = new ArrayList<FAbstractEquation>();
+			java.util.List<Eq> residuals = new ArrayList<Eq>();
 			for (Eq e : SUME) {
 				Eq bestRes = e;
 				for (Var v : e.getSolvableVariables()) {
@@ -2173,16 +2177,16 @@ aspect TransformCanonical {
 					bestRes.isRes(true);
 					g.match(e, bestRes.getMatching());
 					e.isRes(false);
-					residuals.add(bestRes.getEquation());
+					residuals.add(bestRes);
 				} else {
-					residuals.add(e.getEquation());
+					residuals.add(e);
 				}
 			}
 
 			// Compute inner BLT and see if tearings can be changed 
 			Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
 			Collection<Collection<Eq>> innerBlocks = g.computeRawBLT(false);
-			java.util.List<FVariable> tearings = new ArrayList<FVariable>();
+			java.util.List<Var> tearings = new ArrayList<Var>();
 
 			for (Collection<Eq> bInner : innerBlocks) {
 				SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, true, true);
@@ -2193,7 +2197,7 @@ aspect TransformCanonical {
 					for (Eq e : bInner) {
 						for (Var vv : e.getVariables()) {
 							if (SUMV.remove(vv))
-								tearings.add(vv.getVariable());
+								tearings.add(vv);
 						}
 					}
 				} else {
@@ -2214,7 +2218,7 @@ aspect TransformCanonical {
 								gInnerVar = gInner.addVariable(v.getName(), v.getVariable());
 								gInnerVar.isIter(true);
 								SUMV.remove(v);
-								tearings.add(v.getVariable());
+								tearings.add(v);
 								graphHasTear = true;
 								gInner.addInsidence(gInnerEq, gInnerVar);
 								if (gInner.canMatch(gInnerEq, gInnerVar) && !eqs.contains(gInnerEq)) {
@@ -2235,8 +2239,8 @@ aspect TransformCanonical {
 							Var tmp = e.getMatching();
 							tmp.isIter(true);
 							bestMatch.isIter(false);
-							tearings.add(tmp.getVariable());
-							tearings.remove(bestMatch.getVariable());
+							tearings.add(tmp);
+							tearings.remove(bestMatch);
 							gInner.match(e, bestMatch);
 							isChanged = true;
 						}
@@ -2265,11 +2269,11 @@ aspect TransformCanonical {
 			for (Var v : SUMV) {
 				//SUMV ought to be empty, but there might exist variables that hasn't 
 				// been altered before. 
-				tearings.add(v.getVariable());
+				tearings.add(v);
 			}
 			for (int i = 0; i < tearings.size(); i++) {
-				log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i), tearings.get(i).name());
-				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), false));
+				log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+				eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i)));
 			}
 		}
 	}	
@@ -2286,7 +2290,7 @@ aspect TransformCanonical {
 		bestIter.isIter(true);
 		res.isRes(true);
 		log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
-		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res.getEquation(), bestIter.getVariable(), false));
+		eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
 		Collection<Collection<Eq>> blt = g.computeRawBLT(false);
 		for (Collection<Eq> block : blt) {
 			SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
