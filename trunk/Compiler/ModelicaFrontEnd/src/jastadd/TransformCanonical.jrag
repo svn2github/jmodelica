@@ -4979,6 +4979,7 @@ aspect FunctionInlining {
 	syn boolean FExp.eventGenerating() = false;
 	eq FIfExp.eventGenerating()        = true;
 	eq FRelExp.eventGenerating()       = getLeft().isContinuousExp() || getRight().isContinuousExp();
+	eq FEventGenExp.eventGenerating() = true;
 	// TODO: support more event-generating expressions
 	
 	/**
@@ -6202,8 +6203,8 @@ aspect EventGeneratingExps {
 	}
 	eq FDivFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FPreExp(var.createUseExp())));
-		guards.addFExp(new FGeqExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
 		return guards;
 	} 
 	

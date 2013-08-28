@@ -2897,13 +2897,13 @@ equation
  x = temp_3;
  y[1] = temp_2;
  y[2] = temp_1;
- when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+ when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
   temp_1 = div(time, 2);
  end when;
- when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+ when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
   temp_2 = div(time, 2);
  end when;
- when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+ when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
   temp_3 = div(time, 2);
  end when;
 end ArrayBuiltins.FunctionLike.EventGen.Div;
@@ -2971,13 +2971,13 @@ equation
  x = time - temp_3 * 2;
  y[1] = time - temp_2 * 2;
  y[2] = time - temp_1 * 2;
- when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
+ when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
   temp_1 = div(time, 2);
  end when;
- when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
+ when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
   temp_2 = div(time, 2);
  end when;
- when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
+ when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
   temp_3 = div(time, 2);
  end when;
 end ArrayBuiltins.FunctionLike.EventGen.Rem;

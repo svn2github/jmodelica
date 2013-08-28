@@ -5138,38 +5138,32 @@ model InFunctionCall
     input Real x;
     output Real y;
   algorithm
-   y := x;
+   y := mod(x,2);
    return;
   end f;
 	
+	Real x;
 equation
-	f(integer(0.9 + time/10) * 3.14);
+	x = f(integer(0.9 + time/10) * 3.14);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="EventGeneratingExps_InFunctionCall",
 			description="Tests event generating expressions in function calls.",
-			inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
- discrete Integer temp_1;
+ Real x;
+ discrete Real temp_1;
+ discrete Integer temp_3;
 initial equation 
- temp_1 = integer(0.9 + time / 10);
+ temp_3 = integer(0.9 + time / 10);
+ pre(temp_1) = 0.0;
 equation
- TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f(temp_1 * 3.14);
- when {0.9 + time / 10 < pre(temp_1), 0.9 + time / 10 >= pre(temp_1) + 1} then
-  temp_1 = integer(0.9 + time / 10);
+ x = temp_1 - noEvent(floor(temp_1 / 2)) * 2;
+ temp_1 = temp_3 * 3.14;
+ when {0.9 + time / 10 < pre(temp_3), 0.9 + time / 10 >= pre(temp_3) + 1} then
+  temp_3 = integer(0.9 + time / 10);
  end when;
-
-public
- function TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- end TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f;
-
 end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
 ")})));
 end InFunctionCall;
