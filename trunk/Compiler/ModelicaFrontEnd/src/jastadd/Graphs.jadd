@@ -610,20 +610,16 @@ public class BiPGraph {
 	}
 	
 	public BiPGraph(Collection<Eq> eqs, Collection<Var> vars) {
-		for (Eq oldE : eqs) {
-			Eq e = addEquation(oldE.getName(), oldE.getEquation());
-			e.groupNumber(oldE.groupNumber());
-		}
-		for (Var oldV : vars) {
+		for (Eq oldE : eqs)
+			addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber());
+		for (Var oldV : vars)
 			addVariable(oldV.getName(), oldV.getVariable());
-		}
 		for (Eq oldE : eqs) {
 			Eq e = getEquation(oldE.getName());
 			for (Var oldV : oldE.getVariables()) {
 				Var v = getVariable(oldV.getName());
-				if (v != null) {
+				if (v != null)
 					addInsidence(e, v);
-				}
 			}
 		}
 	}
@@ -664,10 +660,10 @@ public class BiPGraph {
 		return (list == null) ? Collections.<Eq>emptyList() : list;
 	}
 
-	public Eq addEquation(String name, FAbstractEquation eqn) {
+	public Eq addEquation(String name, FAbstractEquation eqn, int groupNumber) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
-			e = new Eq(name, eqn);
+			e = new Eq(name, eqn, groupNumber);
 			equationMap.put(name,e);
 			insertIntoEquationIndexMap(eqn,e);
 		}
@@ -788,10 +784,9 @@ public class BiPGraph {
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
-				eqn = addEquation(eqNamePrefix+k, e);
+				eqn = addEquation(eqNamePrefix+k, e, i);
 				groupMembers.add(eqn);
 				k++;
-				eqn.groupNumber(i);
 
 				for (VarType t : variableTypes) {
 					for (FVariable y : t.variables(e)) {
@@ -1147,8 +1142,7 @@ public class BiPGraph {
 								// Add the differentiated equation		
 								// Loop over all equations in the group 
 								for (Eq groupMemberEquation : ee.getGroupMembers()) {				
-									Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee);
-									eqn.groupNumber(groupMemberEquation.groupNumber());
+									Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupMemberEquation.groupNumber());
 									
 									// Add edges
 									for (FVariable fv : deee.variables()) {
@@ -1310,7 +1304,7 @@ public class BiPGraph {
 				
 				for (int i=0;i<n_eq;i++) {
 					ASTNode.log.info("*** " + e.prettyPrint(""));
-					eqn = gd.addEquation("eq_"+k,e);
+					eqn = gd.addEquation("eq_"+k, e, i);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
@@ -1770,7 +1764,9 @@ public class SolvingBiPGraph extends BiPGraph {
 
 public class Eq implements Comparable<Eq> {
 
-	private String name;
+	private final String name;
+	private final FAbstractEquation eqn;
+	private final int groupNumber;
 	private java.util.List<Var> variables = new ArrayList<Var>();
 	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
 	private int analyticallySolvableOccurrences = 0;
@@ -1778,8 +1774,6 @@ public class Eq implements Comparable<Eq> {
 	private Var matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
-	private FAbstractEquation eqn;
-	private int groupNumber;
 	private Eq meDifferentiated = null;
 	private Eq meIntegrated = null;
 	private boolean isRes = false;
@@ -1798,9 +1792,10 @@ public class Eq implements Comparable<Eq> {
 	*/
 	private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
 
-	public Eq(String name, FAbstractEquation eqn) {
+	public Eq(String name, FAbstractEquation eqn, int groupNumber) {
 		this.name = name;
 		this.eqn = eqn;
+		this.groupNumber = groupNumber;
 		this.groupMembers.add(this);
 	}
 			
@@ -1830,10 +1825,14 @@ public class Eq implements Comparable<Eq> {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public FAbstractEquation getEquation() {
+		return eqn;
 	}
-
+		
+	public int groupNumber() {
+		return groupNumber;
+	}
+	
 	public java.util.List<Var> getVariables() {
 		return variables;
 	}
@@ -1904,22 +1903,6 @@ public class Eq implements Comparable<Eq> {
 		return getName();
 	}
 
-	public FAbstractEquation getEquation() {
-		return eqn;
-	}
-		
-	public void setEquation(FAbstractEquation eqn) {
-		this.eqn = eqn;
-	}
-	
-	public int groupNumber() {
-		return groupNumber;
-	}
-	
-	public void groupNumber(int groupNumber) {
-		this.groupNumber = groupNumber;
-	}
-	
 	public void addAnalyticallySolvableVariable(Var v) {
 		solvableVariables.add(v);
 		analyticallySolvableOccurrences++;
@@ -1996,16 +1979,24 @@ public class Eq implements Comparable<Eq> {
 		return 0;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Eq))
+			return false;
+		Eq other = (Eq)o;
+		return getName().equals(other.getName());
+	}
+
 
 }
 
 public class Var implements Comparable<Var> {
 
-	private String name;
+	private final String name;
+	private final FVariable v;
 	private Eq matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
-	private FVariable v;
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
 	private int occurrences = 0;
@@ -2032,9 +2023,9 @@ public class Var implements Comparable<Var> {
 	public String getName() {
 		return name;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	
+	public FVariable getVariable() {
+		return v;
 	}
 
 	public Eq getMatching() {
@@ -2060,15 +2051,7 @@ public class Var implements Comparable<Var> {
 	public void setLayer(int layer) {
 		this.layer = layer;
 	}
-	
-	public FVariable getVariable() {
-		return v;
-	}
 		
-	public void setVariable(FVariable v) {
-		this.v = v;
-	}
-	
 	public void setMeDifferentiated(Var var) {
 		this.meDifferentiated = var;
 		this.getVariable().setMeDifferentiated(var.getVariable());
@@ -2160,6 +2143,14 @@ public class Var implements Comparable<Var> {
 		if (diff != 0)
 			return diff;
 		return 0;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Var))
+			return false;
+		Var other = (Var)o;
+		return getName().equals(other.getName());
 	}
 
 }
