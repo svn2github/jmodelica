@@ -1459,6 +1459,11 @@ FMatrixExp : FDimensionConvert;
 FTranspose : FUnaryBuiltIn;
 
 /**
+ * \brief Symmetric built-in function.
+ */
+FSymmetric : FUnaryBuiltIn;
+
+/**
  * \brief Cross built-in function.
  */
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;

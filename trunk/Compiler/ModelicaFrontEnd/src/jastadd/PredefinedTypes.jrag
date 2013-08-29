@@ -347,6 +347,10 @@ aspect PredefinedTypes {
     		+ "  input Real A;\n"    // Type not used
     		+ "  output Real B;\n"   // Type not used
     		+ "end transpose;\n"
+    		+ "function symmetric\n"
+    		+ "  input Real A;\n"    // Type not used
+    		+ "  output Real B;\n"   // Type not used
+    		+ "end symmetric;\n"
     		+ "function cross\n"
     		+ "  input Real x[3];\n"
     		+ "  input Real y[3];\n"
@@ -400,7 +404,6 @@ aspect PredefinedTypes {
     		+ "  input Real A;\n"      // Type not used
     		+ "  output Real o;\n"     // Type not used
     		+ "end product;\n"
-    		+ "function symmetric end symmetric;\n"
     		+ "function skew\n"
     		+ "  input Real x[3];\n"
     		+ "  output Real y[3,3];\n"   // Type not used

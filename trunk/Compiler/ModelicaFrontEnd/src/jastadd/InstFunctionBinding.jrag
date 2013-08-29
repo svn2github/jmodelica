@@ -282,6 +282,7 @@ aspect InstFunctionBinding {
 				map.put("vector",       new BuiltInCreator(false, new FVectorExp(),      1));
 				map.put("matrix",       new BuiltInCreator(false, new FMatrixExp(),      1));
 				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
+				map.put("symmetric",    new BuiltInCreator(false, new FSymmetric(),      1));
 				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
 				map.put("skew",         new BuiltInCreator(false, new FSkew(),           1));
 				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));

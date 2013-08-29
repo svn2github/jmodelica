@@ -119,6 +119,7 @@ aspect ComplianceCheck {
 	
 	public boolean FUnaryBuiltIn.unknownSizeNotSupported() { return false; }
 	public boolean FTranspose.unknownSizeNotSupported()    { return true; }
+	public boolean FSymmetric.unknownSizeNotSupported()    { return true; }
 	public boolean FScalarExp.unknownSizeNotSupported()    { return true; }
 	public boolean FVectorExp.unknownSizeNotSupported()    { return true; }
 	public boolean FMatrixExp.unknownSizeNotSupported()    { return true; }

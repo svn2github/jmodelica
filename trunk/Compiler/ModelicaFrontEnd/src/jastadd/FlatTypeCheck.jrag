@@ -694,6 +694,7 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
   eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()         = true;
   eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
+  eq FSymmetric.getChild().argumentDefinedTypeValid()                    = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FReductionExp.getChild().argumentDefinedTypeValid()                 = false;
   eq FHomotopyExp.getChild().argumentDefinedTypeValid()                  = false;
@@ -722,6 +723,7 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentTypeValid(FType type);
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
   eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
+  eq FSymmetric.getChild().argumentTypeValid(FType type)            = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
   eq FReductionExp.getChild().argumentTypeValid(FType type)         = type.ndims() > 0 && type.hasAdd();
   eq FHomotopyExp.getChild().argumentTypeValid(FType type)          = true;
   eq FSemiLinearExp.getChild().argumentTypeValid(FType type)        = type.isNumeric();

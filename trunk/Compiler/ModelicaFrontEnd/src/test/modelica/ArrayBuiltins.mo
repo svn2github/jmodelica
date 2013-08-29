@@ -1305,7 +1305,168 @@ end Transpose8;
 
 end Transpose;
 
+package Symmetric
+	
+model Symmetric1
+ Real x[2,2] = symmetric({{1,2},{3,4}});
 
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric1",
+			description="Scalarization of symmetric operator: Integer[2,2]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric1
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 4;
+end ArrayBuiltins.Symmetric.Symmetric1;
+")})));
+end Symmetric1;
+
+
+model Symmetric2
+ Real x[3,3] = symmetric({{1,2,3},{4,5,6},{7,8,9}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric2",
+			description="Scalarization of symmetric operator: Integer[3,3]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric2
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[1,3] = 3;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 5;
+ constant Real x[2,3] = 6;
+ constant Real x[3,1] = 3;
+ constant Real x[3,2] = 6;
+ constant Real x[3,3] = 9;
+end ArrayBuiltins.Symmetric.Symmetric2;
+")})));
+end Symmetric2;
+
+
+model Symmetric3
+ Real x[1,1] = symmetric({{3}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric3",
+			description="Scalarization of symmetric operator: Integer[1,1]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric3
+ constant Real x[1,1] = 3;
+end ArrayBuiltins.Symmetric.Symmetric3;
+")})));
+end Symmetric3;
+
+
+model Symmetric4
+ Integer x[4,4] = symmetric({{1,2,3,4},{5,6,7,8},{11,12,13,14},{15,16,17,18}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric4",
+			description="Scalarization of symmetric operator: Integer[2,2,2]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric4
+ constant Integer x[1,1] = 1;
+ constant Integer x[1,2] = 2;
+ constant Integer x[1,3] = 3;
+ constant Integer x[1,4] = 4;
+ constant Integer x[2,1] = 2;
+ constant Integer x[2,2] = 6;
+ constant Integer x[2,3] = 7;
+ constant Integer x[2,4] = 8;
+ constant Integer x[3,1] = 3;
+ constant Integer x[3,2] = 7;
+ constant Integer x[3,3] = 13;
+ constant Integer x[3,4] = 14;
+ constant Integer x[4,1] = 4;
+ constant Integer x[4,2] = 8;
+ constant Integer x[4,3] = 14;
+ constant Integer x[4,4] = 18;
+end ArrayBuiltins.Symmetric.Symmetric4;
+")})));
+end Symmetric4;
+
+
+model Symmetric5
+  Real x[2] = {1,2};
+  Real y[2,2];
+equation
+  y=symmetric(x)*x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric5",
+			description="Scalarization of symmetric operator: too few dimensions of arg",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1390, column 15:
+  Calling function symmetric(): types of positional argument 1 and input A are not compatible
+")})));
+end Symmetric5;
+
+
+model Symmetric6
+ Real x[2] = symmetric(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric6",
+			description="Scalarization of symmetric operator: Integer",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 4876, column 24:
+  Calling function symmetric(): types of positional argument 1 and input A are not compatible
+")})));
+end Symmetric6;
+
+
+model Symmetric7
+ Integer x[2,1] = symmetric({{1.0,2},{1,1}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric7",
+			description="Scalarization of symmetric operator: Real[1,2] -> Integer[2,1]",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 4892, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end Symmetric7;
+
+
+model Symmetric8
+    Real[2,2] x = {{1,2},{3,4}};
+    Real[2,2] y = symmetric(x) .+ 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric8",
+			description="Scalarization of symmetric operator: access to variable",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric8
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
+ constant Real y[1,1] = 2.0;
+ constant Real y[1,2] = 3.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 5.0;
+end ArrayBuiltins.Symmetric.Symmetric8;
+")})));
+end Symmetric8;
+
+end Symmetric;
 
 package Cross
 	

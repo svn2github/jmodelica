@@ -210,7 +210,7 @@ aspect Arrays {
 	 */
 	syn int FIterExp.localNdims() = getNumForIndex();
 	
-	eq FTranspose.ndims()    = getFExp().ndims();
+	eq FSymmetric.ndims()    = 2;
 	eq FCross.ndims()        = 1;
 	eq FSkew.ndims()         = 2;
 	eq FOuterProduct.ndims() = 2;
@@ -866,8 +866,8 @@ aspect Arrays {
 		return s;
 	}
 	
-	eq FCross.size() = new Size(3);
-	eq FSkew.size() = new Size(3, 3);
+	eq FCross.size()     = new Size(3);
+	eq FSkew.size()      = new Size(3, 3);
 	
 	eq FOuterProduct.size() {
 		MutableSize s = new MutableSize(2);
@@ -1504,6 +1504,24 @@ aspect Arrays {
 			ind[1] = i.get(0);
 			for (int j = 2; j < ind.length; j++)
 				ind[j] = i.get(j);
+			res.set(i, inner.get(ti));
+		}
+		return res;
+	}
+	
+	eq FSymmetric.getArray() {
+		Array inner = getFExp().getArray();
+		Array res = new Array(indices());
+		int[] ind = new int[ndims()];
+		Index ti = new Index(ind);
+		for (Index i : res.indices()) {
+			ind[0] = i.get(0);
+			ind[1] = i.get(1);
+			if (ind[0] > ind[1]) {
+				int temp = ind[0];
+				ind[0] = ind[1];
+				ind[1] = temp;
+			}
 			res.set(i, inner.get(ti));
 		}
 		return res;

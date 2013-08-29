@@ -186,23 +186,6 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  symmetric(1 + "2");
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins1_ComplErr",
-			description="Compliance error for unsupported builtins",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 171, column 3:
-  The symmetric() function-like operator is not supported
-")})));
-end UnsupportedBuiltins1_ComplErr;
-
-
-model UnsupportedBuiltins2_ComplErr
- equation
   String();
   delay(1);
   cardinality();
@@ -210,7 +193,7 @@ model UnsupportedBuiltins2_ComplErr
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins2_ComplErr",
+			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
 8 errors found:
@@ -227,10 +210,10 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported
 ")})));
-end UnsupportedBuiltins2_ComplErr;
+end UnsupportedBuiltins1_ComplErr;
 
 
-model UnsupportedBuiltins3_ComplErr
+model UnsupportedBuiltins2_ComplErr
   parameter Boolean x;
  equation
   sign(1);
@@ -250,7 +233,7 @@ model UnsupportedBuiltins3_ComplErr
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins3_ComplErr",
+			name="UnsupportedBuiltins2_ComplErr",
 			description="Compliance error for unsupported builtins",
 			generate_ode=false,
 			generate_dae=true,
@@ -299,7 +282,7 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
   The terminate() function-like operator is currently only supported when compiling FMUs
 ")})));
-end UnsupportedBuiltins3_ComplErr;
+end UnsupportedBuiltins2_ComplErr;
 
 model UnsupportedBuiltins_WarnErr
  equation
@@ -675,6 +658,7 @@ model Error2
     output Real y[size(x,2),size(x,1)];
   algorithm
 	y := transpose(x);
+	y := symmetric(x);
 	b := identity(n);
 	c := linspace(1,5,n);
 	a := min(c);
@@ -696,6 +680,9 @@ model Error2
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 736, column 7:
   Unknown sizes in operator transpose() is not supported in functions
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 736, column 7:
+  Unknown sizes in operator symmetric() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions

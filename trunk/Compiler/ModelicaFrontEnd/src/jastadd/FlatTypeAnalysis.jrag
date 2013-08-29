@@ -362,6 +362,10 @@ aspect FlatTypeAnalysis {
 			fUnknownType() : 
 			getFExp().type().arrayType(size());
 	
+	eq FSymmetric.type() = getFExp().ndims() == 2 && getFExp().size().get(0) == getFExp().size().get(1) ?
+		getFExp().type() : 
+		fUnknownType();
+		
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
 	eq FSkew.type()  = getFExp().type().arrayType(size());
 
