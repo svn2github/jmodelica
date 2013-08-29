@@ -668,6 +668,10 @@ aspect Derivatives {
 			throw new ExpressionDifferentiationException(this);
 	}
 
+	public FExp FHomotopyExp.diff(String name) {
+		return dynamicFExp(getActual().diff(name));
+	}
+	
 	public FExp FNoEventExp.diff(String name) {
 		return new FNoEventExp(getFExp().diff(name));
 	}
@@ -682,6 +686,12 @@ aspect Derivatives {
 		} 
 		FExp e = getIfExp().copySymbolic();
 		return dynamicFExp(new FIfExp(e, td, ed));
+	}
+	
+	public FExp FMinMaxExp.diff(String name) {
+		return dynamicFExp(createNode(
+				dynamicFExp((getX().diff(name))), 
+				dynamicFExp((getY().diff(name)))));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {

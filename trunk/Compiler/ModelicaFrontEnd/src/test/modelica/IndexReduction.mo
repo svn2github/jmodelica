@@ -1739,4 +1739,89 @@ end IndexReduction.IndexReduction38_ComponentArray;
 ")})));
 end IndexReduction38_ComponentArray;
 	
+model IndexReduction39_MinExp
+  Real x1,x2,x3;
+equation
+  der(x1) + der(x2) + der(x3) = 1;
+  min({x1,x2}) = 0;
+  min(x1,x3) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction39_MinExp",
+            description="Test of index reduction. Min expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction39_MinExp
+ Real x1;
+ Real x2;
+ Real x3;
+ Real der_x1;
+ Real der_x2;
+initial equation 
+ x3 = 0.0;
+equation
+ der_x1 + der_x2 + der(x3) = 1;
+ min(x1, x2) = 0;
+ min(x1, x3) = 0;
+ min(der_x1, der_x2) = 0.0;
+ min(der_x1, der(x3)) = 0.0;
+end IndexReduction.IndexReduction39_MinExp;
+")})));
+end IndexReduction39_MinExp;
+
+model IndexReduction40_MaxExp
+  Real x1,x2,x3;
+equation
+  der(x1) + der(x2) + der(x3) = 1;
+  max({x1,x2}) = 0;
+  max(x1,x3) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction40_MaxExp",
+            description="Test of index reduction. Max expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction40_MaxExp
+ Real x1;
+ Real x2;
+ Real x3;
+ Real der_x1;
+ Real der_x2;
+initial equation 
+ x3 = 0.0;
+equation
+ der_x1 + der_x2 + der(x3) = 1;
+ max(x1, x2) = 0;
+ max(x1, x3) = 0;
+ max(der_x1, der_x2) = 0.0;
+ max(der_x1, der(x3)) = 0.0;
+end IndexReduction.IndexReduction40_MaxExp;
+")})));
+end IndexReduction40_MaxExp;
+
+model IndexReduction41_Homotopy
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+  homotopy(x1,x2) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction41_Homotopy",
+            description="Test of index reduction. Homotopy expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction41_Homotopy
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ homotopy(x1, x2) = 0;
+ der_x1 = 0.0;
+end IndexReduction.IndexReduction41_Homotopy;
+")})));
+end IndexReduction41_Homotopy;
+
 end IndexReduction;
