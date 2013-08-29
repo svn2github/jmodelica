@@ -303,6 +303,12 @@ public class OptionRegistry {
 			 "If the option is set to true (default is false), two text files containing tearing pairs" +
 			 " is written to disk. The files contains the tearing pairs for the DAE and the" +
 			 "DAE initialization system respectively. The files are outputed to the working directory"),
+		INTERACTIVE_FMU
+			("interactive_fmu",
+			 compiler,
+			 false,
+			 "Converts the DAE system into an interactive fmu where all residual equations and iteration" +
+			 "variables have been changed into top level outputs and inputs."),
 		
 		// Runtime options
         /*
