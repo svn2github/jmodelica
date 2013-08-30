@@ -789,8 +789,11 @@ aspect Derivatives {
 		return dynamicFExp(new FRealLitExp(0));
 	}
 	
-	public FExp FTimeExp.diff(String name) {			
-			return dynamicFExp(new FRealLitExp(1));		
+	public FExp FTimeExp.diff(String name) {
+		int val = 0;
+		if (name.equals(TIME))
+			val = 1;
+		return dynamicFExp(new FRealLitExp(val));
 	}
 	
 	public FExp FFunctionCall.diff(String name) {
