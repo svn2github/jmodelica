@@ -888,7 +888,7 @@ Semantic error at line 0, column 0:
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   u = u_0 + ( c_v ) * ( T - ( T_0 ) )
+   u = u_0 + c_v * (T - T_0)
 ")})));
   end IndexReduction23_BasicVolume_Err;
 

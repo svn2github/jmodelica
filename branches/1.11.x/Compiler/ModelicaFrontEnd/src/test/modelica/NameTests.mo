@@ -87,8 +87,9 @@ A a;
 			name="NameTest3_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 90, column 1:
   Cannot find class declaration for A
   
@@ -115,8 +116,9 @@ model NameTest4_Err
 			name="NameTest4_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 100, column 4:
   Cannot find class declaration for B
 
@@ -141,10 +143,13 @@ equation
 			name="NameTest5_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-2 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+2 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 151, column 5:
   Cannot find class or component declaration for b
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 151, column 15:
   Cannot find class or component declaration for x
 ")})));
@@ -166,8 +171,9 @@ model NameTest55_Err
 			name="NameTest55_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 181, column 11:
   Cannot find class or component declaration for x
 ")})));
@@ -188,8 +194,9 @@ model NameTest6_Err
 			name="NameTest6_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 174, column 14:
   Cannot find class or component declaration for y
 ")})));
@@ -210,8 +217,9 @@ model NameTest7_Err
 			name="NameTest7_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
   Cannot find class declaration for B
 
@@ -230,8 +238,9 @@ model NameTest8_Err
 			name="NameTest8_Err",
 			description="Basic test of name lookup",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
   Cannot find class declaration for D
 
@@ -261,8 +270,9 @@ model NameTest9_Err
 			name="NameTest9_Err",
 			description="Test that names are looked up in constraining clauses.",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 196, column 4:
   Cannot find component declaration for y
 
@@ -300,8 +310,9 @@ model NameTest10_Err
 			name="NameTest10_Err",
 			description="Test that names are looked up in constraining clauses.",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 297, column 4:
   Cannot find class declaration for B
 
@@ -324,7 +335,8 @@ Semantic error at line 297, column 4:
 			description="Test that names are looked up correct.",
 			errorMessage="
 1 errors found:
-Error: In file 'src/test/modelica/NameTests.mo':
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 320, column 9:
   Cannot find class or component declaration for p1
 ")})));
@@ -357,8 +369,9 @@ M m(redeclare B a);
 			name="NameTest12_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
-  1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 346, column 15:
   Cannot find class declaration for B
 ")})));
@@ -399,11 +412,13 @@ end NameTest12_Err;
 			name="NameTest13_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
- 2 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+2 errors found:
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
   Cannot find class declaration for C
-In file 'src/test/modelica/NameTests.mo':
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
   Cannot find component declaration for y
 ")})));
@@ -444,11 +459,13 @@ end NameTest13_Err;
 			name="NameTest14_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
- 2 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+2 errors found:
+ 
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
   Cannot find component declaration for z
-In file 'src/test/modelica/NameTests.mo':
+
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 20:
   Cannot find class or component declaration for pp
 
@@ -1901,13 +1918,15 @@ model ConstantLookup39
 			description="Error in constant used from other package",
 			errorMessage="
 2 errors found:
+
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1930, column 23:
   Cannot find class or component declaration for e
-Error: in file Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
 Semantic error at line 1899, column 23:
   Could not evaluate binding expression for constant 'f': 'e'
-  ")})));
+")})));
 end ConstantLookup39;
 
 
@@ -1989,8 +2008,8 @@ class ExtendsTest3
 			name="ExtendsTest3",
 			description="Test that local classes that becomes visible through inheritance can not be used as super classes",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 164, column 11:
   Cannot find class declaration for D
   
@@ -2115,8 +2134,8 @@ model ImportTest3
 			name="ImportTest3",
 			description="Test that only a class imported with qualified import is visible.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 253, column 3:
   Cannot find class declaration for B
   "
@@ -2452,11 +2471,11 @@ model ShortClassDeclTest35_Err
 			name="ShortClassDeclTest35_Err",
 			description="Short class declaration of Real.",
 			errorMessage="
-  2 error(s) found...
-In file 'src/test/modelica/NameTests.mo':
+2 errors found:
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 549, column 4:
   Cannot find component declaration for q
-In file 'src/test/modelica/NameTests.mo':
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 550, column 4:
   Cannot find component declaration for t
 
@@ -2572,8 +2591,8 @@ end ShortClassDeclTest6;
 //			name="ShortClassDeclTest7_Err",
 //			description="Short class declaration of Real.",
 //			errorMessage="
-//  1 error(s) found...
-//In file 'src/test/modelica/NameTests.mo':
+//1 errors found:
+//Error: in file 'src/test/modelica/NameTests.mo':
 //Semantic error at line 834, column 14:
 //  Cannot find component declaration for y
 //")})));

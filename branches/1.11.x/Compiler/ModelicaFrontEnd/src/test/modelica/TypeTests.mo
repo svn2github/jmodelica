@@ -25,8 +25,8 @@ package TypeTests
 			name="TypeTest1",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 11, column 11:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -43,8 +43,8 @@ Semantic error at line 11, column 11:
 			name="TypeTest2",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 35, column 4:
   The right and left expression types of equation are not compatible
 ")})));
@@ -60,8 +60,8 @@ Semantic error at line 35, column 4:
 			name="TypeTest3",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 51, column 16:
   Type error in expression: x + y
 ")})));
@@ -78,8 +78,8 @@ Semantic error at line 51, column 16:
 			name="TypeTest4",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
   Type error in expression: x + y
 ")})));
@@ -96,8 +96,8 @@ Semantic error at line 66, column 4:
 			name="TypeTest5",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
   Type error in expression: x + y
 ")})));

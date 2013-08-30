@@ -33,8 +33,4 @@ public class ComplianceErrorTestCase extends ErrorTestCase {
 				it.remove();
 	}
 	
-	protected boolean nextLineIsRelevant(String line) {
-		return super.nextLineIsRelevant(line) || line.contains("Compliance error at line");
-	}
-
 }

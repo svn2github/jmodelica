@@ -115,10 +115,15 @@ model ArrayOfRecords_Warn
 			generate_ode=false,
 			generate_dae=true,
 			errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 79, column 3:
-  Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD
+2 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 107, column 3:
+  Using arrays of records with indices of higher than parameter variability is currently only supported when compiling FMUs
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 107, column 5:
+  The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end ArrayOfRecords_Warn;
 

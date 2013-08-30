@@ -1406,9 +1406,6 @@ model Cross6
 			errorMessage="
 2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Compliance error at line 6454, column 7:
-  String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 6456, column 22:
   Calling function cross(): types of positional argument 1 and input x are not compatible
   Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':

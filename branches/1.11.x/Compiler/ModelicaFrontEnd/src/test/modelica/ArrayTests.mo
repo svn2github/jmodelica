@@ -1035,6 +1035,7 @@ model UnknownSize4
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
   Can not infer array size of the variable x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
@@ -1071,6 +1072,7 @@ equation
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 821, column 7:
   Can not infer array size of the variable x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 823, column 2:
   The right and left expression types of equation are not compatible
 ")})));
