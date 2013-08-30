@@ -159,6 +159,50 @@ At line 0, column 0:
 ")})));
 end WarningTest2;
 
+model WarningTest3
+	Real u0,u1,uL;
+	Real u2 annotation(__Modelon(IterationVariable));
+	Real u3 annotation(__Modelon(IterationVariable));
+	Real i0,i1,i2(start=1),i3,iL;
+	parameter Real R1 = 1;
+	parameter Real R2 = 1;
+	parameter Real R3 = 1;
+	parameter Real L = 1;
+equation
+	u0 = sin(time);
+	u1 = R1*i1;
+	u2 = R2*i2;
+	u3 = R3*i3;
+	uL = L*der(iL);
+	u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
+	uL = u1 + u2;
+	u2 = u3;
+	i0 = i1 + iL;
+	i1 = i2 + i3;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="WarningTest3",
+			description="",
+			equation_sorting=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
+			errorMessage="
+Warning: in file '...':
+At line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+  Real u2 annotation(__Modelon(IterationVariable))
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"i3\" is missing start value!
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"u2\" is missing start value!
+")})));
+end WarningTest3;
+
 model RecordTearingTest1
   record R
     Real x;
@@ -3021,7 +3065,8 @@ At line 0, column 0:
 
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Hand guided tearing variable 'y' has been alias eliminated
+  Hand guided tearing variable 'y' has been alias eliminated. Selected model variable is:
+    Real x(start = 1) annotation(__Modelon(IterationVariable))
 ")})));
 end HandGuidedTearingWarning1;
 

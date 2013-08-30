@@ -74,9 +74,9 @@ public class ErrorTestCase extends TestCase {
 	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+\\.(mof|mo)':");
 	private static String fileReplacement = "$1'...':";
 	private static Pattern lineFilter = Pattern.compile("([Aa]t line )[0-9]+");
-	private static String lineReplacement = "$1...";
+	private static String lineReplacement = "$10";
 	private static Pattern columnFilter = Pattern.compile("(column )[0-9]+");
-	private static String columnReplacement = "$1...";
+	private static String columnReplacement = "$10";
 
 
 	public  String filterErrorMessages(String str) {
