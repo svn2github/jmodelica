@@ -479,6 +479,8 @@ aspect FlatTypeAnalysis {
 	// TODO: Maybe there should be a special type for "no return value"
 	eq FConnectionsOp.type() = null;
 	eq FConnBoolOp.type()    = fBooleanScalarType();
+	
+	eq FCardinality.type() = fIntegerScalarType();
 
 	eq FTerminate.type() = null;
 	eq FAssert.type() = null;

@@ -525,6 +525,8 @@ aspect InstanceErrorCheck {
   		  		errorChecked = false;
 	    		super.collectErrors();
   		  		collectErrorsInClassName();
+  		  		if (hasFArraySubscripts())
+  		  		    getFArraySubscripts().collectErrors();
 	    		if (hasConditionalAttribute()) 
 	    			getConditionalAttribute().collectErrors();
 	    		if (isActive() && hasInstModification())

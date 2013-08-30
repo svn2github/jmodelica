@@ -243,70 +243,71 @@ aspect InstFunctionBinding {
 			
 			public BuiltInTranslator() {
 				map = new HashMap<String, BuiltInCreator>();
-				//       name                              math       node               # args
-				map.put("abs",          new BuiltInCreator(false, new FAbsExp(),         1));
-				map.put("sign",         new BuiltInCreator(false, new FSignExp(),        1));
-				map.put("sqrt",         new BuiltInCreator(false, new FSqrtExp(),        1));
-				map.put("Integer",      new BuiltInCreator(false, new FEnumIntegerExp(), 1));
-				map.put("div",          new BuiltInCreator(false, new FDivFuncExp(),     2));
-				map.put("mod",          new BuiltInCreator(false, new FModFuncExp(),     2));
-				map.put("rem",          new BuiltInCreator(false, new FRemFuncExp(),     2));
-				map.put("ceil",         new BuiltInCreator(false, new FCeilFuncExp(),    1));
-				map.put("floor",        new BuiltInCreator(false, new FFloorFuncExp(),   1));
-				map.put("integer",      new BuiltInCreator(false, new FIntegerFuncExp(), 1));
-				map.put("sin",          new BuiltInCreator(true,  new FSinExp(),         1));
-				map.put("cos",          new BuiltInCreator(true,  new FCosExp(),         1));
-				map.put("tan",          new BuiltInCreator(true,  new FTanExp(),         1));
-				map.put("asin",         new BuiltInCreator(true,  new FAsinExp(),        1));
-				map.put("acos",         new BuiltInCreator(true,  new FAcosExp(),        1));
-				map.put("atan",         new BuiltInCreator(true,  new FAtanExp(),        1));
-				map.put("atan2",        new BuiltInCreator(true,  new FAtan2Exp(),       2));
-				map.put("sinh",         new BuiltInCreator(true,  new FSinhExp(),        1));
-				map.put("cosh",         new BuiltInCreator(true,  new FCoshExp(),        1));
-				map.put("tanh",         new BuiltInCreator(true,  new FTanhExp(),        1));
-				map.put("exp",          new BuiltInCreator(true,  new FExpExp(),         1));
-				map.put("log",          new BuiltInCreator(true,  new FLogExp(),         1));
-				map.put("log10",        new BuiltInCreator(true,  new FLog10Exp(),       1));
-				map.put("noEvent",      new BuiltInCreator(false, new FNoEventExp(),     1));
-				map.put("smooth",       new BuiltInCreator(false, new FSmoothExp(),      2));
-				map.put("pre",          new BuiltInCreator(false, new FPreExp(),         1));
-				map.put("edge",         new BuiltInCreator(false, new FEdgeExp(),        1));
-				map.put("change",       new BuiltInCreator(false, new FChangeExp(),      1));
-				map.put("sample",       new BuiltInCreator(false, new FSampleExp(),      2));
-				map.put("initial",      new BuiltInCreator(false, new FInitialExp(),     0));
-				map.put("terminal",     new BuiltInCreator(false, new FTerminalExp(),    0));
-				map.put("terminate",    new BuiltInCreator(false, new FTerminate(),      1));
-				map.put("identity",     new BuiltInCreator(false, new FIdentity(),       1));
-				map.put("diagonal",     new BuiltInCreator(false, new FDiagonal(),       1));
-				map.put("scalar",       new BuiltInCreator(false, new FScalarExp(),      1));
-				map.put("vector",       new BuiltInCreator(false, new FVectorExp(),      1));
-				map.put("matrix",       new BuiltInCreator(false, new FMatrixExp(),      1));
-				map.put("transpose",    new BuiltInCreator(false, new FTranspose(),      1));
-				map.put("symmetric",    new BuiltInCreator(false, new FSymmetric(),      1));
-				map.put("cross",        new BuiltInCreator(false, new FCross(),          2));
-				map.put("skew",         new BuiltInCreator(false, new FSkew(),           1));
-				map.put("outerProduct", new BuiltInCreator(false, new FOuterProduct(),   2));
-				map.put("sum",          new BuiltInCreator(false, new FSumExp(),         1));
-				map.put("product",      new BuiltInCreator(false, new FProductExp(),     1));
-				map.put("ndims",        new BuiltInCreator(false, new FNdimsExp(),       1));
-				map.put("linspace",     new BuiltInCreator(false, new FLinspace(),       3));
-				map.put("homotopy",     new BuiltInCreator(false, new FHomotopyExp(),    2));
-				map.put("semiLinear",   new BuiltInCreator(false, new FSemiLinearExp(),  3));
-				map.put("inStream",     new BuiltInCreator(false, new FInStream(),       1));
-				map.put("actualStream", new BuiltInCreator(false, new FActualStream(),   1));
-				map.put("getInstanceName", new BuiltInCreator(false, new FGetInstanceName(),   0));
-				//       name                                         node           # fixed args
-				map.put("array",        new InfArgsBuiltInCreator(new FParseArray(), 0));
-				map.put("ones",         new InfArgsBuiltInCreator(new FOnes(),       0));
-				map.put("zeros",        new InfArgsBuiltInCreator(new FZeros(),      0));
-				map.put("fill",         new InfArgsBuiltInCreator(new FFillExp(),    1));
-				map.put("cat",          new InfArgsBuiltInCreator(new FCatExp(),     1));
-				map.put("String",       new InfArgsBuiltInCreator(new FStringExp(),  1));
-				//       name                                         node        min/max # args
-				map.put("size",         new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",          new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",          new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
-				map.put("assert",       new VarArgsBuiltInCreator(new FAssert(),  2, 3));
+				//       name                                 math       node                # args
+				map.put("abs",             new BuiltInCreator(false, new FAbsExp(),          1));
+				map.put("sign",            new BuiltInCreator(false, new FSignExp(),         1));
+				map.put("sqrt",            new BuiltInCreator(false, new FSqrtExp(),         1));
+				map.put("Integer",         new BuiltInCreator(false, new FEnumIntegerExp(),  1));
+				map.put("div",             new BuiltInCreator(false, new FDivFuncExp(),      2));
+				map.put("mod",             new BuiltInCreator(false, new FModFuncExp(),      2));
+				map.put("rem",             new BuiltInCreator(false, new FRemFuncExp(),      2));
+				map.put("ceil",            new BuiltInCreator(false, new FCeilFuncExp(),     1));
+				map.put("floor",           new BuiltInCreator(false, new FFloorFuncExp(),    1));
+				map.put("integer",         new BuiltInCreator(false, new FIntegerFuncExp(),  1));
+				map.put("sin",             new BuiltInCreator(true,  new FSinExp(),          1));
+				map.put("cos",             new BuiltInCreator(true,  new FCosExp(),          1));
+				map.put("tan",             new BuiltInCreator(true,  new FTanExp(),          1));
+				map.put("asin",            new BuiltInCreator(true,  new FAsinExp(),         1));
+				map.put("acos",            new BuiltInCreator(true,  new FAcosExp(),         1));
+				map.put("atan",            new BuiltInCreator(true,  new FAtanExp(),         1));
+				map.put("atan2",           new BuiltInCreator(true,  new FAtan2Exp(),        2));
+				map.put("sinh",            new BuiltInCreator(true,  new FSinhExp(),         1));
+				map.put("cosh",            new BuiltInCreator(true,  new FCoshExp(),         1));
+				map.put("tanh",            new BuiltInCreator(true,  new FTanhExp(),         1));
+				map.put("exp",             new BuiltInCreator(true,  new FExpExp(),          1));
+				map.put("log",             new BuiltInCreator(true,  new FLogExp(),          1));
+				map.put("log10",           new BuiltInCreator(true,  new FLog10Exp(),        1));
+				map.put("noEvent",         new BuiltInCreator(false, new FNoEventExp(),      1));
+				map.put("smooth",          new BuiltInCreator(false, new FSmoothExp(),       2));
+				map.put("pre",             new BuiltInCreator(false, new FPreExp(),          1));
+				map.put("edge",            new BuiltInCreator(false, new FEdgeExp(),         1));
+				map.put("change",          new BuiltInCreator(false, new FChangeExp(),       1));
+				map.put("sample",          new BuiltInCreator(false, new FSampleExp(),       2));
+				map.put("initial",         new BuiltInCreator(false, new FInitialExp(),      0));
+				map.put("terminal",        new BuiltInCreator(false, new FTerminalExp(),     0));
+				map.put("terminate",       new BuiltInCreator(false, new FTerminate(),       1));
+				map.put("identity",        new BuiltInCreator(false, new FIdentity(),        1));
+				map.put("diagonal",        new BuiltInCreator(false, new FDiagonal(),        1));
+				map.put("scalar",          new BuiltInCreator(false, new FScalarExp(),       1));
+				map.put("vector",          new BuiltInCreator(false, new FVectorExp(),       1));
+				map.put("matrix",          new BuiltInCreator(false, new FMatrixExp(),       1));
+				map.put("transpose",       new BuiltInCreator(false, new FTranspose(),       1));
+				map.put("symmetric",       new BuiltInCreator(false, new FSymmetric(),       1));
+				map.put("cross",           new BuiltInCreator(false, new FCross(),           2));
+				map.put("skew",            new BuiltInCreator(false, new FSkew(),            1));
+				map.put("outerProduct",    new BuiltInCreator(false, new FOuterProduct(),    2));
+				map.put("sum",             new BuiltInCreator(false, new FSumExp(),          1));
+				map.put("product",         new BuiltInCreator(false, new FProductExp(),      1));
+				map.put("ndims",           new BuiltInCreator(false, new FNdimsExp(),        1));
+				map.put("linspace",        new BuiltInCreator(false, new FLinspace(),        3));
+				map.put("homotopy",        new BuiltInCreator(false, new FHomotopyExp(),     2));
+				map.put("semiLinear",      new BuiltInCreator(false, new FSemiLinearExp(),   3));
+				map.put("inStream",        new BuiltInCreator(false, new FInStream(),        1));
+				map.put("actualStream",    new BuiltInCreator(false, new FActualStream(),    1));
+				map.put("cardinality",     new BuiltInCreator(false, new FCardinality(),     1));
+				map.put("getInstanceName", new BuiltInCreator(false, new FGetInstanceName(), 0));
+				//       name                                            node           # fixed args
+				map.put("array",           new InfArgsBuiltInCreator(new FParseArray(), 0));
+				map.put("ones",            new InfArgsBuiltInCreator(new FOnes(),       0));
+				map.put("zeros",           new InfArgsBuiltInCreator(new FZeros(),      0));
+				map.put("fill",            new InfArgsBuiltInCreator(new FFillExp(),    1));
+				map.put("cat",             new InfArgsBuiltInCreator(new FCatExp(),     1));
+				map.put("String",          new InfArgsBuiltInCreator(new FStringExp(),  1));
+				//       name                                            node        min/max # args
+				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
+				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
+				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
+				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),  2, 3));
 				//       name                                    math       node              # args
 				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
 				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));
@@ -317,15 +318,14 @@ aspect InstFunctionBinding {
 				map.put("Connections.potentialRoot", new VarArgsBuiltInCreator(new FConnPotentialRoot(), 1, 2));
 				
 				String[] unsupported = new String[] { 
-						// Ticket 678: Support for array related functions
-						"symmetric", 
 						// Ticket 664: Support all function-like operators
-						"delay", "cardinality", "reinit"
+						"delay", "reinit"
 					};
 				for (String name : unsupported)
 					if (!map.containsKey(name))
 						map.put(name, new UnsupportedBuiltInCreator(name));
 				
+				// Not used anymore, but left for possible future needs
 				String[] ignored = new String[] {};
 				for (String name : ignored)
 					if (!map.containsKey(name))

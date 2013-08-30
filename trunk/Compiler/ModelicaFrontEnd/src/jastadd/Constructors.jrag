@@ -815,7 +815,7 @@ aspect InheritedFactoryMethods {
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
 	public FUnsupportedBuiltIn FUnsupportedBuiltIn.createEmptyNode() { return new FUnsupportedBuiltIn(); }
-	public FIgnoredBuiltIn     FIgnoredBuiltIn.createEmptyNode()     { return new FIgnoredBuiltIn(); }
+	public FIgnoredBuiltIn     FIgnoredBuiltIn.createEmptyNode()     { return new FIgnoredBuiltIn();     }
 	
 	// Arithmetic oprerators
 	public FAddExp       FAddExp.createEmptyNode()       { return new FAddExp();       }
@@ -952,6 +952,7 @@ aspect InheritedFactoryMethods {
 	public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
 	public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
 	public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
+	public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
 	
 	/**
 	 * Create new node of same class as this, with the specified children.

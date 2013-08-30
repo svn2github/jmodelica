@@ -24,6 +24,8 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 import java.util.PriorityQueue;
 
+import org.jmodelica.util.Enumerator;
+
 aspect Connections {
 
 	/* Machinery to manage connection sets */
@@ -681,6 +683,8 @@ aspect Connections {
 				leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
 			}
 		}
+        csm.countCardinality(left.name());
+        csm.countCardinality(right.name());
 	}
 
 	public void InstPrimitive.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
@@ -690,6 +694,8 @@ aspect Connections {
 		} else {
 			csm.addVars(left, right);
 		}
+        csm.countCardinality(left.name());
+        csm.countCardinality(right.name());
 	}
 	
 	syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
@@ -1323,4 +1329,35 @@ aspect OverconstrainedConnections {
 		
 	}
 	
+}
+
+aspect Cardinality {
+    
+    private Map<String,Enumerator> ConnectionSetManager.cardinality = null;
+    
+    public void ConnectionSetManager.countCardinality(String name) {
+        if (cardinality == null)
+            cardinality = new HashMap<String,Enumerator>();
+        Enumerator e = cardinality.get(name);
+        if (e == null)
+            cardinality.put(name, new Enumerator(1));
+        else
+            e.next();
+    }
+    
+    public int ConnectionSetManager.getCardinality(String name) {
+        if (cardinality == null)
+            return 0;
+        Enumerator e = cardinality.get(name);
+        return (e == null) ? 0 : e.peek();
+    }
+
+
+    private boolean FCardinality.rewriteCardinality = false;
+    
+    rewrite FCardinality {
+        when (rewriteCardinality) to FIntegerLitExp 
+            new FIntegerLitExp(myFClass().getConnectionSetManager().getCardinality(((FIdUseExp) getFExp()).name()));
+    }
+    
 }

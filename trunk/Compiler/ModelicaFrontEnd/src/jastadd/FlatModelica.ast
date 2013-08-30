@@ -603,6 +603,11 @@ FConnRooted : FConnBoolOp;
 FConnRootedDep : FConnRooted;
 
 /**
+ * The cardinality() function-like operator.
+ */
+FCardinality : FUnaryBuiltIn;
+
+/**
  * \brief For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;

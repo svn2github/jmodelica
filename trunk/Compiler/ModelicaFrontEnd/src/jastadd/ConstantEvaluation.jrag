@@ -1286,6 +1286,9 @@ aspect ConstantEvaluation {
   
   eq FNdimsExp.cevalCalc() = new CValueInteger(getFExp().ndims());
   
+  // Rewritten after flattening - give dummy value here to prevent error messages about structural parameters
+  eq FCardinality.cevalCalc() = new CValueInteger(1);
+  
   eq FConnectionsOp.cevalCalc() {
 	  throw new ConstantEvaluationException();
   }

@@ -191,9 +191,7 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  String();
   delay(1);
-  cardinality();
   reinit(1);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -201,16 +199,10 @@ model UnsupportedBuiltins1_ComplErr
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-8 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 212, column 3:
-  The class String is not a function
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 218, column 3:
   The delay() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 219, column 3:
-  The cardinality() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 287, column 3:
   The reinit() function-like operator is not supported

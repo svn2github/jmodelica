@@ -1720,5 +1720,125 @@ Semantic error at line 985, column 6:
 end StreamTest5;
 
 
+model Cardinality1
+    Real x;
+    Real y;
+    Real z;
+equation
+    connect(x, y);
+    connect(y, z);
+    if cardinality(x) == 2 then
+        x = time;
+    elseif cardinality(y) == 2 then
+        y = time;
+    else
+        z = time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cardinality1",
+            description="cardinality(): basic test",
+            flatModel="
+fclass ConnectTests.Cardinality1
+ Real x;
+ Real y;
+ Real z;
+equation
+ if 1 == 2 then
+  x = time;
+ elseif 2 == 2 then
+  y = time;
+ else
+  z = time;
+ end if;
+ x = y;
+ y = z;
+end ConnectTests.Cardinality1;
+")})));
+end Cardinality1;
+
+
+model Cardinality2
+    connector A
+        Real x;
+        flow Real y;
+    end A;
+	
+    A x;
+    A y;
+    A z;
+equation
+    connect(x, y);
+    connect(y, z);
+    if cardinality(x) == 2 then
+        x.x = time;
+    elseif cardinality(y) == 2 then
+        y.x = time;
+    else
+        z.x = time;
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Cardinality2",
+			description="cardinality(): basic test",
+			flatModel="
+fclass ConnectTests.Cardinality2
+ Real x.x;
+ Real x.y;
+ Real y.x;
+ Real y.y;
+ Real z.x;
+ Real z.y;
+equation
+ if 1 == 2 then
+  x.x = time;
+ elseif 2 == 2 then
+  y.x = time;
+ else
+  z.x = time;
+ end if;
+ x.x = y.x;
+ y.x = z.x;
+ - x.y - y.y - z.y = 0;
+ x.y = 0;
+ y.y = 0;
+ z.y = 0;
+end ConnectTests.Cardinality2;
+")})));
+end Cardinality2;
+
+
+model Cardinality3
+    inner A a;
+    B b[cardinality(a)];
+	
+	connector A
+		Real x;
+		flow Real y;
+	end A;
+	
+	model B
+		outer A a;
+		A a2;
+	equation
+		connect(a, a2);
+	end B;
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="Cardinality3",
+			description="cardinality(): deprecation warning and limitation on where it can be used",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Compliance error at line 1815, column 9:
+  The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+At line 1815, column 9:
+  The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
+")})));
+end Cardinality3;
 
 end ConnectTests;

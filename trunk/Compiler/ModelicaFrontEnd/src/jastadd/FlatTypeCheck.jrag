@@ -16,6 +16,7 @@
 
 import java.util.Arrays;
 import java.util.Collections;
+import org.jmodelica.util.Criteria;
 
 aspect FlatTypeCheck {
 	
@@ -168,7 +169,7 @@ aspect FlatTypeCheck {
   
   protected void InstComponentAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown()) {
+	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
 		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
 			  top.error("Could not calculate type of " + top.name());
 		  else
@@ -179,12 +180,17 @@ aspect FlatTypeCheck {
   protected void InstComponentArrayAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
 	  if (!icd.isUnknown()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
+		  if (icd.isOrExtendsPrimitive() || icd.isRecord() && !inCardinality())
 			  top.error("Could not calculate type of " + top.name());
 		  else
 			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
 	  }
   }
+  
+  inh boolean InstAccess.inCardinality();
+  eq FCardinality.getChild().inCardinality() = true;
+  eq InstNode.getChild().inCardinality()     = false;
+  eq Root.getChild().inCardinality()         = false;
   
   protected void InstClassAccess.typeError(InstAccess top) {
 	  if (!isComponentSizeClass() || !isInstComponentSize())
@@ -578,11 +584,16 @@ aspect FlatTypeCheck {
 		  }
 	  }
 	  if (!typeOk) {
-		  if (getBoundInput() == null)
+		  if (getBoundInput() == null) {
 			  error(nonBoundArgumentTypeError());
-		  else
-			  error(functionCallDecription() + ": types of " + argumentDesc() + 
-					  " and input " + getBoundInput().name() + " are not compatible");
+		  } else {
+		      String msg = argumentTypeError();
+		      if (msg != null)
+		          error(msg);
+		      else
+    			  error(functionCallDecription() + ": types of " + argumentDesc() + 
+    					  " and input " + getBoundInput().name() + " are not compatible");
+		  }
 	  }
   }
   
@@ -608,6 +619,10 @@ aspect FlatTypeCheck {
   eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
   eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
 	  functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
+  
+  inh String InstFunctionArgument.argumentTypeError();
+  eq FExp.getChild().argumentTypeError()         = null;
+  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a reference to a connector";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -705,6 +720,7 @@ aspect FlatTypeCheck {
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
   eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
   eq FEventGenExp.getChild().argumentDefinedTypeValid()                  = false;
+  eq FCardinality.getChild().argumentDefinedTypeValid()                  = false;
   eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
   eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
@@ -741,9 +757,27 @@ aspect FlatTypeCheck {
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
+  eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
+  eq FConnectionsOp.getA().argumentTypeValid(FType type)            = getA().isComponentReference(ALLOWED_COMPONENTS);
+  eq FConnBranch.getB().argumentTypeValid(FType type)               = getB().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
+  
+  protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
+      public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
+  };
 
+  protected static final Criteria<InstComponentDecl> FConnectionsOp.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
+      public boolean test(InstComponentDecl elem) { return elem.isOverconstrainedType(); }
+  };
+
+  /**
+   * Check if this expression is a reference to a component matching specified criteria.
+   * 
+   * Only valid in instance tree.
+   */
+  syn boolean FExp.isComponentReference(Criteria<InstComponentDecl> criteria)  = false;
+  eq FInstAccessExp.isComponentReference(Criteria<InstComponentDecl> criteria) = 
+      criteria.test(getInstAccess().myInstComponentDecl());
 
   /**
    * Check if the given Size is valid for the argument of the operator.
