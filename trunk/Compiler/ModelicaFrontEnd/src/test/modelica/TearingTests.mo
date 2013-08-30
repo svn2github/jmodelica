@@ -119,10 +119,10 @@ equation
 2 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i2\" is missing start value!
+  Iteration variable \"i2\" is missing start value!
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i3\" is missing start value!
+  Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest1;
 
@@ -155,7 +155,7 @@ equation
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i3\" is missing start value!
+  Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest2;
 
@@ -3015,11 +3015,11 @@ equation
 			errorMessage="
 2 warnings found:
 
-Warning: in file '':
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
   Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: x. Equation: - x = z + 1
 
-Warning: in file '':
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
   Hand guided tearing variable 'y' has been alias eliminated
 ")})));

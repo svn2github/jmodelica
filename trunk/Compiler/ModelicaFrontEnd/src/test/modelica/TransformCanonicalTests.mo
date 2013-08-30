@@ -776,7 +776,10 @@ Alias sets:
 		ErrorTestCase(
 			name="AliasTest16_Err",
 			description="Test alias error.",
-			errorMessage=" 1 error found...
+			errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
 
@@ -1277,7 +1280,7 @@ model ParameterBindingExpTest3_Warn
 			errorMessage="
 Warning: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ConstantEvalTests.mo':
 At line 110, column 18:
-  The parameter p does not have a binding expression.
+  The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
 
@@ -2172,13 +2175,14 @@ equation
 		ErrorTestCase(
 			name="UnbalancedTest2_Err",
 			description="Test error messages for unbalanced systems.",
+			variability_propagation=false,
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
    y
 
-  The follwowing equation(s) could not be matched to any variable:
+  The following equation(s) could not be matched to any variable:
    x = 1 + 2
 ")})));
 end UnbalancedTest2_Err;

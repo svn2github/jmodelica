@@ -369,8 +369,8 @@ model ModTest13_Err
 			name="ModTest13_Err",
 			description="Test of lookup errors in modifications",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/ModificationTests.mo':
+1 error(s) found:
+Error: in file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
   Cannot find component declaration for y
 
@@ -390,8 +390,9 @@ model ModTest14_Err
 			name="ModTest14_Err",
 			description="Test of lookup errors in modifications",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/ModificationTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 351, column 7:
   Cannot find component declaration for y
 
@@ -420,8 +421,9 @@ model ModTest15_Err
 			name="ModTest15_Err",
 			description="Test of lookup errors in modifications",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/ModificationTests.mo':
+1 errors found:
+
+Error: in file 'src/test/modelica/ModificationTests.mo':
 Semantic error at line 404, column 7:
   Cannot find component declaration for z
 

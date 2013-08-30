@@ -84,8 +84,8 @@ end ConnectTests.ConnectTest1;
 			name="ConnectTest2_Err",
 			description="Basic test of name lookup in connect clauses",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/ConnectTests.mo':
+1 error(s) found:
+Error: in file 'src/test/modelica/ConnectTests.mo':
 Semantic error at line 53, column 15:
   Cannot find class or component declaration for cc
 ")})));

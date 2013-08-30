@@ -683,8 +683,8 @@ model FunctionBinding3
 			description="Function call with too many arguments",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction1(): too many positional arguments
 ")})));
@@ -699,11 +699,11 @@ model FunctionBinding4
 			description="Function call with too few arguments: no arguments",
 			variability_propagation=false,
 			errorMessage="
-2 error(s) found...
-In file 'FunctionTests.mo':
+2 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i1
-In file 'FunctionTests.mo':
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
@@ -718,8 +718,8 @@ model FunctionBinding5
 			description="Function call with too few arguments: one positional argument",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
@@ -836,8 +836,8 @@ model FunctionBinding10
 			description="Function call with too few arguments: missing middle argument",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
@@ -852,8 +852,8 @@ model FunctionBinding11
 			description="Function call with named arguments: non-existing input",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): no input matching named argument i3 found
 ")})));
@@ -868,8 +868,8 @@ model FunctionBinding12
 			description="Function call with named arguments: using output as input",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): no input matching named argument o1 found
 ")})));
@@ -884,8 +884,8 @@ model FunctionBinding13
 			description="Function call with named arguments: giving an input value twice",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
@@ -900,8 +900,8 @@ model FunctionBinding14
 			description="Function call with named arguments: giving an input value four times",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
@@ -1125,11 +1125,11 @@ model BadFunctionCall1
 			description="Call to non-existing function",
 			variability_propagation=false,
 			errorMessage="
-2 error(s) found...
-In file 'FunctionTests.mo':
+2 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Cannot find function declaration for NonExistingFunction()
-In file 'FunctionTests.mo':
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Cannot find function declaration for NonExistingFunction()
 ")})));
@@ -1146,11 +1146,11 @@ model BadFunctionCall2
 			description="Call to component as function",
 			variability_propagation=false,
 			errorMessage="
-2 error(s) found...
-In file 'FunctionTests.mo':
+2 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Cannot find function declaration for notAFunction()
-In file 'FunctionTests.mo':
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Cannot find function declaration for notAFunction()
 ")})));
@@ -1170,11 +1170,11 @@ model BadFunctionCall3
 			description="Call to non-function class as function",
 			variability_propagation=false,
 			errorMessage="
-2 error(s) found...
-In file 'FunctionTests.mo':
+2 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The class NotAFunctionClass is not a function
-In file 'FunctionTests.mo':
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The class NotAFunctionClass is not a function
 ")})));
@@ -1434,8 +1434,8 @@ model FunctionType2
 			description="Function type checks: function with Real output as binding exp for Integer component",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -1502,8 +1502,8 @@ model FunctionType5
 			description="Function type checks: Boolean literal arg, Real input",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
@@ -1519,8 +1519,8 @@ model FunctionType6
 			description="Function type checks: Boolean component arg, Real input",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
 ")})));
@@ -1565,8 +1565,8 @@ model FunctionType8
 			description="Function type checks: nestled function calls, type mismatch in inner",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
 ")})));
@@ -1636,8 +1636,8 @@ equation
 			description="Function type checks: 2 outputs, 2nd wrong type",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction2(): types of component y and output o2 are not compatible
 ")})));
@@ -1656,11 +1656,11 @@ equation
 			description="Function type checks: 3 outputs, 1st and 3rd wrong type",
 			variability_propagation=false,
 			errorMessage="
-2 error(s) found...
-In file 'FunctionTests.mo':
+2 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): types of component x and output o1 are not compatible
-In file 'FunctionTests.mo':
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
@@ -1679,8 +1679,8 @@ equation
 			description="Function type checks: 2 outputs, 3 components assigned",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Too many components assigned from function call: TestFunction2() has 2 output(s)
 ")})));
@@ -1698,8 +1698,8 @@ equation
 			description="Function type checks: 3 outputs, 2nd skipped, 3rd wrong type",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
@@ -1717,8 +1717,8 @@ equation
 			description="Function type checks: assigning 2 components from sin()",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Too many components assigned from function call: sin() has 1 output(s)
 ")})));
@@ -1758,8 +1758,8 @@ model BuiltInCallType1
 			description="Built-in type checks: passing Boolean literal to sin()",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sin(): types of positional argument 1 and input u are not compatible
 ")})));
@@ -1774,8 +1774,8 @@ model BuiltInCallType2
 			description="Built-in type checks: passing String literal to sqrt()",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
 ")})));
@@ -1806,8 +1806,8 @@ model BuiltInCallType4
 			description="Built-in type checks: using return value from sqrt() as Integer",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -1822,8 +1822,8 @@ model BuiltInCallType5
 			description="Built-in type checks: calling sin() without arguments",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function sin(): missing argument for required input u
 ")})));
@@ -1838,8 +1838,8 @@ model BuiltInCallType6
 			description="Built-in type checks: calling atan2() with only one argument",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function atan2(): missing argument for required input u2
 ")})));
@@ -1854,8 +1854,8 @@ model BuiltInCallType7
 			description="Built-in type checks: calling atan2() with String literal as second argument",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
 ")})));
@@ -1888,8 +1888,8 @@ model BuiltInCallType9
 			description="Built-in type checks: calling zeros() with Real literal as argument",
 			variability_propagation=false,
 			errorMessage="
-1 error(s) found...
-In file 'FunctionTests.mo':
+1 error(s) found:
+Error: in file 'FunctionTests.mo':
 Semantic error at line 1, column 1:
   Argument of zeros() is not compatible with Integer: 3.0
 ")})));

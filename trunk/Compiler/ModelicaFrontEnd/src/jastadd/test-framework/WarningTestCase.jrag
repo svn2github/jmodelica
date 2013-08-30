@@ -29,8 +29,4 @@ public class WarningTestCase extends ErrorTestCase {
 	 */
 	protected void filterProblems(Collection<Problem> problems) {}
 
-	protected  boolean nextLineIsRelevant(String line) {
-		return super.nextLineIsRelevant(line) || line.contains("Warning error at line");
-	}
-	
 }
