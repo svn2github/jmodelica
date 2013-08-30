@@ -930,39 +930,42 @@ aspect FlatPrettyPrint {
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-			str.print(indent);
-			
-			str.print(getFTypePrefixVariability());
-						
-			if (hasFTypePrefixInputOutput()) {
-				str.print(getFTypePrefixInputOutput());
-				str.print(" ");
-			}
-			
-			str.print(prettyPrintType());
-			str.print(" ");
-			p.print(getFQName(),str,"");
+		str.print(indent);
 		
-	    	getFAttributeList().prettyPrintFAttributeList(str,p);
-	    	
-	   if (hasBindingExp()) {
-				str.print(" = ");
-				FExp bindingExp = getBindingExp();
-				p.print(bindingExp,str,indent);
-				
-			}
-	    	
+		str.print(getFTypePrefixVariability());
+		
+		if (hasFTypePrefixInputOutput()) {
+			str.print(getFTypePrefixInputOutput());
+			str.print(" ");
+		}
+		
+		str.print(prettyPrintType());
+		str.print(" ");
+		p.print(getFQName(),str,"");
+	
+		getFAttributeList().prettyPrintFAttributeList(str,p);
+		
+		if (hasBindingExp()) {
+			str.print(" = ");
+			FExp bindingExp = getBindingExp();
+			p.print(bindingExp,str,indent);
+			
+		}
+		
 		p.print(getFStringCommentOpt(),str,indent);
+		
+		if (getHGTType() == FClass.HGTVariableType.COMPONENT || getHGTType() == FClass.HGTVariableType.PAIR)
+			str.print(" annotation(__Modelon(IterationVariable))");
 
-	    if (isIndependentParameter() && hasBindingExp()) {
-	    	str.print(" /* ");
-	    	try {
+		if (isIndependentParameter() && hasBindingExp()) {
+			str.print(" /* ");
+			try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
 				str.print("evalutation error");
 			}
-	    	str.print(" */");
-	    }
+			str.print(" */");
+		}
 	}
 	
 	public void FVariable.printFAttributes(PrintStream str, String ... attributes) {

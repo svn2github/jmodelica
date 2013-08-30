@@ -3300,7 +3300,7 @@ aspect TransformCanonical {
 	public void FClass.checkForEliminatedHGTVars() {
 		for (FVariable var : getAliasVariables()) {
 			if (var.getHGTType() == FClass.HGTVariableType.COMPONENT || var.getHGTType() == FClass.HGTVariableType.PAIR)
-				var.warning("Hand guided tearing variable '%s' has been alias eliminated", var.name());
+				var.warning("Hand guided tearing variable '%s' has been alias eliminated. Selected model variable is:\n    %s", var.name(), var.alias());
 		}
 	}
 	

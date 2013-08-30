@@ -251,7 +251,7 @@ fclass VariabilityPropagationTests.Tearing
  Real uL;
  Real i0;
  Real i2;
- Real i3;
+ Real i3 annotation(__Modelon(IterationVariable));
  Real iL;
  constant Real i1 = 1;
  parameter Real R1 = 1 /* 1 */;
