@@ -18,7 +18,7 @@ AUTOMAKE_OPTIONS = foreign
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
+SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -128,16 +128,27 @@ endif
 	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/include/
 	mkdir -p $(DESTDIR)$(prefix)/Makefiles
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/Makefiles/LICENSE
+#	case $(build) in \
+#	*-cygwin*) \
+#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
+#  	*-mingw*) \
+#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+#  	*-apple*) \
+#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+#  	*) \
+#	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+#	esac
 	case $(build) in \
 	*-cygwin*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/Makefile ;; \
   	*-mingw*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/RuntimeLibrary/Makefiles/Makefile.windows $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
   	*-apple*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/RuntimeLibrary/Makefiles/Makefile.macosx $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
   	*) \
-	cp $(abs_top_srcdir)/JMI/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
+	cp $(abs_top_srcdir)/RuntimeLibrary/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
+
 	mkdir -p $(DESTDIR)$(prefix)/Options
 	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
