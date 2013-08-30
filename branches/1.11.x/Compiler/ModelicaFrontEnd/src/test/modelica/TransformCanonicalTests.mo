@@ -4606,6 +4606,36 @@ Jacobian:
 ")})));
 end BlockTest7;
 
+model BlockTest8
+  Real y1,y2;
+equation 
+  y1 =  sin(time) + y2;
+  y2 =  (y1 * 4) + (3 * time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest8",
+			description="Test of linear systems of equations. Checks that the time
+			derivative is not included in the jacobian.",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved linear block of 2 variables:
+Coefficient variability: Constant
+Unknown variables:
+  y2
+  y1
+Equations:
+  y2 = y1 * 4 + 3 * time
+  y1 = sin(time) + y2
+Jacobian:
+  |1.0, - 4|
+  |- 1.0, 1.0|
+-------------------------------
+")})));
+end BlockTest8;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];
