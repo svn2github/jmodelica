@@ -193,8 +193,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-RUNTIMELIBRARY_BUILD_DIR = $(abs_builddir)/../RuntimeLibrary_build
-RUNTIMELIBRARY_SRC_DIR = $(abs_top_srcdir)/RuntimeLibrary/RuntimeLibrary/
+RUNTIMELIBRARY_BUILD_DIR = $(abs_builddir)/../RuntimeLibrary/build
+RUNTIMELIBRARY_SRC_DIR = $(abs_top_srcdir)/RuntimeLibrary
 all: all-am
 
 .SUFFIXES:
