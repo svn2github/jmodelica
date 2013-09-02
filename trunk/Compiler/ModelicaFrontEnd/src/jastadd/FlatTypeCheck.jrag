@@ -758,8 +758,8 @@ aspect FlatTypeCheck {
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
   eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
-  eq FConnectionsOp.getA().argumentTypeValid(FType type)            = getA().isComponentReference(ALLOWED_COMPONENTS);
-  eq FConnBranch.getB().argumentTypeValid(FType type)               = getB().isComponentReference(ALLOWED_COMPONENTS);
+  eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
+          getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
   
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
