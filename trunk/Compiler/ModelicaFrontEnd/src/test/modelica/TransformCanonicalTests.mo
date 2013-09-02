@@ -2154,7 +2154,7 @@ model UnbalancedTest1_Err
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 0 equations and 2 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
@@ -2179,7 +2179,10 @@ equation
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  Index reduction failed
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Semantic error at line 0, column 0:  The system is structurally singular. The following varible(s) could not be matched to any equation:
    y
 
   The following equation(s) could not be matched to any variable:
@@ -2200,11 +2203,7 @@ equation
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE initialization system has 1 equations and 0 free variables.
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 1 equations and 0 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
@@ -2226,7 +2225,7 @@ equation
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 0 equations and 1 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
 Semantic error at line 0, column 0:
@@ -2249,11 +2248,11 @@ equation
 			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
-Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 3 equations and 2 free variables.
+  Index reduction failed
 
-Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
    x = 0

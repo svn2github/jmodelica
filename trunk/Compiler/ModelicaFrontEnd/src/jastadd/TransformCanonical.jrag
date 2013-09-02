@@ -1863,13 +1863,14 @@ aspect TransformCanonical {
 			g.maximumMatching(true);	
 			log.info("DAE system real variables only");
 			log.info(g.printMatchingObj());
+			
+			String errMsg = "Index reduction failed";
 	
 			IndexReductionResult result = null;
 			try {
 				result = g.reduceIndex(false);
 			} catch (EquationDifferentiationException e) {
-				error(e.getMessage());
-				return null; 
+			    errMsg = e.getMessage();
 			}
 			
 			if (result != null) {
@@ -1940,33 +1941,31 @@ aspect TransformCanonical {
 				for (FVariable fv : differentiatedRealVariables()) {
 					log.info(new PrettyPrintDelegate(fv, "  "));
 				}
-			} else {
-				return null;
+    			
+				// Calculate new graph
+    			g = new BiPGraph();
+    			g.addVariables(this, VAR_TYPES_NORMAL);
+    			g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
+    	
+    			log.info(g);
+    			g.maximumMatching(true);	
+    			log.info("DAE system ");
+    			log.info(g.printMatchingObj());
+    
+    			if (g.isComplete()) {
+    	            daeUnmatchedVariables.clear();
+    	            daeUnmatchedEquations.clear();
+    			    return g;
+    			}
 			}
 			
-			g = new BiPGraph();
-			g.addVariables(this, VAR_TYPES_NORMAL);
-			g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
-	
-			log.info(g);
-			g.maximumMatching(true);	
-			log.info("DAE system ");
-			log.info(g.printMatchingObj());
-	
-			daeUnmatchedVariables.clear();
-			for (Var var : g.getUnmatchedVariables()) {
-				daeUnmatchedVariables.add(var.getVariable());
-			}
-	
-			daeUnmatchedEquations.clear();
-			for (Eq ee : g.getUnmatchedEquations()) {
-				daeUnmatchedEquations.add(ee.getEquation());
-			}
-	
-			return g.isComplete() ? g : null;
-		} else {
-			return null;
+			// If we get here, index reduction failed
+            error(errMsg);
 		}
+		
+		// If we get here, generate an error for singular equation system
+        checkStructure();
+        return null;
 	}
 
 	
