@@ -4775,7 +4775,8 @@ aspect FunctionInlining {
 		 * @param call   the new function call
 		 */
 		public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
-			FTypePrefixVariability variability = call.variability().fullCopy();
+            int nLefts = lefts.getNumChild();
+            FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : call.variability().fullCopy();
 			
 			FExp[] exps = null;
 			if (variability.constantVariability()) {
@@ -4789,7 +4790,6 @@ aspect FunctionInlining {
 				}
 			}
 
-			int nLefts = lefts.getNumChild();
 			if (exps == null)
 				exps = new FExp[nLefts];
 			FExp[] lExps = new FExp[nLefts];
