@@ -362,9 +362,10 @@ aspect Flattening {
 		if (fc.lookupFRec(qualifiedName()) == null) {
 			FRecordDecl frd = new FRecordDecl();
 	   		frd.setFQName(new FQNameString(qualifiedName()));
+	   		Set<String> names = new HashSet<String>();
 	   		
 	   		for (InstComponentDecl icd : allInstComponentDecls())
-				icd.flattenInRecord(frd, fc);
+				icd.flattenInRecord(frd, fc, names);
 			
 			fc.addFRecordDecl(frd);
 			
@@ -607,29 +608,31 @@ aspect Flattening {
 	
 //	public void InstClassDecl.flatten(FClass fc) {}
 	
-	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc) {}
+	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}
 	
-	public void InstPrimitive.flattenInRecord(FRecordDecl frd, FClass fc) {
-		frd.addFVariable(createFVariable());
-		myInstClass().addFDerivedType(fc);
+	public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+	    if (names.add(name())) {
+    		frd.addFVariable(createFVariable());
+            flattenMyType(fc);
+	    }
 	}
 	
-	public void InstRecord.flattenInRecord(FRecordDecl frd, FClass fc) {
-		frd.addFVariable(createFVariable());
-		myInstClass().flattenRecord(fc);
-	}
-	
-	public void InstPrimitive.flatten(FClass fc) {
+	public void InstAssignable.flatten(FClass fc) {
 		if (useInFlattening()) {
 			fc.addUniqueFVariable(createFVariable());
-			myInstClass().addFDerivedType(fc);
+			flattenMyType(fc);
 		}
 	}
 	
-	public void InstRecord.flatten(FClass fc) {
-		fc.addFVariable(createFVariable());
-		myInstClass().flattenRecord(fc);
-	}
+    public abstract void InstAssignable.flattenMyType(FClass fc);
+
+    public void InstPrimitive.flattenMyType(FClass fc) {
+        myInstClass().addFDerivedType(fc);
+    }
+    
+    public void InstRecord.flattenMyType(FClass fc) {
+        myInstClass().flattenRecord(fc);
+    }
 
 	public void InstEnum.flatten(FClass fc) {
 		myInstClass().flattenEnum(fc);
