@@ -962,7 +962,7 @@ class Test_Logger:
 
         log = parse_jmi_log(os.path.join(path_to_fmu_logs, 'LoggerTest_log.txt'))
 
-        assert log.nodes[0].t == 0.0
+        assert log.find("EquationSolve")[0].t == 0.0
         
         d = gather_solves(log)
 

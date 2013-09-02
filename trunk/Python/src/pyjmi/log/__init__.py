@@ -21,5 +21,6 @@ The JModelica Python log analysis toolkit.
 
 from parser import parse_xml_log, parse_jmi_log, extract_jmi_log
 from jmi_log import gather_solves
+from prettyprinter import prettyprint_to_file
 
-__all__=['parser','tree']
+__all__=['parser','tree','jmi_log','prettyprinter']
