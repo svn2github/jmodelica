@@ -1071,27 +1071,14 @@ public class ModelicaCompiler {
 		log.info("======= Compiling model =======");
 		resetCompilationInfo();
 		
-		OptionRegistry opts = null;
 		FClass fc = null;
 		try {
-
-			// build source tree
-			SourceRoot sr = parseModel(name);
-			opts = sr.options;
-			dumpMemoryUseFile(sr, "source", false);
-
-			if (sr.options.getBooleanOption("generate_html_diagnostics")) {
-				setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
-			}
-
 			// compute instance tree
-			InstClassDecl icl = instantiateModel(sr, cl);
+			InstClassDecl icl = instantiateModel(name, cl);
 			
 			// flattening
 			// Throw away source and instance trees when they are not needed any more
 			PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icl);
-			dumpMemoryUseFile(sr, "source and instance", "instance", true);
-			sr = null;
 			icl = null;
 			fc = flattenModel(buf.pass());
 
@@ -1105,7 +1092,7 @@ public class ModelicaCompiler {
 //			dumpNodeCountFile("node_count.txt");
 		}
 
-		if (opts.getBooleanOption("generate_html_diagnostics")) {
+		if (options.getBooleanOption("generate_html_diagnostics")) {
 			getDiagnosticsGenerator().finalize();
 			setDiagnosticsGenerator(null);
 		}
@@ -1213,7 +1200,41 @@ public class ModelicaCompiler {
 	}
 	
 	/**
+	 * Parses and instantiated the model <code>cl</code> from the source files <code>name</code>.
 	 * 
+	 * @param name
+	 *            Array of model file or library paths.
+	 * @param cl
+	 *            The name of the class in the model file to compile.
+	 * @throws ModelicaException
+	 *             If errors have been found during the parsing, instantiation
+	 *             or flattening.
+	 * @throws FileNotFoundException
+	 *             If the model file can not be found.
+	 * @throws IOException
+	 *             If there was an error creating the .mof file.
+	 * @throws beaver.Parser.Exception
+	 *             If there was an Beaver parsing exception.
+	 */
+	private InstClassDecl instantiateModel(String name[], String cl)
+			throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+		// build source tree
+		SourceRoot sr = parseModel(name);
+		dumpMemoryUseFile(sr, "source", false);
+
+		if (options.getBooleanOption("generate_html_diagnostics")) {
+			setDiagnosticsGenerator(new DiagnosticsGenerator(cl));
+		}
+
+		// compute instance tree
+		InstClassDecl icl = instantiateModel(sr, cl);
+		
+		dumpMemoryUseFile(sr, "source and instance", "instance", true);
+		
+		return icl;
+	}
+	
+	/**
 	 * Computes a model instance tree from a source tree. Some error checks such
 	 * as type checking is performed during the computation.
 	 * 
@@ -1701,7 +1722,9 @@ public class ModelicaCompiler {
 		// Compile model
 		try {
 			if (programarguments.containsKey("parse"))
-				parseFiles(name);	
+				parseFiles(name);
+			else if (programarguments.containsKey("check"))
+				instantiateModel(name, cl);
 			else if (programarguments.containsKey("fmucs"))
 				compileFMUCS(cl, name, compileTo);
 			else if (programarguments.containsKey("fmux"))
