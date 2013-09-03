@@ -108,6 +108,7 @@ aspect FlatVariability {
 		}
 		return var;
 	}
+	eq FWhenEquation.variability() = fDiscrete();
 	
 	syn boolean FAbstractEquation.isConstant() = false;
 	syn boolean FAbstractEquation.isParameter() = false;
@@ -123,6 +124,11 @@ aspect FlatVariability {
 	eq FFunctionCallEquation.isParameter() = variability().parameterVariability();
 	eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
 	eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
+	
+	eq FWhenEquation.isConstant() = variability().constantVariability();
+	eq FWhenEquation.isParameter() = variability().parameterVariability();
+	eq FWhenEquation.isDiscrete() = variability().discreteVariability();
+	eq FWhenEquation.isContinuous() = variability().continuousVariability();
 	
 	syn boolean FAbstractVariable.isConstant()   = false;
     syn boolean FAbstractVariable.isParameter()  = false;
@@ -287,6 +293,7 @@ aspect FlatVariability {
 	inh boolean FExp.inDiscreteLocation();
 	eq FFunctionDecl.getChild().inDiscreteLocation()             = true;
 	eq FWhenEquation.getFAbstractEquation().inDiscreteLocation() = true;
+	eq FWhenEquation.getInitialEquation().inDiscreteLocation()   = true;
 	eq FWhenClause.getFStatement().inDiscreteLocation()          = true;
 	eq FClass.getChild().inDiscreteLocation()                    = false;
 	eq InstNode.getChild().inDiscreteLocation()                  = false;
@@ -320,6 +327,7 @@ aspect FlatVariability {
 	eq FEndExp.expVariability()   = fParameter();
 	eq FTimeExp.expVariability()  = fContinuous();
 	eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
+	eq FFunctionCall.expVariability() = (typeOfOutput(0).isReal() ? fContinuous() : fDiscrete()).combineDown(super.expVariability());
 
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());

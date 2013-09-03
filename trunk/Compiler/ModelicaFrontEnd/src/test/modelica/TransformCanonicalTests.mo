@@ -4635,6 +4635,47 @@ Jacobian:
 ")})));
 end BlockTest8;
 
+model BlockTest9
+record R
+	Real[2] a;	
+end R;
+function f
+  input Real a;
+  output R b;
+  output Real dummy;
+  output Integer[2] c;
+algorithm
+  b := R({a,a});
+  c := {integer(a),integer(a)};
+  dummy := 1;
+end f;
+R r;
+Integer[2] i;
+equation
+  (r, ,i) = f(time*10);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest9",
+			description="Test of linear systems of equations. Checks that function
+			call equations with different return value types are matched correctly.",
+			equation_sorting=true,
+			inline_functions="none",
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 4 variables:
+Unknown variables:
+  r.a[1]
+  r.a[2]
+  i[1]
+  i[2]
+Equations:
+  (TransformCanonicalTests.BlockTest9.R({r.a[1], r.a[2]}), , {i[1], i[2]}) = TransformCanonicalTests.BlockTest9.f(time * 10)
+-------------------------------
+")})));
+end BlockTest9;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];

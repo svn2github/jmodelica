@@ -4347,7 +4347,7 @@ model IntegerExternal2
 		external;
 	end f;
 	equation
-		b_out = f(a_in);	
+		b_out = f(a_in);
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -6955,7 +6955,7 @@ model StartValues2
   
 equation
   der(r) = -r;
-  i = r + 2;
+  i = integer(r) + 2;
   b = false;
   
 
@@ -6969,13 +6969,15 @@ equation
     _pr_0 = (1.5);
     _pi_1 = (2);
     _pb_2 = (JMI_TRUE);
-	model_init_eval_parameters(jmi);
+    model_init_eval_parameters(jmi);
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
     _der_r_6 = (0.0);
+    _temp_1_7 = (0);
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
+    pre_temp_1_7 = (0);
 ")})));
 end StartValues2;
 
