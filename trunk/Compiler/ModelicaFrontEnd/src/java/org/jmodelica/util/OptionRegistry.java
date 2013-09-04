@@ -333,11 +333,6 @@ public class OptionRegistry {
               0,
               "Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity.",
               0,3),
-        USE_JACOBIAN_SCALING
-            ("use_jacobian_scaling",
-            runtime,
-            false,
-            "To be deprecated utilize use_jacobian_equilibration. If jacobian rows/columns should be automatically scaled in equation block solvers."),
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
              runtime,
@@ -350,16 +345,6 @@ public class OptionRegistry {
             "Iteration variables scaling mode in equation block solvers:"+
             "0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc.",
             0,2),
-        USE_AUTOMATIC_SCALING
-            ("use_automatic_scaling",
-            runtime,
-            true,
-            "To be deprecated: Enable equations and variables automatic scaling in equation block solvers."),
-        USE_MANUAL_EQUATION_SCALING
-             ("use_manual_equation_scaling",
-              runtime,
-              false,
-              "To be deprecated: Enable equations scaling using manual values from annotations in equation block solvers."),
         RESIDUAL_EQUATION_SCALING
             ("residual_equation_scaling",
              runtime,

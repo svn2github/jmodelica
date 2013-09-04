@@ -9501,10 +9501,7 @@ const char *fmi_runtime_options_map_names[] = {
     \"_residual_equation_scaling\",
     \"_runtime_log_to_file\",
     \"_use_Brent_in_1d\",
-    \"_use_automatic_scaling\",
     \"_use_jacobian_equilibration\",
-    \"_use_jacobian_scaling\",
-    \"_use_manual_equation_scaling\",
     NULL
 };
 

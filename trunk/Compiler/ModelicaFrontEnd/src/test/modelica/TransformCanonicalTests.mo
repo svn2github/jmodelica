@@ -5214,10 +5214,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Integer _residual_equation_scaling = 1 /* 1 */;
  parameter Boolean _runtime_log_to_file = false /* false */;
  parameter Boolean _use_Brent_in_1d = false /* false */;
- parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_equilibration = false /* false */;
- parameter Boolean _use_jacobian_scaling = false /* false */;
- parameter Boolean _use_manual_equation_scaling = false /* false */;
 end TransformCanonicalTests.TestRuntimeOptions1;
 ")})));
 end TestRuntimeOptions1;
