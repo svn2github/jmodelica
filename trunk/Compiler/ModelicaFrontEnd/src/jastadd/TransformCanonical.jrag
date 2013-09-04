@@ -3123,10 +3123,10 @@ aspect TransformCanonical {
 			checkForEliminatedHGTVars();
 			removeUnusedTemporaries();
 			mergeEquivalentRecords();
+			insertTempsInLHS();
 			endStep("aliasEliminationIfSet()");
 		}
 	}
-
 	
 	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
 	
@@ -3725,6 +3725,41 @@ aspect TransformCanonical {
 	public FType FClass.createEquivalentRecordType(FType old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
 		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
+	}
+	
+	public void FClass.insertTempsInLHS() {
+		for (FAbstractEquation equation : 
+			getFEquationBlock(0).getFAbstractEquations()) {
+			equation.insertTempsInLHS(this);
+		}
+	}
+	
+	public void FAbstractEquation.insertTempsInLHS(FClass fClass) {}
+	public void FFunctionCallEquation.insertTempsInLHS(FClass fClass) {
+		for (FFunctionCallLeft left : getLefts())
+			left.insertTempsInLHS(fClass);
+	}
+	
+	public void FFunctionCallLeft.insertTempsInLHS(FClass fClass) {
+		if (hasFExp())
+			getFExp().insertTempsInLHS(fClass);
+	}
+	
+	public void FExp.insertTempsInLHS(FClass fClass) {
+		String tempName = calcTempVarName();
+		fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), false));
+		replaceMe(new FIdUseExp(tempName));
+		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
+	}
+	
+	public void FIdUseExp.insertTempsInLHS(FClass fClass) {}
+	public void FArray.insertTempsInLHS(FClass fClass) {
+		for (FExp fExp : getFExps())
+			fExp.insertTempsInLHS(fClass);
+	}
+	public void FRecordConstructor.insertTempsInLHS(FClass fClass) {
+		for (FExp fExp : getArgs())
+			fExp.insertTempsInLHS(fClass);
 	}
 	
 }

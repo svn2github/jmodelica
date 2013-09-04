@@ -4676,6 +4676,56 @@ Equations:
 ")})));
 end BlockTest9;
 
+model BlockTest10
+	function F
+		input Real x[2];
+		output Real y[2];
+	algorithm
+		if x[1] < 0 then
+			x := -x;
+		end if;
+		y := x;
+	end F;
+	Real z[2], w[2];
+equation
+	w = {time, 2};
+	z + F(w) = {0, 0};
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest10",
+			description="Test alias elimination of negative function call lefts",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  w[1]
+Solution:
+  time
+-------------------------------
+Solved block of 2 variables:
+Unknown variables:
+  temp_2
+  temp_3
+Equations:
+  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[1]
+Solution:
+  temp_2 / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[2]
+Solution:
+  temp_3 / (- 1.0)
+-------------------------------
+")})));
+end BlockTest10;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];
