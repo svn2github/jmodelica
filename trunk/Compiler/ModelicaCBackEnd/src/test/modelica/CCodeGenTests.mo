@@ -4347,7 +4347,7 @@ model IntegerExternal2
 		external;
 	end f;
 	equation
-		b_out = f(a_in);
+		b_out = f(a_in);	
 
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
@@ -6969,7 +6969,7 @@ equation
     _pr_0 = (1.5);
     _pi_1 = (2);
     _pb_2 = (JMI_TRUE);
-    model_init_eval_parameters(jmi);
+	model_init_eval_parameters(jmi);
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
@@ -8954,9 +8954,7 @@ void func_Modelica_Math_Matrices_solve_def(jmi_array_t* A_a, jmi_array_t* b_a, j
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(A_a, b_a, x_a, &info_v);
     if (COND_EXP_EQ(info_v, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed(\"Solving a linear system of equations with function
-\\\"Matrices.solve\\\" is not possible, because the system has either
-no or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -9052,9 +9050,7 @@ void func_Modelica_Math_Matrices_solve2_def(jmi_array_t* A_a, jmi_array_t* B_a, 
     }
     func_Modelica_Math_Matrices_LAPACK_dgesv_def(A_a, B_a, X_a, &info_v);
     if (COND_EXP_EQ(info_v, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
-        jmi_assert_failed(\"Solving a linear system of equations with function
-\\\"Matrices.solve2\\\" is not possible, because the system has either
-no or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
+        jmi_assert_failed(\"Solving a linear system of equations with function\\n\\\"Matrices.solve2\\\" is not possible, because the system has either\\nno or infinitely many solutions (A is singular).\", JMI_ASSERT_ERROR);
     }
     JMI_DYNAMIC_FREE()
     return;
@@ -10035,6 +10031,32 @@ equation
     }
 ")})));
 end TestAssert2;
+
+
+model TestStringWithUnicode1
+	Real x = time + 1;
+equation
+	assert(x < 5, "euro: €
+aring: å
+Auml: Ä\nbell: \a");
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestStringWithUnicode1",
+			description="C string literal with line breaks and unicode chars",
+			template="$C_ode_derivatives$",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = _time + 1;
+    if (COND_EXP_LT(_x_0, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"euro: \\xe2\\x82\\xac\\naring: \\xc3\\xa5\\nAuml: \\xc3\\x84\\nbell: \\a\", JMI_ASSERT_ERROR);
+    }
+")})));
+end TestStringWithUnicode1;
 
 
 end CCodeGenTests;

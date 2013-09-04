@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 
 import org.jmodelica.util.logging.StreamingLogger;
 import org.jmodelica.util.logging.Level;
@@ -129,17 +130,14 @@ aspect RootAccess {
     }
     
     public static Reader ParserHandler.fileReader(File file) throws FileNotFoundException {
-		FileInputStream stream = new FileInputStream(file);
-		try {
-			return new InputStreamReader(stream, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-		}
-		return new InputStreamReader(stream);
+		return new InputStreamReader(new FileInputStream(file), UTF8);
     }
     
     public static Reader ParserHandler.fileReader(String path) throws FileNotFoundException {
 		return fileReader(new File(path));
     }
+    
+    public static final Charset ASTNode.UTF8 = Charset.forName("UTF-8");
     
 }
 
@@ -2735,9 +2733,14 @@ aspect Strings {
 	 * \brief Get the value of this string literal with all escape sequences 
 	 *        replaced with their actual meaning.
 	 */
-	syn String StringLitExp.unEscape() {
+	syn String StringLitExp.unEscape() = unEscape(getSTRING());
+	
+	/**
+	 * Replace all escape sequences with their actual meaning.
+	 */
+	public static String ASTNode.unEscape(String str) {
 		StringBuffer buf = new StringBuffer();
-		Matcher m = ESCAPE_PATTERN.matcher(getSTRING());
+		Matcher m = ESCAPE_PATTERN.matcher(str);
 		Map<String,String> repl = escapeReplacements();
 		while (m.find())
 			m.appendReplacement(buf, repl.get(m.group(1)));
@@ -2745,9 +2748,9 @@ aspect Strings {
 		return buf.toString();
 	}
 	
-	protected static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
+	private static Pattern ASTNode.ESCAPE_PATTERN = Pattern.compile("\\\\(.)");
 	
-	protected static Map<String,String> ASTNode.escapeReplacements() {
+	private static Map<String,String> ASTNode.escapeReplacements() {
 		if (ESCAPE_REPLACEMENTS == null) {
 			ESCAPE_REPLACEMENTS = new HashMap<String,String>();
 			ESCAPE_REPLACEMENTS.put("'", "'");
