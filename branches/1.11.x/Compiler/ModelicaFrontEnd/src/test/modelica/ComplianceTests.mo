@@ -168,6 +168,62 @@ Compliance error at line 126, column 2:
 ")})));
 end WhenStmt_ComplErr;
 
+model UnsolvedWhenEqu_ComplErr
+ discrete Real x;
+ Real y1,y2;
+ Real z1,z2,z3;
+equation
+ when time > 3 then
+  x = sin(x) +3;
+ end when;
+ 
+  y1 + y2 = 5;
+  when time > 3 then 
+    y1 = 7 - 2*y2;
+  end when;
+  
+  z1 + z2 + z3 = 5;
+  when time > 3 then 
+    z1 = 7 - 2*z2;
+    z3 = 7 - 2*z2;
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsolvedWhenEqu_ComplErr",
+			description="Compliance error for when statements",
+			errorMessage="
+4 errors found:
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Unsolved equations in when-clause is not supported. 
+when time > 3 then
+ x = sin(x) + 3;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ y1 = 7 - 2 * y2;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ z1 = 7 - 2 * z2;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ z3 = 7 - 2 * z2;
+end when
+")})));
+end UnsolvedWhenEqu_ComplErr;
+
 model ElseWhenEq_ComplErr
  Real x;
 equation

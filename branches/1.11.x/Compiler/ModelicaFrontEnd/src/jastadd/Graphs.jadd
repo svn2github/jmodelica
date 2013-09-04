@@ -819,7 +819,12 @@ public class BiPGraph {
 	}
 	
 	public boolean canMatch(Eq e, Var v) {
-		return true;
+		if (e.getEquation() instanceof FFunctionCallEquation ||
+				e.getEquation() instanceof FAlgorithm) {
+			return true;
+		}
+		// Discrete variables can only be matched to discrete equations.
+		return !(v.getVariable().isDiscrete() && e.getEquation().isContinuous());
 	}
 	
 	public void addInsidence(Eq e, Var v) {

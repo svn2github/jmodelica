@@ -120,6 +120,7 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
+			daeBLT.complianceCheck();
 		}
 	
 		root().flushAllRecursive();	
@@ -181,6 +182,21 @@ aspect TransformCanonical {
 			out.close();
 		}
 		
+		public void complianceCheck() {
+			for (AbstractEquationBlock block : this) {
+				if (!block.isSolvable()) {
+					for (FAbstractEquation equ : block.equations()) {
+						if (equ instanceof FWhenEquation) {
+							if (block.equations().size() == 1) {
+								equ.compliance("Unsolved equations in when-clause is not supported. \n" + equ.prettyPrint(""));
+							} else {
+								equ.compliance("When-clause in unsolved equations is not supported. \n" + equ.prettyPrint(""));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public class StructuredBLT extends BLT {
@@ -804,7 +820,7 @@ aspect TransformCanonical {
 		public Collection<FVariable> activeContinuousVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
 			for (FVariable fv : activeVariables())
-				if (fv.isReal())
+				if (fv.isContinuous())
 					l.add(fv);
 			return l;
 		}
@@ -812,7 +828,7 @@ aspect TransformCanonical {
 		public Collection<FVariable> activeDiscreteVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
 			for (FVariable fv : activeVariables())
-				if (!fv.isReal())
+				if (fv.isDiscrete())
 					l.add(fv);
 			return l;
 		}
@@ -834,7 +850,7 @@ aspect TransformCanonical {
 		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks) {
-				if (!seb.equation().isDiscrete())
+				if (seb.equation().isContinuous())
 					l.add(seb);
 			}
 			return l;
@@ -872,9 +888,11 @@ aspect TransformCanonical {
 
 		public MixedLinearEquationBlock(Collection<SimpleEquationBlock> blocks) {
 			super(blocks);
-			
-			// Compute Jacobian
-			jacobian = new FExp[continuousEquations().size()][continuousEquations().size()];
+			jacobian = computeJacobian();
+		}
+		
+		private FExp[][] computeJacobian() {
+			FExp[][] jacobian = new FExp[continuousEquations().size()][activeContinuousVariables().size()];
 			int row = 0;
 			int col = 0;
 			blockVariability = ASTNode.fConstant();
@@ -905,6 +923,7 @@ aspect TransformCanonical {
 				}	
 				row++;
 			}
+			return jacobian;
 		}
 		
 		@Override
@@ -1291,7 +1310,13 @@ aspect TransformCanonical {
 		}
 		
 		public boolean isSolvable() {
-			return true;
+			boolean solvable = true;
+			for (Collection<SimpleEquationBlock> c: blocks) {
+				for (SimpleEquationBlock b: c) {
+					solvable = solvable && b.isSolvable();
+				}
+			}
+			return solvable;
 		}
 		
 		public FWhenEquation equation() {
