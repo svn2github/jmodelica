@@ -333,7 +333,13 @@ abstract public class TestCase {
 		// Flatten class and test it
 	    InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
 		FClass fc = FClass.create(icd, getSourceFileName());
-		icd.flattenInstClassDecl(fc);
+		
+		try {
+			icd.flattenInstClassDecl(fc);
+		} catch (CompilerException e) {
+			problems = e.getProblems();
+			if (testSemanticProblems(problems)) return;
+		}
 		if (testFlattened(fc)) return;
 		
 		

@@ -957,6 +957,8 @@ aspect OverconstrainedConnections {
 		private Collection<Node> nodes = new ArrayList<Node>();
 		private Map<InstComponentDecl,Node> nodeMap = new HashMap<InstComponentDecl,Node>();
 		private Map<String,OpsResult> opsMap;
+		static String UNROOTED_ERR_MSG = "Set of unrooted connectors in overconstrained connection graph:";
+		static String UNROOTED_ERR_SEP = "\n    ";
 		
 		/**
 		 * Add a connection to the graph.
@@ -1025,8 +1027,20 @@ aspect OverconstrainedConnections {
 				}
 			}
 			
-			// Check for unconnected nodes (with visited = false) - gives error
-			// TODO
+			// Produce errors for unrooted nodes
+			for (Node n : nodes) {
+				if (!n.visited) {
+					StringBuilder sb = new StringBuilder();
+					sb.append(UNROOTED_ERR_MSG);
+					ArrayList<Node> sg = new ArrayList<Node>();
+					n.subGraph(sg);
+					for (Node unrooted : sg) {
+						sb.append(UNROOTED_ERR_SEP);
+						sb.append(unrooted.var.buildQualifiedName(""));
+					}
+					n.var.error(sb.toString());
+				}
+			}
 			
 			// Build map for dependents
 			opsMap = new HashMap<String,OpsResult>();
@@ -1322,6 +1336,19 @@ aspect OverconstrainedConnections {
 						}
 						n.markSelectedRoot(root);
 					}
+				}
+			}
+			
+			/**
+			 * Gathers the subgraph which n is in.
+			 */
+			public void subGraph(ArrayList<Node> sg) {
+				if (visited)
+					return;
+				visited = true;
+				sg.add(this);
+				for (Edge e : edges) {
+					e.other(this).subGraph(sg);
 				}
 			}
 			

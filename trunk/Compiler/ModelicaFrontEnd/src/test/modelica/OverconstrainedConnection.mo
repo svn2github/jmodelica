@@ -300,5 +300,54 @@ end OverconstrainedConnection.OverconstrainedCorrect7;
 ")})));
 end OverconstrainedCorrect7;
 
+model OverconstrainedUnrooted1
+	C1 c1;
+    C1 c2;
+    C1 c3;
+    C1 c4;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c3.t, c4.t);
+	Connections.root(c1.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnrooted1",
+			description="Unconnected connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    OverconstrainedConnection.OverconstrainedUnrooted1.c3
+    OverconstrainedConnection.OverconstrainedUnrooted1.c4
+")})));
+end OverconstrainedUnrooted1;
+
+model OverconstrainedUnrooted2
+	C1 c1,c2,c3,c4,c5;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c2.t, c3.t);
+	Connections.branch(c4.t, c5.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnrooted2",
+			description="Unconnected connector sets",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    OverconstrainedConnection.OverconstrainedUnrooted2.c1
+    OverconstrainedConnection.OverconstrainedUnrooted2.c2
+    OverconstrainedConnection.OverconstrainedUnrooted2.c3
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    OverconstrainedConnection.OverconstrainedUnrooted2.c4
+    OverconstrainedConnection.OverconstrainedUnrooted2.c5
+")})));
+end OverconstrainedUnrooted2;
 
 end OverconstrainedConnection;

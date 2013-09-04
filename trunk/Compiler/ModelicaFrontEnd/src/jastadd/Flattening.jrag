@@ -83,6 +83,7 @@ aspect Flattening {
 		flattenInstClassDeclExtra(fc);
 		fc.genConnectionEquations();
 		fc.createExperiment(annotation("experiment"));
+		root().breakOnErrors();
     	endStep("flattenInstClassDecl()");
     }
     
