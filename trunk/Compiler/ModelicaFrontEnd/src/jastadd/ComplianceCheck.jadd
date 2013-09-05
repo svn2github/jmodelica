@@ -227,10 +227,6 @@ aspect ComplianceCheck {
 				"() function-like operator is not supported, and is currently ignored");
 	}
 	
-	public void FConnectionsOp.complianceCheck() {
-		compliance("The " + builtInName() + "() function-like operator is not supported");
-	}
-	
 	public void FTerminalExp.complianceCheck() {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
