@@ -9508,10 +9508,10 @@ const char *fmi_runtime_options_map_names[] = {
 const int fmi_runtime_options_map_vrefs[] = {
     536870927, 0, 268435464, 1, 268435465, 2, 536870928, 3, 4, 268435466,
     268435467, 536870929, 5, 268435468, 268435469, 6, 7, 536870930, 536870931, 268435470,
-    536870932, 536870933, 536870934, 536870935, 536870936, 536870937, 0
+    536870932, 536870933, 536870934, 0
 };
 
-const int fmi_runtime_options_map_length = 26;
+const int fmi_runtime_options_map_length = 23;
 ")})));
 end TestRuntimeOptions1;
 
