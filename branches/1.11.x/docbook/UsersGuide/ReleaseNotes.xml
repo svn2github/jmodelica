@@ -11,6 +11,152 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.11</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Runtime logging</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for ModelicaError and assert</para>
+          </listitem>
+
+          <listitem>
+            <para>Additional method in block solver</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for ModelicaStandardTables in MSL</para>
+          </listitem>
+
+          <listitem>
+            <para>Improved compliance</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <para>The following compliance improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Most of the previously unsupported operators are now supported
+          for FMUs</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for assert clauses</para>
+        </listitem>
+
+        <listitem>
+          <para>String operations are now supported (this is useful for
+          asserts, even though String variables are not supported)</para>
+        </listitem>
+
+        <listitem>
+          <para>Support for vectorization for built-in functions</para>
+        </listitem>
+
+        <listitem>
+          <para>Inlining of simple functions is now activate by default</para>
+        </listitem>
+
+        <listitem>
+          <para>Several bug fixes</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <section>
+        <title>Runtime logging</title>
+
+        <para>The runtime logging has been much improved with a new debugging
+        and analysis framework. This enables debugging of convergence issues
+        in non-linear systems of equations.</para>
+      </section>
+
+      <section>
+        <title>Support for ModelicaError and assert</title>
+
+        <para>The compiler and runtime has support for ModelicaError and
+        assert clauses. If an assert clause fails or a ModelicaError is
+        called, the integrator will reject the current step.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Bengt-Arne Andersson</para>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Emil Fredriksson</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Toivo Henningsson</para>
+
+      <para>Jonathan Kämpe</para>
+
+      <para>Fredrik Magnusson</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Iakov Nakhimovski</para>
+
+      <para>Jon Sten</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Sofia Gedda</para>
+
+        <para>Björn Lennernäs</para>
+
+        <para>Petter Lindgren</para>
+
+        <para>John Lindskog</para>
+
+        <para>Tobias Mattsson</para>
+
+        <para>Lennart Moraeus</para>
+
+        <para>Philip Nilsson</para>
+
+        <para>Teo Nilsson</para>
+
+        <para>Patrik Meijer</para>
+
+        <para>Kristina Olsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+
+        <para>Jonas Rosenqvist</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.10</title>
 
     <section>

@@ -90,7 +90,7 @@
     standard and specifically contains information about the variables, names,
     identifiers, types and start attributes. A model is distributed in a
     zip-file with the extension '.fmu', these zip-files containing the models
-    are called FMUs (Functional Mock-up Units). FMI version1.0 specifies two
+    are called FMUs (Functional Mock-up Units). FMI version 1.0 specifies two
     types of FMUs, either Model Exchange or Co-Simulation. The difference
     between them is that in a Co-Simulation FMU, the integrator for solving
     the system is contained in the model while in an Model Exchange FMU, an
