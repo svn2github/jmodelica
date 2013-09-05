@@ -1176,7 +1176,55 @@ aspect FlatAPI {
 		findReferencedFVariablesInTree(res);
 		return res;
 	}
-		
+	
+	
+	syn java.util.List<FIdUse> FAbstractEquation.assignedFIdUses() {
+		throw new UnsupportedOperationException();
+	}
+	
+	eq FFunctionCallEquation.assignedFIdUses() {
+		java.util.List<FIdUse> fIdUses = new ArrayList<FIdUse>();
+		for (FFunctionCallLeft left : getLefts())
+			left.collectFIdUses(fIdUses);
+		return fIdUses;
+	}
+	
+	eq FAlgorithm.assignedFIdUses() {
+		java.util.List<FIdUse> fIdUses = new ArrayList<FIdUse>();
+		for (FIdUse use : containedFIdUses()) 
+			if (use.useIsAssignment() && !use.myFV().isForIndex())
+				fIdUses.add(use);
+		return fIdUses;
+	}
+	
+	syn java.util.List<FIdUse> FFunctionCallLeft.assignedFIdUses() {
+		java.util.List<FIdUse> fIdUses = new ArrayList<FIdUse>();
+		collectFIdUses(fIdUses);
+		return fIdUses;
+	}
+	
+	public void FFunctionCallLeft.collectFIdUses(Collection<FIdUse> res) {
+		if (hasFExp())
+			getFExp().collectFIdUses(res);
+	}
+	
+	public void FExp.collectFIdUses(Collection<FIdUse> res) {
+		throw new UnsupportedOperationException();
+	}
+	public void FIdUseExp.collectFIdUses(Collection<FIdUse> res) {
+		res.add(getFIdUse());
+	}
+	
+	public void FArray.collectFIdUses(Collection<FIdUse> res) {
+		for (FExp fExp : getFExps())
+			fExp.collectFIdUses(res);
+	}
+	
+	public void FRecordConstructor.collectFIdUses(Collection<FIdUse> res) {
+		for (FExp e : getArgs())
+			e.collectFIdUses(res);
+	}
+	
 	syn lazy String FClass.guid() {
 		try {
 			PipedInputStream in = new PipedInputStream();
@@ -2470,14 +2518,6 @@ aspect FlatAlgorithmAPI {
 	coll ArrayList<FIdUse> FAlgorithm.containedFIdUses() 
     	[new ArrayList<FIdUse>()] with add root FAlgorithm;
 	FIdUse contributes this to FAlgorithm.containedFIdUses() for myFAlgorithm();
-	
-	syn lazy ArrayList<FIdUse> FAlgorithm.assignedFIdUses() {
-		ArrayList<FIdUse> res = new ArrayList<FIdUse>();
-		for (FIdUse use : containedFIdUses())
-			if (use.useIsAssignment())
-				res.add(use);
-		return res;
-	}
 	
 	syn lazy ArrayList<FIdUse> FAlgorithm.usedFIdUses() {
 		ArrayList<FIdUse> res = new ArrayList<FIdUse>();

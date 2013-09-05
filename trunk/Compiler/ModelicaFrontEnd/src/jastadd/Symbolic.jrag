@@ -428,33 +428,39 @@ aspect Derivatives {
     
     }
 
-	public FAbstractEquation FAbstractEquation.diff(String name) {
-		throw new EquationDifferentiationException(this, 
-				"Cannot differentate the equation:\n   " + prettyPrint(""));
+	syn Collection<FAbstractEquation> FAbstractEquation.diff(String name) {
+		throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
 	}
 	
-	public FAbstractEquation FEquation.diff(String name) {
+	eq FEquation.diff(String name) {
 		try {
-			return dynamicFAbstractEquation(
-					new FEquation(getLeft().diff(name), getRight().diff(name)));
+			return Arrays.asList(dynamicFAbstractEquation(new FEquation(getLeft().diff(name), getRight().diff(name))));
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this,
-			    e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	
-	public FAbstractEquation FFunctionCallEquation.diff(String name) {
+	eq FFunctionCallEquation.diff(String name) {
 		List lefts = new List();
 		for (FFunctionCallLeft l : getLefts()) {
 			Opt lopt = l.hasFExp() ? new Opt(l.getFExp().diff(name)) : new Opt();
 			lefts.add(new FFunctionCallLeft(lopt));
 		}
 		try {
-			return dynamicFAbstractEquation(new FFunctionCallEquation(lefts, 
-					(FAbstractFunctionCall) getCall().diff(name)));
+			FExp diffedCall = getCall().diff(name);
+			if (diffedCall.isLiteralZero()) {
+				Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
+				for (FFunctionCallLeft left : getLefts())
+					for (FIdUse fIdUse : left.assignedFIdUses())
+						res.add(dynamicFAbstractEquation(
+								new FEquation(new FIdUseExp(fIdUse.fullCopy()), fIdUse.type().zeroLiteral())));
+				return res;
+			} else {
+				return Arrays.asList(dynamicFAbstractEquation(
+						new FFunctionCallEquation(lefts, (FAbstractFunctionCall)diffedCall)));
+			}
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this,
-				    e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	

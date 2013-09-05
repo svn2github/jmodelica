@@ -125,36 +125,6 @@ aspect InteractiveFMU{
 		}
 	}
 	
-	syn java.util.List<FIdUse> FFunctionCallEquation.assignedFIdUses() {
-		java.util.List<FIdUse> res = new ArrayList<FIdUse>();
-		for (FFunctionCallLeft left : getLefts())
-			left.collectFIdUses(res);
-		return res;
-	}
-
-	public void FFunctionCallLeft.collectFIdUses(Collection<FIdUse> res) {
-		if (hasFExp())
-			getFExp().collectFIdUses(res);
-	}
-	
-	public void FExp.collectFIdUses(Collection<FIdUse> res) {
-		throw new UnsupportedOperationException();
-	}
-	public void FIdUseExp.collectFIdUses(Collection<FIdUse> res) {
-		res.add(getFIdUse());
-	}
-	
-	public void FArray.collectFIdUses(Collection<FIdUse> res) {
-		for (FExp fExp : getFExps())
-			fExp.collectFIdUses(res);
-	}
-	
-	public void FRecordConstructor.collectFIdUses(Collection<FIdUse> res) {
-		for (FExp e : getArgs())
-			e.collectFIdUses(res);
-	}
-
-
 	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
 		for (SimpleEquationBlock solvedBlock : solvedBlocks)
 			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator);
