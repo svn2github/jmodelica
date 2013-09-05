@@ -19,247 +19,50 @@
   example:</para>
 
   <informalequation>
-    <m:math display="block">
-      <m:mrow>
-        <m:munder>
-          <m:mo>min</m:mo>
-
-          <m:mrow>
-            <m:mi>u</m:mi>
-
-            <m:mo>⁡</m:mo>
-
-            <m:mfenced>
-              <m:mi>t</m:mi>
-            </m:mfenced>
-          </m:mrow>
-        </m:munder>
-
-        <m:msub>
-          <m:mi>t</m:mi>
-
-          <m:mi>f</m:mi>
-        </m:msub>
-      </m:mrow>
-    </m:math>
+    <m:math display="block"><m:mrow> <m:munder> <m:mo>min</m:mo> <m:mrow>
+    <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced>
+    </m:mrow> </m:munder> <m:msub> <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub>
+    </m:mrow></m:math>
   </informalequation>
 
   <para>subject to the dynamic constraint</para>
 
   <informalequation>
-    <m:math display="block">
-      <m:mtable>
-        <m:mlabeledtr>
-          <m:mtd>
-            <m:mrow>
-              <m:mover>
-                <m:mrow>
-                  <m:mi>x</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mrow>
-
-                <m:mi>.</m:mi>
-              </m:mover>
-
-              <m:mo>=</m:mo>
-
-              <m:mrow>
-                <m:mi>v</m:mi>
-
-                <m:mo>⁡</m:mo>
-
-                <m:mfenced>
-                  <m:mi>t</m:mi>
-                </m:mfenced>
-              </m:mrow>
-            </m:mrow>
-          </m:mtd>
-
-          <m:mtd>
-            <m:mrow>
-              <m:mtext>,</m:mtext>
-
-              <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
-
-              <m:mrow>
-                <m:mrow>
-                  <m:mi>x</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mrow>
-
-                <m:mo>=</m:mo>
-
-                <m:mi>0</m:mi>
-              </m:mrow>
-            </m:mrow>
-          </m:mtd>
-        </m:mlabeledtr>
-
-        <m:mlabeledtr>
-          <m:mtd>
-            <m:mrow>
-              <m:mover>
-                <m:mrow>
-                  <m:mi>v</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mrow>
-
-                <m:mi>.</m:mi>
-              </m:mover>
-
-              <m:mo>=</m:mo>
-
-              <m:mrow>
-                <m:mi>u</m:mi>
-
-                <m:mo>⁡</m:mo>
-
-                <m:mfenced>
-                  <m:mi>t</m:mi>
-                </m:mfenced>
-              </m:mrow>
-            </m:mrow>
-          </m:mtd>
-
-          <m:mtd>
-            <m:mrow>
-              <m:mtext>,</m:mtext>
-
-              <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
-
-              <m:mrow>
-                <m:mrow>
-                  <m:mi>v</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mrow>
-
-                <m:mo>=</m:mo>
-
-                <m:mi>0</m:mi>
-              </m:mrow>
-            </m:mrow>
-          </m:mtd>
-        </m:mlabeledtr>
-      </m:mtable>
-    </m:math>
+    <m:math display="block"><m:mtable> <m:mlabeledtr> <m:mtd> <m:mrow>
+    <m:mover> <m:mrow> <m:mi>x</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
+    <m:mi>t</m:mi> </m:mfenced> </m:mrow> <m:mi>.</m:mi> </m:mover>
+    <m:mo>=</m:mo> <m:mrow> <m:mi>v</m:mi> <m:mo>⁡</m:mo> <m:mfenced>
+    <m:mi>t</m:mi> </m:mfenced> </m:mrow> </m:mrow> </m:mtd> <m:mtd> <m:mrow>
+    <m:mtext>,</m:mtext> <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+    <m:mrow> <m:mrow> <m:mi>x</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
+    </m:mfenced> </m:mrow> <m:mo>=</m:mo> <m:mi>0</m:mi> </m:mrow> </m:mrow>
+    </m:mtd> </m:mlabeledtr> <m:mlabeledtr> <m:mtd> <m:mrow> <m:mover>
+    <m:mrow> <m:mi>v</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi>
+    </m:mfenced> </m:mrow> <m:mi>.</m:mi> </m:mover> <m:mo>=</m:mo> <m:mrow>
+    <m:mi>u</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced>
+    </m:mrow> </m:mrow> </m:mtd> <m:mtd> <m:mrow> <m:mtext>,</m:mtext>
+    <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/> <m:mrow> <m:mrow>
+    <m:mi>v</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced>
+    </m:mrow> <m:mo>=</m:mo> <m:mi>0</m:mi> </m:mrow> </m:mrow> </m:mtd>
+    </m:mlabeledtr> </m:mtable></m:math>
   </informalequation>
 
   <para>and</para>
 
   <informalequation>
-    <m:math display="block">
-      <m:mtable>
-        <m:mlabeledtr>
-          <m:mtd>
-            <m:mrow>
-              <m:mrow>
-                <m:mi>v</m:mi>
-
-                <m:mo>⁡</m:mo>
-
-                <m:mfenced>
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:mfenced>
-              </m:mrow>
-
-              <m:mo>=</m:mo>
-
-              <m:mi>0</m:mi>
-            </m:mrow>
-          </m:mtd>
-
-          <m:mtd>
-            <m:mrow>
-              <m:mrow>
-                <m:mi>x</m:mi>
-
-                <m:mo>⁡</m:mo>
-
-                <m:mfenced>
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:mfenced>
-              </m:mrow>
-
-              <m:mo>=</m:mo>
-
-              <m:mi>1</m:mi>
-            </m:mrow>
-          </m:mtd>
-        </m:mlabeledtr>
-
-        <m:mlabeledtr>
-          <m:mtd>
-            <m:mrow>
-              <m:mn>1</m:mn>
-
-              <m:mo>&lt;</m:mo>
-
-              <m:mrow>
-                <m:mrow>
-                  <m:mi>u</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mrow>
-
-                <m:mo>&lt;</m:mo>
-
-                <m:mi>-1</m:mi>
-              </m:mrow>
-            </m:mrow>
-          </m:mtd>
-
-          <m:mtd>
-            <m:mrow>
-              <m:mrow>
-                <m:mi>v</m:mi>
-
-                <m:mo>⁡</m:mo>
-
-                <m:mfenced>
-                  <m:mi>t</m:mi>
-                </m:mfenced>
-              </m:mrow>
-
-              <m:mo>&lt;</m:mo>
-
-              <m:mi>0.5</m:mi>
-            </m:mrow>
-          </m:mtd>
-        </m:mlabeledtr>
-      </m:mtable>
-    </m:math>
+    <m:math display="block"><m:mtable> <m:mlabeledtr> <m:mtd> <m:mrow>
+    <m:mrow> <m:mi>v</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:msub> <m:mi>t</m:mi>
+    <m:mi>f</m:mi> </m:msub> </m:mfenced> </m:mrow> <m:mo>=</m:mo>
+    <m:mi>0</m:mi> </m:mrow> </m:mtd> <m:mtd> <m:mrow> <m:mrow> <m:mi>x</m:mi>
+    <m:mo>⁡</m:mo> <m:mfenced> <m:msub> <m:mi>t</m:mi> <m:mi>f</m:mi>
+    </m:msub> </m:mfenced> </m:mrow> <m:mo>=</m:mo> <m:mi>1</m:mi> </m:mrow>
+    </m:mtd> </m:mlabeledtr> <m:mlabeledtr> <m:mtd> <m:mrow> <m:mn>1</m:mn>
+    <m:mo>&lt;</m:mo> <m:mrow> <m:mrow> <m:mi>u</m:mi> <m:mo>⁡</m:mo>
+    <m:mfenced> <m:mi>t</m:mi> </m:mfenced> </m:mrow> <m:mo>&lt;</m:mo>
+    <m:mi>-1</m:mi> </m:mrow> </m:mrow> </m:mtd> <m:mtd> <m:mrow> <m:mrow>
+    <m:mi>v</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>t</m:mi> </m:mfenced>
+    </m:mrow> <m:mo>&lt;</m:mo> <m:mi>0.5</m:mi> </m:mrow> </m:mtd>
+    </m:mlabeledtr> </m:mtable></m:math>
   </informalequation>
 
   <para>In this problem, the final time, <emphasis>tf</emphasis>, is free, and
@@ -315,7 +118,7 @@ end DoubleIntegrator;
 
   <section>
     <title xml:id="sec-optimica-spec-class">A new specialized class:
-    <literal>optimization</literal></title>
+    optimization</title>
 
     <para>A new specialized class, called <literal>optimization</literal>, in
     which the proposed Optimica-specific constructs are valid is supported by
@@ -382,7 +185,7 @@ end DIMinTime;
     optimization interval. This is particularly important if a simultaneous or
     multiple-shooting algorithm is used, since these algorithms introduce
     optimization variables corresponding to the values of variables at
-    discrete points over the interval. Notice that such initial guesses may be
+    discrete points over the interval. Note that such initial guesses may be
     needed both for control and state variables. For such variables, however,
     the proposed strategy for providing initial guesses may sometimes be
     inadequate. In some cases, a better solution is to use simulation data to
@@ -429,7 +232,7 @@ end DIMinTime;
     The name of the function is identical to the name of the variable, and it
     has one argument; the time instant at which the variable is evaluated.
     This syntax is also very natural since it corresponds precisely to the
-    mathematical notation of a function. Notice that the proposed syntax
+    mathematical notation of a function. Note that the proposed syntax
     <literal>y(t_i)</literal> makes the interpretation of such an expression
     context dependent. In order for this construct to be valid in standard
     Modelica, <literal>y</literal> must refer to a function declaration. With

@@ -338,9 +338,8 @@ from pymodelica import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module pymodelica.compiler:
 
-compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', 
-            compiler_options={}, compile_to='.', compiler_log_level='warning', 
-            separate_process=False, jvm_args='')
+compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', compiler_options={}, 
+            compile_to='.', compiler_log_level='warning', separate_process=False, jvm_args='')
     Compile a Modelica model to an FMU.
 
     A model class name must be passed, all other arguments have default values.
@@ -366,10 +365,9 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
     Other options for the compiler should also be listed in the compiler_options
     dict.
 
-    The compiler target is 'fmume' by default which means that the shared 
-    file contains the FMI for Model Exchange API. Setting this parameter to 
+    The compiler target is 'fmume' by default which means that the shared
+    file contains the FMI for Model Exchange API. Setting this parameter to
     'fmucs' will generate an FMU containing the FMI for Co-Simulation API.
-
     Parameters::
 
         class_name --
@@ -377,7 +375,7 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
 
         file_name --
             A path (string) or paths (list of strings) to model files and/or
-            libraries. Supports only be .mo files.
+            libraries.
             Default: Empty list.
 
         compiler --
@@ -402,8 +400,10 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: Current directory.
 
         compiler_log_level --
-            Set the log level for the compiler. Valid options are 'warning'/'w',
-            'error'/'e' or 'info'/'i'.
+            Set the logging for the compiler. Takes a comma separated list with
+            log outputs. Log outputs start with a flag :'warning'/'w',
+            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
+            by appended flag with a colon and file name.
             Default: 'warning'
 
         separate_process --
@@ -1222,7 +1222,7 @@ rlc_circuit.set(vars, values)
       <para><programlisting># Set compiler log level to 'info'
 compile_fmu('myModel', 'myModels.mo', compiler_log_level='info')
 </programlisting>The log is printed to the standard output, normally the
-      terminal window from which the compiler is invoked. </para>
+      terminal window from which the compiler is invoked.</para>
 
       <para>The log can also be written to file by appending the log level
       flag with a colon and file name. This is shown in the following
