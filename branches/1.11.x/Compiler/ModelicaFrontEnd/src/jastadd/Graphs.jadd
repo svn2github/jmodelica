@@ -1140,28 +1140,52 @@ public class BiPGraph {
 									}
 									return null;
 								}
-								// Create a new differentiated equation
-								FAbstractEquation deee = eee.diff("time");
-								result.addEquation(deee);
-								ASTNode.log.info("About to add equation: " + deee);
-								// Add the differentiated equation		
-								// Loop over all equations in the group 
-								for (Eq groupMemberEquation : ee.getGroupMembers()) {				
-									Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupMemberEquation.groupNumber());
-									
-									// Add edges
-									for (FVariable fv : deee.variables()) {
-										Var vvv = variableMap.get(fv.name());
-										ASTNode.log.info("*** " + fv.name());
-										if (vvv!=null) {
-											addEdge(eqn,vvv);
-										}
-									}
-									// Set a reference from the visited equation to
-									// its differentiated counterpart
-									groupMemberEquation.setMeDifferentiated(eqn);
-									eqn.setMeIntegrated(groupMemberEquation);
+								FAbstractEquation deee = null;
+								// Look through member equations and check if the differentiated equation already exisits
+								for (Eq groupMember : ee.getGroupMembers())
+									if (groupMember.getMeDifferentiated() != null)
+										deee = groupMember.getMeDifferentiated().getEquation();
+								if (deee == null) {
+									// It does not exsit, create it.
+									deee = eee.diff("time");
+									result.addEquation(deee);
+								} else {
+									// It already exisits we need to flush cached values since we might have added new variables
+									deee.flushAllRecursive();
 								}
+								ASTNode.log.info("About to add equation: " + deee);
+								// Sets that indicates the variables in the lhs and rhs.
+								Set<FVariable> rhsVars = Collections.emptySet();
+								Map<FVariable, Integer> lhsVars = Collections.emptyMap();
+								if (deee.numScalarEquations() > 1) {
+									rhsVars = deee.referencedFVariablesInRHS();
+									lhsVars = new HashMap<FVariable, Integer>();
+									int i = 0;
+									for (FVariable fv : eee.referencedFVariablesInLHS()) {
+										if (fv.getMeDifferentiated() != null)
+											lhsVars.put(fv.getMeDifferentiated(), i);
+										i++;
+									}
+								}
+								// Add the differentiated equation
+								int groupNumber = ee.groupNumber();
+								Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupNumber);
+								
+								// Add edges
+								for (FVariable fv : deee.variables()) {
+									Var vvv = variableMap.get(fv.name());
+									Integer pos = lhsVars.get(fv);
+									if (vvv!=null && (pos == null || pos == groupNumber || rhsVars.contains(fv))) {
+										ASTNode.log.info("*** " + fv.name());
+										addEdge(eqn,vvv);
+									}
+								}
+								// Set a reference from the visited equation to
+								// its differentiated counterpart
+								
+								ee.setMeDifferentiated(eqn);
+								eqn.setMeIntegrated(ee);
+								// TODO: We might need to add this equation to its existing groupmembers?
 								ASTNode.log.info("Equation added");
 							}
 							for (Var vv : visitedVariables) {

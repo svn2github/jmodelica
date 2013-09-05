@@ -847,10 +847,10 @@ equation
 			output Real c;
 			output Real d;
 		algorithm
-			a := cos(x1);
-			b := tan(x2);
-			c := sin(x3);
-			d := x4^2;
+			a := cos(x1)+0.1;
+			b := tan(x2)+0.1;
+			c := sin(x3)+0.1;
+			d := x4^2+0.1;
 		end F;
 		Real x1(start=.1);
 		Real x2(start=.2);

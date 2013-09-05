@@ -4676,6 +4676,56 @@ Equations:
 ")})));
 end BlockTest9;
 
+model BlockTest10
+	function F
+		input Real x[2];
+		output Real y[2];
+	algorithm
+		if x[1] < 0 then
+			x := -x;
+		end if;
+		y := x;
+	end F;
+	Real z[2], w[2];
+equation
+	w = {time, 2};
+	z + F(w) = {0, 0};
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest10",
+			description="Test alias elimination of negative function call lefts",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  w[1]
+Solution:
+  time
+-------------------------------
+Solved block of 2 variables:
+Unknown variables:
+  temp_2
+  temp_3
+Equations:
+  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[1]
+Solution:
+  temp_2 / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[2]
+Solution:
+  temp_3 / (- 1.0)
+-------------------------------
+")})));
+end BlockTest10;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];
@@ -5164,10 +5214,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Integer _residual_equation_scaling = 1 /* 1 */;
  parameter Boolean _runtime_log_to_file = false /* false */;
  parameter Boolean _use_Brent_in_1d = false /* false */;
- parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_equilibration = false /* false */;
- parameter Boolean _use_jacobian_scaling = false /* false */;
- parameter Boolean _use_manual_equation_scaling = false /* false */;
 end TransformCanonicalTests.TestRuntimeOptions1;
 ")})));
 end TestRuntimeOptions1;
@@ -5212,38 +5259,32 @@ model InFunctionCall
     input Real x;
     output Real y;
   algorithm
-   y := x;
+   y := mod(x,2);
    return;
   end f;
 	
+	Real x;
 equation
-	f(integer(0.9 + time/10) * 3.14);
+	x = f(integer(0.9 + time/10) * 3.14);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="EventGeneratingExps_InFunctionCall",
 			description="Tests event generating expressions in function calls.",
-			inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
- discrete Integer temp_1;
+ Real x;
+ discrete Real temp_1;
+ discrete Integer temp_3;
 initial equation 
- temp_1 = integer(0.9 + time / 10);
+ temp_3 = integer(0.9 + time / 10);
+ pre(temp_1) = 0.0;
 equation
- TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f(temp_1 * 3.14);
- when {0.9 + time / 10 < pre(temp_1), 0.9 + time / 10 >= pre(temp_1) + 1} then
-  temp_1 = integer(0.9 + time / 10);
+ x = temp_1 - noEvent(floor(temp_1 / 2)) * 2;
+ temp_1 = temp_3 * 3.14;
+ when {0.9 + time / 10 < pre(temp_3), 0.9 + time / 10 >= pre(temp_3) + 1} then
+  temp_3 = integer(0.9 + time / 10);
  end when;
-
-public
- function TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- end TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f;
-
 end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
 ")})));
 end InFunctionCall;

@@ -1157,14 +1157,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real der_x1_1;
  Real der_x1_2;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 2;
  der_x1_2 + der(x2[2]) = 3;
- ({- x1[1], - x1[2]}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- ({- der_x1_1, - der_x1_2}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ ({temp_6, temp_7}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1[1] = temp_4;
+ - x1[2] = temp_5;
+ - der_x1_1 = temp_6;
+ - der_x1_2 = temp_7;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f_der
@@ -1244,14 +1252,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real der_x1_a_2;
  Real der_x2_a_2;
+ Real der_temp_2;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  x1.der(a[1]) + x2.der(a[1]) = 2;
  der_x1_a_2 + der_x2_a_2 = 3;
- (IndexReduction.IndexReduction28_Record.R({- x1.a[1], - x1.a[2]})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- (IndexReduction.IndexReduction28_Record.R({- x1.der(a[1]), - der_x1_a_2})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
+ (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ (IndexReduction.IndexReduction28_Record.R({der_temp_2, temp_6})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1.der(a[1]) = der_temp_2;
+ - x1.a[1] = temp_4;
+ - x1.a[2] = temp_5;
+ - der_x1_a_2 = temp_6;
 
 public
  function IndexReduction.IndexReduction28_Record.f_der

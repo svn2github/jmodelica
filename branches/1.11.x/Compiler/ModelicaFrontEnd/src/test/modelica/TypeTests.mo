@@ -1095,16 +1095,16 @@ initial equation
  temp_4 = div(aReal, aReal);
 equation
  x = temp_4 + temp_3 + temp_2 + temp_1;
- when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+ when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
   temp_1 = 1;
  end when;
- when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+ when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
   temp_2 = 1.0;
  end when;
- when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+ when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
   temp_3 = 1.0;
  end when;
- when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+ when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
   temp_4 = 1.0;
  end when;
 end TypeTests.DivTest1;
@@ -1213,16 +1213,16 @@ initial equation
  temp_4 = div(aReal, aReal);
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+ when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
   temp_1 = 1;
  end when;
- when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+ when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
   temp_2 = 1.0;
  end when;
- when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+ when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
   temp_3 = 1.0;
  end when;
- when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+ when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
   temp_4 = 1.0;
  end when;
 end TypeTests.RemTest1;
