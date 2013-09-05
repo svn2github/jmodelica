@@ -322,13 +322,21 @@ equation
             description="Test error messages for unbalanced systems.",
 			inline_functions="none",
             errorMessage="
-1 error(s), 0 compliance error(s) and 0 warning(s) found:
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
   Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction4_Err.F(x2)' in equation:
    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
-")})));
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
+   Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
+   ")})));
 end IndexReduction4_Err;
 
 model IndexReduction5_Err
@@ -351,12 +359,21 @@ equation
             name="IndexReduction5_Err",
             description="Test error messages for unbalanced systems.",
             errorMessage="
-1 error(s), 0 compliance error(s) and 0 warning(s) found:
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file 'IndexReduction.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
   Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction5_Err.F(x2)' in equation:
    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
+
+Error: in file 'IndexReduction.IndexReduction5_Err.mof':
+   Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
+    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
 ")})));
 end IndexReduction5_Err;
 
@@ -883,7 +900,7 @@ P*V=m*R*T;
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 12 equations and 11 free variables.
+  Index reduction failed
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:

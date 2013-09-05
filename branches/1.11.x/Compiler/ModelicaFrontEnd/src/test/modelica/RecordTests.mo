@@ -202,6 +202,76 @@ end RecordTests.RecordFlat5;
 end RecordFlat5;
 
 
+model RecordFlat6
+    record A
+        Real a;
+    end A;
+    
+    record B
+        extends A;
+        Real a;
+        Real b;
+    end B;
+    
+    B b(a = 1, b = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat6",
+            description="Merging of equivalent members when flattening records",
+            flatModel="
+fclass RecordTests.RecordFlat6
+ RecordTests.RecordFlat6.B b(a = 1,b = 2);
+
+public
+ record RecordTests.RecordFlat6.B
+  Real a;
+  Real b;
+ end RecordTests.RecordFlat6.B;
+
+end RecordTests.RecordFlat6;
+")})));
+end RecordFlat6;
+
+
+model RecordFlat7
+    record A
+        Real b = time;
+    end A;
+
+    model B
+        A a;
+    end B;
+
+    model C
+        extends B;
+    end C;
+
+    model D
+        extends B;
+        extends C;
+    end D;
+
+    D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordFlat7",
+			description="Merging of equivalent record variables when flattening",
+			flatModel="
+fclass RecordTests.RecordFlat7
+ RecordTests.RecordFlat7.A d.a;
+
+public
+ record RecordTests.RecordFlat7.A
+  Real b = time;
+ end RecordTests.RecordFlat7.A;
+
+end RecordTests.RecordFlat7;
+")})));
+end RecordFlat7;
+
+
 
 model RecordType1
  record A

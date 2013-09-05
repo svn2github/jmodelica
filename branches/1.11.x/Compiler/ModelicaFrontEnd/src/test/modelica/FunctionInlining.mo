@@ -3050,5 +3050,34 @@ end FunctionInlining.BindingExpInRecord;
 ")})));
 end BindingExpInRecord;
 
+
+model AssertInline1
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		assert(x < 5, "Bad x: " + String(x));
+		y := 2 / (x - 5);
+		annotation(Inline=true);
+	end f;
+	
+	Real z = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AssertInline1",
+			description="Inline function containing assert",
+			flatModel="
+fclass FunctionInlining.AssertInline1
+ Real z;
+ Real temp_1;
+equation
+ z = 2 / (temp_1 - 5);
+ temp_1 = time;
+ assert(noEvent(temp_1 < 5), \"Bad x: \" + String());
+end FunctionInlining.AssertInline1;
+")})));
+end AssertInline1;
+
 	
 end FunctionInlining;
