@@ -71,6 +71,7 @@ aspect InteractiveFMU{
 		FVariable iterVar = (FVariable) fv.fullCopy();
 		iterVar.setFQName(new FQNameString(iterName));
 		iterVar.setFTypePrefixInputOutput(new FInput());
+		iterVar.setFStringComment(new FStringComment(fv.name()));
 		fclass.addFVariable(iterVar);
 		
 		FVariable resVar = (FVariable) fv.fullCopy();
@@ -104,6 +105,7 @@ aspect InteractiveFMU{
 			FVariable iterVar = (FVariable) fv.fullCopy();
 			iterVar.setFQName(new FQNameString(iterName));
 			iterVar.setFTypePrefixInputOutput(new FInput());
+			iterVar.setFStringComment(new FStringComment(fv.name()));
 			fclass.addFVariable(iterVar);
 			
 			FVariable resVar = (FVariable) fv.fullCopy();
