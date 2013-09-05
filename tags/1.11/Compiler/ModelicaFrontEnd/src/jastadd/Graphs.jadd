@@ -1,0 +1,2215 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package org.jmodelica.util;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import java.util.Random;
+import java.util.Set;
+import java.util.Stack;
+import java.util.EnumSet;
+import org.jmodelica.util.FilteredIterator;
+
+aspect Graphs {
+
+public class EquationBlockFactory {
+
+	/**
+	 * This method groups the Eq objects in a BLT block so that Eqs that
+	 * originates from the same FAbstractEquation are grouped together.
+	 */
+	public static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
+	
+		Eq previous = null;
+		Collection<Eq> group = null;
+		Collection<Collection<Eq>> l = new ArrayList<Collection<Eq>>();
+
+		for (Eq current : component) {
+			if (previous == null || (previous.getEquation() != current.getEquation())) {
+				group = new ArrayList<Eq>();
+				l.add(group);
+			}
+			group.add(current);	
+			previous = current;
+		}	
+		return l;
+	}
+
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation eqn, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve) {
+		return createSimpleEquationBlock(eqn, fvs, assignedIndices, solve, false);
+	}
+
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve, boolean duringTearing) {
+		// Check if equation is solvable for all active variables (only if we want a solved block)
+		Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
+		for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
+			solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
+		
+		return e.createSimpleEquationBlock(fvs, assignedIndices, solvability);
+	}
+	
+	/**
+	 * This method takes an equation and a variable and constructs an equation block.
+	 * If <code>solve</code> is true the equation will be solved for the variable. 
+	 */
+	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, boolean solve) {
+		return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), solve);
+	}
+
+	/**
+	 * This method takes a list of Eq objects and create equation blocks
+	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
+		return createSimpleEquationBlock(component, solve, false);
+	}
+	
+	/**
+	 * This method takes an equation <code>eqn</code> and variable
+	 * <code>var</code> and produces an unsolved block of types
+	 * ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
+		return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
+	}
+	
+	/**
+	 * This method takes a list of Eq objects and create equation blocks
+	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+	 */
+	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
+		Collection<FVariable> fvs = new ArrayList<FVariable>();
+		Collection<Integer> assignedIndices = new ArrayList<Integer>();
+		
+		FAbstractEquation e = eqns.iterator().next().getEquation();
+		for (Eq eqn : eqns) {
+			if (eqn.getEquation() != e) 
+				return null;
+			fvs.add(eqn.getMatching().getVariable());
+			assignedIndices.add(eqn.groupNumber());
+		} 
+
+		return createSimpleEquationBlock(e, fvs, assignedIndices, solve, duringTearing);
+		
+	}
+
+	/**
+	 * This method takes as input a set of Eq objects corresponeing to
+	 * a BLT block. First the, the Eq objects are grouped using
+	 * groupComponent to simplify the analysis. Then, if there is
+	 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
+	 * a real or mixed equation block is created.
+	 */
+	public static AbstractEquationBlock createEquationBlock(Collection<Eq> component) {
+		
+		// System of equations
+		Collection<Collection<Eq>> l = EquationBlockFactory.groupComponent(component);
+
+		if (l.size() == 1) {
+			SimpleEquationBlock seb = createSimpleEquationBlock(l.iterator().next(), true);
+			if (seb != null && seb.isSolvable()) {
+				return seb;
+			}	
+		}
+
+		Collection<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();
+		for (Collection<Eq> s : l) {
+			ls.add(createSimpleEquationBlock(s, false));
+		}	
+
+		// Check if an equation block is mixed, i.e., contains both continous
+		// and discrete variables, and if it is linear in the unknowns
+		Set<FVariable> activeVariables = new HashSet<FVariable>();
+		for (SimpleEquationBlock sb : ls) {
+			activeVariables.addAll(sb.activeVariables());
+		}
+		boolean isMixed = false;
+		boolean isLinear = true;
+		for (SimpleEquationBlock seb : ls) {
+			for (FAbstractEquation e : seb.equations()) {
+				if (e.isReal()) {
+					if (!e.checkLinearity(activeVariables))
+						isLinear = false;
+				} else {
+					isMixed = true;
+				}
+			}
+		}
+		
+		EquationBlock b = null;
+		if (isMixed && isLinear) {
+			b = new MixedLinearEquationBlock(ls);
+		} else if (isMixed) {
+			b = new MixedEquationBlock(ls);
+		} else if (isLinear) {
+			b = new LinearEquationBlock(ls);
+		} else {
+			b = new EquationBlock(ls);
+		}
+		return b;
+	}	
+}
+
+/**
+ * Create a simple equation block from a single equation. 
+ */
+public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+	return null;
+}
+
+public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+	FVariable fv = fvs.iterator().next();
+	if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
+		return new SolvedScalarEquationBlock(this, fv);
+	} else if(solvability.isSolvable()) { // Numerically solvable scalar equation
+		return new NumericallySolvedScalarEquationBlock(this, fv);
+	} else { // Unsolved scalar equation
+		return new UnsolvedScalarEquationBlock(this, fv);
+	}
+}
+
+// If equation TODO
+
+public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+	return new WhenEquationBlock(this);
+}
+
+public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+	if (solvability.isAnalyticallySolvable()) {
+		return new SolvedAlgorithmBlock(this, fvs);
+	} else {
+		return new UnsolvedAlgorithmBlock(this, fvs);
+	}
+}
+
+public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+	if (numScalarEquations() == 0)
+		return new MetaEquationBlock(this);
+	for (Integer assignedIndex : assignedIndices)
+		if (assignedIndex == null)
+			throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
+	if (solvability.isAnalyticallySolvable()) {
+		return new SolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+	} else {
+		return new UnsolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+	}
+}
+
+
+public class MunkresProblem {
+
+	private long originalCost[][];
+	private int n;
+	private int m;
+	private int k;
+	private long cost[][];
+	private boolean rowCover[];
+	private boolean columnCover[];
+	private boolean starred[][];
+	private boolean primed[][];
+
+	private final int COVER_MATCHED_COLUMNS = 0;
+	private final int PRIME_ZEROS = 1;
+	private final int AUGMENT_PATH = 2;
+	private final int ADD_SUB_MIN_VALUE = 3;	
+	
+	int rp;
+	int cp;
+	
+	java.util.List<Integer> pathRow;
+	java.util.List<Integer> pathColumn;
+	
+	private int nextStep = COVER_MATCHED_COLUMNS;
+
+	/** Implementation of the Munkres (Hungarian) algorithm: based on the description at:
+	 * http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
+	 */
+	public MunkresProblem(long[][] cost) {
+		n = cost.length;
+		m = cost[0].length;
+		k = (n < m) ? n : m;
+		originalCost = new long[n][m];	
+		this.cost = new long[n][m];		
+		rowCover = new boolean[n];
+		columnCover = new boolean[m];
+		starred = new boolean[n][m];
+		primed = new boolean[n][m];	
+		
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				this.cost[i][j] = cost[i][j];
+				originalCost[i][j] = cost[i][j];
+				starred[i][j] = false;
+				primed[i][j] = false;
+			}
+		}
+		for (int i=0;i<n;i++) {	
+			rowCover[i] = false;
+		}
+		for (int j=0;j<m;j++) {	
+			columnCover[j] = false;
+		}		
+		//System.out.println(this);
+	}
+	
+	public int[][] solve() {
+		minimizeRows();
+		//System.out.println(this);
+		
+		match();
+		//System.out.println(this);
+		
+		nextStep = COVER_MATCHED_COLUMNS;
+		
+		boolean done = false;
+		while (!done) {
+			
+			switch (nextStep) {
+				case COVER_MATCHED_COLUMNS:
+					//System.out.println("Step: COVER_MATCHED_COLUMNS");
+					int nbrMatchedColumns = coverMatchedColumns();
+					//System.out.println(this);
+					if (nbrMatchedColumns == k) {
+						done = true;
+					}
+					break;
+				case PRIME_ZEROS:
+					//System.out.println("Step: PRIME_ZEROS");
+					primeZeros();
+					//System.out.println(this);
+					break;
+				case AUGMENT_PATH:
+					//System.out.println("Step: AUGMENT_PATH");
+				    augmentPath(rp,cp);
+				    //System.out.println(this);
+				    break;
+				case ADD_SUB_MIN_VALUE:
+					//System.out.println("Step: ADD_SUB_MIN_VALUE");
+					addSubMinValue();
+					//System.out.println(this);
+					break;
+				default:
+					done = true;
+					break;
+			}
+		}
+		
+		int[][] result = new int[n][2];
+		int ind = 0;
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				if (starred[i][j]) {
+					result[ind][0] = i;
+					result[ind][1] = j;
+					ind++;
+				}		
+			}
+		}
+		return result;
+	}
+	
+	public void minimizeRows() {
+		long row_min = 0;
+		for (int i=0;i<n;i++) {
+			row_min = -1;
+			for (int j=0;j<m;j++) {
+				if (row_min<0 || cost[i][j]<row_min) {
+					row_min = cost[i][j];
+				}
+			}
+			for (int j=0;j<m;j++) {
+				cost[i][j] -= row_min;
+			}
+		}	
+	}
+	
+	public void match() {
+		// Greedy matching: Hopcorft Karp would be better
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				if (cost[i][j]==0 && !rowCover[i] && !columnCover[j]) {
+					starred[i][j] = true;
+					rowCover[i] = true;
+					columnCover[j] = true;
+				}
+			}
+		}		
+		resetCovers();
+	}
+	
+	public int coverMatchedColumns() {
+		int nStarred = 0;
+		for (int j=0;j<m;j++) {
+			if (columnContainsStarred(j)) {
+				columnCover[j] = true;
+				nStarred++;
+			}
+		}
+		nextStep = PRIME_ZEROS;
+		return nStarred;	
+	}
+	
+	public void primeZeros() {
+		boolean done = false;
+//		int iter = 0;
+		while (!done) {
+//			iter++;
+//			if (iter>10) 
+//				break;
+			findUncoveredZero();
+			if (rp==-1) {
+				break;
+			}
+			primed[rp][cp] = true;
+			if (!rowContainsStarred(rp)) {
+				nextStep = AUGMENT_PATH;
+				return;	
+			} else {
+				int si = starIndexInRow(rp);
+				rowCover[rp] = true;
+				columnCover[si] = false;
+			}
+		}
+		nextStep = ADD_SUB_MIN_VALUE;
+		rp = -1;
+		cp = -1;		
+		return;
+	}
+	
+	public void augmentPath(int primedRow, int primedCol) {
+		pathRow = new ArrayList<Integer>();
+		pathColumn = new ArrayList<Integer>();
+		pathRow.add(new Integer(primedRow));
+		pathColumn.add(new Integer(primedCol));
+		boolean done = false;
+		while (!done) {
+			int rs = starIndexInColumn(pathColumn.get(pathColumn.size()-1).intValue());
+			if (rs>=0) {
+				pathRow.add(new Integer(rs));
+				pathColumn.add(new Integer(pathColumn.get(pathColumn.size()-1).intValue()));
+			} else {
+				break;
+			}
+			int cp = primedIndexInRow(pathRow.get(pathRow.size()-1).intValue());
+			pathRow.add(new Integer(pathRow.get(pathRow.size()-1).intValue()));
+			pathColumn.add(new Integer(cp));
+		}
+		// Flip stars
+		for (int k=0;k<pathColumn.size();k++) {
+			if (starred[pathRow.get(k).intValue()][pathColumn.get(k).intValue()]) {
+				starred[pathRow.get(k).intValue()][pathColumn.get(k).intValue()] = false;
+			} else {
+				starred[pathRow.get(k).intValue()][pathColumn.get(k).intValue()] = true;
+			}
+		}
+		resetCovers();
+		resetPrimed();
+		nextStep = COVER_MATCHED_COLUMNS;
+	}
+	
+	public void addSubMinValue() {
+		long minValue = findMinUncoveredValue();
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				if (rowCover[i]) {
+					cost[i][j] = cost[i][j] + minValue;	
+				}
+				if (!columnCover[j]) {
+					cost[i][j] = cost[i][j] - minValue;	
+				}
+				
+			}
+		}
+		nextStep = PRIME_ZEROS;
+	}
+	
+	public void findUncoveredZero() {
+		for (int j=0;j<m;j++) {
+			if (!columnCover[j]) {
+				for (int i=0;i<n;i++) {
+					if (!rowCover[i]) {
+						if (cost[i][j]==0) {
+							rp = i;
+							cp = j;
+							return;
+						}	
+					}
+				}
+			}		
+		}	
+		rp = -1;
+		cp  =-1;
+		return;
+	}
+	
+	public long findMinUncoveredValue() {
+		long minValue = -1;
+		for (int j=0;j<m;j++) {
+			if (!columnCover[j]) {
+				for (int i=0;i<n;i++) {
+					if (!rowCover[i] && (minValue<0 || cost[i][j]<minValue)) {
+						minValue = cost[i][j];
+					}
+				}
+			}
+		}
+		return minValue;		
+	}
+	
+	public boolean rowContainsStarred(int row) {
+		for (int j=0;j<m;j++) {
+			if (starred[row][j]) {
+				return true;
+			}
+		}	
+		return false;
+	}
+
+	public boolean rowContainsPrimed(int row) {
+		for (int j=0;j<m;j++) {
+			if (primed[row][j]) {
+				return true;
+			}
+		}	
+		return false;
+	}
+
+	public boolean columnContainsStarred(int col) {
+		for (int i=0;i<n;i++) {
+			if (starred[i][col]) {
+				return true;
+			}
+		}	
+		return false;
+	}
+
+	public boolean columnContainsPrimed(int col) {
+		for (int i=0;i<n;i++) {
+			if (primed[i][col]) {
+				return true;
+			}
+		}	
+		return false;
+	}
+	
+	public int starIndexInRow(int row) {
+		for (int j=0;j<m;j++) {
+			if (starred[row][j]) {
+				return j;
+			}
+		}
+		return -1;				
+	}
+
+	public int starIndexInColumn(int col) {
+		for (int i=0;i<n;i++) {
+			if (starred[i][col]) {
+				return i;
+			}
+		}
+		return -1;	
+	}
+
+	public int primedIndexInRow(int row) {
+		for (int j=0;j<m;j++) {
+			if (primed[row][j]) {
+				return j;
+			}
+		}
+		return -1;				
+	}
+	
+	public void resetCovers() {
+		for (int i=0;i<n;i++) {
+			rowCover[i] = false;
+		}	
+		for (int j=0;j<m;j++) {
+			columnCover[j] = false;
+		}	
+	}
+
+	public void resetStarred() {
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				starred[i][j] = false;
+			}
+		}	
+	}
+
+	public void resetPrimed() {
+		for (int i=0;i<n;i++) {
+			for (int j=0;j<m;j++) {
+				primed[i][j] = false;
+			}
+		}	
+	}
+	
+	public String toString() {
+		StringBuffer str = new StringBuffer();
+		for (int j=0;j<m;j++) {
+			if (columnCover[j]) {
+				str.append(String.format("%8s","x"));
+			} else {
+				str.append(String.format("%8s"," "));
+			}	
+		}
+		str.append("\n");
+		for (int i=0;i<n;i++) {
+			if (rowCover[i]) {
+				str.append("x");
+			} else {
+				str.append(" ");
+			}	
+			for (int j=0;j<m;j++) {
+				str.append(String.format("%6s",cost[i][j]));
+				if (starred[i][j]) {
+					str.append("*");
+				} else {
+					str.append(" ");
+				}
+				if (primed[i][j]) {
+					str.append("'");
+				} else {
+					str.append(" ");
+				}	
+			}	
+			str.append("\n");
+		}
+		return str.toString();
+	}
+	
+}
+
+public class BiPGraph {
+
+	public static final int MAX_N_EQ_DIFFS = 5;
+
+	protected Map<String,Var> variableMap = new LinkedHashMap<String,Var>();
+	protected Map<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
+	protected Map<FAbstractEquation,java.util.List<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,java.util.List<Eq>>();
+	
+	public BiPGraph() {
+	}
+	
+	public BiPGraph(Collection<Eq> eqs, Collection<Var> vars) {
+		for (Eq oldE : eqs)
+			addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber());
+		for (Var oldV : vars)
+			addVariable(oldV.getName(), oldV.getVariable());
+		for (Eq oldE : eqs) {
+			Eq e = getEquation(oldE.getName());
+			for (Var oldV : oldE.getVariables()) {
+				Var v = getVariable(oldV.getName());
+				if (v != null)
+					addInsidence(e, v);
+			}
+		}
+	}
+	
+	public BiPGraph(Collection<Eq> block) {
+		this(block, collectMatchingVariables(block));
+		for (Eq e : block) {
+			match(getEquation(e.getName()), getVariable(e.getMatching().getName()));
+		}
+	}
+	
+	private static Collection<Var> collectMatchingVariables(Collection<Eq> eqns) {
+		Collection<Var> vars = new ArrayList<Var>();
+		for (Eq e : eqns)
+			vars.add(e.getMatching());
+		return vars;
+	}
+	
+	public boolean isComplete() {
+		return getUnmatchedVariables().size() == 0 && getUnmatchedEquations().size() == 0;
+	}
+	
+	public Collection<Eq> getEquations() {
+		return equationMap.values();
+	}
+
+	public Collection<Var> getVariables() {
+		return variableMap.values();
+	}
+
+	public Eq getEquation(String name) {
+		return equationMap.get(name);
+	}
+	
+
+	public java.util.List<Eq> getEquations(FAbstractEquation eqn) {
+		java.util.List<Eq> list = equationIndexMap.get(eqn);
+		return (list == null) ? Collections.<Eq>emptyList() : list;
+	}
+
+	public Eq addEquation(String name, FAbstractEquation eqn, int groupNumber) {
+		Eq e = equationMap.get(name);
+		if (e==null) {
+			e = new Eq(name, eqn, groupNumber);
+			equationMap.put(name,e);
+			insertIntoEquationIndexMap(eqn,e);
+		}
+		return e;
+	}
+	
+	public Var addVariable(String name, FVariable var) {
+		Var v = variableMap.get(name);
+		if (v==null) {
+			v = new Var(name, var);
+			variableMap.put(name,v);
+		}	
+		return v;
+	}
+	
+	public void removeEquation(Eq e) {
+		for (Var v : e.getVariables()) {
+			if (v.getMatching() == e) {
+				v.setMatching(null);
+			}
+		}
+		e.setMatching(null);
+		e.getVariables().clear();
+		equationMap.remove(e.getName());
+		removeFromEquationIndexMap(e.getEquation(),e);
+	}
+	
+	public void removeVariable(Var v) {
+		for (Eq e : getEquations()) {
+			if (e.getMatching() == v) {
+				e.setMatching(null);
+			}
+			e.getVariables().remove(v);
+			e.getSolvableVariables().remove(v);
+		}
+		v.setMatching(null);
+		variableMap.remove(v.getName());
+	}
+	
+	public Var getVariable(String name) {
+		return variableMap.get(name);
+	}
+	
+	public boolean addEdge(String equationName, String variableName) {
+		Eq e = getEquation(equationName);
+		Var v = getVariable(variableName);
+		if (v==null || e==null) {
+			return false;
+		}
+		if (e.getVariables().contains(v)) {
+			return false;
+		}
+		e.addVariable(v);
+		return true;
+	}
+
+	public boolean addEdge(Eq e, Var v) {
+		return addEdge(e.getName(),v.getName());
+	}
+	
+	
+	public enum VarType {
+		DERIVATIVE_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.derivativeVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
+		},
+		DIFFERENTIATED_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.differentiatedRealVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
+		}, 
+		ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicVariables(); }
+		}, 
+		CONTINUOUS_ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicContinousRealVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
+		}, 
+		DISCRETE_ALGEBRAIC_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.discreteVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
+		}, 
+		DISCRETE_PRE_VARIABLES { 
+			public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
+			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
+		};
+		
+		public abstract Collection<? extends FVariable> variables(FClass c);
+		public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
+	}
+		
+	public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {
+		for (VarType t : variableTypes)
+			for (FVariable fv : t.variables(fclass))
+				addVariable(fv.name(), fv);
+	}
+		
+	public void addEquations(java.util.List<FAbstractEquation> eqns, EnumSet<VarType> variableTypes, String eqNamePrefix, int startIndex) {
+		int k = startIndex;
+		Eq eqn = null;
+		Var v = null;
+		Map<FVariable, Integer> emptyMap = Collections.emptyMap();
+		Set<FVariable> emptySet = Collections.emptySet();
+		for (FAbstractEquation e : eqns) {
+			int n_eq = e.numScalarEquations();
+			LinkedHashSet<Eq> groupMembers = new LinkedHashSet<Eq>();
+			// For equations that counts as several scalar equations (function calls, algorithms), 
+			// the left hand side variables depends on all the right-hand side ones, 
+			// but not on the other left-hand side ones
+			Set<FVariable> rhsVars = emptySet;
+			Map<FVariable, Integer> lhsVars = emptyMap;
+			if (n_eq > 1) {
+				rhsVars = e.referencedFVariablesInRHS();
+				lhsVars = new HashMap<FVariable, Integer>();
+				int i = 0;
+				for (FVariable fv : e.referencedFVariablesInLHS()) 
+					lhsVars.put(fv,i++);
+			}
+			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
+				                                  // need to reverse here to preserve the initial order.
+				eqn = addEquation(eqNamePrefix+k, e, i);
+				groupMembers.add(eqn);
+				k++;
+
+				for (VarType t : variableTypes) {
+					for (FVariable y : t.variables(e)) {
+						Integer pos = lhsVars.get(y);
+						if (pos == null || pos == i || rhsVars.contains(y)) {
+							v = getVariable(y.name());
+							addEdge(eqn, v);
+						}
+					}
+				}
+			}
+			for (Eq ee : groupMembers) {
+				for (Eq eee : groupMembers) {
+					ee.addGroupMember(eee);
+				}
+			}
+		}
+	}
+	
+	public boolean match(Eq e, Var v) {
+		if (!canMatch(e, v))
+			return false;
+		if (e.getMatching() != null)
+			e.getMatching().setMatching(null);
+		if (v.getMatching() != null)
+			v.getMatching().setMatching(null);
+		v.setMatching(e);
+		e.setMatching(v);
+		return true;
+	}
+	
+	public boolean canMatch(Eq e, Var v) {
+		if (e.getEquation() instanceof FFunctionCallEquation ||
+				e.getEquation() instanceof FAlgorithm) {
+			return true;
+		}
+		// Discrete variables can only be matched to discrete equations.
+		return !(v.getVariable().isDiscrete() && e.getEquation().isContinuous());
+	}
+	
+	public void addInsidence(Eq e, Var v) {
+		e.addVariable(v);
+		v.occurrence();
+	}
+	
+	public Collection<Eq> greedyMatching() {
+		Collection<Eq> unmatched = new ArrayList<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getMatching() != null)
+				continue;
+			for (Var v : e.getVariables()) {
+				if (v.getMatching()==null) {
+					match(e, v);
+					break;
+				}
+			}
+			if (e.getMatching() == null)
+				unmatched.add(e);
+		}
+		return unmatched;
+	}
+	
+	public java.util.List<Map<Var,Set<Eq>>> bfs(Collection<Eq> startingNodes) {
+		java.util.List<Map<Var,Set<Eq>>> Lv = new ArrayList<Map<Var,Set<Eq>>>();
+		Set<Eq> Le_current = new LinkedHashSet<Eq>();
+		Set<Eq> Le_next = new LinkedHashSet<Eq>();
+		
+		Le_current.addAll(startingNodes);
+		// Reset nodes
+		lightReset();
+		
+		int layer = 0;
+		boolean freeVarNodeFound = false;
+		//System.out.println("************** BFS ************* starting nodes: " + startingNodes);
+		
+		while (Le_current.size()>0 && !freeVarNodeFound) {
+			//System.out.println("*** layer: " + layer);
+			//System.out.println(Lv);
+			//System.out.println(Le_current);
+			Lv.add(new LinkedHashMap<Var,Set<Eq>>());
+			
+			for (Eq s : Le_current) {
+				//System.out.println(" eq: " + s.getName());
+				for (Var t : s.getVariables()) {
+					//System.out.println("  " + t.getName() + " layer: " + t.getLayer());
+					if (t.getLayer() >= layer) {
+						//System.out.println("    adding " + t.getName());
+						t.setLayer(layer);
+						Set<Eq> h = Lv.get(layer).get(t);
+						if (h==null) {
+							h = new LinkedHashSet<Eq>();
+							Lv.get(layer).put(t,h);
+						}
+						h.add(s);
+						Eq u = t.getMatching();
+						if (u!=null) {
+							//System.out.println("     " + t.getName() + "'s matching is " + u.getName());
+							u.setLayer(layer);
+							Le_next.add(u);
+						} else {
+							//System.out.println("     " + t.getName() + "has no matching");
+							freeVarNodeFound = true;
+					
+						}
+					}
+				}
+			}
+			layer++;
+			Le_current = Le_next;
+			Le_next = new LinkedHashSet<Eq>();
+		}
+		
+		java.util.List<Var> delQueue = new ArrayList<Var>();
+		for (Var v : Lv.get(Lv.size()-1).keySet()) {
+			if (v.getMatching()!=null) {
+				delQueue.add(v);
+			}
+		}
+		for (Var v : delQueue) {
+			Lv.get(Lv.size()-1).remove(v);
+		}
+		//System.out.println(Lv);
+		//System.out.println("************** BFS ends *************");
+		return Lv;
+	}
+
+	public java.util.List<java.util.List<Edge>> dfs(java.util.List<Map<Var,Set<Eq>>> Lv) {
+		lightReset();
+		java.util.List<java.util.List<Edge>> P = new ArrayList<java.util.List<Edge>>();
+	
+		boolean found_path = true;
+		for (Var v : Lv.get(Lv.size()-1).keySet()) {
+			ArrayList<Edge> P_tmp = new ArrayList<Edge>();
+			
+			ListIterator<Map<Var,Set<Eq>>> iter = Lv.listIterator(Lv.size());
+			while (iter.hasPrevious()) {
+				Map<Var,Set<Eq>> l = iter.previous();
+				v.setVisited(true);
+				if (!found_path) {
+					break;
+				}
+				found_path = false;
+				for (Eq e : l.get(v)) {
+					if (!e.isVisited()) {
+						e.setVisited(true);
+						P_tmp.add(new Edge(e,v));
+						v = e.getMatching();
+						found_path = true;
+						break;
+					}
+				}
+			}
+			if (P_tmp.size() == Lv.size()) {
+				P.add(P_tmp);
+			}
+		}
+		//System.out.println(P);
+		return P;
+	}
+		
+	public void reassign(java.util.List<java.util.List<Edge>> P) {
+		for (java.util.List<Edge> l : P) {
+			for (Edge ed : l) {
+				match(ed.getEquation(), ed.getVariable());
+			}
+		}
+	}
+	
+	public void maximumMatching(boolean resetMatching) {
+		if (resetMatching) {
+			reset();
+			greedyMatching();
+		}
+		//System.out.println(printMatching());
+		
+		// Initialize set of free equations
+		Set<Eq> startingNodes = new LinkedHashSet<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getMatching()==null) {
+				startingNodes.add(e);
+			}
+		}
+	
+		Set<Eq> unmatchedEquations = new LinkedHashSet<Eq>(getUnmatchedEquations());
+		
+		java.util.List<Map<Var,Set<Eq>>> Lv = null;
+		java.util.List<java.util.List<Edge>> P = null;
+		
+		while (unmatchedEquations.size()>0) {
+		
+			Lv = bfs(unmatchedEquations);
+			P = dfs(Lv);
+
+			if (Lv.get(Lv.size()-1).size()==0) {
+				break;
+			}
+			
+			reassign(P);
+		
+			for (java.util.List<Edge> l : P) {
+				unmatchedEquations.remove(l.get(l.size()-1).getEquation());
+			}
+		}
+	}
+	
+	public void matchMunkres(Map<String,Integer> weights) {
+
+		if (equationMap.size()==0 || variableMap.size()==0) {
+			return;	
+		}
+
+		long cost[][] = new long[equationMap.size()][variableMap.size()];	
+
+		int i = 0;
+		
+		for (Eq e : getEquations()) {
+			int j = 0;
+			for (String vName : variableMap.keySet()) {
+				Var v = variableMap.get(vName);
+				if (e.getVariables().contains(v)) {
+					cost[i][j] = v.stateSelectionWeight();
+				} else {
+					cost[i][j] = FVariable.SS_UNMATCHED_WEIGHT;	
+				}
+				Integer weight = weights.get(vName);
+				if (weight!=null) {
+					cost[i][j] += weight.intValue();
+				}
+				j++;
+			}
+			i++;
+		}
+		
+		MunkresProblem munk = new MunkresProblem(cost);
+		int[][] result = munk.solve();
+		long opt_cost = 0L;
+		ASTNode.log.info("Munkres result:");
+		Eq[] eqs = equationMap.values().toArray(new Eq[equationMap.size()]);
+		Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
+		for (i=0;i<result.length;i++) {
+			opt_cost += cost[result[i][0]][result[i][1]];
+			Eq eqn = eqs[result[i][0]];
+			Var var = vars[result[i][1]];
+			match(eqn, var);
+			ASTNode.log.info("%s: %s %d",eqn.toString(), var.getVariable().name(), cost[result[i][0]][result[i][1]]);
+		}
+		ASTNode.log.info("Optimal cost: %d", opt_cost);
+	}
+	
+	public boolean augmentPath(Eq e) {
+		e.setVisited(true);
+		for (Var v : e.getVariables()) {
+			if (!canMatch(e, v))
+				continue;
+			if (v.getMatching()==null) {
+				match(e, v);
+				return true;
+			} else if (!v.isVisited()) {
+				v.setVisited(true);
+				if (augmentPath(v.getMatching())) {
+					match(e, v);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public IndexReductionResult reduceIndex(boolean resetMatching) {
+		if (resetMatching) {
+			reset();
+		}
+		
+		IndexReductionResult result = new IndexReductionResult();
+		
+		Set<Eq> es = new LinkedHashSet<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getEquation().isContinuous()) {
+				es.add(e);
+			}
+		}
+				
+		// If there are no equations, we cannot do index reduction.
+		if (es.size()==0) {
+			return null;
+		}
+		
+		Eq eqToMatch;
+		
+		boolean pathFound = false;		
+		java.util.List<FVariable> newDiffedVars = new ArrayList<FVariable>();	
+		Stack<Eq> eqToMatchStack = new Stack<Eq>();
+		// Algoritm step numbering from the original Pantelides paper		
+		// Loop over all equations (step 3)
+		for (Eq e : es) {
+			// If the equation is not matched
+			eqToMatchStack.push(e);
+			while (!eqToMatchStack.empty()){
+				eqToMatch = eqToMatchStack.pop(); // Step 3a
+				if (eqToMatch.getMatching()==null && eqToMatch.getMeDifferentiated()==null) {
+
+					pathFound = false; // Step
+					while (!pathFound) { // Step 3b
+						// Since the states are not added to the graph,
+						// Step 3b-1 is skipped and is done at the end of 
+						// the iteration 
+						lightReset(); // Step 3b-2
+						pathFound = false; // Step 3b-3
+						// Find an augmenting path, step 3b-4
+						//n_ind = 0;
+						pathFound = augmentPath(eqToMatch); 
+						Collection<Eq> visitedEquations = getVisitedEquations();
+						Collection<Var> visitedVariables = getVisitedVariables();
+						ASTNode.log.info("*************");
+						ASTNode.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());
+						if (pathFound) {
+							ASTNode.log.info("Path found!");
+						} else {	
+						 	ASTNode.log.info("Path not found!");
+						}
+						ASTNode.log.info("Visisted equations:");
+						for (Eq ee : visitedEquations) {
+							ASTNode.log.info("  " + ee.getEquation());
+						}
+						ASTNode.log.info("Visisted variables:");
+						for (Var vv : visitedVariables) {
+							ASTNode.log.info("  " + vv.toString());
+						}
+						
+						if (!pathFound) { // Step 3b-5
+							for (Var vv : visitedVariables) { // Loop over all visited variables, Step 3b-5i
+							    // Create a new differentiated variable
+								FVariable newVar = vv.getVariable().myFClass().addFDerivativeVariable(vv.getVariable());
+								newDiffedVars.add(newVar);
+								// Add the differentiated variable to the graph 
+								Var vvv = addVariable(newVar.name(),newVar);
+								// Set the "A vector" in the paper: 
+								// a reference from the visited variable to its 
+								// differentiated counterpart
+								vv.setMeDifferentiated(vvv); 
+								vvv.setMeIntegrated(vv);
+							}
+							for (Eq ee : visitedEquations) { // Step 3b-5ii
+								FAbstractEquation eee = ee.getEquation();
+								if (ee.numDifferentiations() > MAX_N_EQ_DIFFS) {
+									for (FVariable v : newDiffedVars) {
+										int ind = v.myFClass().getFVariableList().getIndexOfChild(v);
+										if (ind>=0) {
+											v.myFClass().getFVariableList().removeChild(ind);
+										}
+									}
+									return null;
+								}
+								FAbstractEquation deee = null;
+								// Look through member equations and check if the differentiated equation already exisits
+								for (Eq groupMember : ee.getGroupMembers())
+									if (groupMember.getMeDifferentiated() != null)
+										deee = groupMember.getMeDifferentiated().getEquation();
+								if (deee == null) {
+									// It does not exsit, create it.
+									deee = eee.diff("time");
+									result.addEquation(deee);
+								} else {
+									// It already exisits we need to flush cached values since we might have added new variables
+									deee.flushAllRecursive();
+								}
+								ASTNode.log.info("About to add equation: " + deee);
+								// Sets that indicates the variables in the lhs and rhs.
+								Set<FVariable> rhsVars = Collections.emptySet();
+								Map<FVariable, Integer> lhsVars = Collections.emptyMap();
+								if (deee.numScalarEquations() > 1) {
+									rhsVars = deee.referencedFVariablesInRHS();
+									lhsVars = new HashMap<FVariable, Integer>();
+									int i = 0;
+									for (FVariable fv : eee.referencedFVariablesInLHS()) {
+										if (fv.getMeDifferentiated() != null)
+											lhsVars.put(fv.getMeDifferentiated(), i);
+										i++;
+									}
+								}
+								// Add the differentiated equation
+								int groupNumber = ee.groupNumber();
+								Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupNumber);
+								
+								// Add edges
+								for (FVariable fv : deee.variables()) {
+									Var vvv = variableMap.get(fv.name());
+									Integer pos = lhsVars.get(fv);
+									if (vvv!=null && (pos == null || pos == groupNumber || rhsVars.contains(fv))) {
+										ASTNode.log.info("*** " + fv.name());
+										addEdge(eqn,vvv);
+									}
+								}
+								// Set a reference from the visited equation to
+								// its differentiated counterpart
+								
+								ee.setMeDifferentiated(eqn);
+								eqn.setMeIntegrated(ee);
+								// TODO: We might need to add this equation to its existing groupmembers?
+								ASTNode.log.info("Equation added");
+							}
+							for (Var vv : visitedVariables) {
+								// Set matchings, Step 3b-5iii
+								Eq ee = vv.getMatching();
+								match(ee.getMeDifferentiated(), vv.getMeDifferentiated());
+								// Remove variables that have been differentiated, Step 3b-1
+								removeVariable(vv);
+							}
+						
+							// Set the next equation to start matching from, 
+							// Step 3b-5iv
+							// Push all differentiated equations in the group to the stack
+							// of equations to be matched
+							for (Eq groupMemberEquation : eqToMatch.getGroupMembers()) {
+								eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
+							}
+
+							eqToMatch = eqToMatchStack.pop();
+						
+							ASTNode.log.info("Graph after addition of equations and variables:");
+							ASTNode.log.info(toString());
+						}		
+
+						ASTNode.log.info("Matching:");
+						ASTNode.log.info(printMatching());
+						ASTNode.log.info("*************");
+					
+					}	
+				}
+			}
+		}
+
+		// Remove equations that are not connected
+		java.util.List<Eq> eqToRemove = new ArrayList<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getVariables().size()==0) {
+				eqToRemove.add(e);
+			}
+		}
+		for (Eq e : eqToRemove) {
+			removeEquation(e);
+		}
+		ASTNode.log.info("Index reduction done!");
+		ASTNode.log.info("Matching:");
+		ASTNode.log.info(printMatching());
+		
+		// Selection of dummy derivatives
+		/*
+			The algorithm is implemented differently than in the original paper
+			by Mattsson and S�derlind. In the paper, each block is treated
+			individually by selecting all dummy derivatives of one block
+			before proceeding to the next block. This approach, however, makes
+			it hard to handle user preferences for state selection as defined
+			by the stateSelect attribute. This is because selection of
+			dummy derivatives in one block may restrict the choices in 
+			following blocks, even though a global analysis would yield that
+			it would indeed be possible to satisfy user selection.
+			
+			Therefore, all equations in blocks containing differentiated
+			equations are treated in one block.
+			
+			NOTE: This algorithm is still a prototype and it needs to be refactored.
+			This will be done when the final algorithm have been settled.
+		*/
+		
+		BLT blt = computeBLT();
+	
+		ASTNode.log.info(blt.toString());
+
+		// Lists of equations and variables, notation is the same as in the 
+		// paper
+		java.util.List<FAbstractEquation> g = new ArrayList<FAbstractEquation>();
+		
+		java.util.List<FAbstractEquation> h = new ArrayList<FAbstractEquation>();
+
+		java.util.List<FVariable> z = new ArrayList<FVariable>();
+
+		java.util.List<FVariable> zHat = new ArrayList<FVariable>();
+
+		// Collect all blocks that contain differentiated equations
+		for (AbstractEquationBlock eb : blt) {
+			Collection<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
+			if (diffedEqns.size()>0) {
+				ASTNode.log.info(" ********* Found block containing diffed equations ***********");
+				ASTNode.log.info(eb.toString());
+		
+				// Step 1: Initialize, add all equations in blocks
+				// having differentiated equations
+				g.addAll(eb.equations());
+				
+				// Step 2: Extract all active variables, i.e., highest order 
+				// derivatives for each variable
+				for (FVariable fv : eb.activeVariables()) {
+					if (fv.isDerivativeVariable()) {
+						// If the stateSelect attribute equals StateSelect.always,
+						// then don't add the variable so that it cannot be
+						// selected as dummy derivative.
+						FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
+						if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+							z.add(fv);
+						}
+					} else {
+						z.add(fv);
+					}
+				}
+			}
+		}
+		
+		// Initialize variable to keep track of there are still 
+		// differentiated equations
+		boolean remainingDifferentiatedEquations = true;
+		
+		// Iterate
+		while (remainingDifferentiatedEquations) {
+		   ASTNode.log.info("----------------");
+			// Step 3: Extract differentiated equations 
+			h = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation fe : g) {
+				if (fe.getMeIntegrated()!=null) {
+					h.add(fe);
+				}
+			}
+									
+			// Step 4: Select independent columns.
+			// In a first attempt we don't add variables with StateSeclect.prefer
+			// If it is possible to find a matching, then we proceed. If not, then
+			// We start over and all all variables, also the ones with StateSelect.prefer
+			// This algorithm is a first approximation of what we need, since we must also
+			// have to support avoid and never.
+			BiPGraph gd = new BiPGraph(); 
+						
+			// Add variables to the graph
+			for (FVariable fv : z) {
+				gd.addVariable(fv.name(),fv);     
+			}
+				
+			int k = 1;
+			Eq eqn = null;
+			Var v = null;
+			// Add the equations to the graph
+			for (FAbstractEquation e : h) {
+			
+				int n_eq = e.numScalarEquations();
+				
+				for (int i=0;i<n_eq;i++) {
+					ASTNode.log.info("*** " + e.prettyPrint(""));
+					eqn = gd.addEquation("eq_"+k, e, i);
+					k++;
+				
+					for (FVariable y : e.variables()) { 
+						//FRealVariable frv = (FRealVariable)((FRealVariable)y).getMeIntegrated();
+						if (z.contains(y)) {
+							ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));	
+							v = gd.getVariable(y.name()); 
+							gd.addEdge(eqn,v);
+						} 
+					} 
+				}
+			}
+					
+			ASTNode.log.info(gd.toString());
+			
+			// Run matching
+			// Compute weights for variables based on linearity
+			Map<String,Integer> linearityWeights = new HashMap<String,Integer>();
+			for (FVariable fv : z) {
+		 		int w = 0;
+ 				for (FAbstractEquation feq : g) {
+ 					try {
+						FAbstractEquation feqd = feq.diff(fv.name());
+						//System.out.println(feqd.prettyPrint(""));
+						if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
+							w += 2;
+						} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
+							w += 1; 
+						}
+					} catch(Exception e) {}
+				}	
+				FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
+				if (frv!=null) {
+					for (FAbstractEquation feq : g) {
+						try {
+							FAbstractEquation feqd = feq.diff(frv.name());
+							//System.out.println(feqd.prettyPrint(""));
+							if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
+								w += 2;
+							} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
+								w += 1; 
+							}
+						} catch(Exception e) {}							
+					}		
+				}
+				ASTNode.log.info("Linearity weight: " + fv.name() + " " + w);
+				linearityWeights.put(fv.name(),new Integer(w));
+			}
+			
+			gd.matchMunkres(linearityWeights);				
+			ASTNode.log.info(gd.printMatching());
+			
+			// The matched variables are selected as dummy derivatives
+			for (Var vv : gd.getMatchedVariables()) {
+				zHat.add(vv.getVariable());
+			}
+
+					
+			// Step 5: prepare for next iteration
+			// Get the "integrated" equations
+			g = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation ee : h) {
+				g.add(ee.getMeIntegrated());
+			}
+							
+			// Get the "integrated" variables 
+			z = new ArrayList<FVariable>();
+			for (FVariable fv : zHat) {
+				FVariable z_test = fv.getMeIntegrated();
+				if (z_test.isDerivativeVariable()) {
+					// Take into account user defined state selection
+					FRealVariable frv = (FRealVariable)z_test.getMeIntegrated();
+					if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
+						z.add(z_test);
+					}
+				} else {
+					z.add(z_test);
+				}
+			}
+
+			// Check if there are remaining differentiated equations								
+			remainingDifferentiatedEquations = false;
+			for (FAbstractEquation fe : g) {
+				if (fe.getMeIntegrated()!=null) {
+					remainingDifferentiatedEquations = true;
+				}
+			}
+			
+			ASTNode.log.info(" --- Equations in iteration: --- ");
+			ASTNode.log.info(" Equations: ");
+			for (FAbstractEquation fe : g) {
+				ASTNode.log.info(fe.prettyPrint("   "));
+			}
+
+			ASTNode.log.info(" Dummy derivatives selected in iteration: ");
+			for (FVariable fv : zHat) {
+				result.addDummyDerivative(fv);
+				ASTNode.log.info(fv.prettyPrint("   "));
+			}
+			ASTNode.log.info("");
+				
+		}
+		
+		ASTNode.log.info(" Dummy derivatives: ");
+		for (FVariable fv : zHat) {
+			result.addDummyDerivative(fv);
+			ASTNode.log.info(fv.prettyPrint("   "));
+		}
+		ASTNode.log.info("");
+		
+		return result;
+	}
+	
+	protected class UnmatchedEquationsCriteria implements Criteria<Eq> {
+		@Override
+		public boolean test(Eq elem) {
+			return elem.getMatching() == null;
+		}
+	}
+	
+	public Iterator<Eq> unmatchedEquationsIterator() {
+		return new FilteredIterator<Eq>(getEquations().iterator(), new UnmatchedEquationsCriteria());
+	}
+	
+	public Iterable<Eq> unmatchedEquationsIterable() {
+		return new Iterable<Eq>() {
+			@Override
+			public Iterator<Eq> iterator() {
+				return unmatchedEquationsIterator();
+			}
+		};
+	}
+	
+	public Collection<Eq> getUnmatchedEquations() {
+		java.util.List<Eq> l = new ArrayList<Eq>();
+		for (Eq e : unmatchedEquationsIterable())
+			l.add(e);
+		return l;
+	}
+
+	protected class UnmatchedVariablesCriteria implements Criteria<Var> {
+		@Override
+		public boolean test(Var elem) {
+			return elem.getMatching() == null;
+		}
+	}
+	
+	public Iterator<Var> unmatchedVariablesIterator() {
+		return new FilteredIterator<Var>(getVariables().iterator(), new UnmatchedVariablesCriteria());
+	}
+	
+	public Iterable<Var> unmatchedVariablesIterable() {
+		return new Iterable<Var>() {
+			@Override
+			public Iterator<Var> iterator() {
+				return unmatchedVariablesIterator();
+			}
+		};
+	}
+	
+	public Collection<Var> getUnmatchedVariables() {
+		java.util.List<Var> l = new ArrayList<Var>();
+		for (Var v : unmatchedVariablesIterable())
+			l.add(v);
+		return l;
+	}
+	
+	public java.util.List<Eq> getMatchedEquations() {
+		java.util.List<Eq> l = new ArrayList<Eq>();
+		for (Eq e : getEquations()) {
+			if (e.getMatching()!=null) {
+				l.add(e);
+			}
+		}
+		return l;
+	}
+
+	public java.util.List<Var> getMatchedVariables() {
+		java.util.List<Var> l = new ArrayList<Var>();
+		for (Var v : getVariables()) {
+			if (v.getMatching()!=null) {
+				l.add(v);
+			}
+		}
+		return l;
+	}
+	
+	public Collection<Eq> getVisitedEquations() {
+		Collection<Eq> l = new ArrayList<Eq>();
+		for (Eq e: getEquations()) {
+			if (e.isVisited())
+				l.add(e);
+		}
+		return l;
+	}
+	
+	public Collection<Var> getVisitedVariables() {
+		Collection<Var> l = new ArrayList<Var>();
+		for (Var v: getVariables()) {
+			if (v.isVisited())
+				l.add(v);
+		}
+		return l;
+	}
+
+	public BLT computeBLT() {
+		Collection<Collection<Eq>> components = computeRawBLT(false);
+		BLT blt = new BLT();
+		for (Collection<Eq> bl : components) {
+			blt.add(EquationBlockFactory.createEquationBlock(bl));
+		}
+		return blt;
+	}
+	
+	public Collection<Collection<Eq>> computeRawBLT(boolean merge_blt_blocks) {
+		Enumerator indexer = new Enumerator();
+		Stack<Eq> stack = new Stack<Eq>();
+		Collection<Collection<Eq>> components = new ArrayList<Collection<Eq>>();
+		tarjanReset();
+		
+		Set<Eq> keepTogether = new LinkedHashSet<Eq>();
+		if (merge_blt_blocks) {
+			for (Eq e : getEquations()) {
+				if (e.markedAsResidualEquation() || e.getMatching().markedAsIterationVariable()) {
+					keepTogether.add(e);
+				}
+				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
+					FVariable fVar = e.getEquation().getResidual().iterationVariable();
+					Var var = getVariable(fVar.name());
+					if (var != null) {
+						keepTogether.add(var.getMatching());
+					}
+				}
+			}
+		}
+		
+		for (Eq e : getEquations()) {
+			if (!e.isVisited() && !e.isRes())
+				tarjan(indexer, stack, components, keepTogether, e);
+		}
+		
+		return components;
+	}
+	
+	public void tarjan(Enumerator indexer, Stack<Eq> stack, Collection<Collection<Eq>> components, Set<Eq> keepTogether,  Eq e) {
+		stack.add(e);
+		int index = indexer.next();
+		e.setTarjanNbr(index);
+		e.setTarjanLowLink(index);
+		e.setVisited(true);
+		Collection<Eq> eqToVisit = new ArrayList<Eq>();
+		if (keepTogether.contains(e)) {
+			for (Eq ee : keepTogether) {
+				if (ee != e && !ee.isRes())
+					eqToVisit.add(ee);
+			}
+		}
+		for (Var v : e.getVariables()) {
+			Eq ee = v.getMatching();
+			if (!v.isIter() && ee != null && e != ee)
+				eqToVisit.add(ee);
+ 		}
+		for (Eq ee : e.getGroupMembers()) {
+			if (!ee.isRes() && ee != null && e != ee)
+				eqToVisit.add(ee);
+		}
+		for (Eq ee : eqToVisit) {
+			if (!ee.isVisited()) {
+				tarjan(indexer, stack, components, keepTogether, ee);
+				e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
+			} else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
+				e.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
+			}
+		}
+		if (e.getTarjanNbr()==e.getTarjanLowLink()) {
+			Collection<Eq> component = new ArrayList<Eq>();
+			Eq ee;
+			do {
+				ee = stack.pop();
+				component.add(ee);
+			} while (ee != e);
+			components.add(component);
+		}
+	}
+	
+	public void reset() {
+		for (Eq e : getEquations()) {
+			e.reset();
+		}		
+		for (Var v : getVariables()) {
+			v.reset();
+		}		
+	}
+
+	public void lightReset() {
+		for (Eq e : getEquations()) {
+			e.lightReset();
+		}		
+		for (Var v : getVariables()) {
+			v.lightReset();
+		}		
+	}
+
+	public void tarjanReset() {
+		for (Eq e : getEquations()) {
+			e.tarjanReset();
+		}		
+	}
+	
+	public void insertIntoEquationIndexMap(FAbstractEquation eqn, Eq e) {
+		java.util.List<Eq> l = equationIndexMap.get(eqn);
+		if (l==null) {
+			l = new ArrayList<Eq>();
+			equationIndexMap.put(eqn, l);
+		}
+		l.add(e);
+	}
+
+	public void removeFromEquationIndexMap(FAbstractEquation eqn, Eq e) {
+		java.util.List<Eq> l = equationIndexMap.get(eqn);
+		if (l!=null) {
+			for (Eq ee : l) {
+				if (e==ee) {
+        			l.remove(e);
+        			return;
+        		}
+        	}
+		}
+	}
+	
+	public String printMatching() {
+		StringBuffer str = new StringBuffer();
+		str.append("----------------------------------------\n");
+		str.append("BiPGraph matching:\n");
+		for (Eq e : getEquations()) {
+			if (e.getMatching()!=null) {
+				str.append(e.getName());
+				str.append(" : ");
+				str.append(e.getMatching().getName());
+				str.append("\n");
+			}
+		}		
+		str.append("Unmatched equations: {");
+		for (Eq e : unmatchedEquationsIterable()) {
+			str.append(e.getName() + " ");
+		}
+		str.append("}\n");
+
+		str.append("Unmatched variables: {");
+		for (Var v : unmatchedVariablesIterable()) {
+			str.append(v.getName() + " ");
+		}
+		str.append("}\n");
+
+		str.append("----------------------------------------\n");
+		return str.toString();
+	}
+	
+	public Object printMatchingObj() {
+		return new Object() {
+			@Override
+			public String toString() {
+				return printMatching();
+			}
+		};
+	}
+	
+	public String toString() {
+		StringBuffer str = new StringBuffer();
+		str.append("BiPGraph\n");
+		str.append("Variables: {");
+		for (String vName : variableMap.keySet()) {
+			Var v = variableMap.get(vName);
+			str.append(v.getName());
+			str.append(" ");
+		}
+		str.append("}\n");
+		for (Eq e : getEquations()) {
+			str.append(e.getName());
+			str.append(" : ");
+			for (Var v : e.getVariables()) {
+				str.append(v.getName() + " ");
+			}
+			str.append("\n");
+		}
+		return str.toString();
+	}
+	
+    class Edge {
+    	private Var variable;
+    	private Eq equation;
+    	
+    	public Edge(Eq e, Var v) {
+    		this.equation = e;
+    		this.variable = v;
+    	}
+
+		public Var getVariable() {
+			return variable;
+		}
+
+		public void setVariable(Var variable) {
+			this.variable = variable;
+		}
+
+		public Eq getEquation() {
+			return equation;
+		}
+
+		public void setEquation(Eq equation) {
+			this.equation = equation;
+		}
+    	
+		public String toString() {
+			return "(" + equation.getName() + "," + variable.getName() + ")";
+		}
+    	
+    }
+}
+
+public class SolvingBiPGraph extends BiPGraph {
+	
+	public SolvingBiPGraph(Collection<Eq> eqns, Collection<Var> vars) {
+		super(eqns, vars);
+	}
+	
+	public SolvingBiPGraph(Collection<Eq> block) {
+		super(block);
+	}
+	
+	@Override
+	public boolean canMatch(Eq e, Var v) {
+		return isSolved(e, v).isSolvable();
+	}
+	
+	public Solvability isSolved(Eq e, Var v) {
+		return e.getEquation().isSolved(v.getName(), true);
+	}
+	
+	@Override
+	public void addInsidence(Eq e, Var v) {
+		super.addInsidence(e, v);
+		Solvability solvability = isSolved(e, v);
+		switch (solvability) {
+		case ANALYTICALLY_SOLVABLE:
+			e.addAnalyticallySolvableVariable(v);
+			v.analyticallySolvableOccurrence();
+			break;
+		case NUMERICALLY_SOLVABLE:
+			e.addNumericallySolvableVariable(v);
+			v.numericallySolvableOccurrence();
+			break;
+		}
+	}
+	
+}
+
+public class Eq implements Comparable<Eq> {
+
+	private final String name;
+	private final FAbstractEquation eqn;
+	private final int groupNumber;
+	private java.util.List<Var> variables = new ArrayList<Var>();
+	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
+	private int analyticallySolvableOccurrences = 0;
+	private int numericallySolvableOccurrences = 0;
+	private Var matching = null;
+	private boolean visited = false;
+	private int layer = 1000000;
+	private Eq meDifferentiated = null;
+	private Eq meIntegrated = null;
+	private boolean isRes = false;
+	private int tarjanNbr = 0;
+	private int tarjanLowLink = 0;
+	private int depth = 1;
+	/* In some cases, equations needs to be treated as a group,
+	   e.g., in the case when several equations are generated from
+	   a function call equation. In this case, all the "scalar"
+	   equations generated for the function call equation are
+	   members of each such equation. Note that every equation
+	   is member of its own group: scalar equations therefor has
+	   one member: itself. This approach makes handling of equation
+	   groups more consistent, e.g., when a function call equation
+	   needs to be differentiated. 
+	*/
+	private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
+
+	public Eq(String name, FAbstractEquation eqn, int groupNumber) {
+		this.name = name;
+		this.eqn = eqn;
+		this.groupNumber = groupNumber;
+		this.groupMembers.add(this);
+	}
+			
+	public void addVariable(Var v) {
+		variables.add(v);
+	}
+	
+
+	public void reset() {
+		setMatching(null);
+		setVisited(false);
+		setLayer(1000000);
+	}
+
+	public void lightReset() {
+		setVisited(false);
+		setLayer(1000000);
+	}
+	
+	public void tarjanReset() {
+		setTarjanLowLink(0);
+		setTarjanNbr(0);
+		setVisited(false);
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public FAbstractEquation getEquation() {
+		return eqn;
+	}
+		
+	public int groupNumber() {
+		return groupNumber;
+	}
+	
+	public java.util.List<Var> getVariables() {
+		return variables;
+	}
+
+	public Var getMatching() {
+		return matching;
+	}
+
+	public void setMatching(Var matching) {
+		this.matching = matching;
+	}
+	
+	public boolean isVisited() {
+		return visited;
+	}
+
+	public void setVisited(boolean visited) {
+		this.visited = visited;
+	}
+
+	public int getLayer() {
+		return layer;
+	}
+
+	public void setLayer(int layer) {
+		this.layer = layer;
+	}
+
+	public int getTarjanNbr() {
+		return tarjanNbr;
+	}
+
+	public void setTarjanNbr(int tarjanNbr) {
+		this.tarjanNbr = tarjanNbr;
+	}
+
+	public int getTarjanLowLink() {
+		return tarjanLowLink;
+	}
+
+	public void setTarjanLowLink(int tarjanLowLink) {
+		this.tarjanLowLink = tarjanLowLink;
+	}
+
+	public int numDifferentiations() {
+		return getMeIntegrated()==null? 0: getMeIntegrated().numDifferentiations() + 1;	
+	}
+
+	public void setMeDifferentiated(Eq e) {
+		this.meDifferentiated = e;
+		this.getEquation().setMeDifferentiated(e.getEquation());
+	}
+	
+	public Eq getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
+
+	public void setMeIntegrated(Eq e) {
+		this.meIntegrated = e;
+		this.getEquation().setMeIntegrated(e.getEquation());
+	}
+	
+	public Eq getMeIntegrated() {
+		return this.meIntegrated;
+	}
+	
+	public String toString() {
+		return getName();
+	}
+
+	public void addAnalyticallySolvableVariable(Var v) {
+		solvableVariables.add(v);
+		analyticallySolvableOccurrences++;
+	}
+	
+	public void addNumericallySolvableVariable(Var v) {
+		solvableVariables.add(v);
+		numericallySolvableOccurrences++;
+	}
+	
+	public java.util.List<Var> getSolvableVariables() {
+		return solvableVariables;
+	}
+	
+	public void isRes(boolean bol){
+		this.isRes=bol;
+	}
+	
+	public boolean isRes(){
+		return this.isRes;
+	}
+	
+	public int getDepth(){
+		return this.depth;
+	}
+	
+	public void setDepth(int d){
+		this.depth = d;
+	}
+	
+	public void addGroupMember(Eq eqn) {
+		groupMembers.add(eqn);
+	}
+	
+	public Set<Eq> getGroupMembers() {
+		return groupMembers;	
+	}
+	
+	public Var getVariable(String name) {
+		for (Var var : variables) {
+			if (var.getName().equals(name)) {
+				return var;
+			}
+		}
+		return null;
+	}
+	
+	public boolean markedAsResidualEquation() {
+		return getEquation().hasResidual();
+	}
+	
+	/**
+	 * Returns integer greather than zero if this variable sutes better as iteration
+	 * variable than the <code>other</code> variable. Zero is returned if they are equal
+	 * and <0 is returned if the <code>other</code> variable is better.
+	 */
+	@Override
+	public int compareTo(Eq other) {
+		int diff = (markedAsResidualEquation() ? 1 : 0) - (other.markedAsResidualEquation() ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		diff = getVariables().size() - other.getVariables().size();
+		if (diff != 0)
+			return diff;
+		diff = numericallySolvableOccurrences - other.numericallySolvableOccurrences;
+		if (diff != 0)
+			return diff;
+		diff = other.analyticallySolvableOccurrences - analyticallySolvableOccurrences;
+		if (diff != 0)
+			return diff;
+		diff = (getEquation().hasNominal() ? 1 : 0) - (other.getEquation().hasNominal() ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		return 0;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Eq))
+			return false;
+		Eq other = (Eq)o;
+		return getName().equals(other.getName());
+	}
+
+
+}
+
+public class Var implements Comparable<Var> {
+
+	private final String name;
+	private final FVariable v;
+	private Eq matching = null;
+	private boolean visited = false;
+	private int layer = 1000000;
+	private Var meDifferentiated = null; // A reference to this variable differentiated once
+	private Var meIntegrated = null;
+	private int occurrences = 0;
+	private int analyticallySolvableOccurrences = 0;
+	private int numericallySolvableOccurrences = 0;
+	private boolean isIter=false;
+	
+	public Var(String name, FVariable v) {
+		this.name = name;
+		this.v = v;
+	}
+		
+	public void reset() {
+		setMatching(null);
+		setVisited(false);
+		setLayer(1000000);
+	}
+
+	public void lightReset() {
+		setVisited(false);
+		setLayer(1000000);
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public FVariable getVariable() {
+		return v;
+	}
+
+	public Eq getMatching() {
+		return matching;
+	}
+
+	public void setMatching(Eq matching) {
+		this.matching = matching;
+	}
+
+	public boolean isVisited() {
+		return visited;
+	}
+
+	public void setVisited(boolean visited) {
+		this.visited = visited;
+	}
+
+	public int getLayer() {
+		return layer;
+	}
+
+	public void setLayer(int layer) {
+		this.layer = layer;
+	}
+		
+	public void setMeDifferentiated(Var var) {
+		this.meDifferentiated = var;
+		this.getVariable().setMeDifferentiated(var.getVariable());
+	}
+	
+	public Var getMeDifferentiated() {
+		return this.meDifferentiated;
+	}
+
+	public void setMeIntegrated(Var var) {
+		this.meIntegrated = var;
+		this.getVariable().setMeIntegrated(var.getVariable());
+	}
+	
+	public Var getMeIntegrated() {
+		return this.meIntegrated;
+	}
+	
+	public void occurrence(){
+		occurrences++;
+	}
+	
+	public void analyticallySolvableOccurrence(){
+		analyticallySolvableOccurrences++;
+	}
+	
+	public void numericallySolvableOccurrence(){
+		numericallySolvableOccurrences++;
+	}
+	
+	public int getNbrOccurrences(){
+		return occurrences;
+	}
+	
+	public int getNbrAnalyticallySolvableOccurrences(){
+		return analyticallySolvableOccurrences;
+	}
+	
+	public int getNbrNumericallySolvableOccurrences(){
+		return numericallySolvableOccurrences;
+	}
+	
+	public String toString() {
+		return getName();
+	}
+	
+	public void isIter(boolean bol){
+		this.isIter=bol;
+	}
+	
+	public boolean isIter(){
+		return this.isIter;
+	}
+	
+	public long stateSelectionWeight() {
+		return v.stateSelectionWeight();
+	}
+	
+	public boolean markedAsIterationVariable() {
+		return getVariable().getHGTType() == FClass.HGTVariableType.COMPONENT;
+	}
+	
+	/**
+	 * Returns integer greather than zero if this variable sutes better as iteration
+	 * variable than the <code>other</code> variable. Zero is returned if they are equal
+	 * and <0 is returned if the <code>other</code> variable is better.
+	 */
+	@Override
+	public int compareTo(Var other) {
+		int diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		diff = getNbrOccurrences() - other.getNbrOccurrences();
+		if (diff != 0)
+			return diff;
+		diff = getNbrNumericallySolvableOccurrences() - other.getNbrNumericallySolvableOccurrences();
+		if (diff != 0)
+			return diff;
+		diff = other.getNbrAnalyticallySolvableOccurrences() - getNbrAnalyticallySolvableOccurrences();
+		if (diff != 0)
+			return diff;
+		diff = (getVariable().attributeSet(FAttribute.START) ? 1 : 0) - (other.getVariable().attributeSet(FAttribute.START) ? 1 : 0);
+		if (diff != 0)
+			return diff;
+		diff = other.getVariable().getFQName().numDots() - getVariable().getFQName().numDots();
+		if (diff != 0)
+			return diff;
+		return 0;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Var))
+			return false;
+		Var other = (Var)o;
+		return getName().equals(other.getName());
+	}
+
+}
+
+public class IndexReductionResult {
+
+	private java.util.List<FAbstractEquation> addedEquations;
+	private java.util.List<FVariable> dummyDerivatives;
+
+	public IndexReductionResult() {
+		addedEquations = new ArrayList<FAbstractEquation>();
+		dummyDerivatives = new ArrayList<FVariable>();
+	}
+	
+	public void addEquation(FAbstractEquation fe) {
+		addedEquations.add(fe);	
+	}
+
+	public void addDummyDerivative(FVariable fv) {
+		dummyDerivatives.add(fv);	
+	}
+
+	public java.util.List<FAbstractEquation> getEquations() {
+		return addedEquations;
+	}
+
+	public java.util.List<FVariable> getDummyDerivatives() {
+		return dummyDerivatives;
+	}
+
+}
+
+}

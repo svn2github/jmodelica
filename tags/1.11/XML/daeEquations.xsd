@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2010 (http://www.altova.com) by Magnus Gäfvert (Modelon AB) -->
+<xs:schema xmlns:equ="https://svn.jmodelica.org/trunk/XML/daeEquations.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:exp="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" targetNamespace="https://svn.jmodelica.org/trunk/XML/daeEquations.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="https://svn.jmodelica.org/trunk/XML/daeExpressions.xsd" schemaLocation="daeExpressions.xsd"/>
+	<xs:annotation>
+		<xs:documentation>
+Copyright(c) 2008-2010, Modelon AB. All rights reserved.
+This file is licensed by the copyright holders under the BSD License
+(http://www.opensource.org/licenses/bsd-license.html):
+----------------------------------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+- Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+- Neither the name of the copyright holders nor the names of its
+  contributors may be used to endorse or promote products derived
+  from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+----------------------------------------------------------------------------
+    </xs:documentation>
+	</xs:annotation>
+	<xs:complexType name="AbstractEquation">
+		<xs:annotation>
+			<xs:documentation>Definition of the equation type in residual form exp=0</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element ref="exp:Sub"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BindingEquation">
+		<xs:annotation>
+			<xs:documentation>Definition of the equation type for binding expressions in form parameter=expression</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Parameter" type="exp:QualifiedName"/>
+			<xs:element name="BindingExp" type="exp:Exp"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FunctionCallLeft">
+		<xs:annotation>
+			<xs:documentation>Element of the left hand side of a function call equation</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element ref="exp:Identifier"/>
+			<xs:element ref="exp:Array"/>
+			<xs:element ref="exp:RecordConstructor"/>
+			<xs:element name="EmptyOutputArgument" fixed=""/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="FunctionCallEquation">
+		<xs:annotation>
+			<xs:documentation>Set of scalar equations produced by a function call</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="OutputArgument" type="equ:FunctionCallLeft" maxOccurs="unbounded"/>
+			<xs:element ref="exp:FunctionCall"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DynamicEquations">
+		<xs:annotation>
+			<xs:documentation>List of flat dynamic equations of the model</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="Equation" type="equ:AbstractEquation"/>
+				<xs:element name="FunctionCallEquation" type="equ:FunctionCallEquation"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BindingEquations">
+		<xs:annotation>
+			<xs:documentation>List of binding equations for parameters</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="BindingEquation" type="equ:BindingEquation"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InitialEquations">
+		<xs:annotation>
+			<xs:documentation>List of initial equations for the model</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence minOccurs="0" maxOccurs="unbounded">
+				<xs:element name="Equation" type="equ:AbstractEquation"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
