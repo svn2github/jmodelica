@@ -1932,6 +1932,7 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
 algorithm
+ x := 0.0;
  x := 5;
  x := x + 2;
 end FunctionTests.AlgorithmFlatten1;
@@ -1940,7 +1941,7 @@ end AlgorithmFlatten1;
 
 
 model AlgorithmFlatten2
- Real x;
+ Real x(start = 1.0);
  Real y = x;
 algorithm
  x := 5;
@@ -1954,10 +1955,11 @@ algorithm
 			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten2
- Real y;
+ Real x(start = 1.0);
 algorithm
- y := 5;
- y := y + 2;
+ x := 1.0;
+ x := 5;
+ x := x + 2;
 end FunctionTests.AlgorithmFlatten2;
 ")})));
 end AlgorithmFlatten2;
@@ -1994,6 +1996,8 @@ initial equation
  pre(x) = 0;
  pre(y) = 0;
 algorithm
+ x := pre(x);
+ y := pre(y);
  if x == 4 then
   x := 1;
   y := 2;
@@ -2040,6 +2044,8 @@ initial equation
  pre(x) = 0;
  pre(y) = 0;
 algorithm
+ x := pre(x);
+ y := pre(y);
  when x == 4 then
   x := 1;
   y := 2;
@@ -2076,6 +2082,7 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten5
  Real x;
 algorithm
+ x := 0.0;
  while x < 1 loop
   while x < 2 loop
    while x < 3 loop
@@ -2105,6 +2112,7 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
+ x := 0.0;
  for i in {1, 2, 4} loop
   for j in 1:3 loop
    x := x + i * j;

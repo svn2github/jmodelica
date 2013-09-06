@@ -1150,7 +1150,7 @@ aspect FlatAPI {
 	eq FAlgorithm.referencedFVariablesInRHS() {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FIdUse use : containedFIdUses()) 
-			if (!use.useIsAssignment() && !use.myFV().isForIndex())
+			if (use.myFV() instanceof FVariable && !use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add((FVariable) use.myFV());
 		res.removeAll(referencedFVariablesInLHS());
 		return res;

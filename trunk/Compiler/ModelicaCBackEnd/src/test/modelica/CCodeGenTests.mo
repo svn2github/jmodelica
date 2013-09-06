@@ -6484,6 +6484,7 @@ $C_ode_derivatives$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+    _x_0 = 0.0;
     _x_0 = 5;
     _y_1 = _x_0 + 2;
 ")})));
@@ -6520,6 +6521,7 @@ $C_ode_derivatives$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+    _x_0 = 0.0;
     _x_0 = 5;
     _x_0 = _x_0 + 2;
     _y_1 = _x_0 + 2;
@@ -6567,6 +6569,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _x_0 = x[0];
         _y_1 = x[1];
+        _x_0 = 0.0;
         _x_0 = _y_1;
         _x_0 = _x_0 * 2;
         (*res)[0] = _x_0 - x[0];
@@ -6597,6 +6600,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _x_0 = x[0];
         _y_1 = x[1];
+        _x_0 = 0.0;
         _x_0 = _y_1;
         _x_0 = _x_0 * 2;
         (*res)[0] = _x_0 - x[0];
@@ -6649,30 +6653,32 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 0;
-        x[1] = 1;
-        x[2] = 2;
+        x[0] = 2;
+        x[1] = 0;
+        x[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _x_0;
-        x[1] = _y_1;
-        x[2] = _z_2;
+        x[0] = _z_2;
+        x[1] = _x_0;
+        x[2] = _y_1;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        _x_0 = x[0];
-        _y_1 = x[1];
-        _z_2 = x[2];
+        _z_2 = x[0];
+        _x_0 = x[1];
+        _y_1 = x[2];
+        _y_1 = 0.0;
+        _z_2 = 0.0;
         _y_1 = _x_0 * 2 + 2;
         _z_2 = _y_1 + _x_0;
-        (*res)[0] = _x_0 - x[0];
-        _x_0 = x[0];
-        (*res)[1] = _y_1 - x[1];
-        _y_1 = x[1];
+        (*res)[0] = _z_2 - x[0];
+        _z_2 = x[0];
+        (*res)[1] = _x_0 - x[1];
+        _x_0 = x[1];
         (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        _x_0 = x[0];
-        _y_1 = x[1];
-        _z_2 = x[2];
+        _z_2 = x[0];
+        _x_0 = x[1];
+        _y_1 = x[2];
     }
     return ef;
 }
@@ -6685,30 +6691,32 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[0] = 0;
-        x[1] = 1;
-        x[2] = 2;
+        x[0] = 2;
+        x[1] = 0;
+        x[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _x_0;
-        x[1] = _y_1;
-        x[2] = _z_2;
+        x[0] = _z_2;
+        x[1] = _x_0;
+        x[2] = _y_1;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        _x_0 = x[0];
-        _y_1 = x[1];
-        _z_2 = x[2];
+        _z_2 = x[0];
+        _x_0 = x[1];
+        _y_1 = x[2];
+        _y_1 = 0.0;
+        _z_2 = 0.0;
         _y_1 = _x_0 * 2 + 2;
         _z_2 = _y_1 + _x_0;
-        (*res)[0] = _x_0 - x[0];
-        _x_0 = x[0];
-        (*res)[1] = _y_1 - x[1];
-        _y_1 = x[1];
+        (*res)[0] = _z_2 - x[0];
+        _z_2 = x[0];
+        (*res)[1] = _x_0 - x[1];
+        _x_0 = x[1];
         (*res)[2] = 3 - (_y_1 + _x_0 + _z_2);
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        _x_0 = x[0];
-        _y_1 = x[1];
-        _z_2 = x[2];
+        _z_2 = x[0];
+        _x_0 = x[1];
+        _y_1 = x[2];
     }
     return ef;
 }
@@ -6725,7 +6733,7 @@ end Algorithm4;
 
 
 model Algorithm5
- Real x;
+ Real x(start=0.5);
 algorithm
  while x < 1 loop
   while x < 2 loop
@@ -6756,6 +6764,7 @@ $C_ode_derivatives$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+    _x_0 = 0.5;
     while (COND_EXP_LT(_x_0, 1, JMI_TRUE, JMI_FALSE)) {
         while (COND_EXP_LT(_x_0, 2, JMI_TRUE, JMI_FALSE)) {
             while (COND_EXP_LT(_x_0, 3, JMI_TRUE, JMI_FALSE)) {

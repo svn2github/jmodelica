@@ -80,6 +80,7 @@ aspect TransformCanonical {
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
+		genAlgoInitStmts();
 		propagateResidualPairs();
 		genInitArrayStatements();
 		functionInliningIfSet();
@@ -2919,6 +2920,28 @@ aspect TransformCanonical {
 		}
 		
 		endStep("genAlgorithmFunctions()");
+	}
+	
+	public void FClass.genAlgoInitStmts() {
+		beginStep("genAlgoInitStmts()");
+		for (FAbstractEquation equation : equations()) {
+			equation.genAlgoInitStmts();
+		}
+		endStep("genAlgoInitStmts()");
+	}
+	
+	public void FAbstractEquation.genAlgoInitStmts() {}
+	public void FAlgorithm.genAlgoInitStmts() {
+		
+		List<FStatement> stmts = new List<FStatement>();
+		for (FVariable fv : referencedFVariablesInLHS()) {
+			FStatement stmt = new FAssignStmt(fv.createFIdUse(),fv.createAlgorithmArgument(true));
+			stmts.add(stmt);
+		}
+		for (FStatement stmt : getFStatements()) {
+			stmts.add(stmt);
+		}
+		setFStatementList(stmts);
 	}
 	
 	/**

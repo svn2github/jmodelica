@@ -153,6 +153,73 @@ class TestFunction2(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'r.a'], same_span=True)
 
+class TestAlgo1(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest1',options={'algorithms_as_functions':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run()
+        self.load_expected_data('Algorithm_AlgoTest1_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['b', 'r', 'i'])
+        
+class TestAlgo2(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest2',options={'algorithms_as_functions':False})
+    
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run()
+        self.load_expected_data('Algorithm_AlgoTest2_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['y', 'z', 'a'])
+        
+class TestAlgo3(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest3',options={'algorithms_as_functions':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run()
+        self.load_expected_data('Algorithm_AlgoTest3_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['r'])
+
+class TestAlgo4(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest4',options={'algorithms_as_functions':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run()
+        self.load_expected_data('Algorithm_AlgoTest4_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['x', 'y', 'd'])
 
 class TestStreams1(SimulationTest):
 
@@ -407,7 +474,7 @@ class TestIndexReduction1FMU(SimulationTest):
     @testattr(stddist = True)
     def setUp(self):
         self.setup_base(start_time=0.0, final_time=10,rel_tol = 1.0e-6, abs_tol = 1.0e-6)
-	self.ncp=50
+        self.ncp=50
         self.run()
         self.load_expected_data(
             'Pendulum_pack_PlanarPendulum_result.txt')

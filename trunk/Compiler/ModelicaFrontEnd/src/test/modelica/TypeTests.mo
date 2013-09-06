@@ -1664,5 +1664,149 @@ Semantic error at line 1440, column 30:
 ")})));
 end StringExpType1;
 
+model AlgorithmType1
+	Boolean b;
+	Integer i;
+	Real r;
+algorithm
+	r := time*time + 1;
+	b := noEvent(r > 2) and noEvent(r < 4);
+	i := integer(r);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmType1",
+			description="Correct types in algorithm.",
+			algorithms_as_functions=false,
+			flatModel="
+fclass TypeTests.AlgorithmType1
+ discrete Boolean b;
+ discrete Integer i;
+ Real r;
+initial equation 
+ pre(b) = false;
+ pre(i) = 0;
+algorithm
+ r := 0.0;
+ b := pre(b);
+ i := pre(i);
+ r := time * time + 1;
+ b := noEvent(r > 2) and noEvent(r < 4);
+ i := integer(r);
+
+end TypeTests.AlgorithmType1;
+")})));
+end AlgorithmType1;
+	
+model AlgorithmType2
+	record I
+		R innerR[3];
+		Integer innerInteger[3];
+	end I;
+	record R
+		Real r;
+	end R;
+	R outerR[3];
+	Integer outerInteger[3];
+	I i;
+algorithm
+	outerInteger := {1,2,3};
+	outerR := {R(1.0),R(2.0),R(3.0)};
+	i := I(outerR, outerInteger);
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmType2",
+			description="Correct types in algorithm. Records and arrays.",
+			algorithms_as_functions=false,
+			flatModel="
+fclass TypeTests.AlgorithmType2
+ Real outerR[1].r;
+ Real outerR[2].r;
+ Real outerR[3].r;
+ discrete Integer outerInteger[1];
+ discrete Integer outerInteger[2];
+ discrete Integer outerInteger[3];
+ Real i.innerR[1].r;
+ Real i.innerR[2].r;
+ Real i.innerR[3].r;
+ discrete Integer i.innerInteger[1];
+ discrete Integer i.innerInteger[2];
+ discrete Integer i.innerInteger[3];
+initial equation 
+ pre(outerInteger[1]) = 0;
+ pre(outerInteger[2]) = 0;
+ pre(outerInteger[3]) = 0;
+ i.pre(innerInteger[1]) = 0;
+ i.pre(innerInteger[2]) = 0;
+ i.pre(innerInteger[3]) = 0;
+algorithm
+ outerInteger[1] := pre(outerInteger[1]);
+ outerInteger[2] := pre(outerInteger[2]);
+ outerInteger[3] := pre(outerInteger[3]);
+ outerR[1].r := 0.0;
+ outerR[2].r := 0.0;
+ outerR[3].r := 0.0;
+ i.innerR[1].r := 0.0;
+ i.innerR[2].r := 0.0;
+ i.innerR[3].r := 0.0;
+ i.innerInteger[1] := i.pre(innerInteger[1]);
+ i.innerInteger[2] := i.pre(innerInteger[2]);
+ i.innerInteger[3] := i.pre(innerInteger[3]);
+ outerInteger[1] := 1;
+ outerInteger[2] := 2;
+ outerInteger[3] := 3;
+ outerR[1].r := 1.0;
+ outerR[2].r := 2.0;
+ outerR[3].r := 3.0;
+ i.innerR[1].r := outerR[1].r;
+ i.innerR[2].r := outerR[2].r;
+ i.innerR[3].r := outerR[3].r;
+ i.innerInteger[1] := outerInteger[1];
+ i.innerInteger[2] := outerInteger[2];
+ i.innerInteger[3] := outerInteger[3];
+
+public
+ record TypeTests.AlgorithmType2.R
+  Real r;
+ end TypeTests.AlgorithmType2.R;
+
+ record TypeTests.AlgorithmType2.I
+  TypeTests.AlgorithmType2.R innerR[3];
+  discrete Integer innerInteger[3];
+ end TypeTests.AlgorithmType2.I;
+
+end TypeTests.AlgorithmType2;
+
+")})));
+end AlgorithmType2;
+
+model AlgorithmType3
+	Boolean b;
+	Integer i;
+	Real r;
+algorithm
+	b := time*time + 1;
+	r := noEvent(r > 2) and noEvent(r < 4);
+	i := if b then "one" else "two";
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType3",
+			description="Incorrect types in algorithm",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+")})));
+end AlgorithmType3;
 
 end TypeTests;
