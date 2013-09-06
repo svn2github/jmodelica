@@ -300,6 +300,44 @@ end OverconstrainedConnection.OverconstrainedCorrect7;
 ")})));
 end OverconstrainedCorrect7;
 
+
+model OverconstrainedCorrect8
+    C1 c1;
+    C1 c2;
+    C1 c3;
+    constant Boolean c1Root1 = Connections.isRoot(c1.t);
+    constant Boolean c1Root2 = c1Root1;
+    constant Boolean c2Root1 = Connections.isRoot(c2.t);
+    constant Boolean c2Root2 = c2Root1;
+equation
+    Connections.root(c3.t);
+    Connections.potentialRoot(c1.t);
+    Connections.root(c2.t);
+    connect(c1, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OverconstrainedCorrect8",
+			description="Test model that failed due to ordering of roots",
+			flatModel="
+fclass OverconstrainedConnection.OverconstrainedCorrect8
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+ constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root2 = false;
+ constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root2 = true;
+equation
+ c1.t[1:2] = c2.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.OverconstrainedCorrect8;
+")})));
+end OverconstrainedCorrect8;
+
+
 model OverconstrainedUnrooted1
 	C1 c1;
     C1 c2;
@@ -322,6 +360,7 @@ Semantic error at line 0, column 0:
     c4.t
 ")})));
 end OverconstrainedUnrooted1;
+
 
 model OverconstrainedUnrooted2
 	C1 c1,c2,c3,c4,c5;
@@ -350,6 +389,7 @@ Semantic error at line 0, column 0:
 ")})));
 end OverconstrainedUnrooted2;
 
+
 model OverconstrainedMultipleRoot1
 	C1 c1,c2,c3,c4;
 equation
@@ -371,6 +411,7 @@ Semantic error at line 0, column 0:
     Other root: c2.t
 ")})));
 end OverconstrainedMultipleRoot1;
+
 
 model OverconstrainedMultipleRoot2
 	C1 c1,c2,c3,c4,c5,c6;
@@ -398,6 +439,7 @@ Semantic error at line 0, column 0:
 ")})));
 end OverconstrainedMultipleRoot2;
 
+
 model OverconstrainedUnbreakableLoop1
 	C1 c1,c2;
 equation
@@ -415,6 +457,7 @@ Semantic error at line 0, column 0:
     Selected root: c1.t
 ")})));
 end OverconstrainedUnbreakableLoop1;
+
 
 model OverconstrainedUnbreakableLoop2
 	C1 c1,c2,c3,c4,c5,c6;
@@ -437,6 +480,7 @@ Semantic error at line 0, column 0:
     Selected root: c4.t
 ")})));
 end OverconstrainedUnbreakableLoop2;
+
 
 model OverconstrainedMultiRootDef1
 	C1 c1,c2;

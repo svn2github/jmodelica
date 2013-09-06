@@ -998,7 +998,7 @@ aspect OverconstrainedConnections {
 		 */
 		public void buildTrees(ConnectionSetManager csm) {
 			// Collect roots
-			Collection<Node> roots = new PriorityQueue<Node>();
+			Queue<Node> roots = new PriorityQueue<Node>();
 			for (Node n : nodes)
 				if (n.canBeRoot())
 					roots.add(n);
@@ -1007,7 +1007,8 @@ aspect OverconstrainedConnections {
 			boolean abort = false;
 			java.util.List<Node> selected = new ArrayList<Node>(roots.size());
 			java.util.List<Node> otherRoots = new ArrayList<Node>();
-			for (Node root : roots) {
+			Node root;
+			while ((root = roots.poll()) != null) {
 				if (!root.visited) {
 					boolean loop = root.markSelectedRoot(root, otherRoots);
 					selected.add(root);
@@ -1051,12 +1052,12 @@ aspect OverconstrainedConnections {
 				e.visited = false;
 			
 			// Create trees
-			for (Node root : selected) {
-				if (!root.visited) {
+			for (Node sel : selected) {
+				if (!sel.visited) {
 					Queue<Node> work = new ArrayDeque<Node>();
-					work.add(root);
-					root.level = 0;
-					root.visited = true;
+					work.add(sel);
+					sel.level = 0;
+					sel.visited = true;
 					for (Node n = work.poll(); n != null; n = work.poll()) 
 						n.buildTree(work, csm);
 				}
@@ -1175,6 +1176,10 @@ aspect OverconstrainedConnections {
 			public boolean isBreakable() {
 				return source.isBreakable();
 			}
+            
+            public String toString() {
+                return n1 + " - " + n2;
+            }
 			
 			/**
 			 * Get the other end of the edge.
@@ -1253,6 +1258,10 @@ aspect OverconstrainedConnections {
 			public int compareTo(Node other) {
 				return rootPriority - other.rootPriority;
 			}
+            
+            public String toString() {
+                return var.getFQName().name();
+            }
 			
 			public void addEdge(Edge e) {
 				edges.add(e);
