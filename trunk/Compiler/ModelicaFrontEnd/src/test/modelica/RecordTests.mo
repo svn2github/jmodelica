@@ -4509,5 +4509,41 @@ end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;
 
+model RecordEval6
+	record R
+		parameter Integer n1 = 1;
+		Real x;
+	end R;
+	R r(n1 = n2, x = time);
+	parameter Integer n2 = 2;
+	Real y[n2] = ones(n2) * time;
+	Real z = y * (1:r.n1);
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval6",
+			description="Test that evaluation before scalarization of record variable works",
+			flatModel="
+fclass RecordTests.RecordEval6
+ parameter Integer r.n1 = 2 /* 2 */;
+ Real r.x;
+ parameter Integer n2 = 2 /* 2 */;
+ Real y[1];
+ Real y[2];
+ Real z;
+equation
+ r.x = time;
+ y[1] = time;
+ y[2] = time;
+ z = y[1] + y[2] * 2;
+
+public
+ record RecordTests.RecordEval6.R
+  parameter Integer n1;
+  Real x;
+ end RecordTests.RecordEval6.R;
+
+end RecordTests.RecordEval6;
+")})));
+end RecordEval6;
 
 end RecordTests;

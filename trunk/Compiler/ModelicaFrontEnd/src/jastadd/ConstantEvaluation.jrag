@@ -1705,37 +1705,34 @@ aspect ConstantEvaluation {
 		return null;
 	}
 
-  /**
-   * \brief Constant evaluation of FVariable binding expressions.
-   * 
-   * If an expression is evaluated in an FClass, then identifiers are 
-   * referencing FVariables. The constant value of an FVariable is computed
-   * by evaluating the binding expression of the variable, if any. If the
-   * FVariable is not a constant or a parameter, or if it has no binding
-   * expressions, then a CValueUnknown object is returned.
-   * 
-   *  @return The constant value.
-   */
-  syn CValue FAbstractVariable.ceval() = CValue.UNKNOWN;
-  eq FFunctionVariable.ceval()         = evaluationValue();
-  eq FVariable.ceval() {
-	  if (!isConstant() && !isParameter() && !inRecord()) {
-		  return CValue.UNKNOWN;
-	  } else {
-		  CValue val;
-		  if (isForIndex())
-			  val = evaluationValue();
-		  else if (hasParameterEquation())
-			  val = parameterEquation().cevalParameter(this);
-		  else if (hasBindingExp())
-			  val = getBindingExp().ceval();
-		  else
-			  val = defaultCValue();
-		  if (isReal())
-			  val = val.convertReal();
-		  return val;
-	  }
-  }
+	/**
+	 * \brief Constant evaluation of FVariable binding expressions.
+	 * 
+	 * If an expression is evaluated in an FClass, then identifiers are 
+	 * referencing FVariables. The constant value of an FVariable is computed
+	 * by evaluating the binding expression of the variable, if any. If the
+	 * FVariable is not a constant or a parameter, or if it has no binding
+	 * expressions, then a CValueUnknown object is returned.
+	 * 
+	 *  @return The constant value.
+	 */
+	syn CValue FAbstractVariable.ceval() = CValue.UNKNOWN;
+	eq FFunctionVariable.ceval()         = evaluationValue();
+	eq FVariable.ceval()                 = ceval(isParameter());
+	syn CValue FVariable.ceval(boolean inParameterRecord) {
+		CValue val;
+		if (isForIndex())
+			val = evaluationValue();
+		else if (hasParameterEquation())
+			val = parameterEquation().cevalParameter(this);
+		else if (hasBindingExp())
+			val = getBindingExp().ceval();
+		else
+			val = defaultCValue(inParameterRecord);
+		if (isReal())
+			val = val.convertReal();
+		return val;
+	}
 
 	/**
 	 * \brief Constant evaluation of FVariable binding expressions.
@@ -1833,15 +1830,15 @@ aspect ConstantEvaluation {
    * Constant eval for variables without any binding expression, or binding equation.
    * Uses the start value for non-records.
    */
-  syn CValue FVariable.defaultCValue() = startAttributeCValue();
-  eq FRecordVariable.defaultCValue() {
+  syn CValue FVariable.defaultCValue(boolean inParameterRecord) = startAttributeCValue();
+  eq FRecordVariable.defaultCValue(boolean inParameterRecord) {
 	  if (isArray()) {
 		  CValueArray res = new CValueArray(size());
 		  for (Index i : indices())
-			  res.setCell(i, defaultCValueCell(i));
+			  res.setCell(i, defaultCValueCell(i, inParameterRecord));
 		  return res;
 	  } else {
-		  return defaultCValueCell(Index.NULL);
+		  return defaultCValueCell(Index.NULL, inParameterRecord);
 	  }
   }
   
@@ -1849,12 +1846,17 @@ aspect ConstantEvaluation {
    * Constant eval for variables without any binding expression, or binding equation.
    * Uses the start value for non-records.
    */
-  syn CValue FVariable.defaultCValueCell(Index i) = startAttributeCValue();
-  eq FRecordVariable.defaultCValueCell(Index i) {
+  syn CValue FVariable.defaultCValueCell(Index i, boolean inParameterRecord) = startAttributeCValue();
+  eq FRecordVariable.defaultCValueCell(Index i, boolean inParameterRecord) {
 	  CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
 	  FRecordDecl rec = myFRecordDecl();
-	  for (int j = 0, n = rec.getNumFVariable(); j < n; j++) 
-		  res.setMember(j, rec.getFVariable(j).ceval());
+	  for (int j = 0, n = rec.getNumFVariable(); j < n; j++) {
+		  FVariable fv = rec.getFVariable(j);
+		  if (inParameterRecord || fv.isParameter() || fv.isRecord())
+			  res.setMember(j, fv.ceval(inParameterRecord));
+		  else
+			  res.setMember(j, CValue.UNKNOWN);
+	  }
 	  for (FAttribute a : getFAttributes())
 		  a.applyToCValue(res, i);
 	  return res;
@@ -1870,9 +1872,11 @@ aspect ConstantEvaluation {
 			  CValue val = getValue().ceval();
 			  if (i != Index.NULL && rec.getMember(j).size().ndims() + i.ndims() == val.size().ndims())
 				  val = val.array().getPart(i);
-			  rec.setMember(j, val);
+			  if (!rec.getMember(j).isUnknown())
+				  rec.setMember(j, val);
 		  } else {
-			  rec.getMember(j).applyAttributes(getFAttributes(), i);
+			  if (!rec.getMember(j).isUnknown())
+				  rec.getMember(j).applyAttributes(getFAttributes(), i);
 		  }
 	  }
   }
