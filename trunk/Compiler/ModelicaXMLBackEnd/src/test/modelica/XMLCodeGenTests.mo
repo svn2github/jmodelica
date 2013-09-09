@@ -1096,6 +1096,29 @@ equation
 ")})));
 end FixedAndStart3;
 
+model FixedAndStart4
+	parameter Real a = 1;
+	parameter Real b(start=5); 
+	parameter Real c(start=2) = a + b;	
+
+	annotation(__JModelica(UnitTesting(tests={
+		XMLCodeGenTestCase(
+			name="FixedAndStart4",
+			description="Test that start attributes are not generated for dependent parameters.",
+			template="$XML_variables$",
+			generatedCode="
+
+		<ScalarVariable name=\"a\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"1.0\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"b\" valueReference=\"1\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"5.0\" />
+		</ScalarVariable>
+		<ScalarVariable name=\"c\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" />
+		</ScalarVariable>
+")})));
+end FixedAndStart4;
 
 model Experiment1
     Real x = 1;
