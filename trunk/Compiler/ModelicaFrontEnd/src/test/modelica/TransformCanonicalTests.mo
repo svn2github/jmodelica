@@ -5289,18 +5289,17 @@ end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
 ")})));
 end InFunctionCall;
 
+
 model InWhenEquations
-	Real x;
+       Real x;
 equation
+    when integer(time*3) + noEvent(integer(time*3)) > 1 then
+        x = floor(time * 0.3 + 4.2);
+    end when;
 
-when integer(time*3) + noEvent(integer(time*3)) > 1 then
-  x = floor(time * 0.3 + 4.2);
- end when;
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="EventGeneratingExps_InWhenEquations",
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InWhenEquations",
 			description="Tests event generating expressions in a when equation.",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
@@ -5321,6 +5320,7 @@ end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
 end InWhenEquations;
 
 end EventGeneratingExps;
+
 
 model GetInstanceName
 	model B
@@ -5358,5 +5358,33 @@ end TransformCanonicalTests.GetInstanceName;
 ")})));
 	
 end GetInstanceName;
+
+
+model FixedFalseParam1
+    Real x;
+    parameter Real p(fixed=false);
+initial equation
+    2*x = p;
+    x = 3;
+equation
+    der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalseParam1",
+            description="Test of parameters with fixed = false.",
+            flatModel="
+fclass TransformCanonicalTests.FixedFalseParam1
+ Real x;
+ parameter Real p(fixed = false);
+initial equation
+ 2 * x = p;
+ x = 3;
+equation
+ der(x) = - x;
+end TransformCanonicalTests.FixedFalseParam1;
+")})));
+end FixedFalseParam1;
+
 
 end TransformCanonicalTests;

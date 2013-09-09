@@ -531,6 +531,16 @@ aspect FlatAPI {
 		this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
 	to FClass.discreteVariables() for myFClass();	
 
+    syn int FClass.numNonFixedParameters() = nonFixedParameters().size();
+    coll ArrayList<FVariable> FClass.nonFixedParameters()
+        [new ArrayList<FVariable>()] with add root FlatRoot;
+    FVariable contributes this when isNonFixedParameter() && shouldContribute()
+    to FClass.nonFixedParameters() for myFClass();
+
+    syn boolean FAbstractVariable.isNonFixedParameter() = false;
+    eq FStringVariable.isNonFixedParameter()            = false;
+    eq FVariable.isNonFixedParameter()                  = isParameter() && !fixedAttribute();
+
 	syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
 	syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
 		ArrayList<FVariable> l = new ArrayList<FVariable>();
@@ -726,11 +736,14 @@ aspect FlatAPI {
 	syn lazy ArrayList<FVariable> FClass.stringOutputs() =
       intersectFVColl(outputs(), strings());
 
-    syn lazy int FClass.numScalarEquations() {
-    	int res = 0;
-    	for (FAbstractEquation e : equations())
-    		res += e.numScalarEquations();
-    	return res;
+    syn int FClass.numScalarEquations() {
+       int res = 0;
+       for (FAbstractEquation e : equations())
+               res += e.numScalarEquations();
+        for (FVariable fv : getFVariables())
+            if (!fv.variability().parameterOrLess() && fv.hasBindingExp())
+                res += fv.getBindingExp().type().numScalarElements();
+       return res;
     }
     syn lazy int FClass.numScalarEquationsAtInitialization() {
     	int res = 0;
@@ -765,9 +778,25 @@ aspect FlatAPI {
 		return l;
 	}
 
-	syn int FAbstractEquation.numScalarEquations() = 1;
-	eq FEquation.numScalarEquations()           = getLeft().size().numElements();
-	eq FConnectClause.numScalarEquations()      = getConnector1().size().numElements();
+    syn int FClass.numScalarVariables() {
+        int res = 0;
+        for (FVariable fv : getFVariables())
+            if (!fv.variability().parameterOrLess())
+                res += fv.type().numScalarElements();
+        return res;
+    }
+
+    syn int FType.numScalarElements() = size().numElements();
+    eq FRecordType.numScalarElements() {
+        int res = 0;
+        for (FRecordComponentType c : getComponents())
+            res += c.getFType().numScalarElements();
+        return res * super.numScalarElements();
+    }
+
+    syn int FAbstractEquation.numScalarEquations() = 1;
+    eq FEquation.numScalarEquations()           = getLeft().type().numScalarElements();
+    eq FConnectClause.numScalarEquations()      = getConnector1().type().numScalarElements();
 	eq FAlgorithm.numScalarEquations() {
 		ArrayList<FVariable> assignedVars = new ArrayList<FVariable>();
 		for (FIdUse use : assignedFIdUses()) {
@@ -785,9 +814,10 @@ aspect FlatAPI {
 	eq InstForClauseE.numScalarEquations()      = 
 		numScalarEqnsInList(getFAbstractEquations()) * numForElems(getInstForIndexs());
 	eq FFunctionCallEquation.numScalarEquations() {
-		 int res = 0;
-		 for (FFunctionCallLeft l : getLefts())
-			 res += l.numScalarVars();
+		int res = 0;
+		for (FFunctionCallLeft l : getLefts())
+            if (l.hasFExp())
+                res += l.getFExp().type().numScalarElements();
 		 return res;
 	}
 	
@@ -1003,8 +1033,9 @@ aspect FlatAPI {
 	
 	syn lazy boolean FVariable.isDependentParameter() = 
 		isParameter() && !isIndependentParameter();
-	syn lazy boolean FVariable.isIndependentParameter() = isParameter() && 
-		!hasParameterEquation() && (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
+	syn lazy boolean FVariable.isIndependentParameter() = 
+	    isParameter() && !isNonFixedParameter() && !hasParameterEquation() && 
+	    (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
 
 	syn boolean FExp.isIndependentParameterExp() = isConstantExp() && !hasCompositeFunc();
 	
@@ -1534,7 +1565,7 @@ aspect Attributes {
 	syn FExp    FVariable.fixedAttributeExp()           = attributeExp(FAttribute.FIXED);
 	syn CValue  FVariable.fixedAttributeCValue()        = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	eq          FStringVariable.fixedAttributeCValue()  = CValue.UNKNOWN;
-	syn boolean FVariable.fixedAttribute()              = fixedAttributeCValue().booleanValue();
+	syn boolean FVariable.fixedAttribute()              = fixedAttributeCValue().reduceBooleanOr();
 		
 	// Nominal attribute
 	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
@@ -1626,7 +1657,7 @@ aspect FVariableUses {
 	coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
 		with add root FlatRoot;
 	
-	FIdUseExp contributes this when !(getParent() instanceof FDerExp) to 
+	FIdUseExp contributes this when !isDerUse() to 
 		FAbstractVariable.uses() for myFV();
 	
 	/**
@@ -1738,8 +1769,7 @@ aspect FVariableUses {
 		with addAll root FlatRoot;
 	
 	FIdUseExp contributes boundParameters() 
-		when !(getParent() instanceof FDerExp) && !myFV().isUnknown() && 
-		     myFV().isParameter()
+		when !isDerUse() && !myFV().isUnknown() && myFV().isParameter()
 		to FAbstractVariable.dependentParameters() for myFV();
 	
 	syn lazy ArrayList<FRealVariable> FAbstractVariable.dependentRealParameters() =
@@ -1762,10 +1792,9 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.retrieveInputs() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
-		myFV().isInput() to 
-		FAbstractEquation.retrieveInputs() for myFEquation();
+    FIdUseExp contributes (FVariable) myFV() when 
+        !myFV().isUnknown() && isNormalUse() && myFV().isInput() to 
+        FAbstractEquation.retrieveInputs() for myFEquation();
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.inputs() = 
 	    retrieveInputs();
@@ -1834,6 +1863,28 @@ aspect FVariableUses {
 		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().discreteStringVariables(),algebraicVariables()));
 
 
+    /**
+     * Check if this use is a normal use, i.e. not a der() or pre() use.
+     */
+    inh boolean FIdUseExp.isNormalUse();
+    eq FPreExp.getChild().isNormalUse()  = false;
+    eq FDerExp.getChild().isNormalUse()  = false;
+    eq BaseNode.getChild().isNormalUse() = true;
+
+    /**
+     * Check if this is the use of a der() expression.
+     */
+    inh boolean FIdUseExp.isDerUse();
+    eq FDerExp.getChild().isDerUse()  = true;
+    eq BaseNode.getChild().isDerUse() = false;
+
+    /**
+     * Check if this is the use of a pre() expression.
+     */
+    inh boolean FIdUseExp.isPreUse();
+    eq FPreExp.getChild().isPreUse()  = true;
+    eq BaseNode.getChild().isPreUse() = false;
+
 
 	/**
 	 * \brief Collection attribute returning all derivative variables (FDerivativeVariables)
@@ -1842,7 +1893,7 @@ aspect FVariableUses {
 	coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
 		[new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
 
-	FDerExp contributes (FDerivativeVariable)myFV() when !myFV().isUnknown() && 
+	FDerExp contributes (FDerivativeVariable) myFV() when !myFV().isUnknown() && 
 		myFV().isDerivativeVariable() to 
 		FAbstractEquation.derivativeVariables() for myFEquation();
 
@@ -1853,9 +1904,9 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-	    !(getParent() instanceof FDerExp) && myFV().isDifferentiatedVariable() to 
-		FAbstractEquation.differentiatedRealVariables() for myFEquation();
+    FIdUseExp contributes (FVariable) myFV() when 
+        !myFV().isUnknown() && !isDerUse() && myFV().isDifferentiatedVariable() to 
+        FAbstractEquation.differentiatedRealVariables() for myFEquation();
 
 	/**
 	 * \brief Collection attribute returning all discrete variables (FVariables)
@@ -1864,10 +1915,20 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-	    !(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) && 
-	    myFV().isDiscreteVariable() to 
-		FAbstractEquation.discreteVariables() for myFEquation();
+    FIdUseExp contributes (FVariable) myFV() when 
+        !myFV().isUnknown() && isNormalUse() && myFV().isDiscreteVariable() to 
+        FAbstractEquation.discreteVariables() for myFEquation();
+
+    /**
+     * \brief Collection attribute returning all non-fixed parameters (FVariables)
+     * referenced in an equation.
+     */
+    coll LinkedHashSet<FVariable> FAbstractEquation.nonFixedParameters()
+        [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
+
+    FIdUseExp contributes (FVariable) myFV() when
+        !myFV().isUnknown() && isNormalUse() && myFV().isNonFixedParameter() to
+        FAbstractEquation.nonFixedParameters() for myFEquation();
 
 	/**
 	 * \brief Collection attribute returning all pre variables (FPreVariable)
@@ -1876,9 +1937,9 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.discretePreVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-	FPreExp contributes (FVariable)myFV() when !myFV().isUnknown() && 
-		myFV().isPreVariable() to 
-		FAbstractEquation.discretePreVariables() for myFEquation();
+    FPreExp contributes (FVariable) myFV() when 
+        !myFV().isUnknown() && myFV().isPreVariable() to 
+        FAbstractEquation.discretePreVariables() for myFEquation();
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {
 		LinkedHashSet<FVariable> l = new LinkedHashSet<FVariable>();
@@ -1979,9 +2040,9 @@ aspect LinearFVariables {
     coll Set<FIdUseExp> FAbstractEquation.collectUses() 
 		[new LinkedHashSet<FIdUseExp>()] with add root FAbstractEquation;
 
-	FIdUseExp contributes this when !myFV().isUnknown() && 
-		!(getParent() instanceof FDerExp) && !(getParent() instanceof FPreExp) to 
-		FAbstractEquation.collectUses() for myFEquation();
+    FIdUseExp contributes this when 
+        !myFV().isUnknown() && isNormalUse() to 
+        FAbstractEquation.collectUses() for myFEquation();
     
     syn Set<FIdUseExp> FAbstractEquation.collectUses(Set<FVariable> vars) {
     	HashSet<FIdUseExp> set = new HashSet<FIdUseExp>();

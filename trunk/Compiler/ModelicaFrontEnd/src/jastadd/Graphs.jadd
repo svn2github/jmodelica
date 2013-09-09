@@ -749,6 +749,10 @@ public class BiPGraph {
 		DISCRETE_PRE_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
+	    },
+	    NON_FIXED_PARAMETERS {
+	        public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
+	        public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
 		};
 		
 		public abstract Collection<? extends FVariable> variables(FClass c);

@@ -475,7 +475,7 @@ aspect ConstantEvaluation {
     	public static final CValueBoolean FALSE = new CValueBoolean(false);
 
     	/** A CValueBolean with the value <code>true</code>, for conveniance. */
-    	public static final CValueBoolean TRUE  = new CValueBoolean(false);
+    	public static final CValueBoolean TRUE  = new CValueBoolean(true);
     	
         private boolean value;
 

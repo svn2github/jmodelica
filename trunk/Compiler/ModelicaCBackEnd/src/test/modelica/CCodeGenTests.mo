@@ -10065,4 +10065,48 @@ Auml: Ä\nbell: \a");
 end TestStringWithUnicode1;
 
 
+model CFixedFalseParam1
+    Real x, y;
+    parameter Real p(fixed=false);
+initial equation
+    2*x = p;
+    x = 3;
+equation
+    der(x) = -x;
+    y = x * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFixedFalseParam1",
+            description="Test of C code generation of parameters with fixed = false.",
+            template="
+***Derivatives:
+$C_ode_derivatives$
+***Initialization:
+$C_ode_initialization$
+***Param:
+$C_DAE_initial_dependent_parameter_assignments$
+",
+            generatedCode="
+***Derivatives:
+    model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_3 = - _x_0;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_1 = _x_0 * _time;
+
+***Initialization:
+    model_ode_guards(jmi);
+    _x_0 = 3;
+    _der_x_3 = - _x_0;
+    _y_1 = _x_0 * _time;
+    _p_2 = jmi_divide_equation(jmi, (- 2 * _x_0),(- 1.0),\"(- 2 * x) / (- 1.0)\");
+
+***Param:
+")})));
+end CFixedFalseParam1;
+
+
 end CCodeGenTests;

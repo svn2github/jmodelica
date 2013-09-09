@@ -1683,13 +1683,15 @@ aspect TransformCanonical {
 	
 	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_INIT = 
 			EnumSet.of(BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
 	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_ALL = 
 			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
 					   BiPGraph.VarType.ALGEBRAIC_VARIABLES, 
 					   BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
 	private void FClass.computeMatchingsAndBLTWrapped() {
         log.info("Flat tree before index reduction and BLT:");
@@ -4533,13 +4535,14 @@ aspect TransformCanonicalErrorCheck {
 	/**
 	 * The number of unknowns in the DAE initialization system is the 
 	 * number of unknowns in the DAE system plus the number of differentiated
-	 * variables plus the number of (pre) discrete variables.
-	 */
-	syn int FClass.numDAEInitVariables() = numDAEVariables() + 
-		numDifferentiatedRealVariables() + numDiscretePreVariables();
-	
-	public void FClass.checkFClassDimensions() {
-		// Check dimensions of DAE
+        * variables plus the number of (pre) discrete variables.
+        */
+       syn int FClass.numDAEInitVariables() = numDAEVariables() +
+               numDifferentiatedRealVariables() + numDiscretePreVariables() +
+               numNonFixedParameters();
+
+       public void FClass.checkFClassDimensions() {
+               // Check dimensions of DAE
 		int n_eq_F = numDAEEquations();
 		int n_vars_F = numDAEVariables();
 		if (n_eq_F != n_vars_F) 
