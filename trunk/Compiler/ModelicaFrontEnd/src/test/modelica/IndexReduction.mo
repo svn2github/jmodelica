@@ -314,7 +314,7 @@ model IndexReduction4_Err
   Real x2;
 equation
   der(x1) + der(x2) = 1;
-  x1 + F(x2) = 1; 
+  x1 + F(x2) = 1;
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
@@ -1856,5 +1856,40 @@ equation
 end IndexReduction.IndexReduction41_Homotopy;
 ")})));
 end IndexReduction41_Homotopy;
+
+model IndexReduction42_Err
+  Real x1;
+  Real x2;
+algorithm
+  x1 := x2;
+equation
+  der(x1) + der(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IndexReduction42_Err",
+            description="Test error messages for algorithms.",
+			inline_functions="none",
+			algorithms_as_functions=false,
+            errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Cannot differentate the equation:
+   algorithm
+ x1 := 0.0;
+ x1 := x2;
+
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    algorithm
+     x1 := 0.0;
+     x1 := x2;
+")})));
+end IndexReduction42_Err;
 
 end IndexReduction;

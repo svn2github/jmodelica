@@ -100,7 +100,7 @@ aspect FlatVariability {
 		for (FFunctionCallLeft fl : getLefts()) {
 			if (fl.hasFExp()) {
 				var = var.combine(fl.getFExp().variability());
-			}	
+			}
 		}
 		// Check all input arguments
 		for (FVariable fv : referencedFVariablesInRHS()) {
@@ -109,6 +109,16 @@ aspect FlatVariability {
 		return var;
 	}
 	eq FWhenEquation.variability() = fDiscrete();
+	eq FAlgorithm.variability() {
+		FTypePrefixVariability var = fConstant();
+		for (FVariable fv : referencedFVariablesInLHS()) {
+			var = var.combine(fv.variability());
+		}
+		for (FVariable fv : referencedFVariablesInRHS()) {
+			var = var.combine(fv.variability());
+		}
+		return var;
+	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
 	syn boolean FAbstractEquation.isParameter() = false;
@@ -129,6 +139,11 @@ aspect FlatVariability {
 	eq FWhenEquation.isParameter() = variability().parameterVariability();
 	eq FWhenEquation.isDiscrete() = variability().discreteVariability();
 	eq FWhenEquation.isContinuous() = variability().continuousVariability();
+	
+	eq FAlgorithm.isConstant() = variability().constantVariability();
+	eq FAlgorithm.isParameter() = variability().parameterVariability();
+	eq FAlgorithm.isDiscrete() = variability().discreteVariability();
+	eq FAlgorithm.isContinuous() = variability().continuousVariability();
 	
 	syn boolean FAbstractVariable.isConstant()   = false;
     syn boolean FAbstractVariable.isParameter()  = false;
