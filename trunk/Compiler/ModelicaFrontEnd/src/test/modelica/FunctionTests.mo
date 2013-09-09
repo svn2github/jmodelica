@@ -4823,6 +4823,64 @@ end FunctionTests.ArrayOutputScalarization23;
 end ArrayOutputScalarization23;
 
 
+model ArrayOutputScalarization24
+    function f
+        input Real a;
+        output Real[2] b;
+    algorithm
+        b := { a, a*a };
+    end f;
+        
+    Real x(start = 1);
+    Real y;
+    Real z[2];
+initial equation
+    y = x / 2;
+    z = x .+ f(y);
+equation
+    der(x) = z[1];
+    der(y) = z[2];
+    der(z) = { -x, -y };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization24",
+			description="Scalarize use of function returning array in initial equations",
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization24
+ Real x(start = 1);
+ Real y;
+ Real z[1];
+ Real z[2];
+ parameter Real temp_1[1](fixed = false);
+ parameter Real temp_1[2](fixed = false);
+initial equation 
+ y = x / 2;
+ ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization24.f(y);
+ z[1] = x .+ temp_1[1];
+ z[2] = x .+ temp_1[2];
+ z[1] = 0.0;
+equation
+ der(x) = z[1];
+ der(y) = z[2];
+ der(z[1]) = - x;
+ der(z[2]) = - y;
+
+public
+ function FunctionTests.ArrayOutputScalarization24.f
+  input Real a;
+  output Real[2] b;
+ algorithm
+  b[1] := a;
+  b[2] := a * a;
+  return;
+ end FunctionTests.ArrayOutputScalarization24.f;
+
+end FunctionTests.ArrayOutputScalarization24;
+")})));
+end ArrayOutputScalarization24;
+
+
 
 /* ======================= Unknown array sizes ======================*/
 

@@ -243,6 +243,13 @@ aspect Constructors {
 	public FIdUse.FIdUse(String name) {
 		this(new FQNameString(name));
 	}
+    
+    /**
+     * \brief Constructs an FIdDecl with the given name.
+     */
+    public FIdDecl.FIdDecl(String name) {
+        this(new FQNameString(name));
+    }
 	
 	/**
 	 * \brief Constructs an FIdUse that refers to a cell of the variable with the given name.
