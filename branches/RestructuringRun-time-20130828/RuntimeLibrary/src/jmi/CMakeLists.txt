@@ -53,4 +53,10 @@ add_library(jm_ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
 install(TARGETS jm_jmi jm_ModelicaExternalC
     DESTINATION "${JMODELICA_HOME}/lib")
 
+install(DIRECTORY "${CMAKE_CURRENT_COURCE_DIR}"
+    DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"
+    FILES_MATCHING PATTERN "*.h")
+    
+install(FILES "${MSLCSOURCES}/ModelicaStandardTables.h"
+    DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary")
 

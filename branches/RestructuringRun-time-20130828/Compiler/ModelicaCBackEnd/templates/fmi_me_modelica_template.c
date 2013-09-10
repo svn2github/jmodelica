@@ -354,15 +354,6 @@ int jmi_new(jmi_t** jmi) {
 		      *model_init_R0, N_eq_R0, NULL,
 		      0, NULL, NULL);
 
-	/* Initialize the Opt interface */
-	jmi_opt_init(*jmi, *model_opt_Ffdp, N_eq_opt_Ffdp, NULL, 0, NULL, NULL,
-		     *model_opt_J, N_eq_L, NULL, 0, NULL, NULL,
-		     *model_opt_L, N_eq_L, NULL, 0, NULL, NULL,
-		     *model_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,
-		     *model_opt_Cineq, N_eq_Cineq, NULL, 0, NULL, NULL,
-		     *model_opt_Heq, N_eq_Heq, NULL, 0, NULL, NULL,
-		     *model_opt_Hineq, N_eq_Hineq, NULL, 0, NULL, NULL);
-
 	return 0;
 }
 

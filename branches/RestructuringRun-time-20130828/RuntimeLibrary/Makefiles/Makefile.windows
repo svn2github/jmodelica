@@ -125,6 +125,7 @@ SHARED_LDFLAGS = -shared -pthread
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
+RUNTIMELIBRARY_INC_DIR = ${JMODELICA_HOME}/include/RuntimeLibrary
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
@@ -137,13 +138,13 @@ LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && 
 # Libraries necessary to link with jmi
 LIBS_FMUME = -ljm_fmi_me -ljm_jmi -ljm_ModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -lstdc++
 LIBS_FMUCS = -ljm_fmi_cs -ljm_fmi_me -ljm_jmi -ljm_ModelicaExternalC -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -lstdc++
-LIBS_IPOPT = -ljm_fmi_me -ljm_ModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial 
+LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial 
 
 #LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(JMI_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
+INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))

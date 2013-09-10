@@ -11,3 +11,7 @@ set(FMI_CSSources
 add_library(jm_fmi_cs STATIC ${FMI_CSSources})
 
 install(TARGETS jm_fmi_cs DESTINATION "${JMODELICA_HOME}/lib")
+
+install(DIRECTORY "${CMAKE_CURRENT_COURCE_DIR}"
+    DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"
+    FILES_MATCHING PATTERN "*.h")

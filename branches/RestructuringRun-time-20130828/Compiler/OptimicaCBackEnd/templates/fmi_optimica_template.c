@@ -16,24 +16,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "fmiCSFunctions.h"
-#include "fmi1_functions.h"
+#include "fmiModelFunctions.h"
 #include <jmi.h>
-#include <jmi_block_residual.h>
-#include <fmi1_me.h>
-#include <fmi1_cs.h>
+#include "fmi1_me.h"
 #include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
-$external_func_includes$
-
 #define MODEL_IDENTIFIER $C_model_id$
 #define C_GUID $C_guid$
-
-static int model_ode_guards_init(jmi_t* jmi);
-static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res);
-static int model_ode_initialize(jmi_t* jmi);
 
 static const int N_real_ci = $n_real_ci$;
 static const int N_real_cd = $n_real_cd$;
@@ -71,14 +62,9 @@ static const int N_boolean_u = $n_boolean_u$;
 static const int N_string_d = $n_string_d$;
 static const int N_string_u = $n_string_u$;
 
-static const int N_ext_objs = $n_ext_objs$;
-
 static const int N_sw = $n_switches$;
 static const int N_eq_F = $n_equations$;
 static const int N_eq_R = $n_event_indicators$;
-
-static const int N_dae_blocks = $n_dae_blocks$;
-static const int N_dae_init_blocks = $n_dae_init_blocks$;
 static const int N_guards = $n_guards$;
 
 static const int N_eq_F0 = $n_equations$ + $n_initial_equations$;
@@ -88,14 +74,17 @@ static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
-static const int N_eq_J = 0;
-static const int N_eq_L = 0;
-static const int N_eq_opt_Ffdp = 0;
-static const int N_eq_Ceq = 0;
-static const int N_eq_Cineq = 0;
-static const int N_eq_Heq = 0;
-static const int N_eq_Hineq = 0;
-static const int N_t_p = 0;
+static const int N_dae_blocks = $n_dae_blocks$;
+static const int N_dae_init_blocks = $n_dae_init_blocks$;
+
+static const int N_eq_J = $n_j$;
+static const int N_eq_L = $n_l$;
+static const int N_eq_opt_Ffdp = $n_free_dependent_real_parameters$;
+static const int N_eq_Ceq = $n_ceq$;
+static const int N_eq_Cineq = $n_cineq$;
+static const int N_eq_Heq = $n_heq$;
+static const int N_eq_Hineq = $n_hineq$;
+static const int N_t_p = $n_tp$;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
 
@@ -114,7 +103,11 @@ $C_DAE_relations$
 
 $C_variable_aliases$
 
-$C_runtime_option_map$
+$C_point_variable_aliases$
+
+const char *fmi_runtime_options_map_names[] = { NULL };
+const int fmi_runtime_options_map_vrefs[] = { -1 };
+const int fmi_runtime_options_map_length = 1;
 
 #define _real_ci(i) ((*(jmi->z))[jmi->offs_real_ci+i])
 #define _real_cd(i) ((*(jmi->z))[jmi->offs_real_cd+i])
@@ -133,7 +126,6 @@ $C_runtime_option_map$
   j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
 #define _real_w_p(j,i) ((*(jmi->z))[jmi->offs_real_w_p + \
   j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
-
 #define _real_d(i) ((*(jmi->z))[jmi->offs_real_d+i])
 #define _integer_d(i) ((*(jmi->z))[jmi->offs_integer_d+i])
 #define _integer_u(i) ((*(jmi->z))[jmi->offs_integer_u+i])
@@ -166,22 +158,7 @@ $C_records$
 
 $C_function_headers$
 
-$CAD_function_headers$
-
-$C_dae_blocks_residual_functions$
-
-$C_dae_init_blocks_residual_functions$
-
-$CAD_dae_blocks_residual_functions$
-
-$CAD_dae_init_blocks_residual_functions$
-
 $C_functions$
-
-$CAD_functions$
-
-$C_export_functions$
-$C_export_wrappers$
 
 static int model_ode_guards(jmi_t* jmi) {
   $C_ode_guards$
@@ -194,21 +171,18 @@ $C_ode_time_events$
 }
 
 static int model_ode_derivatives(jmi_t* jmi) {
-  int ef = 0;
   $C_ode_derivatives$
-  return ef;
+  return 0;
 }
 
 static int model_ode_derivatives_dir_der(jmi_t* jmi) {
-  int ef = 0;
   $CAD_ode_derivatives$
-  return ef;
+  return 0;
 }
 
 static int model_ode_outputs(jmi_t* jmi) {
-  int ef = 0;
   $C_ode_outputs$
-  return ef;
+  return 0;
 }
 
 static int model_ode_guards_init(jmi_t* jmi) {
@@ -217,18 +191,9 @@ static int model_ode_guards_init(jmi_t* jmi) {
 }
 
 static int model_ode_initialize(jmi_t* jmi) {
-  int ef = 0;
   $C_ode_initialization$
-  return ef;
+  return 0;
 }
-
-
-static int model_ode_initialize_dir_der(jmi_t* jmi) {
-  int ef = 0;
-  /* This function is not needed - no derivatives of the initialization system is exposed.*/
-  return ef;
-}
-
 
 /*
  * The res argument is of type pointer to a vector. This means that
@@ -282,68 +247,68 @@ $C_DAE_initial_event_indicator_residuals$
 }
 
 static int model_opt_Ffdp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_dependent_free_parameter_residuals$
+	return 0;
 }
 
 static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_cost_function$
+	return 0;
 }
 
 static int model_opt_L(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_lagrange_integrand$
+	return 0;
 }
 
 static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_path_equality_constraints$
+	return 0;
 }
 
 static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_path_inequality_constraints$
+	return 0;
 }
 
 static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_point_equality_constraints$
+	return 0;
 }
 
 static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
+$C_Opt_point_inequality_constraints$
+	return 0;
 }
 
 int jmi_new(jmi_t** jmi) {
 
-  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
-	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
-	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
-	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
-	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
-           N_sw,N_sw_init,N_guards,N_guards_init,
-	   N_dae_blocks,N_dae_init_blocks,
-	   N_initial_relations, (int (*))DAE_initial_relations,
-	   N_relations, (int (*))DAE_relations,
-	   Scaling_method, N_ext_objs);
 
-  $C_dae_add_blocks_residual_functions$
-
-  $C_dae_init_add_blocks_residual_functions$
-
-  $CAD_dae_add_blocks_residual_functions$
-
-  $CAD_dae_init_add_blocks_residual_functions$
+	  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
+		   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
+		   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
+		   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
+		   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
+		   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
+		   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
+	           N_sw,N_sw_init,N_guards,N_guards_init,
+		   N_dae_blocks,N_dae_init_blocks,
+		   N_initial_relations, (int (*))DAE_initial_relations,
+		   N_relations, (int (*))DAE_relations,
+		   Scaling_method, -1);
 
 	/* Initialize the DAE interface */
 	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
-                     *model_dae_dir_dF,
-        		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
-        		     CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
-        		     CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
-        		     CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
-        		     CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
+		     *model_dae_dir_dF,
+		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
+		     CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
+		     CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
+		     CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
+		     CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
 		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
-		     	 *model_ode_derivatives_dir_der,
-                     *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
-                     *model_ode_guards_init,*model_ode_next_time_event);
+		     *model_ode_derivatives_dir_der,
+                     *model_ode_outputs,*model_ode_initialize,*model_ode_guards,*model_ode_guards_init,
+                     *model_ode_next_time_event);
 
 	/* Initialize the Init interface */
 	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
@@ -360,7 +325,6 @@ int jmi_new(jmi_t** jmi) {
 }
 
 int jmi_terminate(jmi_t* jmi) {
-$C_destruct_external_object$
 	return 0;
 }
 
@@ -375,126 +339,112 @@ const char *jmi_get_model_identifier() { return "$C_model_id$"; }
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* FMI for co-simulation Functions*/
+/* FMI Functions*/
 
 /* Inquire version numbers of header files */
-DllExport const char* fmiGetTypesPlatform() {
-    return fmi1_cs_get_types_platform();
+DllExport const char* fmiGetModelTypesPlatform() {
+    return fmi1_me_get_model_types_platform();
 }
 DllExport const char* fmiGetVersion() {
-    return fmi1_cs_get_version();
-}
-
-DllExport void fmiFreeSlaveInstance(fmiComponent c) {
-    fmi1_cs_free_slave_instance(c);
+    return fmi1_me_get_version();
 }
 
 /* Creation and destruction of model instances and setting debug status */
-DllExport fmiComponent fmiInstantiateSlave(fmiString instanceName, fmiString GUID, fmiString fmuLocation, fmiString mimeType, 
-                                   fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
-                                   fmiBoolean loggingOn) {
-    return fmi1_cs_instantiate_slave(instanceName, GUID, fmuLocation, mimeType, timeout, visible, interactive, functions, loggingOn);
+DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
+    return fmi1_me_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 
-
-DllExport fmiStatus fmiTerminateSlave(fmiComponent c) {
-    return fmi1_cs_terminate_slave(c);
-}
-
-DllExport fmiStatus fmiInitializeSlave(fmiComponent c, fmiReal tStart,
-                                    fmiBoolean StopTimeDefined, fmiReal tStop){
-    return fmi1_cs_initialize_slave(c,tStart,StopTimeDefined,tStop);
+DllExport void fmiFreeModelInstance(fmiComponent c) {
+    fmi1_me_free_model_instance(c);
 }
 
 DllExport fmiStatus fmiSetDebugLogging(fmiComponent c, fmiBoolean loggingOn) {
-    return fmi1_cs_set_debug_logging(c, loggingOn);
+    return fmi1_me_set_debug_logging(c, loggingOn);
 }
 
-DllExport fmiStatus fmiDoStep(fmiComponent c,
-			      fmiReal      currentCommunicationPoint,
-			      fmiReal      communicationStepSize,
-			      fmiBoolean   newStep) {
-  return fmi1_cs_do_step(c, currentCommunicationPoint, communicationStepSize, newStep);
+
+/* Providing independent variables and re-initialization of caching */
+DllExport fmiStatus fmiSetTime(fmiComponent c, fmiReal fmitime) {
+    return fmi1_me_set_time(c, fmitime);
 }
 
-DllExport fmiStatus fmiCancelStep(fmiComponent c){
-    return fmi1_cs_cancel_step(c);
+DllExport fmiStatus fmiSetContinuousStates(fmiComponent c, const fmiReal x[], size_t nx) {
+    return fmi1_me_set_continuous_states(c, x, nx);
 }
 
-DllExport fmiStatus fmiResetSlave(fmiComponent c) {
-    return fmi1_cs_reset_slave(c);
-}
-
-DllExport fmiStatus fmiGetRealOutputDerivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]){
-    return fmi1_cs_get_real_output_derivatives(c, vr, nvr, order, value);
-}
-
-DllExport fmiStatus fmiSetRealInputDerivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
-    return fmi1_cs_set_real_input_derivatives(c,vr,nvr,order,value);
+DllExport fmiStatus fmiCompletedIntegratorStep(fmiComponent c, fmiBoolean* callEventUpdate) {
+    return fmi1_me_completed_integrator_step(c, callEventUpdate);
 }
 
 DllExport fmiStatus fmiSetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
-    return fmi1_cs_set_real(c, vr, nvr, value);
+    return fmi1_me_set_real(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
-    return fmi1_cs_set_integer(c, vr, nvr, value);
+    return fmi1_me_set_integer(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
-    return fmi1_cs_set_boolean(c, vr, nvr, value);
+    return fmi1_me_set_boolean(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiSetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString  value[]) {
-    return fmi1_cs_set_string(c, vr, nvr, value);
+    return fmi1_me_set_string(c, vr, nvr, value);
+}
+
+
+/* Evaluation of the model equations */
+DllExport fmiStatus fmiInitialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
+    return fmi1_me_initialize(c, toleranceControlled, relativeTolerance, eventInfo);
+}
+
+DllExport fmiStatus fmiGetDerivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
+    return fmi1_me_get_derivatives(c, derivatives, nx);
+}
+
+DllExport fmiStatus fmiGetEventIndicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+    return fmi1_me_get_event_indicators(c, eventIndicators, ni);
 }
 
 DllExport fmiStatus fmiGetReal(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
-    return fmi1_cs_get_real(c, vr, nvr, value);
+    return fmi1_me_get_real(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetInteger(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
-    return fmi1_cs_get_integer(c, vr, nvr, value);
+    return fmi1_me_get_integer(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetBoolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
-    return fmi1_cs_get_boolean(c, vr, nvr, value);
+    return fmi1_me_get_boolean(c, vr, nvr, value);
 }
 
 DllExport fmiStatus fmiGetString(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
-    return fmi1_cs_get_string(c, vr, nvr, value);
+    return fmi1_me_get_string(c, vr, nvr, value);
 }
 
-DllExport fmiStatus fmiGetStatus(fmiComponent c, const fmiStatusKind s, fmiStatus* value){
-    return fmi1_cs_get_status(c,s,value);
+DllExport jmi_t* fmiGetJMI(fmiComponent c) {
+    return fmi1_me_get_jmi_t(c);
 }
 
-DllExport fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s, fmiReal* value){
-    return fmi1_cs_get_real_status(c, s, value);
+DllExport fmiStatus fmiEventUpdate(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+    return fmi1_me_event_update(c, intermediateResults, eventInfo);
 }
 
-DllExport fmiStatus fmiGetIntegerStatus(fmiComponent c, const fmiStatusKind s, fmiInteger* value){
-    return fmi1_cs_get_integer_status(c, s, value);
+DllExport fmiStatus fmiGetContinuousStates(fmiComponent c, fmiReal states[], size_t nx) {
+    return fmi1_me_get_continuous_states(c, states, nx);
 }
 
-DllExport fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s, fmiBoolean* value){
-    return fmi1_cs_get_boolean_status(c, s, value);
+DllExport fmiStatus fmiGetNominalContinuousStates(fmiComponent c, fmiReal x_nominal[], size_t nx) {
+    return fmi1_me_get_nominal_continuous_states(c, x_nominal, nx);
 }
 
-DllExport fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s, fmiString* value){
-    return fmi1_cs_get_string_status(c,s,value);
+DllExport fmiStatus fmiGetStateValueReferences(fmiComponent c, fmiValueReference vrx[], size_t nx) {
+    return fmi1_me_get_state_value_references(c, vrx, nx);
 }
 
-/* NOTE IN THE FILE FMICSFUNCTIONS.H WHY? */
-/*
-DLLExport fmiStatus fmiSaveState(fmiComponent c, size_t index){
-    return fmi_save_state(c,index);
+DllExport fmiStatus fmiTerminate(fmiComponent c) {
+    return fmi1_me_terminate(c);
 }
-
-DLLExport fmiStatus fmiRestoreState(fmiComponent c, size_t index){
-    return fmi_restore_state(c,index);
-}
-*/
 
 #ifdef __cplusplus
 }

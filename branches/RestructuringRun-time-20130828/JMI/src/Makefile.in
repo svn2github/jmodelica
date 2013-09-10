@@ -500,7 +500,7 @@ libfmi_la_SOURCES = fmi1_me.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 libfmi_cs_la_SOURCES = fmi1_cs.h \
-                    fmiCSModelFunctions.h \
+                    fmiCSFunctions.h \
                     fmiCSPlatformTypes.h \
                     jmi.h \
                     fmi1_cs.c \
@@ -546,7 +546,7 @@ libModelicaExternalC_la_LDFLAGS = -no-undefined -static-libtool-libs
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/trees.c \
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/uncompr.c \
 @WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/zutil.c
-@WITH_TABLES_TRUE@libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
+@WITH_TABLES_TRUE@libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -I$(MSLCSOURCES)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
