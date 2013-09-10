@@ -88,13 +88,6 @@ static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
-static const int N_eq_J = 0;
-static const int N_eq_L = 0;
-static const int N_eq_opt_Ffdp = 0;
-static const int N_eq_Ceq = 0;
-static const int N_eq_Cineq = 0;
-static const int N_eq_Heq = 0;
-static const int N_eq_Hineq = 0;
 static const int N_t_p = 0;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
@@ -279,34 +272,6 @@ $C_DAE_initial_dependent_parameter_assignments$
 static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_event_indicator_residuals$
 	return 0;
-}
-
-static int model_opt_Ffdp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_L(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
 }
 
 int jmi_new(jmi_t** jmi) {

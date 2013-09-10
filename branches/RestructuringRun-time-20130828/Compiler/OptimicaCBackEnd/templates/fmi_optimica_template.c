@@ -77,13 +77,6 @@ static const int N_guards_init = $n_guards_init$;
 static const int N_dae_blocks = $n_dae_blocks$;
 static const int N_dae_init_blocks = $n_dae_init_blocks$;
 
-static const int N_eq_J = $n_j$;
-static const int N_eq_L = $n_l$;
-static const int N_eq_opt_Ffdp = $n_free_dependent_real_parameters$;
-static const int N_eq_Ceq = $n_ceq$;
-static const int N_eq_Cineq = $n_cineq$;
-static const int N_eq_Heq = $n_heq$;
-static const int N_eq_Hineq = $n_hineq$;
 static const int N_t_p = $n_tp$;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
@@ -243,41 +236,6 @@ $C_DAE_initial_dependent_parameter_assignments$
 
 static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
 $C_DAE_initial_event_indicator_residuals$
-	return 0;
-}
-
-static int model_opt_Ffdp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_dependent_free_parameter_residuals$
-	return 0;
-}
-
-static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_cost_function$
-	return 0;
-}
-
-static int model_opt_L(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_lagrange_integrand$
-	return 0;
-}
-
-static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_path_equality_constraints$
-	return 0;
-}
-
-static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_path_inequality_constraints$
-	return 0;
-}
-
-static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_point_equality_constraints$
-	return 0;
-}
-
-static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-$C_Opt_point_inequality_constraints$
 	return 0;
 }
 
