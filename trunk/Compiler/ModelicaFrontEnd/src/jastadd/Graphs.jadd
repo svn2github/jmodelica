@@ -145,12 +145,10 @@ public class EquationBlockFactory {
 		boolean isLinear = true;
 		for (SimpleEquationBlock seb : ls) {
 			for (FAbstractEquation e : seb.equations()) {
-				if (e.isReal()) {
-					if (!e.checkLinearity(activeVariables))
-						isLinear = false;
-				} else {
+				if (e.isDiscreteDAE())
 					isMixed = true;
-				}
+				if (!e.checkLinearity(activeVariables))
+					isLinear = false;
 			}
 		}
 		
@@ -823,12 +821,16 @@ public class BiPGraph {
 	}
 	
 	public boolean canMatch(Eq e, Var v) {
-		if (e.getEquation() instanceof FFunctionCallEquation ||
-				e.getEquation() instanceof FAlgorithm) {
+		FAbstractEquation equation = e.getEquation();
+		if (equation instanceof FFunctionCallEquation ||
+				equation instanceof FAlgorithm) {
 			return true;
 		}
 		// Discrete variables can only be matched to discrete equations.
-		return !(v.getVariable().isDiscrete() && e.getEquation().isContinuous());
+		// Except discrete reals in initial system.
+		return v.getVariable().isContinuous() ||
+				equation.isDiscrete() ||
+				equation.isInitial();
 	}
 	
 	public void addInsidence(Eq e, Var v) {
@@ -1768,7 +1770,7 @@ public class SolvingBiPGraph extends BiPGraph {
 	
 	@Override
 	public boolean canMatch(Eq e, Var v) {
-		return isSolved(e, v).isSolvable();
+		return super.canMatch(e, v) && isSolved(e, v).isSolvable();
 	}
 	
 	public Solvability isSolved(Eq e, Var v) {

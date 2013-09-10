@@ -225,7 +225,7 @@ aspect FlatTypeAnalysis {
 	// TODO: isInteger(), etc. for algorithm
 	
 	syn boolean FStatement.assignsOnlyReals() = true;
-	eq FAssignStmt.assignsOnlyReals()         = getRight().type().onlyContainsReal();
+	eq FAssignStmt.assignsOnlyReals()         = getLeft().type().onlyContainsReal();
 	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
 	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
 	eq FIfStmt.assignsOnlyReals()             = 

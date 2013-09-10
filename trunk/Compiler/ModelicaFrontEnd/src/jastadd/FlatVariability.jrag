@@ -124,6 +124,8 @@ aspect FlatVariability {
 	syn boolean FAbstractEquation.isParameter() = false;
 	syn boolean FAbstractEquation.isDiscrete() = false;
 	syn boolean FAbstractEquation.isContinuous() = false;
+	syn boolean FAbstractEquation.isContinuousDAE() = isContinuous() || (isReal() && isInitial());
+	syn boolean FAbstractEquation.isDiscreteDAE()   = isDiscrete() && !(isReal() && isInitial());
 	
 	eq FEquation.isConstant() = variability().constantVariability();
 	eq FEquation.isParameter() = variability().parameterVariability();
@@ -308,7 +310,6 @@ aspect FlatVariability {
 	inh boolean FExp.inDiscreteLocation();
 	eq FFunctionDecl.getChild().inDiscreteLocation()             = true;
 	eq FWhenEquation.getFAbstractEquation().inDiscreteLocation() = true;
-	eq FWhenEquation.getInitialEquation().inDiscreteLocation()   = true;
 	eq FWhenClause.getFStatement().inDiscreteLocation()          = true;
 	eq FClass.getChild().inDiscreteLocation()                    = false;
 	eq InstNode.getChild().inDiscreteLocation()                  = false;

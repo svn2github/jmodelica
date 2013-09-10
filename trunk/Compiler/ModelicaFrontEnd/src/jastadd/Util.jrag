@@ -2632,6 +2632,12 @@ aspect FlatExpressions {
     
     inh boolean FStatement.inWhen();
     eq FWhenStmt.getFIfWhenClause().inWhen() = true;
+
+    inh boolean FAbstractEquation.isInitial();
+    eq FClass.getChild().isInitial()                   = false;
+    eq FClass.getFInitialEquation().isInitial()        = true;
+    eq InstNode.getChild().isInitial()                 = false;
+    eq FWhenEquation.getInitialEquation().isInitial()  = true;
     
     /**
      * \brief Is this expression of a type that is valid for most uses?

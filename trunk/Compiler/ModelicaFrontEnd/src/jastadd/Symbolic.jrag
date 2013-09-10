@@ -65,10 +65,28 @@ aspect EquationSolve {
 	}
 	
 	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
-		for (FVariable fv : referencedFVariablesInLHS())
+		Set<FVariable> leftVars = referencedFVariablesInLHS();
+		
+		boolean inLeft = false;
+		for (FVariable fv : leftVars) {
 			if (fv.name().equals(name))
-				return Solvability.ANALYTICALLY_SOLVABLE;
-		return Solvability.UNSOLVABLE;
+				inLeft = true;
+		}
+		
+		Set<FVariable> argVars = referencedFVariablesInRHS();
+
+		boolean inArgs = false;
+		for (FVariable fv : argVars) {
+			if (fv.name().equals(name))
+				inArgs = true;
+		}
+
+		if (inLeft && !inArgs)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
 	}
 
 	syn nta FExp FEquation.solution(String name) {

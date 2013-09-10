@@ -818,27 +818,27 @@ aspect TransformCanonical {
 		
 		public Collection<FVariable> activeContinuousVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (FVariable fv : activeVariables())
-				if (fv.isContinuous())
-					l.add(fv);
+			for (SimpleEquationBlock seb : blocks)
+				if (seb.equation().isContinuousDAE())
+					l.addAll(seb.activeVariables());
 			return l;
 		}
-
+		
 		public Collection<FVariable> activeDiscreteVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (FVariable fv : activeVariables())
-				if (fv.isDiscrete())
-					l.add(fv);
+			for (SimpleEquationBlock seb : blocks)
+				if (seb.equation().isDiscreteDAE())
+					l.addAll(seb.activeVariables());
 			return l;
 		}
-
+		
 		public Collection<FAbstractEquation> continuousEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock seb : continuousEquationBlocks())
 				l.add(seb.equation());
 			return l;
 		}
-
+		
 		public Collection<FAbstractEquation> discreteEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock seb : discreteEquationBlocks())
@@ -849,16 +849,16 @@ aspect TransformCanonical {
 		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks) {
-				if (seb.equation().isContinuous())
+				if (seb.equation().isContinuousDAE())
 					l.add(seb);
 			}
 			return l;
 		}
-
+		
 		public Collection<SimpleEquationBlock> discreteEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks)
-				if (seb.equation().isDiscrete())
+				if (seb.equation().isDiscreteDAE())
 					l.add(seb);
 			return l;
 		}
@@ -1366,7 +1366,7 @@ aspect TransformCanonical {
 		
 		public void prettyPrint(PrintStream str) {
 			String prefix = isSolvable() ? "Solved" : "Non-solved";
-			str.format("%s algorithm block of %d variables:", prefix, activeVariables().size());
+			str.format("%s algorithm block of %d variables:\n", prefix, activeVariables().size());
 			str.println("Unknown variables:");
 			prettyPrintActiveVariables(str);
 			str.println("Algorithm:");

@@ -2062,6 +2062,7 @@ aspect LinearFVariables {
     	}
     	return true;
     }
+    eq FWhenEquation.checkLinearity(Set<FVariable> vars) = false;
     eq FAlgorithm.checkLinearity(Set<FVariable> vars) = false;
     
     inh boolean FExp.isLinear(Set<FVariable> vars);
