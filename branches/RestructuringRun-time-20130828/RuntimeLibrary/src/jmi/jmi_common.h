@@ -149,7 +149,6 @@ typedef struct jmi_t jmi_t;                               /**< \brief Forward de
 typedef struct fmi_t fmi_t;                               /**< \brief Forward declaration of struct. */
 typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
-typedef struct jmi_opt_t jmi_opt_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
@@ -1111,103 +1110,6 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 void jmi_delete_init(jmi_init_t** pinit);
 
 /**
- * \brief Allocates a jmi_opt_t struct.
- *
- * @param jmi A jmi_t struct.
- * @param Ffdp A function pointer to the free dependent parameters residual
- * function \f$F_{fdp}\f$.
- * @param n_eq_Ffdp Number of equations in the free dependent parameters residual
- *        \f$F_{fdp}\f$.
- * @param dFfdp Function pointer to the symbolic Jacobian of \f$F_{fdp}\f$.
- * @param dFfdp_n_nz Number of non-zeros in the symbolic jacobian of
- *        \f$F_{fdp}\f$.
- * @param dFfdp_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$F_{fdp}\f$.
- * @param dFfdp_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$F_{fdp}\f$.
- * @param J A function pointer to the generalized terminal penalty function \f$J\f$.
- * @param n_eq_J Number of generalized terminal penalty functions.
- * @param dJ Function pointer to the symbolic Jacobian of \f$J\f$.
- * @param dJ_n_nz Number of non-zeros in the symbolic jacobian of \f$J\f$.
- * @param dJ_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$J\f$.
- * @param dJ_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$J\f$.
- * @param L A function pointer to the Lagrange integrand \f$L\f$.
- * @param n_eq_L Number of Lagrange integrands.
- * @param dL Function pointer to the symbolic Jacobian of \f$L\f$.
- * @param dL_n_nz Number of non-zeros in the symbolic jacobian of \f$L\f$.
- * @param dL_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$L\f$.
- * @param dL_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$L\f$.
- * @param Ceq A function pointer to the equality path constraint residual
- * function \f$C_{eq}\f$.
- * @param n_eq_Ceq Number of equations in the equality path constraint residual
- *        \f$C_{eq}\f$.
- * @param dCeq Function pointer to the symbolic Jacobian of \f$C_{eq}\f$.
- * @param dCeq_n_nz Number of non-zeros in the symbolic jacobian of
- *        \f$C_{eq}\f$.
- * @param dCeq_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$C_{eq}\f$.
- * @param dCeq_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$C_{eq}\f$.
- * @param Cineq A function pointer to the inequality path constraint residual
- * function \f$C_{ineq}\f$.
- * @param n_eq_Cineq Number of equations in the inequality path constraint
- *        residual \f$C_{ineq}\f$.
- * @param dCineq Function pointer to the symbolic Jacobian of \f$C_{ineq}\f$.
- * @param dCineq_n_nz Number of non-zeros in the symbolic jacobian of
- *        \f$C_{ineq}\f$.
- * @param dCineq_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$C_{ineq}\f$.
- * @param dCineq_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$C_{ineq}\f$.
- * @param Heq A function pointer to the equality point constraint residual
- * function \f$H_{eq}\f$.
- * @param n_eq_Heq Number of equations in the equality point constraint residual
- *        \f$H_{eq}\f$.
- * @param dHeq Function pointer to the symbolic Jacobian of \f$H_{eq}\f$.
- * @param dHeq_n_nz Number of non-zeros in the symbolic jacobian of
- *        \f$H_{eq}\f$.
- * @param dHeq_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$H_{eq}\f$.
- * @param dHeq_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$H_{eq}\f$.
- * @param Hineq A function pointer to the inequality point constraint residual
- * function \f$H_{ineq}\f$.
- * @param n_eq_Hineq Number of equations in the inequality point constraint
- *        residual \f$H_{ineq}\f$.
- * @param dHineq Function pointer to the symbolic Jacobian of \f$H_{ineq}\f$.
- * @param dHineq_n_nz Number of non-zeros in the symbolic jacobian of
- *        \f$H_{ineq}\f$.
- * @param dHineq_row Row indices of the non-zeros in the symbolic Jacobian
- *        of \f$H_{ineq}\f$.
- * @param dHineq_col Column indices of the non-zeros in the symbolic Jacobian
- *        of \f$H_{ineq}\f$.
- * @return Error code.
- */
-int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
-         jmi_jacobian_func_t dFfdp,
-         int dfdp_n_nz, int* dfdp_row, int* dfdp_col,
-         jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
-         int dJ_n_nz, int* dJ_row, int* dJ_col,
-         jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
-         int dL_n_nz, int* dL_row, int* dL_col,
-         jmi_residual_func_t Ceq, int n_eq_Ceq,
-         jmi_jacobian_func_t dCeq,
-         int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
-         jmi_residual_func_t Cineq, int n_eq_Cineq,
-         jmi_jacobian_func_t dCineq,
-         int dCineq_n_nz, int* dCineq_row, int* dCineq_col,
-         jmi_residual_func_t Heq, int n_eq_Heq,
-         jmi_jacobian_func_t dHeq,
-         int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
-         jmi_residual_func_t Hineq, int n_eq_Hineq,
-         jmi_jacobian_func_t dHineq,
-         int dHineq_n_nz, int* dHineq_row, int* dHineq_col);
-
-/**
  * \brief The main struct of the JMI Model interface containing
  * dimension information and pointers to jmi_dae_t, jmi_init_t, and
  * jmi_opt_t structs.
@@ -1220,7 +1122,6 @@ int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
 struct jmi_t {
     jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
-    jmi_opt_t* opt;                      /**< \brief A jmi_opt_t struct pointer. */
     fmi_t* fmi;                          /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
     int n_real_ci;                       /**< \brief Number of independent constants. */
@@ -1416,27 +1317,6 @@ struct jmi_init_t {
     jmi_func_t* Fp;                      /**< \brief  A jmi_func_t struct representing \f$F_p\f$. */
     jmi_func_t* R0;                      /**< \brief  A jmi_func_t struct representing \f$R_0\f$. */
     jmi_generic_func_t eval_parameters;  /**< \brief A function pointer to a function for evaluating parameters. */
-};
-
-/**
- * \brief A struct containing functions and information about the
- * interval definition and optimization parameters for an optimization
- * problem.
- */
-struct  jmi_opt_t {
-    jmi_func_t* Ffdp;                     /**< \brief  Function pointer to the free dependent parameters residual function. */
-    jmi_func_t* J;                        /**< \brief  Function pointer to the cost function. */
-    jmi_func_t* L;                        /**< \brief  Function pointer to the Lagrange integrand. */
-    jmi_func_t* Ceq;                      /**< \brief  Function pointer to the equality path constraint residual function. */
-    jmi_func_t* Cineq;                    /**< \brief  Function pointer to the inequality path constraint residual function. */
-    jmi_func_t* Heq;                      /**< \brief  Function pointer to the equality point constraint residual function. */
-    jmi_func_t* Hineq;                    /**< \brief  Function pointer to the inequality point constraint residual function. */
-    jmi_real_t start_time;                /**< \brief  Optimization interval start time. */
-    int start_time_free;                  /**< \brief  Start time free or fixed. */
-    jmi_real_t final_time;                /**< \brief  Optimization interval final time. */
-    int final_time_free;                  /**< \brief  Final time free or fixed. */
-    int n_p_opt;                          /**< \brief  Number of parameters to optimize (in the \f$p_i\f$ vector). */
-    int *p_opt_indices;                   /**< \brief  Indices of the parameters to optimize (in the \f$p_i\f$ vector). */
 };
 
 /* @} */

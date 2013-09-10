@@ -462,7 +462,7 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_var
     
     
     
-    int n_p_opt = jmi->opt->n_p_opt;
+    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
@@ -587,7 +587,7 @@ not work correctly for those*/
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
         int *dF_n_cols, int *dF_n_nz) {
     
-    int n_p_opt = jmi->opt->n_p_opt;
+    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
@@ -1205,64 +1205,6 @@ void jmi_delete_init(jmi_init_t** pinit) {
         *pinit = 0;
 }
 
-
-int jmi_opt_init(jmi_t* jmi, jmi_residual_func_t Ffdp,int n_eq_Fdp,
-         jmi_jacobian_func_t dFfdp,
-         int dFfdp_n_nz, int* dFfdp_row, int* dFfdp_col,
-         jmi_residual_func_t J, int n_eq_J, jmi_jacobian_func_t dJ,
-         int dJ_n_nz, int* dJ_row, int* dJ_col,
-         jmi_residual_func_t L, int n_eq_L, jmi_jacobian_func_t dL,
-         int dL_n_nz, int* dL_row, int* dL_col,
-        jmi_residual_func_t Ceq, int n_eq_Ceq,
-        jmi_jacobian_func_t dCeq,
-        int dCeq_n_nz, int* dCeq_row, int* dCeq_col,
-        jmi_residual_func_t Cineq, int n_eq_Cineq,
-        jmi_jacobian_func_t dCineq,
-        int dCineq_n_nz, int* dCineq_row, int* dCineq_col,
-        jmi_residual_func_t Heq, int n_eq_Heq,
-        jmi_jacobian_func_t dHeq,
-        int dHeq_n_nz, int* dHeq_row, int* dHeq_col,
-        jmi_residual_func_t Hineq, int n_eq_Hineq,
-        jmi_jacobian_func_t dHineq,
-        int dHineq_n_nz, int* dHineq_row, int* dHineq_col) {
-    jmi_func_t* jf_Ffdp;
-    jmi_func_t* jf_J;
-    jmi_func_t* jf_L;
-    jmi_func_t* jf_Ceq;
-    jmi_func_t* jf_Cineq;
-    jmi_func_t* jf_Heq;
-    jmi_func_t* jf_Hineq;
-    
-    /* Create opt_init_t struct */
-    jmi_opt_t* opt = (jmi_opt_t*)calloc(1,sizeof(jmi_opt_t));
-    jmi->opt = opt;
-
-
-    jmi_func_new(&jf_Ffdp,Ffdp,n_eq_Fdp,dFfdp,dFfdp_n_nz,dFfdp_row, dFfdp_col, NULL, 0, NULL, NULL);
-    jmi->opt->Ffdp = jf_Ffdp;
-
-    jmi_func_new(&jf_J,J,n_eq_J,dJ,dJ_n_nz,dJ_row, dJ_col, NULL, 0, NULL, NULL);
-    jmi->opt->J = jf_J;
-
-    jmi_func_new(&jf_L,L,n_eq_L,dL,dL_n_nz,dL_row, dL_col, NULL, 0, NULL, NULL);
-    jmi->opt->L = jf_L;
-
-    jmi_func_new(&jf_Ceq,Ceq,n_eq_Ceq,dCeq,dCeq_n_nz,dCeq_row, dCeq_col, NULL, 0, NULL, NULL);
-    jmi->opt->Ceq = jf_Ceq;
-
-    jmi_func_new(&jf_Cineq,Cineq,n_eq_Cineq,dCineq,dCineq_n_nz,dCineq_row, dCineq_col, NULL, 0, NULL, NULL);
-    jmi->opt->Cineq = jf_Cineq;
-
-    jmi_func_new(&jf_Heq,Heq,n_eq_Heq,dHeq,dHeq_n_nz,dHeq_row, dHeq_col, NULL, 0, NULL, NULL);
-    jmi->opt->Heq = jf_Heq;
-
-    jmi_func_new(&jf_Hineq,Hineq,n_eq_Hineq,dHineq,dHineq_n_nz,dHineq_row, dHineq_col, NULL, 0, NULL, NULL);
-    jmi->opt->Hineq = jf_Hineq;
-
-    return 0;
-
-}
-
 int jmi_variable_type(jmi_t *jmi, int col_index) {
     int i;
 
@@ -1379,21 +1321,6 @@ int jmi_init_get_sizes(jmi_t* jmi, int* n_eq_F0, int* n_eq_F1, int* n_eq_Fp,
     return 0;
 }
 
-int jmi_opt_get_sizes(jmi_t* jmi, int* n_eq_J, int* n_eq_L, int* n_eq_Ffdp,
-        int* n_eq_Ceq, int* n_eq_Cineq, int* n_eq_Heq, int* n_eq_Hineq) {
-    if (jmi->opt == NULL) {
-        return -1;
-    }
-    *n_eq_J = jmi->opt->J->n_eq_F;
-    *n_eq_L = jmi->opt->L->n_eq_F;
-    *n_eq_Ffdp = jmi->opt->Ffdp->n_eq_F;
-    *n_eq_Ceq = jmi->opt->Ceq->n_eq_F;
-    *n_eq_Cineq = jmi->opt->Cineq->n_eq_F;
-    *n_eq_Heq = jmi->opt->Heq->n_eq_F;
-    *n_eq_Hineq = jmi->opt->Hineq->n_eq_F;
-return 0;
-}
-
 int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp) {
     int i;
     for (i=0;i<jmi->n_tp;i++) {
@@ -1414,55 +1341,6 @@ int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp) {
             tp[i] = jmi->tp[i];
         }
         return 0;
-    } else {
-        return -1;
-    }
-}
-
-int jmi_opt_get_optimization_interval(jmi_t *jmi, double *start_time, int *start_time_free,
-                                      double *final_time, int *final_time_free) {
-    *start_time = jmi->opt->start_time;
-    *start_time_free = jmi->opt->start_time_free;
-    *final_time = jmi->opt->final_time;
-    *final_time_free = jmi->opt->final_time_free;
-    return 0;
-}
-
-
-int jmi_opt_set_optimization_interval(jmi_t *jmi, double start_time, int start_time_free,
-         double final_time, int final_time_free) {
-    jmi->opt->start_time = start_time;
-    jmi->opt->start_time_free = start_time_free;
-    jmi->opt->final_time = final_time;
-    jmi->opt->final_time_free = final_time_free;
-    return 0;
-}
-
-int jmi_opt_set_p_opt_indices(jmi_t *jmi, int n_p_opt, int *p_opt_indices) {
-    int i;
-    if (jmi->opt->p_opt_indices != NULL) {
-        free(jmi->opt->p_opt_indices);
-    }
-    jmi->opt->n_p_opt = n_p_opt;
-    jmi->opt->p_opt_indices = (int*)calloc(n_p_opt,sizeof(int));
-    for (i=0;i<n_p_opt;i++) {
-        jmi->opt->p_opt_indices[i] = p_opt_indices[i];
-    }
-    return 0;
-}
-
-int jmi_opt_get_n_p_opt(jmi_t *jmi, int *n_p_opt) {
-    *n_p_opt = jmi->opt->n_p_opt;
-    return 0;
-}
-
-int jmi_opt_get_p_opt_indices(jmi_t *jmi, int *p_opt_indices) {
-    int i;
-    if (jmi->opt->p_opt_indices != NULL) {
-        for (i=0;i<jmi->opt->n_p_opt;i++) {
-            p_opt_indices[i] = jmi->opt->p_opt_indices[i];
-        }
-    return 0;
     } else {
         return -1;
     }
@@ -1624,15 +1502,6 @@ void jmi_print_summary(jmi_t *jmi) {
         printf("  Number of F1 equations:                      %d\n",jmi->init->F1->n_eq_F);
     } else {
         printf("No Initialization functions available");
-    }
-    if (jmi->opt != NULL) {
-        printf("Optimization interface:\n");
-        printf("  Number of Ceq constraints:                   %d\n",jmi->opt->Ceq->n_eq_F);
-        printf("  Number of Cineq constraints:                 %d\n",jmi->opt->Cineq->n_eq_F);
-        printf("  Number of Heq constraints:                   %d\n",jmi->opt->Heq->n_eq_F);
-        printf("  Number of Hineq constraints:                 %d\n",jmi->opt->Hineq->n_eq_F);
-    } else {
-        printf("No Optimization functions available");
     }
 }
 

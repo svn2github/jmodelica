@@ -35,7 +35,7 @@ int jmi_get_type_from_value_ref(int vref) {
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
     jmi_real_t h = 0.0001;
     
-    int n_p_opt;
+    int n_p_opt = 0;
     int n_eq;
     int n_eq_R;
     int i;
@@ -50,11 +50,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     jmi_real_t* res1;
     jmi_real_t* res2;
 
-    if(jmi->opt->n_p_opt != 0){
-        jmi_opt_get_n_p_opt(jmi, &n_p_opt);
-    } else{
-        n_p_opt = 0;
-    }
     
     dx = jmi_get_real_dx(jmi);
     x = jmi_get_real_x(jmi);
@@ -69,13 +64,7 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     res2 = (jmi_real_t*)calloc(n_eq,sizeof(jmi_real_t));
     
     
-    if(n_p_opt > 0){
-        int *p_opt_indices = (int*)calloc(n_p_opt, sizeof(int));
-        jmi_opt_get_p_opt_indices(jmi, p_opt_indices);
-        for(i = 0; i < n_p_opt; i++){
-            (*(jmi->z_val))[i] = (*(jmi->z_val))[i] + dv[i]*h;
-        }
-    }
+    
     offs = n_p_opt;
     for (i=0;i<jmi->n_real_dx;i++) {
         dx[i] = dx[i] + dv[i+offs]*h;       
@@ -101,13 +90,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     
     jmi_func_F(jmi,jmi->dae->F, res1);
     
-    if(n_p_opt > 0){
-        int *p_opt_indices = (int*)calloc(n_p_opt, sizeof(int));
-        jmi_opt_get_p_opt_indices(jmi, p_opt_indices);
-        for(i = 0; i < n_p_opt; i++){
-            (*(jmi->z_val))[i] = (*(jmi->z_val))[i] - 2*dv[i]*h;
-        }
-    }
     offs = n_p_opt;
     
     for (i=0;i<jmi->n_real_dx;i++) {
@@ -135,14 +117,7 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     
     
     jmi_func_F(jmi, jmi->dae->F, res2);
-
-    if(n_p_opt > 0){
-        int *p_opt_indices = (int*)calloc(n_p_opt, sizeof(int));
-        jmi_opt_get_p_opt_indices(jmi, p_opt_indices);
-        for(i = 0; i < n_p_opt; i++){
-            (*(jmi->z_val))[i] = (*(jmi->z_val))[i] + dv[i]*h;
-        }
-    }
+    
     offs = n_p_opt;
     for (i=0;i<jmi->n_real_dx;i++) {
         dx[i] = dx[i] + dv[i]*h;
@@ -677,7 +652,7 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity,
 
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind) {
     
-    int n_p_opt = jmi->opt->n_p_opt;
+    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
