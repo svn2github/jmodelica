@@ -38,16 +38,6 @@
 
 #include <kinsol/kinsol.h>
 
-#if JMI_AD == JMI_AD_CPPAD
-/* This must be done outside of 'extern "C"' */
-#include <cppad/cppad.hpp>
-#include <vector>
-#endif /* JMI_AD == JMI_AD_CPPAD */
-
-#ifdef JMI_AD_NONE_AND_CPP
-extern "C" {
-#endif /* JMI_AD_NONE_AND_CPP */
-
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_residual_t* block);
@@ -114,8 +104,4 @@ extern int dlaqge_(int *m, int *n, double *a, int *
     lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, char *equed);
 
-
-#ifdef JMI_AD_NONE_AND_CPP
-}
-#endif /* JMI_AD_NONE_AND_CPP */
 #endif /* _JMI_KINSOL_SOLVER_H */

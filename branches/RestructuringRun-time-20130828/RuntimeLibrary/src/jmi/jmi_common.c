@@ -460,9 +460,6 @@ variables is not complete so this implemention might not work correctly for thos
 int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_vars,
                            int *mask,int *row, int *col) {
     
-    
-    
-    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
@@ -478,25 +475,6 @@ int jmi_func_cad_dF_nz_indices(jmi_t *jmi, jmi_func_t *func, int independent_var
 
     if(JMI_DER_T & independent_vars){
         n_t = 1;
-    }
-    
-    aim+=n_p_opt;
-    while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
-        if(JMI_DER_P_OPT & independent_vars){   
-            col[j] = func->cad_dF_col[i]-offs;
-            row[j] = func->cad_dF_row[i];
-            j++;
-            if(i != max_n_nz-1){
-                if(func->cad_dF_col[i]+1<func->cad_dF_col[i+1]){
-                    offs+=func->cad_dF_col[i+1]-(func->cad_dF_col[i]+1);
-                }
-            }
-        }
-        i++;
-    }
-    if(!(JMI_DER_P_OPT & independent_vars)){    
-        offs+=n_p_opt;
-        
     }
 
     aim+=n_dx;
@@ -587,7 +565,6 @@ not work correctly for those*/
 int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independent_vars, int *mask,
         int *dF_n_cols, int *dF_n_nz) {
     
-    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
@@ -606,20 +583,6 @@ int jmi_func_cad_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity, int independ
         n_t = 1;
     }
     
-    aim+=n_p_opt;
-    while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
-        if(JMI_DER_P_OPT & independent_vars){   
-            j++;
-            if(i != max_n_nz-1){
-                if(func->cad_dF_col[i]<func->cad_dF_col[i+1]){
-                    n_cols++;
-                }
-            } else{
-                n_cols++;
-            }
-        }
-        i++;
-    }
     aim+=n_dx;
     while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
         if(JMI_DER_DX & independent_vars){  

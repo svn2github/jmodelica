@@ -27,10 +27,6 @@
 
 #include "jmi_common.h"
 
-#ifdef JMI_AD_NONE_AND_CPP
-extern "C" {
-#endif /* JMI_AD_NONE_AND_CPP */
-
 /* Lapack function */
 extern void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV,
                 double* B, int* LDB, int* INFO );
@@ -267,9 +263,4 @@ jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t n
  */
 jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, jmi_real_t* x_new, jmi_real_t* sw_init, jmi_real_t* bool_init, jmi_int_t nR, jmi_real_t tolerance);
 
-
-
-#ifdef JMI_AD_NONE_AND_CPP
-}
-#endif /* JMI_AD_NONE_AND_CPP */
 #endif /* _JMI_COMMON_H */

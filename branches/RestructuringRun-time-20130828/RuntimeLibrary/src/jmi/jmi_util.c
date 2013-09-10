@@ -35,7 +35,6 @@ int jmi_get_type_from_value_ref(int vref) {
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
     jmi_real_t h = 0.0001;
     
-    int n_p_opt = 0;
     int n_eq;
     int n_eq_R;
     int i;
@@ -65,7 +64,7 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     
     
     
-    offs = n_p_opt;
+    offs = 0;
     for (i=0;i<jmi->n_real_dx;i++) {
         dx[i] = dx[i] + dv[i+offs]*h;       
     }
@@ -90,12 +89,10 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     
     jmi_func_F(jmi,jmi->dae->F, res1);
     
-    offs = n_p_opt;
-    
     for (i=0;i<jmi->n_real_dx;i++) {
         dx[i] = dx[i] - 2*dv[i]*h;
     }
-    offs += jmi->n_real_dx;
+    offs = jmi->n_real_dx;
     for (i=0;i<jmi->n_real_x;i++) {
         x[i] = x[i] - 2*dv[i+offs]*h;
     }
@@ -118,11 +115,10 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     
     jmi_func_F(jmi, jmi->dae->F, res2);
     
-    offs = n_p_opt;
     for (i=0;i<jmi->n_real_dx;i++) {
         dx[i] = dx[i] + dv[i]*h;
     }
-    offs += jmi->n_real_dx;
+    offs = jmi->n_real_dx;
     for (i=0;i<jmi->n_real_x;i++) {
         x[i] = x[i] + dv[i+offs]*h;
     }
@@ -652,7 +648,6 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity,
 
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind) {
     
-    int n_p_opt = 0;
     int n_dx = jmi->n_real_dx;
     int n_x = jmi->n_real_x;
     int n_u = jmi->n_real_u;
@@ -669,14 +664,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
         n_t = 1;
     }
     
-    aim+=n_p_opt;
-    while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
-        if(JMI_DER_P_OPT & independent_vars){   
-            col_independent_ind[j] = func->cad_dF_col[i];
-            j++;
-        }
-        i++;
-    }
     aim+=n_dx;
     while(func->cad_dF_col[i]<aim && aim != 0 && i < max_n_nz){
         if(JMI_DER_DX & independent_vars){  

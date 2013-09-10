@@ -28,10 +28,6 @@
 #include "jmi_ode_solver.h"
 #include <nvector/nvector_serial.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct jmi_ode_cvode_t jmi_ode_cvode_t;
 
 int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver);
@@ -50,8 +46,4 @@ struct jmi_ode_cvode_t {
     N_Vector y_work;
 };
 
-
-#ifdef __cplusplus
-}
-#endif
 #endif

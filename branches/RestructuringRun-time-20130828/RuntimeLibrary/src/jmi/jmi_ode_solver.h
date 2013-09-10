@@ -30,11 +30,6 @@
 #include "jmi_util.h"
 #include "fmi1_cs.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 
 /**
  * \brief A ode solver function signature.
@@ -62,7 +57,4 @@ struct jmi_ode_solver_t {
 int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver);
 void jmi_delete_ode_solver(fmi1_cs_t* fmi1_cs);
 
-#ifdef __cplusplus
-}
-#endif
 #endif

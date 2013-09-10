@@ -296,10 +296,6 @@
 
 /* @{ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \defgroup Defines Defined constants
  * \brief Constants defined in the JMI Model interface.
@@ -1583,16 +1579,6 @@ void jmi_lin_interpolate(jmi_real_t x, jmi_real_t *z , int n ,int m,
         jmi_real_t *y);
 
 /**
- * \brief Check if there is support for CppAD derivatives or not.
- *
- * If the return value is 1 then there is support for CppAD derivatives,
- * if return value is 0 there is no CppAD support.
- *
- * @return 1 for CppAD support, 0 if no CppAD support.
- */
-int jmi_with_cppad_derivatives();
-
-/**
  * \brief Check if there is support for CAD derivatives or not.
  *
  * If the return value is 1 then there is support for CAD derivatives,
@@ -1613,13 +1599,5 @@ int jmi_set_start_values(jmi_t *jmi);
 
 int jmi_write_back_to_z_val(jmi_t* jmi);
 int jmi_write_back_to_z(jmi_t* jmi);
-
-/* @} */
-
-#ifdef __cplusplus
-}
-#endif
-
-/* @} */
 
 #endif

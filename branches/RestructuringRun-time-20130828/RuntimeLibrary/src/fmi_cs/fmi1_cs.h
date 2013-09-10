@@ -36,10 +36,6 @@
 
 /* @{ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define FMI1_CS_MAX_INPUT_DERIVATIVES 3
 
 typedef struct fmi1_cs_t fmi1_cs_t;
@@ -377,7 +373,4 @@ fmiStatus fmi_restore_state(fmiComponent c, size_t index);
 */
 /* @} */
 
-#ifdef __cplusplus
-}
-#endif
 #endif

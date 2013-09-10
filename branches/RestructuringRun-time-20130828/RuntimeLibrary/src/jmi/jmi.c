@@ -1029,24 +1029,3 @@ int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
 
     return 0;
 }
-
-
-int jmi_with_cppad_derivatives()
-{
-    return JMI_AD_WITH_CPPAD;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -29,19 +29,10 @@
 #include "jmi.h"
 #include "jmi_block_residual.h"
 
-
-#ifdef JMI_AD_NONE_AND_CPP
-extern "C" {
-#endif
-
 int jmi_simple_newton_solve(jmi_block_residual_t *block);
 
 void jmi_simple_newton_delete(jmi_block_residual_t *block);
 
 int jmi_simple_newton_jac(jmi_block_residual_t *block);
 
-
-#ifdef JMI_AD_NONE_AND_CPP
-}
-#endif
 #endif

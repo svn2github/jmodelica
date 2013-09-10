@@ -26,16 +26,6 @@
 
 #include "jmi_common.h"
 
-#if JMI_AD == JMI_AD_CPPAD
-/* This must be done outside of 'extern "C"' */
-#include <cppad/cppad.hpp>
-#include <vector>
-#endif /* JMI_AD == JMI_AD_CPPAD */
-
-#ifdef JMI_AD_NONE_AND_CPP
-extern "C" {
-#endif /* JMI_AD_NONE_AND_CPP */
-
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
@@ -67,7 +57,4 @@ struct jmi_linear_solver_t {
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
 };
 
-#ifdef JMI_AD_NONE_AND_CPP
-}
-#endif /* JMI_AD_NONE_AND_CPP */
 #endif /* _JMI_LINEAR_SOLVER_H */

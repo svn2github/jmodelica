@@ -115,18 +115,6 @@
 /* @{ */
 
 /**
- * \defgroup jmi_internal_defines Defines
- * \brief Defined constants.
- */
-
-/* @{ */
-
-#define JMI_AD_NONE 0 /**< \brief No CppAD support.*/
-#define JMI_AD_CPPAD 1 /**< \brief CppAD support. */
-
-/* @} */
-
-/**
  * \defgroup jmi_internal_typedefs Typedefs
  * \brief Internal typedefs.
  */
@@ -137,12 +125,6 @@
  *  TODO: Error codes...
  *  Introduce #defines to denote different error codes
  */
-
-#if JMI_AD == JMI_AD_CPPAD
-/* This must be done outside of 'extern "C"' */
-#include <cppad/cppad.hpp>
-#include <vector>
-#endif /* JMI_AD == JMI_AD_CPPAD */
 
 /* Forward declaration of jmi structs */
 typedef struct jmi_t jmi_t;                               /**< \brief Forward declaration of struct. */
@@ -167,7 +149,6 @@ typedef int jmi_int_t; /*< Typedef for the integer number
 
 /* This section defines types in the case of no AD and
  in the case of CppAD.*/
-#if JMI_AD == JMI_AD_NONE
 typedef jmi_real_t jmi_ad_var_t;                       /**< \brief If JMI_AD_NONE: alias for jmi_real_t.<br> */
                                                        /**< \brief If JMI_AD_CPPAD: an active AD object. */
 typedef jmi_real_t *jmi_real_vec_t;                    /**< \brief If JMI_AD_NONE: a vector of jmi_real_ts.<br> */
@@ -192,44 +173,8 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;                  /**< \brief If JMI_AD_NON
 
 #define LOG_EXP_OR(op1,op2) ((op1)+(op2)>JMI_FALSE) /**< \brief Macro for logical expression or <br> */
 
-#define JMI_AD_WITH_CPPAD 0
-
 #include "jmi_array_none.h"
 
-#elif JMI_AD == JMI_AD_CPPAD  /* else to if JMI_AD == JMI_AD_NONE ... */
-typedef CppAD::AD<jmi_real_t> jmi_ad_var_t;
-typedef std::vector<jmi_real_t> jmi_real_vec_t;
-typedef jmi_real_vec_t *jmi_real_vec_p;
-typedef std::vector< jmi_ad_var_t > jmi_ad_var_vec_t;
-typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;
-typedef CppAD::ADFun<jmi_real_t> jmi_ad_tape_t;
-typedef jmi_ad_tape_t *jmi_ad_tape_p;
-
-#define AD_WRAP_LITERAL(x) CppAD::AD<jmi_real_t>(x)
-
-#define COND_EXP_EQ(op1,op2,th,el) (CppAD::CondExpEq(op1,op2,th,el))
-#define COND_EXP_LE(op1,op2,th,el) (CppAD::CondExpLe(op1,op2,th,el))
-#define COND_EXP_LT(op1,op2,th,el) (CppAD::CondExpLt(op1,op2,th,el))
-#define COND_EXP_GE(op1,op2,th,el) (CppAD::CondExpGe(op1,op2,th,el))
-#define COND_EXP_GT(op1,op2,th,el) (CppAD::CondExpGt(op1,op2,th,el))
-
-#define LOG_EXP_OR(op1,op2)  (COND_EXP_GT((op1)+(op2),JMI_FALSE,JMI_TRUE,JMI_FALSE))
-
-#define JMI_AD_WITH_CPPAD 1
-
-#include "jmi_array_cppad.h"
-
-#else /* if JMI_AD == JMI_AD_NONE ... elif JMI_AD == JMI_AD_CPPAD ... */
-/* TODO: Shouldn't this error state that JMI_AD must be set to JMI_AD_NONE or JMI_AD_CPPAD? */
-#error "The directive JMI_AD_NONE or JMI_AD_CPPAD must be set"
-#endif /* if JMI_AD == JMI_AD_NONE ... elif JMI_AD == JMI_AD_CPPAD ... else ... */
-
-/* If we are using a C++ compiler now, but aren't using CppAD, then we need extern "C" around functions. */
-#ifdef __cplusplus
-#if JMI_AD == JMI_AD_NONE
-#define JMI_AD_NONE_AND_CPP
-#endif /* JMI_AD == JMI_AD_NONE */
-#endif /* __cplusplus */
 
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
@@ -246,10 +191,6 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define JMI_RECORD_STATIC(type, name) \
     type name##_rec;\
     type* name = &name##_rec;
-
-#ifdef JMI_AD_NONE_AND_CPP
-extern "C" {
-#endif /* JMI_AD_NONE_AND_CPP */
 
 /**
  * Function to wrap division and report errors to the log, for use in functions.
@@ -1391,7 +1332,4 @@ int jmi_variable_type_spec(jmi_t *jmi, int independent_vars,
 
 /* @} */
 
-#ifdef JMI_AD_NONE_AND_CPP
-}
-#endif /* JMI_AD_NONE_AND_CPP */
 #endif /* _JMI_COMMON_H */

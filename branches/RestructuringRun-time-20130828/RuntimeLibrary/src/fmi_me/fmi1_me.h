@@ -36,10 +36,6 @@
 
 /* @{ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Type definitions */
 /*typedef */
 struct fmi_t {
@@ -459,7 +455,4 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 
 /* @} */
 
-#ifdef __cplusplus
-}
-#endif
 #endif

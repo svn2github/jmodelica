@@ -484,15 +484,10 @@ void jmi_dynamic_free(jmi_dynamic_list* jmi_dynamic_first);
 #define jmi_array_ref_24 jmi_array_val_24
 #define jmi_array_ref_25 jmi_array_val_25
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 void jmi_transpose_matrix(jmi_array_t* arr, jmi_ad_var_t* src, jmi_ad_var_t* dest);
 void jmi_transpose_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
 void jmi_transpose_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
 void jmi_copy_matrix_to_int(jmi_array_t* arr, jmi_ad_var_t* src, jmi_int_t* dest);
 void jmi_copy_matrix_from_int(jmi_array_t* arr, jmi_int_t* src, jmi_ad_var_t* dest);
-#ifdef __cplusplus
-}
-#endif
+
 #endif /* _JMI_ARRAY_NONE_H */

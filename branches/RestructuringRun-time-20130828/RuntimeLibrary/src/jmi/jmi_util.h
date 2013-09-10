@@ -168,11 +168,6 @@ int jmi_util_dae_derivative_checker(jmi_t *jmi,jmi_func_t *func, int sparsity, i
  */
 int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int independent_vars, int *col_independent_ind);
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * \brief Call a jmi_generic_func_t, and handle exceptions and setting the current jmi_t pointer.
  */
@@ -221,9 +216,5 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

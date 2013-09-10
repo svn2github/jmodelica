@@ -27,10 +27,6 @@
 
 #include "jmi_ode_solver.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct jmi_ode_euler_t jmi_ode_euler_t;
 
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver);
@@ -43,9 +39,5 @@ struct jmi_ode_euler_t {
     jmi_real_t step_size;
 };
 
-
-#ifdef __cplusplus
-}
-#endif
 #endif
 

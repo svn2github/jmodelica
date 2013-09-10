@@ -8,10 +8,6 @@
 #include <stddef.h>
 #include <stdarg.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** 
  * \brief Output the message string (no format control).
  * 
@@ -85,8 +81,4 @@ char* ModelicaAllocateString(size_t len);
  */ 
 char* ModelicaAllocateStringWithErrorReturn(size_t len);
 
-
-#ifdef __cplusplus
-}
-#endif
 #endif
