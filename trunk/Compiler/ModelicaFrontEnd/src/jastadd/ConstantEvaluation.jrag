@@ -644,6 +644,7 @@ aspect ConstantEvaluation {
 		 * Individual values must be set with setCell().
 		 */
     	public CValueArray(Size s) {
+    	    s = s.evaluated();
     		indices = Indices.create(s);
 			values = new CValue[indices.numElements()];
 			for (int i = 0; i < values.length; i++)

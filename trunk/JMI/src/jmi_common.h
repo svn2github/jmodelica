@@ -248,6 +248,11 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
     type name##_rec;\
     type* name = &name##_rec;
 
+#ifdef _MSC_VER
+/* Note: the return value isn't the same as for snprintf(). */
+#define snprintf(f, n, ...) sprintf_s(f, n, _TRUNCATE, __VA_ARGS__)
+#endif
+
 #ifdef JMI_AD_NONE_AND_CPP
 extern "C" {
 #endif /* JMI_AD_NONE_AND_CPP */

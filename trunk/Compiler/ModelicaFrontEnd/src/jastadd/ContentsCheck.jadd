@@ -410,8 +410,7 @@ aspect StructuralParams {
 		if (hasBindingFExp()) {
 			FExp e = getBindingFExp();
 			if (!e.canCeval())
-				compliance("Could not evaluate binding expression of structural parameter " + 
-						qualifiedName());
+				compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
 			e.markUsesAsStructuralParameter();
 		}
 	}

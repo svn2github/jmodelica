@@ -927,4 +927,41 @@ end EvaluationTests.EvaluateAnnotation;
 ")})));
 end EvaluateAnnotation;
 
+
+model EvalColonSizeCell
+    function f
+        input Real[:] x;
+        output Real[size(x, 1)] y;
+    algorithm
+        y := x / 2;
+    end f;
+    
+    parameter Real a[1] = {1};
+    parameter Real b[1] = f(a);
+    parameter Real c[1] = if b[1] > 0.1 then {1} else {0} annotation (Evaluate=true);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvalColonSizeCell",
+            description="Evaluation of function returning array dependent on colon size",
+            checkAll=true,
+            flatModel="
+fclass EvaluationTests.EvalColonSizeCell
+ parameter Real a[1] = {1} /* { 1 } */;
+ parameter Real b[1] = EvaluationTests.EvalColonSizeCell.f({1.0});
+ parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* 1 */;
+
+public
+ function EvaluationTests.EvalColonSizeCell.f
+  input Real[:] x;
+  output Real[size(x, 1)] y;
+ algorithm
+  y := x / 2;
+  return;
+ end EvaluationTests.EvalColonSizeCell.f;
+
+end EvaluationTests.EvalColonSizeCell;
+")})));
+end EvalColonSizeCell;
+
 end EvaluationTests;

@@ -585,25 +585,25 @@ aspect PrettyPrint {
 	}
 	
 	public void ValueModification.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print("=");
+		str.print(" = ");
 		p.print(getExp(),str,indent);
 	}
 	
 	public void ClassModification.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("(");
-		for (int i=0;i<getNumArgument();i++) {
-			p.print(getArgument(i),str,indent);
-			if (i<getNumArgument()-1)
-				str.print(",");
+		for (int i = 0; i < getNumArgument(); i++) {
+			p.print(getArgument(i), str, indent);
+			if (i < getNumArgument() - 1)
+				str.print(", ");
 		}
 		str.print(")");
 	}
 	
 	public void ElementModification.prettyPrint(Printer p, PrintStream str, String indent) {
 		if (hasEach())
-			str.print(getEach().toString() + " ");
+			str.print(getEach() + " ");
 		if (hasFinal())
-		 	str.print(getFinal().toString() + " ");
+		 	str.print(getFinal() + " ");
 		p.print(getName(),str, indent);
 		if (hasModification())
 			p.print(getModification(),str,indent);
@@ -721,6 +721,24 @@ aspect PrettyPrint {
 		} else
 			p.print(getExp(),str,indent);
 	}
+	
+	public void IfExp.prettyPrint(Printer p, PrintStream str, String indent) {
+        prettyPrintAsElseExp(p, str, indent);
+    }
+    
+    public void Exp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+        str.print(' ');
+        p.print(this, str, indent);
+    }
+    
+    public void IfExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+        str.print("if ");
+        p.print(getIfExp(), str, indent);
+        str.print(" then ");
+        p.print(getThenExp(), str, indent);
+        str.print(" else");
+        getElseExp().prettyPrintAsElseExp(p, str, indent);
+    }
 	
 	public void RealLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(getUNSIGNED_NUMBER());
@@ -849,7 +867,8 @@ aspect PrettyPrint {
 
 
 	syn String Redeclare.toString() = "redeclare";
-	syn String Final.toString() = "final";
+    syn String Each.toString() = "each";
+    syn String Final.toString() = "final";
 	syn String Inner.toString() = "inner";
 	syn String Outer.toString() = "outer";
 	syn String Replaceable.toString() = "replaceable";
