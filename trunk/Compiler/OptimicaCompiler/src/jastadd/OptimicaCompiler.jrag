@@ -74,12 +74,13 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	private String optimicaCTemplatefile = null;
+	private String currOptimicaCTemplatefile = null;
+	private String userDefOptimicaCTemplatefile = null;
 	
 	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
 			String cTemplatefile, String optimicaCTemplatefile) {
 		super(options, xmlTpl, cTemplatefile);
-		this.optimicaCTemplatefile = optimicaCTemplatefile;
+		userDefOptimicaCTemplatefile = optimicaCTemplatefile;
 	}
 	
 	public OptimicaCompiler(OptionRegistry options) {
@@ -91,7 +92,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	}
 	
 	private void defaultTemplate() {
-		optimicaCTemplatefile = (optimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : optimicaCTemplatefile;
+		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
 	}
 	
 	public void defaultTemplatePathsJMU() {
@@ -111,7 +112,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	
 	public void defaultTemplatePathsFMUX() {
 		super.defaultTemplatePathsFMUX();
-		optimicaCTemplatefile = null;
+		currOptimicaCTemplatefile = null;
 	}
 	
 	public boolean hasModelicaFileExt(String file) {
@@ -166,7 +167,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * @param template The new c template file path.
 	 */
 	public void setOptimicaCTemplate(String template) {
-		optimicaCTemplatefile = template;
+		userDefOptimicaCTemplatefile = template;
 	}
 
 	/**
@@ -178,9 +179,9 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 */
 	protected String getCTemplatefile(FClass fc) {
 		if (fc instanceof FOptClass) {
-			return optimicaCTemplatefile;
+			return (userDefOptimicaCTemplatefile == null) ? currOptimicaCTemplatefile : userDefOptimicaCTemplatefile;
 		} else {
-			return cTemplatefile;
+			return (userDefCTemplatefile == null) ? currCTemplatefile : userDefCTemplatefile;
 		}
 	}
 
@@ -190,7 +191,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
 		if (args.length >= arg+5) 
-			optimicaCTemplatefile = args[arg+4];
+			userDefOptimicaCTemplatefile = args[arg+4];
 	}
 	
 	public static void main(String args[]) {		
