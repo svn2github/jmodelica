@@ -1892,4 +1892,103 @@ Semantic error at line 0, column 0:
 ")})));
 end IndexReduction42_Err;
 
+
+model IndexReduction43_Order
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		y := x * x;
+		y := y * x + 2 * y + 3 * x;
+		annotation(derivative=df);
+	end f;
+
+    function df
+        input Real x;
+        input Real dx;
+        output Real dy;
+    algorithm
+        dy := x * x;
+        dy := dy + 2 * x + 3;
+        annotation(derivative(order=2)=ddf);
+    end df;
+
+    function ddf
+        input Real x;
+        input Real dx;
+        input Real ddx;
+        output Real ddy;
+    algorithm
+        ddy := x;
+        ddy := ddy + 2;
+    end ddf;
+	
+	Real x;
+    Real dx;
+    Real y;
+    Real dy;
+equation
+	der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 0;
+	x + f(y) = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction43_Order",
+			description="Test use of order argument to derivative annotation",
+			flatModel="
+fclass IndexReduction.IndexReduction43_Order
+ Real x;
+ Real y;
+ Real dy;
+ Real der_x;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ y = 0.0;
+ dy = 0.0;
+equation
+ der(y) = dy;
+ der_2_x + der(dy) = 0;
+ x + IndexReduction.IndexReduction43_Order.f(y) = 0;
+ der_x + IndexReduction.IndexReduction43_Order.df(y, der(y)) = 0.0;
+ der_2_y = der(dy);
+ der_2_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), der_2_y) = 0.0;
+
+public
+ function IndexReduction.IndexReduction43_Order.ddf
+  input Real x;
+  input Real dx;
+  input Real ddx;
+  output Real ddy;
+ algorithm
+  ddy := x;
+  ddy := ddy + 2;
+  return;
+ end IndexReduction.IndexReduction43_Order.ddf;
+
+ function IndexReduction.IndexReduction43_Order.df
+  input Real x;
+  input Real dx;
+  output Real dy;
+ algorithm
+  dy := x * x;
+  dy := dy + 2 * x + 3;
+  return;
+ end IndexReduction.IndexReduction43_Order.df;
+
+ function IndexReduction.IndexReduction43_Order.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  y := y * x + 2 * y + 3 * x;
+  return;
+ end IndexReduction.IndexReduction43_Order.f;
+
+end IndexReduction.IndexReduction43_Order;
+")})));
+end IndexReduction43_Order;
+
 end IndexReduction;

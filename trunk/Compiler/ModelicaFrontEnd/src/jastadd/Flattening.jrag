@@ -233,12 +233,17 @@ aspect Flattening {
 		
 		if (functionDer.exists()) {
 			String functionDerName = functionDer.string();
-			List<FIdUse> noDerivatives = new List<FIdUse>();
+            List<FIdUse> noDerivatives = new List<FIdUse>();
+            List<FIdUse> zeroDerivatives = new List<FIdUse>();
+            int order = 1;
 			for (AnnotationNode nd : functionDer) {
-				if (nd != null && "noDerivative".equals(nd.name())) {
-					if (nd.string() != null) {
+				if (nd != null) {
+					if ("noDerivative".equals(nd.name()) && nd.isStringValue()) 
 						noDerivatives.add(new FIdUse(nd.string()));
-					}
+                    if ("zeroDerivative".equals(nd.name()) && nd.isStringValue()) 
+                        noDerivatives.add(new FIdUse(nd.string()));
+                    if ("order".equals(nd.name()) && nd.isIntegerValue()) 
+                        order = nd.integer();
 				}	
 			}				
 			
@@ -246,7 +251,7 @@ aspect Flattening {
 			if (!fd_decl.isUnknown()) {
 				fd_decl.flattenFunction(fc);
 				FIdUse use = new FIdUse(new FQNameString(fd_decl.qualifiedName()));
-				return new FDerivativeFunction(use, 1, noDerivatives);
+				return new FDerivativeFunction(use, order, noDerivatives, zeroDerivatives);
 			}
 		}
 		return null;

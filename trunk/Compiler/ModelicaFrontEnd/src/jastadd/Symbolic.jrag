@@ -844,7 +844,7 @@ aspect Derivatives {
 		}
 		FFunctionDecl fd = myFFunctionDecl();
 		if (!fd.hasFDerivativeFunction()) 
-			throw new FunctionDifferentiationException(this);	
+			throw new FunctionDifferentiationException(this);
 		FFunctionDecl myDecl = myFFunctionDecl();
 		List args = new List();
 		for (FExp e : getArgs()) {

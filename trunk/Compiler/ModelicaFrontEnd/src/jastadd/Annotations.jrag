@@ -204,6 +204,20 @@ aspect AnnotationAPI {
 			}
 			return res;
 		}
+        
+        /**
+         * Returns the value for a node that represents an integer value.
+         */
+        public int integer() {
+            return 0;
+        }
+        
+        /**
+         * Check if this node represents an integer value.
+         */
+        public boolean isIntegerValue() {
+            return false;
+        }
 		
 		/**
 		 * Returns the value for a node that represents a real value.
@@ -748,6 +762,17 @@ aspect AnnotationAPI {
 		public boolean isStringListValue() {
 			return exp() != null && exp().isAvalueStringList();
 		}
+
+        public int integer() {
+            if (exp() == null)
+                return super.integer();
+            else
+                return exp().avalueInteger();
+        }
+
+        public boolean isIntegerValue() {
+            return exp() != null && exp().isAvalueInteger();
+        }
 		
 		public double real() {
 			if (exp() == null)
@@ -1072,6 +1097,14 @@ aspect AnnotationAPI {
 	
 	syn boolean Exp.isAvalueBool()  = false;
 	eq BooleanLitExp.isAvalueBool() = true;
+    
+    syn int Exp.avalueInteger()      = 0;
+    eq IntegerLitExp.avalueInteger() = Integer.parseInt(getUNSIGNED_INTEGER());
+    eq NegExp.avalueInteger()        = -getExp().avalueInteger();
+    
+    syn boolean Exp.isAvalueInteger()  = false;
+    eq IntegerLitExp.isAvalueInteger() = true;
+    eq NegExp.isAvalueInteger()        = getExp().isAvalueInteger();
 	
 	syn double Exp.avalueReal()   = 0.0;
 	eq IntegerLitExp.avalueReal() = (double) Integer.parseInt(getUNSIGNED_INTEGER());

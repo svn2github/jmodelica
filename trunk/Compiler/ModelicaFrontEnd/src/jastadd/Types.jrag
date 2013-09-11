@@ -264,29 +264,112 @@ aspect Types {
 
 aspect DerivativeFunctions {
 
-	inh boolean FFunctionVariable.isNoDerivative();
-	
-	eq FFunctionDecl.getFFunctionVariable(int i).isNoDerivative() {
-		if (!hasFDerivativeFunction()) {
-			return false;
-		}
-		String n = getFFunctionVariable(i).name();
-		for (FIdUse fid : getFDerivativeFunction().getNoDerivatives()) {
-			if (fid.name().equals(n)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	syn boolean FType.shouldBeDifferentiated() =             isReal() || isComposite();
+	syn boolean FType.shouldBeDifferentiated()             = isReal() || isComposite();
 	syn boolean FAbstractVariable.shouldBeDifferentiated() = false;
-	eq FFunctionVariable.shouldBeDifferentiated() =          !isNoDerivative() && type().shouldBeDifferentiated();
-	eq FVariable.shouldBeDifferentiated() =                  variability().continuousVariability();
-	syn boolean FIdUse.shouldBeDifferentiated() =            myFV().shouldBeDifferentiated();
-	syn boolean FExp.shouldBeDifferentiated() =              type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
-	syn boolean FStatement.shouldBeDifferentiated() =        type().shouldBeDifferentiated();
+	eq FFunctionVariable.shouldBeDifferentiated()          = delegateShouldBeDifferentiated();
+	eq FVariable.shouldBeDifferentiated()                  = variability().continuousVariability();
+	syn boolean FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+	syn boolean FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
+	syn boolean FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
 	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
 	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
+	
+	inh boolean FFunctionVariable.delegateShouldBeDifferentiated();
+	eq Root.getChild().delegateShouldBeDifferentiated() = true;
+	eq FFunctionDecl.getFFunctionVariable(int i).delegateShouldBeDifferentiated() {
+	    if (!hasFDerivativeFunction())
+	        return getFFunctionVariable(i).type().shouldBeDifferentiated();
+	    else
+	        return getFDerivativeFunction().calculateShouldBeDifferentiated(i);
+	}
+	
+	inh List<FFunctionVariable> FDerivativeFunction.myFFunctionVariables();
+	eq FFunctionDecl.getFDerivativeFunction().myFFunctionVariables() = getFFunctionVariables();
+	
+	/**
+	 * Calculate if variable no <code>i</code> in the variables the function should be differentiated.
+	 * 
+	 * Result is cached for all variables in list, and in subsequent calls it will be assumed that 
+	 * the list is the same.
+	 */
+	syn boolean FDerivativeFunction.calculateShouldBeDifferentiated(int i) {
+	    if (cachedShouldBeDifferentiated == null) {
+	        List<FFunctionVariable> vars = myFFunctionVariables();
+	        cachedShouldBeDifferentiated = new boolean[vars.getNumChild()];
+	        
+	        // Type
+            boolean[] okType = new boolean[cachedShouldBeDifferentiated.length];
+            boolean[] input = new boolean[cachedShouldBeDifferentiated.length];
+	        int n = 0;
+	        int k = 0;
+	        for (FFunctionVariable var : vars) {
+	            okType[k] = var.type().shouldBeDifferentiated();
+	            input[k] = var.isInput();
+	            if (okType[k] && input[k]) 
+	                n++;
+	            k++;
+	        }
+	        
+	        // noDerivative && zeroDerivative
+	        boolean[] hasDerivative = new boolean[n];
+	        Set<String> exclude = new HashSet<String>();
+            for (FIdUse use : getNoDerivatives())
+                exclude.add(use.name());
+            for (FIdUse use : getZeroDerivatives())
+                exclude.add(use.name());
+            int j = k = 0;
+	        for (FFunctionVariable var : vars) {
+	            if (okType[k] && input[k]) {
+	                if (!exclude.contains(var.name()))
+	                    hasDerivative[j] = true;
+	                j++;
+	            }
+                k++;
+	        }
+	        
+	        // order
+	        int order = getOrder();
+	        int[] part = new int[order];
+	        partitionArgumentsByOrder(hasDerivative, 0, n, order, part);
+	        
+	        // Calc result
+	        int ignore = n - part[order - 1];
+            for (k = 0, j = 0; k < cachedShouldBeDifferentiated.length; k++) {
+                if (okType[k]) { 
+                    if (input[k]) {
+                        if (j >= ignore && hasDerivative[j])
+                            cachedShouldBeDifferentiated[k] = true;
+                        j++;
+                    } else {
+                        cachedShouldBeDifferentiated[k] = true;
+                    }
+                }
+            }
+	    }
+	    return cachedShouldBeDifferentiated[i];
+	}
+	
+	private static boolean FDerivativeFunction.partitionArgumentsByOrder(boolean[] hasDerivative, int start, int max, int order, int[] result) {
+	    int n = hasDerivative.length - start;
+	    if (order <= 1) {
+	        result[result.length - 1] = n;
+	        return max == n;
+	    }
+	    int first = (n + order - 1) / order;
+	    int nd = 0;
+        for (int i = start; i < max; i++)
+            if (hasDerivative[i])
+                nd++;
+	    for (; first < n; first++) {
+	        result[result.length - order] = first;
+            if (hasDerivative[start + first - 1])
+                nd++;
+            if (nd * order >= n - first && partitionArgumentsByOrder(hasDerivative, start + first, nd, order - 1, result))
+                return true;
+	    }
+	    return false;
+	}
+	
+	private boolean[] FDerivativeFunction.cachedShouldBeDifferentiated = null;
 
 }
