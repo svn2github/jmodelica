@@ -357,10 +357,10 @@ aspect DerivativeFunctions {
 	    }
 	    int first = (n + order - 1) / order;
 	    int nd = 0;
-        for (int i = start; i < max; i++)
+        for (int i = start; i < start + first - 1; i++)
             if (hasDerivative[i])
                 nd++;
-	    for (; first < n; first++) {
+	    for (; first < max; first++) {
 	        result[result.length - order] = first;
             if (hasDerivative[start + first - 1])
                 nd++;

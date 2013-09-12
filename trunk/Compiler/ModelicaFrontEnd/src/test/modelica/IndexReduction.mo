@@ -1991,4 +1991,115 @@ end IndexReduction.IndexReduction43_Order;
 ")})));
 end IndexReduction43_Order;
 
+
+model IndexReduction44_Order2Arg
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y;
+    algorithm
+        y := x1 * x1;
+        y := y * x2;
+        annotation(derivative=df);
+    end f;
+
+    function df
+        input Real x1;
+        input Real x2;
+        input Real dx1;
+        input Real dx2;
+        output Real dy;
+    algorithm
+        dy := x1 * x1;
+        dy := y * x2;
+        annotation(derivative(order=2)=ddf);
+    end df;
+
+    function ddf
+        input Real x1;
+        input Real x2;
+        input Real dx1;
+        input Real dx2;
+        input Real ddx1;
+        input Real ddx2;
+        output Real ddy;
+    algorithm
+        ddy := x1 * x1;
+        ddy := y * x2;
+    end ddf;
+    
+    Real x;
+    Real dx;
+    Real y;
+    Real dy;
+equation
+    der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 0;
+    x + f(y, time) = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction44_Order2Arg",
+			description="Test use of order argument to derivative annotation for function with two arguments",
+			flatModel="
+fclass IndexReduction.IndexReduction44_Order2Arg
+ Real x;
+ Real y;
+ Real dy;
+ Real der_x;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ y = 0.0;
+ dy = 0.0;
+equation
+ der(y) = dy;
+ der_2_x + der(dy) = 0;
+ x + IndexReduction.IndexReduction44_Order2Arg.f(y, time) = 0;
+ der_x + IndexReduction.IndexReduction44_Order2Arg.df(y, time, der(y), 1.0) = 0.0;
+ der_2_y = der(dy);
+ der_2_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, der_2_y, 0.0) = 0.0;
+
+public
+ function IndexReduction.IndexReduction44_Order2Arg.ddf
+  input Real x1;
+  input Real x2;
+  input Real dx1;
+  input Real dx2;
+  input Real ddx1;
+  input Real ddx2;
+  output Real ddy;
+ algorithm
+  ddy := x1 * x1;
+  ddy := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.ddf;
+
+ function IndexReduction.IndexReduction44_Order2Arg.df
+  input Real x1;
+  input Real x2;
+  input Real dx1;
+  input Real dx2;
+  output Real dy;
+ algorithm
+  dy := x1 * x1;
+  dy := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.df;
+
+ function IndexReduction.IndexReduction44_Order2Arg.f
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := x1 * x1;
+  y := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.f;
+
+end IndexReduction.IndexReduction44_Order2Arg;
+")})));
+end IndexReduction44_Order2Arg;
+
 end IndexReduction;
