@@ -1015,10 +1015,6 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
         (*dz)[i] = 0;
     }
 
-    for(i = 0; i < jmi->n_real_u; i++){
-        (*(jmi->z))[i+jmi->offs_real_u] = (*(jmi->z_val))[i+jmi->offs_real_u];
-    }
-
     if ((dependents==FMI_DERIVATIVES) && (independents==FMI_STATES) && jmi->color_info_A != NULL) {
         /* Compute Jacobian A with compression */
         for (i=0;i<jmi->color_info_A->n_groups;i++) {

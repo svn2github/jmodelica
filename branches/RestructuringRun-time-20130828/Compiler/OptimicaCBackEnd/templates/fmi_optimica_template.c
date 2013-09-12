@@ -199,32 +199,32 @@ static int model_ode_initialize(jmi_t* jmi) {
  * this solution does not work. Probably not too bad, since we can use
  * macros.
  */
-static int model_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_equation_residuals$
 	return 0;
 }
 
-static int model_dae_dir_dF(jmi_t* jmi, jmi_ad_var_vec_p res, jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz) {
+static int model_dae_dir_dF(jmi_t* jmi, jmi_real_t** res, jmi_real_t** dF, jmi_real_t** dz) {
 $C_DAE_equation_directional_derivative$
 	return 0;
 }
 
-static int model_dae_R(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_dae_R(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_event_indicator_residuals$
 	return 0;
 }
 
-static int model_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_equation_residuals$
 	return 0;
 }
 
-static int model_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_guess_equation_residuals$
 	return 0;
 }
 
-static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
   /* C_DAE_initial_dependent_parameter_residuals */
 	return -1;
 }
@@ -234,7 +234,7 @@ $C_DAE_initial_dependent_parameter_assignments$
         return 0;
 }
 
-static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_event_indicator_residuals$
 	return 0;
 }
@@ -288,15 +288,11 @@ int jmi_terminate(jmi_t* jmi) {
 
 int jmi_set_start_values(jmi_t* jmi) {
 $C_set_start_values$
-    jmi_copy_z_to_zval(jmi);
     return 0;
 }
 
 const char *jmi_get_model_identifier() { return "$C_model_id$"; }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 /* FMI Functions*/
 
 /* Inquire version numbers of header files */
@@ -403,7 +399,3 @@ DllExport fmiStatus fmiGetStateValueReferences(fmiComponent c, fmiValueReference
 DllExport fmiStatus fmiTerminate(fmiComponent c) {
     return fmi1_me_terminate(c);
 }
-
-#ifdef __cplusplus
-}
-#endif

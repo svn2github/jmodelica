@@ -83,10 +83,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     offs+=jmi->n_real_w;
     *t = *t + dv[offs]*h;
     
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-    
     jmi_func_F(jmi,jmi->dae->F, res1);
     
     for (i=0;i<jmi->n_real_dx;i++) {
@@ -107,12 +103,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     offs+=jmi->n_real_w;
     *t = *t - 2*dv[offs]*h;
     
-    
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-    
-    
     jmi_func_F(jmi, jmi->dae->F, res2);
     
     for (i=0;i<jmi->n_real_dx;i++) {
@@ -132,10 +122,6 @@ int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi
     }
     offs+=jmi->n_real_w;
     *t = *t + dv[offs]*h;
-    
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
     
     for(i=0;i< n_eq;i++){
         dF[i] = (res1[i] -  res2[i])/(2*h);

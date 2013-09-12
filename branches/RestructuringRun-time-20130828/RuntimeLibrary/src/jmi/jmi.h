@@ -351,8 +351,8 @@
 #define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
 
 /**  \brief Definitions of boolean true and false literals.*/
-#define JMI_TRUE  AD_WRAP_LITERAL(1.0)
-#define JMI_FALSE AD_WRAP_LITERAL(0.0)
+#define JMI_TRUE  ((jmi_real_t) (1.0))
+#define JMI_FALSE ((jmi_real_t) (0.0))
 
 /** \brief */
 #define JMI_SCALING_NONE 1        /**< \brief No scaling.*/
@@ -1522,14 +1522,6 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 int jmi_init_eval_parameters(jmi_t* jmi);
 
 /**
- * \brief Helper function. Copies values in z to zval.
- *
- * @param jmi A jmi_t struct.
- * @return Error code.
- */
-int jmi_copy_z_to_zval(jmi_t* jmi);
-
-/**
  * \brief Evaluate DAE event indicator residuals for the initialization system.
  *
  * The user sets the input variables by writing to
@@ -1596,8 +1588,5 @@ int jmi_with_cad_derivatives(jmi_t* jmi);
  * @param jmi A jmi_t struct.
  */
 int jmi_set_start_values(jmi_t *jmi);
-
-int jmi_write_back_to_z_val(jmi_t* jmi);
-int jmi_write_back_to_z(jmi_t* jmi);
 
 #endif

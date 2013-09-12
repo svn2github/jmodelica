@@ -147,23 +147,9 @@ typedef int jmi_int_t; /*< Typedef for the integer number
                < representation used in the Runtime
                < Library. */
 
-/* This section defines types in the case of no AD and
- in the case of CppAD.*/
-typedef jmi_real_t jmi_ad_var_t;                       /**< \brief If JMI_AD_NONE: alias for jmi_real_t.<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: an active AD object. */
-typedef jmi_real_t *jmi_real_vec_t;                    /**< \brief If JMI_AD_NONE: a vector of jmi_real_ts.<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: a vector of jmi_real_ts. */
-typedef jmi_real_vec_t *jmi_real_vec_p;                /**< \brief If JMI_AD_NONE: a pointer to a vector of jmi_real_ts.<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: a pointer to a vector of jmi_real_ts. */
-typedef jmi_real_t *jmi_ad_var_vec_t;                  /**< \brief If JMI_AD_NONE: a vector of jmi_real_ts.<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: a vector of active AD objecs. */
-typedef jmi_ad_var_vec_t *jmi_ad_var_vec_p;            /**< \brief If JMI_AD_NONE: a pointer to a vector of jmi_real_ts.<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: a pointer to a vector of active AD objecs. */
-typedef void jmi_ad_tape_t;                            /**< \brief If JMI_AD_NONE: void (not used).<br> */
-                                                       /**< \brief If JMI_AD_CPPAD: an AD tape. */
-typedef jmi_ad_tape_t *jmi_ad_tape_p;                  /**< \brief If JMI_AD_NONE: a pointer to void (not used).<br> */
-
-#define AD_WRAP_LITERAL(x) ((jmi_ad_var_t) (x)) /**< \brief Macro for inserting an AD object based on a literal. Has no effect when compiling without CppAD  <br> */
+/* These are a temporary remnant of CppAD*/            
+#define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
+typedef jmi_real_t jmi_ad_var_t;
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */
@@ -192,6 +178,7 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;                  /**< \brief If JMI_AD_NON
     type name##_rec;\
     type* name = &name##_rec;
 
+/*Some of these functions are a temporary remnant of CppAD*/
 /**
  * Function to wrap division and report errors to the log, for use in functions.
  */
@@ -291,7 +278,7 @@ typedef int (*jmi_next_time_event_func_t)(jmi_t* jmi, jmi_real_t* nextTime);
  * @return Error code.
  *
  */
-typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
+typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_real_t** res);
 
 /**
  * \brief Function signature for evaluation of a directional derivative function
@@ -309,8 +296,8 @@ typedef int (*jmi_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res);
  * @return Error code.
  *
  */
-typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_ad_var_vec_p res,
-        jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz);
+typedef int (*jmi_directional_der_residual_func_t)(jmi_t* jmi, jmi_real_t** res,
+        jmi_real_t** dF, jmi_real_t** dz);
 
 
 /**
@@ -777,8 +764,7 @@ struct jmi_simple_color_info_t {
  * information for a particular jmi_func_t struct.
  */
 struct jmi_func_ad_t {
-    jmi_ad_var_vec_p F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
-    jmi_ad_tape_p F_z_tape;         /**< \brief An AD tape. */
+    jmi_real_t** F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
     int tape_initialized;           /**< \brief Flag to indicate if the other fields are initialized. 0 if uninitialized and 1 if initialized. */
     int dF_z_n_nz;                  /**< \brief Number of non-zeros in Jacobian. */
     int* dF_z_row;                  /**< \brief Row indices of non-zeros in Jacobian. */
@@ -787,7 +773,7 @@ struct jmi_func_ad_t {
                                                 first element corresponding to a particular column. */
     int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
                                                 Jacobian. */
-    jmi_real_vec_p z_work;          /**< \brief A work vector for \f$z\f$. */
+    jmi_real_t** z_work;          /**< \brief A work vector for \f$z\f$. */
     int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
     jmi_simple_color_info_t* color_info; /**< \brief A struct containing coloring info for the CPR seeding. */
 
@@ -1189,9 +1175,8 @@ struct jmi_t {
     int offs_q;                          /**< \brief  Offset of the \f$q\f$ vector in \f$z\f$. */
     int offs_d;                          /**< \brief  Offset of the \f$d\f$ vector in \f$z\f$. */
 
-    jmi_ad_var_vec_p z;                  /**< \brief  This vector contains active AD objects in case of AD. */
-    jmi_real_t** z_val;                  /**< \brief  This vector contains the actual values. */
-    jmi_real_t **dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
+    jmi_real_t** z;                      /**< \brief  This vector contains the actual values. */
+    jmi_real_t** dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
     int dz_active_index;                 /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
     int block_level;                     /**< \brief Block level for nested equation blocks. Currently 0 or 1. */
     jmi_real_t *dz_active_variables[1];	 /**< \brief  This vector is used to store seed-values for active variables in block Jacobians */
@@ -1212,8 +1197,8 @@ struct jmi_t {
     jmi_int_t n_relations;               /**< \brief Number of relational operators used in the event indicators for the DAE system */
     jmi_int_t* relations;                /**< \brief Kind of relational operators used in the event indicators for the DAE system: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ */
 
-    jmi_ad_var_t atEvent;                /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
-    jmi_ad_var_t atInitial;              /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
+    jmi_real_t atEvent;                /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
+    jmi_real_t atInitial;              /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
 

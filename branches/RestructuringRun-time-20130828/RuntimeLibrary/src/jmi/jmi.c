@@ -183,14 +183,12 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->n_z = jmi_->n_p + 2*(jmi_->n_v) - 1 + jmi_->n_q + 2*jmi_->n_d + 2*n_sw +
             2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
-    jmi_->z = (jmi_ad_var_vec_p)calloc(1,sizeof(jmi_ad_var_vec_t));
-    *(jmi_->z) = (jmi_ad_var_vec_t)calloc(jmi_->n_z,sizeof(jmi_ad_var_t));
+    jmi_->z = (jmi_real_t*)calloc(1,sizeof(jmi_real_t *));
+    *(jmi_->z) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
     /*jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));*/
-    jmi_->z_val = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
-    *(jmi_->z_val) =  (jmi_real_vec_t)calloc(jmi_->n_z,sizeof(jmi_real_t));
     
-    jmi_->dz = (jmi_real_vec_p)calloc(1, sizeof(jmi_real_t *));
-    *(jmi_->dz) = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
+    jmi_->dz = (jmi_real_t**)calloc(1, sizeof(jmi_real_t *));
+    *(jmi_->dz) = (jmi_real_t*)calloc(jmi_->n_v, sizeof(jmi_real_t));/*Need number of equations*/
     
     jmi_->ext_objs = (void**)calloc(n_ext_objs, sizeof(void*));
     jmi_->indep_extobjs_initialized = 0;
@@ -198,7 +196,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->block_level = 0;
     jmi_->dz_active_index = 0;
     for (i=0;i<JMI_ACTIVE_VAR_BUFS_NUM;i++) {
-        jmi_->dz_active_variables_buf[i] = (jmi_real_vec_t)calloc(jmi_->n_v, sizeof(jmi_real_t));
+        jmi_->dz_active_variables_buf[i] = (jmi_real_t*)calloc(jmi_->n_v, sizeof(jmi_real_t));
     }
     
     jmi_->dz_active_variables[0] = jmi_->dz_active_variables_buf[0];
@@ -209,7 +207,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     for (i=0;i<jmi_->n_z;i++) {
         jmi_->variable_scaling_factors[i] = 1.0;
         (*(jmi_->z))[i] = 0;
-        (*(jmi_->z_val))[i] = 0;
     }
 
     for (i=0;i<jmi_->n_v;i++) {
@@ -292,10 +289,8 @@ int jmi_delete(jmi_t* jmi){
 
     free(jmi->output_vrefs);
     free(*(jmi->z));
-    free(*(jmi->z_val));
     free(jmi->z);
 /*  free(jmi->pre_z);*/
-    free(jmi->z_val);
     free(*(jmi->dz));
     free(jmi->dz);
     free(jmi->initial_relations);
@@ -347,10 +342,6 @@ int jmi_ode_f(jmi_t* jmi) {
     
     if (jmi->n_real_w != 0) { /* Check if not ODE */
         return -1;
-    }
-
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
 
     dx = jmi_get_real_dx(jmi);
@@ -463,7 +454,7 @@ int jmi_ode_df_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 
 int jmi_ode_derivatives(jmi_t* jmi) {
 
-    int i, return_status;
+    int return_status;
     jmi_log_node_t node;
     jmi_real_t *t = jmi_get_t(jmi);
 
@@ -472,9 +463,6 @@ int jmi_ode_derivatives(jmi_t* jmi) {
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
     jmi->block_level = 0; /* to recover from errors */
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
 
@@ -483,22 +471,12 @@ int jmi_ode_derivatives(jmi_t* jmi) {
         jmi_log_leave(jmi->log, node);
     }
 
-    /* Write back evaluation result */
-    if (return_status==0) {
-        for (i=0;i<jmi->n_z;i++) {
-            (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        }
-        return 0;
-    }
     return return_status;
 }
 
 int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t *dv) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    int return_status;
     jmi->block_level = 0; /* to recover from errors */
     
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
@@ -508,32 +486,18 @@ int jmi_ode_derivatives_dir_der(jmi_t* jmi, jmi_real_t *dv) {
 
 int jmi_ode_outputs(jmi_t* jmi) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-
+    int return_status;
+    
     return_status = jmi_generic_func(jmi, jmi->dae->ode_outputs);
 
-    /* Write back evaluation result */
-    if (return_status==0) {
-        for (i=0;i<jmi->n_z;i++) {
-            (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        }
-        return 0;
-    }
     return return_status;
 }
 
 int jmi_ode_initialize(jmi_t* jmi) {
 
-    int i, return_status;
+    int return_status;
     jmi_log_node_t node;
     jmi_real_t* t = jmi_get_t(jmi);
-
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
 
     if((jmi->options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
@@ -546,61 +510,30 @@ int jmi_ode_initialize(jmi_t* jmi) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
     }
-
-    /* Write back evaluation result */
-    if (return_status==0) {
-        for (i=0;i<jmi->n_z;i++) {
-            (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        }
-        return 0;
-    }
     return return_status;
 }
 
 int jmi_ode_guards(jmi_t* jmi) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    int return_status;
 
     return_status = jmi_generic_func(jmi, jmi->dae->ode_guards);
-
-    /* Write back evaluation result */
-    if (return_status==0) {
-        for (i=0;i<jmi->n_z;i++) {
-            (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        }
-        return 0;
-    }
+    
     return return_status;
 }
 
 int jmi_ode_guards_init(jmi_t* jmi) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    int return_status;
 
     return_status = jmi_generic_func(jmi, jmi->dae->ode_guards_init);
 
-    /* Write back evaluation result */
-    if (return_status==0) {
-        for (i=0;i<jmi->n_z;i++) {
-            (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        }
-        return 0;
-    }
     return return_status;
 }
 
 int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    int return_status;
 
     jmi_set_current(jmi);
     if (jmi_try(jmi))
@@ -626,11 +559,6 @@ jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {
-
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
 
     /*jmi->dae->F->F(jmi, &res);*/
     jmi_func_F(jmi,jmi->dae->F,res);
@@ -707,11 +635,6 @@ int jmi_dae_dF_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_vars,
 }
 
 int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t* dF, jmi_real_t* dz) {
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-    
     
     if (eval_alg & JMI_DER_SYMBOLIC) {
         return jmi_func_sym_directional_dF(jmi, jmi->dae->F, res, dF, dz);
@@ -727,11 +650,6 @@ int jmi_dae_directional_dF(jmi_t* jmi, int eval_alg, jmi_real_t* res, jmi_real_t
 }
 
 int jmi_dae_R(jmi_t* jmi, jmi_real_t* res) {
-
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
 
     /*jmi->dae->F->F(jmi, &res);*/
     jmi_func_F(jmi,jmi->dae->R,res);
@@ -771,11 +689,7 @@ int jmi_dae_R_perturbed(jmi_t* jmi, jmi_real_t* res){
 }
 
 int jmi_init_F0(jmi_t* jmi, jmi_real_t* res) {
-
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    
     return jmi_func_F(jmi,jmi->init->F0,res);
 }
 
@@ -837,11 +751,6 @@ int jmi_init_dF0_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 
 
 int jmi_init_F1(jmi_t* jmi, jmi_real_t* res) {
-
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
 
     return jmi_func_F(jmi,jmi->init->F1,res);
 
@@ -906,11 +815,6 @@ int jmi_init_dF1_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
 
 int jmi_init_Fp(jmi_t* jmi, jmi_real_t* res) {
 
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-
     return jmi_func_F(jmi,jmi->init->Fp,res);
 
 }
@@ -972,57 +876,16 @@ int jmi_init_dFp_dim(jmi_t* jmi, int eval_alg, int sparsity, int independent_var
     }
 }
 
-int jmi_write_back_to_z_val(jmi_t* jmi) {
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z_val))[i] = (*(jmi->z))[i];
-    }
-    return 1;
-}
-
-int jmi_write_back_to_z(jmi_t* jmi) {
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
-    return 1;
-}
-
 int jmi_init_eval_parameters(jmi_t* jmi) {
 
-    int i, return_status;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
+    int return_status;
 
     return_status = jmi_generic_func(jmi, jmi->init->eval_parameters);
 
-    /* Write back evaluation result */
-    if (return_status==0) {
-        /*for (i=0;i<jmi->n_z;i++) {
-        *   (*(jmi->z_val))[i] = (*(jmi->z))[i];
-        *}
-        */
-        jmi_copy_z_to_zval(jmi);
-        return 0;
-    }
     return return_status;
 }
 
-int jmi_copy_z_to_zval(jmi_t* jmi) {
-    int i;
-    for (i = 0; i < jmi->n_z; i++) {
-        (*(jmi->z_val))[i] = (*(jmi->z))[i];
-    }
-    return 0;
-}
-
 int jmi_init_R0(jmi_t* jmi, jmi_real_t* res) {
-
-    int i;
-    for (i=0;i<jmi->n_z;i++) {
-        (*(jmi->z))[i] = (*(jmi->z_val))[i];
-    }
 
     /*jmi->dae->F->F(jmi, &res);*/
     jmi_func_F(jmi,jmi->init->R0,res);

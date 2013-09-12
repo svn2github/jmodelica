@@ -283,14 +283,11 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                     break;
                 }
                 
-                jmi_write_back_to_z_val(jmi); 
                 
                 retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-                jmi_write_back_to_z(jmi);
                 
                 ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
                 if(ef != 0) { jmi_log_leave(jmi->log, iter_node); break; }
-                jmi_write_back_to_z_val(jmi);
                 
                 jmi_log_reals(jmi->log, iter_node, logInfo, "ivs", block->x, block->n);
                 jmi_log_reals(jmi->log, iter_node, logInfo, "switches", switches, nbr_sw);
@@ -334,13 +331,10 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             /* Solve block */
             ef = block->solve(block); 
             if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
-            jmi_write_back_to_z_val(jmi);
             
             retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-            jmi_write_back_to_z(jmi);
         
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-            jmi_write_back_to_z_val(jmi);
             
             jmi_log_reals(jmi->log, iter_node, logInfo, "ivs", block->x, block->n);
             jmi_log_reals(jmi->log, iter_node, logInfo, "switches", switches, nbr_sw);
@@ -398,16 +392,12 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             /* Solve block */
             ef = block->solve(block);
-            jmi_write_back_to_z_val(jmi);
             
             memcpy(x_new,block->x,block->n*sizeof(jmi_real_t));
             
             retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-            jmi_write_back_to_z(jmi);
             
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-            jmi_write_back_to_z_val(jmi);
-
         
             iter = 0;
             while (1 && ef==0){
@@ -421,16 +411,12 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 retval = jmi_compute_reduced_step(h,x_new,x,x,block->n);
                 
                 block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
-                jmi_write_back_to_z_val(jmi);
                 
                 retval = jmi_evaluate_switches(jmi,switches,mode_sw);
-                jmi_write_back_to_z(jmi);
             
                 block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-                jmi_write_back_to_z_val(jmi);
                 
                 ef = block->solve(block); if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
-                jmi_write_back_to_z_val(jmi);
                 
                 memcpy(x_new, block->x, block->n*sizeof(jmi_real_t));
                 
@@ -543,14 +529,11 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
         
         /*jmi_write_block_x(block,x);*/
         block->F(jmi,x_temp,NULL,JMI_BLOCK_WRITE_BACK);
-        jmi_write_back_to_z_val(jmi);
         
         retval = jmi_evaluate_switches(jmi,sw,1);
-        jmi_write_back_to_z(jmi);
         
         /*
         block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
-        jmi_write_back_to_z_val(jmi);
         */
         
         if (jmi_compare_switches(sw,sw_init,nR)){
@@ -561,7 +544,6 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
         /* RESET Z DUE TO THE COUPLING BETWEEN BOOLEANS */
         /*
         memcpy(booleans,bool_init,(jmi->n_boolean_d)*sizeof(jmi_real_t));
-        jmi_write_back_to_z(jmi);
         */
         if ( b-a < tolerance){
             break;
