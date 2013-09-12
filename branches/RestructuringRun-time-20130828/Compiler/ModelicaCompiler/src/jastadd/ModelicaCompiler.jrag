@@ -118,8 +118,10 @@ public class ModelicaCompiler {
 	public static final Level DEFAULT_LEVEL = Level.ERROR;
 	protected static ModelicaLogger log = new StreamingLogger(ModelicaCompiler.DEFAULT_LEVEL, System.out);
 	
-	protected String xmlTpl = null;
-	protected String cTemplatefile = null;
+	protected String currXMLTpl = null;
+	protected String currCTemplatefile = null;
+	protected String userDefXMLTpl = null;
+	protected String userDefCTemplatefile = null;
 	
 	private OptionRegistry options = null;
 	private DiagnosticsGenerator diagGenerator = null;
@@ -145,8 +147,8 @@ public class ModelicaCompiler {
 	
 	public ModelicaCompiler(OptionRegistry options, String xmlTpl, String cTemplatefile) {
 		this(options);
-		this.xmlTpl = xmlTpl;
-		this.cTemplatefile = cTemplatefile;
+		userDefXMLTpl = xmlTpl;
+		userDefCTemplatefile = cTemplatefile;
 	}
 	
 	public ModelicaCompiler(OptionRegistry options) {
@@ -193,26 +195,26 @@ public class ModelicaCompiler {
 	
 	public void defaultTemplatePathsJMU() {
 		File dir = getTemplatesDir();
-		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath(): xmlTpl;
-		cTemplatefile = (cTemplatefile == null) ? new File(dir, "jmi_modelica_template.c").getPath(): cTemplatefile;
+		currXMLTpl = (userDefXMLTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath(): userDefXMLTpl;
+		currCTemplatefile = (userDefCTemplatefile == null) ? new File(dir, "jmi_modelica_template.c").getPath(): userDefCTemplatefile;
 	}
 	
 	public void defaultTemplatePathsFMUME() {
 		File dir = getTemplatesDir();
-		xmlTpl  = (xmlTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : xmlTpl;
-		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : cTemplatefile;
+		currXMLTpl  = (userDefXMLTpl == null) ?  new File(dir, "fmi_model_description.tpl").getPath() : userDefXMLTpl;
+		currCTemplatefile = (userDefCTemplatefile == null) ? new File(dir, "fmi_me_modelica_template.c").getPath() : userDefCTemplatefile;
 	}
 
 	public void defaultTemplatePathsFMUCS() {
 		File dir = getTemplatesDir();
-		xmlTpl = (xmlTpl == null) ? new File(dir, "fmi1_cs_model_description.tpl").getPath() : xmlTpl;
-		cTemplatefile = (cTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : cTemplatefile;
+		currXMLTpl = (userDefXMLTpl == null) ? new File(dir, "fmi1_cs_model_description.tpl").getPath() : userDefXMLTpl;
+		currCTemplatefile = (userDefCTemplatefile == null) ? new File(dir, "fmi_cs_modelica_template.c").getPath() : userDefCTemplatefile;
 	}
 	
 	public void defaultTemplatePathsFMUX() {
 		File dir = getTemplatesDir();
-		xmlTpl = (xmlTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath() : xmlTpl;
-		cTemplatefile = null;
+		currXMLTpl = (userDefXMLTpl == null) ? new File(dir, "jmodelica_model_description.tpl").getPath() : userDefXMLTpl;
+		currCTemplatefile = null;
 	}
 
 	/**
@@ -496,7 +498,7 @@ public class ModelicaCompiler {
 	 * 
 	 */
 	public String getXMLTpl() {
-		return this.xmlTpl;
+		return (userDefXMLTpl == null) ? currXMLTpl : userDefXMLTpl;
 	}
 
 	/**
@@ -505,7 +507,7 @@ public class ModelicaCompiler {
 	 * @param template The new XML variables template file path.
 	 */
 	public void setXMLTpl(String template) {
-		this.xmlTpl = template;
+		userDefXMLTpl = template;
 	}
 
 	/**
@@ -515,7 +517,7 @@ public class ModelicaCompiler {
 	 * 
 	 */
 	public String getCTemplate() {
-		return this.cTemplatefile;
+		return (userDefCTemplatefile == null) ? currCTemplatefile : userDefCTemplatefile;
 	}
 	
 	/**
@@ -524,7 +526,7 @@ public class ModelicaCompiler {
 	 * @param template The new c template file path.
 	 */
 	public void setCTemplate(String template) {
-		this.cTemplatefile = template;
+		userDefCTemplatefile = template;
 	}
 
 	protected final static int NUM_USED_MEMORY_SLOTS = 6;
@@ -1413,7 +1415,7 @@ public class ModelicaCompiler {
 	 * different kinds of flattened classes.
 	 */
 	protected String getXmlTpl(FClass fc) {
-		return this.xmlTpl;
+		return (userDefXMLTpl == null) ? currXMLTpl : userDefXMLTpl;
 	}
 
 	/**
@@ -1424,7 +1426,7 @@ public class ModelicaCompiler {
 	 * different kinds of flattened classes.
 	 */
 	protected String getCTemplatefile(FClass fc) {
-		return this.cTemplatefile;
+		return (userDefCTemplatefile == null) ? currCTemplatefile : userDefCTemplatefile;
 	}
 	
 	/**
@@ -1664,8 +1666,8 @@ public class ModelicaCompiler {
 		
 		// set templates and options		
 		if (args.length >= arg+4) {
-			this.xmlTpl = args[arg+2];
-			this.cTemplatefile = args[arg+3];
+			userDefXMLTpl = args[arg+2];
+			userDefCTemplatefile = args[arg+3];
 		}
 		
 		// set options
