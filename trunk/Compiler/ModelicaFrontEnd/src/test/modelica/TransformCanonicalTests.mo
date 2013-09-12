@@ -4649,7 +4649,7 @@ algorithm
   c := {integer(a),integer(a)};
   dummy := 1;
 end f;
-R r;
+discrete R r;
 Integer[2] i;
 equation
   (r, ,i) = f(time*10);

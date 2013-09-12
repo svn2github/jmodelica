@@ -124,8 +124,6 @@ aspect FlatVariability {
 	syn boolean FAbstractEquation.isParameter() = false;
 	syn boolean FAbstractEquation.isDiscrete() = false;
 	syn boolean FAbstractEquation.isContinuous() = false;
-	syn boolean FAbstractEquation.isContinuousDAE() = isContinuous() || (isReal() && isInitial());
-	syn boolean FAbstractEquation.isDiscreteDAE()   = isDiscrete() && !(isReal() && isInitial());
 	
 	eq FEquation.isConstant() = variability().constantVariability();
 	eq FEquation.isParameter() = variability().parameterVariability();
@@ -343,7 +341,6 @@ aspect FlatVariability {
 	eq FEndExp.expVariability()   = fParameter();
 	eq FTimeExp.expVariability()  = fContinuous();
 	eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
-	eq FFunctionCall.expVariability() = (typeOfOutput(0).isReal() ? fContinuous() : fDiscrete()).combineDown(super.expVariability());
 
 	eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
 	eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());

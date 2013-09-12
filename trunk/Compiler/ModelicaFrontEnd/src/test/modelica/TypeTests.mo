@@ -1667,7 +1667,7 @@ end StringExpType1;
 model AlgorithmType1
 	Boolean b;
 	Integer i;
-	Real r;
+	discrete Real r;
 algorithm
 	r := time*time + 1;
 	b := noEvent(r > 2) and noEvent(r < 4);
@@ -1682,12 +1682,13 @@ algorithm
 fclass TypeTests.AlgorithmType1
  discrete Boolean b;
  discrete Integer i;
- Real r;
+ discrete Real r;
 initial equation 
  pre(b) = false;
  pre(i) = 0;
+ pre(r) = 0.0;
 algorithm
- r := 0.0;
+ r := pre(r);
  b := pre(b);
  i := pre(i);
  r := time * time + 1;
@@ -1704,7 +1705,7 @@ model AlgorithmType2
 		Integer innerInteger[3];
 	end I;
 	record R
-		Real r;
+		discrete Real r;
 	end R;
 	R outerR[3];
 	Integer outerInteger[3];
@@ -1721,22 +1722,28 @@ algorithm
 			algorithms_as_functions=false,
 			flatModel="
 fclass TypeTests.AlgorithmType2
- Real outerR[1].r;
- Real outerR[2].r;
- Real outerR[3].r;
+ discrete Real outerR[1].r;
+ discrete Real outerR[2].r;
+ discrete Real outerR[3].r;
  discrete Integer outerInteger[1];
  discrete Integer outerInteger[2];
  discrete Integer outerInteger[3];
- Real i.innerR[1].r;
- Real i.innerR[2].r;
- Real i.innerR[3].r;
+ discrete Real i.innerR[1].r;
+ discrete Real i.innerR[2].r;
+ discrete Real i.innerR[3].r;
  discrete Integer i.innerInteger[1];
  discrete Integer i.innerInteger[2];
  discrete Integer i.innerInteger[3];
 initial equation 
+ outerR[1].pre(r) = 0.0;
+ outerR[2].pre(r) = 0.0;
+ outerR[3].pre(r) = 0.0;
  pre(outerInteger[1]) = 0;
  pre(outerInteger[2]) = 0;
  pre(outerInteger[3]) = 0;
+ i.innerR[1].pre(r) = 0.0;
+ i.innerR[2].pre(r) = 0.0;
+ i.innerR[3].pre(r) = 0.0;
  i.pre(innerInteger[1]) = 0;
  i.pre(innerInteger[2]) = 0;
  i.pre(innerInteger[3]) = 0;
@@ -1744,12 +1751,12 @@ algorithm
  outerInteger[1] := pre(outerInteger[1]);
  outerInteger[2] := pre(outerInteger[2]);
  outerInteger[3] := pre(outerInteger[3]);
- outerR[1].r := 0.0;
- outerR[2].r := 0.0;
- outerR[3].r := 0.0;
- i.innerR[1].r := 0.0;
- i.innerR[2].r := 0.0;
- i.innerR[3].r := 0.0;
+ outerR[1].r := outerR[1].pre(r);
+ outerR[2].r := outerR[2].pre(r);
+ outerR[3].r := outerR[3].pre(r);
+ i.innerR[1].r := i.innerR[1].pre(r);
+ i.innerR[2].r := i.innerR[2].pre(r);
+ i.innerR[3].r := i.innerR[3].pre(r);
  i.innerInteger[1] := i.pre(innerInteger[1]);
  i.innerInteger[2] := i.pre(innerInteger[2]);
  i.innerInteger[3] := i.pre(innerInteger[3]);
@@ -1768,11 +1775,11 @@ algorithm
 
 public
  record TypeTests.AlgorithmType2.R
-  Real r;
+  discrete Real r;
  end TypeTests.AlgorithmType2.R;
 
  record TypeTests.AlgorithmType2.I
-  TypeTests.AlgorithmType2.R innerR[3];
+  discrete TypeTests.AlgorithmType2.R innerR[3];
   discrete Integer innerInteger[3];
  end TypeTests.AlgorithmType2.I;
 

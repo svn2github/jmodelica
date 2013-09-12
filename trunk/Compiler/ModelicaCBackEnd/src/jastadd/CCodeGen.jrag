@@ -1815,6 +1815,7 @@ aspect CCodeGen {
 		genBlockResidualFunctionBeforeEqns_C(nextIndent, str, inInitial, visitedList);
 		// Write the residual expressions
 		genBlockResidualFunctionEqns_C(new Enumerator(), nextIndent, str, visitedList, solverArrayMap);
+		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		genBlockResidualFunctionAfterEqns_C(nextIndent, str, visitedList);
 		// Write back
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
@@ -1952,8 +1953,6 @@ aspect CCodeGen {
 	}
 	
 	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		// TODO: The indent used here is incorrect and this is a ugly hack that should be fixed!
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
 		for (FAbstractEquation ae : discreteEquations()) {

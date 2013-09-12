@@ -818,17 +818,17 @@ aspect TransformCanonical {
 		
 		public Collection<FVariable> activeContinuousVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (SimpleEquationBlock seb : blocks)
-				if (seb.equation().isContinuousDAE())
-					l.addAll(seb.activeVariables());
+			for (FVariable fv : activeVariables())
+				if (fv.isReal())
+					l.add(fv);
 			return l;
 		}
 		
 		public Collection<FVariable> activeDiscreteVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
-			for (SimpleEquationBlock seb : blocks)
-				if (seb.equation().isDiscreteDAE())
-					l.addAll(seb.activeVariables());
+			for (FVariable fv : activeVariables())
+				if (!fv.isReal())
+					l.add(fv);
 			return l;
 		}
 		
@@ -849,7 +849,7 @@ aspect TransformCanonical {
 		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks) {
-				if (seb.equation().isContinuousDAE())
+				if (seb.equation().isReal())
 					l.add(seb);
 			}
 			return l;
@@ -858,7 +858,7 @@ aspect TransformCanonical {
 		public Collection<SimpleEquationBlock> discreteEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks)
-				if (seb.equation().isDiscreteDAE())
+				if (!seb.equation().isReal())
 					l.add(seb);
 			return l;
 		}

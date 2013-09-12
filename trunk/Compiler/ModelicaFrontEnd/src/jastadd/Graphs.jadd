@@ -145,7 +145,7 @@ public class EquationBlockFactory {
 		boolean isLinear = true;
 		for (SimpleEquationBlock seb : ls) {
 			for (FAbstractEquation e : seb.equations()) {
-				if (e.isDiscreteDAE())
+				if (e.isDiscrete())
 					isMixed = true;
 				if (!e.checkLinearity(activeVariables))
 					isLinear = false;
@@ -822,13 +822,11 @@ public class BiPGraph {
 	
 	public boolean canMatch(Eq e, Var v) {
 		FAbstractEquation equation = e.getEquation();
-		if (equation instanceof FFunctionCallEquation ||
-				equation instanceof FAlgorithm) {
-			return true;
-		}
+		FVariable variable = v.getVariable();
+		
 		// Discrete variables can only be matched to discrete equations.
 		// Except discrete reals in initial system.
-		return v.getVariable().isContinuous() ||
+		return variable.isContinuous() ||
 				equation.isDiscrete() ||
 				equation.isInitial();
 	}

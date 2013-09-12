@@ -4,9 +4,10 @@ model AlgoTest1
 	Integer i;
 	Real r;
 algorithm
-	r := time*time + 1;
-	b := r > 2 and r < 4;
-	i := integer(r);
+	b := i >= 2 and i < 4;
+equation
+	r = time*time + 1;
+	i = integer(r);
 end AlgoTest1;
 
 model AlgoTest2
@@ -43,6 +44,9 @@ algorithm
 	n := integer(time*10);
 	for i in is loop
 		n := n + 1;
+	end for;
+algorithm
+	for i in is loop
 		r := f(r,i) / n;
 	end for;
 end AlgoTest3;
