@@ -6,8 +6,13 @@ project (SimulationRuntime)
 set(JMODELICA_HOME "$ENV{JMODELICA_HOME}")
 STRING(REGEX REPLACE "\\\\" "/" JMODELICA_HOME ${JMODELICA_HOME} )
 
+#Make directory for header files to be installed in.
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory 
                 ${JMODELICA_HOME}/include/RuntimeLibrary)
+                
+#Make directory for lib files to be installed in.
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory 
+                ${JMODELICA_HOME}/lib/RuntimeLibrary)
 
 #Including Sundials.
 set(SundialsDir ${JMODELICA_HOME}/../build/sundials_install)

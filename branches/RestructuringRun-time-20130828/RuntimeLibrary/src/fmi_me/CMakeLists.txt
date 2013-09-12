@@ -8,9 +8,9 @@ set(FMI_MESources
 	fmi1_me.c
 )
 
-add_library(jm_fmi_me STATIC ${FMI_MESources})
+add_library(fmi_me STATIC ${FMI_MESources})
 
-install(TARGETS jm_fmi_me DESTINATION "${JMODELICA_HOME}/lib")
+install(TARGETS fmi_me DESTINATION "${JMODELICA_HOME}/lib/RuntimeLibrary")
 
 install(DIRECTORY "${CMAKE_CURRENT_COURCE_DIR}"
     DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"

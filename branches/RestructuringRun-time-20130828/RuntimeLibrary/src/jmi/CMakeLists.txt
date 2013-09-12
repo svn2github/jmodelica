@@ -47,11 +47,34 @@ set(MODELICAEXTERNALCSources
     ${MSLCSOURCES}/ModelicaStrings.c
 )
 
-add_library(jm_jmi STATIC ${JMISources})
-add_library(jm_ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+set(STANDARDTABLESSources
+    ${MSLCSOURCES}/ModelicaStandardTables.c
+    ${MSLCSOURCES}/ModelicaMatIO.c
+    ${MSLCSOURCES}/zlib/adler32.c
+    ${MSLCSOURCES}/zlib/compress.c
+    ${MSLCSOURCES}/zlib/crc32.c
+    ${MSLCSOURCES}/zlib/deflate.c
+    ${MSLCSOURCES}/zlib/gzclose.c
+    ${MSLCSOURCES}/zlib/gzlib.c
+    ${MSLCSOURCES}/zlib/gzread.c
+    ${MSLCSOURCES}/zlib/gzwrite.c
+    ${MSLCSOURCES}/zlib/infback.c
+    ${MSLCSOURCES}/zlib/inffast.c
+    ${MSLCSOURCES}/zlib/inflate.c
+    ${MSLCSOURCES}/zlib/inftrees.c
+    ${MSLCSOURCES}/zlib/trees.c
+    ${MSLCSOURCES}/zlib/uncompr.c
+    ${MSLCSOURCES}/zlib/zutil.c
+)
 
-install(TARGETS jm_jmi jm_ModelicaExternalC
-    DESTINATION "${JMODELICA_HOME}/lib")
+add_library(jmi STATIC ${JMISources})
+include_directories(${MSLCSOURCES})
+add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
+add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
+
+install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
+    DESTINATION "${JMODELICA_HOME}/lib/RuntimeLibrary")
 
 install(DIRECTORY "${CMAKE_CURRENT_COURCE_DIR}"
     DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"
