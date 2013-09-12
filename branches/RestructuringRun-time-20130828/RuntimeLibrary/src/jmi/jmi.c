@@ -33,8 +33,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
         int n_string_pi, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
-        int n_tp,int n_real_d,
-        int n_integer_d, int n_integer_u,
+        int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
@@ -81,8 +80,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->n_real_x = n_real_x;
     jmi_->n_real_u = n_real_u;
     jmi_->n_real_w = n_real_w;
-
-    jmi_->n_tp = n_tp;
 
     jmi_->n_real_d = n_real_d;
 
@@ -131,12 +128,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->offs_real_w = jmi_->offs_real_u + n_real_u;
     jmi_->offs_t = jmi_->offs_real_w + n_real_w;
 
-    jmi_->offs_real_dx_p = jmi_->offs_t + (n_tp>0? 1: 0);
-    jmi_->offs_real_x_p = jmi_->offs_real_dx_p + (n_tp>0? n_real_dx: 0);
-    jmi_->offs_real_u_p = jmi_->offs_real_x_p + (n_tp>0? n_real_x: 0);
-    jmi_->offs_real_w_p = jmi_->offs_real_u_p + (n_tp>0? n_real_u: 0);
-
-    jmi_->offs_real_d = jmi_->offs_t + 1 + (n_real_dx + n_real_x + n_real_w + n_real_u)*n_tp;
+    jmi_->offs_real_d = jmi_->offs_t + 1;
 
     jmi_->offs_integer_d = jmi_->offs_real_d + n_real_d;
     jmi_->offs_integer_u = jmi_->offs_integer_d + n_integer_d;
@@ -166,22 +158,10 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->offs_pre_guards = jmi_->offs_pre_sw_init + n_sw_init;
     jmi_->offs_pre_guards_init = jmi_->offs_pre_guards + n_guards;
 
-    jmi_->offs_p = 0;
-    jmi_->offs_v = jmi_->offs_real_dx;
-    if (n_tp>0) {
-        jmi_->offs_q = jmi_->offs_t + 1;
-    } else {
-        jmi_->offs_q = jmi_->offs_t;
-    }
-
-    jmi_->n_p = jmi_->offs_real_dx;
     jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 1;
-    jmi_->n_q = (n_real_dx + n_real_x + n_real_u + n_real_w)*n_tp;
-    jmi_->n_d = n_real_d + n_integer_d + n_integer_u + n_boolean_d +
-        n_boolean_u;
-
-    jmi_->n_z = jmi_->n_p + 2*(jmi_->n_v) - 1 + jmi_->n_q + 2*jmi_->n_d + 2*n_sw +
-            2*n_sw_init + 2*n_guards + 2*n_guards_init;
+    jmi_->n_z = jmi_->offs_real_dx + 2*(jmi_->n_v) - 1 + 
+        2*(n_real_d + n_integer_d + n_integer_u + n_boolean_d + n_boolean_u) + 
+        2*n_sw + 2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
     jmi_->z = (jmi_real_t*)calloc(1,sizeof(jmi_real_t *));
     *(jmi_->z) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
@@ -216,8 +196,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
             jmi_->dz_active_variables_buf[j][i] = 0;
         }
     }
-
-    jmi_->tp = (jmi_real_t*)calloc(jmi_->n_tp,sizeof(jmi_real_t));
 
     jmi_->scaling_method = scaling_method;
 
@@ -299,7 +277,6 @@ int jmi_delete(jmi_t* jmi){
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
-    free(jmi->tp);
     free(jmi->ext_objs);
     jmi_log_delete(jmi->log);
     free(jmi);

@@ -77,8 +77,6 @@ static const int N_guards_init = $n_guards_init$;
 static const int N_dae_blocks = $n_dae_blocks$;
 static const int N_dae_init_blocks = $n_dae_init_blocks$;
 
-static const int N_t_p = $n_tp$;
-
 static const int Scaling_method = $C_DAE_scaling_method$;
 
 #define sf(i) (jmi->variable_scaling_factors[i])
@@ -111,14 +109,7 @@ const int fmi_runtime_options_map_length = 1;
 #define _real_u(i) ((*(jmi->z))[jmi->offs_real_u+i])
 #define _real_w(i) ((*(jmi->z))[jmi->offs_real_w+i])
 #define _t ((*(jmi->z))[jmi->offs_t])
-#define _real_dx_p(j,i) ((*(jmi->z))[jmi->offs_real_dx_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)+ i])
-#define _real_real_x_p(j,i) ((*(jmi->z))[jmi->offs_real_x_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
-#define _real_u_p(j,i) ((*(jmi->z))[jmi->offs_real_u_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
-#define _real_w_p(j,i) ((*(jmi->z))[jmi->offs_real_w_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
+
 #define _real_d(i) ((*(jmi->z))[jmi->offs_real_d+i])
 #define _integer_d(i) ((*(jmi->z))[jmi->offs_integer_d+i])
 #define _integer_u(i) ((*(jmi->z))[jmi->offs_integer_u+i])
@@ -246,7 +237,7 @@ int jmi_new(jmi_t** jmi) {
 		   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
 		   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
 		   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-		   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
+		   N_real_dx,N_real_x, N_real_u, N_real_w,
 		   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
 		   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
 	           N_sw,N_sw_init,N_guards,N_guards_init,

@@ -329,16 +329,10 @@
 #define JMI_DER_U 64               /**< \brief Evaluate derivatives w.r.t. real inputs, \f$u\f$.*/
 #define JMI_DER_W 128              /**< \brief Evaluate derivatives w.r.t. real algebraic variables, \f$w\f$.*/
 #define JMI_DER_T 256              /**< \brief Evaluate derivatives w.r.t. real time, \f$t\f$.*/
-/* Flags for evaluation of Jacobians w.r.t. variables in the q vector */
-#define JMI_DER_DX_P 512           /**< \brief Evaluate derivatives w.r.t. real derivatives at time points, \f$\dot x_p\f$.*/
-#define JMI_DER_X_P 1024           /**< \brief Evaluate derivatives w.r.t. real differentiated variables at time points, \f$x_p\f$.*/
-#define JMI_DER_U_P 2048           /**< \brief Evaluate derivatives w.r.t. real inputs at time points, \f$u_p\f$.*/
-#define JMI_DER_W_P 4096           /**< \brief Evaluate derivatives w.r.t. real algebraic variables at time points, \f$w_p\f$.*/
 
 /** \brief Evaluate derivatives w.r.t. all variables, \f$z\f$.*/
 #define JMI_DER_ALL (JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD |\
-    JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
-    JMI_DER_T | JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P)
+    JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W | JMI_DER_T  )
 
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$p\f$.*/
 #define JMI_DER_ALL_P JMI_DER_CI | JMI_DER_CD | JMI_DER_PI | JMI_DER_PD
@@ -346,9 +340,6 @@
 /**  \brief Evaluate derivatives w.r.t. all variables in \f$v\f$.*/
 #define JMI_DER_ALL_V JMI_DER_DX | JMI_DER_X | JMI_DER_U | JMI_DER_W |\
     JMI_DER_T
-
-/**  \brief Evaluate derivatives w.r.t. all variables in \f$q\f$.*/
-#define JMI_DER_ALL_Q  JMI_DER_DX_P | JMI_DER_X_P | JMI_DER_U_P | JMI_DER_W_P
 
 /**  \brief Definitions of boolean true and false literals.*/
 #define JMI_TRUE  ((jmi_real_t) (1.0))
@@ -495,7 +486,6 @@ int jmi_delete(jmi_t* jmi);
  * @param n_real_u (Output) number of real inputs.
  * @param n_real_w (Output) number of real algebraic variables.
  * @param n_real_d (Output) number of real discrete variables.
- * @param n_tp (Output) number of time points included in the model.
  * @param n_integer_d (Output) number of integer discrete variables.
  * @param n_integer_u (Output) number of integer inputs.
  * @param n_boolean_d (Output) number of boolean discrete variables.
@@ -512,8 +502,8 @@ int jmi_delete(jmi_t* jmi);
 int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, int* n_real_pd,
         int* n_integer_ci, int* n_integer_cd, int* n_integer_pi, int* n_integer_pd,
         int* n_boolean_ci, int* n_boolean_cd, int* n_boolean_pi, int* n_boolean_pd,
-        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_tp,
-        int* n_real_d, int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
+        int* n_real_dx, int* n_real_x, int* n_real_u, int* n_real_w, int* n_real_d, 
+        int* n_integer_d, int* n_integer_u, int* n_boolean_d, int* n_boolean_u,
         int* n_outputs, int* n_sw, int* n_sw_init, int* n_guards, int* n_guards_init, int* n_z);
 
 /**
@@ -537,10 +527,6 @@ int jmi_get_sizes(jmi_t* jmi, int* n_real_ci, int* n_real_cd, int* n_real_pi, in
  * @param offs_real_u (Output) offset of real inputs.
  * @param offs_real_w (Output) offset of real algebraic variables.
  * @param offs_t (Output) offset of time.
- * @param offs_real_dx_p (Output) offset of the first real  derivatives in the time point part of \f$z\f$.
- * @param offs_real_x_p (Output) offset of the first real differentiated variables in the time point part of \f$z\f$.
- * @param offs_real_u_p (Output) offset of the first real inputs in the time point part of \f$z\f$.
- * @param offs_real_w_p (Output) offset of the first real algebraic variables in the time point part of \f$z\f$.
  * @param offs_real_d (Output) offset of real discrete variables.
  * @param offs_integer_d (Output) offset of integer discrete variables.
  * @param offs_integer_u (Output) offset of integer input variables.
@@ -573,8 +559,6 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
         int* offs_boolean_pi, int* offs_boolean_pd,
         int* offs_real_dx, int* offs_real_x, int* offs_real_u,
         int* offs_real_w, int *offs_t,
-        int* offs_real_dx_p, int* offs_real_x_p,
-        int* offs_real_u_p, int* offs_real_w_p,
         int* offs_real_d, int* offs_integer_d, int* offs_integer_u,
         int* offs_boolean_d, int* offs_boolean_u,
         int* offs_sw, int* offs_sw_init,
@@ -593,40 +577,6 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
  * @return Error code.
  */
 int jmi_copy_pre_values(jmi_t *jmi);
-
-/**
- * \brief Get the number of time points.
- *
- * @param jmi The jmi_t struct.
- * @param n_tp (Output) number of time points in the model.
- * @return Error code.
- *�
- */
-int jmi_get_n_tp(jmi_t *jmi, int *n_tp);
-
-/**
- * \brief Set the vector of time points included in the problem.
- *
- * @param jmi The jmi_t struct.
- * @param tp A pointer to a jmi_real_t array of size n_tp that contains the time
- * points. Notice that the time points should be normalized to the interval
- * [0,1], where 0 corresponds to the interval start time and where 1 corresponds
- * to the interval final time.
- * @return Error code.
- *
- */
-int jmi_set_tp(jmi_t *jmi, jmi_real_t *tp);
-
-/**
- * \brief Get the vector of time points included in the problem.
- *
- * @param jmi The jmi_t struct.
- * @param tp (Output) a pointer to a jmi_real_t array of size n_tp.
- * Upon return the array contains the normalized time points of the model.
- * @return Error code.
- *
- */
-int jmi_get_tp(jmi_t *jmi, jmi_real_t *tp);
 
 /**
  * \brief Get a pointer to the z vector containing all variables.

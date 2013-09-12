@@ -827,7 +827,6 @@ struct jmi_func_ad_t {
  * @param n_real_x Number of real differentiated variables.
  * @param n_real_u Number of real inputs.
  * @param n_real_w Number of real algebraics.
- * @param n_tp Number of interpolation time points.
  * @param n_real_d Number of real discrete parameters.
  * @param n_integer_d Number of integer discrete parameters.
  * @param n_integer_u Number of integer inputs.
@@ -856,8 +855,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_boolean_pi, int n_boolean_pd, int n_string_ci, int n_string_cd,
         int n_string_pi, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
-        int n_tp,int n_real_d,
-        int n_integer_d, int n_integer_u,
+        int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
         int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
@@ -1075,7 +1073,6 @@ struct jmi_t {
     int n_real_x;                        /**< \brief Number of differentiated states. */
     int n_real_u;                        /**< \brief Number of inputs. */
     int n_real_w;                        /**< \brief Number of algebraics. */
-    int n_tp;                            /**< \brief Number of time points included in the optimization problem */
 
     int n_real_d;                        /**< \brief Number of discrete variables. */
 
@@ -1098,17 +1095,12 @@ struct jmi_t {
     int n_guards;                        /**< \brief Number of guards in the DAE \f$F\f$. */
     int n_guards_init;                     /**< \brief Number of guards in the DAE initialization system\f$F_0\f$. */
 
-    int n_p;                             /**< \brief Number of elements in \f$p\f$. */
-    int n_v;                             /**< \brief Number of elements in \f$v\f$. */
-    int n_q;                             /**< \brief Number of elements in \f$q\f$. */
-    int n_d;                             /**< \brief Number of elements in \f$d\f$. */
+    int n_v;                             /**< \brief Number of elements in \f$v\f$. Number of equations??*/
 
     int n_z;                             /**< \brief Number of elements in \f$z\f$. */
     
     int n_dae_blocks;                    /**< \brief Number of BLT blocks. */
     int n_dae_init_blocks;               /**< \brief Number of initial BLT blocks. */
-    
-    jmi_real_t *tp;                      /**< \brief Time point values in the normalized interval [0..1]. A value \f$\leq 0\f$ corresponds to the initial time and a value \f$\geq 1\f$ corresponds to the final time. */
 
     /* Offset variables in the z vector, for convenience. */
     int offs_real_ci;                    /**< \brief  Offset of the independent real constant vector in \f$z\f$. */
@@ -1131,11 +1123,6 @@ struct jmi_t {
     int offs_real_u;                     /**< \brief  Offset of the input real vector in \f$z\f$. */
     int offs_real_w;                     /**< \brief  Offset of the algebraic real variables vector in \f$z\f$. */
     int offs_t;                          /**< \brief  Offset of the time entry in \f$z\f$. */
-
-    int offs_real_dx_p;                  /**< \brief  Offset of the first time point derivative vector in \f$z\f$. */
-    int offs_real_x_p;                   /**< \brief  Offset of the first time point differentiated variable vector in \f$z\f$. */
-    int offs_real_u_p;                   /**< \brief  Offset of the first time point input vector in \f$z\f$. */
-    int offs_real_w_p;                   /**< \brief  Offset of the first time point algebraic variable vector in \f$z\f$. */
 
     int offs_real_d;                     /**< \brief  Offset of the discrete real variable vector in \f$z\f$. */
 
@@ -1169,11 +1156,6 @@ struct jmi_t {
 
     int offs_pre_guards;                 /**< \brief  Offset of the first pre guard \f$F\f$ */
     int offs_pre_guards_init;            /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
-
-    int offs_p;                          /**< \brief  Offset of the \f$p\f$ vector in \f$z\f$. */
-    int offs_v;                          /**< \brief  Offset of the \f$v\f$ vector in \f$z\f$. */
-    int offs_q;                          /**< \brief  Offset of the \f$q\f$ vector in \f$z\f$. */
-    int offs_d;                          /**< \brief  Offset of the \f$d\f$ vector in \f$z\f$. */
 
     jmi_real_t** z;                      /**< \brief  This vector contains the actual values. */
     jmi_real_t** dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
