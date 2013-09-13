@@ -132,7 +132,6 @@ typedef struct fmi_t fmi_t;                               /**< \brief Forward de
 typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
-typedef struct jmi_func_ad_t jmi_func_ad_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
 typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
@@ -724,7 +723,6 @@ struct jmi_func_t {
     int cad_dF_n_nz;            /**< \brief Number of non-zeros in the AD Jacobian of \f$F(z)\f$ (if available). */
     int* cad_dF_row;            /**< \brief Row indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
     int* cad_dF_col;            /**< \brief Column indices of the non-zero elements in the AD Jacobian of \f$F(z)\f$ (if available). */
-    jmi_func_ad_t* ad;      /**< \brief Pointer to a jmi_func_ad_t struct containing AD information (if compiled with AD support). */
     int coloring_counter;   /**< \brief Number of times that the graph coloring algorithm  has been performed. */
     int* coloring_done;     /**< \brief Contains info of which independent_vars that the graph_coloring algorithm has been done. */
     jmi_color_info** c_info;  /**< \brief Vector of jmi_graph_coloring struct, contains graph coloring results for every independent_vars that has been performed  */
@@ -756,35 +754,6 @@ struct jmi_simple_color_info_t {
     int* group_cols;                /**< \brief An ordered array of column indices corresponding to CPR groups. */
     int* group_start_index;         /**< \brief An array containing the start indices for each group in the array group_cols. */
 };
-
-/**
- * \brief Contains data structures for CppAD.
- *
- * The struct jmi_func_ad_t contains a tape and associated sparsity
- * information for a particular jmi_func_t struct.
- */
-struct jmi_func_ad_t {
-    jmi_real_t** F_z_dependent; /**< \brief A vector containing active AD independent objects for use by CppAD. */
-    int tape_initialized;           /**< \brief Flag to indicate if the other fields are initialized. 0 if uninitialized and 1 if initialized. */
-    int dF_z_n_nz;                  /**< \brief Number of non-zeros in Jacobian. */
-    int* dF_z_row;                  /**< \brief Row indices of non-zeros in Jacobian. */
-    int* dF_z_col;                  /**< \brief Column indices of non-zeros in Jacobian. */
-    int* dF_z_col_start_index;        /**< \brief The index in the sparse Jacobian vector of the
-                                                first element corresponding to a particular column. */
-    int* dF_z_col_n_nz;               /**< \brief The number of non-zeros of each column in the sparse
-                                                Jacobian. */
-    jmi_real_t** z_work;          /**< \brief A work vector for \f$z\f$. */
-    int exec_time;                  /**< \brief A variable that is used for measuring execution time. */
-    jmi_simple_color_info_t* color_info; /**< \brief A struct containing coloring info for the CPR seeding. */
-
-    /*int n_groups;*/                   /**< \brief Number of groups in the CPR seeding. */
-    /*int n_cols_in_grouping;*/         /**< \brief Total number of columns used in CPR seeding computation. */
-    /*int* n_cols_in_group;    */       /**< \brief The number of column in each CPR group. */
-    /*int* group_cols;          */      /**< \brief An ordered array of column indices corresponding to CPR groups. */
-    /*int* group_start_index;     */    /**< \brief An array containing the start indices for each group in the array group_cols. */
-
-};
-
 
 /* @} */
 

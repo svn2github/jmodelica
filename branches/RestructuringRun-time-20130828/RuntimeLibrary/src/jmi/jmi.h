@@ -305,6 +305,7 @@
 #define JMI_INF 1e20                /**< \brief A Very Large Number denoting infinity.*/
 #define JMI_SMALL 1e-6                /**< \brief A Quite Small Number. */
 
+/*The option JMI_DER_CPPAD is no longer used and should be removed.*/
 #define JMI_DER_SYMBOLIC 1          /**< \brief Use symbolic evaluation of derivatives (if available). */
 #define JMI_DER_CPPAD 2             /**< \brief Use automatic differentiation (CppAD) to evaluate derivatives. */
 #define JMI_DER_CAD 4             /**< \brief Use automatic differentiation (generated C code) to evaluate derivatives. */

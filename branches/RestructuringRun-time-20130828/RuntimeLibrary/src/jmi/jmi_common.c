@@ -121,8 +121,6 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
         func->coloring_done[i] = 0;
         func->c_info[i] = (jmi_color_info*)malloc(sizeof(jmi_color_info));
     }
-    
-    func->ad = NULL;
 
     return 0;
 }
@@ -130,9 +128,7 @@ int jmi_func_new(jmi_func_t** jmi_func, jmi_residual_func_t F, int n_eq_F, jmi_j
 int jmi_func_delete(jmi_func_t *func) {
     int i;
     int flag = 0;
-    if (func->ad!=NULL) {
-        return -1;
-    }
+
     free(func->sym_dF_row);
     free(func->sym_dF_col);
     free(func->cad_dF_row);
