@@ -680,11 +680,11 @@ end QuadTankOptimization;
     parameter Modelica.SIunits.Area A = 2.8e-3 
       "Cross section area of the tanks";
     parameter Modelica.SIunits.Area a = 7e-6 "Cross section area of the holes";
-    parameter Real k(unit="m^3/s/V") = 2.7e-6 
+    parameter Real k(unit="m3/s/V") = 2.7e-6 
       "Constant of proportionality for the pump";
     parameter Real beta(unit="m/s/V") = k/A;
     parameter Real gamma = a/A;
-    parameter Real g(unit="m/s^2") = 9.81;
+    parameter Real g(unit="m/s2") = 9.81;
     
     Modelica.SIunits.Length h1(start=0.0682) "Level in upper tank";
     Modelica.SIunits.Length h2(start=0.0682) "Level in lower tank";
