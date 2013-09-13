@@ -769,6 +769,28 @@ Compliance error at line 744, column 7:
 ")})));
 end Error2;
 
+model ArrayIterTest
+ Real x[1,1] = { i * j for i, j };
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArrayIterTest",
+			description="Array constructor with iterators: without in",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index without in expression isn't supported
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index without in expression isn't supported
+")})));
+end ArrayIterTest;
+
 end UnknownArraySizes;
 
 end ComplianceTests;

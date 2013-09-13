@@ -65,11 +65,6 @@ aspect ContentCheck {
 			error("When statements are not allowed inside if, for, while and when clauses");
 	}
 	
-	public void InstForIndex.contentCheck() {
-		if (!hasFExp())
-			error("For index without in expression isn't supported");
-	}
-	
 	public void FParseArray.contentCheck() {
 		// If not already rewritten to FLongArray, this is an error.
 		error("The array() operator may not be used in function call equations or function call statements");

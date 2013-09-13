@@ -188,6 +188,12 @@ aspect ComplianceCheck {
 		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess()) {
 			compliance("Unknown size array as a for index is not supported in functions");
 		}
+		if (!hasFExp()) {
+			compliance("For index without in expression isn't supported");
+		}
+	}
+	
+	public void InstForIndex.contentCheck() {
 	}
 	
 	
