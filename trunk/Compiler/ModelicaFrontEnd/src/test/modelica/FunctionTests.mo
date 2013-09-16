@@ -4904,7 +4904,7 @@ end fwrap;
 
 	R[2] a;
 algorithm
-	(a,) := fwrap({R({1,1},{1,1}),R({1,1},{1,1})});
+	a := fwrap({R({1,1},{1,1}),R({1,1},{1,1})});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -4923,7 +4923,23 @@ fclass FunctionTests.ArrayOutputScalarization25
  Real a[2].x[2];
  Real a[2].y[1];
  Real a[2].y[2];
+ Real temp_1[1].x[1];
+ Real temp_1[1].x[2];
+ Real temp_1[1].y[1];
+ Real temp_1[1].y[2];
+ Real temp_1[2].x[1];
+ Real temp_1[2].x[2];
+ Real temp_1[2].y[1];
+ Real temp_1[2].y[2];
 algorithm
+ temp_1[1].x[1] := 0.0;
+ temp_1[1].x[2] := 0.0;
+ temp_1[1].y[1] := 0.0;
+ temp_1[1].y[2] := 0.0;
+ temp_1[2].x[1] := 0.0;
+ temp_1[2].x[2] := 0.0;
+ temp_1[2].y[1] := 0.0;
+ temp_1[2].y[2] := 0.0;
  a[1].x[1] := 0.0;
  a[1].x[2] := 0.0;
  a[1].y[1] := 0.0;
@@ -4932,7 +4948,15 @@ algorithm
  a[2].x[2] := 0.0;
  a[2].y[1] := 0.0;
  a[2].y[2] := 0.0;
- ({FunctionTests.ArrayOutputScalarization25.R({a[1].x[1], a[1].x[2]}, {a[1].y[1], a[1].y[2]}), FunctionTests.ArrayOutputScalarization25.R({a[2].x[1], a[2].x[2]}, {a[2].y[1], a[2].y[2]})}, ) := FunctionTests.ArrayOutputScalarization25.fwrap({FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1}), FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1})});
+ ({FunctionTests.ArrayOutputScalarization25.R({temp_1[1].x[1], temp_1[1].x[2]}, {temp_1[1].y[1], temp_1[1].y[2]}), FunctionTests.ArrayOutputScalarization25.R({temp_1[2].x[1], temp_1[2].x[2]}, {temp_1[2].y[1], temp_1[2].y[2]})}) := FunctionTests.ArrayOutputScalarization25.fwrap({FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1}), FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1})});
+ a[1].x[1] := temp_1[1].x[1];
+ a[1].x[2] := temp_1[1].x[2];
+ a[1].y[1] := temp_1[1].y[1];
+ a[1].y[2] := temp_1[1].y[2];
+ a[2].x[1] := temp_1[2].x[1];
+ a[2].x[2] := temp_1[2].x[2];
+ a[2].y[1] := temp_1[2].y[1];
+ a[2].y[2] := temp_1[2].y[2];
 
 public
  function FunctionTests.ArrayOutputScalarization25.fwrap

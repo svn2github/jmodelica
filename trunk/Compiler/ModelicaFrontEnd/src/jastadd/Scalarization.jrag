@@ -1219,13 +1219,14 @@ aspect Scalarization {
 			FFunctionCall call = (FFunctionCall) right;
 			if (inFunction()) {
 				call.getArgs().createArrayTemporaries(stmts, vars, indexMap, true);
+				FFunctionCallStmt res = new FFunctionCallStmt();
+				res.addLeft(new FFunctionCallLeft(new Opt(left.myFV().createUseExp())));
+				res.setCall(call.scalarizeFunction(indexMap));
+				stmts.add(res);
 			} else {
 				call.createArrayTemporaries(stmts, vars, indexMap, true);
+				left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
 			}
-			FFunctionCallStmt res = new FFunctionCallStmt();
-			res.addLeft(new FFunctionCallLeft(new Opt(left.myFV().createUseExp())));
-			res.setCall(call.scalarizeFunction(indexMap));
-			stmts.add(res);
 		} else if (left.type().isRecord()) {
 			right.createArrayTemporaries(stmts, vars, indexMap, true);
 			left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
