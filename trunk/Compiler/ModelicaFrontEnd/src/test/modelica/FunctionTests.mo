@@ -2113,11 +2113,15 @@ fclass FunctionTests.AlgorithmFlatten6
  Real x;
 algorithm
  x := 0.0;
- for i in {1, 2, 4} loop
-  for j in 1:3 loop
-   x := x + i * j;
-  end for;
- end for;
+ x := x + 1;
+ x := x + 2;
+ x := x + 3;
+ x := x + 2;
+ x := x + 2 * 2;
+ x := x + 2 * 3;
+ x := x + 4;
+ x := x + 4 * 2;
+ x := x + 4 * 3;
 end FunctionTests.AlgorithmFlatten6;
 ")})));
 end AlgorithmFlatten6;

@@ -37,7 +37,7 @@ model AlgoTest3
 		o := sqrt(a*a + b*b);
 	end f;
 
-	Integer is[10] = {3,6,4,2,-1,8,-10,10,-20,37};
+	constant Integer is[10] = {3,6,4,2,-1,8,-10,10,-20,37};
 	Integer n;
 	Real r;
 algorithm

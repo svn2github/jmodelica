@@ -5222,6 +5222,58 @@ end ArrayTests.For.ForStructural1;
 ")})));
 end ForStructural1;
 
+model ForAlgorithm1
+	function f
+		input Real x;
+		output Real y = x + 1;
+	algorithm
+	end f;
+	
+	constant Integer n = 3;
+	Real x[n];
+algorithm
+	for i in 2:n + 1, j in 2:n+1 loop
+		x[i-1] := f(sum(1.0:j));
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForAlgorithm1",
+			description="Array expressions depending on for loop index",
+			algorithms_as_functions=false,
+			flatModel="
+fclass ArrayTests.For.ForAlgorithm1
+ constant Integer n = 3;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+algorithm
+ x[1] := 0.0;
+ x[2] := 0.0;
+ x[3] := 0.0;
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+
+public
+ function ArrayTests.For.ForAlgorithm1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end ArrayTests.For.ForAlgorithm1.f;
+
+end ArrayTests.For.ForAlgorithm1;
+")})));
+end ForAlgorithm1;
+
 end For;
 
 

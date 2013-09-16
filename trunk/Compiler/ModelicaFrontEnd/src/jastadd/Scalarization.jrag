@@ -199,6 +199,13 @@ aspect Scalarization {
 			ae.scalarize(toList, vars, indexMap);
 	}
 	
+	public static void FAlgorithm.scalarizeStmtList(
+			List<FStatement> fromList, List<FStatement> toList, 
+			List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
+		for (FStatement stmt : fromList) 
+			stmt.scalarize(vars, toList, indexMap);
+	}
+	
 	/**
 	 * \brief Replace all expressions in array subscripts with literals.
 	 * 
@@ -1294,12 +1301,27 @@ aspect Scalarization {
 	
 	public void FForStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
-		getIndex().createArrayTemporaries(stmts, vars, indexMap, true);
-		FForStmt stmt = new FForStmt();
-		stmt.setIndex(getIndex().scalarize(indexMap));
-		for (FStatement fs : getForStmts())
-			fs.scalarize(vars, stmt.getForStmtList(), indexMap);
-		stmts.add(stmt);
+		if (inFunction()) {
+			getIndex().createArrayTemporaries(stmts, vars, indexMap, true);
+			FForStmt stmt = new FForStmt();
+			stmt.setIndex(getIndex().scalarize(indexMap));
+			for (FStatement fs : getForStmts())
+				fs.scalarize(vars, stmt.getForStmtList(), indexMap);
+			stmts.add(stmt);
+		} else {
+			List<FForIndex> indexList = new List(getIndex());
+			Indices indices = Indices.create(indexList);
+			Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
+			myIndexMap.putAll(indexMap);
+			for (Index i : indices) {
+				indices.fillIndexMap(myIndexMap, i, indexList);
+				FAlgorithm.scalarizeStmtList(getForStmts(), stmts, vars, myIndexMap);
+				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
+				getForStmts().flushTempVarNames();
+			}
+			for (FForIndex fi : indexList) 
+				fi.setEvaluationValue(null);
+		}
 	}
 	
 	public void FWhileStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
@@ -1433,9 +1455,8 @@ aspect Scalarization {
 	public void FAlgorithm.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {		
 		List<FStatement> stmts = new List<FStatement>();
-		for (FStatement stmt : getFStatements())
-			stmt.scalarizeStmt(vars, stmts, indexMap);	
-	    eqns.add(new FAlgorithm(stmts));	
+		scalarizeStmtList(getFStatements(),stmts,vars,indexMap);
+		eqns.add(new FAlgorithm(stmts));	
 	}
 	
 	/**

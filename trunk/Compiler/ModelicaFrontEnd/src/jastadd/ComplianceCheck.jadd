@@ -185,11 +185,15 @@ aspect ComplianceCheck {
 	
 	public void InstForIndex.complianceCheck() {
 		super.complianceCheck();
-		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess()) {
+		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {
 			compliance("Unknown size array as a for index is not supported in functions");
 		}
 		if (!hasFExp()) {
 			compliance("For index without in expression isn't supported");
+		}
+		if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
+			compliance("For index with higher than parameter variability is not "
+					+ "supported in equations and algorithms.");
 		}
 	}
 	
