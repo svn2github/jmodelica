@@ -54,7 +54,6 @@ aspect TransformCanonical {
 	 *         equations by calling genBindingEquations().
 	 *    <li> For each non-function algorithm:
 	 *         <ul>
-	 *           <li> A function is generated with the algorithm as body, 
 	 *                any assigned variables as outputs and any used 
 	 *                variables as inputs.
 	 *           <li> The original algorithm is replaced with a call to 
@@ -1822,14 +1821,16 @@ aspect TransformCanonical {
 			for (Var var : g.getUnmatchedVariables()) {	
 				FVariable fv = var.getVariable();
 				FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
-				if (fv.isDiscrete())
-					lhs = new FPreExp(lhs);
 				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+				if (fv.isDiscrete()) {
+					fv = (FVariable) fv.myPreVariable();
+					lhs = new FPreExp(lhs);
+				}
 				FEquation fe = new FEquation(lhs, rhs);
 				addFInitialEquation(fe);
 				
 				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0);
-				v = g.getVariable(var.getName());
+				v = g.getVariable(fv.name());
 				g.addEdge(eqn,v);
 			}
 			root().flushAllRecursive();

@@ -2008,8 +2008,8 @@ initial equation
  m.pre(x1) = 1;
  m.pre(b1) = false;
  m.pre(i1) = 4;
- m.t = 0;
  m.pre(x2) = 2;
+ m.t = 0;
 equation
  m.der(t) = 1;
  when time > 1 then
@@ -2259,6 +2259,63 @@ Semantic error at line 0, column 0:
 ")})));
 end UnbalancedTest5_Err;
 
+
+model MatchingTest1
+	Real x(start=1);
+	Real y;
+initial equation
+	x = 2*y;
+equation
+	der(x) = -x;
+	der(y) = -y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MatchingTest1",
+			description="Tests so that the matching algorithm prioritizes start value",
+			equation_sorting=true,
+			flatModel="
+fclass TransformCanonicalTests.MatchingTest1
+ Real x(start = 1);
+ Real y;
+initial equation 
+ x = 2 * y;
+ x = 1;
+equation
+ der(x) = - x;
+ der(y) = - y;
+end TransformCanonicalTests.MatchingTest1;
+")})));
+end MatchingTest1;
+
+model MatchingTest2
+	Real x;
+	Real y(start=1);
+initial equation
+	x = 2*y;
+equation
+	der(x) = -x;
+	der(y) = -y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MatchingTest2",
+			description="Tests so that the matching algorithm prioritizes start value",
+			equation_sorting=true,
+			flatModel="
+fclass TransformCanonicalTests.MatchingTest2
+ Real x;
+ Real y(start = 1);
+initial equation 
+ x = 2 * y;
+ y = 1;
+equation
+ der(x) = - x;
+ der(y) = - y;
+end TransformCanonicalTests.MatchingTest2;
+")})));
+end MatchingTest2;
+
 model WhenEqu15
 	discrete Real x[3];
         Real z[3];
@@ -2321,12 +2378,12 @@ fclass TransformCanonicalTests.WhenEqu1
  Real z[2];
  Real z[3];
 initial equation 
- z[1] = 0.0;
- z[2] = 0.0;
- z[3] = 0.0;
  pre(x[1]) = 0.0;
  pre(x[2]) = 0.0;
  pre(x[3]) = 0.0;
+ z[1] = 0.0;
+ z[2] = 0.0;
+ z[3] = 0.0;
 equation
  der(z[1]) = z[1] .* 0.1;
  der(z[2]) = z[2] .* 0.2;
@@ -2393,12 +2450,12 @@ fclass TransformCanonicalTests.WhenEqu2
  discrete Boolean v(start = true);
  discrete Boolean z(start = true);
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
 equation
  der(xx) = - x;
  when y > 2 and pre(z) then
@@ -2460,12 +2517,12 @@ fclass TransformCanonicalTests.WhenEqu3
  discrete Boolean z(start = true);
  discrete Boolean b1;
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
  pre(b1) = false;
 equation
  der(xx) = - x;
@@ -2519,11 +2576,11 @@ discrete Real z;
 discrete Real v;
 Real t;
 initial equation 
-t = 0.0;
 pre(x) = 0.0;
 pre(y) = 0.0;
 pre(z) = 0.0;
 pre(v) = 0.0;
+t = 0.0;
 equation
 der(t) = 1;
 when time > 3 then
@@ -2624,10 +2681,10 @@ fclass TransformCanonicalTests.WhenEqu5
  discrete Boolean h1;
  discrete Boolean h2;
 initial equation 
- x = 1;
- pre(a) = 1.0;
  pre(z) = false;
  pre(y) = false;
+ x = 1;
+ pre(a) = 1.0;
  pre(h1) = false;
  pre(h2) = false;
 equation
@@ -2667,8 +2724,8 @@ fclass TransformCanonicalTests.WhenEqu7
  discrete Real x(start = 0);
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when dummy > - 1 then
@@ -2702,9 +2759,9 @@ fclass TransformCanonicalTests.WhenEqu8
  discrete Real y;
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when sample(0, 1 / 3) then
@@ -2749,9 +2806,9 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
 initial equation 
+ pre(u) = 0.0;
  x = 0.0;
  pre(I) = 0.0;
- pre(u) = 0.0;
 equation
  der(x) = - x + u;
  when sample(0, h) then
@@ -2874,8 +2931,8 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Boolean atInit;
 initial equation 
  x_c = pre(x_c);
+ x_p = 1;
  pre(sampleTrigger) = false;
- pre(x_c) = 0.0;
  pre(u_c) = 0.0;
 parameter equation
  atInit = true and initial();
@@ -2982,8 +3039,8 @@ initial equation
  v3 = 0;
  v4 = 1;
  pre(y) = 1;
- pre(i) = 0;
  pre(up) = true;
+ pre(i) = 0;
 equation
  when sample(0.1, 1) then
   i = if up then pre(i) + 1 else pre(i) - 1;

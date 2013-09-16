@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.TreeMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
@@ -853,6 +854,16 @@ public class BiPGraph {
 		return unmatched;
 	}
 	
+	private static class VarMatchingComparator implements Comparator<Var> {
+		@Override
+		public int compare(Var o1, Var o2) {
+			int diff = (o1.getVariable().startAttributeSet() ? 1 : 0) - (o2.getVariable().startAttributeSet() ? 1 : 0);
+			if (diff != 0)
+				return diff;
+			return o1.getName().compareTo(o2.getName());
+		}
+	}
+	
 	public java.util.List<Map<Var,Set<Eq>>> bfs(Collection<Eq> startingNodes) {
 		java.util.List<Map<Var,Set<Eq>>> Lv = new ArrayList<Map<Var,Set<Eq>>>();
 		Set<Eq> Le_current = new LinkedHashSet<Eq>();
@@ -870,7 +881,7 @@ public class BiPGraph {
 			//System.out.println("*** layer: " + layer);
 			//System.out.println(Lv);
 			//System.out.println(Le_current);
-			Lv.add(new LinkedHashMap<Var,Set<Eq>>());
+			Lv.add(new TreeMap<Var,Set<Eq>>(new VarMatchingComparator()));
 			
 			for (Eq s : Le_current) {
 				//System.out.println(" eq: " + s.getName());

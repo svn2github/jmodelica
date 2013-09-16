@@ -507,12 +507,12 @@ fclass ComplianceTests.HybridFMU1
  parameter Real p1 = 1.2 /* 1.2 */;
  parameter Real p2;
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
 parameter equation
  p2 = floor(p1);
 equation
@@ -607,9 +607,9 @@ fclass ComplianceTests.HybridFMU2
  discrete Real y;
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when sample(0, 1 / 3) then

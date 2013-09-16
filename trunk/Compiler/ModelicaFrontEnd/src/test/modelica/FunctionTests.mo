@@ -4859,7 +4859,7 @@ initial equation
  ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization24.f(y);
  z[1] = x .+ temp_1[1];
  z[2] = x .+ temp_1[2];
- z[1] = 0.0;
+ x = 1;
 equation
  der(x) = z[1];
  der(y) = z[2];
