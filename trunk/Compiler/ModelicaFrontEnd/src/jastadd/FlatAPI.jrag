@@ -2591,9 +2591,13 @@ aspect FlatAlgorithmAPI {
 	
 	inh boolean FIdUse.useIsAssignment();
 	inh boolean FIdUseExp.useIsAssignment();
+	inh boolean FArray.useIsAssignment();
+	inh boolean FRecordConstructor.useIsAssignment();
 	eq FAssignStmt.getLeft().useIsAssignment()       = true;
 	eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
 	eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
+	eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
+	eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();
 	eq FExp.getChild().useIsAssignment()             = false;
 	eq FStatement.getChild().useIsAssignment()       = false;
 	eq FAlgorithm.getChild().useIsAssignment()       = false;

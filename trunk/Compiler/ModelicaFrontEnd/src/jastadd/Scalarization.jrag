@@ -1217,7 +1217,11 @@ aspect Scalarization {
 		FExp right = getRight();
 		if (left.type().isComposite() && right instanceof FFunctionCall) {
 			FFunctionCall call = (FFunctionCall) right;
-			call.getArgs().createArrayTemporaries(stmts, vars, indexMap, true);
+			if (inFunction()) {
+				call.getArgs().createArrayTemporaries(stmts, vars, indexMap, true);
+			} else {
+				call.createArrayTemporaries(stmts, vars, indexMap, true);
+			}
 			FFunctionCallStmt res = new FFunctionCallStmt();
 			res.addLeft(new FFunctionCallLeft(new Opt(left.myFV().createUseExp())));
 			res.setCall(call.scalarizeFunction(indexMap));
@@ -1675,8 +1679,8 @@ aspect Scalarization {
 			List vars, Map<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		if (!isFunctionCallClause()) {
-			boolean equation = !inFunction();
-			FExp temp = createTemporaryExp(indexMap, equation);
+			boolean equation = !inFunction() && !inAlgorithm();
+			FExp temp = createTemporaryExp(indexMap, !inFunction());
 			if (temp != null) {
 				List lefts = new List().add(new FFunctionCallLeft(new Opt(temp)));
 				ASTNode clause = equation ? 
@@ -1684,7 +1688,7 @@ aspect Scalarization {
 						new FFunctionCallStmt(lefts, scalarizeFunction(indexMap));
 				clauses.add(clause);
 				if (addVar)
-					addTemporaryVars(vars, equation);
+					addTemporaryVars(vars, !inFunction());
 			}
 		}
 	}

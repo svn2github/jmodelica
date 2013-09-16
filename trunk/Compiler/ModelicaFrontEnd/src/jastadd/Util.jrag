@@ -2204,6 +2204,7 @@ aspect FlatFunctionUtils {
       * \brief Check is this node is in a non-function algorithm.
       */
      inh boolean FSubscript.inAlgorithm();
+     inh boolean FFunctionCall.inAlgorithm();
      eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;

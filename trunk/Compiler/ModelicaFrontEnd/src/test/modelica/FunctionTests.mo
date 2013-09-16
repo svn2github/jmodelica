@@ -4880,7 +4880,95 @@ end FunctionTests.ArrayOutputScalarization24;
 ")})));
 end ArrayOutputScalarization24;
 
+model ArrayOutputScalarization25
+	record R
+		Real[2] x;
+		Real[2] y;
+	end R;
 
+function f
+	input R[2] i;
+	output R[2] o;
+algorithm
+	o := i;
+end f;
+
+function fwrap
+	input R[2] i;
+	output R[2] o;
+	output Real dummy;
+algorithm
+	o := f(i);
+	dummy := 1;
+end fwrap;
+
+	R[2] a;
+algorithm
+	(a,) := fwrap({R({1,1},{1,1}),R({1,1},{1,1})});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization25",
+			description="Scalarize function call statements.",
+			variability_propagation=false,
+			inline_functions="none",
+			algorithms_as_functions=false,
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization25
+ Real a[1].x[1];
+ Real a[1].x[2];
+ Real a[1].y[1];
+ Real a[1].y[2];
+ Real a[2].x[1];
+ Real a[2].x[2];
+ Real a[2].y[1];
+ Real a[2].y[2];
+algorithm
+ a[1].x[1] := 0.0;
+ a[1].x[2] := 0.0;
+ a[1].y[1] := 0.0;
+ a[1].y[2] := 0.0;
+ a[2].x[1] := 0.0;
+ a[2].x[2] := 0.0;
+ a[2].y[1] := 0.0;
+ a[2].y[2] := 0.0;
+ ({FunctionTests.ArrayOutputScalarization25.R({a[1].x[1], a[1].x[2]}, {a[1].y[1], a[1].y[2]}), FunctionTests.ArrayOutputScalarization25.R({a[2].x[1], a[2].x[2]}, {a[2].y[1], a[2].y[2]})}, ) := FunctionTests.ArrayOutputScalarization25.fwrap({FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1}), FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1})});
+
+public
+ function FunctionTests.ArrayOutputScalarization25.fwrap
+  input FunctionTests.ArrayOutputScalarization25.R[2] i;
+  output FunctionTests.ArrayOutputScalarization25.R[2] o;
+  output Real dummy;
+ algorithm
+  (o) := FunctionTests.ArrayOutputScalarization25.f(i);
+  dummy := 1;
+  return;
+ end FunctionTests.ArrayOutputScalarization25.fwrap;
+
+ function FunctionTests.ArrayOutputScalarization25.f
+  input FunctionTests.ArrayOutputScalarization25.R[2] i;
+  output FunctionTests.ArrayOutputScalarization25.R[2] o;
+ algorithm
+  o[1].x[1] := i[1].x[1];
+  o[1].x[2] := i[1].x[2];
+  o[1].y[1] := i[1].y[1];
+  o[1].y[2] := i[1].y[2];
+  o[2].x[1] := i[2].x[1];
+  o[2].x[2] := i[2].x[2];
+  o[2].y[1] := i[2].y[1];
+  o[2].y[2] := i[2].y[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization25.f;
+
+ record FunctionTests.ArrayOutputScalarization25.R
+  Real x[2];
+  Real y[2];
+ end FunctionTests.ArrayOutputScalarization25.R;
+
+end FunctionTests.ArrayOutputScalarization25;
+
+")})));
+end ArrayOutputScalarization25;
 
 /* ======================= Unknown array sizes ======================*/
 
