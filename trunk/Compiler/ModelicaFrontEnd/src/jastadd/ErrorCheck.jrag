@@ -1024,7 +1024,7 @@ aspect AssertEval {
      * @return  <code>true</code> if this is an assert that should be removed
      */
     public boolean FAbstractFunctionCall.evaluateAsserts() {
-        return true;
+        return false;
     }
     
     private static final String FAssert.LEVEL_ERROR = "error";
