@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-set(MSLCSOURCES ${JMODELICA_HOME}/../src/ThirdParty/MSL/Modelica/Resources/C-Sources)
+set(RuntimeLibrary_SRC ${SimulationRuntime_SOURCE_DIR})
+set(MSLCSOURCES ${RuntimeLibrary_SRC}/../ThirdParty/MSL/Modelica/Resources/C-Sources)
+message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
 set(JMISources
 	fmi1_functions.h

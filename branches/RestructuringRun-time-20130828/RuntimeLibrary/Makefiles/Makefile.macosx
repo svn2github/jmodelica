@@ -118,6 +118,7 @@ SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
 # Directory with jmi_cppad.a
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
+RUNTIMELIBRARY_LIB_DIR = ${JMODELICA_HOME}/lib/RuntimeLibrary
 SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 
 # Libraries necessary to link with jmi
@@ -125,13 +126,13 @@ SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
 LIB_LAPACK   = $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a -lgfortran
 LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS)
-LIB_JMIC     = -L$(JMI_LIB_DIR) -ljm_jmi -ljm_ModelicaExternalC
-LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIB_JMIC     = -ljmi -lModelicaExternalC
+LIB_JMIAD    = -ljmi_cppad
 LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
-LIBS_FMUME   = -ljm_fmi_me $(LIB_JMIC) $(LIB_COMMON)
-LIBS_FMUCS   = -ljm_fmi_cs -ljm_fmi_me $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
+LIBS_FMUME   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_me $(LIB_JMIC) $(LIB_COMMON)
+LIBS_FMUCS   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_cs -lfmi_me $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
 LIBS_IPOPT   = -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
@@ -146,7 +147,7 @@ fmume:
 
 fmume_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME)
 	$(RM) $(OBJS)
 
 fmucs:
@@ -154,7 +155,7 @@ fmucs:
 
 fmucs_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS)
+	$(CC) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS)
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)

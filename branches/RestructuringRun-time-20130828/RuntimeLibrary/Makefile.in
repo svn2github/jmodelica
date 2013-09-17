@@ -392,17 +392,17 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	cmake -G "MSYS Makefiles" $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
 	*-mingw*) \
-	cmake -G "MSYS Makefiles" $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
 	*-apple*) \
-	cmake $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
 	*) \
-	cmake $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
 	esac
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR)
-	cd $(RUNTIMELIBRARY_BUILD_DIR) && make install $(AM_MAKEFLAGS)
+	cd $(RUNTIMELIBRARY_BUILD_DIR) && make $(AM_MAKEFLAGS) install
 
 check-local:
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
