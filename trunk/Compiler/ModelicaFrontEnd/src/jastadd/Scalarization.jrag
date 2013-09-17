@@ -1309,7 +1309,8 @@ aspect Scalarization {
 				fs.scalarize(vars, stmt.getForStmtList(), indexMap);
 			stmts.add(stmt);
 		} else {
-			List<FForIndex> indexList = new List(getIndex());
+			ArrayList<FForIndex> indexList = new ArrayList();
+			indexList.add(getIndex());
 			Indices indices = Indices.create(indexList);
 			Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
 			myIndexMap.putAll(indexMap);
