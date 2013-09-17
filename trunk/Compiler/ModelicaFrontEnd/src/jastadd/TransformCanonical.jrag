@@ -90,6 +90,7 @@ aspect TransformCanonical {
 		enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		variabilityPropagationIfSet();
+		evaluateAsserts();
 		enableSemiLinearRewrite();
 		genInitialEquations();
 		sortDependentParameters();

@@ -5444,4 +5444,41 @@ end TransformCanonicalTests.FixedFalseParam1;
 end FixedFalseParam1;
 
 
+model AssertEval1
+	Real x = time;
+equation
+	assert(true, "Test assertion");
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AssertEval1",
+			description="Test assertation evaluation: passed assert",
+			flatModel="
+fclass TransformCanonicalTests.AssertEval1
+ Real x;
+equation
+ x = time;
+end TransformCanonicalTests.AssertEval1;
+")})));
+end AssertEval1;
+
+
+model AssertEval2
+    Real x = time;
+equation
+    assert(false, "Test assertion");
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AssertEval2",
+			description="Test assertation evaluation: failed assert",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: Test assertion
+")})));
+end AssertEval2;
+
+
 end TransformCanonicalTests;
