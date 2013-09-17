@@ -1093,7 +1093,12 @@ aspect FlatPrettyPrint {
     	}
     	str.print(";\n\n");
     }
-
+    
+    public void FEquationType.prettyPrint(Printer p, PrintStream str, String indent) {}
+    public void FInitialEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+    	str.print(indent + "initial");
+    }
+    
     public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "type " + getName() + " = ");
@@ -1269,11 +1274,9 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
+		p.print(getType(),str,indent);
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
-//		str.print(indent);
-//		str.print("end algorithm");
 	}
 	
 	public void FAssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {

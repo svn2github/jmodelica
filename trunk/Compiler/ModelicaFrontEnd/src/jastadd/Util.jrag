@@ -2206,6 +2206,7 @@ aspect FlatFunctionUtils {
       */
      inh boolean FSubscript.inAlgorithm();
      inh boolean FFunctionCall.inAlgorithm();
+     inh boolean FIdUse.inAlgorithm();
      eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;

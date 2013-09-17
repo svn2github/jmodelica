@@ -1816,4 +1816,39 @@ Semantic error at line 0, column 0:
 ")})));
 end AlgorithmType3;
 
+model AlgorithmType4
+	
+	function f
+		output Real o = 2;
+	algorithm
+	end f;
+	constant Real x;
+	parameter Real y;
+initial algorithm
+	x := 1;
+	y := 2;
+algorithm
+	x := 2;
+	y := 3;
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType4",
+			description="Algorithm assigning to parameters and constants.",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to constants is not allowed in algorithms
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to constants is not allowed in algorithms
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to parameters in algorithms is only allowed in initial algorithms
+			
+")})));
+end AlgorithmType4;
+
 end TypeTests;

@@ -220,6 +220,16 @@ aspect FlatTypeCheck {
 		  typeError();
   }
   
+	public void FIdUse.typeCheck() {
+		if (inAlgorithm() && useIsAssignment() && variability().constantVariability()) {
+			error("Assignments to constants is not allowed in algorithms");
+		}
+		if (inAlgorithm() && useIsAssignment() && !(myFAlgorithm().getType() instanceof FInitialEquation) && 
+				variability().parameterVariability() && !isForIndex()) {
+			error("Assignments to parameters in algorithms is only allowed in initial algorithms");
+		}
+	}
+  
   public void FInstAccessExp.typeCheck() {
 	  if (!getInstAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
