@@ -48,7 +48,8 @@ def run_demo(with_plots=True):
     The model was developed by Francesco Casella and was published in
     @InProceedings{CFA2011,
       author = "Casella, Francesco and Donida, Filippo and {\AA}kesson, Johan",
-      title = "Object-Oriented Modeling and Optimal Control: A Case Study in Power Plant Start-Up",
+      title = "Object-Oriented Modeling and Optimal Control: A Case Study in
+               Power Plant Start-Up",
       booktitle = "18th IFAC World Congress",
       address = "Milano, Italy",
       year = 2011,
@@ -78,8 +79,7 @@ def run_demo(with_plots=True):
     
     # Plot the initial guess trajectories
     if with_plots:
-        plt.figure(1)
-        plt.close()
+        plt.close(1)
         plt.figure(1)
         plt.subplot(3, 1, 1)
         plt.plot(init_sim_time, init_sim_plant_p * 1e-6)
@@ -122,8 +122,7 @@ def run_demo(with_plots=True):
     
     # Plot the optimized trajectories
     if with_plots:
-        plt.figure(2)
-        plt.close()
+        plt.close(2)
         plt.figure(2)
         plt.subplot(3, 1, 1)
         plt.plot(opt_time, opt_plant_p * 1e-6)
@@ -174,8 +173,7 @@ def run_demo(with_plots=True):
     
     # Plot the simulated trajectories
     if with_plots:
-        plt.figure(3)
-        plt.close()
+        plt.close(3)
         plt.figure(3)
         plt.subplot(3, 1, 1)
         plt.plot(opt_time, opt_plant_p * 1e-6, '--', lw=5)
@@ -203,7 +201,8 @@ def run_demo(with_plots=True):
         plt.show()
     
     # Verify solution for testing purposes
-    N.testing.assert_allclose(opt_res.final('plant.p'), sim_res.final('plant.p'), rtol=5e-3)
+    N.testing.assert_allclose(opt_res.final('plant.p'),
+                              sim_res.final('plant.p'), rtol=5e-3)
 
 if __name__=="__main__":
     run_demo()
