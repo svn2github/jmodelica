@@ -126,16 +126,16 @@ SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 # Libraries necessary to link with jmi
 # Reused parts
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
-LIB_LAPACK   = -L$(JMI_LIB_DIR)-l:liblapack.a -l:libblas.a -lgfortran
+LIB_LAPACK   = -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -lgfortran
 LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS) -lstdc++ -lm
 LIB_JMIC     = -ljmi -lModelicaExternalC
-LIB_JMIAD    = -ljmi_cppad
-LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
+LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
 LIBS_FMUME   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_me $(LIB_JMIC) $(LIB_COMMON)
-LIBS_FMUCS   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_cs -ljm_fmi_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
-LIBS_IPOPT   = -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
+LIBS_FMUCS   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_cs -lfmi_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)

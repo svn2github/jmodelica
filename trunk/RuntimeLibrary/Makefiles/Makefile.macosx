@@ -127,13 +127,13 @@ LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $
 LIB_LAPACK   = $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a -lgfortran
 LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS)
 LIB_JMIC     = -ljmi -lModelicaExternalC
-LIB_JMIAD    = -ljmi_cppad
-LIB_EXTRA_AD = -ljmi_algorithm_cppad -ljmi_solver_cppad
+LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
+LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
 LIBS_FMUME   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_me $(LIB_JMIC) $(LIB_COMMON)
 LIBS_FMUCS   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_cs -lfmi_me $(LIB_JMIC) $(LIB_COMMON) $(SUNDIALS_HOME)/lib/libsundials_cvode.a
-LIBS_IPOPT   = -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
+LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
