@@ -803,6 +803,13 @@ aspect OptimicaFlatAPI {
 	inh FOptClass InstComponentModification.myFOptClass();
 	eq FOptClass.getChild().myFOptClass() = this;
 	eq Root.getChild().myFOptClass() = null; 
+    
+    inh boolean FAbstractVariable.inOptimization();
+    inh boolean FExp.inOptimization();
+    inh boolean FIdUse.inOptimization();
+    inh boolean InstComponentModification.inOptimization();
+    eq FOptClass.getChild().inOptimization() = true;
+    eq Root.getChild().inOptimization()      = false; 
 	
 	eq FOptClass.getFEquationBlock().inEquationSection() = true;
 	
