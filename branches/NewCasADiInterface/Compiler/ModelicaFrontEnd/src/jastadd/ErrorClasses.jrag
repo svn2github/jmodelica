@@ -1,0 +1,139 @@
+import java.util.Collections;
+import java.util.Iterator;
+
+aspect ErrorClasses {
+	
+	syn boolean ASTNode.isError() = false;
+
+	eq BadDefinition.isError() = true;
+	eq BadClassDecl.isError() = true;
+	eq BadElement.isError() = true;
+	eq BadArgument.isError() = true;
+	eq BadStatement.isError() = true;
+	
+	public InstModification BadArgument.newInstModification() {
+		return null;
+	}
+	
+	public FStatement BadStatement.instantiateStatement() {
+		return null;
+	}
+	
+	
+	// Make iterator empty to prevent traversials from throwing null pointer exceptions.
+	
+	public Iterator<ASTNode> BadDefinition.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadClassDecl.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadElement.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadArgument.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	public Iterator<ASTNode> BadStatement.iterator() {
+		return Collections.<ASTNode>emptyList().iterator();
+	}
+	
+	
+	// Common information to save in bad nodes
+	
+	public class BadNodeInfo {
+		
+		private Problem problemToReport;
+		private ASTNode node;
+		
+		public BadNodeInfo(ASTNode n) {
+			node = n;
+			problemToReport = null;
+		}
+		
+		public void reportProblem(Problem p) {
+			problemToReport = p;
+		}
+
+		public void collectErrors() {
+			if (problemToReport != null) {
+				// report problem (missing suupport in error handler
+			}
+		}
+
+	}
+	
+	private BadNodeInfo BadDefinition.badNodeInfo = null;
+	private BadNodeInfo BadClassDecl.badNodeInfo = null;
+	private BadNodeInfo BadElement.badNodeInfo = null;
+	private BadNodeInfo BadArgument.badNodeInfo = null;
+	private BadNodeInfo BadStatement.badNodeInfo = null;
+	
+	public BadNodeInfo BadDefinition.badInfo() {
+		if (badNodeInfo == null)
+			badNodeInfo = new BadNodeInfo(this);
+		return badNodeInfo;
+	}
+	
+	public BadNodeInfo BadClassDecl.badInfo() {
+		if (badNodeInfo == null)
+			badNodeInfo = new BadNodeInfo(this);
+		return badNodeInfo;
+	}
+	
+	public BadNodeInfo BadElement.badInfo() {
+		if (badNodeInfo == null)
+			badNodeInfo = new BadNodeInfo(this);
+		return badNodeInfo;
+	}
+	
+	public BadNodeInfo BadArgument.badInfo() {
+		if (badNodeInfo == null)
+			badNodeInfo = new BadNodeInfo(this);
+		return badNodeInfo;
+	}
+	
+	public BadNodeInfo BadStatement.badInfo() {
+		if (badNodeInfo == null)
+			badNodeInfo = new BadNodeInfo(this);
+		return badNodeInfo;
+	}
+	
+	
+	// Delegate error reporting to BadInfoNode
+	
+	public void BadDefinition.collectErrors() {
+		if (badNodeInfo != null)
+			badNodeInfo.collectErrors();
+		super.collectErrors();
+	}
+	
+	public void BadClassDecl.collectErrors() {
+		if (badNodeInfo != null)
+			badNodeInfo.collectErrors();
+		super.collectErrors();
+	}
+	
+	public void BadElement.collectErrors() {
+		if (badNodeInfo != null)
+			badNodeInfo.collectErrors();
+		super.collectErrors();
+	}
+	
+	public void BadArgument.collectErrors() {
+		if (badNodeInfo != null)
+			badNodeInfo.collectErrors();
+		super.collectErrors();
+	}
+	
+	public void BadStatement.collectErrors() {
+		if (badNodeInfo != null)
+			badNodeInfo.collectErrors();
+		super.collectErrors();
+	}
+	
+}

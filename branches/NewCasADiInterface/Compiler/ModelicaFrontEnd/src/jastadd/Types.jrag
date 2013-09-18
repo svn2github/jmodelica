@@ -1,0 +1,375 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Comparator;
+
+aspect Types { 
+ 
+   // This attribute is used to check if the instance tree should be built based only on constraining types
+   // TODO: make sure this is used in the instance tree construction framework
+   inh boolean InstNode.constrainingType();
+   eq InstConstraining.getInstNode().constrainingType() = true;
+   eq InstRoot.getChild().constrainingType() = false;
+
+   syn String InstNode.className() = "";
+   syn String InstComponentDecl.className() = myInstClass().name();
+
+   // The double dispatch pattern applied to subtype testing.
+   syn boolean InstNode.subType(InstNode t) = false;
+   syn boolean InstNode.superTypeCompositeType(InstComposite subType) = false;
+   syn boolean InstNode.superTypeRecordType(InstRecord subType) = false;
+   syn boolean InstNode.superTypeClassType(InstRoot subType) = false;
+   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType) = false;
+   
+   eq InstComposite.subType(InstNode t) = t.superTypeCompositeType(this);
+   eq InstRecord.subType(InstNode t) = t.superTypeRecordType(this);
+   eq InstPrimitive.subType(InstNode t) = t.superTypePrimitiveComponentType(this);
+
+   eq InstRecord.superTypeRecordType(InstRecord subType) {
+       if (subType == this) return true;
+       if (subType.myInstClass().isUnknown()) return true;
+       InstRecord superType = this;
+   
+       // Check that all elements (here: components) in superType are in subType 
+       for (InstNode superTypeComponentInst : containedInstComponents()) {
+       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
+          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+          if (set.size()!=1)
+          	return false;
+          InstNode subTypeComponentInst = set.iterator().next();
+          if (!subTypeComponentInst.subType(superTypeComponentInst))
+          	return false;
+	   }
+   	   return true;
+   }
+
+   eq InstComposite.superTypeCompositeType(InstComposite subType) {
+       if (subType == this) return true;
+       if (subType.myInstClass().isUnknown()) return true;
+       InstComposite superType = this;
+   
+       // Check that all elements (here: components) in superType are in subType 
+       for (InstNode superTypeComponentInst : containedInstComponents()) {
+       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
+          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+          if (set.size()!=1)
+          	return false;
+          InstNode subTypeComponentInst = set.iterator().next();
+          if (!subTypeComponentInst.subType(superTypeComponentInst))
+          	return false;
+	   }
+   	   return true;
+   }
+   
+   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType) = true;
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType) = true;
+   
+   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
+       if (subType == this) return true;
+       InstPrimitive superType = this;
+       if (subType.className().equals(superType.className()))
+       	  return true;
+       else   
+   	      return false;
+   }
+
+  // Rudimentary name analysis framework for looking up instances
+  syn lazy HashSet<InstNode> InstNode.memberComponentInst(String name) {
+     HashSet<InstNode> set = new HashSet<InstNode>(4);
+     for (InstNode node : containedInstComponents()) {
+     	// This is to take InstExtends into account
+     if (node.name().equals(name))
+        set.add(node);
+     }
+     return set;
+  }
+
+  public static final Comparator<InstComponentDecl> InstComponentDecl.NAME_COMPARATOR = 
+	  new Comparator<InstComponentDecl>() {
+	  public int compare(InstComponentDecl o1, InstComponentDecl o2) {
+		  return o1.name().compareTo(o2.name());
+	  }
+  };
+
+  syn lazy SortedSet<InstComponentDecl> InstNode.containedInstComponents() {
+	  SortedSet<InstComponentDecl> s = new TreeSet<InstComponentDecl>(InstComponentDecl.NAME_COMPARATOR);
+	  for (InstNode node : getInstExtendss())
+		  s.addAll(node.containedInstComponents());
+	  for (InstComponentDecl node : getInstComponentDecls())
+		  s.add(node);
+	  return s;
+  }
+  
+  
+  // TODO: Shouldn't this be in TypeCheck.jrag?
+  // TODO: Does InstRecord need this?
+  // InstNodes are type checked recursively, which means if a top level component
+  // is type checked, then all sub-components are also type checked. Therefore a flag 
+  // is introduced to detect this situation to avoid duplicate error messages.
+  public boolean InstNode.typeChecked = false;
+  
+  public void InstNode.typeCheck() {
+	     if (!typeChecked) {
+	      	typeChecked = true;
+	      	typeCheckSystemResiduals();
+	     }
+  }
+  
+  public void InstComposite.typeCheck() {
+     if (!typeChecked) {
+     	typeChecked = true;
+	     // Notice that modifiers (including redeclarations) in a constraining clause
+   	  	 // are applied to the declaration itself and is therefore also type checked.
+		if (hasInstConstraining()) {
+		      InstNode superType = getInstConstraining().getInstNode();
+	     	  InstComponentDecl declaredType = this; 
+    	 	  if (!declaredType.subType(superType))
+     			declaredType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
+		}
+  	
+		typeCheckSystemResiduals();
+  	 }
+  }
+  
+  syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
+  	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
+
+    public void InstReplacingRecord.typeCheck() {
+    	typeCheckReplacingComponent(getOriginalInstComponent());
+    }
+
+    public void InstReplacingComposite.typeCheck() {
+    	typeCheckReplacingComponent(getOriginalInstComponent());
+    }
+
+    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType) {
+    	if (!typeChecked) {
+    		typeChecked = true;
+     
+    		// Type check the original component
+    		InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
+    		if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
+    			superType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+    					declaredType.getComponentDecl());
+
+    		// The environment should be traversed backwards in order to perform correct
+    		// subtype tests in redeclaration chains.     	
+    		for (int i = myEnvironment().size() - 1; i >= 0; i--) {
+    			InstModification im = myEnvironment().get(i);
+    			InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
+    			if (redeclare != null) { 
+    				InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
+    				InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
+                        
+    				// Check consistency of the redeclaring component
+    				if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
+    					declaredSubType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+    							declaredSubType.getComponentDecl());
+
+    				// It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
+    				// of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
+    				// follows that declaredSubType is a subtype of superType by transitivity.
+    				if (!constrainingSubType.subType(superType))
+    					constrainingSubType.getComponentDecl().error("In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'", 
+    							constrainingSubType.getComponentDecl(), superType.getComponentDecl());
+                
+    				// If the redeclaring declaration has a constraining clause, the constraining
+    				// type of the redeclaring declaration of should be used in following subtype-test 
+    				// instead of the constraining type of the orignal declaration.
+    				if (declaredSubType.hasInstConstraining()) 
+    					superType = constrainingSubType;
+     			}
+    			typeCheckSystemResiduals();
+    		}
+    	}
+    }
+  
+	public void InstNode.typeCheckSystemResiduals() {
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
+			return;
+		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
+			if (!pair.name().equals("Pair"))
+				continue;
+			Exp enabledExp = pair.forPath("enabled").exp();
+			if (enabledExp != null) {
+				FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
+				enabledFExp.collectErrors();
+				try {
+					enabledFExp.ceval().booleanValue();
+				} catch (ConstantEvaluationException e) {
+					enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
+				}
+			}
+			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
+			InstAccess iterationVariable = null;
+			if (iterationVariableExp == null) {
+				pair.ast().error("Iteration variable definition is missing from tearing pair.");
+			} else if (!iterationVariableExp.isAccess()) {
+				iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+			} else {
+				InstAccess ia = iterationVariableExp.asAccess().instantiate();
+				iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
+				iterationVariable.collectErrors();
+				if (iterationVariable.isUnknown()) {
+					iterationVariable = null;
+				} else {
+					FTypePrefixVariability variability = iterationVariable.myInstComponentDecl().variability();
+					if (!variability.continuousVariability()) {
+						iterationVariable.error("Iteration variable should have continuous variability, %s has %svariability", iterationVariable.qualifiedName(), variability);
+						iterationVariable = null;
+					}
+				}
+			}
+			Exp residualEquationExp = pair.forPath("residualEquation").exp();
+			InstAccess residualEquation = null;
+			if (residualEquationExp == null) {
+				pair.ast().error("Residual equation definition is missing from tearing pair.");
+			} else if (!residualEquationExp.isAccess()) {
+				residualEquationExp.error("Expression \"%s\" is not a legal residual equation reference", residualEquationExp);
+			} else {
+				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+				residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
+				residualEquation.collectErrors();
+				if (residualEquation.isUnknown())
+					residualEquation = null;
+			}
+			if (iterationVariable != null && residualEquation != null) {
+				Size eqnSize = residualEquation.myEquation().totalSize();
+				Size varSize = iterationVariable.myInstComponentDecl().size();
+				if (!eqnSize.equals(varSize))
+					pair.ast().error("Size of the iteration variable is not the same size as the size of the residual equation, size of variable %s, size of equation %s", varSize, eqnSize);
+			}
+		}
+	}
+
+}
+
+aspect DerivativeFunctions {
+
+	syn boolean FType.shouldBeDifferentiated()             = isReal() || isComposite();
+	syn boolean FAbstractVariable.shouldBeDifferentiated() = false;
+	eq FFunctionVariable.shouldBeDifferentiated()          = delegateShouldBeDifferentiated();
+	eq FVariable.shouldBeDifferentiated()                  = variability().continuousVariability();
+	syn boolean FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
+	syn boolean FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
+	syn boolean FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
+	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
+	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
+	
+	inh boolean FFunctionVariable.delegateShouldBeDifferentiated();
+	eq Root.getChild().delegateShouldBeDifferentiated() = true;
+	eq FFunctionDecl.getFFunctionVariable(int i).delegateShouldBeDifferentiated() {
+	    if (!hasFDerivativeFunction())
+	        return getFFunctionVariable(i).type().shouldBeDifferentiated();
+	    else
+	        return getFDerivativeFunction().calculateShouldBeDifferentiated(i);
+	}
+	
+	inh List<FFunctionVariable> FDerivativeFunction.myFFunctionVariables();
+	eq FFunctionDecl.getFDerivativeFunction().myFFunctionVariables() = getFFunctionVariables();
+	
+	/**
+	 * Calculate if variable no <code>i</code> in the variables the function should be differentiated.
+	 * 
+	 * Result is cached for all variables in list, and in subsequent calls it will be assumed that 
+	 * the list is the same.
+	 */
+	syn boolean FDerivativeFunction.calculateShouldBeDifferentiated(int i) {
+	    if (cachedShouldBeDifferentiated == null) {
+	        List<FFunctionVariable> vars = myFFunctionVariables();
+	        cachedShouldBeDifferentiated = new boolean[vars.getNumChild()];
+	        
+	        // Type
+            boolean[] okType = new boolean[cachedShouldBeDifferentiated.length];
+            boolean[] input = new boolean[cachedShouldBeDifferentiated.length];
+	        int n = 0;
+	        int k = 0;
+	        for (FFunctionVariable var : vars) {
+	            okType[k] = var.type().shouldBeDifferentiated();
+	            input[k] = var.isInput();
+	            if (okType[k] && input[k]) 
+	                n++;
+	            k++;
+	        }
+	        
+	        // noDerivative && zeroDerivative
+	        boolean[] hasDerivative = new boolean[n];
+	        Set<String> exclude = new HashSet<String>();
+            for (FIdUse use : getNoDerivatives())
+                exclude.add(use.name());
+            for (FIdUse use : getZeroDerivatives())
+                exclude.add(use.name());
+            int j = k = 0;
+	        for (FFunctionVariable var : vars) {
+	            if (okType[k] && input[k]) {
+	                if (!exclude.contains(var.name()))
+	                    hasDerivative[j] = true;
+	                j++;
+	            }
+                k++;
+	        }
+	        
+	        // order
+	        int order = getOrder();
+	        int[] part = new int[order];
+	        partitionArgumentsByOrder(hasDerivative, 0, n, order, part);
+	        
+	        // Calc result
+	        int ignore = n - part[order - 1];
+            for (k = 0, j = 0; k < cachedShouldBeDifferentiated.length; k++) {
+                if (okType[k]) { 
+                    if (input[k]) {
+                        if (j >= ignore && hasDerivative[j])
+                            cachedShouldBeDifferentiated[k] = true;
+                        j++;
+                    } else {
+                        cachedShouldBeDifferentiated[k] = true;
+                    }
+                }
+            }
+	    }
+	    return cachedShouldBeDifferentiated[i];
+	}
+	
+	private static boolean FDerivativeFunction.partitionArgumentsByOrder(boolean[] hasDerivative, int start, int max, int order, int[] result) {
+	    int n = hasDerivative.length - start;
+	    if (order <= 1) {
+	        result[result.length - 1] = n;
+	        return max == n;
+	    }
+	    int first = (n + order - 1) / order;
+	    int nd = 0;
+        for (int i = start; i < start + first - 1; i++)
+            if (hasDerivative[i])
+                nd++;
+	    for (; first < max; first++) {
+	        result[result.length - order] = first;
+            if (hasDerivative[start + first - 1])
+                nd++;
+            if (nd * order >= n - first && partitionArgumentsByOrder(hasDerivative, start + first, nd, order - 1, result))
+                return true;
+	    }
+	    return false;
+	}
+	
+	private boolean[] FDerivativeFunction.cachedShouldBeDifferentiated = null;
+
+}

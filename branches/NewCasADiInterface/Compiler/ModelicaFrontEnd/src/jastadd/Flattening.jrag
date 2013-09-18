@@ -1,0 +1,2620 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.util.Map;
+import java.util.Collections;
+import java.util.Set;
+import java.util.HashSet;
+
+aspect FlatTree {
+	
+	/**
+	 * Create a correctly set up FClass.
+	 * 
+	 * Also creates a FlatRoot and sets its fields.
+	 * 
+	 * @param icd   the class being flattened
+	 * @param file  the path to the file to report errors on
+	 */
+	public static FClass FClass.create(InstClassDecl icl, String file) {
+		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
+		flatRoot.setFileName(file);
+		FClass fc = flatRoot.getFClass(); // make FClass final
+		flatRoot.options = new OptionRegistry(icl.root().options);
+		// TODO: We should change how the checkErrors() method works, 
+		//       since it relies on the behaviour of DefaultErrorHandler
+		icl.root().getErrorHandler().connectTo(flatRoot);
+		return fc;
+	}
+	
+	/**
+	 * Create a new FClass object.
+	 * 
+	 * Override for subclasses needing a subclass of FClass.
+	 */
+	public FClass InstClassDecl.createFClass() {
+		return new FClass();
+	}
+	
+}
+
+aspect Flattening {
+    
+	/**
+	 * \ingroup aspect_Flattening
+	 * 
+	 * Generic traversal method used to find a particular class instance
+	 * in the instance tree, and if so, flatten it.
+	 */
+    public InstNode InstProgramRoot.findFlattenInst(String className,FClass fc) throws ModelicaClassNotFoundException {
+    	
+    	InstClassDecl icd = lookupInstClassQualified(className);
+    	if (!icd.isUnknown()) {
+    		icd.flattenInstClassDecl(fc);
+    	} else {
+        	throw new ModelicaClassNotFoundException(className);
+    	}
+    	
+    	return icd;
+    }
+    
+    public void InstClassDecl.flattenInstClassDecl(FClass fc) {
+    	beginStep("flattenInstClassDecl()");
+		fc.setFQName(new FQNameString(qualifiedName()));
+		fc.addFEquationBlock(new FEquationBlock(new List()));
+		buildConnectionSets(fc);
+		flatten(fc);
+		fc.removeUniqueFVariableSet();
+		createAndFlattenResidualPairs(fc);
+		flattenUsedFuncsAndEnums(fc);
+		flattenInstClassDeclExtra(fc);
+		fc.genConnectionEquations();
+		fc.createExperiment(annotation("experiment"));
+		root().breakOnErrors();
+    	endStep("flattenInstClassDecl()");
+    }
+    
+
+	public void InstSimpleShortClassDecl.flattenInstClassDecl(FClass fc) {
+		actualInstClass().flattenInstClassDecl(fc);
+		fc.setFQName(new FQNameString(qualifiedName()));
+	}
+
+    /**
+     * Delegate for adding extra flattening code to top-level model.
+     */
+    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {}
+
+    /**
+     * \brief Find functions, record and enumeration declarations that need to be flattened.
+     */
+	public void ASTNode.flattenUsedFuncsAndEnums(FClass fc) {
+		for (ASTNode n : this) 
+			n.flattenUsedFuncsAndEnums(fc);
+	}
+    
+    public void InstNode.flattenUsedFuncsAndEnums(FClass fc) {
+		getInstComponentDeclList().flattenUsedFuncsAndEnums(fc);
+		getFAbstractEquationList().flattenUsedFuncsAndEnums(fc);
+		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
+		super.flattenUsedFuncsAndEnums(fc);
+    }
+
+    public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
+    	actualInstClass().flattenUsedFuncsAndEnums(fc);
+    }
+
+	public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
+		getFExp().flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
+		if (getName().myInstClassDecl().inOrIsOuter()) {
+			getName().myInstClassDecl().myInnerInstClassDecl().flattenFunction(fc);
+		} else {
+			getName().myInstClassDecl().flattenFunction(fc);
+		}
+		getArgs().flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void InstExternalObject.flattenUsedFuncsAndEnums(FClass fc) {
+		myDestructor().flattenFunction(fc);
+		super.flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void FRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
+		getRecord().flattenMyRecord(fc);
+		getArgs().flattenUsedFuncsAndEnums(fc);
+	}
+	
+	public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
+		super.flattenUsedFuncsAndEnums(fc);
+		getClassName().myInstClassDecl().flattenRecord(fc);
+	}
+	
+	public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
+		super.flattenUsedFuncsAndEnums(fc);
+		InstAccess ia = getInstAccess();
+		if (ia.isAssignable()) {
+			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
+			// If this access will be inlined
+			if (var.isConstant() && !ia.hasUnknownIndices()) 
+				var.flattenUsedFuncsAndEnums(fc);
+		}
+	}
+	
+	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
+		if (myInstClassDecl().extendsEnum())
+			myInstClassDecl().flattenEnum(fc);
+	}
+	
+	public void FIdUse.flattenMyRecord(FClass fc) {}
+	
+	public void FIdUseInstAccess.flattenMyRecord(FClass fc) {
+		getInstAccess().myInstClassDecl().flattenRecord(fc);
+	}
+	
+	// Flatten function if not already done
+	public void InstClassDecl.flattenFunction(FClass fc) {}
+	
+	public void InstBaseClassDecl.flattenFunction(FClass fc) {
+		getInstRestriction().flattenFunction(fc, this);
+	}
+	
+	public void InstSimpleShortClassDecl.flattenFunction(FClass fc) {
+		actualInstClass().flattenFunction(fc);
+	}
+	
+	public void InstRestriction.flattenFunction(FClass fc, InstBaseClassDecl icd) {}
+	
+	public void InstFunction.flattenFunction(FClass fc, InstBaseClassDecl icd) {
+		icd.flattenThisFunction(fc);
+	}
+	
+	public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
+		if (fc.lookupFunc(qualifiedName()) == null) {	
+	   		FFunctionDecl ffd = createFFunctionDecl();
+	   		ffd.setFQName(new FQNameString(qualifiedName()));
+	   		
+	   		flattenComponentsInFunction(ffd, fc, new HashSet<String>());
+			
+	   		FAlgorithm fab = findFunctionAlgorithm();
+	   		fab = (fab == null) ? new FAlgorithm(new List()) : fab.flattenEqn(new FQNameEmpty(), fc);
+			InstExternal ie = findFunctionExternal();
+			if (ie != null)
+				fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
+			fab.ensureReturn();
+			ffd.setFAlgorithm(fab);
+			
+			FDerivativeFunction der = createFDerivativeFunction(fc, ie);
+			if (der != null)
+				ffd.setFDerivativeFunction(der);
+			// TODO: should we look in extends as well?
+			ffd.readInlineAnnotation(annotation());
+			
+			fc.addFFunctionDecl(ffd);
+			ffd.ensureFQNamesFull();
+			addLocalFunctionConstants(ffd, fc);
+			flattenUsedFuncsAndEnums(fc);
+			ffd.updateRecordArraySizes();
+		}
+	}
+	
+	private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
+        if (isConstructor())
+            return new FConstructorDecl();
+        if (isDestructor())
+            return new FDestructorDecl();
+	    return new FFunctionDecl();
+	}
+	
+	public AnnotationNode InstClassDecl.derivativeAnnotation(InstExternal ie) {
+		AnnotationNode functionDer = annotation("derivative");
+		if (!functionDer.exists() && ie != null) 
+			functionDer = ie.annotation("derivative");
+		return functionDer;
+	}
+	
+	private FDerivativeFunction InstBaseClassDecl.createFDerivativeFunction(FClass fc, InstExternal ie) {
+		AnnotationNode functionDer = derivativeAnnotation(ie);
+		
+		if (functionDer.exists()) {
+			String functionDerName = functionDer.string();
+            List<FIdUse> noDerivatives = new List<FIdUse>();
+            List<FIdUse> zeroDerivatives = new List<FIdUse>();
+            int order = 1;
+			for (AnnotationNode nd : functionDer) {
+				if (nd != null) {
+					if ("noDerivative".equals(nd.name()) && nd.isStringValue()) 
+						noDerivatives.add(new FIdUse(nd.string()));
+                    if ("zeroDerivative".equals(nd.name()) && nd.isStringValue()) 
+                        noDerivatives.add(new FIdUse(nd.string()));
+                    if ("order".equals(nd.name()) && nd.isIntegerValue()) 
+                        order = nd.integer();
+				}	
+			}				
+			
+			InstClassDecl fd_decl = lookupInstClassQualified(functionDer.string());
+			if (!fd_decl.isUnknown()) {
+				fd_decl.flattenFunction(fc);
+				FIdUse use = new FIdUse(new FQNameString(fd_decl.qualifiedName()));
+				return new FDerivativeFunction(use, order, noDerivatives, zeroDerivatives);
+			}
+		}
+		return null;
+	}
+	
+	public void ASTNode.ensureFQNamesFull() {
+		for (ASTNode n : this)
+			n.ensureFQNamesFull();
+	}
+	
+	public void FQNameString.ensureFQNamesFull() {
+		replaceMe(copyAsFQNameFull());
+	}
+	
+	private void InstBaseClassDecl.addLocalFunctionConstants(FFunctionDecl ffd, FClass fc) {
+		Set<InstAssignable> added = new HashSet<InstAssignable>();
+		Set<InstAssignable> all = localFunctionConstantList();
+		List<FFunctionVariable> ffvs = ffd.getFFunctionVariableListNoTransform();
+		ffd.setFFunctionVariableList(new List());
+		int n = 0;
+		while (n < all.size()) {
+			n = all.size();
+			// We need a copy of all since it can be modified during iteration
+			for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
+				if (!added.contains(cons)) {
+					cons.flattenInFunction(ffd, fc, true, this);
+					cons.myBindingInstExp().flattenUsedFuncsAndEnums(fc);
+					all.remove(cons);
+					added.add(cons);
+				}
+			}
+		}
+		for (FFunctionVariable ffv : ffvs.noTransform())
+			ffd.addFFunctionVariable(ffv);
+	}
+	
+	public void FFunctionDecl.updateRecordArraySizes() {
+		for (FFunctionVariable ffv : getFFunctionVariables())
+			ffv.updateRecordArraySizes();
+	}
+	
+	public void FFunctionVariable.updateRecordArraySizes() {
+		// TODO: this should probably be in attributes as well
+		// TODO: if exp is access to input with unknown array sizes, handle that
+		if (hasBindingExp() && isRecord())
+			getType().updateRecordArraySizes(getBindingExp().type());
+	}
+	
+	public void FType.updateRecordArraySizes(FType from) {
+		setSize(from.getSize());
+	}
+	
+	public void FRecordType.updateRecordArraySizes(FType from) {
+		super.updateRecordArraySizes(from);
+		FRecordType rfrom = (FRecordType) from;
+		for (FRecordComponentType comp : getComponents())
+			comp.getFType().updateRecordArraySizes(rfrom.componentType(comp.getName()));
+	}
+	
+	public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added) {
+   		for (InstExtends ie : getInstExtendss())
+   	   		ie.flattenComponentsInFunction(ffd, fc, added);
+   		for (InstComponentDecl icd : getInstComponentDecls())
+   			if (added.add(icd.name()))
+   				icd.flattenInFunction(ffd, fc, false, null);
+	}
+	
+	syn FAlgorithm InstNode.findFunctionAlgorithm() {
+		if (getNumFAbstractEquation() > 0) {
+			FAbstractEquation equ = getFAbstractEquation(0);
+			if (equ instanceof FAlgorithm)
+				return (FAlgorithm) equ;
+		} else {
+			for (InstExtends ie : getInstExtendss()) {
+				FAlgorithm tmp = ie.findFunctionAlgorithm();
+				if (tmp != null) 
+					return tmp;
+			}
+		}
+		return null;
+	}
+	
+	syn InstExternal InstClassDecl.findFunctionExternal() {
+		for (InstExtends ie : getInstExtendss()) {
+			InstExternal tmp = ie.myInstClass().findFunctionExternal();
+			if (tmp != null) 
+				return tmp;
+		}
+		return null;
+	}
+	eq InstFullClassDecl.findFunctionExternal()        = 
+		hasInstExternal() ? getInstExternal() : super.findFunctionExternal();
+	eq InstSimpleShortClassDecl.findFunctionExternal() = actualInstClass().findFunctionExternal();
+	
+	// Flatten record if not already done
+	public void InstClassDecl.flattenRecord(FClass fc) {}
+	
+	public void InstBaseClassDecl.flattenRecord(FClass fc) {
+		getInstRestriction().flattenRecord(fc, this);
+	}
+	
+	public void InstRestriction.flattenRecord(FClass fc, InstBaseClassDecl icd) {}
+	
+	private FClass InstMRecord.flatRecordAddedTo = null;
+	
+	public void InstMRecord.flattenRecord(FClass fc, InstBaseClassDecl icd) {
+		if (flatRecordAddedTo != fc) {
+			flatRecordAddedTo = fc;
+			icd.flattenThisRecord(fc);
+		}
+	}
+	
+	public void InstBaseClassDecl.flattenThisRecord(FClass fc) {
+		if (fc.lookupFRec(qualifiedName()) == null) {
+			FRecordDecl frd = new FRecordDecl();
+	   		frd.setFQName(new FQNameString(qualifiedName()));
+	   		Set<String> names = new HashSet<String>();
+	   		
+	   		for (InstComponentDecl icd : allInstComponentDecls())
+				icd.flattenInRecord(frd, fc, names);
+			
+			fc.addFRecordDecl(frd);
+			
+			flattenUsedFuncsAndEnums(fc);
+		}
+	}
+	
+	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
+		FExternalStmt stmt = new FExternalStmt();
+		stmt.setFExternalLanguage(hasFExternalLanguage() ? 
+				(FExternalLanguage) getFExternalLanguage().fullCopy() : 
+				new FCExternalLanguage());
+		stmt.extractLibrary(this);
+		if (hasInstExternalCall()) {
+			InstExternalCall call = getInstExternalCall();
+			if (call.hasReturnVar())
+				stmt.setReturnVar(new FIdUse(call.getReturnVar().flatten(prefix)));
+			stmt.setName(call.getName());
+			for (FExp arg : call.getArgs())
+				stmt.addArg(arg.flatten(prefix));
+		} else {
+			boolean hasReturn = func.myOutputs().size() == 1 && 
+					func.myOutputs().get(0).canBeExternalReturn(stmt.getFExternalLanguage());
+			if (hasReturn)
+				stmt.setReturnVar(new FIdUse(func.myOutputs().get(0).name()));
+			stmt.setName(func.name());
+			for (InstComponentDecl arg : func.getInstComponentDecls())
+				if (!hasReturn || !arg.isOutput())
+					arg.flattenExternalArg(stmt.getArgs());
+		}
+		return stmt;
+	}
+	
+	public void InstComponentDecl.flattenExternalArg(List<FExp> args) {}
+	
+	public void InstAssignable.flattenExternalArg(List<FExp> args) {
+		FIdUseExp use = new FIdUseExp(name());
+		args.add(use);
+		for (int i = 0; i < ndims(); i++)
+			args.add(new FSizeExp(use.fullCopy(), new Opt(new FIntegerLitExp(i + 1))));
+	}
+	
+	syn boolean InstComponentDecl.canBeExternalReturn(FExternalLanguage lang) = false;
+	eq InstAssignable.canBeExternalReturn(FExternalLanguage lang) = 
+		!isArray() && lang.canBeReturn(type());
+	
+	syn boolean FExternalLanguage.canBeReturn(FType type) = !type.isArray();
+	eq FFortran77ExternalLanguage.canBeReturn(FType type) = !type.isComposite() && !type.isString();
+	
+	public FExternalStmt FExternalStmt.flatten(FQName prefix) {
+		return fullCopy();
+	}
+	
+	public void FAlgorithm.ensureReturn() {
+		int num = getNumFStatement();
+		if (num == 0 || !(getFStatement(num - 1) instanceof FReturnStmt)) 
+			addFStatement(new FReturnStmt());
+	}
+	
+	public void InstComponentDecl.flattenInFunction(
+			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {}
+	
+	public void InstAssignable.flattenInFunction(
+			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {
+		boolean isConstant = getComponentDecl().isConstant();
+		if (useConstant || !isConstant) {
+			InstClassDecl old = temporarilyInFunction;
+			temporarilyInFunction = func;
+			FExp e = flattenBindingFExp();
+			if (hasInstValueMod())
+				getBindingFExp().flattenUsedFuncsAndEnums(fc);
+			Opt eo = (e == null) ? new Opt() : new Opt(e);
+			FQName fqn = createFQNameForFuncVar(func);
+			fqn.removeFArraySubscripts();
+			FFunctionVariable ffv = createFFunctionVariable(eo, fqn);
+			if (isInput())
+				ffv.setFTypePrefixInputOutput(new FInput());
+			if (isOutput())
+				ffv.setFTypePrefixInputOutput(new FOutput());
+			// TODO: Mark var as constant if isConstant is true?
+			ffd.addFFunctionVariable(ffv);
+			myInstClass().flattenRecord(fc);
+			temporarilyInFunction = old;
+		}
+	}
+	
+	public FQName InstComponentDecl.createFQNameForFuncVar(InstClassDecl func) {
+		FQName name = getFQName();
+		if (func != null) {
+			InstComponentDecl found = func.memberInstComponent(name.name());
+			if (name.numParts() > 1 || (found != null && found != this))
+				return new FQNameString(func.localTempVarName(this));
+		}
+		return name.fullCopy();
+	}
+
+	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
+		// TODO: if we need separate variable class for records, override this
+		FType type = (FType) type().fullCopy();
+		FFunctionVariable ffv;
+		if (isArray())
+			ffv = new FFunctionArray(new Opt(), type, eo, fqn);
+		else
+			ffv = new FFunctionVariable(new Opt(), type, eo, fqn);
+		type.flattenSize(new FQNameEmpty(), ffv);
+		return ffv;
+	}
+	
+	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
+	//       of function calls in the flat tree instead of all this (all down to "TODO: end of remove")
+	public void FType.flattenSize(FQName prefix, ASTNode context) {
+		setSize(getSize().flatten(prefix, context));
+	}
+	
+	public void FRecordType.flattenSize(FQName prefix, ASTNode context) {
+		super.flattenSize(prefix, context);
+		for (FRecordComponentType comp : getComponents())
+			comp.getFType().flattenSize(prefix, null);
+	}
+	
+	public Size Size.flatten(FQName prefix, ASTNode context) {
+		return this;
+	}
+	
+	public MutableSize MutableSize.flatten(FQName prefix, ASTNode context) {
+		MutableSize res = new MutableSize(size.length);
+		System.arraycopy(size, 0, res.size, 0, size.length);
+		for (int i = 0; i < exps.length; i++) {
+			if (exps[i] != null) {
+				res.exps[i] = exps[i].flatten(prefix);
+				if (context != null)
+					res.exps[i] = context.affixExpression(res.exps[i]);
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 * Affix the given expression to the tree.
+	 * 
+	 * Where supported, adds it to dynamicFExp(), otherwise throws UnsupportedOperationException.
+	 * 
+	 * @return the expression, possibly rewritten
+	 */
+	public FExp ASTNode.affixExpression(FExp exp) {
+		throw new UnsupportedOperationException("Method affixExpression(FExp) not supported by class " + getClass().getSimpleName());
+	}
+	
+	public FExp FExp.affixExpression(FExp exp) {
+		return dynamicFExp(exp);
+	}
+	
+	public FExp FFunctionCall.affixExpression(FExp exp) {
+		// can't use dynamicExp(), since this node might not be in tree (InstFunctionCall.flatten())
+		// TODO: if InstFunctionCall.flatten() is changed so that the size is flattened in a 
+		//       rewrite on FFunctionCall instead, then dynamicExp() can be used here
+		exp.parent = this;
+		return exp;
+	}
+	
+	/**
+	 * Affix the given expression to the tree, and point FUnknownSizeExps to this var.
+	 * 
+	 * This implementation uses a hack to add node to tree.
+	 * 
+	 * @return the expression, possibly rewritten
+	 */
+	public FExp FAbstractVariable.affixExpression(FExp exp) {
+		// TODO: need better way of including exp in tree
+		exp.parent = this;
+		exp.updateFUnknownSizeExps(this);
+		return exp;
+	}
+	
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp to the given variable.
+	 */
+	public void FExp.updateFUnknownSizeExps(FAbstractVariable var) {
+	}
+	
+	public void FUnknownSizeExp.updateFUnknownSizeExps(FAbstractVariable var) {
+		setVariable(var);
+	}
+	
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp in size to the given variable.
+	 */
+	public void FType.updateFUnknownSizeExps(FAbstractVariable var) {
+		if (getSize() != Size.SCALAR) {
+			Size s = getSize().clone();
+			s.updateFUnknownSizeExps(var);
+			setSize(s);
+		}
+	}
+
+	/**
+	 * \brief Change the variable of any FUnknownSizeExp dimension to the given variable.
+	 */
+	public void Size.updateFUnknownSizeExps(FAbstractVariable var) {}
+	
+	public void MutableSize.updateFUnknownSizeExps(FAbstractVariable var) {
+		for (int i = 0; i < exps.length; i++) 
+			if (exps[i] != null) 
+				exps[i] = var.affixExpression(exps[i].fullCopy());
+	}
+	
+	// TODO: end of remove (see TODO above)
+	
+	
+	// Generic method for flattening	
+	public void ASTNode.flatten(FClass fc) {
+		for (ASTNode n : this) {
+			n.flatten(fc);
+		}
+	}
+	
+	public void InstNode.flatten(FClass fc) {
+		FQName prefix = getFQName();
+		for (FAbstractEquation ae : getFAbstractEquations()) 
+		   ae.flatten(prefix, fc);
+		getInstComponentDeclList().flatten(fc);
+		getInstExtendsList().flatten(fc);
+	}
+	
+	/**
+	 * Check if this component should be considered during flattening.
+	 */
+	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
+	
+	public void InstComponentDecl.flatten(FClass fc) {
+		if (useInFlattening()) 
+			super.flatten(fc);
+	}
+	
+	public void InstClassDecl.buildConnectionSets(FClass fc) {
+		ConnectionSetManager csm = fc.getConnectionSetManager();
+		buildConnectionSets(new FQNameEmpty(), csm, true);
+		csm.getGraph().buildTrees(csm);
+	}
+	
+//	public void InstClassDecl.flatten(FClass fc) {}
+	
+	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}
+	
+	public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+	    if (names.add(name())) {
+    		frd.addFVariable(createFVariable());
+            flattenMyType(fc);
+	    }
+	}
+	
+	public void InstAssignable.flatten(FClass fc) {
+		if (useInFlattening()) {
+			fc.addUniqueFVariable(createFVariable());
+			flattenMyType(fc);
+		}
+	}
+	
+    public abstract void InstAssignable.flattenMyType(FClass fc);
+
+    public void InstPrimitive.flattenMyType(FClass fc) {
+        myInstClass().addFDerivedType(fc);
+    }
+    
+    public void InstRecord.flattenMyType(FClass fc) {
+        myInstClass().flattenRecord(fc);
+    }
+
+	public void InstEnum.flatten(FClass fc) {
+		myInstClass().flattenEnum(fc);
+		fc.addFVariable(createFVariable());
+	}
+	
+	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
+		FEnumLiteral e = new FEnumLiteral(new FIdUse(name()),new Opt());
+		if (getComponentDecl().getComment().hasStringComment())
+			e.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+		return e;
+	}
+
+	private FClass InstClassDecl.flatEnumClassDeclAddedTo = null;
+	
+	public void InstClassDecl.flattenEnum(FClass fc) {		
+		if (flatEnumClassDeclAddedTo != fc) {
+			flatEnumClassDeclAddedTo = fc;
+			// Flatten all InstEnums corresponding to FEnumLiterals
+			FEnumLiteralList l = new FEnumLiteralList();
+			for (InstEnumLiteral ie : enumLiterals()) 
+				l.addFEnumLiteral(ie.createFEnumLiteral());
+			FIdDecl id = new FIdDecl(new FQNameString(qualifiedName()));
+			ClassDecl classDecl = getClassDecl();
+			Opt comment = null;
+			if (classDecl.hasStringComment()) 
+				comment = new Opt(new FStringComment(classDecl.getStringComment().getComment()));
+			else 
+				comment = new Opt();
+			fc.addFEnumDecl(new FEnumDecl(id, l, comment));	
+			addFDerivedType(fc);
+		}
+	}
+	
+	public void InstSimpleShortClassDecl.flattenEnum(FClass fc) {
+		actualInstClass().flattenEnum(fc);
+	}
+	
+	public abstract FVariable InstAssignable.createEmptyFVariable();
+	
+	public FVariable InstPrimitive.createEmptyFVariable() {
+		if (isReal()) 
+			return new FRealVariable();
+		if (isInteger()) 
+			return new FIntegerVariable();
+		if (isBoolean()) 
+			return new FBooleanVariable();
+		if (isString()) 
+			return new FStringVariable();
+		throw new UnsupportedOperationException("InstPrimitive without type");
+	}	
+
+	public FEnumVariable InstEnum.createEmptyFVariable() {
+		FEnumVariable fv = new FEnumVariable();
+		fv.setEnum(new FQNameString(myInstClass().actualInstClass().qualifiedName()));
+		return fv;
+	}	
+	
+	public FVariable InstRecord.createEmptyFVariable() {
+		FRecordVariable rec = new FRecordVariable();
+		rec.setRecord(new FQNameString(myInstClass().qualifiedName()));
+		return rec;
+	}
+		
+	public FVariable InstExternalObject.createEmptyFVariable() {
+		FExternalObjectVariable exo = new FExternalObjectVariable();
+		exo.setDestructorCall(getDestructorCall().flatten(getFQNamePrefix()));
+		return exo;
+	}
+	
+	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {
+		AttributeExpRetriever mut = new AttributeExpRetriever() {
+			public FExp retrieve(InstValueModification im, boolean isEach) {
+				FExp exp = super.retrieve(im, isEach);
+				InstNode decl = im.myInstNode();
+				return (isEach || decl == InstAssignable.this || !enclosedBy(decl)) ? 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, decl));
+			}
+		};
+		addAttributes(attr, totalMergedEnvironment(), mut, false);
+	}
+	
+	public void InstNode.addAttributes(List<FAttribute> attr, Environment env) {
+		addAttributes(attr, env, AttributeExpRetriever.DEFAULT, true);
+	}
+	
+	public void InstNode.addAttributes(
+			List<FAttribute> attr, Environment env, AttributeExpRetriever aer, boolean cls) {
+		for (InstModification im : env) 
+			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), aer, cls);
+	}
+	
+	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
+		super.addAttributesToFV(attr);
+		generateSizeAttributes(attr);
+//		if (hasBindingFExp())
+//			generateSizeAttributesFromBExp(attr, getBindingFExp());
+	}
+	
+	public void InstComponentDecl.generateSizeAttributes(List<FAttribute> attr) {}
+	
+	public void InstRecord.generateSizeAttributes(List<FAttribute> attr) {
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			FAttribute a = findMatching(attr, icd.name());
+			boolean create = (a == null);
+			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
+			if (!icd.declaredSize().isComplete()) // TODO: use isUnknown instead?
+				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
+			icd.generateSizeAttributes(list);
+			if (create && list.getNumChild() > 0) {
+				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
+						new FIdDecl(new FQNameString(icd.name())), 
+						new Opt(), true, 0, new Opt(), new Opt(), list);
+				attr.add(a);
+			}
+		}
+	}
+	
+	private boolean InstClassDecl.derivedTypeAdded;
+	
+	public void InstClassDecl.addFDerivedType(FClass fc) {
+		if (!derivedTypeAdded && extendsPrimitive()) {
+			derivedTypeAdded = true;
+			List<FAttribute> attr = new List<FAttribute>();
+			addAttributes(attr, totalMergedEnvironment());
+			FType baseType = primitiveScalarType().fullCopy();
+			fc.addFDerivedType(new FDerivedType(qualifiedName(), baseType, attr));
+		}
+	}
+	
+	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+		actualInstClass().addFDerivedType(fc);
+	}
+	
+	public FVariable InstAssignable.createFVariable() {
+		FVariable fv = createEmptyFVariable();
+		
+		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
+				new FPublicVisibilityType() : new FProtectedVisibilityType());
+		
+		fv.setFTypePrefixVariability(variability().fullCopy());
+ 		
+		// Only set prefix for top level inputs and outputs
+		// TODO: Make sure that prefixes specified in short class declarations are propagated
+		if (isInput() && getFQName().numDots() == 0)
+			fv.setFTypePrefixInputOutput(new FInput());
+		if (isOutput() && getFQName().numDots() == 0)
+			fv.setFTypePrefixInputOutput(new FOutput());
+		
+		addAttributesToFV(fv.getFAttributes());
+		if (myInstClass().extendsPrimitive())
+			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
+		
+		FExp e = flattenBindingFExp();
+		if (e != null)
+			fv.setBindingExp(e);
+		
+		if (getComponentDecl().getComment().hasStringComment())
+			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
+				
+		fv.setFQName(getFQName());
+		
+		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+		if (root().options.getBooleanOption("hand_guided_tearing") && iterationNode.exists()) {
+			AnnotationNode enabledNode = iterationNode.forPath("enabled");
+			if (!enabledNode.exists() || containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue()) {
+				fv.setHGTType(FClass.HGTVariableType.COMPONENT);
+			}
+		}
+		
+		return fv;
+	}
+	
+	/**
+	 * \brief Retrieve the binding expression of an InstAssignable node.
+	 */
+	syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
+
+	/**
+	 * \brief Check if this primitive or record has a binding expression.
+	 */
+	syn boolean InstAssignable.hasBindingFExp() = myBindingInstExp() != null;
+
+	/**
+	 * \brief Retrieve the part of the binding expression that applies to this InstAssignable.
+	 */
+	syn lazy FExp InstAssignable.getBindingFExp() {
+		//log.debug("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
+		if (hasInstValueMod()) {
+			InstValueModification im = myInstValueMod();
+			FExp fe = im.getFExp();
+			boolean hasEach = im.hasEach() || 
+				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
+			if (!hasEach && im.myInstNode() != this)
+				fe = splitBindingFExp(fe, im.myInstNode());
+			return fe.unboundCopy();
+		}
+		return null;
+	}
+	
+	public FExp InstAssignable.flattenBindingFExp() {
+		if (hasInstValueMod()) {
+			InstValueModification im = myInstValueMod();
+			return getBindingFExp().flatten(im.myInstNode().getFQNamePrefix());
+		}
+		return null;
+	}
+		
+	
+	/**
+	 * \brief Extract the part of a binding array expression that refers to this primitive or record.
+	 * 
+	 * Will not create new nodes unless necessary.
+	 * 
+	 * @param fe    the expression to split
+	 * @param node  the node where the binding expression was declared 
+	 */
+	inh FExp InstAssignable.splitBindingFExp(FExp fe, InstNode node);
+	inh FExp InstArrayComponentDecl.splitBindingFExp(FExp fe, InstNode node);
+	inh FExp InstComposite.splitBindingFExp(FExp fe, InstNode node);
+	
+	eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
+	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq FlatRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
+	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		(node == this) ? fe : splitBindingFExp(fe, node);
+	eq InstRecord.getChild().splitBindingFExp(FExp fe, InstNode node) =
+		(node == this) ? fe : splitBindingFExp(fe, node);
+	
+	/**
+	 * \Return the expression corresponding to the given index in this array expression. 
+	 * 
+	 * Will not create new nodes unless necessary.
+	 */
+	syn FExp FExp.splitArrayExp(Index index) {
+		FExp res = this;
+		for (int i : index.index())
+			res = res.splitArrayExp(i);
+		return res;
+	}
+	
+	/**
+	 * \Return the expression corresponding to the given index in this array expression. 
+	 * 
+	 * Will not create new nodes unless necessary.
+	 */
+	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
+	eq FArray.splitArrayExp(int index)         = isIterArray() ? super.splitArrayExp(index) : getFExp(index - 1);
+	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
+	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
+	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
+	eq FArrayDimAsArgsExp.splitArrayExp(int index) {
+		if (getNumFExp() == 1)
+			return fillExp();
+		List<FExp> args = new List<FExp>();
+		for (int i = 1, n = getNumFExp(); i < n; i++)
+			args.add(getFExp(i).fullCopy());
+		return createNode(args);
+	}
+	eq FFillExp.splitArrayExp(int index) {
+		FExp res = super.splitArrayExp(index);
+		if (getNumFExp() > 1)
+			((FFillExp) res).setFillExp(getFillExp().fullCopy());
+		return res;
+	}
+	eq FSubscriptedExp.splitArrayExp(int index) {
+		FSubscriptedExp exp = (FSubscriptedExp) unboundCopy();
+		exp.getFArraySubscripts().specifyNext(index);
+		return exp;
+	}
+	// TODO: consider if expressions
+	
+	/**
+	 * Return a new access that has index instead of the first array subscript with ndims() > 1.
+	 * 
+	 * If access has no subscripts, a set of subscripts with all colons is first created.
+	 * 
+	 * Note: Current implementation assumes that only last name part needs to be considered.
+	 */
+	syn FIdUse FIdUse.splitArrayAccess(int index) = new FIdUse(getFQName().splitArrayAccess(index));
+	
+	/**
+	 * Return a new name that has index instead of the first array subscript with ndims() > 1.
+	 * 
+	 * If name has no subscripts, a set of subscripts with all colons is first created.
+	 */
+	syn FQName FQName.splitArrayAccess(int index); 
+	eq FQNameEmpty.splitArrayAccess(int index) = new FQNameEmpty();
+	eq FQNameString.splitArrayAccess(int index) {
+		FQNameFull res = new FQNameFull(getName());
+		int i = res.getNumFQNamePart();
+		res.setFQNamePart(res.getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
+		return res;
+	}
+	eq FQNameFull.splitArrayAccess(int index) {
+		FQNameFull res = fullCopy();
+		int i = getNumFQNamePart();
+		res.setFQNamePart(getFQNamePart(i - 1).splitArrayAccess(index, ndims()), i - 1);
+		return res;
+	}
+	
+	/**
+	 * Return a new name part that has index instead of the first array subscript with ndims() > 1.
+	 * 
+	 * If name part has no subscripts, a set of subscripts with all colons and ndims subscripts 
+	 * is first added to the new part.
+	 */
+	syn FQNamePart FQNamePart.splitArrayAccess(int index, int ndims) {
+		FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(ndims);
+		fas.specifyNext(index);
+		return new FQNamePartArray(getName(), fas);
+	}
+	eq FQNamePartArray.splitArrayAccess(int index, int ndims) {
+		FQNamePartArray res = fullCopy();
+		res.parent = parent; // Hack to allow lookups of uses from specifyNext()
+		res.getFArraySubscripts().specifyNext(index);
+		res.parent = null;
+		return res;
+	}
+	
+	syn InstAccess InstAccess.splitArrayAccess(int index) = this;
+	
+	eq InstDot.splitArrayAccess(int index) {
+		InstDot res = fullCopy();
+		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
+			InstAccess ia = getInstAccess(i);
+			if (ia.isArray()) {
+				res.setInstAccess(ia.splitArrayAccess(index), i);
+				i = n;
+			}
+		}
+		return res;
+	}
+	
+	eq InstScalarAccess.splitArrayAccess(int index) {
+		FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(localNdims());
+		fas.specifyNext(index);
+		return getArrayCopy(fas);
+	}
+	
+	eq InstArrayAccess.splitArrayAccess(int index) {
+		InstArrayAccess access = fullCopy();
+		access.getFArraySubscripts().specifyNext(index);
+		return access;
+	}
+	
+	eq InstGlobalAccess.splitArrayAccess(int index) = 
+		new InstGlobalAccess(getInstAccess().splitArrayAccess(index));
+	
+	public void FArraySubscripts.specifyNext(int index) {
+		for (int i = 0; i < getNumFSubscript(); i++) {
+			if (getFSubscript(i).ndims() > 0) {
+				setFSubscript(getFSubscript(i).specify(index), i);
+				return;
+			}
+		}
+	}
+	
+	syn FSubscript FSubscript.specify(int index);
+	eq FExpSubscript.specify(int index)     = 
+		new FExpSubscript(getFExp().getArray().getFExp(index - 1).fullCopy());
+	eq FIntegerSubscript.specify(int index) = this;
+	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
+
+	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
+	/**
+	 * \brief Check if the binding expression of an InstAssignable node is set 
+	 *        through a modification that is declared "each".
+	 */
+	syn lazy boolean InstAssignable.myBindingExpHasEach() {
+		return hasInstValueMod() ? myInstValueMod().hasEach() : false;
+	}
+	
+	/**
+	 * \brief Check if this InstAssignable node has an InstModification setting 
+	 *        its binding expression.
+	 */
+	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
+	
+	/**
+	 * \brief Retrieve the InstModification setting the binding expression of 
+	 *        this InstAssignable node.
+	 */
+	syn lazy InstValueModification InstAssignable.myInstValueMod() {
+		for (InstModification im : totalMergedEnvironment()) 
+			if (im.hasInstValueMod()) 
+				return im.getInstValueMod();
+		return null;
+	}
+
+	/**
+	 * \brief Check if this InstValueModification is part of a modification 
+	 *        that is declared "each".
+	 */
+	inh boolean InstValueModification.hasEach();
+	eq InstArgument.getChild().hasEach()          = getEach();
+	eq InstNode.getChild().hasEach()              = false;
+	eq InstArrayModification.getChild().hasEach() = true;
+	syn boolean InstArrayModification.hasEach()   = true;
+	
+	/**
+	 * \ingroup aspect_Flattening
+	 * 
+	 * Check if a modification has a value modification.
+	 */
+	syn boolean InstModification.hasInstValueMod() = false;
+
+	/**
+	 * \ingroup aspect_Flattening
+	 * 
+	 * Check if a modification has a value modification. True for
+	 * InstValueModification.
+	 */
+	eq InstValueModification.hasInstValueMod() = true;
+	
+	/**
+	 * \ingroup aspect_Flattening
+	 * 
+	 * Check if a modification has a value modification. Delegate computation
+	 * to son.
+	 */
+	eq InstCompleteModification.hasInstValueMod() = hasInstValueModification();
+	
+	syn FExp InstModification.instValueMod()   = null;
+	eq InstValueModification.instValueMod()    = getFExp();
+	eq InstCompleteModification.instValueMod() = getInstValueModification().getFExp();
+	
+	syn InstValueModification InstModification.getInstValueMod() = null;
+	eq InstValueModification.getInstValueMod()    = this;
+	eq InstCompleteModification.getInstValueMod() = getInstValueModification();
+	
+	/**
+	 * \brief Delegate object that retrieves the FExp of an InstValueModification, and 
+	 *        possibly alters it.
+	 * 
+	 * Default implementation only retrieves the expression.
+	 */
+	public class AttributeExpRetriever {
+		public FExp retrieve(InstValueModification im, boolean isEach) { return im.instValueMod(); }
+		public static final AttributeExpRetriever DEFAULT = new AttributeExpRetriever();
+	}
+
+	public void ASTNode.collectAttributes(
+			List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
+		for (int i = 0; i < getNumChild(); i++)
+			getChild(i).collectAttributes(attrs, prefix, aer, cls);
+	}
+
+	// This is just to avoid collecting ComponentModification:s that resides inside
+	// ClassRedeclares.
+    public void InstClassRedeclare.collectAttributes(
+    		List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {}
+
+	public void InstComponentModification.collectAttributes(
+			List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
+		if (hasInstModification()) {
+			InstModification im = getInstModification();
+            boolean attr_set = findMatching(attrs, getName().name()) != null;
+            // If attribute is not set, add to list
+			if (!attr_set && (cls || !im.isOnPrimitiveTypeDecl())) {
+				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
+				FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
+				FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
+				boolean isEach = getComponentModification().hasEach();
+				boolean isFinal = getComponentModification().hasFinal();
+				if (getInstModification().hasInstValueMod()) {
+					InstValueModification ivm = getInstModification().getInstValueMod();
+					a.setValue(aer.retrieve(ivm, isEach).flatten(prefix));
+				}
+				if (isEach)
+					a.setFEach(new FEach());
+				if (isFinal)
+					a.setFFinal(new FFinal());
+				im.collectAttributes(a.getFAttributes(), prefix, aer, cls);
+				attrs.add(a);
+			}
+		}
+	}
+
+	inh boolean InstModification.isOnPrimitiveTypeDecl();
+	eq InstExtends.getChild().isOnPrimitiveTypeDecl() = extendsPrimitive();
+	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
+	
+	
+	syn FResidual FResidual.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	eq InstResidual.flatten(FQName prefix) {  
+		if (hasEnabled()) {
+			if (!getEnabled().ceval().booleanValue())
+				return null;
+		}
+		FResidual flattened = new FResidual();
+		flattened.setLevel(getLevel());
+		if (hasIterationVariable())
+			flattened.setIterationVariable(getIterationVariable().flatten(prefix));
+		return flattened;
+	}
+	
+	syn FNominal FNominal.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	eq InstNominal.flatten(FQName prefix) {  
+		if (hasEnabled()) {
+			if (!getEnabled().ceval().booleanValue())
+				return null;
+		}
+		return new FNominal(getValue().flatten(prefix));
+	}
+	
+    /**
+     * \brief Find functions, record and enumeration declarations that need to be flattened.
+     */
+	protected void ASTNode.createAndFlattenResidualPairs(FClass fc) {
+		for (ASTNode n : this)
+			n.createAndFlattenResidualPairs(fc);
+	}
+	
+	protected void InstNode.createAndFlattenResidualPairs(FClass fc) {
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
+			return;
+		getInstComponentDecls().createAndFlattenResidualPairs(fc);
+		FQName prefix = getFQName();
+		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
+			if (!pair.name().equals("Pair"))
+				continue;
+			Exp enabledExp = pair.forPath("enabled").exp();
+			if (enabledExp != null && !dynamicFExp(enabledExp.instantiate()).ceval().booleanValue())
+				continue;
+			
+			Exp iterationVariableExp = pair.forPath("iterationVariable").exp();
+			InstAccess via = iterationVariableExp.asAccess().instantiate();
+			FQName iterationVariableName = dynamicFExp(new FInstAccessExp(via)).asInstAccess().flatten(prefix);
+			
+			Exp residualEquationExp = pair.forPath("residualEquation").exp();
+			InstAccess eia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
+			FQName residualEquationName = dynamicFExp(new FInstAccessExp(eia)).asInstAccess().flatten(prefix);
+			
+			fc.addFResidualPair(new FResidualPair(new FIdUse(residualEquationName), 
+					new FIdUse(iterationVariableName), prefix.numDots() + prefix.numParts()));
+		}
+	}
+	
+}
+
+aspect FlatteningDebug {
+	coll HashSet<InstAccess> FClass.collectInstAccesses() [new HashSet<InstAccess>()] with add root FlatRoot;
+	InstAccess contributes
+ 		this 
+	to FClass.collectInstAccesses() for myFClass();
+    inh FClass InstAccess.myFClass();
+
+}
+
+
+aspect InstNodeInterface {
+
+	syn ArraySubscripts InstComponentDecl.arraySubscripts() = 
+		getComponentDecl().arraySubscripts()!=null?
+			getComponentDecl().arraySubscripts(): null;
+
+}
+
+aspect UniqueVariables {
+
+	public Set<String> FClass.uniqueVars = new HashSet<String>();
+	// This can be removed when a real name collision check is added
+	public Set<String> FClass.nonUniqueVars = new HashSet<String>();
+	
+	public void FClass.addUniqueFVariable(FVariable fv) {
+		if (uniqueVars.add(fv.name())) {
+			addFVariableNoTransform(fv);
+		} else {
+			// This can be removed when a real name collision check is added
+			nonUniqueVars.add(fv.name());
+		}
+	}
+	
+	public void FClass.removeUniqueFVariableSet() {
+		uniqueVars = null;
+	}
+	
+}
+
+aspect FlatExpressions {
+
+	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
+		FAbstractEquation eqn = flattenEqn(prefix, fc);
+		if (eqn != null)
+			getType().addEquationTo(fc, eqn);
+	}
+	
+	public FEquationType FEquationType.flatten(FQName prefix) {
+		return (FEquationType) fullCopy();
+	}
+	
+	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
+	
+	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
+		fc.getFEquationBlock(0).addFAbstractEquationNoTransform(f);
+	}
+	
+	public void FInitialEquation.addEquationTo(FClass fc, FAbstractEquation f) {
+		fc.addFInitialEquationNoTransform(f);
+	}
+
+	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
+		return (FAbstractEquation) fullCopy();
+	}
+
+	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
+		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		if (hasName()) {
+			if (ndims() > 0)
+				flattened.setName(prefix.copyAndAppend(getName(), getLeft().size().createExpandedFArraySubscripts()));
+			else
+				flattened.setName(prefix.copyAndAppend(getName()));
+		}
+		if (hasResidual()) {
+			FResidual flatten = getResidual().flatten(prefix);
+			if (flatten != null)
+				flattened.setResidual(flatten);
+		}
+		if (hasNominal()) {
+			FNominal flatten = getNominal().flatten(prefix);
+			if (flatten != null)
+				flattened.setNominal(flatten);
+		}
+		return flattened;
+	}
+
+	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
+		List forIndex = new List();
+		List eqns = new List();
+		for (InstForIndex ifi : getInstForIndexs()) 
+			forIndex.add(ifi.flatten(prefix));
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
+			if (feqn != null)
+				eqns.add(feqn);
+		}
+		if (eqns.getNumChild() == 0)
+			return null;
+		return new FForClauseE(forIndex, eqns);
+	}
+
+	public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
+		FIfWhenElseEquation res = createEmptyNode();
+		res.setType((FEquationType) getType().fullCopy());
+		res.eliminateOnParamTest = eliminateOnParamTest;
+		for (FAbstractEquation ae : getFAbstractEquations()) {
+			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
+			if (feqn != null)
+				res.addFAbstractEquation(feqn);
+		}
+		if (res.getNumFAbstractEquation() == 0)
+			return null;
+		return res;
+	}
+
+	public FIfWhenEquation FIfWhenEquation.flattenEqn(FQName prefix, FClass fc) {
+		FIfWhenEquation res = (FIfWhenEquation) super.flattenEqn(prefix, fc);
+		if (res == null)
+			return null;
+		if (hasElse()) {
+			FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
+			if (elseRes != null)
+				res.setElse(elseRes);
+		}
+		res.setTest(getTest().flatten(prefix));
+		return res;
+	}
+
+	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
+		return null;
+	}
+	
+	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
+		if (ignoreInFlattening())
+			return null;
+		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+		for (FFunctionCallLeft l : getLefts()) 
+			lefts.add(l.flatten(prefix));
+		return new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) getCall().flatten(prefix));
+	}
+	
+	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
+		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
+	}
+
+	public FAlgorithm FAlgorithm.flattenEqn(FQName prefix, FClass fc) {
+		List l = FStatement.flattenFStatementList(prefix, getFStatements());
+		return new FAlgorithm(l);
+	}
+	
+	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
+		List<FStatement> l2 = new List<FStatement>();
+		for (FStatement s : l) 
+			l2.add(s.flatten(prefix));
+		return l2;
+	}
+	
+	public abstract FStatement FStatement.flatten(FQName prefix);
+	
+	public FAssignStmt InstAssignStmt.flatten(FQName prefix) {
+		return new FAssignStmt(getLeft().flatten(prefix), 
+				               getRight().flatten(prefix));
+	}
+	
+	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
+		return new FInitArrayStmt((FIdUseExp) getFIdUseExp().flatten(prefix));
+	}
+	
+	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {
+		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+		for (FFunctionCallLeft a : getLefts())
+			l.add(a.flatten(prefix));
+		return new FFunctionCallStmt(l, (FAbstractFunctionCall) getCall().flatten(prefix));
+	}
+	
+	public FIfWhenStmt FIfWhenStmt.flatten(FQName prefix) {
+		List l = new List();
+		for (FIfWhenClause c : getFIfWhenClauses()) 
+			l.add(c.flatten(prefix));
+		return flattenFIfWhenStmt(prefix, l);
+	}
+	
+	protected abstract FIfWhenStmt FIfWhenStmt.flattenFIfWhenStmt(FQName prefix, List l);
+	
+	protected FIfStmt FIfStmt.flattenFIfWhenStmt(FQName prefix, List icl) {
+		List esl = FStatement.flattenFStatementList(prefix, getElseStmts());
+		return new FIfStmt(icl, esl);
+	}
+	
+	protected FWhenStmt FWhenStmt.flattenFIfWhenStmt(FQName prefix, List l) {
+		return new FWhenStmt(l);
+	}
+	
+	public FIfWhenClause FIfWhenClause.flatten(FQName prefix) {
+		FExp t = getTest().flatten(prefix);
+		List l = FStatement.flattenFStatementList(prefix, getFStatements());
+		return flattenFIfWhenClause(t, l);
+	}
+	
+	protected abstract FIfWhenClause FIfWhenClause.flattenFIfWhenClause(FExp t, List l);
+	
+	protected FIfClause FIfClause.flattenFIfWhenClause(FExp t, List l) {
+		return new FIfClause(t, l);
+	}
+	
+	protected FWhenClause FWhenClause.flattenFIfWhenClause(FExp t, List l) {
+		return new FWhenClause(t, l);
+	}
+	
+	public FForStmt FForStmt.flatten(FQName prefix) {
+		return (FForStmt)(this.fullCopy());
+	}
+		
+	public FForStmt InstForStmt.flatten(FQName prefix) {
+		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
+		int i = getNumInstForIndex() - 1;
+		FForStmt res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+		for (i--; i >= 0; i--) {
+			sl = new List().add(res);
+			res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+		}
+		return res;		
+	}
+
+	
+	public FWhileStmt FWhileStmt.flatten(FQName prefix) {
+		List l = FStatement.flattenFStatementList(prefix, getWhileStmts());
+		return new FWhileStmt(getTest().flatten(prefix), l);
+	}
+	
+	public FBreakStmt FBreakStmt.flatten(FQName prefix)   { return new FBreakStmt(); }
+	public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
+	
+	public FAssignStmt FAssignStmt.flatten(FQName prefix)             { return null; }
+
+	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
+		List l = new List();
+		for (int i=0;i<getNumFSubscript();i++)
+			l.add(getFSubscript(i).flatten(prefix));
+		return new FArraySubscripts(l);
+	}
+	
+	abstract public FSubscript FSubscript.flatten(FQName prefix);
+	public FSubscript FColonSubscript.flatten(FQName prefix) { 
+		return new FColonSubscript();
+	}
+	
+	public FSubscript FIntegerSubscript.flatten(FQName prefix) { 
+		return new FIntegerSubscript(getValue());
+	}
+	
+	public FSubscript FExpSubscript.flatten(FQName name) {
+		return new FExpSubscript(getFExp().flatten(name));
+	}
+	
+	public FExp FExp.flatten(FQName prefix) {
+		throw new UnsupportedOperationException();
+	}
+	
+	public FIgnoredBuiltIn FIgnoredBuiltIn.flatten(FQName prefix) {
+		return new FIgnoredBuiltIn();
+	}
+
+    public FIdUse FIdUse.flatten(FQName prefix) {
+    	return (FIdUse)fullCopy();
+    }
+    
+    public FExp FIdUseExp.flatten(FQName prefix) {
+    	// TODO: Replace with constant exp for constants? Do this for FExp in general instead?
+		return new FIdUseExp(getFIdUse().flatten(prefix));
+    }
+
+	public FExp FInstAccessExp.flatten(FQName prefix) {
+		// If the FInstAccess refers to a constant or string parameter, then inline expression
+		// Checks in the instance tree ensures that constants always
+		// have binding expressions, however, array subscripts may need to be 
+		// flattened during error checks, when using qualifiedName()
+		InstAccess ia = getInstAccess();
+		if (ia.isAssignable()) {
+			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
+			InstComponentDecl bindingOf = findComponentWithThisBindingExp();
+			if (inFunction() && bindingOf != null && bindingOf.isInput() && var.isInput() && 
+					var.containingEntity() == bindingOf.containingEntity()) {
+				int i = var.containingEntity().myInputs().indexOf(var);
+				int d = findDepthOfNestledFunctionCalls();
+				return new FArgumentExp(i, d);
+			} else if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
+				try {
+					if (!var.size().isEmpty()) {
+						// Check if we have non-constant array subscripts
+						if (ia.hasUnknownIndices()) {
+							if (!inFunction()) {
+								// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
+								FExp exp = var.getBindingFExp().getArray().buildLiteral(var.isReal());
+								FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+								return new FSubscriptedExp(exp, fas);
+							}
+						} else {
+							// Inline value
+							CValue cval = ceval();
+							if (var.isReal())
+								cval = cval.convertReal();
+							return cval.buildLiteral();
+						}
+					}
+				} catch (ConstantEvaluationException e) {
+					// In this case, simply don't inline value if we aren't in a function
+					// TODO: Really? isn't this an error?
+				}
+				if (inFunction() && ia.isAssignable()) {
+					// TODO: possible name conflict
+					// Add the constant array to the function and keep the access
+					var = ia.topInstAssignable();
+					functionConstantList().add(var);
+					FQName name = var.getFQName();
+					FQName use = ia.flattenAssignablePart(prefix);
+					InstComponentDecl found = ia.localLookupInstComponent(name.name());
+					if (name.numParts() > 1 || (found != null && found != var)) {
+						// TODO: this should probably be a helper function on FQName
+						FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
+						fullUse.getFQNamePart(0).setName(ia.findTempVarName(var));
+						use = fullUse;
+					}
+					return new FIdUseExp(use);
+				}
+			}
+		} 
+		if (ia.myInstComponentDecl().inOrIsOuter()) {
+			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().getFQName().fullCopy());
+		} else {
+			return new FIdUseExp(ia.flatten(prefix));
+		}
+	}
+	
+	/**
+	 * Check if this access is in the binding expression of an input to a function, 
+	 * and refers to an input in the same function.
+	 */
+	syn boolean FInstAccessExp.inDefaultArgument() {
+		InstComponentDecl target = getInstAccess().myInstComponentDecl();
+		InstComponentDecl holder = findComponentWithThisBindingExp();
+		return inFunction() && !target.isUnknown() && holder != null && 
+				target.containingEntity() == holder.containingEntity();
+	}
+	
+	/**
+	 * Find the component that has this expression as a part of its binding expression, if any.
+	 */
+	inh InstComponentDecl FInstAccessExp.findComponentWithThisBindingExp();
+	eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
+	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;
+	
+	/**
+	 * Find the depth of nestled function calls in this expression.
+	 */
+	inh int FExp.findDepthOfNestledFunctionCalls();
+	eq InstModification.getChild().findDepthOfNestledFunctionCalls() = 0;
+	eq InstNode.getChild().findDepthOfNestledFunctionCalls()         = 0;
+	eq FClass.getChild().findDepthOfNestledFunctionCalls()           = 0;
+	eq FFunctionCall.getChild().findDepthOfNestledFunctionCalls()    = 1 + findDepthOfNestledFunctionCalls();
+	eq InstFunctionCall.getChild().findDepthOfNestledFunctionCalls() = 1 + findDepthOfNestledFunctionCalls();
+	
+	/**
+	 * Get the referenced argument.
+	 */
+	syn FExp FArgumentExp.copiedFExp() = findArgOfNestledFunctionCall(getIndex(), getDepth());
+	
+	/**
+	 * Find argument nr <code>index</code> in a surrounding function call, <code>depth</code> calls up.
+	 */
+	inh FExp FArgumentExp.findArgOfNestledFunctionCall(int index, int depth);
+	inh FExp FFunctionCall.findArgOfNestledFunctionCall(int index, int depth);
+	eq FFunctionCall.getChild().findArgOfNestledFunctionCall(int index, int depth) = 
+		(depth == 0) ? getArg(index) : findArgOfNestledFunctionCall(index, depth - 1);
+	eq InstNode.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	eq FlatRoot.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	
+	// TODO: Handle FArgumentExp all the way to C code generation or generate a temporary variable instead
+	rewrite FArgumentExp { 
+		to FExp copiedFExp().fullCopy();
+	} 
+
+	private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
+	private int InstClassDecl.nextTempVarIndex = 1;
+	
+	inh String InstAccess.findTempVarName(InstComponentDecl var);
+	eq InstClassDecl.getChild().findTempVarName(InstComponentDecl var) = localTempVarName(var);
+	eq InstRoot.getChild().findTempVarName(InstComponentDecl var)      = null;
+	eq FlatRoot.getChild().findTempVarName(InstComponentDecl var)      = null;
+	
+	syn String InstClassDecl.localTempVarName(InstComponentDecl var) {
+		if (tempVarNames == null)
+			tempVarNames = new HashMap<InstComponentDecl,String>();
+		if (tempVarNames.containsKey(var))
+			return tempVarNames.get(var);
+		String name;
+		do {
+			name = "temp_" + nextTempVarIndex++;
+		} while (memberInstComponent(name) != null);
+		tempVarNames.put(var, name);
+		return name;
+	}
+	
+	syn int InstDot.firstAssignableIndex() {
+		for (int i = 0, n = getNumInstAccess(); i < n; i++)
+			if (getInstAccess(i).isAssignable())
+				return i;
+		return -1;
+	}
+	
+	syn InstAssignable InstAccess.topInstAssignable() = (InstAssignable) myInstComponentDecl();
+	eq InstDot.topInstAssignable()                    = 
+			getInstAccess(firstAssignableIndex()).topInstAssignable();
+	
+	public FQName InstAccess.flattenAssignablePart(FQName prefix) {
+		return flatten(prefix);
+	}
+	
+	public FQName InstDot.flattenAssignablePart(FQName prefix) {
+		return flattenName(prefix, prefix, firstAssignableIndex(), getNumInstAccess() - 1);
+	}
+	
+	/**
+	 * \brief Get the list of constants that need to be added to the surrounding function.
+	 */
+	inh Set<InstAssignable> FInstAccessExp.functionConstantList();
+	inh Set<InstAssignable> InstAssignable.functionConstantList();
+	eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
+	eq InstAssignable.getChild().functionConstantList() = 
+		(temporarilyInFunction != null) ? 
+				temporarilyInFunction.localFunctionConstantList() : 
+				functionConstantList();
+	eq Root.getChild().functionConstantList()           = null;
+	
+	/**
+	 * \brief The list of constants that need to be added to this function.
+	 * 
+	 * The list will be populated when expressions in the function are flattened.
+	 */
+	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
+		new LinkedHashSet<InstAssignable>();
+	
+	syn boolean InstAccess.hasUnknownIndices() = 
+		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();
+	eq InstDot.hasUnknownIndices() {
+		for (InstAccess ia : getInstAccesss())
+			if (ia.hasUnknownIndices())
+				return true;
+		return false;
+	}
+	
+	syn lazy boolean FArraySubscripts.hasUnknownIndices() {
+		for (FSubscript fs : getFSubscripts())
+			if (fs.isUnknownIndex())
+				return true;
+		return false;
+	}
+	
+	// TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
+	syn boolean FSubscript.isUnknownIndex() = false;
+	eq FExpSubscript.isUnknownIndex() {
+		try {
+			return ceval().intValue() == 0;
+		} catch (ConstantEvaluationException e) {
+			return true;
+		}
+	}
+	
+	public FQName InstAccess.flatten(FQName prefix) { 
+		if (myInstComponentDecl().isEnumLiteral())
+			return myInstComponentDecl().getFQName().fullCopy();
+		
+		FQName base = isForIndex() ? new FQNameEmpty() : prefix;
+		int last = allFArraySubscripts().size() - 1;
+		return flattenName(prefix, base, 0, last);
+	}
+	
+	/**
+	 * Flatten part of this name.
+	 * 
+	 * @param prefix  prefix to pass when flattening subscripts
+	 * @param base    prefix to prepend to name
+	 * @param first   first part of name to flatten
+	 * @param last    last part of name to flatten
+	 */
+	public FQName InstAccess.flattenName(FQName prefix, FQName base, int first, int last) {
+		if (first != 0 || last != 0)
+			throw new ArrayIndexOutOfBoundsException(first == 0 ? last : first);
+		FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
+		if (fas == null)
+			return base.copyAndAppend(name());
+		if (!fas.hasNonLiteralSubscripts())
+			return base.copyAndAppend(name() + fas);
+		return base.copyAndAppend(name(), fas.flatten(prefix));
+	}
+
+	public FQName InstDot.flattenName(FQName prefix, FQName base, int first, int last) {
+		java.util.List<FArraySubscripts> fasl = allFArraySubscripts();
+		boolean nonLiteral = false;
+		for (FArraySubscripts fas : fasl)
+			nonLiteral = nonLiteral || fas.hasNonLiteralSubscripts();
+		boolean size = inSizeExp();
+		if (nonLiteral || inFunction()) {
+			FQNameFull res = new FQNameFull();
+			for (int i = first; i <= last; i++) {
+				InstAccess cur = getInstAccess(i);
+				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+				res.addFQNamePart(cur.flattenPart(prefix, fas));
+			}
+			return base.copyAndAppend(res);
+		} else {
+			StringBuilder buf = new StringBuilder();
+			for (int i = first; i <= last; i++) {
+				InstAccess cur = getInstAccess(i);
+				FArraySubscripts fas = cur.filterFASForFlatten(fasl.get(i), i == last, size);
+				buf.append(cur.name());
+				if (fas != null)
+					buf.append(fas);
+				if (i < last)
+					buf.append('.');
+			}
+			return prefix.copyAndAppend(buf.toString());
+		}
+	}
+	
+	protected FArraySubscripts InstAccess.filterFASForFlatten(FArraySubscripts fas, boolean last, boolean size) {
+		/* Simplify check later. */
+		if (fas.getNumFSubscript() == 0)
+			return null;
+		/* TODO: This is a temporary fix to make the slices code play nice 
+		 *        with functions - it will probably need to be replaced with 
+		 *        a more permanent fix later. See #741. */
+		if (last && inFunction())
+			return null;
+        /* This prevents a potential infinite recursion, see #1150. */
+		if (size)
+			return null;
+		return fas;
+	}
+	
+	protected FArraySubscripts InstArrayAccess.filterFASForFlatten(FArraySubscripts fas, boolean last, boolean size) {
+		return fas;
+	}
+	
+	public FQNamePart InstAccess.flattenPart(FQName prefix, FArraySubscripts fas) {
+		return (fas == null) ? new FQNamePart(name()) : new FQNamePartArray(name(), fas.flatten(prefix));
+	}
+	
+	/**
+     * Specialized flattening method for resolving loop indices during flattening.
+     * Intended for use when building connection sets. Do not use for accesses in functions or size 
+     * expressions.
+     *
+     * @param prefix  prefix to add to name
+     */
+	public FQName InstAccess.flattenAndResolveIndices(FQName prefix) {
+		if (isArray() || !prefix.isSimple()) {
+			FQNameFull res = new FQNameFull();
+			flattenPartsAndResolveIndices(prefix, res);
+			return prefix.copyAndAppend(res);
+		} else {
+			StringBuilder buf = new StringBuilder();
+			appendWithResolvedSubscripts(buf);
+			return prefix.copyAndAppend(buf.toString());
+		}
+	}
+	
+	/**
+	 * Write this name to string builder, evaluating any expressions in subscripts.
+	 */
+	protected void InstAccess.appendWithResolvedSubscripts(StringBuilder buf) {}
+	
+	protected void InstDot.appendWithResolvedSubscripts(StringBuilder buf) {
+		for (InstAccess ia : getInstAccesss())
+			ia.appendWithResolvedSubscripts(buf);
+	}
+	
+	protected void InstNamedAccess.appendWithResolvedSubscripts(StringBuilder buf) {
+		if (buf.length() > 0)
+			buf.append('.');
+		buf.append(getID());
+	}
+	
+	protected void InstArrayAccess.appendWithResolvedSubscripts(StringBuilder buf) {
+		super.appendWithResolvedSubscripts(buf);
+		getFArraySubscripts().appendWithResolvedSubscripts(buf);
+	}
+	
+	/**
+	 * Write these array subscripts to string builder, evaluating any expressions.
+	 */
+	public void FArraySubscripts.appendWithResolvedSubscripts(StringBuilder buf) {
+		buf.append('[');
+		for (FSubscript s : getFSubscripts())
+			s.appendWithResolvedSubscripts(buf);
+		buf.append(']');
+	}
+	
+	/**
+	 * Write this subscript to string builder, evaluating any expressions.
+	 */
+	public void FSubscript.appendWithResolvedSubscripts(StringBuilder buf) {
+		if (buf.charAt(buf.length() - 1) != '[')
+			buf.append(',');
+		buf.append(toString());
+	}
+	
+	public void FExpSubscript.appendWithResolvedSubscripts(StringBuilder buf) {
+		if (buf.charAt(buf.length() - 1) != '[')
+			buf.append(',');
+		buf.append(getFExp().ceval().toString());
+	}
+	
+	/**
+     * Specialized flattening method for resolving loop indices during flattening.
+     * Intended for use when building connection sets. Do not use for accesses in functions or size 
+     * expressions.
+     *
+     * @param prefix  prefix to add to name
+     */
+	protected void InstAccess.flattenPartsAndResolveIndices(FQName prefix, FQNameFull target) {}
+	
+	protected void InstDot.flattenPartsAndResolveIndices(FQName prefix, FQNameFull target) {
+		for (InstAccess ia : getInstAccesss())
+			ia.flattenPartsAndResolveIndices(prefix, target);
+	}
+	
+	protected void InstNamedAccess.flattenPartsAndResolveIndices(FQName prefix, FQNameFull target) {
+		FArraySubscripts fas = allFArraySubscripts().get(0);
+		if (fas.getNumFSubscript() > 0) {
+			FArraySubscripts newFas = new FArraySubscripts();
+			for (FSubscript s : fas.getFSubscripts())
+				newFas.addFSubscript(s.flattenAndResolveIndices(prefix));
+			target.addFQNamePart(new FQNamePartArray(getID(), newFas));
+		} else {
+			target.addFQNamePart(new FQNamePart(getID()));
+		}
+	}
+	
+	/**
+     * Specialized flattening method for resolving loop indices during flattening.
+     * Intended for use when building connection sets. Do not use for accesses in functions or size 
+     * expressions.
+     *
+     * @param prefix  prefix to add to name
+     */
+	public FSubscript FSubscript.flattenAndResolveIndices(FQName prefix) {
+		return flatten(prefix);
+	}
+	
+	public FSubscript FExpSubscript.flattenAndResolveIndices(FQName prefix) {
+		return getFExp().ceval().createFSubscript();
+	}
+	
+	/**
+	 * Create a constant FSubscript.
+	 */
+	public FSubscript CValue.createFSubscript() {
+		return new FExpSubscript(buildLiteral());
+	}
+	
+	public FSubscript CValueInteger.createFSubscript() {
+		return new FIntegerSubscript(intValue());
+	}
+
+	inh boolean InstAccess.inSizeExp();
+	eq FSizeExp.getChild().inSizeExp() = true;
+	eq InstNode.getChild().inSizeExp() = false;
+	eq Root.getChild().inSizeExp()     = false;
+
+	public FIdUse FIdUseInstAccess.flatten(FQName prefix) {
+	   return new FIdUse(getInstAccess().flatten(prefix));
+	}
+
+	public FExp FArray.flatten(FQName prefix) {
+	   List l = new List();
+	   for (FExp exp : getFExps())
+	   	 l.add(exp.flatten(prefix));
+	   return createNode(l);
+	}
+	
+	public FReductionExp FReductionExp.flatten(FQName prefix) {
+		return (FReductionExp) createNode(getFExp().flatten(prefix));
+	}
+	
+	public FExp FIterExp.flatten(FQName prefix) {
+		List<CommonForIndex> fil = new List<CommonForIndex>();
+		for (CommonForIndex fi : getForIndexList())
+			fil.add(fi.flatten(prefix));
+		return new FIterExp(getFExp().flatten(prefix), fil);
+	}
+
+	public FExp FSubscriptedExp.flatten(FQName prefix) {
+		return new FSubscriptedExp(getFExp().flatten(prefix), getFArraySubscripts().flatten(prefix));
+	}
+
+	public FIdDecl FIdDecl.flatten(FQName prefix) {
+		return (FIdDecl)fullCopy();
+	}
+
+	public FExp FRangeExp.flatten(FQName prefix) {
+		List l = new List();
+		for (FExp e : getFExps())
+			l.add(e.flatten(prefix));
+		return new FRangeExp(l);
+	}
+
+	public FLinspace FLinspace.flatten(FQName prefix) {
+		return new FLinspace(getStartExp().flatten(prefix), 
+				             getStopExp().flatten(prefix), 
+				             getN().flatten(prefix));
+	}
+
+    public FExp FIfExp.flatten(FQName prefix) {
+		return new FIfExp(getIfExp().flatten(prefix),
+		                  getThenExp().flatten(prefix),
+		                  getElseExp().flatten(prefix));
+	}
+
+	public FExp FBinExp.flatten(FQName prefix)     { return createNode(getLeft().flatten(prefix), getRight().flatten(prefix)); }
+	public FExp FUnaryExp.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
+	public FExp FLitExp.flatten(FQName prefix)     { return fullCopy(); }
+	public FExp FEnumLitExp.flatten(FQName prefix) { return new FEnumLitExp(getEnum(), getValue(), null); }
+	
+	public FExp FModFuncExp.flatten(FQName prefix) {
+		FExp toRound = new FDivExp(getX().flatten(prefix), getY().flatten(prefix));
+		FExp rounded = type().isInteger() ? new FIntegerFuncExp(toRound) : new FFloorFuncExp(toRound);
+		return new FSubExp(getX().flatten(prefix), new FMulExp(rounded, getY().flatten(prefix)));
+	}
+		
+	public FExp FEventGenExp.flatten(FQName prefix)    { return createNode(getX().flatten(prefix)); }
+	public FExp FBinEventGenExp.flatten(FQName prefix) { return createNode(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FExp FRemFuncExp.flatten(FQName prefix)     { return new FSubExp(getX().flatten(prefix), new FMulExp(new FDivFuncExp(getX().flatten(prefix), getY().flatten(prefix)), getY().flatten(prefix)));}
+	public FExp FUnaryBuiltIn.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
+	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
+	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), new FPreExp(getFExp().flatten(prefix))); }
+
+	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
+	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
+	public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
+	public FHomotopyExp         FHomotopyExp.flatten(FQName prefix)              { return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); }
+	public FSemiLinearExp       FSemiLinearExp.flatten(FQName prefix)            { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
+	public FExp                 FGetInstanceName.flatten(FQName prefix)          { return new FStringLitExp(myInstFullClassDecl().name() + "." + prefix.name()); }
+	
+	inh InstFullClassDecl ASTNode.myInstFullClassDecl();
+	eq Root.getChild().myInstFullClassDecl() = null;
+	eq InstFullClassDecl.getChild().myInstFullClassDecl() = this;
+	
+	public FUnsupportedBuiltIn FUnsupportedBuiltIn.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
+	
+	public FCross        FCross.flatten(FQName prefix)        { return new FCross(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FOuterProduct FOuterProduct.flatten(FQName prefix) { return new FOuterProduct(getX().flatten(prefix), getY().flatten(prefix)); }
+	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
+	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
+	
+	
+	public FAssert FAssert.flatten(FQName prefix) {
+		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
+		return new FAssert(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
+	}
+	                     
+	public FCardinality FCardinality.flatten(FQName prefix) { 
+	    FCardinality res = new FCardinality(getFExp().flatten(prefix));
+	    res.rewriteCardinality = true;
+	    return res;
+	}
+	
+	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }
+	public FConnectionsOp FConnBoolOp.flatten(FQName prefix) {
+		FConnBoolOp res = createNode(getA().flatten(prefix));
+		res.connectionGraph = connectionGraph;
+		return res;
+	}
+	
+	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
+	public FExp FDotAddExp.flatten(FQName prefix) { 
+		return type().isString() ? 
+				new FStringAddExp(getLeft().flatten(prefix), getRight().flatten(prefix)) : 
+				super.flatten(prefix);
+	}
+	
+	public FMinMaxExp FMinMaxExp.flatten(FQName prefix) { 
+		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
+	}
+	
+	public FSizeExp FSizeExp.flatten(FQName prefix) {
+		FExp exp = getFExp();
+		exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
+		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
+		return new FSizeExp(exp, dim);
+	}
+	
+	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {
+		return new FUnknownSizeExp(null, getDim());
+	}
+	
+	public FExp InstDerExp.flatten(FQName prefix) {
+		return getFExp().flattenDer(prefix, order());
+	}
+	
+	public FExp FExp.flattenDer(FQName prefix, int order) {
+		return diff(TIME, order).flatten(prefix);
+	}
+	
+	public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
+		FIdUse use = new FIdUse(getInstAccess().flatten(prefix));
+		return (order == 1) ? new FDerExp(use) : new FHDerExp(use, order);
+	}
+	
+	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
+		List<FExp> l = new List<FExp>();
+		for (FExp e : getFExps()) 
+			l.add(e.flatten(prefix));
+		return createNode(l); 
+	}
+	
+	public FFillExp FFillExp.flatten(FQName prefix) {
+		FFillExp res = (FFillExp) super.flatten(prefix);
+		res.setFillExp(getFillExp().flatten(prefix));
+		return res;
+	}
+	
+	public FCatExp FCatExp.flatten(FQName prefix) {
+		FCatExp res = (FCatExp) super.flatten(prefix);
+		res.setDim(getDim().flatten(prefix));
+		return res;
+	}
+	
+	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
+	
+	public FRecordConstructor FRecordConstructor.flatten(FQName prefix) {
+		List args = new List();
+		for (FExp e : getArgs()) 
+			args.add(e.flatten(prefix));
+		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
+	}
+	
+	public FIdUse FIdUse.flattenRecordName() {
+		return flatten(new FQNameEmpty());
+	}
+	
+	public FIdUse FIdUseInstAccess.flattenRecordName() {
+		return new FIdUse(getInstAccess().myInstClassDecl().qualifiedName());
+	}
+	
+	public FFunctionCall FFunctionCall.flatten(FQName prefix) {
+		List args = new List();
+		for (FExp e : getArgs()) 
+			args.add(e.flatten(prefix));
+		return new FFunctionCall(getName().flatten(new FQNameEmpty()), args, getSizes());		
+	}
+
+	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
+		List args = new List();
+		for (InstFunctionArgument e : getArgs()) 
+			args.add(e.flatten(prefix));
+		InstClassDecl target = getName().myInstClassDecl().actualInstClass();
+		if (target.inOrIsOuter()) 
+			target = target.myInnerInstClassDecl();
+		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
+		Size[] sizes = new Size[myOutputs().size()];
+		FFunctionCall res = createFFunctionCall(name, args, sizes);
+		if (isFunctionCallClause()) 
+			for (int i = 0; i < myLefts().size(); i++)
+				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res) : null;
+		else
+			sizes[0] = size().flatten(prefix, res);
+		return res;	
+	}
+
+	public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+		return new FFunctionCall(name, args, sizes);
+	}
+
+	public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+		boolean[] vectorFlags = new boolean[getNumArg()];
+		int i = 0;
+		for (InstFunctionArgument e : getArgs())
+			vectorFlags[i++] = e.isVectorized();
+		return new FVectorFunctionCall(name, args, sizes, size(), vectorFlags);
+	}
+
+	public FExp InstFunctionArgument.flatten(FQName prefix) {
+		return getFExp().flatten(prefix);
+	}
+
+	public FExp InstDefaultArgument.flatten(FQName prefix) {
+		return getFExp().flatten(getFExp().retrieveFQName());
+	}
+	
+	public abstract FForIndex CommonForIndex.flatten(FQName prefix);
+	
+	public FForIndex InstForIndex.flatten(FQName prefix) {
+		return new FForIndex(hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt(),
+				getInstPrimitive().createFVariable());
+	}
+	
+	public FForIndex FForIndex.flatten(FQName prefix) {
+		return (FForIndex) fullCopy();
+	}
+	
+	/**
+	 * \brief Creates a flattened access to this component.
+	 */
+	public FQName InstComponentDecl.flattenedAccess(FQName prefix) {
+		if (expandedSubscripts().getNumFSubscript() > 0)
+			return prefix.copyAndAppend(name(), expandedSubscripts());
+		else 
+			return prefix.copyAndAppend(name());
+	}
+	
+	/**
+	 * Flatten variability specifier.
+     *
+	 * This is done during variability calculation to keep compatibility with FExp. 
+	 */
+	abstract public FTypePrefixVariability TypePrefixVariability.flatten();
+	public FTypePrefixVariability Continuous.flatten() { return new FContinuous(); }
+	public FTypePrefixVariability Discrete.flatten()   { return new FDiscrete();   }
+	public FTypePrefixVariability Parameter.flatten()  { return new FParameter();  }
+	public FTypePrefixVariability Constant.flatten()   { return new FConstant();   }
+
+}
+
+aspect InstantiatedExpressions {
+
+	public FEquationType AbstractEquation.equationType() {
+		return isInitial() ? new FInitialEquation() : new FNormalEquation();
+	}
+
+	public FEquationType Algorithm.equationType() {
+		return hasInitial() ? new FInitialEquation() : new FNormalEquation();
+	}
+
+	public FAbstractEquation AbstractEquation.instantiate() {
+		return copyLocationTo(new FUnsupportedEquation(equationType()));
+	}
+
+	public FAbstractEquation Equation.instantiate() {
+		return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
+				buildNominalOpt(), getLeft().instantiate(), getRight().instantiate()));
+	}
+	
+	private Opt<FQName> Equation.buildNameOpt() {
+		AnnotationNode nameNode = annotation().vendorNode().forPath("name");
+		if (!nameNode.exists())
+			return new Opt<FQName>();
+		Exp nameExp = nameNode.exp();
+		if (nameExp == null)
+			nameNode.ast().error("Name annotation is incorrect");
+		else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
+			nameExp.error("Illegal equation name \"%s\"", nameExp);
+		else
+			return new Opt<FQName>(new FQNameString(nameExp.asAccess().asID()));
+		return new Opt<FQName>();
+	}
+	
+	/**
+	 * Builds a FResidual instance for "this" equation.  
+	 */
+	private Opt<FResidual> Equation.buildResidualOpt() {
+		if (!root().options.getBooleanOption("hand_guided_tearing"))
+			return new Opt<FResidual>();
+		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
+		if (!residualNode.exists())
+			return new Opt<FResidual>();
+		InstResidual residual = new InstResidual();
+		residual.setLevel(Integer.MAX_VALUE);
+		Exp enabledExp = residualNode.forPath("enabled").exp();
+		if (enabledExp != null)
+			residual.setEnabled(enabledExp.instantiate());
+		Exp iterationVariableExp = residualNode.forPath("iterationVariable").exp();
+		if (iterationVariableExp != null) {
+			if (!iterationVariableExp.isAccess())
+				iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
+			else
+				residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
+		}
+		return new Opt<FResidual>(residual);
+	}
+	
+	/**
+	 * Builds a FNominal instance for "this" equation.  
+	 */
+	private Opt<FNominal> Equation.buildNominalOpt() {
+		AnnotationNode nominalNode = annotation().vendorNode().forPath("nominal");
+		if (!nominalNode.exists())
+			return new Opt<FNominal>();
+		InstNominal nominal = new InstNominal();
+		Exp enabledExp = nominalNode.forPath("enabled").exp();
+		if (enabledExp != null)
+			nominal.setEnabled(enabledExp.instantiate());
+		Exp valueExp = nominalNode.exp();
+		if (valueExp == null)
+			nominal.error("Nominal value is missing from nominal annotation");
+		nominal.setValue(valueExp.instantiate());
+		return new Opt<FNominal>(nominal);
+	}
+	
+	public FAbstractEquation ConnectClause.instantiate() {
+	    Opt o = null;
+	    if (getComment().hasStringComment())
+		   o = new Opt(new FStringComment(getComment().getStringComment().getComment()));
+	    else
+	    	o = new Opt();
+		FConnectClause c = new FConnectClause(equationType(), o, this,
+				new FIdUseInstAccess(getConnector1().newInstAccess()),
+				new FIdUseInstAccess(getConnector2().newInstAccess()));
+		c.setLocation(this);
+		return c;
+	}
+	
+	protected FIfWhenElseEquation IfWhenElseEquation.instantiate(FIfWhenElseEquation res) {
+		res.setType(equationType());
+		for (AbstractEquation eqn : getAbstractEquations())
+			res.addFAbstractEquation(eqn.instantiate());
+		res.setLocation(this);
+		return res;
+	}
+	
+	protected FIfWhenEquation IfWhenEquation.instantiate(FIfWhenEquation res) {
+		super.instantiate(res);
+		res.setTest(getTest().instantiate());
+		if (hasElse())
+			res.setElse(getElse().instantiate());
+		return res;
+	}
+	
+	public abstract FIfWhenElseEquation IfWhenElseEquation.instantiate();
+	
+	public FIfWhenElseEquation IfEquation.instantiate() {
+		return instantiate(new FIfEquation());
+	}
+	
+	public FIfWhenElseEquation WhenEquation.instantiate() {
+		return instantiate(new FWhenEquation());
+	}
+	
+	public FIfWhenElseEquation ElseEquation.instantiate() {
+		return instantiate(new FElseEquation());
+	}
+		
+	public FFunctionCallEquation FunctionCallEquation.instantiate() {
+		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+		for (FunctionCallLeft a : getLefts()) 
+			l.add(a.instantiate());
+		return copyLocationTo(new FFunctionCallEquation(equationType(), l, getCall().instantiate()));
+	}
+	
+	public 	FFunctionCallLeft FunctionCallLeft.instantiate() {
+		Opt id = hasAccess() ? 
+				new Opt(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess()))) : 
+				new Opt();
+		return new FFunctionCallLeft(id);
+	}
+	
+	public FAlgorithm Algorithm.instantiate() {
+		List l = Statement.instantiateStatementList(getStatements());
+		return copyLocationTo(new FAlgorithm(equationType(), l));
+	}
+	
+	public InstExternal ExternalClause.instantiate() {
+		// TODO: Interpret annotations and add information to InstExternal
+		Opt lang = hasExternalLanguage() ? new Opt(getExternalLanguage().instantiate()) : new Opt();
+		Opt call = hasExternalFunctionCall() ? new Opt(getExternalFunctionCall().instantiate()) : new Opt();
+		return copyLocationTo(new InstExternal(this, lang, call));
+	}
+	
+	public static final String FCExternalLanguage.LANGUAGE_STRING         = "C";
+	public static final String FFortran77ExternalLanguage.LANGUAGE_STRING = "FORTRAN 77";
+	public static final String FBuiltinExternalLanguage.LANGUAGE_STRING   = "BUILTIN";
+	
+	public FExternalLanguage ExternalLanguage.instantiate() {
+		String lang = getLanguage().toUpperCase();
+		if (lang.equals(FCExternalLanguage.LANGUAGE_STRING))
+			return new FCExternalLanguage();
+		else if (lang.equals(FFortran77ExternalLanguage.LANGUAGE_STRING))
+			return new FFortran77ExternalLanguage();
+		else if (lang.equals(FBuiltinExternalLanguage.LANGUAGE_STRING))
+			return new FBuiltinExternalLanguage();
+		else 
+			return new FUnknownExternalLanguage(lang);
+	}
+	
+	public InstExternalCall ExternalFunctionCall.instantiate() {
+		InstExternalCall res = new InstExternalCall();
+		if (hasReturnVar())
+			res.setReturnVar(getReturnVar().newInstAccess());
+		res.setName(getFunctionName().name());
+		for (Exp e : getArgs())
+			res.addArg(e.instantiate());
+		return res;
+	}
+	
+	public static List Statement.instantiateStatementList(List<Statement> l) {
+		List l2 = new List();
+		for (Statement s : l) 
+			if (!(s instanceof AlgorithmAnnotation))
+				l2.add(s.instantiate());
+		return l2;
+	}
+	
+	public FStatement Statement.instantiate() {
+		FStatement s = instantiateStatement();
+		s.setLocation(this);
+		return s;
+	}
+	
+	protected abstract FStatement Statement.instantiateStatement();
+	
+	protected FStatement AlgorithmAnnotation.instantiateStatement() {
+		return null;
+	}
+	
+	protected InstAssignStmt AssignStmt.instantiateStatement() {
+		FIdUseInstAccess left = new FIdUseInstAccess(getLeft().newInstAccess());
+		return new InstAssignStmt(left, getRight().instantiate());
+	}
+	
+	protected FFunctionCallStmt FunctionCallStmt.instantiateStatement() {
+		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+		for (FunctionCallLeft a : getLefts()) 
+			l.add(a.instantiate());
+		return new FFunctionCallStmt(l, getFunctionCall().instantiate());
+	}
+	
+	protected FBreakStmt BreakStmt.instantiateStatement() {
+		return new FBreakStmt();
+	}
+	
+	protected FReturnStmt ReturnStmt.instantiateStatement() {
+		return new FReturnStmt();
+	}
+	
+	protected FIfWhenStmt IfWhenStmt.instantiateStatement() {
+		List l = new List();
+		for (IfWhenClause c : getIfWhenClauses()) 
+			l.add(c.instantiate());
+		return instantiateIfWhenStmt(l);
+	}
+	
+	protected abstract FIfWhenStmt IfWhenStmt.instantiateIfWhenStmt(List l);
+	
+	protected FIfStmt IfStmt.instantiateIfWhenStmt(List icl) {
+		List esl = new List();
+		if (hasElseClause()) {
+			esl = Statement.instantiateStatementList(getElseClause().getStmts());
+		}
+		return new FIfStmt(icl, esl);
+	}
+	
+	protected FWhenStmt WhenStmt.instantiateIfWhenStmt(List l) {
+		return new FWhenStmt(l);
+	}
+	
+	public FIfWhenClause IfWhenClause.instantiate() {
+		FExp t = getTest().instantiate();
+		List l = Statement.instantiateStatementList(getStatements());
+		FIfWhenClause c = instantiateIfWhenClause(t, l);
+		c.setLocation(this);
+		return c;
+	}
+	
+	protected abstract FIfWhenClause IfWhenClause.instantiateIfWhenClause(FExp t, List l);
+	
+	protected FIfClause IfClause.instantiateIfWhenClause(FExp t, List l) {
+		return new FIfClause(t, l);
+	}
+	
+	protected FWhenClause WhenClause.instantiateIfWhenClause(FExp t, List l) {
+		return new FWhenClause(t, l);
+	}
+	
+	
+	protected InstForStmt ForStmt.instantiateStatement() {
+		List il = new List();
+		for (ForIndex i : getForIndexList()) 
+			il.add(i.instantiate());
+		List sl = Statement.instantiateStatementList(getForStmtList().getStmts());
+		return new InstForStmt(il, sl);
+	}
+	
+	protected FWhileStmt WhileStmt.instantiateStatement() {
+		List l = Statement.instantiateStatementList(getWhileStmts());
+		return new FWhileStmt(getTest().instantiate(), l);
+	}
+
+	public FArraySubscripts ArraySubscripts.instantiate() {
+		List l = new List();
+		for (Subscript s : getSubscripts())
+			l.add(s.instantiate());
+		return copyLocationTo(new FArraySubscripts(l));
+	}
+	
+	abstract public FSubscript Subscript.instantiate();
+	public FSubscript ColonSubscript.instantiate() { 
+		return copyLocationTo(new FColonSubscript());
+	}
+	
+	public FSubscript ExpSubscript.instantiate() {
+		return copyLocationTo(new FExpSubscript(getExp().instantiate()));
+	}
+	
+	public FExp Exp.instantiate() {
+		return copyLocationTo(new FUnsupportedExp());
+	}
+
+	
+	public InstDerExp DerExp.instantiate() {
+		return copyLocationTo(new InstDerExp(getExp().instantiate()));
+	}
+	
+
+	public FExp AccessExp.instantiate() {
+		return copyLocationTo(new FInstAccessExp(getAccess().newInstAccess()));
+	}
+
+
+	public InstAccess Access.instantiate() { 
+		return copyLocationTo(newInstAccess());
+	}
+
+	public FExp ArrayConstructor.instantiate() {
+	   List l = new List();
+	   for (Exp e : getFunctionArguments().getExps())
+		   l.add(e.instantiate());
+	   return copyLocationTo(new FArray(l));
+	}
+	
+	public FExp IterExp.instantiate() {
+		List<CommonForIndex> ifil = new List<CommonForIndex>();
+		// Add indices backwards, since they should be interpreted in the opposite order compared to for loops
+		for (int i = getNumForIndex() - 1; i >= 0; i--)
+			ifil.add(getForIndex(i).instantiate());
+		return copyLocationTo(new FIterExp(getExp().instantiate(), ifil));
+	}
+
+	public FExp RangeExp.instantiate() {
+		List l = new List();
+		for (Exp e : getExps()) 
+			l.add(e.instantiate());
+		return copyLocationTo(new FRangeExp(l));
+	}
+
+    public FExp IfExp.instantiate() {
+		FIfExp n = new FIfExp(getIfExp().instantiate(),
+		                      getThenExp().instantiate(),
+		                      getElseExp().instantiate());
+		return copyLocationTo(n);
+    }
+
+	public FExp Matrix.instantiate() {
+		FMatrix m = new FMatrix();
+		for (MatrixRow r : getRows())
+			m.addFExp(r.instantiate());
+		return copyLocationTo(m);
+	}
+	
+	public FMatrixRow MatrixRow.instantiate() {
+		FMatrixRow r = new FMatrixRow();
+		for (Exp e : getExps())
+			r.addFExp(e.instantiate());
+		return copyLocationTo(r);
+	}
+	
+	public FExp AddExp.instantiate() { 
+		return copyLocationTo(new FAddExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp SubExp.instantiate() { 
+		return copyLocationTo(new FSubExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+
+	public FExp MulExp.instantiate() { 
+		return copyLocationTo(new FMulExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp DivExp.instantiate() { 
+		return copyLocationTo(new FDivExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp PowExp.instantiate() { 
+		return copyLocationTo(new FPowExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp DotAddExp.instantiate() { 
+		return copyLocationTo(new FDotAddExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp DotSubExp.instantiate() { 
+		return copyLocationTo(new FDotSubExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+
+	public FExp DotMulExp.instantiate() { 
+		return copyLocationTo(new FDotMulExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp DotDivExp.instantiate() { 
+		return copyLocationTo(new FDotDivExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp DotPowExp.instantiate() { 
+		return copyLocationTo(new FDotPowExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp NegExp.instantiate() { 
+		return copyLocationTo(new FNegExp(getExp().instantiate()));
+	}
+
+	public FExp LtExp.instantiate() { 
+		return copyLocationTo(new FLtExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+
+	public FExp LeqExp.instantiate() { 
+		return copyLocationTo(new FLeqExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp GtExp.instantiate() { 
+		return copyLocationTo(new FGtExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp GeqExp.instantiate() { 
+		return copyLocationTo(new FGeqExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp EqExp.instantiate() { 
+		return copyLocationTo(new FEqExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp NeqExp.instantiate() { 
+		return copyLocationTo(new FNeqExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp NotExp.instantiate() { 
+		return copyLocationTo(new FNotExp(getExp().instantiate()));
+	}
+	
+	public FExp OrExp.instantiate() { 
+		return copyLocationTo(new FOrExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+	
+	public FExp AndExp.instantiate() { 
+		return copyLocationTo(new FAndExp(getLeft().instantiate(),getRight().instantiate()));
+	}
+
+	public FExp RealLitExp.instantiate() {
+		double value = Double.parseDouble(getUNSIGNED_NUMBER());
+		return copyLocationTo(new FRealLitExp(value));
+	}
+	
+	public FExp IntegerLitExp.instantiate() { 
+		try {
+			int value = Integer.parseInt(getUNSIGNED_INTEGER());
+			return copyLocationTo(new FIntegerLitExp(value));
+		} catch (NumberFormatException e) {
+			double value = Double.parseDouble(getUNSIGNED_INTEGER());
+			return copyLocationTo(new FOverflowIntLitExp(value, getUNSIGNED_INTEGER()));
+		}
+	}
+	
+	public FExp StringLitExp.instantiate() { 
+		return copyLocationTo(new FStringLitExp(getSTRING()));
+	}
+	
+	public FExp BooleanLitExpTrue.instantiate() { 
+		return copyLocationTo(new FBooleanLitExpTrue());
+	}
+	
+	public FExp BooleanLitExpFalse.instantiate() { 
+		return copyLocationTo(new FBooleanLitExpFalse());
+	}
+	
+	public FExp TimeExp.instantiate() { 
+		return copyLocationTo(new FTimeExp());
+	}	
+
+	public FExp EndExp.instantiate() { 
+		return copyLocationTo(new FEndExp());
+	}
+	
+	public InstNamedArgument NamedArgument.instantiate() {
+		return copyLocationTo(new InstNamedArgument(getName().instantiate(), getExp().instantiate()));
+	}
+	
+	protected FAbstractFunctionCall FunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+		return new InstFunctionCall(name, args);
+	}
+	
+	protected FAbstractFunctionCall PartialFunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
+		return new InstPartialFunctionCall(name, args);
+	}
+	
+	public FAbstractFunctionCall FunctionCall.instantiate() {
+		// Instantiate arguments
+		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
+		if (hasFunctionArguments()) {
+			int i = 0;
+			for (Exp arg : getFunctionArguments().getExpList()) {
+				InstPositionalArgument iarg = new InstPositionalArgument(i++, arg.instantiate());
+				iarg.setLocation(arg);
+				args.add(iarg);
+			}
+			for (NamedArgument arg : getFunctionArguments().getNamedArguments())
+				args.add(arg.instantiate());
+		}
+		
+		// Create InstFunctionCall
+		return copyLocationTo(createInstNode(getName().newInstAccess(), args));
+	}
+  
+	public InstForIndex ForIndex.instantiate() {
+		InstPrimitive ip = new InstCreateForIndexPrimitive(getForIndexDecl());
+		Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
+		return copyLocationTo(new InstForIndex(o, ip));
+	}
+	
+	public InstForClauseE ForClauseE.instantiate() {
+		List<InstForIndex> forIndex = new List();
+		List<FAbstractEquation> eqns = new List();
+		for (ForIndex fi : getForIndexs()) {
+    		forIndex.add(fi.instantiate());    	
+		}
+		for (AbstractEquation ae : getAbstractEquations()) {
+			eqns.add(ae.instantiate());
+		}
+		return new InstForClauseE(equationType(), forIndex, eqns);
+	}
+
+}
+

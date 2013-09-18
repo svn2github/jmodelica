@@ -1,0 +1,104 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collection;
+
+/**
+ * @author jakesson
+ *
+ */
+public class ErrorTestCase extends TestCase {
+
+	String errorMessage="";
+	
+	public ErrorTestCase() {}
+	
+	public ErrorTestCase(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+	
+	/**
+	 * \brief Perform tests on a set of semantic problems.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testProblems(Collection<Problem> problems) {
+		filterProblems(problems);
+		
+		if (problems.size() == 0)
+			return false;
+		
+		String test = new CompilerException(problems).getMessage();
+		String correct = getErrorMessage();
+		String f_test = filterErrorMessages(test);
+		String f_correct = filterErrorMessages(correct);
+		String sf_test = removeWhitespace(f_test);
+		String sf_correct = removeWhitespace(f_correct);
+		
+		if (!sf_test.equals(sf_correct))
+			assertEquals("Wrong errors reported.", f_correct, f_test);
+			
+		return true;
+	}
+
+	/**
+	 * \brief Perform tests on the set of semantic problems found after transform canonical step.
+	 * 
+	 * @return  <code>true</code> if test case shoule stop after this method
+	 */
+	protected boolean testTransformedProblems(Collection<Problem> problems) {
+		if (!testProblems(problems))
+			fail("No errors reported.");
+		return true;
+	}
+	
+	private static  Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
+	private static String introReplacement = "";
+	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+\\.(mof|mo)':");
+	private static String fileReplacement = "$1'...':";
+	private static Pattern lineFilter = Pattern.compile("([Aa]t line )[0-9]+");
+	private static String lineReplacement = "$10";
+	private static Pattern columnFilter = Pattern.compile("(column )[0-9]+");
+	private static String columnReplacement = "$10";
+
+
+	public  String filterErrorMessages(String str) {
+		str = introFilter.matcher(str).replaceAll(introReplacement);
+		str = fileFilter.matcher(str).replaceAll(fileReplacement);
+		str = lineFilter.matcher(str).replaceAll(lineReplacement);
+		str = columnFilter.matcher(str).replaceAll(columnReplacement);
+		return str;
+	}
+	
+	/**
+	 * @return the errorMessage
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * @param errorMessage the errorMessage to set
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+}
