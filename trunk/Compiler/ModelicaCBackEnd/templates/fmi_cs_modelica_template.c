@@ -32,7 +32,7 @@ $external_func_includes$
 #define C_GUID $C_guid$
 
 static int model_ode_guards_init(jmi_t* jmi);
-static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res);
+static int model_init_R0(jmi_t* jmi, jmi_real_t** res);
 static int model_ode_initialize(jmi_t* jmi);
 
 static const int N_real_ci = $n_real_ci$;
@@ -88,15 +88,6 @@ static const int N_eq_R0 = $n_event_indicators$ + $n_initial_event_indicators$;
 static const int N_sw_init = $n_initial_switches$;
 static const int N_guards_init = $n_guards_init$;
 
-static const int N_eq_J = 0;
-static const int N_eq_L = 0;
-static const int N_eq_opt_Ffdp = 0;
-static const int N_eq_Ceq = 0;
-static const int N_eq_Cineq = 0;
-static const int N_eq_Heq = 0;
-static const int N_eq_Hineq = 0;
-static const int N_t_p = 0;
-
 static const int Scaling_method = $C_DAE_scaling_method$;
 
 #define sf(i) (jmi->variable_scaling_factors[i])
@@ -125,14 +116,6 @@ $C_runtime_option_map$
 #define _real_u(i) ((*(jmi->z))[jmi->offs_real_u+i])
 #define _real_w(i) ((*(jmi->z))[jmi->offs_real_w+i])
 #define _t ((*(jmi->z))[jmi->offs_t])
-#define _real_dx_p(j,i) ((*(jmi->z))[jmi->offs_real_dx_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w)+ i])
-#define _real_real_x_p(j,i) ((*(jmi->z))[jmi->offs_real_x_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
-#define _real_u_p(j,i) ((*(jmi->z))[jmi->offs_real_u_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
-#define _real_w_p(j,i) ((*(jmi->z))[jmi->offs_real_w_p + \
-  j*(jmi->n_real_dx + jmi->n_real_x + jmi->n_real_u + jmi->n_real_w) + i])
 
 #define _real_d(i) ((*(jmi->z))[jmi->offs_real_d+i])
 #define _integer_d(i) ((*(jmi->z))[jmi->offs_integer_d+i])
@@ -241,32 +224,32 @@ static int model_ode_initialize_dir_der(jmi_t* jmi) {
  * this solution does not work. Probably not too bad, since we can use
  * macros.
  */
-static int model_dae_F(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_equation_residuals$
 	return 0;
 }
 
-static int model_dae_dir_dF(jmi_t* jmi, jmi_ad_var_vec_p res, jmi_ad_var_vec_p dF, jmi_ad_var_vec_p dz) {
+static int model_dae_dir_dF(jmi_t* jmi, jmi_real_t** res, jmi_real_t** dF, jmi_real_t** dz) {
 $C_DAE_equation_directional_derivative$
 	return 0;
 }
 
-static int model_dae_R(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_dae_R(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_event_indicator_residuals$
 	return 0;
 }
 
-static int model_init_F0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_equation_residuals$
 	return 0;
 }
 
-static int model_init_F1(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_guess_equation_residuals$
 	return 0;
 }
 
-static int model_init_Fp(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
   /* C_DAE_initial_dependent_parameter_residuals */
 	return -1;
 }
@@ -276,37 +259,9 @@ $C_DAE_initial_dependent_parameter_assignments$
         return 0;
 }
 
-static int model_init_R0(jmi_t* jmi, jmi_ad_var_vec_p res) {
+static int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_event_indicator_residuals$
 	return 0;
-}
-
-static int model_opt_Ffdp(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_J(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_L(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Ceq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Cineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Heq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
-}
-
-static int model_opt_Hineq(jmi_t* jmi, jmi_ad_var_vec_p res) {
-	return -1;
 }
 
 int jmi_new(jmi_t** jmi) {
@@ -315,7 +270,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
 	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
 	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-	   N_real_dx,N_real_x, N_real_u, N_real_w,N_t_p,
+	   N_real_dx,N_real_x, N_real_u, N_real_w,
 	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
 	   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
            N_sw,N_sw_init,N_guards,N_guards_init,
@@ -356,15 +311,6 @@ int jmi_new(jmi_t** jmi) {
 		      *model_init_R0, N_eq_R0, NULL,
 		      0, NULL, NULL);
 
-	/* Initialize the Opt interface */
-	jmi_opt_init(*jmi, *model_opt_Ffdp, N_eq_opt_Ffdp, NULL, 0, NULL, NULL,
-		     *model_opt_J, N_eq_L, NULL, 0, NULL, NULL,
-		     *model_opt_L, N_eq_L, NULL, 0, NULL, NULL,
-		     *model_opt_Ceq, N_eq_Ceq, NULL, 0, NULL, NULL,
-		     *model_opt_Cineq, N_eq_Cineq, NULL, 0, NULL, NULL,
-		     *model_opt_Heq, N_eq_Heq, NULL, 0, NULL, NULL,
-		     *model_opt_Hineq, N_eq_Hineq, NULL, 0, NULL, NULL);
-
 	return 0;
 }
 
@@ -375,15 +321,11 @@ $C_destruct_external_object$
 
 int jmi_set_start_values(jmi_t* jmi) {
 $C_set_start_values$
-    jmi_copy_z_to_zval(jmi);
     return 0;
 }
 
 const char *jmi_get_model_identifier() { return "$C_model_id$"; }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 /* FMI for co-simulation Functions*/
 
 /* Inquire version numbers of header files */
@@ -504,7 +446,3 @@ DLLExport fmiStatus fmiRestoreState(fmiComponent c, size_t index){
     return fmi_restore_state(c,index);
 }
 */
-
-#ifdef __cplusplus
-}
-#endif

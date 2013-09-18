@@ -91,23 +91,27 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		super();
 	}
 	
-	private void defaultTemplate() {
+	private void defaultTemplateJMI() {
 		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
+	}
+    
+    private void defaultTemplateFMI() {
+		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "fmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
 	}
 	
 	public void defaultTemplatePathsJMU() {
 		super.defaultTemplatePathsJMU();
-		defaultTemplate();
+		defaultTemplateJMI();
 	}
 	
 	public void defaultTemplatePathsFMUME() {
 		super.defaultTemplatePathsFMUME();
-		defaultTemplate();
+		defaultTemplateFMI();
 	}
 	
 	public void defaultTemplatePathsFMUCS() {
 		super.defaultTemplatePathsFMUCS();
-		defaultTemplate();
+		defaultTemplateFMI();
 	}
 	
 	public void defaultTemplatePathsFMUX() {
