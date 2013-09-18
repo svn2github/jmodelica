@@ -317,9 +317,11 @@ aspect PredefinedTypes {
     		+ "  input Real x;\n"      // Type not used
     		+ "  output String y;\n"
     		+ "end String;\n"
-    		+ "//function String end String;\n"
     		+ "function delay end delay;\n"
-    		+ "function cardinality end cardinality;\n"
+    		+ "function cardinality"
+    		+ "  input Real x;\n"      // Type not used
+    		+ "  output Integer y;\n"  // Type not used
+    		+ "end cardinality;\n"
     		+ "function isPresent end isPresent;\n"
     		+ "function promote end promote;\n"
     		+ "function ndims\n"
@@ -347,6 +349,10 @@ aspect PredefinedTypes {
     		+ "  input Real A;\n"    // Type not used
     		+ "  output Real B;\n"   // Type not used
     		+ "end transpose;\n"
+    		+ "function symmetric\n"
+    		+ "  input Real A;\n"    // Type not used
+    		+ "  output Real B;\n"   // Type not used
+    		+ "end symmetric;\n"
     		+ "function cross\n"
     		+ "  input Real x[3];\n"
     		+ "  input Real y[3];\n"
@@ -400,11 +406,15 @@ aspect PredefinedTypes {
     		+ "  input Real A;\n"      // Type not used
     		+ "  output Real o;\n"     // Type not used
     		+ "end product;\n"
-    		+ "function symmetric end symmetric;\n"
     		+ "function skew\n"
     		+ "  input Real x[3];\n"
     		+ "  output Real y[3,3];\n"   // Type not used
     		+ "end skew;\n"
+    		+ "function homotopy\n"
+    		+ "  input Real v1;\n"     // Type not used
+    		+ "  input Real v2;\n"     // Type not used
+    		+ "  output Real o;\n"     // Type not used
+    		+ "end homotopy;\n"
     		+ "function semiLinear\n"
     		+ "  input Real v1;\n"     // Type not used
     		+ "  input Real v2;\n"     // Type not used

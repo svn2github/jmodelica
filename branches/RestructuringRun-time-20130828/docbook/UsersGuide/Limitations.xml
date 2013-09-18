@@ -31,11 +31,6 @@
         </listitem>
 
         <listitem>
-          <para>Only partial support for enumeration variables in FMUs
-          (parameters and constants are supported)</para>
-        </listitem>
-
-        <listitem>
           <para>The support for String variables and parameters is
           limited</para>
         </listitem>
@@ -57,68 +52,72 @@
 
         <listitem>
           <para>The following built-in functions are not
-          supported:<informaltable border="1" frame="void" width="75%">
+          supported:<informaltable border="1" frame="void" width="25%">
               <tr>
-                <td>sign(v)</td>
-
                 <td>cardinality()</td>
 
-                <td>semiLinear(...)</td>
-              </tr>
-
-              <tr>
-                <td>div(x,y)</td>
-
-                <td>Subtask.decouple(v)</td>
-
-                <td>floor(x)</td>
-              </tr>
-
-              <tr>
-                <td>mod(x,y)</td>
-
-                <td>String(...)</td>
-
-                <td>reinit(x, expr)</td>
+                <td>Connections.branch()</td>
               </tr>
 
               <tr>
                 <td>delay(...)</td>
 
-                <td>rem(x,y)</td>
+                <td>Connections.root(()</td>
+              </tr>
 
-                <td>integer(x)</td>
+              <tr>
+                <td>reinit(x, expr)</td>
+
+                <td>Connections.potentialRoot()</td>
+              </tr>
+
+              <tr>
+                <td>symmetric()</td>
+
+                <td>Connections.isRoot()</td>
               </tr>
 
               <tr>
                 <td>terminal()</td>
 
-                <td>ceil(x)</td>
-
-                <td>symmetric(A)</td>
-              </tr>
-
-              <tr>
-                <td>edge(b)</td>
-
-                <td>product(...)</td>
+                <td>Connections.rooted()</td>
               </tr>
             </informaltable></para>
         </listitem>
 
         <listitem>
           <para>The following built-in functions are only supported in
-          FMUs:<informaltable border="1" frame="void" width="25%">
+          FMUs:<informaltable border="1" frame="void" width="75%">
               <tr>
+                <td>ceil(x)</td>
+
+                <td>initial()</td>
+
+                <td>rem(x,y)</td>
+              </tr>
+
+              <tr>
+                <td>div(x,y)</td>
+
+                <td>integer(x)</td>
+
                 <td>sample(start,interval)</td>
               </tr>
 
               <tr>
-                <td>pre(y)</td>
+                <td>edge(b)</td>
+
+                <td>mod(x,y)</td>
+
+                <td>semiLinear(...)</td>
               </tr>
 
               <tr>
-                <td>initial()</td>
+                <td>floor(x)</td>
+
+                <td>pre(y)</td>
+
+                <td>sign(v)</td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -178,7 +177,7 @@
         </listitem>
 
         <listitem>
-          <para>Options for setting and getting string variables do not
+          <para>Functions for setting and getting string variables do not
           work</para>
         </listitem>
       </itemizedlist>

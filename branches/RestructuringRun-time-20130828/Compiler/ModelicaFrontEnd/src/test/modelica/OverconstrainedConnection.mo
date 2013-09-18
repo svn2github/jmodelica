@@ -301,4 +301,211 @@ end OverconstrainedConnection.OverconstrainedCorrect7;
 end OverconstrainedCorrect7;
 
 
+model OverconstrainedCorrect8
+    C1 c1;
+    C1 c2;
+    C1 c3;
+    constant Boolean c1Root1 = Connections.isRoot(c1.t);
+    constant Boolean c1Root2 = c1Root1;
+    constant Boolean c2Root1 = Connections.isRoot(c2.t);
+    constant Boolean c2Root2 = c2Root1;
+equation
+    Connections.root(c3.t);
+    Connections.potentialRoot(c1.t);
+    Connections.root(c2.t);
+    connect(c1, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OverconstrainedCorrect8",
+			description="Test model that failed due to ordering of roots",
+			flatModel="
+fclass OverconstrainedConnection.OverconstrainedCorrect8
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+ constant Boolean c1Root1 = Connections.isRoot(c1.t[1:2]);
+ constant Boolean c1Root2 = false;
+ constant Boolean c2Root1 = Connections.isRoot(c2.t[1:2]);
+ constant Boolean c2Root2 = true;
+equation
+ c1.t[1:2] = c2.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.OverconstrainedCorrect8;
+")})));
+end OverconstrainedCorrect8;
+
+
+model OverconstrainedUnrooted1
+	C1 c1;
+    C1 c2;
+    C1 c3;
+    C1 c4;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c3.t, c4.t);
+	Connections.root(c1.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnrooted1",
+			description="Unconnected connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    c3.t
+    c4.t
+")})));
+end OverconstrainedUnrooted1;
+
+
+model OverconstrainedUnrooted2
+	C1 c1,c2,c3,c4,c5;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c2.t, c3.t);
+	Connections.branch(c4.t, c5.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnrooted2",
+			description="Unconnected connector sets",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    c1.t
+    c2.t
+    c3.t
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Set of unrooted connectors in overconstrained connection graph:
+    c4.t
+    c5.t
+")})));
+end OverconstrainedUnrooted2;
+
+
+model OverconstrainedMultipleRoot1
+	C1 c1,c2,c3,c4;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c3.t, c4.t);
+	Connections.root(c1.t);
+	Connections.root(c2.t);
+	Connections.root(c3.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedMultipleRoot1",
+			description="Double root in connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Multiple definite roots in unbreakable subgraph in overconstrained connection graph
+    Selected root: c1.t
+    Other root: c2.t
+")})));
+end OverconstrainedMultipleRoot1;
+
+
+model OverconstrainedMultipleRoot2
+	C1 c1,c2,c3,c4,c5,c6;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c2.t, c3.t);
+    Connections.branch(c3.t, c4.t);
+    Connections.branch(c4.t, c5.t);
+    Connections.branch(c5.t, c6.t);
+    Connections.root(c1.t);
+    Connections.root(c3.t);
+    Connections.root(c6.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedMultipleRoot2",
+			description="Triple root in connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Multiple definite roots in unbreakable subgraph in overconstrained connection graph
+    Selected root: c1.t
+    Other root: c3.t
+    Other root: c6.t
+")})));
+end OverconstrainedMultipleRoot2;
+
+
+model OverconstrainedUnbreakableLoop1
+	C1 c1,c2;
+equation
+	Connections.root(c1.t);
+	Connections.branch(c1.t,c2.t);
+	Connections.branch(c2.t,c1.t);
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnbreakableLoop1",
+			description="Unbreakable loop in connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Unbreakable loop in overconstrained connection graph
+    Selected root: c1.t
+")})));
+end OverconstrainedUnbreakableLoop1;
+
+
+model OverconstrainedUnbreakableLoop2
+	C1 c1,c2,c3,c4,c5,c6;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.branch(c2.t, c3.t);
+    Connections.branch(c3.t, c4.t);
+    Connections.branch(c4.t, c5.t);
+    Connections.branch(c5.t, c6.t);
+    Connections.branch(c6.t, c1.t);
+    Connections.root(c4.t);
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedUnbreakableLoop2",
+			description="Unbreakable loop in connector set",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Unbreakable loop in overconstrained connection graph
+    Selected root: c4.t
+")})));
+end OverconstrainedUnbreakableLoop2;
+
+
+model OverconstrainedMultiRootDef1
+	C1 c1,c2;
+equation
+    Connections.branch(c1.t, c2.t);
+    Connections.potentialRoot(c1.t);
+    Connections.root(c1.t);
+    Connections.potentialRoot(c2.t);
+    Connections.potentialRoot(c2.t,3);
+    Connections.potentialRoot(c2.t,1);
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="OverconstrainedMultiRootDef1",
+			description="Multiple definitions of root priority",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Multiple root definitions for single connector in overconstrained connection graph
+    Connector: c1.t
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Multiple root definitions for single connector in overconstrained connection graph
+    Connector: c2.t
+")})));
+end OverconstrainedMultiRootDef1;
+
 end OverconstrainedConnection;

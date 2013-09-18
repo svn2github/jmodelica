@@ -119,10 +119,10 @@ equation
 2 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i2\" is missing start value!
+  Iteration variable \"i2\" is missing start value!
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i3\" is missing start value!
+  Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest1;
 
@@ -155,9 +155,53 @@ equation
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Tearing variable \"i3\" is missing start value!
+  Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest2;
+
+model WarningTest3
+	Real u0,u1,uL;
+	Real u2 annotation(__Modelon(IterationVariable));
+	Real u3 annotation(__Modelon(IterationVariable));
+	Real i0,i1,i2(start=1),i3,iL;
+	parameter Real R1 = 1;
+	parameter Real R2 = 1;
+	parameter Real R3 = 1;
+	parameter Real L = 1;
+equation
+	u0 = sin(time);
+	u1 = R1*i1;
+	u2 = R2*i2;
+	u3 = R3*i3;
+	uL = L*der(iL);
+	u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
+	uL = u1 + u2;
+	u2 = u3;
+	i0 = i1 + iL;
+	i1 = i2 + i3;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="WarningTest3",
+			description="",
+			equation_sorting=true,
+			automatic_tearing=true,
+			hand_guided_tearing=true,
+			errorMessage="
+Warning: in file '...':
+At line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+  Real u2 annotation(__Modelon(IterationVariable))
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"i3\" is missing start value!
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"u2\" is missing start value!
+")})));
+end WarningTest3;
 
 model RecordTearingTest1
   record R
@@ -391,6 +435,90 @@ Residual equations:
 -------------------------------
       ")})));
 end RecordTearingTest5;
+
+model AlgorithmTearingTest1
+  Real x, y, z;
+algorithm
+  x := x + y + z;
+  y := y - x + z;
+equation
+  z = x + y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AlgorithmTearingTest1",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			automatic_tearing=true,
+			inline_functions="none",
+			algorithms_as_functions=false,
+			description="Test of algorithm tearing",
+			methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 2 solved variables.
+Solved variables:
+  y
+  x
+Iteration variables:
+  z()
+Solved equations:
+  algorithm
+ x := 0.0;
+ y := 0.0;
+ x := x + y + z;
+ y := y - x + z;
+
+  algorithm
+ x := 0.0;
+ y := 0.0;
+ x := x + y + z;
+ y := y - x + z;
+
+Residual equations:
+ Iteration variables: z
+  z = x + y
+-------------------------------
+      ")})));
+end AlgorithmTearingTest1;
+
+model AlgorithmTearingTest2
+  Real x, y, z;
+algorithm
+  y := y * z + 1;
+equation
+  x = 2*z + y;
+  z = 2*x;
+  
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AlgorithmTearingTest2",
+			methodName="printDAEBLT",
+			equation_sorting=true,
+			automatic_tearing=true,
+			inline_functions="none",
+			algorithms_as_functions=false,
+			local_iteration_in_tearing=true,
+			description="Test of algorithm tearing",
+			methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 2 solved variables.
+Solved variables:
+  y
+  x
+Iteration variables:
+  z()
+Solved equations:
+  algorithm
+ y := 0.0;
+ y := y * z + 1;
+
+  x = 2 * z + y
+Residual equations:
+ Iteration variables: z
+  z = 2 * x
+-------------------------------
+      ")})));
+end AlgorithmTearingTest2;
 
 model HandGuidedTearing1
   Real u0,u1,u2,u3,uL;
@@ -3015,13 +3143,14 @@ equation
 			errorMessage="
 2 warnings found:
 
-Warning: in file '':
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
   Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: x. Equation: - x = z + 1
 
-Warning: in file '':
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
-  Hand guided tearing variable 'y' has been alias eliminated
+  Hand guided tearing variable 'y' has been alias eliminated. Selected model variable is:
+    Real x(start = 1) annotation(__Modelon(IterationVariable))
 ")})));
 end HandGuidedTearingWarning1;
 

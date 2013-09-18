@@ -115,10 +115,15 @@ model ArrayOfRecords_Warn
 			generate_ode=false,
 			generate_dae=true,
 			errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 79, column 3:
-  Using arrays of records with indices of higher than parameter variability is currently not supported when compiling with CppAD
+2 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 107, column 3:
+  Using arrays of records with indices of higher than parameter variability is currently only supported when compiling FMUs
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 107, column 5:
+  The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end ArrayOfRecords_Warn;
 
@@ -163,6 +168,62 @@ Compliance error at line 126, column 2:
 ")})));
 end WhenStmt_ComplErr;
 
+model UnsolvedWhenEqu_ComplErr
+ discrete Real x;
+ Real y1,y2;
+ Real z1,z2,z3;
+equation
+ when time > 3 then
+  x = sin(x) +3;
+ end when;
+ 
+  y1 + y2 = 5;
+  when time > 3 then 
+    y1 = 7 - 2*y2;
+  end when;
+  
+  z1 + z2 + z3 = 5;
+  when time > 3 then 
+    z1 = 7 - 2*z2;
+    z3 = 7 - 2*z2;
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnsolvedWhenEqu_ComplErr",
+			description="Compliance error for when statements",
+			errorMessage="
+4 errors found:
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Unsolved equations in when-clause is not supported. 
+when time > 3 then
+ x = sin(x) + 3;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ y1 = 7 - 2 * y2;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ z1 = 7 - 2 * z2;
+end when
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when time > 3 then
+ z3 = 7 - 2 * z2;
+end when
+")})));
+end UnsolvedWhenEqu_ComplErr;
+
 model ElseWhenEq_ComplErr
  Real x;
 equation
@@ -186,51 +247,26 @@ end ElseWhenEq_ComplErr;
 
 model UnsupportedBuiltins1_ComplErr
  equation
-  symmetric(1 + "2");
+  delay(1);
+  reinit(1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins1_ComplErr",
 			description="Compliance error for unsupported builtins",
 			errorMessage="
-1 errors found:
+2 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 171, column 3:
-  The symmetric() function-like operator is not supported
+Compliance error at line 214, column 3:
+  The delay() function-like operator is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 216, column 3:
+  The reinit() function-like operator is not supported
 ")})));
 end UnsupportedBuiltins1_ComplErr;
 
 
 model UnsupportedBuiltins2_ComplErr
- equation
-  String();
-  delay(1);
-  cardinality();
-  reinit(1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins2_ComplErr",
-			description="Compliance error for unsupported builtins",
-			errorMessage="
-8 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 212, column 3:
-  The class String is not a function
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 218, column 3:
-  The delay() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 219, column 3:
-  The cardinality() function-like operator is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 287, column 3:
-  The reinit() function-like operator is not supported
-")})));
-end UnsupportedBuiltins2_ComplErr;
-
-
-model UnsupportedBuiltins3_ComplErr
   parameter Boolean x;
  equation
   sign(1);
@@ -250,7 +286,7 @@ model UnsupportedBuiltins3_ComplErr
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins3_ComplErr",
+			name="UnsupportedBuiltins2_ComplErr",
 			description="Compliance error for unsupported builtins",
 			generate_ode=false,
 			generate_dae=true,
@@ -299,8 +335,24 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 288, column 3:
   The terminate() function-like operator is currently only supported when compiling FMUs
 ")})));
-end UnsupportedBuiltins3_ComplErr;
+end UnsupportedBuiltins2_ComplErr;
 
+model UnsupportedBuiltins_WarnErr
+ equation
+  homotopy(1,1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="UnsupportedBuiltins_WarnErr",
+			description="Compliance error for unsupported builtins",
+			errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+At line 306, column 3:
+  The homotopy() function like operator is not fully supported. It is replaced with its first argument.
+
+")})));
+end UnsupportedBuiltins_WarnErr;
 
 model ArrayCellMod_ComplErr
  model A
@@ -455,12 +507,12 @@ fclass ComplianceTests.HybridFMU1
  parameter Real p1 = 1.2 /* 1.2 */;
  parameter Real p2;
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
 parameter equation
  p2 = floor(p1);
 equation
@@ -555,9 +607,9 @@ fclass ComplianceTests.HybridFMU2
  discrete Real y;
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when sample(0, 1 / 3) then
@@ -659,6 +711,7 @@ model Error2
     output Real y[size(x,2),size(x,1)];
   algorithm
 	y := transpose(x);
+	y := symmetric(x);
 	b := identity(n);
 	c := linspace(1,5,n);
 	a := min(c);
@@ -680,6 +733,9 @@ model Error2
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 736, column 7:
   Unknown sizes in operator transpose() is not supported in functions
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 736, column 7:
+  Unknown sizes in operator symmetric() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions
@@ -712,6 +768,56 @@ Compliance error at line 744, column 7:
   Unknown sizes in operator matrix() is not supported in functions
 ")})));
 end Error2;
+
+model Error3
+	Real[2] x1,x2;
+equation
+	for i in 1:integer(time) loop
+		x1[i] = i;
+	end for;
+algorithm
+	for i in 1:integer(time) loop
+		x2[i] := i;
+	end for;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnknownArraySizes_Error3",
+			description="Test errors for unknown array for indices in algorithms and equations.",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+			
+")})));
+end Error3;
+
+model ArrayIterTest
+ Real x[1,1] = { i * j for i, j };
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArrayIterTest",
+			description="Array constructor with iterators: without in",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index without in expression isn't supported
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index without in expression isn't supported
+")})));
+end ArrayIterTest;
 
 end UnknownArraySizes;
 

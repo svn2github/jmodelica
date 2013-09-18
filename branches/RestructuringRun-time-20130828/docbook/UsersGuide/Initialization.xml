@@ -174,7 +174,7 @@ y = init_result['y']
         based on IPOPT, the mathematical formulation of the algorithm can be
         found in the <link
         xlink:href="http://www.jmodelica.org/api-docs/jmi/">JMI API
-        documentation</link>. Notice that this algorithm does not rely on the
+        documentation</link>. Note that this algorithm does not rely on the
         causalization procedure (in particular the BLT transformation) which
         is common. Instead, the DAE residual is introduced as an equality
         constraint when solving an optimization problem where the squared
@@ -224,7 +224,7 @@ y = init_result['y']
               <row>
                 <entry><literal>result_format</literal></entry>
 
-                <entry>'txt'</entry>
+                <entry><literal>'txt'</literal></entry>
 
                 <entry>Specifies in which format to write the result.
                 Currently only textual mode is supported.</entry>
@@ -233,11 +233,12 @@ y = init_result['y']
               <row>
                 <entry><literal>write_scaled_result</literal></entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
-                <entry>Write the scaled optimization result if set to true.
-                This option is only applicable when automatic variable scaling
-                is enabled. Only for debugging use.</entry>
+                <entry>Write the scaled optimization result if set to
+                <literal>True</literal>. This option is only applicable when
+                automatic variable scaling is enabled. Only for debugging
+                use.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -328,7 +329,7 @@ y = init_result['y']
               <row>
                 <entry><literal>use_constraints</literal></entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
                 <entry>A flag indicating whether constraints are to be used
                 <emphasis>during</emphasis> initialization. Further explained
@@ -338,7 +339,7 @@ y = init_result['y']
               <row>
                 <entry><literal>constraints</literal></entry>
 
-                <entry>None</entry>
+                <entry><literal>None</literal></entry>
 
                 <entry>A <literal>numpy.array</literal> containing floats
                 that, when supplied, defines the constraints on the variables.
@@ -349,7 +350,7 @@ y = init_result['y']
               <row>
                 <entry><literal>result_format</literal></entry>
 
-                <entry>'txt'</entry>
+                <entry><literal>'txt'</literal></entry>
 
                 <entry>Specifies in which format to write the result.
                 Currently only textual mode is supported.</entry>
@@ -399,21 +400,23 @@ y = init_result['y']
               <row>
                 <entry><literal>use_jac</literal></entry>
 
-                <entry>True</entry>
+                <entry><literal>True</literal></entry>
 
                 <entry>Flag indicating whether or not KINSOL uses the jacobian
-                supplied by JModelica.org (True) or if KINSOL evaluates the
-                Jacobian through finite differences (False). Finite
-                differences is currently not available in sparse mode.</entry>
+                supplied by JModelica.org (<literal>True</literal>) or if
+                KINSOL evaluates the Jacobian through finite differences
+                (<literal>False</literal>). Finite differences is currently
+                not available in sparse mode.</entry>
               </row>
 
               <row>
                 <entry>sparse</entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
                 <entry>Flag indicating whether the problem should be treated
-                as sparse (True) or dense (False).</entry>
+                as sparse (<literal>True</literal>) or dense
+                (<literal>False</literal>).</entry>
               </row>
             </tbody>
           </tgroup>
@@ -422,16 +425,17 @@ y = init_result['y']
         <section xml:id="sec_const_usage">
           <title>The use of constraints</title>
 
-          <para>KINSOL, and hence also KInitSolvAlg, only support simple
-          unilateral constraints, that is constraining a variable to being
-          positive or negative. If the option
-          <literal>use_constraints</literal> is set to True, constraints are
-          use. What constraints that are used depends on whether or not the
-          user has supplied constraints with the
-          <literal>constraints</literal> option. If set, these will be used
-          otherwise constraints will be computed by reading the min and max
-          attributes from the Modelica file. How the constraint array is
-          written is summarized in <xref linkend="constraints_array"/>.</para>
+          <para>KINSOL, and hence also <literal>KInitSolvAlg</literal>, only
+          supports simple unilateral constraints, that is constraining a
+          variable to being positive or negative. If the option
+          <literal>use_constraints</literal> is set to
+          <literal>True</literal>, constraints are used. Which constraints
+          that are used depends on whether or not the user has supplied
+          constraints with the <literal>constraints</literal> option. If set,
+          these will be used otherwise constraints will be computed by reading
+          the min and max attributes from the Modelica file. How the
+          constraint array is written is summarized in <xref
+          linkend="constraints_array"/>.</para>
 
           <table pgwide="0" xml:id="constraints_array">
             <title>Values allowed in the <literal>constraints</literal>
@@ -581,7 +585,7 @@ my_model = JMUModel('myJMU.jmu')</programlisting>The simulation method in
       <para>There are several parameters that can be set in the
       <literal>JMUModel.simulate</literal> function. <glosslist>
           <glossentry>
-            <glossterm>start_time</glossterm>
+            <glossterm><literal>start_time</literal></glossterm>
 
             <glossdef>
               <para>The time when the solver should start the
@@ -590,7 +594,7 @@ my_model = JMUModel('myJMU.jmu')</programlisting>The simulation method in
           </glossentry>
 
           <glossentry>
-            <glossterm>final_time</glossterm>
+            <glossterm><literal>final_time</literal></glossterm>
 
             <glossdef>
               <para>The time when the solver should finish the
@@ -599,7 +603,7 @@ my_model = JMUModel('myJMU.jmu')</programlisting>The simulation method in
           </glossentry>
 
           <glossentry>
-            <glossterm>input</glossterm>
+            <glossterm><literal>input</literal></glossterm>
 
             <glossdef>
               <para>Input signal for the simulation. (Further explained in
@@ -608,7 +612,7 @@ my_model = JMUModel('myJMU.jmu')</programlisting>The simulation method in
           </glossentry>
 
           <glossentry>
-            <glossterm>algorithm</glossterm>
+            <glossterm><literal>algorithm</literal></glossterm>
 
             <glossdef>
               <para>The algorithm that will be used for the simulation.
@@ -619,7 +623,7 @@ my_model = JMUModel('myJMU.jmu')</programlisting>The simulation method in
           </glossentry>
 
           <glossentry>
-            <glossterm>options</glossterm>
+            <glossterm><literal>options</literal></glossterm>
 
             <glossdef>
               <para>The options to be used in the algorithm. (Further
@@ -652,7 +656,7 @@ u_traj = N.transpose(N.vstack((t,u))) # Create the data matrix and transpose
                                       # it to the correct form
 </programlisting>
 
-        <para>The above code have created the data matrix that we are
+        <para>The above code has created the data matrix that we are
         interested in giving to the model as input, we just need to connect
         the data to a specific input variable, <literal>u1</literal>:</para>
 
@@ -740,47 +744,49 @@ input_object = (['u1','u2'],input_function)
 
             <tbody>
               <row>
-                <entry>solver</entry>
+                <entry><literal>solver</literal></entry>
 
-                <entry>'IDA'</entry>
+                <entry><literal>'IDA'</literal></entry>
 
                 <entry>Specifies the simulation method that is to be
                 used.</entry>
               </row>
 
               <row>
-                <entry>ncp</entry>
+                <entry><literal>ncp</literal></entry>
 
-                <entry>0</entry>
+                <entry><literal>0</literal></entry>
 
-                <entry>Number of communication points. If ncp is zero, the
-                solver will return the internal steps taken.</entry>
+                <entry>Number of communication points. If
+                <literal>ncp</literal> is zero, the solver will return the
+                internal steps taken.</entry>
               </row>
 
               <row>
-                <entry>initialize</entry>
+                <entry><literal>initialize</literal></entry>
 
-                <entry>True</entry>
+                <entry><literal>True</literal></entry>
 
-                <entry>If set to True, an algorithm for initializing the
-                differential equation is invoked, otherwise the differential
-                equation is assumed to have consistent initial
-                conditions.</entry>
+                <entry>If set to <literal>True</literal>, an algorithm for
+                initializing the differential equation is invoked, otherwise
+                the differential equation is assumed to have consistent
+                initial conditions.</entry>
               </row>
 
               <row>
-                <entry>write_scaled_result</entry>
+                <entry><literal>write_scaled_result</literal></entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
-                <entry>Set this parameter to True to write the result to file
-                without taking scaling into account. If the value of scaled is
-                False, then the variable scaling factors of the model are used
-                to reproduced the unscaled variable values.</entry>
+                <entry>Set this parameter to <literal>True</literal> to write
+                the result to file without taking scaling into account. If the
+                value of scaled is <literal>False</literal>, then the variable
+                scaling factors of the model are used to reproduced the
+                unscaled variable values.</entry>
               </row>
 
               <row>
-                <entry>result_file_name</entry>
+                <entry><literal>result_file_name</literal></entry>
 
                 <entry>Empty string (default generated file name will be
                 used)</entry>
@@ -795,8 +801,9 @@ input_object = (['u1','u2'],input_function)
         </table>
 
         <para>Lets look at an example, consider that you want to simulate a
-        JMU model using the solver CVode together with changing the
-        discretization method (discr) from BDF to Adams:</para>
+        JMU model using the solver <literal>CVode</literal> together with
+        changing the discretization method (discr) from <literal>BDF</literal>
+        to <literal>Adams</literal>:</para>
 
         <programlisting language="python">...
 opts = model.simulate_options()          # Retrieve the default options
@@ -838,44 +845,46 @@ opts['ncp'] = 1000       # Changing the number of communication points.
 
             <tbody>
               <row>
-                <entry>discr</entry>
+                <entry><literal>discr</literal></entry>
 
-                <entry>'BDF'</entry>
+                <entry><literal>'BDF'</literal></entry>
 
-                <entry>The discretization method. Can be either 'BDF' or
-                'Adams'</entry>
+                <entry>The discretization method. Can be either
+                <literal>'BDF'</literal> or <literal>'Adams'</literal></entry>
               </row>
 
               <row>
-                <entry>iter</entry>
+                <entry><literal>iter</literal></entry>
 
-                <entry>'Newton'</entry>
+                <entry><literal>'Newton'</literal></entry>
 
-                <entry>The iteration method. Can be either 'Newton' or
-                'FixedPoint'.</entry>
+                <entry>The iteration method. Can be either
+                <literal>'Newton</literal>' or
+                <literal>'FixedPoint'</literal>.</entry>
               </row>
 
               <row>
-                <entry>maxord</entry>
+                <entry><literal>maxord</literal></entry>
 
-                <entry>5</entry>
+                <entry><literal>5</literal></entry>
 
-                <entry>The maximum order used. Maximum for 'BDF' is 5 while
-                for the 'Adams' method the maximum is 12</entry>
+                <entry>The maximum order used. Maximum for
+                <literal>'BDF'</literal> is 5 while for the
+                <literal>'Adams'</literal> method the maximum is 12</entry>
               </row>
 
               <row>
-                <entry>maxh</entry>
+                <entry><literal>maxh</literal></entry>
 
-                <entry>Inf</entry>
+                <entry><literal>Inf</literal></entry>
 
                 <entry>Maximum step-size. Positive float.</entry>
               </row>
 
               <row>
-                <entry>atol</entry>
+                <entry><literal>atol</literal></entry>
 
-                <entry>1.0e-6</entry>
+                <entry><literal>1.0e-6</literal></entry>
 
                 <entry>Absolute Tolerance. Can be an array of floats where
                 each value corresponds to the absolute tolerance for the
@@ -884,9 +893,9 @@ opts['ncp'] = 1000       # Changing the number of communication points.
               </row>
 
               <row>
-                <entry>rtol</entry>
+                <entry><literal>rtol</literal></entry>
 
-                <entry>1.0e-6</entry>
+                <entry><literal>1.0e-6</literal></entry>
 
                 <entry>Relative Tolerance. Positive float.</entry>
               </row>
@@ -910,25 +919,25 @@ opts['ncp'] = 1000       # Changing the number of communication points.
 
             <tbody>
               <row>
-                <entry>maxord</entry>
+                <entry><literal>maxord</literal></entry>
 
-                <entry>5</entry>
+                <entry><literal>5</literal></entry>
 
                 <entry>The maximum order used. Positive integer.</entry>
               </row>
 
               <row>
-                <entry>maxh</entry>
+                <entry><literal>maxh</literal></entry>
 
-                <entry>Inf</entry>
+                <entry><literal>Inf</literal></entry>
 
                 <entry>Maximum step-size. Positive float.</entry>
               </row>
 
               <row>
-                <entry>atol</entry>
+                <entry><literal>atol</literal></entry>
 
-                <entry>1.0e-6</entry>
+                <entry><literal>1.0e-6</literal></entry>
 
                 <entry>Absolute Tolerance. Can be an array of floats where
                 each value corresponds to the absolute tolerance for the
@@ -937,30 +946,31 @@ opts['ncp'] = 1000       # Changing the number of communication points.
               </row>
 
               <row>
-                <entry>rtol</entry>
+                <entry><literal>rtol</literal></entry>
 
-                <entry>1.0e-6</entry>
+                <entry><literal>1.0e-6</literal></entry>
 
                 <entry>Relative Tolerance. Positive float.</entry>
               </row>
 
               <row>
-                <entry>suppress_alg</entry>
+                <entry><literal>suppress_alg</literal></entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
                 <entry>Suppress the algebraic variables on the error test. Can
-                be either False or True.</entry>
+                be either <literal>False</literal> or
+                <literal>True</literal>.</entry>
               </row>
 
               <row>
-                <entry>sensitivity</entry>
+                <entry><literal>sensitivity</literal></entry>
 
-                <entry>False</entry>
+                <entry><literal>False</literal></entry>
 
-                <entry>If set to True, sensitivities for the states with
-                respect to parameters set to free in the model will be
-                calculated.</entry>
+                <entry>If set to <literal>True</literal>, sensitivities for
+                the states with respect to parameters set to free in the model
+                will be calculated.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -1003,7 +1013,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
 
             <tbody>
               <row>
-                <entry>options</entry>
+                <entry><literal>options</literal></entry>
 
                 <entry>Property</entry>
 
@@ -1012,7 +1022,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
               </row>
 
               <row>
-                <entry>solver</entry>
+                <entry><literal>solver</literal></entry>
 
                 <entry>Property</entry>
 
@@ -1021,7 +1031,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
               </row>
 
               <row>
-                <entry>result_file</entry>
+                <entry><literal>result_file</literal></entry>
 
                 <entry>Property</entry>
 
@@ -1029,16 +1039,16 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
               </row>
 
               <row>
-                <entry>is_variable(name)</entry>
+                <entry><literal>is_variable(name)</literal></entry>
 
                 <entry>Method</entry>
 
-                <entry>Returns True if the given name is a time-varying
-                variable.</entry>
+                <entry>Returns <literal>True</literal> if the given name is a
+                time-varying variable.</entry>
               </row>
 
               <row>
-                <entry>data_matrix</entry>
+                <entry><literal>data_matrix</literal></entry>
 
                 <entry>Property</entry>
 
@@ -1046,16 +1056,16 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
               </row>
 
               <row>
-                <entry>is_negated(name)</entry>
+                <entry><literal>is_negated(name)</literal></entry>
 
                 <entry>Method</entry>
 
-                <entry>Returns True if the given name is negated in the result
-                matrix.</entry>
+                <entry>Returns <literal>True</literal> if the given name is
+                negated in the result matrix.</entry>
               </row>
 
               <row>
-                <entry>get_column(name)</entry>
+                <entry><literal>get_column(name)</literal></entry>
 
                 <entry>Method</entry>
 
@@ -1078,7 +1088,7 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
         <title>Simulation with inputs</title>
 
         <para>This example will demonstrate how a model with two inputs with
-        data from a matlab-file can be simulated. The model to be simulated is
+        data from a MATLAB-file can be simulated. The model to be simulated is
         a quadruple tank connected to two pumps, which also are the inputs to
         the model. The model is depicted in <xref linkend="sim_fig_quadtank"/>
         and in the code below the corresponding Modelica code is
@@ -1130,8 +1140,8 @@ dery = res['der(y)']   # Return the result for the variable/parameter/constant d
 end QuadTank;
 </programlisting>
 
-        <para>Lets begin with the the example, copy and paste the Modelica
-        code and save it into <literal>QuadTank.mo</literal> and open a python
+        <para>Let's begin with the the example, copy and paste the Modelica
+        code and save it into <literal>QuadTank.mo</literal> and open a Python
         script file. We start by importing the necessary objects:</para>
 
         <programlisting language="python">from scipy.io.matlab.mio import loadmat
@@ -1144,10 +1154,10 @@ from pyjmi import JMUModel
 
         <para>The input data is stored in
         <literal>qt_par_est_data.mat</literal> which can be found in the
-        <literal>Python/pyjmi/examples/files</literal> catalogue in
-        JModelica.org. Copy it into your working directory and paste the
-        following commands to load the data-file and extract the data
-        trajectories:</para>
+        <literal>Python/pyjmi/examples/files</literal> catalogue in the
+        JModelica.org install folder. Copy it into your working directory and
+        paste the following commands to load the data-file and extract the
+        data trajectories:</para>
 
         <programlisting language="python">data = loadmat('qt_par_est_data.mat',appendmat=False)
 
@@ -1177,8 +1187,8 @@ jmu_name = compile_jmu('QuadTank', 'QuadTank.mo')
 model = JMUModel(jmu_name)
 </programlisting>
 
-        <para>Now, that the model is compiled and the input have been adapted,
-        lets give the information to the simulate method and simulate:</para>
+        <para>Now that the model is compiled and the input has been adapted,
+        let's give the information to the simulate method and simulate:</para>
 
         <programlisting language="python"># Simulate model with input trajectories
 res = model.simulate(final_time=60, input=input_object)
@@ -1255,12 +1265,13 @@ plt.show()
       <section>
         <title>Simulation of a discontinuous system</title>
 
-        <para>The model which is to be simulated is an electric circuit. The
-        model is depicted in <xref linkend="sim_fig_rlc"/> and consists of
-        resistances, inductors and a capacitor. The circuit is connected to a
-        voltage source which generates a square-wave with an amplitude of 1.0
-        and a frequency of 0.6 Hz. The model is also available from the
-        examples in the file RLC_Circuit.mo.</para>
+        <para>The model to be simulated in this example is an electric
+        circuit. The model is depicted in <xref linkend="sim_fig_rlc"/> and
+        consists of resistances, inductors and a capacitor. The circuit is
+        connected to a voltage source which generates a square-wave with an
+        amplitude of 1.0 and a frequency of 0.6 Hz. The model is also
+        available from the examples in the file
+        <filename>RLC_Circuit.mo</filename>.</para>
 
         <figure xml:id="sim_fig_rlc">
           <title>Electric Circuit</title>
@@ -1272,7 +1283,7 @@ plt.show()
           </mediaobject>
         </figure>
 
-        <para>This examples assumes that the file
+        <para>This example assumes that the file
         <literal>RLC_Circuit.mo</literal> is located in the working
         directory.</para>
 
@@ -1306,9 +1317,10 @@ rlc = JMUModel(jmu_name)
 </programlisting>
 
         <para>After a successful simulation the statistics are printed in the
-        prompt and the results are stored in the variable 'res'. To view the
-        result, we have to retrieve information about the variables we are
-        interested of which is easily done in the following way:</para>
+        prompt and the results are stored in the variable
+        <literal>res</literal>. To view the result, we have to retrieve
+        information about the variables we are interested in which is easily
+        done in the following way:</para>
 
         <programlisting language="python">square_y    = res['square.y']
 resistor_v  = res['resistor.v']
@@ -1316,8 +1328,7 @@ inductor1_i = res['inductor1.i']
 time        = res['time']
 </programlisting>
 
-        <para>And then plotted with the help from
-        <literal>matplotlib</literal>,</para>
+        <para>And then plotted with <literal>matplotlib</literal>,</para>
 
         <programlisting language="python">plt.figure(1)
 plt.plot(time, square_y, time, resistor_v, time, inductor1_i)    
@@ -1366,13 +1377,13 @@ plt.show()
 end Robertson;
 </programlisting>
 
-        <para>In the model we have set the parameters to free which means that
-        we want to calculate sensitivities of the states with respect to the
-        free parameters.</para>
+        <para>In the model, we have set the parameters to free which means
+        that we want to calculate sensitivities of the states with respect to
+        the free parameters.</para>
 
-        <para>Lets begin with the the example, copy and paste the Optimica
-        code and save it into <literal>Robertson.mop</literal> and open a
-        python script file. We start by importing the necessary
+        <para>Let's begin with the the example. Copy and paste the Optimica
+        code and save it into <literal>Robertson.mop</literal>, then open a
+        Python script file. We start by importing the necessary
         objects:</para>
 
         <programlisting language="python"># Import the function for compilation of models and the JMUModel class
@@ -1392,9 +1403,9 @@ jmu_name = compile_jmu("Robertson","Robertson.mop")
 model = JMUModel(jmu_name)
 </programlisting>
 
-        <para>Notice that sensitivity computations are only supported for
-        JMUModels currently. Now that the model is loaded, we have to change
-        the option to activate the sensitivity calculations and also the
+        <para>Note that sensitivity computations are currently only supported
+        for JMUModels. Now that the model is loaded, we have to change an
+        option to activate the sensitivity calculations and also set the
         absolute tolerances:</para>
 
         <programlisting language="python"># Get and set the options
@@ -1404,7 +1415,7 @@ opts['IDA_options']['sensitivity'] = True               # Activate the sensitivi
 opts['ncp'] = 400                                       # Change the number of communication points
 </programlisting>
 
-        <para>Now lets simulate the model:</para>
+        <para>Now simulate the model:</para>
 
         <programlisting language="python">res = model.simulate(final_time=4, options=opts)
 </programlisting>

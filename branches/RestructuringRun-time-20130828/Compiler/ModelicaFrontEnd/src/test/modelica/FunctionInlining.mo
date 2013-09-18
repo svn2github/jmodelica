@@ -723,15 +723,18 @@ fclass FunctionInlining.RecordInline4
  Real y[3];
  Real y[4];
  Real x;
+ discrete Integer temp_4;
  discrete Integer temp_6;
 initial equation 
  temp_6 = integer(y[4]);
+ pre(temp_4) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = temp_6 + (y[1] + y[2] + y[3]);
+ x = temp_4 + (y[1] + y[2] + y[3]);
+ temp_4 = temp_6;
  when {y[4] < pre(temp_6), y[4] >= pre(temp_6) + 1} then
   temp_6 = integer(y[4]);
  end when;
@@ -940,19 +943,14 @@ fclass FunctionInlining.RecordInline8
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
- discrete Integer temp_7;
 initial equation 
- temp_7 = integer(5 - y);
  x.pre(b) = 0;
 equation
  y = 1;
  x.a[1] = 2 / y;
  x.a[2] = 3 + y;
  x.a[3] = 4 * y;
- x.b = temp_7;
- when {5 - y < pre(temp_7), 5 - y >= pre(temp_7) + 1} then
-  temp_7 = integer(5 - y);
- end when;
+ x.b = noEvent(integer(5 - y));
 
 public
  record FunctionInlining.RecordInline8.R
@@ -1051,15 +1049,9 @@ end FunctionInlining.RecordInline9;
 fclass FunctionInlining.RecordInline10
  Real x;
  Real y;
- discrete Integer temp_12;
-initial equation 
- temp_12 = integer(5 - y);
 equation
- x = y + 2 * y + 3 * y + temp_12;
+ x = y + 2 * y + 3 * y + noEvent(integer(5 - y));
  y = 1;
- when {5 - y < pre(temp_12), 5 - y >= pre(temp_12) + 1} then
-  temp_12 = integer(5 - y);
- end when;
 
 public
  record FunctionInlining.RecordInline10.R
@@ -1109,15 +1101,9 @@ end FunctionInlining.RecordInline10;
 fclass FunctionInlining.RecordInline11
  Real x;
  Real y;
- discrete Integer temp_12;
-initial equation 
- temp_12 = integer(5 - y);
 equation
- x = y + 2 * y + 3 * y + temp_12;
+ x = y + 2 * y + 3 * y + noEvent(integer(5 - y));
  y = 1;
- when {5 - y < pre(temp_12), 5 - y >= pre(temp_12) + 1} then
-  temp_12 = integer(5 - y);
- end when;
 
 public
  record FunctionInlining.RecordInline11.R
@@ -3049,6 +3035,35 @@ public
 end FunctionInlining.BindingExpInRecord;
 ")})));
 end BindingExpInRecord;
+
+
+model AssertInline1
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		assert(x < 5, "Bad x: " + String(x));
+		y := 2 / (x - 5);
+		annotation(Inline=true);
+	end f;
+	
+	Real z = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AssertInline1",
+			description="Inline function containing assert",
+			flatModel="
+fclass FunctionInlining.AssertInline1
+ Real z;
+ Real temp_1;
+equation
+ z = 2 / (temp_1 - 5);
+ temp_1 = time;
+ assert(noEvent(temp_1 < 5), \"Bad x: \" + String());
+end FunctionInlining.AssertInline1;
+")})));
+end AssertInline1;
 
 	
 end FunctionInlining;

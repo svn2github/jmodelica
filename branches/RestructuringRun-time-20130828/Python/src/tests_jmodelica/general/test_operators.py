@@ -18,6 +18,28 @@
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
 
+class TestHomotopy(SimulationTest):
+    """
+    Basic test of Modelica operators.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.HomotopyTest')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.5, time_step=0.01)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_end_value('x', 0.5)
+
 class TestSemiLinear(SimulationTest):
     """
     Basic test of Modelica operators.

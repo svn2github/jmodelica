@@ -1035,6 +1035,7 @@ model UnknownSize4
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
   Can not infer array size of the variable x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 789, column 7:
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
@@ -1071,6 +1072,7 @@ equation
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 821, column 7:
   Can not infer array size of the variable x
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 823, column 2:
   The right and left expression types of equation are not compatible
 ")})));
@@ -4993,37 +4995,15 @@ end ArrayIterTest2;
 
 
 model ArrayIterTest3
- Real x[1,1] = { i * j for i, j };
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayIterTest3",
-			description="Array constructor with iterators: without in",
-			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5981, column 7:
-  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5981, column 28:
-  For index without in expression isn't supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 5981, column 31:
-  For index without in expression isn't supported
-")})));
-end ArrayIterTest3;
-
-
-model ArrayIterTest4
  Real i = 1;
  Real x[2,2,2,2] = { { { {i, j} for j in 1:2 } for i in 3:4 } for i in 5:6 };
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest4",
+			name="Constructors_Iterators_ArrayIterTest3",
 			description="Array constructor with iterators: nestled constructors, masking index",
 			flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest3
  constant Real i = 1;
  constant Real x[1,1,1,1] = 3;
  constant Real x[1,1,1,2] = 1;
@@ -5041,27 +5021,27 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
  constant Real x[2,2,1,2] = 1;
  constant Real x[2,2,2,1] = 4;
  constant Real x[2,2,2,2] = 2;
+end ArrayTests.Constructors.Iterators.ArrayIterTest3;
+")})));
+end ArrayIterTest3;
+
+
+model ArrayIterTest4
+ Real x[1,1,1] = { {1} for i in {1}, j in {1} };
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Constructors_Iterators_ArrayIterTest4",
+			description="Array constructor with iterators: vectors of length 1",
+			flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
+ constant Real x[1,1,1] = 1;
 end ArrayTests.Constructors.Iterators.ArrayIterTest4;
 ")})));
 end ArrayIterTest4;
 
 
 model ArrayIterTest5
- Real x[1,1,1] = { {1} for i in {1}, j in {1} };
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTest5",
-			description="Array constructor with iterators: vectors of length 1",
-			flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest5
- constant Real x[1,1,1] = 1;
-end ArrayTests.Constructors.Iterators.ArrayIterTest5;
-")})));
-end ArrayIterTest5;
-                       
-                       
-model ArrayIterTest6
     function f
     algorithm
     end f;
@@ -5070,7 +5050,7 @@ model ArrayIterTest6
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
-			name="ArrayIterTest6",
+			name="ArrayIterTest5",
 			description="Iterated expression with bad size",
 			errorMessage="
 1 errors found:
@@ -5078,7 +5058,7 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 1960, column 16:
   Function f() has no outputs, but is used in expression
 ")})));
-end ArrayIterTest6;
+end ArrayIterTest5;
 
 end Iterators;
 
@@ -5241,6 +5221,58 @@ equation
 end ArrayTests.For.ForStructural1;
 ")})));
 end ForStructural1;
+
+model ForAlgorithm1
+	function f
+		input Real x;
+		output Real y = x + 1;
+	algorithm
+	end f;
+	
+	constant Integer n = 3;
+	Real x[n];
+algorithm
+	for i in 2:n + 1, j in 2:n+1 loop
+		x[i-1] := f(sum(1.0:j));
+	end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ForAlgorithm1",
+			description="Array expressions depending on for loop index",
+			algorithms_as_functions=false,
+			flatModel="
+fclass ArrayTests.For.ForAlgorithm1
+ constant Integer n = 3;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+algorithm
+ x[1] := 0.0;
+ x[2] := 0.0;
+ x[3] := 0.0;
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+
+public
+ function ArrayTests.For.ForAlgorithm1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end ArrayTests.For.ForAlgorithm1.f;
+
+end ArrayTests.For.ForAlgorithm1;
+")})));
+end ForAlgorithm1;
 
 end For;
 

@@ -1,0 +1,137 @@
+/*
+    Copyright (C) 2009-2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect InteractiveFMU{
+	
+	public void FClass.computeInteractiveFMUIfSet() {
+		if (root().options.getBooleanOption("interactive_fmu")) {
+			// Convert equations
+			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator());
+			
+			// Remove HGT stuff
+			for (FAbstractEquation equation : equations())
+				equation.setResidualOpt(new Opt<FResidual>());
+			for (FVariable variable : variables())
+				variable.setHGTType(HGTVariableType.NONE);
+			
+			// Flush cache
+			root().flushAllRecursive();
+			
+			// Print the model
+			log.info("FClass after interactiveFMU:");
+			log.info(this);
+			
+			// Eliminate aliases
+			aliasEliminationIfSet();
+			
+			// Redo BLT
+			computeMatchingsAndBLT();
+			
+			// Check for unsolved blocks
+			if (!daeBLT.unsolvedBlockSizes().isEmpty() || !daeInitBLT.unsolvedBlockSizes().isEmpty())
+				error("Generation of interactive FMU failed, system still contains unsolved blocks, contact JModelica.org developer!");
+		}
+	}
+	
+	public void BLT.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		for (AbstractEquationBlock subBlock : this)
+			subBlock.computeInteractiveFMU(fclass, indexEnumerator);
+	}
+	
+	public abstract void AbstractEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator);
+	
+	public void EquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		for (SimpleEquationBlock subBlock : blocks)
+			subBlock.computeInteractiveFMU(fclass, indexEnumerator);
+	}
+	
+	public void SimpleEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		// Default empty implementation
+	}
+
+	public void UnsolvedScalarEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		int index = indexEnumerator.next();
+		String iterName = "iter_" + index;
+		String resName = "res_" + index;
+		FEquation equation = equation();
+		
+		FVariable iterVar = (FVariable) fv.fullCopy();
+		iterVar.setFQName(new FQNameString(iterName));
+		iterVar.setFTypePrefixInputOutput(new FInput());
+		iterVar.setFStringComment(new FStringComment(fv.name()));
+		fclass.addFVariable(iterVar);
+		
+		FVariable resVar = (FVariable) fv.fullCopy();
+		resVar.setFQName(new FQNameString(resName));
+		resVar.setFTypePrefixInputOutput(new FOutput());
+		fclass.addFVariable(resVar);
+		
+		FEquation aliasEquation = new FEquation(equation.getType(), new FIdUseExp(iterName), new FIdUseExp(fv.name()));
+		fclass.addFEquation(aliasEquation);
+		
+		FExp oldLhs = equation.getLeft();
+		FExp oldRhs = equation.getRight();
+		equation.setLeft(new FIdUseExp(resName));
+		equation.setRight(new FSubExp(oldLhs, oldRhs));
+	}
+
+	public void UnsolvedFunctionCallEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		Iterator<FVariable> activeVarIt = activeVars.iterator();
+		Iterator<Integer> assignedIndicesIt = assignedIndices.iterator();
+		FFunctionCallEquation equation = equation();
+		java.util.List<FIdUse> assignedFIdUses = equation.assignedFIdUses();
+		while (activeVarIt.hasNext() && assignedIndicesIt.hasNext()) {
+			FVariable fv = activeVarIt.next();
+			int assignedIndex = assignedIndicesIt.next();
+			FIdUse oldLhs = assignedFIdUses.get(assignedIndex);
+			int index = indexEnumerator.next();
+			String iterName = "iter_" + index;
+			String resName = "res_" + index;
+			String tmpName = fclass.nextTempVarName();
+			
+			FVariable iterVar = (FVariable) fv.fullCopy();
+			iterVar.setFQName(new FQNameString(iterName));
+			iterVar.setFTypePrefixInputOutput(new FInput());
+			iterVar.setFStringComment(new FStringComment(fv.name()));
+			fclass.addFVariable(iterVar);
+			
+			FVariable resVar = (FVariable) fv.fullCopy();
+			resVar.setFQName(new FQNameString(resName));
+			resVar.setFTypePrefixInputOutput(new FOutput());
+			fclass.addFVariable(resVar);
+			
+			FEquation aliasEquation = new FEquation(equation.getType(), new FIdUseExp(iterName), new FIdUseExp(fv.name()));
+			fclass.addFEquation(aliasEquation);
+			
+			FVariable tmpVar = (FVariable) fv.fullCopy();
+			tmpVar.setFQName(new FQNameString(tmpName));
+			fclass.addFVariable(tmpVar);
+			
+			oldLhs.replaceMe(new FIdUse(tmpName));
+			
+			FEquation resEquation = new FEquation(equation.getType(), new FIdUseExp(resName), new FSubExp(new FIdUseExp(tmpName),new FIdUseExp(oldLhs)));
+			fclass.addFEquation(resEquation);
+		}
+	}
+	
+	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+		for (SimpleEquationBlock solvedBlock : solvedBlocks)
+			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator);
+		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks)
+			unsolvedBlock.computeInteractiveFMU(fclass, indexEnumerator);
+	}
+	
+}

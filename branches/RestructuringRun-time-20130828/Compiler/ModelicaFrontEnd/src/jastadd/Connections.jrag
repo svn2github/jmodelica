@@ -24,6 +24,8 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 import java.util.PriorityQueue;
 
+import org.jmodelica.util.Enumerator;
+
 aspect Connections {
 
 	/* Machinery to manage connection sets */
@@ -681,6 +683,8 @@ aspect Connections {
 				leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
 			}
 		}
+        csm.countCardinality(left.name());
+        csm.countCardinality(right.name());
 	}
 
 	public void InstPrimitive.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
@@ -690,6 +694,8 @@ aspect Connections {
 		} else {
 			csm.addVars(left, right);
 		}
+        csm.countCardinality(left.name());
+        csm.countCardinality(right.name());
 	}
 	
 	syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
@@ -951,6 +957,11 @@ aspect OverconstrainedConnections {
 		private Collection<Node> nodes = new ArrayList<Node>();
 		private Map<InstComponentDecl,Node> nodeMap = new HashMap<InstComponentDecl,Node>();
 		private Map<String,OpsResult> opsMap;
+		static String UNROOTED_ERR_MSG  = "Set of unrooted connectors in overconstrained connection graph:";
+		static String MULTIROOT_ERR_MSG = "Multiple definite roots in unbreakable subgraph in overconstrained connection graph";
+		static String LOOP_ERR_MSG      = "Unbreakable loop in overconstrained connection graph";
+		static String MULTIDEF_ERR_MSG  = "Multiple root definitions for single connector in overconstrained connection graph";
+		static String ERR_SEP = "\n    ";
 		
 		/**
 		 * Add a connection to the graph.
@@ -987,19 +998,52 @@ aspect OverconstrainedConnections {
 		 */
 		public void buildTrees(ConnectionSetManager csm) {
 			// Collect roots
-			Collection<Node> roots = new PriorityQueue<Node>();
+			Queue<Node> roots = new PriorityQueue<Node>();
 			for (Node n : nodes)
 				if (n.canBeRoot())
 					roots.add(n);
 			
 			// Select roots among unbreakable sub-graphs
+			boolean abort = false;
 			java.util.List<Node> selected = new ArrayList<Node>(roots.size());
-			for (Node root : roots) {
+			java.util.List<Node> otherRoots = new ArrayList<Node>();
+			Node root;
+			while ((root = roots.poll()) != null) {
 				if (!root.visited) {
-					root.markSelectedRoot(root);
+					boolean loop = root.markSelectedRoot(root, otherRoots);
 					selected.add(root);
+					
+					// Generate errors for unbreakable loops.
+					if (loop) {
+						StringBuilder errorMsg = new StringBuilder();
+						errorMsg.append(LOOP_ERR_MSG);
+						errorMsg.append(ERR_SEP);
+						errorMsg.append("Selected root: ");
+						errorMsg.append(root.flatName());
+						root.var.error(errorMsg.toString());
+						abort = true;
+					}
+					// Generate errors for multiple roots.
+					if (otherRoots.size() > 0) {
+						StringBuilder errorMsg = new StringBuilder();
+						errorMsg.append(MULTIROOT_ERR_MSG);
+						errorMsg.append(ERR_SEP);
+						errorMsg.append("Selected root: ");
+						errorMsg.append(root.flatName());
+						for (Node n : otherRoots) {
+							errorMsg.append(ERR_SEP);
+							errorMsg.append("Other root: ");
+							errorMsg.append(n.flatName());
+						}
+						root.var.error(errorMsg.toString());
+						otherRoots = new ArrayList<Node>();
+						abort = true;
+					}
 				}
 			}
+			
+			if (abort)
+				return;
 			
 			// Clear visited for next step
 			for (Node n : nodes)
@@ -1008,19 +1052,31 @@ aspect OverconstrainedConnections {
 				e.visited = false;
 			
 			// Create trees
-			for (Node root : selected) {
-				if (!root.visited) {
+			for (Node sel : selected) {
+				if (!sel.visited) {
 					Queue<Node> work = new ArrayDeque<Node>();
-					work.add(root);
-					root.level = 0;
-					root.visited = true;
+					work.add(sel);
+					sel.level = 0;
+					sel.visited = true;
 					for (Node n = work.poll(); n != null; n = work.poll()) 
 						n.buildTree(work, csm);
 				}
 			}
 			
-			// Check for unconnected nodes (with visited = false) - gives error
-			// TODO
+			// Generate errors for unrooted nodes
+			for (Node n : nodes) {
+				if (!n.visited) {
+					ArrayList<Node> subGraph = new ArrayList<Node>();
+					n.subGraph(subGraph);
+					StringBuilder errorMsg = new StringBuilder();
+					errorMsg.append(UNROOTED_ERR_MSG);
+					for (Node unrooted : subGraph) {
+						errorMsg.append(ERR_SEP);
+						errorMsg.append(unrooted.flatName());
+					}
+					n.var.error(errorMsg.toString());
+				}
+			}
 			
 			// Build map for dependents
 			opsMap = new HashMap<String,OpsResult>();
@@ -1120,6 +1176,10 @@ aspect OverconstrainedConnections {
 			public boolean isBreakable() {
 				return source.isBreakable();
 			}
+            
+            public String toString() {
+                return n1 + " - " + n2;
+            }
 			
 			/**
 			 * Get the other end of the edge.
@@ -1198,6 +1258,10 @@ aspect OverconstrainedConnections {
 			public int compareTo(Node other) {
 				return rootPriority - other.rootPriority;
 			}
+            
+            public String toString() {
+                return var.getFQName().name();
+            }
 			
 			public void addEdge(Edge e) {
 				edges.add(e);
@@ -1231,7 +1295,13 @@ aspect OverconstrainedConnections {
 			 */
 			public void setPotentialRoot(int priority) {
 				if (rootPriority < NOT_ROOT && rootPriority != priority) {
-					// Error - trying to set root in different ways
+					// Error - Multiple root definitions of a connector 
+					StringBuilder errorMsg = new StringBuilder();
+					errorMsg.append(MULTIDEF_ERR_MSG);
+					errorMsg.append(ERR_SEP);
+					errorMsg.append("Connector: ");
+					errorMsg.append(this.flatName());
+					var.error(errorMsg.toString());
 				}
 				if (rootPriority > priority)
 					rootPriority = priority;
@@ -1299,12 +1369,17 @@ aspect OverconstrainedConnections {
 
 			/**
 			 * Set the selected root of this subgraph.
+			 * @param root: The selected root node.
+			 * @param otherRoots: A collection to add any redundant roots to.
+			 * @return true if unbreakable loop found
 			 */
-			public void markSelectedRoot(Node root) {
+			public boolean markSelectedRoot(Node root, Collection<Node> otherRoots) {
+				boolean loop = false;
 				visited = true;
 				selectedRoot = root;
 				if (root != this && rootPriority == DEFINITE_ROOT) {
 					// Error - more than one definite root in unbreakable subgraph
+					otherRoots.add(this);
 				}
 				
 				for (Edge e : edges) {
@@ -1313,9 +1388,24 @@ aspect OverconstrainedConnections {
 						Node n = e.other(this);
 						if (n.visited) {
 							// Error - unbreakable loop
+							loop = true;
 						}
-						n.markSelectedRoot(root);
+						loop = loop || n.markSelectedRoot(root, otherRoots);
 					}
+				}
+				return loop;
+			}
+			
+			/**
+			 * Gathers the subgraph which n is in.
+			 */
+			public void subGraph(ArrayList<Node> sg) {
+				if (visited)
+					return;
+				visited = true;
+				sg.add(this);
+				for (Edge e : edges) {
+					e.other(this).subGraph(sg);
 				}
 			}
 			
@@ -1323,4 +1413,35 @@ aspect OverconstrainedConnections {
 		
 	}
 	
+}
+
+aspect Cardinality {
+    
+    private Map<String,Enumerator> ConnectionSetManager.cardinality = null;
+    
+    public void ConnectionSetManager.countCardinality(String name) {
+        if (cardinality == null)
+            cardinality = new HashMap<String,Enumerator>();
+        Enumerator e = cardinality.get(name);
+        if (e == null)
+            cardinality.put(name, new Enumerator(1));
+        else
+            e.next();
+    }
+    
+    public int ConnectionSetManager.getCardinality(String name) {
+        if (cardinality == null)
+            return 0;
+        Enumerator e = cardinality.get(name);
+        return (e == null) ? 0 : e.peek();
+    }
+
+
+    private boolean FCardinality.rewriteCardinality = false;
+    
+    rewrite FCardinality {
+        when (rewriteCardinality) to FIntegerLitExp 
+            new FIntegerLitExp(myFClass().getConnectionSetManager().getCardinality(((FIdUseExp) getFExp()).name()));
+    }
+    
 }

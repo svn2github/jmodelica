@@ -210,7 +210,7 @@ aspect Arrays {
 	 */
 	syn int FIterExp.localNdims() = getNumForIndex();
 	
-	eq FTranspose.ndims()    = getFExp().ndims();
+	eq FSymmetric.ndims()    = 2;
 	eq FCross.ndims()        = 1;
 	eq FSkew.ndims()         = 2;
 	eq FOuterProduct.ndims() = 2;
@@ -223,7 +223,8 @@ aspect Arrays {
 	eq FEventGenExp.ndims()               = getX().ndims();
 	eq FMathematicalFunctionCall.ndims()  = getFExp().ndims();
 	
-	eq FSemiLinearExp.ndims()  = getX().ndims();
+	eq FHomotopyExp.ndims()   = getActual().ndims();
+	eq FSemiLinearExp.ndims() = getX().ndims();
 	
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -865,8 +866,8 @@ aspect Arrays {
 		return s;
 	}
 	
-	eq FCross.size() = new Size(3);
-	eq FSkew.size() = new Size(3, 3);
+	eq FCross.size()     = new Size(3);
+	eq FSkew.size()      = new Size(3, 3);
 	
 	eq FOuterProduct.size() {
 		MutableSize s = new MutableSize(2);
@@ -924,6 +925,7 @@ aspect Arrays {
 	
 	eq FEventGenExp.size()              = getX().size();
 	eq FMathematicalFunctionCall.size() = getFExp().size();
+	eq FHomotopyExp.size()              = getActual().size();
 	eq FSemiLinearExp.size()            = getX().size();
 	
 	eq FArrayDimAsArgsExp.size() {
@@ -1507,6 +1509,24 @@ aspect Arrays {
 		return res;
 	}
 	
+	eq FSymmetric.getArray() {
+		Array inner = getFExp().getArray();
+		Array res = new Array(indices());
+		int[] ind = new int[ndims()];
+		Index ti = new Index(ind);
+		for (Index i : res.indices()) {
+			ind[0] = i.get(0);
+			ind[1] = i.get(1);
+			if (ind[0] > ind[1]) {
+				int temp = ind[0];
+				ind[0] = ind[1];
+				ind[1] = temp;
+			}
+			res.set(i, inner.get(ti));
+		}
+		return res;
+	}
+	
 	eq FCross.getArray() {
 		Array res = new Array(indices());
 		Array x = getX().getArray();
@@ -1726,6 +1746,18 @@ aspect Arrays {
 		Array arr = new Array(indices());
 		Array inner1 = getFExp().getArray();
 		Array inner2 = getY().getArray();
+		for (Index i : arr.indices())
+			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
+		return arr;
+	}
+	
+	eq FHomotopyExp.getArray() {
+		if (!isArray())
+			return super.getArray();
+		
+		Array arr = new Array(indices());
+		Array inner1 = getActual().getArray();
+		Array inner2 = getSimplified().getArray();
 		for (Index i : arr.indices())
 			arr.set(i, createNode(inner1.get(i), inner2.get(i)));
 		return arr;
@@ -2517,6 +2549,14 @@ aspect ArrayHelpers {
 		}
 		
 		/**
+		 * If this size contains any dimensions that are represented with expressions, then creates 
+		 * and attempts to evaluate a copy of this size. Otherwise, return this.
+		 */
+		public Size evaluated() {
+		    return this;
+		}
+		
+		/**
 		 * \brief Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
 		 * 
@@ -3150,6 +3190,26 @@ aspect ArrayHelpers {
 				res = new FMulExp(res, new FIntegerLitExp(known));
 			return res;
 		}
+
+		/**
+         * If this size contains any dimensions that are represented with expressions, then creates 
+         * and attempts to evaluate a copy of this size. Otherwise, return this.
+         */
+        public Size evaluated() {
+            boolean copy = false;
+            for (FExp e : exps)
+                if (e != null)
+                    copy = true;
+            if (copy) {
+                MutableSize res = new MutableSize(size.length);
+                System.arraycopy(size, 0, res.size, 0, size.length);
+                System.arraycopy(exps, 0, res.exps, 0, exps.length);
+                res.evaluate();
+                return res;
+            } else {
+                return this;
+            }
+        }
 
 		/**
 		 * For each unknown length, copy the equivalent length from the size of <code>exp</code>. 

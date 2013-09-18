@@ -1305,7 +1305,168 @@ end Transpose8;
 
 end Transpose;
 
+package Symmetric
+	
+model Symmetric1
+ Real x[2,2] = symmetric({{1,2},{3,4}});
 
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric1",
+			description="Scalarization of symmetric operator: Integer[2,2]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric1
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 4;
+end ArrayBuiltins.Symmetric.Symmetric1;
+")})));
+end Symmetric1;
+
+
+model Symmetric2
+ Real x[3,3] = symmetric({{1,2,3},{4,5,6},{7,8,9}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric2",
+			description="Scalarization of symmetric operator: Integer[3,3]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric2
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[1,3] = 3;
+ constant Real x[2,1] = 2;
+ constant Real x[2,2] = 5;
+ constant Real x[2,3] = 6;
+ constant Real x[3,1] = 3;
+ constant Real x[3,2] = 6;
+ constant Real x[3,3] = 9;
+end ArrayBuiltins.Symmetric.Symmetric2;
+")})));
+end Symmetric2;
+
+
+model Symmetric3
+ Real x[1,1] = symmetric({{3}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric3",
+			description="Scalarization of symmetric operator: Integer[1,1]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric3
+ constant Real x[1,1] = 3;
+end ArrayBuiltins.Symmetric.Symmetric3;
+")})));
+end Symmetric3;
+
+
+model Symmetric4
+ Integer x[4,4] = symmetric({{1,2,3,4},{5,6,7,8},{11,12,13,14},{15,16,17,18}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric4",
+			description="Scalarization of symmetric operator: Integer[2,2,2]",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric4
+ constant Integer x[1,1] = 1;
+ constant Integer x[1,2] = 2;
+ constant Integer x[1,3] = 3;
+ constant Integer x[1,4] = 4;
+ constant Integer x[2,1] = 2;
+ constant Integer x[2,2] = 6;
+ constant Integer x[2,3] = 7;
+ constant Integer x[2,4] = 8;
+ constant Integer x[3,1] = 3;
+ constant Integer x[3,2] = 7;
+ constant Integer x[3,3] = 13;
+ constant Integer x[3,4] = 14;
+ constant Integer x[4,1] = 4;
+ constant Integer x[4,2] = 8;
+ constant Integer x[4,3] = 14;
+ constant Integer x[4,4] = 18;
+end ArrayBuiltins.Symmetric.Symmetric4;
+")})));
+end Symmetric4;
+
+
+model Symmetric5
+  Real x[2] = {1,2};
+  Real y[2,2];
+equation
+  y=symmetric(x)*x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric5",
+			description="Scalarization of symmetric operator: too few dimensions of arg",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 1390, column 15:
+  Calling function symmetric(): types of positional argument 1 and input A are not compatible
+")})));
+end Symmetric5;
+
+
+model Symmetric6
+ Real x[2] = symmetric(1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric6",
+			description="Scalarization of symmetric operator: Integer",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 4876, column 24:
+  Calling function symmetric(): types of positional argument 1 and input A are not compatible
+")})));
+end Symmetric6;
+
+
+model Symmetric7
+ Integer x[2,1] = symmetric({{1.0,2},{1,1}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Symmetric_Symmetric7",
+			description="Scalarization of symmetric operator: Real[1,2] -> Integer[2,1]",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
+Semantic error at line 4892, column 10:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end Symmetric7;
+
+
+model Symmetric8
+    Real[2,2] x = {{1,2},{3,4}};
+    Real[2,2] y = symmetric(x) .+ 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Symmetric_Symmetric8",
+			description="Scalarization of symmetric operator: access to variable",
+			flatModel="
+fclass ArrayBuiltins.Symmetric.Symmetric8
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
+ constant Real y[1,1] = 2.0;
+ constant Real y[1,2] = 3.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 5.0;
+end ArrayBuiltins.Symmetric.Symmetric8;
+")})));
+end Symmetric8;
+
+end Symmetric;
 
 package Cross
 	
@@ -1405,9 +1566,6 @@ model Cross6
 			description="cross() operator: String[3] arguments",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Compliance error at line 6454, column 7:
-  String variables are not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
 Semantic error at line 6456, column 22:
   Calling function cross(): types of positional argument 1 and input x are not compatible
@@ -2525,101 +2683,6 @@ Semantic error at line 7272, column 15:
 ")})));
 end ScalarSize2;
 
-model VectorizedAbsTest
-    constant Real[2,2] c = {{-1, 2}, {3, -4}};
-    constant Real[2,2] d = abs(c);
-    Real[2,2] x = c;
-    Real[2,2] y = d;
-    Real[2,2] z = abs(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="VectorizedAbsTest",
-			description="Test of vectorized abs()",
-			flatModel="
-fclass ArrayBuiltins.VectorizedAbsTest
- constant Real c[1,1] = - 1;
- constant Real c[1,2] = 2;
- constant Real c[2,1] = 3;
- constant Real c[2,2] = - 4;
- constant Real d[1,1] = abs(-1.0);
- constant Real d[1,2] = abs(2.0);
- constant Real d[2,1] = abs(3.0);
- constant Real d[2,2] = abs(-4.0);
- constant Real x[1,1] = -1.0;
- constant Real x[1,2] = 2.0;
- constant Real x[2,1] = 3.0;
- constant Real x[2,2] = -4.0;
- constant Real y[1,1] = 1.0;
- constant Real y[1,2] = 2.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 4.0;
- constant Real z[1,1] = 1.0;
- constant Real z[1,2] = 2.0;
- constant Real z[2,1] = 3.0;
- constant Real z[2,2] = 4.0;
-end ArrayBuiltins.VectorizedAbsTest;
-")})));
-end VectorizedAbsTest;
-
-model VectorizedSignTest
-    constant Real[2,2] c = {{-1, 2}, {3, -4}};
-    constant Real[2,2] d = sign(c);
-    Real[2,2] x = c;
-    Real[2,2] y = d;
-    Real[2,2] z = sign(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="VectorizedSignTest",
-			description="Test of vectorized sign()",
-			flatModel="
-fclass ArrayBuiltins.VectorizedSignTest
- constant Real c[1,1] = - 1;
- constant Real c[1,2] = 2;
- constant Real c[2,1] = 3;
- constant Real c[2,2] = - 4;
- constant Real d[1,1] = sign(-1.0);
- constant Real d[1,2] = sign(2.0);
- constant Real d[2,1] = sign(3.0);
- constant Real d[2,2] = sign(-4.0);
- constant Real x[1,1] = -1.0;
- constant Real x[1,2] = 2.0;
- constant Real x[2,1] = 3.0;
- constant Real x[2,2] = -4.0;
- constant Real y[1,1] = -1.0;
- constant Real y[1,2] = 1.0;
- constant Real y[2,1] = 1.0;
- constant Real y[2,2] = -1.0;
- constant Real z[1,1] = -1;
- constant Real z[1,2] = 1;
- constant Real z[2,1] = 1;
- constant Real z[2,2] = -1;
-end ArrayBuiltins.VectorizedSignTest;
-")})));
-end VectorizedSignTest;
-
-model VectorizedSmoothTest
-    Real x[3] = {1,2,3};
-    Real y[3] = smooth(2, x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="VectorizedSmoothTest",
-			description="",
-			flatModel="
-fclass ArrayBuiltins.VectorizedSmoothTest
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
- constant Real y[1] = 1.0;
- constant Real y[2] = 2.0;
- constant Real y[3] = 3.0;
-end ArrayBuiltins.VectorizedSmoothTest;
-")})));
-end VectorizedSmoothTest;
-
-
 
 model NonVectorizedSalarization1
     function f1
@@ -2759,849 +2822,5 @@ Semantic error at line 2720, column 27:
   Calling function ones(): no input matching named argument xxx found
 ")})));
 end InfArgsWithNamed;
-
-
-
-package FunctionLike
-
-package NumericConversion
-
-model Abs
-    Real x = abs(1);
-    Real y[3] = abs({2,3,4});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_NumericConversion_Abs",
-			description="Basic test of abs().",
-			variability_propagation=false,
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.NumericConversion.Abs
- Real x;
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x = abs(1);
- y[1] = abs(2);
- y[2] = abs(3);
- y[3] = abs(4);
-end ArrayBuiltins.FunctionLike.NumericConversion.Abs;
-")})));
-end Abs;
-
-model Sign
-    Real x = sign(1);
-    Real y[3] = sign({2,3,4});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_NumericConversion_Sign",
-			description="Basic test of sign().",
-			variability_propagation=false,
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.NumericConversion.Sign
- Real x;
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x = sign(1);
- y[1] = sign(2);
- y[2] = sign(3);
- y[3] = sign(4);
-end ArrayBuiltins.FunctionLike.NumericConversion.Sign;
-")})));
-end Sign;
-
-model Sqrt
-    Real x = sqrt(1);
-    Real y[3] = sqrt({2,3,4});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_NumericConversion_Sqrt",
-			description="Basic test of sqrt().",
-			variability_propagation=false,
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.NumericConversion.Sqrt
- Real x;
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x = sqrt(1);
- y[1] = sqrt(2);
- y[2] = sqrt(3);
- y[3] = sqrt(4);
-end ArrayBuiltins.FunctionLike.NumericConversion.Sqrt;
-")})));
-end Sqrt;
-
-model Integer1
-    type E = enumeration(x,a,b,c);
-    Real x = Integer(E.x);
-    Real y[3] = Integer({E.a,E.b,E.c});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_NumericConversion_Integer1",
-			description="Basic test of Integer().",
-			variability_propagation=false,
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.NumericConversion.Integer1
- Real x;
- Real y[1];
- Real y[2];
- Real y[3];
-equation
- x = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.x);
- y[1] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.a);
- y[2] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.b);
- y[3] = Integer(ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E.c);
-
-public
- type ArrayBuiltins.FunctionLike.NumericConversion.Integer1.E = enumeration(x, a, b, c);
-
-end ArrayBuiltins.FunctionLike.NumericConversion.Integer1;
-")})));
-end Integer1;
-
-end NumericConversion;
-
-
-
-package EventGen
-	
-model Div
-	Real x    = div(time, 2);
-	Real y[2] = div({time,time},2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Div",
-			description="Basic test of div().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Div
- Real x;
- Real y[1];
- Real y[2];
- discrete Real temp_1;
- discrete Real temp_2;
- discrete Real temp_3;
-initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
-equation
- x = temp_3;
- y[1] = temp_2;
- y[2] = temp_1;
- when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Div;
-")})));
-end Div;
-
-model Mod
-	Real x    = mod(time, 2);
-	Real y[2] = mod({time,time},2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Mod",
-			description="Basic test of mod().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Mod
- Real x;
- Real y[1];
- Real y[2];
- discrete Real temp_1;
- discrete Real temp_2;
- discrete Real temp_3;
-initial equation 
- temp_1 = floor(time / 2);
- temp_2 = floor(time / 2);
- temp_3 = floor(time / 2);
-equation
- x = time - temp_3 * 2;
- y[1] = time - temp_2 * 2;
- y[2] = time - temp_1 * 2;
- when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_2), time / 2 >= pre(temp_2) + 1} then
-  temp_2 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_3), time / 2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time / 2);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Mod;
-")})));
-end Mod;
-
-model Rem
-	Real x    = rem(time, 2);
-	Real y[2] = rem({time,time},2);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Rem",
-			description="Basic test of rem().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Rem
- Real x;
- Real y[1];
- Real y[2];
- discrete Real temp_1;
- discrete Real temp_2;
- discrete Real temp_3;
-initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
-equation
- x = time - temp_3 * 2;
- y[1] = time - temp_2 * 2;
- y[2] = time - temp_1 * 2;
- when {noEvent(div(time, 2)) < pre(temp_1), noEvent(div(time, 2)) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {noEvent(div(time, 2)) < pre(temp_2), noEvent(div(time, 2)) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {noEvent(div(time, 2)) < pre(temp_3), noEvent(div(time, 2)) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Rem;
-")})));
-end Rem;
-
-model Ceil
-	Real x = 4 + ceil((time * 0.3) + 4.2) * 4;
-	Real y[2] = ceil({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Ceil",
-			description="Basic test of ceil().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Ceil
- Real x;
- Real y[1];
- Real y[2];
- discrete Real temp_1;
- discrete Real temp_2;
- discrete Real temp_3;
-initial equation 
- temp_1 = ceil(time * 2);
- temp_2 = ceil(time);
- temp_3 = ceil(time * 0.3 + 4.2);
-equation
- x = 4 + temp_3 * 4;
- y[1] = temp_2;
- y[2] = temp_1;
- when {time * 2 <= pre(temp_1) - 1, time * 2 > pre(temp_1)} then
-  temp_1 = ceil(time * 2);
- end when;
- when {time <= pre(temp_2) - 1, time > pre(temp_2)} then
-  temp_2 = ceil(time);
- end when;
- when {time * 0.3 + 4.2 <= pre(temp_3) - 1, time * 0.3 + 4.2 > pre(temp_3)} then
-  temp_3 = ceil(time * 0.3 + 4.2);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Ceil;
-")})));
-end Ceil;
-
-model Floor
-	Real x = 4 + floor((time * 0.3) + 4.2) * 4;
-	Real y[2] = floor({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Floor",
-			description="Basic test of floor().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Floor
- Real x;
- Real y[1];
- Real y[2];
- discrete Real temp_1;
- discrete Real temp_2;
- discrete Real temp_3;
-initial equation 
- temp_1 = floor(time * 2);
- temp_2 = floor(time);
- temp_3 = floor(time * 0.3 + 4.2);
-equation
- x = 4 + temp_3 * 4;
- y[1] = temp_2;
- y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = floor(time);
- end when;
- when {time * 0.3 + 4.2 < pre(temp_3), time * 0.3 + 4.2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time * 0.3 + 4.2);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Floor;
-")})));
-end Floor;
-
-model Integer
-	Real x = integer((0.9 + time/10) * 3.14);
-	Real y[2] = integer({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventGen_Integer",
-			description="Basic test of integer().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventGen.Integer
- Real x;
- Real y[1];
- Real y[2];
- discrete Integer temp_1;
- discrete Integer temp_2;
- discrete Integer temp_3;
-initial equation 
- temp_1 = integer(time * 2);
- temp_2 = integer(time);
- temp_3 = integer((0.9 + time / 10) * 3.14);
-equation
- x = temp_3;
- y[1] = temp_2;
- y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = integer(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = integer(time);
- end when;
- when {(0.9 + time / 10) * 3.14 < pre(temp_3), (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1} then
-  temp_3 = integer((0.9 + time / 10) * 3.14);
- end when;
-end ArrayBuiltins.FunctionLike.EventGen.Integer;
-")})));
-end Integer;
-
-end EventGen;
-
-
-
-package Math
-
-model Sin
-	Real x = sin(time);
-	Real y[2] = sin({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Sin",
-			description="Basic test of sin().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Sin
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = sin(time);
- y[1] = sin(time);
- y[2] = sin(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Sin;
-")})));
-end Sin;
-
-model Cos
-	Real x = cos(time);
-	Real y[2] = cos({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Cos",
-			description="Basic test of cos().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Cos
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = cos(time);
- y[1] = cos(time);
- y[2] = cos(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Cos;
-")})));
-end Cos;
-
-model Tan
-	Real x = tan(time);
-	Real y[2] = tan({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Tan",
-			description="Basic test of tan().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Tan
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = tan(time);
- y[1] = tan(time);
- y[2] = tan(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Tan;
-")})));
-end Tan;
-
-model Asin
-	Real x = asin(time);
-	Real y[2] = asin({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Asin",
-			description="Basic test of asin().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Asin
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = asin(time);
- y[1] = asin(time);
- y[2] = asin(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Asin;
-")})));
-end Asin;
-
-model Acos
-	Real x = acos(time);
-	Real y[2] = acos({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Acos",
-			description="Basic test of acos().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Acos
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = acos(time);
- y[1] = acos(time);
- y[2] = acos(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Acos;
-")})));
-end Acos;
-
-model Atan
-	Real x = atan(time);
-	Real y[2] = atan({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Atan",
-			description="Basic test of atan().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Atan
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = atan(time);
- y[1] = atan(time);
- y[2] = atan(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Atan;
-")})));
-end Atan;
-
-model Atan2
-	Real x = atan2(time,5);
-	Real y[2] = atan2({time,time*2}, {5,6});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Atan2",
-			description="Basic test of atan2().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Atan2
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = atan2(time, 5);
- y[1] = atan2(time, 5);
- y[2] = atan2(time * 2, 6);
-end ArrayBuiltins.FunctionLike.Math.Atan2;
-")})));
-end Atan2;
-
-model Sinh
-	Real x = sinh(time);
-	Real y[2] = sinh({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Sinh",
-			description="Basic test of sinh().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Sinh
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = sinh(time);
- y[1] = sinh(time);
- y[2] = sinh(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Sinh;
-")})));
-end Sinh;
-
-model Cosh
-	Real x = cosh(time);
-	Real y[2] = cosh({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Cosh",
-			description="Basic test of cosh().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Cosh
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = cosh(time);
- y[1] = cosh(time);
- y[2] = cosh(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Cosh;
-")})));
-end Cosh;
-
-model Tanh
-	Real x = tanh(time);
-	Real y[2] = tanh({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Tanh",
-			description="Basic test of tanh().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Tanh
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = tanh(time);
- y[1] = tanh(time);
- y[2] = tanh(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Tanh;
-")})));
-end Tanh;
-
-model Exp
-	Real x = exp(time);
-	Real y[2] = exp({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Exp",
-			description="Basic test of exp().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Exp
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = exp(time);
- y[1] = exp(time);
- y[2] = exp(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Exp;
-")})));
-end Exp;
-
-model Log
-	Real x = log(time);
-	Real y[2] = log({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Log",
-			description="Basic test of log().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Log
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = log(time);
- y[1] = log(time);
- y[2] = log(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Log;
-")})));
-end Log;
-
-model Log10
-	Real x = log10(time);
-	Real y[2] = log10({time,time*2});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Math_Log10",
-			description="Basic test of log10().",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Math.Log10
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = log10(time);
- y[1] = log10(time);
- y[2] = log10(time * 2);
-end ArrayBuiltins.FunctionLike.Math.Log10;
-")})));
-end Log10;
-
-end Math;
-
-
-
-package Special
-
-model SemiLinear1
-  Real x = semiLinear(sin(time*10),2,-10);
-  Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Special_SemiLinear1",
-			description="Basic test of the semiLinear() operator.",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Special.SemiLinear1
- Real x;
- Real y[1];
- Real y[2];
-equation
- x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[2] = if time >= 0.0 then time * 2 else time * 3;
-end ArrayBuiltins.FunctionLike.Special.SemiLinear1;
-")})));
-end SemiLinear1;
-
-model SemiLinear2
-  Real x = 0;
-  Real y = 0;
-  Real sa,sb;
-equation
-  sa = time;
-  y = semiLinear(x,sa,sb);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Special_SemiLinear2",
-			description="Test of the semiLinear() operator.",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.Special.SemiLinear2
- constant Real x = 0;
- constant Real y = 0;
- Real sa;
- Real sb;
-equation
- sa = time;
- sa = sb;
-end ArrayBuiltins.FunctionLike.Special.SemiLinear2;
-")})));
-end SemiLinear2;
-
-end Special;
-
-
-
-package EventRel
-
-model NoEventArray1
-	Real x[2] = {1, 2};
-	Real y[2] = noEvent(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_NoEventArray1",
-			description="noEvent() for Real array",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.NoEventArray1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real y[1] = 1.0;
- constant Real y[2] = 2.0;
-end ArrayBuiltins.FunctionLike.EventRel.NoEventArray1;
-")})));
-end NoEventArray1;
-
-model NoEventArray2
-	parameter Boolean x[2] = {true, false};
-	parameter Boolean y[2] = noEvent(x);  // Not very logical, but we need to test this
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_NoEventArray2",
-			description="noEvent() for Boolean array",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.NoEventArray2
- parameter Boolean x[1] = true /* true */;
- parameter Boolean x[2] = false /* false */;
- parameter Boolean y[1];
- parameter Boolean y[2];
-parameter equation
- y[1] = noEvent(x[1]);
- y[2] = noEvent(x[2]);
-end ArrayBuiltins.FunctionLike.EventRel.NoEventArray2;
-")})));
-end NoEventArray2;
-
-model NoEventRecord1
-	record A
-		Real a;
-		Real b;
-	end A;
-	
-	A x = A(1, 2);
-	A y = noEvent(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_NoEventRecord1",
-			description="",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.NoEventRecord1
- constant Real x.a = 1;
- constant Real x.b = 2;
- constant Real y.a = 1.0;
- constant Real y.b = 2.0;
-
-public
- record ArrayBuiltins.FunctionLike.EventRel.NoEventRecord1.A
-  Real a;
-  Real b;
- end ArrayBuiltins.FunctionLike.EventRel.NoEventRecord1.A;
-
-end ArrayBuiltins.FunctionLike.EventRel.NoEventRecord1;
-")})));
-end NoEventRecord1;
-
-model PreTest1
-	parameter Integer x = 1;
-	Real y = pre(x);
-	parameter Integer x2[2] = ones(2);
-	Real y2[2] = pre(x2);
-equation
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_PreTest1",
-			description="pre(): basic test",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.PreTest1
- parameter Integer x = 1 /* 1 */;
- parameter Real y;
- parameter Integer x2[1] = 1 /* 1 */;
- parameter Integer x2[2] = 1 /* 1 */;
- parameter Real y2[1];
- parameter Real y2[2];
-parameter equation
- y = pre(x);
- y2[1] = pre(x2[1]);
- y2[2] = pre(x2[2]);
-end ArrayBuiltins.FunctionLike.EventRel.PreTest1;
-")})));
-end PreTest1;
-
-model EdgeTest1
-	parameter Boolean x = true;
-	Boolean y = edge(x);
-	parameter Boolean x2[2] = {true,true};
-	Boolean y2[2] = edge(x2);
-equation
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_EdgeTest1",
-			description="edge(): basic test",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.EdgeTest1
- parameter Boolean x = true /* true */;
- parameter Boolean y;
- parameter Boolean x2[1] = true /* true */;
- parameter Boolean x2[2] = true /* true */;
- parameter Boolean y2[1];
- parameter Boolean y2[2];
-parameter equation
- y = x and not pre(x);
- y2[1] = x2[1] and not pre(x2[1]);
- y2[2] = x2[2] and not pre(x2[2]);
-end ArrayBuiltins.FunctionLike.EventRel.EdgeTest1;
-")})));
-end EdgeTest1;
-
-model ChangeTest1
-	parameter Real x = 1;
-	Boolean y = change(x);
-	parameter Real x2[2] = ones(2);
-	Boolean y2[2] = change(x2);
-equation
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_ChangeTest1",
-			description="change(): basic test",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.ChangeTest1
- parameter Real x = 1 /* 1 */;
- parameter Boolean y;
- parameter Real x2[1] = 1 /* 1 */;
- parameter Real x2[2] = 1 /* 1 */;
- parameter Boolean y2[1];
- parameter Boolean y2[2];
-parameter equation
- y = x <> pre(x);
- y2[1] = x2[1] <> pre(x2[1]);
- y2[2] = x2[2] <> pre(x2[2]);
-end ArrayBuiltins.FunctionLike.EventRel.ChangeTest1;
-")})));
-end ChangeTest1;
-
-model SampleTest1
-	Boolean x = sample(0, 1);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_EventRel_SampleTest1",
-			description="sample(): basic test",
-			flatModel="
-fclass ArrayBuiltins.FunctionLike.EventRel.SampleTest1
- discrete Boolean x;
-initial equation 
- pre(x) = false;
-equation
- x = sample(0, 1);
-end ArrayBuiltins.FunctionLike.EventRel.SampleTest1;
-")})));
-end SampleTest1;
-
-end EventRel;
-
-end FunctionLike;
 
 end ArrayBuiltins;

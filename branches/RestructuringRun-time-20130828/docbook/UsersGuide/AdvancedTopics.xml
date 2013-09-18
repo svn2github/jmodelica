@@ -70,7 +70,7 @@
 
       <para>For more information about the Java classes and their methods used
       in this example, please consult the API documentation for the Modelica
-      compiler. Notice however that the documentation for the compiler
+      compiler. Note however that the documentation for the compiler
       front-ends is still very rudimentary. Also, the interfaces to the source
       and instance AST will be made more user friendly in upcoming
       versions.</para>
@@ -101,7 +101,7 @@
       <para>The Python commands in this tutorial may be copied and pasted
       directly into a Python shell, in some cases with minor modifications.
       You are, however, strongly encouraged to copy the commands into a text
-      file, e.g., ast_example.py.</para>
+      file, e.g., <filename>ast_example.py</filename>.</para>
 
       <para>Start the tutorial by creating a working directory and copy the
       file

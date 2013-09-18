@@ -94,8 +94,9 @@
               </listitem>
 
               <listitem>
-                <para><link xlink:href="https://www.modelica.org/">MSL
-                (Modelica Standard Library)</link></para>
+                <para><link
+                xlink:href="https://www.modelica.org/libraries">MSL (Modelica
+                Standard Library)</link></para>
               </listitem>
 
               <listitem>
@@ -502,7 +503,8 @@ make install
       <programlisting>cd JModelica.org
 mkdir build
 cd build
-../configure --prefix=/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt; --with-ipopt=/home/&lt;user_name&gt;/&lt;ipopt_install_location&gt; 
+../configure --prefix=/home/&lt;user_name&gt;/&lt;jmodelica_install_location&gt; \
+             --with-ipopt=/home/&lt;user_name&gt;/&lt;ipopt_install_location&gt; 
 make install
 make install_casadi
 </programlisting>

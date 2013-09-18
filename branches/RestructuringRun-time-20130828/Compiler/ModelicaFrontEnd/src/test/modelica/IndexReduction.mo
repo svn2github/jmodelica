@@ -314,7 +314,7 @@ model IndexReduction4_Err
   Real x2;
 equation
   der(x1) + der(x2) = 1;
-  x1 + F(x2) = 1; 
+  x1 + F(x2) = 1;
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
@@ -322,13 +322,21 @@ equation
             description="Test error messages for unbalanced systems.",
 			inline_functions="none",
             errorMessage="
-1 error(s), 0 compliance error(s) and 0 warning(s) found:
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
   Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction4_Err.F(x2)' in equation:
    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
-")})));
+
+Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
+   Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
+   ")})));
 end IndexReduction4_Err;
 
 model IndexReduction5_Err
@@ -351,12 +359,21 @@ equation
             name="IndexReduction5_Err",
             description="Test error messages for unbalanced systems.",
             errorMessage="
-1 error(s), 0 compliance error(s) and 0 warning(s) found:
+2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
 Error: in file 'IndexReduction.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
   Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction5_Err.F(x2)' in equation:
    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
+
+Error: in file 'IndexReduction.IndexReduction5_Err.mof':
+   Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
+    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
 ")})));
 end IndexReduction5_Err;
 
@@ -883,12 +900,12 @@ P*V=m*R*T;
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 12 equations and 11 free variables.
+  Index reduction failed
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc2815301804134878885out/resources/BasicVolume.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   u = u_0 + ( c_v ) * ( T - ( T_0 ) )
+   u = u_0 + c_v * (T - T_0)
 ")})));
   end IndexReduction23_BasicVolume_Err;
 
@@ -1140,14 +1157,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real der_x1_1;
  Real der_x1_2;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 2;
  der_x1_2 + der(x2[2]) = 3;
- ({- x1[1], - x1[2]}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- ({- der_x1_1, - der_x1_2}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ ({temp_6, temp_7}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1[1] = temp_4;
+ - x1[2] = temp_5;
+ - der_x1_1 = temp_6;
+ - der_x1_2 = temp_7;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f_der
@@ -1227,14 +1252,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real der_x1_a_2;
  Real der_x2_a_2;
+ Real der_temp_2;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  x1.der(a[1]) + x2.der(a[1]) = 2;
  der_x1_a_2 + der_x2_a_2 = 3;
- (IndexReduction.IndexReduction28_Record.R({- x1.a[1], - x1.a[2]})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- (IndexReduction.IndexReduction28_Record.R({- x1.der(a[1]), - der_x1_a_2})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
+ (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ (IndexReduction.IndexReduction28_Record.R({der_temp_2, temp_6})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1.der(a[1]) = der_temp_2;
+ - x1.a[1] = temp_4;
+ - x1.a[2] = temp_5;
+ - der_x1_a_2 = temp_6;
 
 public
  function IndexReduction.IndexReduction28_Record.f_der
@@ -1739,4 +1772,334 @@ end IndexReduction.IndexReduction38_ComponentArray;
 ")})));
 end IndexReduction38_ComponentArray;
 	
+model IndexReduction39_MinExp
+  Real x1,x2,x3;
+equation
+  der(x1) + der(x2) + der(x3) = 1;
+  min({x1,x2}) = 0;
+  min(x1,x3) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction39_MinExp",
+            description="Test of index reduction. Min expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction39_MinExp
+ Real x1;
+ Real x2;
+ Real x3;
+ Real der_x1;
+ Real der_x2;
+initial equation 
+ x3 = 0.0;
+equation
+ der_x1 + der_x2 + der(x3) = 1;
+ min(x1, x2) = 0;
+ min(x1, x3) = 0;
+ min(der_x1, der_x2) = 0.0;
+ min(der_x1, der(x3)) = 0.0;
+end IndexReduction.IndexReduction39_MinExp;
+")})));
+end IndexReduction39_MinExp;
+
+model IndexReduction40_MaxExp
+  Real x1,x2,x3;
+equation
+  der(x1) + der(x2) + der(x3) = 1;
+  max({x1,x2}) = 0;
+  max(x1,x3) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction40_MaxExp",
+            description="Test of index reduction. Max expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction40_MaxExp
+ Real x1;
+ Real x2;
+ Real x3;
+ Real der_x1;
+ Real der_x2;
+initial equation 
+ x3 = 0.0;
+equation
+ der_x1 + der_x2 + der(x3) = 1;
+ max(x1, x2) = 0;
+ max(x1, x3) = 0;
+ max(der_x1, der_x2) = 0.0;
+ max(der_x1, der(x3)) = 0.0;
+end IndexReduction.IndexReduction40_MaxExp;
+")})));
+end IndexReduction40_MaxExp;
+
+model IndexReduction41_Homotopy
+  Real x1,x2;
+equation
+  der(x1) + der(x2) = 1;
+  homotopy(x1,x2) = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction41_Homotopy",
+            description="Test of index reduction. Homotopy expression.",
+            flatModel="
+fclass IndexReduction.IndexReduction41_Homotopy
+ Real x1;
+ Real x2;
+ Real der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ der_x1 + der(x2) = 1;
+ homotopy(x1, x2) = 0;
+ der_x1 = 0.0;
+end IndexReduction.IndexReduction41_Homotopy;
+")})));
+end IndexReduction41_Homotopy;
+
+model IndexReduction42_Err
+  Real x1;
+  Real x2;
+algorithm
+  x1 := x2;
+equation
+  der(x1) + der(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IndexReduction42_Err",
+            description="Test error messages for algorithms.",
+			inline_functions="none",
+			algorithms_as_functions=false,
+            errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Cannot differentate the equation:
+   algorithm
+ x1 := 0.0;
+ x1 := x2;
+
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     der(x2)
+
+  The following equation(s) could not be matched to any variable:
+    algorithm
+     x1 := 0.0;
+     x1 := x2;
+")})));
+end IndexReduction42_Err;
+
+
+model IndexReduction43_Order
+	function f
+		input Real x;
+		output Real y;
+	algorithm
+		y := x * x;
+		y := y * x + 2 * y + 3 * x;
+		annotation(derivative=df);
+	end f;
+
+    function df
+        input Real x;
+        input Real dx;
+        output Real dy;
+    algorithm
+        dy := x * x;
+        dy := dy + 2 * x + 3;
+        annotation(derivative(order=2)=ddf);
+    end df;
+
+    function ddf
+        input Real x;
+        input Real dx;
+        input Real ddx;
+        output Real ddy;
+    algorithm
+        ddy := x;
+        ddy := ddy + 2;
+    end ddf;
+	
+	Real x;
+    Real dx;
+    Real y;
+    Real dy;
+equation
+	der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 0;
+	x + f(y) = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction43_Order",
+			description="Test use of order argument to derivative annotation",
+			flatModel="
+fclass IndexReduction.IndexReduction43_Order
+ Real x;
+ Real y;
+ Real dy;
+ Real der_x;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ y = 0.0;
+ dy = 0.0;
+equation
+ der(y) = dy;
+ der_2_x + der(dy) = 0;
+ x + IndexReduction.IndexReduction43_Order.f(y) = 0;
+ der_x + IndexReduction.IndexReduction43_Order.df(y, der(y)) = 0.0;
+ der_2_y = der(dy);
+ der_2_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), der_2_y) = 0.0;
+
+public
+ function IndexReduction.IndexReduction43_Order.ddf
+  input Real x;
+  input Real dx;
+  input Real ddx;
+  output Real ddy;
+ algorithm
+  ddy := x;
+  ddy := ddy + 2;
+  return;
+ end IndexReduction.IndexReduction43_Order.ddf;
+
+ function IndexReduction.IndexReduction43_Order.df
+  input Real x;
+  input Real dx;
+  output Real dy;
+ algorithm
+  dy := x * x;
+  dy := dy + 2 * x + 3;
+  return;
+ end IndexReduction.IndexReduction43_Order.df;
+
+ function IndexReduction.IndexReduction43_Order.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  y := y * x + 2 * y + 3 * x;
+  return;
+ end IndexReduction.IndexReduction43_Order.f;
+
+end IndexReduction.IndexReduction43_Order;
+")})));
+end IndexReduction43_Order;
+
+
+model IndexReduction44_Order2Arg
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y;
+    algorithm
+        y := x1 * x1;
+        y := y * x2;
+        annotation(derivative=df);
+    end f;
+
+    function df
+        input Real x1;
+        input Real x2;
+        input Real dx1;
+        input Real dx2;
+        output Real dy;
+    algorithm
+        dy := x1 * x1;
+        dy := y * x2;
+        annotation(derivative(order=2)=ddf);
+    end df;
+
+    function ddf
+        input Real x1;
+        input Real x2;
+        input Real dx1;
+        input Real dx2;
+        input Real ddx1;
+        input Real ddx2;
+        output Real ddy;
+    algorithm
+        ddy := x1 * x1;
+        ddy := y * x2;
+    end ddf;
+    
+    Real x;
+    Real dx;
+    Real y;
+    Real dy;
+equation
+    der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 0;
+    x + f(y, time) = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction44_Order2Arg",
+			description="Test use of order argument to derivative annotation for function with two arguments",
+			flatModel="
+fclass IndexReduction.IndexReduction44_Order2Arg
+ Real x;
+ Real y;
+ Real dy;
+ Real der_x;
+ Real der_2_x;
+ Real der_2_y;
+initial equation 
+ y = 0.0;
+ dy = 0.0;
+equation
+ der(y) = dy;
+ der_2_x + der(dy) = 0;
+ x + IndexReduction.IndexReduction44_Order2Arg.f(y, time) = 0;
+ der_x + IndexReduction.IndexReduction44_Order2Arg.df(y, time, der(y), 1.0) = 0.0;
+ der_2_y = der(dy);
+ der_2_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, der_2_y, 0.0) = 0.0;
+
+public
+ function IndexReduction.IndexReduction44_Order2Arg.ddf
+  input Real x1;
+  input Real x2;
+  input Real dx1;
+  input Real dx2;
+  input Real ddx1;
+  input Real ddx2;
+  output Real ddy;
+ algorithm
+  ddy := x1 * x1;
+  ddy := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.ddf;
+
+ function IndexReduction.IndexReduction44_Order2Arg.df
+  input Real x1;
+  input Real x2;
+  input Real dx1;
+  input Real dx2;
+  output Real dy;
+ algorithm
+  dy := x1 * x1;
+  dy := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.df;
+
+ function IndexReduction.IndexReduction44_Order2Arg.f
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := x1 * x1;
+  y := y * x2;
+  return;
+ end IndexReduction.IndexReduction44_Order2Arg.f;
+
+end IndexReduction.IndexReduction44_Order2Arg;
+")})));
+end IndexReduction44_Order2Arg;
+
 end IndexReduction;

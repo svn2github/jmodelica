@@ -68,7 +68,7 @@ FDestructorDecl : FFunctionDecl;
  * The information in this node is extracted from the derivative 
  * annotation in a function declaration.
  */
-FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse*;
+FDerivativeFunction : BaseNode ::= Name:FIdUse <Order:int> NoDerivative:FIdUse* ZeroDerivative:FIdUse*;
 
 /**
  * \brief A flattenend record declaration.
@@ -601,6 +601,11 @@ FConnRooted : FConnBoolOp;
  * This is a deprecated variant of Connections.rooted().
  */
 FConnRootedDep : FConnRooted;
+
+/**
+ * The cardinality() function-like operator.
+ */
+FCardinality : FUnaryBuiltIn;
 
 /**
  * \brief For equation clause.
@@ -1459,6 +1464,11 @@ FMatrixExp : FDimensionConvert;
 FTranspose : FUnaryBuiltIn;
 
 /**
+ * \brief Symmetric built-in function.
+ */
+FSymmetric : FUnaryBuiltIn;
+
+/**
  * \brief Cross built-in function.
  */
 FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
@@ -1547,6 +1557,11 @@ FSumExp : FReductionExp;
  * \brief Product built-in function.
  */
 FProductExp : FReductionExp;
+
+/**
+ * \brief SemiLinear built-in function.
+ */
+FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
 
 /**
  * \brief SemiLinear built-in function.

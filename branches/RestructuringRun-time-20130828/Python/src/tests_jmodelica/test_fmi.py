@@ -76,12 +76,14 @@ class Test_FMUModelBase:
         Sets up the test class.
         """
         name = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
+        name = compile_fmu('TablesTest.Table1DfromArray', os.path.join(path_to_mofiles,'TablesTests.mo'))
 
     def setUp(self):
         """
         Sets up the test case.
         """
         self.negated_alias  = load_fmu('NegatedAlias.fmu')
+        self.tables = load_fmu('TablesTest_Table1DfromArray.fmu')
 
     @testattr(stddist = True)
     def test_initialize_once(self):
@@ -123,6 +125,18 @@ class Test_FMUModelBase:
         x,y = self.negated_alias.get("ix"),self.negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,3.0)
         nose.tools.assert_almost_equal(y,-3.0)
+        
+    @testattr(stddist = True)
+    def test_set_get_enumeration(self):
+        self.tables.get("modelicaTable1D.smoothness") #Test that it works
+        self.tables.set("modelicaTable1D.smoothness",2)
+        
+        assert self.tables.get("modelicaTable1D.smoothness") == 2
+        
+        var = self.tables.get_model_variables()["modelicaTable1D.smoothness"]
+        
+        self.tables.set_integer([var.value_reference],3)
+        assert self.tables.get_integer([var.value_reference]) == 3
 
 
 class Test_FMUModelCS1:
@@ -962,7 +976,7 @@ class Test_Logger:
 
         log = parse_jmi_log(os.path.join(path_to_fmu_logs, 'LoggerTest_log.txt'))
 
-        assert log.nodes[0].t == 0.0
+        assert log.find("EquationSolve")[0].t == 0.0
         
         d = gather_solves(log)
 

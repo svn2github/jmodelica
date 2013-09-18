@@ -585,25 +585,25 @@ aspect PrettyPrint {
 	}
 	
 	public void ValueModification.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print("=");
+		str.print(" = ");
 		p.print(getExp(),str,indent);
 	}
 	
 	public void ClassModification.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print("(");
-		for (int i=0;i<getNumArgument();i++) {
-			p.print(getArgument(i),str,indent);
-			if (i<getNumArgument()-1)
-				str.print(",");
+		for (int i = 0; i < getNumArgument(); i++) {
+			p.print(getArgument(i), str, indent);
+			if (i < getNumArgument() - 1)
+				str.print(", ");
 		}
 		str.print(")");
 	}
 	
 	public void ElementModification.prettyPrint(Printer p, PrintStream str, String indent) {
 		if (hasEach())
-			str.print(getEach().toString() + " ");
+			str.print(getEach() + " ");
 		if (hasFinal())
-		 	str.print(getFinal().toString() + " ");
+		 	str.print(getFinal() + " ");
 		p.print(getName(),str, indent);
 		if (hasModification())
 			p.print(getModification(),str,indent);
@@ -721,6 +721,24 @@ aspect PrettyPrint {
 		} else
 			p.print(getExp(),str,indent);
 	}
+	
+	public void IfExp.prettyPrint(Printer p, PrintStream str, String indent) {
+        prettyPrintAsElseExp(p, str, indent);
+    }
+    
+    public void Exp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+        str.print(' ');
+        p.print(this, str, indent);
+    }
+    
+    public void IfExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+        str.print("if ");
+        p.print(getIfExp(), str, indent);
+        str.print(" then ");
+        p.print(getThenExp(), str, indent);
+        str.print(" else");
+        getElseExp().prettyPrintAsElseExp(p, str, indent);
+    }
 	
 	public void RealLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(getUNSIGNED_NUMBER());
@@ -849,7 +867,8 @@ aspect PrettyPrint {
 
 
 	syn String Redeclare.toString() = "redeclare";
-	syn String Final.toString() = "final";
+    syn String Each.toString() = "each";
+    syn String Final.toString() = "final";
 	syn String Inner.toString() = "inner";
 	syn String Outer.toString() = "outer";
 	syn String Replaceable.toString() = "replaceable";
@@ -930,39 +949,42 @@ aspect FlatPrettyPrint {
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-			str.print(indent);
-			
-			str.print(getFTypePrefixVariability());
-						
-			if (hasFTypePrefixInputOutput()) {
-				str.print(getFTypePrefixInputOutput());
-				str.print(" ");
-			}
-			
-			str.print(prettyPrintType());
-			str.print(" ");
-			p.print(getFQName(),str,"");
+		str.print(indent);
 		
-	    	getFAttributeList().prettyPrintFAttributeList(str,p);
-	    	
-	   if (hasBindingExp()) {
-				str.print(" = ");
-				FExp bindingExp = getBindingExp();
-				p.print(bindingExp,str,indent);
-				
-			}
-	    	
+		str.print(getFTypePrefixVariability());
+		
+		if (hasFTypePrefixInputOutput()) {
+			str.print(getFTypePrefixInputOutput());
+			str.print(" ");
+		}
+		
+		str.print(prettyPrintType());
+		str.print(" ");
+		p.print(getFQName(),str,"");
+	
+		getFAttributeList().prettyPrintFAttributeList(str,p);
+		
+		if (hasBindingExp()) {
+			str.print(" = ");
+			FExp bindingExp = getBindingExp();
+			p.print(bindingExp,str,indent);
+			
+		}
+		
 		p.print(getFStringCommentOpt(),str,indent);
+		
+		if (getHGTType() == FClass.HGTVariableType.COMPONENT || getHGTType() == FClass.HGTVariableType.PAIR)
+			str.print(" annotation(__Modelon(IterationVariable))");
 
-	    if (isIndependentParameter() && hasBindingExp()) {
-	    	str.print(" /* ");
-	    	try {
+		if (isIndependentParameter() && hasBindingExp()) {
+			str.print(" /* ");
+			try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
 				str.print("evalutation error");
 			}
-	    	str.print(" */");
-	    }
+			str.print(" */");
+		}
 	}
 	
 	public void FVariable.printFAttributes(PrintStream str, String ... attributes) {
@@ -1071,7 +1093,12 @@ aspect FlatPrettyPrint {
     	}
     	str.print(";\n\n");
     }
-
+    
+    public void FEquationType.prettyPrint(Printer p, PrintStream str, String indent) {}
+    public void FInitialEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+    	str.print(indent + "initial");
+    }
+    
     public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "type " + getName() + " = ");
@@ -1247,11 +1274,9 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
+		p.print(getType(),str,indent);
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
-//		str.print(indent);
-//		str.print("end algorithm");
 	}
 	
 	public void FAssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {
@@ -1754,6 +1779,7 @@ aspect FlatPrettyPrint {
 	eq FVectorExp.builtInName()          = "vector";
 	eq FMatrixExp.builtInName()          = "matrix";
 	eq FTranspose.builtInName()          = "transpose";
+	eq FSymmetric.builtInName()          = "symmetric";
 	eq FCross.builtInName()              = "cross";
 	eq FSkew.builtInName()               = "skew";
 	eq FOuterProduct.builtInName()       = "outerProduct";
@@ -1781,6 +1807,8 @@ aspect FlatPrettyPrint {
 	eq FSumExp.builtInName()             = "sum";
 	eq FProductExp.builtInName()         = "product";
 	eq FLinspace.builtInName()           = "linspace";
+	eq FHomotopyExp.builtInName()        = "homotopy";
+    eq FCardinality.builtInName()        = "cardinality";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
 	eq FActualStream.builtInName()       = "actualStream";

@@ -776,7 +776,10 @@ Alias sets:
 		ErrorTestCase(
 			name="AliasTest16_Err",
 			description="Test alias error.",
-			errorMessage=" 1 error found...
+			errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
 
@@ -1277,7 +1280,7 @@ model ParameterBindingExpTest3_Warn
 			errorMessage="
 Warning: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ConstantEvalTests.mo':
 At line 110, column 18:
-  The parameter p does not have a binding expression.
+  The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
 
@@ -2005,8 +2008,8 @@ initial equation
  m.pre(x1) = 1;
  m.pre(b1) = false;
  m.pre(i1) = 4;
- m.t = 0;
  m.pre(x2) = 2;
+ m.t = 0;
 equation
  m.der(t) = 1;
  when time > 1 then
@@ -2151,7 +2154,7 @@ model UnbalancedTest1_Err
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 0 equations and 2 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
 Semantic error at line 0, column 0:
@@ -2172,13 +2175,17 @@ equation
 		ErrorTestCase(
 			name="UnbalancedTest2_Err",
 			description="Test error messages for unbalanced systems.",
+			variability_propagation=false,
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
 Semantic error at line 0, column 0:
-  The system is structurally singular. The following varible(s) could not be matched to any equation:
+  Index reduction failed
+
+Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Semantic error at line 0, column 0:  The system is structurally singular. The following varible(s) could not be matched to any equation:
    y
 
-  The follwowing equation(s) could not be matched to any variable:
+  The following equation(s) could not be matched to any variable:
    x = 1 + 2
 ")})));
 end UnbalancedTest2_Err;
@@ -2196,11 +2203,7 @@ equation
 			errorMessage="
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE initialization system has 1 equations and 0 free variables.
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
-Semantic error at line 0, column 0:
-  The DAE system has 1 equations and 0 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
 Semantic error at line 0, column 0:
@@ -2222,7 +2225,7 @@ equation
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 0 equations and 1 free variables.
+  Index reduction failed
 
 Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
 Semantic error at line 0, column 0:
@@ -2245,16 +2248,73 @@ equation
 			errorMessage="
 2 error(s), 0 compliance error(s) and 0 warning(s) found:
 
-Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
 Semantic error at line 0, column 0:
-  The DAE system has 3 equations and 2 free variables.
+  Index reduction failed
 
-Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc3729100224648595936out/sources/TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
    x = 0
 ")})));
 end UnbalancedTest5_Err;
+
+
+model MatchingTest1
+	Real x(start=1);
+	Real y;
+initial equation
+	x = 2*y;
+equation
+	der(x) = -x;
+	der(y) = -y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MatchingTest1",
+			description="Tests so that the matching algorithm prioritizes start value",
+			equation_sorting=true,
+			flatModel="
+fclass TransformCanonicalTests.MatchingTest1
+ Real x(start = 1);
+ Real y;
+initial equation 
+ x = 2 * y;
+ x = 1;
+equation
+ der(x) = - x;
+ der(y) = - y;
+end TransformCanonicalTests.MatchingTest1;
+")})));
+end MatchingTest1;
+
+model MatchingTest2
+	Real x;
+	Real y(start=1);
+initial equation
+	x = 2*y;
+equation
+	der(x) = -x;
+	der(y) = -y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="MatchingTest2",
+			description="Tests so that the matching algorithm prioritizes start value",
+			equation_sorting=true,
+			flatModel="
+fclass TransformCanonicalTests.MatchingTest2
+ Real x;
+ Real y(start = 1);
+initial equation 
+ x = 2 * y;
+ y = 1;
+equation
+ der(x) = - x;
+ der(y) = - y;
+end TransformCanonicalTests.MatchingTest2;
+")})));
+end MatchingTest2;
 
 model WhenEqu15
 	discrete Real x[3];
@@ -2318,12 +2378,12 @@ fclass TransformCanonicalTests.WhenEqu1
  Real z[2];
  Real z[3];
 initial equation 
- z[1] = 0.0;
- z[2] = 0.0;
- z[3] = 0.0;
  pre(x[1]) = 0.0;
  pre(x[2]) = 0.0;
  pre(x[3]) = 0.0;
+ z[1] = 0.0;
+ z[2] = 0.0;
+ z[3] = 0.0;
 equation
  der(z[1]) = z[1] .* 0.1;
  der(z[2]) = z[2] .* 0.2;
@@ -2390,12 +2450,12 @@ fclass TransformCanonicalTests.WhenEqu2
  discrete Boolean v(start = true);
  discrete Boolean z(start = true);
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
 equation
  der(xx) = - x;
  when y > 2 and pre(z) then
@@ -2457,12 +2517,12 @@ fclass TransformCanonicalTests.WhenEqu3
  discrete Boolean z(start = true);
  discrete Boolean b1;
 initial equation 
- xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ xx = 2;
  pre(b1) = false;
 equation
  der(xx) = - x;
@@ -2516,11 +2576,11 @@ discrete Real z;
 discrete Real v;
 Real t;
 initial equation 
-t = 0.0;
 pre(x) = 0.0;
 pre(y) = 0.0;
 pre(z) = 0.0;
 pre(v) = 0.0;
+t = 0.0;
 equation
 der(t) = 1;
 when time > 3 then
@@ -2621,10 +2681,10 @@ fclass TransformCanonicalTests.WhenEqu5
  discrete Boolean h1;
  discrete Boolean h2;
 initial equation 
- x = 1;
- pre(a) = 1.0;
  pre(z) = false;
  pre(y) = false;
+ x = 1;
+ pre(a) = 1.0;
  pre(h1) = false;
  pre(h2) = false;
 equation
@@ -2664,8 +2724,8 @@ fclass TransformCanonicalTests.WhenEqu7
  discrete Real x(start = 0);
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when dummy > - 1 then
@@ -2699,9 +2759,9 @@ fclass TransformCanonicalTests.WhenEqu8
  discrete Real y;
  Real dummy;
 initial equation 
- dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ dummy = 0.0;
 equation
  der(dummy) = 0;
  when sample(0, 1 / 3) then
@@ -2746,9 +2806,9 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
 initial equation 
+ pre(u) = 0.0;
  x = 0.0;
  pre(I) = 0.0;
- pre(u) = 0.0;
 equation
  der(x) = - x + u;
  when sample(0, h) then
@@ -2871,8 +2931,8 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Boolean atInit;
 initial equation 
  x_c = pre(x_c);
+ x_p = 1;
  pre(sampleTrigger) = false;
- pre(x_c) = 0.0;
  pre(u_c) = 0.0;
 parameter equation
  atInit = true and initial();
@@ -2979,8 +3039,8 @@ initial equation
  v3 = 0;
  v4 = 1;
  pre(y) = 1;
- pre(i) = 0;
  pre(up) = true;
+ pre(i) = 0;
 equation
  when sample(0.1, 1) then
   i = if up then pre(i) + 1 else pre(i) - 1;
@@ -4602,6 +4662,127 @@ Jacobian:
 ")})));
 end BlockTest7;
 
+model BlockTest8
+  Real y1,y2;
+equation 
+  y1 =  sin(time) + y2;
+  y2 =  (y1 * 4) + (3 * time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest8",
+			description="Test of linear systems of equations. Checks that the time
+			derivative is not included in the jacobian.",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved linear block of 2 variables:
+Coefficient variability: Constant
+Unknown variables:
+  y2
+  y1
+Equations:
+  y2 = y1 * 4 + 3 * time
+  y1 = sin(time) + y2
+Jacobian:
+  |1.0, - 4|
+  |- 1.0, 1.0|
+-------------------------------
+")})));
+end BlockTest8;
+
+model BlockTest9
+record R
+	Real[2] a;	
+end R;
+function f
+  input Real a;
+  output R b;
+  output Real dummy;
+  output Integer[2] c;
+algorithm
+  b := R({a,a});
+  c := {integer(a),integer(a)};
+  dummy := 1;
+end f;
+discrete R r;
+Integer[2] i;
+equation
+  (r, ,i) = f(time*10);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest9",
+			description="Test of linear systems of equations. Checks that function
+			call equations with different return value types are matched correctly.",
+			equation_sorting=true,
+			inline_functions="none",
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 4 variables:
+Unknown variables:
+  r.a[1]
+  r.a[2]
+  i[1]
+  i[2]
+Equations:
+  (TransformCanonicalTests.BlockTest9.R({r.a[1], r.a[2]}), , {i[1], i[2]}) = TransformCanonicalTests.BlockTest9.f(time * 10)
+-------------------------------
+")})));
+end BlockTest9;
+
+model BlockTest10
+	function F
+		input Real x[2];
+		output Real y[2];
+	algorithm
+		if x[1] < 0 then
+			x := -x;
+		end if;
+		y := x;
+	end F;
+	Real z[2], w[2];
+equation
+	w = {time, 2};
+	z + F(w) = {0, 0};
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest10",
+			description="Test alias elimination of negative function call lefts",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  w[1]
+Solution:
+  time
+-------------------------------
+Solved block of 2 variables:
+Unknown variables:
+  temp_2
+  temp_3
+Equations:
+  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[1]
+Solution:
+  temp_2 / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  z[2]
+Solution:
+  temp_3 / (- 1.0)
+-------------------------------
+")})));
+end BlockTest10;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];
@@ -5090,10 +5271,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Integer _residual_equation_scaling = 1 /* 1 */;
  parameter Boolean _runtime_log_to_file = false /* false */;
  parameter Boolean _use_Brent_in_1d = false /* false */;
- parameter Boolean _use_automatic_scaling = true /* true */;
  parameter Boolean _use_jacobian_equilibration = false /* false */;
- parameter Boolean _use_jacobian_scaling = false /* false */;
- parameter Boolean _use_manual_equation_scaling = false /* false */;
 end TransformCanonicalTests.TestRuntimeOptions1;
 ")})));
 end TestRuntimeOptions1;
@@ -5138,54 +5316,47 @@ model InFunctionCall
     input Real x;
     output Real y;
   algorithm
-   y := x;
+   y := mod(x,2);
    return;
   end f;
 	
+	Real x;
 equation
-	f(integer(0.9 + time/10) * 3.14);
+	x = f(integer(0.9 + time/10) * 3.14);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="EventGeneratingExps_InFunctionCall",
 			description="Tests event generating expressions in function calls.",
-			inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
- discrete Integer temp_1;
+ Real x;
+ discrete Real temp_1;
+ discrete Integer temp_3;
 initial equation 
- temp_1 = integer(0.9 + time / 10);
+ temp_3 = integer(0.9 + time / 10);
+ pre(temp_1) = 0.0;
 equation
- TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f(temp_1 * 3.14);
- when {0.9 + time / 10 < pre(temp_1), 0.9 + time / 10 >= pre(temp_1) + 1} then
-  temp_1 = integer(0.9 + time / 10);
+ x = temp_1 - noEvent(floor(temp_1 / 2)) * 2;
+ temp_1 = temp_3 * 3.14;
+ when {0.9 + time / 10 < pre(temp_3), 0.9 + time / 10 >= pre(temp_3) + 1} then
+  temp_3 = integer(0.9 + time / 10);
  end when;
-
-public
- function TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x;
-  return;
- end TransformCanonicalTests.EventGeneratingExps.InFunctionCall.f;
-
 end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
 ")})));
 end InFunctionCall;
 
+
 model InWhenEquations
-	Real x;
+       Real x;
 equation
+    when integer(time*3) + noEvent(integer(time*3)) > 1 then
+        x = floor(time * 0.3 + 4.2);
+    end when;
 
-when integer(time*3) + noEvent(integer(time*3)) > 1 then
-  x = floor(time * 0.3 + 4.2);
- end when;
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="EventGeneratingExps_InWhenEquations",
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InWhenEquations",
 			description="Tests event generating expressions in a when equation.",
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
@@ -5206,6 +5377,7 @@ end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
 end InWhenEquations;
 
 end EventGeneratingExps;
+
 
 model GetInstanceName
 	model B
@@ -5243,5 +5415,70 @@ end TransformCanonicalTests.GetInstanceName;
 ")})));
 	
 end GetInstanceName;
+
+
+model FixedFalseParam1
+    Real x;
+    parameter Real p(fixed=false);
+initial equation
+    2*x = p;
+    x = 3;
+equation
+    der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FixedFalseParam1",
+            description="Test of parameters with fixed = false.",
+            flatModel="
+fclass TransformCanonicalTests.FixedFalseParam1
+ Real x;
+ parameter Real p(fixed = false);
+initial equation
+ 2 * x = p;
+ x = 3;
+equation
+ der(x) = - x;
+end TransformCanonicalTests.FixedFalseParam1;
+")})));
+end FixedFalseParam1;
+
+
+model AssertEval1
+	Real x = time;
+equation
+	assert(true, "Test assertion");
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AssertEval1",
+			description="Test assertation evaluation: passed assert",
+			flatModel="
+fclass TransformCanonicalTests.AssertEval1
+ Real x;
+equation
+ x = time;
+end TransformCanonicalTests.AssertEval1;
+")})));
+end AssertEval1;
+
+
+model AssertEval2
+    Real x = time;
+equation
+    assert(false, "Test assertion");
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AssertEval2",
+			description="Test assertation evaluation: failed assert",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: Test assertion
+")})));
+end AssertEval2;
+
 
 end TransformCanonicalTests;

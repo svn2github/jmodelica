@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.TreeMap;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
@@ -145,12 +146,10 @@ public class EquationBlockFactory {
 		boolean isLinear = true;
 		for (SimpleEquationBlock seb : ls) {
 			for (FAbstractEquation e : seb.equations()) {
-				if (e.isReal()) {
-					if (!e.checkLinearity(activeVariables))
-						isLinear = false;
-				} else {
+				if (e.isDiscrete())
 					isMixed = true;
-				}
+				if (!e.checkLinearity(activeVariables))
+					isLinear = false;
 			}
 		}
 		
@@ -610,20 +609,16 @@ public class BiPGraph {
 	}
 	
 	public BiPGraph(Collection<Eq> eqs, Collection<Var> vars) {
-		for (Eq oldE : eqs) {
-			Eq e = addEquation(oldE.getName(), oldE.getEquation());
-			e.groupNumber(oldE.groupNumber());
-		}
-		for (Var oldV : vars) {
+		for (Eq oldE : eqs)
+			addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber());
+		for (Var oldV : vars)
 			addVariable(oldV.getName(), oldV.getVariable());
-		}
 		for (Eq oldE : eqs) {
 			Eq e = getEquation(oldE.getName());
 			for (Var oldV : oldE.getVariables()) {
 				Var v = getVariable(oldV.getName());
-				if (v != null) {
+				if (v != null)
 					addInsidence(e, v);
-				}
 			}
 		}
 	}
@@ -664,10 +659,10 @@ public class BiPGraph {
 		return (list == null) ? Collections.<Eq>emptyList() : list;
 	}
 
-	public Eq addEquation(String name, FAbstractEquation eqn) {
+	public Eq addEquation(String name, FAbstractEquation eqn, int groupNumber) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
-			e = new Eq(name, eqn);
+			e = new Eq(name, eqn, groupNumber);
 			equationMap.put(name,e);
 			insertIntoEquationIndexMap(eqn,e);
 		}
@@ -753,6 +748,10 @@ public class BiPGraph {
 		DISCRETE_PRE_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
+	    },
+	    NON_FIXED_PARAMETERS {
+	        public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
+	        public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
 		};
 		
 		public abstract Collection<? extends FVariable> variables(FClass c);
@@ -788,10 +787,9 @@ public class BiPGraph {
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
-				eqn = addEquation(eqNamePrefix+k, e);
+				eqn = addEquation(eqNamePrefix+k, e, i);
 				groupMembers.add(eqn);
 				k++;
-				eqn.groupNumber(i);
 
 				for (VarType t : variableTypes) {
 					for (FVariable y : t.variables(e)) {
@@ -824,7 +822,14 @@ public class BiPGraph {
 	}
 	
 	public boolean canMatch(Eq e, Var v) {
-		return true;
+		FAbstractEquation equation = e.getEquation();
+		FVariable variable = v.getVariable();
+		
+		// Discrete variables can only be matched to discrete equations.
+		// Except discrete reals in initial system.
+		return variable.isContinuous() ||
+				equation.isDiscrete() ||
+				equation.isInitial();
 	}
 	
 	public void addInsidence(Eq e, Var v) {
@@ -849,6 +854,16 @@ public class BiPGraph {
 		return unmatched;
 	}
 	
+	private static class VarMatchingComparator implements Comparator<Var> {
+		@Override
+		public int compare(Var o1, Var o2) {
+			int diff = (o1.getVariable().startAttributeSet() ? 1 : 0) - (o2.getVariable().startAttributeSet() ? 1 : 0);
+			if (diff != 0)
+				return diff;
+			return o1.getName().compareTo(o2.getName());
+		}
+	}
+	
 	public java.util.List<Map<Var,Set<Eq>>> bfs(Collection<Eq> startingNodes) {
 		java.util.List<Map<Var,Set<Eq>>> Lv = new ArrayList<Map<Var,Set<Eq>>>();
 		Set<Eq> Le_current = new LinkedHashSet<Eq>();
@@ -866,7 +881,7 @@ public class BiPGraph {
 			//System.out.println("*** layer: " + layer);
 			//System.out.println(Lv);
 			//System.out.println(Le_current);
-			Lv.add(new LinkedHashMap<Var,Set<Eq>>());
+			Lv.add(new TreeMap<Var,Set<Eq>>(new VarMatchingComparator()));
 			
 			for (Eq s : Le_current) {
 				//System.out.println(" eq: " + s.getName());
@@ -1140,29 +1155,57 @@ public class BiPGraph {
 									}
 									return null;
 								}
-								// Create a new differentiated equation
-								FAbstractEquation deee = eee.diff("time");
-								result.addEquation(deee);
-								ASTNode.log.info("About to add equation: " + deee);
-								// Add the differentiated equation		
-								// Loop over all equations in the group 
-								for (Eq groupMemberEquation : ee.getGroupMembers()) {				
-									Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee);
-									eqn.groupNumber(groupMemberEquation.groupNumber());
-									
-									// Add edges
-									for (FVariable fv : deee.variables()) {
-										Var vvv = variableMap.get(fv.name());
-										ASTNode.log.info("*** " + fv.name());
-										if (vvv!=null) {
-											addEdge(eqn,vvv);
-										}
-									}
-									// Set a reference from the visited equation to
-									// its differentiated counterpart
-									groupMemberEquation.setMeDifferentiated(eqn);
-									eqn.setMeIntegrated(groupMemberEquation);
+								FAbstractEquation deee = null;
+								// Look through member equations and check if the differentiated equation already exisits
+								for (Eq groupMember : ee.getGroupMembers())
+									if (groupMember.getMeDifferentiated() != null)
+										deee = groupMember.getMeDifferentiated().getEquation();
+								if (deee == null) {
+									// It does not exsit, create it.
+									Collection<FAbstractEquation> deees = eee.diff("time");
+									if (deees.size() != 1)
+										throw new UnsupportedOperationException("Differentiation of equations should result" +
+												" in a single equation when differentiating on time");
+									else
+										deee = deees.iterator().next();
+									result.addEquation(deee);
+								} else {
+									// It already exisits we need to flush cached values since we might have added new variables
+									deee.flushAllRecursive();
 								}
+								ASTNode.log.info("About to add equation: " + deee);
+								// Sets that indicates the variables in the lhs and rhs.
+								Set<FVariable> rhsVars = Collections.emptySet();
+								Map<FVariable, Integer> lhsVars = Collections.emptyMap();
+								if (deee.numScalarEquations() > 1) {
+									rhsVars = deee.referencedFVariablesInRHS();
+									lhsVars = new HashMap<FVariable, Integer>();
+									int i = 0;
+									for (FVariable fv : eee.referencedFVariablesInLHS()) {
+										if (fv.getMeDifferentiated() != null)
+											lhsVars.put(fv.getMeDifferentiated(), i);
+										i++;
+									}
+								}
+								// Add the differentiated equation
+								int groupNumber = ee.groupNumber();
+								Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupNumber);
+								
+								// Add edges
+								for (FVariable fv : deee.variables()) {
+									Var vvv = variableMap.get(fv.name());
+									Integer pos = lhsVars.get(fv);
+									if (vvv!=null && (pos == null || pos == groupNumber || rhsVars.contains(fv))) {
+										ASTNode.log.info("*** " + fv.name());
+										addEdge(eqn,vvv);
+									}
+								}
+								// Set a reference from the visited equation to
+								// its differentiated counterpart
+								
+								ee.setMeDifferentiated(eqn);
+								eqn.setMeIntegrated(ee);
+								// TODO: We might need to add this equation to its existing groupmembers?
 								ASTNode.log.info("Equation added");
 							}
 							for (Var vv : visitedVariables) {
@@ -1297,7 +1340,7 @@ public class BiPGraph {
 						
 			// Add variables to the graph
 			for (FVariable fv : z) {
-				gd.addVariable(fv.name(),fv);     
+				gd.addVariable(fv.name(),fv);
 			}
 				
 			int k = 1;
@@ -1310,13 +1353,13 @@ public class BiPGraph {
 				
 				for (int i=0;i<n_eq;i++) {
 					ASTNode.log.info("*** " + e.prettyPrint(""));
-					eqn = gd.addEquation("eq_"+k,e);
+					eqn = gd.addEquation("eq_"+k, e, i);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
 						//FRealVariable frv = (FRealVariable)((FRealVariable)y).getMeIntegrated();
 						if (z.contains(y)) {
-							ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));	
+							ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
 							v = gd.getVariable(y.name()); 
 							gd.addEdge(eqn,v);
 						} 
@@ -1330,52 +1373,28 @@ public class BiPGraph {
 			// Compute weights for variables based on linearity
 			Map<String,Integer> linearityWeights = new HashMap<String,Integer>();
 			for (FVariable fv : z) {
-		 		int w = 0;
- 				for (FAbstractEquation feq : g) {
- 					try {
-						FAbstractEquation feqd = feq.diff(fv.name());
-						//System.out.println(feqd.prettyPrint(""));
-						if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
-							w += 2;
-						} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
-							w += 1; 
-						}
-					} catch(Exception e) {}
-				}	
-				FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
-				if (frv!=null) {
-					for (FAbstractEquation feq : g) {
-						try {
-							FAbstractEquation feqd = feq.diff(frv.name());
-							//System.out.println(feqd.prettyPrint(""));
-							if (!feqd.variability().lessOrEqual(ASTNode.fParameter())) {
-								w += 2;
-							} else if (!feqd.variability().lessOrEqual(ASTNode.fConstant())) {
-								w += 1; 
-							}
-						} catch(Exception e) {}							
-					}		
-				}
+		 		int w = calculateLinearityWeight(g, fv);
+		 		if (fv.getMeIntegrated() != null)
+					w += calculateLinearityWeight(g, fv.getMeIntegrated());
 				ASTNode.log.info("Linearity weight: " + fv.name() + " " + w);
-				linearityWeights.put(fv.name(),new Integer(w));
+				linearityWeights.put(fv.name(), w);
 			}
 			
-			gd.matchMunkres(linearityWeights);				
+			gd.matchMunkres(linearityWeights);
 			ASTNode.log.info(gd.printMatching());
 			
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
 				zHat.add(vv.getVariable());
 			}
-
-					
+			
 			// Step 5: prepare for next iteration
 			// Get the "integrated" equations
 			g = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation ee : h) {
 				g.add(ee.getMeIntegrated());
 			}
-							
+			
 			// Get the "integrated" variables 
 			z = new ArrayList<FVariable>();
 			for (FVariable fv : zHat) {
@@ -1391,7 +1410,7 @@ public class BiPGraph {
 				}
 			}
 
-			// Check if there are remaining differentiated equations								
+			// Check if there are remaining differentiated equations
 			remainingDifferentiatedEquations = false;
 			for (FAbstractEquation fe : g) {
 				if (fe.getMeIntegrated()!=null) {
@@ -1422,6 +1441,23 @@ public class BiPGraph {
 		ASTNode.log.info("");
 		
 		return result;
+	}
+	
+	private int calculateLinearityWeight(Collection<FAbstractEquation> equations, FVariable variable) {
+		int weight = 0;
+		for (FAbstractEquation feq : equations) {
+			try {
+				Collection<FAbstractEquation> feqds = feq.diff(variable.name());
+				FTypePrefixVariability variability = ASTNode.fConstant();
+				for (FAbstractEquation feqd : feqds)
+					variability = variability.combine(feqd.variability());
+				if (!variability.lessOrEqual(ASTNode.fParameter()))
+					weight += 2;
+				else if (!variability.lessOrEqual(ASTNode.fConstant()))
+					weight += 1;
+			} catch(EquationDifferentiationException e) {}
+		}
+		return weight;
 	}
 	
 	protected class UnmatchedEquationsCriteria implements Criteria<Eq> {
@@ -1743,7 +1779,7 @@ public class SolvingBiPGraph extends BiPGraph {
 	
 	@Override
 	public boolean canMatch(Eq e, Var v) {
-		return isSolved(e, v).isSolvable();
+		return super.canMatch(e, v) && isSolved(e, v).isSolvable();
 	}
 	
 	public Solvability isSolved(Eq e, Var v) {
@@ -1770,7 +1806,9 @@ public class SolvingBiPGraph extends BiPGraph {
 
 public class Eq implements Comparable<Eq> {
 
-	private String name;
+	private final String name;
+	private final FAbstractEquation eqn;
+	private final int groupNumber;
 	private java.util.List<Var> variables = new ArrayList<Var>();
 	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
 	private int analyticallySolvableOccurrences = 0;
@@ -1778,8 +1816,6 @@ public class Eq implements Comparable<Eq> {
 	private Var matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
-	private FAbstractEquation eqn;
-	private int groupNumber;
 	private Eq meDifferentiated = null;
 	private Eq meIntegrated = null;
 	private boolean isRes = false;
@@ -1798,9 +1834,10 @@ public class Eq implements Comparable<Eq> {
 	*/
 	private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
 
-	public Eq(String name, FAbstractEquation eqn) {
+	public Eq(String name, FAbstractEquation eqn, int groupNumber) {
 		this.name = name;
 		this.eqn = eqn;
+		this.groupNumber = groupNumber;
 		this.groupMembers.add(this);
 	}
 			
@@ -1830,10 +1867,14 @@ public class Eq implements Comparable<Eq> {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public FAbstractEquation getEquation() {
+		return eqn;
 	}
-
+		
+	public int groupNumber() {
+		return groupNumber;
+	}
+	
 	public java.util.List<Var> getVariables() {
 		return variables;
 	}
@@ -1904,22 +1945,6 @@ public class Eq implements Comparable<Eq> {
 		return getName();
 	}
 
-	public FAbstractEquation getEquation() {
-		return eqn;
-	}
-		
-	public void setEquation(FAbstractEquation eqn) {
-		this.eqn = eqn;
-	}
-	
-	public int groupNumber() {
-		return groupNumber;
-	}
-	
-	public void groupNumber(int groupNumber) {
-		this.groupNumber = groupNumber;
-	}
-	
 	public void addAnalyticallySolvableVariable(Var v) {
 		solvableVariables.add(v);
 		analyticallySolvableOccurrences++;
@@ -1996,16 +2021,24 @@ public class Eq implements Comparable<Eq> {
 		return 0;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Eq))
+			return false;
+		Eq other = (Eq)o;
+		return getName().equals(other.getName());
+	}
+
 
 }
 
 public class Var implements Comparable<Var> {
 
-	private String name;
+	private final String name;
+	private final FVariable v;
 	private Eq matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
-	private FVariable v;
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
 	private int occurrences = 0;
@@ -2032,9 +2065,9 @@ public class Var implements Comparable<Var> {
 	public String getName() {
 		return name;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	
+	public FVariable getVariable() {
+		return v;
 	}
 
 	public Eq getMatching() {
@@ -2060,15 +2093,7 @@ public class Var implements Comparable<Var> {
 	public void setLayer(int layer) {
 		this.layer = layer;
 	}
-	
-	public FVariable getVariable() {
-		return v;
-	}
 		
-	public void setVariable(FVariable v) {
-		this.v = v;
-	}
-	
 	public void setMeDifferentiated(Var var) {
 		this.meDifferentiated = var;
 		this.getVariable().setMeDifferentiated(var.getVariable());
@@ -2160,6 +2185,14 @@ public class Var implements Comparable<Var> {
 		if (diff != 0)
 			return diff;
 		return 0;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Var))
+			return false;
+		Var other = (Var)o;
+		return getName().equals(other.getName());
 	}
 
 }

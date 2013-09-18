@@ -202,6 +202,76 @@ end RecordTests.RecordFlat5;
 end RecordFlat5;
 
 
+model RecordFlat6
+    record A
+        Real a;
+    end A;
+    
+    record B
+        extends A;
+        Real a;
+        Real b;
+    end B;
+    
+    B b(a = 1, b = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat6",
+            description="Merging of equivalent members when flattening records",
+            flatModel="
+fclass RecordTests.RecordFlat6
+ RecordTests.RecordFlat6.B b(a = 1,b = 2);
+
+public
+ record RecordTests.RecordFlat6.B
+  Real a;
+  Real b;
+ end RecordTests.RecordFlat6.B;
+
+end RecordTests.RecordFlat6;
+")})));
+end RecordFlat6;
+
+
+model RecordFlat7
+    record A
+        Real b = time;
+    end A;
+
+    model B
+        A a;
+    end B;
+
+    model C
+        extends B;
+    end C;
+
+    model D
+        extends B;
+        extends C;
+    end D;
+
+    D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordFlat7",
+			description="Merging of equivalent record variables when flattening",
+			flatModel="
+fclass RecordTests.RecordFlat7
+ RecordTests.RecordFlat7.A d.a;
+
+public
+ record RecordTests.RecordFlat7.A
+  Real b = time;
+ end RecordTests.RecordFlat7.A;
+
+end RecordTests.RecordFlat7;
+")})));
+end RecordFlat7;
+
+
 
 model RecordType1
  record A
@@ -4439,5 +4509,41 @@ end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;
 
+model RecordEval6
+	record R
+		parameter Integer n1 = 1;
+		Real x;
+	end R;
+	R r(n1 = n2, x = time);
+	parameter Integer n2 = 2;
+	Real y[n2] = ones(n2) * time;
+	Real z = y * (1:r.n1);
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordEval6",
+			description="Test that evaluation before scalarization of record variable works",
+			flatModel="
+fclass RecordTests.RecordEval6
+ parameter Integer r.n1 = 2 /* 2 */;
+ Real r.x;
+ parameter Integer n2 = 2 /* 2 */;
+ Real y[1];
+ Real y[2];
+ Real z;
+equation
+ r.x = time;
+ y[1] = time;
+ y[2] = time;
+ z = y[1] + y[2] * 2;
+
+public
+ record RecordTests.RecordEval6.R
+  parameter Integer n1;
+  Real x;
+ end RecordTests.RecordEval6.R;
+
+end RecordTests.RecordEval6;
+")})));
+end RecordEval6;
 
 end RecordTests;

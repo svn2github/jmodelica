@@ -25,8 +25,8 @@ package TypeTests
 			name="TypeTest1",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 11, column 11:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
@@ -43,8 +43,8 @@ Semantic error at line 11, column 11:
 			name="TypeTest2",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 35, column 4:
   The right and left expression types of equation are not compatible
 ")})));
@@ -60,8 +60,8 @@ Semantic error at line 35, column 4:
 			name="TypeTest3",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 51, column 16:
   Type error in expression: x + y
 ")})));
@@ -78,8 +78,8 @@ Semantic error at line 51, column 16:
 			name="TypeTest4",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
   Type error in expression: x + y
 ")})));
@@ -96,8 +96,8 @@ Semantic error at line 66, column 4:
 			name="TypeTest5",
 			description="Basic expression type test.",
 			errorMessage="
-1 error(s) found...
-In file 'src/test/modelica/TypeTests.mo':
+1 errors found:
+Error: in file 'src/test/modelica/TypeTests.mo':
 Semantic error at line 66, column 4:
   Type error in expression: x + y
 ")})));
@@ -1095,16 +1095,16 @@ initial equation
  temp_4 = div(aReal, aReal);
 equation
  x = temp_4 + temp_3 + temp_2 + temp_1;
- when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+ when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
   temp_1 = 1;
  end when;
- when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+ when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
   temp_2 = 1.0;
  end when;
- when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+ when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
   temp_3 = 1.0;
  end when;
- when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+ when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
   temp_4 = 1.0;
  end when;
 end TypeTests.DivTest1;
@@ -1213,16 +1213,16 @@ initial equation
  temp_4 = div(aReal, aReal);
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {noEvent(div(anInt, anInt)) < pre(temp_1), noEvent(div(anInt, anInt)) >= pre(temp_1) + 1} then
+ when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
   temp_1 = 1;
  end when;
- when {noEvent(div(aReal, anInt)) < pre(temp_2), noEvent(div(aReal, anInt)) >= pre(temp_2) + 1} then
+ when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
   temp_2 = 1.0;
  end when;
- when {noEvent(div(anInt, aReal)) < pre(temp_3), noEvent(div(anInt, aReal)) >= pre(temp_3) + 1} then
+ when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
   temp_3 = 1.0;
  end when;
- when {noEvent(div(aReal, aReal)) < pre(temp_4), noEvent(div(aReal, aReal)) >= pre(temp_4) + 1} then
+ when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
   temp_4 = 1.0;
  end when;
 end TypeTests.RemTest1;
@@ -1664,5 +1664,191 @@ Semantic error at line 1440, column 30:
 ")})));
 end StringExpType1;
 
+model AlgorithmType1
+	Boolean b;
+	Integer i;
+	discrete Real r;
+algorithm
+	r := time*time + 1;
+	b := noEvent(r > 2) and noEvent(r < 4);
+	i := integer(r);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmType1",
+			description="Correct types in algorithm.",
+			algorithms_as_functions=false,
+			flatModel="
+fclass TypeTests.AlgorithmType1
+ discrete Boolean b;
+ discrete Integer i;
+ discrete Real r;
+initial equation 
+ pre(b) = false;
+ pre(i) = 0;
+ pre(r) = 0.0;
+algorithm
+ r := pre(r);
+ b := pre(b);
+ i := pre(i);
+ r := time * time + 1;
+ b := noEvent(r > 2) and noEvent(r < 4);
+ i := integer(r);
+
+end TypeTests.AlgorithmType1;
+")})));
+end AlgorithmType1;
+	
+model AlgorithmType2
+	record I
+		R innerR[3];
+		Integer innerInteger[3];
+	end I;
+	record R
+		discrete Real r;
+	end R;
+	R outerR[3];
+	Integer outerInteger[3];
+	I i;
+algorithm
+	outerInteger := {1,2,3};
+	outerR := {R(1.0),R(2.0),R(3.0)};
+	i := I(outerR, outerInteger);
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmType2",
+			description="Correct types in algorithm. Records and arrays.",
+			algorithms_as_functions=false,
+			flatModel="
+fclass TypeTests.AlgorithmType2
+ discrete Real outerR[1].r;
+ discrete Real outerR[2].r;
+ discrete Real outerR[3].r;
+ discrete Integer outerInteger[1];
+ discrete Integer outerInteger[2];
+ discrete Integer outerInteger[3];
+ discrete Real i.innerR[1].r;
+ discrete Real i.innerR[2].r;
+ discrete Real i.innerR[3].r;
+ discrete Integer i.innerInteger[1];
+ discrete Integer i.innerInteger[2];
+ discrete Integer i.innerInteger[3];
+initial equation 
+ outerR[1].pre(r) = 0.0;
+ outerR[2].pre(r) = 0.0;
+ outerR[3].pre(r) = 0.0;
+ pre(outerInteger[1]) = 0;
+ pre(outerInteger[2]) = 0;
+ pre(outerInteger[3]) = 0;
+ i.innerR[1].pre(r) = 0.0;
+ i.innerR[2].pre(r) = 0.0;
+ i.innerR[3].pre(r) = 0.0;
+ i.pre(innerInteger[1]) = 0;
+ i.pre(innerInteger[2]) = 0;
+ i.pre(innerInteger[3]) = 0;
+algorithm
+ outerInteger[1] := pre(outerInteger[1]);
+ outerInteger[2] := pre(outerInteger[2]);
+ outerInteger[3] := pre(outerInteger[3]);
+ outerR[1].r := outerR[1].pre(r);
+ outerR[2].r := outerR[2].pre(r);
+ outerR[3].r := outerR[3].pre(r);
+ i.innerR[1].r := i.innerR[1].pre(r);
+ i.innerR[2].r := i.innerR[2].pre(r);
+ i.innerR[3].r := i.innerR[3].pre(r);
+ i.innerInteger[1] := i.pre(innerInteger[1]);
+ i.innerInteger[2] := i.pre(innerInteger[2]);
+ i.innerInteger[3] := i.pre(innerInteger[3]);
+ outerInteger[1] := 1;
+ outerInteger[2] := 2;
+ outerInteger[3] := 3;
+ outerR[1].r := 1.0;
+ outerR[2].r := 2.0;
+ outerR[3].r := 3.0;
+ i.innerR[1].r := outerR[1].r;
+ i.innerR[2].r := outerR[2].r;
+ i.innerR[3].r := outerR[3].r;
+ i.innerInteger[1] := outerInteger[1];
+ i.innerInteger[2] := outerInteger[2];
+ i.innerInteger[3] := outerInteger[3];
+
+public
+ record TypeTests.AlgorithmType2.R
+  discrete Real r;
+ end TypeTests.AlgorithmType2.R;
+
+ record TypeTests.AlgorithmType2.I
+  discrete TypeTests.AlgorithmType2.R innerR[3];
+  discrete Integer innerInteger[3];
+ end TypeTests.AlgorithmType2.I;
+
+end TypeTests.AlgorithmType2;
+
+")})));
+end AlgorithmType2;
+
+model AlgorithmType3
+	Boolean b;
+	Integer i;
+	Real r;
+algorithm
+	b := time*time + 1;
+	r := noEvent(r > 2) and noEvent(r < 4);
+	i := if b then "one" else "two";
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType3",
+			description="Incorrect types in algorithm",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Types of right and left side of assignment are not compatible
+")})));
+end AlgorithmType3;
+
+model AlgorithmType4
+	
+	function f
+		output Real o = 2;
+	algorithm
+	end f;
+	constant Real x;
+	parameter Real y;
+initial algorithm
+	x := 1;
+	y := 2;
+algorithm
+	x := 2;
+	y := 3;
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AlgorithmType4",
+			description="Algorithm assigning to parameters and constants.",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to constants is not allowed in algorithms
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to constants is not allowed in algorithms
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Assignments to parameters in algorithms is only allowed in initial algorithms
+			
+")})));
+end AlgorithmType4;
 
 end TypeTests;

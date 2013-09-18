@@ -54,7 +54,6 @@ aspect TransformCanonical {
 	 *         equations by calling genBindingEquations().
 	 *    <li> For each non-function algorithm:
 	 *         <ul>
-	 *           <li> A function is generated with the algorithm as body, 
 	 *                any assigned variables as outputs and any used 
 	 *                variables as inputs.
 	 *           <li> The original algorithm is replaced with a call to 
@@ -80,6 +79,7 @@ aspect TransformCanonical {
 		genAlgorithmFunctions();
 		genBindingEquations();
 		scalarize();
+		genAlgoInitStmts();
 		propagateResidualPairs();
 		genInitArrayStatements();
 		functionInliningIfSet();
@@ -90,6 +90,7 @@ aspect TransformCanonical {
 		enableIfEquationRewrite();
 		enableWhenEquationRewrite();
 		variabilityPropagationIfSet();
+		evaluateAsserts();
 		enableSemiLinearRewrite();
 		genInitialEquations();
 		sortDependentParameters();
@@ -120,6 +121,8 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
+			computeInteractiveFMUIfSet();
+			daeBLT.complianceCheck();
 		}
 	
 		root().flushAllRecursive();	
@@ -181,6 +184,21 @@ aspect TransformCanonical {
 			out.close();
 		}
 		
+		public void complianceCheck() {
+			for (AbstractEquationBlock block : this) {
+				if (!block.isSolvable()) {
+					for (FAbstractEquation equ : block.equations()) {
+						if (equ instanceof FWhenEquation) {
+							if (block.equations().size() == 1) {
+								equ.compliance("Unsolved equations in when-clause is not supported. \n" + equ.prettyPrint(""));
+							} else {
+								equ.compliance("When-clause in unsolved equations is not supported. \n" + equ.prettyPrint(""));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public class StructuredBLT extends BLT {
@@ -450,6 +468,7 @@ aspect TransformCanonical {
 	 */
 	public abstract class AbstractEquationBlock {
 	
+		private Set<AbstractEquationBlock> allPredecessors = null;
 		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
 		private Set<FVariable> dependsOnVariables = null; 
@@ -561,14 +580,10 @@ aspect TransformCanonical {
 		}
 
 		public Collection<AbstractEquationBlock> getAllPredecessors() {
-			java.util.List<AbstractEquationBlock> allPredecessors = new ArrayList<AbstractEquationBlock>(); 
-			for (AbstractEquationBlock eb : getPredecessors()) {
-				for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
-					if (!allPredecessors.contains(ebb)) {
-						allPredecessors.add(ebb);
-					}
-				}
-				if (!allPredecessors.contains(eb)) {
+			if (allPredecessors == null) {
+				allPredecessors = new LinkedHashSet<AbstractEquationBlock>(); 
+				for (AbstractEquationBlock eb : getPredecessors()) {
+					allPredecessors.addAll(eb.getAllPredecessors());
 					allPredecessors.add(eb);
 				}
 			}
@@ -808,7 +823,7 @@ aspect TransformCanonical {
 					l.add(fv);
 			return l;
 		}
-
+		
 		public Collection<FVariable> activeDiscreteVariables() {
 			Collection<FVariable> l = new ArrayList<FVariable>();
 			for (FVariable fv : activeVariables())
@@ -816,14 +831,14 @@ aspect TransformCanonical {
 					l.add(fv);
 			return l;
 		}
-
+		
 		public Collection<FAbstractEquation> continuousEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock seb : continuousEquationBlocks())
 				l.add(seb.equation());
 			return l;
 		}
-
+		
 		public Collection<FAbstractEquation> discreteEquations() {
 			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 			for (SimpleEquationBlock seb : discreteEquationBlocks())
@@ -834,16 +849,16 @@ aspect TransformCanonical {
 		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks) {
-				if (!seb.equation().isDiscrete())
+				if (seb.equation().isReal())
 					l.add(seb);
 			}
 			return l;
 		}
-
+		
 		public Collection<SimpleEquationBlock> discreteEquationBlocks() {
 			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
 			for (SimpleEquationBlock seb : blocks)
-				if (seb.equation().isDiscrete())
+				if (!seb.equation().isReal())
 					l.add(seb);
 			return l;
 		}
@@ -872,9 +887,11 @@ aspect TransformCanonical {
 
 		public MixedLinearEquationBlock(Collection<SimpleEquationBlock> blocks) {
 			super(blocks);
-			
-			// Compute Jacobian
-			jacobian = new FExp[continuousEquations().size()][continuousEquations().size()];
+			jacobian = computeJacobian();
+		}
+		
+		private FExp[][] computeJacobian() {
+			FExp[][] jacobian = new FExp[continuousEquations().size()][activeContinuousVariables().size()];
 			int row = 0;
 			int col = 0;
 			blockVariability = ASTNode.fConstant();
@@ -905,6 +922,7 @@ aspect TransformCanonical {
 				}	
 				row++;
 			}
+			return jacobian;
 		}
 		
 		@Override
@@ -1291,7 +1309,13 @@ aspect TransformCanonical {
 		}
 		
 		public boolean isSolvable() {
-			return true;
+			boolean solvable = true;
+			for (Collection<SimpleEquationBlock> c: blocks) {
+				for (SimpleEquationBlock b: c) {
+					solvable = solvable && b.isSolvable();
+				}
+			}
+			return solvable;
 		}
 		
 		public FWhenEquation equation() {
@@ -1342,7 +1366,7 @@ aspect TransformCanonical {
 		
 		public void prettyPrint(PrintStream str) {
 			String prefix = isSolvable() ? "Solved" : "Non-solved";
-			str.format("%s algorithm block of %d variables:", prefix, activeVariables().size());
+			str.format("%s algorithm block of %d variables:\n", prefix, activeVariables().size());
 			str.println("Unknown variables:");
 			prettyPrintActiveVariables(str);
 			str.println("Algorithm:");
@@ -1659,13 +1683,15 @@ aspect TransformCanonical {
 	
 	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_INIT = 
 			EnumSet.of(BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
 	private static final EnumSet<BiPGraph.VarType> FClass.VAR_TYPES_ALL = 
 			EnumSet.of(BiPGraph.VarType.DERIVATIVE_VARIABLES, 
 					   BiPGraph.VarType.ALGEBRAIC_VARIABLES, 
 					   BiPGraph.VarType.DIFFERENTIATED_VARIABLES, 
-					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES);
+					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
+					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
 	private void FClass.computeMatchingsAndBLTWrapped() {
         log.info("Flat tree before index reduction and BLT:");
@@ -1796,14 +1822,16 @@ aspect TransformCanonical {
 			for (Var var : g.getUnmatchedVariables()) {	
 				FVariable fv = var.getVariable();
 				FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
-				if (fv.isDiscrete())
-					lhs = new FPreExp(lhs);
 				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
+				if (fv.isDiscrete()) {
+					fv = (FVariable) fv.myPreVariable();
+					lhs = new FPreExp(lhs);
+				}
 				FEquation fe = new FEquation(lhs, rhs);
 				addFInitialEquation(fe);
 				
-				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe);
-				v = g.getVariable(var.getName());
+				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0);
+				v = g.getVariable(fv.name());
 				g.addEdge(eqn,v);
 			}
 			root().flushAllRecursive();
@@ -1865,13 +1893,14 @@ aspect TransformCanonical {
 			g.maximumMatching(true);	
 			log.info("DAE system real variables only");
 			log.info(g.printMatchingObj());
+			
+			String errMsg = "Index reduction failed";
 	
 			IndexReductionResult result = null;
 			try {
 				result = g.reduceIndex(false);
 			} catch (EquationDifferentiationException e) {
-				error(e.getMessage());
-				return null; 
+			    errMsg = e.getMessage();
 			}
 			
 			if (result != null) {
@@ -1942,33 +1971,31 @@ aspect TransformCanonical {
 				for (FVariable fv : differentiatedRealVariables()) {
 					log.info(new PrettyPrintDelegate(fv, "  "));
 				}
-			} else {
-				return null;
+    			
+				// Calculate new graph
+    			g = new BiPGraph();
+    			g.addVariables(this, VAR_TYPES_NORMAL);
+    			g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
+    	
+    			log.info(g);
+    			g.maximumMatching(true);	
+    			log.info("DAE system ");
+    			log.info(g.printMatchingObj());
+    
+    			if (g.isComplete()) {
+    	            daeUnmatchedVariables.clear();
+    	            daeUnmatchedEquations.clear();
+    			    return g;
+    			}
 			}
 			
-			g = new BiPGraph();
-			g.addVariables(this, VAR_TYPES_NORMAL);
-			g.addEquations(equations(), VAR_TYPES_NORMAL, "eq_", 1);
-	
-			log.info(g);
-			g.maximumMatching(true);	
-			log.info("DAE system ");
-			log.info(g.printMatchingObj());
-	
-			daeUnmatchedVariables.clear();
-			for (Var var : g.getUnmatchedVariables()) {
-				daeUnmatchedVariables.add(var.getVariable());
-			}
-	
-			daeUnmatchedEquations.clear();
-			for (Eq ee : g.getUnmatchedEquations()) {
-				daeUnmatchedEquations.add(ee.getEquation());
-			}
-	
-			return g.isComplete() ? g : null;
-		} else {
-			return null;
+			// If we get here, index reduction failed
+            error(errMsg);
 		}
+		
+		// If we get here, generate an error for singular equation system
+        checkStructure();
+        return null;
 	}
 
 	
@@ -2899,6 +2926,28 @@ aspect TransformCanonical {
 		endStep("genAlgorithmFunctions()");
 	}
 	
+	public void FClass.genAlgoInitStmts() {
+		beginStep("genAlgoInitStmts()");
+		for (FAbstractEquation equation : equations()) {
+			equation.genAlgoInitStmts();
+		}
+		endStep("genAlgoInitStmts()");
+	}
+	
+	public void FAbstractEquation.genAlgoInitStmts() {}
+	public void FAlgorithm.genAlgoInitStmts() {
+		
+		List<FStatement> stmts = new List<FStatement>();
+		for (FVariable fv : referencedFVariablesInLHS()) {
+			FStatement stmt = new FAssignStmt(fv.createFIdUse(),fv.createAlgorithmArgument(true));
+			stmts.add(stmt);
+		}
+		for (FStatement stmt : getFStatements()) {
+			stmts.add(stmt);
+		}
+		setFStatementList(stmts);
+	}
+	
 	/**
 	 * \brief Replace one equation with another.
 	 */
@@ -3101,10 +3150,10 @@ aspect TransformCanonical {
 			checkForEliminatedHGTVars();
 			removeUnusedTemporaries();
 			mergeEquivalentRecords();
+			insertTempsInLHS();
 			endStep("aliasEliminationIfSet()");
 		}
 	}
-
 	
 	ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
 	
@@ -3300,7 +3349,7 @@ aspect TransformCanonical {
 	public void FClass.checkForEliminatedHGTVars() {
 		for (FVariable var : getAliasVariables()) {
 			if (var.getHGTType() == FClass.HGTVariableType.COMPONENT || var.getHGTType() == FClass.HGTVariableType.PAIR)
-				var.warning("Hand guided tearing variable '%s' has been alias eliminated", var.name());
+				var.warning("Hand guided tearing variable '%s' has been alias eliminated. Selected model variable is:\n    %s", var.name(), var.alias());
 		}
 	}
 	
@@ -3703,6 +3752,41 @@ aspect TransformCanonical {
 	public FType FClass.createEquivalentRecordType(FType old) {
 		FRecordDecl rec = equivalentRecordMap.get(old.name());
 		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
+	}
+	
+	public void FClass.insertTempsInLHS() {
+		for (FAbstractEquation equation : 
+			getFEquationBlock(0).getFAbstractEquations()) {
+			equation.insertTempsInLHS(this);
+		}
+	}
+	
+	public void FAbstractEquation.insertTempsInLHS(FClass fClass) {}
+	public void FFunctionCallEquation.insertTempsInLHS(FClass fClass) {
+		for (FFunctionCallLeft left : getLefts())
+			left.insertTempsInLHS(fClass);
+	}
+	
+	public void FFunctionCallLeft.insertTempsInLHS(FClass fClass) {
+		if (hasFExp())
+			getFExp().insertTempsInLHS(fClass);
+	}
+	
+	public void FExp.insertTempsInLHS(FClass fClass) {
+		String tempName = calcTempVarName();
+		fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), false));
+		replaceMe(new FIdUseExp(tempName));
+		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
+	}
+	
+	public void FIdUseExp.insertTempsInLHS(FClass fClass) {}
+	public void FArray.insertTempsInLHS(FClass fClass) {
+		for (FExp fExp : getFExps())
+			fExp.insertTempsInLHS(fClass);
+	}
+	public void FRecordConstructor.insertTempsInLHS(FClass fClass) {
+		for (FExp fExp : getArgs())
+			fExp.insertTempsInLHS(fClass);
 	}
 	
 }
@@ -4453,13 +4537,14 @@ aspect TransformCanonicalErrorCheck {
 	/**
 	 * The number of unknowns in the DAE initialization system is the 
 	 * number of unknowns in the DAE system plus the number of differentiated
-	 * variables plus the number of (pre) discrete variables.
-	 */
-	syn int FClass.numDAEInitVariables() = numDAEVariables() + 
-		numDifferentiatedRealVariables() + numDiscretePreVariables();
-	
-	public void FClass.checkFClassDimensions() {
-		// Check dimensions of DAE
+        * variables plus the number of (pre) discrete variables.
+        */
+       syn int FClass.numDAEInitVariables() = numDAEVariables() +
+               numDifferentiatedRealVariables() + numDiscretePreVariables() +
+               numNonFixedParameters();
+
+       public void FClass.checkFClassDimensions() {
+               // Check dimensions of DAE
 		int n_eq_F = numDAEEquations();
 		int n_vars_F = numDAEVariables();
 		if (n_eq_F != n_vars_F) 
@@ -4778,7 +4863,8 @@ aspect FunctionInlining {
 		 * @param call   the new function call
 		 */
 		public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
-			FTypePrefixVariability variability = call.variability().fullCopy();
+            int nLefts = lefts.getNumChild();
+            FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : call.variability().fullCopy();
 			
 			FExp[] exps = null;
 			if (variability.constantVariability()) {
@@ -4792,7 +4878,6 @@ aspect FunctionInlining {
 				}
 			}
 
-			int nLefts = lefts.getNumChild();
 			if (exps == null)
 				exps = new FExp[nLefts];
 			FExp[] lExps = new FExp[nLefts];
@@ -4979,6 +5064,7 @@ aspect FunctionInlining {
 	syn boolean FExp.eventGenerating() = false;
 	eq FIfExp.eventGenerating()        = true;
 	eq FRelExp.eventGenerating()       = getLeft().isContinuousExp() || getRight().isContinuousExp();
+	eq FEventGenExp.eventGenerating() = true;
 	// TODO: support more event-generating expressions
 	
 	/**
@@ -6202,8 +6288,8 @@ aspect EventGeneratingExps {
 	}
 	eq FDivFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FPreExp(var.createUseExp())));
-		guards.addFExp(new FGeqExp(new FNoEventExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy())), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
 		return guards;
 	} 
 	

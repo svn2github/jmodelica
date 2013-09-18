@@ -225,7 +225,7 @@ aspect FlatTypeAnalysis {
 	// TODO: isInteger(), etc. for algorithm
 	
 	syn boolean FStatement.assignsOnlyReals() = true;
-	eq FAssignStmt.assignsOnlyReals()         = getRight().type().onlyContainsReal();
+	eq FAssignStmt.assignsOnlyReals()         = getLeft().type().onlyContainsReal();
 	eq FForStmt.assignsOnlyReals()            = statementsAssignsOnlyReals(getForStmts());
 	eq FWhileStmt.assignsOnlyReals()          = statementsAssignsOnlyReals(getWhileStmts());
 	eq FIfStmt.assignsOnlyReals()             = 
@@ -340,6 +340,7 @@ aspect FlatTypeAnalysis {
 	eq FIntegerFuncExp.type() = fIntegerType(size());
 	eq FBinEventGenExp.type() = getX().type().numericPromotion(getY().type());
 	
+	eq FHomotopyExp.type()    = getActual().type();
 	eq FSemiLinearExp.type()  = fRealType(size());
 	
 	syn FType FRecordConstructor.type() = getType();
@@ -361,6 +362,10 @@ aspect FlatTypeAnalysis {
 			fUnknownType() : 
 			getFExp().type().arrayType(size());
 	
+	eq FSymmetric.type() = getFExp().ndims() == 2 && getFExp().size().get(0) == getFExp().size().get(1) ?
+		getFExp().type() : 
+		fUnknownType();
+		
 	eq FCross.type() = getX().type().numericPromotion(getY().type());
 	eq FSkew.type()  = getFExp().type().arrayType(size());
 
@@ -474,6 +479,8 @@ aspect FlatTypeAnalysis {
 	// TODO: Maybe there should be a special type for "no return value"
 	eq FConnectionsOp.type() = null;
 	eq FConnBoolOp.type()    = fBooleanScalarType();
+	
+	eq FCardinality.type() = fIntegerScalarType();
 
 	eq FTerminate.type() = null;
 	eq FAssert.type() = null;

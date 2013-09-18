@@ -65,10 +65,28 @@ aspect EquationSolve {
 	}
 	
 	eq FAlgorithm.isSolved(String name, boolean duringTearing) {
-		for (FVariable fv : referencedFVariablesInLHS())
+		Set<FVariable> leftVars = referencedFVariablesInLHS();
+		
+		boolean inLeft = false;
+		for (FVariable fv : leftVars) {
 			if (fv.name().equals(name))
-				return Solvability.ANALYTICALLY_SOLVABLE;
-		return Solvability.UNSOLVABLE;
+				inLeft = true;
+		}
+		
+		Set<FVariable> argVars = referencedFVariablesInRHS();
+
+		boolean inArgs = false;
+		for (FVariable fv : argVars) {
+			if (fv.name().equals(name))
+				inArgs = true;
+		}
+
+		if (inLeft && !inArgs)
+			return Solvability.ANALYTICALLY_SOLVABLE;
+		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+			return Solvability.NUMERICALLY_SOLVABLE;
+		else
+			return Solvability.UNSOLVABLE;
 	}
 
 	syn nta FExp FEquation.solution(String name) {
@@ -428,33 +446,39 @@ aspect Derivatives {
     
     }
 
-	public FAbstractEquation FAbstractEquation.diff(String name) {
-		throw new EquationDifferentiationException(this, 
-				"Cannot differentate the equation:\n   " + prettyPrint(""));
+	syn Collection<FAbstractEquation> FAbstractEquation.diff(String name) {
+		throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
 	}
 	
-	public FAbstractEquation FEquation.diff(String name) {
+	eq FEquation.diff(String name) {
 		try {
-			return dynamicFAbstractEquation(
-					new FEquation(getLeft().diff(name), getRight().diff(name)));
+			return Arrays.asList(dynamicFAbstractEquation(new FEquation(getLeft().diff(name), getRight().diff(name))));
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this,
-			    e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	
-	public FAbstractEquation FFunctionCallEquation.diff(String name) {
+	eq FFunctionCallEquation.diff(String name) {
 		List lefts = new List();
 		for (FFunctionCallLeft l : getLefts()) {
 			Opt lopt = l.hasFExp() ? new Opt(l.getFExp().diff(name)) : new Opt();
 			lefts.add(new FFunctionCallLeft(lopt));
 		}
 		try {
-			return dynamicFAbstractEquation(new FFunctionCallEquation(lefts, 
-					(FAbstractFunctionCall) getCall().diff(name)));
+			FExp diffedCall = getCall().diff(name);
+			if (diffedCall.isLiteralZero()) {
+				Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
+				for (FFunctionCallLeft left : getLefts())
+					for (FIdUse fIdUse : left.assignedFIdUses())
+						res.add(dynamicFAbstractEquation(
+								new FEquation(new FIdUseExp(fIdUse.fullCopy()), fIdUse.type().zeroLiteral())));
+				return res;
+			} else {
+				return Arrays.asList(dynamicFAbstractEquation(
+						new FFunctionCallEquation(lefts, (FAbstractFunctionCall)diffedCall)));
+			}
 		} catch (ExpressionDifferentiationException e) {
-			throw new EquationDifferentiationException(this,
-				    e.toQuotedString() + " in equation:\n   " + this);
+			throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
 		}
 	}
 	
@@ -668,6 +692,10 @@ aspect Derivatives {
 			throw new ExpressionDifferentiationException(this);
 	}
 
+	public FExp FHomotopyExp.diff(String name) {
+		return dynamicFExp(getActual().diff(name));
+	}
+	
 	public FExp FNoEventExp.diff(String name) {
 		return new FNoEventExp(getFExp().diff(name));
 	}
@@ -682,6 +710,12 @@ aspect Derivatives {
 		} 
 		FExp e = getIfExp().copySymbolic();
 		return dynamicFExp(new FIfExp(e, td, ed));
+	}
+	
+	public FExp FMinMaxExp.diff(String name) {
+		return dynamicFExp(createNode(
+				dynamicFExp((getX().diff(name))), 
+				dynamicFExp((getY().diff(name)))));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {
@@ -779,8 +813,11 @@ aspect Derivatives {
 		return dynamicFExp(new FRealLitExp(0));
 	}
 	
-	public FExp FTimeExp.diff(String name) {			
-			return dynamicFExp(new FRealLitExp(1));		
+	public FExp FTimeExp.diff(String name) {
+		int val = 0;
+		if (name.equals(TIME))
+			val = 1;
+		return dynamicFExp(new FRealLitExp(val));
 	}
 	
 	public FExp FFunctionCall.diff(String name) {
@@ -807,7 +844,7 @@ aspect Derivatives {
 		}
 		FFunctionDecl fd = myFFunctionDecl();
 		if (!fd.hasFDerivativeFunction()) 
-			throw new FunctionDifferentiationException(this);	
+			throw new FunctionDifferentiationException(this);
 		FFunctionDecl myDecl = myFFunctionDecl();
 		List args = new List();
 		for (FExp e : getArgs()) {

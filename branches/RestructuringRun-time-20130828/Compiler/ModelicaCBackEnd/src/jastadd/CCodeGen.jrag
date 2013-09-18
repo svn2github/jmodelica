@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.Collections;
 
@@ -1072,12 +1073,17 @@ aspect CCodeGen {
 		str.print("\""+prettyPrint("")+"\")");
 	}
 	
-	// TODO: handle non-ascii & non-printable chars
 	// TODO: support format args
-	
-	public void FStringAddExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.print(tempName_C());
-	}
+    
+    public void FStringLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+        str.print('"');
+        str.print(string_C());
+        str.print('"');
+    }
+    
+    public void FStringAddExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+        str.print(tempName_C());
+    }
 	
 	public void FStringAddExp.genTempVars_C(Printer p, PrintStream str, String indent) {
 		super.genTempVars_C(p, str, indent);
@@ -1132,14 +1138,46 @@ aspect CCodeGen {
 	eq FStringAddExp.getChild().isTopStringAdd() = false;
 	eq BaseNode.getChild().isTopStringAdd()      = true;
 	
+	/**
+	 * The value of this string, encoded as UTF-8.
+	 * 
+	 * All line breaks are encoded as LF.
+	 */
+	syn lazy byte[] FStringLitExp.stringUtf8() = getString().replaceAll("\r\n|\r", "\n").getBytes(UTF8);
+	
+	/**
+	 * The C representation of this string literal.
+	 */
+	syn String FStringLitExp.string_C() {
+	    StringBuffer buf = new StringBuffer();
+	    for (byte c : stringUtf8()) {
+	        if (c == '\n') {
+                buf.append("\\n");
+            } else if (c > 31 && c < 127) {
+                buf.append((char) c);
+	        } else if (c != 0) {
+	            int c2 = (c < 0) ? 256 + c : c;
+	            buf.append((c2 < 16) ? "\\x0" : "\\x");
+	            buf.append(Integer.toHexString(c2));
+	        }
+	    }
+	    return buf.toString();
+	}
+	
+	/**
+	 * The maximum length string the representation of the value of this expression can have in C.
+	 */
 	syn int FExp.maxStringLength_C()               = 
 		isConstantExp() ? ceval().stringValue().length() : type().maxStringLength_C();
 	syn lazy int FStringAddExp.maxStringLength_C() = 
 		Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), FStringType.MAX_STRING_LENGTH_C);
 	eq FStringExp.maxStringLength_C()              = 
 		isConstantExp() ? ceval().stringValue().length() : getValue().maxStringLength_C();
-	eq FStringLitExp.maxStringLength_C()           = getString().length();
+	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
 	
+	/**
+	 * The maximum length string representations of values of this type can have in C.
+	 */
 	syn int FType.maxStringLength_C()   = 0;
 	eq FIntegerType.maxStringLength_C() = 10;
 	eq FRealType.maxStringLength_C()    = 13;
@@ -1154,11 +1192,17 @@ aspect CCodeGen {
 	
 	public static final int FStringType.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	
+    /**
+     * The format string to use for this expression with the printf family of functions in C.
+     */
 	syn String FExp.formatString_C()               = isConstantExp() ? ceval().stringValue() : type().formatString_C();
 	syn lazy String FStringAddExp.formatString_C() = getLeft().formatString_C() + getRight().formatString_C();
 	eq FStringExp.formatString_C()                 = isConstantExp() ? ceval().stringValue() : getValue().formatString_C();
-	eq FStringLitExp.formatString_C()              = getString();
+	eq FStringLitExp.formatString_C()              = string_C();
 
+    /**
+     * The format string to use for this type with the printf family of functions in C.
+     */
 	syn String FType.formatString_C() = "%s";
 	eq FIntegerType.formatString_C()  = "%d";
 	eq FRealType.formatString_C()     = "%.6g";
@@ -1241,6 +1285,12 @@ aspect CCodeGen {
 	public void FCeilFuncExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("ceil(");
 		p.print(getX(), str, indent);
+		str.print(")");
+	}
+	
+	public void FHomotopyExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print("(");
+		p.print(getActual(), str, indent);
 		str.print(")");
 	}
 	
@@ -1765,6 +1815,7 @@ aspect CCodeGen {
 		genBlockResidualFunctionBeforeEqns_C(nextIndent, str, inInitial, visitedList);
 		// Write the residual expressions
 		genBlockResidualFunctionEqns_C(new Enumerator(), nextIndent, str, visitedList, solverArrayMap);
+		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		genBlockResidualFunctionAfterEqns_C(nextIndent, str, visitedList);
 		// Write back
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
@@ -1902,8 +1953,6 @@ aspect CCodeGen {
 	}
 	
 	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		// TODO: The indent used here is incorrect and this is a ugly hack that should be fixed!
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
 		for (FAbstractEquation ae : discreteEquations()) {

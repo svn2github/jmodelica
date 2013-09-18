@@ -527,7 +527,7 @@ public class XMLGenerator extends GenericGenerator {
 		    boolean startGenerated = false;
 		    if (var.useBindingExpAsStart()) 
 		        e_start = var.getBindingExp();
-		    else if (var.startAttributeSet())
+		    else if (var.startAttributeSet() && !var.isDependentParameter())
 		        e_start = var.startAttributeExp();
 		    else if (var.isInput())
 		        e_start = var.createStartAttributeExp();

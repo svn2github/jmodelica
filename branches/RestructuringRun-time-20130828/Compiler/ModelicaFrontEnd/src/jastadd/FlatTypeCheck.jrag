@@ -16,6 +16,7 @@
 
 import java.util.Arrays;
 import java.util.Collections;
+import org.jmodelica.util.Criteria;
 
 aspect FlatTypeCheck {
 	
@@ -168,7 +169,7 @@ aspect FlatTypeCheck {
   
   protected void InstComponentAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown()) {
+	  if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
 		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
 			  top.error("Could not calculate type of " + top.name());
 		  else
@@ -179,12 +180,17 @@ aspect FlatTypeCheck {
   protected void InstComponentArrayAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
 	  if (!icd.isUnknown()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord())
+		  if (icd.isOrExtendsPrimitive() || icd.isRecord() && !inCardinality())
 			  top.error("Could not calculate type of " + top.name());
 		  else
 			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
 	  }
   }
+  
+  inh boolean InstAccess.inCardinality();
+  eq FCardinality.getChild().inCardinality() = true;
+  eq InstNode.getChild().inCardinality()     = false;
+  eq Root.getChild().inCardinality()         = false;
   
   protected void InstClassAccess.typeError(InstAccess top) {
 	  if (!isComponentSizeClass() || !isInstComponentSize())
@@ -213,6 +219,16 @@ aspect FlatTypeCheck {
 	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
   }
+  
+	public void FIdUse.typeCheck() {
+		if (inAlgorithm() && useIsAssignment() && variability().constantVariability()) {
+			error("Assignments to constants is not allowed in algorithms");
+		}
+		if (inAlgorithm() && useIsAssignment() && !(myFAlgorithm().getType() instanceof FInitialEquation) && 
+				variability().parameterVariability() && !isForIndex()) {
+			error("Assignments to parameters in algorithms is only allowed in initial algorithms");
+		}
+	}
   
   public void FInstAccessExp.typeCheck() {
 	  if (!getInstAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
@@ -306,7 +322,7 @@ aspect FlatTypeCheck {
 			  compliance("Array indices of Boolean or enumeration type not supported: " + getFExp());
 		  else if (!type().isUnknown())
 			  error("Array index must be Integer expression: " + getFExp());
-	  } else if (!inAlgorithmOrFunction()) { 
+	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
 		  } else { 
@@ -578,11 +594,16 @@ aspect FlatTypeCheck {
 		  }
 	  }
 	  if (!typeOk) {
-		  if (getBoundInput() == null)
+		  if (getBoundInput() == null) {
 			  error(nonBoundArgumentTypeError());
-		  else
-			  error(functionCallDecription() + ": types of " + argumentDesc() + 
-					  " and input " + getBoundInput().name() + " are not compatible");
+		  } else {
+		      String msg = argumentTypeError();
+		      if (msg != null)
+		          error(msg);
+		      else
+    			  error(functionCallDecription() + ": types of " + argumentDesc() + 
+    					  " and input " + getBoundInput().name() + " are not compatible");
+		  }
 	  }
   }
   
@@ -608,6 +629,10 @@ aspect FlatTypeCheck {
   eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
   eq FArrayDimAsArgsExp.getOriginalArg(int i).nonBoundArgumentTypeError() = 
 	  functionCallDecription() + ": type of positional argument " + i + " is not compatible with Integer";
+  
+  inh String InstFunctionArgument.argumentTypeError();
+  eq FExp.getChild().argumentTypeError()         = null;
+  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a reference to a connector";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -694,8 +719,10 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
   eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()         = true;
   eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
+  eq FSymmetric.getChild().argumentDefinedTypeValid()                    = false;
   eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FReductionExp.getChild().argumentDefinedTypeValid()                 = false;
+  eq FHomotopyExp.getChild().argumentDefinedTypeValid()                  = false;
   eq FSemiLinearExp.getChild().argumentDefinedTypeValid()                = false;
   eq FNdimsExp.getChild().argumentDefinedTypeValid()                     = false;
   eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
@@ -703,6 +730,7 @@ aspect FlatTypeCheck {
   eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
   eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
   eq FEventGenExp.getChild().argumentDefinedTypeValid()                  = false;
+  eq FCardinality.getChild().argumentDefinedTypeValid()                  = false;
   eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
   eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
@@ -721,7 +749,9 @@ aspect FlatTypeCheck {
   inh boolean InstFunctionArgument.argumentTypeValid(FType type);
   eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type) = type.isPrimitive();
   eq FTranspose.getChild().argumentTypeValid(FType type)            = type.ndims() >= 2 && type.isPrimitive();
+  eq FSymmetric.getChild().argumentTypeValid(FType type)            = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
   eq FReductionExp.getChild().argumentTypeValid(FType type)         = type.ndims() > 0 && type.hasAdd();
+  eq FHomotopyExp.getChild().argumentTypeValid(FType type)          = true;
   eq FSemiLinearExp.getChild().argumentTypeValid(FType type)        = type.isNumeric();
   eq FNoEventExp.getChild().argumentTypeValid(FType type)           = true;
   eq FSizeExp.getChild().argumentTypeValid(FType type)              = true;
@@ -737,9 +767,27 @@ aspect FlatTypeCheck {
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FConnectionsOp.getChild().argumentTypeValid(FType type)        = true;  // TODO: check that this is an overdetermined type
+  eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
+  eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
+          getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
+  
+  protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
+      public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
+  };
 
+  protected static final Criteria<InstComponentDecl> FConnectionsOp.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
+      public boolean test(InstComponentDecl elem) { return elem.isOverconstrainedType(); }
+  };
+
+  /**
+   * Check if this expression is a reference to a component matching specified criteria.
+   * 
+   * Only valid in instance tree.
+   */
+  syn boolean FExp.isComponentReference(Criteria<InstComponentDecl> criteria)  = false;
+  eq FInstAccessExp.isComponentReference(Criteria<InstComponentDecl> criteria) = 
+      criteria.test(getInstAccess().myInstComponentDecl());
 
   /**
    * Check if the given Size is valid for the argument of the operator.

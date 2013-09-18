@@ -49,9 +49,11 @@ public class ErrorTestCase extends TestCase {
 		String correct = getErrorMessage();
 		String f_test = filterErrorMessages(test);
 		String f_correct = filterErrorMessages(correct);
+		String sf_test = removeWhitespace(f_test);
+		String sf_correct = removeWhitespace(f_correct);
 		
-		if (!f_test.equals(f_correct))
-			assertEquals("Wrong errors reported.", correct, test);
+		if (!sf_test.equals(sf_correct))
+			assertEquals("Wrong errors reported.", f_correct, f_test);
 			
 		return true;
 	}
@@ -67,27 +69,22 @@ public class ErrorTestCase extends TestCase {
 		return true;
 	}
 	
-	public String filterErrorMessages(String str) {
-		StringBuilder filteredStr = new StringBuilder();
-		BufferedReader origStr = new BufferedReader(new StringReader(str));
-		
-		try {
-			String line = origStr.readLine();
-			while (line != null) {
-				line = origStr.readLine();
-				if (line != null && nextLineIsRelevant(line)) {
-					line = origStr.readLine();
-					filteredStr.append(line + "\n");
-				}
-			}
-		} catch (IOException e) {
-		}
-		
-		return filteredStr.toString();
-	}
-	
-	protected boolean nextLineIsRelevant(String line) {
-		return line.contains("Semantic error at line");
+	private static  Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
+	private static String introReplacement = "";
+	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+\\.(mof|mo)':");
+	private static String fileReplacement = "$1'...':";
+	private static Pattern lineFilter = Pattern.compile("([Aa]t line )[0-9]+");
+	private static String lineReplacement = "$10";
+	private static Pattern columnFilter = Pattern.compile("(column )[0-9]+");
+	private static String columnReplacement = "$10";
+
+
+	public  String filterErrorMessages(String str) {
+		str = introFilter.matcher(str).replaceAll(introReplacement);
+		str = fileFilter.matcher(str).replaceAll(fileReplacement);
+		str = lineFilter.matcher(str).replaceAll(lineReplacement);
+		str = columnFilter.matcher(str).replaceAll(columnReplacement);
+		return str;
 	}
 	
 	/**

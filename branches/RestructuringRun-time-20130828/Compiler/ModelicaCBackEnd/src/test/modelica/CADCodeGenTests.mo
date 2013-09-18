@@ -2047,7 +2047,7 @@ model FunctionDiscreteOutputTest3
 	algorithm
 		i := size(x, 1);
 	end F;
-	Real x[:] = {1,2,3};
+	Integer x[:] = {1,2,3};
 	Integer i;
 equation
 	i = F(x);
@@ -2077,19 +2077,16 @@ jmi_real_t** dz = jmi->dz;
 /*** Integer and boolean outputs ***/
 /********* Other variables *********/
   _x_1_0 = 1;
-  (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
   _x_2_1 = 2;
-  (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
   _x_3_2 = 3;
-  (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
   JMI_ARRAY_STATIC_INIT_1(tmp_var_0, 3)
   jmi_array_ref_1(tmp_var_0, 1) = _x_1_0;
   jmi_array_ref_1(tmp_var_0, 2) = _x_2_1;
   jmi_array_ref_1(tmp_var_0, 3) = _x_3_2;
   JMI_ARRAY_STATIC_INIT_1(tmp_der_0, 3)
-  jmi_array_ref_1(tmp_der_0, 1) = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
-  jmi_array_ref_1(tmp_der_0, 2) = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx];
-  jmi_array_ref_1(tmp_der_0, 3) = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
+  jmi_array_ref_1(tmp_der_0, 1) = AD_WRAP_LITERAL(0);
+  jmi_array_ref_1(tmp_der_0, 2) = AD_WRAP_LITERAL(0);
+  jmi_array_ref_1(tmp_der_0, 3) = AD_WRAP_LITERAL(0);
   func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD(tmp_var_0, tmp_der_0, &v_0);
   _i_3 = v_0;
 

@@ -525,6 +525,8 @@ aspect InstanceErrorCheck {
   		  		errorChecked = false;
 	    		super.collectErrors();
   		  		collectErrorsInClassName();
+  		  		if (hasFArraySubscripts())
+  		  		    getFArraySubscripts().collectErrors();
 	    		if (hasConditionalAttribute()) 
 	    			getConditionalAttribute().collectErrors();
 	    		if (isActive() && hasInstModification())
@@ -989,3 +991,60 @@ aspect InstanceErrorCheck {
 	
 }
 
+aspect AssertEval {
+    
+    /**
+     * Evaluate asserts with constant tests, generate errors for failing ones, 
+     * and eliminate all evaluated assets.
+     */
+    public void FClass.evaluateAsserts() {
+        for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+            eqn.evaluateAsserts();
+        List<FAbstractEquation> l = new List<FAbstractEquation>();
+        for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+            if (!eqn.markedForRemoval)
+                l.add(eqn);
+        getFEquationBlock(0).setFAbstractEquationList(l);
+    }
+    
+    /**
+     * Try to evaluate asserts with constant tests in this equation.
+     * 
+     * If this equation should be removed, <code>markedForRemoval</code> is set.
+     */
+    public void FAbstractEquation.evaluateAsserts() {}
+    
+    public void FFunctionCallEquation.evaluateAsserts() {
+        markedForRemoval = getCall().evaluateAsserts();
+    }
+    
+    /**
+     * If this call is an assert with constant test, try to evaluate it.
+     * 
+     * @return  <code>true</code> if this is an assert that should be removed
+     */
+    public boolean FAbstractFunctionCall.evaluateAsserts() {
+        return false;
+    }
+    
+    private static final String FAssert.LEVEL_ERROR = "error";
+    
+    public boolean FAssert.evaluateAsserts() {
+        boolean remove = false;
+        if (getTest().isConstantExp()) {
+            try {
+                boolean val = getTest().ceval().booleanValue();
+                if (!val) {
+                    String msg = "Assertion failed: " + getMsg().ceval().stringValue();
+                    if (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))
+                        error(msg);
+                    else
+                        warning(msg);
+                }
+                remove = true;
+            } catch (ConstantEvaluationException e) {}
+        }
+        return remove;
+    }
+    
+}
