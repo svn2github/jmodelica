@@ -3148,6 +3148,43 @@ model RedeclareTest34
 end RedeclareTest34;
 
 
+model RedeclareTest35
+	model A
+		replaceable package E = F;
+	end A;
+	
+	model B
+		extends A;
+        replaceable C x constrainedby C(redeclare package D = E);
+	end B;
+	
+	model C
+		replaceable package D = G;
+		Real z = D.c;
+	end C;
+    
+    package F
+        constant Real c = 1;
+    end F;
+    
+    package G
+        constant Real c = 0;
+    end G;
+	
+	B w;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest35",
+			description="Redeclare class in constrainedby",
+			flatModel="
+fclass RedeclareTests.RedeclareTest35
+ Real w.x.z = 1.0;
+end RedeclareTests.RedeclareTest35;
+")})));
+end RedeclareTest35;
+
+
 
 model RedeclareElement1
   model A
