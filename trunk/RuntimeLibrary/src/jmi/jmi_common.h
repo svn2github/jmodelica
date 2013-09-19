@@ -177,6 +177,11 @@ typedef jmi_real_t jmi_ad_var_t;
     type name##_rec;\
     type* name = &name##_rec;
 
+#ifdef _MSC_VER
+/* Note: the return value isn't the same as for snprintf(). */
+#define snprintf sprintf_s
+#endif
+
 /*Some of these functions are a temporary remnant of CppAD*/
 /**
  * Function to wrap division and report errors to the log, for use in functions.
