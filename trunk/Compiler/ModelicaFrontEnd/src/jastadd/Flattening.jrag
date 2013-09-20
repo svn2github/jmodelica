@@ -1472,7 +1472,7 @@ aspect FlatExpressions {
 				int i = var.containingEntity().myInputs().indexOf(var);
 				int d = findDepthOfNestledFunctionCalls();
 				return new FArgumentExp(i, d);
-			} else if (var.variability().structuralOrLess() || (var.isParameter() && var.isString())) {
+			} else if (var.variability().structuralOrLess()) {
 				try {
 					if (!var.size().isEmpty()) {
 						// Check if we have non-constant array subscripts
