@@ -46,6 +46,8 @@ aspect XMLCodeGen_Optimica {
 		right.prettyPrint_XML(str,p.indent(indent));
 		str.println(indent + "</" + namespace + ":" + tag + ">");
 	}
+	
+	eq FAssert.isIgnoredXML() = inOptimization();
 		
 }
 

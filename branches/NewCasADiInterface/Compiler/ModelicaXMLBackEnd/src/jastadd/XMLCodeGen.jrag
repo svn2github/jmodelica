@@ -241,7 +241,7 @@ aspect XMLCodeGen {
 	}
 		
 	public void FFunctionCallEquation.prettyPrint_XML(Printer p, PrintStream str, String indent) {
-		if (!getCall().isIgnored()) {
+		if (!getCall().isIgnoredXML()) {
 			String indent2 = p.indent(indent);
 			open_XML(str, indent);
 			for (FFunctionCallLeft f : this.getLeftList())
@@ -251,6 +251,8 @@ aspect XMLCodeGen {
 		}
 	}
 	
+	syn boolean FExp.isIgnoredXML()   = false;
+	eq FIgnoredBuiltIn.isIgnoredXML() = true;	
 	
 	//-------------------- Functions ---------------------------
 	
@@ -592,9 +594,9 @@ aspect XMLTagBinding{
         //other expressions
         eq FArray.xmlTag() = "Array";   
         eq FFunctionCall.xmlTag() = "FunctionCall";
+        eq FAssert.xmlTag() = "Assert";
         //unsupported expressions       
-        eq FExp.xmlTag() = "*** Not supported expression ***";
-        eq FUnsupportedExp.xmlTag() = "*** not supported tag ***";
+        eq FExp.xmlTag() = "Unsupported";
        
         //equations
         eq FEquation.xmlTag() = "Equation";
@@ -624,8 +626,8 @@ aspect XMLTagBinding{
         
         eq InstForStmt.xmlTag() = "For";
         eq InstAssignStmt.xmlTag() = "Assign";
-        eq FExternalStmt.xmlTag() = "--- Not Supported Statement ---";
-        eq FWhenStmt.xmlTag() = "--- Not Supported Statement ---";
+        eq FExternalStmt.xmlTag() = "External";
+        eq FWhenStmt.xmlTag() = "When";
     	
     	
     	syn String ASTNode.xmlNamespace() = null;

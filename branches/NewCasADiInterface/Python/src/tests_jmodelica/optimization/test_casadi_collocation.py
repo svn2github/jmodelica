@@ -213,6 +213,7 @@ class TestLocalDAECollocator:
     def test_init_traj_sim(self):
         """Test initial trajectories based on an existing simulation."""
         model = self.model_cstr
+        model.reset()
         model_opt = self.model_cstr_extends
         model.set(['c_init', 'T_init'], model_opt.get(['c_init', 'T_init']))
         
@@ -527,6 +528,7 @@ class TestLocalDAECollocator:
         Test estimation with and without initial and nominal trajectories.
         """
         sim_model = self.model_second_order
+        sim_model.reset()
         opt_model = self.model_second_order_par_est
         
         # Simulate with initial guesses
@@ -579,6 +581,7 @@ class TestLocalDAECollocator:
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
+        sim_model.reset()
         opt_model = self.model_qt_par_est
         a_ref = [0.02656702, 0.02713898]
         
@@ -634,6 +637,7 @@ class TestLocalDAECollocator:
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
+        sim_model.reset()
         opt_model = self.model_qt_par_est
         opt_model_2 = self.model_qt_par_est_degenerate
         a_ref = [0.02656702, 0.02713898]
@@ -721,6 +725,7 @@ class TestLocalDAECollocator:
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
+        sim_model.reset()
         opt_model = self.model_qt_par_est
         a_ref = [0.02656702, 0.02713898]
         
@@ -798,6 +803,7 @@ class TestLocalDAECollocator:
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
+        sim_model.reset()
         opt_model = self.model_qt_par_est
         a_ref = [0.02656702, 0.02713898]
         
@@ -879,6 +885,7 @@ class TestLocalDAECollocator:
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
         sim_model = self.model_qt_sim
+        sim_model.reset()
         opt_model = self.model_qt_par_est
         a_ref = [0.02656702, 0.02713898]
         
@@ -927,6 +934,7 @@ class TestLocalDAECollocator:
         opt_model.set_min('u1', 5.1)
         N.testing.assert_raises(CasadiCollocatorException,
                                 opt_model.optimize, self.algorithm, opts)
+        opt_model.set_min('u1', -N.inf)
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):
@@ -1169,6 +1177,7 @@ class TestLocalDAECollocator:
         # Eliminated derivatives
         model.set_nominal('cstr.c', 500.)
         res = model.optimize(self.algorithm, opts)
+        model.set_nominal('cstr.c', 1000.)
         assert_results(res, cost_ref, u_norm_ref)
         c_scaled = res['cstr.c']
         N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
@@ -1513,6 +1522,7 @@ class TestLocalDAECollocator:
         Test the input interpolator for simulation purposes
         """
         model = self.model_cstr
+        model.reset()
         model_opt = self.model_cstr_extends
         model.set(['c_init', 'T_init'], model_opt.get(['c_init', 'T_init']))
         
@@ -1528,7 +1538,7 @@ class TestLocalDAECollocator:
         opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
         res = model.simulate(start_time=0., final_time=150., input=opt_input, options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
-                                  [284.62140206, 345.22510435], rtol=1e-5)
+                                  [284.62140206, 345.22510435], rtol=5e-4)
 
     @testattr(casadi = True)
     def test_matrix_evaluations(self):

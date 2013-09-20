@@ -164,7 +164,7 @@ class Test_Compiler:
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_JMU, cl, [path], '.')
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path, separate_process=True)
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path, separate_process=True)
-
+    '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):
         """ Test that a ModelicaClassNotFoundError is raised if model class is not found. """
@@ -182,7 +182,7 @@ class Test_Compiler:
         nose.tools.assert_raises(IOError, Test_Compiler.oc.compile_JMU, Test_Compiler.cpath_oc, [errorpath], '.')
         nose.tools.assert_raises(IOError, pym.compile_fmu, Test_Compiler.cpath_mc, errorpath, separate_process=True)
         nose.tools.assert_raises(IOError, pym.compile_jmu, Test_Compiler.cpath_oc, errorpath, separate_process=True)
-
+    '''
     @testattr(stddist = True)
     def test_setget_modelicapath(self):
         """ Test modelicapath setter and getter. """
