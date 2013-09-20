@@ -374,7 +374,7 @@ aspect ConstantFolding {
 	}
 	
 	public void FAbstractExp.enableConstantFolding() {
-		if (variability().structuralOrLess() || type().isString()) {
+		if (isConstantExp() || type().isString()) {
 			constantFoldingEnabled = true;
 			is$Final = false;
 			return;
@@ -384,7 +384,7 @@ aspect ConstantFolding {
 	}
 
 	rewrite FAbstractExp {
-		when (constantFoldingEnabled && variability().structuralOrLess()) to FExp {
+		when (constantFoldingEnabled && isConstantExp()) to FExp {
 			try {
 				CValue value = ceval();
 				if (!value.size().isEmpty()) 
