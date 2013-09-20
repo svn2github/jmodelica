@@ -21,6 +21,7 @@ AC_INIT([jmodelica.org], 0.0.0, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([JMI/src/jmi.h])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_CXX
