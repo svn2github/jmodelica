@@ -169,9 +169,9 @@ aspect CCodeGen {
 	inh boolean FIdUse.isAssignUse();
 	eq InstNode.getChild().isAssignUse()          = false;
 	eq FClass.getChild().isAssignUse()            = false;
-	eq FIdUseExp.getChild().isAssignUse()         = false;
 	eq FFunctionCallLeft.getChild().isAssignUse() = true;
-	eq FAssignStmt.getChild().isAssignUse()       = true;
+	eq FAssignStmt.getLeft().isAssignUse()        = true;
+	eq FAssignStmt.getRight().isAssignUse()       = false;
 	
 	syn String FIdUse.name_C() = toString_C(printer_C);
 	
@@ -848,6 +848,9 @@ aspect CCodeGen {
 		if (!getCall().isIgnored()) {
 			genTempVars_C(p, str, indent);
 			p.print(getCall(), str, indent);
+			for (FFunctionCallLeft l : getLefts()) {
+				l.genWriteBackAssignment_C(str, indent, null);
+			}
 		}
 	}
 	
@@ -2410,7 +2413,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> forVariables) {
-		if (hasFExp()) 
+		if (hasFExp() && !getFExp().keepAsArray()) 
 			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), forVariables);
 	}
 	

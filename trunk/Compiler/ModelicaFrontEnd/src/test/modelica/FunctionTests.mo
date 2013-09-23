@@ -4998,6 +4998,76 @@ end FunctionTests.ArrayOutputScalarization25;
 ")})));
 end ArrayOutputScalarization25;
 
+model ArrayOutputScalarization26
+record R
+	Real x;
+end R;
+
+function f
+	input Real[2] i;
+	output R[2] o;
+	output Real d = 1;
+algorithm
+	o := {R(i[1]),R(i[2])};
+end f;
+
+R[4] x;
+Real[4] y = {1,2,3,4};
+algorithm
+	(x[{4,2}],) := f(y[{4,2}]);
+	(x[{1,3}],) := f(y[{1,3}]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization26",
+			description="Slices of records in function call statements.",
+			variability_propagation=false,
+			inline_functions="none",
+			algorithms_as_functions=false,
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization26
+ Real x[1].x;
+ Real x[2].x;
+ Real x[3].x;
+ Real x[4].x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+algorithm
+ x[4].x := 0.0;
+ x[2].x := 0.0;
+ x[1].x := 0.0;
+ x[3].x := 0.0;
+ ({FunctionTests.ArrayOutputScalarization26.R(x[4].x), FunctionTests.ArrayOutputScalarization26.R(x[2].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[4], y[2]});
+ ({FunctionTests.ArrayOutputScalarization26.R(x[1].x), FunctionTests.ArrayOutputScalarization26.R(x[3].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[1], y[3]});
+equation
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+ y[4] = 4;
+
+public
+ function FunctionTests.ArrayOutputScalarization26.f
+  input Real[2] i;
+  output FunctionTests.ArrayOutputScalarization26.R[2] o;
+  output Real d;
+algorithm
+  d := 1;
+  o[1].x := i[1];
+  o[2].x := i[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization26.f;
+
+ record FunctionTests.ArrayOutputScalarization26.R
+  Real x;
+ end FunctionTests.ArrayOutputScalarization26.R;
+
+end FunctionTests.ArrayOutputScalarization26;
+
+")})));
+end ArrayOutputScalarization26;
+
 /* ======================= Unknown array sizes ======================*/
 
 model UnknownArray1

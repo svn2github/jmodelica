@@ -1917,6 +1917,15 @@ aspect Arrays {
 		}
 	}
 	
+	public void FExp.setScalarizedFlag() {
+		for (FExp child : childFExps())
+			child.setScalarizedFlag();
+	}
+	
+	public void FIdUseExp.setScalarizedFlag() {
+		getFIdUse().getFQName().scalarized = true;
+	}
+	
 	/**
 	 * \brief Returns a scalar FIdUseInstAccess, as specified by an index.
 	 * 
@@ -1967,7 +1976,9 @@ aspect Arrays {
 	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
 	 */
 	public FQName FQName.specify(Index i, boolean scalarize) {
-		return copyAndAddFas(i.createFArraySubscripts());
+		FQName fqn = copyAndAddFas(i.createFArraySubscripts());
+		fqn.scalarized = scalarize;
+		return fqn;
 	}
 	
 	public FQName FQNameFull.specify(Index i, boolean scalarize) {
