@@ -1,0 +1,122 @@
+/*
+    Copyright (C) 2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+optimization atomicOptimizationEQ (objectiveIntegrand=x1) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1(finalTime) = 1.00;
+end atomicOptimizationEQ;
+
+optimization atomicOptimizationLEQ (objectiveIntegrand=x1) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 <=  1.00;
+end atomicOptimizationLEQ;
+
+optimization atomicOptimizationGEQ (objectiveIntegrand=x1) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicOptimizationGEQ;
+
+optimization atomicOptimizationStart5 (objectiveIntegrand=x1, startTime = 5) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicOptimizationStart5;
+
+optimization atomicOptimizationFinal10(objectiveIntegrand=x1, finalTime=10) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicOptimizationFinal10;
+
+optimization atomicLagrangeX1(objectiveIntegrand=x1, finalTime=10) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicLagrangeX1;
+
+optimization atomicLagrangeNull(objective=finalTime, finalTime=10) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicLagrangeNull;
+
+optimization atomicMayerFinalTime(objective=finalTime) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+    
+constraint
+    x1 >=  1.00;
+end atomicMayerFinalTime;
+
+optimization atomicMayerNull(objectiveIntegrand=x1) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicMayerNull;
+
+optimization atomicMayerX1AtFinalTime(objective=x1(finaltime)) 
+    Real x1(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicMayerX1AtFinalTime;
+
+type Voltage = Real(quantity="ElectricalPotential", unit="V");
+optimization atomicWithVoltageType(objectiveIntegrand=x1, finalTime=10) 
+    Voltage x1(start=0, fixed = true);
+equation
+    der(x1)  = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicWithVoltageType;
+
+optimization atomicWithFree(objectiveIntegrand=x1, finalTime=10) 
+    Real x1(start=0, free = false, fixed = true);
+equation
+    der(x1)  = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicWithFree;
+
+optimization atomicWithInitialGuess(objectiveIntegrand=x1, finalTime=10) 
+    Real x1(start=0, initialGuess = 5, fixed = true);
+equation
+    der(x1)  = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+end atomicWithInitialGuess;

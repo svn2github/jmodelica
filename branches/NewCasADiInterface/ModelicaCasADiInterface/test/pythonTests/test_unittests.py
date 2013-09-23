@@ -1,0 +1,810 @@
+from casadi import *
+
+def test_DependentParameters():
+    a = MX("a")
+    b = MX("b")
+    c = MX("c")
+    d = MX("d")
+    funcVar = MX("funcVar")
+    f = MXFunction([funcVar], [funcVar*2])
+    f.init()
+    
+    
+    eq1 = MX(10)
+    eq2 = a + MX(2)
+    eq3 = a*b
+    eq4 = f.call([a])[0]
+    
+    r1 = RealVariable(a, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r2 = RealVariable(b, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r3 = RealVariable(c, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r4 = RealVariable(d, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    
+    r1.setAttribute("bindingExpression", eq1)
+    r2.setAttribute("bindingExpression", eq2)
+    r3.setAttribute("bindingExpression", eq3)
+    r4.setAttribute("bindingExpression", eq4)
+    
+    model = Model()
+    
+    model.addVariable(r1)
+    model.addVariable(r2)
+    model.addVariable(r3)
+    model.addVariable(r4)
+    
+    model.calculateValuesForDependentParameters()
+    
+    assert r2.getAttribute("evaluatedBindingExpression").getValue() == 12
+    assert r3.getAttribute("evaluatedBindingExpression").getValue() == 120
+    assert r4.getAttribute("evaluatedBindingExpression").getValue() == 20
+
+def test_equationGetter():
+    lhs = MX("lhs")
+    rhs = MX("rhs")
+    eq = Equation(lhs, rhs)
+    assert( isEqual(eq.getLhs(), lhs) )
+    assert( isEqual(eq.getRhs(), rhs) )
+    assert( isEqual(eq.getResidual(), rhs - lhs) )
+    
+def test_equationPrinting(): 
+    eq = Equation(MX("lhs"), MX("rhs"));
+    assert( str(eq) == "MX(lhs) = MX(rhs)" );
+
+def test_RealTypePrinting():
+    realType = RealType()
+    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
+                     "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                     "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
+    assert( str(realType) == expectedPrint )
+    assert( realType.getAttribute("start").getValue() == 0 )
+    assert( realType.hasAttribute("quantity") )
+    assert( not realType.hasAttribute("not") )
+    assert( realType.getName() == "Real" )
+    
+def test_RealVariableAttributes():
+    attributeNode1 = MX(1)
+    attributeNode2 = MX(2)
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+
+    realVar.setAttribute("myAttribute", attributeNode1)
+    assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode1) )
+    realVar.setAttribute("myAttribute", attributeNode2)
+    assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( realVar.hasAttribute("myAttribute"))
+    assert( not realVar.hasAttribute("iDontHaveThisAttribute"))
+
+def test_RealVariableConstants():
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    assert( realVar.getCausality() == MyVariable.INTERNAL )
+    assert( realVar.getVariability() == MyVariable.CONTINUOUS )
+    assert( realVar.getType() == MyVariable.REAL)
+    assert( not realVar.isDerivative() )
+    
+def test_RealVariableNode():
+    node = MX("var")
+    realVar = RealVariable(node, MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    assert( isEqual(realVar.getVar(), node) )
+    
+def test_RealVariableVariableType():
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    assert( realVar.getDeclaredType() == None )
+    realType = RealType()
+    realVar.setDeclaredType(realType)
+    assert( int(realType.this) == int(realVar.getDeclaredType().this) )
+    userType = UserType("typeName", realType)
+    realVar.setDeclaredType(userType)
+    assert( int(userType.this) == int(realVar.getDeclaredType().this) )
+    
+def test_RealVariableDerivativeVariable():
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    derVar = DerivativeVariable(MX("node"), realVar)
+    assert( realVar.getMyDerivativeVariable() == None )
+    realVar.setMyDerivativeVariable(derVar)
+    assert( int(realVar.getMyDerivativeVariable().this) == int(derVar.this) )
+
+def test_RealVariableNonSymbolicError():
+    import sys
+    errorString = ""
+    try:
+        realVar = RealVariable(MX(1), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "A variable must have a symbolic MX");
+    
+def test_RealVariablePrinting():
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS);
+    realVar.setAttribute("myAttribute", MX(2));
+    assert( str(realVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" );
+    
+def test_DerivativeVariableAttributes():
+    attributeNode1 = MX(1)
+    attributeNode2 = MX(2)
+    derVar = DerivativeVariable(MX("node"), None)
+
+    derVar.setAttribute("myAttribute", attributeNode1)
+    assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode1) )
+    derVar.setAttribute("myAttribute", attributeNode2)
+    assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( derVar.hasAttribute("myAttribute"))
+    assert( not derVar.hasAttribute("iDontHaveThisAttribute"))
+
+def test_DerivativeVariableConstants():
+    derVar = DerivativeVariable(MX("node"), None)
+    assert( derVar.getCausality() == MyVariable.INTERNAL )
+    assert( derVar.getVariability() == MyVariable.CONTINUOUS )
+    assert( derVar.getType() == MyVariable.REAL)
+    assert( derVar.isDerivative() )
+
+def test_DerivativeVariableNode():
+    node = MX("var")
+    derVar = DerivativeVariable(node, None)
+    assert( isEqual(derVar.getVar(), node) )
+    
+def test_DerivativeVariableVariableType():
+    derVar = DerivativeVariable(MX("node"), None)
+    assert( derVar.getDeclaredType() == None )
+    realType = RealType()
+    derVar.setDeclaredType(realType)
+    assert( int(realType.this) == int(derVar.getDeclaredType().this) )
+    userType = UserType("typeName", realType)
+    derVar.setDeclaredType(userType)
+    assert( int(userType.this) == int(derVar.getDeclaredType().this) )
+    
+def test_DerivativeVariableDifferentiatedVariable():
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    derVar = DerivativeVariable(MX("node"), realVar)
+    assert( int(derVar.getMyDifferentiatedVariable().this) == int(realVar.this) )
+
+def test_DerivativeVariablePrinting():
+    derVar = DerivativeVariable(MX("node"), None)
+    derVar.setAttribute("myAttribute", MX(2))
+    assert( str(derVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+
+def test_IntegerVariableAttributes():
+    attributeNode1 = MX(1)
+    attributeNode2 = MX(2)
+    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+
+    intVar.setAttribute("myAttribute", attributeNode1)
+    assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode1) )
+    intVar.setAttribute("myAttribute", attributeNode2)
+    assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( intVar.hasAttribute("myAttribute"))
+    assert( not intVar.hasAttribute("iDontHaveThisAttribute"))
+    
+def test_IntegerVariableConstants():
+    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( intVar.getCausality() == MyVariable.INTERNAL )
+    assert( intVar.getVariability() == MyVariable.DISCRETE )
+    assert( intVar.getType() == MyVariable.INTEGER)
+
+def test_IntegerVariableNode():
+    node = MX("var")
+    intVar = IntegerVariable(node, MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( isEqual(intVar.getVar(), node) )
+    
+def test_IntegerVariableVariableType():
+    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( intVar.getDeclaredType() == None )
+    intType = IntegerType()
+    intVar.setDeclaredType(intType)
+    assert( int(intType.this) == int(intVar.getDeclaredType().this) )
+    userType = UserType("typeName", intType)
+    intVar.setDeclaredType(userType)
+    assert( int(userType.this) == int(intVar.getDeclaredType().this) )
+   
+def test_IntegerVariablePrinting():
+    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar.setAttribute("myAttribute", MX(2))
+    assert( str(intVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+    
+def test_IntegerVariableContinuousError():
+    import sys
+    errorString = ""
+    try:
+        intVar = IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "An integer variable can not have continuous variability");
+    
+def test_BooleanVariableAttributes():
+    attributeNode1 = MX(1)
+    attributeNode2 = MX(2)
+    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+
+    boolVar.setAttribute("myAttribute", attributeNode1)
+    assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode1) )
+    boolVar.setAttribute("myAttribute", attributeNode2)
+    assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode2) )
+    assert( boolVar.hasAttribute("myAttribute"))
+    assert( not boolVar.hasAttribute("iDontHaveThisAttribute"))
+    
+def test_BooleanVariableConstants():
+    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( boolVar.getCausality() == MyVariable.INTERNAL )
+    assert( boolVar.getVariability() == MyVariable.DISCRETE )
+    assert( boolVar.getType() == MyVariable.BOOLEAN)
+
+def test_BooleanVariableNode():
+    node = MX("var")
+    boolVar = BooleanVariable(node, MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( isEqual(boolVar.getVar(), node) )
+    
+def test_BooleanVariableVariableType():
+    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    assert( boolVar.getDeclaredType() == None )
+    boolType = BooleanType()
+    boolVar.setDeclaredType(boolType)
+    assert( int(boolType.this) == int(boolVar.getDeclaredType().this) )
+    userType = UserType("typeName", boolType)
+    boolVar.setDeclaredType(userType)
+    assert( int(userType.this) == int(boolVar.getDeclaredType().this) )
+    
+def test_BooleanVariableContinuousError():
+    import sys
+    errorString = ""
+    try:
+        boolVar = BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "A boolean variable can not have continuous variability");
+    
+def test_BooleanVariablePrinting():
+    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar.setAttribute("myAttribute", MX(2))
+    assert( str(boolVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+    
+def test_ModelFunctionGetName():
+    funcVar = MX("node")
+    functionName = "myFunction"
+    function = MXFunction([funcVar],[funcVar+2])
+    function.setOption("name", functionName)
+    function.init()
+    modelFunction = ModelFunction(function)
+    assert( modelFunction.getName() == functionName )
+
+def test_ModelFunctionGetNameCall():
+    funcVar = MX("node")
+    functionName = "myFunction"
+    function = MXFunction([funcVar],[funcVar+2])
+    function.setOption("name", functionName)
+    function.init()
+    modelFunction = ModelFunction(function)
+    arg = MX("arg")
+    manualCall = function.call([arg])[0]
+    assert( isEqual( modelFunction.call([arg])[0].getDep(0).getDep(0),arg) )
+    assert( str(manualCall) == str(modelFunction.call([arg])[0]) )
+
+def test_ModelFunctionCallAndUse():
+    funcVar = MX("node")
+    functionName = "myFunction"
+    function = MXFunction([funcVar],[funcVar+2])
+    function.setOption("name", functionName)
+    function.init()
+    modelFunction = ModelFunction(function)
+    arg = MX("arg")
+    call = modelFunction.call([arg])[0]
+    evaluateCall = MXFunction([arg], [call])
+    evaluateCall.init()
+    evaluateCall.setInput(0.0)
+    evaluateCall.evaluate()        
+    assert( evaluateCall.output().elem(0) == 2 )
+    
+def test_ModelFunctionPrinting():
+    funcVar = MX("node")
+    functionName = "myFunction"
+    function = MXFunction([funcVar],[funcVar+2])
+    function.setOption("name", functionName)
+    function.init()
+    modelFunction = ModelFunction(function)
+    expectedPrint = ("ModelFunction : function(\"myFunction\")\n" +
+                    " Input: 1-by-1 (dense)\n" +
+                    " Output: 1-by-1 (dense)\n" +
+                    "@0 = Const<2>(scalar)\n" +
+                    "@1 = input[0]\n" +
+                    "@0 = (@0+@1)\n" +
+                    "output[0] = @0\n")
+    assert( str(modelFunction) == expectedPrint )
+
+def test_Constraint():
+    lhs = MX("lhs")
+    rhs = MX("rhs")
+    equalityConstraint = Constraint(lhs, rhs, Constraint.EQ)
+    lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
+    greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
+    
+    # Equality constraint
+    assert( isEqual(equalityConstraint.getLhs(), lhs) )
+    assert( isEqual(equalityConstraint.getRhs(), rhs) )
+    assert( isEqual(equalityConstraint.getResidual(), rhs - lhs) )
+    assert( equalityConstraint.getType() == Constraint.EQ)
+    # Less than or equal to constraint
+    assert( isEqual(lessThanConstraint.getLhs(), lhs) )
+    assert( isEqual(lessThanConstraint.getRhs(), rhs) )
+    assert( isEqual(equalityConstraint.getResidual(), rhs - lhs) )
+    assert( lessThanConstraint.getType() == Constraint.LEQ )
+    # Greater than or equal to constraint
+    assert( isEqual(greaterThanConstraint.getLhs(), lhs) )
+    assert( isEqual(greaterThanConstraint.getRhs(), rhs) )
+    assert( isEqual(greaterThanConstraint.getResidual(), rhs - lhs) )
+    assert( greaterThanConstraint.getType() == Constraint.GEQ )
+
+def test_ConstraintPrinting():
+    lhs = MX("lhs")
+    rhs = MX("rhs")
+    equalityConstraint = Constraint(lhs, rhs, Constraint.EQ)
+    lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
+    greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
+    actual = str(equalityConstraint) + str(lessThanConstraint) + str(greaterThanConstraint)
+    assert( actual == "MX(lhs) == MX(rhs)MX(lhs) <= MX(rhs)MX(lhs) >= MX(rhs)" )
+
+def test_OptimizationProblemConstructors():
+    model = Model()
+    constraintsEmpty = constraintVector()
+    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0), MX(0))
+    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0))
+    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0))
+
+    assert( int(model.this) == int(optBothMayerAndLagrange.getModel().this) )
+    assert( int(model.this) == int(optOnlyLagrange.getModel().this) )
+    assert( int(model.this) == int(optNeitherLagrangreOrMayer.getModel().this) )
+
+def test_OptimizationProblemTime():
+    start = MX (0)
+    final = MX(1)
+    constraintsEmpty = constraintVector()
+    model = Model()
+    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, start, final, MX(0), MX(0))
+    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, start, final, MX(0))
+    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, start, final)
+
+    assert( isEqual(start, optBothMayerAndLagrange.getStartTime()) )
+    assert( isEqual(final, optBothMayerAndLagrange.getFinalTime()) )
+    assert( isEqual(start, optOnlyLagrange.getStartTime()) )
+    assert( isEqual(final, optOnlyLagrange.getFinalTime()) )
+    assert( isEqual(start, optNeitherLagrangreOrMayer.getStartTime()) )
+    assert( isEqual(final, optNeitherLagrangreOrMayer.getFinalTime()) )
+    # Set and check
+    start = MX(2)
+    final = MX(4)
+    optBothMayerAndLagrange.setStartTime(start)
+    optBothMayerAndLagrange.setFinalTime(final)
+    assert( isEqual(start, optBothMayerAndLagrange.getStartTime()) )
+    assert( isEqual(final, optBothMayerAndLagrange.getFinalTime()) )
+    
+def test_OptimizationProblemLagrangeMayer():
+    lagrange = MX("lagrange")
+    mayer = MX("mayer")
+    constraintsEmpty = constraintVector()
+    model = Model()
+    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty,  MX(0),  MX(0), lagrange, mayer)
+    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty,  MX(0),  MX(0), lagrange)
+    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty,  MX(0),  MX(0))
+
+    assert( isEqual(lagrange, optBothMayerAndLagrange.getLagrangeTerm()) )
+    assert( isEqual(mayer, optBothMayerAndLagrange.getMayerTerm()) )
+    assert( isEqual(lagrange, optOnlyLagrange.getLagrangeTerm()) )
+    assert( optOnlyLagrange.getMayerTerm().getValue() == 0 )
+    assert( optNeitherLagrangreOrMayer.getLagrangeTerm().getValue() == 0 )
+    assert( optNeitherLagrangreOrMayer.getMayerTerm().getValue() == 0 )
+    # Set and check
+    optNeitherLagrangreOrMayer.setMayerTerm(mayer)
+    optNeitherLagrangreOrMayer.setLagrangeTerm(lagrange)
+    assert( isEqual(lagrange, optNeitherLagrangreOrMayer.getLagrangeTerm()) )
+    assert( isEqual(mayer, optNeitherLagrangreOrMayer.getMayerTerm()) )
+
+def test_OptimizationProblemConstraints():
+    constraintsEmpty = constraintVector()
+    constraintsLessThan = constraintVector()
+    constraintsGreaterThan = constraintVector()
+    lhs = MX("lhs")
+    rhs = MX("rhs")
+    lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
+    greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
+    constraintsLessThan.push_back(lessThanConstraint)
+    constraintsGreaterThan.push_back(greaterThanConstraint)
+    
+    model = Model()
+    
+    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0), MX(0))
+    optOnlyLagrange = OptimizationProblem(model, constraintsLessThan, MX(0), MX(0), MX(0))
+    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsGreaterThan, MX(0), MX(0))
+    
+    assert( len(optBothMayerAndLagrange.getPathConstraints()) == 0 )
+    assert( isEqual(optOnlyLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    assert( isEqual(optNeitherLagrangreOrMayer.getPathConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
+    # Set and check
+    optBothMayerAndLagrange.setPathConstraint(constraintsLessThan)
+    assert( isEqual(optBothMayerAndLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+
+def test_OptimizationProblemPrinting():
+    constraintsEmpty = constraintVector()
+    model = Model()
+    simpleOptProblem = OptimizationProblem(model, constraintsEmpty, MX(0), MX(1))
+    expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
+                     "------------------------------- Variables -------------------------------\n\n\n" +
+                     "---------------------------- Variable types  ----------------------------\n\n\n" +
+                     "------------------------------- Functions -------------------------------\n\n\n" +
+                     "------------------------------- Equations -------------------------------\n\n\n" +
+                     "-- Optimization information  --\n\n" +
+                     "Start time = MX(Const<0>(scalar))\nEnd time = MX(Const<1>(scalar))\n" +
+                     "-- Lagrange term --\nMX(Const<0>(scalar))\n-- Mayer term --\nMX(Const<0>(scalar))\n")
+    assert( str(simpleOptProblem) == expectedPrint )
+
+def test_ModelVariableKindsEmpty():
+    model = Model()
+    for kind in range(Model.NUM_OF_VARIABLE_KIND):
+        assert( len(model.getVariableByKind(kind)) == 0)
+
+def test_ModelVariableSorting():
+    model = Model()
+    var1 = MX("node1")
+    var2 = MX("node2")
+    
+    def checkVariablesEqualToInOrder(varTuple, varVec):
+        for i in range(len(varTuple)):
+            assert( int(varTuple[i].this) == int(varVec[i].this))
+    def addVariableVectorToModel(varVec, model):
+        for i in range(len(varVec)):
+            model.addVariable(varVec[i])
+    
+    #Create different kinds of variables
+    outputVariables = variableVector()
+    inputRealVariables = variableVector()
+    inputIntegerVariables = variableVector()
+    inputBooleanVariables = variableVector()
+    algebraicVariables = variableVector()
+    differentiatedVariables = variableVector()
+    derivativeVariables = variableVector()
+    discreteRealVariables = variableVector()
+    discreteIntegerVariables = variableVector()
+    discreteBooleanVariables = variableVector()
+    constantRealVariables = variableVector()
+    constantIntegerVariables = variableVector()
+    constantBooleanVariables = variableVector()
+    indepenentRealParameterVariables = variableVector()
+    depenentRealParameterVariables = variableVector()
+    indepenentIntegerParameterVariables = variableVector()
+    depenentIntegerParameterVariables = variableVector()
+    indepenentBooleanParameterVariables = variableVector()
+    depenentBooleanParameterVariables = variableVector()
+    
+    # Real variables
+    rIn1 = RealVariable(var1, MyVariable.INPUT, MyVariable.CONTINUOUS)
+    rIn2 = RealVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
+    rIn3 = RealVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
+    rIn4 = RealVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
+    rOut1 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.CONTINUOUS)
+    rOut2 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
+    rOut3 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
+    rOut4 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    inputRealVariables.push_back(rIn1)
+    inputRealVariables.push_back(rIn2)
+    inputRealVariables.push_back(rIn3)
+    inputRealVariables.push_back(rIn4)
+    outputVariables.push_back(rOut1)
+    outputVariables.push_back(rOut2)
+    outputVariables.push_back(rOut3)
+    outputVariables.push_back(rOut4)
+    
+    rAlg = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    algebraicVariables.push_back(rAlg)
+    
+    rDiff = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    differentiatedVariables.push_back(rDiff)
+    rDer = DerivativeVariable(var1, rDiff)
+    derivativeVariables.push_back(rDer)
+    rDisc = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
+    discreteRealVariables.push_back(rDisc)
+    rConst = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    constantRealVariables.push_back(rConst)
+    rIndep = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    indepenentRealParameterVariables.push_back(rIndep)
+    rDep =  RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    rDep.setAttribute("bindingExpression", var2)
+    depenentRealParameterVariables.push_back(rDep)
+    
+    
+    # Integer variables
+    iIn1 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
+    iIn2 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
+    iIn3 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
+    iOut1 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
+    iOut2 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
+    iOut3 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    inputIntegerVariables.push_back(iIn1)
+    inputIntegerVariables.push_back(iIn2)
+    inputIntegerVariables.push_back(iIn3)
+    outputVariables.push_back(iOut1)
+    outputVariables.push_back(iOut2)
+    outputVariables.push_back(iOut3)
+    
+    iDisc = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
+    discreteIntegerVariables.push_back(iDisc)
+    iConst = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    constantIntegerVariables.push_back(iConst)
+    iIndep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    indepenentIntegerParameterVariables.push_back(iIndep)
+    iDep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    iDep.setAttribute("bindingExpression", var2)
+    depenentIntegerParameterVariables.push_back(iDep)
+    
+    
+    # Boolean variables
+    bIn1 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
+    bIn2 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
+    bIn3 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
+    bOut1 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
+    bOut2 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
+    bOut3 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    inputBooleanVariables.push_back(bIn1)
+    inputBooleanVariables.push_back(bIn2)
+    inputBooleanVariables.push_back(bIn3)
+    outputVariables.push_back(bOut1)
+    outputVariables.push_back(bOut2)
+    outputVariables.push_back(bOut3)
+    
+    bDisc = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
+    bConst = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    discreteBooleanVariables.push_back(bDisc)
+    constantBooleanVariables.push_back(bConst)
+    bIndep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    bDep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    indepenentBooleanParameterVariables.push_back(bIndep)
+    bDep.setAttribute("bindingExpression", var2)
+    depenentBooleanParameterVariables.push_back(bDep)
+    
+    
+    
+    
+    # Add differentiated variable, but without its corresponding derivative variable
+    # => should be sorted as algebraic. Then add derivative variable and check again
+    addVariableVectorToModel(differentiatedVariables, model)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_ALGEBRAIC), differentiatedVariables)
+    addVariableVectorToModel(derivativeVariables, model)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DIFFERENTIATED), differentiatedVariables) 
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DERIVATIVE), derivativeVariables) 
+    
+    # Add the rest of the variables and check that they are sorted correctly
+    addVariableVectorToModel(outputVariables, model)
+    addVariableVectorToModel(inputRealVariables, model)
+    addVariableVectorToModel(inputIntegerVariables, model)
+    addVariableVectorToModel(inputBooleanVariables, model)
+    addVariableVectorToModel(algebraicVariables, model)
+    addVariableVectorToModel(discreteRealVariables, model)
+    addVariableVectorToModel(discreteIntegerVariables, model)
+    addVariableVectorToModel(discreteBooleanVariables, model)
+    addVariableVectorToModel(constantRealVariables, model)
+    addVariableVectorToModel(constantIntegerVariables, model)
+    addVariableVectorToModel(constantBooleanVariables, model)
+    addVariableVectorToModel(indepenentRealParameterVariables, model)
+    addVariableVectorToModel(indepenentIntegerParameterVariables, model)
+    addVariableVectorToModel(indepenentBooleanParameterVariables, model)
+    addVariableVectorToModel(depenentRealParameterVariables, model)
+    addVariableVectorToModel(depenentIntegerParameterVariables, model)
+    addVariableVectorToModel(depenentBooleanParameterVariables, model)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.OUTPUT), outputVariables) 
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_INPUT), inputRealVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_INPUT), inputIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_INPUT), inputBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_ALGEBRAIC), algebraicVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DIFFERENTIATED), differentiatedVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DERIVATIVE), derivativeVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_DISCRETE), discreteRealVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_DISCRETE), discreteIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_DISCRETE), discreteBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_CONSTANT), constantRealVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_CONSTANT), constantIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_CONSTANT), constantBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT), indepenentRealParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT), indepenentIntegerParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT), indepenentBooleanParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT), depenentRealParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_PARAMETER_DEPENDENT), depenentIntegerParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_PARAMETER_DEPENDENT), depenentBooleanParameterVariables)
+
+def test_ModelEqutionFunctionality():
+    model = Model()
+    var1 = MX("var1")
+    var2 = MX("var2")
+    var3 = MX("var3")
+    var4 = MX("var4")
+    res1 = var2 - var1
+    res2 = var4 - var3
+    eq1 = Equation(var1, var2)
+    eq2 = Equation(var3, var4)
+
+    # Should return an MX with a null node (default MX value 
+    # for default/empty constructor), if there are no equations
+    assert( model.getDaeResidual().isNull() )
+     # Add equations and check residuals
+    model.addDaeEquation(eq1)
+    model.addDaeEquation(eq2)
+    model.addInitialEquation(eq1)
+    assert( isEqual(res1, model.getInitialResidual()) )
+    # Also test residuals with more than one residual equation
+    res1.append(res2)
+    # isEqual in the casadi namespace gives a false negative 
+    # (which is warned for in the casadi source) if used, 
+    # so MX.isEqual is used instead.
+    assert( res1.isEqual(model.getDaeResidual(), 2) )
+
+def test_ModelWithModelFunction():
+    model = Model()
+    funcVar = MX("node")
+    functionName = "myFunction"
+    f = MXFunction([funcVar],[funcVar+2])
+    f.setOption("name", functionName)
+    f.init()
+    modelFunction = ModelFunction(f)
+    assert( model.getModelFunctionByName(functionName) == None )
+    model.setModelFunctionByItsName(modelFunction)
+    assert( int(model.getModelFunctionByName(functionName).this) == int(modelFunction.this) )
+    assert( model.getModelFunctionByName("iDontExist") == None )
+
+def test_ModelNonExistingVariableType():
+    model = Model()
+    assert( model.getVariableTypeByName("IAmNotATypeInModel") == None )
+    
+def test_ModelDefaultVariableTypeAssignment():
+    model = Model()
+    realVar = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    model.addVariable(realVar)
+    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
+                           "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                           "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
+    assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
+    
+def test_ModelDefaultVariableTypeAssignmentSingletons():
+    model = Model()
+    realVar1 = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar2 = RealVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    intVar1 = IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar2 = IntegerVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar1 = BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar2 = BooleanVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    model.addVariable(realVar1)
+    model.addVariable(realVar2)
+    model.addVariable(intVar1)
+    model.addVariable(intVar2)
+    model.addVariable(boolVar1)
+    model.addVariable(boolVar2)
+    assert( int(realVar1.getDeclaredType().this) == int(realVar2.getDeclaredType().this) ) 
+    assert( int(intVar1.getDeclaredType().this) == int(intVar2.getDeclaredType().this) ) 
+    assert( int(boolVar1.getDeclaredType().this) == int(boolVar2.getDeclaredType().this) ) 
+    
+def test_ModelVariableTypeGettersSetters():
+    model = Model()
+    realVarType = RealType()
+    model.addVariable(RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS, realVarType))
+    assert( int(realVarType.this) == int(model.getVariableTypeByName("Real").this) )
+    
+    boolVarType = BooleanType()
+    model.addVariable(BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE, boolVarType))
+    assert( int(boolVarType.this) == int(model.getVariableTypeByName("Boolean").this) )
+    
+    intVarType = IntegerType()
+    model.addVariable(IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE, intVarType))
+    assert( int(intVarType.this) == int(model.getVariableTypeByName("Integer").this) )
+      
+def test_ModelTrySettingExistingVariableType():
+    import sys
+    model = Model()
+    errorMessage = ""
+    expectedErrorMessage = ("A VariableType with the same name as a type in the Model can not be " +
+                                     "added if those types are not the same object")
+    varType1 = RealType()
+    varType2 = RealType()
+    model.addNewVariableType(varType1)
+    try:
+        model.addNewVariableType(varType2)
+    except:
+        errorMessage = sys.exc_info()[1].message 
+    assert( errorMessage==expectedErrorMessage )
+       
+def test_ModelInvalidVariabilityRealVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    realVar = RealVariable(MX("var"), MyVariable.INTERNAL, 10)
+    model.addVariable(realVar)
+    try:
+        model.getVariableByKind(Model.REAL_ALGEBRAIC)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable variability when sorting for internal real variable: MX(var), declaredType : Real");
+    
+def test_ModelInvalidVariabilityIntegerVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    intVar = IntegerVariable(MX("var"), MyVariable.INTERNAL, 10)
+    model.addVariable(intVar)
+    try:
+        model.getVariableByKind(Model.INTEGER_DISCRETE)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable variability when sorting for internal integer variable: MX(var), declaredType : Integer");
+    
+def test_ModelInvalidVariabilityBooleanVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    boolVar = BooleanVariable(MX("var"), MyVariable.INTERNAL, 10)
+    model.addVariable(boolVar)
+    try:
+        model.getVariableByKind(Model.BOOLEAN_DISCRETE)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable variability when sorting for internal boolean variable: MX(var), declaredType : Boolean");
+    
+def test_ModelInvalidCausalityRealVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    realVar = RealVariable(MX("var"), 10, 10)
+    model.addVariable(realVar)
+    try:
+        model.getVariableByKind(Model.REAL_ALGEBRAIC)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Real")
+    
+def test_ModelInvalidCausalityIntegerVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    intVar = IntegerVariable(MX("var"), 10, 10)
+    model.addVariable(intVar)
+    try:
+        model.getVariableByKind(Model.INTEGER_DISCRETE)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Integer");
+    
+def test_ModelInvalidCausalityBooleanVariable():
+    import sys
+    errorString = ""
+    model = Model()
+    boolVar = BooleanVariable(MX("var"), 10, 10)
+    model.addVariable(boolVar)
+    try:
+        model.getVariableByKind(Model.BOOLEAN_DISCRETE)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Boolean");
+ 
+def test_ModelInvalidVariableKindInGetter():
+    import sys
+    errorString = ""
+    model = Model()
+    try:
+        model.getVariableByKind(-1)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid VariableKind");
+    try:
+        model.getVariableByKind(Model.NUM_OF_VARIABLE_KIND)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "Invalid VariableKind");
+        
+def test_ModelPrinting():
+    model = Model()
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    eq1 = Equation(MX("node1"), MX("node2"))
+    eq2 = Equation(MX("node3"), MX("node4"))
+    model.addVariable(realVar)
+    model.addDaeEquation(eq1)
+    model.addInitialEquation(eq2)
+    expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
+                    "MX(node), declaredType : Real\n\n" +
+                    "---------------------------- Variable types  ----------------------------\n\n" +
+                    "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
+                    "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                    "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()\n\n" +
+                    "------------------------------- Functions -------------------------------\n\n\n" +
+                    "------------------------------- Equations -------------------------------\n\n" +
+                    " -- Initial equations -- \nMX(node3) = MX(node4)\n -- DAE equations -- \n" +
+                    "MX(node1) = MX(node2)\n\n")
+    assert( str(model) == expectedPrint )
