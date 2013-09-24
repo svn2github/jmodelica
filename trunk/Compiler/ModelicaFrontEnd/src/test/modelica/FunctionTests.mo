@@ -2126,6 +2126,42 @@ end FunctionTests.AlgorithmFlatten6;
 ")})));
 end AlgorithmFlatten6;
 
+model AlgorithmFlatten7
+function f
+	input Real[2] i;
+	output Real[2] o;
+algorithm
+	o := if i * i > 1.0E-6 then i else i;
+end f;
+
+Real[2] x = f({time,time*2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten7",
+			description="Flattening algorithms: if expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten7
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1], x[2]}) = FunctionTests.AlgorithmFlatten7.f({time, time * 2});
+
+public
+ function FunctionTests.AlgorithmFlatten7.f
+  input Real[2] i;
+  output Real[2] o;
+algorithm
+  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1];
+  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2];
+  return;
+ end FunctionTests.AlgorithmFlatten7.f;
+end FunctionTests.AlgorithmFlatten7;
+")})));
+end AlgorithmFlatten7;
+
 
 /* ====================== Algorithm type checks ====================== */
 

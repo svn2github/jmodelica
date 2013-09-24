@@ -1115,8 +1115,7 @@ aspect Scalarization {
 				Indices ind = size().isUnknown() ? right.indices() : indices();
 				for (Index i : ind) {
 					FQName fqn = left.specify(i, true);
-					FExp exp = right.extractArrayCell(i);
-					exp.setScalarizedFlag();
+					FExp exp = right.dynamicFExp(right.dynamicFExp(right.extractArrayCell(i)).scalarize(indexMap));
 					scalarizeAssignment(vars, stmts, indexMap, fqn, exp);
 				}
 			}
