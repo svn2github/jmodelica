@@ -18,7 +18,6 @@
 */
 
 #include <stdarg.h>
-#include "fmi1_me.h"
 #include "jmi.h"
 
 int jmi_get_index_from_value_ref(int vref) {
