@@ -19,7 +19,8 @@ aspect InteractiveFMU{
 	public void FClass.computeInteractiveFMUIfSet() {
 		if (root().options.getBooleanOption("interactive_fmu")) {
 			// Convert equations
-			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator());
+			Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
+			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
 			
 			// Remove HGT stuff
 			for (FAbstractEquation equation : equations())
@@ -41,28 +42,43 @@ aspect InteractiveFMU{
 			computeMatchingsAndBLT();
 			
 			// Check for unsolved blocks
-			if (!daeBLT.unsolvedBlockSizes().isEmpty() || !daeInitBLT.unsolvedBlockSizes().isEmpty())
+			boolean allSolved = true;
+			for (AbstractEquationBlock aeb : daeBLT) {
+				if (aeb.isSolvable())
+					continue;
+				for (FAbstractEquation fae : aeb.equations())
+					if (!localIterations.contains(fae))
+						allSolved = false;
+			}
+			for (AbstractEquationBlock aeb : daeInitBLT) {
+				if (aeb.isSolvable())
+					continue;
+				for (FAbstractEquation fae : aeb.equations())
+					if (!localIterations.contains(fae))
+						allSolved = false;
+			}
+			if (!allSolved)
 				error("Generation of interactive FMU failed, system still contains unsolved blocks, contact JModelica.org developer!");
 		}
 	}
 	
-	public void BLT.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void BLT.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		for (AbstractEquationBlock subBlock : this)
-			subBlock.computeInteractiveFMU(fclass, indexEnumerator);
+			subBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	
-	public abstract void AbstractEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator);
+	public abstract void AbstractEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations);
 	
-	public void EquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void EquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		for (SimpleEquationBlock subBlock : blocks)
-			subBlock.computeInteractiveFMU(fclass, indexEnumerator);
+			subBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	
-	public void SimpleEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void SimpleEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		// Default empty implementation
 	}
 
-	public void UnsolvedScalarEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void UnsolvedScalarEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		int index = indexEnumerator.next();
 		String iterName = "iter_" + index;
 		String resName = "res_" + index;
@@ -88,7 +104,7 @@ aspect InteractiveFMU{
 		equation.setRight(new FSubExp(oldLhs, oldRhs));
 	}
 
-	public void UnsolvedFunctionCallEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void UnsolvedFunctionCallEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		Iterator<FVariable> activeVarIt = activeVars.iterator();
 		Iterator<Integer> assignedIndicesIt = assignedIndices.iterator();
 		FFunctionCallEquation equation = equation();
@@ -127,11 +143,15 @@ aspect InteractiveFMU{
 		}
 	}
 	
-	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator) {
+	public void NumericallySolvedScalarEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
+		localIterations.add(equation());
+	}
+	
+	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
 		for (SimpleEquationBlock solvedBlock : solvedBlocks)
-			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator);
+			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks)
-			unsolvedBlock.computeInteractiveFMU(fclass, indexEnumerator);
+			unsolvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	
 }

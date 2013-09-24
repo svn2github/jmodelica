@@ -189,5 +189,84 @@ Solution:
 ")})));
 	end FunctionCallEquation2;
 	
+	model LocalIteration1
+		Real a, b, c;
+	equation
+		20 = c * a;
+		23 = c * b;
+		c = a + b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="LocalIteration1",
+			description="Test of interactive FMU and local iterations",
+			equation_sorting=true,
+			interactive_fmu=true,
+			local_iteration_in_tearing=true,
+			inline_functions="none",
+			automatic_tearing=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  b
+Solution:
+  (- 23) / (- iter_0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  a
+Solution:
+  (- iter_0 + b) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  res_0
+Solution:
+  20 + (- iter_0 * a)
+-------------------------------
+")})));
+	end LocalIteration1;
+	
+	model LocalIteration2
+		Real a, b, c;
+	equation
+		20 = c * a;
+		23 = sin(c * b);
+		c = a + b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="LocalIteration2",
+			description="Test of interactive FMU and local iterations",
+			equation_sorting=true,
+			interactive_fmu=true,
+			local_iteration_in_tearing=true,
+			inline_functions="none",
+			automatic_tearing=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved block of 1 variables:
+Unknown variables:
+  b
+Equations:
+  23 = sin(iter_0 * b)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  a
+Solution:
+  (- iter_0 + b) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  res_0
+Solution:
+  20 + (- iter_0 * a)
+-------------------------------
+")})));
+	end LocalIteration2;
 	
 end InteractiveFMU;
