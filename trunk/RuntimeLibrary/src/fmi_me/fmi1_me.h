@@ -45,7 +45,6 @@ struct fmi_t {
     fmiCallbackFunctions fmi_functions;
     fmiEventInfo event_info;
     fmiBoolean fmi_logging_on;
-    fmiReal fmi_newton_tolerance;
     jmi_t* jmi;
 };
 

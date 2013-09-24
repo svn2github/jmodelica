@@ -421,11 +421,11 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     if (toleranceControlled == fmiFalse){
         relativeTolerance = jmi->options.nle_solver_default_tol;
         jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
-        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
+        jmi->newton_tolerance = jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
     }
     else {
         jmi->events_epsilon = jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
-        ((fmi_t *)c) -> fmi_newton_tolerance=jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
+        jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
     }
     
     /* We are at the initial event TODO: is this really necessary? */
