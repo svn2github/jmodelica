@@ -22,34 +22,17 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <fmi1_functions.h>
 
-#include "fmi1_me.h"
 #include "jmi_log.h"
 
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
 
-/* convenience typedefs */
-typedef jmi_log_node_t     node_t;
-typedef jmi_log_category_t category_t;
-typedef jmi_log_t          log_t;
-
-typedef int BOOL;
-
-
-static category_t severest(category_t c1, category_t c2) {
+category_t severest(category_t c1, category_t c2) {
     /* Smaller is more severe. */
     return c1 <= c2 ? c1 : c2;
 }
-
-
-/** ***************************************************************************
- * \brief Raw character buffer used by jmi_log_t.
- */
-typedef struct {
-    char *msg;
-    int len, alloced;    
-} buf_t;
 
 /* buf_t constructor and destructor. */
 static void init_buffer(buf_t *buf);
@@ -210,52 +193,14 @@ static void buffer_endtag(buf_t *buf, const char *type) {
     buffer_char(buf, '>');
 }
 
-
-/** ***************************************************************************
- * \brief Log frame used by jmi_log_t.
- */
-typedef struct {
-    int id;
-    jmi_log_category_t c;
-    const char *type;
-
-    jmi_log_category_t severest_category; /* among the node's contents */
-} frame_t;
-
 static void logging_error(log_t *log, const char *msg);
-
-
-/** ***************************************************************************
- * \brief Structured logger
- */ 
-
-struct jmi_log_t {
-    jmi_t *jmi;
-    buf_t buf;
-
-    BOOL filtering_enabled;
-    FILE *log_file;  /**< \brief Destination for direct file logging, or NULL. */
-    BOOL initialized;
-
-    category_t c;
-    category_t severest_category;
-    const char *next_name;
-    int leafdim;   /**< \brief  -1 when top is not a leaf, otherwise dimension of the leaf. */
-
-    frame_t *frames;
-    int topindex;  /**< \brief  Index of the top frame in frames. */
-    int alloced_frames;
-    int id_counter;
-
-    BOOL outstanding_comma;
-};
 
 /* convenience typedef and functions */
 static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
 
 
 /* constructor */
-static void init_log(log_t *log, jmi_t *jmi);
+static void init_log(log_t *log, jmi_t *jmi, fmiCallbackFunctions functions);
 static void initialize(log_t *log); /* extra initialization */
 
 /* logging primitives */
@@ -279,20 +224,7 @@ static void force_commas(log_t *log) {
 
 static INLINE int current_indent_of(log_t *log) { return 2*log->topindex; }
 
-static BOOL emitted_category(log_t *log, category_t category) {
-    jmi_t *jmi = log->jmi;
-    if ((jmi->fmi != NULL) && !jmi->fmi->fmi_logging_on) return FALSE;
-    if (!log->filtering_enabled) return TRUE;
-
-    switch (category) {
-    case logError:   break;
-    case logWarning: if(jmi->options.log_level < 3) return FALSE; break;
-    case logInfo:    if(jmi->options.log_level < 4) return FALSE; break;
-    }
-    return TRUE;    
-}
-
-static fmiStatus category_to_fmiStatus(category_t c) {
+fmiStatus category_to_fmiStatus(category_t c) {
     switch (c) {
     case logError:   return fmiError;
     case logWarning: return fmiWarning;
@@ -301,7 +233,7 @@ static fmiStatus category_to_fmiStatus(category_t c) {
     }
 }
 
-static const char *category_to_fmiCategory(category_t c) {
+const char *category_to_fmiCategory(category_t c) {
     switch (c) {
     case logError:   return "ERROR";
     case logWarning: return "WARNING";
@@ -310,24 +242,7 @@ static const char *category_to_fmiCategory(category_t c) {
     }
 }
 
-static void create_log_file_if_needed(log_t *log) {
-    if (log->log_file != NULL) return;
-    if (log->jmi->options.runtime_log_to_file) {
-        /* Create new log file */
-        fmi_t *fmi = log->jmi->fmi;
-        const char *instance_name = fmi ? fmi->fmi_instance_name : "";
-        char filename[1024];
-
-        sprintf(filename, "%s_%s.log", jmi_get_model_identifier(),
-                                       instance_name);
-        /* TODO: fopen returns NULL on error
-           ==> will try to reopen the file at the next emit. Do we want this? 
-           Not an issue if create_log_file_if_needed is only called once.*/
-        log->log_file = fopen(filename, "w");
-    }
-}
-
-static void file_logger(FILE *out, FILE *err, 
+void file_logger(FILE *out, FILE *err, 
                         category_t category, category_t severest_category, 
                         const char *message) {
     switch (category) {
@@ -356,29 +271,6 @@ static void file_logger(FILE *out, FILE *err,
         break;
     }
     */    
-}
-
-static void _emit(log_t *log, char* message) {
-    jmi_t *jmi = log->jmi;
-    category_t category = log->c;
-    category_t severest_category = severest(category, log->severest_category);
-
-    if (!emitted_category(log, category)) return;
-    
-    /* create_log_file_if_needed(log); */
-    if (log->log_file) {
-        file_logger(log->log_file, log->log_file, 
-                    category, severest_category, message);
-        fflush(log->log_file);
-    }
-    if (jmi->fmi) {
-        fmi_t* fmi = jmi->fmi;
-        fmi->fmi_functions.logger(fmi, fmi->fmi_instance_name,
-                                  category_to_fmiStatus(category),
-                                  category_to_fmiCategory(severest_category),
-                                  message);
-    }
-    else file_logger(stdout, stderr, category, severest_category, message);
 }
 
 /** \brief Emit the currently buffered log message, if one exists. */
@@ -462,7 +354,7 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
 
 
 /** log_t constructor. */
-static void init_log(log_t *log, jmi_t *jmi) {
+static void init_log(log_t *log, jmi_t *jmi, fmiCallbackFunctions functions) {
     log->jmi = jmi;
     init_buffer(bufof(log));
 
@@ -479,6 +371,8 @@ static void init_log(log_t *log, jmi_t *jmi) {
 
     log->outstanding_comma = FALSE;
     push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
+    
+    log-> callback_functions = functions;
 
     log->initialized = FALSE;  /* More initialization to do later */
 }
@@ -664,9 +558,9 @@ static void logging_error(log_t *log, const char *msg) {
 
  /* User constructor, destructor */
 
-jmi_log_t *jmi_log_init(jmi_t *jmi) {
+jmi_log_t *jmi_log_init(jmi_t *jmi, fmiCallbackFunctions functions) {
     log_t *log = (log_t *)malloc(sizeof(log_t));
-    init_log(log, jmi);
+    init_log(log, jmi, functions);
     return log;
 }
 void jmi_log_delete(log_t *log) { delete_log(log); }

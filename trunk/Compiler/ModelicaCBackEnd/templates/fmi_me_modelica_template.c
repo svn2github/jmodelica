@@ -164,6 +164,10 @@ $CAD_functions$
 $C_export_functions$
 $C_export_wrappers$
 
+void _emit(log_t *log, char* message) { fmi1_me_emit(log, message); }
+void create_log_file_if_needed(log_t *log) { fmi1_me_create_log_file_if_needed(log); }
+BOOL emitted_category(log_t *log, category_t category) { fmi1_me_emitted_category(log, category); }
+
 static int model_ode_guards(jmi_t* jmi) {
   $C_ode_guards$
   return 0;
@@ -262,7 +266,7 @@ $C_DAE_initial_event_indicator_residuals$
 	return 0;
 }
 
-int jmi_new(jmi_t** jmi) {
+int jmi_new(jmi_t** jmi, fmiCallbackFunctions functions) {
 
   jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
 	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
@@ -275,7 +279,7 @@ int jmi_new(jmi_t** jmi) {
 	   N_dae_blocks,N_dae_init_blocks,
 	   N_initial_relations, (int (*))DAE_initial_relations,
 	   N_relations, (int (*))DAE_relations,
-	   Scaling_method, N_ext_objs);
+	   Scaling_method, N_ext_objs, functions);
 
   $C_dae_add_blocks_residual_functions$
 
@@ -336,7 +340,7 @@ DllExport const char* fmiGetVersion() {
 
 /* Creation and destruction of model instances and setting debug status */
 DllExport fmiComponent fmiInstantiateModel(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
-$HOOK__C_FMI_instantiate$
+$HOOK__C_FMI_instantiate$    
     return fmi1_me_instantiate_model(instanceName, GUID, functions, loggingOn);
 }
 

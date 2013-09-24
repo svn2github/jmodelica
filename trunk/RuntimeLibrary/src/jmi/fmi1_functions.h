@@ -64,6 +64,9 @@ typedef struct {
     fmiCallbackAllocateMemory allocateMemory;
     fmiCallbackFreeMemory     freeMemory;
     fmiStepFinished           stepFinished;
+    fmiComponent              c;
+    fmiString                 fmi_name;
+    fmiBoolean                logging_on;
 } fmiCallbackFunctions;
 
 /** Event info structure as used in FMI 1.0 ME */

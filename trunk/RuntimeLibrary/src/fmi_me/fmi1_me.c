@@ -79,14 +79,17 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     }
     
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
-    component -> fmi_functions = functions;
+    functions.c = component;
+    functions.fmi_name = instanceName;
+    functions.logging_on = loggingOn;
+    component->fmi_functions = functions;
 
 #ifdef USE_FMI_ALLOC
     /* Set the global user functions pointer so that memory allocation functions are intercepted */
     fmiFunctions = &(component -> fmi_functions);
 #endif
 
-    retval = jmi_new(&jmi);
+    retval = jmi_new(&jmi, functions);
     if(retval != 0) {
         /* creating jmi struct failed */
         functions.freeMemory(component);
@@ -1601,6 +1604,59 @@ fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
     jmi_terminate(((fmi_t *)c)->jmi);
     return fmiOK;
+}
+
+BOOL fmi1_me_emitted_category(log_t *log, category_t category) {
+    fmiCallbackFunctions callbacks = log->callback_functions;
+    if (((fmi_t *)(callbacks.c) != NULL) && !callbacks.logging_on) return FALSE;
+    if (!log->filtering_enabled) return TRUE;
+    
+    switch (category) {
+        case logError:   break;
+        case logWarning: if(log->jmi->options.log_level < 3) return FALSE; break;
+        case logInfo:    if(log->jmi->options.log_level < 4) return FALSE; break;
+    }
+    return TRUE;    
+}
+
+void fmi1_me_create_log_file_if_needed(log_t *log) {
+    if (log->log_file != NULL) return;
+    if (log->jmi->options.runtime_log_to_file) {
+        /* Create new log file */
+        const char *instance_name = log->callback_functions.fmi_name;
+        char filename[1024];
+
+        sprintf(filename, "%s_%s.log", jmi_get_model_identifier(),
+                                       instance_name);
+        /* TODO: fopen returns NULL on error
+           ==> will try to reopen the file at the next emit. Do we want this? 
+           Not an issue if create_log_file_if_needed is only called once.*/
+        log->log_file = fopen(filename, "w");
+    }
+}
+
+void fmi1_me_emit(log_t *log, char* message) {
+    fmiCallbackFunctions callbacks = log->callback_functions;
+    category_t category = log->c;
+    category_t severest_category = severest(category, log->severest_category);
+
+    if (!emitted_category(log, category)) return;
+    
+    /* create_log_file_if_needed(log); */
+    if (log->log_file) {
+        file_logger(log->log_file, log->log_file, 
+                    category, severest_category, message);
+        fflush(log->log_file);
+    }
+    if ((fmi_t *)(callbacks.c)) {
+        callbacks.logger((fmi_t *)(callbacks.c), callbacks.fmi_name,
+                                  category_to_fmiStatus(category),
+                                  category_to_fmiCategory(severest_category),
+                                  message);
+        
+    } else {
+        file_logger(stdout, stderr, category, severest_category, message);
+    }
 }
 
 fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {

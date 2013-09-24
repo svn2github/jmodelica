@@ -31,6 +31,7 @@
 #include <string.h>
 #include <math.h>
 #include <setjmp.h>
+#include <fmi1_functions.h>
 /*#include <sundials/sundials_types.h>*/
 
 /**
@@ -838,7 +839,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-        int scaling_method, int n_ext_objs);
+        int scaling_method, int n_ext_objs, fmiCallbackFunctions functions);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
