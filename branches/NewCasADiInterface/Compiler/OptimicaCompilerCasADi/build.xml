@@ -36,7 +36,7 @@
 	<property name="optimica_xml_back_end_path" value="../OptimicaXMLBackEnd" />
 	<property name="optimica_c_back_end_path" value="../OptimicaCBackEnd" />
 	<property name="modelica_compiler_path" value="../ModelicaCompiler" />
-    <property name="modelica_casadi_back_end_path" value="../../.." />  <!-- todo: change when integrating -->
+    <property name="modelica_casadi_back_end_path" value="." />  <!-- todo: change when integrating -->
 
 
 	<!-- "package" is the directory where generated files will be stored -->
@@ -119,7 +119,7 @@
 				destdir="bin" includeantruntime="false">
 			<src path="${base_output}" />
 			<src path="${modelica_front_end_path}/src/java" />
-             <src path="${modelica_casadi_back_end_path}/src/java_generated/casadi" />
+             <src path="${modelica_casadi_back_end_path}/src/java-generated/casadi" />
 			<include name="**/*.java" />
 			<exclude name="**/*junit*/**" />
 			<exclude name="**/*.aj" />

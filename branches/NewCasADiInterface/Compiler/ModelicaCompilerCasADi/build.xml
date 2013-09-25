@@ -33,7 +33,7 @@
 	<property name="modelica_xml_back_end_path" value="../ModelicaXMLBackEnd" />
 	<property name="modelica_c_back_end_path" value="../ModelicaCBackEnd" />
 
-	<property name="modelica_casadi_back_end_path" value="../../.." /> <!-- todo: change when integrating -->
+	<property name="modelica_casadi_back_end_path" value="." /> 
 
 
 	<!-- "package" is the directory where generated files will be stored -->
@@ -109,7 +109,7 @@
 				target="${java_version}" debug="true" destdir="bin" includeantruntime="false">
 			<src path="${base_output}" />
 			<src path="${modelica_front_end_path}/src/java" />
-			<src path="${modelica_casadi_back_end_path}/src/java_generated/casadi" />
+			<src path="${modelica_casadi_back_end_path}/src/java-generated/casadi" />
 			<include name="**/*.java" />
 			<exclude name="**/*junit*/**" />
 			<exclude name="**/*.aj" />

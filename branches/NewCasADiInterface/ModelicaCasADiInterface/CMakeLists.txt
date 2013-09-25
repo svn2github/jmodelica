@@ -33,20 +33,18 @@ set(JAVA_HOME $ENV{JAVA_HOME})
 set(LIBS "${CASADI_HOME}/build/lib/libcasadi.so" -ldl -lpthread)
 
 # Add library path for libs
-link_directories(${CASADI_HOME}/build/lib)
+link_directories(${CASADI_HOME}/build/lib) 
 
-
-get_filename_component(JM_CASADI_BACKEND "../../JModelicaCasADiBackend/trunk" REALPATH)
+get_filename_component(JM_CASADI_BACKEND "../build/ModelicaCasADiInterfaceBuild" REALPATH)
 set(JMODELICA "${JM_CASADI_BACKEND}/JModelica.org")
 
 # todo: this might not allways be the place to find Beaver?
-set(BEAVER_JAR "${JMODELICA}/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar")
+set(BEAVER_JAR "${JMODELICA}/jars/beaver.jar")
 
 foreach(Target Modelica Optimica)
   string(TOLOWER ${Target} target)
-
-  set(COMPILER_${target} "${JMODELICA}/Compiler/${Target}Compiler")
-  set(COMPILER_${target}_JAR_DIR "${COMPILER_${target}}/bin")
+  set(COMPILER_${target} "${JMODELICA}")
+  set(COMPILER_${target}_JAR_DIR "${JMODELICA}/jars/${target}")
   set(JARS_${target} "${COMPILER_${target}_JAR_DIR}/${Target}Compiler.jar" "${COMPILER_${target}_JAR_DIR}/util.jar")
 endforeach(Target)
 
@@ -59,10 +57,11 @@ join(CLASSPATH "${SEP}" "${JARS}")
 # generate modelicacasadi_paths.h
 set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-set(LIBPATH "${JM_CASADI_BACKEND}/lib")
+set(LIBPATH ${JMODELICA}/lib)
 set(MODELPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/common")
 
 message(STATUS "CLASSPATH=${CLASSPATH}")
+message(STATUS "CASADI_HOME=${CASADI_HOME}")
 message(STATUS "LIBPATH=${LIBPATH}")
 
 # uses MODELPATH, LIBPATH, and CLASSPATH (inherited from parent)
