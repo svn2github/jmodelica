@@ -1115,21 +1115,21 @@ aspect Scalarization {
 				Indices ind = size().isUnknown() ? right.indices() : indices();
 				for (Index i : ind) {
 					FQName fqn = left.specify(i, true);
+					right.dynamicFExp(new FIdUseExp(new FIdUse(fqn)));
+					fqn = fqn.scalarize(indexMap);
 					FExp exp = right.dynamicFExp(right.dynamicFExp(right.extractArrayCell(i)).scalarize(indexMap));
 					scalarizeAssignment(vars, stmts, indexMap, fqn, exp);
 				}
 			}
 		} else {
-			left = left.scalarize(indexMap);
-			right = right.dynamicFExp(right.scalarize(indexMap));
-			scalarizeAssignment(vars, stmts, indexMap, left, right);
+			scalarizeAssignment(vars, stmts, indexMap, left.scalarize(indexMap), right.dynamicFExp(right.scalarize(indexMap)));
 		}
 	}
 	
 	/**
-	 * Scalarize an assignment and put the resulting statements in the list of statements.
+	 * Create an assignment and put it in the list of statements.
 	 */
-	public void FType.scalarizeAssignment(
+	protected void FType.scalarizeAssignment(
 			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.unboundCopy()));
@@ -1138,7 +1138,7 @@ aspect Scalarization {
 	/**
 	 * Scalarize an assignment and put the resulting statements in the list of statements.
 	 */
-	public void FRecordType.scalarizeAssignment(
+	protected void FRecordType.scalarizeAssignment(
 			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
 		for (FRecordComponentType comp : getComponents()) {

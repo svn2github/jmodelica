@@ -2162,6 +2162,45 @@ end FunctionTests.AlgorithmFlatten7;
 ")})));
 end AlgorithmFlatten7;
 
+model AlgorithmFlatten8
+Real[3] x;
+algorithm
+  for i in 1:3 loop
+    x[1:i] := 1:i;
+    x[{i,2}] := {i,2};
+  end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten8",
+			description="Flattening algorithms: for indices in left hand side of array assignments.",
+			variability_propagation=false,
+			algorithms_as_functions=false,
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten8
+ Real x[1];
+ Real x[2];
+ Real x[3];
+algorithm
+ x[1] := 0.0;
+ x[2] := 0.0;
+ x[3] := 0.0;
+ x[1] := 1;
+ x[1] := 1;
+ x[2] := 2;
+ x[1] := 1;
+ x[2] := 2;
+ x[2] := 2;
+ x[2] := 2;
+ x[1] := 1;
+ x[2] := 2;
+ x[3] := 3;
+ x[3] := 3;
+ x[2] := 2;
+end FunctionTests.AlgorithmFlatten8;
+
+")})));
+end AlgorithmFlatten8;
 
 /* ====================== Algorithm type checks ====================== */
 
