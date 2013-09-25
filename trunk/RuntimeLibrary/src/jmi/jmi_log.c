@@ -22,7 +22,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include <fmi1_functions.h>
 
 #include "jmi_log.h"
 
@@ -200,7 +199,7 @@ static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
 
 
 /* constructor */
-static void init_log(log_t *log, jmi_t *jmi, fmiCallbackFunctions functions);
+static void init_log(log_t *log, jmi_t *jmi, jmiCallback_t* jmi_callbacks);
 static void initialize(log_t *log); /* extra initialization */
 
 /* logging primitives */
@@ -223,24 +222,6 @@ static void force_commas(log_t *log) {
 }
 
 static INLINE int current_indent_of(log_t *log) { return 2*log->topindex; }
-
-fmiStatus category_to_fmiStatus(category_t c) {
-    switch (c) {
-    case logError:   return fmiError;
-    case logWarning: return fmiWarning;
-    case logInfo:    return fmiOK;
-    default:         return fmiError;
-    }
-}
-
-const char *category_to_fmiCategory(category_t c) {
-    switch (c) {
-    case logError:   return "ERROR";
-    case logWarning: return "WARNING";
-    case logInfo:    return "INFO";
-    default:         return "UNKNOWN CATEGORY";
-    }
-}
 
 void file_logger(FILE *out, FILE *err, 
                         category_t category, category_t severest_category, 
@@ -275,6 +256,7 @@ void file_logger(FILE *out, FILE *err,
 
 /** \brief Emit the currently buffered log message, if one exists. */
 static void emit(log_t *log) {
+    
     buf_t *buf = bufof(log);
     force_commas(log);
     if (!isempty(buf)) {
@@ -354,7 +336,7 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
 
 
 /** log_t constructor. */
-static void init_log(log_t *log, jmi_t *jmi, fmiCallbackFunctions functions) {
+static void init_log(log_t *log, jmi_t *jmi, jmiCallback_t* jmi_callbacks) {
     log->jmi = jmi;
     init_buffer(bufof(log));
 
@@ -372,7 +354,7 @@ static void init_log(log_t *log, jmi_t *jmi, fmiCallbackFunctions functions) {
     log->outstanding_comma = FALSE;
     push_frame(log, logInfo, "Log", -1);  /* todo: do we need to always have a frame on the stack? */
     
-    log-> callback_functions = functions;
+    log-> jmi_callbacks = jmi_callbacks;
 
     log->initialized = FALSE;  /* More initialization to do later */
 }
@@ -395,6 +377,7 @@ static void delete_log(log_t *log) {
     if (log->log_file) fclose(log->log_file);
     delete_buffer(bufof(log));
     free(log->frames);
+    free(log->jmi_callbacks);
     free(log);
 }
 
@@ -558,9 +541,9 @@ static void logging_error(log_t *log, const char *msg) {
 
  /* User constructor, destructor */
 
-jmi_log_t *jmi_log_init(jmi_t *jmi, fmiCallbackFunctions functions) {
+jmi_log_t *jmi_log_init(jmi_t *jmi, jmiCallback_t* jmi_callbacks) {
     log_t *log = (log_t *)malloc(sizeof(log_t));
-    init_log(log, jmi, functions);
+    init_log(log, jmi, jmi_callbacks);
     return log;
 }
 void jmi_log_delete(log_t *log) { delete_log(log); }

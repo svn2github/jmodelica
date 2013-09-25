@@ -81,7 +81,7 @@ typedef int BOOL;
 #define FALSE 0
 
 /** \brief Allocate and intialize a log, with output to `jmi` */
-jmi_log_t *jmi_log_init(jmi_t *jmi, fmiCallbackFunctions functions);
+jmi_log_t *jmi_log_init(jmi_t *jmi, jmiCallback_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
@@ -120,7 +120,7 @@ struct jmi_log_t {
     int alloced_frames;
     int id_counter;
     
-    fmiCallbackFunctions callback_functions;
+    jmiCallback_t* jmi_callbacks;
     
     BOOL outstanding_comma;
 };
@@ -228,12 +228,6 @@ void jmi_log_vref_(  jmi_log_t *log, char t, int vref);
 
 /** \brief Return the one input that has the severest category. */
 category_t severest(category_t c1, category_t c2);
-
-/** \brief Return the the corresponding fmi status for the inputted category. */
-fmiStatus category_to_fmiStatus(category_t c);
-
-/** \brief Return the the corresponding fmi-category for the inputted category. */
-const char *category_to_fmiCategory(category_t c);
 
 /** \brief Logging the category and message. */
 void file_logger(FILE *out, FILE *err, 

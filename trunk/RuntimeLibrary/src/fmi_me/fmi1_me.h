@@ -44,7 +44,6 @@ struct fmi_t {
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
     fmiEventInfo event_info;
-    fmiBoolean fmi_logging_on;
     jmi_t* jmi;
 };
 
@@ -426,7 +425,7 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c);
  */
 const char* fmi1_me_get_model_types_platform();
 
-/** Logging functions that are specific for fmi1_me, are only used from jmi_log.c */
+/** Logging functions that are specific for fmi1_me, are used from jmi_log.c via templates */
 BOOL fmi1_me_emitted_category(log_t *log, category_t category);
 void fmi1_me_create_log_file_if_needed(log_t *log);
 void fmi1_me_emit(log_t *log, char* message);

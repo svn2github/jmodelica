@@ -31,7 +31,6 @@
 #include <string.h>
 #include <math.h>
 #include <setjmp.h>
-#include <fmi1_functions.h>
 /*#include <sundials/sundials_types.h>*/
 
 /**
@@ -138,6 +137,7 @@ typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward de
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 typedef struct jmi_log_t jmi_log_t;                       /**< \brief Forward declaration of struct. */
+typedef struct jmiCallback_t jmiCallback_t;               /**< \brief Forward declaration of struct. */
 
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
@@ -706,6 +706,15 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
     init_with_lbound(x, xmin, message) \
     else init_with_ubound(x, xmax, message)
 
+typedef void (*loggerCallabackFunction) (void* c, const char* instanceName, void* status,
+                                          const char* category, const char* message);
+
+struct jmiCallback_t {
+    loggerCallabackFunction    logger;
+    void*                      fmix_me;
+    const char*                fmi_name;
+    char                       logging_on;
+};
 
 /**
  * \brief Data structure for representing a single function
@@ -839,7 +848,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-        int scaling_method, int n_ext_objs, fmiCallbackFunctions functions);
+        int scaling_method, int n_ext_objs, jmiCallback_t* jmi_callbacks);
 
 /**
  * \brief Allocates a jmi_dae_t struct.

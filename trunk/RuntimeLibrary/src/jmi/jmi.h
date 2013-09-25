@@ -421,7 +421,7 @@
  * @param jmi A pointer to a jmi_t pointer where the new jmi_t struct is stored.
  * @return Error code.
  */
-int jmi_new(jmi_t** jmi, fmiCallbackFunctions functions);
+int jmi_new(jmi_t** jmi, jmiCallback_t* jmi_callbacks);
 
 /**
  * Clean up after a completed simulation.

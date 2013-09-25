@@ -79,17 +79,20 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     }
     
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
-    functions.c = component;
-    functions.fmi_name = instanceName;
-    functions.logging_on = loggingOn;
     component->fmi_functions = functions;
-
+    
+    jmiCallback_t* jmi_callbacks = (jmiCallback_t*)calloc(1,sizeof(jmiCallback_t));
+    jmi_callbacks->fmix_me = component;
+    jmi_callbacks->fmi_name = instanceName;
+    jmi_callbacks->logging_on = loggingOn;
+    jmi_callbacks->logger = (loggerCallabackFunction)functions.logger;
+    
 #ifdef USE_FMI_ALLOC
     /* Set the global user functions pointer so that memory allocation functions are intercepted */
     fmiFunctions = &(component -> fmi_functions);
 #endif
 
-    retval = jmi_new(&jmi, functions);
+    retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
         /* creating jmi struct failed */
         functions.freeMemory(component);
@@ -109,7 +112,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     component -> fmi_GUID = tmpguid;
     
     component -> fmi_functions = functions;
-    component -> fmi_logging_on = loggingOn;
     component -> jmi = jmi;
     
     /* set start values*/
@@ -168,7 +170,7 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 		return fmiFatal;
     }
     
-    ((fmi_t*)c) -> fmi_logging_on = loggingOn;
+    ((fmi_t*)c) -> jmi -> log -> jmi_callbacks -> logging_on = loggingOn;
     return fmiOK;
 }
 
@@ -1607,23 +1609,27 @@ fmiStatus fmi1_me_terminate(fmiComponent c) {
 }
 
 BOOL fmi1_me_emitted_category(log_t *log, category_t category) {
-    fmiCallbackFunctions callbacks = log->callback_functions;
-    if (((fmi_t *)(callbacks.c) != NULL) && !callbacks.logging_on) return FALSE;
-    if (!log->filtering_enabled) return TRUE;
+    jmiCallback_t* jmi_callbacks = log->jmi_callbacks;
+    if (((fmi_t *)(jmi_callbacks->fmix_me) != NULL) && !jmi_callbacks->logging_on) {
+        return FALSE;
+    }
+    if (!log->filtering_enabled) {
+        return TRUE;
+    }
     
     switch (category) {
         case logError:   break;
         case logWarning: if(log->jmi->options.log_level < 3) return FALSE; break;
         case logInfo:    if(log->jmi->options.log_level < 4) return FALSE; break;
     }
-    return TRUE;    
+    return TRUE;
 }
 
 void fmi1_me_create_log_file_if_needed(log_t *log) {
     if (log->log_file != NULL) return;
     if (log->jmi->options.runtime_log_to_file) {
         /* Create new log file */
-        const char *instance_name = log->callback_functions.fmi_name;
+        const char *instance_name = log->jmi_callbacks->fmi_name;
         char filename[1024];
 
         sprintf(filename, "%s_%s.log", jmi_get_model_identifier(),
@@ -1635,24 +1641,43 @@ void fmi1_me_create_log_file_if_needed(log_t *log) {
     }
 }
 
+static fmiStatus category_to_fmiStatus(category_t c) {
+    switch (c) {
+    case logError:   return fmiError;
+    case logWarning: return fmiWarning;
+    case logInfo:    return fmiOK;
+    default:         return fmiError;
+    }
+}
+
+static const char *category_to_fmiCategory(category_t c) {
+    switch (c) {
+    case logError:   return "ERROR";
+    case logWarning: return "WARNING";
+    case logInfo:    return "INFO";
+    default:         return "UNKNOWN CATEGORY";
+    }
+}
+
 void fmi1_me_emit(log_t *log, char* message) {
-    fmiCallbackFunctions callbacks = log->callback_functions;
+    jmiCallback_t* jmi_callbacks = log->jmi_callbacks;
     category_t category = log->c;
     category_t severest_category = severest(category, log->severest_category);
 
     if (!emitted_category(log, category)) return;
-    
+
     /* create_log_file_if_needed(log); */
     if (log->log_file) {
         file_logger(log->log_file, log->log_file, 
                     category, severest_category, message);
         fflush(log->log_file);
     }
-    if ((fmi_t *)(callbacks.c)) {
-        callbacks.logger((fmi_t *)(callbacks.c), callbacks.fmi_name,
-                                  category_to_fmiStatus(category),
-                                  category_to_fmiCategory(severest_category),
-                                  message);
+    if ((fmi_t *)(jmi_callbacks->fmix_me)) {
+        ((fmiCallbackLogger)(jmi_callbacks->logger))((fmi_t *)(jmi_callbacks->fmix_me),
+                                   jmi_callbacks->fmi_name,
+                                   category_to_fmiStatus(category),
+                                   category_to_fmiCategory(severest_category),
+                                   message);
         
     } else {
         file_logger(stdout, stderr, category, severest_category, message);

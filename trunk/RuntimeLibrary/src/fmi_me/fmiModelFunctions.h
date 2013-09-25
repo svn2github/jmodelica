@@ -157,9 +157,6 @@
      fmiCallbackLogger         logger;
      fmiCallbackAllocateMemory allocateMemory;
      fmiCallbackFreeMemory     freeMemory;
-     fmiComponent              c;
-     fmiString                 fmi_name;
-     fmiBoolean                logging_on;
    } fmiCallbackFunctions;
 
    typedef struct {
