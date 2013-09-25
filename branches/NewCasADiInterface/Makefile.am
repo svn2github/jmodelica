@@ -60,7 +60,7 @@ LIBCASADI=$(CASADI_HOME)/build/lib/libcasadi.so
 
 MODELICA_CASADI_HOME=$(MC_INTERFACE)
  
-MC_interface: MC_casadi MC_interface_compilers MC_install_python
+MC_interface: MC_casadi MC_interface_compilers  MC_python_interface
 
 MC_casadi:
 	cd $(CASADI_HOME); \
@@ -112,14 +112,15 @@ MC_modelica_lib: MC_modelica_compiler_swig
 
 MC_python_interface: MC_casadi MC_interface_compilers
 	cd $(CASADI_HOME)/build ; make python
-
-MC_install_python: MC_python_interface
-	cd $(CASADI_HOME)/build ; sudo make install_python
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
+
+MC_install_python: 
+	cd $(CASADI_HOME)/build ; make install_python
+
 
 MC_interface_cpluscplus: MC_casadi MC_interface_compilers
 	rm -rf $(MC_BUILD)/cplusplus; mkdir -p $(MC_BUILD)/cplusplus
