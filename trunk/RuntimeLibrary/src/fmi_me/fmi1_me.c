@@ -68,6 +68,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
     jmi_t* jmi = 0;
+    jmiCallback_t* jmi_callbacks = 0;
     fmiInteger retval;
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
@@ -81,7 +82,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
     component->fmi_functions = functions;
     
-    jmiCallback_t* jmi_callbacks = (jmiCallback_t*)calloc(1,sizeof(jmiCallback_t));
+    jmi_callbacks = (jmiCallback_t*)calloc(1,sizeof(jmiCallback_t));
     jmi_callbacks->fmix_me = component;
     jmi_callbacks->fmi_name = instanceName;
     jmi_callbacks->logging_on = loggingOn;
