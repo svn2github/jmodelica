@@ -145,6 +145,8 @@ $C_runtime_option_map$
 
 $C_records$
 
+$C_enum_strings$
+
 $C_function_headers$
 
 $CAD_function_headers$

@@ -1090,7 +1090,7 @@ aspect CCodeGen {
 	
 	public void FStringAddExp.genTempVars_C(Printer p, PrintStream str, String indent) {
 		super.genTempVars_C(p, str, indent);
-		if (isTopStringAdd()) {
+		if (isTopStringOp()) {
 			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
 			genStringParts_C(p, str, indent);
 			str.print(");\n");
@@ -1099,7 +1099,26 @@ aspect CCodeGen {
 	
 	public void FStringAddExp.genVarDecls_C(Printer p, PrintStream str, String indent) {
 		super.genVarDecls_C(p, str, indent);
-		if (isTopStringAdd())
+		if (isTopStringOp())
+			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
+	}
+
+	public void FStringExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print(tempName_C());
+	}
+	
+	public void FStringExp.genTempVars_C(Printer p, PrintStream str, String indent) {
+		super.genTempVars_C(p, str, indent);
+		if (isTopStringOp()) {
+			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
+			genStringParts_C(p, str, indent);
+			str.print(");\n");
+		}
+	}
+	
+	public void FStringExp.genVarDecls_C(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_C(p, str, indent);
+		if (isTopStringOp())
 			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
 	}
 
@@ -1134,12 +1153,13 @@ aspect CCodeGen {
 	}
 	
 	/**
-	 * Check if this string concatenation is the top node in an expression consisting of 
+	 * Check if this string concatenation or String operator is the top node in an expression consisting of 
 	 * one or more string concatenations, i.e. returns true if parent is not an FStringAddExp.
 	 */
-	inh boolean FStringAddExp.isTopStringAdd();
-	eq FStringAddExp.getChild().isTopStringAdd() = false;
-	eq BaseNode.getChild().isTopStringAdd()      = true;
+	inh boolean FStringAddExp.isTopStringOp();
+	inh boolean FStringExp.isTopStringOp();
+	eq FStringAddExp.getChild().isTopStringOp() = false;
+	eq BaseNode.getChild().isTopStringOp()      = true;
 	
 	/**
 	 * The value of this string, encoded as UTF-8.
@@ -1317,7 +1337,15 @@ aspect CCodeGen {
 	eq FNeqExp.relIsInverted_C() = true;
 	
 	public void FRelExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (!generatesEvent()) {
+		if (cevalType().isString()) {
+			str.print("strcmp(");
+			p.print(getLeft(), str, indent);
+			str.print(", ");
+			p.print(getRight(), str, indent);
+			str.print(")");
+			str.print(op_C());
+			str.print("0");
+		} else if (!generatesEvent()) {
 			str.print(macro_C()+"(");
 			p.print(getLeft(), str, indent);
 			str.print(", ");
@@ -1333,6 +1361,9 @@ aspect CCodeGen {
 			}
 		}
 	}
+	
+	syn String FRelExp.op_C() = op();
+	eq FNeqExp.op_C() = " != ";
 	
 	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print(macro_C());
