@@ -135,7 +135,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CASADI_HOME = $(abs_top_srcdir)/ThirdParty/CasADi/CasADi
+CASADI_HOME = @CASADI_HOME@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = -I$(JAVA_HOME)/include/
@@ -296,7 +296,6 @@ MC_JARS = $(MC_COMPILERS_DIR)/jars
 MC_MODELICA_JARS = $(MC_JARS)/modelica
 MC_OPTIMICA_JARS = $(MC_JARS)/optimica
 LIBCASADI = $(CASADI_HOME)/build/lib/libcasadi.so
-MODELICA_CASADI_HOME = $(MC_INTERFACE)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -826,6 +825,10 @@ casadi:
 install_casadi: casadi
 	cd $(abs_builddir)/casadi_build/python/; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
+
+export CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
+
+export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 
 MC_interface: MC_casadi MC_interface_compilers  MC_python_interface
 

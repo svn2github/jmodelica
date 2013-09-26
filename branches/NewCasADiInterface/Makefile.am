@@ -43,7 +43,7 @@ install_casadi: casadi
 
 MC_INTERFACE=$(abs_top_srcdir)/ModelicaCasADiInterface
 
-CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
+export CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
 MC_SRC=$(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi
 OC_SRC=$(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi
 
@@ -58,7 +58,8 @@ MC_OPTIMICA_JARS=$(MC_JARS)/optimica
 CFLAGS=-I$(JAVA_HOME)/include/
 LIBCASADI=$(CASADI_HOME)/build/lib/libcasadi.so
 
-MODELICA_CASADI_HOME=$(MC_INTERFACE)
+export MODELICA_CASADI_HOME= $(MC_INTERFACE)
+
  
 MC_interface: MC_casadi MC_interface_compilers  MC_python_interface
 
