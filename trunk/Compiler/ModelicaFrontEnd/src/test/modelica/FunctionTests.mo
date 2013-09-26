@@ -9416,8 +9416,8 @@ end Math;
 package Special
 
 model Homotopy1
-  Real x = homotopy(sin(time*10),2);
-  Real y[2] = homotopy({sin(time*10),time},{2,2});
+  Real x = homotopy(sin(time*10) .+ 1, 1);
+  Real y[2] = homotopy({sin(time*10),time} .+ 1, {1,1});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9425,19 +9425,19 @@ model Homotopy1
 			description="Basic test of the homotopy() operator.",
 			flatModel="
 fclass FunctionTests.FunctionLike.Special.Homotopy1
-  Real x;
-  Real y[1];
-  Real y[2];
+ Real x;
+ Real y[1];
+ Real y[2];
 equation
-  x = homotopy(sin(time*10),2);
-  y[1] = homotopy(sin(time*10),2);
-  y[2] = homotopy(time,2);
+ x = sin(time * 10) .+ 1;
+ y[1] = sin(time * 10) .+ 1;
+ y[2] = time .+ 1;
 end FunctionTests.FunctionLike.Special.Homotopy1;
 ")})));
 end Homotopy1;
 
 model Homotopy2
-  Real x = homotopy(1,2);
+  Real x = homotopy(1,time);
 
   annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(

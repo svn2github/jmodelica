@@ -1833,6 +1833,7 @@ end IndexReduction.IndexReduction40_MaxExp;
 end IndexReduction40_MaxExp;
 
 model IndexReduction41_Homotopy
+  //TODO: this test should be updated when the homotopy operator is fully implemented.
   Real x1,x2;
 equation
   der(x1) + der(x2) = 1;
@@ -1844,16 +1845,14 @@ equation
             description="Test of index reduction. Homotopy expression.",
             flatModel="
 fclass IndexReduction.IndexReduction41_Homotopy
- Real x1;
+ constant Real x1 = 0;
  Real x2;
- Real der_x1;
 initial equation 
  x2 = 0.0;
 equation
- der_x1 + der(x2) = 1;
- homotopy(x1, x2) = 0;
- der_x1 = 0.0;
+ 0.0 + der(x2) = 1;
 end IndexReduction.IndexReduction41_Homotopy;
+
 ")})));
 end IndexReduction41_Homotopy;
 

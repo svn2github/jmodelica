@@ -349,7 +349,7 @@ model UnsupportedBuiltins_WarnErr
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 306, column 3:
-  The homotopy() function like operator is not fully supported. It is replaced with its first argument.
+  The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.
 
 ")})));
 end UnsupportedBuiltins_WarnErr;

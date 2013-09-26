@@ -526,6 +526,12 @@ aspect FlatTypeCheck {
     }
   }
   
+  public void FHomotopyExp.typeCheck() {
+    if (!getActual().type().equivalentTo(getSimplified().type())) {
+      error("Calling function homotopy(): arguments must be same type");
+    }
+  }
+  
   syn boolean FBuiltInFunctionCall.builtInHasOutput() = true;
   eq FIgnoredBuiltIn.builtInHasOutput() = false;
   eq FConnectionsOp.builtInHasOutput()  = false;

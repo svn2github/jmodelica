@@ -102,8 +102,11 @@ aspect ComplianceCheck {
 	}
 	
 	public void FHomotopyExp.complianceCheck() {
-		warning("The homotopy() function like operator is not fully supported."
-				+ " It is replaced with its first argument.");
+		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.HOMOTOPY) {
+			warning("The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.");
+			root().options.setStringOption("homotopy", OptionRegistry.Homotopy.ACTUAL);
+			
+		}
 	}
 	
 	public void FSemiLinearExp.complianceCheck() {

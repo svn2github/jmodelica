@@ -51,6 +51,11 @@ public class OptionRegistry {
 		public static final String TRIVIAL = "trivial";
 		public static final String ALL     = "all";
 	}
+	public interface Homotopy {
+		public static final String SIMPLIFIED = "simplified";
+		public static final String ACTUAL     = "actual";
+		public static final String HOMOTOPY   = "homotopy";
+	}
 	public interface RuntimeLogLevel {
 		public static final int NONE = 0;
 		public static final int FATAL = 1;
@@ -268,6 +273,14 @@ public class OptionRegistry {
 			 Inlining.TRIVIAL, 
 			 "Perform function inlining on model after flattening (allowed values are none, trivial or all, default is trivial)", 
 			 Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
+		HOMOTOPY 
+			("homotopy", 
+			 compiler, 
+			 Homotopy.HOMOTOPY, 
+			 "Decides how homotopy expressions are interpreted during compilation. Default value is 'homotopy'."
+			 + "Can be set to either 'simplified' or 'actual' which will compile the model using the simplified or"
+			 + "actual expressions.", 
+			 Homotopy.HOMOTOPY, Homotopy.ACTUAL, Homotopy.SIMPLIFIED),
 		DEBUG_CSV_STEP_INFO 
 			("debug_csv_step_info", 
 			 compiler, 

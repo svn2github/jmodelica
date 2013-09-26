@@ -1321,6 +1321,21 @@ Semantic error at line 1147, column 7:
 ")})));
 end ChangeTest1;
 
+model HomotopyTest1
+  Real x = homotopy(1, {1});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="HomotopyTest1",
+			description="Testing error when type of homotopy arguments differ",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1147, column 7:
+  Calling function homotopy(): arguments must be same type
+")})));
+end HomotopyTest1;
+
 model IfExpType1
     model M
         parameter Integer n=1;
