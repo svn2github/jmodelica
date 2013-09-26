@@ -989,7 +989,7 @@ FStringLitExp : FLitExp ::= <String>;
  * All accesses to enumeration literals should be replaced by FEnumLitExps in flat tree.
  * Note that Type may be <code>null</code> in the flat tree - use type().
  */
-FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
+FEnumLitExp : FLitExp ::= <Enum> <Value> [Type:FEnumType];
 
 
 /**
@@ -1531,7 +1531,7 @@ abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
 /**
  * String conversion operator.
  */
-FStringExp : FInfArgsFunctionCall ::= Value:FExp;
+FStringExp : FBuiltInFunctionCall ::= Value:FExp [MinimumLength:FExp] [LeftJustified:FExp] [SignificantDigits:FExp] [Format:FExp];
 
 /**
  * \brief Min built-in function.

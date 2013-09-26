@@ -1553,12 +1553,36 @@ aspect ConstantEvaluation {
   eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   eq FStringExp.cevalCalc() {
-	  // TODO: support format args
+	  Object value;
 	  if (getValue().type().isReal())
-		  return new CValueString(String.format((Locale) null, "%.6g", getValue().ceval().realValue()));
+		  value = getValue().ceval().realValue();
+	  else if (getValue().type().isInteger())
+		  value = getValue().ceval().intValue();
+	  else if (getValue().type().isBoolean() || getValue().type().isEnum())
+		  value = getValue().ceval().stringValue();
 	  else
-		  return getValue().ceval().convertString();
+		  throw new UnsupportedOperationException();
+	  return new CValueString(String.format((Locale) null, formatString(), value));
   }
+  
+  // TODO: support format args
+  syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
+  
+  syn String FStringExp.formatWidth() = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
+  syn String FStringExp.formatFlags() = leftJustified() && minimumLength() > 0 ? "-" : "";
+  syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
+  syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
+  syn int FStringExp.minimumLength() = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
+  syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
+  syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
+  syn String FType.formatSpecifier() {
+	  throw new UnsupportedOperationException();
+  }
+  eq FRealType.formatSpecifier()    = "g";
+  eq FIntegerType.formatSpecifier() = "d";
+  eq FBooleanType.formatSpecifier() = "s";
+  eq FEnumType.formatSpecifier()    = "s";
+  public static final int FStringExp.DEFAULT_PRECISION = 6;
   
   eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
   eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));

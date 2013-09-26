@@ -296,3 +296,47 @@ class TestChange(SimulationTest):
         Test that results match the expected ones.
         """
         self.assert_all_trajectories(['x','y'])
+
+class TestStringExpConstant(SimulationTest):
+    """
+    Basic test of Modelica string operator.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.StringExpConstant')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        # Tested with asserts in model
+
+class TestStringExpParameter(SimulationTest):
+    """
+    Basic test of Modelica string operator.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('OperatorTests.mo', 
+            'OperatorTests.StringExpParameter')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base()
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        # Tested with asserts in model

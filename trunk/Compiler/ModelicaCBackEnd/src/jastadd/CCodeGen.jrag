@@ -1076,8 +1076,6 @@ aspect CCodeGen {
 		str.print("\""+prettyPrint("")+"\")");
 	}
 	
-	// TODO: support format args
-    
     public void FStringLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
         str.print('"');
         str.print(string_C());
@@ -1123,23 +1121,21 @@ aspect CCodeGen {
 	}
 
 	public void FExp.genStringParts_C(Printer p, PrintStream str, String indent) {
-		if (!isConstantExp()) {
-			str.print(", ");
-			FType t = type();
-			if (t.isEnum()) {
-				str.print(t.enumNames_C());
-				str.print("[(int) ");
-				p.print(this, str, indent);
-				str.print("]");
-			} else if (t.isBoolean()) {
-				str.print("COND_EXP_EQ(");
-				p.print(this, str, indent);
-				str.print(", JMI_TRUE, \"true\", \"false\")");
-			} else {
-				if (t.isInteger())
-					str.print("(int) ");
-				p.print(this, str, indent);
-			}
+		str.print(", ");
+		FType t = type();
+		if (t.isEnum()) {
+			str.print(t.enumNames_C());
+			str.print("[(int) ");
+			p.print(this, str, indent);
+			str.print("]");
+		} else if (t.isBoolean()) {
+			str.print("COND_EXP_EQ(");
+			p.print(this, str, indent);
+			str.print(", JMI_TRUE, \"true\", \"false\")");
+		} else {
+			if (t.isInteger())
+				str.print("(int) ");
+			p.print(this, str, indent);
 		}
 	}
 	
@@ -1152,6 +1148,7 @@ aspect CCodeGen {
 		getRight().genStringParts_C(p, str, indent);
 	}
 	
+	public void FStringLitExp.genStringParts_C(Printer p, PrintStream str, String indent) {}
 	/**
 	 * Check if this string concatenation or String operator is the top node in an expression consisting of 
 	 * one or more string concatenations, i.e. returns true if parent is not an FStringAddExp.
@@ -1190,54 +1187,52 @@ aspect CCodeGen {
 	/**
 	 * The maximum length string the representation of the value of this expression can have in C.
 	 */
-	syn int FExp.maxStringLength_C()               = 
-		isConstantExp() ? ceval().stringValue().length() : type().maxStringLength_C();
-	syn lazy int FStringAddExp.maxStringLength_C() = 
-		Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), FStringType.MAX_STRING_LENGTH_C);
-	eq FStringExp.maxStringLength_C()              = 
-		isConstantExp() ? ceval().stringValue().length() : getValue().maxStringLength_C();
+	syn int FExp.maxStringLength_C() { 
+		if (type().isString())
+			return MAX_STRING_LENGTH_C;
+		else
+			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+	}
+	syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
 	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
+	eq FStringExp.maxStringLength_C()              = Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
 	
 	/**
 	 * The maximum length string representations of values of this type can have in C.
 	 */
-	syn int FType.maxStringLength_C()   = 0;
-	eq FIntegerType.maxStringLength_C() = 10;
-	eq FRealType.maxStringLength_C()    = 13;
-	eq FBooleanType.maxStringLength_C() = 5;
-	eq FStringType.maxStringLength_C()  = MAX_STRING_LENGTH_C;
-	eq FEnumType.maxStringLength_C() {
+	syn int FType.maxStringLength_C(int precision) {
+		throw new UnsupportedOperationException();
+	}
+	eq FRealType.maxStringLength_C(int precision)    = 7 + precision;
+	eq FIntegerType.maxStringLength_C(int precision) = 10;
+	eq FBooleanType.maxStringLength_C(int precision) = 5;
+	eq FEnumType.maxStringLength_C(int precision) {
 		int res = 0;
 		for (FEnumLiteralType lit : getFEnumLiteralTypes())
 			res = Math.max(res, lit.getName().length());
 		return res;
 	}
 	
-	public static final int FStringType.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
+	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	
     /**
      * The format string to use for this expression with the printf family of functions in C.
      */
-	syn String FExp.formatString_C()               = isConstantExp() ? ceval().stringValue() : type().formatString_C();
+	syn String FExp.formatString_C() {
+		if (type().isString())
+			return "%s";
+		else
+			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+	}
 	syn lazy String FStringAddExp.formatString_C() = getLeft().formatString_C() + getRight().formatString_C();
-	eq FStringExp.formatString_C()                 = isConstantExp() ? ceval().stringValue() : getValue().formatString_C();
+	eq FStringExp.formatString_C()                 = formatString();
 	eq FStringLitExp.formatString_C()              = string_C();
-
-    /**
-     * The format string to use for this type with the printf family of functions in C.
-     */
-	syn String FType.formatString_C() = "%s";
-	eq FIntegerType.formatString_C()  = "%d";
-	eq FRealType.formatString_C()     = "%.6g";
 
 	
 	public void FEnumDecl.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.format("%schar* %s[] = { ", indent, name_C());
-		boolean first = true;
-		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals()) {
-			str.format(first ? "\"%s\"" : ", \"%s\"", el.name());
-			first = false;
-		}
+		str.format("%schar* %s[] = { \"\"", indent, name_C());
+		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals())
+			str.format(", \"%s\"", el.name());
 		str.print(" };\n");
 	}
 
@@ -2178,8 +2173,8 @@ aspect CCodeGen {
 	}
 
 	public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-	    equation().genTempVars_C(ASTNode.printer_C, str, indent);
-		equation().prettyPrint_C(ASTNode.printer_C, str, indent);
+		equation().genTempVars_C(ASTNode.printer_C, str, indent);
+		equation().getCall().prettyPrint_C(ASTNode.printer_C, str, indent);
 	}
 
 	public void WhenEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {

@@ -145,8 +145,6 @@ aspect FlatTypeAnalysis {
 	eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
 	eq FEnumLitExp.type()     = hasType() ? getType() : myFEnumDecl().type();
 	
-	syn boolean FEnumLitExp.hasType() = getType() != null;
-	
 	syn FType InstClassDecl.enumType() {
 		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
 		for (InstEnumLiteral el : enumLiterals()) 

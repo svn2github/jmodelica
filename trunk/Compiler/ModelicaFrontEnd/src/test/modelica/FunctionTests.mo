@@ -8050,7 +8050,7 @@ public
   size(tau) := {size(A, 2)};
   nrow := size(A, 1);
   ncol := size(A, 2);
-  assert(nrow >= ncol, \"\\nInput matrix A[\" + String() + \",\" + String() + \"] has more columns as rows.
+  assert(nrow >= ncol, \"\\nInput matrix A[\" + String(nrow) + \",\" + String(ncol) + \"] has more columns as rows.
 This is not allowed when calling Modelica.Matrices.QR(A).\");
   if pivoting then
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);

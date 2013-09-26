@@ -135,6 +135,100 @@ end VariabilityPropagationTests.ConstantFolding2;
 ")})));
 end ConstantFolding2;
 
+model ConstantFolding3
+	function StringCompare
+		input String expected;
+		input String actual;
+	algorithm
+		assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
+	end StringCompare;
+	type E = enumeration(small, medium, large, xlarge);
+	Real realVar = 3.14;
+	Integer intVar = if realVar < 2.5 then 12 else 42;
+	Boolean boolVar = if realVar < 2.5 then true else false;
+	E enumVar = if realVar < 2.5 then E.small else E.medium;
+equation
+	StringCompare("42",           String(intVar));
+	StringCompare("42          ", String(intVar, minimumLength=12));
+	StringCompare("          42", String(intVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("3.14000",      String(realVar));
+	StringCompare("3.14000     ", String(realVar, minimumLength=12));
+	StringCompare("     3.14000", String(realVar, minimumLength=12, leftJustified=false));
+	StringCompare("3.1400000",    String(realVar, significantDigits=8));
+	StringCompare("3.1400000   ", String(realVar, minimumLength=12, significantDigits=8));
+	StringCompare("   3.1400000", String(realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("-3.14000",     String(-realVar));
+	StringCompare("-3.14000    ", String(-realVar, minimumLength=12));
+	StringCompare("    -3.14000", String(-realVar, minimumLength=12, leftJustified=false));
+	StringCompare("-3.1400000",   String(-realVar, significantDigits=8));
+	StringCompare("-3.1400000  ", String(-realVar, minimumLength=12, significantDigits=8));
+	StringCompare("  -3.1400000", String(-realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("false",        String(boolVar));
+	StringCompare("false       ", String(boolVar, minimumLength=12));
+	StringCompare("       false", String(boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("true",         String(not boolVar));
+	StringCompare("true        ", String(not boolVar, minimumLength=12));
+	StringCompare("        true", String(not boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("medium",       String(enumVar));
+	StringCompare("medium      ", String(enumVar, minimumLength=12));
+	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantFolding3",
+			description="Tests folding of string operator.",
+			flatModel="
+fclass VariabilityPropagationTests.ConstantFolding3
+ constant Real realVar = 3.14;
+ constant Integer intVar = 42;
+ constant Boolean boolVar = false;
+ constant VariabilityPropagationTests.ConstantFolding3.E enumVar = VariabilityPropagationTests.ConstantFolding3.E.medium;
+equation
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42\", \"42\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42          \", \"42          \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"          42\", \"          42\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000\", \"3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000     \", \"3.14000     \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"     3.14000\", \"     3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000\", \"3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000   \", \"3.1400000   \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"   3.1400000\", \"   3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000\", \"-3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000    \", \"-3.14000    \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"    -3.14000\", \"    -3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000\", \"-3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000  \", \"-3.1400000  \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"  -3.1400000\", \"  -3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false\", \"false\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false       \", \"false       \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"       false\", \"       false\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true\", \"true\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true        \", \"true        \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"        true\", \"        true\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium\", \"medium\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium      \", \"medium      \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"      medium\", \"      medium\");
+
+public
+ function VariabilityPropagationTests.ConstantFolding3.StringCompare
+  input String actual;
+  input String expected;
+algorithm
+  assert(actual == expected, \"Compare failed, expected: \" + expected + \", actual: \" + actual);
+  return;
+ end VariabilityPropagationTests.ConstantFolding3.StringCompare;
+
+ type VariabilityPropagationTests.ConstantFolding3.E = enumeration(small, medium, large, xlarge);
+
+end VariabilityPropagationTests.ConstantFolding3;
+")})));
+end ConstantFolding3;
+
 model NoExp
 	Real x(start=.5);
 equation

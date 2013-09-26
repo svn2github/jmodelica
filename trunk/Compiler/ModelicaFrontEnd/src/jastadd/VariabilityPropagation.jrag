@@ -374,12 +374,19 @@ aspect ConstantFolding {
 	}
 	
 	public void FAbstractExp.enableConstantFolding() {
-		if (isConstantExp() || type().isString()) {
+		if (isConstantExp()) {
 			constantFoldingEnabled = true;
 			is$Final = false;
 			return;
 		}
-
+		super.enableConstantFolding();
+	}
+	public void FIdUseExp.enableConstantFolding() {
+		if (type().isString()) {
+			constantFoldingEnabled = true;
+			is$Final = false;
+			return;
+		}
 		super.enableConstantFolding();
 	}
 

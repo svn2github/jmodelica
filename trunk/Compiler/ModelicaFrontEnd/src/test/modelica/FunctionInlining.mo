@@ -3060,7 +3060,7 @@ fclass FunctionInlining.AssertInline1
 equation
  z = 2 / (temp_1 - 5);
  temp_1 = time;
- assert(noEvent(temp_1 < 5), \"Bad x: \" + String());
+ assert(noEvent(temp_1 < 5), \"Bad x: \" + String(temp_1));
 end FunctionInlining.AssertInline1;
 ")})));
 end AssertInline1;

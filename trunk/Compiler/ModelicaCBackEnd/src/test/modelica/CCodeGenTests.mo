@@ -594,6 +594,136 @@ model CLogExp3
 ")})));
 end CLogExp3;
 
+model CStringExp
+	function StringCompare
+		input String expected;
+		input String actual;
+	algorithm
+		assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
+	end StringCompare;
+	type E = enumeration(small, medium, large, xlarge);
+	parameter Real realVar = 3.14;
+	Integer intVar = if realVar < 2.5 then 12 else 42;
+	Boolean boolVar = if realVar < 2.5 then true else false;
+	E enumVar = if realVar < 2.5 then E.small else E.medium;
+equation
+	StringCompare("42",           String(intVar));
+	StringCompare("42          ", String(intVar, minimumLength=12));
+	StringCompare("          42", String(intVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("3.14000",      String(realVar));
+	StringCompare("3.14000     ", String(realVar, minimumLength=12));
+	StringCompare("     3.14000", String(realVar, minimumLength=12, leftJustified=false));
+	StringCompare("3.1400000",    String(realVar, significantDigits=8));
+	StringCompare("3.1400000   ", String(realVar, minimumLength=12, significantDigits=8));
+	StringCompare("   3.1400000", String(realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("-3.14000",     String(-realVar));
+	StringCompare("-3.14000    ", String(-realVar, minimumLength=12));
+	StringCompare("    -3.14000", String(-realVar, minimumLength=12, leftJustified=false));
+	StringCompare("-3.1400000",   String(-realVar, significantDigits=8));
+	StringCompare("-3.1400000  ", String(-realVar, minimumLength=12, significantDigits=8));
+	StringCompare("  -3.1400000", String(-realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("false",        String(boolVar));
+	StringCompare("false       ", String(boolVar, minimumLength=12));
+	StringCompare("       false", String(boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("true",         String(not boolVar));
+	StringCompare("true        ", String(not boolVar, minimumLength=12));
+	StringCompare("        true", String(not boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("medium",       String(enumVar));
+	StringCompare("medium      ", String(enumVar, minimumLength=12));
+	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="CStringExp",
+			description="C code generation for string operator",
+			variability_propagation=false,
+			generate_ode=false,
+			generate_dae=true,
+			template="$C_DAE_equation_residuals$",
+			generatedCode="
+    char tmp_1[11];
+    char tmp_2[13];
+    char tmp_3[13];
+    char tmp_4[14];
+    char tmp_5[14];
+    char tmp_6[14];
+    char tmp_7[16];
+    char tmp_8[16];
+    char tmp_9[16];
+    char tmp_10[14];
+    char tmp_11[14];
+    char tmp_12[14];
+    char tmp_13[16];
+    char tmp_14[16];
+    char tmp_15[16];
+    char tmp_16[6];
+    char tmp_17[13];
+    char tmp_18[13];
+    char tmp_19[6];
+    char tmp_20[13];
+    char tmp_21[13];
+    char tmp_22[7];
+    char tmp_23[13];
+    char tmp_24[13];
+    snprintf(tmp_1, 11, \"%d\", (int) _intVar_1);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"42\", tmp_1);
+    snprintf(tmp_2, 13, \"%-12d\", (int) _intVar_1);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"42          \", tmp_2);
+    snprintf(tmp_3, 13, \"%12d\", (int) _intVar_1);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"          42\", tmp_3);
+    snprintf(tmp_4, 14, \"%.6g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"3.14000\", tmp_4);
+    snprintf(tmp_5, 14, \"%-12.6g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"3.14000     \", tmp_5);
+    snprintf(tmp_6, 14, \"%12.6g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"     3.14000\", tmp_6);
+    snprintf(tmp_7, 16, \"%.8g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"3.1400000\", tmp_7);
+    snprintf(tmp_8, 16, \"%-12.8g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"3.1400000   \", tmp_8);
+    snprintf(tmp_9, 16, \"%12.8g\", _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"   3.1400000\", tmp_9);
+    snprintf(tmp_10, 14, \"%.6g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"-3.14000\", tmp_10);
+    snprintf(tmp_11, 14, \"%-12.6g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"-3.14000    \", tmp_11);
+    snprintf(tmp_12, 14, \"%12.6g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"    -3.14000\", tmp_12);
+    snprintf(tmp_13, 16, \"%.8g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"-3.1400000\", tmp_13);
+    snprintf(tmp_14, 16, \"%-12.8g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"-3.1400000  \", tmp_14);
+    snprintf(tmp_15, 16, \"%12.8g\", - _realVar_0);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"  -3.1400000\", tmp_15);
+    snprintf(tmp_16, 6, \"%s\", COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"false\", tmp_16);
+    snprintf(tmp_17, 13, \"%-12s\", COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"false       \", tmp_17);
+    snprintf(tmp_18, 13, \"%12s\", COND_EXP_EQ(_boolVar_2, JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"       false\", tmp_18);
+    snprintf(tmp_19, 6, \"%s\", COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"true\", tmp_19);
+    snprintf(tmp_20, 13, \"%-12s\", COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"true        \", tmp_20);
+    snprintf(tmp_21, 13, \"%12s\", COND_EXP_EQ(LOG_EXP_NOT(_boolVar_2), JMI_TRUE, \"true\", \"false\"));
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"        true\", tmp_21);
+    snprintf(tmp_22, 7, \"%s\", E_0_e[(int) _enumVar_3]);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"medium\", tmp_22);
+    snprintf(tmp_23, 13, \"%-12s\", E_0_e[(int) _enumVar_3]);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"medium      \", tmp_23);
+    snprintf(tmp_24, 13, \"%12s\", E_0_e[(int) _enumVar_3]);
+    func_CCodeGenTests_CStringExp_StringCompare_def(\"      medium\", tmp_24);
+    (*res)[0] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(12), AD_WRAP_LITERAL(42)) - (_intVar_1);
+    (*res)[1] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, JMI_TRUE, JMI_FALSE) - (_boolVar_2);
+    (*res)[2] = COND_EXP_EQ(COND_EXP_LT(_realVar_0, AD_WRAP_LITERAL(2.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_enumVar_3);
+")})));
+end CStringExp;
+
 
 
 

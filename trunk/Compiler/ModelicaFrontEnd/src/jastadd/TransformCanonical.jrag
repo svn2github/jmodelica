@@ -1053,7 +1053,7 @@ aspect TransformCanonical {
 	 */
 	public class MetaEquationBlock extends SimpleEquationBlock {
 
-		public MetaEquationBlock(FAbstractEquation equation) {
+		public MetaEquationBlock(FFunctionCallEquation equation) {
 			super(equation);
 		}
 
@@ -1065,6 +1065,11 @@ aspect TransformCanonical {
 			return true;
 		}
 
+		@Override
+		public FFunctionCallEquation equation() {
+			return (FFunctionCallEquation) super.equation();
+		}
+		
 		public void prettyPrint(PrintStream str) {
 			str.println("Meta equation block:");
 			str.println("Equation:");

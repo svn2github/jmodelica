@@ -525,6 +525,14 @@ aspect FlatTypeCheck {
       error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
     }
   }
+
+	public void FStringExp.typeCheck() {
+		FType valueType = getValue().type();
+		if (hasSignificantDigits() && !valueType.isReal())
+			error("Calling function String(): named argument significantDigits can only be used when first argument is real");
+		if (hasFormat() && (hasMinimumLength() || hasLeftJustified() || hasSignificantDigits()))
+			error("Calling function String(): named argument format can not be used together with minimumLength, leftJustified or significantDigits");
+	}
   
   public void FHomotopyExp.typeCheck() {
     if (!getActual().type().equivalentTo(getSimplified().type())) {
@@ -739,7 +747,7 @@ aspect FlatTypeCheck {
   eq FCardinality.getChild().argumentDefinedTypeValid()                  = false;
   eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
   eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
-  eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
+  eq FStringExp.getChild(int i).argumentDefinedTypeValid()               = i > 0;
   eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
   eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
@@ -776,7 +784,7 @@ aspect FlatTypeCheck {
   eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
           getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
-  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
+  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
   
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }

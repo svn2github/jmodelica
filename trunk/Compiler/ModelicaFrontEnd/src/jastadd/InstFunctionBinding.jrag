@@ -302,12 +302,12 @@ aspect InstFunctionBinding {
 				map.put("zeros",           new InfArgsBuiltInCreator(new FZeros(),      0));
 				map.put("fill",            new InfArgsBuiltInCreator(new FFillExp(),    1));
 				map.put("cat",             new InfArgsBuiltInCreator(new FCatExp(),     1));
-				map.put("String",          new InfArgsBuiltInCreator(new FStringExp(),  1));
-				//       name                                            node        min/max # args
-				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
-				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),  2, 3));
+				//       name                                            node          min/max # args
+				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(),   1, 2));
+				map.put("String",          new VarArgsBuiltInCreator(new FStringExp(), 1, 5));
+				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),    1, 2));
+				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
+				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
 				//       name                                    math       node              # args
 				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
 				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));

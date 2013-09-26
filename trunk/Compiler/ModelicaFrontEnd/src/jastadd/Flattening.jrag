@@ -1969,7 +1969,19 @@ aspect FlatExpressions {
 		return res;
 	}
 	
-	public FStringExp FStringExp.flatten(FQName prefix) { return new FStringExp(new List(), getValue().flatten(prefix)); }
+	public FStringExp FStringExp.flatten(FQName prefix) {
+		FStringExp flattened = new FStringExp();
+		flattened.setValue(getValue().flatten(prefix));
+		if (hasMinimumLength())
+			flattened.setMinimumLength(getMinimumLength().flatten(prefix));
+		if (hasLeftJustified())
+			flattened.setLeftJustified(getLeftJustified().flatten(prefix));
+		if (hasSignificantDigits())
+			flattened.setSignificantDigits(getSignificantDigits().flatten(prefix));
+		if (hasFormat())
+			flattened.setFormat(getFormat().flatten(prefix));
+		return flattened;
+	}
 	public FExp FDotAddExp.flatten(FQName prefix) { 
 		return type().isString() ? 
 				new FStringAddExp(getLeft().flatten(prefix), getRight().flatten(prefix)) : 

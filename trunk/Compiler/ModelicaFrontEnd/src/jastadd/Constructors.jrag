@@ -220,14 +220,14 @@ aspect Constructors {
 	 * \brief Constructs a enumeration literal expression from a type and an ordinal.
 	 */
 	public FEnumLitExp.FEnumLitExp(FEnumType type, int val) {
-		this(type.getName(), type.getFEnumLiteralType(val - 1).getName(), type);
+		this(type.getName(), type.getFEnumLiteralType(val - 1).getName(), new Opt<FEnumType>(type));
 	}
 	
 	/**
 	 * \brief Constructs a enumeration literal expression from a type and a literal name.
 	 */
 	public FEnumLitExp.FEnumLitExp(FEnumType type, String val) {
-		this(type.getName(), val, type);
+		this(type.getName(), val, new Opt<FEnumType>(type));
 	}
 	
 	/**

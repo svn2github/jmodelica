@@ -2261,7 +2261,19 @@ aspect Scalarization {
 	public FExp FSmoothExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSmoothExp(getOrder().scalarize(indexMap), getFExp().scalarize(indexMap)); }
 	public FExp FSampleExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FSampleExp(getOffset().scalarize(indexMap), getInterval().scalarize(indexMap)); }
 	
-	public FExp FStringExp.scalarizeExp(Map<String,FExp> indexMap)  { return new FStringExp(new List(), getValue().scalarize(indexMap)); }
+	public FExp FStringExp.scalarizeExp(Map<String,FExp> indexMap)  {
+		FStringExp scalarized = new FStringExp();
+		scalarized.setValue(getValue().scalarize(indexMap));
+		if (hasMinimumLength())
+			scalarized.setMinimumLength(getMinimumLength().scalarize(indexMap));
+		if (hasLeftJustified())
+			scalarized.setLeftJustified(getLeftJustified().scalarize(indexMap));
+		if (hasSignificantDigits())
+			scalarized.setSignificantDigits(getSignificantDigits().scalarize(indexMap));
+		if (hasFormat())
+			scalarized.setFormat(getFormat().scalarize(indexMap));
+		return scalarized;
+	}
 	
 	public FExp FFunctionCall.scalarizeExp(Map<String,FExp> indexMap) {
 		if (isComposite() && functionCallIsExp())
