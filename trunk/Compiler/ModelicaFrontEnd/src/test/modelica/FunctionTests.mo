@@ -2668,6 +2668,7 @@ algorithm
 			name="AlgorithmTransformation1",
 			description="Generating functions from algorithms: simple algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation1
@@ -2712,6 +2713,8 @@ algorithm
 			name="AlgorithmTransformation2",
 			description="Generating functions from algorithms: vars used several times",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation2
  Real a;
@@ -2755,6 +2758,8 @@ algorithm
 			name="AlgorithmTransformation3",
 			description="Generating functions from algorithms: complex algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation3
  Real a;
@@ -2807,6 +2812,8 @@ algorithm
 			name="AlgorithmTransformation4",
 			description="Generating functions from algorithms: complex algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation4
  Real a;
@@ -2856,6 +2863,7 @@ algorithm
 			name="AlgorithmTransformation5",
 			description="Generating functions from algorithms: no used variables",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation5
@@ -2892,6 +2900,7 @@ algorithm
 			name="AlgorithmTransformation6",
 			description="Generating functions from algorithms: 2 algorithms",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation6
@@ -2937,6 +2946,7 @@ algorithm
 			name="AlgorithmTransformation7",
 			description="Generating functions from algorithms: generated name exists - function",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation7
@@ -2981,6 +2991,7 @@ algorithm
 			name="AlgorithmTransformation8",
 			description="Generating functions from algorithms: generated name exists - model",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation8
@@ -3017,6 +3028,7 @@ algorithm
 			name="AlgorithmTransformation9",
 			description="Generating functions from algorithms: generated name exists - component",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation9
@@ -3061,6 +3073,8 @@ equation
 			name="AlgorithmTransformation10",
 			description="Generating functions from algorithms: generated arg name exists",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation10
  Real x;
@@ -3100,6 +3114,8 @@ algorithm
 			name="AlgorithmTransformation11",
 			description="Generating functions from algorithms: assigned variable used",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation11
  Real x;
@@ -3140,6 +3156,8 @@ algorithm
 			name="AlgorithmTransformation12",
 			description="Generating functions from algorithms: assigned variables used, different start values",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation12
  Real x0;
@@ -3186,6 +3204,8 @@ algorithm
 			name="AlgorithmTransformation13",
 			description="Generating functions from algorithms: no assignments",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation13
  Real x;
@@ -3229,6 +3249,8 @@ algorithm
 			name="AlgorithmTransformation14",
 			description="Generating functions from algorithms: using for index",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation14
  Real x;
@@ -3275,6 +3297,7 @@ algorithm
 			name="AlgorithmTransformation15",
 			description="Generating functions from algorithms: function call statement",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation15
@@ -3601,6 +3624,8 @@ algorithm
 			name="ArrayExpInFunc7",
 			description="Scalarization of functions: when statements",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.ArrayExpInFunc7
  Real o;

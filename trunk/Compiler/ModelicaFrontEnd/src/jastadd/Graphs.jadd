@@ -825,6 +825,9 @@ public class BiPGraph {
 		FAbstractEquation equation = e.getEquation();
 		FVariable variable = v.getVariable();
 		
+		if (equation instanceof FAlgorithm)
+			return true;
+		
 		// Discrete variables can only be matched to discrete equations.
 		// Except discrete reals in initial system.
 		return variable.isContinuous() ||

@@ -893,6 +893,11 @@ aspect FlatAPI {
 			isRealComparison() &&
 			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
+	syn boolean FEventGenExp.generatesEvent() =
+			!inNoEventExp() &&
+			!inSmoothExp(1) &&
+			!inWhen() &&
+			!variability().lessOrEqual(fParameter());
 	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();
 	

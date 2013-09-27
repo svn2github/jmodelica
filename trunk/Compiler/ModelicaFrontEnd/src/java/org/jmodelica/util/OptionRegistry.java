@@ -307,7 +307,7 @@ public class OptionRegistry {
 		ALG_FUNCS
 			 ("algorithms_as_functions",
 			  compiler,
-			  true,
+			  false,
 			  "Convert algorithm sections to function calls"),
 		WRITE_TEARING_PAIRS
 			("write_tearing_pairs_to_file",

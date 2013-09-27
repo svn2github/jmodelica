@@ -5310,6 +5310,26 @@ end TransformCanonicalTests.EventGeneratingExps.Nested;
 ")})));
 end Nested;
 
+model InAlgorithm
+	Real x;
+algorithm
+	x := integer(3 + floor((time * 0.3) + 4.2) * 4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_InAlgorithm",
+			description="Tests extraction of event generating expressions in algorithms.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
+ Real x;
+algorithm
+ x := 0.0;
+ x := integer(3 + floor(time * 0.3 + 4.2) * 4);
+end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
+
+")})));
+end InAlgorithm;
+
 model InFunctionCall
 
   function f

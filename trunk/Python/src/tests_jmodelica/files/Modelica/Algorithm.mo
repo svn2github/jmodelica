@@ -70,4 +70,43 @@ equation
 	end when;
 end AlgoTest4;
 
+model AlgoTest5
+  model R
+    Boolean inside(start = false);
+    Integer target;
+    Real r_pos;
+    Integer d_pos;
+    Integer i_pos;
+	Real[10] intervals = linspace(-1,1,10);
+  algorithm
+    assert(r_pos >= min(intervals) or r_pos < max(intervals), "Outside of intervals");
+    for i in 1:(size(intervals,1)-1) loop
+      if intervals[i] <= r_pos and intervals[i+1] > r_pos then
+        i_pos := i;
+      end if;
+    end for;
+    inside := i_pos == target;
+    d_pos := integer(r_pos);
+  end R;
+
+  Integer[5] targets = {5,1,3,4,3};
+  Real[5] positions,_p;
+  R[5] rs;
+
+algorithm
+  positions := {
+    max(_p),
+    min(_p),
+    sin(sum(_p) / size(_p,1)),
+    _p[3] + time,
+    _p[3] - 0.5*time
+  };
+
+equation
+  rs[:].target = targets[:];
+  rs[:].r_pos = positions[:];
+
+  positions = der(_p);
+end AlgoTest5;
+
 end Algorithm;

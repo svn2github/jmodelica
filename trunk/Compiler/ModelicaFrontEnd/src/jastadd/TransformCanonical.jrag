@@ -6260,10 +6260,10 @@ aspect EventGeneratingExps {
 	coll ArrayList<FEventGenExp> FClass.collectEventGeneratingExps() 
 		[new ArrayList<FEventGenExp>()] with add root FClass;
 	FEventGenExp contributes this
-		when inEquationSection() && !inDiscreteLocation() && !inNoEventExp() && !getX().variability().parameterOrLess() 
+		when generatesEvent()
 		to FClass.collectEventGeneratingExps()
 		for myFClass();
-	
+		
 	/**
 	 * Creates a guard expression for an event generating expression
 	 * extracted to a when equation. (Integer inherits from floor.)

@@ -1709,8 +1709,8 @@ algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
  i := integer(r);
-
 end TypeTests.AlgorithmType1;
+
 ")})));
 end AlgorithmType1;
 	

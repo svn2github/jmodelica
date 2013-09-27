@@ -69,6 +69,11 @@ aspect ComplianceCheck {
 		compliance("When statements are not supported");
 	}
 	
+	public void FBreakStmt.complianceCheck() {
+		if (!inFunction() && enclosingLoop() instanceof InstForStmt)
+			compliance("Break statement in algorithm only supported in while loops");
+	}
+	
 	public void FUnsupportedBuiltIn.complianceCheck() {
 		compliance("The " + getName() + "() function-like operator is not supported");
 	}

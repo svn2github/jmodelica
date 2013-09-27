@@ -682,6 +682,12 @@ aspect Names {
 
   eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
   
+  inh FStatement FStatement.enclosingLoop();
+  eq FAlgorithm.getChild().enclosingLoop() = null;
+  eq FWhileStmt.getWhileStmt().enclosingLoop() = this;
+  eq FForStmt.getForStmt().enclosingLoop() = this;
+  eq InstForStmt.getForStmt().enclosingLoop() = this;
+  
   
     /**
      * Access method for the last Access of a qualified or

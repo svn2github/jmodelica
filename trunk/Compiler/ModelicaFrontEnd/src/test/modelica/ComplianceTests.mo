@@ -769,34 +769,6 @@ Compliance error at line 744, column 7:
 ")})));
 end Error2;
 
-model Error3
-	Real[2] x1,x2;
-equation
-	for i in 1:integer(time) loop
-		x1[i] = i;
-	end for;
-algorithm
-	for i in 1:integer(time) loop
-		x2[i] := i;
-	end for;
-	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArraySizes_Error3",
-			description="Test errors for unknown array for indices in algorithms and equations.",
-			algorithms_as_functions=false,
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
-  For index with higher than parameter variability is not supported in equations and algorithms.
-
-Error: in file '...':
-Compliance error at line 0, column 0:
-  For index with higher than parameter variability is not supported in equations and algorithms.
-			
-")})));
-end Error3;
-
 model ArrayIterTest
  Real x[1,1] = { i * j for i, j };
 
@@ -820,5 +792,54 @@ Compliance error at line 0, column 0:
 end ArrayIterTest;
 
 end UnknownArraySizes;
+
+model UnknownArrayIndex
+	Real[2] x1,x2;
+equation
+	for i in 1:integer(time) loop
+		x1[i] = i;
+	end for;
+algorithm
+	for i in 1:integer(time) loop
+		x2[i] := i;
+	end for;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnknownArrayIndex",
+			description="Test errors for unknown array for indices in algorithms and equations.",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+			
+")})));
+end UnknownArrayIndex;
+
+model BreakInFor
+	Real[2] x;
+algorithm
+	for i in 1:2 loop
+		break;
+		x[i] := i;
+	end for;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="BreakInFor",
+			description="Test errors for break statement in scalarized for",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Break statement in algorithm only supported in while loops
+
+")})));
+end BreakInFor;
 
 end ComplianceTests;
