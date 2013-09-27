@@ -1107,6 +1107,14 @@ aspect FlatNames {
     	return str.toString();
 	}
     
+	private static String FQName.derPrefixString = "_der_der_der_der";
+	
+	protected static String FQName.createDerPrefixString(int order) {
+		while (4 * order >= derPrefixString.length())
+			derPrefixString = derPrefixString + derPrefixString;
+		return derPrefixString.substring(0, 4 * order + 1);
+	}
+    
     syn String FQNamePart.name() = getName();
 
     syn String FIdUse.name()           = getFQName().name();

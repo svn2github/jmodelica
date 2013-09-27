@@ -2004,20 +2004,19 @@ aspect TransformCanonical {
 	}
 
 	
-	private static String FQName.derPrefixString = "_der_der_der_der";
-	
 	/**
 	 * Create a new FQName that is a copy of this one, prefixed with "_der" <code>order</code> times in the last name part.
 	 */
 	public FQName FQName.createDerPrefixedName(int order) {
 		FQName pref = copyPrefix();
-		while (4 * order >= derPrefixString.length())
-			derPrefixString = derPrefixString + derPrefixString;
-		String name = derPrefixString.substring(0, 4 * order + 1) + lastActualPartName();
+		String name = createDerPrefixString(order) + lastActualPartName();
+		FQName der;
 		if (hasFArraySubscripts())
-			return pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
+			der = pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
 		else
-			return pref.copyAndAppend(name);
+			der = pref.copyAndAppend(name);
+		der.scalarized = true;
+		return der;
 	}
 
 
@@ -3260,9 +3259,12 @@ aspect TransformCanonical {
 	}
 	
 	syn boolean FExp.canBeAlias() = false;
-	eq FIdUseExp.canBeAlias()     = myFV() instanceof FVariable;
+	eq FIdUseExp.canBeAlias()     = myFV().canBeAlias();
 	eq FDerExp.canBeAlias()       = false;
 	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
+	
+	syn boolean FAbstractVariable.canBeAlias() = false;
+	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable();
 	
 	syn int FExp.aliasSign() = 1;
 	eq FNegExp.aliasSign()   = -getFExp().aliasSign();
@@ -4456,29 +4458,17 @@ aspect ParameterSorting {
 aspect DummyDerivatives {
 
 	rewrite FDerExp {
-		when (myFV().isDummyDer()) to FDummyDerExp {
+		when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
 			return new FDummyDerExp(getFIdUse());
 		}
 	}
 
 	rewrite FHDerExp {
-		when (myFV().isDummyDer()) to FHDummyDerExp {
+		when (myFV().isDummyDerivativeVariable()) to FHDummyDerExp {
 			return new FHDummyDerExp(getFIdUse(),getOrder());
 		}
 	}
 	
-	syn boolean FAbstractVariable.isDummyDer() {
-		return false;
-	}
-	
-	eq FDummyDerivativeVariable.isDummyDer() {
-		return true;
-	}
-	
-	eq FHDummyDerivativeVariable.isDummyDer() {
-		return true;	
-	}
-
 	public void ASTNode.enableFHDerRewrite() {
 		for (ASTNode n : this)
 			n.enableFHDerRewrite();

@@ -43,9 +43,11 @@ fclass IndexReduction.IndexReduction1a_PlanarPendulum
  Real x \"Cartesian x coordinate\";
  Real y \"Cartesian x coordinate\";
  Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real der_y;
  Real der_vx;
+ Real der_vy;
  Real _der_x;
  Real der_2_y;
 initial equation 
@@ -53,11 +55,13 @@ initial equation
  _der_x = 0.0;
 equation
  der(x) = vx;
+ der_y = vy;
  der_vx = lambda * x;
- der_2_y = lambda * y - g;
+ der_vy = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
+ der_2_y = der_vy;
  2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end IndexReduction.IndexReduction1a_PlanarPendulum;
@@ -90,9 +94,11 @@ fclass IndexReduction.IndexReduction1b_PlanarPendulum
  Real x \"Cartesian x coordinate\";
  Real y \"Cartesian x coordinate\";
  Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real der_y;
  Real der_vx;
+ Real der_vy;
  Real _der_x;
  Real der_2_y;
 initial equation 
@@ -100,11 +106,13 @@ initial equation
  _der_x = 0.0;
 equation
  der(x) = vx;
+ der_y = vy;
  der_vx = lambda * x;
- der_2_y = lambda * y - g;
+ der_vy = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der(_der_x) = der_vx;
+ der_2_y = der_vy;
  2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
  _der_x = der(x);
 end IndexReduction.IndexReduction1b_PlanarPendulum;
@@ -176,6 +184,17 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
  constant Real sine.pi = 3.141592653589793;
+ Real der_inertia1_phi;
+ Real der_inertia1_w;
+ Real der_inertia2_phi;
+ Real der_inertia2_w;
+ Real der_idealGear_phi_a;
+ Real der_idealGear_phi_b;
+ Real der_2_inertia1_phi;
+ Real der_2_inertia2_phi;
+ Real der_2_idealGear_phi_a;
+ Real der_2_idealGear_phi_b;
+ Real der_2_damper_phi_rel;
 initial equation 
  inertia2.phi = 0;
  inertia2.w = 0;
@@ -189,11 +208,15 @@ parameter equation
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
 equation
+ inertia1.w = der_inertia1_phi;
+ inertia1.a = der_inertia1_w;
  inertia1.J * inertia1.a = - torque.flange.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - fixed.phi0;
  idealGear.phi_b = inertia2.phi - fixed.phi0;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
+ inertia2.w = der_inertia2_phi;
+ inertia2.a = der_inertia2_w;
  inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
  spring.flange_b.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
  spring.phi_rel = inertia3.phi - inertia2.phi;
@@ -209,10 +232,17 @@ equation
  - damper.flange_b.tau + inertia2.flange_b.tau + (- spring.flange_b.tau) = 0;
  damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau + (- torque.flange.tau) = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
- inertia1.w = idealGear.ratio * inertia2.w;
- inertia1.a = idealGear.ratio * inertia2.a;
- damper.der(phi_rel) = - inertia2.w;
- damper.der(w_rel) = - inertia2.a;
+ der_idealGear_phi_a = der_inertia1_phi;
+ der_idealGear_phi_b = der_inertia2_phi;
+ der_idealGear_phi_a = idealGear.ratio * der_idealGear_phi_b;
+ der_inertia1_w = der_2_inertia1_phi;
+ der_inertia2_w = der_2_inertia2_phi;
+ der_2_idealGear_phi_a = der_2_inertia1_phi;
+ der_2_idealGear_phi_b = der_2_inertia2_phi;
+ der_2_idealGear_phi_a = idealGear.ratio * der_2_idealGear_phi_b;
+ damper.der(phi_rel) = - der_inertia2_phi;
+ damper.der(w_rel) = der_2_damper_phi_rel;
+ der_2_damper_phi_rel = - der_2_inertia2_phi;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1157,22 +1187,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real der_x1_1;
  Real der_x1_2;
- Real temp_4;
- Real temp_5;
- Real temp_6;
- Real temp_7;
+ Real temp_2;
+ Real temp_3;
+ Real der_temp_2;
+ Real der_temp_3;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  der_x1_1 + der(x2[1]) = 2;
  der_x1_2 + der(x2[2]) = 3;
- ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- ({temp_6, temp_7}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- - der_x1_1 = temp_6;
- - der_x1_2 = temp_7;
+ ({temp_2, temp_3}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1[1] = temp_2;
+ - x1[2] = temp_3;
+ ({der_temp_2, der_temp_3}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - der_x1_1 = der_temp_2;
+ - der_x1_2 = der_temp_3;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f_der
@@ -1181,7 +1211,7 @@ public
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output Real[2] der_y;
- algorithm
+algorithm
   der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -1191,7 +1221,7 @@ public
   input Real[2] x;
   input Real[2, 2] A;
   output Real[2] y;
- algorithm
+algorithm
   y[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -1252,22 +1282,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real der_x1_a_2;
  Real der_x2_a_2;
+ Real temp_2;
+ Real temp_3;
  Real der_temp_2;
- Real temp_4;
- Real temp_5;
- Real temp_6;
+ Real der_temp_3;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  x1.der(a[1]) + x2.der(a[1]) = 2;
  der_x1_a_2 + der_x2_a_2 = 3;
- (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- (IndexReduction.IndexReduction28_Record.R({der_temp_2, temp_6})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
+ (IndexReduction.IndexReduction28_Record.R({temp_2, temp_3})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1.a[1] = temp_2;
+ - x1.a[2] = temp_3;
+ (IndexReduction.IndexReduction28_Record.R({der_temp_2, der_temp_3})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), der_x2_a_2}, {{0.0, 0.0}, {0.0, 0.0}});
  - x1.der(a[1]) = der_temp_2;
- - x1.a[1] = temp_4;
- - x1.a[2] = temp_5;
- - der_x1_a_2 = temp_6;
+ - der_x1_a_2 = der_temp_3;
 
 public
  function IndexReduction.IndexReduction28_Record.f_der
@@ -1276,7 +1306,7 @@ public
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
- algorithm
+algorithm
   der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -1286,7 +1316,7 @@ public
   input Real[2] x;
   input Real[2, 2] A;
   output IndexReduction.IndexReduction28_Record.R y;
- algorithm
+algorithm
   y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -1410,8 +1440,10 @@ fclass IndexReduction.IndexReduction30_PlanarPendulum_StatePrefer
  Real x(stateSelect = StateSelect.prefer) \"Cartesian x coordinate\";
  Real y \"Cartesian x coordinate\";
  Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real der_y;
+ Real der_vy;
  Real der_2_x;
  Real der_2_y;
 initial equation 
@@ -1419,11 +1451,13 @@ initial equation
  vx = 0.0;
 equation
  der(x) = vx;
+ der_y = vy;
  der(vx) = lambda * x;
- der_2_y = lambda * y - g;
+ der_vy = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
+ der_2_y = der_vy;
  2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
@@ -1460,8 +1494,10 @@ fclass IndexReduction.IndexReduction31_PlanarPendulum_StateAlways
  Real x(stateSelect = StateSelect.always) \"Cartesian x coordinate\";
  Real y \"Cartesian x coordinate\";
  Real vx(stateSelect = StateSelect.always) \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
  Real der_y;
+ Real der_vy;
  Real der_2_x;
  Real der_2_y;
 initial equation 
@@ -1469,11 +1505,13 @@ initial equation
  vx = 0.0;
 equation
  der(x) = vx;
+ der_y = vy;
  der(vx) = lambda * x;
- der_2_y = lambda * y - g;
+ der_vy = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
  2 * x * der(x) + 2 * y * der_y = 0.0;
  der_2_x = der(vx);
+ der_2_y = der_vy;
  2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
@@ -1511,19 +1549,23 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferAlways
  Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
  Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
+ Real der_x;
+ Real der_vx;
  Real der_2_x;
  Real der_2_y;
 initial equation 
  y = 0.0;
  vy = 0.0;
 equation
+ der_x = vx;
  der(y) = vy;
- der_2_x = lambda * x;
+ der_vx = lambda * x;
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
- 2 * x * vx + 2 * y * der(y) = 0.0;
+ 2 * x * der_x + 2 * y * der(y) = 0.0;
+ der_2_x = der_vx;
  der_2_y = der(vy);
- 2 * x * der_2_x + 2 * vx * vx + (2 * y * der_2_y + 2 * der(y) * der(y)) = 0.0;
+ 2 * x * der_2_x + 2 * der_x * der_x + (2 * y * der_2_y + 2 * der(y) * der(y)) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1560,6 +1602,8 @@ fclass IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever
  Real vx(stateSelect = StateSelect.prefer) \"Velocity in x coordinate\";
  Real vy(stateSelect = StateSelect.always) \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
+ Real der_y;
+ Real der_vx;
  Real der_2_x;
  Real der_2_y;
 initial equation 
@@ -1567,12 +1611,14 @@ initial equation
  vy = 0.0;
 equation
  der(x) = vx;
- der_2_x = lambda * x;
+ der_y = vy;
+ der_vx = lambda * x;
  der(vy) = lambda * y - g;
  x ^ 2 + y ^ 2 = L;
- 2 * x * der(x) + 2 * y * vy = 0.0;
+ 2 * x * der(x) + 2 * y * der_y = 0.0;
+ der_2_x = der_vx;
  der_2_y = der(vy);
- 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * vy * vy) = 0.0;
+ 2 * x * der_2_x + 2 * der(x) * der(x) + (2 * y * der_2_y + 2 * der_y * der_y) = 0.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -1751,9 +1797,11 @@ fclass IndexReduction.IndexReduction38_ComponentArray
  Real m[1].x \"Cartesian x coordinate\";
  Real m[1].y \"Cartesian x coordinate\";
  Real m[1].vx \"Velocity in x coordinate\";
+ Real m[1].vy \"Velocity in y coordinate\";
  Real m[1].lambda \"Lagrange multiplier\";
  Real der_m_1_y;
  Real der_m_1_vx;
+ Real der_m_1_vy;
  Real m[1]._der_x;
  Real der_2_m_1_y;
 initial equation 
@@ -1761,11 +1809,13 @@ initial equation
  m[1]._der_x = 0.0;
 equation
  m[1].der(x) = m[1].vx;
+ der_m_1_y = m[1].vy;
  der_m_1_vx = m[1].lambda * m[1].x;
- der_2_m_1_y = m[1].lambda * m[1].y - m[1].g;
+ der_m_1_vy = m[1].lambda * m[1].y - m[1].g;
  m[1].x ^ 2 + m[1].y ^ 2 = m[1].L;
  2 * m[1].x * m[1].der(x) + 2 * m[1].y * der_m_1_y = 0.0;
  m[1].der(_der_x) = der_m_1_vx;
+ der_2_m_1_y = der_m_1_vy;
  2 * m[1].x * m[1].der(_der_x) + 2 * m[1].der(x) * m[1].der(x) + (2 * m[1].y * der_2_m_1_y + 2 * der_m_1_y * der_m_1_y) = 0.0;
  m[1]._der_x = m[1].der(x);
 end IndexReduction.IndexReduction38_ComponentArray;
@@ -1939,19 +1989,23 @@ equation
 			flatModel="
 fclass IndexReduction.IndexReduction43_Order
  Real x;
+ Real dx;
  Real y;
  Real dy;
  Real der_x;
+ Real der_dx;
  Real der_2_x;
  Real der_2_y;
 initial equation 
  y = 0.0;
  dy = 0.0;
 equation
+ der_x = dx;
  der(y) = dy;
- der_2_x + der(dy) = 0;
+ der_dx + der(dy) = 0;
  x + IndexReduction.IndexReduction43_Order.f(y) = 0;
  der_x + IndexReduction.IndexReduction43_Order.df(y, der(y)) = 0.0;
+ der_2_x = der_dx;
  der_2_y = der(dy);
  der_2_x + IndexReduction.IndexReduction43_Order.ddf(y, der(y), der_2_y) = 0.0;
 
@@ -1961,7 +2015,7 @@ public
   input Real dx;
   input Real ddx;
   output Real ddy;
- algorithm
+algorithm
   ddy := x;
   ddy := ddy + 2;
   return;
@@ -1971,7 +2025,7 @@ public
   input Real x;
   input Real dx;
   output Real dy;
- algorithm
+algorithm
   dy := x * x;
   dy := dy + 2 * x + 3;
   return;
@@ -1980,7 +2034,7 @@ public
  function IndexReduction.IndexReduction43_Order.f
   input Real x;
   output Real y;
- algorithm
+algorithm
   y := x * x;
   y := y * x + 2 * y + 3 * x;
   return;
@@ -2044,19 +2098,23 @@ equation
 			flatModel="
 fclass IndexReduction.IndexReduction44_Order2Arg
  Real x;
+ Real dx;
  Real y;
  Real dy;
  Real der_x;
+ Real der_dx;
  Real der_2_x;
  Real der_2_y;
 initial equation 
  y = 0.0;
  dy = 0.0;
 equation
+ der_x = dx;
  der(y) = dy;
- der_2_x + der(dy) = 0;
+ der_dx + der(dy) = 0;
  x + IndexReduction.IndexReduction44_Order2Arg.f(y, time) = 0;
  der_x + IndexReduction.IndexReduction44_Order2Arg.df(y, time, der(y), 1.0) = 0.0;
+ der_2_x = der_dx;
  der_2_y = der(dy);
  der_2_x + IndexReduction.IndexReduction44_Order2Arg.ddf(y, time, der(y), 1.0, der_2_y, 0.0) = 0.0;
 
@@ -2069,7 +2127,7 @@ public
   input Real ddx1;
   input Real ddx2;
   output Real ddy;
- algorithm
+algorithm
   ddy := x1 * x1;
   ddy := y * x2;
   return;
@@ -2081,7 +2139,7 @@ public
   input Real dx1;
   input Real dx2;
   output Real dy;
- algorithm
+algorithm
   dy := x1 * x1;
   dy := y * x2;
   return;
@@ -2091,7 +2149,7 @@ public
   input Real x1;
   input Real x2;
   output Real y;
- algorithm
+algorithm
   y := x1 * x1;
   y := y * x2;
   return;

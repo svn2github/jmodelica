@@ -1683,21 +1683,21 @@ public class BiPGraph {
 		str.append("BiPGraph matching:\n");
 		for (Eq e : getEquations()) {
 			if (e.getMatching()!=null) {
-				str.append(e.getName());
+				str.append(e);
 				str.append(" : ");
-				str.append(e.getMatching().getName());
+				str.append(e.getMatching());
 				str.append("\n");
 			}
 		}		
 		str.append("Unmatched equations: {");
 		for (Eq e : unmatchedEquationsIterable()) {
-			str.append(e.getName() + " ");
+			str.append(e + " ");
 		}
 		str.append("}\n");
 
 		str.append("Unmatched variables: {");
 		for (Var v : unmatchedVariablesIterable()) {
-			str.append(v.getName() + " ");
+			str.append(v + " ");
 		}
 		str.append("}\n");
 
@@ -1720,15 +1720,15 @@ public class BiPGraph {
 		str.append("Variables: {");
 		for (String vName : variableMap.keySet()) {
 			Var v = variableMap.get(vName);
-			str.append(v.getName());
+			str.append(v);
 			str.append(" ");
 		}
 		str.append("}\n");
 		for (Eq e : getEquations()) {
-			str.append(e.getName());
+			str.append(e);
 			str.append(" : ");
 			for (Var v : e.getVariables()) {
-				str.append(v.getName() + " ");
+				str.append(v + " ");
 			}
 			str.append("\n");
 		}
