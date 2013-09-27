@@ -1016,6 +1016,16 @@ aspect FlatNames {
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
     /**
+     * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.prefixActualPartName();
+    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false);
+    eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
+    eq FQNameEmpty.prefixActualPartName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * The number of name parts. Will always report 1 for FQNameString.
      */
     syn int FQName.numParts()  = 0;
@@ -1114,7 +1124,20 @@ aspect FlatNames {
 			derPrefixString = derPrefixString + derPrefixString;
 		return derPrefixString.substring(0, 4 * order + 1);
 	}
-    
+	
+	syn String FQName.derPrefixName(int order) {
+		String name = prefixActualPartName();
+		if (!name.isEmpty())
+			name += ".";
+		name += createDerPrefixString(order) + lastActualPartName();
+		if (hasFArraySubscripts())
+			name += getFArraySubscripts();
+		return name;
+	}
+	
+	syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
+	syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+	
     syn String FQNamePart.name() = getName();
 
     syn String FIdUse.name()           = getFQName().name();

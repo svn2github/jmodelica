@@ -1730,7 +1730,7 @@ public class BiPGraph {
 			for (Var v : e.getVariables()) {
 				str.append(v + " ");
 			}
-			str.append("\n");
+			str.append("// " + e.getEquation() + "\n");
 		}
 		return str.toString();
 	}

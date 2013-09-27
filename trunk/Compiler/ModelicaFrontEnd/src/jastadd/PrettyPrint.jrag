@@ -1021,7 +1021,7 @@ aspect FlatPrettyPrint {
 				
 		str.print(type());
 		str.print(" ");
-		str.print(nameUnderscore());		
+		str.print(derPrefixName());
 	}
 
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
@@ -1640,11 +1640,7 @@ aspect FlatPrettyPrint {
 	}
 
 	protected void FDummyDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.print(nameUnderscore());
-	}
-
-	protected void FHDummyDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.print(nameUnderscore());
+		str.print(derPrefixName());
 	}
 
 	protected void FPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {

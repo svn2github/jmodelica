@@ -764,10 +764,16 @@ aspect Derivatives {
 		return new FRealLitExp(val);
 	}
 	
-	syn int FDerExp.order()    = 1;
-	eq FHDerExp.order()        = getOrder();
-	syn int InstDerExp.order() = 1;
-	eq InstHDerExp.order()     = getOrder();
+	syn int FDerExp.order()                  = 1;
+	eq FHDerExp.order()                      = getOrder();
+	syn int InstDerExp.order()               = 1;
+	eq InstHDerExp.order()                   = getOrder();
+	syn int FDummyDerExp.order()             = 1;
+	eq FHDummyDerExp.order()                 = getOrder();
+	syn int FDerivativeVariable.order()      = 1;
+	eq FHDerivativeVariable.order()          = getOrder();
+	syn int FDummyDerivativeVariable.order() = 1;
+	eq FHDummyDerivativeVariable.order()     = getOrder();
 	
 	protected FExp FExp.createDerExp(int order) {
 		return diff(TIME, order);
