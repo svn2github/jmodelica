@@ -118,6 +118,8 @@ MC_python_interface: MC_casadi MC_interface_compilers
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
+	cd $(CASADI_HOME)/build/python/ ; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 
 MC_install_python: 
 	cd $(CASADI_HOME)/build ; make install_python
