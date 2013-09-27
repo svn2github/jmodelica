@@ -10541,7 +10541,7 @@ $C_enum_strings$
 $C_ode_derivatives$
 ",
 			generatedCode="
-char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 
     char tmp_1[45];
     model_ode_guards(jmi);
@@ -10581,7 +10581,7 @@ $C_enum_strings$
 $C_ode_derivatives$
 ",
 			generatedCode="
-char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 
     char tmp_1[43];
     model_ode_guards(jmi);
@@ -10619,7 +10619,7 @@ $C_enum_strings$
 $C_ode_derivatives$
 ",
 			generatedCode="
-char* E_0_e[] = { \"a\", \"bb\", \"ccc\" };
+char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 
     model_ode_guards(jmi);
 /************* ODE section *********/

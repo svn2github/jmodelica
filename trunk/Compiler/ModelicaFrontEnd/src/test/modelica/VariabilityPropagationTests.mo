@@ -216,8 +216,8 @@ equation
 
 public
  function VariabilityPropagationTests.ConstantFolding3.StringCompare
-  input String actual;
   input String expected;
+  input String actual;
 algorithm
   assert(actual == expected, \"Compare failed, expected: \" + expected + \", actual: \" + actual);
   return;
