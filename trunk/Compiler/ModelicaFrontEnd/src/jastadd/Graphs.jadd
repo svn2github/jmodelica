@@ -887,11 +887,11 @@ public class BiPGraph {
 			Lv.add(new TreeMap<Var,Set<Eq>>(new VarMatchingComparator()));
 			
 			for (Eq s : Le_current) {
-				//System.out.println(" eq: " + s.getName());
+				//System.out.println(" eq: " + s);
 				for (Var t : s.getVariables()) {
-					//System.out.println("  " + t.getName() + " layer: " + t.getLayer());
+					//System.out.println("  " + t + " layer: " + t.getLayer());
 					if (t.getLayer() >= layer) {
-						//System.out.println("    adding " + t.getName());
+						//System.out.println("    adding " + t);
 						t.setLayer(layer);
 						Set<Eq> h = Lv.get(layer).get(t);
 						if (h==null) {
@@ -901,11 +901,11 @@ public class BiPGraph {
 						h.add(s);
 						Eq u = t.getMatching();
 						if (u!=null) {
-							//System.out.println("     " + t.getName() + "'s matching is " + u.getName());
+							//System.out.println("     " + t + "'s matching is " + u);
 							u.setLayer(layer);
 							Le_next.add(u);
 						} else {
-							//System.out.println("     " + t.getName() + "has no matching");
+							//System.out.println("     " + t + "has no matching");
 							freeVarNodeFound = true;
 					
 						}
@@ -1764,7 +1764,7 @@ public class BiPGraph {
 		}
     	
 		public String toString() {
-			return "(" + equation.getName() + "," + variable.getName() + ")";
+			return "(" + equation + "," + variable + ")";
 		}
     	
     }
@@ -2140,7 +2140,7 @@ public class Var implements Comparable<Var> {
 	}
 	
 	public String toString() {
-		return getName();
+		return v.displayName();
 	}
 	
 	public void isIter(boolean bol){

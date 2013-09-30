@@ -1180,6 +1180,11 @@ aspect FlatAPI {
 		super.findReferencedFVariablesInTree(set);
 	}
 	
+	public void FPreExp.findReferencedFVariablesInTree(Set<FVariable> set) {
+		if (myFV() instanceof FVariable)
+			set.add((FVariable) myFV());
+	}
+	
 	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = Collections.emptySet();
 	eq FEquation.referencedFVariablesInRHS()             = getRight().referencedFVariablesInFExp();
 	eq FFunctionCallEquation.referencedFVariablesInRHS() = getCall().referencedFVariablesInFExp();

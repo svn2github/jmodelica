@@ -947,6 +947,9 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
+	syn String FVariable.displayName()        = getFQName().toString();
+	eq FDerivativeVariable.displayName()      = name();
+	eq FDummyDerivativeVariable.displayName() = derPrefixName();
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
@@ -960,7 +963,7 @@ aspect FlatPrettyPrint {
 		
 		str.print(prettyPrintType());
 		str.print(" ");
-		p.print(getFQName(),str,"");
+		str.print(displayName());
 	
 		getFAttributeList().prettyPrintFAttributeList(str,p);
 		
@@ -999,29 +1002,6 @@ aspect FlatPrettyPrint {
 				str.print(attributeExp(attribute));
 			}
 		}
-	}
-
-	
-	public void FDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		if (isProtected()) {
-			str.print("protected ");
-		}
-				
-		str.print(type());
-		str.print(" ");
-		str.print(name());		
-	}
-
-	public void FDummyDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		if (isProtected()) {
-			str.print("protected ");
-		}
-				
-		str.print(type());
-		str.print(" ");
-		str.print(derPrefixName());
 	}
 
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {

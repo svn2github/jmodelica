@@ -2080,13 +2080,17 @@ aspect CCodeGen {
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
 
 	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		String innerIndent = ASTNode.printer_C.indent(indent);
+		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
+		int rows = equations().size();
+		int cols = activeVariables().size();
+		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
 		// Output Jacobian
 		int var_counter = 0;
-		for (int i=0;i<activeVariables().size();i++) {
-			for (int j=0;j<activeVariables().size();j++) {
-				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
+		for (int i=0;i<rows;i++) {
+			for (int j=0;j<cols;j++) {
+				if (jacobian[j][i] != null)
+					str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
 				var_counter++;
 			}
 		}
@@ -2094,13 +2098,17 @@ aspect CCodeGen {
 	}
 
 	public void MixedLinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		String innerIndent = ASTNode.printer_C.indent(indent);
+		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
 		// Output Jacobian
+		int rows = continuousEquations().size();
+		int cols = activeContinuousVariables().size();
+		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
 		int var_counter = 0;
-		for (int i=0;i<activeContinuousVariables().size();i++) {
-			for (int j=0;j<activeContinuousVariables().size();j++) {
-				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
+		for (int i=0;i<rows;i++) {
+			for (int j=0;j<cols;j++) {
+				if (jacobian[j][i] != null)
+					str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
 				var_counter++;
 			}
 		}
