@@ -96,12 +96,12 @@ class Model: public Printable {
 
         /** 
          * Returns all initial equations in a stacked MX on the form: rhs - lhs.
-         * @return An MX.
+         * @return A MX.
          */
         const CasADi::MX getInitialResidual() const; 
         /** 
          * Returns all DAE equations in a stacked MX on the form: rhs - lhs.
-         * @return An MX.
+         * @return A MX.
          */
         const CasADi::MX getDaeResidual() const; 
         /** 

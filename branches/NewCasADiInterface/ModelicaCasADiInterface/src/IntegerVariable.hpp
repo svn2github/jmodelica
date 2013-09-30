@@ -6,11 +6,9 @@ namespace ModelicaCasADi
 class IntegerVariable : public Variable {
     public:
         /**
-         * Create an Integer Variable. The MX variable of an Integer
-         * variable is modeled as a regular MX. This means that operations
-         * such as sin(thisVariable) that are legal in Modelica will produce errors. 
+         * Create an Integer Variable. 
          * An integer Variable may not have continuous variability. 
-         * @param An MX
+         * @param A symbolic MX
          * @param A Causality enum
          * @param A Variability enum
          * @param A pointer to a VariableType, dafault is NULL. 

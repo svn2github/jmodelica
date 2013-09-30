@@ -10,7 +10,7 @@ class ModelFunction : public Printable {
         /** 
          * Create a ModelFunction, which is basically a wrapper around an MXFunction
          * that may be called and printed. 
-         * @param An MXFunction 
+         * @param A MXFunction 
          */
         ModelFunction(CasADi::MXFunction myFunction); 
         /**

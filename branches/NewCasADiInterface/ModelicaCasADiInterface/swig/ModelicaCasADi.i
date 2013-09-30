@@ -23,16 +23,16 @@
 #include "transferModelica.hpp"
 #include "transferOptimica.hpp"
 %}
-
+%include "doc.i"
 
 %rename(MyVariable) ModelicaCasADi::Variable;
 
 %include "std_string.i"
 %include "std_vector.i"
 
-%template(variableVector) std::vector<ModelicaCasADi::Variable*>;
+%template(MyVariableVector) std::vector<ModelicaCasADi::Variable*>;
 
-%template(constraintVector) std::vector<ModelicaCasADi::Constraint>;
+%template(ConstraintVector) std::vector<ModelicaCasADi::Constraint>;
 
 // These must be in dependency order!
 // SWIG doesn't follow #includes in the header files

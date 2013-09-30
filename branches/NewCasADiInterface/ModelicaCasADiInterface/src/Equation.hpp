@@ -11,17 +11,17 @@ class Equation: public Printable {
     public:
         /** 
          * Create an equation with MX expressions for the left and right hand side
-         * @param An MX
-         * @param An MX
+         * @param A MX
+         * @param A MX
          */
         Equation(CasADi::MX lhs, CasADi::MX rhs); 
-        /** @return An MX */
+        /** @return A MX */
         const CasADi::MX getLhs() const;
-        /** @return An MX */
+        /** @return A MX */
         const CasADi::MX getRhs() const;
         /** 
          * Returns the residual on the form: right-hand-side - left-hand-side
-         * @return An MX 
+         * @return A MX 
          */
         const CasADi::MX getResidual() const; 
         /** Allows the use of the operator << to print this class to a stream, through Printable */

@@ -44,7 +44,8 @@ class Variable : public Printable {
         };
         Variable();
         /**
-         * The Variable class is purely abstract and can not be instantiated. 
+         * The Variable class should not be used, use subclasses such 
+         * as RealVariable instead.
          * @param A symbolic MX.
          * @param An entry of the enum Causality
          * @param An entry of the enum Variability
@@ -53,7 +54,7 @@ class Variable : public Printable {
                 Variability variability);
         
         /**
-         * @return An MX
+         * @return A MX
          */        
         const CasADi::MX getVar() const;
         /**

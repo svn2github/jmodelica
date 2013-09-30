@@ -1,6 +1,6 @@
 #ifndef _MODELICACASADI_DER_VAR
 #define _MODELICACASADI_DER_VAR
-#include <RealVariable.hpp>
+#include "RealVariable.hpp"
 namespace ModelicaCasADi
 {
 class DerivativeVariable : public RealVariable {
@@ -8,7 +8,7 @@ class DerivativeVariable : public RealVariable {
         /**
          * Create a derivative variable. A derivative variable takes a pointer to
          * its corresponding state variable as argument.
-         * @param An MX
+         * @param A symbolic MX
          * @param A pointer to a Variable
          * @param A pointer to a VariableType, default is NULL
          */

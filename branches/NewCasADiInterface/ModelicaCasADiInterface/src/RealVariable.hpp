@@ -1,6 +1,6 @@
 #ifndef _MODELICACASADI_REAL_VAR
 #define _MODELICACASADI_REAL_VAR
-#include <Variable.hpp>
+#include "Variable.hpp"
 namespace ModelicaCasADi
 {
 class RealVariable : public Variable {
@@ -34,7 +34,20 @@ class RealVariable : public Variable {
         Variable* myDerivativeVariable;
 };
 inline const Variable::Type RealVariable::getType() const { return Variable::REAL; }
-inline void RealVariable::setMyDerivativeVariable(Variable* diffVar) { myDerivativeVariable = diffVar; }
+inline void RealVariable::setMyDerivativeVariable(Variable* diffVar) { 
+	RealVariable* dVar = dynamic_cast<RealVariable*>(diffVar);
+	if (dVar != NULL ) {
+		if( !dVar->isDerivative()) {
+			throw std::runtime_error("A Variable that is set as a derivative variable must be a DerivativeVariable");
+		}
+	} else {
+		throw std::runtime_error("A Variable that is set as a derivative variable must be a DerivativeVariable");
+	}
+    if (getVariability() != Variable::CONTINUOUS || isDerivative()) {
+        throw std::runtime_error("A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable.");
+    }
+    myDerivativeVariable = diffVar; 	
+}
 inline const Variable* RealVariable::getMyDerivativeVariable() const { return myDerivativeVariable; }
 inline bool RealVariable::isDerivative() const { return false; }
 }; // End namespace

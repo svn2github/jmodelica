@@ -6,10 +6,9 @@ namespace ModelicaCasADi
 class BooleanVariable : public Variable {
     public:
         /**
-         * Create a Boolean variable. The MX variable of Boolean variable is
-         * modeled as a regular MX. Boolean variables may not have
+         * Create a Boolean variable. Boolean variables may not have
          * continuous variability. 
-         * @param An MX
+         * @param A symbolic MX
          * @param A Causality enum
          * @param A Variability enum
          * @param A pointer to a VariableType, dafault is NULL. 

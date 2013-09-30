@@ -15,18 +15,18 @@ class Constraint : public Printable {
         /**
          * Create a constraint from MX for the left and right hand side, 
          * and a relation type (<, >, ==).
-         * @param An MX
-         * @param An MX
+         * @param A MX
+         * @param A MX
          * @param A Type enum
          */
         Constraint(CasADi::MX lhs, CasADi::MX rhs, Type ct);
-        /** @return An MX */                   
+        /** @return A MX */                   
         const CasADi::MX getLhs() const;
-        /** @return An MX */
+        /** @return A MX */
         const CasADi::MX getRhs() const;
         /**
          * Returns the residual of the constraint as: right-hand-side - left-hand-side.
-         * @return An MX
+         * @return A MX
          */
         const CasADi::MX getResidual() const; 
         /** @return An enum Type */
