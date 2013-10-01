@@ -2529,24 +2529,17 @@ aspect ComponentDeclMethods {
     /**
      * Check if a InstComponentDecl is declared flow.
      */
-    syn boolean InstComponentDecl.isFlow() {
-    
-        if (getComponentDecl().hasTypePrefixFlow())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstComponentDecl.isFlow() = getComponentDecl().isFlow();
+
+    /**
+     * Check if a InstComponentDecl is declared stream.
+     */
+    syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
 
     /**
      * Check if a InstComponentDecl is declared inner.
      */
-    syn boolean InstComponentDecl.isInner() {
-    
-        if (getComponentDecl().isInner())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
 
     /**
      * Check if a InstComponentDecl is declared inner.

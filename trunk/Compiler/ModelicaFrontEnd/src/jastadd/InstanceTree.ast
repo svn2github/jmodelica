@@ -92,16 +92,19 @@ abstract InstComponentDecl : InstNode ::= ClassName:InstAccess
                                           [InstConstraining] 
                                           /FArraySubscripts/ 
                                           [ConditionalAttribute:FExp];
-InstComposite            : InstComponentDecl;
-abstract InstAssignable  : InstComponentDecl ::= /BindingFExp:FExp/;
-InstPrimitive            : InstAssignable;
-InstEnum	             : InstPrimitive;
-InstRecord               : InstAssignable;
-InstBuiltIn              : InstPrimitive;
-InstEnumLiteral          : InstBuiltIn;
-InstExternalObject       : InstPrimitive ::= /DestructorCall:FFunctionCallStmt/;
-UnknownInstComponentDecl : InstComponentDecl;
-InstArrayComponentDecl   : InstComponentDecl ::= <Index:int>;
+InstComposite                 : InstComponentDecl;
+abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
+InstPrimitive                 : InstAssignable;
+InstEnum	                  : InstPrimitive;
+InstRecord                    : InstAssignable;
+InstBuiltIn                   : InstPrimitive;
+InstEnumLiteral               : InstBuiltIn;
+InstExternalObject            : InstPrimitive ::= /DestructorCall:FFunctionCallStmt/;
+UnknownInstComponentDecl      : InstComponentDecl;
+InstArrayComponentDecl        : InstComponentDecl ::= <Index:int>;
+InstExpandableConnectorDecl   : InstComposite;
+InstArrayExpandableConnector  : InstArrayComponentDecl;
+InstExpandableConnectorMember : InstComponentDecl ::= <CopyOf:InstComponentDecl> <Name:String>;
                          
 InstReplacingComposite   : InstComposite ::= <OriginalDecl:ComponentDecl> 
                                              /OriginalInstComponent:InstComponentDecl/ 

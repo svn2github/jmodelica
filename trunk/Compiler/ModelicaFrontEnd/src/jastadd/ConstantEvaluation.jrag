@@ -2342,6 +2342,86 @@ aspect ConstantEvaluation {
   protected CValue FAbstractVariable.evaluationValue = null;
   protected CValue InstComponentDecl.evaluationValue = null;
   
+
+    public class EvaluataionValueCache {
+
+        private Map<CommonVariableDecl,CValue> values;
+        private Map<CommonVariableDecl,CValue> old;
+
+        public EvaluataionValueCache(ASTNode source) {
+            values = source.collectEvaluationValues(null);
+        }
+        
+        public void apply() {
+            if (values != null) {
+                old = new HashMap<CommonVariableDecl,CValue>();
+                for (CommonVariableDecl var : values.keySet()) {
+                    CValue prev = var.evaluationValue();
+                    if (!prev.isUnknown())
+                        old.put(var, prev);
+                    var.setEvaluationValue(values.get(var), null);
+                }
+            }
+        }
+        
+        public void reset() {
+            if (values != null)
+                for (CommonVariableDecl var : values.keySet())
+                    var.setEvaluationValue(old.get(var), null);
+            old = null;
+        }
+
+    }
+
+    public Map<CommonVariableDecl,CValue> ASTNode.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        for (ASTNode n : this)
+            map = n.collectEvaluationValues(map);
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentAccess.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(myInstComponentDecl().collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentDecl.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> FIdUse.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> FAbstractVariable.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+    
+    public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        return myFV().collectMyEvaluationValue(map);
+    }
+    
+    public Map<CommonVariableDecl,CValue> FIdUseInstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentDecl.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        if (evaluationValue != null) {
+            if (map == null)
+                map = new HashMap<CommonVariableDecl,CValue>();
+            map.put(this, evaluationValue);
+        }
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> FAbstractVariable.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        if (evaluationValue != null) {
+            if (map == null)
+                map = new HashMap<CommonVariableDecl,CValue>();
+            map.put(this, evaluationValue);
+        }
+        return map;
+    }
+  
+  
   // Return values for FStatement.evaluate()
   public static final int FStatement.EVAL_CONT   = 1;
   public static final int FStatement.EVAL_RETURN = 2;

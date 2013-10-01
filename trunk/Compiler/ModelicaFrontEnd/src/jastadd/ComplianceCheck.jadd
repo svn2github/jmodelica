@@ -64,6 +64,11 @@ aspect ComplianceCheck {
 		compliance("Unsupported expression type");
 	}
 	
+	public void InstExpandableConnectorDecl.complianceCheck() {
+        if (!root().options.getBooleanOption("expandable_connectors"))
+            compliance("Expandable connectors are not supported");
+	}
+	
 	public void FWhenStmt.complianceCheck() {
 		super.complianceCheck();
 		compliance("When statements are not supported");

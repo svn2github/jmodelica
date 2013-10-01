@@ -322,6 +322,12 @@ public class OptionRegistry {
 			 false,
 			 "Converts the DAE system into an interactive fmu where all residual equations and iteration" +
 			 "variables have been changed into top level outputs and inputs."),
+		EXPANDABLE
+	        ("expandable_connectors",
+	         compiler,
+	         false,
+	         "Activate experimental support for expandable connectors. Warning: support is partial and may " + 
+	         "cause compiler to crash"),
 		
 		// Runtime options
         /*

@@ -872,14 +872,16 @@ aspect PrettyPrint {
 	syn String Inner.toString() = "inner";
 	syn String Outer.toString() = "outer";
 	syn String Replaceable.toString() = "replaceable";
-	syn String TypePrefixFlow.toString() = "flow";
+	syn String TypePrefixFlow.toString();
+	eq Flow.toString()   = "flow";
+	eq Stream.toString() = "stream";
 	syn String TypePrefixInputOutput.toString();
-	eq Input.toString() = "input";
-	eq Output.toString()= "output";
+	eq Input.toString()  = "input";
+	eq Output.toString() = "output";
 	syn String TypePrefixVariability.toString();
-	eq Parameter.toString() = "parameter";
-	eq Discrete.toString() = "discrete";
-	eq Constant.toString() = "constant";
+	eq Parameter.toString()  = "parameter";
+	eq Discrete.toString()   = "discrete";
+	eq Constant.toString()   = "constant";
 	eq Continuous.toString() = "";
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();

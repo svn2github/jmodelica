@@ -57,12 +57,11 @@ aspect OptimicaFlattening {
 		}
     }
 	
-	refine Flattening public void InstNode.flatten(FClass fc) {
-		FQName prefix = getFQName();
+	refine Flattening public void InstNode.flatten(FClass fc, FQName name) {
 		for (FAbstractEquation ae : getFAbstractEquations()) 
-		   ae.flatten(prefix, fc);
+		   ae.flatten(name, fc);
         for (FConstraint c : getFConstraints()) 
-           c.flatten(prefix, fc);
+           c.flatten(name, fc);
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 	}

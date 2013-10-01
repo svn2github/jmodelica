@@ -17,6 +17,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Collections;
 
     /**
      * TODO: Is it a good idea to inherit? Should env be a component?
@@ -680,8 +681,7 @@ aspect InstanceTreeConstruction {
 			//for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
 			int n = size().get(0);
 			for (int i = 1; i <= n; i++)
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
-						getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
+				l.add(createInstArrayComponentDecl(i));
 			return l;
 		} else { // If not array, then proceed as usual
 			return super.getInstComponentDeclList();
@@ -695,13 +695,17 @@ aspect InstanceTreeConstruction {
 		if (n > 0) {
 			// Loop over indices and create new InstArrayComponentDecls
 			for (int i = 1; i <= n; i++)
-				l.add(new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
-						instComponentDecl(). getComponentDecl(), new Opt(), new Opt(), new Opt(), i));
+				l.add(createInstArrayComponentDecl(i));
 		} else {
 			for (ComponentDecl cd : components()) 
 				l.add(createInstComponentDecl(cd));
 		}
 			return l;
+	}
+	
+	public InstComponentDecl InstComponentDecl.createInstArrayComponentDecl(int i) {
+	    return new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
+                getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
 	}
 	
 	syn lazy List InstNode.getInstClassDeclList() {
@@ -774,7 +778,8 @@ aspect InstanceTreeConstruction {
     	InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
     	if (irc!=null) {
     		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-    		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);    	    		
+    		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);
+    		// TODO: handle expandable connectors in this case
     	} else { 
     		return new InstCreateComponentDecl(cd, this);    	
     	}
@@ -927,6 +932,8 @@ aspect InstanceTreeConstruction {
 			return new InstExternalObject(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else if (extendsPrimitive()) 
 			return new InstPrimitive(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
+		else if (isExpandableConnector())
+		    return new InstExpandableConnectorDecl(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 		else
 			return new InstComposite(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
 	}
@@ -1287,6 +1294,51 @@ aspect InstanceTreeConstruction {
 		throw new UnsupportedOperationException();
 	}
 
+}
+
+aspect ExpandableConnectorMembers {
+    
+    private List<InstComponentDecl> InstExpandableConnectorDecl.expandedMembers = null;
+    private List<InstComponentDecl> InstArrayExpandableConnector.expandedMembers = null;
+    
+    eq InstExpandableConnectorDecl.getInstComponentDeclList()  = 
+        (expandedMembers != null) ? expandedMembers : super.getInstComponentDeclList();
+    eq InstArrayExpandableConnector.getInstComponentDeclList() = 
+        (expandedMembers != null) ? expandedMembers : super.getInstComponentDeclList();
+    
+    public InstComponentDecl InstExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
+        return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
+                getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
+    }
+    public InstComponentDecl InstArrayExpandableConnector.createInstArrayComponentDecl(int i) {
+        return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
+                getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
+    }
+    
+    public InstExpandableConnectorMember.InstExpandableConnectorMember(InstComponentDecl org, String name) {
+        this(null, new Opt(), org.getComponentDecl(), new Opt(), new Opt(), new Opt(), org, name);
+    }
+    
+    eq InstExpandableConnectorMember.getInstComponentDeclList()       = getCopyOf().getInstComponentDeclList().fullCopy();
+    eq InstExpandableConnectorMember.getInstClassDeclList()           = getCopyOf().getInstClassDeclList().fullCopy();
+    eq InstExpandableConnectorMember.getInstExtendsList()             = getCopyOf().getInstExtendsList().fullCopy();
+    eq InstExpandableConnectorMember.getInstImportList()              = getCopyOf().getInstImportList().fullCopy();
+    eq InstExpandableConnectorMember.getRedeclaredInstClassDeclList() = getCopyOf().getRedeclaredInstClassDeclList().fullCopy();
+    eq InstExpandableConnectorMember.getFAbstractEquationList()       = getCopyOf().getFAbstractEquationList().fullCopy();
+    
+    eq InstExpandableConnectorMember.name() = getName();
+    
+    eq InstExpandableConnectorMember.myInstClass()        = getCopyOf().myInstClass();
+    eq InstExpandableConnectorMember.defaultVariability() = getCopyOf().defaultVariability();
+    
+    // TODO: support connecting to slice or single element
+    eq InstExpandableConnectorMember.ndims() = getCopyOf().ndims();
+    eq InstExpandableConnectorMember.size()  = getCopyOf().size();
+    
+    public void InstExpandableConnectorMember.flattenUsedFuncsAndEnums(FClass fc) {
+        getCopyOf().flattenUsedFuncsAndEnums(fc);
+    }
+    
 }
 
 aspect InstaceConstrainingClauses {

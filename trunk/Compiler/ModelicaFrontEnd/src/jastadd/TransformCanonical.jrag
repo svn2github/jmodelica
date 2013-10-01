@@ -4573,11 +4573,8 @@ aspect FlushFClass {
 	}
 	
 	public void FExp.flushAllRecursiveClearFinal() {
-		flushAll();
+		super.flushAllRecursiveClearFinal();
 		is$Final = false;
-		for (ASTNode n : noTransform()) {
-			n.flushAllRecursiveClearFinal();
-		}
 	}
 
 	/**
@@ -4598,6 +4595,14 @@ aspect FlushFClass {
 	public void FClass.flush() {
 		flushAllRecursiveClearFinal();
 		//is$Final = true;
+	}
+	
+	/**
+	 * Traverse entire tree, forcing any pending rewrites to occur.
+	 */
+	public void ASTNode.forceRewrites() {
+        for (ASTNode n : this) 
+            n.forceRewrites();
 	}
 	
 }

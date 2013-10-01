@@ -1170,6 +1170,19 @@ aspect InstClassRestriction {
 	 */
 	syn boolean InstRestriction.isConnector() = false;
 	eq InstConnector.isConnector() = true;
+    
+    /**
+     * \brief Is this class an expandable connector?
+     */
+    syn boolean InstClassDecl.isExpandableConnector() = false;
+    eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
+    eq UnknownInstClassDecl.isExpandableConnector()   = false;
+    
+    /**
+     * \brief Is this restriction "expandable connector"?
+     */
+    syn boolean InstRestriction.isExpandableConnector() = false;
+    eq InstExpandableConnector.isExpandableConnector()  = true;
 	
 	/**
 	 * \brief Is this class a function?

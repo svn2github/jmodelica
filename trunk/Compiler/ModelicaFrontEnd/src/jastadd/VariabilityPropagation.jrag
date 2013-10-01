@@ -75,6 +75,7 @@ aspect VariabilityPropagation {
 			beginStep("variabilityPropagationIfSet()");
 			variabilityPropagation();
 			enableConstantFolding();
+//			forceRewrites();
 			root().flushAllRecursiveClearFinal(); // Enable expression rewrites
 			endStep("variabilityPropagationIfSet()");
 		}

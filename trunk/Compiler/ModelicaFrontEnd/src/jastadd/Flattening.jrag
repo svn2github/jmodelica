@@ -587,11 +587,14 @@ aspect Flattening {
 			n.flatten(fc);
 		}
 	}
-	
-	public void InstNode.flatten(FClass fc) {
-		FQName prefix = getFQName();
+    
+    public void InstNode.flatten(FClass fc) {
+        flatten(fc, getFQName());
+    }
+    
+    public void InstNode.flatten(FClass fc, FQName name) {
 		for (FAbstractEquation ae : getFAbstractEquations()) 
-		   ae.flatten(prefix, fc);
+		   ae.flatten(name, fc);
 		getInstComponentDeclList().flatten(fc);
 		getInstExtendsList().flatten(fc);
 	}
@@ -601,15 +604,23 @@ aspect Flattening {
 	 */
 	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
 	
-	public void InstComponentDecl.flatten(FClass fc) {
+	public void InstComponentDecl.flatten(FClass fc, FQName name) {
 		if (useInFlattening()) 
-			super.flatten(fc);
+			super.flatten(fc, name);
 	}
+    
+    public void InstExpandableConnectorMember.flatten(FClass fc) {
+        if (getCopyOf().isAssignable())
+            getCopyOf().flatten(fc, getFQName());
+        else
+            flatten(fc, getFQName());
+    }
 	
 	public void InstClassDecl.buildConnectionSets(FClass fc) {
 		ConnectionSetManager csm = fc.getConnectionSetManager();
 		buildConnectionSets(new FQNameEmpty(), csm, true);
-		csm.getGraph().buildTrees(csm);
+		csm.buildOverconstrainedConnectionTrees();
+		csm.elaborateExpandableConnectors();
 	}
 	
 //	public void InstClassDecl.flatten(FClass fc) {}
@@ -623,9 +634,9 @@ aspect Flattening {
 	    }
 	}
 	
-	public void InstAssignable.flatten(FClass fc) {
+	public void InstAssignable.flatten(FClass fc, FQName name) {
 		if (useInFlattening()) {
-			fc.addUniqueFVariable(createFVariable());
+			fc.addUniqueFVariable(createFVariable(name));
 			flattenMyType(fc);
 		}
 	}
@@ -640,9 +651,9 @@ aspect Flattening {
         myInstClass().flattenRecord(fc);
     }
 
-	public void InstEnum.flatten(FClass fc) {
+	public void InstEnum.flatten(FClass fc, FQName name) {
 		myInstClass().flattenEnum(fc);
-		fc.addFVariable(createFVariable());
+		fc.addFVariable(createFVariable(name));
 	}
 	
 	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
@@ -772,8 +783,12 @@ aspect Flattening {
 	public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
 		actualInstClass().addFDerivedType(fc);
 	}
-	
-	public FVariable InstAssignable.createFVariable() {
+
+    public FVariable InstAssignable.createFVariable() {
+        return createFVariable(getFQName());
+    }
+
+	public FVariable InstAssignable.createFVariable(FQName name) {
 		FVariable fv = createEmptyFVariable();
 		
 		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
@@ -799,7 +814,7 @@ aspect Flattening {
 		if (getComponentDecl().getComment().hasStringComment())
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
 				
-		fv.setFQName(getFQName());
+		fv.setFQName(name);
 		
 		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 		if (root().options.getBooleanOption("hand_guided_tearing") && iterationNode.exists()) {
