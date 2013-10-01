@@ -199,6 +199,18 @@ Parameters::
         
     Variability --
         A Variability, e.g. Variable.CONTINUOUS
+        
+    VariableType --
+        A VariableType, default is None. 
+"; 
+
+%feature("docstring") ModelicaCasADi::Variable::getName "
+Returns the name of this variable
+
+Returns::
+
+    string --
+        This variable's name. 
 "; 
 
 %feature("docstring") ModelicaCasADi::Variable::getVar "

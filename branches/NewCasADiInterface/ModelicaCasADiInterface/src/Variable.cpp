@@ -4,14 +4,15 @@ namespace ModelicaCasADi
 {
 
 Variable::Variable(MX var, Variable::Causality causality, 
-                 Variable::Variability variability) : 
+                 Variable::Variability variability,
+                 VariableType* declaredType) : 
                  causality(causality),
                  variability(variability) {
     if (var.isConstant()) {
 		throw std::runtime_error("A variable must have a symbolic MX");
-	} else {
-		this->var = var;
 	}
+	this->var = var;
+	this->declaredType = declaredType;
 }
 
 const Variable::AttributeValue* Variable::getAttribute(AttributeKey key) const { 

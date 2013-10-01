@@ -295,7 +295,7 @@ MC_COMPILERS_DIR = $(MC_BUILD)/JModelica.org
 MC_JARS = $(MC_COMPILERS_DIR)/jars
 MC_MODELICA_JARS = $(MC_JARS)/modelica
 MC_OPTIMICA_JARS = $(MC_JARS)/optimica
-LIBCASADI = $(CASADI_HOME)/build/lib/libcasadi.so
+LIBCASADI = $(MODELICA_CASADI_CASADI_BUILD_DIR)/lib/libcasadi.so
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -828,27 +828,30 @@ install_casadi: casadi
 
 export CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
 
+# The CMake for ModelicaCasADi needs these variables.
 export MODELICA_CASADI_HOME= $(MC_INTERFACE)
+export MODELICA_CASADI_CASADI_BUILD_DIR=$(MC_BUILD)/casadi
+export IPOPT_HOME
 
-MC_interface: MC_casadi MC_interface_compilers  MC_python_interface
+MC_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/casadi
 
-MC_casadi:
-	cd $(CASADI_HOME); \
-	rm -rf build ; mkdir build; cd build; \
-	cmake .. -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ; \
+$(MODELICA_CASADI_CASADI_BUILD_DIR): 
+	mkdir -p $(MC_BUILD); cd $(MC_BUILD); \
+	rm -rf casadi ; mkdir casadi; cd casadi; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_HOME) -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ; \
 	make
 
-MC_interface_compilers:  MC_modelica_compiler MC_optimica_compiler MC_modelica_lib
+$(MC_JARS):  $(MC_SRC)/src/cpp-generated/ $(MC_MODELICA_JARS) $(OC_SRC)/src/cpp-generated/ $(MC_OPTIMICA_JARS) $(MC_COMPILERS_DIR)/lib/
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(MC_JARS)
 
-MC_modelica_compiler: MC_modelica_compiler_swig 
+$(MC_MODELICA_JARS): 
 	cd $(MC_SRC); ant -f build.xml 
 	rm -rf $(MC_MODELICA_JARS)
 	mkdir -p $(MC_MODELICA_JARS)
 	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_MODELICA_JARS)
 	cp $(MC_SRC)/bin/util.jar $(MC_MODELICA_JARS)
 
-MC_modelica_compiler_swig:
+$(MC_SRC)/src/cpp-generated/: $(MODELICA_CASADI_CASADI_BUILD_DIR)
 	rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
 	mkdir -p $(MC_SRC)/src/cpp-generated
 	mkdir -p $(MC_SRC)/src/java-generated/casadi
@@ -856,7 +859,7 @@ MC_modelica_compiler_swig:
              -o $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
 	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
 
-MC_optimica_compiler: MC_optimica_compiler_swig 
+$(MC_OPTIMICA_JARS): $(OC_SRC)/src/cpp-generated/ 
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; ant -f build.xml 
 	cd $(OC_SRC); ant -f build.xml 
 	rm -rf $(MC_OPTIMICA_JARS)
@@ -864,7 +867,7 @@ MC_optimica_compiler: MC_optimica_compiler_swig
 	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_OPTIMICA_JARS)
 	cp $(OC_SRC)/bin/util.jar $(MC_OPTIMICA_JARS)
 
-MC_optimica_compiler_swig: MC_casadi
+$(OC_SRC)/src/cpp-generated/: $(MODELICA_CASADI_CASADI_BUILD_DIR)
 	rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
 	mkdir -p $(OC_SRC)/src/cpp-generated
 	mkdir -p $(OC_SRC)/src/java-generated/casadi
@@ -872,7 +875,7 @@ MC_optimica_compiler_swig: MC_casadi
              -o $(OC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
 	     -java -package casadi -c++ -I$(CASADI_HOME) $(OC_SRC)/src/swig/java_casadi.i
 
-MC_modelica_lib: MC_modelica_compiler_swig
+$(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	mkdir -p $(MC_COMPILERS_DIR)/lib
 	g++ -o $(MC_COMPILERS_DIR)/lib/libifcasadi.so $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
 	    $(LIBCASADI) \
@@ -880,20 +883,25 @@ MC_modelica_lib: MC_modelica_compiler_swig
 	    -I"$(CASADI_HOME)" \
 	    $(CFLAGS)
 
-MC_python_interface: MC_casadi MC_interface_compilers
-	cd $(CASADI_HOME)/build ; make python
+$(DESTDIR)$(prefix)/Python/casadi: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS)
+	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make python
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
-	cd $(CASADI_HOME)/build/python/ ; \
+	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
+	touch $(MC_BUILD)/test/pythonTests/runtests.sh
+	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
+	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
+	mkdir -p $(DESTDIR)$(prefix)/Python/ 
+	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 
 MC_install_python: 
-	cd $(CASADI_HOME)/build ; make install_python
+	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make install_python
 
-MC_interface_cpluscplus: MC_casadi MC_interface_compilers
+MC_interface_cplusplus: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS)
 	rm -rf $(MC_BUILD)/cplusplus; mkdir -p $(MC_BUILD)/cplusplus
 	cd $(MC_BUILD)/cplusplus; cmake $(MC_INTERFACE); make
 
@@ -1066,7 +1074,7 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
-	cd $(CASADI_HOME)/build ; make clean
+	rm -rf $(DESTDIR)$(prefix)/Python/casadi
 
 clean-python-packages:
 @WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/external/Assimulo; \

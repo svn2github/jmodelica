@@ -72,6 +72,7 @@ def test_RealVariableAttributes():
     assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode2) )
     assert( realVar.hasAttribute("myAttribute"))
     assert( not realVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( realVar.getName() == "node" )
 
 def test_RealVariableConstants():
     realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
@@ -161,6 +162,7 @@ def test_DerivativeVariableAttributes():
     assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode2) )
     assert( derVar.hasAttribute("myAttribute"))
     assert( not derVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( derVar.getName() == "node" )
 
 def test_DerivativeVariableConstants():
     derVar = DerivativeVariable(MX("node"), None)
@@ -223,6 +225,7 @@ def test_IntegerVariableAttributes():
     assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode2) )
     assert( intVar.hasAttribute("myAttribute"))
     assert( not intVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( intVar.getName() == "node")
     
 def test_IntegerVariableConstants():
     intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
@@ -270,6 +273,7 @@ def test_BooleanVariableAttributes():
     assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode2) )
     assert( boolVar.hasAttribute("myAttribute"))
     assert( not boolVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( boolVar.getName() == "node")
     
 def test_BooleanVariableConstants():
     boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)

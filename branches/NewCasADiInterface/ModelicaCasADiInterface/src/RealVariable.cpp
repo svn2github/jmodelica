@@ -3,8 +3,7 @@ namespace ModelicaCasADi
 {
 RealVariable::RealVariable(CasADi::MX var, Variable::Causality causality,
                            Variable::Variability variability, VariableType* declaredType /* = NULL */) :
-                           Variable(var, causality, variability) { 
+                           Variable(var, causality, variability, declaredType) { 
     myDerivativeVariable = NULL;
-    this->declaredType = declaredType;
 }
 }; // End namespace

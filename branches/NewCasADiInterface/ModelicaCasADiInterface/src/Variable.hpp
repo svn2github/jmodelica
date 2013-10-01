@@ -49,9 +49,16 @@ class Variable : public Printable {
          * @param A symbolic MX.
          * @param An entry of the enum Causality
          * @param An entry of the enum Variability
+         * @param A pointer to a VariableType, default is NULL. 
          */
         Variable(CasADi::MX var, Causality causality,
-                Variability variability);
+                Variability variability, 
+                VariableType* = NULL);
+        
+        /**
+         * @return The string name of this Variable 
+         */
+        std::string getName() const;
         
         /**
          * @return A MX
@@ -113,6 +120,7 @@ class Variable : public Printable {
         Variability variability;
 };
 inline Variable::Variable() {}
+inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(VariableType* declaredType) { this->declaredType = declaredType; }
 inline VariableType* Variable::getDeclaredType() const { return declaredType; }
