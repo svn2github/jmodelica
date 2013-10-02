@@ -35,24 +35,26 @@ aspect Scalarization {
 	
 	syn boolean FVariable.isScalarized() = getFQName().isScalarized();
 	syn boolean FQName.isScalarized() = scalarized;
-	
-	/**
-	 * \brief Scalarize all variables and equations in the flat model.
-	 */
-	public void FClass.scalarize() {
-		beginStep("scalarize()");
-		List<FVariable> vars = new List<FVariable>();
-		List<FVariable> alias_vars = new List<FVariable>();
-		scalarizeVars(vars, alias_vars);
-		scalarizeAllVarDependent(vars);
-		replaceScalarizedVars(vars, alias_vars);
-		scalarizeFuncs();
-		scalarizeTypes();
-		getConnectionSetManager().scalarize();
-		scalarized = true;
-		scalarizationCleanup();
-		endStep("scalarize()");
-	}
+
+    public class FClass {
+        /**
+         * Scalarize all variables and equations in the flat model.
+         */
+        public class scalarize extends Transformation {
+            public void perform() {
+                List<FVariable> vars = new List<FVariable>();
+                List<FVariable> alias_vars = new List<FVariable>();
+                scalarizeVars(vars, alias_vars);
+                scalarizeAllVarDependent(vars);
+                replaceScalarizedVars(vars, alias_vars);
+                scalarizeFuncs();
+                scalarizeTypes();
+                getConnectionSetManager().scalarize();
+                scalarized = true;
+                scalarizationCleanup();
+            }
+        }
+    }
 	
 	/**
 	 * Scalarize variable declarations.

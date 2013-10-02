@@ -66,20 +66,24 @@ aspect VariabilityPropagation {
 	
 	// Hook for checks that are needed in optimica
 	syn boolean FEquation.canPropagate(FVariable var, FExp solution) = true;
-	
-	/**
-	 * Runs variability propagation if option is set.
-	 */
-	public void FClass.variabilityPropagationIfSet() {
-		if (root().options.getBooleanOption("variability_propagation")) {
-			beginStep("variabilityPropagationIfSet()");
-			variabilityPropagation();
-			enableConstantFolding();
-//			forceRewrites();
-			root().flushAllRecursiveClearFinal(); // Enable expression rewrites
-			endStep("variabilityPropagationIfSet()");
-		}
-	}
+
+    public class FClass {
+        /**
+         * Runs variability propagation if option is set.
+         */
+        public class variabilityPropagationIfSet extends Transformation {
+            public variabilityPropagationIfSet() {
+                super("variability_propagation");
+            }
+            
+            public void perform() {
+                variabilityPropagation();
+                enableConstantFolding();
+//              forceRewrites();
+                root().flushAllRecursiveClearFinal(); // Enable expression rewrites
+            }
+        }
+    }
 	
 	/**
 	 * Runs variability propagation.

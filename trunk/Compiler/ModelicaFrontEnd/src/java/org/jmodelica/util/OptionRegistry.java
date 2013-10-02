@@ -328,6 +328,11 @@ public class OptionRegistry {
 	         false,
 	         "Activate experimental support for expandable connectors. Warning: support is partial and may " + 
 	         "cause compiler to crash"),
+	    TRANSFORM_STEPS
+	        ("log_transformation_steps",
+	         compiler,
+	         false,
+	         "Write flat tree after each transformation step to file"),
 		
 		// Runtime options
         /*

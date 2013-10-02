@@ -992,19 +992,23 @@ aspect InstanceErrorCheck {
 }
 
 aspect AssertEval {
-    
-    /**
-     * Evaluate asserts with constant tests, generate errors for failing ones, 
-     * and eliminate all evaluated assets.
-     */
-    public void FClass.evaluateAsserts() {
-        for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
-            eqn.evaluateAsserts();
-        List<FAbstractEquation> l = new List<FAbstractEquation>();
-        for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
-            if (!eqn.markedForRemoval)
-                l.add(eqn);
-        getFEquationBlock(0).setFAbstractEquationList(l);
+
+    public class FClass {
+        /**
+         * Evaluate asserts with constant tests, generate errors for failing ones, 
+         * and eliminate all evaluated assets.
+         */
+        public class evaluateAsserts extends Transformation {
+            public void perform() {
+                for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+                    eqn.evaluateAsserts();
+                List<FAbstractEquation> l = new List<FAbstractEquation>();
+                for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+                    if (!eqn.markedForRemoval)
+                        l.add(eqn);
+                getFEquationBlock(0).setFAbstractEquationList(l);
+            }
+        }
     }
     
     /**

@@ -36,7 +36,7 @@ aspect InteractiveFMU{
 			log.info(this);
 			
 			// Eliminate aliases
-			aliasEliminationIfSet();
+			aliasElimination.apply();
 			
 			// Redo BLT
 			computeMatchingsAndBLT();
