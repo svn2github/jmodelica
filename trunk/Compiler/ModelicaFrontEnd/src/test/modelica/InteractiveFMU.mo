@@ -52,7 +52,7 @@ Solution:
 		Real x;
 		Real y;
 	equation
-		x = y + time;
+		x = abs(y) + time;
 		y = x - 2;
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -69,7 +69,7 @@ Solved block of 1 variables:
 Computed variable:
   x
 Solution:
-  iter_0 + time
+  abs(iter_0) + time
 -------------------------------
 Solved block of 1 variables:
 Computed variable:

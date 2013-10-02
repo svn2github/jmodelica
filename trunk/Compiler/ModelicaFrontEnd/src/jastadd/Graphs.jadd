@@ -31,188 +31,6 @@ import org.jmodelica.util.FilteredIterator;
 
 aspect Graphs {
 
-public class EquationBlockFactory {
-
-	/**
-	 * This method groups the Eq objects in a BLT block so that Eqs that
-	 * originates from the same FAbstractEquation are grouped together.
-	 */
-	public static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
-	
-		Eq previous = null;
-		Collection<Eq> group = null;
-		Collection<Collection<Eq>> l = new ArrayList<Collection<Eq>>();
-
-		for (Eq current : component) {
-			if (previous == null || (previous.getEquation() != current.getEquation())) {
-				group = new ArrayList<Eq>();
-				l.add(group);
-			}
-			group.add(current);	
-			previous = current;
-		}	
-		return l;
-	}
-
-	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation eqn, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve) {
-		return createSimpleEquationBlock(eqn, fvs, assignedIndices, solve, false);
-	}
-
-	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve, boolean duringTearing) {
-		// Check if equation is solvable for all active variables (only if we want a solved block)
-		Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
-		for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
-			solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
-		
-		return e.createSimpleEquationBlock(fvs, assignedIndices, solvability);
-	}
-	
-	/**
-	 * This method takes an equation and a variable and constructs an equation block.
-	 * If <code>solve</code> is true the equation will be solved for the variable. 
-	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, boolean solve) {
-		return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), solve);
-	}
-
-	/**
-	 * This method takes a list of Eq objects and create equation blocks
-	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
-		return createSimpleEquationBlock(component, solve, false);
-	}
-	
-	/**
-	 * This method takes an equation <code>eqn</code> and variable
-	 * <code>var</code> and produces an unsolved block of types
-	 * ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
-		return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
-	}
-	
-	/**
-	 * This method takes a list of Eq objects and create equation blocks
-	 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
-	 */
-	public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
-		Collection<FVariable> fvs = new ArrayList<FVariable>();
-		Collection<Integer> assignedIndices = new ArrayList<Integer>();
-		
-		FAbstractEquation e = eqns.iterator().next().getEquation();
-		for (Eq eqn : eqns) {
-			if (eqn.getEquation() != e) 
-				return null;
-			fvs.add(eqn.getMatching().getVariable());
-			assignedIndices.add(eqn.groupNumber());
-		} 
-
-		return createSimpleEquationBlock(e, fvs, assignedIndices, solve, duringTearing);
-		
-	}
-
-	/**
-	 * This method takes as input a set of Eq objects corresponeing to
-	 * a BLT block. First the, the Eq objects are grouped using
-	 * groupComponent to simplify the analysis. Then, if there is
-	 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
-	 * a real or mixed equation block is created.
-	 */
-	public static AbstractEquationBlock createEquationBlock(Collection<Eq> component) {
-		
-		// System of equations
-		Collection<Collection<Eq>> l = EquationBlockFactory.groupComponent(component);
-
-		if (l.size() == 1) {
-			SimpleEquationBlock seb = createSimpleEquationBlock(l.iterator().next(), true);
-			if (seb != null && seb.isSolvable()) {
-				return seb;
-			}	
-		}
-
-		Collection<SimpleEquationBlock> ls = new ArrayList<SimpleEquationBlock>();
-		for (Collection<Eq> s : l) {
-			ls.add(createSimpleEquationBlock(s, false));
-		}	
-
-		// Check if an equation block is mixed, i.e., contains both continous
-		// and discrete variables, and if it is linear in the unknowns
-		Set<FVariable> activeVariables = new HashSet<FVariable>();
-		for (SimpleEquationBlock sb : ls) {
-			activeVariables.addAll(sb.activeVariables());
-		}
-		boolean isMixed = false;
-		boolean isLinear = true;
-		for (SimpleEquationBlock seb : ls) {
-			for (FAbstractEquation e : seb.equations()) {
-				if (e.isDiscrete())
-					isMixed = true;
-				if (!e.checkLinearity(activeVariables))
-					isLinear = false;
-			}
-		}
-		
-		EquationBlock b = null;
-		if (isMixed && isLinear) {
-			b = new MixedLinearEquationBlock(ls);
-		} else if (isMixed) {
-			b = new MixedEquationBlock(ls);
-		} else if (isLinear) {
-			b = new LinearEquationBlock(ls);
-		} else {
-			b = new EquationBlock(ls);
-		}
-		return b;
-	}	
-}
-
-/**
- * Create a simple equation block from a single equation. 
- */
-public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
-	return null;
-}
-
-public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
-	FVariable fv = fvs.iterator().next();
-	if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
-		return new SolvedScalarEquationBlock(this, fv);
-	} else if(solvability.isSolvable()) { // Numerically solvable scalar equation
-		return new NumericallySolvedScalarEquationBlock(this, fv);
-	} else { // Unsolved scalar equation
-		return new UnsolvedScalarEquationBlock(this, fv);
-	}
-}
-
-// If equation TODO
-
-public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
-	return new WhenEquationBlock(this);
-}
-
-public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
-	if (solvability.isAnalyticallySolvable()) {
-		return new SolvedAlgorithmBlock(this, fvs);
-	} else {
-		return new UnsolvedAlgorithmBlock(this, fvs);
-	}
-}
-
-public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
-	if (numScalarEquations() == 0)
-		return new MetaEquationBlock(this);
-	for (Integer assignedIndex : assignedIndices)
-		if (assignedIndex == null)
-			throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
-	if (solvability.isAnalyticallySolvable()) {
-		return new SolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
-	} else {
-		return new UnsolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
-	}
-}
-
-
 public class MunkresProblem {
 
 	private long originalCost[][];
@@ -1275,7 +1093,7 @@ public class BiPGraph {
 			This will be done when the final algorithm have been settled.
 		*/
 		
-		BLT blt = computeBLT();
+		BLT blt = computeBLT(false, false, false);
 	
 		ASTNode.log.info(blt.toString());
 
@@ -1555,16 +1373,7 @@ public class BiPGraph {
 		return l;
 	}
 
-	public BLT computeBLT() {
-		Collection<Collection<Eq>> components = computeRawBLT(false);
-		BLT blt = new BLT();
-		for (Collection<Eq> bl : components) {
-			blt.add(EquationBlockFactory.createEquationBlock(bl));
-		}
-		return blt;
-	}
-	
-	public Collection<Collection<Eq>> computeRawBLT(boolean merge_blt_blocks) {
+	public Collection<Collection<Eq>> tarjan(boolean merge_blt_blocks) {
 		Enumerator indexer = new Enumerator();
 		Stack<Eq> stack = new Stack<Eq>();
 		Collection<Collection<Eq>> components = new ArrayList<Collection<Eq>>();

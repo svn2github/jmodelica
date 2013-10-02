@@ -28,7 +28,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1;
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -65,7 +65,7 @@ Solved equations:
   u0 = u1 + u2
 Residual equations:
  Iteration variables: i2
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
  Iteration variables: i3
   u2 = R2 * i2
 -------------------------------
@@ -101,7 +101,7 @@ equation
 	u0 = sin(time);
 	u1 = R1*i1;
 	u2 = R2*i2;
-	u3 = R3*i3;
+	u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	uL = L*der(iL);
 	u0 = u1 + u3;
 	uL = u1 + u2;
@@ -137,7 +137,7 @@ equation
 	u0 = sin(time);
 	u1 = R1*i1;
 	u2 = R2*i2;
-	u3 = R3*i3;
+	u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	uL = L*der(iL);
 	u0 = u1 + u3;
 	uL = u1 + u2;
@@ -172,7 +172,7 @@ equation
 	u0 = sin(time);
 	u1 = R1*i1;
 	u2 = R2*i2;
-	u3 = R3*i3;
+	u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	uL = L*der(iL);
 	u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
 	uL = u1 + u2;
@@ -531,7 +531,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -564,7 +564,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -605,7 +605,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1;
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3 annotation(__Modelon(ResidualEquation(iterationVariable=i2)));
   uL = u1 + u2;
@@ -646,7 +646,7 @@ Residual equations:
  Iteration variables: i1
   i1 = i2 + i3
  Iteration variables: i3
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -680,7 +680,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1;
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3 annotation(__Modelon(ResidualEquation(iterationVariable=i2)));
   uL = u1 + u2;
@@ -713,7 +713,7 @@ Iteration variables:
   i3()
   i1()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u1 = R1 * i1
 Residual equations:
  Iteration variables: i2
@@ -756,7 +756,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -789,7 +789,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -832,7 +832,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -865,7 +865,7 @@ Iteration variables:
   i4()
   i2()
 Solved equations:
-  u2 = R3 * i4
+  u2 = R3 * abs(i4)
   u0 = u1 + u2
   i1 = i2 + i4
 Residual equations:
@@ -907,7 +907,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(enabled=true)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -940,7 +940,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -981,7 +981,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(enabled=false)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1019,7 +1019,7 @@ Solved equations:
   u0 = u1 + u2
 Residual equations:
  Iteration variables: i2
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
  Iteration variables: i3
   u2 = R2 * i2
 -------------------------------
@@ -1057,7 +1057,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(enabled=isResidual)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1090,7 +1090,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -1132,7 +1132,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(enabled=isResidual)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1170,7 +1170,7 @@ Solved equations:
   u0 = u1 + u2
 Residual equations:
  Iteration variables: i2
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
  Iteration variables: i3
   u2 = R2 * i2
 -------------------------------
@@ -1208,7 +1208,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1251,7 +1251,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1291,7 +1291,7 @@ Residual equations:
  Iteration variables: i2
   u1 = R1 * i1
  Iteration variables: i3
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -1327,7 +1327,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1360,7 +1360,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -1404,7 +1404,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1444,7 +1444,7 @@ Residual equations:
  Iteration variables: i2
   u1 = R1 * i1
  Iteration variables: i3
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -1481,7 +1481,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -1514,7 +1514,7 @@ Iteration variables:
   i3()
   i2()
 Solved equations:
-  u2 = R3 * i3
+  u2 = R3 * abs(i3)
   u0 = u1 + u2
   i1 = i2 + i3
 Residual equations:
@@ -1554,8 +1554,8 @@ model HandGuidedTearing15
 equation
 	for i in 1:n loop
 		a[i]=c[i] + 1;
-		a[i]=b[i] + 2;
-		c[i]=b[i] - 3;
+		a[i]=b[i] + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
+		c[i]=abs(b[i]) - 3;
 	end for;
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -1575,7 +1575,7 @@ Solved variables:
 Iteration variables:
   b[1]()
 Solved equations:
-  c[1] = b[1] - 3
+  c[1] = abs(b[1]) - 3
   a[1] = c[1] + 1
 Residual equations:
  Iteration variables: b[1]
@@ -1588,7 +1588,7 @@ Solved variables:
 Iteration variables:
   b[2]()
 Solved equations:
-  c[2] = b[2] - 3
+  c[2] = abs(b[2]) - 3
   a[2] = c[2] + 1
 Residual equations:
  Iteration variables: b[2]
@@ -1601,7 +1601,7 @@ Solved variables:
 Iteration variables:
   b[3]()
 Solved equations:
-  c[3] = b[3] - 3
+  c[3] = abs(b[3]) - 3
   a[3] = c[3] + 1
 Residual equations:
  Iteration variables: b[3]
@@ -1614,7 +1614,7 @@ Solved variables:
 Iteration variables:
   b[4]()
 Solved equations:
-  c[4] = b[4] - 3
+  c[4] = abs(b[4]) - 3
   a[4] = c[4] + 1
 Residual equations:
  Iteration variables: b[4]
@@ -1627,7 +1627,7 @@ Solved variables:
 Iteration variables:
   b[5]()
 Solved equations:
-  c[5] = b[5] - 3
+  c[5] = abs(b[5]) - 3
   a[5] = c[5] + 1
 Residual equations:
  Iteration variables: b[5]
@@ -1645,7 +1645,7 @@ model HandGuidedTearing16
 
 equation
 	for i in 1:n loop
-		a[i]=c[i] + 1;
+		a[i]=abs(c[i]) + 1; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a[i]=b[i] + 2;
 		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c[i])));
 	end for;
@@ -1667,7 +1667,7 @@ Solved variables:
 Iteration variables:
   c[1]()
 Solved equations:
-  a[1] = c[1] + 1
+  a[1] = abs(c[1]) + 1
   a[1] = b[1] + 2
 Residual equations:
  Iteration variables: c[1]
@@ -1680,7 +1680,7 @@ Solved variables:
 Iteration variables:
   c[2]()
 Solved equations:
-  a[2] = c[2] + 1
+  a[2] = abs(c[2]) + 1
   a[2] = b[2] + 2
 Residual equations:
  Iteration variables: c[2]
@@ -1693,7 +1693,7 @@ Solved variables:
 Iteration variables:
   c[3]()
 Solved equations:
-  a[3] = c[3] + 1
+  a[3] = abs(c[3]) + 1
   a[3] = b[3] + 2
 Residual equations:
  Iteration variables: c[3]
@@ -1706,7 +1706,7 @@ Solved variables:
 Iteration variables:
   c[4]()
 Solved equations:
-  a[4] = c[4] + 1
+  a[4] = abs(c[4]) + 1
   a[4] = b[4] + 2
 Residual equations:
  Iteration variables: c[4]
@@ -1719,7 +1719,7 @@ Solved variables:
 Iteration variables:
   c[5]()
 Solved equations:
-  a[5] = c[5] + 1
+  a[5] = abs(c[5]) + 1
   a[5] = b[5] + 2
 Residual equations:
  Iteration variables: c[5]
@@ -1737,7 +1737,7 @@ model HandGuidedTearing17
 
 equation
 	for i in 1:n loop
-		a[i]=c[i] + 1;
+		a[i]=abs(c[i]) + 1; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a[i]=b[i] + 2;
 		c[i]=b[i] - 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c[i])));
 	end for;
@@ -1772,15 +1772,15 @@ Iteration variables:
   c[2]()
   c[1]()
 Solved equations:
-  a[1] = c[1] + 1
+  a[1] = abs(c[1]) + 1
   a[1] = b[1] + 2
-  a[2] = c[2] + 1
+  a[2] = abs(c[2]) + 1
   a[2] = b[2] + 2
-  a[3] = c[3] + 1
+  a[3] = abs(c[3]) + 1
   a[3] = b[3] + 2
-  a[4] = c[4] + 1
+  a[4] = abs(c[4]) + 1
   a[4] = b[4] + 2
-  a[5] = c[5] + 1
+  a[5] = abs(c[5]) + 1
   a[5] = b[5] + 2
 Residual equations:
  Iteration variables: c[5]
@@ -1815,7 +1815,7 @@ model HandGuidedTearing18
 	A a;
 	B b;
 equation
-	a.x = b.y + 2;
+	a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	a.y = b.x - 3;
 	annotation(__Modelon(tearingPairs={
 		Pair(residualEquation=a.eq, iterationVariable=b.x)
@@ -1841,7 +1841,7 @@ Iteration variables:
 Solved equations:
   a.y = b.x - 3
   b.x = b.y + 2
-  a.x = b.y + 2
+  a.x = abs(b.y) + 2
 Residual equations:
  Iteration variables: b.x
   a.x = a.y + 1
@@ -1868,7 +1868,7 @@ model HandGuidedTearing19
 		A a;
 		B b;
 	equation
-		a.x = b.y + 2;
+		a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a.y = b.x - 3;
 		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
@@ -1897,7 +1897,7 @@ Iteration variables:
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
-  c.a.x = c.b.y + 2
+  c.a.x = abs(c.b.y) + 2
 Residual equations:
  Iteration variables: c.b.x
   c.a.x = c.a.y + 1
@@ -1924,7 +1924,7 @@ model HandGuidedTearing20
 		A a;
 		B b;
 	equation
-		a.x = b.y + 2;
+		a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a.y = b.x - 3;
 		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
@@ -1953,7 +1953,7 @@ Iteration variables:
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
-  c.a.x = c.b.y + 2
+  c.a.x = abs(c.b.y) + 2
 Residual equations:
  Iteration variables: c.b.x
   c.a.x = c.a.y + 1
@@ -1983,7 +1983,7 @@ model HandGuidedTearing21
 		A a;
 		B b;
 	equation
-		a.x = b.y + 2;
+		a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a.y = b.x - 3;
 		annotation(__Modelon(tearingPairs={
 			Pair(residualEquation=a.eq, iterationVariable=b.x)
@@ -2012,7 +2012,7 @@ Iteration variables:
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
-  c.a.x = c.b.y + 2
+  c.a.x = abs(c.b.y) + 2
 Residual equations:
  Iteration variables: c.b.x
   c.a.x = c.a.y + 1
@@ -2041,7 +2041,7 @@ model HandGuidedTearing22
 		A a;
 		B b;
 	equation
-		a.x = b.y + 2;
+		a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a.y = b.x - 3;
 		annotation(__Modelon(tearingPairs={
 			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
@@ -2071,7 +2071,7 @@ Iteration variables:
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
-  c.a.x = c.b.y + 2
+  c.a.x = abs(c.b.y) + 2
 Residual equations:
  Iteration variables: c.b.x
   c.a.x = c.a.y + 1
@@ -2100,7 +2100,7 @@ model HandGuidedTearing23
 		A a;
 		B b;
 	equation
-		a.x = b.y + 2;
+		a.x = abs(b.y) + 2; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		a.y = b.x - 3;
 		annotation(__Modelon(tearingPairs={
 			Pair(enabled=useFirst, residualEquation=a.eq, iterationVariable=b.x),
@@ -2130,7 +2130,7 @@ Iteration variables:
 Solved equations:
   c.b.x = c.b.y + 2
   c.a.y = c.b.x - 3
-  c.a.x = c.b.y + 2
+  c.a.x = abs(c.b.y) + 2
 Residual equations:
  Iteration variables: c.b.y
   c.a.x = c.a.y + 1
@@ -2146,7 +2146,7 @@ model HandGuidedTearing24
 	Real c[n];
 
 equation
-	a=c .+ 1;
+	a=abs(c) .+ 1; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	a=b .+ 2;
 	c=b .- 3 annotation(__Modelon(ResidualEquation(enabled=true,iterationVariable=c)));
 
@@ -2167,7 +2167,7 @@ Solved variables:
 Iteration variables:
   c[1]()
 Solved equations:
-  a[1] = c[1] .+ 1
+  a[1] = abs(c[1]) .+ 1
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
@@ -2180,7 +2180,7 @@ Solved variables:
 Iteration variables:
   c[2]()
 Solved equations:
-  a[2] = c[2] .+ 1
+  a[2] = abs(c[2]) .+ 1
   a[2] = b[2] .+ 2
 Residual equations:
  Iteration variables: c[2]
@@ -2193,7 +2193,7 @@ Solved variables:
 Iteration variables:
   c[3]()
 Solved equations:
-  a[3] = c[3] .+ 1
+  a[3] = abs(c[3]) .+ 1
   a[3] = b[3] .+ 2
 Residual equations:
  Iteration variables: c[3]
@@ -2206,7 +2206,7 @@ Solved variables:
 Iteration variables:
   c[4]()
 Solved equations:
-  a[4] = c[4] .+ 1
+  a[4] = abs(c[4]) .+ 1
   a[4] = b[4] .+ 2
 Residual equations:
  Iteration variables: c[4]
@@ -2219,7 +2219,7 @@ Solved variables:
 Iteration variables:
   c[5]()
 Solved equations:
-  a[5] = c[5] .+ 1
+  a[5] = abs(c[5]) .+ 1
   a[5] = b[5] .+ 2
 Residual equations:
  Iteration variables: c[5]
@@ -2236,7 +2236,7 @@ model HandGuidedTearing25
 	Real c[n];
 
 equation
-	a=c .+ 1;
+	a=abs(c) .+ 1; //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	a=b .+ 2;
 	c=b .- 3 annotation(__Modelon(name=res));
 	annotation(
@@ -2258,7 +2258,7 @@ Solved variables:
 Iteration variables:
   c[1]()
 Solved equations:
-  a[1] = c[1] .+ 1
+  a[1] = abs(c[1]) .+ 1
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
@@ -2271,7 +2271,7 @@ Solved variables:
 Iteration variables:
   c[2]()
 Solved equations:
-  a[2] = c[2] .+ 1
+  a[2] = abs(c[2]) .+ 1
   a[2] = b[2] .+ 2
 Residual equations:
  Iteration variables: c[2]
@@ -2284,7 +2284,7 @@ Solved variables:
 Iteration variables:
   c[3]()
 Solved equations:
-  a[3] = c[3] .+ 1
+  a[3] = abs(c[3]) .+ 1
   a[3] = b[3] .+ 2
 Residual equations:
  Iteration variables: c[3]
@@ -2297,7 +2297,7 @@ Solved variables:
 Iteration variables:
   c[4]()
 Solved equations:
-  a[4] = c[4] .+ 1
+  a[4] = abs(c[4]) .+ 1
   a[4] = b[4] .+ 2
 Residual equations:
  Iteration variables: c[4]
@@ -2310,7 +2310,7 @@ Solved variables:
 Iteration variables:
   c[5]()
 Solved equations:
-  a[5] = c[5] .+ 1
+  a[5] = abs(c[5]) .+ 1
   a[5] = b[5] .+ 2
 Residual equations:
  Iteration variables: c[5]
@@ -2327,7 +2327,7 @@ model HandGuidedTearing26
 equation
 	a=c .+ 1;
 	a=b .+ 2;
-	c=b .- 3 annotation(__Modelon(name=res));
+	c=abs(b) .- 3 annotation(__Modelon(name=res)); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	annotation(
 	__Modelon(tearingPairs={
 		Pair(residualEquation=res[1],iterationVariable=c[1]),
@@ -2355,7 +2355,7 @@ Solved equations:
   a[1] = b[1] .+ 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] .- 3
+  c[1] = abs(b[1]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2368,7 +2368,7 @@ Solved equations:
   a[2] = c[2] .+ 1
 Residual equations:
  Iteration variables: b[2]
-  c[2] = b[2] .- 3
+  c[2] = abs(b[2]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2381,7 +2381,7 @@ Solved equations:
   a[3] = c[3] .+ 1
 Residual equations:
  Iteration variables: b[3]
-  c[3] = b[3] .- 3
+  c[3] = abs(b[3]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2394,7 +2394,7 @@ Solved equations:
   a[4] = c[4] .+ 1
 Residual equations:
  Iteration variables: a[4]
-  c[4] = b[4] .- 3
+  c[4] = abs(b[4]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2407,7 +2407,7 @@ Solved equations:
   a[5] = c[5] .+ 1
 Residual equations:
  Iteration variables: a[5]
-  c[5] = b[5] .- 3
+  c[5] = abs(b[5]) .- 3
 -------------------------------
 ")})));
 end HandGuidedTearing26;
@@ -2423,7 +2423,7 @@ equation
 	for i in 1:n loop
 		a[i]=c[i] + 1;
 		a[i]=b[i] + 2;
-		c[i]=b[i] - 3 annotation(__Modelon(name=res));
+		c[i]=abs(b[i]) - 3 annotation(__Modelon(name=res)); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	end for;
 	
 	annotation(
@@ -2453,7 +2453,7 @@ Solved equations:
   a[1] = b[1] + 2
 Residual equations:
  Iteration variables: c[1]
-  c[1] = b[1] - 3
+  c[1] = abs(b[1]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2466,7 +2466,7 @@ Solved equations:
   a[2] = c[2] + 1
 Residual equations:
  Iteration variables: b[2]
-  c[2] = b[2] - 3
+  c[2] = abs(b[2]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2479,7 +2479,7 @@ Solved equations:
   a[3] = c[3] + 1
 Residual equations:
  Iteration variables: b[3]
-  c[3] = b[3] - 3
+  c[3] = abs(b[3]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2492,7 +2492,7 @@ Solved equations:
   a[4] = c[4] + 1
 Residual equations:
  Iteration variables: a[4]
-  c[4] = b[4] - 3
+  c[4] = abs(b[4]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2505,7 +2505,7 @@ Solved equations:
   a[5] = c[5] + 1
 Residual equations:
  Iteration variables: a[5]
-  c[5] = b[5] - 3
+  c[5] = abs(b[5]) - 3
 -------------------------------
 ")})));
 end HandGuidedTearing27;
@@ -2521,7 +2521,7 @@ model HandGuidedTearing28
 		for i in 1:n loop
 			a[i]=c[i] + 1;
 			a[i]=b[i] + 2;
-			c[i]=b[i] - 3 annotation(__Modelon(name=res));
+			c[i]=abs(b[i]) - 3 annotation(__Modelon(name=res)); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		end for;
 	end A;
 	
@@ -2552,7 +2552,7 @@ Solved equations:
   a.a[1] = a.b[1] + 2
 Residual equations:
  Iteration variables: a.c[1]
-  a.c[1] = a.b[1] - 3
+  a.c[1] = abs(a.b[1]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2565,7 +2565,7 @@ Solved equations:
   a.a[2] = a.b[2] + 2
 Residual equations:
  Iteration variables: a.c[2]
-  a.c[2] = a.b[2] - 3
+  a.c[2] = abs(a.b[2]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2578,7 +2578,7 @@ Solved equations:
   a.a[3] = a.b[3] + 2
 Residual equations:
  Iteration variables: a.c[3]
-  a.c[3] = a.b[3] - 3
+  a.c[3] = abs(a.b[3]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2591,7 +2591,7 @@ Solved equations:
   a.a[4] = a.b[4] + 2
 Residual equations:
  Iteration variables: a.c[4]
-  a.c[4] = a.b[4] - 3
+  a.c[4] = abs(a.b[4]) - 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2604,7 +2604,7 @@ Solved equations:
   a.a[5] = a.b[5] + 2
 Residual equations:
  Iteration variables: a.c[5]
-  a.c[5] = a.b[5] - 3
+  a.c[5] = abs(a.b[5]) - 3
 -------------------------------
 ")})));
 end HandGuidedTearing28;
@@ -2626,7 +2626,7 @@ model HandGuidedTearing29
 	equation
 		x=z .+ 1;
 		x=y .+ 2;
-		z=y .- 3 annotation(__Modelon(name=res));
+		z=abs(y) .- 3 annotation(__Modelon(name=res)); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		annotation(
 		__Modelon(tearingPairs={
 			Pair(residualEquation=res[1],iterationVariable=z[1]),
@@ -2660,7 +2660,7 @@ Solved equations:
   a.b.x[1] = a.b.z[1] .+ 1
 Residual equations:
  Iteration variables: a.b.y[1]
-  a.b.z[1] = a.b.y[1] .- 3
+  a.b.z[1] = abs(a.b.y[1]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2673,7 +2673,7 @@ Solved equations:
   a.b.x[2] = a.b.y[2] .+ 2
 Residual equations:
  Iteration variables: a.b.z[2]
-  a.b.z[2] = a.b.y[2] .- 3
+  a.b.z[2] = abs(a.b.y[2]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2686,7 +2686,7 @@ Solved equations:
   a.b.x[3] = a.b.z[3] .+ 1
 Residual equations:
  Iteration variables: a.b.y[3]
-  a.b.z[3] = a.b.y[3] .- 3
+  a.b.z[3] = abs(a.b.y[3]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2699,7 +2699,7 @@ Solved equations:
   a.b.x[4] = a.b.z[4] .+ 1
 Residual equations:
  Iteration variables: a.b.x[4]
-  a.b.z[4] = a.b.y[4] .- 3
+  a.b.z[4] = abs(a.b.y[4]) .- 3
 -------------------------------
 Torn block of 1 iteration variables and 2 solved variables.
 Solved variables:
@@ -2712,7 +2712,7 @@ Solved equations:
   a.b.x[5] = a.b.z[5] .+ 1
 Residual equations:
  Iteration variables: a.b.x[5]
-  a.b.z[5] = a.b.y[5] .- 3
+  a.b.z[5] = abs(a.b.y[5]) .- 3
 -------------------------------
 ")})));
 end HandGuidedTearing29;
@@ -2721,7 +2721,7 @@ model HandGuidedTearing30
 	model B
 		Real x, y;
 	equation
-		x = y + 1 annotation(__Modelon(name=res));
+		x = abs(y) + 1 annotation(__Modelon(name=res)); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 		y = x - 1;
 	end B;
 	extends B;
@@ -2748,7 +2748,7 @@ Solved equations:
   y = x - 1
 Residual equations:
  Iteration variables: x
-  x = y + 1
+  x = abs(y) + 1
 -------------------------------
 ")})));
 end HandGuidedTearing30;
@@ -2757,7 +2757,7 @@ model HandGuidedTearing31
 	Real x[2](each start=1), y[2](each start=2), z[2];
 equation
 	x = -y;
-	y = z .+ 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
+	y = abs(z) .+ 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
 	z = x .- 1;
 annotation(
 	__JModelica(UnitTesting(tests={
@@ -2779,7 +2779,7 @@ Solved equations:
   z[1] = - y[1] .- 1
 Residual equations:
  Iteration variables: y[1]
-  y[1] = z[1] .+ 1
+  y[1] = abs(z[1]) .+ 1
 -------------------------------
 Torn block of 1 iteration variables and 1 solved variables.
 Solved variables:
@@ -2790,7 +2790,7 @@ Solved equations:
   z[2] = - y[2] .- 1
 Residual equations:
  Iteration variables: y[2]
-  y[2] = z[2] .+ 1
+  y[2] = abs(z[2]) .+ 1
 -------------------------------
 ")})));
 end HandGuidedTearing31;
@@ -3102,7 +3102,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1 annotation(__Modelon(ResidualEquation(iterationVariable=i3)));
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -3131,7 +3131,7 @@ model HandGuidedTearingWarning1
 equation
 	x = -y;
 	y = z + 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
-	z = x - 1 annotation(__Modelon(ResidualEquation(iterationVariable=x)));
+	z = abs(x) - 1 annotation(__Modelon(ResidualEquation(iterationVariable=x)));
 	annotation(
 	__JModelica(UnitTesting(tests={
 		WarningTestCase(

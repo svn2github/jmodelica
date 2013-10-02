@@ -9200,7 +9200,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1;
   u2 = R2*i2;
-  u3 = R3*i3;
+  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -9239,7 +9239,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
   _i1_5 = _i2_6 + _i3_7;
   _u1_1 = _R1_9 * _i1_5;
   _u2_2 = jmi_divide_equation(jmi, (- _u0_0 + _u1_1),(- 1.0),\"(- u0 + u1) / (- 1.0)\");
-  (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
+  (*res)[0] = _R3_11 * jmi_abs(_i3_7) - (_u2_2);
   (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
   } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
   } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -9524,7 +9524,7 @@ model NominalTest1
 	parameter Boolean pEnabled = true;
 	parameter Real pValues[2] = {2,3};
 equation
-	x = y .+ 1;
+	x = abs(y); //TODO: Temporary fix until tearing works on linear blocks (#3099)
 	y = x .- 1 annotation(__Modelon(nominal(enabled=pEnabled)=pValues));
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -9538,49 +9538,49 @@ equation
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  int ef = 0;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 5;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 2.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_1_2;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _y_1_2 = x[0];
-  _x_1_0 = _y_1_2 + 1;
-  (*res)[0] = _x_1_0 - 1 - (_y_1_2);
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_1_2 = x[0];
-  }
-  return ef;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 2.0;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1_2 = x[0];
+        _x_1_0 = jmi_abs(_y_1_2);
+        (*res)[0] = _x_1_0 - 1 - (_y_1_2);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1_2 = x[0];
+    }
+    return ef;
 }
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  int ef = 0;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 6;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-      (*res)[0] = 3.0;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _y_2_3;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _y_2_3 = x[0];
-  _x_2_1 = _y_2_3 + 1;
-  (*res)[0] = _x_2_1 - 1 - (_y_2_3);
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _y_2_3 = x[0];
-  }
-  return ef;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 6;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 3.0;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_2_3;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_2_3 = x[0];
+        _x_2_1 = jmi_abs(_y_2_3);
+        (*res)[0] = _x_2_1 - 1 - (_y_2_3);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_2_3 = x[0];
+    }
+    return ef;
 }
 
 ")})));
