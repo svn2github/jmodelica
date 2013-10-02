@@ -55,12 +55,13 @@ MC_JARS=$(MC_COMPILERS_DIR)/jars
 MC_MODELICA_JARS=$(MC_JARS)/modelica
 MC_OPTIMICA_JARS=$(MC_JARS)/optimica
 
+MODELICA_CASADI_CASADI_BUILD_DIR = $(MC_BUILD)/casadi
 CFLAGS=-I$(JAVA_HOME)/include/
 LIBCASADI=$(MODELICA_CASADI_CASADI_BUILD_DIR)/lib/libcasadi.so
 
 # The CMake for ModelicaCasADi needs these variables.
 export MODELICA_CASADI_HOME= $(MC_INTERFACE)
-export MODELICA_CASADI_CASADI_BUILD_DIR=$(MC_BUILD)/casadi
+export MC_BUILD
 export IPOPT_HOME
  
 MC_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/casadi
@@ -81,7 +82,7 @@ $(MC_MODELICA_JARS):
 	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_MODELICA_JARS)
 	cp $(MC_SRC)/bin/util.jar $(MC_MODELICA_JARS)
 	
-$(MC_SRC)/src/cpp-generated/: $(MODELICA_CASADI_CASADI_BUILD_DIR)
+$(MC_SRC)/src/cpp-generated/: 
 	rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
 	mkdir -p $(MC_SRC)/src/cpp-generated
 	mkdir -p $(MC_SRC)/src/java-generated/casadi
@@ -97,7 +98,7 @@ $(MC_OPTIMICA_JARS): $(OC_SRC)/src/cpp-generated/
 	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_OPTIMICA_JARS)
 	cp $(OC_SRC)/bin/util.jar $(MC_OPTIMICA_JARS)
 	     
-$(OC_SRC)/src/cpp-generated/: $(MODELICA_CASADI_CASADI_BUILD_DIR)
+$(OC_SRC)/src/cpp-generated/: 
 	rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
 	mkdir -p $(OC_SRC)/src/cpp-generated
 	mkdir -p $(OC_SRC)/src/java-generated/casadi
@@ -113,7 +114,7 @@ $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	    -I"$(CASADI_HOME)" \
 	    $(CFLAGS)
 
-$(DESTDIR)$(prefix)/Python/casadi: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS)
+$(DESTDIR)$(prefix)/Python/casadi: 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make python
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
@@ -121,6 +122,7 @@ $(DESTDIR)$(prefix)/Python/casadi: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
+	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
 	touch $(MC_BUILD)/test/pythonTests/runtests.sh
 	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
 	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 

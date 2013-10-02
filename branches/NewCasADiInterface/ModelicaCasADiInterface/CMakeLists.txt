@@ -26,19 +26,19 @@ endif(WIN32)
 
 # import environment variables
 set(CASADI_HOME $ENV{CASADI_HOME})
-set(MODELICA_CASADI_CASADI_BUILD_DIR $ENV{MODELICA_CASADI_CASADI_BUILD_DIR})
+set(MC_BUILD $ENV{MC_BUILD})
 set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 set(JAVA_HOME $ENV{JAVA_HOME})
 
 # LIBS is used by the test directory
-set(LIBS "${MODELICA_CASADI_CASADI_BUILD_DIR}/lib/libcasadi.so" -ldl -lpthread)
+set(LIBS "${MC_BUILD}/casadi/lib/libcasadi.so" -ldl -lpthread)
 
 # Add library path for libs
-link_directories(${MODELICA_CASADI_CASADI_BUILD_DIR}/lib) 
+link_directories(${MC_BUILD}/casadi/lib) 
 link_directories(${IPOPT_HOME}/lib) 
 
-get_filename_component(JM_CASADI_BACKEND "../build/ModelicaCasADiInterfaceBuild" REALPATH)
+get_filename_component(JM_CASADI_BACKEND "${MC_BUILD}" REALPATH)
 set(JMODELICA "${JM_CASADI_BACKEND}/JModelica.org")
 
 # todo: this might not allways be the place to find Beaver?
