@@ -57,13 +57,13 @@ aspect OptimicaFlattening {
 		}
     }
 	
-	refine Flattening public void InstNode.flatten(FClass fc, FQName name) {
+	refine Flattening public void InstNode.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.flatten(name, fc);
         for (FConstraint c : getFConstraints()) 
            c.flatten(name, fc);
-		getInstComponentDeclList().flatten(fc);
-		getInstExtendsList().flatten(fc);
+		getInstComponentDeclList().flatten(fc, excludeBinding);
+		getInstExtendsList().flatten(fc, excludeBinding);
 	}
 	
 	refine Connections public void InstNode.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
