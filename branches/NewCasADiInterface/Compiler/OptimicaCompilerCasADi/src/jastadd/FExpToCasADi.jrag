@@ -295,7 +295,24 @@ aspect FExpToCasADi {
                 argVec.add(expMXVec.get(i));
             }
         }
-        return f.call(argVec);
+        // To handle the case where some outputs are not used. 
+        return  myLefts().size() > 0 ? retrieveUsedOutputsFromMXFunctionCall(f.call(argVec)) : f.call(argVec);
+    }
+    
+    /** @return An MXVector with the used MX outputs for this function call */
+    MXVector FFunctionCall.retrieveUsedOutputsFromMXFunctionCall(MXVector callVector) {
+        MXVector usedCalls = new MXVector();
+        ArrayList<FFunctionCallLeft> lefts = myLefts();
+        int index = 0;
+        for (FFunctionCallLeft fleft : myLefts()) {
+            if (fleft.hasFExp()) {
+                for (int i = 0; i < fleft.getFExp().toMXVector().size(); ++i) {
+                    usedCalls.add(callVector.get(index + i));
+                }
+            }
+            index += (fleft.hasFExp() ? fleft.getFExp().toMXVector().size() : 1); //TODO: What about omitted arrays?
+        }
+        return usedCalls;
     }
     
     /**

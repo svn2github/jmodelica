@@ -1,4 +1,4 @@
-#include <OptimizationProblem.hpp>
+#include "OptimizationProblem.hpp"
 using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
@@ -19,7 +19,7 @@ void OptimizationProblem::print(ostream& os) const {
     os << "Model contained in OptimizationProblem:\n" << endl;
     os << *model;
     os << "-- Optimization information  --\n" << endl;
-    os << "Start time = " << startTime << "\nEnd time = " << finalTime << endl;
+    os << "Start time = " << startTime << "\nFinal time = " << finalTime << endl;
     for (vector<Constraint>::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
         if (it == pathConstraints.begin()) {
             os << "-- Constraints --" << endl;

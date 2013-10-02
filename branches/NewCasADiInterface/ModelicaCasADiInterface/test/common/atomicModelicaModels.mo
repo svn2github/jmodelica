@@ -1002,4 +1002,59 @@ model atomicModelPolyOutFunctionCallForDependentParameter
     parameter Real[2] p2 = f(p1);
 end atomicModelPolyOutFunctionCallForDependentParameter;
 
+model atomicModelFunctionCallEquationIgnoredOuts
+    
+    function f
+        input Real in1;
+        input Real in2;
+        output Real out1;
+        output Real out2;
+        output Real out3;
+        output Real out4;
+        
+    algorithm
+        out1 := in1+1;
+        out2 := in2+1;
+        out3 := in1+in2;
+        out4 := 100;
+    end f;
+    Real x1 (start=1);
+    Real x2 (start=2);
+    Real x3 (start=2);
+
+    equation
+        der(x2) = x1+x2;
+        (x1,,x2,) = f(1,x3);
+end atomicModelFunctionCallEquationIgnoredOuts;
+
+model atomicModelFunctionCallStatementIgnoredOuts
+    
+    function f
+        input Real in1;
+        input Real in2;
+        output Real out1;
+        output Real out2;
+        output Real out3;
+        
+    algorithm
+        out1 := in1+1;
+        out2 := in2+1;
+        out3 := in1+in2;
+    end f;
+    
+    function f2
+        input Real in1;
+        output Real out1;
+        Real internal1;
+        Real internal2;
+    algorithm
+        internal2 := in1;
+        (internal1, , out1) := f(10, internal2);
+    end f2;
+        
+    Real x1 (start=1);
+    
+    equation
+        x1 = f2(x1);
+end atomicModelFunctionCallStatementIgnoredOuts;
 

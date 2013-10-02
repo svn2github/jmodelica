@@ -1,4 +1,4 @@
-#include <RealVariable.hpp>
+#include "RealVariable.hpp"
 namespace ModelicaCasADi 
 {
 RealVariable::RealVariable(CasADi::MX var, Variable::Causality causality,

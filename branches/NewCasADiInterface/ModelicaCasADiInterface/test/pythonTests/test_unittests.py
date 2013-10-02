@@ -483,7 +483,7 @@ def test_OptimizationProblemPrinting():
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "-- Optimization information  --\n\n" +
-                     "Start time = MX(Const<0>(scalar))\nEnd time = MX(Const<1>(scalar))\n" +
+                     "Start time = MX(Const<0>(scalar))\nFinal time = MX(Const<1>(scalar))\n" +
                      "-- Lagrange term --\nMX(Const<0>(scalar))\n-- Mayer term --\nMX(Const<0>(scalar))\n")
     assert( str(simpleOptProblem) == expectedPrint )
 

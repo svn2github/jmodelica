@@ -698,6 +698,26 @@ def test_ConstructArrayInOutFunctionCallEquation():
                 "function(\"AtomicModelVector3.f\").call([A[1],A[2],Const<1>(scalar),Const<2>(scalar)]){3})-vertcat(A[1],A[2],B[1],B[2]))")
     assert str(model.getDaeResidual()) == expected
     
+def test_FunctionCallEquationOmittedOuts():
+    model = transferModelicaModelWithoutInlining("atomicModelFunctionCallEquationIgnoredOuts", modelFile)
+    expected = ("vertcat(((x1+x2)-der_x2),"
+                "(vertcat("
+                "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([Const<1>(scalar),x3]){0},"
+                "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([Const<1>(scalar),x3]){2})"
+                "-vertcat(x1,x2)))")
+    assert str(model.getDaeResidual()) == expected
+    
+def test_FunctionCallStatementOmittedOuts():
+    model = transferModelicaModelWithoutInlining("atomicModelFunctionCallStatementIgnoredOuts", modelFile)
+    expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"
+                " Input: 1-by-1 (dense)\n"
+                " Output: 1-by-1 (dense)\n"
+                "@0 = Const<10>(scalar)\n"
+                "@1 = input[0]\n"
+                "{NULL,NULL,@2} = function(\"atomicModelFunctionCallStatementIgnoredOuts.f\").call([@0,@1])\n"
+                "output[0] = @2\n")
+    assert str(model.getModelFunctionByName("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
+    
 def test_ConstructFunctionMatrix():
     model = transferModelicaModelWithoutInlining("AtomicModelMatrix", modelFile)
     expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"

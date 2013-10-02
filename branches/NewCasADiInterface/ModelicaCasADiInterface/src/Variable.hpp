@@ -1,11 +1,14 @@
 #ifndef _MODELICACASADI_VAR
 #define _MODELICACASADI_VAR
-#include <symbolic/casadi.hpp>
-#include <boost/flyweight.hpp>
-#include <types/VariableType.hpp>
+
 #include <iostream>
 #include <map>
-#include <Printable.hpp>
+
+#include "symbolic/casadi.hpp"
+#include "boost/flyweight.hpp"
+
+#include "types/VariableType.hpp"
+#include "Printable.hpp"
 namespace ModelicaCasADi
 {
 /** 

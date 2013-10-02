@@ -1,18 +1,18 @@
 #ifndef _MODELICACASADI_OPTIMIZER
 #define _MODELICACASADI_OPTIMIZER
-
-#include <Model.hpp>
-#include <Constraint.hpp>
-#include <Equation.hpp>
-#include <Variable.hpp>
-#include <RealVariable.hpp>
-#include <DerivativeVariable.hpp>
-#include <OptimizationProblem.hpp>
-
-#include <symbolic/casadi.hpp>
-#include <interfaces/ipopt/ipopt_solver.hpp>
-
 #include <numeric>
+
+#include "symbolic/casadi.hpp"
+#include "interfaces/ipopt/ipopt_solver.hpp"
+
+#include "Model.hpp"
+#include "Constraint.hpp"
+#include "Equation.hpp"
+#include "Variable.hpp"
+#include "RealVariable.hpp"
+#include "DerivativeVariable.hpp"
+#include "OptimizationProblem.hpp"
+
 
 using std::vector; using std::cout; using std::endl;
 using CasADi::MX; using ModelicaCasADi::Variable; using ModelicaCasADi::Constraint; using ModelicaCasADi::Model;

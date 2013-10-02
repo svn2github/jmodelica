@@ -1,4 +1,4 @@
-#include <Variable.hpp>
+#include "Variable.hpp"
 using std::ostream; using CasADi::MX;
 namespace ModelicaCasADi 
 {

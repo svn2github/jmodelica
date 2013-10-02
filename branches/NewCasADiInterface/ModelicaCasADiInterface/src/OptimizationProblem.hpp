@@ -1,10 +1,11 @@
 #ifndef _MODELICACASADI_OPTIMIZATIONPROBLEM
 #define _MODELICACASADI_OPTIMIZATIONPROBLEM
-#include <Model.hpp>
-#include <Constraint.hpp>
-#include <vector>
 #include <iostream>
-#include <Printable.hpp>
+
+#include "Model.hpp"
+#include "Constraint.hpp"
+#include "vector"
+#include "Printable.hpp"
 namespace ModelicaCasADi 
 {
 class OptimizationProblem : public Printable {

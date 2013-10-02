@@ -1,9 +1,9 @@
+// System includes
+#include <iostream>
+
 // Other transfer functionality, including shared with transferModelica. 
 #include "jccutils.h"
 #include "transferModelica.hpp"
-
-// System includes
-#include <iostream>
 
 // Wrapped classes from the Modelica compiler
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
