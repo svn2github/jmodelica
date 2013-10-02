@@ -7,7 +7,7 @@
 
 namespace ModelicaCasADi
 {
-    template <class T> class Ref {
+template <class T> class Ref {
     public:
         // Default constructor needed so that SWIG doesn't use SWIGValueWrapper<Ref<T>>
         Ref() { this->node = NULL; }
@@ -41,7 +41,6 @@ namespace ModelicaCasADi
     private:
         void incRef() { incRefNode(node); }
         void decRef() { if (decRefNode(node)) node = NULL; }
-    };
-}
-
+};
+}; // End namespace
 #endif

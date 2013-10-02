@@ -22,6 +22,9 @@
 
 #include "transferModelica.hpp"
 #include "transferOptimica.hpp"
+
+#include "SharedNode.hpp"
+#include "Ref.hpp"
 %}
 %include "doc.i"
 
