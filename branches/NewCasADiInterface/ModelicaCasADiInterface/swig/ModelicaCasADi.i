@@ -27,6 +27,11 @@
 
 %rename(MyVariable) ModelicaCasADi::Variable;
 
+
+%feature("ref")   SharedNode "ModelicaCasADi::incRefNode($this);"
+%feature("unref") SharedNode "ModelicaCasADi::decRefNode($this);"
+
+
 %include "std_string.i"
 %include "std_vector.i"
 
@@ -37,7 +42,16 @@
 // These must be in dependency order!
 // SWIG doesn't follow #includes in the header files
 
+%include "Ref.i" // includes Ref.hpp
+
+// Instantiate Ref<T> along with apropriate typemaps
+// All %instantiate_Ref invocations must be afer "Ref.i"
+// and befor the header for the type T in question.
+//%instantiate_Ref(ModelicaCasADi::Equation)
+
+
 %include "Printable.hpp"
+%include "SharedNode.hpp"
 
 %include "Equation.hpp"
 %include "Constraint.hpp"
