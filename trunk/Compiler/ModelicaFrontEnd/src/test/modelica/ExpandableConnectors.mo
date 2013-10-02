@@ -279,6 +279,74 @@ end ExpandableConnectors.Expandable5;
 	end Expandable5;
 	
 	
+	model Expandable6
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+		
+		C[2] c;
+		EC ec;
+	equation
+		connect(c[2], ec.a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Expandable6",
+			description="",
+			flatModel="
+fclass ExpandableConnectors.Expandable6
+ Real c[2];
+ Real ec.a;
+equation
+ c[2] = ec.a[{1, 2}];
+end ExpandableConnectors.Expandable6;
+")})));
+	end Expandable6;
+	
+	
+	model Expandable7
+        expandable connector EC
+        end EC;
+        
+		model A
+			replaceable EC ec;
+		end A;
+        
+        connector C = Real;
+		
+		A a1(redeclare EC ec);
+        A a2(redeclare EC ec);
+        A a3(redeclare EC ec);
+        C c1;
+        C c2;
+    equation
+        connect(c1, a1.ec.b);
+        connect(a1.ec, a2.ec);
+        connect(a2.ec, a3.ec);
+        connect(a3.ec.b, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Expandable7",
+			description="Added support for redeclaring expandable connectors",
+			flatModel="
+fclass ExpandableConnectors.Expandable7
+ Real a1.ec.b;
+ Real a2.ec.b;
+ Real a3.ec.b;
+ Real c1;
+ Real c2;
+equation
+ a1.ec.b = a2.ec.b;
+ a2.ec.b = a3.ec.b;
+ a3.ec.b = c1;
+ c1 = c2;
+end ExpandableConnectors.Expandable7;
+")})));
+	end Expandable7;
+	
+	
 	model ExpandableCompliance
         expandable connector EC
         end EC;
@@ -296,6 +364,40 @@ Compliance error at line 284, column 15:
   Expandable connectors are not supported
 ")})));
 	end ExpandableCompliance;
+
+
+model ConnectTest25_Err
+    connector A
+        Real x;
+        Real y;
+    end A;
+    
+    connector B
+        Real y;
+        Real z;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest25_Err",
+			description="",
+			flatModel="
+fclass ExpandableConnectors.ConnectTest25_Err
+ Real a.x;
+ Real a.y;
+ Real b.y;
+ Real b.z;
+equation
+ a.x = a.y;
+ a.y = b.y;
+end ExpandableConnectors.ConnectTest25_Err;
+")})));
+end ConnectTest25_Err;
     
 
 end ExpandableConnectors;

@@ -805,6 +805,15 @@ aspect Connections {
         }
     }
     
+    public void InstReplacingExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        if (useInFlattening() && !csm.getExpandable().isExpansionDone()) {
+            if (isArray())
+                super.buildConnectionSets(prefix, csm, connect);
+            else
+                csm.getExpandable().addConnector(this);
+        }
+    }
+    
     public void InstArrayExpandableConnector.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (useInFlattening() && !csm.getExpandable().isExpansionDone()) {
             if (childDimensionLength() > 0)
@@ -1497,14 +1506,18 @@ aspect ExpandableConnectors {
          * involving them.
          */
         public void elaborate(ConnectionSetManager csm) {
+            boolean ok = true;
             for (ExpandableSet set : map.values()) 
-                set.expand();
+                if (!set.expand())
+                    ok = false;
             
-            expansionDone = true;
-            for (Connection conn : connections)
-                conn.connect(csm);
-            for (InstComponentDecl icd : map.keySet())
-                icd.buildConnectionSets(null, csm, true);
+            if (ok) {
+                expansionDone = true;
+                for (Connection conn : connections)
+                    conn.connect(csm);
+                for (InstComponentDecl icd : map.keySet())
+                    icd.buildConnectionSets(null, csm, true);
+            }
         }
         
         /**
@@ -1582,26 +1595,35 @@ aspect ExpandableConnectors {
             private Set<InstComponentDecl> connectors;
             private Map<String,ConnectorMember> members;
             private boolean expanded;
+            private boolean isok;
             
             public ExpandableSet(InstComponentDecl connector) {
                 connectors = new HashSet<InstComponentDecl>();
                 members = new HashMap<String,ConnectorMember>();
                 expanded = false;
+                isok = true;
                 connectors.add(connector);
                 map.put(connector, this);
             }
             
             /**
              * Calculate the components present in each expandable connector, if not already done.
+             * 
+             * @return  <code>false</code> if any errors were found
              */
-            public void expand() {
+            public boolean expand() {
                 if (!expanded) {
-                    ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
-                    Arrays.sort(sorted);
-                    for (InstComponentDecl conn : connectors)
-                        conn.expandConnector(sorted);
+                    for (ConnectorMember member : members.values())
+                        isok = isok && member.check();
+                    if (isok) {
+                        ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
+                        Arrays.sort(sorted);
+                        for (InstComponentDecl conn : connectors)
+                            conn.expandConnector(createInstComponents(sorted));
+                    }
                     expanded = true;
                 }
+                return isok;
             }
             
             /**
@@ -1633,71 +1655,114 @@ aspect ExpandableConnectors {
                     member.addSource(source);
             }
             
-        }
-        
-        public static class ConnectorMember implements Comparable<ConnectorMember> {
-            
-            public final String name;
-            private java.util.List<InstAccess> sources;
-            private InstComponentDecl template;
-            
-            public ConnectorMember(String name, InstAccess source) {
-                this.name = name;
-                sources = new ArrayList<InstAccess>();
-                template = null;
-                sources.add(source);
+            /**
+             * Create a list with the components each connector in this set should have.
+             * 
+             * @param members  the members of this set, sorted by name
+             */
+            public List<InstComponentDecl> createInstComponents(ConnectorMember[] members) {
+                List<InstComponentDecl> memberList = new List<InstComponentDecl>();
+                for (ConnectorMember member : members)
+                    memberList.add(member.createInstComponent());
+                return memberList;
             }
             
-            public int compareTo(ConnectorMember other) {
-                return name.compareTo(other.name);
-            }
-            
-            public void addSource(InstAccess source) {
-                sources.add(source);
-            }
-
-            public void merge(ConnectorMember other) {
-                sources.addAll(other.sources);
-            }
-            
-            public InstComponentDecl createInstComponent() {
-                return new InstExpandableConnectorMember(template(), name);
-                // TODO: Support connecting to part of array
-                // TODO: handle input/output
-            }
-            
-            private InstComponentDecl template() {
-                if (template == null) {
-                    // TODO: Check that types are consistent
-                    return sources.get(0).myInstComponentDecl();
-                    // TODO: Support connecting to part of array
+            private class ConnectorMember implements Comparable<ConnectorMember> {
+                
+                public final String name;
+                private java.util.List<InstAccess> sources;
+                private InstComponentDecl template;
+                private Opt<FArraySubscripts> subscripts;
+                private boolean error;
+                private boolean calculated;
+                
+                public ConnectorMember(String name, InstAccess source) {
+                    this.name = name;
+                    sources = new ArrayList<InstAccess>();
+                    template = null;
+                    calculated = false;
+                    sources.add(source);
                 }
-                return template;
+                
+                public int compareTo(ConnectorMember other) {
+                    return name.compareTo(other.name);
+                }
+                
+                public void addSource(InstAccess source) {
+                    sources.add(source);
+                }
+
+                public void merge(ConnectorMember other) {
+                    sources.addAll(other.sources);
+                }
+                
+                /**
+                 * Check if all connections to this member are consistent.
+                 * 
+                 * @return  <code>false</code> if any errors were found
+                 */
+                public boolean check() {
+                    if (!calculated)
+                        calculateVariable();
+                    return !error;
+                }
+                
+                public InstComponentDecl createInstComponent() {
+                    return new InstExpandableConnectorMember(template(), subscripts(), name);
+                    // TODO: Support connecting to part of array
+                    // TODO: handle input/output (or is that really needed?)
+                }
+                
+                private InstComponentDecl template() {
+                    if (!calculated)
+                        calculateVariable();
+                    return template;
+                }
+                
+                private Opt<FArraySubscripts> subscripts() {
+                    if (!calculated)
+                        calculateVariable();
+                    return subscripts;
+                }
+                
+                private void calculateVariable() {
+                    error = false;
+                    // TODO: Check that types are consistent
+                    Size s = sources.get(0).size();
+                    subscripts = new Opt();
+                    if (s == Size.SCALAR) 
+                        subscripts.setChild(s.createFArraySubscripts(), 0);
+                    template = sources.get(0).myInstComponentDecl();
+                    // TODO: Support connecting to part of array
+                    calculated = true;
+                }
+                
+                public String toString() {
+                    return name + ": " + sources.toString();
+                }
+
             }
             
-            public String toString() {
-                return name + ": " + sources.toString();
-            }
-
         }
         
     }
     
-    public void InstComponentDecl.expandConnector(ExpandableConnectorSets.ConnectorMember[] members) {
+    public void InstComponentDecl.expandConnector(List<InstComponentDecl> members) {
         throw new UnsupportedOperationException();
     }
     
-    public void InstExpandableConnectorDecl.expandConnector(ExpandableConnectorSets.ConnectorMember[] members) {
-        expandedMembers = new List<InstComponentDecl>();
-        for (ExpandableConnectorSets.ConnectorMember member: members)
-            expandedMembers.add(member.createInstComponent());
+    public void InstExpandableConnectorDecl.expandConnector(List<InstComponentDecl> members) {
+        expandedMembers = members;
         flushAll();
     }
     
-    public void InstArrayExpandableConnector.expandConnector(ExpandableConnectorSets.ConnectorMember[] members) {
-        expandedMembers = new List<InstComponentDecl>();
-        for (ExpandableConnectorSets.ConnectorMember member: members)
-            expandedMembers.add(member.createInstComponent());
+    public void InstReplacingExpandableConnectorDecl.expandConnector(List<InstComponentDecl> members) {
+        expandedMembers = members;
+        flushAll();
+    }
+    
+    public void InstArrayExpandableConnector.expandConnector(List<InstComponentDecl> members) {
+        expandedMembers = members;
         flushAll();
     }
     

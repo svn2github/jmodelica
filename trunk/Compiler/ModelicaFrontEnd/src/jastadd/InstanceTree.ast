@@ -115,6 +115,7 @@ InstReplacingRecord      : InstRecord    ::= <OriginalDecl:ComponentDecl>
 InstReplacingPrimitive   : InstPrimitive ::= <OriginalDecl:ComponentDecl>
                                              /OriginalInstComponent:InstComponentDecl/ 
                                              <InstComponentRedeclare:InstComponentRedeclare>;
+InstReplacingExpandableConnectorDecl : InstReplacingComposite;
 
 InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNode>;
 InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;

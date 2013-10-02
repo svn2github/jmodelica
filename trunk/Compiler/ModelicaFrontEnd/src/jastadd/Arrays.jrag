@@ -2801,6 +2801,27 @@ aspect ArrayHelpers {
 		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
 			return createFExp(d);
 		}
+        
+        /**
+         * Create an FArraySubscripts that defines this size as used in variable declarations.
+         * 
+         * Dimension that nothing is known about get an FColonSubscript.
+         */
+        public FArraySubscripts createFArraySubscripts() {
+            FArraySubscripts res = new FArraySubscripts();
+            for (int i = 0; i < ndims(); i++)
+                res.addFSubscript(createFSubscript(i));
+            return res;
+        }
+        
+        /**
+         * Create an FSubscript that defines the length of dimension <code>d</code>.
+         * 
+         * If nothing is known of the length of the dimension, an FColonSubscript is created.
+         */
+        public FSubscript createFSubscript(int d) {
+            return hasValue(d) ? new FExpSubscript(createFExp(d)) : new FColonSubscript();
+        }
 		
 		/**
 		 * \brief Create an FArraySubscripts that spans this size.

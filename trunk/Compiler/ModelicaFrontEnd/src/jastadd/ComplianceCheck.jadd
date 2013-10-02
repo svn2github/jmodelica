@@ -68,6 +68,11 @@ aspect ComplianceCheck {
         if (!root().options.getBooleanOption("expandable_connectors"))
             compliance("Expandable connectors are not supported");
 	}
+    
+    public void InstReplacingExpandableConnectorDecl.complianceCheck() {
+        if (!root().options.getBooleanOption("expandable_connectors"))
+            compliance("Expandable connectors are not supported");
+    }
 	
 	public void FWhenStmt.complianceCheck() {
 		super.complianceCheck();
