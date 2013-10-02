@@ -76,7 +76,7 @@ aspect Flattening {
 		fc.setFQName(new FQNameString(qualifiedName()));
 		fc.addFEquationBlock(new FEquationBlock(new List()));
 		buildConnectionSets(fc);
-		flatten(fc);
+		flatten(fc, false);
 		fc.removeUniqueFVariableSet();
 		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
@@ -582,21 +582,21 @@ aspect Flattening {
 	
 	
 	// Generic method for flattening	
-	public void ASTNode.flatten(FClass fc) {
+	public void ASTNode.flatten(FClass fc, boolean excludeBinding) {
 		for (ASTNode n : this) {
-			n.flatten(fc);
+			n.flatten(fc, excludeBinding);
 		}
 	}
     
-    public void InstNode.flatten(FClass fc) {
-        flatten(fc, getFQName());
+    public void InstNode.flatten(FClass fc, boolean excludeBinding) {
+        flatten(fc, getFQName(), excludeBinding);
     }
     
-    public void InstNode.flatten(FClass fc, FQName name) {
+    public void InstNode.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		for (FAbstractEquation ae : getFAbstractEquations()) 
 		   ae.flatten(name, fc);
-		getInstComponentDeclList().flatten(fc);
-		getInstExtendsList().flatten(fc);
+		getInstComponentDeclList().flatten(fc, excludeBinding);
+		getInstExtendsList().flatten(fc, excludeBinding);
 	}
 	
 	/**
@@ -604,16 +604,16 @@ aspect Flattening {
 	 */
 	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
 	
-	public void InstComponentDecl.flatten(FClass fc, FQName name) {
+	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) 
-			super.flatten(fc, name);
+			super.flatten(fc, name, excludeBinding);
 	}
     
-    public void InstExpandableConnectorMember.flatten(FClass fc) {
+    public void InstExpandableConnectorMember.flatten(FClass fc, boolean excludeBinding) {
         if (getCopyOf().isAssignable())
-            getCopyOf().flatten(fc, getFQName());
+            getCopyOf().flatten(fc, getFQName(), true);
         else
-            flatten(fc, getFQName());
+            flatten(fc, getFQName(), true);
     }
 	
 	public void InstClassDecl.buildConnectionSets(FClass fc) {
@@ -622,8 +622,6 @@ aspect Flattening {
 		csm.buildOverconstrainedConnectionTrees();
 		csm.elaborateExpandableConnectors();
 	}
-	
-//	public void InstClassDecl.flatten(FClass fc) {}
 	
 	public void InstComponentDecl.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {}
 	
@@ -634,9 +632,9 @@ aspect Flattening {
 	    }
 	}
 	
-	public void InstAssignable.flatten(FClass fc, FQName name) {
+	public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) {
-			fc.addUniqueFVariable(createFVariable(name));
+			fc.addUniqueFVariable(createFVariable(name, excludeBinding));
 			flattenMyType(fc);
 		}
 	}
@@ -651,9 +649,9 @@ aspect Flattening {
         myInstClass().flattenRecord(fc);
     }
 
-	public void InstEnum.flatten(FClass fc, FQName name) {
+	public void InstEnum.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		myInstClass().flattenEnum(fc);
-		fc.addFVariable(createFVariable(name));
+		fc.addFVariable(createFVariable(name, excludeBinding));
 	}
 	
 	public FEnumLiteral InstEnumLiteral.createFEnumLiteral() {
@@ -785,10 +783,10 @@ aspect Flattening {
 	}
 
     public FVariable InstAssignable.createFVariable() {
-        return createFVariable(getFQName());
+        return createFVariable(getFQName(), false);
     }
 
-	public FVariable InstAssignable.createFVariable(FQName name) {
+	public FVariable InstAssignable.createFVariable(FQName name, boolean excludeBinding) {
 		FVariable fv = createEmptyFVariable();
 		
 		fv.setFVisibilityType(getComponentDecl().isPublic() ? 
@@ -807,9 +805,11 @@ aspect Flattening {
 		if (myInstClass().extendsPrimitive())
 			fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 		
-		FExp e = flattenBindingFExp();
-		if (e != null)
-			fv.setBindingExp(e);
+		if (!excludeBinding) {
+    		FExp e = flattenBindingFExp();
+    		if (e != null)
+    			fv.setBindingExp(e);
+		}
 		
 		if (getComponentDecl().getComment().hasStringComment())
 			fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));

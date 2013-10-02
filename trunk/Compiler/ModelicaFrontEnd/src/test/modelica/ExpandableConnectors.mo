@@ -345,6 +345,46 @@ equation
 end ExpandableConnectors.Expandable7;
 ")})));
 	end Expandable7;
+
+
+    model Expandable8
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        EC ec1;
+        EC ec2;
+        EC ec3;
+        C c1 = 1;
+        C c2;
+    equation
+        connect(c1, ec1.a);
+        connect(ec1, ec2);
+        connect(ec2, ec3);
+        connect(ec3.a, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Expandable8",
+			description="",
+			expandable_connectors=true,
+			flatModel="
+fclass ExpandableConnectors.Expandable8
+ Real ec1.a;
+ Real ec2.a;
+ Real ec3.a;
+ Real c1 = 1;
+ Real c2;
+equation
+ c1 = c2;
+ c2 = ec1.a;
+ ec1.a = ec2.a;
+ ec2.a = ec3.a;
+end ExpandableConnectors.Expandable8;
+")})));
+	end Expandable8;
+
 	
 	
 	model ExpandableCompliance
