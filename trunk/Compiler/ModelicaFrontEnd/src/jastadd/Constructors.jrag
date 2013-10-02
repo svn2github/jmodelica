@@ -1192,4 +1192,17 @@ aspect InheritedFactoryMethods {
 		return node;
 	}
 		
+	syn boolean FArtmBinExp.isDotOp() = true;
+	eq FAddExp.isDotOp()              = false;
+	eq FSubExp.isDotOp()              = false;
+	eq FMulExp.isDotOp()              = false;
+	eq FDivExp.isDotOp()              = false;
+	eq FPowExp.isDotOp()              = false;
+	
+	syn FDotAddExp FArtmBinExp.newFAddExp(FExp l, FExp r) = isDotOp() ? new FDotAddExp(l, r) : new FAddExp(l, r);
+	syn FDotSubExp FArtmBinExp.newFSubExp(FExp l, FExp r) = isDotOp() ? new FDotSubExp(l, r) : new FSubExp(l, r);
+	syn FDotMulExp FArtmBinExp.newFMulExp(FExp l, FExp r) = isDotOp() ? new FDotMulExp(l, r) : new FMulExp(l, r);
+	syn FDotDivExp FArtmBinExp.newFDivExp(FExp l, FExp r) = isDotOp() ? new FDotDivExp(l, r) : new FDivExp(l, r);
+	syn FDotPowExp FArtmBinExp.newFPowExp(FExp l, FExp r) = isDotOp() ? new FDotPowExp(l, r) : new FPowExp(l, r);
+	
 }

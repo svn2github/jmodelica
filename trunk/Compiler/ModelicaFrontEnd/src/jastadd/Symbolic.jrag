@@ -492,7 +492,7 @@ aspect Derivatives {
 		throw new ExpressionDifferentiationException(this);
 	}
 	
-	public FExp FAddExp.diff(String name) {
+	public FExp FDotAddExp.diff(String name) {
 		FExp rd = dynamicFExp(getRight().diff(name));
 		FExp ld = dynamicFExp(getLeft().diff(name));
 		boolean rz = rd.equalsRealValue(0);
@@ -504,11 +504,11 @@ aspect Derivatives {
 		} else if (rz) {
 			return dynamicFExp(ld);
 		} else {
-			return dynamicFExp(new FAddExp(ld,rd));
+			return dynamicFExp(newFAddExp(ld,rd));
 		}
 	}
 
-	public FExp FSubExp.diff(String name) {
+	public FExp FDotSubExp.diff(String name) {
 		FExp rd = dynamicFExp(getRight().diff(name));
 		FExp ld = dynamicFExp(getLeft().diff(name));
 		boolean rz = rd.equalsRealValue(0);
@@ -520,11 +520,11 @@ aspect Derivatives {
 		} else if (rz) {
 			return dynamicFExp(ld);
 		} else {
-			return dynamicFExp(new FSubExp(ld,rd));
+			return dynamicFExp(newFSubExp(ld,rd));
 		}
 	}
 
-	public FExp FMulExp.diff(String name) {
+	public FExp FDotMulExp.diff(String name) {
 		FExp rd = dynamicFExp((getRight().diff(name)));
 		FExp ld = dynamicFExp((getLeft().diff(name)));
 		boolean rz = rd.equalsRealValue(0);
@@ -532,30 +532,30 @@ aspect Derivatives {
 		if (rz && lz) {
 			return new FRealLitExp(0.0);
 		} else if (lz) {
-			return dynamicFExp(new FMulExp(getLeft().fullCopy(), rd));
+			return dynamicFExp(newFMulExp(getLeft().fullCopy(), rd));
 		} else if (rz) {
-			return dynamicFExp(new	FMulExp(ld, getRight().fullCopy()));
+			return dynamicFExp(newFMulExp(ld, getRight().fullCopy()));
 		} else {
-			return dynamicFExp(new FAddExp(
-	    		new FMulExp(getLeft().fullCopy(), rd),
-				new	FMulExp(ld, getRight().fullCopy())));
+			return dynamicFExp(newFAddExp(
+				newFMulExp(getLeft().fullCopy(), rd),
+				newFMulExp(ld, getRight().fullCopy())));
 		}	
 	}
 
-	public FExp FDivExp.diff(String name) {
+	public FExp FDotDivExp.diff(String name) {
 		if (getRight().variability().lessOrEqual(fParameter())) {
-			return dynamicFExp(new FDivExp(
+			return dynamicFExp(newFDivExp(
 			    getLeft().diff(name),
 				getRight().fullCopy()));
 		} else {
-			return dynamicFExp(new FDivExp(new FSubExp(
-			    new FMulExp(getLeft().diff(name), getRight().fullCopy()),
-				new	FMulExp(getLeft().fullCopy(), getRight().diff(name))),
-				new	FPowExp(getRight().fullCopy(), new FIntegerLitExp(2))));
+			return dynamicFExp(newFDivExp(newFSubExp(
+			    newFMulExp(getLeft().diff(name), getRight().fullCopy()),
+				newFMulExp(getLeft().fullCopy(), getRight().diff(name))),
+				newFPowExp(getRight().fullCopy(), new FIntegerLitExp(2))));
 		}
 	}
 
-	public FExp FPowExp.diff(String name) {
+	public FExp FDotPowExp.diff(String name) {
 		FExp exponent;
 		FExp e;
 		if (getRight().variability().constantVariability()) {
@@ -564,15 +564,15 @@ aspect Derivatives {
 				e = getLeft().fullCopy();
 			} else {
 				exponent = new FRealLitExp(getRight().ceval().realValue() - 1);
-				e = new FPowExp(getLeft().fullCopy(),exponent);	
+				e = newFPowExp(getLeft().fullCopy(),exponent);
 			}
 		} else {
-			exponent = new FSubExp(getRight().fullCopy(),new FIntegerLitExp(1));
-			e = new FPowExp(getLeft().fullCopy(),exponent);
+			exponent = newFSubExp(getRight().fullCopy(),new FIntegerLitExp(1));
+			e = newFPowExp(getLeft().fullCopy(),exponent);
 		}
 		
-		FExp e2 = new FMulExp(getRight().fullCopy(), e);
-		return dynamicFExp(new FMulExp(e2, getLeft().diff(name)));	
+		FExp e2 = newFMulExp(getRight().fullCopy(), e);
+		return dynamicFExp(newFMulExp(e2, getLeft().diff(name)));	
 	}
 
 	public FExp FNegExp.diff(String name) {

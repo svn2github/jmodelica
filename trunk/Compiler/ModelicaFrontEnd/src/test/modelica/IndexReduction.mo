@@ -2154,4 +2154,148 @@ end IndexReduction.IndexReduction44_Order2Arg;
 ")})));
 end IndexReduction44_Order2Arg;
 
+model IndexReduction45_DotAdd
+  Real x1[2],x2[2];
+equation
+  der(x1) .+ der(x2) = {1,1};
+ x1 .+ x2 = {0,0};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction45_DotAdd",
+			description="Test of index reduction",
+			flatModel="
+fclass IndexReduction.IndexReduction45_DotAdd
+ Real x1[1];
+ Real x1[2];
+initial equation 
+ x1[1] = 0.0;
+ x1[2] = 0.0;
+equation
+ der(x1[1]) .+ (- der(x1[1])) = 1;
+ der(x1[2]) .+ (- der(x1[2])) = 1;
+end IndexReduction.IndexReduction45_DotAdd;
+")})));
+end IndexReduction45_DotAdd;
+
+model IndexReduction46_DotSub
+  Real x1[2],x2[2];
+equation
+  der(x1) .+ der(x2) = {1,1};
+ x1 .- x2 = {0,0};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction46_DotSub",
+			description="Test of index reduction",
+			flatModel="
+fclass IndexReduction.IndexReduction46_DotSub
+ Real x1[1];
+ Real x1[2];
+initial equation 
+ x1[1] = 0.0;
+ x1[2] = 0.0;
+equation
+ der(x1[1]) .+ der(x1[1]) = 1;
+ der(x1[2]) .+ der(x1[2]) = 1;
+end IndexReduction.IndexReduction46_DotSub;
+")})));
+end IndexReduction46_DotSub;
+
+model IndexReduction47_DotMul
+  Real x1[2],x2[2];
+equation
+  der(x1) .+ der(x2) = {1,1};
+ x1 .* x2 = {0,0};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction47_DotMul",
+			description="Test of index reduction",
+			flatModel="
+fclass IndexReduction.IndexReduction47_DotMul
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real _der_x2[1];
+ Real _der_x2[2];
+initial equation 
+ x1[1] = 0.0;
+ x1[2] = 0.0;
+equation
+ der(x1[1]) .+ _der_x2[1] = 1;
+ der(x1[2]) .+ _der_x2[2] = 1;
+ x1[1] .* x2[1] = 0;
+ x1[2] .* x2[2] = 0;
+ x1[1] .* _der_x2[1] .+ der(x1[1]) .* x2[1] = 0.0;
+ x1[2] .* _der_x2[2] .+ der(x1[2]) .* x2[2] = 0.0;
+end IndexReduction.IndexReduction47_DotMul;
+")})));
+end IndexReduction47_DotMul;
+
+model IndexReduction48_DotDiv
+  Real x1[2],x2[2];
+equation
+  der(x1) .+ der(x2) = {1,1};
+ x1 ./ x2 = {0,0};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction48_DotDiv",
+			description="Test of index reduction",
+			flatModel="
+fclass IndexReduction.IndexReduction48_DotDiv
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real _der_x1[1];
+ Real _der_x1[2];
+initial equation 
+ x2[1] = 0.0;
+ x2[2] = 0.0;
+equation
+ _der_x1[1] .+ der(x2[1]) = 1;
+ _der_x1[2] .+ der(x2[2]) = 1;
+ x1[1] ./ x2[1] = 0;
+ x1[2] ./ x2[2] = 0;
+ (_der_x1[1] .* x2[1] .- x1[1] .* der(x2[1])) ./ x2[1] .^ 2 = 0.0;
+ (_der_x1[2] .* x2[2] .- x1[2] .* der(x2[2])) ./ x2[2] .^ 2 = 0.0;
+end IndexReduction.IndexReduction48_DotDiv;
+")})));
+end IndexReduction48_DotDiv;
+
+model IndexReduction49_DotPow
+  Real x1[2],x2[2];
+equation
+  der(x1) .+ der(x2) = {1,1};
+ x1 .^ x2 = {0,0};
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction49_DotPow",
+			description="Test of index reduction",
+			flatModel="
+fclass IndexReduction.IndexReduction49_DotPow
+ Real x1[1];
+ Real x1[2];
+ Real x2[1];
+ Real x2[2];
+ Real _der_x1[1];
+ Real _der_x1[2];
+initial equation 
+ x2[1] = 0.0;
+ x2[2] = 0.0;
+equation
+ _der_x1[1] .+ der(x2[1]) = 1;
+ _der_x1[2] .+ der(x2[2]) = 1;
+ x1[1] .^ x2[1] = 0;
+ x1[2] .^ x2[2] = 0;
+ x2[1] .* x1[1] .^ (x2[1] .- 1) .* _der_x1[1] = 0.0;
+ x2[2] .* x1[2] .^ (x2[2] .- 1) .* _der_x1[2] = 0.0;
+end IndexReduction.IndexReduction49_DotPow;
+")})));
+end IndexReduction49_DotPow;
+
 end IndexReduction;
