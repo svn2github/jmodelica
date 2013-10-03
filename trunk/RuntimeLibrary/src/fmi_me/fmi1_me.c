@@ -1576,14 +1576,15 @@ fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nomina
 		return fmiFatal;
     }
     
-    ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal));
-    
+/*    ones = ((fmi_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal)); */
+
     for(i = 0; i <nx; i = i + 1) {
-        ones[i]=1.0;
+        x_nominal[i]=1.0;
     }
+    /*
     memcpy (x_nominal, ones, nx*sizeof(fmiReal));
 
-    ((fmi_t*)c) -> fmi_functions.freeMemory(ones);
+    ((fmi_t*)c) -> fmi_functions.freeMemory(ones); */
     return fmiOK;
 }
 

@@ -386,7 +386,7 @@
  typedef enum {
      JMI_ODE_CVODE,
      JMI_ODE_EULER
- } jmi_ode_solvers_t;
+ } jmi_ode_method_t;
 
 /* @} */
 

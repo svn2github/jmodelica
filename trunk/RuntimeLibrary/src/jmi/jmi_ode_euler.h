@@ -31,7 +31,7 @@ typedef struct jmi_ode_euler_t jmi_ode_euler_t;
 
 int jmi_ode_euler_new(jmi_ode_euler_t** integrator_ptr, jmi_ode_solver_t* solver);
 
-int jmi_ode_euler_solve(jmi_ode_solver_t* solver,double time_final, int initialize);
+int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double time_final, int initialize);
 
 void jmi_ode_euler_delete(jmi_ode_solver_t* solver);
 

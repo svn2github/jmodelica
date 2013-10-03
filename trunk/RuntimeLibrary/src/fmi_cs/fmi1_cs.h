@@ -42,24 +42,14 @@ typedef struct fmi1_cs_t fmi1_cs_t;
 typedef struct fmi1_cs_input_t fmi1_cs_input_t;
 
 struct fmi1_cs_t {
-    fmiComponent fmi1_me;                /**< \brief Reference to a fmi1_me instance. */
+    jmi_ode_problem_t* ode_problem;
+    
     fmiString instance_name;             /**< \brief The fmi1_cs instance name. */
     fmiString encoded_instance_name;     /**< \brief The encoded instance name provided to the fmi1_me instance. */
     fmiString GUID;                      /**< \brief The GUID identifier. */
     fmiCallbackFunctions callback_functions;  /**< \brief The callback functions provided by the user. */
     fmiCallbackFunctions me_callback_functions; /**< \brief The modified callbacks provided to the fmi1_me instance. */
     fmiEventInfo event_info;
-    fmiBoolean logging_on;               /**< \brief The logging on / off attribute. */
-    fmiInteger n_real_x;
-    fmiInteger n_sw;
-    fmiReal time;
-    fmiReal* states;
-    fmiReal* states_derivative;
-    fmiReal* event_indicators;
-    fmiReal* event_indicators_previous;
-    fmi1_cs_input_t* inputs;
-    fmiInteger n_real_u;
-    jmi_ode_solver_t *ode_solver;        /** \brief Struct containing the ODE solver. */
 };
 
 struct fmi1_cs_input_t {
@@ -336,20 +326,11 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 /**
  * \brief Calls the underlying ME completed integrator step
  * 
- * @param c The FMU struct
+ * @param ode_problem The ODE probelm struct
  * @param step_event (Output) If an event occured.
  * @return Error code.
  */
-fmiStatus fmi1_cs_completed_integrator_step(fmiComponent c, fmiBoolean* step_event);
-
-/**
- * \brief Gets the current internal time.
- * 
- * @param c The FMU struct
- * @param time (Output) The internal time.
- * @return Error code.
- */
-fmiStatus fmi1_cs_get_time(fmiComponent c, fmiReal* time);
+int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event);
 
 /**
  * \brief Sets the current internal time.
@@ -359,13 +340,12 @@ fmiStatus fmi1_cs_get_time(fmiComponent c, fmiReal* time);
  * @return Error code.
  */
 fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
-fmiStatus fmi1_cs_set_input(fmiComponent c, fmiReal time);
+fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time);
 
 fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value);
 
-int fmi1_cs_root_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
-int fmi1_cs_rhs_fcn(void* c, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);
-jmi_log_t* fmi1_cs_get_jmi_t_log(fmi1_cs_t* fmi1_cs);
+int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
+int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);
 
 /* Note in fmiCSFunctions.h
 fmiStatus fmi_save_state(fmiComponent c, size_t index);
