@@ -1728,12 +1728,12 @@ aspect ExpandableConnectors {
                 private void calculateVariable() {
                     error = false;
                     // TODO: Check that types are consistent
+                    // TODO: Support array indices in access to added element
                     Size s = sources.get(0).size();
                     subscripts = new Opt();
-                    if (s == Size.SCALAR) 
+                    if (s != Size.SCALAR) 
                         subscripts.setChild(s.createFArraySubscripts(), 0);
                     template = sources.get(0).myInstComponentDecl();
-                    // TODO: Support connecting to part of array
                     calculated = true;
                 }
                 

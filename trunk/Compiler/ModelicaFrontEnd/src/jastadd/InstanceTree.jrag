@@ -1343,9 +1343,15 @@ aspect ExpandableConnectorMembers {
     eq InstExpandableConnectorMember.myInstClass()        = getCopyOf().myInstClass();
     eq InstExpandableConnectorMember.defaultVariability() = getCopyOf().defaultVariability();
     
-    // TODO: support connecting to slice or single element
-    eq InstExpandableConnectorMember.ndims() = getCopyOf().ndims();
-    eq InstExpandableConnectorMember.size()  = getCopyOf().size();
+    eq InstExpandableConnectorMember.isAssignable() = getCopyOf().isAssignable();
+    
+    eq InstExpandableConnectorMember.myFSubscripts() {
+        // Only use local subscripts - they include entire size
+        java.util.List<FSubscript> l = new ArrayList<FSubscript>();
+        if (hasLocalFArraySubscripts())
+            getLocalFArraySubscripts().getFSubscripts().addAllTo(l);
+        return l;
+    }
     
     public void InstExpandableConnectorMember.flattenUsedFuncsAndEnums(FClass fc) {
         getCopyOf().flattenUsedFuncsAndEnums(fc);

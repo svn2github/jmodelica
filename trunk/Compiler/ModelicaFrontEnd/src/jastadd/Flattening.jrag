@@ -76,6 +76,7 @@ aspect Flattening {
 		fc.setFQName(new FQNameString(qualifiedName()));
 		fc.addFEquationBlock(new FEquationBlock(new List()));
 		buildConnectionSets(fc);
+		root().breakOnErrors();
 		flatten(fc, false);
 		fc.removeUniqueFVariableSet();
 		createAndFlattenResidualPairs(fc);
