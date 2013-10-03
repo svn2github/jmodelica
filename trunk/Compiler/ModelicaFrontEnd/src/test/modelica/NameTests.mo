@@ -734,6 +734,67 @@ model NameTest23
 end NameTest23;
 
 
+model NameTest24
+    model A
+        replaceable B b constrainedby B;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+        Real x = 1;
+        Real y = x;
+    end C;
+    
+    A a(redeclare C b);
+    Real z = a.b.y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest24",
+			description="",
+			flatModel="
+fclass NameTests.NameTest24
+ Real a.b.x = 1;
+ Real a.b.y = a.b.x;
+ Real z = a.b.y;
+end NameTests.NameTest24;
+")})));
+end NameTest24;
+
+
+model NameTest25_Err
+    model A
+        replaceable B b constrainedby B;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+        Real x = 1;
+        Real y = x;
+    end C;
+    
+    A a(redeclare replaceable C b);
+    Real z = a.b.y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest25_Err",
+			description="Check that member lookup is limited by constraining class when using redeclare replaceable",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 771, column 18:
+  Cannot find class or component declaration for y
+")})));
+end NameTest25_Err;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;

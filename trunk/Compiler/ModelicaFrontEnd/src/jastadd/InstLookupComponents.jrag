@@ -168,7 +168,7 @@ aspect InstLookupComponents {
 	 * \brief Check if any constraining class/component has the given component.
 	 */
 	syn boolean InstNode.constrainMemberInstComponent(String name) {
-		if (!hasInstConstraining())
+		if (!hasInstConstraining() || !isReplaceable())
 			return true;
 		return getInstConstraining().getInstNode().memberInstComponent(name) != null;
 	}

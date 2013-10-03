@@ -1583,10 +1583,16 @@ aspect InstanceAST_API {
 	}
 
 	
-	// TODO: this seems to be a trick? equations are added in InstComponentDecl and
-	// InstBaseClassDecl since they have nodes of type InstConstraining
+	// Overridden in InstComponentDecl and InstBaseClassDecl by generated API for optional child
 	syn boolean InstNode.hasInstConstraining() = false;
 	syn InstConstraining InstNode.getInstConstraining() = null;
+	
+	syn boolean InstNode.isReplaceable() = false;
+    eq InstClassDecl.isReplaceable()     = getClassDecl().hasReplaceable();
+    eq InstComponentDecl.isReplaceable() = getComponentDecl().hasReplaceable();
+
+    // Overridden in BaseClassDecl by generated API for optional child
+    syn boolean ClassDecl.hasReplaceable() = false;
 
 	syn boolean InstNode.extendsPrimitive()        = false;
 	eq InstShortClassDecl.extendsPrimitive()       = 
