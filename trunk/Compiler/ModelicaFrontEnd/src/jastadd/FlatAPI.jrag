@@ -764,6 +764,11 @@ aspect FlatAPI {
 		}
 		return l;
 	}
+	
+	coll ArrayList<FAlgorithm> FClass.algorithms() 
+		[new ArrayList<FAlgorithm>()] with add root FClass;
+	FAlgorithm contributes this when !inFunction()
+		to FClass.algorithms() for myFClass();
 
     syn int FClass.numContinousEquations() = continuousEquations().size();
 	syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
@@ -894,6 +899,7 @@ aspect FlatAPI {
 			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
 	syn boolean FEventGenExp.generatesEvent() =
+			!inAlgorithm() && // TODO: remove when support as nonliteral in algorithms
 			!inNoEventExp() &&
 			!inSmoothExp(1) &&
 			!inWhen() &&
@@ -906,8 +912,26 @@ aspect FlatAPI {
 	  [new ArrayList<FRelExp>()] with add root FlatRoot;
 	FRelExp contributes
  		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
-	to FClass.relExpInEquations() for myFClass();	
-		
+	to FClass.relExpInEquations() for myFClass();
+	
+	coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
+		[new ArrayList<FRelExp>()] with add root FAbstractEquation;
+	FRelExp contributes
+		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
+	to FAbstractEquation.relExpInEquation() for myFEquation();
+	
+	coll ArrayList<FRelExp> FStatement.relExpInStmt() 
+		[new ArrayList<FRelExp>()] with add root FStatement;
+	FRelExp contributes
+		this when originalFRelExp==null && generatesEvent() 
+	to FStatement.relExpInStmt() for myFStatement();
+			
+	inh FStatement FExp.myFStatement();
+	inh FStatement FStatement.myFStatement();
+	eq FStatement.getChild().myFStatement()        = this;
+	eq FAbstractEquation.getChild().myFStatement() = null;
+	eq Root.getChild().myFStatement()              = null;
+	
 	public int FRelExp.relExpInEquationsIndex() {
 		return myFClass().relExpInEquations().
 			indexOf(this.originalFRelExp==null? this: this.originalFRelExp);
@@ -1669,6 +1693,8 @@ aspect FVariableUses {
 	
 	FIdUseExp contributes this when !isDerUse() to 
 		FAbstractVariable.uses() for myFV();
+	FRelExp contributes getIndicator() when hasIndicator() to
+		FAbstractVariable.uses() for getIndicator().myFV();
 	
 	/**
 	 * All uses of this variable that are not the left-hand side of an equation. 
@@ -1754,8 +1780,9 @@ aspect FVariableUses {
 	 * Check if this is the left hand side of an equation.
 	 */
 	inh boolean FIdUseExp.isLeftHandSide();
-	eq BaseNode.getChild().isLeftHandSide() = false;
-	eq FEquation.getLeft().isLeftHandSide() = true;
+	eq BaseNode.getChild().isLeftHandSide()    = false;
+	eq FEquation.getLeft().isLeftHandSide()    = true;
+	eq FRelExp.getIndicator().isLeftHandSide() = true;
 	
 	/**
 	 * Check if this is the left hand side of an assignment or function call statement.

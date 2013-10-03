@@ -185,7 +185,7 @@ class TestAlgo2(SimulationTest):
 
     @testattr(stddist = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['y', 'z', 'a'])
+        self.assert_all_trajectories(['y', 'z']) #TODO: add 'a' in #2617
         
 class TestAlgo3(SimulationTest):
 
