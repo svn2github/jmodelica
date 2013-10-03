@@ -3116,6 +3116,7 @@ equation
 			description="Test of hand guided tearing error when hgt is unable to solve the block",
 			equation_sorting=true,
 			hand_guided_tearing=true,
+			automatic_tearing=false,
 			errorMessage="
 1 errors found:
 

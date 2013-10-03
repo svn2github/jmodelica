@@ -2029,10 +2029,10 @@ aspect CCodeGen {
 		if (firstVisit) {
 			alg.genTempVars_C(ASTNode.printer_C, str, indent);
 			alg.prettyPrint_C(str, indent);
-			for (FVariable fv : activeVariables()) {
-				str.format("%s(*res)[%d] = %s - %s;\n", indent, enumerator.next(), fv.name_C(), solverArrayMap.get(fv));
-				str.format("%s%s = %s;\n", indent, fv.name_C(), solverArrayMap.get(fv));
-			}
+		}
+		for (FVariable fv : activeVariables()) {
+			str.format("%s(*res)[%d] = %s - %s;\n", indent, enumerator.next(), fv.name_C(), solverArrayMap.get(fv));
+			str.format("%s%s = %s;\n", indent, fv.name_C(), solverArrayMap.get(fv));
 		}
 	}
 	
@@ -2051,6 +2051,15 @@ aspect CCodeGen {
 	
 	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
+	}
+	
+	public void SolvedAlgorithmBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		FAlgorithm alg = equation();
+		boolean firstVisit = visited == null || visited.add(alg);
+		if (firstVisit) {
+			alg.genTempVars_C(ASTNode.printer_C, str, indent);
+			alg.prettyPrint_C(str, indent);
+		}
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {

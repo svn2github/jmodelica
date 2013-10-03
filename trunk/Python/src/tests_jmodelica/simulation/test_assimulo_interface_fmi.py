@@ -755,7 +755,7 @@ class Test_ODE_JACOBIANS2:
         cname='NonLinear.MultiSystems'
         fname = os.path.join(get_files_path(), 'Modelica', 'NonLinear.mo')
         
-        _fn_nonlin = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0})
+        _fn_nonlin = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'fmi_version':2.0,'automatic_tearing':False})
         
     def setUp(self):
         pass
@@ -806,7 +806,7 @@ class Test_ODE_JACOBIANS4:
         cname='NonLinear.TwoSystems_wIO'
         fname = os.path.join(get_files_path(), 'Modelica', 'NonLinearIO.mo')
         
-        fn_nonlinIO = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0})
+        fn_nonlinIO = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'eliminate_alias_variables':False,'fmi_version':2.0,'automatic_tearing':False})
         
     def setUp(self):
         pass       
@@ -833,7 +833,7 @@ class Test_ODE_JACOBIANS5:
         cname='BlockOdeJacTest'
         fname = os.path.join(get_files_path(), 'Modelica', 'BlockOdeJacTest.mo')
         
-        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'generate_runtime_option_parameters':False,'fmi_version':2.0})
+        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'generate_runtime_option_parameters':False,'fmi_version':2.0, 'automatic_tearing':False})
         
     def setUp(self):
         pass

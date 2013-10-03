@@ -30,6 +30,7 @@ package InteractiveFMU
 			description="Test of interactive FMU of scalar equations",
 			equation_sorting=true,
 			interactive_fmu=true,
+			automatic_tearing=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -104,6 +105,7 @@ Solution:
 			name="FunctionCallEquation1",
 			description="Test of interactive FMU of function call equations",
 			equation_sorting=true,
+			automatic_tearing=false,
 			interactive_fmu=true,
 			inline_functions="none",
 			methodName="printDAEBLT",

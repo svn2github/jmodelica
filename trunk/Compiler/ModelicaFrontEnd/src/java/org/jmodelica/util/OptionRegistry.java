@@ -93,7 +93,7 @@ public class OptionRegistry {
 		AUTOMATIC_TEARING
 			("automatic_tearing", 
 			 compiler, 
-			 false, 
+			 true, 
 			 "If this option is set to true (default is false), automatic tearing of equation systems is performed."),
 		HAND_GUIDED_TEARING 
 			("hand_guided_tearing", 

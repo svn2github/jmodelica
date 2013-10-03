@@ -6530,6 +6530,7 @@ equation
 			description="Test of mixed non-solved equation block",
 			generate_ode=true,
 			equation_sorting=true,
+			automatic_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -6694,6 +6695,7 @@ algorithm
 			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
+			automatic_tearing=false,
 			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
@@ -6771,6 +6773,79 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+"),
+		CCodeGenTestCase(
+			name="Algorithm3Tearing",
+			description="C code generation of algorithms - in torn block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1 = x[0];
+        _x_0 = 0.0;
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+    }
+    return ef;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1 = x[0];
+        _x_0 = 0.0;
+        _x_0 = _y_1;
+        _x_0 = _x_0 * 2;
+        (*res)[0] = _x_0 + 2 - (_y_1);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+    }
+    return ef;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+
 ")})));
 end Algorithm3;
 
@@ -6791,6 +6866,7 @@ algorithm
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+			automatic_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -6881,6 +6957,81 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+"),
+		CCodeGenTestCase(
+			name="Algorithm4Tearing",
+			description="C code generation of algorithms - in torn block",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_ode_derivatives$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = 0.0;
+        _z_2 = 0.0;
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+    }
+    return ef;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _x_0 = x[0];
+        _y_1 = 0.0;
+        _z_2 = 0.0;
+        _y_1 = _x_0 * 2 + 2;
+        _z_2 = _y_1 + _x_0;
+        (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _x_0 = x[0];
+    }
+    return ef;
+}
+
+
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+
 ")})));
 end Algorithm4;
 
@@ -6957,7 +7108,7 @@ equation
 			equation_sorting=true,
 			inline_functions="none",
 			variability_propagation=false,
-			local_iteration_in_tearing=true,
+			automatic_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_ode_derivatives$
@@ -7058,7 +7209,7 @@ equation
 			equation_sorting=true,
 			inline_functions="none",
 			variability_propagation=false,
-			local_iteration_in_tearing=true,
+			automatic_tearing=false,
 			template="
 $C_dae_init_blocks_residual_functions$
 $C_dae_blocks_residual_functions$

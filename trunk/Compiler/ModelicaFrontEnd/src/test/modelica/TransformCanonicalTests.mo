@@ -4367,6 +4367,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
@@ -4445,6 +4446,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
@@ -4503,6 +4505,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
