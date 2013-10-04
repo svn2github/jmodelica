@@ -68,7 +68,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
     jmi_t* jmi = 0;
-    jmiCallback_t* jmi_callbacks = 0;
+    jmi_callbacks_t* jmi_callbacks = 0;
     fmiInteger retval;
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
@@ -82,11 +82,12 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     component = (fmi_t *)functions.allocateMemory(1, sizeof(fmi_t));
     component->fmi_functions = functions;
     
-    jmi_callbacks = (jmiCallback_t*)calloc(1,sizeof(jmiCallback_t));
+    jmi_callbacks = (jmi_callbacks_t*)calloc(1,sizeof(jmi_callbacks_t));
     jmi_callbacks->fmix_me = component;
     jmi_callbacks->fmi_name = instanceName;
     jmi_callbacks->logging_on = loggingOn;
     jmi_callbacks->logger = (loggerCallabackFunction)functions.logger;
+    jmi_callbacks->allocate_memory = (globalAllocateMemory)functions.allocateMemory;
     
 #ifdef USE_FMI_ALLOC
     /* Set the global user functions pointer so that memory allocation functions are intercepted */
@@ -1611,7 +1612,7 @@ fmiStatus fmi1_me_terminate(fmiComponent c) {
 }
 
 BOOL fmi1_me_emitted_category(log_t *log, category_t category) {
-    jmiCallback_t* jmi_callbacks = log->jmi_callbacks;
+    jmi_callbacks_t* jmi_callbacks = log->jmi_callbacks;
     if (((fmi_t *)(jmi_callbacks->fmix_me) != NULL) && !jmi_callbacks->logging_on) {
         return FALSE;
     }
@@ -1662,7 +1663,7 @@ static const char *category_to_fmiCategory(category_t c) {
 }
 
 void fmi1_me_emit(log_t *log, char* message) {
-    jmiCallback_t* jmi_callbacks = log->jmi_callbacks;
+    jmi_callbacks_t* jmi_callbacks = log->jmi_callbacks;
     category_t category = log->c;
     category_t severest_category = severest(category, log->severest_category);
 

@@ -28,7 +28,6 @@
 #include "jmi_global.h"
 #include "jmi_log.h"
 #include "jmi_common.h"
-#include "fmi1_me.h"
 
 
 #ifdef _MSC_VER
@@ -162,8 +161,8 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  */
 void* jmi_global_calloc(size_t n, size_t s) {
 	jmi_t* jmi = jmi_get_current();
-	if (jmi->fmi != NULL && jmi->fmi->fmi_functions.allocateMemory != NULL) {
-		return (char*) jmi->fmi->fmi_functions.allocateMemory(n, s);
+	if (jmi->jmi_callbacks->allocate_memory != NULL) {
+		return (char*) jmi->jmi_callbacks->allocate_memory(n, s);
 	} else {
 		return (char*) calloc(n, s);
 	}

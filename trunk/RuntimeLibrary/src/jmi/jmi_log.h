@@ -81,7 +81,7 @@ typedef int BOOL;
 #define FALSE 0
 
 /** \brief Allocate and intialize a log, with output to `jmi` */
-jmi_log_t *jmi_log_init(jmi_t *jmi, jmiCallback_t* jmi_callbacks);
+jmi_log_t *jmi_log_init(jmi_t *jmi, jmi_callbacks_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
@@ -120,7 +120,7 @@ struct jmi_log_t {
     int alloced_frames;
     int id_counter;
     
-    jmiCallback_t* jmi_callbacks;
+    jmi_callbacks_t* jmi_callbacks;
     
     BOOL outstanding_comma;
 };

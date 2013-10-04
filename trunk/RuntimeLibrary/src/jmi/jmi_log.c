@@ -199,7 +199,7 @@ static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
 
 
 /* constructor */
-static void init_log(log_t *log, jmi_t *jmi, jmiCallback_t* jmi_callbacks);
+static void init_log(log_t *log, jmi_t *jmi, jmi_callbacks_t* jmi_callbacks);
 static void initialize(log_t *log); /* extra initialization */
 
 /* logging primitives */
@@ -336,7 +336,7 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
 
 
 /** log_t constructor. */
-static void init_log(log_t *log, jmi_t *jmi, jmiCallback_t* jmi_callbacks) {
+static void init_log(log_t *log, jmi_t *jmi, jmi_callbacks_t* jmi_callbacks) {
     log->jmi = jmi;
     init_buffer(bufof(log));
 
@@ -377,7 +377,6 @@ static void delete_log(log_t *log) {
     if (log->log_file) fclose(log->log_file);
     delete_buffer(bufof(log));
     free(log->frames);
-    free(log->jmi_callbacks);
     free(log);
 }
 
@@ -541,7 +540,7 @@ static void logging_error(log_t *log, const char *msg) {
 
  /* User constructor, destructor */
 
-jmi_log_t *jmi_log_init(jmi_t *jmi, jmiCallback_t* jmi_callbacks) {
+jmi_log_t *jmi_log_init(jmi_t *jmi, jmi_callbacks_t* jmi_callbacks) {
     log_t *log = (log_t *)malloc(sizeof(log_t));
     init_log(log, jmi, jmi_callbacks);
     return log;

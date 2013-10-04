@@ -138,7 +138,7 @@ typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward de
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
 typedef struct jmi_log_t jmi_log_t;                       /**< \brief Forward declaration of struct. */
-typedef struct jmiCallback_t jmiCallback_t;               /**< \brief Forward declaration of struct. */
+typedef struct jmi_callbacks_t jmi_callbacks_t;               /**< \brief Forward declaration of struct. */
 
 
 /* Typedef for the doubles used in the interface. */
@@ -710,9 +710,12 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
 
 typedef void (*loggerCallabackFunction) (void* c, const char* instanceName, void* status,
                                           const char* category, const char* message);
+                                          
+typedef void* (*globalAllocateMemory)(size_t nobj, size_t size);
 
-struct jmiCallback_t {
+struct jmi_callbacks_t {
     loggerCallabackFunction    logger;
+    globalAllocateMemory       allocate_memory;
     void*                      fmix_me;
     const char*                fmi_name;
     char                       logging_on;
@@ -850,7 +853,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-        int scaling_method, int n_ext_objs, jmiCallback_t* jmi_callbacks);
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -1179,7 +1182,8 @@ struct jmi_t {
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
-    jmi_log_t *log;                      /**< \brief Struct containing the structured logger. */
+    jmi_log_t* log;                      /**< \brief Struct containing the structured logger. */
+    jmi_callbacks_t* jmi_callbacks;      /**< \brief Struct containing callbacks the jmi run-time needs. */
 
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     int terminate;                       /**< \brief Flag to trigger termination of the simulation. */

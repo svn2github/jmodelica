@@ -42,7 +42,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-        int scaling_method, int n_ext_objs, jmiCallback_t* jmi_callbacks) {
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
     
@@ -226,6 +226,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
+    jmi_->jmi_callbacks = jmi_callbacks;
     jmi_->log = jmi_log_init(jmi_, jmi_callbacks);
 
     jmi_->terminate = 0;
@@ -278,6 +279,7 @@ int jmi_delete(jmi_t* jmi){
     }
     free(jmi->variable_scaling_factors);
     free(jmi->ext_objs);
+    free(jmi->log->jmi_callbacks);
     jmi_log_delete(jmi->log);
     free(jmi);
 
