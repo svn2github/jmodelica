@@ -53,7 +53,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->dae = NULL;
     jmi_->init = NULL;
     /* jmi_->user_func = NULL; */
-    jmi_->fmi = NULL;
 
     /* Set sizes of dae vectors */
     jmi_->n_real_ci = n_real_ci;

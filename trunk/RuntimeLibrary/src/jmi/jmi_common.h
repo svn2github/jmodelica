@@ -128,7 +128,6 @@
 
 /* Forward declaration of jmi structs */
 typedef struct jmi_t jmi_t;                               /**< \brief Forward declaration of struct. */
-typedef struct fmi_t fmi_t;                               /**< \brief Forward declaration of struct. */
 typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward declaration of struct. */
 typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
@@ -1036,7 +1035,6 @@ void jmi_delete_init(jmi_init_t** pinit);
 struct jmi_t {
     jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
-    fmi_t* fmi;                          /**< \brief A pointer to the FMI interface (NULL in JMI mode). */
 
     int n_real_ci;                       /**< \brief Number of independent constants. */
     int n_real_cd;                       /**< \brief Number of dependent constants. */

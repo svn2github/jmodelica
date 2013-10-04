@@ -39,6 +39,8 @@
 
 /* Type definitions */
 /*typedef */
+typedef struct fmi_t fmi_t;             /**< \brief Forward declaration of struct. */
+
 struct fmi_t {
     fmiString fmi_instance_name;
     fmiString fmi_GUID;

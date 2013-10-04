@@ -101,8 +101,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
         return NULL;
     }
 
-    jmi->fmi = component;
-
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
