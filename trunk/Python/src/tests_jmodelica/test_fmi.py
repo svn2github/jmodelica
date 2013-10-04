@@ -355,7 +355,7 @@ class Test_FMUModelCS1:
         """
         Tests a simulation using Euler.
         """
-        self.rlc.set("_cs_solver",1)
+        self.rlc_square.set("_cs_solver",1)
 
         res1 = self.rlc_square.simulate()
         resistor_v = res1['resistor.v']
