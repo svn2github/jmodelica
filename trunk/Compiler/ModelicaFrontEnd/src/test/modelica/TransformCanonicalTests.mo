@@ -4786,6 +4786,30 @@ Solution:
 ")})));
 end BlockTest10;
 
+model BlockTest11
+	Real x;
+equation
+	12 = if x < 0.5 then 0.5 else x * time;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest11",
+			description="Test linear block with single equation",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved linear block of 1 variables:
+Coefficient variability: Continuous
+Unknown variables:
+  x
+Equations:
+  12 = if x < 0.5 then 0.5 else x * time
+Jacobian:
+  |- (if x < 0.5 then 0.0 else time)|
+-------------------------------
+")})));
+end BlockTest11;
+
 model VarDependencyTest1
   Real x[15];
   input Real u[4];

@@ -114,8 +114,6 @@ aspect BLT{
 					seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
 				if (seb.isSolvable())
 					return seb;
-				else if (component.size() == 1)
-					return seb;
 			}
 			
 			// System of equations
@@ -141,7 +139,7 @@ aspect BLT{
 				return new MixedLinearEquationBlock(createSimpleBlocks(l));
 			else if (isLinear)
 				return new LinearEquationBlock(createSimpleBlocks(l));
-			else if (useTearing || useHGT)
+			else if ((useTearing || useHGT) && component.size() > 1)
 				return tear(component, useTearing, useHGT, blockNumber);
 			else if (isMixed)
 				return new MixedEquationBlock(createSimpleBlocks(l));
