@@ -6,13 +6,11 @@ project (SimulationRuntime)
 set(JMODELICA_HOME ${CMAKE_INSTALL_DIR})
 message(STATUS JMODELICA_HOME=${JMODELICA_HOME})
 
-#Make directory for header files to be installed in.
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory 
-                ${JMODELICA_HOME}/include/RuntimeLibrary)
+#Make the directory for header files to be installed in.
+file(MAKE_DIRECTORY ${JMODELICA_HOME}/include/RuntimeLibrary)
                 
-#Make directory for lib files to be installed in.
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory 
-                ${JMODELICA_HOME}/lib/RuntimeLibrary)
+#Make the directory for lib files to be installed in.
+file(MAKE_DIRECTORY ${JMODELICA_HOME}/lib/RuntimeLibrary)
 
 if(NOT(WIN32 OR CYGWIN OR APPLE))
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")
@@ -25,9 +23,18 @@ set(SundialsDir ${RuntimeLibrary_BUILD}/../../sundials_install)
 message(STATUS SundialsDir=${SundialsDir})
 include_directories(${SundialsDir}/include)
 
-include_directories(src/fmi_cs)
-include_directories(src/fmi_me)
-include_directories(src/jmi)
-add_subdirectory(src/fmi_cs)
-add_subdirectory(src/fmi_me)
+#Add jmi
 add_subdirectory(src/jmi)
+
+#Add fmi_me
+include_directories(src/jmi)
+add_subdirectory(src/fmi_me)
+
+#Add fmi_cs
+include_directories(src/fmi_me)
+add_subdirectory(src/fmi_cs)
+
+
+
+
+

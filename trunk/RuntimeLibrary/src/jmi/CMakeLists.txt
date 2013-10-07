@@ -5,8 +5,6 @@ set(MSLCSOURCES ${RuntimeLibrary_SRC}/../ThirdParty/MSL/Modelica/Resources/C-Sou
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
 set(JMISources
-	fmi1_functions.h
-	fmi1_types.h
 	
     jmi.h
     jmi_array_common.h
@@ -71,6 +69,7 @@ set(STANDARDTABLESSources
 
 add_library(jmi STATIC ${JMISources})
 include_directories(${MSLCSOURCES})
+include_directories(${MSLCSOURCES}/zlib)
 add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
 add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
@@ -78,7 +77,8 @@ add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
 install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
     DESTINATION "${JMODELICA_HOME}/lib/RuntimeLibrary")
 
-install(DIRECTORY "${CMAKE_CURRENT_COURCE_DIR}"
+
+install(DIRECTORY "" #Files from current directory
     DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"
     FILES_MATCHING PATTERN "*.h")
     
