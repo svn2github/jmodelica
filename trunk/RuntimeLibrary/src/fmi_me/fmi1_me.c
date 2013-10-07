@@ -1620,15 +1620,15 @@ BOOL fmi1_me_emitted_category(log_t *log, category_t category) {
     
     switch (category) {
         case logError:   break;
-        case logWarning: if(log->jmi->options.log_level < 3) return FALSE; break;
-        case logInfo:    if(log->jmi->options.log_level < 4) return FALSE; break;
+        case logWarning: if(log->options->log_level < 3) return FALSE; break;
+        case logInfo:    if(log->options->log_level < 4) return FALSE; break;
     }
     return TRUE;
 }
 
 void fmi1_me_create_log_file_if_needed(log_t *log) {
     if (log->log_file != NULL) return;
-    if (log->jmi->options.runtime_log_to_file) {
+    if (log->options->runtime_log_to_file) {
         /* Create new log file */
         const char *instance_name = log->jmi_callbacks->fmi_name;
         char filename[1024];

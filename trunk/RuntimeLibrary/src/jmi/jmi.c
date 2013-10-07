@@ -226,7 +226,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->recomputeVariables = 1;
 
     jmi_->jmi_callbacks = jmi_callbacks;
-    jmi_->log = jmi_log_init(jmi_, jmi_callbacks);
+    jmi_->log = jmi_log_init(&jmi_->options, jmi_callbacks);
 
     jmi_->terminate = 0;
 

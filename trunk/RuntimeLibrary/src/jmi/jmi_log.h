@@ -81,7 +81,7 @@ typedef int BOOL;
 #define FALSE 0
 
 /** \brief Allocate and intialize a log, with output to `jmi` */
-jmi_log_t *jmi_log_init(jmi_t *jmi, jmi_callbacks_t* jmi_callbacks);
+jmi_log_t *jmi_log_init(jmi_options_t* options, jmi_callbacks_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
@@ -103,7 +103,6 @@ typedef struct {
 
 /** \brief Structured logger */ 
 struct jmi_log_t {
-    jmi_t *jmi;
     buf_t buf;
 
     BOOL filtering_enabled;
@@ -121,6 +120,7 @@ struct jmi_log_t {
     int id_counter;
     
     jmi_callbacks_t* jmi_callbacks;
+    jmi_options_t* options;
     
     BOOL outstanding_comma;
 };
