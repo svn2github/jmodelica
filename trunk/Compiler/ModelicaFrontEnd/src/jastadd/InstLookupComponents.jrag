@@ -78,7 +78,7 @@ aspect InstLookupComponents {
 	}
 	
 	public InstComponentDecl InstArrayAccess.lookupArrayElement(InstComponentDecl array) {
-		if (!isArray()) {
+		if (!isArray() && array != null) {
 			// If we can, try to get the correct InstArrayComponentDecl to do lookup from
 			try {
 				Index i = getFArraySubscripts().createIndex();

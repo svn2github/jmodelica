@@ -1535,7 +1535,7 @@ aspect ExpandableConnectors {
             InstComponentDecl expandable = unknown.findReferencedExpandableConnector();
             String name = unknown.findExpandableMemberName(expandable);
             ExpandableSet set = setFor(expandable);
-            set.addMember(name, known);
+            set.addMember(name, known, unknown);
             
             connections.add(new Connection(prefix, source));
             // TODO: support adding nestled expandable connectors? see Modelica:#428
@@ -1647,12 +1647,13 @@ aspect ExpandableConnectors {
             /**
              * Add a member to the connectors of the set.
              */
-            public void addMember(String name, InstAccess source) {
+            public void addMember(String name, InstAccess source, InstAccess unknown) {
                 ConnectorMember member = members.get(name);
+                FArraySubscripts fas = unknown.hasFArraySubscripts() ? unknown.getFArraySubscripts() : null;
                 if (member == null) 
-                    members.put(name, new ConnectorMember(name, source));
+                    members.put(name, new ConnectorMember(name, source, fas));
                 else
-                    member.addSource(source);
+                    member.addConnection(source, fas);
             }
             
             /**
@@ -1670,26 +1671,27 @@ aspect ExpandableConnectors {
             private class ConnectorMember implements Comparable<ConnectorMember> {
                 
                 public final String name;
-                private java.util.List<InstAccess> sources;
+                private java.util.List<Source> sources;
                 private InstComponentDecl template;
                 private Opt<FArraySubscripts> subscripts;
                 private boolean error;
                 private boolean calculated;
                 
-                public ConnectorMember(String name, InstAccess source) {
+                public ConnectorMember(String name, InstAccess target, FArraySubscripts fas) {
                     this.name = name;
-                    sources = new ArrayList<InstAccess>();
+                    sources = new ArrayList<Source>();
                     template = null;
                     calculated = false;
-                    sources.add(source);
+                    error = false;
+                    addConnection(target, fas);
                 }
                 
                 public int compareTo(ConnectorMember other) {
                     return name.compareTo(other.name);
                 }
                 
-                public void addSource(InstAccess source) {
-                    sources.add(source);
+                public void addConnection(InstAccess target, FArraySubscripts fas) {
+                    sources.add(new Source(target, fas));
                 }
 
                 public void merge(ConnectorMember other) {
@@ -1729,16 +1731,121 @@ aspect ExpandableConnectors {
                     error = false;
                     // TODO: Check that types are consistent
                     // TODO: Support array indices in access to added element
-                    Size s = sources.get(0).size();
+                    // TODO: check declared elements in connectors, if any
+                    SummedSize ss = new SummedSize();
+                    for (Source src : sources)
+                        src.collectSize(ss);
+                    Size s = ss.size;
+                    
                     subscripts = new Opt();
-                    if (s != Size.SCALAR) 
+                    if (s != Size.SCALAR && s != null) 
                         subscripts.setChild(s.createFArraySubscripts(), 0);
-                    template = sources.get(0).myInstComponentDecl();
+                    
+                    template = sources.get(0).template();
                     calculated = true;
                 }
                 
                 public String toString() {
                     return name + ": " + sources.toString();
+                }
+                
+                private class Source {
+                    
+                    private InstAccess target;
+                    private FArraySubscripts fas;
+                    private boolean errorReported = false;
+                    
+                    public Source(InstAccess target, FArraySubscripts fas) {
+                        this.target = target;
+                        this.fas = fas;
+                    }
+                    
+                    public void collectSize(SummedSize ss) {
+                        // Calculate local size
+                        Size s;
+                        Size ts = target.size();
+                        boolean[] fixed;
+                        if (fas != null) {
+                            MutableSize ms = new MutableSize(fas.getNumFSubscript());
+                            fixed = new boolean[ms.ndims()];
+                            int tspos = 0;
+                            for (int i = 0; i < fixed.length; i++) {
+                                FSubscript sub = fas.getFSubscript(i);
+                                int len = (tspos < ts.ndims()) ? ts.get(tspos) : 1;
+                                if (!sub.calculateExpandableConnectorSize(ms, i, len)) 
+                                    localError();
+                                fixed[i] = sub.isColon();
+                                if (sub.ndims() > 0) 
+                                    tspos++;
+                            }
+                            if (tspos != ts.ndims())
+                                localError();
+                            s = ms;
+                        } else {
+                            s = (ts == Size.SCALAR) ? ts : ts.mutableClone();
+                            fixed = new boolean[s.ndims()];
+                            Arrays.fill(fixed, true);
+                        }
+                        if (errorReported)
+                            return;                        
+                        
+                        // Merge with other sizes in set
+                        if (ss.size == null) {
+                            ss.size = s;
+                            ss.fixed = fixed;
+                        } else if (fixed.length != ss.fixed.length) {
+                            mismatchError();
+                        } else {
+                            for (int i = 0; i < fixed.length; i++) {
+                                int diff = s.get(i) - ss.size.get(i);
+                                if (fixed[i]) {
+                                    if (diff == 0) {
+                                        ss.fixed[i] = true;
+                                    } else if (diff < 0) {
+                                        mismatchError();
+                                    }
+                                } 
+                                if (diff > 0) {
+                                    if (ss.fixed[i]) {
+                                        mismatchError();
+                                    } else {
+                                        ss.fixed[i] = fixed[i];
+                                        ((MutableSize) ss.size).set(i, s, i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    private void mismatchError() {
+                        error = true;
+                        if (!errorReported) {
+                            errorReported = true;
+                            target.getParent().error("Size introduced for external connector member does not match other connections to same name in connection set");
+                        }
+                    }
+                    
+                    private void localError() {
+                        error = true;
+                        if (!errorReported) {
+                            errorReported = true;
+                            target.getParent().error("Can not match size of connector to access introducing member in external connector");
+                        }
+                    }
+                    
+                    public InstComponentDecl template() {
+                        return target.myInstComponentDecl();
+                    }
+                    
+                    public String toString() {
+                        return target.toString() + ((fas != null) ? (" (" + fas + ")") : "");
+                    }
+                    
+                }
+                
+                private class SummedSize {
+                    public Size size = null;
+                    public boolean[] fixed = null;
                 }
 
             }
@@ -1765,6 +1872,34 @@ aspect ExpandableConnectors {
         expandedMembers = members;
         flushAll();
     }
+    
+
+    private static final BinaryOperation<CValue> FExpSubscript.INT_MAX_OP = new BinaryOperation<CValue>() {
+        public CValue op(CValue a, CValue b) { 
+            return (a.intValue() >= b.intValue()) ? a : b;
+        }
+    };
+    
+    public abstract boolean FSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len);
+    
+    public boolean FExpSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
+        CValue val = ceval();
+        if (ndims() > 0) 
+            val = val.reduce(INT_MAX_OP, new CValueInteger(1));
+        s.set(i, val.intValue());
+        return ndims() == 0 || size().get(0) == len;
+    }
+    
+    public boolean FIntegerSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
+        s.set(i, getValue());
+        return true;
+    }
+    
+    public boolean FColonSubscript.calculateExpandableConnectorSize(MutableSize s, int i, int len) {
+        s.set(i, len);
+        return true;
+    }
+    
     
     syn boolean InstAccess.isExpandableConnectorPart() = false;
     eq InstDot.isExpandableConnectorPart() {
@@ -1800,6 +1935,12 @@ aspect ExpandableConnectors {
     
     // We need to make sure lookups work properly after flush
     public void InstAmbiguousAccess.flushAllRecursiveClearFinal() {
+        super.flushAllRecursiveClearFinal();
+        rewritten = false;
+        is$Final = false;
+    }
+
+    public void InstAmbiguousArrayAccess.flushAllRecursiveClearFinal() {
         super.flushAllRecursiveClearFinal();
         rewritten = false;
         is$Final = false;

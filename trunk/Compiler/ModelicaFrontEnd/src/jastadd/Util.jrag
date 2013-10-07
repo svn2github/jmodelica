@@ -1080,6 +1080,9 @@ aspect FlatNames {
     	}
     }
     
+    syn boolean FSubscript.isColon() = false;
+    eq FColonSubscript.isColon()     = true;
+    
     syn FQName FAbstractVariable.getFQName() = null;
 
     syn String FQName.name()         = "";
