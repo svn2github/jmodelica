@@ -39,9 +39,9 @@
 
 /* Type definitions */
 /*typedef */
-typedef struct fmi_t fmi_t;             /**< \brief Forward declaration of struct. */
+typedef struct fmi1_me_t fmi1_me_t;             /**< \brief Forward declaration of struct. */
 
-struct fmi_t {
+struct fmi1_me_t {
     fmiString fmi_instance_name;
     fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
@@ -71,7 +71,7 @@ extern const int fmi_runtime_options_map_length;
 /**
  * Update run-time options specified by the user.
  */
-void fmi_update_runtime_options(fmi_t* fmi);
+void fmi_update_runtime_options(fmi1_me_t* fmi1_me);
 
 /**
  * \defgroup fmi_init Creation, initialization and destruction.

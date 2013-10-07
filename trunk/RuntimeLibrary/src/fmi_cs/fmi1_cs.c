@@ -51,7 +51,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize, fmiBoolean newStep) {
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
-    fmi_t* fmi1_me;
+    fmi1_me_t* fmi1_me;
     fmi1_cs_input_t* inputs;
     int flag, retval = JMI_ODE_EVENT;
     int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
@@ -65,7 +65,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     
     fmi1_cs = (fmi1_cs_t*)c;
     ode_problem = fmi1_cs -> ode_problem;
-    fmi1_me = (fmi_t*)(ode_problem ->fmix_me);
+    fmi1_me = (fmi1_me_t*)(ode_problem ->fmix_me);
 
     /* Check if there are upcoming time events. */
     if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
@@ -275,16 +275,16 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     }
     
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
-    ode_problem -> n_real_x = ((fmi_t*)ode_problem->fmix_me)->jmi->n_real_x;
-    ode_problem -> n_sw     = ((fmi_t*)ode_problem->fmix_me)->jmi->n_sw;
-    ode_problem -> n_real_u = ((fmi_t*)ode_problem->fmix_me)->jmi->n_real_u;
+    ode_problem -> n_real_x = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_real_x;
+    ode_problem -> n_sw     = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_sw;
+    ode_problem -> n_real_u = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_real_u;
     ode_problem -> states   = (jmi_real_t*)functions.allocateMemory(ode_problem->n_real_x, sizeof(jmi_real_t));
     ode_problem -> states_derivative   = (fmiReal*)functions.allocateMemory(ode_problem->n_real_x, sizeof(fmiReal));
     ode_problem -> event_indicators = (fmiReal*)functions.allocateMemory(ode_problem->n_sw, sizeof(fmiReal));
     ode_problem -> event_indicators_previous = (fmiReal*)functions.allocateMemory(ode_problem->n_sw, sizeof(fmiReal));
     inputs = (fmi1_cs_input_t*)functions.allocateMemory(ode_problem->n_real_u, sizeof(fmi1_cs_input_t));
     
-    ode_problem -> log = ((fmi_t*)ode_problem -> fmix_me)->jmi->log;
+    ode_problem -> log = ((fmi1_me_t*)ode_problem -> fmix_me)->jmi->log;
     /* In case fmi1_me_instantiate_model was not called, log struct have to
      * be created as:
      * ode_problem -> log = jmi_log_init(fmi1_me->jmi, jmi_callbacks); */
@@ -317,7 +317,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                                     fmiBoolean StopTimeDefined, fmiReal tStop){
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
-    fmi_t* fmi1_me;
+    fmi1_me_t* fmi1_me;
     jmi_ode_method_t ode_method;
     jmi_real_t* nominal;
     jmi_real_t ode_step_size;
@@ -332,7 +332,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     
     fmi1_cs = (fmi1_cs_t*)c;
     ode_problem = fmi1_cs -> ode_problem;
-    fmi1_me = (fmi_t*)(ode_problem->fmix_me);
+    fmi1_me = (fmi1_me_t*)(ode_problem->fmix_me);
     
     /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
                                         
@@ -482,13 +482,13 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
     fmi1_cs_input_t* inputs;
     fmiInteger i,j;
     fmiBoolean found_input = fmiFalse;
-    fmi_t* fmi1_me;
+    fmi1_me_t* fmi1_me;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    fmi1_me = (fmi_t*)(ode_problem->fmix_me);
+    fmi1_me = (fmi1_me_t*)(ode_problem->fmix_me);
     
     if (nvr > ode_problem -> n_real_u) {
         jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, too many inputs.");
