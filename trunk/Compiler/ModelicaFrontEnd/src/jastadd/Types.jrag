@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -260,6 +260,53 @@ aspect Types {
 		}
 	}
 
+}
+
+aspect ConnectorTypes {
+    
+    /**
+     * Check if two components are of types that can be connected.
+     */
+    syn boolean InstComponentDecl.connectableTo(InstComponentDecl other) = 
+        connectableTypes(other) && typePrefixesMatch(other);
+    
+    /**
+     * Check if two components are of sizes that can be connected.
+     */
+    syn boolean InstComponentDecl.connectableSizes(InstComponentDecl other) = size().equivalent(other.size(), false);
+    
+    /**
+     * Check if two components are of types that can be connected given that they have matching type prefixes.
+     */
+    syn boolean InstComponentDecl.connectableTypes(InstComponentDecl other) {
+        // TODO: in array case, we should make sure that all connected elements match, since array elements can be of different structure
+        if (isArray())
+            return getInstComponentDecl(0).connectableTypes(other);
+        while (other.isArray())
+            other = other.getInstComponentDecl(0);
+        Map<String,InstComponentDecl> componentMap = new HashMap<String,InstComponentDecl>();
+        for (InstComponentDecl oicd : other.allInstComponentDecls())
+            if (!oicd.definedVariability().constantVariability())
+                componentMap.put(oicd.name(), oicd);
+        for (InstComponentDecl icd : allInstComponentDecls()) {
+            if (!icd.definedVariability().constantVariability()) {
+                InstComponentDecl oicd = componentMap.remove(icd.name());
+                if (oicd == null || !icd.connectableTo(oicd) || !icd.connectableSizes(oicd))
+                    return false;
+            }
+        }
+        return componentMap.size() == 0;
+    }
+    eq InstPrimitive.connectableTypes(InstComponentDecl other) = 
+        other.isPrimitive() && type().scalarType().equivalentTo(other.type().scalarType());
+    
+    // TODO: Should other prefixes be checked?
+    /**
+     * Check if two components have type prefixes that are compatible for connecting.
+     */
+    syn boolean InstComponentDecl.typePrefixesMatch(InstComponentDecl other) = 
+        (isFlow() == other.isFlow()) && (isStream() == other.isStream()) && (isParameter() == other.isParameter());
+    
 }
 
 aspect DerivativeFunctions {
