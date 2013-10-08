@@ -3185,6 +3185,100 @@ end RedeclareTests.RedeclareTest35;
 end RedeclareTest35;
 
 
+model RedeclareTest36
+    model A
+        extends B(redeclare G.D c(x = 1));
+    end A;
+    
+    model B
+        replaceable C c;
+    end B;
+    
+    model C
+    end C;
+    
+    package G
+        model D
+            parameter F x = 1;
+            E e(y = x);
+        end D;
+        
+        model E
+            parameter F y;
+        end E;
+        
+        type F = Real;
+    end G;
+    
+    A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest36",
+			description="Class lookup from replacing component",
+			flatModel="
+fclass RedeclareTests.RedeclareTest36
+ parameter Real a.c.x = 1 /* 1 */;
+ parameter Real a.c.e.y = a.c.x;
+end RedeclareTests.RedeclareTest36;
+")})));
+end RedeclareTest36;
+
+
+model RedeclareTest37
+    record A
+        extends B(redeclare G.D c(x = 1));
+    end A;
+    
+    record B
+        replaceable C c;
+    end B;
+    
+    record C
+    end C;
+    
+    package G
+        record D
+            parameter F x = 1;
+            E e(y = x);
+        end D;
+        
+        record E
+            parameter F y;
+        end E;
+        
+        type F = Real;
+    end G;
+    
+    A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest37",
+			description="Class lookup from replacing record",
+			flatModel="
+fclass RedeclareTests.RedeclareTest37
+ parameter RedeclareTests.RedeclareTest37.A a;
+
+public
+ record RedeclareTests.RedeclareTest37.G.E
+  parameter Real y;
+ end RedeclareTests.RedeclareTest37.G.E;
+
+ record RedeclareTests.RedeclareTest37.G.D
+  parameter Real x = 1 /* 1 */;
+  parameter RedeclareTests.RedeclareTest37.G.E e(y = x);
+ end RedeclareTests.RedeclareTest37.G.D;
+
+ record RedeclareTests.RedeclareTest37.A
+  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1);
+ end RedeclareTests.RedeclareTest37.A;
+
+end RedeclareTests.RedeclareTest37;
+")})));
+end RedeclareTest37;
+
+
 
 model RedeclareElement1
   model A

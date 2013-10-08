@@ -781,7 +781,7 @@ aspect InstanceTreeConstruction {
     		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);
     		// TODO: handle expandable connectors in this case
     	} else { 
-    		return new InstCreateComponentDecl(cd, this);    	
+    		return new InstCreateComponentDecl(cd, null);    	
     	}
      }
      
@@ -1200,13 +1200,13 @@ aspect InstanceTreeConstruction {
 	}
 
 	syn lazy InstComponentDecl InstComponentRedeclare.getInstComponentDecl() =
-		new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), this);
+		new InstCreateComponentDecl(getComponentRedeclare().getComponentDecl(), null);
 
 	syn lazy InstComponentDecl InstReplacingRecord.getOriginalInstComponent() =
-    	new InstCreateComponentDecl(getOriginalDecl(), this);
+    	new InstCreateComponentDecl(getOriginalDecl(), null);
 
 	syn lazy InstComponentDecl InstReplacingComposite.getOriginalInstComponent() =
-    	new InstCreateComponentDecl(getOriginalDecl(), this);
+    	new InstCreateComponentDecl(getOriginalDecl(), null);
 
 
 	syn lazy InstClassDecl InstReplacingShortClassDecl.getOriginalInstClass() =

@@ -23,8 +23,6 @@ aspect InstLookupClasses {
     syn InstClassDecl InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
     eq InstClassDecl.lookupInstClassRedirect(String name)                   = actualInstClass().genericLookupInstClass(name);
     eq InstEnumClassDecl.lookupInstClassRedirect(String name)               = lookupInstBuiltInClass(name);
-    eq InstReplacingComposite.lookupInstClassRedirect(String name)          = lookupInstClass(name);
-    eq InstReplacingRecord.lookupInstClassRedirect(String name)             = lookupInstClass(name);
     eq InstReplacingPrimitive.lookupInstClassRedirect(String name)          = lookupInstClass(name);
     eq InstExtends.lookupInstClassRedirect(String name)                     = genericLookupInstClassInExtends(name);
     syn InstClassDecl InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
@@ -82,8 +80,10 @@ aspect InstLookupClasses {
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	
-	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = getLookupNode().lookupInstClassRedirect(name);
-	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = getLookupNode().lookupInstClassRedirect(name);
+	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = 
+	    (getLookupNode() == null) ? lookupInstClass(name) : getLookupNode().lookupInstClassRedirect(name);
+	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = 
+	    (getLookupNode() == null) ? lookupInstClass(name) : getLookupNode().lookupInstClassRedirect(name);
 	
 	eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
