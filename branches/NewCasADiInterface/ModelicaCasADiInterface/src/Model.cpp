@@ -217,6 +217,33 @@ vector<Variable*> Model::getVariableByKind(VariableKind kind) {
     return varVec;
 }
 
+Variable* Model::getVariableByName(std::string name) {
+    Variable* returnVar = NULL;
+    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+        if ((*it)->getName() == name) {
+            returnVar = *it;
+            break;
+        }
+    }
+    return returnVar;
+}
+
+Variable* Model::getModelVariableByName(std::string name) {
+    Variable* returnVar = NULL;
+    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+        if ((*it)->getName() == name) {
+            if( (*it)->isAlias()) {
+                returnVar = (*it)->getAlias();
+            } else {
+                returnVar = *it;
+            }
+            break;
+        }
+    }
+    return returnVar;
+}
+
+
 void Model::calculateValuesForDependentParameters() {
     MX val, bindingExpression;
     pair< vector<MX>, vector<MX> > valsAndNodes = retrieveValuesAndNodesForIndependentParameters();

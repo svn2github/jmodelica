@@ -58,6 +58,18 @@ class Variable : public Printable {
                 Variability variability, 
                 VariableType* = NULL);
         
+        /** @return True if this variable is an alias */
+        bool isAlias() const;
+        /** @return True if this variable is negated */
+        bool isNegated() const;
+        /** @param Bool negated */
+        void setNegated(bool negated);
+        /** @param Sets an alias for this variable, making this an alias variable */
+        void setAlias(Variable* var);
+        /** @return This variables alias, or NULL */
+        Variable* getAlias() const;
+        
+        
         /**
          * @return The string name of this Variable 
          */
@@ -115,6 +127,8 @@ class Variable : public Printable {
         virtual void print(std::ostream& os) const;
         
     protected:
+        Variable* aliasVariable;
+        bool negated;
         VariableType* declaredType;
         CasADi::MX var;
         attributeMap attributes;
@@ -122,7 +136,16 @@ class Variable : public Printable {
         Causality causality;
         Variability variability;
 };
-inline Variable::Variable() {}
+inline bool Variable::isAlias() const { return aliasVariable != NULL; }
+inline bool Variable::isNegated() const { return negated; }
+inline void Variable::setNegated(bool negated) { 
+    if (!isAlias()) {
+        throw std::runtime_error("Only alias variables may be negated");
+    }
+    this->negated = negated; 
+}
+inline void Variable::setAlias(Variable* aliasVariable) { this->aliasVariable = aliasVariable; }
+inline Variable* Variable::getAlias() const { return aliasVariable; }
 inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(VariableType* declaredType) { this->declaredType = declaredType; }
@@ -130,9 +153,5 @@ inline VariableType* Variable::getDeclaredType() const { return declaredType; }
 inline const CasADi::MX Variable::getVar() const { return var; }
 inline const Variable::Causality Variable::getCausality() const { return causality; }
 inline const Variable::Variability Variable::getVariability() const { return variability; }
- 
-inline bool Variable::hasAttribute(AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }
-inline void Variable::setAttribute(AttributeKey key, AttributeValue val) { attributes[AttributeKeyInternal(key)]=val; }
-
 }; // End namespace
 #endif

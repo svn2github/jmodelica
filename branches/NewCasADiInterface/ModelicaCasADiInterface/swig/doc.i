@@ -84,6 +84,45 @@ Returns::
         A tuple with zero or more Variables. 
 
 ";
+
+
+%feature("docstring") ModelicaCasADi::Model::getVariableByName "
+Returns the Variable with the provided name. If there is no 
+variable with that name present in the Model None is returned.
+
+This method does not discriminate between alias variables and 
+an alias variable may be returned.
+
+Parameters::
+
+    String --
+        String name of a Variable
+
+Returns::
+
+    Variable --
+        The Variable with the provided name or None
+        
+";
+
+%feature("docstring") ModelicaCasADi::Model::getModelVariableByName "
+Returns the Variable with the provided name. If there is no 
+variable with that name present in the Model None is returned.
+
+This method does discriminate between alias variables, and if the
+provided name is an alias variable its alias is returned instead. 
+
+Parameters::
+
+    String --
+        String name of a Variable
+
+Returns::
+
+    Variable --
+        The Variable with the provided name or its alias, or None
+        
+";
     
 %feature("docstring") ModelicaCasADi::Model::getAllVariables "
 Returns a tuple with all Variables present in the Model. 
@@ -202,6 +241,51 @@ Parameters::
         
     VariableType --
         A VariableType, default is None. 
+"; 
+
+
+%feature("docstring") ModelicaCasADi::Variable::isAlias "
+Is this Variable an alias variable or not. 
+
+Returns::
+
+    bool --
+       
+"; 
+
+%feature("docstring") ModelicaCasADi::Variable::isNegated "
+Is this variable negated.
+
+Returns::
+
+    bool --
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::Variable::setNegated "
+Only alias variables may be negated. 
+
+Params::
+
+    bool --
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::Variable::setAlias "
+Sets an alias for this variable, making it an alias variable
+
+Params::
+
+    Variable --
+        
+"; 
+%feature("docstring") ModelicaCasADi::Variable::getAlias "
+Returns this Variable's alias, or None if it does not have one. 
+
+Params::
+
+    Variable --
+        
 "; 
 
 %feature("docstring") ModelicaCasADi::Variable::getName "

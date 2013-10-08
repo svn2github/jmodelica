@@ -340,6 +340,8 @@ void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Model* m, FV
     transferAttributes<FVar, List, Attribute, Comment>(*derVar, fDer);
     m->addVariable(derVar);
     m->addVariable(realVar);
+    handleAliasVariable(m, realVar, fv); 
+    handleAliasVariable(m, derVar, fv);
 }
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
@@ -354,6 +356,7 @@ void transferRealVariable(ModelicaCasADi::Model* m, FVar &fv){
     ModelicaCasADi::RealVariable* realVar = new ModelicaCasADi::RealVariable(toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(*realVar, fv);
+    handleAliasVariable(m, realVar, fv);
     m->addVariable(realVar);
 }
 
@@ -363,6 +366,7 @@ void transferIntegerVariable(ModelicaCasADi::Model* m, FVar &fv){
     ModelicaCasADi::IntegerVariable* intVar = new ModelicaCasADi::IntegerVariable(toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(*intVar, fv);
+    handleAliasVariable(m, intVar, fv);
     m->addVariable(intVar);
 }
 
@@ -371,11 +375,19 @@ template <class FVar, class List, class Attribute, class Comment>
 void transferBooleanVariable(ModelicaCasADi::Model* m, FVar &fv){
     ModelicaCasADi::BooleanVariable* boolVar = new ModelicaCasADi::BooleanVariable(toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
-    CasADi::MX var = (boolVar->getVar());
     transferAttributes<FVar, List, Attribute, Comment>(*boolVar, fv);
+    handleAliasVariable(m, boolVar, fv);
     m->addVariable(boolVar);
 }
 
+template <class FVar>
+void handleAliasVariable(ModelicaCasADi::Model* m, ModelicaCasADi::Variable* var, FVar &fv) {
+    if (!fv.isAlias()) {
+        return;
+    }
+    var->setAlias(m->getVariableByName(env->toString(fv.alias().name().this$)));
+    var->setNegated(fv.isNegated());
+}  
 
 template <class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
 void transferFVariable(ModelicaCasADi::Model* m, FVar fv) {

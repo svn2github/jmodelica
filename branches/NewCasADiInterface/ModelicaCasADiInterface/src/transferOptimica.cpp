@@ -6,6 +6,7 @@
 #include "transferOptimica.hpp"
 
 // Wrapped classes from the Optimica compiler
+#include "org/jmodelica/optimica/compiler/AliasManager.h"
 #include "org/jmodelica/optimica/compiler/OptimicaCompiler.h"
 #include "org/jmodelica/optimica/compiler/FStringComment.h"
 #include "org/jmodelica/optimica/compiler/FAttribute.h"

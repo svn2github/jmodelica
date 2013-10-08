@@ -1,5 +1,65 @@
 from casadi import *
 
+""" 
+As there is no function to check equality of variables this
+function provides a substitute. Check that the MX of the kept variables
+are equal and that the print of the variables are equal
+"""
+def heurestic_MC_variables_equal(MC_var1, MC_var2):
+    return MC_var1.getVar().isEqual(MC_var2.getVar()) and str(MC_var1) == str(MC_var2)
+    
+
+def test_VariableAlias():
+    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    # Default values
+    assert not realVar1.isAlias()
+    assert realVar1.getAlias() == None
+    assert not realVar1.isNegated()
+    
+    # Try to set negated attribute, even though it is not an alias variable yet. 
+    import sys
+    errorString = ""
+    try:
+        realVar1.setNegated(True)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert errorString == "Only alias variables may be negated";
+    
+    
+    # Make realVar1 an AliasVariables
+    realVar1.setAlias(realVar2)
+    # Check updated attributes, results of getters etc. 
+    assert realVar1.isAlias()
+    assert not realVar2.isAlias()
+    assert heurestic_MC_variables_equal(realVar1.getAlias(), realVar2)
+    assert not realVar1.isNegated()
+    # Set negated, and check
+    realVar1.setNegated(True)
+    assert realVar1.isNegated()
+    
+    # Set and check attributes. 
+    # Attributes that are set in an alias variable are propagated to its model variable. 
+    # Attributes that are set in a model variable are accessed by its alias.
+    anMX = MX("mx")
+    realVar1.setAttribute("attr", anMX)
+    assert realVar1.getAttribute("attr").isEqual(anMX)
+    assert realVar2.getAttribute("attr").isEqual(anMX)
+    anotherMX = MX("mx2")
+    realVar2.setAttribute("anotherAttr", anotherMX)
+    assert realVar1.getAttribute("anotherAttr").isEqual(anotherMX)
+    assert realVar2.getAttribute("anotherAttr").isEqual(anotherMX)
+    
+    # Add the variables to a Model and make sure that the distinction between the 
+    # function getVariableByName and getModelVariableByName works.
+    model = Model()
+    model.addVariable(realVar1)
+    model.addVariable(realVar2)
+    assert heurestic_MC_variables_equal(model.getVariableByName("node1"), realVar1)
+    assert heurestic_MC_variables_equal(model.getVariableByName("node2"), realVar2)
+    assert heurestic_MC_variables_equal(model.getModelVariableByName("node1"), realVar2)
+    assert heurestic_MC_variables_equal(model.getModelVariableByName("node2"), realVar2)
+
 def test_DependentParameters():
     a = MX("a")
     b = MX("b")

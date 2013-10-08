@@ -33,6 +33,18 @@ def assertNear(val1, val2, tol):
 #                                            #
 ##############################################
     
+def test_ModelicaAliasVariables():
+    model = transferModelicaModel("atomicModelAlias", modelFile)
+    assert not model.getVariableByName("x").isNegated()
+    assert model.getVariableByName("z").isNegated()
+    assert str(model.getVariableByName("x")) == "MX(x), alias: y, declaredType : Real"
+    assert str(model.getModelVariableByName("x")) == "MX(y), declaredType : Real"
+    assert str(model.getVariableByName("y")) == "MX(y), declaredType : Real"
+    assert str(model.getModelVariableByName("y")) == "MX(y), declaredType : Real"
+    assert str(model.getVariableByName("z")) == "MX(z), alias: y, declaredType : Real"
+    assert str(model.getModelVariableByName("z")) == "MX(y), declaredType : Real"
+    
+
 def test_ModelicaSimpleEquation():
     assert str(transferModelicaModel("AtomicModelSimpleEquation", modelFile).getDaeResidual()) == str(x1 - der_x1) 
 
@@ -285,6 +297,17 @@ def test_ModelicaFunctionCallEquationForParameterBinding():
 ##############################################
 
 optproblemsFile = "../common/atomicOptimizationProblems.mop"
+
+def test_OptimicaAliasVariables():
+    model = transferOptimizationProblem("atomicModelAlias", modelFile).getModel()
+    assert not model.getVariableByName("x").isNegated()
+    assert model.getVariableByName("z").isNegated()
+    assert str(model.getVariableByName("x")) == "MX(x), alias: y, declaredType : Real"
+    assert str(model.getModelVariableByName("x")) == "MX(y), declaredType : Real"
+    assert str(model.getVariableByName("y")) == "MX(y), declaredType : Real"
+    assert str(model.getModelVariableByName("y")) == "MX(y), declaredType : Real"
+    assert str(model.getVariableByName("z")) == "MX(z), alias: y, declaredType : Real"
+    assert str(model.getModelVariableByName("z")) == "MX(y), declaredType : Real"
 
 def computeStringRepresentationForContainer(myContainer):
     stringRepr = ""

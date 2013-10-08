@@ -1058,3 +1058,12 @@ model atomicModelFunctionCallStatementIgnoredOuts
         x1 = f2(x1);
 end atomicModelFunctionCallStatementIgnoredOuts;
 
+model atomicModelAlias
+    Real x;
+    Real y;
+    Real z;
+equation
+    der(x) = -2;
+    y = x;
+    z = -y;
+end atomicModelAlias;

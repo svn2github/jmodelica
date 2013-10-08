@@ -13,6 +13,7 @@ set(CLASSES_common
 )
 
 set(CLASSES_modelica
+  org.jmodelica.modelica.compiler.AliasManager
   org.jmodelica.modelica.compiler.ModelicaCompiler
   org.jmodelica.modelica.compiler.FDerivedType
   org.jmodelica.modelica.compiler.FType
@@ -43,6 +44,7 @@ set(CLASSES_modelica
 
 # todo: consolidate with CLASSES_modelica
 set(CLASSES_optimica
+  org.jmodelica.optimica.compiler.AliasManager
   org.jmodelica.optimica.compiler.OptimicaCompiler
   org.jmodelica.optimica.compiler.FStringComment
   org.jmodelica.optimica.compiler.FAttribute

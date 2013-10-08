@@ -91,6 +91,27 @@ class Model: public Printable {
         /** @return A vector of pointers to Variables. */
         std::vector<Variable*> getAllVariables();
 
+        /**
+         * Returns the Variable with a certain name in the Model.
+         * If there is no variable with the name present NULL is returned.
+         * This method does not discriminate between alias variables and
+         * an alias variable may be returned.
+         * @param String name of a Variable
+         * @return A pointer to a Variable
+         */
+        Variable* getVariableByName(std::string name);
+        
+        /**
+         * Returns the Variable with a certain name in the Model.
+         * If there is no variable with the name present NULL is returned.
+         * This method does discriminate between alias variables and if the
+         * provided name is an alias variable its alias is returned instead. 
+         * @param String name of a Variable
+         * @return A pointer to a Variable
+         */
+        Variable* getModelVariableByName(std::string name);
+        
+
         /** Calculates values for dependent parameters */
         void calculateValuesForDependentParameters();
 

@@ -6,6 +6,7 @@
 #include "transferModelica.hpp"
 
 // Wrapped classes from the Modelica compiler
+#include "org/jmodelica/modelica/compiler/AliasManager.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/modelica/compiler/FDerivedType.h"
 #include "org/jmodelica/modelica/compiler/FType.h"
