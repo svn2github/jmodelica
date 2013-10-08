@@ -886,7 +886,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * \brief Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp ::= /[Indicator:FIdUseExp]/;
+abstract FRelExp : FBoolBinExp;
 
 /**
  * \brief Less than expression.

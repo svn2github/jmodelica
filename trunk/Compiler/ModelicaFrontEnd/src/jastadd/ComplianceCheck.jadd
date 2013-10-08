@@ -36,12 +36,6 @@ aspect ComplianceCheck {
 			complianceOnlyFMU("Using while statements is");
 	}
 	
-	public void FRelExp.complianceCheck() {
-		super.complianceCheck();
-		if (!inFunction() && generatesEvent() && inWhile())
-			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
-	}
-	
 	public void InstAccess.complianceCheck() {
 		super.complianceCheck();
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
