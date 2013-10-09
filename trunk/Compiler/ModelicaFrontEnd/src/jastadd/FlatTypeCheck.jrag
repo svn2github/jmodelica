@@ -134,7 +134,7 @@ aspect FlatTypeCheck {
       InstAccess right = getConnector2().getInstAccess();
       boolean check = true;
       for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
-          if (!access.isExpandableConnection() && !access.isUnknown()) {
+          if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
               if (!access.myInstComponentDecl().isConnector())
                   access.error("Connecting to an instance of a non-connector type is not allowed");
           } else {
@@ -150,12 +150,6 @@ aspect FlatTypeCheck {
               error("Sizes do not match in connection");
       }
   }
-  
-  /**
-   * Is this an access to an expandable connector or a member of an expandable connector?
-   */
-  syn boolean InstAccess.isExpandableConnection() = 
-      isExpandableConnectorPart() || myInstComponentDecl().myInstClass().isExpandableConnector();
   
   // Generic typeCheck() that calls typeError() if type is unknown and no FExp child has unknown type
   public void FExp.typeCheck() {

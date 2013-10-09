@@ -1598,7 +1598,7 @@ aspect ExpandableConnectors {
             private boolean isok;
             
             public ExpandableSet(InstComponentDecl connector) {
-                connectors = new HashSet<InstComponentDecl>();
+                connectors = new LinkedHashSet<InstComponentDecl>();
                 members = new HashMap<String,ConnectorMember>();
                 expanded = false;
                 isok = true;
@@ -1613,14 +1613,13 @@ aspect ExpandableConnectors {
              */
             public boolean expand() {
                 if (!expanded) {
-                    for (ConnectorMember member : members.values())
+                    ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
+                    Arrays.sort(sorted);
+                    for (ConnectorMember member : sorted)
                         isok = isok && member.check();
-                    if (isok) {
-                        ConnectorMember[] sorted = members.values().toArray(new ConnectorMember[members.size()]);
-                        Arrays.sort(sorted);
+                    if (isok) 
                         for (InstComponentDecl conn : connectors)
                             conn.expandConnector(createInstComponents(sorted));
-                    }
                     expanded = true;
                 }
                 return isok;
@@ -1728,20 +1727,43 @@ aspect ExpandableConnectors {
                 
                 private void calculateVariable() {
                     error = false;
-                    // TODO: Check that types are consistent
-                    // TODO: check declared elements in connectors, if any
+                    // Collect instances of this member from declarations
+                    ArrayList<InstComponentDecl> declared = new ArrayList<InstComponentDecl>();
+                    for (InstComponentDecl conn : connectors) {
+                        InstComponentDecl member = conn.memberInstComponent(name);
+                        if (member != null)
+                            declared.add(member);
+                    }
+                    
+                    // Calculate size
                     SummedSize ss = new SummedSize();
+                    for (InstComponentDecl decl : declared)
+                        ss.updateFromDeclaration(decl);
                     for (Source src : sources)
                         src.collectSize(ss);
                     Size s = ss.size;
                     
+                    // Create subscripts as size
                     subscripts = new Opt();
                     if (s != Size.SCALAR && s != null) 
                         subscripts.setChild(s.createFArraySubscripts(), 0);
                     
-                    template = sources.get(0).template();
+                    // Pick a variable to use as template
+                    if (declared.isEmpty())
+                        template = sources.get(0).template();
+                    else
+                        template = declared.get(0);
+                    
+                    // Check types against template
                     for (Source src : sources)
                         src.checkType(template);
+                    for (InstComponentDecl decl : declared) {
+                        if (!decl.connectableTypes(template)) {
+                            error = true;
+                            decl.error("Type of declared member of expandable connector does not match declarations in other expandable connectors in same connection set");
+                        }
+                    }
+                    
                     calculated = true;
                 }
                 
@@ -1790,40 +1812,17 @@ aspect ExpandableConnectors {
                             return;                        
                         
                         // Merge with other sizes in set
-                        if (ss.size == null) {
-                            ss.size = s;
-                            ss.fixed = fixed;
-                        } else if (fixed.length != ss.fixed.length) {
+                        if (!ss.merge(s, fixed))
                             mismatchError();
-                        } else {
-                            for (int i = 0; i < fixed.length; i++) {
-                                int diff = s.get(i) - ss.size.get(i);
-                                if (fixed[i]) {
-                                    if (diff == 0) {
-                                        ss.fixed[i] = true;
-                                    } else if (diff < 0) {
-                                        mismatchError();
-                                    }
-                                } 
-                                if (diff > 0) {
-                                    if (ss.fixed[i]) {
-                                        mismatchError();
-                                    } else {
-                                        ss.fixed[i] = fixed[i];
-                                        ((MutableSize) ss.size).set(i, s, i);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                   }
                     
                     public void checkType(InstComponentDecl template) {
                         if (!target.myInstComponentDecl().connectableTypes(template))
-                            error("Type of component introduced to external connector does not match other connections to same name in connection set");
+                            error("Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector");
                     }
                     
                     private void mismatchError() {
-                        error("Size introduced for external connector member does not match other connections to same name in connection set");
+                        error("Size introduced for external connector member does not match other connections to same name in connection set or component declared in connector");
                     }
                     
                     private void localError() {
@@ -1849,8 +1848,55 @@ aspect ExpandableConnectors {
                 }
                 
                 private class SummedSize {
+                    
                     public Size size = null;
                     public boolean[] fixed = null;
+                    
+                    public void updateFromDeclaration(InstComponentDecl icd) {
+                        if (!mergeKnownFixed(icd.size())) {
+                            error = true;
+                            icd.error("Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set");
+                        }
+                    }
+
+                    private boolean mergeKnownFixed(Size s) {
+                        if (s != Size.SCALAR)
+                            s = s.mutableClone();
+                        boolean[] sFixed = new boolean[s.ndims()];
+                        for (int i = 0; i < sFixed.length; i++)
+                            sFixed[i] = s.hasValue(i);
+                        return merge(s, sFixed);
+                    }
+
+                    public boolean merge(Size s, boolean[] sFixed) {
+                        if (size == null) {
+                            size = s;
+                            fixed = sFixed;
+                        } else if (sFixed.length != fixed.length) {
+                            return false;
+                        } else {
+                            for (int i = 0; i < fixed.length; i++) {
+                                int diff = s.get(i) - size.get(i);
+                                if (sFixed[i]) {
+                                    if (diff == 0) {
+                                        fixed[i] = true;
+                                    } else if (diff < 0) {
+                                        return false;
+                                    }
+                                } 
+                                if (diff > 0) {
+                                    if (fixed[i]) {
+                                        return false;
+                                    } else {
+                                        fixed[i] = sFixed[i];
+                                        ((MutableSize) size).set(i, s, i);
+                                    }
+                                }
+                            }
+                        }
+                        return true;
+                    }
+                    
                 }
 
             }

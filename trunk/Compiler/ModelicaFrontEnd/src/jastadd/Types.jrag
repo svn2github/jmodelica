@@ -288,14 +288,16 @@ aspect ConnectorTypes {
         for (InstComponentDecl oicd : other.allInstComponentDecls())
             if (!oicd.definedVariability().constantVariability())
                 componentMap.put(oicd.name(), oicd);
+        boolean expandable = myInstClass().isExpandableConnector();
         for (InstComponentDecl icd : allInstComponentDecls()) {
             if (!icd.definedVariability().constantVariability()) {
                 InstComponentDecl oicd = componentMap.remove(icd.name());
-                if (oicd == null || !icd.connectableTo(oicd) || !icd.connectableSizes(oicd))
+                boolean match = oicd != null && icd.connectableTo(oicd) && icd.connectableSizes(oicd);
+                if (!match && (oicd != null || !expandable))
                     return false;
             }
         }
-        return componentMap.size() == 0;
+        return other.myInstClass().isExpandableConnector() || componentMap.size() == 0;
     }
     eq InstPrimitive.connectableTypes(InstComponentDecl other) = 
         other.isPrimitive() && type().scalarType().equivalentTo(other.type().scalarType());
