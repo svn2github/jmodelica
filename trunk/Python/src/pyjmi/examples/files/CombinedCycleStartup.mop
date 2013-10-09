@@ -56,7 +56,7 @@ optimization Startup4 (objectiveIntegrand=0.1*((plant.p-7.57e6)/1e6)^2 +/* 0.5*(
 CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant(sigma(max=1.6e7));
 
 Modelica.Blocks.Interfaces.RealInput du(free=true,min=-0.1/60,max=0.1/60);
-Real u(start=0.1,fixed=true,min=0,max=1);
+RealConnector u(start=0.1,fixed=true,min=0,max=1);
 
 equation 
   der(u) = du;
@@ -68,7 +68,7 @@ optimization Startup5 (objectiveIntegrand=1*((plant.p-8.35e6)/1e6)^2 +/* 0.5*(pl
 CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant(sigma(max=1.6e8));
 
 Modelica.Blocks.Interfaces.RealInput du(free=true,min=0,max=0.1/60);
-Real u(start=0.15,fixed=true,min=0,max=1);
+RealConnector u(start=0.15,fixed=true,min=0,max=1);
 
 equation 
   der(u) = du;
@@ -93,7 +93,7 @@ optimization Startup6 (objectiveIntegrand=1*((plant.p-8.35e6)/1e6)^2 + 0.5*(u-1)
   //parameter Real sigma_max = 4e8;
   CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant(sigma(max=sigma_max));
   Modelica.Blocks.Interfaces.RealInput du(free=true,min=0,max=0.1/60);
-  Real u(start=0.15,fixed=true,min=0,max=1);
+  RealConnector u(start=0.15,fixed=true,min=0,max=1);
 equation 
   der(u) = du;
   connect(u, plant.load);
@@ -102,7 +102,7 @@ end Startup6;
 model Startup6Verification
 	CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant;
 	Modelica.Blocks.Interfaces.RealInput du;
-	Real u(start=0.15, fixed=true);
+	RealConnector u(start=0.15, fixed=true);
 equation
 	der(plant.load) = du;
 	connect(u, plant.load);
@@ -113,7 +113,7 @@ model Startup7Reference
   parameter Real Tstart = 10000 "Start-up time";
   parameter Real N = 6;
   CombinedCycle.Optimization.Plants.CC1D_WarmStartUp plant;
-  Real u;
+  RealConnector u;
 equation 
   u = u0+(1-u0)*(time/Tstart)/(1+(time/Tstart)^N)^(1/N);
   connect(u, plant.load);
@@ -123,7 +123,7 @@ optimization Startup7 (objectiveIntegrand=1*((plant.p-8.35e6)/1e6)^2 + 0.5*(u-1)
   parameter Real sigma_max = 2.8e8;
   CombinedCycle.Optimization.Plants.CC1D_WarmStartUp plant(sigma(max=sigma_max));
   Modelica.Blocks.Interfaces.RealInput du(free=true,min=0,max=0.1/60);
-  Real u(start=0.15,fixed=true,min=0,max=1);
+  RealConnector u(start=0.15,fixed=true,min=0,max=1);
 equation 
   der(u) = du;
   connect(u, plant.load);
