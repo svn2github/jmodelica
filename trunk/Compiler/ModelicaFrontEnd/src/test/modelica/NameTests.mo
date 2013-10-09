@@ -3414,6 +3414,30 @@ Semantic error at line 3271, column 9:
 ")})));
 end PreErrorTest;
 
+model PreAliasTest1
+	discrete Real x;
+	discrete Real y;
+initial equation
+	pre(x) = 42;
+equation
+	x = y;
+	x = pre(x) * pre(y) + 3.14;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="PreAliasTest1",
+			description="Test so that pre() variables are rewritten correctly",
+			flatModel="
+fclass NameTests.PreAliasTest1
+ discrete Real x;
+initial equation 
+ pre(x) = 42;
+equation
+ x = pre(x) * pre(x) + 3.14;
+end NameTests.PreAliasTest1;
+")})));
+end PreAliasTest1;
+
 
 model AssignedInWhenRecursion
     model A

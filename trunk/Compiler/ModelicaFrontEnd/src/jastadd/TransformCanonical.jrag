@@ -1775,6 +1775,16 @@ aspect TransformCanonical {
 		}
 	}
 	
+	rewrite FPreExp {
+		when (rewriteAlias && myNonPreFV().isAlias()) to FExp {
+			FVariable fv = (FVariable) myNonPreFV();
+			FExp new_exp = fv.alias().createFPreExp();
+			if (fv.isNegated()) 
+				new_exp = new FNegExp(new_exp);
+			return new_exp;
+		}
+	}
+	
 	rewrite FAssignStmt {
 		when (rewriteAlias && getLeft().myFV().isAlias()) to FAssignStmt {
 			FVariable fv = (FVariable) getLeft().myFV();

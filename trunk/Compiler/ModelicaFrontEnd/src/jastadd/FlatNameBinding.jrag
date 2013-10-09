@@ -567,6 +567,7 @@ aspect FlatPreBinding {
 	inh FAbstractVariable FExp.lookupPreFV(FQName fqn);	
 	inh FAbstractVariable FAbstractVariable.lookupPreFV(FQName fqn);	
 	syn FAbstractVariable FPreExp.myFV() = lookupPreFV(getFIdUse().getFQName());
+	syn FAbstractVariable FPreExp.myNonPreFV() = lookupFV(getFIdUse().getFQName());
 	eq Root.getChild().lookupPreFV(FQName fqn)   = null;
 	eq FClass.getChild().lookupPreFV(FQName fqn) = lookupFV(fqn.preName());
 
