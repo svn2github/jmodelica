@@ -2298,4 +2298,53 @@ end IndexReduction.IndexReduction49_DotPow;
 ")})));
 end IndexReduction49_DotPow;
 
+model IndexReduction50
+	parameter StateSelect c1_ss = StateSelect.default; 
+	parameter StateSelect c2_ss = StateSelect.never; 
+	parameter Real p = 0;
+	Real c1_phi(stateSelect=c1_ss), c1_w(stateSelect=c1_ss), c1_a;
+	Real c2_phi(stateSelect=c2_ss), c2_w(stateSelect=c2_ss), c2_a;
+equation
+	c1_phi = c2_phi;
+	c1_w = der(c1_phi);
+	c1_a = der(c1_w);
+	c2_w = der(c1_phi);
+	c2_a = der(c2_w);
+	c2_a * p = 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction50",
+			description="Test of index reduction of differentiated variables with StateSelect.never",
+			flatModel="
+fclass IndexReduction.IndexReduction50
+ parameter StateSelect c1_ss = StateSelect.default /* StateSelect.default */;
+ parameter StateSelect c2_ss = StateSelect.never /* StateSelect.never */;
+ parameter Real p = 0 /* 0 */;
+ Real c1_phi(stateSelect = c1_ss);
+ Real c1_w(stateSelect = c1_ss);
+ Real c1_a;
+ Real c2_w(stateSelect = c2_ss);
+ parameter Real c2_a = 0 /* 0 */;
+ Real _der_c2_w;
+ Real _der_der_c1_phi;
+initial equation 
+ c1_phi = 0.0;
+ c1_w = 0.0;
+equation
+ c1_w = der(c1_phi);
+ c1_a = der(c1_w);
+ c2_w = der(c1_phi);
+ c2_a = _der_c2_w;
+ der(c1_w) = _der_der_c1_phi;
+ _der_c2_w = _der_der_c1_phi;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.IndexReduction50;
+")})));
+end IndexReduction50;
+
+
 end IndexReduction;

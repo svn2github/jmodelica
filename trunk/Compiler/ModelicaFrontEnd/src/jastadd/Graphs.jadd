@@ -1109,8 +1109,21 @@ public class BiPGraph {
 
 		// Collect all blocks that contain differentiated equations
 		for (AbstractEquationBlock eb : blt) {
-			Collection<FAbstractEquation> diffedEqns = eb.differentiatedEquations();
-			if (diffedEqns.size()>0) {
+			boolean add = false;
+			if (!eb.differentiatedEquations().isEmpty()) {
+				add = true;
+			} else {
+				for (FVariable var : eb.activeVariables()) {
+					if (!var.isDerivativeVariable())
+						continue;
+					FDerivativeVariable dVar = var.asDerivativeVariable();
+					if (dVar.myDifferentiatedVariable().stateSelectAttribute() == FRealVariable.StateSelect.NEVER) {
+						add = true;
+						break;
+					}
+				}
+			}
+			if (add) {
 				ASTNode.log.info(" ********* Found block containing diffed equations ***********");
 				ASTNode.log.info(eb.toString());
 		

@@ -1116,6 +1116,11 @@ aspect FlatAPI {
 	syn boolean FAbstractVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 
+	syn FDerivativeVariable FAbstractVariable.asDerivativeVariable() {
+		throw new UnsupportedOperationException("isDerivativeVariable() is not supported for class type " + getClass().getSimpleName());
+	}
+	eq FDerivativeVariable.asDerivativeVariable() = this;
+
 	syn boolean FAbstractVariable.isDummyDerivativeVariable() = false;
 	eq FDummyDerivativeVariable.isDummyDerivativeVariable() = true;
 
