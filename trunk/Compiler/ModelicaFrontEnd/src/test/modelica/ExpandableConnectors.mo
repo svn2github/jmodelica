@@ -789,6 +789,66 @@ Semantic error at line 762, column 9:
   Size introduced for external connector member does not match other connections to same name in connection set
 ")})));
     end ExpandableErr8;
+	
+	
+	model ExpandableErr9
+        expandable connector EC
+        end EC;
+        
+        connector C1
+            Real x;
+        end C1;
+        
+        connector C2
+            Real y;
+        end C2;
+		
+        EC ec;
+        C1 c1;
+		C2 c2;
+	equation
+        connect(c1, ec.a);
+        connect(c2, ec.a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr9",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Semantic error at line 811, column 9:
+  Type of component introduced to external connector does not match other connections to same name in connection set
+")})));
+	end ExpandableErr9;
+    
+    
+    model ExpandableErr10
+        expandable connector EC
+        end EC;
+        
+        connector C1 = Real;
+        
+        connector C2 = Boolean;
+        
+        EC ec;
+        C1 c1;
+        C2 c2;
+    equation
+        connect(c1, ec.a[1]);
+        connect(c2, ec.a[2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr10",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Semantic error at line 839, column 9:
+  Type of component introduced to external connector does not match other connections to same name in connection set
+")})));
+    end ExpandableErr10;
 
 
 

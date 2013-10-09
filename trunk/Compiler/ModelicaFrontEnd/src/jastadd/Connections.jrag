@@ -1711,7 +1711,6 @@ aspect ExpandableConnectors {
                 
                 public InstComponentDecl createInstComponent() {
                     return new InstExpandableConnectorMember(template(), subscripts(), name);
-                    // TODO: Support connecting to part of array
                     // TODO: handle input/output (or is that really needed?)
                 }
                 
@@ -1730,7 +1729,6 @@ aspect ExpandableConnectors {
                 private void calculateVariable() {
                     error = false;
                     // TODO: Check that types are consistent
-                    // TODO: Support array indices in access to added element
                     // TODO: check declared elements in connectors, if any
                     SummedSize ss = new SummedSize();
                     for (Source src : sources)
@@ -1742,6 +1740,8 @@ aspect ExpandableConnectors {
                         subscripts.setChild(s.createFArraySubscripts(), 0);
                     
                     template = sources.get(0).template();
+                    for (Source src : sources)
+                        src.checkType(template);
                     calculated = true;
                 }
                 
@@ -1817,19 +1817,24 @@ aspect ExpandableConnectors {
                         }
                     }
                     
+                    public void checkType(InstComponentDecl template) {
+                        if (!target.myInstComponentDecl().connectableTypes(template))
+                            error("Type of component introduced to external connector does not match other connections to same name in connection set");
+                    }
+                    
                     private void mismatchError() {
-                        error = true;
-                        if (!errorReported) {
-                            errorReported = true;
-                            target.getParent().error("Size introduced for external connector member does not match other connections to same name in connection set");
-                        }
+                        error("Size introduced for external connector member does not match other connections to same name in connection set");
                     }
                     
                     private void localError() {
+                        error("Can not match size of connector to access introducing member in external connector");
+                    }
+                    
+                    private void error(String err) {
                         error = true;
                         if (!errorReported) {
                             errorReported = true;
-                            target.getParent().error("Can not match size of connector to access introducing member in external connector");
+                            target.getParent().error(err);
                         }
                     }
                     
