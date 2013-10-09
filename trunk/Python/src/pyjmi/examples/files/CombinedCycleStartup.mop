@@ -75,12 +75,14 @@ equation
   connect(u, plant.load);
 end Startup5;
 
+connector RealConnector = Real;
+
 model Startup6Reference
   parameter Real u0 = 0.15 "Initial value of control variable";
   parameter Real Tstart = 8000 "Start-up time";
   parameter Real N = 6;
   CombinedCycle.Optimization.Plants.CC0D_WarmStartUp plant;
-  Real u;
+  RealConnector u;
 equation 
   u = u0+(1-u0)*(time/Tstart)/(1+(time/Tstart)^N)^(1/N);
   connect(u, plant.load);
