@@ -297,6 +297,10 @@ aspect FlatTypeCheck {
   syn boolean FExp.isAccess()  = false;
   eq FIdUseExp.isAccess()      = true;
   eq FInstAccessExp.isAccess() = true;
+  syn FIdUse FExp.asFIdUse() {
+	  throw new UnsupportedOperationException("asFIdUse() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq FIdUseExp.asFIdUse() = getFIdUse();
   
 	syn boolean FExp.isInstAccess()  = false;
 	eq FInstAccessExp.isInstAccess() = true;
@@ -313,6 +317,7 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().getComponentDecl().isStream();
+  
   
   
   public void InstForIndex.typeCheck() {
@@ -528,14 +533,14 @@ aspect FlatTypeCheck {
 		  error("Calling function Integer(): too " + (n > 1 ? "many" : "few") + " arguments");
   }
   
-  public void FPreExp.typeCheck() {
+  public void InstPreExp.typeCheck() {
   	if (!getFExp().isAccess()) {
   		error("Calling function pre(): argument must be variable access");
   		return;
   	}
     if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
     	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
-    }     
+    }
   }
  
   public void FAssert.typeCheck() {
@@ -788,7 +793,7 @@ aspect FlatTypeCheck {
   eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
   eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
   eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
-  eq FPreExp.getChild().argumentDefinedTypeValid()                       = false;
+  eq InstPreExp.getChild().argumentDefinedTypeValid()                    = false;
   eq FEdgeExp.getChild().argumentDefinedTypeValid()                      = false;
   eq FChangeExp.getChild().argumentDefinedTypeValid()                    = false;
 

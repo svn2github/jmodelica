@@ -1937,8 +1937,9 @@ aspect FlatExpressions {
 	public FExp FBinEventGenExp.flatten(FQName prefix) { return createNode(getX().flatten(prefix), getY().flatten(prefix)); }
 	public FExp FRemFuncExp.flatten(FQName prefix)     { return new FSubExp(getX().flatten(prefix), new FMulExp(new FDivFuncExp(getX().flatten(prefix), getY().flatten(prefix)), getY().flatten(prefix)));}
 	public FExp FUnaryBuiltIn.flatten(FQName prefix)   { return createNode(getFExp().flatten(prefix)); }
-	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(new FPreExp(getFExp().flatten(prefix)))); }
-	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), new FPreExp(getFExp().flatten(prefix))); }
+	public FExp FEdgeExp.flatten(FQName prefix)        { return new FAndExp(getFExp().flatten(prefix), new FNotExp(FPreExp.create(getFExp().flatten(prefix)))); }
+	public FExp FChangeExp.flatten(FQName prefix)      { return new FNeqExp(getFExp().flatten(prefix), FPreExp.create(getFExp().flatten(prefix))); }
+	public FExp InstPreExp.flatten(FQName prefix)      { return FPreExp.create(getFExp().flatten(prefix)); }
 
 	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
 	public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }

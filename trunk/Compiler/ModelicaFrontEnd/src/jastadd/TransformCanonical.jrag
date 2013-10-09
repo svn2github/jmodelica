@@ -499,17 +499,13 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			for (Var var : g.getUnmatchedVariables()) {	
 				FVariable fv = var.getVariable();
-				FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
+				FIdUseExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
 				FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
-				if (fv.isDiscrete()) {
-					fv = (FVariable) fv.myPreVariable();
-					lhs = new FPreExp(lhs);
-				}
 				FEquation fe = new FEquation(lhs, rhs);
 				addFInitialEquation(fe);
 				
 				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0);
-				v = g.getVariable(fv.name());
+				v = g.getVariable(lhs.name());
 				g.addEdge(eqn,v);
 			}
 			root().flushAllRecursive();
@@ -1503,9 +1499,7 @@ aspect TransformCanonical {
                         generate = true;
                     
                     if (generate) {
-                        FExp lhs = new FIdUseExp(new FIdUse(fv.getFQName().fullCopy()));
-                        if (fv.isDiscrete())
-                            lhs = new FPreExp(lhs);
+                        FExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
                         FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                         addFInitialEquation(new FEquation(lhs, rhs));
                     }
@@ -4700,20 +4694,20 @@ aspect EventGeneratingExps {
 	syn FExp FEventGenExp.createGuardExp(FVariable var);
 	eq FFloorFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(getX().fullCopy(), new FPreExp(var.createUseExp())));
-		guards.addFExp(new FGeqExp(getX().fullCopy(), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FLtExp(getX().fullCopy(), new FPreExp(var.createFIdUse())));
+		guards.addFExp(new FGeqExp(getX().fullCopy(), new FAddExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
 		return guards;
 	}
 	eq FCeilFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLeqExp(getX().fullCopy(), new FSubExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
-		guards.addFExp(new FGtExp(getX().fullCopy(), new FPreExp(var.createUseExp())));
+		guards.addFExp(new FLeqExp(getX().fullCopy(), new FSubExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
+		guards.addFExp(new FGtExp(getX().fullCopy(), new FPreExp(var.createFIdUse())));
 		return guards;
 	}
 	eq FDivFuncExp.createGuardExp(FVariable var) {
 		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FPreExp(var.createUseExp())));
-		guards.addFExp(new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(new FPreExp(var.createUseExp()), new FIntegerLitExp(1))));
+		guards.addFExp(new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FPreExp(var.createFIdUse())));
+		guards.addFExp(new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
 		return guards;
 	} 
 	

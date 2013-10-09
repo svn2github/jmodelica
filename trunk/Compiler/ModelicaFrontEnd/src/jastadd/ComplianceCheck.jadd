@@ -92,7 +92,7 @@ aspect ComplianceCheck {
 	    complianceOnlyFMU("The sample() function-like operator is");
 	}
 
-	public void FPreExp.complianceCheck() {
+	public void InstPreExp.complianceCheck() {
 	    complianceOnlyFMU("The pre() function-like operator is");
 	}
 	

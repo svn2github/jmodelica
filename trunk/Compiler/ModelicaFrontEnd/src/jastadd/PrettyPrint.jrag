@@ -1641,6 +1641,12 @@ aspect FlatPrettyPrint {
 		str.format(",%d)", getOrder());
 	}
 
+	protected void InstPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.print("pre(");
+		p.print(getFExp(),str,indent);
+		str.format(")");
+	}
+	
 	protected void FSumExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		str.print("sum(");
 		p.print(getFExp(), str, indent);
@@ -1765,7 +1771,7 @@ aspect FlatPrettyPrint {
 	eq FSizeExp.builtInName()            = "size";
 	eq FNoEventExp.builtInName()         = "noEvent";
 	eq FSmoothExp.builtInName()          = "smooth";
-	eq FPreExp.builtInName()             = "pre";
+	eq InstPreExp.builtInName()          = "pre";
 	eq FEdgeExp.builtInName()            = "edge";
 	eq FChangeExp.builtInName()          = "change";
 	eq FSampleExp.builtInName()          = "sample";

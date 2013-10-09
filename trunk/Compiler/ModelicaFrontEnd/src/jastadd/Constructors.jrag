@@ -261,6 +261,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Surounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
+	 */
+	public static FExp FPreExp.create(FExp exp) {
+		return exp.isLiteralExp() ? exp : new FPreExp(exp.asFIdUse());
+	}
+	
+	/**
 	 * \brief Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
@@ -862,7 +869,6 @@ aspect InheritedFactoryMethods {
 	public FTimeExp        FTimeExp.createEmptyNode()        { return new FTimeExp();        }
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
-	public FPreExp         FPreExp.createEmptyNode()         { return new FPreExp();         }
 	public FEdgeExp        FEdgeExp.createEmptyNode()        { return new FEdgeExp();        }
 	public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
@@ -880,6 +886,8 @@ aspect InheritedFactoryMethods {
 	public InstHDerExp    InstHDerExp.createEmptyNode()    { return new InstHDerExp();    }
 	public FHDerExp       FHDerExp.createEmptyNode()       { return new FHDerExp();       }
 	public FInstAccessExp FInstAccessExp.createEmptyNode() { return new FInstAccessExp(); }
+	public FPreExp        FPreExp.createEmptyNode()        { return new FPreExp();      }
+	public InstPreExp      InstPreExp.createEmptyNode()    { return new InstPreExp();      }
 	
 	// Array expressions
 	public FArray          FArray.createEmptyNode()          { return new FArray();          }

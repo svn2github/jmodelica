@@ -379,6 +379,8 @@ aspect FlatVariability {
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	eq FDerExp.expVariability() = 
 			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
+	eq FPreExp.expVariability() = super.expVariability().combineDown(fDiscrete());
+	eq InstPreExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		FAbstractVariable variable = myFV();
@@ -410,7 +412,6 @@ aspect FlatVariability {
 	eq FZeros.expVariability()     = fConstant();
 	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()    = getFExp().variability().combineDown(fDiscrete());
 	eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	eq FSampleExp.expVariability() = fDiscrete();

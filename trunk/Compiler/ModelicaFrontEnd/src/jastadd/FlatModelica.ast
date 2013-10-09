@@ -1035,7 +1035,18 @@ InstDerExp : FUnaryExp;
 /**
  * \brief The built-in function der.
  */
+
 FDerExp : FIdUseExp; 
+
+/**
+ * Pre built-in function in the instance tree.
+ */
+InstPreExp : FUnaryBuiltIn; 
+
+/**
+ * Pre built-in function.
+ */
+FPreExp : FIdUseExp;
 
 /**
  * \brief The built-in function der converted into a dummy derivative.
@@ -1252,11 +1263,6 @@ FNoEventExp : FVectUnaryBuiltIn;
  * Handled like noEvent(), but with a warning. To be implemented properly later.
  */
 FSmoothExp : FBuiltInFunctionCall ::= Order:FExp FExp;
-
-/**
- * Pre built-in function.
- */
-FPreExp : FUnaryBuiltIn;
 
 /**
  * Edge built-in function.

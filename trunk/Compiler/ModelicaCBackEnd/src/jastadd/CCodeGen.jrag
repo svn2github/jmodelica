@@ -114,12 +114,12 @@ aspect CCodeGen {
 		if (myFV().isReal() && !inFunction() && 
 				root().options.getBooleanOption("enable_variable_scaling")) {
 			str.print("(");
-			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
+			str.print(myFV().name_C());
 			str.print("*sf(");
-			str.print(((FIdUseExp)getFExp()).myFV().valueReference());
+			str.print(myFV().valueReference());
 			str.print("))");
 		} else {
-			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
+			str.print(myFV().name_C());
 		}
 	}
 	

@@ -75,7 +75,7 @@ aspect ContentCheck {
 			error("The end operator may only be used in array subscripts");
 	}
 	
-	public void FPreExp.contentCheck() {
+	public void InstPreExp.contentCheck() {
 		if (inFunction()) { 
 			error("The pre() operator may not be used inside functions");
 		}
