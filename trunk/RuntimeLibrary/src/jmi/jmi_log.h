@@ -54,7 +54,7 @@
 #ifndef _JMI_LOG_H
 #define _JMI_LOG_H
 
-#include "jmi_common.h"  /* for jmi_t */
+#include "jmi_util.h"  /* for jmi_t */
 
 /**
  * \brief Types of log messages.
@@ -119,8 +119,8 @@ struct jmi_log_t {
     int alloced_frames;
     int id_counter;
     
-    jmi_callbacks_t* jmi_callbacks;
-    jmi_options_t* options;
+    jmi_callbacks_t* jmi_callbacks;  /**< \brief  A pointer to a callbacks the logger needs. */
+    jmi_options_t* options;          /**< \brief  A pointer to jmi options. */
     
     BOOL outstanding_comma;
 };

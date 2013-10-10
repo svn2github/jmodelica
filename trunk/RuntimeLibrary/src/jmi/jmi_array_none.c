@@ -17,7 +17,7 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_common.h"
+#include "jmi_util.h"
 
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \

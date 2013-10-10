@@ -42,7 +42,7 @@ typedef struct fmi1_cs_t fmi1_cs_t;
 typedef struct fmi1_cs_input_t fmi1_cs_input_t;
 
 struct fmi1_cs_t {
-    jmi_ode_problem_t* ode_problem;
+    jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
     
     fmiString instance_name;             /**< \brief The fmi1_cs instance name. */
     fmiString encoded_instance_name;     /**< \brief The encoded instance name provided to the fmi1_me instance. */
@@ -326,7 +326,7 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn);
 /**
  * \brief Calls the underlying ME completed integrator step
  * 
- * @param ode_problem The ODE probelm struct
+ * @param ode_problem A ODE probelm struct
  * @param step_event (Output) If an event occured.
  * @return Error code.
  */
@@ -340,11 +340,44 @@ int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
  * @return Error code.
  */
 fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
+
+/**
+ * \brief Sets the inputs.
+ * 
+ * @param ode_problem The ODE problem struct
+ * @param time The time for which the input is set.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time);
 
+/**
+ * \brief Initializes the input.
+ * 
+ * @param value A pointer to one input that should be initialized.
+ * @return Error code.
+ */
 fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value);
 
+/**
+ * \brief Evaluation of the root-function of the ODE.
+ *
+ * @param ode_problem A jmi_ode_problem_t struct.
+ * @param t The ODE time.
+ * @param x A pointer to the states of the ODE.
+ * @param root A pointer to an evaluation of the event indicator of the ODE.
+ * @return Error code.
+  */
 int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *root);
+
+/**
+ * \brief Evaluation of the right-hand-side of the ODE.
+ *
+ * @param ode_problem A jmi_ode_problem_t struct.
+ * @param t The ODE time.
+ * @param x A pointer to the states of the ODE.
+ * @param rhs A pointer to the state derivatives of the ODE.
+ * @return Error code.
+  */
 int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *x, jmi_real_t *rhs);
 
 /* Note in fmiCSFunctions.h

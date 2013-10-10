@@ -24,7 +24,7 @@
 #ifndef _JMI_LINEAR_SOLVER_H
 #define _JMI_LINEAR_SOLVER_H
 
-#include "jmi_common.h"
+#include "jmi_util.h"
 
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );

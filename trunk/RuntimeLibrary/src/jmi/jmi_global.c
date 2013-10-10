@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "jmi_global.h"
 #include "jmi_log.h"
-#include "jmi_common.h"
+#include "jmi_util.h"
 
 
 #ifdef _MSC_VER

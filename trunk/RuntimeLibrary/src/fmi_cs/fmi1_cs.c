@@ -537,7 +537,7 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
         }
         
         /*
-        for (j = 0; j < ode_problem-> -> n_real_u; j++) {
+        for (j = 0; j < ode_problem->n_real_u; j++) {
             if (fmi1_cs->inputs[j].vr == vr[i]) {
                 if (ode_problem-> -> inputs[j].active == fmiFalse) {
                     fmi1_cs_init_input_struct(&(ode_problem-> -> inputs[j]));

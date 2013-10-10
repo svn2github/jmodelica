@@ -10,7 +10,6 @@ set(JMISources
     jmi_array_common.h
     jmi_array_none.h
     jmi_block_residual.h
-    jmi_common.h
     jmi_kinsol_solver.h
     jmi_linear_solver.h
     jmi_simple_newton.h
@@ -24,7 +23,6 @@ set(JMISources
     jmi.c
     jmi_array_none.c
     jmi_block_residual.c
-    jmi_common.c
     jmi_kinsol_solver.c
     jmi_linear_solver.c
     jmi_simple_newton.c
