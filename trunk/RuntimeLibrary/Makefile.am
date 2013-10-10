@@ -1,4 +1,4 @@
-RUNTIMELIBRARY_BUILD_DIR=$(abs_builddir)/../RuntimeLibrary/build
+RUNTIMELIBRARY_BUILD_DIR=$(abs_builddir)/build
 RUNTIMELIBRARY_SRC_DIR=$(abs_top_srcdir)/RuntimeLibrary
 
 # This is to ensure that the install target of the Sundials
@@ -11,13 +11,13 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*-apple*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) ;; \
+	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	esac
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR)

@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-set(RuntimeLibrary_SRC ${SimulationRuntime_SOURCE_DIR})
-set(MSLCSOURCES ${RuntimeLibrary_SRC}/../ThirdParty/MSL/Modelica/Resources/C-Sources)
+add_definitions(-DTOP_SRC)
+set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
 set(JMISources
@@ -64,22 +64,27 @@ set(STANDARDTABLESSources
     ${MSLCSOURCES}/zlib/uncompr.c
     ${MSLCSOURCES}/zlib/zutil.c
 )
-
+#Build jmi library
 add_library(jmi STATIC ${JMISources})
+
+#Build ModelicaExternalC library
 include_directories(${MSLCSOURCES})
 include_directories(${MSLCSOURCES}/zlib)
 add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+
+#Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
 add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
 
+#Install the libraries
 install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
-    DESTINATION "${JMODELICA_HOME}/lib/RuntimeLibrary")
+    DESTINATION "${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary")
 
-
-install(DIRECTORY "" #Files from current directory
-    DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary"
+#Install header files
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+    DESTINATION "${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary"
     FILES_MATCHING PATTERN "*.h")
     
 install(FILES "${MSLCSOURCES}/ModelicaStandardTables.h"
-    DESTINATION "${JMODELICA_HOME}/include/RuntimeLibrary")
+    DESTINATION "${JMODELICA_INSTALL_DIR}/include/RuntimeLibrary")
 
