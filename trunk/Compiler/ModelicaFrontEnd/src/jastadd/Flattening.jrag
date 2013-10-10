@@ -149,12 +149,8 @@ aspect Flattening {
 	public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
 		super.flattenUsedFuncsAndEnums(fc);
 		InstAccess ia = getInstAccess();
-		if (ia.isAssignable()) {
-			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
-			// If this access will be inlined
-			if (var.isConstant() && !ia.hasUnknownIndices()) 
-				var.flattenUsedFuncsAndEnums(fc);
-		}
+		if (ia.isAssignable() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
+		    ia.myInstComponentDecl().flattenUsedFuncsAndEnums(fc);
 	}
 	
 	public void InstClassAccess.flattenUsedFuncsAndEnums(FClass fc) {
@@ -1475,67 +1471,81 @@ aspect FlatExpressions {
     }
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
-		// If the FInstAccess refers to a constant or string parameter, then inline expression
-		// Checks in the instance tree ensures that constants always
-		// have binding expressions, however, array subscripts may need to be 
-		// flattened during error checks, when using qualifiedName()
-		InstAccess ia = getInstAccess();
-		if (ia.isAssignable()) {
-			InstAssignable var = (InstAssignable) ia.myInstComponentDecl();
-			InstComponentDecl bindingOf = findComponentWithThisBindingExp();
-			if (inFunction() && bindingOf != null && bindingOf.isInput() && var.isInput() && 
-					var.containingEntity() == bindingOf.containingEntity()) {
-				int i = var.containingEntity().myInputs().indexOf(var);
-				int d = findDepthOfNestledFunctionCalls();
-				return new FArgumentExp(i, d);
-			} else if (var.variability().structuralOrLess()) {
-				try {
-					if (!var.size().isEmpty()) {
-						// Check if we have non-constant array subscripts
-						if (ia.hasUnknownIndices()) {
-							if (!inFunction()) {
-								// Inline entire array wrapped in an FSubscriptedExp, and resolve index later
-								FExp exp = var.getBindingFExp().getArray().buildLiteral(var.isReal());
-								FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
-								return new FSubscriptedExp(exp, fas);
-							}
-						} else {
-							// Inline value
-							CValue cval = ceval();
-							if (var.isReal())
-								cval = cval.convertReal();
-							return cval.buildLiteral();
-						}
-					}
-				} catch (ConstantEvaluationException e) {
-					// In this case, simply don't inline value if we aren't in a function
-					// TODO: Really? isn't this an error?
-				}
-				if (inFunction() && ia.isAssignable()) {
-					// TODO: possible name conflict
-					// Add the constant array to the function and keep the access
-					var = ia.topInstAssignable();
-					functionConstantList().add(var);
-					FQName name = var.getFQName();
-					FQName use = ia.flattenAssignablePart(prefix);
-					InstComponentDecl found = ia.localLookupInstComponent(name.name());
-					if (name.numParts() > 1 || (found != null && found != var)) {
-						// TODO: this should probably be a helper function on FQName
-						FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
-						fullUse.getFQNamePart(0).setName(ia.findTempVarName(var));
-						use = fullUse;
-					}
-					return new FIdUseExp(use);
-				}
-			}
-		} 
-		if (ia.myInstComponentDecl().inOrIsOuter()) {
-			return new FIdUseExp(ia.myInstComponentDecl().myInnerInstComponentDecl().getFQName().fullCopy());
-		} else {
-			return new FIdUseExp(ia.flatten(prefix));
-		}
+        InstComponentDecl var = getInstAccess().myInstComponentDecl();
+        if (inDefaultArgument()) {
+            int i = var.containingEntity().myInputs().indexOf(var);
+            int d = findDepthOfNestledFunctionCalls();
+            return new FArgumentExp(i, d);
+        } else {
+            return var.flattenAccess(prefix, this);
+        }
 	}
 	
+	/**
+	 * Flatten an access expression to this component.
+	 */
+	public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+        if (inOrIsOuter()) 
+            return new FIdUseExp(myInnerInstComponentDecl().getFQName().fullCopy());
+        else
+            return new FIdUseExp(exp.getInstAccess().flatten(prefix));
+	}
+
+	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
+        // If the FInstAccess refers to a constant or string parameter, then inline expression
+        // Checks in the instance tree ensures that constants always
+        // have binding expressions, however, array subscripts may need to be 
+        // flattened during error checks, when using qualifiedName()
+        InstAccess ia = iae.getInstAccess();
+        if (variability().structuralOrLess()) {
+            try {
+                if (!size().isEmpty()) {
+                    // Check if we have non-constant array subscripts
+                    if (ia.hasUnknownIndices()) {
+                        if (!ia.inFunction()) {
+                            // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
+                            FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
+                            FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
+                            return new FSubscriptedExp(exp, fas);
+                        }
+                    } else {
+                        // Inline value
+                        CValue cval = iae.ceval();
+                        if (isReal())
+                            cval = cval.convertReal();
+                        return cval.buildLiteral();
+                    }
+                }
+            } catch (ConstantEvaluationException e) {
+                // In this case, simply don't inline value if we aren't in a function
+                // TODO: Really? isn't this an error?
+            }
+            if (ia.inFunction())
+                return ia.topInstAssignable().flattenAccessToConstInFunction(prefix, ia);
+        }
+        return super.flattenAccess(prefix, iae);
+	}
+	
+	/**
+	 * Flatten an access to this constant in a function.
+	 * 
+	 * Used when the access can't be constant evaluated. The constant is added to the function.
+	 */
+    public FExp InstAssignable.flattenAccessToConstInFunction(FQName prefix, InstAccess ia) {
+        ia.functionConstantList().add(this);
+        FQName name = getFQName();
+        FQName use = ia.flattenAssignablePart(prefix);
+        InstComponentDecl found = ia.localLookupInstComponent(name.name());
+        if (name.numParts() > 1 || (found != null && found != this)) {
+            // TODO: this should probably be a helper function on FQName
+            FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
+            fullUse.getFQNamePart(0).setName(ia.findTempVarName(this));
+            use = fullUse;
+        }
+        return new FIdUseExp(use);
+    }
+	
+
 	/**
 	 * Check if this access is in the binding expression of an input to a function, 
 	 * and refers to an input in the same function.
@@ -1543,7 +1553,7 @@ aspect FlatExpressions {
 	syn boolean FInstAccessExp.inDefaultArgument() {
 		InstComponentDecl target = getInstAccess().myInstComponentDecl();
 		InstComponentDecl holder = findComponentWithThisBindingExp();
-		return inFunction() && !target.isUnknown() && holder != null && 
+		return inFunction() && holder != null && holder.isInput() && target.isInput() &&
 				target.containingEntity() == holder.containingEntity();
 	}
 	
@@ -1628,7 +1638,7 @@ aspect FlatExpressions {
 	/**
 	 * \brief Get the list of constants that need to be added to the surrounding function.
 	 */
-	inh Set<InstAssignable> FInstAccessExp.functionConstantList();
+	inh Set<InstAssignable> InstAccess.functionConstantList();
 	inh Set<InstAssignable> InstAssignable.functionConstantList();
 	eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
 	eq InstAssignable.getChild().functionConstantList() = 

@@ -347,6 +347,25 @@ aspect NodeMethods {
     }
     
     /**
+     * Check if this node is a direct child (only List/Opt between) of <code>parent</code>.
+     */
+    public boolean ASTNode.isChildOf(BaseNode parent) {
+        ASTNode par = getParent();
+        return par != null && par.isChildOfHelper(parent);
+    }
+    
+    /**
+     * Helper method for {@link #isChildOf(BaseNode parent)}, should not be called directly.
+     */
+    protected boolean ASTNode.isChildOfHelper(BaseNode parent) {
+        return isChildOf(parent);
+    }
+
+    protected boolean BaseNode.isChildOfHelper(BaseNode parent) {
+        return parent == this;
+    }
+    
+    /**
      * \brief Returns an iterable, that has an iterator that iterates over all direct FExp children.
      * 
      * The iterator passes through Lists and Opts.

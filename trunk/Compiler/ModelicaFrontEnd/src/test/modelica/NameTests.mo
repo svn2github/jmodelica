@@ -1405,6 +1405,7 @@ end NameTests.ConstantLookup25;
 end ConstantLookup25;
 
 
+// This is not a test class
 package ExtraForConstantLookup26
 	partial package A
 		extends B(d = size(b, 1), c = b[:].a);
