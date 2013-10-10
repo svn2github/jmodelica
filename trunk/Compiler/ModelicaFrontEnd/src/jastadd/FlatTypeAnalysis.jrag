@@ -1159,30 +1159,40 @@ aspect BuiltInFlatTypes {
 aspect InstClassRestriction {
 	
 	/**
-	 * \brief Is this class a connector?
+	 * Is this class a connector?
 	 */
 	syn boolean InstClassDecl.isConnector() = false;
 	eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
 	eq UnknownInstClassDecl.isConnector()   = false;
 	
 	/**
-	 * \brief Is this restriction "connector"?
+	 * Is this restriction "connector"?
 	 */
 	syn boolean InstRestriction.isConnector() = false;
 	eq InstConnector.isConnector() = true;
+	
+	/**
+	 * Is this component a connector?
+	 */
+	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
     
     /**
-     * \brief Is this class an expandable connector?
+     * Is this class an expandable connector?
      */
     syn boolean InstClassDecl.isExpandableConnector() = false;
     eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
     eq UnknownInstClassDecl.isExpandableConnector()   = false;
     
     /**
-     * \brief Is this restriction "expandable connector"?
+     * Is this restriction "expandable connector"?
      */
     syn boolean InstRestriction.isExpandableConnector() = false;
     eq InstExpandableConnector.isExpandableConnector()  = true;
+    
+    /**
+     * Is this component an expandable connector?
+     */
+    syn boolean InstComponentDecl.isExpandableConnector() = myInstClass().isExpandableConnector();
 	
 	/**
 	 * \brief Is this class a function?

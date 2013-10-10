@@ -133,6 +133,7 @@ aspect FlatTypeCheck {
       InstAccess left  = getConnector1().getInstAccess();
       InstAccess right = getConnector2().getInstAccess();
       boolean check = true;
+      boolean expandableSame = true;
       for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
           if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
               if (!access.myInstComponentDecl().isConnector())
@@ -140,7 +141,11 @@ aspect FlatTypeCheck {
           } else {
               check = false;
           }
+          if (access.myInstComponentDecl().isExpandableConnector())
+              expandableSame = !expandableSame;
       }
+      if (!expandableSame && !left.isUnknown() && !right.isUnknown())
+          error("Connecting an expandable connector to a non-expandable connector is not allowed");
       if (check) { 
           InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
           InstComponentDecl rightComp = right.lookupEvaluatingIndices();

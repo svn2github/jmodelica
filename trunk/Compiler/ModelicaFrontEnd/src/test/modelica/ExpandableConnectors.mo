@@ -1192,6 +1192,33 @@ Semantic error at line 1124, column 32:
   Size of declared member of expandable connector does not match declarations in other expandable connectors in same connection set
 ")})));
     end ExpandableErr17;
+	
+	
+	model ExpandableErr18
+		expandable connector EC
+			Real x;
+		end EC;
+		
+		connector C
+			Real x;
+		end C;
+		
+		EC ec;
+		C c;
+	equation
+		connect(ec, c);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ExpandableErr18",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Semantic error at line 1209, column 3:
+  Connecting an expandable connector to a non-expandable connector is not allowed
+")})));
+	end ExpandableErr18;
 
 
 

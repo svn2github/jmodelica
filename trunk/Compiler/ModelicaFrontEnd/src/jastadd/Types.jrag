@@ -288,7 +288,7 @@ aspect ConnectorTypes {
         for (InstComponentDecl oicd : other.allInstComponentDecls())
             if (!oicd.definedVariability().constantVariability())
                 componentMap.put(oicd.name(), oicd);
-        boolean expandable = myInstClass().isExpandableConnector();
+        boolean expandable = isExpandableConnector();
         for (InstComponentDecl icd : allInstComponentDecls()) {
             if (!icd.definedVariability().constantVariability()) {
                 InstComponentDecl oicd = componentMap.remove(icd.name());
@@ -297,7 +297,7 @@ aspect ConnectorTypes {
                     return false;
             }
         }
-        return other.myInstClass().isExpandableConnector() || componentMap.size() == 0;
+        return other.isExpandableConnector() || componentMap.size() == 0;
     }
     eq InstPrimitive.connectableTypes(InstComponentDecl other) = 
         other.isPrimitive() && type().scalarType().equivalentTo(other.type().scalarType());

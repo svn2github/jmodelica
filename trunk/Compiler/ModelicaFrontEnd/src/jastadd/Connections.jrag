@@ -660,7 +660,7 @@ aspect Connections {
 		        csm.getExpandable().addIntroducingConnection(this, right, rightComp, prefix, source);
 		    else
                 csm.getExpandable().addIntroducingConnection(right, this, leftComp, prefix, source);
-		} else if (leftComp.myInstClass().isExpandableConnector() && !csm.getExpandable().isExpansionDone()) {
+		} else if (leftComp.isExpandableConnector() && !csm.getExpandable().isExpansionDone()) {
 		    csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
 		} else if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
 			Indices leftInd = indices();
@@ -753,8 +753,6 @@ aspect Connections {
         getCopyOf().isPrimitive() ? this : super.findCell(i, j);
 
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
-	
-	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
 	
 	
 	/**
@@ -1961,11 +1959,11 @@ aspect ExpandableConnectors {
     syn InstComponentDecl InstAccess.findReferencedExpandableConnector() = null;
     eq InstComponentAccess.findReferencedExpandableConnector() {
         InstComponentDecl icd = myInstComponentDecl();
-        return icd.myInstClass().isExpandableConnector() ? icd : null;
+        return icd.isExpandableConnector() ? icd : null;
     }
     eq InstComponentArrayAccess.findReferencedExpandableConnector() {
         InstComponentDecl icd = lookupArrayElement(myInstComponentDecl());
-        return (icd != null && icd.myInstClass().isExpandableConnector()) ? icd : null;
+        return (icd != null && icd.isExpandableConnector()) ? icd : null;
     }
     eq InstDot.findReferencedExpandableConnector() {
         for (int i = getNumInstAccess() - 1; i >= 0; i--) {
