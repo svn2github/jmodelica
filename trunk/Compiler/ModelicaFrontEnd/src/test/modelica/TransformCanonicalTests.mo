@@ -5527,5 +5527,102 @@ Semantic error at line 0, column 0:
 ")})));
 end AssertEval2;
 
+model NonFixedParameterTest1
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y = x;
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest1",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest1
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest1;
+")})));
+end NonFixedParameterTest1;
+
+model NonFixedParameterTest2
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false) = x;
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest2",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest2
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ z = y;
+ y = x;
+end TransformCanonicalTests.NonFixedParameterTest2;
+")})));
+end NonFixedParameterTest2;
+
+model NonFixedParameterTest3
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false);
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+    y = x + 42;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest3",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest3
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x + 42;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest3;
+")})));
+end NonFixedParameterTest3;
+
+model NonFixedParameterTest4
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false);
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+    y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest4",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest4
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest4;
+")})));
+end NonFixedParameterTest4;
 
 end TransformCanonicalTests;

@@ -1511,6 +1511,16 @@ aspect Attributes {
 		FAttribute a = findAttribute(name);
 		return (attributeSet(a) ? attributeExp(a).ceval() : new CValueEnum(type, def)).expandArray(size());
 	}
+	
+	public void FVariable.setAttribute(String name, String type, FExp exp) {
+		FAttribute attr = findMatching(getFAttributes(), name);
+		if (attr == null) {
+			attr = new FAttribute(new FIdUse(type), new FIdDecl(name), exp, true, 0);
+			addFAttribute(attr);
+		} else {
+			attr.setValue(exp);
+		}
+	}
 
 	// Quantity attribute
 	syn boolean FVariable.quantityAttributeSet()    = attributeSet(FAttribute.QUANTITY);
@@ -1581,6 +1591,8 @@ aspect Attributes {
 	syn CValue  FVariable.fixedAttributeCValue()        = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
 	eq          FStringVariable.fixedAttributeCValue()  = CValue.UNKNOWN;
 	syn boolean FVariable.fixedAttribute()              = fixedAttributeCValue().reduceBooleanOr();
+	public void FVariable.setFixedAttribute(boolean value) { setFixedAttribute(FBooleanLitExp.create(value)); }
+	public void FVariable.setFixedAttribute(FExp value)    { setAttribute(FAttribute.FIXED, "Boolean", value); }
 		
 	// Nominal attribute
 	syn boolean FRealVariable.nominalAttributeSet()    = attributeSet(FAttribute.NOMINAL);
