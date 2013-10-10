@@ -43,6 +43,13 @@ int main(int argc, char *argv[])
     setUpJVM();
 
     /* Equations */
+    { // Alias
+        model =  transferModelicaModel("atomicModelAlias", modelFile);
+        cout << *model << endl;
+        cout << "model.getVariableByName('x'): " << *model->getVariableByName("x") << endl;
+        cout << "model.getModelVariableByName('x'): " << *model->getModelVariableByName("x") << endl;
+        assert(false);
+    }
     { // Simple equation
         //der(x1) = x1;
         std::stringstream actual, expected;

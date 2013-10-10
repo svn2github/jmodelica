@@ -1,6 +1,6 @@
 #ifndef _MODELICACASADI_PRINTABLE
 #define _MODELICACASADI_PRINTABLE
-
+#include <sstream>
 #include <iostream>
 #include <string>
 

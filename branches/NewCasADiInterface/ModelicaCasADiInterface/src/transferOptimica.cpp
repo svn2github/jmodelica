@@ -43,6 +43,7 @@ using CasADi::MX;
 using ModelicaCasADi::Model;
 using ModelicaCasADi::Constraint;
 using ModelicaCasADi::OptimizationProblem;
+using ModelicaCasADi::CompilerOptionsWrapper;
 
 
 
@@ -62,34 +63,35 @@ vector<Constraint>* transferConstraints(oc::FOptClass &fc){
     return pcs;
 }
 
-
-
-ModelicaCasADi::OptimizationProblem* transferOptimizationProblemWithoutInlining(std::string modelName, std::string modelFile) {
-	org::jmodelica::util::OptionRegistry optr;    
-    optr.addStringOption(StringFromUTF("inline_functions"), StringFromUTF("none"));
-    return transferOptimizationProblem(modelName, modelFile, optr);
-}
-
-OptimizationProblem* transferOptimizationProblem(string modelName, string modelFile, OptionRegistry optr /*= OptionRegistry()*/) {
+OptimizationProblem* transferOptimizationProblem(string modelName, vector<string> modelFiles, CompilerOptionsWrapper options, string log_level) {
     // initalizeClass is needed on classes where static variables are acessed. 
     // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
     jl::System::initializeClass(false);
+    oc::OptimicaCompiler::initializeClass(false);
     
     // Create a model and optimica compiler
     Model* m = new Model();
-    oc::OptimicaCompiler compiler(optr);
+    oc::OptimicaCompiler compiler(options.getOptionRegistry());
+    
+    java::lang::String fileVecJava[modelFiles.size()];
+    for (int i = 0; i < modelFiles.size(); ++i) {
+        fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
+    }
+    compiler.setLogger(StringFromUTF(log_level.c_str()));
     
     try {
-        oc::SourceRoot sourceRoot = compiler.parseModel(new_JArray(StringFromUTF(modelFile.c_str())));
-        oc::InstClassDecl instance = compiler.instantiateModel(sourceRoot, StringFromUTF(modelName.c_str()));
-        oc::FOptClass fclass = oc::FOptClass(compiler.flattenModel(instance).this$);
-        
+        oc::FOptClass fclass =  oc::FOptClass(compiler.compileModel(new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
+                                                                    StringFromUTF(modelName.c_str())).this$);
+       
+       if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
+            throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
+        }
         
         /***** ModelicaCasADi::Model *****/
-        // Transfer user defined types (generates base types for the user types). 
+        // Transfer user defined types (also generates base types for the user types). 
         transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(m, fclass);
         
-        // Variables template <class ArrayList, class FVar, class JMDerivativeVariable, class JMRealVariable>
+        // Variables template
         transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (m, fclass.allVariables());
         
         // Equations
@@ -100,12 +102,6 @@ OptimizationProblem* transferOptimizationProblem(string modelName, string modelF
         transferFunctions<oc::FOptClass, oc::List, oc::FFunctionDecl>(m, fclass);
         
         /***** OptimizationProblem *****/
-        // If transferOptimica was used to transfer a Modelica model
-        // then just return an empty OptimizationProblem with the model in it. 
-        if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
-            std::vector<Constraint> cons;
-            return new OptimizationProblem(m, cons, MX(0), MX(0), MX(0), MX(0)); 
-        }
         
         // Mayer and Lagrange
         MX lagrangeTerm = fclass.objectiveIntegrandExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveIntegrandExp());

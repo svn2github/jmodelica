@@ -36,25 +36,27 @@ using std::cout;  using std::endl; using std::string;
 using std::vector;
 using CasADi::MX;
 using ModelicaCasADi::Model;
+using ModelicaCasADi::CompilerOptionsWrapper;
 
-Model* transferModelicaModelWithoutInlining(std::string modelName, std::string modelFile) {
-    org::jmodelica::util::OptionRegistry optr;    
-    optr.addStringOption(StringFromUTF("inline_functions"), StringFromUTF("none"));
-    return transferModelicaModel(modelName, modelFile, optr);
-}
-
-Model* transferModelicaModel(std::string modelName, std::string modelFile, OptionRegistry optr /*= OptionRegistry()*/) {
+ModelicaCasADi::Model* transferModelicaModel(string modelName, vector<string> modelFiles, CompilerOptionsWrapper options, string log_level) {
     // initalizeClass is needed on classes where static variables are acessed. 
     // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
     jl::System::initializeClass(false); 
+    mc::ModelicaCompiler::initializeClass(false); 
     
     Model* m = new Model();
-    mc::ModelicaCompiler compiler(optr);
+    mc::ModelicaCompiler compiler(options.getOptionRegistry());
+    
+    java::lang::String fileVecJava[modelFiles.size()];
+    for (int i = 0; i < modelFiles.size(); ++i) {
+        fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
+    }
+    compiler.setLogger(StringFromUTF(log_level.c_str()));
 
     try {
-        mc::SourceRoot sourceRoot = compiler.parseModel(new_JArray(StringFromUTF(modelFile.c_str())));
-        mc::InstClassDecl instance = compiler.instantiateModel(sourceRoot, StringFromUTF(modelName.c_str()));
-        mc::FClass fclass =  compiler.flattenModel(instance);
+        mc::FClass fclass =  compiler.compileModel(new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
+                                                   StringFromUTF(modelName.c_str()));
+        
         /***** ModelicaCasADi::Model *****/
             
         // Transfer user defined types (also generates base types for the user types). 

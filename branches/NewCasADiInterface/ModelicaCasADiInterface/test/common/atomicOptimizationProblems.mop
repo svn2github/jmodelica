@@ -39,6 +39,17 @@ constraint
     x1 >=  1.00;
 end atomicOptimizationGEQ;
 
+optimization atomicOptimizationGEQandLEQ (objectiveIntegrand=x1) 
+    Real x1(start=0);
+    Real x2(start=0);
+equation
+    x1 = sin(x1) + 0.5;
+    x2 = sin(x1) + 0.5;
+constraint
+    x1 >=  1.00;
+    x2 <=  1.00;
+end atomicOptimizationGEQandLEQ;
+
 optimization atomicOptimizationStart5 (objectiveIntegrand=x1, startTime = 5) 
     Real x1(start=0);
 equation

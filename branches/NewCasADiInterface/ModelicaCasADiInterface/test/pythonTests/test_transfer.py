@@ -1,12 +1,8 @@
-from casadi import *
+from ModelicaCasADi import *
 
-## In this file there are tests for transferModelica and transferOptimica. A subset of the transferOptimica
-## tests are equal to the transferModelica tests. If a new test is added to the Modelica transfer this test
-## should also be added to the Optimica transfer test.
-##
-## There are also tests for the correct transfer of the MX representation of expressions and various
-## Modelica constructs from JModelica.org, testing the underlying infrastructure and the aspect in JModelica
-## that provides the functionality. 
+## In this file there are tests for transferModelica, transferOptimica and tests for
+## the correct transfer of the MX representation of expressions and various Modelica constructs
+## from JModelica.org.
 
 
 # Common variables used in the tests
@@ -15,14 +11,6 @@ x2 = MX("x2")
 der_x1 = MX("der_x1")
 der_x2 = MX("der_x2") 
 modelFile = "../common/atomicModelicaModels.mo"
-
-# Is run before anything else
-def setup_module(module):
-    setUpJVM() 
-
-# Is run after everything else
-def teardown_module(module):
-    tearDownJVM()
     
 def assertNear(val1, val2, tol):
     assert abs(val1 - val2) < tol
@@ -34,7 +22,7 @@ def assertNear(val1, val2, tol):
 ##############################################
     
 def test_ModelicaAliasVariables():
-    model = transferModelicaModel("atomicModelAlias", modelFile)
+    model = transferToModelicaCasaADi("atomicModelAlias", modelFile)
     assert not model.getVariableByName("x").isNegated()
     assert model.getVariableByName("z").isNegated()
     assert str(model.getVariableByName("x")) == "MX(x), alias: y, declaredType : Real"
@@ -46,18 +34,18 @@ def test_ModelicaAliasVariables():
     
 
 def test_ModelicaSimpleEquation():
-    assert str(transferModelicaModel("AtomicModelSimpleEquation", modelFile).getDaeResidual()) == str(x1 - der_x1) 
+    assert str(transferToModelicaCasaADi("AtomicModelSimpleEquation", modelFile).getDaeResidual()) == str(x1 - der_x1) 
 
 def test_ModelicaSimpleInitialEquation():
-    assert str(transferModelicaModel("AtomicModelSimpleInitialEquation", modelFile).getInitialResidual())  == str(MX(1)-x1)
+    assert str(transferToModelicaCasaADi("AtomicModelSimpleInitialEquation", modelFile).getInitialResidual())  == str(MX(1)-x1)
 
 def test_ModelicaFunctionCallEquations():
-    assert( repr(transferModelicaModelWithoutInlining("AtomicModelFunctionCallEquation", modelFile).getDaeResidual()) == 
+    assert( repr(transferToModelicaCasaADi("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual()) == 
                 ("MX(vertcat((x1-der_x1),(vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
                 ".call([x1]){0},function(\"AtomicModelFunctionCallEquation.f\").call([x1]){1})-vertcat(x2,x3))))") )  
                 
 def test_ModelicaBindingExpression():
-    model =  transferModelicaModel("AtomicModelAttributeBindingExpression", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeBindingExpression", modelFile)
     dependent =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
     independent =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
     actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))
@@ -65,173 +53,173 @@ def test_ModelicaBindingExpression():
     assert actual == expected
 
 def test_ModelicaUnit():
-    model =  transferModelicaModel("AtomicModelAttributeUnit", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeUnit", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("unit")) == str(MX("kg")) 
 
 def test_ModelicaQuantity():
-    model =  transferModelicaModel("AtomicModelAttributeQuantity", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeQuantity", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("quantity")) == str(MX("kg")) 
 
 def test_ModelicaDisplayUnit():
-    model =  transferModelicaModel("AtomicModelAttributeDisplayUnit", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeDisplayUnit", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("displayUnit")) == str(MX("kg")) 
 
 def test_ModelicaMin():
-    model =  transferModelicaModel("AtomicModelAttributeMin", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeMin", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("min"))) == str(MX(0)) 
 
 def test_ModelicaMax():
-    model =  transferModelicaModel("AtomicModelAttributeMax", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeMax", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("max")) == str(MX(100))
     
 def test_ModelicaStart():
-    model =  transferModelicaModel("AtomicModelAttributeStart", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeStart", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("start"))  == str(MX(0.0005))
     
 def test_ModelicaFixed():
-    model =  transferModelicaModel("AtomicModelAttributeFixed", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeFixed", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("fixed")) == str(MX(True))
 
 def test_ModelicaNominal():
-    model =  transferModelicaModel("AtomicModelAttributeNominal", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelAttributeNominal", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("nominal")) == str(MX(0.1))
         
 def test_ModelicaComment():
-    model =  transferModelicaModel("AtomicModelComment", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelComment", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("comment")) == str(MX("I am x1's comment"))
         
 def test_ModelicaRealDeclaredType():
-    model =  transferModelicaModel("AtomicModelDerivedRealTypeVoltage", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelDerivedRealTypeVoltage", modelFile)
     assert str(model.getVariableTypeByName("Voltage")) == ("Type name: Voltage, base type: Real, attributes:" 
                                                            "\n\tquantity = MX(ElectricalPotential)\n\tunit = MX(V)")
    
 def test_ModelicaDerivedTypeDefaultType():
-    model =  transferModelicaModel("AtomicModelDerivedTypeAndDefaultType", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelDerivedTypeAndDefaultType", modelFile)
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert int(diffs[0].getDeclaredType().this) == int(model.getVariableTypeByName("Voltage").this)
     assert int(diffs[1].getDeclaredType().this) == int(model.getVariableTypeByName("Real").this)
     
 def test_ModelicaIntegerDeclaredType():
-    model =  transferModelicaModel("AtomicModelDerivedIntegerTypeSteps", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelDerivedIntegerTypeSteps", modelFile)
     print str(model.getVariableTypeByName("Steps"))
     assert str(model.getVariableTypeByName("Steps")) == ("Type name: Steps, base type: Integer, attributes:"
                                                                 "\n\tquantity = MX(steps)")
     
 def test_ModelicaBooleanDeclaredType():
-    model =  transferModelicaModel("AtomicModelDerivedBooleanTypeIsDone", modelFile)
+    model =  transferToModelicaCasaADi("AtomicModelDerivedBooleanTypeIsDone", modelFile)
     print str(model.getVariableTypeByName("IsDone"))
     assert str(model.getVariableTypeByName("IsDone")) == ("Type name: IsDone, base type: Boolean, attributes:" 
                                                            "\n\tquantity = MX(Done)")
 
 def test_ModelicaRealConstant():
-    model =  transferModelicaModel("atomicModelRealConstant", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealConstant", modelFile)
     constVars =  model.getVariableByKind(Model.REAL_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
 def test_ModelicaRealIndependentParameter():
-    model =  transferModelicaModel("atomicModelRealIndependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealIndependentParameter", modelFile)
     indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
         
 def test_ModelicaRealDependentParameter():
-    model =  transferModelicaModel("atomicModelRealDependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealDependentParameter", modelFile)
     depParam =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
     indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
     assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
     
 def test_ModelicaDerivative():
-    model =  transferModelicaModel("atomicModelRealDerivative", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealDerivative", modelFile)
     assert str(model.getVariableByKind(Model.DERIVATIVE)[0].getVar()) == str(der_x1)
     
 def test_ModelicaDifferentiated():
-    model = transferModelicaModel("atomicModelRealDifferentiated", modelFile)
+    model = transferToModelicaCasaADi("atomicModelRealDifferentiated", modelFile)
     diff = model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diff[0].getVar()) == str(x1)
         
 def test_ModelicaRealInput():
-    model =  transferModelicaModel("atomicModelRealInput", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealInput", modelFile)
     ins =  model.getVariableByKind(Model.REAL_INPUT)
     assert str(ins[0].getVar()) == str(x1)
 
 def test_ModelicaAlgebraic():
-    model =  transferModelicaModel("atomicModelRealAlgebraic", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealAlgebraic", modelFile)
     alg =  model.getVariableByKind(Model.REAL_ALGEBRAIC)
     assert str(alg[0].getVar()) == str(x1)
     
 def test_ModelicaRealDisrete():
-    model =  transferModelicaModel("atomicModelRealDiscrete", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelRealDiscrete", modelFile)
     realDisc =  model.getVariableByKind(Model.REAL_DISCRETE)
     assert str(realDisc[0].getVar()) == str(x1)
     
 def test_ModelicaIntegerConstant():
-    model =  transferModelicaModel("atomicModelIntegerConstant", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelIntegerConstant", modelFile)
     constVars =  model.getVariableByKind(Model.INTEGER_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
     
 def test_ModelicaIntegerIndependentParameter():
-    model =  transferModelicaModel("atomicModelIntegerIndependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelIntegerIndependentParameter", modelFile)
     indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
     
 def test_ModelicaIntegerDependentConstants():
-    model =  transferModelicaModel("atomicModelIntegerDependentParameter", modelFile)    
+    model =  transferToModelicaCasaADi("atomicModelIntegerDependentParameter", modelFile)    
     depParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_DEPENDENT)
     indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
     assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
 
 def test_ModelicaIntegerDiscrete():
-    model =  transferModelicaModel("atomicModelIntegerDiscrete", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelIntegerDiscrete", modelFile)
     intDisc =  model.getVariableByKind(Model.INTEGER_DISCRETE)
     assert str(intDisc[0].getVar()) == str(x1)
     
 def test_ModelicaIntegerInput():
-    model =  transferModelicaModel("atomicModelIntegerInput", modelFile)    
+    model =  transferToModelicaCasaADi("atomicModelIntegerInput", modelFile)    
     intIns =  model.getVariableByKind(Model.INTEGER_INPUT)
     assert str(intIns[0].getVar()) == str(x1)
     
 def test_ModelicaBooleanConstant():
-    model =  transferModelicaModel("atomicModelBooleanConstant", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelBooleanConstant", modelFile)
     constVars =  model.getVariableByKind(Model.BOOLEAN_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
     
 def test_ModelicaBooleanIndependentParameter():
-    model =  transferModelicaModel("atomicModelBooleanIndependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelBooleanIndependentParameter", modelFile)
     indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
     
 def test_ModelicaBooleanDependentParameter():
-    model =  transferModelicaModel("atomicModelBooleanDependentParameter", modelFile)    
+    model =  transferToModelicaCasaADi("atomicModelBooleanDependentParameter", modelFile)    
     depParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_DEPENDENT)  
     indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
     assert str( indepParam[0].getVar().logic_and(MX(True)) ) == str(depParam[0].getAttribute("bindingExpression"))
     
 def test_ModelicaBooleanDiscrete():
-    model =  transferModelicaModel("atomicModelBooleanDiscrete", modelFile)        
+    model =  transferToModelicaCasaADi("atomicModelBooleanDiscrete", modelFile)        
     boolDisc =  model.getVariableByKind(Model.BOOLEAN_DISCRETE)
     assert str(boolDisc[0].getVar()) == str(x1)
 
 def test_ModelicaBooleanInput():
-    model =  transferModelicaModel("atomicModelBooleanInput", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelBooleanInput", modelFile)
     boolIns =  model.getVariableByKind(Model.BOOLEAN_INPUT)
     assert str(boolIns[0].getVar()) == str(x1)
         
 def test_ModelicaModelFunction():
-    model =  transferModelicaModel("simpleModelWithFunctions", "../common/modelicaModels.mo")
+    model =  transferToModelicaCasaADi("simpleModelWithFunctions", "../common/modelicaModels.mo")
     expectedPrint = ("ModelFunction : function(\"simpleModelWithFunctions.f\")\n Inputs (2):\n"
                             "  0. 1-by-1 (dense)\n"
                             "  1. 1-by-1 (dense)\n"
@@ -262,7 +250,7 @@ def test_ModelicaModelFunction():
     assert expectedPrint == actual
 
 def test_ModelicaDependentParametersCalculated():
-    model =  transferModelicaModel("atomicModelDependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelDependentParameter", modelFile)
     model.calculateValuesForDependentParameters()
     depVars = model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
     assert depVars[0].getAttribute("evaluatedBindingExpression").getValue() == 20
@@ -270,7 +258,7 @@ def test_ModelicaDependentParametersCalculated():
     assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
 
 def test_ModelicaFunctionCallEquationForParameterBinding():
-    model =  transferModelicaModelWithoutInlining("atomicModelPolyOutFunctionCallForDependentParameter", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
     model.calculateValuesForDependentParameters()
     expected = ("MX(temp_1[1]), declaredType : Real, attributes:\n"
                 "\tbindingExpression = MX(function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0})\n"
@@ -298,313 +286,68 @@ def test_ModelicaFunctionCallEquationForParameterBinding():
 
 optproblemsFile = "../common/atomicOptimizationProblems.mop"
 
-def test_OptimicaAliasVariables():
-    model = transferOptimizationProblem("atomicModelAlias", modelFile).getModel()
-    assert not model.getVariableByName("x").isNegated()
-    assert model.getVariableByName("z").isNegated()
-    assert str(model.getVariableByName("x")) == "MX(x), alias: y, declaredType : Real"
-    assert str(model.getModelVariableByName("x")) == "MX(y), declaredType : Real"
-    assert str(model.getVariableByName("y")) == "MX(y), declaredType : Real"
-    assert str(model.getModelVariableByName("y")) == "MX(y), declaredType : Real"
-    assert str(model.getVariableByName("z")) == "MX(z), alias: y, declaredType : Real"
-    assert str(model.getModelVariableByName("z")) == "MX(y), declaredType : Real"
-
 def computeStringRepresentationForContainer(myContainer):
     stringRepr = ""
     for index in range(len(myContainer)):
         stringRepr += str(myContainer[index])
-    print stringRepr
     return stringRepr
+    
 
 def test_OptimicaLessThanConstraint():
-    optProblem =  transferOptimizationProblem("atomicOptimizationLEQ", optproblemsFile);
+    optProblem =  transferToModelicaCasaADi("atomicOptimizationLEQ", optproblemsFile);
     expected = repr(x1) + " <= " + repr(MX(1.0))
-    print expected
-    
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
 def test_OptimicaGreaterThanConstraint():
-    optProblem =  transferOptimizationProblem("atomicOptimizationGEQ", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicOptimizationGEQ", optproblemsFile)
     expected = repr(x1) + " >= " + repr(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
+    
+def test_OptimicaSevaralConstraints():
+    optProblem =  transferToModelicaCasaADi("atomicOptimizationGEQandLEQ", optproblemsFile)
+    expected = repr(x2) + " <= " + repr(MX(1.0)) +  repr(x1) + " >= " + repr(MX(1.0)) 
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
 def test_OptimicaStartTime():
-    optProblem =  transferOptimizationProblem("atomicOptimizationStart5", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicOptimizationStart5", optproblemsFile)
     assert( optProblem.getStartTime().getValue() == 5)
     
 def test_OptimicaFinalTime():
-    optProblem =  transferOptimizationProblem("atomicOptimizationFinal10", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicOptimizationFinal10", optproblemsFile)
     assert( optProblem.getFinalTime().getValue() == 10)
 
 def test_OptimicaLagrangeTerm():
-    optProblem =  transferOptimizationProblem("atomicLagrangeX1", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicLagrangeX1", optproblemsFile)
     assert str(optProblem.getLagrangeTerm()) == str(x1) 
-    optProblem =  transferOptimizationProblem("atomicLagrangeNull", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicLagrangeNull", optproblemsFile)
     assert str(optProblem.getLagrangeTerm()) == str(MX(0))  
 
 def test_OptimicaMayerTerm():
-    optProblem =  transferOptimizationProblem("atomicMayerFinalTime", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicMayerFinalTime", optproblemsFile)
     assert str(optProblem.getMayerTerm()) == str(MX("finalTime")) 
-    optProblem =  transferOptimizationProblem("atomicMayerNull", optproblemsFile)
+    optProblem =  transferToModelicaCasaADi("atomicMayerNull", optproblemsFile)
     assert str(optProblem.getMayerTerm()) == str(MX(0))
 
 def test_OptimicaFree():
-    model =  transferOptimizationProblem("atomicWithFree", optproblemsFile).getModel()
+    model =  transferToModelicaCasaADi("atomicWithFree", optproblemsFile).getModel()
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("free"))) == str(MX(False))
 
 def test_OptimicaInitialGuess():
-    model =  transferOptimizationProblem("atomicWithInitialGuess", optproblemsFile).getModel()
+    model =  transferToModelicaCasaADi("atomicWithInitialGuess", optproblemsFile).getModel()
     diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
+
 def test_OptimicaSimpleEquation():
-    assert str(transferOptimizationProblem("AtomicModelSimpleEquation", modelFile).getModel().getDaeResidual()) == str(x1 - der_x1) 
-
-def test_OptimicaSimpleInitialEquation():
-    assert str(transferOptimizationProblem("AtomicModelSimpleInitialEquation", modelFile).getModel().getInitialResidual())  == str(MX(1)-x1)
-
-def test_OptimicaFunctionCallEquations():
-    assert( repr(transferOptimizationProblemWithoutInlining("AtomicModelFunctionCallEquation", modelFile).getModel().getDaeResidual()) == 
-                ("MX(vertcat((x1-der_x1),(vertcat(function(\"AtomicModelFunctionCallEquation.f\").call([x1]){0}," +
-                 "function(\"AtomicModelFunctionCallEquation.f\").call([x1]){1})-vertcat(x2,x3))))") )  
-
-def test_OptimicaBindingExpression():
-    model =  transferOptimizationProblem("AtomicModelAttributeBindingExpression", modelFile).getModel()
-    dependent =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
-    independent =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
-    actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))
-    expected = str(MX(2)) + str(MX("p1"))
-    assert actual == expected
-
-def test_OptimicaUnit():
-    model =  transferOptimizationProblem("AtomicModelAttributeUnit", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("unit")) == str(MX("kg")) 
-
-def test_OptimicaQuantity():
-    model =  transferOptimizationProblem("AtomicModelAttributeQuantity", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("quantity")) == str(MX("kg")) 
-
-def test_OptimicaDisplayUnit():
-    model =  transferOptimizationProblem("AtomicModelAttributeDisplayUnit", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("displayUnit")) == str(MX("kg")) 
-
-def test_OptimicaMin():
-    model =  transferOptimizationProblem("AtomicModelAttributeMin", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str((diffs[0].getAttribute("min"))) == str(MX(0)) 
-
-def test_OptimicaMax():
-    model =  transferOptimizationProblem("AtomicModelAttributeMax", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("max")) == str(MX(100))
-    
-def test_OptimicaStart():
-    model =  transferOptimizationProblem("AtomicModelAttributeStart", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("start"))  == str(MX(0.0005))
-    
-def test_OptimicaFixed():
-    model =  transferOptimizationProblem("AtomicModelAttributeFixed", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("fixed")) == str(MX(True))
-
-def test_OptimicaNominal():
-    model =  transferOptimizationProblem("AtomicModelAttributeNominal", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("nominal")) == str(MX(0.1))
-        
-def test_OptimicaComment():
-    model =  transferOptimizationProblem("AtomicModelComment", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diffs[0].getAttribute("comment")) == str(MX("I am x1's comment"))
-        
-def test_OptimicaRealDeclaredType():
-    model =  transferOptimizationProblem("AtomicModelDerivedRealTypeVoltage", modelFile).getModel()
-    assert str(model.getVariableTypeByName("Voltage")) == ("Type name: Voltage, base type: Real, attributes:" +
-                                                           "\n\tquantity = MX(ElectricalPotential)\n\tunit = MX(V)")
-def test_OptimicaDerivedTypeDefaultType():
-    model =  transferOptimizationProblem("AtomicModelDerivedTypeAndDefaultType", modelFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert int(diffs[0].getDeclaredType().this) == int(model.getVariableTypeByName("Voltage").this)
-    assert int(diffs[1].getDeclaredType().this) == int(model.getVariableTypeByName("Real").this)
-
-def test_OptimicaIntegerDeclaredType():
-    model =  transferOptimizationProblem("AtomicModelDerivedIntegerTypeSteps", modelFile).getModel()
-    print str(model.getVariableTypeByName("Steps"))
-    assert str(model.getVariableTypeByName("Steps")) == ("Type name: Steps, base type: Integer, attributes:"
-                                                                "\n\tquantity = MX(steps)")
-    
-def test_OptimicaBooleanDeclaredType():
-    model =  transferOptimizationProblem("AtomicModelDerivedBooleanTypeIsDone", modelFile).getModel()
-    print str(model.getVariableTypeByName("IsDone"))
-    assert str(model.getVariableTypeByName("IsDone")) == ("Type name: IsDone, base type: Boolean, attributes:" 
-                                                           "\n\tquantity = MX(Done)")
-
-def test_OptimicaRealConstant():
-    model =  transferOptimizationProblem("atomicModelRealConstant", modelFile).getModel()
-    constVars =  model.getVariableByKind(Model.REAL_CONSTANT)
-    assert str(constVars[0].getVar()) == str(MX("pi"))
-    assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
-
-def test_OptimicaRealIndependentParameter():
-    model =  transferOptimizationProblem("atomicModelRealIndependentParameter", modelFile).getModel()
-    indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
-    assert str(indepParam[0].getVar()) == str(MX("pi"))
-    assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
-        
-def test_OptimicaRealDependentParameter():
-    model =  transferOptimizationProblem("atomicModelRealDependentParameter", modelFile).getModel()
-    depParam =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
-    indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
-    assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
-    
-def test_OptimicaDerivative():
-    model =  transferOptimizationProblem("atomicModelRealDerivative", modelFile).getModel()
-    assert str(model.getVariableByKind(Model.DERIVATIVE)[0].getVar()) == str(der_x1)
-    
-def test_OptimicaDifferentiated():
-    model = transferOptimizationProblem("atomicModelRealDifferentiated", modelFile).getModel()
-    diff = model.getVariableByKind(Model.DIFFERENTIATED)
-    assert str(diff[0].getVar()) == str(x1)
-        
-def test_OptimicaRealInput():
-    model =  transferOptimizationProblem("atomicModelRealInput", modelFile).getModel()
-    ins =  model.getVariableByKind(Model.REAL_INPUT)
-    assert str(ins[0].getVar()) == str(x1)
-
-def test_OptimicaAlgebraic():
-    model =  transferOptimizationProblem("atomicModelRealAlgebraic", modelFile).getModel()
-    alg =  model.getVariableByKind(Model.REAL_ALGEBRAIC)
-    assert str(alg[0].getVar()) == str(x1)
-    
-def test_OptimicaRealDisrete():
-    model =  transferOptimizationProblem("atomicModelRealDiscrete", modelFile).getModel()
-    realDisc =  model.getVariableByKind(Model.REAL_DISCRETE)
-    assert str(realDisc[0].getVar()) == str(x1)
-    
-def test_OptimicaIntegerConstant():
-    model =  transferOptimizationProblem("atomicModelIntegerConstant", modelFile).getModel()
-    constVars =  model.getVariableByKind(Model.INTEGER_CONSTANT)
-    assert str(constVars[0].getVar()) == str(MX("pi"))
-    assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
-    
-def test_OptimicaIntegerIndependentParameter():
-    model =  transferOptimizationProblem("atomicModelIntegerIndependentParameter", modelFile).getModel()
-    indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
-    assert str(indepParam[0].getVar()) == str(MX("pi"))
-    assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
-    
-def test_OptimicaIntegerDependentConstants():
-    model =  transferOptimizationProblem("atomicModelIntegerDependentParameter", modelFile).getModel()
-    depParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_DEPENDENT)
-    indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
-    assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
-
-def test_OptimicaIntegerDiscrete():
-    model =  transferOptimizationProblem("atomicModelIntegerDiscrete", modelFile).getModel()
-    intDisc =  model.getVariableByKind(Model.INTEGER_DISCRETE)
-    assert str(intDisc[0].getVar()) == str(x1)
-    
-def test_OptimicaIntegerInput():
-    model =  transferOptimizationProblem("atomicModelIntegerInput", modelFile).getModel()
-    intIns =  model.getVariableByKind(Model.INTEGER_INPUT)
-    assert str(intIns[0].getVar()) == str(x1)
-    
-def test_OptimicaBooleanConstant():
-    model =  transferOptimizationProblem("atomicModelBooleanConstant", modelFile).getModel()
-    constVars =  model.getVariableByKind(Model.BOOLEAN_CONSTANT)
-    assert str(constVars[0].getVar()) == str(MX("pi"))
-    assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
-    
-def test_OptimicaBooleanIndependentParameter():
-    model =  transferOptimizationProblem("atomicModelBooleanIndependentParameter", modelFile).getModel()
-    indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-    assert str(indepParam[0].getVar()) == str(MX("pi"))
-    assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
-    
-def test_OptimicaBooleanDependentParameter():
-    model =  transferOptimizationProblem("atomicModelBooleanDependentParameter", modelFile).getModel()
-    depParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_DEPENDENT)
-    indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-    print depParam[0].getAttribute("bindingExpression")
-    assert str( indepParam[0].getVar().logic_and(MX(True)) ) == str(depParam[0].getAttribute("bindingExpression"))
-    
-def test_OptimicaBooleanDiscrete():
-    model =  transferOptimizationProblem("atomicModelBooleanDiscrete", modelFile).getModel()        
-    boolDisc =  model.getVariableByKind(Model.BOOLEAN_DISCRETE)
-    assert str(boolDisc[0].getVar()) == str(x1)
-
-def test_OptimicaBooleanInput():
-    model =  transferOptimizationProblem("atomicModelBooleanInput", modelFile).getModel()
-    boolIns =  model.getVariableByKind(Model.BOOLEAN_INPUT)
-    assert str(boolIns[0].getVar()) == str(x1)
-        
-def test_OptimicaModelFunction():
-    model =  transferOptimizationProblem("simpleModelWithFunctions", "../common/modelicaModels.mo").getModel()
-    expectedPrint = ("ModelFunction : function(\"simpleModelWithFunctions.f\")\n Inputs (2):\n"
-                            "  0. 1-by-1 (dense)\n"
-                            "  1. 1-by-1 (dense)\n"
-                            " Outputs (2):\n"
-                            "  0. 1-by-1 (dense)\n"
-                            "  1. 1-by-1 (dense)\n"
-                            "@0 = input[0]\n"
-                            "@1 = input[1]\n"
-                            "{@2,@3} = function(\"simpleModelWithFunctions.f2\").call([@0,@1])\n"
-                            "output[0] = @2\n"
-                            "output[1] = @3\n"
-                            "ModelFunction : function(\"simpleModelWithFunctions.f2\")\n Inputs (2):\n"
-                            "  0. 1-by-1 (dense)\n"
-                            "  1. 1-by-1 (dense)\n"
-                            " Outputs (2):\n"
-                            "  0. 1-by-1 (dense)\n"
-                            "  1. 1-by-1 (dense)\n" 
-                            "@0 = Const<0.5>(scalar)\n"
-                            "@1 = input[0]\n"
-                            "@0 = (@0*@1)\n"
-                            "output[0] = @0\n"
-                            "@2 = input[1]\n"
-                            "@0 = (@2+@0)\n"
-                            "output[1] = @0\n")
-    mf_1 = model.getModelFunctionByName("simpleModelWithFunctions.f")
-    mf_2 = model.getModelFunctionByName("simpleModelWithFunctions.f2")
-    actual = str(mf_1) + str(mf_2)
-    assert expectedPrint == actual
-
-def test_OptimicaDependentParametersCalculated():
-    model =  transferOptimizationProblem("atomicModelDependentParameter", modelFile).getModel()
-    model.calculateValuesForDependentParameters()
-    depVars = model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
-    assert depVars[0].getAttribute("evaluatedBindingExpression").getValue() == 20
-    assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
-    assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
-
-
-def test_OptimicaFunctionCallEquationForParameterBinding():
-    model =  transferOptimizationProblemWithoutInlining("atomicModelPolyOutFunctionCallForDependentParameter", modelFile).getModel()
-    model.calculateValuesForDependentParameters()
-    expected = ("MX(temp_1[1]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0})\n"
-                "\tevaluatedBindingExpression = MX(Const<2>(scalar))\n"
-                "MX(temp_1[2]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1})\n"
-                "\tevaluatedBindingExpression = MX(Const<4>(scalar))\n"
-                "MX(p2[1]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(temp_1[1])\n"
-                "\tevaluatedBindingExpression = MX(Const<2>(scalar))\n"
-                "MX(p2[2]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(temp_1[2])\n"
-                "\tevaluatedBindingExpression = MX(Const<4>(scalar))\n")
-    actual = ""
-    for var in model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT):
-        actual += str(var) + "\n"
-    print actual
-    print expected
-    assert actual == expected
-
+    import sys
+    errorString = ""
+    try:
+        transferToModelicaCasaADi("AtomicModelSimpleEquation", modelFile, compiler = "OPTIMICA")
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert errorString == "An OptimizationProblem can not be created from a Modelica model";
+   
 ##############################################
 #                                            # 
 #         CONSTRUCTS TRANSFER TESTS          #
@@ -613,12 +356,12 @@ def test_OptimicaFunctionCallEquationForParameterBinding():
 
 
 def test_ConstructElementaryExpression():
-    dae = transferModelicaModel("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
+    dae = transferToModelicaCasaADi("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
     expected = "MX(vertcat(((Const<2>(scalar)+x1)-der_x1),((x2-x1)-der_x2),((x3*x2)-der_x3),((x4/x3)-der_x4)))"
     assert repr(dae) == expected 
     
 def test_ConstructElementaryFunctions():
-    dae = transferModelicaModel("AtomicModelElementaryFunctions", modelFile).getDaeResidual()
+    dae = transferToModelicaCasaADi("AtomicModelElementaryFunctions", modelFile).getDaeResidual()
     expected = ("MX(vertcat((pow(x1,Const<5>(scalar))-der_x1),(fabs(x2)-der_x2),(fmin(x3,x2)-der_x3)," +
                 "(fmax(x4,x3)-der_x4),(sqrt(x5)-der_x5),(sin(x6)-der_x6),(cos(x7)-der_x7),(tan(x8)-der_x8)," +
                 "(asin(x9)-der_x9),(acos(x10)-der_x10),(atan(x11)-der_x11),(atan2(x12,x11)-der_x12)," +
@@ -627,21 +370,21 @@ def test_ConstructElementaryFunctions():
     assert repr(dae) == expected
     
 def test_ConstructBooleanExpressions():
-    dae = transferModelicaModel("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
+    dae = transferToModelicaCasaADi("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
     expected = ("MX(vertcat((((x2?Const<1>(scalar):0)+((!x2)?Const<2>(scalar):0))-der_x1)," + 
                 "((Const<0>(scalar)<x1)-x2),((Const<0>(scalar)<=x1)-x3),((x1<Const<0>(scalar))-x4)" +
                 ",((x1<=Const<0>(scalar))-x5),((x5==x4)-x6),((x6!=x5)-x7),((x6&&x5)-x8),((x6||x5)-x9)))" )
     assert repr(dae) == expected
      
 def test_ConstructMisc():
-    model = transferModelicaModel("AtomicModelMisc", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelMisc", modelFile)
     expected = ("MX(vertcat((Const<1.11>(scalar)-der_x1),(((x3?Const<3>(scalar):0)+((!x3)?Const<4>(scalar):0))-x2)," +
                 "((Const<1>(scalar)||(Const<1>(scalar)<x2))-x3),((Const<0>(scalar)||x3)-x4)))" + 
                 "MX(vertcat((-x1),(-pre_x2),(-pre_x3),(-pre_x4)))")
     assert (repr(model.getDaeResidual()) + repr(model.getInitialResidual()))  == expected
      
 def test_ConstructVariableLaziness():
-    model = transferModelicaModel("AtomicModelVariableLaziness", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelVariableLaziness", modelFile)
     x2_eq = model.getDaeResidual()[0].getDep(0)
     x1_eq = model.getDaeResidual()[1].getDep(0)
     x1_var = model.getVariableByKind(Model.DIFFERENTIATED)[0].getVar()
@@ -649,7 +392,7 @@ def test_ConstructVariableLaziness():
     assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
     
 def test_ConstructArrayInOutFunction1():
-    model = transferModelicaModelWithoutInlining("AtomicModelVector1", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelVector1", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelVector1.f\")\n"
                 " Inputs (2):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -670,7 +413,7 @@ def test_ConstructArrayInOutFunction1():
     assert str(model.getDaeResidual()) == expected
  
 def test_ConstructArrayInOutFunction2():
-    model = transferModelicaModelWithoutInlining("AtomicModelVector2", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelVector2", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelVector2.f\")\n"
                 " Inputs (2):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -690,7 +433,7 @@ def test_ConstructArrayInOutFunction2():
     assert str(model.getDaeResidual()) == expected
     
 def test_ConstructArrayInOutFunctionCallEquation():
-    model = transferModelicaModelWithoutInlining("AtomicModelVector3", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelVector3.f\")\n"
                 " Inputs (4):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -722,7 +465,7 @@ def test_ConstructArrayInOutFunctionCallEquation():
     assert str(model.getDaeResidual()) == expected
     
 def test_FunctionCallEquationOmittedOuts():
-    model = transferModelicaModelWithoutInlining("atomicModelFunctionCallEquationIgnoredOuts", modelFile)
+    model = transferToModelicaCasaADi("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("vertcat(((x1+x2)-der_x2),"
                 "(vertcat("
                 "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([Const<1>(scalar),x3]){0},"
@@ -731,7 +474,7 @@ def test_FunctionCallEquationOmittedOuts():
     assert str(model.getDaeResidual()) == expected
     
 def test_FunctionCallStatementOmittedOuts():
-    model = transferModelicaModelWithoutInlining("atomicModelFunctionCallStatementIgnoredOuts", modelFile)
+    model = transferToModelicaCasaADi("atomicModelFunctionCallStatementIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"
                 " Input: 1-by-1 (dense)\n"
                 " Output: 1-by-1 (dense)\n"
@@ -742,7 +485,7 @@ def test_FunctionCallStatementOmittedOuts():
     assert str(model.getModelFunctionByName("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
     
 def test_ConstructFunctionMatrix():
-    model = transferModelicaModelWithoutInlining("AtomicModelMatrix", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
                 " Inputs (4):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -771,7 +514,7 @@ def test_ConstructFunctionMatrix():
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructFunctionMatrixDimsGreaterThanTwo():
-    model = transferModelicaModelWithoutInlining("AtomicModelLargerThanTwoDimensionArray", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelLargerThanTwoDimensionArray", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelLargerThanTwoDimensionArray.f\")\n"
                 " Inputs (6):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -818,7 +561,7 @@ def test_ConstructFunctionMatrixDimsGreaterThanTwo():
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructNestedRecordFunctions():
-    model = transferModelicaModelWithoutInlining("AtomicModelRecordNestedArray", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelRecordNestedArray", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelRecordNestedArray.generateCurves\")\n"
                 " Input: 1-by-1 (dense)\n"
                 " Outputs (8):\n"
@@ -863,7 +606,7 @@ def test_ConstructNestedRecordFunctions():
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructRecordInFunctionInFunction():
-    model = transferModelicaModelWithoutInlining("AtomicModelRecordInOutFunctionCallStatement", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelRecordInOutFunctionCallStatement", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelRecordInOutFunctionCallStatement.f1\")\n"
                 " Input: 1-by-1 (dense)\n"
                 " Output: 1-by-1 (dense)\n"
@@ -891,7 +634,7 @@ def test_ConstructRecordInFunctionInFunction():
     assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der_a)"
 
 def test_ConstructRecordArbitraryDimension():
-    model = transferModelicaModelWithoutInlining("AtomicModelRecordArbitraryDimension", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelRecordArbitraryDimension", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelRecordArbitraryDimension.f\")\n"
                 " Input: 1-by-1 (dense)\n"
                 " Outputs (8):\n"
@@ -933,7 +676,7 @@ def test_ConstructRecordArbitraryDimension():
     assert str(model.getDaeResidual()) == expected
     
 def test_ConstructArrayFlattening():
-    model =  transferModelicaModelWithoutInlining("atomicModelSimpleArrayIndexing", modelFile)
+    model =  transferToModelicaCasaADi("atomicModelSimpleArrayIndexing", modelFile, compiler_options={"inline_functions":"none"})
     model.calculateValuesForDependentParameters()
     expected = ("ModelFunction : function(\"atomicModelSimpleArrayIndexing.f\")\n"
                 " Inputs (0):\n"
@@ -953,7 +696,7 @@ def test_ConstructArrayFlattening():
     assert str(model.getModelFunctionByName("atomicModelSimpleArrayIndexing.f")) == expected
     
 def test_ConstructRecordNestedSeveralVars():
-    model = transferModelicaModelWithoutInlining("AtomicModelRecordSeveralVars", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelRecordSeveralVars", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelRecordSeveralVars.f\")\n"
                 " Input: 1-by-1 (dense)\n"
                 " Outputs (10):\n"
@@ -1003,7 +746,7 @@ def test_ConstructRecordNestedSeveralVars():
     assert str(model.getDaeResidual()) == expected
 
 def test_ConstructFunctionsInRhs():
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicRealFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat((sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})-der_x1),"
                 "(function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1,x2]){0}-der_x2),"
                 "(vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0},function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})-vertcat(x3,x4)),"
@@ -1015,7 +758,7 @@ def test_ConstructFunctionsInRhs():
                 "(vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9,x10]){0},function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9,x10]){1})-vertcat(x11,x12)))")
     assert str(model.getDaeResidual()) == expected 
     
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicIntegerFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat(("
                 "function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([x1]){0}-x1),"
                 "(function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([x1,x2]){0}-x2),"
@@ -1028,7 +771,7 @@ def test_ConstructFunctionsInRhs():
                 "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([x9,x10]){0},function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([x9,x10]){1})-vertcat(x11,x12)))")
     assert str(model.getDaeResidual()) == expected 
       
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicBooleanFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat(("
                 "function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([x1]){0}-x1),"
                 "(function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([x1,x2]){0}-x2),"
@@ -1042,7 +785,7 @@ def test_ConstructFunctionsInRhs():
     assert str(model.getDaeResidual()) == expected 
      
 def test_ConstructVariousRealValuedFunctions():
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicRealFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     #function monoInMonoOut
         #input Real x
         #output Real y
@@ -1218,7 +961,7 @@ def test_ConstructVariousRealValuedFunctions():
      
      
 def test_ConstructVariousIntegerValuedFunctions():
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicIntegerFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     #function monoInMonoOut
         #input Integer x
         #output Integer y
@@ -1396,7 +1139,7 @@ def test_ConstructVariousIntegerValuedFunctions():
      
      
 def test_ConstructVariousBooleanValuedFunctions():
-    model = transferModelicaModelWithoutInlining("AtomicModelAtomicBooleanFunctions", modelFile)
+    model = transferToModelicaCasaADi("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     #function monoInMonoOut
         #input Boolean x
         #output Boolean y

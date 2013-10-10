@@ -64,7 +64,7 @@ export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
  
-MC_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/casadi
+MC_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/ModelicaCasADi
 
 $(MODELICA_CASADI_CASADI_BUILD_DIR): 
 	mkdir -p $(MC_BUILD); cd $(MC_BUILD); \
@@ -114,7 +114,7 @@ $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	    -I"$(CASADI_HOME)" \
 	    $(CFLAGS)
 
-$(DESTDIR)$(prefix)/Python/casadi: 
+$(DESTDIR)$(prefix)/Python/ModelicaCasADi: 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make python
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
@@ -125,10 +125,12 @@ $(DESTDIR)$(prefix)/Python/casadi:
 	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
 	touch $(MC_BUILD)/test/pythonTests/runtests.sh
 	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
-	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
+	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ JMODELICA_HOME=$(DESTDIR)$(prefix) nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
 	mkdir -p $(DESTDIR)$(prefix)/Python/ 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/ 
+	mkdir -p $(DESTDIR)$(prefix)/Python/ModelicaCasADi
+	cp $(MC_INTERFACE)/python/*.py $(DESTDIR)$(prefix)/Python/ModelicaCasADi
 
 MC_install_python: 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make install_python
@@ -327,6 +329,7 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
 	rm -rf $(DESTDIR)$(prefix)/Python/casadi
+	rm -rf $(DESTDIR)$(prefix)/Python/ModelicaCasADi
 	
 
 clean-python-packages:

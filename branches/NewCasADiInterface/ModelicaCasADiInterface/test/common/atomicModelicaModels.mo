@@ -15,15 +15,6 @@
 */
 
 
-
-
-
-model AtomicModelDiplayUnit
-    Real x1(start=0.0005);
-equation
-    der(x1) = log10(x1);
-end AtomicModelDiplayUnit;
-
 model AtomicModelElementaryExpressions
     Real x1;
     Real x2;

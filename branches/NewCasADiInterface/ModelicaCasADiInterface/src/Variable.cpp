@@ -5,7 +5,7 @@ namespace ModelicaCasADi
 Variable::Variable() : negated(false) {
     var = MX();
     aliasVariable = NULL;
-	declaredType = NULL;
+    declaredType = NULL;
 }
 
 Variable::Variable(MX var, Variable::Causality causality, 
@@ -15,11 +15,11 @@ Variable::Variable(MX var, Variable::Causality causality,
                  variability(variability),
                  negated(false) {
     if (var.isConstant()) {
-		throw std::runtime_error("A variable must have a symbolic MX");
-	}
+        throw std::runtime_error("A variable must have a symbolic MX");
+    }
     aliasVariable = NULL;
-	this->var = var;
-	this->declaredType = declaredType;
+    this->var = var;
+    this->declaredType = declaredType;
 }
 
 const Variable::AttributeValue* Variable::getAttribute(AttributeKey key) const { 

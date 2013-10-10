@@ -29,6 +29,7 @@ set(TYPES_HPP
 )
 
 set(MC_CPP
+  CompilerOptionsWrapper.cpp
   Constraint.cpp
   OptimizationProblem.cpp
   Model.cpp

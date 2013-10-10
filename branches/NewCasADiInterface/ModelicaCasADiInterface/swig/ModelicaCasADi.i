@@ -23,12 +23,16 @@
 #include "transferModelica.hpp"
 #include "transferOptimica.hpp"
 
+#include "CompilerOptionsWrapper.hpp"
+
 #include "SharedNode.hpp"
 #include "Ref.hpp"
 %}
 %include "doc.i"
 
 %rename(MyVariable) ModelicaCasADi::Variable;
+%rename(_transferModelicaModel) transferModelicaModel;
+%rename(_transferOptimizationProblem) transferOptimizationProblem;
 
 
 %feature("ref")   SharedNode "ModelicaCasADi::incRefNode($this);"
@@ -39,7 +43,7 @@
 %include "std_vector.i"
 
 %template(MyVariableVector) std::vector<ModelicaCasADi::Variable*>;
-
+%template(StringVector) std::vector<std::string>;
 %template(ConstraintVector) std::vector<ModelicaCasADi::Constraint>;
 
 // These must be in dependency order!
@@ -78,6 +82,8 @@
 %include "OptimizationProblem.hpp"
 
 %include "sharedTransferFunctionality.hpp"
+
+%include "CompilerOptionsWrapper.hpp"
 
 %include "transferModelica.hpp"
 %include "transferOptimica.hpp"
