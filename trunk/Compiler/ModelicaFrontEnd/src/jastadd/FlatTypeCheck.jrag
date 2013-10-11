@@ -612,7 +612,7 @@ aspect FlatTypeCheck {
   public void FFunctionCallLeft.typeCheck() {
 	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
 		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
-			  FIdUse use = ((FIdUseExp) getFExp()).getFIdUse();
+			  FIdUse use = getFExp().asFIdUse();
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
 			  else if (size().isUnknown() && !inFunction())

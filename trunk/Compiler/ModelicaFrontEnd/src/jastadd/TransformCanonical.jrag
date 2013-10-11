@@ -971,7 +971,7 @@ aspect TransformCanonical {
 	
 	public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
 		if (!isInput() && hasBindingExp()) {
-			FAssignStmt stmt = new FAssignStmt(createFIdUse(), getBindingExp());
+			FAssignStmt stmt = new FAssignStmt(createUseExp(), getBindingExp());
 			stmt.shouldBeSorted = true;
 			stmts.add(stmt);
 			setBindingExpOpt(new Opt());
@@ -1222,7 +1222,7 @@ aspect TransformCanonical {
 			// - Find inputs
 			ArrayList<FVariable> inVars = new ArrayList<FVariable>();
 			ArrayList<FFunctionVariable> bothInVars = new ArrayList<FFunctionVariable>();
-			for (FIdUse use : alg.usedFIdUses()) {
+			for (FIdUseExp use : alg.FIdUseExpsInRHS()) {
 				FAbstractVariable fv = use.myFV();
 				if (!fv.isUnknown() && !inVars.contains(fv) && !fv.isForIndex()) {
 					inVars.add((FVariable) fv);
@@ -1232,7 +1232,7 @@ aspect TransformCanonical {
 			
 			// - Create outputs, add to vars and locate those that are inputs as well
 			ArrayList<FVariable> outVars = new ArrayList<FVariable>();
-			for (FIdUse use : alg.assignedFIdUses()) {
+			for (FIdUseExp use : alg.FIdUseExpsInLHS()) {
 				if (!use.myFV().isUnknown() && !outVars.contains(use.myFV())) {
 					FVariable fv = (FVariable) use.myFV();
 					FFunctionVariable ffv = fv.createFFunctionOutput();
@@ -1309,7 +1309,7 @@ aspect TransformCanonical {
 		
 		List<FStatement> stmts = new List<FStatement>();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			FStatement stmt = new FAssignStmt(fv.createFIdUse(),fv.createAlgorithmArgument(true));
+			FStatement stmt = new FAssignStmt(fv.createUseExp(),fv.createAlgorithmArgument(true));
 			stmts.add(stmt);
 		}
 		for (FStatement stmt : getFStatements()) {
@@ -1791,7 +1791,7 @@ aspect TransformCanonical {
 	rewrite FAssignStmt {
 		when (rewriteAlias && getLeft().myFV().isAlias()) to FAssignStmt {
 			FVariable fv = (FVariable) getLeft().myFV();
-			setLeft(fv.alias().createFIdUse());
+			setLeft(fv.alias().createUseExp());
 			if (fv.isNegated()) 
 				setRight(new FNegExp(getRight()));
 			return this;
@@ -4081,8 +4081,7 @@ aspect FunctionInlining {
 		FExp right = getRight().fullCopy();
 		right = getRight().dynamicFExp(right);
 		right = right.replaceReferences(fi);
-		FIdUse left = getLeft().fullCopy();
-		left = ((FIdUseExp) getRight().dynamicFExp(new FIdUseExp(left))).getFIdUse();
+		FIdUseExp left = (FIdUseExp)getLeft().dynamicFExp(getLeft().fullCopy());
 		left.replaceReferencesInSubscripts(fi);
 		right.addInliningVarsAndEqns(fi, left.scalarName(), true);
 	}
@@ -4202,7 +4201,7 @@ aspect FunctionInlining {
 		FExp loopExp = getIndex().getFExp();
 		loopExp = loopExp.dynamicFExp(loopExp.fullCopy()).replaceReferences(fi);
 		for (FExp e : loopExp.getArray().iterable()) {
-			stmts.add(new FAssignStmt(index.createFIdUse(), e.fullCopy()));
+			stmts.add(new FAssignStmt(index.createUseExp(), e.fullCopy()));
 			for (FStatement stmt : newStmts)
 				stmts.add(stmt.fullCopy());
 		}
@@ -4255,18 +4254,18 @@ aspect FunctionInlining {
 		try {
 			FAssignStmt left = (FAssignStmt) leftStmt;
 			FAssignStmt right = (FAssignStmt) rightStmt;
-			FIdUse var = ((left != null) ? left : right).getLeft().fullCopy();
+			FIdUseExp lhs = ((left != null) ? left : right).getLeft().fullCopy();
 			FExp test = getTest().fullCopy(); // TODO: use temp var instead
-			FExp leftExp = createIfElseExpBranch(left, var);
-			FExp rightExp = createIfElseExpBranch(right, var);
-			return new FAssignStmt(var, new FIfExp(test, leftExp, rightExp));
+			FExp leftExp = createIfElseExpBranch(left, lhs);
+			FExp rightExp = createIfElseExpBranch(right, lhs);
+			return new FAssignStmt(lhs, new FIfExp(test, leftExp, rightExp));
 		} catch (ClassCastException e) {
 			throw new IllegalArgumentException();
 		}
 	}
 	
-	private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FIdUse var) {
-		return (ass != null) ? ass.getRight().fullCopy() : new FIdUseExp(var.fullCopy());
+	private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FIdUseExp var) {
+		return (ass != null) ? ass.getRight().fullCopy() : var.fullCopy();
 	}
 	
 	/**

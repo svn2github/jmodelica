@@ -656,7 +656,7 @@ InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 /**
  * \brief A flattened assignment statement.
  */
-FAssignStmt : FStatement ::= Left:FIdUse Right:FExp;
+FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 
 /**
  * \brief A flattened function call statement.

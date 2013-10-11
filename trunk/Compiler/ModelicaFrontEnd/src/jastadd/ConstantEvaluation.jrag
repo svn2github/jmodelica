@@ -2476,6 +2476,16 @@ aspect ConstantEvaluation {
    * @param values  constant values for the variables
    * @param right   the right hand side
    */
+  public void FIdUseExp.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
+	  getFIdUse().assignToInFuncEval(values, right);
+  }
+
+  /**
+   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * 
+   * @param values  constant values for the variables
+   * @param right   the right hand side
+   */
   public void FIdUse.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
 	  getFQName().assignToInFuncEval(values, right, this);
   }

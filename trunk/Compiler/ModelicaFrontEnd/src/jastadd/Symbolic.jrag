@@ -73,15 +73,7 @@ aspect EquationSolve {
 				inLeft = true;
 		}
 		
-		Set<FVariable> argVars = referencedFVariablesInRHS();
-
-		boolean inArgs = false;
-		for (FVariable fv : argVars) {
-			if (fv.name().equals(name))
-				inArgs = true;
-		}
-
-		if (inLeft && !inArgs)
+		if (inLeft)
 			return Solvability.ANALYTICALLY_SOLVABLE;
 		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
 			return Solvability.NUMERICALLY_SOLVABLE;
@@ -469,9 +461,9 @@ aspect Derivatives {
 			if (diffedCall.isLiteralZero()) {
 				Collection<FAbstractEquation> res = new ArrayList<FAbstractEquation>();
 				for (FFunctionCallLeft left : getLefts())
-					for (FIdUse fIdUse : left.assignedFIdUses())
+					for (FIdUseExp use : FIdUseExpsInLHS())
 						res.add(dynamicFAbstractEquation(
-								new FEquation(new FIdUseExp(fIdUse.fullCopy()), fIdUse.type().zeroLiteral())));
+								new FEquation(use.fullCopy(), use.type().zeroLiteral())));
 				return res;
 			} else {
 				return Arrays.asList(dynamicFAbstractEquation(

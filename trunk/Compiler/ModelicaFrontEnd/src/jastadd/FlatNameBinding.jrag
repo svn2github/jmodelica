@@ -369,6 +369,7 @@ aspect FlatNameBinding {
 	}
 	
 	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
+	syn boolean FIdUseExp.isForIndex()         = getFIdUse().isForIndex();
 	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
 	syn boolean FInstAccessExp.isForIndex()    = getInstAccess().isForIndex();
 	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();

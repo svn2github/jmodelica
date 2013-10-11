@@ -415,6 +415,9 @@ public class MunkresProblem {
 	
 }
 
+	syn boolean FAbstractEquation.lhsVarsAreSolved() = false;
+	eq FAlgorithm.lhsVarsAreSolved()                 = true;
+
 public class BiPGraph {
 
 	public static final int MAX_N_EQ_DIFFS = 5;
@@ -602,6 +605,8 @@ public class BiPGraph {
 				int i = 0;
 				for (FVariable fv : e.referencedFVariablesInLHS()) 
 					lhsVars.put(fv,i++);
+				if (e.lhsVarsAreSolved())
+					rhsVars.removeAll(lhsVars.keySet());
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.

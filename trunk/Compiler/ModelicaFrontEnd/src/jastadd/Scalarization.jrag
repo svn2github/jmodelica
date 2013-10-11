@@ -870,8 +870,8 @@ aspect Scalarization {
 		List<FStatement> inner = names.createForLoops(stmts, getFQName());
 		if (!isFuncCall)
 			exp.createArrayTemporaries(inner, vars, myIndexMap, true);
-		FIdUse use = createUseWithNamedSubscripts(names);
-		inner.add(new FAssignStmt(use, exp.scalarize(myIndexMap)));
+		FIdUse lhs = createUseWithNamedSubscripts(names);
+		inner.add(new FAssignStmt(new FIdUseExp(lhs), exp.scalarize(myIndexMap)));
 	}
 	
 	/**
@@ -984,7 +984,7 @@ aspect Scalarization {
 		for (Index i : indices()) {
 			FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
 			name.scalarized = true;
-			clauses.add(new FAssignStmt(new FIdUse(name), arr.get(i).scalarize(indexMap)));
+			clauses.add(new FAssignStmt(new FIdUseExp(name), arr.get(i).scalarize(indexMap)));
 		}
 	}
 	
@@ -999,7 +999,7 @@ aspect Scalarization {
 			FType type = (FType) type().scalarType().unboundCopy();
 			if (addVar) 
 				vars.add(new FFunctionVariable(type, tempVarName()));
-			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), reduceStartValue().buildLiteral()));
+			clauses.add(new FAssignStmt(new FIdUseExp(tempVarName()), reduceStartValue().buildLiteral()));
 			
 			// Set up names and create for loop(s)
 			FExp exp = getFExp();
@@ -1019,7 +1019,7 @@ aspect Scalarization {
 			FBinExp scalarizedExp = scalarReduceExp();
 			scalarizedExp.setLeft(new FIdUseExp(tempVarName()));
 			scalarizedExp.setRight(scalar);
-			fsl.add(new FAssignStmt(new FIdUse(tempVarName()), scalarizedExp));
+			fsl.add(new FAssignStmt(new FIdUseExp(tempVarName()), scalarizedExp));
 		} else {
 			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		}
@@ -1036,7 +1036,7 @@ aspect Scalarization {
 			FType type = (FType) type().scalarType().unboundCopy();
 			if (addVar) 
 				vars.add(new FFunctionVariable(type, tempVarName()));
-			clauses.add(new FAssignStmt(new FIdUse(tempVarName()), type.zeroLiteral()));
+			clauses.add(new FAssignStmt(new FIdUseExp(tempVarName()), type.zeroLiteral()));
 			
 			// Set up indices for the left operand
 			FExp exp = getLeft();
@@ -1075,7 +1075,7 @@ aspect Scalarization {
 			// Add statement updating temp var to loop
 			FExp mul = new FMulExp(left, right);
 			FExp add = new FAddExp(new FIdUseExp(tempVarName()), mul);
-			fsl.add(new FAssignStmt(new FIdUse(tempVarName()), add));
+			fsl.add(new FAssignStmt(new FIdUseExp(tempVarName()), add));
 		} else {
 			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		}
@@ -1134,7 +1134,7 @@ aspect Scalarization {
 	protected void FType.scalarizeAssignment(
 			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FQName left, FExp right) {
-		stmts.add(new FAssignStmt(new FIdUse(left.fullCopy()), right.unboundCopy()));
+		stmts.add(new FAssignStmt(new FIdUseExp(left.fullCopy()), right.unboundCopy()));
 	}
 	
 	/**
@@ -1226,20 +1226,20 @@ aspect Scalarization {
 	
 	public void FAssignStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
-		FIdUse left = getLeft();
+		FIdUseExp left = getLeft();
 		FExp right = getRight();
 		
 		if (right.isComposite() && !left.isSlice() && inFunction() && right instanceof FFunctionCall) {
 			FFunctionCall call = (FFunctionCall) right;
 			call.getArgs().createArrayTemporaries(stmts, vars, indexMap, true);
-			FExp leftExp = new FIdUseExp(left.fullCopy());
+			FExp leftExp = left.fullCopy();
 			leftExp.setScalarizedFlag();
 			call.createFunctionCallClause(stmts, indexMap, leftExp);
 		} else if (right.size().isUnknown()) {
 			left.myFV().scalarizeUnknownArrayAssignment(vars, stmts, indexMap, right);
 		} else {
 			right.createArrayTemporaries(stmts, vars, indexMap, true);
-			left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFQName(), right);
+			left.type().scalarizeArrayAssignment(vars, stmts, indexMap, left.getFIdUse().getFQName(), right);
 		} 
 	}
 	
@@ -1727,9 +1727,9 @@ aspect Scalarization {
 			
 			Array arr = getFExp().getArray();
 			for (Index i : arr.indices()) {
-				FExp exp = arr.get(i).scalarize(indexMap);
-				FIdUse use = new FIdUse(name, i.createFArraySubscripts());
-				clauses.add(new FAssignStmt(use, exp));
+				FExp rhs = arr.get(i).scalarize(indexMap);
+				FIdUseExp lhs = new FIdUseExp(name, i.createFArraySubscripts());
+				clauses.add(new FAssignStmt(lhs, rhs));
 			}
 		}
 	}
