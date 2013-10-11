@@ -916,10 +916,11 @@ end TransformCanonicalTests.AliasTest22;
 		TransformCanonicalTestCase(
 			name="AliasTest23",
 			description="Test elimination of alias variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest23
  Real x1;
+initial equation 
+ x1 = 0.0;
 equation
  - der(x1) = 0;
 end TransformCanonicalTests.AliasTest23;
@@ -937,11 +938,12 @@ end TransformCanonicalTests.AliasTest23;
 		TransformCanonicalTestCase(
 			name="AliasTest24",
 			description="Test elimination of alias variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest24
  Real x1;
  input Real u;
+initial equation 
+ x1 = 0.0;
 equation 
  der(x1) = u;
 
@@ -2259,6 +2261,29 @@ Semantic error at line 0, column 0:
 ")})));
 end UnbalancedTest5_Err;
 
+model UnbalancedInitTest1
+	parameter Real x(fixed=false);
+	parameter Real y(fixed=false);
+initial equation
+	x = 0;
+	x = x * 3.14;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedInitTest1",
+			description="Test error messages for unbalanced initial systems.",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The DAE initialization system has 3 equations and 2 free variables.
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The initialization system is structurally singular. The following equation(s) could not be matched to any variable:
+    x = x * 3.14
+
+")})));
+end UnbalancedInitTest1;
 
 model MatchingTest1
 	Real x(start=1);

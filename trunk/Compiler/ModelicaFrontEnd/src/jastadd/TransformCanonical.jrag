@@ -492,10 +492,6 @@ aspect TransformCanonical {
 		log.info("DAE initial ");
 		log.info(g.printMatchingObj());
 
-		if (g.getUnmatchedEquations().size() > 0) {
-			return;
-		}
-
 		// Add initial equations if needed
 		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
 			for (Var var : g.getUnmatchedVariables()) {	
@@ -695,31 +691,37 @@ aspect TransformCanonical {
 	
 	public void FClass.checkStructure() {
 		if (root().options.getBooleanOption("enable_structural_diagnosis")) {
-			boolean unbalanced = false;
 			StringBuffer err_str = new StringBuffer("The system is structurally singular. ");
-			if (getDAEUnmatchedVariables().size() > 0 ) {
-				err_str.append("The following varible(s) could not be matched to any equation:\n");
-				for (FVariable fv : getDAEUnmatchedVariables()) {
-					err_str.append("     " + fv.name());
-					err_str.append("\n");
-				}
-				unbalanced = true;
-			}
-			
-			if (getDAEUnmatchedEquations().size() > 0 ) {
-				if (unbalanced) 
-					err_str.append("\n  ");
-				err_str.append("The following equation(s) could not be matched to any variable:\n");
-				for (FAbstractEquation ee : getDAEUnmatchedEquations()) {
-					err_str.append(ee.prettyPrint("    "));
-					err_str.append("\n");
-				}
-				unbalanced = true;
-			}
-			
-			if (unbalanced) 
+			if (writeUnmatchedElements(err_str, getDAEUnmatchedVariables(), getDAEUnmatchedEquations())) 
+				error(err_str.toString());
+			err_str = new StringBuffer("The initialization system is structurally singular. ");
+			if (writeUnmatchedElements(err_str, getDAEInitUnmatchedVariables(), getDAEInitUnmatchedEquations())) 
 				error(err_str.toString());
 		}
+	}
+	
+	public static boolean FClass.writeUnmatchedElements(StringBuffer str, Collection<FVariable> unmatchedVariables, Collection<FAbstractEquation> unmatchedEquations) {
+		boolean unbalanced = false;
+		if (!unmatchedVariables.isEmpty()) {
+			str.append("The following varible(s) could not be matched to any equation:\n");
+			for (FVariable fv : unmatchedVariables) {
+				str.append("     " + fv.name());
+				str.append("\n");
+			}
+			unbalanced = true;
+		}
+		
+		if (!unmatchedEquations.isEmpty()) {
+			if (unbalanced) 
+				str.append("\n  ");
+			str.append("The following equation(s) could not be matched to any variable:\n");
+			for (FAbstractEquation ee : unmatchedEquations) {
+				str.append(ee.prettyPrint("    "));
+				str.append("\n");
+			}
+			unbalanced = true;
+		}
+		return unbalanced;
 	}
 
 

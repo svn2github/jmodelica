@@ -57,7 +57,7 @@ end CCodeGenTest1;
 
 	model CCodeGenTest2
 		Real x(start=1);
-		Real y(start=3,fixed=true)=3;
+		Real y(start=3)=3;
 	    Real z = x;
 	    Real w(start=1) = 2;
 	    Real v;
@@ -69,7 +69,6 @@ end CCodeGenTest1;
 		CCodeGenTestCase(
 			name="CCodeGenTest2",
 			description="Test of code generation",
-			automatic_add_initial_equations=false,
 			variability_propagation=false,
 			generate_ode=false,
 			generate_dae=true,
@@ -97,11 +96,13 @@ $C_DAE_initial_guess_equation_residuals$
     (*res)[1] = 4 - (_der_v_5);
     (*res)[2] = 3 - (_y_1);
     (*res)[3] = 2 - (_w_2);
-    (*res)[4] = 3 - (_y_1);
+    (*res)[4] = 1 - (_x_0);
+    (*res)[5] = 0.0 - (_v_3);
 
-   (*res)[0] = 1 - _x_0;
-   (*res)[1] = 1 - _w_2;
-   (*res)[2] = 0.0 - _v_3;
+    (*res)[0] = 1 - _x_0;
+    (*res)[1] = 3 - _y_1;
+    (*res)[2] = 1 - _w_2;
+    (*res)[3] = 0.0 - _v_3;
 ")})));
 	end CCodeGenTest2;
 

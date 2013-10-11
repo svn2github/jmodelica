@@ -76,11 +76,13 @@ end ArrayTests.General.ArrayTest1b;
 		TransformCanonicalTestCase(
 			name="ArrayTest1c",
 			description="Test scalarization of variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest1c
  Real x[1];
  Real x[2];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
 equation 
  der(x[1]) = 3;
  der(x[2]) = 4;
@@ -731,12 +733,15 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayTest29",
 			description="Flattening of arrays.",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest29
  Real x[1](start = 1);
  Real x[2](start = 2);
  Real x[3](start = 3);
+initial equation 
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
 equation
  der(x[1]) = 1;
  der(x[2]) = 1;
@@ -756,7 +761,6 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayTest30",
 			description="Flattening of arrays.",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest30
  Real x[1,1](start = 1);
@@ -765,6 +769,13 @@ fclass ArrayTests.General.ArrayTest30
  Real x[2,2](start = 4);
  Real x[3,1](start = 5);
  Real x[3,2](start = 6);
+initial equation 
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
 equation
  der(x[1,1]) = - 1;
  der(x[1,2]) = - 2;
@@ -5388,7 +5399,6 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices1",
 			description="Mixing for index subscripts with colon subscripts",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
  Real y[1,1,1];
@@ -5407,6 +5417,15 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real z[2,1,2] = 0;
  constant Real z[2,2,1] = 0;
  constant Real z[2,2,2] = 1;
+initial equation 
+ y[1,1,1] = 0.0;
+ y[1,1,2] = 0.0;
+ y[1,2,1] = 0.0;
+ y[1,2,2] = 0.0;
+ y[2,1,1] = 0.0;
+ y[2,1,2] = 0.0;
+ y[2,2,1] = 0.0;
+ y[2,2,2] = 0.0;
 equation
  der(y[1,1,1]) = 1.0;
  der(y[1,1,2]) = 0.0;
