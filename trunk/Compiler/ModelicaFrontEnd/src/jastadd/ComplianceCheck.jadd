@@ -63,11 +63,37 @@ aspect ComplianceCheck {
 	public void FUnsupportedExp.collectErrors() {
 		compliance("Unsupported expression type");
 	}
-	
-	public void InstExpandableConnectorDecl.complianceCheck() {
-        if (!root().options.getBooleanOption("expandable_connectors"))
-            compliance("Expandable connectors are not supported");
-	}
+    
+    
+    public void InstExpandableConnectorDecl.complianceCheck() {
+        if (inExpandableConnector())
+            compliance("Nestled expandable connectors are not supported");
+    }
+    
+    public void FConnectClause.complianceCheck() {
+        InstAccess left  = getConnector1().getInstAccess();
+        InstAccess right = getConnector2().getInstAccess();
+        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
+                left.isNestledExpandableConnectorPart())
+            compliance("Nestled expandable connectors are not supported");
+        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
+                right.isNestledExpandableConnectorPart())
+            compliance("Nestled expandable connectors are not supported");
+    }
+    
+    syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
+    eq InstDot.isNestledExpandableConnectorPart() {
+        InstComponentDecl exp = findReferencedExpandableConnector();
+        int n = getNumInstAccess();
+        return exp != null && n > 2 && getInstAccess(n - 2).myInstComponentDecl() != exp;
+    }
+    
+    inh boolean InstComponentDecl.inExpandableConnector();
+    eq InstExpandableConnectorDecl.getChild().inExpandableConnector() = true;
+    eq InstClassDecl.getChild().inExpandableConnector()               = false;
+    eq InstRoot.getChild().inExpandableConnector()                    = false;
+    eq FlatRoot.getChild().inExpandableConnector()                    = false;
+    
     
     public void InstReplacingExpandableConnectorDecl.complianceCheck() {
         if (!root().options.getBooleanOption("expandable_connectors"))

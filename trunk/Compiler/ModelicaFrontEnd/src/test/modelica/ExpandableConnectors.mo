@@ -1652,23 +1652,84 @@ Semantic error at line 1314, column 17:
 
 
 
-	model ExpandableCompliance
-        expandable connector EC
-        end EC;
-	
-        EC ec;		
+    model ExpandableCompliance1
+        expandable connector EC1
+            EC2 ec2;
+        end EC1;
+        
+        expandable connector EC2
+        end EC2;
+        
+        EC1 ec1;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="ExpandableCompliance",
-			description="Check that expandable connectors gives compliance error without correct option",
+			name="ExpandableCompliance1",
+			description="Nested expandable connectors: direct declaration",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
-Compliance error at line 284, column 15:
-  Expandable connectors are not supported
+Compliance error at line 1656, column 32:
+  Nestled expandable connectors are not supported
 ")})));
-	end ExpandableCompliance;
+    end ExpandableCompliance1;
+
+
+    model ExpandableCompliance2
+        expandable connector EC1
+        end EC1;
+        
+        expandable connector EC2
+        end EC2;
+        
+        EC1 ec1;
+		EC2 ec2;
+	equation
+		connect(ec1, ec2.a);
+		connect(ec2.b, ec1);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ExpandableCompliance2",
+			description="Nested expandable connectors: connecting to expandable",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 1688, column 3:
+  Nestled expandable connectors are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 1689, column 3:
+  Nestled expandable connectors are not supported
+")})));
+    end ExpandableCompliance2;
+
+
+    model ExpandableCompliance3
+        expandable connector EC
+        end EC;
+        
+		connector C = Real;
+		
+        EC ec;
+		C c;
+	equation
+        connect(c, ec.a1.a2);
+		connect(ec.b1.b2, c);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ExpandableCompliance3",
+			description="Nested expandable connectors: connecting with more than one unknown name",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 1716, column 9:
+  Nestled expandable connectors are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ExpandableConnectors.mo':
+Compliance error at line 1717, column 3:
+  Nestled expandable connectors are not supported
+")})));
+    end ExpandableCompliance3;
 
 
 end ExpandableConnectors;
