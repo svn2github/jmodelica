@@ -1538,7 +1538,7 @@ aspect FlatExpressions {
         InstComponentDecl found = ia.localLookupInstComponent(name.name());
         if (name.numParts() > 1 || (found != null && found != this)) {
             // TODO: this should probably be a helper function on FQName
-            FQNameFull fullUse = use.isSimple() ? use.copyAsFQNameFull() : (FQNameFull) use;
+            FQNameFull fullUse = use.asFQNameFull();
             fullUse.getFQNamePart(0).setName(ia.findTempVarName(this));
             use = fullUse;
         }
@@ -1769,61 +1769,9 @@ aspect FlatExpressions {
      * @param prefix  prefix to add to name
      */
 	public FQName InstAccess.flattenAndResolveIndices(FQName prefix) {
-		if (isArray() || !prefix.isSimple()) {
-			FQNameFull res = new FQNameFull();
-			flattenPartsAndResolveIndices(prefix, res);
-			return prefix.copyAndAppend(res);
-		} else {
-			StringBuilder buf = new StringBuilder();
-			appendWithResolvedSubscripts(buf);
-			return prefix.copyAndAppend(buf.toString());
-		}
-	}
-	
-	/**
-	 * Write this name to string builder, evaluating any expressions in subscripts.
-	 */
-	protected void InstAccess.appendWithResolvedSubscripts(StringBuilder buf) {}
-	
-	protected void InstDot.appendWithResolvedSubscripts(StringBuilder buf) {
-		for (InstAccess ia : getInstAccesss())
-			ia.appendWithResolvedSubscripts(buf);
-	}
-	
-	protected void InstNamedAccess.appendWithResolvedSubscripts(StringBuilder buf) {
-		if (buf.length() > 0)
-			buf.append('.');
-		buf.append(getID());
-	}
-	
-	protected void InstArrayAccess.appendWithResolvedSubscripts(StringBuilder buf) {
-		super.appendWithResolvedSubscripts(buf);
-		getFArraySubscripts().appendWithResolvedSubscripts(buf);
-	}
-	
-	/**
-	 * Write these array subscripts to string builder, evaluating any expressions.
-	 */
-	public void FArraySubscripts.appendWithResolvedSubscripts(StringBuilder buf) {
-		buf.append('[');
-		for (FSubscript s : getFSubscripts())
-			s.appendWithResolvedSubscripts(buf);
-		buf.append(']');
-	}
-	
-	/**
-	 * Write this subscript to string builder, evaluating any expressions.
-	 */
-	public void FSubscript.appendWithResolvedSubscripts(StringBuilder buf) {
-		if (buf.charAt(buf.length() - 1) != '[')
-			buf.append(',');
-		buf.append(toString());
-	}
-	
-	public void FExpSubscript.appendWithResolvedSubscripts(StringBuilder buf) {
-		if (buf.charAt(buf.length() - 1) != '[')
-			buf.append(',');
-		buf.append(getFExp().ceval().toString());
+		FQNameFull res = new FQNameFull();
+		flattenPartsAndResolveIndices(prefix, res);
+		return prefix.copyAndAppend(res);
 	}
 	
 	/**

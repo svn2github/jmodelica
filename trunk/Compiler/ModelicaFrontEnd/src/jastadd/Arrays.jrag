@@ -3747,14 +3747,25 @@ aspect ArrayHelpers {
 		 * @param level  the first index to copy. Must be between 0 and ndims(), inclusive.
 		 */
 		public Index subIndex(int level) {
-			if (level == 0)
-				return this;
-			if (level == index.length)
-				return NULL;
-			Index copy = new Index(index.length - level);
-			System.arraycopy(index, level, copy.index, 0, copy.index.length);
-			return copy;
+			return partIndex(level, index.length);
 		}
+        
+        /**
+         * Returns an Index that describes dimensions from <code>i</code>, inclusively, 
+         * to <code>j</code>, excludingly, of this Index.
+         * 
+         * @param i  the first index to copy. Must be between 0 and ndims(), inclusively.
+         * @param j  the index after the last to copy. Must be between <code>i</code> and ndims(), inclusively.
+         */
+        public Index partIndex(int i, int j) {
+            if (i == 0 && j == index.length)
+                return this;
+            if (i == j)
+                return NULL;
+            Index copy = new Index(j - i);
+            System.arraycopy(index, i, copy.index, 0, copy.index.length);
+            return copy;
+        }
 		
 		/**
 		 * Creates a new Index that is a copy of this Index, but promoted to <code>ndims</code> 

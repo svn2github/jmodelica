@@ -1314,6 +1314,13 @@ aspect ExpandableConnectorMembers {
     eq InstArrayExpandableConnector.getInstComponentDeclList()         = 
         (expandedMembers != null) ? expandedMembers : super.getInstComponentDeclList();
     
+    eq InstExpandableConnectorDecl.getInstExtendsList()          = 
+        (expandedMembers != null) ? new List<InstExtends>() : super.getInstExtendsList();
+    eq InstReplacingExpandableConnectorDecl.getInstExtendsList() = 
+        (expandedMembers != null) ? new List<InstExtends>() : super.getInstExtendsList();
+    eq InstArrayExpandableConnector.getInstExtendsList()         = 
+        (expandedMembers != null) ? new List<InstExtends>() : super.getInstExtendsList();
+    
     public InstComponentDecl InstExpandableConnectorDecl.createInstArrayComponentDecl(int i) {
         return new InstArrayExpandableConnector(new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
@@ -1330,6 +1337,9 @@ aspect ExpandableConnectorMembers {
     public InstExpandableConnectorMember.InstExpandableConnectorMember(InstComponentDecl org, Opt<FArraySubscripts> subscripts, String name) {
         this(null, subscripts, org.getComponentDecl(), new Opt(), new Opt(), new Opt(), org, name);
     }
+    
+    syn boolean InstComponentDecl.isExpandableConnectorMember()    = false;
+    eq InstExpandableConnectorMember.isExpandableConnectorMember() = true;
     
     eq InstExpandableConnectorMember.getInstComponentDeclList()       = getCopyOf().getInstComponentDeclList().fullCopy();
     eq InstExpandableConnectorMember.getInstClassDeclList()           = getCopyOf().getInstClassDeclList().fullCopy();

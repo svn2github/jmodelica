@@ -1127,31 +1127,6 @@ end ConnectTests.ConnectTest23;
 end ConnectTest23;
 
 
-model ConnectTest24
-    connector A = Real;
-    
-	A x;
-	A y = time;
-equation
-	if time < 2 then
-        x = y + 2;
-    else
-        connect(x,y);
-	end if;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConnectTest24",
-			description="Connect clause in else branch of if with non-parameter test",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1129, column 9:
-  Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
-")})));
-end ConnectTest24;
-
-
 
 model ConnectErrTest1
     model A
@@ -1396,6 +1371,31 @@ Semantic error at line 1386, column 5:
   Types of connected components do not match
 ")})));
 end ConnectErrTest9;
+
+
+model ConnectErrTest10
+    connector A = Real;
+    
+    A x;
+    A y = time;
+equation
+    if time < 2 then
+        x = y + 2;
+    else
+        connect(x,y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest10",
+            description="Connect clause in else branch of if with non-parameter test",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1129, column 9:
+  Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
+")})));
+end ConnectErrTest10;
 
 
 

@@ -354,13 +354,22 @@ aspect Connections {
 		}
 
 		public void generateEquations(FEquationBlock eb) {
-			FExp e1 = null;
-			for (ConnectionSetEntry cse : this) {
-				FExp e2 = cse.createFIdUseExp();
-				if (e1 != null)
-					eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
-				e1 = e2;
-			}
+		    if (size() == 1) {
+		        /* This case is for cells in arrays in expandable connectors that are not present.
+		         * Since we can't have arrays that are non-continous, we generate the missing ones and set them to zero.
+		         */
+		        FExp e = first().createFIdUseExp();
+		        FExp zero = new FIntegerLitExp(0);
+		        eb.addFAbstractEquationNoTransform(new FEquation(e, zero));   
+		    } else {
+    			FExp e1 = null;
+    			for (ConnectionSetEntry cse : this) {
+    				FExp e2 = cse.createFIdUseExp();
+    				if (e1 != null)
+    					eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
+    				e1 = e2;
+    			}
+		    }
 		}
 		
 	}
@@ -383,12 +392,16 @@ aspect Connections {
 				graph = new OverconstrainedConnectionGraph();
 			return graph;
 		}
-	     
-        public ExpandableConnectorSets getExpandable() {
-            if (expandable == null) 
-                expandable = new ExpandableConnectorSets();
-            return expandable;
-        }
+        
+       public ExpandableConnectorSets getExpandable() {
+           if (expandable == null) 
+               expandable = new ExpandableConnectorSets();
+           return expandable;
+       }
+       
+      public boolean isExpandableConnectorsDone() {
+          return expandable != null && expandable.isExpansionDone();
+      }
 
         public void buildOverconstrainedConnectionTrees() {
             if (graph != null) 
@@ -402,14 +415,12 @@ aspect Connections {
             }
         }
 
-		public void addInsideFlowVar(InstComponentDecl var1, FQName namePrefix1) {
-			ConnectionSetEntry cse = new ConnectionSetEntry(var1, false, namePrefix1);
-			
-			if (getConnectionSet(cse) == null) {
-				ConnectionSet set = ConnectionSet.create(cse);
-				list.add(set);
-				entryMap.put(cse, set);
-			}
+		public void addInsideFlowVar(InstComponentDecl var, FQName name) {
+			addVar(new ConnectionSetEntry(var, false, name));
+		}
+		
+		public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
+            addVar(new ConnectionSetEntry(var, true, name));
 		}
 		
 		/**
@@ -447,6 +458,14 @@ aspect Connections {
 		public void addEqualityConstraint(ConnectionSetEntry cse1, ConnectionSetEntry cse2, FQName prefix) {
 			equalityConstraints.add(new EqualityConstraintConnection(cse1, cse2, prefix));
 		}
+        
+        private void addVar(ConnectionSetEntry entry) {
+            if (getConnectionSet(entry) == null) {
+                ConnectionSet set = ConnectionSet.create(entry);
+                list.add(set);
+                entryMap.put(entry, set);
+            }
+        }
 		
 		private void join(ConnectionSetEntry entryA, ConnectionSetEntry entryB) {
 			ConnectionSet set = ConnectionSet.create(entryA);
@@ -606,7 +625,7 @@ aspect Connections {
 		}
 
 		/**
-		 * Create an FIdUseExp that is an acces to a variable in this entry, that is connected to 
+		 * Create an FIdUseExp that is an access to a variable in this entry, that is connected to 
 		 * the variable named <code>name</code> in <code>other</code>.
 		 */
 		public FExp createFIdUseExp(String name, ConnectionSetEntry other) {
@@ -623,12 +642,17 @@ aspect Connections {
 			return toString().hashCode();
 		}
 		
+		/**
+		 * Create a new connection set entry referring to a specific cell of the variable this refers to.
+		 * 
+		 * Assumes that the variable is an array and that <code>i</code> is suitable.
+		 */
+		public ConnectionSetEntry specifyCell(Index i) {
+		    return new ConnectionSetEntry(cd, outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
+		}
 		
 		public boolean equals(Object o) {
-			if (o instanceof ConnectionSetEntry) {
-				return toString().equals(o.toString());
-			}
-			return false;
+			return o instanceof ConnectionSetEntry && toString().equals(o.toString());
 		}
 	
 		public int compareTo(ConnectionSetEntry cse) {
@@ -655,12 +679,13 @@ aspect Connections {
 		InstComponentDecl leftComp  = lookupEvaluatingIndices();
 		InstComponentDecl rightComp = right.lookupEvaluatingIndices();
 		
-		if ((isExpandableConnectorPart() || right.isExpandableConnectorPart()) && !csm.getExpandable().isExpansionDone()) {
+		boolean handleExpandable = !csm.isExpandableConnectorsDone();
+		if (handleExpandable && (isExpandableConnectorPart() || right.isExpandableConnectorPart())) {
 		    if (isExpandableConnectorPart())
 		        csm.getExpandable().addIntroducingConnection(this, right, rightComp, prefix, source);
 		    else
                 csm.getExpandable().addIntroducingConnection(right, this, leftComp, prefix, source);
-		} else if (leftComp.isExpandableConnector() && !csm.getExpandable().isExpansionDone()) {
+		} else if (handleExpandable && leftComp.isExpandableConnector()) {
 		    csm.getExpandable().addSpanningConnection(leftComp, rightComp, prefix, source);
 		} else if (isArray() && !leftComp.isOverconstrainedConnection(rightComp)) {
 			Indices leftInd = indices();
@@ -724,10 +749,26 @@ aspect Connections {
 		if (buildGraph && isOverconstrainedConnection(right.getVar())) {
 			csm.getGraph().addConnection(left, right, prefix, source);
 		} else {
-			csm.addVars(left, right);
+		    // In the special case of members of expandable connectors, we need each cell separately.
+		    if (isArray() && (isExpandableConnectorMember() || right.getVar().isExpandableConnectorMember()) && 
+		            !left.getFQName().hasScalarSubscripts()) 
+		        for (Index i : indices())
+		            csm.addVars(left.specifyCell(i), right.specifyCell(i));
+		    else
+		        csm.addVars(left, right);
 		}
         csm.countCardinality(left.name());
         csm.countCardinality(right.name());
+	}
+	
+	syn boolean FQName.hasScalarSubscripts() {
+	    FArraySubscripts fas = getFArraySubscripts();
+	    if (fas == null)
+	        return false;
+	    for (FSubscript s : fas.getFSubscripts())
+	        if (s.ndims() > 0)
+	            return false;
+	    return true;
 	}
 
     public void InstExpandableConnectorMember.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
@@ -793,33 +834,6 @@ aspect Connections {
 		}
 		super.buildConnectionSets(prefix, csm, connect);
 	}
-    
-    public void InstExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (useInFlattening() && !csm.getExpandable().isExpansionDone()) {
-            if (isArray())
-                super.buildConnectionSets(prefix, csm, connect);
-            else
-                csm.getExpandable().addConnector(this);
-        }
-    }
-    
-    public void InstReplacingExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (useInFlattening() && !csm.getExpandable().isExpansionDone()) {
-            if (isArray())
-                super.buildConnectionSets(prefix, csm, connect);
-            else
-                csm.getExpandable().addConnector(this);
-        }
-    }
-    
-    public void InstArrayExpandableConnector.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (useInFlattening() && !csm.getExpandable().isExpansionDone()) {
-            if (childDimensionLength() > 0)
-                super.buildConnectionSets(prefix, csm, connect);
-            else
-                csm.getExpandable().addConnector(this);
-        }
-    }
 	
 	public void FIfEquation.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
 		boolean all = true;
@@ -1975,6 +1989,65 @@ aspect ExpandableConnectors {
     public void FIdUseInstAccess.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (getInstAccess().isExpandableConnectorPart())
             csm.getExpandable().addUse(getInstAccess());
+    }
+    
+    public void InstExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        buildConnectionSetsForExpandableConnector(prefix, csm, connect);
+    }
+    
+    public void InstReplacingExpandableConnectorDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        buildConnectionSetsForExpandableConnector(prefix, csm, connect);
+    }
+    
+    public void InstArrayExpandableConnector.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        buildConnectionSetsForExpandableConnector(prefix, csm, connect);
+    }
+    
+    public void InstComponentDecl.buildConnectionSetsForExpandableConnector(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        if (useInFlattening()) {
+            if (isArray()) {
+                super.buildConnectionSets(prefix, csm, connect);
+            } else if (csm.isExpandableConnectorsDone()) {
+                for (InstComponentDecl icd : getInstComponentDecls()) {
+                    if (icd.isArray()) {
+                        FQName name = icd.getFQName();
+                        for (Index i : icd.indices()) {
+                            FQName cellName = name.copyAndAddFas(i.createFArraySubscripts());
+                            icd.addExpandableArrayMembers(csm, cellName);
+                        }
+                    }
+                }
+            } else {
+                csm.getExpandable().addConnector(this);
+            }
+        }
+    }
+    
+    public void InstExpandableConnectorMember.addExpandableArrayMembers(ConnectionSetManager csm, FQName name) {
+        getCopyOf().addExpandableArrayMembers(csm, name);
+    }
+    
+    /**
+     * Add all variables to connection set manager, to get "= 0" equations if they are not connected.
+     */
+    public void InstComponentDecl.addExpandableArrayMembers(ConnectionSetManager csm, FQName name) {
+        InstComponentDecl me = this;
+        while (me.isArray())
+            me = me.getInstComponentDecl(0);
+        for (InstComponentDecl icd : me.allInstComponentDecls()) {
+            if (icd.isArray()) {
+                for (Index i : icd.indices()) {
+                    FQName cellName = name.copyAndAppend(icd.name(), i.createFArraySubscripts());
+                    icd.addExpandableArrayMembers(csm, cellName);
+                }
+            } else {
+                icd.addExpandableArrayMembers(csm, name.copyAndAppend(icd.name()));
+            }
+        }
+    }
+    
+    public void InstPrimitive.addExpandableArrayMembers(ConnectionSetManager csm, FQName name) {
+        csm.addExpandableArrayMember(this, name);
     }
     
     

@@ -1747,38 +1747,30 @@ aspect FlatNames {
     }
     
     public FQName FQNameFull.copyReplacingSubscripts(Index i) {
-        StringBuilder buf = new StringBuilder();
+        FQNameFull res = new FQNameFull();
         int j = 0;
-        for (FQNamePart part : getFQNameParts()) {
-        	j = part.appendWithReplacedSubscripts(buf, i, j);
-        	buf.append('.');
-        }
-        buf.deleteCharAt(buf.length() - 1);
-        return new FQNameString(buf.toString());
+        for (FQNamePart part : getFQNameParts()) 
+        	j = part.appendWithReplacedSubscripts(res, i, j);
+        return res;
     }
     
     /**
-     * Append a string representation of this name part to <code>buf</code>, but with 
+     * Append this name part to <code>name</code>, but with 
      * all array subscripts replaced with indices from <code>i</code>.
      * 
      * The first index in <code>i</code> to use should be given in <code>j</code>, and 
      * the new value for <code>j</code> is returned.
      */
-    public int FQNamePart.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
-    	buf.append(getName());
+    public int FQNamePart.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+        name.append(getName());
     	return j;
     }
     
-    public int FQNamePartArray.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
-    	buf.append(getName());
-    	buf.append('[');
-    	int n = j + getFArraySubscripts().getNumFSubscript();
-    	for (int k = j; k < n; k++) {
-    		buf.append(i.get(k));
-    		buf.append(',');
-    	}
-    	buf.setCharAt(buf.length() - 1, ']');
-    	return n;
+    public int FQNamePartArray.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+    	int k = j + getFArraySubscripts().getNumFSubscript();
+        name.append(getName());
+        name.addFArraySubscripts(i.partIndex(j, k).createFArraySubscripts());
+    	return k;
     }
     
     /**
