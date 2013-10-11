@@ -1287,7 +1287,7 @@ class TestJMIModel_VDP:
         cpath = "VDP_pack.VDP"
     
         jmu_name = compile_jmu(cpath, fpath, 
-            compiler_options={'state_start_values_fixed':False,'automatic_add_initial_equations':False})
+            compiler_options={'state_start_values_fixed':False})
         # Load the dynamic library and XML data
         vdp = JMUModel(jmu_name)
     
@@ -1296,7 +1296,7 @@ class TestJMIModel_VDP:
         assert n_eq_F==res_n_eq_F, \
                "test_jmi.py: test_Model_dae_get_sizes: Wrong number of DAE equations." 
     
-        res_n_eq_F0 = 2
+        res_n_eq_F0 = 4
         res_n_eq_F1 = 5
         res_n_eq_Fp = 0
         res_n_eq_R0 = 0
