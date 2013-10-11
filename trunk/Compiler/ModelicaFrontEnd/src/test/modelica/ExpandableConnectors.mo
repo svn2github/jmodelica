@@ -484,7 +484,6 @@ end ExpandableConnectors.Expandable10;
 		FlatteningTestCase(
 			name="Expandable11",
 			description="Connecting to cell of array in expandable connector",
-			expandable_connectors=true,
 			flatModel="
 fclass ExpandableConnectors.Expandable11
  Real ec1.a[2];

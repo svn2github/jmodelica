@@ -94,11 +94,6 @@ aspect ComplianceCheck {
     eq InstRoot.getChild().inExpandableConnector()                    = false;
     eq FlatRoot.getChild().inExpandableConnector()                    = false;
     
-    
-    public void InstReplacingExpandableConnectorDecl.complianceCheck() {
-        if (!root().options.getBooleanOption("expandable_connectors"))
-            compliance("Expandable connectors are not supported");
-    }
 	
 	public void FWhenStmt.complianceCheck() {
 		super.complianceCheck();
