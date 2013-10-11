@@ -500,12 +500,17 @@ aspect BLT{
 	}
 	
 	public BLT BiPGraph.computeBLT(boolean mergeBLT, boolean useTearing, boolean useHGT) {
-		Collection<Collection<Eq>> components = tarjan(mergeBLT);
-		BLT blt = new BLT();
-		int blockNumber = 1;
-		for (Collection<Eq> bl : components)
-			blt.add(EquationBlockFactory.createEquationBlock(bl, useTearing, useHGT, blockNumber++));
-		return blt;
+		ASTNode.beginStep("computeBLT()");
+		try {
+			Collection<Collection<Eq>> components = tarjan(mergeBLT);
+			BLT blt = new BLT();
+			int blockNumber = 1;
+			for (Collection<Eq> bl : components)
+				blt.add(EquationBlockFactory.createEquationBlock(bl, useTearing, useHGT, blockNumber++));
+			return blt;
+		} finally {
+			ASTNode.endStep("computeBLT()");
+		}
 	}
 	
 	public class BLT extends ArrayList<AbstractEquationBlock> {

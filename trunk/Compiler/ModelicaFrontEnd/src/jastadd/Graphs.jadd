@@ -872,7 +872,7 @@ public class BiPGraph {
 			Eq eqn = eqs[result[i][0]];
 			Var var = vars[result[i][1]];
 			match(eqn, var);
-			ASTNode.log.info("%s: %s %d",eqn.toString(), var.getVariable().name(), cost[result[i][0]][result[i][1]]);
+			ASTNode.log.info("%s: %s %d", eqn, var, cost[result[i][0]][result[i][1]]);
 		}
 		ASTNode.log.info("Optimal cost: %d", opt_cost);
 	}
@@ -897,174 +897,154 @@ public class BiPGraph {
 	}
 
 	public IndexReductionResult reduceIndex(boolean resetMatching) {
+		IndexReductionResult result = new IndexReductionResult();
 		if (resetMatching) {
 			reset();
 		}
-		
-		IndexReductionResult result = new IndexReductionResult();
-		
-		Set<Eq> es = new LinkedHashSet<Eq>();
+		FClass fclass = null;
+		Stack<Eq> eqToMatchStack = new Stack<Eq>();
 		for (Eq e : getEquations()) {
 			if (e.getEquation().isContinuous()) {
-				es.add(e);
+				eqToMatchStack.push(e);
+				fclass = e.getEquation().myFClass();
 			}
 		}
-				
+		Collections.reverse(eqToMatchStack);
+		
 		// If there are no equations, we cannot do index reduction.
-		if (es.size()==0) {
+		if (eqToMatchStack.isEmpty()) {
 			return null;
 		}
 		
-		Eq eqToMatch;
-		
-		boolean pathFound = false;		
-		java.util.List<FVariable> newDiffedVars = new ArrayList<FVariable>();	
-		Stack<Eq> eqToMatchStack = new Stack<Eq>();
-		// Algoritm step numbering from the original Pantelides paper		
+		java.util.List<FVariable> newDiffedVars = new ArrayList<FVariable>();
+		// Algoritm step numbering from the original Pantelides paper
 		// Loop over all equations (step 3)
-		for (Eq e : es) {
+		while (!eqToMatchStack.empty() ){
+			Eq eqToMatch = eqToMatchStack.pop(); // Step 3a
+			if (eqToMatch.getMatching() != null || eqToMatch.getMeDifferentiated() != null)
+				continue;
+			
 			// If the equation is not matched
-			eqToMatchStack.push(e);
-			while (!eqToMatchStack.empty()){
-				eqToMatch = eqToMatchStack.pop(); // Step 3a
-				if (eqToMatch.getMatching()==null && eqToMatch.getMeDifferentiated()==null) {
-
-					pathFound = false; // Step
-					while (!pathFound) { // Step 3b
-						// Since the states are not added to the graph,
-						// Step 3b-1 is skipped and is done at the end of 
-						// the iteration 
-						lightReset(); // Step 3b-2
-						pathFound = false; // Step 3b-3
-						// Find an augmenting path, step 3b-4
-						//n_ind = 0;
-						pathFound = augmentPath(eqToMatch); 
-						Collection<Eq> visitedEquations = getVisitedEquations();
-						Collection<Var> visitedVariables = getVisitedVariables();
-						ASTNode.log.info("*************");
-						ASTNode.log.info("Looking for augmented path starting in equation: " + eqToMatch.toString());
-						if (pathFound) {
-							ASTNode.log.info("Path found!");
-						} else {	
-						 	ASTNode.log.info("Path not found!");
-						}
-						ASTNode.log.info("Visisted equations:");
-						for (Eq ee : visitedEquations) {
-							ASTNode.log.info("  " + ee.getEquation());
-						}
-						ASTNode.log.info("Visisted variables:");
-						for (Var vv : visitedVariables) {
-							ASTNode.log.info("  " + vv.toString());
-						}
-						
-						if (!pathFound) { // Step 3b-5
-							for (Var vv : visitedVariables) { // Loop over all visited variables, Step 3b-5i
-							    // Create a new differentiated variable
-								FVariable newVar = vv.getVariable().myFClass().addFDerivativeVariable(vv.getVariable());
-								newDiffedVars.add(newVar);
-								// Add the differentiated variable to the graph 
-								Var vvv = addVariable(newVar.name(),newVar);
-								// Set the "A vector" in the paper: 
-								// a reference from the visited variable to its 
-								// differentiated counterpart
-								vv.setMeDifferentiated(vvv); 
-								vvv.setMeIntegrated(vv);
-							}
-							for (Eq ee : visitedEquations) { // Step 3b-5ii
-								FAbstractEquation eee = ee.getEquation();
-								if (ee.numDifferentiations() > MAX_N_EQ_DIFFS) {
-									for (FVariable v : newDiffedVars) {
-										int ind = v.myFClass().getFVariableList().getIndexOfChild(v);
-										if (ind>=0) {
-											v.myFClass().getFVariableList().removeChild(ind);
-										}
-									}
-									return null;
-								}
-								FAbstractEquation deee = null;
-								// Look through member equations and check if the differentiated equation already exisits
-								for (Eq groupMember : ee.getGroupMembers())
-									if (groupMember.getMeDifferentiated() != null)
-										deee = groupMember.getMeDifferentiated().getEquation();
-								if (deee == null) {
-									// It does not exsit, create it.
-									Collection<FAbstractEquation> deees = eee.diff("time");
-									if (deees.size() != 1)
-										throw new UnsupportedOperationException("Differentiation of equations should result" +
-												" in a single equation when differentiating on time");
-									else
-										deee = deees.iterator().next();
-									result.addEquation(deee);
-								} else {
-									// It already exisits we need to flush cached values since we might have added new variables
-									deee.flushAllRecursive();
-								}
-								ASTNode.log.info("About to add equation: " + deee);
-								// Sets that indicates the variables in the lhs and rhs.
-								Set<FVariable> rhsVars = Collections.emptySet();
-								Map<FVariable, Integer> lhsVars = Collections.emptyMap();
-								if (deee.numScalarEquations() > 1) {
-									rhsVars = deee.referencedFVariablesInRHS();
-									lhsVars = new HashMap<FVariable, Integer>();
-									int i = 0;
-									for (FVariable fv : eee.referencedFVariablesInLHS()) {
-										if (fv.getMeDifferentiated() != null)
-											lhsVars.put(fv.getMeDifferentiated(), i);
-										i++;
-									}
-								}
-								// Add the differentiated equation
-								int groupNumber = ee.groupNumber();
-								Eq eqn = addEquation("eq_" + (getEquations().size() + 1), deee, groupNumber);
-								
-								// Add edges
-								for (FVariable fv : deee.variables()) {
-									Var vvv = variableMap.get(fv.name());
-									Integer pos = lhsVars.get(fv);
-									if (vvv!=null && (pos == null || pos == groupNumber || rhsVars.contains(fv))) {
-										ASTNode.log.info("*** " + fv.name());
-										addEdge(eqn,vvv);
-									}
-								}
-								// Set a reference from the visited equation to
-								// its differentiated counterpart
-								
-								ee.setMeDifferentiated(eqn);
-								eqn.setMeIntegrated(ee);
-								// TODO: We might need to add this equation to its existing groupmembers?
-								ASTNode.log.info("Equation added");
-							}
-							for (Var vv : visitedVariables) {
-								// Set matchings, Step 3b-5iii
-								Eq ee = vv.getMatching();
-								match(ee.getMeDifferentiated(), vv.getMeDifferentiated());
-								// Remove variables that have been differentiated, Step 3b-1
-								removeVariable(vv);
-							}
-						
-							// Set the next equation to start matching from, 
-							// Step 3b-5iv
-							// Push all differentiated equations in the group to the stack
-							// of equations to be matched
-							for (Eq groupMemberEquation : eqToMatch.getGroupMembers()) {
-								eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
-							}
-
-							eqToMatch = eqToMatchStack.pop();
-						
-							ASTNode.log.info("Graph after addition of equations and variables:");
-							ASTNode.log.info(toString());
-						}		
-
-						ASTNode.log.info("Matching:");
-						ASTNode.log.info(printMatching());
-						ASTNode.log.info("*************");
-					
-					}	
-				}
+			
+			// Since the states are not added to the graph,
+			// Step 3b-1 is skipped and is done at the end of 
+			// the iteration 
+			lightReset(); // Step 3b-2
+			// Find an augmenting path, step 3b-4
+			//n_ind = 0;
+			boolean pathFound = augmentPath(eqToMatch);
+			Collection<Eq> visitedEquations = getVisitedEquations();
+			Collection<Var> visitedVariables = getVisitedVariables();
+			ASTNode.log.info("*************");
+			ASTNode.log.info("Looking for augmented path starting in equation: %s", eqToMatch);
+			if (pathFound) {
+				ASTNode.log.info("Path found!");
+			} else {
+				ASTNode.log.info("Path not found!");
 			}
+			ASTNode.log.info("Visisted equations:");
+			for (Eq ee : visitedEquations) {
+				ASTNode.log.info("  %s", ee.getEquation());
+			}
+			ASTNode.log.info("Visisted variables:");
+			for (Var vv : visitedVariables) {
+				ASTNode.log.info("  %s", vv.toString());
+			}
+			
+			if (!pathFound) { // Step 3b-5
+				for (Var var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
+					// Create a new differentiated variable
+					FVariable diffedFVar = var.getVariable().createFDerivativeVariable();
+					newDiffedVars.add(diffedFVar);
+					// Add the differentiated variable to the graph 
+					Var diffedVar = addVariable(diffedFVar.name(), diffedFVar);
+					// Set the "A vector" in the paper: 
+					// a reference from the visited variable to its 
+					// differentiated counterpart
+					var.setMeDifferentiated(diffedVar); 
+					diffedVar.setMeIntegrated(var);
+				}
+				for (Eq eqn : visitedEquations) { // Step 3b-5ii
+					FAbstractEquation fEqn = eqn.getEquation();
+					if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
+						return null;
+					FAbstractEquation diffedFEqn = null;
+					// Look through member equations and check if the differentiated equation already exisits
+					for (Eq groupMember : eqn.getGroupMembers())
+						if (groupMember.getMeDifferentiated() != null)
+							diffedFEqn = groupMember.getMeDifferentiated().getEquation();
+					if (diffedFEqn == null) {
+						// It does not exsit, create it.
+						Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
+						if (diffedFEqns.size() != 1)
+							throw new UnsupportedOperationException("Differentiation of equations should result" +
+									" in a single equation when differentiating on time");
+						else
+							diffedFEqn = diffedFEqns.iterator().next();
+						result.addEquation(diffedFEqn);
+					} else {
+						// It already exisits we need to flush cached values since we might have added new variables
+						diffedFEqn.flushAllRecursive();
+					}
+					ASTNode.log.info("About to add equation: %s", diffedFEqn);
+					// Sets that indicates the variables in the lhs and rhs.
+					Set<Var> rhsVars = Collections.emptySet();
+					Map<Var, Integer> lhsVars = Collections.emptyMap();
+					if (diffedFEqn.numScalarEquations() > 1) {
+						rhsVars = lookupVarsInSet(diffedFEqn.FIdUseExpsInRHS());
+						lhsVars = new HashMap<Var, Integer>();
+						int i = 0;
+						for (Var var : lookupVarsInSet(diffedFEqn.FIdUseExpsInLHS()))
+							lhsVars.put(var, i++);
+						if (diffedFEqn.lhsVarsAreSolved())
+							rhsVars.removeAll(lhsVars.keySet());
+					}
+					// Add the differentiated equation
+					int groupNumber = eqn.groupNumber();
+					Eq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber);
+					
+					// Add edges
+					Collection<FIdUseExp> variables = diffedFEqn.findFIdUseExpsInTree();
+					for (FIdUseExp use : variables) {
+						Var var = variableMap.get(use.name());
+						Integer pos = lhsVars.get(use.name());
+						if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(use.name()))) {
+							ASTNode.log.info("*** %s", var);
+							addEdge(diffedEqn, var);
+						}
+					}
+					
+					// Set a reference from the visited equation to
+					// its differentiated counterpart
+					eqn.setMeDifferentiated(diffedEqn);
+					diffedEqn.setMeIntegrated(eqn);
+					
+					// TODO: We might need to add this equation to its existing groupmembers?
+					ASTNode.log.info("Equation added");
+				}
+				for (Var var : visitedVariables) {
+					// Set matchings, Step 3b-5iii
+					Eq eqn = var.getMatching();
+					match(eqn.getMeDifferentiated(), var.getMeDifferentiated());
+					// Remove variables that have been differentiated, Step 3b-1
+					removeVariable(var);
+				}
+				// Set the next equation to start matching from, 
+				// Step 3b-5iv
+				// Push all differentiated equations in the group to the stack
+				// of equations to be matched
+				for (Eq groupMemberEquation : eqToMatch.getGroupMembers())
+					eqToMatchStack.push(groupMemberEquation.getMeDifferentiated());
+				
+				ASTNode.log.info("Graph after addition of equations and variables:");
+				ASTNode.log.info(this);
+			}
+			ASTNode.log.info("Matching:");
+			ASTNode.log.info(printMatchingObj());
+			ASTNode.log.info("*************");
 		}
-
+		fclass.addFDerivativeVariables(newDiffedVars);
+		
 		// Remove equations that are not connected
 		java.util.List<Eq> eqToRemove = new ArrayList<Eq>();
 		for (Eq e : getEquations()) {
@@ -1077,12 +1057,12 @@ public class BiPGraph {
 		}
 		ASTNode.log.info("Index reduction done!");
 		ASTNode.log.info("Matching:");
-		ASTNode.log.info(printMatching());
+		ASTNode.log.info(printMatchingObj());
 		
 		// Selection of dummy derivatives
 		/*
 			The algorithm is implemented differently than in the original paper
-			by Mattsson and S�derlind. In the paper, each block is treated
+			by Mattsson and S\ufffdderlind. In the paper, each block is treated
 			individually by selecting all dummy derivatives of one block
 			before proceeding to the next block. This approach, however, makes
 			it hard to handle user preferences for state selection as defined
@@ -1100,7 +1080,7 @@ public class BiPGraph {
 		
 		BLT blt = computeBLT(false, false, false);
 	
-		ASTNode.log.info(blt.toString());
+		ASTNode.log.info(blt);
 
 		// Lists of equations and variables, notation is the same as in the 
 		// paper
@@ -1130,8 +1110,8 @@ public class BiPGraph {
 			}
 			if (add) {
 				ASTNode.log.info(" ********* Found block containing diffed equations ***********");
-				ASTNode.log.info(eb.toString());
-		
+				ASTNode.log.info(eb);
+				
 				// Step 1: Initialize, add all equations in blocks
 				// having differentiated equations
 				g.addAll(eb.equations());
@@ -1160,7 +1140,7 @@ public class BiPGraph {
 		
 		// Iterate
 		while (remainingDifferentiatedEquations) {
-		   ASTNode.log.info("----------------");
+			ASTNode.log.info("----------------");
 			// Step 3: Extract differentiated equations 
 			h = new ArrayList<FAbstractEquation>();
 			for (FAbstractEquation fe : g) {
@@ -1168,7 +1148,7 @@ public class BiPGraph {
 					h.add(fe);
 				}
 			}
-									
+			
 			// Step 4: Select independent columns.
 			// In a first attempt we don't add variables with StateSeclect.prefer
 			// If it is possible to find a matching, then we proceed. If not, then
@@ -1191,8 +1171,8 @@ public class BiPGraph {
 				int n_eq = e.numScalarEquations();
 				
 				for (int i=0;i<n_eq;i++) {
-					ASTNode.log.info("*** " + e.prettyPrint(""));
-					eqn = gd.addEquation("eq_"+k, e, i);
+					ASTNode.log.info("*** %s", e.prettyPrint(""));
+					eqn = gd.addEquation("eq_" + k, e, i);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
@@ -1205,8 +1185,8 @@ public class BiPGraph {
 					} 
 				}
 			}
-					
-			ASTNode.log.info(gd.toString());
+			
+			ASTNode.log.info(gd);
 			
 			// Run matching
 			// Compute weights for variables based on linearity
@@ -1215,12 +1195,12 @@ public class BiPGraph {
 		 		int w = calculateLinearityWeight(g, fv);
 		 		if (fv.getMeIntegrated() != null)
 					w += calculateLinearityWeight(g, fv.getMeIntegrated());
-				ASTNode.log.info("Linearity weight: " + fv.name() + " " + w);
+				ASTNode.log.info("Linearity weight: %s %d", fv.name(), w);
 				linearityWeights.put(fv.name(), w);
 			}
 			
 			gd.matchMunkres(linearityWeights);
-			ASTNode.log.info(gd.printMatching());
+			ASTNode.log.info(gd.printMatchingObj());
 			
 			// The matched variables are selected as dummy derivatives
 			for (Var vv : gd.getMatchedVariables()) {
@@ -1248,7 +1228,7 @@ public class BiPGraph {
 					z.add(z_test);
 				}
 			}
-
+			
 			// Check if there are remaining differentiated equations
 			remainingDifferentiatedEquations = false;
 			for (FAbstractEquation fe : g) {
@@ -1260,7 +1240,7 @@ public class BiPGraph {
 			ASTNode.log.info(" --- Equations in iteration: --- ");
 			ASTNode.log.info(" Equations: ");
 			for (FAbstractEquation fe : g) {
-				ASTNode.log.info(fe.prettyPrint("   "));
+				ASTNode.log.info(fe);
 			}
 
 			ASTNode.log.info(" Dummy derivatives selected in iteration: ");
@@ -1275,7 +1255,7 @@ public class BiPGraph {
 		ASTNode.log.info(" Dummy derivatives: ");
 		for (FVariable fv : zHat) {
 			result.addDummyDerivative(fv);
-			ASTNode.log.info(fv.prettyPrint("   "));
+			ASTNode.log.info(fv);
 		}
 		ASTNode.log.info("");
 		
@@ -1286,6 +1266,8 @@ public class BiPGraph {
 		int weight = 0;
 		for (FAbstractEquation feq : equations) {
 			try {
+				if (!feq.referencedFVariables().contains(variable))
+					continue;
 				Collection<FAbstractEquation> feqds = feq.diff(variable.name());
 				FTypePrefixVariability variability = ASTNode.fConstant();
 				for (FAbstractEquation feqd : feqds)
@@ -1858,6 +1840,11 @@ public class Eq implements Comparable<Eq> {
 		Eq other = (Eq)o;
 		return getName().equals(other.getName());
 	}
+	
+	@Override
+	public int hashCode() {
+		return getName().hashCode();
+	};
 
 
 }
@@ -2024,7 +2011,11 @@ public class Var implements Comparable<Var> {
 		Var other = (Var)o;
 		return getName().equals(other.getName());
 	}
-
+	
+	@Override
+	public int hashCode() {
+		return getName().hashCode();
+	};
 }
 
 public class IndexReductionResult {

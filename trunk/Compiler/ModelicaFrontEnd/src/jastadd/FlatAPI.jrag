@@ -1247,6 +1247,17 @@ aspect ReferencedVariables {
 		return res;
 	}
 	
+	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
+	syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
+	syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
+	syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFIdUseExpsInTree());
+	syn lazy Set<FVariable> FAbstractEquation.referencedFVariables() {
+		Set<FVariable> res = new HashSet<FVariable>();
+		res.addAll(referencedFVariablesInLHS());
+		res.addAll(referencedFVariablesInRHS());
+		return res;
+	}
+	
 	public static Set<FVariable> ASTNode.parametersInSet(Set<? extends FVariable> set) {
 		Set<FVariable> res = new LinkedHashSet<FVariable>();
 		for (FVariable fv : set)
@@ -1255,13 +1266,18 @@ aspect ReferencedVariables {
 		return res;
 	}
 	
-	syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
-	syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
-	syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
-	syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFIdUseExpsInTree());
-	
 	syn Set<FVariable> FFunctionCallEquation.referencedParametersInLHS() = parametersInSet(referencedFVariablesInLHS());
 	syn Set<FVariable> FExp.referencedParametersInFExp()                 = parametersInSet(referencedFVariablesInFExp());
+
+	public Set<Var> BiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
+		Set<Var> res = new LinkedHashSet<Var>();
+		for (FIdUseExp use : set) {
+			Var var = getVariable(use.name());
+			if (var != null)
+				res.add(var);
+		}
+		return res;
+	}
 }
 
 aspect FlatEnumerations {

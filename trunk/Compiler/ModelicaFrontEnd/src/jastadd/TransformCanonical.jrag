@@ -551,6 +551,14 @@ aspect TransformCanonical {
 	 * @return  the new graph
 	 */
 	private BiPGraph FClass.reduceIndex() {
+		beginStep("reduceIndex()");
+		try {
+			return reduceIndexWrapped();
+		} finally {
+			endStep("reduceIndex()");
+		}
+	}
+	private BiPGraph FClass.reduceIndexWrapped() {
 		if (root().options.getBooleanOption("index_reduction")) {
 			// Only do index reduction based on real variables and equations
 			BiPGraph g = new BiPGraph();
@@ -1397,11 +1405,10 @@ aspect TransformCanonical {
         }
     }
 
-	public FVariable FClass.addFDerivativeVariable(FVariable fv) {
-		FVariable ffv = fv.createFDerivativeVariable();
-		addFVariable(ffv);
+	public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {
+		for (FVariable fv : fvs)
+			addFVariable(fv);
 		root().flushAllRecursive();
-		return ffv;
 	}
 
 	public FVariable FVariable.createFDerivativeVariable() {
