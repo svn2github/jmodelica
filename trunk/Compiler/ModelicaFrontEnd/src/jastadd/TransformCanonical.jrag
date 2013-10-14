@@ -442,12 +442,13 @@ aspect TransformCanonical {
 			log.info(daeBLT);
 		
 		}
-						
-		// Find matching for the initialization system	
+		
+		// Find matching for the initialization system
 		g.addVariables(this, VAR_TYPES_INIT);
 		g.addEquations(equations(), VAR_TYPES_INIT, "eq_",1);
+		g.isInitialSystem();
 
-	    // Replace when equations	
+		// Replace when equations
 		java.util.List<FAbstractEquation> equationsToReplace = new ArrayList<FAbstractEquation>();
 		for (FAbstractEquation e : equations()) {
 			if (e.replacedAtInitialization()) {

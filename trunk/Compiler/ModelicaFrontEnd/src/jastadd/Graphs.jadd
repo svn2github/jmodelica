@@ -425,6 +425,7 @@ public class BiPGraph {
 	protected Map<String,Var> variableMap = new LinkedHashMap<String,Var>();
 	protected Map<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
 	protected Map<FAbstractEquation,java.util.List<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,java.util.List<Eq>>();
+	private boolean initialSystem = false;
 	
 	public BiPGraph() {
 	}
@@ -474,7 +475,10 @@ public class BiPGraph {
 		return equationMap.get(name);
 	}
 	
-
+	public void isInitialSystem() {
+	    initialSystem = true;
+	}
+	
 	public java.util.List<Eq> getEquations(FAbstractEquation eqn) {
 		java.util.List<Eq> list = equationIndexMap.get(eqn);
 		return (list == null) ? Collections.<Eq>emptyList() : list;
@@ -645,6 +649,9 @@ public class BiPGraph {
 	}
 	
 	public boolean canMatch(Eq e, Var v) {
+	    if (initialSystem)
+	        return true;
+	    
 		FAbstractEquation equation = e.getEquation();
 		FVariable variable = v.getVariable();
 		

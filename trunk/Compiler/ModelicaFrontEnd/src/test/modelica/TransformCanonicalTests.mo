@@ -5650,4 +5650,28 @@ end TransformCanonicalTests.NonFixedParameterTest4;
 ")})));
 end NonFixedParameterTest4;
 
+model NonFixedParameterTest5
+    parameter Real x(fixed=false);
+    Real y;
+initial equation
+    y = 23;
+equation
+    y = x + time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest5",
+            description="Test matching of non-fixed parameter",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest5
+ parameter Real x(fixed = false);
+ Real y;
+initial equation 
+ y = 23;
+equation
+ y = x + time;
+end TransformCanonicalTests.NonFixedParameterTest5;
+")})));
+end NonFixedParameterTest5;
+
 end TransformCanonicalTests;
