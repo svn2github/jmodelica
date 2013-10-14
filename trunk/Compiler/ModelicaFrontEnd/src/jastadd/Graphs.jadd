@@ -1004,11 +1004,10 @@ public class BiPGraph {
 					Eq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber);
 					
 					// Add edges
-					Collection<FIdUseExp> variables = diffedFEqn.findFIdUseExpsInTree();
-					for (FIdUseExp use : variables) {
-						Var var = variableMap.get(use.name());
-						Integer pos = lhsVars.get(use.name());
-						if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(use.name()))) {
+					Collection<Var> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
+					for (Var var : variables) {
+						Integer pos = lhsVars.get(var);
+						if (var != null && (pos == null || pos == groupNumber || rhsVars.contains(var))) {
 							ASTNode.log.info("*** %s", var);
 							addEdge(diffedEqn, var);
 						}
@@ -1044,17 +1043,17 @@ public class BiPGraph {
 			ASTNode.log.info("*************");
 		}
 		fclass.addFDerivativeVariables(newDiffedVars);
-		
+		for (FAbstractEquation eqn : result.getEquations())
+			eqn.flushAllRecursive();
+
 		// Remove equations that are not connected
 		java.util.List<Eq> eqToRemove = new ArrayList<Eq>();
-		for (Eq e : getEquations()) {
-			if (e.getVariables().size()==0) {
+		for (Eq e : getEquations())
+			if (e.getVariables().size() == 0)
 				eqToRemove.add(e);
-			}
-		}
-		for (Eq e : eqToRemove) {
+		for (Eq e : eqToRemove)
 			removeEquation(e);
-		}
+		
 		ASTNode.log.info("Index reduction done!");
 		ASTNode.log.info("Matching:");
 		ASTNode.log.info(printMatchingObj());
@@ -1171,14 +1170,14 @@ public class BiPGraph {
 				int n_eq = e.numScalarEquations();
 				
 				for (int i=0;i<n_eq;i++) {
-					ASTNode.log.info("*** %s", e.prettyPrint(""));
+					ASTNode.log.info("*** %s", e);
 					eqn = gd.addEquation("eq_" + k, e, i);
 					k++;
 				
 					for (FVariable y : e.variables()) { 
 						//FRealVariable frv = (FRealVariable)((FRealVariable)y).getMeIntegrated();
+						ASTNode.log.info(" ** %s %s", y, z.contains(y));
 						if (z.contains(y)) {
-							ASTNode.log.info(" ** " + y.prettyPrint("") + " " + z.contains(y));
 							v = gd.getVariable(y.name()); 
 							gd.addEdge(eqn,v);
 						} 
@@ -1240,13 +1239,13 @@ public class BiPGraph {
 			ASTNode.log.info(" --- Equations in iteration: --- ");
 			ASTNode.log.info(" Equations: ");
 			for (FAbstractEquation fe : g) {
-				ASTNode.log.info(fe);
+				ASTNode.log.info("   %s", fe);
 			}
 
 			ASTNode.log.info(" Dummy derivatives selected in iteration: ");
 			for (FVariable fv : zHat) {
 				result.addDummyDerivative(fv);
-				ASTNode.log.info(fv.prettyPrint("   "));
+				ASTNode.log.info("   %s", fv);
 			}
 			ASTNode.log.info("");
 				
@@ -1255,7 +1254,7 @@ public class BiPGraph {
 		ASTNode.log.info(" Dummy derivatives: ");
 		for (FVariable fv : zHat) {
 			result.addDummyDerivative(fv);
-			ASTNode.log.info(fv);
+			ASTNode.log.info("   %s", fv);
 		}
 		ASTNode.log.info("");
 		
