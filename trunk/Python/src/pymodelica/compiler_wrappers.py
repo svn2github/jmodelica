@@ -377,12 +377,12 @@ class ModelicaCompiler(object):
             self._handle_exception(ex)
         return self.get_warnings()
         
-    def compile_FMU(self, class_name, file_name, target, compile_to):
+    def compile_FMU(self, class_name, file_name, target, version, compile_to):
         """
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates an FMU on the file system. Set 
         target to specify which type of FMU should be created. The different 
-        targets are "fmume" and "fmucs". 
+        targets are "me" and "cs". 
         
         Note: target must currently be set to 'model_fmume'.
         
@@ -396,8 +396,11 @@ class ModelicaCompiler(object):
                 in which the model is contained.
                 
             target --
-                The build target. Valid options are 'fmume' and 'fmucs'.
-                Note: Must currently be set to 'fmume'.
+                The build target. Valid options are 'me' and 'cs'.
+                
+            version --
+                The FMI version. Valid options are '1.0' and '2.0'.
+                Note: Must currently be set to '1.0'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
@@ -409,7 +412,7 @@ class ModelicaCompiler(object):
         """
         self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
-            self._compiler.compileFMU(class_name, file_name, target, compile_to)
+            self._compiler.compileFMU(class_name, file_name, target, version, compile_to)
             self._compiler.closeLogger()
         except jpype.JavaException as ex:
             self._handle_exception(ex)

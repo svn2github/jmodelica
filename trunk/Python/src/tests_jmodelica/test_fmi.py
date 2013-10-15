@@ -149,12 +149,12 @@ class Test_FMUModelCS1:
         """
         Sets up the test class.
         """
-        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
-        rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
-        no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="fmucs")
-        simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
-        simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
-        input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="fmucs")
+        rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        rlc_circuit_square = compile_fmu("RLC_Circuit_Square",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
+        no_state3 = compile_fmu("NoState.Example3",os.path.join(path_to_mofiles,"noState.mo"),target="cs")
+        simple_input = compile_fmu("Inputs.SimpleInput",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        simple_input2 = compile_fmu("Inputs.SimpleInput2",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
+        input_discontinuity = compile_fmu("Inputs.InputDiscontinuity",os.path.join(path_to_mofiles,"InputTests.mo"),target="cs")
 
     def setUp(self):
         """
@@ -439,7 +439,7 @@ class Test_FMUModelCS1:
     @testattr(stddist = True)
     def test_result_name_file(self):
 
-        #rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="fmucs")
+        #rlc_name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"),target="cs")
         rlc = FMUModelCS1("RLC_Circuit.fmu")
 
         res = rlc.simulate()

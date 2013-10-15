@@ -39,7 +39,7 @@ class _BaseSimOptTest:
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu',target="fmume"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format='jmu',target="me"):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 
@@ -255,7 +255,7 @@ class SimulationTest(_BaseSimOptTest):
     """
 
     @classmethod
-    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'fmu',target="fmume"):
+    def setup_class_base(cls, mo_file, class_name, options = {}, format = 'fmu',target="me"):
         """
         Set up a new test model. Compiles the model. 
         Call this with proper args from setUpClass(). 

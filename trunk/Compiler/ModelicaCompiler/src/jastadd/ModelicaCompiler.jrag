@@ -734,7 +734,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUME(String className, String fileName[]) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "fmume", ".");
+		compileFMU(className, fileName, "me", "1.0", ".");
 	}
 
 	/**
@@ -750,7 +750,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUCS(String className, String fileName[]) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "fmucs", ".");
+		compileFMU(className, fileName, "cs", "1.0", ".");
 	}
 
 	/**
@@ -765,7 +765,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUME(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "fmume", compileTo);
+		compileFMU(className, fileName, "me", "1.0", compileTo);
 	}
 
 	/**
@@ -780,7 +780,7 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUCS(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		compileFMU(className, fileName, "fmucs", compileTo);
+		compileFMU(className, fileName, "cs", "1.0", compileTo);
 	}
 
 	/**
@@ -791,21 +791,22 @@ public class ModelicaCompiler {
 	 * 
 	 * @param className Name of model class in the model file to compile.
 	 * @param fileName Array of model file or library paths.
-	 * @param target The compiler target. Valid options are 'fmume' or 'fmucs'.
+	 * @param target The compiler target. Valid options are 'me' or 'cs'.
+     * @param version The FMI version. Valid options are '1.0' or '2.0'.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
-	public void compileFMU(String className, String fileName[], String target, String compileTo) 
+	public void compileFMU(String className, String fileName[], String target, String version, String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling an FMU
 		// First save these options in temp options registry to reset when compiling has finished
 		OptionRegistry tempOptions = new OptionRegistry(options);
 		
 		// use fmi file templates and set the correct options so that XML file will be FMI compliant
-		if (target.equals("fmume")) {
+		if (target.equals("me")) {
 			defaultOptionsFMUME();
 			defaultTemplatePathsFMUME();	
 			compileUnit(className, fileName, "fmume", compileTo, "FMUME");
-		} else 	if (target.equals("fmucs")) {
+		} else 	if (target.equals("cs")) {
 			defaultOptionsFMUCS();
 			defaultTemplatePathsFMUCS();	
 			compileUnit(className, fileName, "fmucs", compileTo, "FMUCS");
@@ -1720,21 +1721,24 @@ public class ModelicaCompiler {
 		String[] name = splitFiles(args[arg]);
 		String cl = (args.length > arg+1) ? args[arg+1] : null;
 		String compileTo = programarguments.containsKey("out") ? programarguments.get("out") : ".";
-		
+		String target = programarguments.get("target");
+        
 		// Compile model
 		try {
 			if (programarguments.containsKey("parse"))
 				parseFiles(name);
 			else if (programarguments.containsKey("check"))
 				instantiateModel(name, cl);
-			else if (programarguments.containsKey("fmucs"))
+			else if (target.equals("cs"))
 				compileFMUCS(cl, name, compileTo);
-			else if (programarguments.containsKey("fmux"))
+			else if (target.equals("fmux"))
 			    compileFMUX(cl, name, compileTo);
-			else if (programarguments.containsKey("jmu"))
+			else if (target.equals("jmu"))
 				compileJMU(cl, name, compileTo);
-			else
+			else if (target.equals("me"))
 				compileFMUME(cl, name, compileTo);
+            else
+                throw new IllegalArgumentException();
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 				getDiagnosticsGenerator().writeProblems(ce.getProblems());

@@ -107,7 +107,7 @@ class Test_Compiler:
         Test that it is possible to compile an FMU from a .mo file with 
         ModelicaCompiler.
         """ 
-        Test_Compiler.mc.compile_FMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'fmume', '.')
+        Test_Compiler.mc.compile_FMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '1.0', '.')
         
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \

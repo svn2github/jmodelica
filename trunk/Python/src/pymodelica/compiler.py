@@ -33,7 +33,7 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', 
+def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0',
                 compiler_options={}, compile_to='.', compiler_log_level='warning',
                 separate_process=False, jvm_args=''):
     """ 
@@ -62,9 +62,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
     Other options for the compiler should also be listed in the compiler_options 
     dict.
     
-    The compiler target is 'fmume' by default which means that the shared 
+    The compiler target is 'me' by default which means that the shared 
     file contains the FMI for Model Exchange API. Setting this parameter to 
-    'fmucs' will generate an FMU containing the FMI for Co-Simulation API.
+    'cs' will generate an FMU containing the FMI for Co-Simulation API.
     
     Parameters::
     
@@ -85,8 +85,12 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
             Default: 'auto'
             
         target --
-            Compiler target. Possible values are 'fmume' or 'fmucs'.
-            Default: 'fmume'
+            Compiler target. Possible values are 'me' or 'cs'.
+            Default: 'me'
+            
+        version --
+            The FMI version. Valid options are '1.0' and '2.0'.
+            Note: Must currently be set to '1.0'.
             
         compiler_options --
             Options for the compiler.
@@ -126,7 +130,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='fmume',
         created and a list of warnings that was raised.
     
     """
-    return _compile_unit(class_name, file_name, compiler, target, 
+    return _compile_unit(class_name, file_name, compiler, target, version,
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)       
 
@@ -207,7 +211,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
         created and a list of warnings that was raised.
     
     """
-    return _compile_unit(class_name, file_name, compiler, 'fmux', 
+    return _compile_unit(class_name, file_name, compiler, 'fmux', None,
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)
 
@@ -295,11 +299,11 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
         created and a list of warnings that was raised.
     
     """
-    return _compile_unit(class_name, file_name, compiler, 'jmu', 
+    return _compile_unit(class_name, file_name, compiler, 'jmu', None, 
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)
 
-def _compile_unit(class_name, file_name, compiler, target, 
+def _compile_unit(class_name, file_name, compiler, target, version,
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args):
     """
@@ -318,8 +322,8 @@ def _compile_unit(class_name, file_name, compiler, target,
         comp.set_compiler_logger(compiler_log_level)
         
         # compile unit in java
-        if (target.find('fmume') >= 0 or target.find('fmucs') >= 0): 
-            warnings = comp.compile_FMU(class_name, file_name, target, compile_to)
+        if (target.find('me') >= 0 or target.find('cs') >= 0): 
+            warnings = comp.compile_FMU(class_name, file_name, target, version, compile_to)
         elif target.find('jmu') >= 0:
             warnings = comp.compile_JMU(class_name, file_name, compile_to)
         elif target.find('fmux') >= 0:
@@ -327,7 +331,7 @@ def _compile_unit(class_name, file_name, compiler, target,
         else:
             raise Exception("Model unit (FMU/JMU/FMUX) could not be extracted from the target: %s" %(target))
     else:
-        warnings = compile_separate_process(class_name, file_name, compiler, target, compiler_options, 
+        warnings = compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
         
     if os.path.isdir(compile_to):
@@ -335,7 +339,7 @@ def _compile_unit(class_name, file_name, compiler, target,
     else:
         return CompilerResult(compile_to, warnings)
 
-def compile_separate_process(class_name, file_name=[], compiler='auto', target='fmume', compiler_options={}, 
+def compile_separate_process(class_name, file_name=[], compiler='auto', target='me', version='1.0', compiler_options={}, 
                              compile_to='.', compiler_log_level='warning', jvm_args=''):
     """
     Compile model in separate process.
@@ -361,8 +365,12 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
             Default: 'auto'
             
         target --
-            Compiler target. Valid options are 'fmume', 'fmucs', 'fmux' or 'jmu'.
-            Default: 'fmume'
+            Compiler target. Valid options are 'me', 'cs', 'fmux' or 'jmu'.
+            Default: 'me'
+            
+        version --
+            The FMI version. Valid options are '1.0' and '2.0'.
+            Note: Must currently be set to '1.0'.
             
         compiler_options --
             Options for the compiler.
@@ -408,7 +416,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
 
     OPTIONS = '-opt=' + _gen_compiler_options(compiler_options)
     
-    TARGET = "-" + target
+    TARGET = "-target=" + target
+    
+    VERSION = "-version=" + str(version) #In case it is None
     
     PLATFORM = "-platform=" + _get_platform()
     
@@ -420,9 +430,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         
     # create cmd
     if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, VERSION, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, VERSION, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
     
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()
@@ -511,7 +521,7 @@ def _get_unit_name_from_target(class_name, target):
    Helper method to get unit file ending from compiler target.
    """
    # compile unit in java
-   if (target.find('fmume') >=0 or target.find('fmucs') >= 0): 
+   if (target.find('me') >=0 or target.find('cs') >= 0): 
        return get_fmu_name(class_name)
    elif target.find('jmu') >= 0:
        return get_jmu_name(class_name)

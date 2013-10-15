@@ -45,7 +45,7 @@ class TestRLCSquareCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
@@ -62,7 +62,7 @@ class TestRLCSquareCSModified(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
@@ -83,7 +83,7 @@ class TestRLCCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
