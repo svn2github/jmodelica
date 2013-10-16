@@ -98,6 +98,7 @@
 				<include name="org/jmodelica/util/*.class" />
 				<include name="org/jmodelica/util/formattedPrint/*.class" />
 				<include name="org/jmodelica/util/logging/*.class" />
+                <include name="org/jmodelica/util/exception/*.class" />
 			</fileset>
 		</jar>
 		<jar destfile="${jar_output_dir}/graphs.jar">
