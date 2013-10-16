@@ -2154,15 +2154,15 @@ model UnbalancedTest1_Err
 			name="UnbalancedTest1_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
-   y
-   z
+     y
+     z
 ")})));
 end UnbalancedTest1_Err;
 
@@ -2179,16 +2179,17 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: Maximum number of differentiations reached
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
-Semantic error at line 0, column 0:  The system is structurally singular. The following varible(s) could not be matched to any equation:
-   y
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     y
 
   The following equation(s) could not be matched to any variable:
-   x = 1 + 2
+    x = 1 + 2
 ")})));
 end UnbalancedTest2_Err;
 
@@ -2203,14 +2204,14 @@ equation
 			name="UnbalancedTest3_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   4.0 = 5
+    4.0 = 5
 ")})));
 end UnbalancedTest3_Err;
 
@@ -2223,16 +2224,14 @@ equation
 			name="UnbalancedTest4_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
-   x
+     x
 ")})));
 end UnbalancedTest4_Err;
 
@@ -2248,16 +2247,14 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: Maximum number of differentiations reached
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   x = 0
+    x = 0
 ")})));
 end UnbalancedTest5_Err;
 

@@ -1,4 +1,5 @@
-package org.jmodelica.util;
+package org.jmodelica.util.exceptions;
+
 
 @SuppressWarnings("serial")
 public class BLTException extends ModelicaException {	

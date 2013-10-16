@@ -40,8 +40,8 @@ UnknownOptionException = jpype.JClass(
     
 IllegalLogStringException = org.jmodelica.util.logging.IllegalLogStringException
 
-CompilerException = org.jmodelica.util.CompilerException
-ModelicaClassNotFoundException = org.jmodelica.util.ModelicaClassNotFoundException
+CompilerException = org.jmodelica.util.exceptions.CompilerException
+ModelicaClassNotFoundException = org.jmodelica.util.exceptions.ModelicaClassNotFoundException
 ModelicaCCodeCompilationException = org.jmodelica.modelica.compiler.CcodeCompilationException
 OptimicaCCodeCompilationException = org.jmodelica.optimica.compiler.CcodeCompilationException
 

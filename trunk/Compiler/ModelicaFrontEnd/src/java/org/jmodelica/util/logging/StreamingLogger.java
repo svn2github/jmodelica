@@ -8,8 +8,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.jmodelica.util.ModelicaException;
 import org.jmodelica.util.Problem;
+import org.jmodelica.util.exceptions.ModelicaException;
 
 public class StreamingLogger extends ModelicaLogger {
 	

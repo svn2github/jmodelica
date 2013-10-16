@@ -188,7 +188,7 @@ class CompilerLogHandler:
         
         exception = exceptions[0]
         
-        if exception.kind == 'org.jmodelica.util.ModelicaClassNotFoundException':
+        if exception.kind == 'org.jmodelica.util.exceptions.ModelicaClassNotFoundException':
             raise ModelicaClassNotFoundError(exception.message)
         
         if exception.kind == 'java.io.FileNotFoundException':

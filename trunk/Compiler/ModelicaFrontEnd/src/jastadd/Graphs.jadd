@@ -457,50 +457,6 @@ public class BiPGraph {
 		}
 	}
 	
-	public void matchMunkres(Map<String,Integer> weights) {
-
-		if (equationMap.size()==0 || variableMap.size()==0) {
-			return;	
-		}
-
-		long cost[][] = new long[equationMap.size()][variableMap.size()];	
-
-		int i = 0;
-		
-		for (Eq e : getEquations()) {
-			int j = 0;
-			for (String vName : variableMap.keySet()) {
-				Var v = variableMap.get(vName);
-				if (e.getVariables().contains(v)) {
-					cost[i][j] = v.stateSelectionWeight();
-				} else {
-					cost[i][j] = FVariable.SS_UNMATCHED_WEIGHT;	
-				}
-				Integer weight = weights.get(vName);
-				if (weight!=null) {
-					cost[i][j] += weight.intValue();
-				}
-				j++;
-			}
-			i++;
-		}
-		
-		MunkresProblem munk = new MunkresProblem(cost);
-		int[][] result = munk.solve();
-		long opt_cost = 0L;
-		ASTNode.log.info("Munkres result:");
-		Eq[] eqs = equationMap.values().toArray(new Eq[equationMap.size()]);
-		Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
-		for (i=0;i<result.length;i++) {
-			opt_cost += cost[result[i][0]][result[i][1]];
-			Eq eqn = eqs[result[i][0]];
-			Var var = vars[result[i][1]];
-			match(eqn, var);
-			ASTNode.log.info("%s: %s %d", eqn, var, cost[result[i][0]][result[i][1]]);
-		}
-		ASTNode.log.info("Optimal cost: %d", opt_cost);
-	}
-	
 	public boolean augmentPath(Eq e) {
 		e.setVisited(true);
 		for (Var v : e.getVariables()) {
@@ -767,7 +723,7 @@ public class BiPGraph {
 	
 	public String toString() {
 		StringBuffer str = new StringBuffer();
-		str.append("BiPGraph\n");
+		str.append("BiPGraph (" + getEquations().size() + " equations, " + variableMap.size() + " variables)\n");
 		str.append("Variables: {");
 		for (String vName : variableMap.keySet()) {
 			Var v = variableMap.get(vName);

@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.exceptions;
 
 /**
  * Exception to be thrown when the Modelica class to instantiate is not

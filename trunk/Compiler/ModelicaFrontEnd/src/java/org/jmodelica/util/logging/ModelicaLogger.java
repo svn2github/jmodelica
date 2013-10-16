@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.util.CompilerException;
 import org.jmodelica.util.NullStream;
 import org.jmodelica.util.Problem;
+import org.jmodelica.util.exceptions.CompilerException;
 
 /**
  * \brief Base class for logging messages from the tree.

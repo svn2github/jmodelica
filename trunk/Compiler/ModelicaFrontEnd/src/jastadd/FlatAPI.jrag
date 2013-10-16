@@ -1560,36 +1560,6 @@ aspect Attributes {
 	syn FExp        FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
 	syn CValue      FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
 	syn int         FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
-	syn StateSelect FRealVariable.stateSelectAttribute()       = StateSelect.values()[stateSelectAttributeInt() - 1];
-	
-	public class FRealVariable {
-		public enum StateSelect {
-			NEVER   (10L), 
-			AVOID   (10000L), 
-			DEFAULT (10000000L), 
-			PREFER  (10000000000L), 
-			ALWAYS  (10000000000000L);
-			
-			private long w;
-			
-			private StateSelect(long weight) {
-				w = weight;
-			}
-			
-			public long weight() {
-				return w;
-			}
-		}
-	}
-	
-	public static long FVariable.SS_UNMATCHED_WEIGHT = 10000000000000000L;
-	
-	syn long FVariable.stateSelectionWeight() = 0;
-	eq FRealVariable.stateSelectionWeight() {
-		FRealVariable frv = (FRealVariable) getMeIntegrated();
-		StateSelect ss = (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
-		return ss.weight();
-	}
 	
 	public void FVariable.warnStartAttributeNotSet() {
 		if (!startAttributeSet())
