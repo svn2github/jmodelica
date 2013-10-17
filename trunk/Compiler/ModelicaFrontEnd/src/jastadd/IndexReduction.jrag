@@ -645,7 +645,7 @@ aspect MunkersProblem {
             ASTNode.log.info("%s: %s %d", eqn, var, cost[result[i][0]][result[i][1]]);
         }
         ASTNode.log.info("Optimal cost: %d", opt_cost);
-        if (opt_cost > UNMATCHED_WEIGHT) {
+        if (opt_cost >= UNMATCHED_WEIGHT) {
             throw new MunkresException("Munkres algorithm was unable to find a matching");
         }
     }
