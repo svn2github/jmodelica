@@ -563,7 +563,7 @@ aspect IndexReduction {
         }
     }
     
-    public static long FVariable.SS_UNMATCHED_WEIGHT = 10000000000000000L;
+    public static long BiPGraph.UNMATCHED_WEIGHT = 10000000000000000L;
     
     syn long FVariable.stateSelectionWeight() = 0;
     eq FRealVariable.stateSelectionWeight() {
@@ -619,7 +619,7 @@ aspect MunkersProblem {
                 if (e.getVariables().contains(v)) {
                     cost[i][j] = v.stateSelectionWeight();
                 } else {
-                    cost[i][j] = FVariable.SS_UNMATCHED_WEIGHT; 
+                    cost[i][j] = UNMATCHED_WEIGHT; 
                 }
                 Integer weight = weights.get(vName);
                 if (weight!=null) {
@@ -638,17 +638,14 @@ aspect MunkersProblem {
         Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
         boolean failed = false;
         for (i=0;i<result.length;i++) {
-            long pairCost = cost[result[i][0]][result[i][1]];
-            opt_cost += pairCost;
+            opt_cost += cost[result[i][0]][result[i][1]];
             Eq eqn = eqs[result[i][0]];
             Var var = vars[result[i][1]];
             match(eqn, var);
-            ASTNode.log.info("%s: %s %d", eqn, var, pairCost);
-            if (pairCost == FVariable.SS_UNMATCHED_WEIGHT)
-                failed = true;
+            ASTNode.log.info("%s: %s %d", eqn, var, cost[result[i][0]][result[i][1]]);
         }
         ASTNode.log.info("Optimal cost: %d", opt_cost);
-        if (failed) {
+        if (opt_cost > UNMATCHED_WEIGHT) {
             throw new MunkresException("Munkres algorithm was unable to find a matching");
         }
     }
