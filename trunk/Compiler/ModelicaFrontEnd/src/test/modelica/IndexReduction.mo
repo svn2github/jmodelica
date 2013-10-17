@@ -304,30 +304,30 @@ fclass IndexReduction.IndexReduction3_Electrical
  Real i1;
  Real i2;
  Real iC;
+ Real _der_iL;
  Real _der_uC;
  Real _der_u0;
  Real _der_u1;
  Real _der_uL;
- Real _der_i1;
  Real _der_i2;
 initial equation 
- iL = 1;
+ i1 = 0.0;
 equation
  u0 = 220 * sin(time * omega);
  u1 = R[1] * i1;
  uL = R[2] * i2;
- uL = L * der(iL);
+ uL = L * _der_iL;
  iC = C * _der_uC;
  u0 = u1 + uL;
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
  _der_u0 = 220 * (cos(time * omega) * omega);
- _der_u1 = R[1] * _der_i1;
+ _der_u1 = R[1] * der(i1);
  _der_uL = R[2] * _der_i2;
  _der_u0 = _der_u1 + _der_uL;
  _der_uC = _der_u1 + _der_uL;
- _der_i1 = _der_i2 + der(iL);
+ der(i1) = _der_i2 + _der_iL;
 end IndexReduction.IndexReduction3_Electrical;
 ")})));
   end IndexReduction3_Electrical;
@@ -1023,15 +1023,15 @@ fclass IndexReduction.IndexReduction25_DerFunc
  constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
- Real _der_x1[1];
+ Real _der_x2[2];
 initial equation 
+ x1[1] = 0.0;
  x2[1] = 0.0;
- x2[2] = 0.0;
 equation
- _der_x1[1] + der(x2[1]) = 1;
- der(x2[2]) = 2;
+ der(x1[1]) + der(x2[1]) = 1;
+ _der_x2[2] = 2;
  x1[1] + IndexReduction.IndexReduction25_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}) = 0;
- _der_x1[1] + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
+ der(x1[1]) + IndexReduction.IndexReduction25_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), _der_x2[2]}, {{0.0, 0.0}, {0.0, 0.0}}) = 0.0;
 
 public
  function IndexReduction.IndexReduction25_DerFunc.f_der
@@ -1092,15 +1092,15 @@ fclass IndexReduction.IndexReduction26_DerFunc
  constant Real x1[2] = 0;
  Real x2[1];
  Real x2[2];
- Real _der_x1[1];
+ Real _der_x2[2];
 initial equation 
+ x1[1] = 0.0;
  x2[1] = 0.0;
- x2[2] = 0.0;
 equation
- _der_x1[1] + der(x2[1]) = 1;
- der(x2[2]) = 2;
+ der(x1[1]) + der(x2[1]) = 1;
+ _der_x2[2] = 2;
  x1[1] + IndexReduction.IndexReduction26_DerFunc.f({x2[1], x2[2]}) = 0;
- _der_x1[1] + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), der(x2[2])}) = 0.0;
+ der(x1[1]) + IndexReduction.IndexReduction26_DerFunc.f_der({x2[1], x2[2]}, {der(x2[1]), _der_x2[2]}) = 0.0;
 
 public
  function IndexReduction.IndexReduction26_DerFunc.f_der

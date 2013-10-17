@@ -363,10 +363,7 @@ aspect IndexReduction {
                 add = true;
             } else {
                 for (FVariable var : eb.activeVariables()) {
-                    if (!var.isDerivativeVariable())
-                        continue;
-                    FDerivativeVariable dVar = var.asDerivativeVariable();
-                    if (dVar.myDifferentiatedVariable().stateSelectAttribute() == FRealVariable.StateSelect.NEVER) {
+                    if (var.isDerivativeVariable()) {
                         add = true;
                         break;
                     }
