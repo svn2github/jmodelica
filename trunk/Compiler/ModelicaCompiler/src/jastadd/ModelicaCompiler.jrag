@@ -1725,9 +1725,9 @@ public class ModelicaCompiler {
         
 		// Compile model
 		try {
-			if (programarguments.containsKey("parse"))
+			if (target.equals("parse"))
 				parseFiles(name);
-			else if (programarguments.containsKey("check"))
+			else if (target.equals("check"))
 				instantiateModel(name, cl);
 			else if (target.equals("cs"))
 				compileFMUCS(cl, name, compileTo);
@@ -1737,8 +1737,8 @@ public class ModelicaCompiler {
 				compileJMU(cl, name, compileTo);
 			else if (target.equals("me"))
 				compileFMUME(cl, name, compileTo);
-            else
-                throw new IllegalArgumentException();
+			else
+				throw new IllegalArgumentException("Unknwon target '" + target + "'");
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 				getDiagnosticsGenerator().writeProblems(ce.getProblems());
