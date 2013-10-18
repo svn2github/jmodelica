@@ -322,14 +322,14 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         comp.set_compiler_logger(compiler_log_level)
         
         # compile unit in java
-        if (target.find('me') >= 0 or target.find('cs') >= 0): 
+        if (target == 'me' or target == 'cs'): 
             warnings = comp.compile_FMU(class_name, file_name, target, version, compile_to)
-        elif target.find('jmu') >= 0:
+        elif target == 'jmu':
             warnings = comp.compile_JMU(class_name, file_name, compile_to)
-        elif target.find('fmux') >= 0:
+        elif target == 'fmux':
             warnings = comp.compile_FMUX(class_name, file_name, compile_to)
         else:
-            raise Exception("Model unit (FMU/JMU/FMUX) could not be extracted from the target: %s" %(target))
+            raise Exception("The target %s is not valid, legal targets are 'me', 'cs', 'jmu' and 'fmux'" %(target))
     else:
         warnings = compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
