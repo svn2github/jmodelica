@@ -494,7 +494,7 @@ aspect TransformCanonical {
 		log.info(g.printMatchingObj());
 
 		// Add initial equations if needed
-		if (root().options.getBooleanOption("automatic_add_initial_equations")) {
+		if (g.getUnmatchedEquations().isEmpty() && root().options.getBooleanOption("automatic_add_initial_equations")) {
 			for (Var var : g.getUnmatchedVariables()) {	
 				FVariable fv = var.getVariable();
 				FIdUseExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
@@ -522,12 +522,11 @@ aspect TransformCanonical {
 		for (Eq ee : g.getUnmatchedEquations()) {
 			daeInitUnmatchedEquations.add(ee.getEquation());
 		}
-
+		
 		// TODO: If no complete matching found, then try index reduction
-		if (!g.isComplete()) {
-			return;
-		}
-				
+		collectErrors();
+		breakOnErrors();
+		
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
 			g.tarjanReset();
 			try {

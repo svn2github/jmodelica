@@ -2272,11 +2272,10 @@ initial equation
 			errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
-  The DAE initialization system has 3 equations and 2 free variables.
+  The initialization system is structurally singular. The following varible(s) could not be matched to any equation:
+     y
 
-Error: in file '...':
-Semantic error at line 0, column 0:
-  The initialization system is structurally singular. The following equation(s) could not be matched to any variable:
+  The following equation(s) could not be matched to any variable:
     x = x * 3.14
 
 ")})));
