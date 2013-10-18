@@ -19,6 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
+import org.jmodelica.modelica.compiler.TargetObject;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.ModelicaLogger;
 
@@ -30,6 +31,7 @@ public class DebugCompiler extends JFrame {
 	private JTextField className;
 	
 	private ModelicaCompiler mc;
+    private TargetObject target;
 	private File tempDir;
 	private boolean deleteAll;
 
@@ -61,6 +63,7 @@ public class DebugCompiler extends JFrame {
 		pack();
 		
 		mc = new ModelicaCompiler(new OptionRegistry());
+        target = new TargetObject("me", "1.0");
 		tempDir = getTempDir();
 		mc.setTempFileDir(tempDir);
 	}
@@ -97,7 +100,7 @@ public class DebugCompiler extends JFrame {
 				
 				out.reset();
 				mc.setLogger(out);
-				mc.compileModel(new String[] { file.getAbsolutePath() }, name);
+				mc.compileModel(new String[] { file.getAbsolutePath() }, name, target);
 				
 				if (deleteAll)
 					for (File f : tempDir.listFiles())

@@ -118,6 +118,25 @@ class ModelicaCompiler(object):
         """
         self._compiler.setModelicapath(path)
 
+    def create_target_object(self, target, version):
+        """ 
+        Creates a target object.
+        
+        Parameters::
+        
+            target --
+                The target type.
+            
+            version --
+                The version in case of a fmu
+        
+        """
+        try:
+            target_obj = self._compiler.createTargetObject(target, version)
+        except jpype.JavaException as ex:
+            self._handle_exception(ex)
+        return target_obj
+
     def get_boolean_option(self, key):
         """ 
         Get the boolean option set for the specific key. 
@@ -281,49 +300,6 @@ class ModelicaCompiler(object):
             self._compiler.setStringOption(key, value)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
-    
-    def get_XML_tpl(self):
-        """ 
-        Get the file path to the XML model description template.
-        
-        Returns::
-        
-            The file path for the XML model description template.
-        """
-        return self._compiler.getXMLTpl()
-
-    def set_XML_tpl(self, template):
-        """ 
-        Set the XML model description template to the file pointed out by 
-        template.
-        
-        Parameters::
-        
-            template --
-                The new XML model description template.       
-        """
-        self._compiler.setXMLTpl(template)
-        
-    def get_cTemplate(self):
-        """ 
-        Get the file path to the c code template. 
-        
-        Returns::
-        
-            The file path for the c code template.
-        """
-        return self._compiler.getCTemplate()
-    
-    def set_cTemplate(self, template):
-        """ 
-        Set the c code template to the file pointed out by template.
-        
-        Parameters::
-        
-            template --
-                The new c code template.
-        """
-        self._compiler.setCTemplate(template)
         
     def get_warnings(self):
         """ 
@@ -556,7 +532,7 @@ class ModelicaCompiler(object):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def generate_code(self,fclass):
+    def generate_code(self,fclass, target):
         """ 
         Generate code for a model.
 
@@ -579,7 +555,7 @@ class ModelicaCompiler(object):
             Java classes.
         """
         try:
-            self._compiler.generateCode(fclass)
+            self._compiler.generateCode(fclass, target)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             

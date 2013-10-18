@@ -145,7 +145,8 @@ class Test_Compiler:
         sourceroot = Test_Compiler.mc.parse_model(Test_Compiler.fpath_mc)
         icd = Test_Compiler.mc.instantiate_model(sourceroot, Test_Compiler.cpath_mc)
         fclass = Test_Compiler.mc.flatten_model(icd)
-        Test_Compiler.mc.generate_code(fclass)
+        target = Test_Compiler.mc.create_target_object("me", "1.0")
+        Test_Compiler.mc.generate_code(fclass, target)
 
     @testattr(stddist = True)
     def test_optimica_stepbystep(self):
@@ -153,7 +154,8 @@ class Test_Compiler:
         sourceroot = Test_Compiler.oc.parse_model(Test_Compiler.fpath_oc)
         icd = Test_Compiler.oc.instantiate_model(sourceroot, Test_Compiler.cpath_oc)
         fclass = Test_Compiler.oc.flatten_model(icd)
-        Test_Compiler.oc.generate_code(fclass)
+        target = Test_Compiler.oc.create_target_object("me", "1.0")
+        Test_Compiler.oc.generate_code(fclass, target)
 
     @testattr(stddist = True)
     def test_compiler_error(self):

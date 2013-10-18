@@ -74,15 +74,6 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	private String currOptimicaCTemplatefile = null;
-	private String userDefOptimicaCTemplatefile = null;
-	
-	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
-			String cTemplatefile, String optimicaCTemplatefile) {
-		super(options, xmlTpl, cTemplatefile);
-		userDefOptimicaCTemplatefile = optimicaCTemplatefile;
-	}
-	
 	public OptimicaCompiler(OptionRegistry options) {
 		super(options);
 	}
@@ -91,36 +82,77 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		super();
 	}
 	
-	private void defaultTemplateJMI() {
-		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
-	}
-    
-    private void defaultTemplateFMI() {
-		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "fmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
-	}
-	
-	public void defaultTemplatePathsJMU() {
-		super.defaultTemplatePathsJMU();
-		defaultTemplateJMI();
-	}
-	
-	public void defaultTemplatePathsFMUME() {
-		super.defaultTemplatePathsFMUME();
-		defaultTemplateFMI();
-	}
-	
-	public void defaultTemplatePathsFMUCS() {
-		super.defaultTemplatePathsFMUCS();
-		defaultTemplateFMI();
-	}
-	
-	public void defaultTemplatePathsFMUX() {
-		super.defaultTemplatePathsFMUX();
-		currOptimicaCTemplatefile = null;
-	}
-	
 	public boolean hasModelicaFileExt(String file) {
 		return super.hasModelicaFileExt(file) || file.endsWith(".mop");
+	}
+    
+    /**
+	 * \brief Creates a target object.
+	 * 
+	 * @param target The type of target: me, cs, jmu, ect.
+	 * @param version The version in case of a fmu.
+	 */
+    public TargetObject createTargetObject(String target, String version) {
+        return new TargetOptObject(target, version);
+    }
+    
+    /**
+	 * \brief Compiles a model and creates an FMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param target The compiler target. Valid options are 'me' or 'cs'.
+     * @param version The FMI version. Valid options are '1.0' or '2.0'.
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
+	public void compileFMU(String className, String fileName[], String target, String version, String compileTo) 
+        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        //Create the target object and use it to set options.
+        TargetOptObject targetObject = new TargetOptObject(target, version);
+
+        //Compile.
+        super.compileUnit(className, fileName, targetObject, compileTo);
+    }
+    
+    /**
+	 * \brief Compiles a model and creates a JMU.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a JMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
+	 */
+	public void compileJMU(String className, String fileName[], String compileTo) 
+        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        //Create the target object and use it to set options.
+        TargetOptObject targetObject = new TargetOptObject("jmu", null);
+
+        //Compile.
+        super.compileUnit(className, fileName, targetObject, compileTo);
+	}
+    
+    /**
+	 * \brief Compiles a model and creates an FMUX.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening and XML code 
+	 * generation) and packs the result in a FMUX.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
+	 */
+	public void compileFMUX(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+        //Create the target object and use it to set options.
+        TargetOptObject targetObject = new TargetOptObject("fmux", null);
+        
+        //Compile.
+        super.compileUnit(className, fileName, targetObject, compileTo);
 	}
 
 	/**
@@ -164,38 +196,12 @@ public class OptimicaCompiler extends ModelicaCompiler {
 			return new CADGenerator(new PrettyPrinter(), '$', fc);
 		}
 	}
-	
-	/**
-	 * Set the Optimica c template file path attribute.
-	 * 
-	 * @param template The new c template file path.
-	 */
-	public void setOptimicaCTemplate(String template) {
-		userDefOptimicaCTemplatefile = template;
-	}
-
-	/**
-	 * \brief get the C template. 
-	 * 
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	protected String getCTemplatefile(FClass fc) {
-		if (fc instanceof FOptClass) {
-			return (userDefOptimicaCTemplatefile == null) ? currOptimicaCTemplatefile : userDefOptimicaCTemplatefile;
-		} else {
-			return (userDefCTemplatefile == null) ? currCTemplatefile : userDefCTemplatefile;
-		}
-	}
 
 	@Override
 	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
 		throws JModelicaHomeNotFoundException {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
-		if (args.length >= arg+5) 
-			userDefOptimicaCTemplatefile = args[arg+4];
 	}
 	
 	public static void main(String args[]) {		
@@ -211,4 +217,32 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);
 	}	
+}
+
+public class TargetOptObject extends TargetObject {
+    
+    public TargetOptObject(String target, String version) {
+		super(target, version);
+	}
+    
+    /**
+	 * \brief get the C template. 
+	 * 
+	 * @param fc A reference to an FClass object. This is convenient in
+	 * extensions of ModelicaCompiler that need to distinguish between
+	 * different kinds of flattened classes.
+	 */
+    public String getCTemplates(FClass fc) {
+        if (fc instanceof FOptClass) {
+			File dir = getTemplatesDir();
+            switch (target) {
+                case JMU:
+                    return new File(dir, "jmi_optimica_template.c").getPath();
+                default:
+                    return null;
+            }
+		} else {
+			return super.getCTemplates(fc);
+		}
+    }
 }
