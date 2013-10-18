@@ -446,16 +446,17 @@ aspect IndexReduction {
             
             // Run matching
             // Compute weights for variables based on linearity
-            Map<String,Integer> linearityWeights = new HashMap<String,Integer>();
-            for (FVariable fv : z) {
-                int w = calculateLinearityWeight(g, fv);
+            Map<Var, Long> weights = new HashMap<Var, Long>();
+            for (Var var : gd.getVariables()) {
+                FVariable fv = var.getVariable();
+                long weight = calculateLinearityWeight(g, fv) + fv.stateSelectionWeight();
                 if (fv.getMeIntegrated() != null)
-                    w += calculateLinearityWeight(g, fv.getMeIntegrated());
-                ASTNode.log.info("Linearity weight: %s %d", fv.name(), w);
-                linearityWeights.put(fv.name(), w);
+                    weight += calculateLinearityWeight(g, fv.getMeIntegrated());
+                ASTNode.log.info("Weight: %s %d", var, weight);
+                weights.put(var, weight);
             }
             
-            gd.matchMunkres(linearityWeights);
+            gd.matchMunkres(weights);
             ASTNode.log.info(gd.printMatchingObj());
             
             // The matched variables are selected as dummy derivatives
@@ -597,7 +598,7 @@ aspect IndexReduction {
 
 aspect MunkersProblem {
     
-    public void BiPGraph.matchMunkres(Map<String,Integer> weights) {
+    public void BiPGraph.matchMunkres(Map<Var, Long> weights) {
 
         if (equationMap.size()==0 || variableMap.size()==0) {
             throw new MunkresException("Empty set of equations or variables was given to the munkres algorithm");
@@ -609,19 +610,8 @@ aspect MunkersProblem {
         
         for (Eq e : getEquations()) {
             int j = 0;
-            for (String vName : variableMap.keySet()) {
-                Var v = variableMap.get(vName);
-                if (e.getVariables().contains(v)) {
-                    cost[i][j] = v.stateSelectionWeight();
-                } else {
-                    cost[i][j] = UNMATCHED_WEIGHT; 
-                }
-                Integer weight = weights.get(vName);
-                if (weight!=null) {
-                    cost[i][j] += weight.intValue();
-                }
-                j++;
-            }
+            for (Var var : variableMap.values())
+                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : UNMATCHED_WEIGHT;
             i++;
         }
         
