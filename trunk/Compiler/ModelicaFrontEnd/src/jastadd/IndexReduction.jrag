@@ -65,11 +65,6 @@ aspect IndexReduction {
                     } else {
                         l.add(fv);
                     }
-                } else if (fv instanceof FDerivativeVariable &&
-                        ((FRealVariable)fv.getMeIntegrated()).stateSelectAttribute() == FRealVariable.StateSelect.NEVER) {
-                    FDummyDerivativeVariable fdv = new FDummyDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                            fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-                    l.add(fdv);
                 } else if (fv instanceof FHDerivativeVariable) {
                     // Convert higher order derivative variables into
                     // first order derivatives, generating variables for each step
