@@ -74,12 +74,12 @@ aspect IndexReduction {
                         FQName fqn = fv.getFQName().createDerPrefixedName(i);
                         l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
                             fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
-                        l.add(new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                            fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
+                        // Derivative variable is added later
                         addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
                         fqnPrev = fqn;
                     }
-                } else {
+                } else if (!fv.isDerivativeVariable()) {
+                    // Derivative variables are added later
                     l.add(fv);
                 }
             }
@@ -96,14 +96,13 @@ aspect IndexReduction {
             root().flushAllRecursiveClearFinal();
 
             aliasElimination.apply();
+            // Add derivative variables
+            addFDerivativeVariables.apply();
 
             root().flushAllRecursive();
 
             log.info(this);
             log.info(aliasManager.printAliasSets());
-            //System.out.println(prettyPrint(""));
-
-            //dumpTree("");
 
             log.info("States:");
             for (FVariable fv : differentiatedRealVariables()) {

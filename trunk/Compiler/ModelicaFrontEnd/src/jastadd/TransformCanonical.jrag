@@ -87,7 +87,7 @@ aspect TransformCanonical {
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
 		    aliasElimination,
-		    new addFDerivativeVariables(),
+		    addFDerivativeVariables,
 		    new extractEventGeneratingExps(),
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
@@ -1382,6 +1382,7 @@ aspect TransformCanonical {
                 root().flushAllRecursive();
             }
         }
+        public addFDerivativeVariables addFDerivativeVariables = new addFDerivativeVariables();
     }
 
 	public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {
