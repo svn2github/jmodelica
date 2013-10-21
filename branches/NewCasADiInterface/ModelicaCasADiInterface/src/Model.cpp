@@ -332,6 +332,9 @@ string generatePrintStringForVector(const vector<T*> &makeStringOf) {
 void Model::print(std::ostream& os) const {
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
+    if (!timeVar.isNull()) {
+        os << "Time variable: " << timeVar << endl;
+    }
     os << generatePrintStringForVector(z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
     for (Model::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {

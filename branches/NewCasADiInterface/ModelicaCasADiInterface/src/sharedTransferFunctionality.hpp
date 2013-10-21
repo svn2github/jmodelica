@@ -314,6 +314,11 @@ void transferUserDefinedTypes(ModelicaCasADi::Model* m, FlatClass &fc) {
  *   Variable transfer.   *
  *                        *
  **************************/
+template <class FClass> 
+void transferTime(ModelicaCasADi::Model* m, FClass fc) {
+    m->setTimeVariable(toMX(fc.timeMX()));
+}
+ 
 template <class FVar>
 ModelicaCasADi::UserType* getUserType(ModelicaCasADi::Model* m, FVar &fv) {
     ModelicaCasADi::UserType* userType = NULL;

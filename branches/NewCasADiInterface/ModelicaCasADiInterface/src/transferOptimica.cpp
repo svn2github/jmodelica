@@ -88,6 +88,9 @@ OptimizationProblem* transferOptimizationProblem(string modelName, vector<string
         }
         
         /***** ModelicaCasADi::Model *****/
+        // Transfer time variable
+        transferTime<oc::FClass>(m, fclass);
+        
         // Transfer user defined types (also generates base types for the user types). 
         transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(m, fclass);
         

@@ -58,6 +58,8 @@ ModelicaCasADi::Model* transferModelicaModel(string modelName, vector<string> mo
                                                    StringFromUTF(modelName.c_str()));
         
         /***** ModelicaCasADi::Model *****/
+        // Transfer time variable
+        transferTime<mc::FClass>(m, fclass);
             
         // Transfer user defined types (also generates base types for the user types). 
         transferUserDefinedTypes<mc::FClass, mc::List, mc::FDerivedType, 

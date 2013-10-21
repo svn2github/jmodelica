@@ -1058,3 +1058,11 @@ equation
     y = x;
     z = -y;
 end atomicModelAlias;
+
+model atomicModelTime
+    Real x;
+    Real y (start=2);
+equation
+    der(x) = time;
+    der(y) = time + 2;
+end atomicModelTime;

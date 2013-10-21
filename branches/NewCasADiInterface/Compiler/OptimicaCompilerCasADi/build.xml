@@ -65,7 +65,7 @@
 	<property name="optimica_xml_back_end_ast" value="${optimica_xml_back_end_path}/src/jastadd" />
 	<property name="optimica_c_back_end_ast" value="${optimica_c_back_end_path}/src/jastadd" />
 	<property name="optimica_front_end_ast" value="${optimica_front_end_path}/src/jastadd" />
-    <property name="modelica_casadi_back_end_ast" value="${modelica_casadi_back_end_path}/src/jastadd" />
+    <property name="modelica_casadi_back_end_ast" value="${modelica_casadi_back_end_path}/../ModelicaCompilerCasADi/src/jastadd/" />
 
 
 	<property name="test_junit_dir" value="src/test/junit" />
@@ -215,9 +215,7 @@
 				<patternset refid="jastadd.files"/>
 			</fileset>
             <fileset dir="${modelica_casadi_back_end_ast}">
-                 <include name="*.ast" />
-                 <include name="*.jadd" />
-                 <include name="*.jrag" />
+                 <include name="FExpToCasADi.jrag" />
             </fileset>
 
 

@@ -56,6 +56,9 @@ class Model: public Printable {
         }; // End enum VariableKind
         /** A Model is instantiated without any arguments */
         Model();
+        void setTimeVariable(CasADi::MX timeVar);
+        CasADi::MX getTimeVariable();
+        
         /** 
          * Variables are assigned a default VariableType if they do not have one set. 
          * @param A pointer to a Variable. 
@@ -134,6 +137,7 @@ class Model: public Printable {
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
     private:
+        CasADi::MX timeVar;
         /// Vector containing pointers to all variables.
         std::vector<Variable*> z;  
         /// Vector containing pointers to DAE equations
@@ -166,6 +170,8 @@ class Model: public Printable {
         void handleVariableTypeForAddedVariable(Variable* var);
         void assignVariableTypeToVariable(Variable* var);
 };
+inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
+inline CasADi::MX Model::getTimeVariable() {return timeVar;}
 inline std::vector<Variable*> Model::getAllVariables() {return z;}
 inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap() {}
 inline VariableType* Model::getVariableTypeByName(std::string typeName) const { return typesInModel.find(typeName) != typesInModel.end() ? typesInModel.find(typeName)->second : NULL; }

@@ -104,8 +104,8 @@ $(OC_SRC)/src/cpp-generated/:
 	mkdir -p $(OC_SRC)/src/java-generated/casadi
 	swig -outdir $(OC_SRC)/src/java-generated/casadi \
              -o $(OC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
-	     -java -package casadi -c++ -I$(CASADI_HOME) $(OC_SRC)/src/swig/java_casadi.i
- 
+	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
+	     
 $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	mkdir -p $(MC_COMPILERS_DIR)/lib
 	g++ -o $(MC_COMPILERS_DIR)/lib/libifcasadi.so $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \

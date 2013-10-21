@@ -280,7 +280,8 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
-    eq FTimeExp.toMX() = new MX("Time expression not implemented");
+    syn lazy MX FClass.timeMX() = new MX("time");
+    eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return An MX with the first output, and perhaps only output, for this function call */
     eq FFunctionCall.toMX() { 
         return toMXVector().get(0);  

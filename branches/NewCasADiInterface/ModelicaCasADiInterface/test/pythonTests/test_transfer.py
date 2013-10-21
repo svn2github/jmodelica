@@ -277,6 +277,13 @@ def test_ModelicaFunctionCallEquationForParameterBinding():
         actual += str(var) + "\n"
     print expected, "\n", actual
     assert actual == expected
+    
+    
+def test_ModelicaStart():
+    model = transfer_to_casadi_interface("atomicModelTime", modelFile)
+    t = model.getTimeVariable()
+    eq = model.getDaeResidual()
+    assert eq[1].getDep(0).getDep(1).isEqual(t) and eq[0].getDep(0).isEqual(t)
 
 ##############################################
 #                                            # 
