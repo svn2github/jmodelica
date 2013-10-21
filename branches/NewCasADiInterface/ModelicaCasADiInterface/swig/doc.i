@@ -14,6 +14,27 @@ Parameters::
 
 ";
 
+%feature("docstring") ModelicaCasADi::Model::setTimeVariable "
+Sets the time variable for this Model. Note that this variable is set
+automatically when models are transferred.
+
+Parameters::
+
+    MX --
+        A MX
+
+";
+
+%feature("docstring") ModelicaCasADi::Model::getTimeVariable "
+Returns this model's time variable. 
+
+Returns::
+
+    MX --
+        A MX
+
+";
+
 %feature("docstring") ModelicaCasADi::Model::addInitialEquation "
 Adds an initial equation to the Model
 

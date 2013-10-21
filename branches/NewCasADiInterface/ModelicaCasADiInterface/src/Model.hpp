@@ -56,7 +56,9 @@ class Model: public Printable {
         }; // End enum VariableKind
         /** A Model is instantiated without any arguments */
         Model();
+        /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
+        /** @return A MX, this Model's time variable */
         CasADi::MX getTimeVariable();
         
         /** 
