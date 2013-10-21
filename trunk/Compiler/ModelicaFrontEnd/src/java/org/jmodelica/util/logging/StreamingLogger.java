@@ -115,6 +115,7 @@ public class StreamingLogger extends ModelicaLogger {
 			sb.append("Unknown program error, " + throwable.getClass().getName());
 			if (throwable.getMessage() != null)
 				sb.append(": " + throwable.getMessage());
+			write(level, sb.toString());
 		}
 		if (getLevel().shouldLog(Level.DEBUG)) {
 			StringWriter str = new StringWriter();
