@@ -678,10 +678,11 @@ aspect Derivatives {
 
 	public FExp FSmoothExp.diff(String name) {
 		int order = getOrder().ceval().intValue();
+		FExp diffExp = getFExp().diff(name);
 		if (order > 0)
-			return new FSmoothExp(new FIntegerLitExp(order - 1), getFExp().diff(name));
+			return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
 		else
-			throw new ExpressionDifferentiationException(this);
+			return diffExp;
 	}
 
 	public FExp FHomotopyExp.diff(String name) {

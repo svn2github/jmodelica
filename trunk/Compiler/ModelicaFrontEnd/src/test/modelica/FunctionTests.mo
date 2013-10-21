@@ -9687,6 +9687,33 @@ end FunctionTests.FunctionLike.EventRel.Smooth;
 ")})));
 end Smooth;
 
+model Smooth2
+    Real a,b,c, d;
+equation
+    b = time;
+    c = b * 2;
+    d = c + b;
+    a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
+    
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventRel_Smooth2",
+			description="",
+			flatModel="
+fclass FunctionTests.FunctionLike.EventRel.Smooth2
+ Real a;
+ Real b;
+ Real c;
+ Real d;
+equation
+ b = time;
+ c = b * 2;
+ d = c + b;
+ a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
+end FunctionTests.FunctionLike.EventRel.Smooth2;
+")})));
+end Smooth2;
+
 model Pre1
 	parameter Integer x = 1;
 	Real y = pre(x);
