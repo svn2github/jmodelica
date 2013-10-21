@@ -74,9 +74,12 @@ import org.jmodelica.util.NotNullPrintStream;
  */
 
 public abstract class AbstractGenerator {
-	
-	/** The prefix for hook tags. */
-	public static final String HOOK_PREFIX = "HOOK__";
+    
+    /** The prefix for hook tags. */
+    public static final String HOOK_PREFIX = "HOOK__";
+    
+    /** The prefix for includes. */
+    public static final String INCLUDE_PREFIX = "INCLUDE:";
     
 	/** \brief A map containing all normal tags */
 	protected Map<String,AbstractTag> tagMap;
@@ -187,14 +190,22 @@ public abstract class AbstractGenerator {
 	public void generate(String templateFile, String outputFile) 
 	  throws FileNotFoundException {
 		try {
-			BufferedReader template = new BufferedReader(new FileReader(new File(templateFile)));
+		    File tFile = new File(templateFile);
+			Reader template = openTemplate(tFile);
 			PrintStream output = new NotNullPrintStream(new File(outputFile), "UTF-8");
-			generate(template, output);
+			generate(template, output, tFile.getParentFile());
 			template.close();
 			output.close();
 		} catch (IOException e) { // TODO: introduce specific exception type
 			throw new RuntimeException("File I/O problem during code generation", e);
 		}
+	}
+	
+	/**
+	 * Opens a new Reader for a template file.
+	 */
+	private Reader openTemplate(File file) throws FileNotFoundException {
+	    return new BufferedReader(new FileReader(file));
 	}
 	
 	/**
@@ -227,15 +238,26 @@ public abstract class AbstractGenerator {
 	 */
 	private enum Mode { NORMAL, TAG, START, BLURB, END, END_WS, BEFORE };
 
+    /**
+     * \brief See generate(String templateFile, String outputFile).
+     * 
+     * @param templateReader A Reader object from which the template 
+     * file can be used.
+     * @param genPrinter A PrintStream object to which the generated code
+     * is written.
+     */
+    public void generate(Reader templateReader, PrintStream genPrinter) {
+        generate(templateReader, genPrinter, null);
+    }
+
 	/**
 	 * \brief See generate(String templateFile, String outputFile).
 	 * 
-	 * @param templateReader A Reader object from which the template 
-	 * file can be used.
-	 * @param genPrinter A PrintStream object to which the generated code
-	 * is written.
+	 * @param templateReader  a Reader object from which the template file can be used.
+	 * @param genPrinter      a PrintStream object to which the generated code is written.
+	 * @param includeDir      directory to look for included files in. If null, includes are not supported
 	 */
-	public void generate(Reader templateReader, PrintStream genPrinter) {
+	public void generate(Reader templateReader, PrintStream genPrinter, File includeDir) {
 		Mode mode = Mode.BEFORE;
 
 		final String startStr = startOfBlurb();
@@ -269,6 +291,12 @@ public abstract class AbstractGenerator {
 					    	if (set != null)
 					    		for (AbstractTag tag : set)
 					    			tag.generate(genPrinter);
+                        } else if (name.startsWith(INCLUDE_PREFIX)) {
+                            if (includeDir == null)
+                                throw new IllegalArgumentException("Can't include template file without include dir.");
+                            name = name.substring(INCLUDE_PREFIX.length()).trim();
+                            File subTemplateFile = new File(includeDir, name);
+                            generate(openTemplate(subTemplateFile), genPrinter, includeDir);
 					    } else {
 							AbstractTag tag = tagMap.get(name);
 							if (tag != null)
