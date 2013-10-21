@@ -1153,25 +1153,81 @@ aspect TransformCanonical {
     public class FClass {
         public class genAlgoInitStmts extends Transformation {
             public void perform() {
-                for (FAbstractEquation equation : equations()) {
-                    equation.genAlgoInitStmts();
+            	for (FAlgorithm a : algorithms()) {
+                    a.genAlgoInitStmts();
                 }
             }
         }
     }
 	
-	public void FAbstractEquation.genAlgoInitStmts() {}
 	public void FAlgorithm.genAlgoInitStmts() {
 		
 		List<FStatement> stmts = new List<FStatement>();
+		Set<FVariable> defSet = defSet();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			FStatement stmt = new FAssignStmt(fv.createUseExp(),fv.createAlgorithmArgument(true));
-			stmts.add(stmt);
+			if (!defSet.contains(fv)) {
+				FStatement stmt = new FAssignStmt(fv.createUseExp(),fv.createAlgorithmArgument(true));
+				stmts.add(stmt);
+			}
 		}
 		for (FStatement stmt : getFStatements()) {
 			stmts.add(stmt);
 		}
 		setFStatementList(stmts);
+	}
+	
+	/**
+	 * \brief Find LHS variables which are not definetly set before use.
+	 */
+	public Set<FVariable> FAlgorithm.defSet() {
+		HashSet<FVariable> fvSet = new HashSet<FVariable>();
+		HashSet<FVariable> fvUse = new HashSet<FVariable>();
+		for (FStatement stmt : getFStatements()) {
+			stmt.defSet(fvSet,fvUse);
+		}
+		return fvSet;
+	}
+	
+	public void FStatement.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+
+	}
+	public void FStatement.defSetBlock(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse, List<FStatement> l) {
+		HashSet<FVariable> fvSetBlock = new HashSet<FVariable>(fvSet);
+		for (FStatement stmt : l) {
+			stmt.defSet(fvSetBlock, fvUse);
+		}
+	}
+	public void FStatement.defSetAdd(HashSet<FVariable> s1, HashSet<FVariable> s2, Collection<FVariable> fvs) {
+		for (FVariable fv : fvs)
+			if (!s1.contains(fv))
+				s2.add(fv);
+	}
+	public void FAssignStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, getRight().referencedFVariablesInFExp());
+		defSetAdd(fvUse, fvSet, getLeft().referencedFVariablesInFExp());
+	}
+	public void FFunctionCallStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, getCall().referencedFVariablesInFExp());
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				defSetAdd(fvUse, fvSet, left.getFExp().referencedFVariablesInFExp());
+	}
+	public void FIfStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			defSetAdd(fvSet, fvUse, clause.getTest().referencedFVariablesInFExp());
+			defSetBlock(fvSet, fvUse, clause.getFStatements());
+		}
+		defSetBlock(fvSet, fvUse, getElseStmts());
+	}
+	public void FWhileStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, getTest().referencedFVariablesInFExp());
+		defSetBlock(fvSet, fvUse, getWhileStmts());
+	}
+	public void FWhenStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			defSetAdd(fvSet, fvUse, clause.getTest().referencedFVariablesInFExp());
+			defSetBlock(fvSet, fvUse, clause.getFStatements());
+		}
 	}
 	
 	/**

@@ -764,6 +764,13 @@ aspect FlatAPI {
 		}
 		return l;
 	}
+	
+	coll Set<FAlgorithm> FClass.algorithms()
+		[new HashSet<FAlgorithm>()] with add root FlatRoot;
+	FAlgorithm contributes
+ 		this when !inFunction()
+	to FClass.algorithms() for myFClass();	
+	  
 
     syn int FClass.numContinousEquations() = continuousEquations().size();
 	syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
@@ -1236,6 +1243,19 @@ aspect ReferencedVariables {
 		for (FIdUseExp use : containedFIdUseExps())
 			if (use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add(use);
+		return res;
+	}
+	
+	syn ArrayList<FIdUseExp> FAbstractEquation.uniqueFIdUseExpsInLHS() {
+		ArrayList<FIdUseExp>   res   = new ArrayList<FIdUseExp>();
+		Set<FAbstractVariable> visit = new LinkedHashSet<FAbstractVariable>();
+		for (FIdUseExp e : FIdUseExpsInLHS()) {
+			FAbstractVariable fv = e.myFV();
+			if (!visit.contains(fv)) {
+				visit.add(fv);
+				res.add(e);
+			}
+		}
 		return res;
 	}
 	

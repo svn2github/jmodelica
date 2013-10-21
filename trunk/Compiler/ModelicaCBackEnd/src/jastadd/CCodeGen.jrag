@@ -1678,14 +1678,14 @@ aspect CCodeGen {
 			getFExp().genTempOutput_C(p, str, indent);
 	}
 	
-	syn lazy String FExp.tempName_C() {
-		return "tmp_" + nextTempNbr_C();
-	}
+	syn lazy String FExp.tempName_C() = "tmp_" + nextTempNbr_C();
+	syn lazy String FAlgorithm.tempName_C() = "tmp_" + nextTempNbr_C();
 	
 	private int FClass.nextTempNbr_C        = 1;
 	private int FFunctionDecl.nextTempNbr_C = 1;
 	
 	inh int FExp.nextTempNbr_C();
+	inh int FAlgorithm.nextTempNbr_C();
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
 	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
@@ -2024,16 +2024,7 @@ aspect CCodeGen {
 	
 	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
 			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		FAlgorithm alg = equation();
-		boolean firstVisit = visited == null || visited.add(alg);
-		if (firstVisit) {
-			alg.genTempVars_C(ASTNode.printer_C, str, indent);
-			alg.prettyPrint_C(str, indent);
-		}
-		for (FVariable fv : activeVariables()) {
-			str.format("%s(*res)[%d] = %s - %s;\n", indent, enumerator.next(), fv.name_C(), solverArrayMap.get(fv));
-			str.format("%s%s = %s;\n", indent, fv.name_C(), solverArrayMap.get(fv));
-		}
+		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {
@@ -2054,12 +2045,7 @@ aspect CCodeGen {
 	}
 	
 	public void SolvedAlgorithmBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		FAlgorithm alg = equation();
-		boolean firstVisit = visited == null || visited.add(alg);
-		if (firstVisit) {
-			alg.genTempVars_C(ASTNode.printer_C, str, indent);
-			alg.prettyPrint_C(str, indent);
-		}
+		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
@@ -2083,6 +2069,10 @@ aspect CCodeGen {
 	}
 	
 	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
+		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
+	}
+	
+	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
 		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
 	}
 	
@@ -2191,7 +2181,7 @@ aspect CCodeGen {
 
 	public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
 		equation().genTempVars_C(ASTNode.printer_C, str, indent);
-		equation().getCall().prettyPrint_C(ASTNode.printer_C, str, indent);
+		equation().prettyPrint_C(ASTNode.printer_C, str, indent);
 	}
 
 	public void WhenEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
@@ -2276,6 +2266,41 @@ aspect CCodeGen {
 				l.genWriteBack_C(str, indent, enumerator, forIndices, indexCounter);
 		}
 	}
+		
+	public void FAlgorithm.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+		if (!visited.contains(this)) {
+			visited.add(this);
+			genTempVars_C(printer_C, str, indent);
+			genResidualPrint_C(str, indent);
+		}
+		Enumerator indexCounter = new Enumerator();
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			use.genWriteBack_C(str, indent, use.tempName_C(), enumerator, forIndices, indexCounter);
+	}
+	
+	public void FAlgorithm.genResidualPrint_C(PrintStream str, String indent) {
+		String switchTemp = this.tempName_C();
+		boolean first = true;
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			if (first) {
+				first = false;
+				use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
+			}
+			use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
+		}
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
+		prettyPrint_C(str, indent);
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
+			FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
+			FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
+		}
+	}
+	
+	public static void FStatement.printAssignStmt_C(PrintStream str, String indent, String dst, String src) {
+		str.print(indent + dst + " = " + src + ";\n");
+	}
 
 	public void FAbstractEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {}
 	
@@ -2293,6 +2318,11 @@ aspect CCodeGen {
 			for (FFunctionCallLeft l : getLefts())
 				l.genWriteNominal_C(str, indent, enumerator, forVariables);
 		}
+	}
+	
+	public void FAlgorithm.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			use.genCellWriteNominal_C(str, indent, enumerator, forVariables);
 	}
 	
 	public void FFunctionCallLeft.genWriteNominal_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
@@ -2376,6 +2406,18 @@ aspect CCodeGen {
 				l.setEquationIndex(i++);
 				l.genWriteBackAssignment_C(str, indent, forVariables);
 			}
+		}
+	}
+	
+	public void FAlgorithm.genAssignment_C(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+		if (!visited.contains(this)) {
+			visited.add(this);
+			genTempVars_C(printer_C, str, indent);
+			genResidualPrint_C(str, indent);
+		}
+
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
 		}
 	}
 

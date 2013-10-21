@@ -951,6 +951,11 @@ aspect FlatPrettyPrint {
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
 	syn String FVariable.displayName()        = getFQName().toString();
 	eq FDerivativeVariable.displayName()      = name();
+	eq FPreBooleanVariable.displayName()      = name();
+	eq FPreEnumVariable.displayName()         = name();
+	eq FPreIntegerVariable.displayName()      = name();
+	eq FPreRealVariable.displayName()         = name();
+	eq FPreStringVariable.displayName()       = name();
 	eq FDummyDerivativeVariable.displayName() = derPrefixName();
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {

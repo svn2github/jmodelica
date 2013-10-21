@@ -1932,7 +1932,6 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
 algorithm
- x := 0.0;
  x := 5;
  x := x + 2;
 end FunctionTests.AlgorithmFlatten1;
@@ -1957,7 +1956,6 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten2
  Real x(start = 1.0);
 algorithm
- x := 1.0;
  x := 5;
  x := x + 2;
 end FunctionTests.AlgorithmFlatten2;
@@ -2182,9 +2180,6 @@ fclass FunctionTests.AlgorithmFlatten8
  Real x[2];
  Real x[3];
 algorithm
- x[1] := 0.0;
- x[2] := 0.0;
- x[3] := 0.0;
  x[1] := 1;
  x[1] := 1;
  x[2] := 2;
@@ -5036,22 +5031,6 @@ fclass FunctionTests.ArrayOutputScalarization25
  Real temp_1[2].y[1];
  Real temp_1[2].y[2];
 algorithm
- temp_1[1].x[1] := 0.0;
- temp_1[1].x[2] := 0.0;
- temp_1[1].y[1] := 0.0;
- temp_1[1].y[2] := 0.0;
- temp_1[2].x[1] := 0.0;
- temp_1[2].x[2] := 0.0;
- temp_1[2].y[1] := 0.0;
- temp_1[2].y[2] := 0.0;
- a[1].x[1] := 0.0;
- a[1].x[2] := 0.0;
- a[1].y[1] := 0.0;
- a[1].y[2] := 0.0;
- a[2].x[1] := 0.0;
- a[2].x[2] := 0.0;
- a[2].y[1] := 0.0;
- a[2].y[2] := 0.0;
  ({FunctionTests.ArrayOutputScalarization25.R({temp_1[1].x[1], temp_1[1].x[2]}, {temp_1[1].y[1], temp_1[1].y[2]}), FunctionTests.ArrayOutputScalarization25.R({temp_1[2].x[1], temp_1[2].x[2]}, {temp_1[2].y[1], temp_1[2].y[2]})}) := FunctionTests.ArrayOutputScalarization25.fwrap({FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1}), FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1})});
  a[1].x[1] := temp_1[1].x[1];
  a[1].x[2] := temp_1[1].x[2];
@@ -5135,10 +5114,6 @@ fclass FunctionTests.ArrayOutputScalarization26
  Real y[3];
  Real y[4];
 algorithm
- x[4].x := 0.0;
- x[2].x := 0.0;
- x[1].x := 0.0;
- x[3].x := 0.0;
  ({FunctionTests.ArrayOutputScalarization26.R(x[4].x), FunctionTests.ArrayOutputScalarization26.R(x[2].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[4], y[2]});
  ({FunctionTests.ArrayOutputScalarization26.R(x[1].x), FunctionTests.ArrayOutputScalarization26.R(x[3].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[1], y[3]});
 equation

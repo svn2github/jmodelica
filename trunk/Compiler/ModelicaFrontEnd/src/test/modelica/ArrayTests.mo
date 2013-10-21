@@ -5259,9 +5259,6 @@ fclass ArrayTests.For.ForAlgorithm1
  Real x[2];
  Real x[3];
 algorithm
- x[1] := 0.0;
- x[2] := 0.0;
- x[3] := 0.0;
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);

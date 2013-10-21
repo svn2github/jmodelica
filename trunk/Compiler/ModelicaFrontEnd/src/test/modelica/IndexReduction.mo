@@ -1903,7 +1903,6 @@ Error: in file '...':
 Semantic error at line 0, column 0:
   Cannot differentate the equation:
    algorithm
- x1 := 0.0;
  x1 := x2;
 ")})));
 end IndexReduction42_Err;

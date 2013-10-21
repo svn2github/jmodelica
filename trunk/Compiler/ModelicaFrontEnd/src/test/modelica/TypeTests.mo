@@ -1703,9 +1703,6 @@ initial equation
  pre(i) = 0;
  pre(r) = 0.0;
 algorithm
- r := pre(r);
- b := pre(b);
- i := pre(i);
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
  i := integer(r);
@@ -1763,18 +1760,6 @@ initial equation
  i.pre(innerInteger[2]) = 0;
  i.pre(innerInteger[3]) = 0;
 algorithm
- outerInteger[1] := pre(outerInteger[1]);
- outerInteger[2] := pre(outerInteger[2]);
- outerInteger[3] := pre(outerInteger[3]);
- outerR[1].r := outerR[1].pre(r);
- outerR[2].r := outerR[2].pre(r);
- outerR[3].r := outerR[3].pre(r);
- i.innerR[1].r := i.innerR[1].pre(r);
- i.innerR[2].r := i.innerR[2].pre(r);
- i.innerR[3].r := i.innerR[3].pre(r);
- i.innerInteger[1] := i.pre(innerInteger[1]);
- i.innerInteger[2] := i.pre(innerInteger[2]);
- i.innerInteger[3] := i.pre(innerInteger[3]);
  outerInteger[1] := 1;
  outerInteger[2] := 2;
  outerInteger[3] := 3;

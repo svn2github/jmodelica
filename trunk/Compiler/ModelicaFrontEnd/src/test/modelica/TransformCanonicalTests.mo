@@ -5371,7 +5371,6 @@ algorithm
 fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
 algorithm
- x := 0.0;
  x := integer(3 + floor(time * 0.3 + 4.2) * 4);
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
 

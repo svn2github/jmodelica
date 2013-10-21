@@ -470,10 +470,15 @@ aspect BLT{
 	}
 
 	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+		if (numScalarEquations() == 0)
+			return new MetaEquationBlock(this);
+		for (Integer assignedIndex : assignedIndices)
+			if (assignedIndex == null)
+				throw new IllegalArgumentException("FAlgorithm, AssignedIndex must be set for this class type! equation: " + this);
 		if (solvability.isAnalyticallySolvable()) {
-			return new SolvedAlgorithmBlock(this, fvs);
+			return new SolvedAlgorithmBlock(this, fvs, assignedIndices);
 		} else {
-			return new UnsolvedAlgorithmBlock(this, fvs);
+			return new UnsolvedAlgorithmBlock(this, fvs, assignedIndices);
 		}
 	}
 
@@ -1423,7 +1428,7 @@ aspect BLT{
 	 */
 	public class MetaEquationBlock extends SimpleEquationBlock {
 
-		public MetaEquationBlock(FFunctionCallEquation equation) {
+		public MetaEquationBlock(FAbstractEquation equation) {
 			super(equation);
 		}
 
@@ -1433,11 +1438,6 @@ aspect BLT{
 
 		public boolean isSolvable() {
 			return true;
-		}
-
-		@Override
-		public FFunctionCallEquation equation() {
-			return (FFunctionCallEquation) super.equation();
 		}
 		
 		public void prettyPrint(PrintStream str) {
@@ -1716,11 +1716,13 @@ aspect BLT{
 	 */
 	public abstract class AlgorithmBlock extends SimpleEquationBlock {
 		
-		protected Collection<FVariable> activeVars;
+		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
 		
-		public AlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
+		public AlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
 			super(alg);
-			activeVars = activeVariables;
+			this.activeVars.addAll(activeVariables);
+			this.assignedIndices.addAll(assignedIndices);
 		}
 	
 		public FAlgorithm equation() {
@@ -1755,8 +1757,8 @@ aspect BLT{
 	 */
 	public class SolvedAlgorithmBlock extends AlgorithmBlock {
 		
-		public SolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
-			super(alg, activeVariables);
+		public SolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(alg, activeVariables, assignedIndices);
 		}
 		
 		public boolean isSolvable() {
@@ -1770,8 +1772,8 @@ aspect BLT{
 	 */
 	public class UnsolvedAlgorithmBlock extends AlgorithmBlock {
 		
-		public UnsolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables) {
-			super(alg, activeVariables);
+		public UnsolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(alg, activeVariables, assignedIndices);
 		}
 
 		public boolean isSolvable() {
