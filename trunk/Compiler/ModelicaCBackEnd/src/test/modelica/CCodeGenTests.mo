@@ -7102,9 +7102,9 @@ end Algorithm4;
 model Algorithm5
  Real x(start=0.5);
 algorithm
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
+ while noEvent(x < 1) loop
+  while noEvent(x < 2) loop
+   while noEvent(x < 3) loop
     x := x + 1;
    end while;
   end while;
@@ -7132,9 +7132,9 @@ $C_ode_derivatives$
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _x_0 = 0.5;
-    while (COND_EXP_LT(_x_0, 1, JMI_TRUE, JMI_FALSE)) {
-        while (COND_EXP_LT(_x_0, 2, JMI_TRUE, JMI_FALSE)) {
-            while (COND_EXP_LT(_x_0, 3, JMI_TRUE, JMI_FALSE)) {
+    while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE))) {
+        while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE))) {
+            while ((COND_EXP_LT(_x_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE))) {
                 _x_0 = _x_0 + 1;
             }
         }
@@ -7773,6 +7773,112 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 ")})));
 end Algorithm11;
+
+model Algorithm12
+ Real x(start=0.5);
+ Real y = time;
+ Boolean b;
+algorithm
+ x := 1;
+ b := y >= x * 3 or y - 1 < x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm12",
+			description="C code generation of relational expressions in algorithms, assign",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_ode_derivatives$
+$C_DAE_event_indicator_residuals$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _y_1 = _time;
+    _temp_1_3 = 1;
+    _temp_2_4 = 1;
+    _x_0 = 1;
+    _temp_1_3 = _y_1 - _x_0 * 3;
+    _temp_2_4 = _y_1 - 1 - _x_0;
+    _b_2 = LOG_EXP_OR(_sw(0), _sw(1));
+
+    (*res)[0] = _temp_1_3;
+    (*res)[1] = _temp_2_4;
+
+")})));
+end Algorithm12;
+
+model Algorithm13
+  Real r1;
+algorithm
+	if time > 0.5 then 
+		r1 := 1;
+	elseif time > 1 then
+		if time > 0.7 then
+			r1 := 2;
+		end if;
+	else
+		if time > 1.5 then
+			r1 := 3;
+		else
+			r1 := 4;
+		end if;
+	end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm13",
+			description="C code generation of relational expressions in algorithms, if",
+			algorithms_as_functions=false,
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			template="
+$C_ode_derivatives$
+$C_DAE_event_indicator_residuals$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _r1_0 = 0.0;
+    _temp_1_1 = 1;
+    _temp_2_2 = 1;
+    _temp_3_3 = 1;
+    _temp_4_4 = 1;
+    _temp_1_1 = _time - 0.5;
+    _temp_2_2 = _time - 1;
+    if (_sw(0)) {
+        _r1_0 = 1;
+    } else if (_sw(1)) {
+        _temp_3_3 = _time - 0.7;
+        if (_sw(2)) {
+            _r1_0 = 2;
+        }
+    } else {
+        _temp_4_4 = _time - 1.5;
+        if (_sw(3)) {
+            _r1_0 = 3;
+        } else {
+            _r1_0 = 4;
+        }
+    }
+
+    (*res)[0] = _temp_1_1;
+    (*res)[1] = _temp_2_2;
+    (*res)[2] = _temp_3_3;
+    (*res)[3] = _temp_4_4;
+
+")})));
+end Algorithm13;
 
 
 

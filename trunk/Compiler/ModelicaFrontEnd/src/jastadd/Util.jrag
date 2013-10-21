@@ -2252,6 +2252,7 @@ aspect FlatFunctionUtils {
      inh boolean FSubscript.inAlgorithm();
      inh boolean FFunctionCall.inAlgorithm();
      inh boolean FIdUse.inAlgorithm();
+     inh boolean FExp.inAlgorithm();
      eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
@@ -2639,7 +2640,7 @@ aspect FlatExpressions {
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
     eq FAssert.getChild().inNoEventExp() = true;
-    eq FAlgorithm.getChild().inNoEventExp() = true;
+    eq FFunctionDecl.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
@@ -2674,6 +2675,11 @@ aspect FlatExpressions {
     inh boolean FStatement.inWhen();
     eq FWhenStmt.getFIfWhenClause().inWhen() = true;
 
+    inh boolean FRelExp.inWhile();
+    eq FWhileStmt.getChild().inWhile() = true;
+    eq Root.getChild().inWhile() = false;
+    eq FAlgorithm.getChild().inWhile() = false;
+    
     inh boolean FAbstractEquation.isInitial();
     eq FClass.getChild().isInitial()                   = false;
     eq FClass.getFInitialEquation().isInitial()        = true;

@@ -842,4 +842,25 @@ Compliance error at line 0, column 0:
 ")})));
 end BreakInFor;
 
+model WhileStmt
+	Real x;
+algorithm
+	while x > time loop
+		x := x - 1;
+	end while;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="WhileStmt",
+			description="Test while statement in algorithm",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Event generating expressions are not supported in while statements: x > time
+
+")})));
+end WhileStmt;
+
+
 end ComplianceTests;

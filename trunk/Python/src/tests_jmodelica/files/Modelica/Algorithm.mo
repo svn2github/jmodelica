@@ -14,15 +14,19 @@ model AlgoTest2
 	Real x;
 	Real y(start=0);
 	Real z(start=0);
+	/*
 	Real a(start=0.05);
+	*/
 algorithm
 	x := der(y);
 	if x < 0.2 then
 		x := -1;
 	end if;
+	/* TODO: replace with when statement in #2617 
 	while a < x loop
 		a := a + 0.01;
 	end while;
+	*/
 equation
 	der(y) = time;
 	der(z) = x;

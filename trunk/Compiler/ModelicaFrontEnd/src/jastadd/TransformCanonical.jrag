@@ -82,7 +82,7 @@ aspect TransformCanonical {
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
-		    new genAlgoInitStmts(),
+		    new transformAlgorithms(),
 		    new propagateResidualPairs(),
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
@@ -1150,34 +1150,46 @@ aspect TransformCanonical {
 		}
 	}
 
-    public class FClass {
-        public class genAlgoInitStmts extends Transformation {
-            public void perform() {
-            	for (FAlgorithm a : algorithms()) {
-                    a.genAlgoInitStmts();
-                }
-            }
-        }
-    }
-	
-	public void FAlgorithm.genAlgoInitStmts() {
-		
-		List<FStatement> stmts = new List<FStatement>();
-		Set<FVariable> defSet = defSet();
-		for (FVariable fv : referencedFVariablesInLHS()) {
-			if (!defSet.contains(fv)) {
-				FStatement stmt = new FAssignStmt(fv.createUseExp(),fv.createAlgorithmArgument(true));
-				stmts.add(stmt);
+	public class FClass {
+		public class transformAlgorithms extends Transformation {
+			public void perform() {
+				for (FAlgorithm algo : algorithms())
+					for (FRelExp exp : algo.relExpInEquation())
+						exp.genIndicator();
+				flushAllRecursive();
+				for (FAlgorithm algo : algorithms()) {
+					algo.transformAlgorithm();
+				}
+				flushAllRecursive();
 			}
 		}
-		for (FStatement stmt : getFStatements()) {
-			stmts.add(stmt);
-		}
-		setFStatementList(stmts);
 	}
 	
 	/**
-	 * \brief Find LHS variables which are not definetly set before use.
+	 * \brief Transformation of algorithm
+	 */
+	public void FAlgorithm.transformAlgorithm() {
+		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
+		/* Add initial statements for LHS variables */
+		Set<FVariable> defSet = defSet();
+		for (FVariable fv : referencedFVariablesInLHS()) {
+			if (!defSet.contains(fv)) {
+				stmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
+			}
+		}
+		/* Add initial statements for indicators */
+		for (FRelExp exp : relExpInEquation()) {
+			stmts.add(exp.indicatorInitStmt());
+		}
+		/* Add indicator statements */
+		for (FStatement stmt : getFStatements()) {
+			stmt.genIndicatorStmts(stmts);
+		}
+		setFStatementList(new List<FStatement>(stmts));
+	}
+	
+	/**
+	 * \brief Find LHS variables which are definetly assigned to before any use.
 	 */
 	public Set<FVariable> FAlgorithm.defSet() {
 		HashSet<FVariable> fvSet = new HashSet<FVariable>();
@@ -1187,7 +1199,6 @@ aspect TransformCanonical {
 		}
 		return fvSet;
 	}
-	
 	public void FStatement.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
 
 	}
@@ -1229,6 +1240,70 @@ aspect TransformCanonical {
 			defSetBlock(fvSet, fvUse, clause.getFStatements());
 		}
 	}
+	
+	/**
+	 * \brief A reference to the FVariable set as indicator for a FRelExp
+	 * Only used in algorithms
+	 */
+	syn nta Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
+	
+	/**
+	 * \brief Creates an indicator for this FRelExp
+	 */
+	public void FRelExp.genIndicator() {
+		FVariable v = new FRealVariable(new FTemporaryVisibilityType(), fContinuous(), new FQNameFull(tempVarName()));
+		myFClass().addFVariable(v);
+		setIndicatorOpt(new Opt<FIdUseExp>(v.createUseExp()));
+	}
+	
+	/**
+	 * \brief Creates an initial assign statement for the indicator
+	 */
+	syn FStatement FRelExp.indicatorInitStmt() = 
+			new FAssignStmt((FIdUseExp) getIndicator().myFV().createUseExp(), new FIntegerLitExp(1));
+	
+	/**
+	 * \brief Creates an assign statement for the indicator
+	 */
+	syn FStatement FRelExp.indicatorStmt() =
+			new FAssignStmt((FIdUseExp) getIndicator().myFV().createUseExp(), new FSubExp(getLeft(), getRight()));
+	
+	/**
+	 * \brief Generates indicator statements for relational expressions
+	 */
+	public void FStatement.genIndicatorStmts(ArrayList<FStatement> l) {
+		for (FRelExp exp : relExpInStmt()) {
+			l.add(exp.indicatorStmt());
+		}
+		l.add(this);
+	}
+	
+	/**
+	 * \brief Generates indicator statements for relational expressions
+	 */
+	public void FIfStmt.genIndicatorStmts(ArrayList<FStatement> l) {
+		super.genIndicatorStmts(l);
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			clause.genIndicatorStmts();
+		}
+		ArrayList<FStatement> newElse = new ArrayList<FStatement>();
+		for (FStatement stmt : getElseStmts()) {
+			stmt.genIndicatorStmts(newElse);
+		}
+		setElseStmtList(new List<FStatement>(newElse));
+	}
+	
+	/**
+	 * \brief Generates indicator statements for relational expressions
+	 */
+	public void FIfWhenClause.genIndicatorStmts() {
+		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
+		for (FStatement stmt : getFStatements()) {
+			stmt.genIndicatorStmts(stmts);
+		}
+		setFStatementList(new List<FStatement>(stmts));
+	}
+	
 	
 	/**
 	 * \brief Replace one equation with another.
@@ -3469,6 +3544,7 @@ aspect FunctionInlining {
 	syn boolean FAbstractEquation.generatesEvents() = false;
 	eq FEquation.generatesEvents()                  = getLeft().generatesEvents() || getRight().generatesEvents();
 	eq FFunctionCallEquation.generatesEvents()      = getCall().generatesEvents();
+	eq FAlgorithm.generatesEvents()                 = relExpInEquation().size() > 0;
 	
 	/**
 	 * Check if an equation contains any calls to functions that we can inline.

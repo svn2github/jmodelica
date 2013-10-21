@@ -2062,9 +2062,9 @@ end AlgorithmFlatten4;
 model AlgorithmFlatten5
  Real x;
 algorithm
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
+ while noEvent(x < 1) loop
+  while noEvent(x < 2) loop
+   while noEvent(x < 3) loop
     x := x + 1;
    end while;
   end while;
@@ -2081,9 +2081,9 @@ fclass FunctionTests.AlgorithmFlatten5
  Real x;
 algorithm
  x := 0.0;
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
+ while noEvent(x < 1) loop
+  while noEvent(x < 2) loop
+   while noEvent(x < 3) loop
     x := x + 1;
    end while;
   end while;

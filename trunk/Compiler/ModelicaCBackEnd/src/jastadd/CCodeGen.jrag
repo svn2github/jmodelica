@@ -877,6 +877,10 @@ aspect CCodeGen {
 		str.print(indent + "return;\n");
 	}
 	
+	public void FBreakStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print(indent + "break;\n");
+	}
+	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		for (FIfWhenClause clause : getFIfWhenClauses())
 			clause.getTest().genTempVars_C(p, str, indent);
@@ -2557,10 +2561,15 @@ aspect CCodeGen {
 
 	public void FRelExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
+		if (hasIndicator()) {
+			getIndicator().prettyPrint_C(str, "");
+		} else {
+			getLeft().prettyPrint_C(str, "");
+			str.print(" - (");
+			getRight().prettyPrint_C(str, "");
+			str.print(")");
+		}
+		str.print(";\n");
 	}	
 
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {
