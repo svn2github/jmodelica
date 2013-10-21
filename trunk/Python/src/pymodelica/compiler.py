@@ -329,7 +329,7 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         elif target == 'fmux':
             warnings = comp.compile_FMUX(class_name, file_name, compile_to)
         else:
-            raise Exception("The target %s is not valid, legal targets are 'me', 'cs', 'jmu' and 'fmux'" %(target))
+            raise Exception("The target %s is not valid" %(target))
     else:
         warnings = compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)

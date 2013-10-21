@@ -582,7 +582,7 @@ public class ModelicaCompiler {
 	 * @param version The version in case of a fmu.
 	 */
 	public TargetObject createTargetObject(String target, String version) {
-		return new TargetObject(target, version);
+		return TargetObject.getTarget(target, version);
 	}
 	
 	/**
@@ -598,7 +598,7 @@ public class ModelicaCompiler {
 	public void compileJMU(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		//Create the target object.
-		TargetObject targetObject = new TargetObject("jmu", null);
+		TargetObject targetObject = TargetObject.getTarget("jmu", null);
 
 		//Compile.
 		compileUnit(className, fileName, targetObject, compileTo);
@@ -619,7 +619,7 @@ public class ModelicaCompiler {
 	public void compileFMU(String className, String fileName[], String target, String version, String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		//Create the target object.
-		TargetObject targetObject = new TargetObject(target, version);
+		TargetObject targetObject = TargetObject.getTarget(target, version);
 		
 		//Compile.
 		compileUnit(className, fileName, targetObject, compileTo);
@@ -638,7 +638,7 @@ public class ModelicaCompiler {
 	public void compileFMUX(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		//Create the target object.
-		TargetObject targetObject = new TargetObject("fmux", null);
+        TargetObject targetObject = TargetObject.getTarget("fmux", null);
 		
 		//Compile.
 		compileUnit(className, fileName, targetObject, compileTo);
@@ -647,7 +647,10 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Compiles a JMU, FMU or FMUX (helper function for compileJMU, compileFMU and compileFMUX).
 	 * 
-	 * @param unitType "JMU", "FMUME", "FMUCS" or "FMUX".
+	 * @param className Name of model class in the model file to compile.
+     * @param fileName Array of model file or library paths.
+     * @param makeTarget Target object, contains information about the target, its unit suffix for example.
+     * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist..
 	 */
 	protected void compileUnit(String className, String fileName[], TargetObject makeTarget, String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
@@ -702,7 +705,7 @@ public class ModelicaCompiler {
 	 * 
 	 * @param className Name of model class that was compiled (will determine file names).
 	 * @param path Location on file system where the packed file should be saved (created if does not exist).
-	 * @param targetObject contains information about the target, its unit suffix for example.
+	 * @param targetObject Target object, contains information about the target, its unit suffix for example.
 	 */
 	protected void packUnit(String className, String path, TargetObject makeTarget) throws PackingFailedException {
 		File unitFile = new File(path);
@@ -1407,17 +1410,17 @@ public class ModelicaCompiler {
 		
 		if (args.length < 1) {
 			log.error(compilerName + " expects the command line arguments: \n" +
-					"[<options>] [-fmume|-fmucs|-jmu] <file name> <class name> [<templates>]\n" +
+					"[<options>] <file name> <class name> [<target>] [<version>]\n" +
 					" where options could be: \n" +
 					"  -log=<i or w or e> \n" +
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
+                    "  -target=<me, cs, jmu or fmux>\n" +
+                    "  -version=<1.0 or 2.0>\n" +
 					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
 					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
-					" and templates, if given, should be (in order): \n" + 
-					"  xml model description template \n" +
-					"  c template \n" +
-					" If no target type option is given, -jmu is assumed.");
+					" If no target is given, -jmu is assumed." +
+                    " If no version is given in case of targets 'me' or 'cs', -1.0 is assumed");
 			System.exit(1);
 		}
 		
@@ -1494,13 +1497,14 @@ public class ModelicaCompiler {
 					instantiateModel(name, cl);
 				} else {
 					//Create the target object.
-					TargetObject target = new TargetObject(targetType, programarguments.get("version"));
+                    TargetObject targetObject = TargetObject.getTarget(targetType, programarguments.get("version"));
 				
 					//Compile
-					compileUnit(cl, name, target, compileTo);
+					compileUnit(cl, name, targetObject, compileTo);
 				} 
 			} else {
-				throw new IllegalArgumentException("Must specify a target.");
+                //If no target was set, assume jmu.
+				compileJMU(cl, name, compileTo);
 			}
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
@@ -1562,205 +1566,237 @@ public class ModelicaCompiler {
 		
 		return platform;
 	}
+    
+    /**
+    * Target object, contains all information related to which target is compiled.
+    * 
+    * The target is an enum that represents all different targets, the templates are in a separate class.
+    */
+    public enum TargetObject {
+        FMUME10(0, "fmume", "fmu"),
+        FMUME20(1, "fmume", "fmu"),
+        FMUCS10(2, "fmucs", "fmu"),
+        FMUCS20(3, "fmucs", "fmu"),
+        JMU(4, "jmu", "jmu"),
+        FMUX(5, null, "fmux");
+    
+        private final String makeFileFlag;
+        private final String suffix;
+        private final Templates templates;
+    
+        private TargetObject(int templateNbr, String makeFileFlag, String suffix) {
+            this.makeFileFlag = makeFileFlag;
+            this.suffix = suffix;
+            this.templates = new Templates(templateNbr);
+        }
+        /**
+        * \brief Returns an enum of the target that contains all relevant information for the target.
+        * 
+        * @param target The compiler target. Valid options are 'me' or 'cs'.
+        * @param version The FMI version. Valid options are '1.0' or '2.0'.
+        */
+        public static TargetObject getTarget(String targetType, String version) {
+            if (targetType.equals("me")) {
+                if (version == null || version.equals("1.0")) {
+                    return FMUME10;
+                } else if (version.equals("2.0")) {
+                    return FMUME20;
+                } else {
+                    throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
+                }
+            } else if (targetType.equals("cs")) {
+                if (version == null || version.equals("1.0")) {
+                    return FMUCS10;
+                } else if (version.equals("2.0")) {
+                    return FMUCS20;
+                } else {
+                    throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
+                }
+            } else if (targetType.equals("jmu")) {
+                return JMU;
+            } else if (targetType.equals("fmux")) {
+                return FMUX;
+            } else {
+                throw new IllegalArgumentException("Unknwon target '" + targetType + "'"); 
+            }
+        }
+    
+        /**
+         * \brief get the C model description template file path.
+         * 
+         * @return Reference to the c template file path attribute. 
+         * 
+         */
+        public String getCTemplates() {
+            return templates.getCTemplates();
+        }
+        
+        /**
+         * \brief get the C model description template file path.
+         * 
+         * @return Reference to the c template file path attribute.
+         * @param fc A reference to an FClass object. This is convenient in
+         * extensions of ModelicaCompiler that need to distinguish between
+         * different kinds of flattened classes.
+         */
+        public String getCTemplates(FClass fc) {
+            return templates.getCTemplates(fc);
+            
+        }
+        
+        /**
+         * \brief get the XML model description template file path.
+         * 
+         * @return Reference to the XML variables template file path attribute. 
+         * 
+         */
+        public String getXMLTemplates() {
+            return templates.getXMLTemplates();
+        }
+        
+        /**
+         * \brief get the XML model description template file path.
+         * 
+         * @return Reference to the XML variables template file path attribute. 
+         * @param fc A reference to an FClass object. This is convenient in
+         * extensions of ModelicaCompiler that need to distinguish between
+         * different kinds of flattened classes.
+         */
+        public String getXMLTemplates(FClass fc) {
+            return templates.getXMLTemplates(fc);
+        }
+        
+        /**
+         * \brief get the flag should be used in the Makefile.
+         * 
+         * @return The flag for the Makefile. 
+         * 
+         */
+        public String getMakeFileFlag() {
+            return makeFileFlag;
+        }
+        
+        /**
+         * Gets the file suffix for a the target object. 
+         */
+        public String getUnitSuffix() {
+            return suffix;
+        }
+        
+        /**
+         * Sets the default options that should be used for this target object. 
+         * 
+         * Should be updated when new default options are added.
+         */
+        public void setDefaultOptions(OptionRegistry options) {
+        
+            switch (this) {
+                case FMUME10:
+                case FMUME20:
+                    options.setBooleanOption("generate_ode", true);
+                    options.setBooleanOption("generate_dae", false);
+                    options.setBooleanOption("equation_sorting", true);
+                    options.setBooleanOption("generate_fmi_me_xml", true);
+                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                    options.setBooleanOption("generate_xml_equations", false);
+                    break;
+                case FMUCS10:
+                case FMUCS20:
+                    options.setBooleanOption("generate_ode", true);
+                    options.setBooleanOption("generate_dae", false);
+                    options.setBooleanOption("equation_sorting", true);
+                    options.setBooleanOption("generate_fmi_me_xml", false);
+                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                    options.setBooleanOption("generate_xml_equations", false);
+                    break;
+                case JMU:
+                    options.setBooleanOption("generate_ode", false);
+                    options.setBooleanOption("generate_dae", true);
+                    options.setBooleanOption("equation_sorting", false);
+                    options.setBooleanOption("generate_fmi_me_xml", false);
+                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                    options.setBooleanOption("generate_xml_equations", false);
+                    break;
+                case FMUX:
+                    options.setBooleanOption("generate_ode", false);
+                    options.setBooleanOption("generate_dae", true);
+                    options.setBooleanOption("equation_sorting", false);
+                    options.setBooleanOption("generate_fmi_me_xml", false);
+                    options.setBooleanOption("generate_fmi_cs_xml", false);
+                    options.setBooleanOption("generate_xml_equations", true);
+                    break;
+            }
+            
+            switch (this) {
+                case FMUME10:
+                case FMUCS10:
+                    options.setRealOption("fmi_version", 1.0);
+                    break;
+                case FMUME20:
+                case FMUCS20:
+                    options.setRealOption("fmi_version", 2.0);
+                    break;
+                case JMU:
+                case FMUX:
+                    break;
+            }
+        }
+    }
 }
 
 }
 
 aspect CompilationHelpers {
+
 /**
- * Target object, contains all information related to which target is compiled.
+ * Class for all templates.
  * 
- * The target encapsulates an enum that represents all different targets.
+ * Support class for the target enum. Contains all templates, when creating
+ * an instance templates are specified with a number.
  */
-public class TargetObject {
-	protected enum Target {
-		FMUME10("fmi_me_modelica_template.c", "fmi_model_description.tpl", "fmume", "fmu"),
-		FMUME20("fmi_me_modelica_template.c", "fmi_model_description.tpl", "fmume", "fmu"),
-		FMUCS10("fmi_cs_modelica_template.c", "fmi1_cs_model_description.tpl", "fmucs", "fmu"),
-		FMUCS20("fmi_cs_modelica_template.c", "fmi1_cs_model_description.tpl", "fmucs", "fmu"),
-		JMU("jmi_modelica_template.c", "jmodelica_model_description.tpl", "jmu", "jmu"),
-		FMUX(null, "jmodelica_model_description.tpl", null, "fmux");
-
-		private final String cTemplate;
-		private final String xmlTemplate;
-		private final String makeFileFlag;
-		private final String suffix;
-
-		private Target(String cTemplate, String xmlTemplate, String makeFileFlag, String suffix) {
-			this.cTemplate = cTemplate;
-			this.xmlTemplate = xmlTemplate;
-			this.makeFileFlag = makeFileFlag;
-			this.suffix = suffix;
-		}    
-	
-		public String getCTemplates() {
-			return cTemplate;
-		}
-		public String getXMLTemplates() {
-			return xmlTemplate;
-		}
-		public String getMakeFileFlag() {
-			return makeFileFlag;
-		}
-		public String getUnitSuffix() {
-			return suffix;
-		}
-	}
-	
-	protected Target target;
-
-	public TargetObject (String targetType, String version) {
-		if (targetType.equals("me")) {
-			if (version.equals("1.0")) {
-				target = Target.FMUME10;
-			} else if (version.equals("2.0")) {
-				target = Target.FMUME20;
-			} else {
-				throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + target + "'"); 
-			}
-		} else if (targetType.equals("cs")) {
-			if (version.equals("1.0")) {
-				target = Target.FMUCS10;
-			} else if (version.equals("2.0")) {
-				target = Target.FMUCS20;
-			} else {
-				throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + target + "'"); 
-			}
-		} else if (targetType.equals("jmu")) {
-			target = Target.JMU;
-		} else if (targetType.equals("fmux")) {
-			target = Target.FMUX;
-		} else {
-			throw new IllegalArgumentException("Unknwon target '" + target + "'"); 
-		}
-	}
-	
-	protected static File getTemplatesDir() {
-		return new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
-	}
-	
-    /**
-	 * \brief get the flag should be used in the Makefile.
-	 * 
-	 * @return The flag for the Makefile. 
-	 * 
-	 */
-	public String getMakeFileFlag() {
-		return target.getMakeFileFlag();
-	}
-	
-	/**
-	 * \brief get the C model description template file path.
-	 * 
-	 * @return Reference to the c template file path attribute. 
-	 * 
-	 */
-	public String getCTemplates() {
-		File dir = getTemplatesDir();
-		return new File(dir, target.getCTemplates()).getPath();
-	}
-	
-	/**
-	 * \brief get the C model description template file path.
-	 * 
-	 * @return Reference to the c template file path attribute.
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	public String getCTemplates (FClass fc) {
-		return getCTemplates();
-	}
-	
-	/**
-	 * \brief get the XML model description template file path.
-	 * 
-	 * @return Reference to the XML variables template file path attribute. 
-	 * 
-	 */
-	public String getXMLTemplates() {
-		File dir = getTemplatesDir();
-		return new File(dir, target.getXMLTemplates()).getPath();
-	}
-	
-	/**
-	 * \brief get the XML model description template file path.
-	 * 
-	 * @return Reference to the XML variables template file path attribute. 
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	public String getXMLTemplates(FClass fc) {
-		return getXMLTemplates();
-	}
-	
-	/**
-	 * Gets the file suffix for a the target object. 
-	 */
-	public String getUnitSuffix() {
-		return target.getUnitSuffix();
-	}
+public class Templates {
     
+    private final static String[] cTemplates = {"fmi_me_modelica_template.c",
+        "fmi_me_modelica_template.c",
+        "fmi_cs_modelica_template.c",
+        "fmi_cs_modelica_template.c",
+        "jmi_modelica_template.c",
+        null};
+        
+    private final static String[] xmlTemplates = {"fmi_model_description.tpl",
+        "fmi_model_description.tpl",
+        "fmi1_cs_model_description.tpl",
+        "fmi1_cs_model_description.tpl",
+        "jmodelica_model_description.tpl",
+        "jmodelica_model_description.tpl"};
     
-    /**
-	 * Sets the default options that should be used for this target object. 
-	 * 
-	 * Should be updated when new default options are added.
-	 */
-	public void setDefaultOptions(OptionRegistry options) {
-		
-		switch (target) {
-			case FMUME10:
-			case FMUME20:
-				options.setBooleanOption("generate_ode", true);
-				options.setBooleanOption("generate_dae", false);
-				options.setBooleanOption("equation_sorting", true);
-				options.setBooleanOption("generate_fmi_me_xml", true);
-				options.setBooleanOption("generate_fmi_cs_xml", false);
-				options.setBooleanOption("generate_xml_equations", false);
-				break;
-			case FMUCS10:
-			case FMUCS20:
-				options.setBooleanOption("generate_ode", true);
-				options.setBooleanOption("generate_dae", false);
-				options.setBooleanOption("equation_sorting", true);
-				options.setBooleanOption("generate_fmi_me_xml", false);
-				options.setBooleanOption("generate_fmi_cs_xml", true);
-				options.setBooleanOption("generate_xml_equations", false);
-				break;
-			case JMU:
-				options.setBooleanOption("generate_ode", false);
-				options.setBooleanOption("generate_dae", true);
-				options.setBooleanOption("equation_sorting", false);
-				options.setBooleanOption("generate_fmi_me_xml", false);
-				options.setBooleanOption("generate_fmi_cs_xml", false);
-				options.setBooleanOption("generate_xml_equations", false);
-				break;
-			case FMUX:
-				options.setBooleanOption("generate_ode", false);
-				options.setBooleanOption("generate_dae", true);
-				options.setBooleanOption("equation_sorting", false);
-				options.setBooleanOption("generate_fmi_me_xml", false);
-				options.setBooleanOption("generate_fmi_cs_xml", false);
-				options.setBooleanOption("generate_xml_equations", true);
-				break;
-		}
+    private final int templateNbr;
+    
+    public Templates (int templateNbr) {
+        this.templateNbr = templateNbr;
+    }
+    
+    private static File getTemplatesDir() {
+        return new File(ModelicaCompiler.getJModelicaHome(), "CodeGenTemplates");
+    }
+    
+    public String getCTemplates() {
+        File dir = getTemplatesDir();
+        return new File(dir, cTemplates[templateNbr]).getPath();
+    }
+    
+    public String getXMLTemplates() {
+        File dir = getTemplatesDir();
+        return new File(dir, xmlTemplates[templateNbr]).getPath();
+    }
+}
+    
+public String Templates.getCTemplates(FClass fc) {
+    return getCTemplates();
+}
 
-		switch (target) {
-			case FMUME10:
-			case FMUCS10:
-				options.setRealOption("fmi_version", 1.0);
-				break;
-			case FMUME20:
-			case FMUCS20:
-				options.setRealOption("fmi_version", 2.0);
-				break;
-			case JMU:
-			case FMUX:
-				break;
-		}
-	}
+public String Templates.getXMLTemplates(FClass fc) {
+    return getXMLTemplates();
 }
 
 /**
@@ -1871,7 +1907,7 @@ public abstract class CCompilerDelegator {
 	private Map<String, String> env = System.getenv();
 	private String[] targetPlatforms = null;
 	
-	abstract public void compileCCode(String fileName, TargetObject targetObject, File workDir, 
+	abstract public void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
 			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs);
 	
 	abstract protected String[] getDefaultTargetPlatforms();
@@ -2131,7 +2167,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
 	/**
 	 * Compile DLL(s) from generated C code.
 	 */
-	public void compileCCode(String fileName, TargetObject targetObject, File workDir, 
+	public void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
 			Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
 		String jmodelicaHome = ModelicaCompiler.getJModelicaHome();
 		String buildPlatform = ModelicaCompiler.getPlatform();
