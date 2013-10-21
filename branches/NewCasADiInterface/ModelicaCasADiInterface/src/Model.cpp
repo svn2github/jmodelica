@@ -43,7 +43,7 @@ Model::VariableKind Model::classifyInternalRealVariable(Variable* var) const {
             } break;
         case(Variable::DISCRETE): return REAL_DISCRETE; break;
         case(Variable::PARAMETER): {
-            if(var->hasAttribute("bindingExpression")){
+            if(var->hasAttributeSet("bindingExpression")){
                 if (!var->getAttribute("bindingExpression")->isConstant()) {
                     return REAL_PARAMETER_DEPENDENT; 
                 }
@@ -62,7 +62,7 @@ Model::VariableKind Model::classifyInternalIntegerVariable(Variable* var) const 
     switch(var->getVariability()) {
         case(Variable::DISCRETE): return INTEGER_DISCRETE; break;
         case(Variable::PARAMETER): {
-            if(var->hasAttribute("bindingExpression")){
+            if(var->hasAttributeSet("bindingExpression")){
                 if (!var->getAttribute("bindingExpression")->isConstant()) {
                     return INTEGER_PARAMETER_DEPENDENT; 
                 }
@@ -81,7 +81,7 @@ Model::VariableKind Model::classifyInternalBooleanVariable(Variable* var) const 
     switch(var->getVariability()) {
         case(Variable::DISCRETE):  return BOOLEAN_DISCRETE; break;
         case(Variable::PARAMETER): {
-            if(var->hasAttribute("bindingExpression")){
+            if(var->hasAttributeSet("bindingExpression")){
                 if (!var->getAttribute("bindingExpression")->isConstant()) {
                     return BOOLEAN_PARAMETER_DEPENDENT; 
                 }
@@ -250,7 +250,7 @@ void Model::calculateValuesForDependentParameters() {
     for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
         Variable* var = (*it);
         if (var->getVariability() == Variable::PARAMETER) {
-            if (var->hasAttribute("bindingExpression")) {
+            if (var->hasAttributeSet("bindingExpression")) {
                 bindingExpression = *var->getAttribute("bindingExpression");
                 if (!bindingExpression.isConstant()) {
                     val = evaluateSymbolicExpression(bindingExpression, valsAndNodes);
@@ -288,7 +288,7 @@ pair< vector<MX>, vector<MX> > Model::retrieveValuesAndNodesForIndependentParame
     pair< vector<MX>, vector<MX> > valsAndNodes;
     for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getVariability() == Variable::PARAMETER) {
-            if ((*it)->hasAttribute("bindingExpression")) {
+            if ((*it)->hasAttributeSet("bindingExpression")) {
                 MX bindingExpression = *(*it)->getAttribute("bindingExpression");
                 if (bindingExpression.isConstant()) {
                     valsAndNodes.first.push_back(bindingExpression);

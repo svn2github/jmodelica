@@ -366,8 +366,8 @@ Returns::
         An AttributeValue, e.g. an MX expression
         
 "; 
-%feature("docstring") ModelicaCasADi::Variable::hasAttribute "
-A check whether the variable has a certain attribute
+%feature("docstring") ModelicaCasADi::Variable::hasAttributeSet "
+A check whether the variable has a certain attribute set. 
 
 Parameters::
     

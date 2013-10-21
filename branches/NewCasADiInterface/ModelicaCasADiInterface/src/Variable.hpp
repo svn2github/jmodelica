@@ -112,10 +112,10 @@ class Variable : public Printable {
          */
         virtual const AttributeValue* getAttribute(AttributeKey key) const;
         /** 
-         * Looks at local attributes then at attributes for its declared type.
-         * @return A bool. 
+         * A check whether a certain attribute is set in this variable. 
+         * @return A bool.  
          */
-        bool hasAttribute(AttributeKey key) const; 
+        bool hasAttributeSet(AttributeKey key) const; 
         /** 
          * Sets an attribute in the local Variable's attribute map.
          * @param An AttributeKey

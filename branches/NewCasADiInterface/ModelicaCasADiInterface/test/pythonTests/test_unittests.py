@@ -113,7 +113,7 @@ def test_equationPrinting():
 def test_RealTypePrinting():
     realType = RealType()
     expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                     "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                     "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
                      "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
     assert( str(realType) == expectedPrint )
     assert( realType.getAttribute("start").getValue() == 0 )
@@ -130,8 +130,8 @@ def test_RealVariableAttributes():
     assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode1) )
     realVar.setAttribute("myAttribute", attributeNode2)
     assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode2) )
-    assert( realVar.hasAttribute("myAttribute"))
-    assert( not realVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( realVar.hasAttributeSet("myAttribute"))
+    assert( not realVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( realVar.getName() == "node" )
 
 def test_RealVariableConstants():
@@ -151,6 +151,9 @@ def test_RealVariableVariableType():
     assert( realVar.getDeclaredType() == None )
     realType = RealType()
     realVar.setDeclaredType(realType)
+    # Has attribute looks at the variable. getAttribute gets the attribute even if it is in 
+    # the declared type. 
+    assert( (not realVar.hasAttributeSet("nominal")) and (realVar.getAttribute("nominal") is not None)) 
     assert( int(realType.this) == int(realVar.getDeclaredType().this) )
     userType = UserType("typeName", realType)
     realVar.setDeclaredType(userType)
@@ -220,8 +223,8 @@ def test_DerivativeVariableAttributes():
     assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode1) )
     derVar.setAttribute("myAttribute", attributeNode2)
     assert( isEqual(derVar.getAttribute("myAttribute"), attributeNode2) )
-    assert( derVar.hasAttribute("myAttribute"))
-    assert( not derVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( derVar.hasAttributeSet("myAttribute"))
+    assert( not derVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( derVar.getName() == "node" )
 
 def test_DerivativeVariableConstants():
@@ -283,8 +286,8 @@ def test_IntegerVariableAttributes():
     assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode1) )
     intVar.setAttribute("myAttribute", attributeNode2)
     assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode2) )
-    assert( intVar.hasAttribute("myAttribute"))
-    assert( not intVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( intVar.hasAttributeSet("myAttribute"))
+    assert( not intVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( intVar.getName() == "node")
     
 def test_IntegerVariableConstants():
@@ -331,8 +334,8 @@ def test_BooleanVariableAttributes():
     assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode1) )
     boolVar.setAttribute("myAttribute", attributeNode2)
     assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode2) )
-    assert( boolVar.hasAttribute("myAttribute"))
-    assert( not boolVar.hasAttribute("iDontHaveThisAttribute"))
+    assert( boolVar.hasAttributeSet("myAttribute"))
+    assert( not boolVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( boolVar.getName() == "node")
     
 def test_BooleanVariableConstants():
@@ -767,7 +770,7 @@ def test_ModelDefaultVariableTypeAssignment():
     realVar = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
     model.addVariable(realVar)
     expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                           "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                           "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
                            "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
     assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
     
@@ -917,7 +920,7 @@ def test_ModelPrinting():
                     "MX(node), declaredType : Real\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
                     "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                    "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))" +
+                    "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
                     "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()\n\n" +
                     "------------------------------- Functions -------------------------------\n\n\n" +
                     "------------------------------- Equations -------------------------------\n\n" +

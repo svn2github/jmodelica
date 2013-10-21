@@ -24,18 +24,18 @@ Variable::Variable(MX var, Variable::Causality causality,
 
 const Variable::AttributeValue* Variable::getAttribute(AttributeKey key) const { 
     if (!isAlias()) {
-        return hasAttribute(key) ? &attributes.find(AttributeKeyInternal(key))->second :
+        return hasAttributeSet(key) ? &attributes.find(AttributeKeyInternal(key))->second :
                                   (declaredType != NULL ? declaredType->getAttribute(key) : NULL);
     } else {
         return aliasVariable->getAttribute(key);
     }
 }
 
-bool Variable::hasAttribute(AttributeKey key) const { 
+bool Variable::hasAttributeSet(AttributeKey key) const { 
     if (!isAlias()) {
         return attributes.find(AttributeKeyInternal(key))!=attributes.end(); 
     } else {
-        return aliasVariable->hasAttribute(key);
+        return aliasVariable->hasAttributeSet(key);
     }
 }
 
