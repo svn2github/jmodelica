@@ -166,6 +166,16 @@ class Test_Compiler:
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_JMU, cl, [path], '.')
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path, separate_process=True)
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path, separate_process=True)
+        
+    @testattr(stddist = True)
+    def test_compile_fmu_illegal_target_error(self):
+        """Test that an exception is raised when an incorrect target is given to compile_fmu"""
+        cl = Test_Compiler.cpath_mc 
+        path = Test_Compiler.fpath_mc
+        #Incorrect target.
+        nose.tools.assert_raises(Exception, pym.compile_fmu, cl, path, target="notValid")
+        #Incorrect target that contains the valid target 'me'.
+        nose.tools.assert_raises(Exception, pym.compile_fmu, cl, path, target="men") 
     '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):

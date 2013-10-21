@@ -521,11 +521,11 @@ def _get_unit_name_from_target(class_name, target):
    Helper method to get unit file ending from compiler target.
    """
    # compile unit in java
-   if (target.find('me') >=0 or target.find('cs') >= 0): 
+   if (target == 'me' or target == 'cs'): 
        return get_fmu_name(class_name)
-   elif target.find('jmu') >= 0:
+   elif (target == 'jmu'):
        return get_jmu_name(class_name)
-   elif target.find('fmux') >= 0:
+   elif (target == 'fmux'):
        return get_fmux_name(class_name)
    else:
        raise Exception("Could not extract unit type from target %s" %(target))
