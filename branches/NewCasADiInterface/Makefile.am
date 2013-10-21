@@ -37,7 +37,7 @@ install_casadi: casadi
 	cd $(abs_builddir)/casadi_build/python/; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
 
-## Install for ModelicaCasADiInterface, Variables and targets. 
+## Install for CasADiInterface, Variables and targets. 
 ## MC_interface installs the system with Python. 
 ## If C++ compilation/tests are wanted there is the target MC_interface_cplusplus
 
@@ -64,7 +64,7 @@ export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
  
-MC_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/ModelicaCasADi
+casadi_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/casadi_interface
 
 $(MODELICA_CASADI_CASADI_BUILD_DIR): 
 	mkdir -p $(MC_BUILD); cd $(MC_BUILD); \
@@ -114,7 +114,7 @@ $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	    -I"$(CASADI_HOME)" \
 	    $(CFLAGS)
 
-$(DESTDIR)$(prefix)/Python/ModelicaCasADi: 
+$(DESTDIR)$(prefix)/Python/casadi_interface: 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make python
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
@@ -129,8 +129,8 @@ $(DESTDIR)$(prefix)/Python/ModelicaCasADi:
 	mkdir -p $(DESTDIR)$(prefix)/Python/ 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/ 
-	mkdir -p $(DESTDIR)$(prefix)/Python/ModelicaCasADi
-	cp $(MC_INTERFACE)/python/*.py $(DESTDIR)$(prefix)/Python/ModelicaCasADi
+	mkdir -p $(DESTDIR)$(prefix)/Python/casadi_interface
+	cp $(MC_INTERFACE)/python/*.py $(DESTDIR)$(prefix)/Python/casadi_interface
 
 MC_install_python: 
 	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make install_python
@@ -329,7 +329,7 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
 	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-	rm -rf $(DESTDIR)$(prefix)/Python/ModelicaCasADi
+	rm -rf $(DESTDIR)$(prefix)/Python/casadi_interface
 	
 
 clean-python-packages:

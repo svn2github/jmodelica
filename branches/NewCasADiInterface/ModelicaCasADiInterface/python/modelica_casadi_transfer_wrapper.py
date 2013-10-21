@@ -5,7 +5,7 @@ from casadi import *
 JVM_SET_UP=False
 
 
-def transferToModelicaCasaADi(class_name, file_name=[], compiler='auto', 
+def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto', 
                 compiler_options={}, compiler_log_level='warning'):
     """ 
     Compiles and transfers a model or optimization problem to the ModelicaCasADi 
