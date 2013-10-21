@@ -185,7 +185,7 @@ class TestAlgo2(SimulationTest):
 
     @testattr(stddist = True)
     def test_trajectories(self):
-        self.assert_all_trajectories(['y', 'z']) #TODO: add 'a' in #2617
+        self.assert_all_trajectories(['y', 'z', 'a'])
         
 class TestAlgo3(SimulationTest):
 
@@ -237,6 +237,24 @@ class TestAlgo5(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['rs[1].inside', 'rs[2].inside', 'rs[3].inside', 'rs[4].inside', 'rs[5].inside'])
+
+
+class TestAlgo6(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest6')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('a', 2)
+        self.assert_end_value('b', 7)
 
 class TestStreams1(SimulationTest):
 

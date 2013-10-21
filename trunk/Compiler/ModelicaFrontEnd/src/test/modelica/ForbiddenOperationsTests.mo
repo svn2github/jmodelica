@@ -128,6 +128,32 @@ Semantic error at line 84, column 3:
 ")})));
 end WhenInBlocks4;
 
+model WhenInInitial
+ Real x,y;
+initial algorithm
+ when time > 1 then
+	 x := 1;
+ end when;
+initial equation
+ when time > 1 then
+	 y = 1;
+ end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="WhenInInitial",
+			description="When in initial equation",
+			errorMessage="
+2 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  When statements are not allowed in initial algorithms
+Error: in file '...':
+Semantic error at line 0, column 0:
+  When equations are not allowed in initial equation sections
+")})));
+end WhenInInitial;
+
 model ReturnOutsideFunction
 algorithm
  return;

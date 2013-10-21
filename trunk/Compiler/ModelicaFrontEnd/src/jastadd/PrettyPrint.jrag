@@ -1083,7 +1083,7 @@ aspect FlatPrettyPrint {
     
     public void FEquationType.prettyPrint(Printer p, PrintStream str, String indent) {}
     public void FInitialEquation.prettyPrint(Printer p, PrintStream str, String indent) {
-    	str.print(indent + "initial");
+    	str.print(indent + "initial ");
     }
     
     public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
@@ -1261,7 +1261,8 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
-		p.print(getType(),str,indent);
+		str.print(indent);
+		p.print(getType(),str,"");
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}

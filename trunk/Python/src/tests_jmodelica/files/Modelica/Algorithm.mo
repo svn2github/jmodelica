@@ -14,19 +14,17 @@ model AlgoTest2
 	Real x;
 	Real y(start=0);
 	Real z(start=0);
-	/*
-	Real a(start=0.05);
-	*/
+	discrete Real a(start=0.05);
 algorithm
 	x := der(y);
 	if x < 0.2 then
 		x := -1;
 	end if;
-	/* TODO: replace with when statement in #2617 
-	while a < x loop
-		a := a + 0.01;
-	end while;
-	*/
+	when a < x then
+		while a < x loop
+			a := a + 0.01;
+		end while;
+	end when;
 equation
 	der(y) = time;
 	der(z) = x;
@@ -112,5 +110,20 @@ equation
 
   positions = der(_p);
 end AlgoTest5;
+
+model AlgoTest6
+  Real x;
+  discrete Real a,b;
+equation
+  x = sin(time*10);
+algorithm
+  when {initial(), x >= 0.7} then
+    a := pre(a) + 1;
+  elsewhen {x < 0.7} then
+    a := a - 1;
+  elsewhen {x >= 0.7, x >= 0.8, x < 0.8, x < 0.7} then
+    b := b + 1;
+  end when;
+end AlgoTest6;
 
 end Algorithm;

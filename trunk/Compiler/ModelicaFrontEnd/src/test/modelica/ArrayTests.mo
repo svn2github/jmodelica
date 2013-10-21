@@ -5251,7 +5251,6 @@ algorithm
 		TransformCanonicalTestCase(
 			name="ForAlgorithm1",
 			description="Array expressions depending on for loop index",
-			algorithms_as_functions=false,
 			flatModel="
 fclass ArrayTests.For.ForAlgorithm1
  constant Integer n = 3;

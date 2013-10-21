@@ -882,13 +882,20 @@ aspect CCodeGen {
 	}
 	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		for (FIfWhenClause clause : getFIfWhenClauses())
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
 			clause.getTest().genTempVars_C(p, str, indent);
+			clause.genWhenGuards_C(p, str, indent);
+		}
 		str.print(indent);
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "} else ");
 		prettyPrintElse_C(p, str, indent);
 		str.print(indent);
 		str.print("}\n");
+	}
+	
+	public void FIfWhenClause.genWhenGuards_C(Printer p, PrintStream str, String indent) {}
+	public void FWhenClause.genWhenGuards_C(Printer p, PrintStream str, String indent) {
+		FExp.genWhenGuards_C(getTest().guards(), indent, str);
 	}
 	
 	protected void FIfWhenStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent) {}
@@ -905,6 +912,11 @@ aspect CCodeGen {
 		str.print("if (");
 		p.print(getTest(), str, indent);
 		str.print(") {\n");
+		p.print(getFStatements(), str, p.indent(indent));
+	}
+	
+	public void FWhenClause.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		FExp.genWhenClause_C(getTest().guards(), indent, str);
 		p.print(getFStatements(), str, p.indent(indent));
 	}
 	
@@ -2189,21 +2201,43 @@ aspect CCodeGen {
 	}
 
 	public void WhenEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-		 // if (guard and !pre(guard)) {
-		 // 	_x = _pre_x + 1;
-		 // }
-		
+		// if (guard and !pre(guard)) {
+		// 	_x = _pre_x + 1;
+		// }
 		// TODO: Add support for else when clauses
-		for (FExp g : equation().guards()) {		
+		FExp.genWhenGuards_C(equation().guards(), indent, str);
+		FExp.genWhenClause_C(equation().guards(), indent, str);
+		
+		for (SimpleEquationBlock b : blocks.iterator().next()) {
+			b.genBlock_C(inInitial, indent + "  ", str);
+		}
+		str.print("} else {\n");
+		for (FVariable fv : activeVariables()) {
+			str.print(indent);
+			str.print(fv.name_C());
+			str.print(" = ");
+			str.print("pre");
+			str.print(fv.name_C());
+			str.print(";\n");
+			str.print(indent);
+		}
+		str.print("}\n");
+	}
+	
+	public static void FExp.genWhenGuards_C(Collection<FExp> guards, String indent, PrintStream str) {
+		for (FExp g : guards) {		
 			g.genTempVars_C(ASTNode.printer_C, str, indent);
 			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
 			g.prettyPrint_C(str,"");
 			str.print(";\n");
 		}
-		int j = equation().guards().size();
+	}
+
+	public static void FExp.genWhenClause_C(Collection<FExp> guards, String indent, PrintStream str) {
+		int j = guards.size();
 		str.print("  if(");
-		for (FExp g : equation().guards()) {
-			if (j>1) {
+		for (FExp g : guards) {
+			if (j > 1) {
 				str.print("LOG_EXP_OR(");
 			}		
 			str.print("COND_EXP_EQ(LOG_EXP_AND(_guards(");
@@ -2216,24 +2250,10 @@ aspect CCodeGen {
 			}		
 			j--;
 		}		
-		for (int k = 0;k<equation().guards().size()-1;k++) {
+		for (int k = 0; k < guards.size() - 1; k++) {
 			str.print(")");
 		}
 		str.print(") {\n");
-		for (SimpleEquationBlock b : blocks.iterator().next()) {
-			b.genBlock_C(inInitial,indent + " ",str);
-		}
-		str.print("  } else {\n");
-		for (FVariable fv : activeVariables()) {
-			str.print(indent);
-			str.print(fv.name_C());
-			str.print(" = ");
-			str.print("pre");
-			str.print(fv.name_C());
-			str.print(";\n");
-			str.print(indent);
-		}
-		str.print("}\n");
 	}
 
 	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}

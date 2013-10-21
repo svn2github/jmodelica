@@ -59,10 +59,17 @@ aspect ContentCheck {
 	}
 	
 	public void FWhenStmt.contentCheck() {
-		if (inFunction())
+		if (myFAlgorithm().getType() instanceof FInitialEquation || myFAlgorithm().isInitial())
+			error("When statements are not allowed in initial algorithms");
+		else if (inFunction())
 			error("When statements are not allowed in functions");
 		else if (insideBlockStmt())
 			error("When statements are not allowed inside if, for, while and when clauses");
+	}
+	
+	public void FEventGenExp.contentCheck() {
+		if (inAlgorithm())
+			warning("Event generating function like expressions in algorithms are not fully supported (will not generate events)");
 	}
 	
 	public void FParseArray.contentCheck() {
@@ -207,8 +214,10 @@ aspect ContentCheck {
 	public void FWhenEquation.contentCheck() {
 		// TODO: check that two when clauses do not assign the same variable
 		super.contentCheck();
-		if (inWhen()) {
+		if (inWhen())
 			error("Nestled when clauses are not allowed");
+		else if (getType() instanceof FInitialEquation || isInitial()) {
+			error("When equations are not allowed in initial equation sections");
 		} else {
 			if (!isBalancedAssignments())
 				error("All branches in when equation must assign the same variables");

@@ -865,9 +865,19 @@ aspect FlatAPI {
     // not inside a noEvent operator
  		guards() when getTest().inEquationSection()
 	to FClass.guardExpInEquations() for myFClass();	
+	FWhenStmt contributes
+		guards() when inEquationSection()
+	to FClass.guardExpInEquations() for myFClass();	
 		
 	syn ArrayList<FExp> FWhenEquation.guards() = getTest().guards();
-			
+	syn ArrayList<FExp> FWhenStmt.guards() {
+		ArrayList<FExp> l = new ArrayList<FExp>();
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			l.addAll(clause.getTest().guards());
+		}
+		return l;
+	}
+	
 	syn ArrayList<FExp> FExp.guards() {
 		ArrayList<FExp> l = new ArrayList<FExp>();
 		if (!isArray()) {
@@ -1052,7 +1062,8 @@ aspect FlatAPI {
 	inh FClass FFunctionDecl.myFClass();
 	inh FClass FRecordDecl.myFClass();
 	inh FClass FAlgorithm.myFClass();
-	inh FClass FAbstractEquation.myFClass();	
+	inh FClass FAbstractEquation.myFClass();
+	inh FClass FStatement.myFClass();
 	inh lazy FClass FExternalStmt.myFClass();
 	eq FClass.getChild().myFClass() = this;
 	eq Root.getChild().myFClass() = null; 
@@ -2532,6 +2543,7 @@ aspect FlatAlgorithmAPI {
 	
 	syn FAlgorithm FIdUseExp.myFAlgorithm() = getFIdUse().myFAlgorithm();
 	inh lazy FAlgorithm FIdUse.myFAlgorithm();
+	inh lazy FAlgorithm FStatement.myFAlgorithm();
 	eq FAlgorithm.getChild().myFAlgorithm() = this;
 	eq Root.getChild().myFAlgorithm() = null;
 	

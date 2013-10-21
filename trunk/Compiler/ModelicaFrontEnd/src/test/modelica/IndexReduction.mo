@@ -1897,7 +1897,6 @@ equation
             name="IndexReduction42_Err",
             description="Test error messages for algorithms.",
 			inline_functions="none",
-			algorithms_as_functions=false,
             errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:

@@ -1927,7 +1927,6 @@ algorithm
         TransformCanonicalTestCase(
             name="AlgorithmFlatten1",
             description="Flattening algorithms: assign stmts",
-            algorithms_as_functions=false,
             flatModel="
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
@@ -1951,7 +1950,6 @@ algorithm
 			name="AlgorithmFlatten2",
 			description="Alias elimination in algorithm",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten2
  Real x(start = 1.0);
@@ -1985,7 +1983,6 @@ algorithm
 			name="AlgorithmFlatten3",
 			description="Flattening algorithms: if stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten3
  discrete Integer x;
@@ -2033,7 +2030,6 @@ algorithm
 			name="AlgorithmFlatten4",
 			description="Flattening algorithms: when stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten4
  discrete Integer x;
@@ -2075,7 +2071,6 @@ algorithm
 			name="AlgorithmFlatten5",
 			description="Flattening algorithms: while stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten5
  Real x;
@@ -2105,7 +2100,6 @@ algorithm
 			name="AlgorithmFlatten6",
 			description="Flattening algorithms: for stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
@@ -2173,7 +2167,6 @@ algorithm
 			name="AlgorithmFlatten8",
 			description="Flattening algorithms: for indices in left hand side of array assignments.",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten8
  Real x[1];
@@ -2196,6 +2189,90 @@ end FunctionTests.AlgorithmFlatten8;
 
 ")})));
 end AlgorithmFlatten8;
+
+model AlgorithmFlatten9
+ Real y1,y2,y3,x;
+algorithm
+ when x > 2 then
+  y1 := sin(x);
+ end when;
+equation
+ y2 = sin(y1);
+ x = time;
+algorithm
+ when x > 2 then
+	 y3 := 2*x + y1 + y2;
+ end when;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten9",
+			description="Flattening algorithms: when stmts",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten9
+ Real y1;
+ Real y2;
+ Real y3;
+ Real x;
+ Real temp_1;
+ Real temp_2;
+equation
+ y2 = sin(y1);
+ x = time;
+algorithm
+ y1 := 0.0;
+ temp_1 := 1;
+ temp_1 := x - 2;
+ when x > 2 then
+  y1 := sin(x);
+ end when;
+algorithm
+ y3 := 0.0;
+ temp_2 := 1;
+ temp_2 := x - 2;
+ when x > 2 then
+  y3 := 2 * x + y1 + y2;
+ end when;
+end FunctionTests.AlgorithmFlatten9;
+
+")})));
+end AlgorithmFlatten9;
+
+model AlgorithmFlatten10
+ Real y1,y2;
+algorithm
+	when time > 1 then
+		y1 := 1;
+	elsewhen time > 2 then
+		y2 := 2;
+	end when;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten10",
+			description="Flattening algorithms: else-when stmts",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten10
+ Real y1;
+ Real y2;
+ Real temp_1;
+ Real temp_2;
+algorithm
+ y1 := 0.0;
+ y2 := 0.0;
+ temp_1 := 1;
+ temp_2 := 1;
+ temp_1 := time - 1;
+ temp_2 := time - 2;
+ when time > 1 then
+  y1 := 1;
+ elsewhen time > 2 then
+  y2 := 2;
+ end when;
+end FunctionTests.AlgorithmFlatten10;
+
+")})));
+end AlgorithmFlatten10;
+
 
 /* ====================== Algorithm type checks ====================== */
 
@@ -5011,7 +5088,6 @@ algorithm
 			description="Scalarize function call statements.",
 			variability_propagation=false,
 			inline_functions="none",
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization25
  Real a[1].x[1];
@@ -5102,7 +5178,6 @@ algorithm
 			description="Slices of records in function call statements.",
 			variability_propagation=false,
 			inline_functions="none",
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization26
  Real x[1].x;

@@ -6618,7 +6618,6 @@ algorithm
 		CCodeGenTestCase(
 			name="Algorithm1",
 			description="C code generation of algorithms",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -6654,7 +6653,6 @@ algorithm
 		CCodeGenTestCase(
 			name="Algorithm2",
 			description="C code generation of algorithms",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -6691,7 +6689,6 @@ algorithm
 		CCodeGenTestCase(
 			name="Algorithm3",
 			description="C code generation of algorithms - in block",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			automatic_tearing=false,
@@ -6787,7 +6784,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 		CCodeGenTestCase(
 			name="Algorithm3Tearing",
 			description="C code generation of algorithms - in torn block",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -6884,7 +6880,6 @@ algorithm
 		CCodeGenTestCase(
 			name="Algorithm4",
 			description="C code generation of algorithms - in block",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -7002,7 +6997,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 		CCodeGenTestCase(
 			name="Algorithm4Tearing",
 			description="C code generation of algorithms - in torn block",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -7114,7 +7108,6 @@ algorithm
 		CCodeGenTestCase(
 			name="Algorithm5",
 			description="C code generation of algorithm with while loops",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
@@ -7166,7 +7159,6 @@ equation
 		CCodeGenTestCase(
 			name="Algorithm7",
 			description="C code generation of algorithm.",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			inline_functions="none",
@@ -7277,7 +7269,6 @@ equation
 		CCodeGenTestCase(
 			name="Algorithm8",
 			description="C code generation of initial algorithm.",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			inline_functions="none",
@@ -7431,7 +7422,6 @@ equation
 		CCodeGenTestCase(
 			name="Algorithm9",
 			description="C code generation of assignment statements scalarized into function call statements",
-			algorithms_as_functions=false,
 			generate_ode=true,
 			equation_sorting=true,
 			inline_functions="none",

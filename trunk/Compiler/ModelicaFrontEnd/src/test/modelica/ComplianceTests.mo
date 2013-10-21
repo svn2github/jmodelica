@@ -148,26 +148,6 @@ end ArrayOfRecords_Warn;
 // Real x = f();
 //end ExternalFunction_ComplErr;
 
-
-model WhenStmt_ComplErr
- Real x;
-algorithm
- when (time < 2) then
-  x := 5;
- end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="WhenStmt_ComplErr",
-			description="Compliance error for when statements",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 126, column 2:
-  When statements are not supported
-")})));
-end WhenStmt_ComplErr;
-
 model UnsolvedWhenEqu_ComplErr
  discrete Real x;
  Real y1,y2;
@@ -808,7 +788,6 @@ algorithm
 		ComplianceErrorTestCase(
 			name="UnknownArrayIndex",
 			description="Test errors for unknown array for indices in algorithms and equations.",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Compliance error at line 0, column 0:
@@ -833,7 +812,6 @@ algorithm
 		ComplianceErrorTestCase(
 			name="BreakInFor",
 			description="Test errors for break statement in scalarized for",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Compliance error at line 0, column 0:

@@ -2627,9 +2627,13 @@ aspect ShortClassUtil {
 aspect FlatExpressions {
     
     inh boolean FExp.inEquationSection();
+    inh boolean FAbstractEquation.inEquationSection();
+    inh boolean FStatement.inEquationSection();
     eq FClass.getFEquationBlock().inEquationSection() = true;
     eq Root.getChild().inEquationSection() = false;
     inh boolean FExp.inInitialEquationSection();
+    inh boolean FAbstractEquation.inInitialEquationSection();
+    inh boolean FStatement.inInitialEquationSection();
     eq FClass.getFInitialEquation().inInitialEquationSection() = true;
     eq Root.getChild().inInitialEquationSection() = false;
 
@@ -2673,7 +2677,7 @@ aspect FlatExpressions {
     eq FClass.getChild().inWhen()                    = false;
     
     inh boolean FStatement.inWhen();
-    eq FWhenStmt.getFIfWhenClause().inWhen() = true;
+    eq FWhenClause.getFStatement().inWhen()          = true;
 
     inh boolean FRelExp.inWhile();
     eq FWhileStmt.getChild().inWhile() = true;

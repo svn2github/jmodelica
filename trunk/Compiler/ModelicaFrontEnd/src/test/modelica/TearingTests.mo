@@ -451,7 +451,6 @@ equation
 			equation_sorting=true,
 			automatic_tearing=true,
 			inline_functions="none",
-			algorithms_as_functions=false,
 			description="Test of algorithm tearing",
 			methodResult="
 -------------------------------
@@ -496,7 +495,6 @@ equation
 			equation_sorting=true,
 			automatic_tearing=true,
 			inline_functions="none",
-			algorithms_as_functions=false,
 			local_iteration_in_tearing=true,
 			description="Test of algorithm tearing",
 			methodResult="

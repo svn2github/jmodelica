@@ -1692,7 +1692,6 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmType1",
 			description="Correct types in algorithm.",
-			algorithms_as_functions=false,
 			flatModel="
 fclass TypeTests.AlgorithmType1
  discrete Boolean b;
@@ -1731,7 +1730,6 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmType2",
 			description="Correct types in algorithm. Records and arrays.",
-			algorithms_as_functions=false,
 			flatModel="
 fclass TypeTests.AlgorithmType2
  discrete Real outerR[1].r;
@@ -1800,7 +1798,6 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmType3",
 			description="Incorrect types in algorithm",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -1834,7 +1831,6 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmType4",
 			description="Algorithm assigning to parameters and constants.",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
