@@ -19,7 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.jmodelica.modelica.compiler.ModelicaCompiler;
-import org.jmodelica.modelica.compiler.TargetObject;
+import org.jmodelica.modelica.compiler.ModelicaCompiler.TargetObject;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.ModelicaLogger;
 
@@ -63,7 +63,7 @@ public class DebugCompiler extends JFrame {
 		pack();
 		
 		mc = new ModelicaCompiler(new OptionRegistry());
-        target = new TargetObject("me", "1.0");
+        target = TargetObject.getTarget("me", "1.0");
 		tempDir = getTempDir();
 		mc.setTempFileDir(tempDir);
 	}
