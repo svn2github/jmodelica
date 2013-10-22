@@ -201,6 +201,8 @@ def test_RealVariableAttributes():
     assert( realVar.hasAttributeSet("myAttribute"))
     assert( not realVar.hasAttributeSet("iDontHaveThisAttribute"))
     assert( realVar.getName() == "node" )
+    realVar.setAttribute("start", 1)
+    assert( abs(realVar.getAttribute("start").getValue() - 1) < 0.000001)
 
 def test_RealVariableConstants():
     realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)

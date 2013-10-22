@@ -83,6 +83,13 @@ void Variable::setAttribute(AttributeKey key, AttributeValue val) {
         attributes[AttributeKeyInternal(key)]=val; 
     }
 }
+void Variable::setAttribute(AttributeKey key, double val) { 
+    if (isAlias()) {
+        setAttributeForAlias(key, val);
+    } else {
+        attributes[AttributeKeyInternal(key)]=MX(val); 
+    }
+}
 
 
 void Variable::print(ostream& os) const {

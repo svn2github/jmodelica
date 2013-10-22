@@ -126,6 +126,14 @@ class Variable : public Printable {
          * @param An AttributeValue
          */
         void setAttribute(AttributeKey key, AttributeValue val);
+        /** 
+         * Sets an attribute in the local Variable's attribute map, 
+         * or it propagates the attribute to its alias if this is an
+         * alias variable. 
+         * @param An AttributeKey
+         * @param A double.
+         */
+        void setAttribute(AttributeKey key, double val);
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;

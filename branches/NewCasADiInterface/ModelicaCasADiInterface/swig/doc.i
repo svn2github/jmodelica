@@ -436,7 +436,7 @@ Parameters::
         A string name
         
     AttributeValue --
-        An AttributeValue, e.g. an MX expression
+        An AttributeValue, a double or a MX.
 
 "; 
 
