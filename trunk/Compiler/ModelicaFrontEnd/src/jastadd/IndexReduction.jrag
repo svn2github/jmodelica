@@ -72,7 +72,7 @@ aspect IndexReduction {
                     FQName fqnPrev = fv.getFQName().fullCopy();
                     for (int i = 1; i < fhdv.getOrder(); i++) {
                         FQName fqn = fv.getFQName().createDerPrefixedName(i);
-                        l.add(new FRealVariable(fv.getFVisibilityType().fullCopy(),
+                        l.add(new FRealVariable(new FPublicVisibilityType(),
                             fv.getFTypePrefixVariability().fullCopy(), fqn.fullCopy()));
                         // Derivative variable is added later
                         addFEquation(new FEquation(new FIdUseExp(fqn), new FDerExp(fqnPrev.fullCopy())));
@@ -95,9 +95,10 @@ aspect IndexReduction {
             // trigger rewrites of FDerExp -> FDummyDerExp
             root().flushAllRecursiveClearFinal();
 
-            aliasElimination.apply();
             // Add derivative variables
             addFDerivativeVariables.apply();
+            
+            aliasElimination.apply();
 
             root().flushAllRecursive();
 
