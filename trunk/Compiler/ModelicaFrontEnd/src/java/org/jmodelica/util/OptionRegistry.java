@@ -211,7 +211,7 @@ public class OptionRegistry {
 		FMI_VER 
 			("fmi_version", 
 			 compiler, 
-			 1.0, 
+			 "1.0", 
 			 "Version of FMU."),
 		VAR_SCALE 
 			("enable_variable_scaling", 

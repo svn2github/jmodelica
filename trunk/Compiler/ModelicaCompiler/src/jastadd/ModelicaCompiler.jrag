@@ -1573,21 +1573,23 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10(0, "fmume", "fmu"),
-        FMUME20(1, "fmume", "fmu"),
-        FMUCS10(2, "fmucs", "fmu"),
-        FMUCS20(3, "fmucs", "fmu"),
+        FMUME10(0, "fmume10", "fmu"),
+        FMUME20(1, "fmume20", "fmu"),
+        FMUCS10(2, "fmucs10", "fmu"),
+        FMUCS20(3, "fmucs20", "fmu"),
         JMU(4, "jmu", "jmu"),
-        FMUX(5, null, "fmux");
-    
+        FMUX(5, null, "fmux"),
+        FMUME20a(0 , "fmume10", "fmu"), //Temporary alpha implementation of FMI 2.0, generates extra xml stuff
+        FMUCS20a(2 , "fmucs10", "fmu"); //Temporary alpha implementation of FMI 2.0, generates extra xml stuff
+
+        private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
-        private final Templates templates;
-    
+
         private TargetObject(int templateNbr, String makeFileFlag, String suffix) {
+            this.templates = new Templates(templateNbr);
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
-            this.templates = new Templates(templateNbr);
         }
         /**
         * \brief Returns an enum of the target that contains all relevant information for the target.
@@ -1601,6 +1603,8 @@ public class ModelicaCompiler {
                     return FMUME10;
                 } else if (version.equals("2.0")) {
                     return FMUME20;
+                } else if (version.equals("2.0alpha")) {
+                    return FMUME20a;
                 } else {
                     throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
                 }
@@ -1609,6 +1613,8 @@ public class ModelicaCompiler {
                     return FMUCS10;
                 } else if (version.equals("2.0")) {
                     return FMUCS20;
+                } else if (version.equals("2.0alpha")) {
+                    return FMUCS20a;
                 } else {
                     throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
                 }
@@ -1693,6 +1699,7 @@ public class ModelicaCompiler {
             switch (this) {
                 case FMUME10:
                 case FMUME20:
+                case FMUME20a:
                     options.setBooleanOption("generate_ode", true);
                     options.setBooleanOption("generate_dae", false);
                     options.setBooleanOption("equation_sorting", true);
@@ -1702,6 +1709,7 @@ public class ModelicaCompiler {
                     break;
                 case FMUCS10:
                 case FMUCS20:
+                case FMUCS20a:
                     options.setBooleanOption("generate_ode", true);
                     options.setBooleanOption("generate_dae", false);
                     options.setBooleanOption("equation_sorting", true);
@@ -1730,11 +1738,14 @@ public class ModelicaCompiler {
             switch (this) {
                 case FMUME10:
                 case FMUCS10:
-                    options.setRealOption("fmi_version", 1.0);
-                    break;
+                    options.setStringOption("fmi_version", "1.0");
                 case FMUME20:
                 case FMUCS20:
-                    options.setRealOption("fmi_version", 2.0);
+                    options.setStringOption("fmi_version", "2.0");
+                    break;
+                case FMUME20a:
+                case FMUCS20a:
+                    options.setStringOption("fmi_version", "2.0alpha");
                     break;
                 case JMU:
                 case FMUX:
@@ -1757,9 +1768,9 @@ aspect CompilationHelpers {
 public class Templates {
     
     private final static String[] cTemplates = {"fmi1_me_modelica_template.c",
-        "fmi1_me_modelica_template.c",
+        "fmi2_me_modelica_template.c",
         "fmi1_cs_modelica_template.c",
-        "fmi1_cs_modelica_template.c",
+        "fmi2_cs_modelica_template.c",
         "jmi_modelica_template.c",
         null};
         

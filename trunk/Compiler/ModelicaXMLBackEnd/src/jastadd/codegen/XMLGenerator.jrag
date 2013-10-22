@@ -863,7 +863,7 @@ public class XMLGenerator extends GenericGenerator {
 		 */
 		public void generate(PrintStream genPrinter) {
 
-		if (fclass.root().options.getRealOption("fmi_version")!=2.0) {
+		if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
 			return;
 		}
 		
