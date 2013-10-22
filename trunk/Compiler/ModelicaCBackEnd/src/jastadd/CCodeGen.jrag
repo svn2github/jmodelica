@@ -2513,6 +2513,9 @@ aspect CCodeGen {
 	public void FIdUseExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
 		if (forIndices == null || forIndices.contains(index)) {
+			if (!myFV().isReal()) 
+				throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable");
+			
 			// This variable is in the set of variables to generate code for.
 			str.print(indent);
 			str.print("(*res)[");
