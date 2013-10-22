@@ -208,9 +208,9 @@ optimization OptimicaTransformCanonicalTests.ArrayTest1(objective = cost(finalTi
  parameter Real C[2] = 1 /* 1 */;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
+ Real der(cost);
  Real der(x[1]);
  Real der(x[2]);
- Real der(cost);
 initial equation 
  cost = 0;
  x[1] = 1;
@@ -271,9 +271,9 @@ optimization OptimicaTransformCanonicalTests.ArrayTest2(objective = cost(finalTi
  parameter Real C[2] = 1 /* 1 */;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
+ Real der(cost);
  Real der(x[1]);
  Real der(x[2]);
- Real der(cost);
 initial equation 
  cost = 0;
  x[1] = 1;

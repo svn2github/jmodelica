@@ -616,7 +616,7 @@ end XMLCodeGenTest2;
 <isLinear>true</isLinear>
 <VariableCategory>state</VariableCategory>
 </ScalarVariable>
-<ScalarVariable name=\"der(x[1])\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+<ScalarVariable name=\"der(x[1])\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
 <VariableCategory>derivative</VariableCategory>
@@ -626,7 +626,7 @@ end XMLCodeGenTest2;
 <isLinear>true</isLinear>
 <VariableCategory>state</VariableCategory>
 </ScalarVariable>
-<ScalarVariable name=\"der(x[2])\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+<ScalarVariable name=\"der(x[2])\" valueReference=\"4\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
 <VariableCategory>derivative</VariableCategory>
@@ -636,7 +636,7 @@ end XMLCodeGenTest2;
 <isLinear>true</isLinear>
 <VariableCategory>state</VariableCategory>
 </ScalarVariable>
-<ScalarVariable name=\"der(y[1])\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+<ScalarVariable name=\"der(y[1])\" valueReference=\"5\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
 <VariableCategory>derivative</VariableCategory>
@@ -646,7 +646,7 @@ end XMLCodeGenTest2;
 <isLinear>true</isLinear>
 <VariableCategory>state</VariableCategory>
 </ScalarVariable>
-<ScalarVariable name=\"der(y[2])\" valueReference=\"3\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+<ScalarVariable name=\"der(y[2])\" valueReference=\"6\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
 <Real relativeQuantity=\"false\" />
 <isLinear>true</isLinear>
 <VariableCategory>derivative</VariableCategory>

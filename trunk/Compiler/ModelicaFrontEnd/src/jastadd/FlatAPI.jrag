@@ -1939,11 +1939,10 @@ aspect FVariableUses {
 		(FRealVariable) lookupFV(getFQName());
 
 	/**
-	 * \brief Get the derivative variabel (FDerivativeVariable) corresponding to 
+	 * \brief Get the derivative variabel corresponding to 
 	 * a differentiated variable (FVariable)
 	 */
-	syn FDerivativeVariable FVariable.myDerivativeVariable() =
-		(FDerivativeVariable) lookupDerFV(getFQName());
+	syn FAbstractVariable FVariable.myDerivativeVariable() = lookupDerFV(getFQName());
 	
 	/**
 	 * Get the pre variable connected to a normal variable, if any.

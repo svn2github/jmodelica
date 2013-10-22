@@ -95,10 +95,10 @@ aspect IndexReduction {
             // trigger rewrites of FDerExp -> FDummyDerExp
             root().flushAllRecursiveClearFinal();
 
-            // Add derivative variables
-            addFDerivativeVariables.apply();
-            
             aliasElimination.apply();
+            
+            // Add derivative variables
+            updateDerivativeVariables.apply();
 
             root().flushAllRecursive();
 
