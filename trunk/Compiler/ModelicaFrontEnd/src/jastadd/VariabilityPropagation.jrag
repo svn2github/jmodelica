@@ -335,10 +335,7 @@ aspect ConstantFolding {
 	 * Enables constant folding
 	 */
 	public void FClass.enableConstantFolding() {
-		for (FAbstractEquation equation : getFParameterEquations()) {
-			equation.enableConstantFolding();
-		}
-		for (FAbstractEquation equation : equations()) {
+		for (FAbstractEquation equation : allEquations()) {
 			equation.enableConstantFolding();
 		}
 	}

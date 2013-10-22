@@ -765,6 +765,14 @@ aspect FlatAPI {
 		return l;
 	}
 	
+	syn ArrayList<FAbstractEquation> FClass.allEquations() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		l.addAll(equations());
+		l.addAll(initialEquations());
+		l.addAll(getFParameterEquations().toArrayList());
+		return l;
+	}
+	
 	coll ArrayList<FAlgorithm> FClass.algorithms() 
 		[new ArrayList<FAlgorithm>()] with add root FClass;
 	FAlgorithm contributes this when !inFunction()

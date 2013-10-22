@@ -1334,6 +1334,10 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+	public void FSemiLinearExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException("Untransformed semiLinear() expression");
+	}
+	
 	syn String FBoolBinExp.macro_C();
 	eq FEqExp.macro_C()  = "COND_EXP_EQ";
 	eq FNeqExp.macro_C() = "COND_EXP_EQ";

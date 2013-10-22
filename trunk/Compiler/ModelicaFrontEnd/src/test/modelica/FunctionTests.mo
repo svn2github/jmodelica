@@ -9530,6 +9530,15 @@ end Homotopy2;
 model SemiLinear1
   Real x = semiLinear(sin(time*10),2,-10);
   Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});
+  parameter Real a;
+  parameter Real p = semiLinear(a,1,2);
+  discrete Real k;
+initial equation
+  k = semiLinear(time,1,2);
+equation
+	when time > 1 then
+		k = semiLinear(time,1,2);
+	end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9540,7 +9549,17 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  Real x;
  Real y[1];
  Real y[2];
+ parameter Real a;
+ parameter Real p;
+ discrete Real k;
+initial equation 
+ k = if time >= 0.0 then time else time * 2;
+parameter equation
+ p = if a >= 0.0 then a else a * 2;
 equation
+ when time > 1 then
+  k = if time >= 0.0 then time else time * 2;
+ end when;
  x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[2] = if time >= 0.0 then time * 2 else time * 3;
@@ -9568,9 +9587,20 @@ model SemiLinear3
   Real x = 0;
   Real y = 0;
   Real sa,sb;
+  parameter Real p1(fixed=false);
+  parameter Real p2 = 2;
+  discrete Real r1,r2;
+initial equation
+	y = semiLinear(x,r1,r2);
+	y = semiLinear(x,p1,p2);
 equation
   sa = time;
   y = semiLinear(x,sa,sb);
+  
+  when time > 1 then
+	  r2 = 2;
+	  r1 = 2;
+  end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9582,9 +9612,23 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real y = 0;
  Real sa;
  Real sb;
+ parameter Real p1(fixed = false);
+ parameter Real p2 = 2 /* 2 */;
+ discrete Real r1;
+ discrete Real r2;
+initial equation 
+ r1 = r2;
+ p1 = p2;
+ pre(r2) = 0.0;
 equation
  sa = time;
  sa = sb;
+ when time > 1 then
+  r2 = 2;
+ end when;
+ when time > 1 then
+  r1 = 2;
+ end when;
 end FunctionTests.FunctionLike.Special.SemiLinear3;
 ")})));
 end SemiLinear3;

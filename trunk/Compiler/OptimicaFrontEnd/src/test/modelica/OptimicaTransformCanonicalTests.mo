@@ -725,5 +725,32 @@ end OptimicaTransformCanonicalTests.VariabilityPropagation1;
 ")})));
 end VariabilityPropagation1;
 
+optimization SemiLinearConstraint (objective = x(finalTime)^2, startTime=0, finalTime=5)
+	Real x;
+	Real y;
+equation
+	x = time;
+	y = time;
+constraint
+	x >= semiLinear(time, y, 2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="SemiLinearConstraint",
+			description="Test transformation of semiLinear in constraints",
+			flatModel="
+optimization OptimicaTransformCanonicalTests.SemiLinearConstraint(objective = x(finalTime) ^ 2,startTime = 0,finalTime = 5)
+ Real x;
+ Real y;
+ parameter Real startTime = 0 /* 0 */;
+ parameter Real finalTime = 5 /* 5 */;
+equation
+ x = time;
+ y = time;
+constraint 
+ x >= if time >= 0.0 then time * y else time * 2;
+end OptimicaTransformCanonicalTests.SemiLinearConstraint;
+")})));
+end SemiLinearConstraint;
 
 end OptimicaTransformCanonicalTests;

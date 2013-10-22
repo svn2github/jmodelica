@@ -4774,7 +4774,7 @@ aspect SemiLinear {
         public class enableSemiLinearRewrite extends Transformation {
             public void perform() {
                 // Transform equations 0 = semiLinear(0,x,y) into x = y;
-                for (FAbstractEquation equation : getFEquationBlock(0).getFAbstractEquations()) {
+                for (FAbstractEquation equation : allEquations()) {
                     equation.enableSemiLinearRewrite();
                 }
                 
@@ -4828,7 +4828,6 @@ aspect SemiLinear {
 	coll HashSet<FSemiLinearExp> FClass.collectSemiLinearExps() 
 		[new HashSet<FSemiLinearExp>()] with add root FClass;
 	FSemiLinearExp contributes this
-		when inEquationSection()
 		to FClass.collectSemiLinearExps()
 		for myFClass();
 }

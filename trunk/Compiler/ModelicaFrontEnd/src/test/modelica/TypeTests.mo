@@ -464,7 +464,7 @@ end IntegerExp1;
 
 
 model IntegerExp2
- Real x = 1.0;
+ Real x = time;
  Integer y = integer(x);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -473,16 +473,17 @@ model IntegerExp2
 			description="integer() operator: continous arg",
 			flatModel="
 fclass TypeTests.IntegerExp2
- constant Real x = 1.0;
+ Real x;
  discrete Integer y;
  discrete Integer temp_1;
 initial equation 
  temp_1 = integer(x);
  pre(y) = 0;
 equation
+ x = time;
  y = temp_1;
  when {x < pre(temp_1), x >= pre(temp_1) + 1} then
-  temp_1 = 1;
+  temp_1 = integer(x);
  end when;
 end TypeTests.IntegerExp2;
 ")})));
@@ -1089,10 +1090,10 @@ fclass TypeTests.DivTest1
  discrete Real temp_3;
  discrete Real temp_4;
 initial equation 
- temp_1 = div(anInt, anInt);
- temp_2 = div(aReal, anInt);
- temp_3 = div(anInt, aReal);
- temp_4 = div(aReal, aReal);
+ temp_1 = 1;
+ temp_2 = 1.0;
+ temp_3 = 1.0;
+ temp_4 = 1.0;
 equation
  x = temp_4 + temp_3 + temp_2 + temp_1;
  when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
@@ -1148,10 +1149,10 @@ fclass TypeTests.ModTest1
  discrete Real temp_3;
  discrete Real temp_4;
 initial equation 
- temp_1 = integer(anInt / anInt);
- temp_2 = floor(aReal / anInt);
- temp_3 = floor(anInt / aReal);
- temp_4 = floor(aReal / aReal);
+ temp_1 = 1;
+ temp_2 = 1.0;
+ temp_3 = 1.0;
+ temp_4 = 1.0;
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
  when {anInt / anInt < pre(temp_1), anInt / anInt >= pre(temp_1) + 1} then
@@ -1207,10 +1208,10 @@ fclass TypeTests.RemTest1
  discrete Real temp_3;
  discrete Real temp_4;
 initial equation 
- temp_1 = div(anInt, anInt);
- temp_2 = div(aReal, anInt);
- temp_3 = div(anInt, aReal);
- temp_4 = div(aReal, aReal);
+ temp_1 = 1;
+ temp_2 = 1.0;
+ temp_3 = 1.0;
+ temp_4 = 1.0;
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
  when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
