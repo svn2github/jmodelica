@@ -1756,10 +1756,10 @@ aspect CompilationHelpers {
  */
 public class Templates {
     
-    private final static String[] cTemplates = {"fmi_me_modelica_template.c",
-        "fmi_me_modelica_template.c",
-        "fmi_cs_modelica_template.c",
-        "fmi_cs_modelica_template.c",
+    private final static String[] cTemplates = {"fmi1_me_modelica_template.c",
+        "fmi1_me_modelica_template.c",
+        "fmi1_cs_modelica_template.c",
+        "fmi1_cs_modelica_template.c",
         "jmi_modelica_template.c",
         null};
         
