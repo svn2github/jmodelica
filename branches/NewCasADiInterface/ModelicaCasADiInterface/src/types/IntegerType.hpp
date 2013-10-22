@@ -15,7 +15,7 @@ class IntegerType : public PrimitiveType {
          * @param An AttributeKey
          * @return An AttributeValue, returns NULL if not present. 
          */
-        const AttributeValue* getAttribute(const AttributeKey key) const;
+        AttributeValue* getAttribute(const AttributeKey key);
         /**
          * @param An AttributeKey
          * @return A bool

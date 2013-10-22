@@ -62,11 +62,11 @@ class Variable : public Printable {
         bool isAlias() const;
         /** @return True if this variable is negated */
         bool isNegated() const;
-        /** @param Bool negated */
+        /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
         /** @param Sets an alias for this variable, making this an alias variable */
         void setAlias(Variable* var);
-        /** @return This variables alias, or NULL */
+        /** @return This variable's alias, or NULL */
         Variable* getAlias() const;
         
         
@@ -105,19 +105,23 @@ class Variable : public Printable {
         void setDeclaredType(VariableType* declaredType);
         
         /** 
-         * Looks at local attributes then at attributes for its declared type. 
+         * Looks at local attributes, then at attributes for is declared type,
+         * OR at the attributes of its alias if this is an alias variable. 
          * Returns NULL if not present.
          * @param An AttributeKey
          * @return A pointer to an AttributeValue 
          */
-        virtual const AttributeValue* getAttribute(AttributeKey key) const;
+        virtual AttributeValue* getAttribute(AttributeKey key);
         /** 
-         * A check whether a certain attribute is set in this variable. 
+         * A check whether a certain attribute is set in this variable,
+         * OR in its alias if this is an alias variable. 
          * @return A bool.  
          */
         bool hasAttributeSet(AttributeKey key) const; 
         /** 
-         * Sets an attribute in the local Variable's attribute map.
+         * Sets an attribute in the local Variable's attribute map, 
+         * or it propagates the attribute to its alias if this is an
+         * alias variable. 
          * @param An AttributeKey
          * @param An AttributeValue
          */
@@ -127,16 +131,19 @@ class Variable : public Printable {
         virtual void print(std::ostream& os) const;
         
     protected:
-        Variable* aliasVariable;
+        Variable* myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;
         VariableType* declaredType;
         CasADi::MX var;
         attributeMap attributes;
+        AttributeValue* getAttributeForAlias(AttributeKey key);
+        AttributeKey keyForAlias(AttributeKey key) const;
+        void setAttributeForAlias(AttributeKey key, AttributeValue val);
     private:
         Causality causality;
         Variability variability;
 };
-inline bool Variable::isAlias() const { return aliasVariable != NULL; }
+inline bool Variable::isAlias() const { return myModelVariable != NULL; }
 inline bool Variable::isNegated() const { return negated; }
 inline void Variable::setNegated(bool negated) { 
     if (!isAlias()) {
@@ -144,8 +151,8 @@ inline void Variable::setNegated(bool negated) {
     }
     this->negated = negated; 
 }
-inline void Variable::setAlias(Variable* aliasVariable) { this->aliasVariable = aliasVariable; }
-inline Variable* Variable::getAlias() const { return aliasVariable; }
+inline void Variable::setAlias(Variable* modelVariable) { this->myModelVariable = modelVariable; }
+inline Variable* Variable::getAlias() const { return myModelVariable; }
 inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(VariableType* declaredType) { this->declaredType = declaredType; }

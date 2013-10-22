@@ -60,6 +60,74 @@ def test_VariableAlias():
     assert heurestic_MC_variables_equal(model.getModelVariableByName("node1"), realVar2)
     assert heurestic_MC_variables_equal(model.getModelVariableByName("node2"), realVar2)
 
+def test_NegatedAliasAttributes():
+    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar3 = RealVariable(MX("node3"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar1.setAlias(realVar3)
+    realVar2.setAlias(realVar3)
+    realVar1.setNegated(True)
+    attr1 = MX("attr1")
+    attr2 = MX("attr2")
+    attr3 = MX("attr3")
+    attr4 = MX("attr4")
+
+    # Set attributes affected by negation on model variable
+    realVar3.setAttribute("min", attr1)
+    realVar3.setAttribute("max", attr2)
+    realVar3.setAttribute("start", attr3)
+    realVar3.setAttribute("nominal", attr4)
+
+    # Check correctness for negated and non-negated alias. 
+    assert isEqual(realVar1.getAttribute("min"), -attr2)
+    assert isEqual(realVar1.getAttribute("max"), -attr1)
+    assert isEqual(realVar1.getAttribute("start"), -attr3)
+    assert isEqual(realVar1.getAttribute("nominal"), -attr4)
+
+    assert isEqual(realVar2.getAttribute("min"), attr1)
+    assert isEqual(realVar2.getAttribute("max"), attr2)
+    assert isEqual(realVar2.getAttribute("start"), attr3)
+    assert isEqual(realVar2.getAttribute("nominal"), attr4)
+
+    # Set attributes on negated alias
+    realVar1.setAttribute("min", attr1)
+    realVar1.setAttribute("max", attr2)
+    realVar1.setAttribute("start", attr3)
+    realVar1.setAttribute("nominal", attr4)
+
+    # Check that the attributes are propagated correctly
+    assert isEqual(realVar1.getAttribute("min"), attr1)
+    assert isEqual(realVar1.getAttribute("max"), attr2)
+    assert isEqual(realVar1.getAttribute("start"), attr3)
+    assert isEqual(realVar1.getAttribute("nominal"), attr4)
+
+    assert isEqual(realVar2.getAttribute("min"), -attr2)
+    assert isEqual(realVar2.getAttribute("max"), -attr1)
+    assert isEqual(realVar2.getAttribute("start"), -attr3)
+    assert isEqual(realVar2.getAttribute("nominal"), -attr4)
+
+    assert isEqual(realVar3.getAttribute("min"), -attr2)
+    assert isEqual(realVar3.getAttribute("max"), -attr1)
+    assert isEqual(realVar3.getAttribute("start"), -attr3)
+    assert isEqual(realVar3.getAttribute("nominal"), -attr4)
+
+def test_ModelAliasAndModelGetters():
+    model = Model()
+    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar3 = RealVariable(MX("node3"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar1.setAlias(realVar3)
+    realVar2.setAlias(realVar3)
+    realVar1.setNegated(True)
+    model.addVariable(realVar1)
+    model.addVariable(realVar2)
+    model.addVariable(realVar3)
+    modelVars = model.getModelVariables()
+    aliasVars = model.getAliasVariables()
+    assert isEqual(modelVars[0].getVar(), realVar3.getVar())
+    assert isEqual(aliasVars[0].getVar(), realVar1.getVar())
+    assert isEqual(aliasVars[1].getVar(), realVar2.getVar())
+
 def test_DependentParameters():
     a = MX("a")
     b = MX("b")

@@ -29,7 +29,7 @@ class UserType : public VariableType {
          * @param An AttributeKey
          * @return An AttributeValue, returns NULL if not present. 
          */
-        const AttributeValue* getAttribute(const AttributeKey key) const;
+         AttributeValue* getAttribute(const AttributeKey key);
         /**
          * @param An AttributeKey
          * @return A bool
@@ -40,7 +40,7 @@ class UserType : public VariableType {
     private:
         attributeMap attributes;
         const std::string name;
-        const PrimitiveType* baseType;
+        PrimitiveType* baseType;
 };
 inline const std::string UserType::getName() const { return name; }
 inline void UserType::setAttribute(AttributeKey key, AttributeValue val) { attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal(key), val)); }

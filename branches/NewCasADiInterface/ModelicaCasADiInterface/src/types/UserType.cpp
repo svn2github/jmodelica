@@ -5,8 +5,7 @@ namespace ModelicaCasADi
 UserType::UserType(string name, PrimitiveType* baseType) : name(name), baseType(baseType) {
 }
 
-const VariableType::AttributeValue* UserType::getAttribute(const AttributeKey key) const { 
-    // If the attribute is in the map, return, otherwise return null. 
+VariableType::AttributeValue* UserType::getAttribute(const AttributeKey key) { 
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : baseType->getAttribute(key);
 }
 

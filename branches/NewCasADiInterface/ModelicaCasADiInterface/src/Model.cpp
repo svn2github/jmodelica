@@ -243,6 +243,24 @@ Variable* Model::getModelVariableByName(std::string name) {
     return returnVar;
 }
 
+vector<Variable*> Model::getModelVariables() {
+    vector<Variable*> modelVars;
+    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+        if (!(*it)->isAlias()) {
+            modelVars.push_back(*it);
+        }
+    }
+    return modelVars;
+}
+vector<Variable*> Model::getAliasVariables() {
+    vector<Variable*> aliasVars;
+    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+        if ((*it)->isAlias()) {
+            aliasVars.push_back(*it);
+        }
+    }
+    return aliasVars;
+}
 
 void Model::calculateValuesForDependentParameters() {
     MX val, bindingExpression;

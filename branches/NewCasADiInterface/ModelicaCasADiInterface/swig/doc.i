@@ -155,6 +155,26 @@ Returns::
 
 ";  
 
+%feature("docstring") ModelicaCasADi::Model::getModelVariables "
+Returns a tuple with all model variables, i.e. that have not been 
+alias eliminated, present in the Model.  
+
+Returns::
+    
+    Tuple(Variable) --
+        A tuple with zero or more Variables. 
+
+";  
+%feature("docstring") ModelicaCasADi::Model::getAliasVariables "
+Returns a tuple with all alias variables present in the Model. 
+
+Returns::
+    
+    Tuple(Variable) --
+        A tuple with zero or more Variables. 
+
+";  
+
 %feature("docstring") ModelicaCasADi::Model::calculateValuesForDependentParameters "
 Calculates the value of all dependent parameters. The calculated value is 
 set in the attribute evaluatedBindingExpression for dependent parameters. 
@@ -275,7 +295,7 @@ Returns::
 "; 
 
 %feature("docstring") ModelicaCasADi::Variable::isNegated "
-Is this variable negated.
+Is this variable negated. 
 
 Returns::
 
@@ -374,7 +394,11 @@ Parameters::
         
 "; 
 %feature("docstring") ModelicaCasADi::Variable::getAttribute "
-Returns the value of the attribute with the specified name
+Returns the value of the attribute with the specified name. Looks at
+the local attributes then at its declared type, OR at its alias if 
+this is an alias variable (whether this is a negated alias
+variable or not is considered for the start, min, max and nominal attributes). 
+
 
 Parameters::
     
@@ -387,8 +411,9 @@ Returns::
         An AttributeValue, e.g. an MX expression
         
 "; 
-%feature("docstring") ModelicaCasADi::Variable::hasAttributeSet "
-A check whether the variable has a certain attribute set. 
+%feature("docstring") ModelicaCasADi::Variable::hasAttributeSet"
+A check whether the variable has a certain attribute set, OR if 
+its alias has a certain attribute set if this is an alias variable
 
 Parameters::
     
@@ -401,8 +426,9 @@ Returns::
     
 "; 
 %feature("docstring") ModelicaCasADi::Variable::setAttribute "
-Sets an attribute in the model. If there already is an attribute with 
-the same name it is thrown away.
+Sets an attribute in this variable, OR if this is an alias variable
+the attribute is propagated to its alias (whether this is a negated alias
+variable or not is considered for the start, min, max and nominal attributes). 
 
 Parameters::
     

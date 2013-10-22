@@ -95,6 +95,11 @@ class Model: public Printable {
         
         /** @return A vector of pointers to Variables. */
         std::vector<Variable*> getAllVariables();
+        
+        /** @return A vector of pointers to all model variables (i.e. that haven't been aliaseliminated). */
+        std::vector<Variable*> getModelVariables();
+        /** @return A vector of pointers to all alias variables in the model. */
+        std::vector<Variable*> getAliasVariables();
 
         /**
          * Returns the Variable with a certain name in the Model.

@@ -12,7 +12,7 @@ IntegerType::IntegerType(){
     attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal("fixed"), MX(false)));
 }
 
-const VariableType::AttributeValue* IntegerType::getAttribute(const AttributeKey key) const { 
+VariableType::AttributeValue* IntegerType::getAttribute(const AttributeKey key) { 
     // If the attribute is in the map, return, otherwise return null. 
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : NULL;
 }

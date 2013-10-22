@@ -26,7 +26,7 @@ class VariableType : public Printable {
          * @param An AttributeKey
          * @return An AttributeValue, returns NULL if not present. 
          */ 
-        virtual const AttributeValue* getAttribute(const AttributeKey key) const = 0; 
+        virtual AttributeValue* getAttribute(const AttributeKey key) = 0; 
         /** @return A string */
         virtual const std::string getName() const = 0; 
         /** @return A bool */
