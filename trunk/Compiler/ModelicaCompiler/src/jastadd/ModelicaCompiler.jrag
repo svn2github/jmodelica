@@ -1606,7 +1606,7 @@ public class ModelicaCompiler {
                 } else if (version.equals("2.0alpha")) {
                     return FMUME20a;
                 } else {
-                    throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
+                    throw new IllegalArgumentException("Unknown version '" + version + "' for target '" + targetType + "'"); 
                 }
             } else if (targetType.equals("cs")) {
                 if (version == null || version.equals("1.0")) {
@@ -1616,14 +1616,14 @@ public class ModelicaCompiler {
                 } else if (version.equals("2.0alpha")) {
                     return FMUCS20a;
                 } else {
-                    throw new IllegalArgumentException("Unknwon version '" + version + "' for target '" + targetType + "'"); 
+                    throw new IllegalArgumentException("Unknown version '" + version + "' for target '" + targetType + "'"); 
                 }
             } else if (targetType.equals("jmu")) {
                 return JMU;
             } else if (targetType.equals("fmux")) {
                 return FMUX;
             } else {
-                throw new IllegalArgumentException("Unknwon target '" + targetType + "'"); 
+                throw new IllegalArgumentException("Unknown target '" + targetType + "'"); 
             }
         }
     

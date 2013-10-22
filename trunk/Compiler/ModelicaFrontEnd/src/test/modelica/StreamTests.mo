@@ -260,7 +260,7 @@ end StreamTests.StreamTest6;
 
 
 // This is actually a compliance error but is kept here in order to avoid copying dependent classes.
-model StreamComplErr
+model StreamComplErr1
 Reservoir r1;
 Reservoir r2;
 Reservoir r3;
@@ -278,14 +278,48 @@ connect(res3.port_b,r3.fluidPort);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
-			name="StreamComplErr",
+			name="StreamComplErr1",
 			description="Compliance error for stream connections with more than two connectors",
 			errorMessage="
-Error: in file 'StreamTests.StreamComplErr.mof':
+Error: in file 'StreamTests.StreamComplErr1.mof':
 Compliance error at line 0, column 0:
   Stream connections with more than two connectors are not supported: Connection set (stream): {res1.port_b.h_outflow (i), res2.port_a.h_outflow (i), res3.port_a.h_outflow (i)}
 ")})));
-end StreamComplErr;
+end StreamComplErr1;
+
+
+model StreamComplErr2
+	model A
+		FluidPort p(h_outflow(start = 1));
+		Real x, y, z;
+	equation
+		x = y + 1 - z;
+		y = x + inStream(p.h_outflow) + 1;
+		x = 1*y + z;
+		p.p = time;
+		inStream(p.h_outflow) = p.p + 3;
+	end A;
+	
+	FluidPort p1, p2;
+	A a;
+equation
+	connect(p1, p2);
+	connect(p1, a.p);
+	p1.h_outflow = 1 / time;
+	p2.h_outflow = 1 - 1/time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="StreamComplErr2",
+			description="Too many stream connectors in set, with inStream() used in linear equation system",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/StreamTests.mo':
+Compliance error at line 0, column 0:
+  Stream connections with more than two connectors are not supported: Connection set (stream): {a.p.h_outflow (i), p1.h_outflow (o), p2.h_outflow (o)}
+
+")})));
+end StreamComplErr2;
 
     
 model StreamMinMax1

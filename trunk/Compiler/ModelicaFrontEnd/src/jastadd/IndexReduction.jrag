@@ -29,6 +29,9 @@ aspect IndexReduction {
             return null;
         beginStep("reduceIndex()");
         try {
+            // Make sure that we don't do this if any errors have been reported previously
+            breakOnErrors();
+            
             // Only do index reduction based on real variables and equations
             BiPGraph g = new BiPGraph();
             g.addVariables(this, VAR_TYPES_REAL);

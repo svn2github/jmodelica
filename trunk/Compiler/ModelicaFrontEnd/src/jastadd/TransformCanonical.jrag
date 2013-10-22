@@ -175,8 +175,8 @@ aspect TransformCanonical {
             	        beginStep(name());
             	        log.info("Applying transformation: " + name() + "...");
             	        perform();
-            	        completedTransformationSteps++;
     	            } finally {
+            	        completedTransformationSteps++;
     	                endStep(name());
     	            }
         	        generateStepMof();
@@ -380,6 +380,9 @@ aspect TransformCanonical {
 					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
 	private void FClass.computeMatchingsAndBLTWrapped() {
+        // Make sure that we don't do this if any errors have been reported
+        breakOnErrors();
+
         log.info("Flat tree before index reduction and BLT:");
 		log.info(this);
 
@@ -3005,7 +3008,6 @@ aspect TransformCanonicalErrorCheck {
 		checkDuplicateVariables();
 		checkFClassDimensions();
 		checkStructure();
-		checkUnsupportedStreamConnections();
 	}
 }
 

@@ -54,6 +54,11 @@ aspect Connections {
 		for (ASTNode n : this)
 			n.enableStreamsRewrite();
 	}
+    
+    public void FClass.enableStreamsRewrite() {
+        checkUnsupportedStreamConnections();
+        super.enableStreamsRewrite();
+    }
 	
 	public void FStreamBuiltIn.enableStreamsRewrite() {
 		super.enableStreamsRewrite();
@@ -76,10 +81,10 @@ aspect Connections {
 			// stream variable in the same connection set.
 			String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
 			ConnectionSet cs = myFClass().getConnectionSetManager().getConnectionSet(name, false);
-			if (cs != null && cs.canCreateInStreamExp()) {
+			if (cs.canCreateInStreamExp()) {
 				return cs.createInStreamExp(name);
 			} else {
-				// TODO: should throw an exception here, but this situation is detected *after* this rewrite
+			    // An error has been generated for this case
 				this.rewriteStreams = false;
 				return this;
 			}
