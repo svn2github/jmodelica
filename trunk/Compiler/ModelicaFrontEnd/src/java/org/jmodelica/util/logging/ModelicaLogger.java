@@ -26,12 +26,12 @@ public abstract class ModelicaLogger {
 		this.level = level;
 	}
 
-	/**
-	 * Retreives the log level for this logger
-	 */
-	public final Level getLevel() {
-		return level;
-	}
+    /**
+     * Retreives the log level for this logger
+     */
+    public final Level getLevel() {
+        return level;
+    }
 
 	/**
 	 * Closes the logger and underlying streams

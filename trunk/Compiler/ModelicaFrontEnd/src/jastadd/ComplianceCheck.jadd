@@ -71,20 +71,22 @@ aspect ComplianceCheck {
 	}
     
     
-    public void InstExpandableConnectorDecl.complianceCheck() {
-        if (inExpandableConnector())
-            compliance("Nestled expandable connectors are not supported");
-    }
+//    public void InstExpandableConnectorDecl.complianceCheck() {
+//        if (inExpandableConnector())
+//            compliance("Nested expandable connectors are not supported");
+//    }
     
     public void FConnectClause.complianceCheck() {
         InstAccess left  = getConnector1().getInstAccess();
         InstAccess right = getConnector2().getInstAccess();
-        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
-                left.isNestledExpandableConnectorPart())
-            compliance("Nestled expandable connectors are not supported");
-        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
-                right.isNestledExpandableConnectorPart())
-            compliance("Nestled expandable connectors are not supported");
+        if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
+            compliance("Adding variables to non-declared nested expandable connectors is not supported");
+//        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
+//                left.isNestledExpandableConnectorPart())
+//            compliance("Nested expandable connectors are not supported");
+//        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
+//                right.isNestledExpandableConnectorPart())
+//            compliance("Nested expandable connectors are not supported");
     }
     
     syn boolean InstAccess.isNestledExpandableConnectorPart() = false;

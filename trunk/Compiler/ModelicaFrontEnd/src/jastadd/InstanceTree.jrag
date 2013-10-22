@@ -2056,8 +2056,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(" Declared type:\n");
 	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
 	   return str.toString();	
 	}
     
@@ -2069,8 +2067,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(" Declared type:\n");
 	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
 	   return str.toString();	
 	}
 	
@@ -2083,8 +2079,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(" Declared type:\n");
 	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
 	   return str.toString();	
 	}
 	
@@ -2097,8 +2091,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(" Declared type:\n");
 	   //str.append(declaredType().toString());
-	   //str.append(" Constraining type:\n");
-	   //str.append(constrainingType().toString());
 	   return str.toString();	
 	}
 
@@ -2128,8 +2120,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(indent+" Declared type:\n");
 	   //str.append(indent+declaredType().toString());
-	   //str.append(indent+" Constraining type:\n");
-	   //str.append(indent+constrainingType().toString());
 	   
 	   return str.toString();	
 	}
@@ -2141,8 +2131,6 @@ aspect InstanceDumpTree {
 	   appendEnvironment(str, indent);
 	   //str.append(indent+" Declared type:\n");
 	   //str.append(indent+declaredType().toString());
-	   //str.append(indent+" Constraining type:\n");
-	   //str.append(indent+constrainingType().toString());
 	   
 	   return str.toString();	
 	}

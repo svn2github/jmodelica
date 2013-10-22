@@ -1520,6 +1520,8 @@ aspect ExpandableConnectors {
         public void elaborate(ConnectionSetManager csm) {
             boolean ok = true;
             for (ExpandableSet set : map.values()) 
+                set.addNested();
+            for (ExpandableSet set : map.values()) 
                 if (!set.expand())
                     ok = false;
             
@@ -1619,12 +1621,14 @@ aspect ExpandableConnectors {
             private Set<InstComponentDecl> connectors;
             private Map<String,ConnectorMember> members;
             private boolean expanded;
+            private boolean nestedDone;
             private boolean isok;
             
             public ExpandableSet(InstComponentDecl connector) {
                 connectors = new LinkedHashSet<InstComponentDecl>();
                 members = new HashMap<String,ConnectorMember>();
                 expanded = false;
+                nestedDone = false;
                 isok = true;
                 connectors.add(connector);
                 map.put(connector, this);
@@ -1647,6 +1651,24 @@ aspect ExpandableConnectors {
                     expanded = true;
                 }
                 return isok;
+            }
+            
+            /**
+             * Add all nested expandable connector to their parent's sets.
+             */
+            public void addNested() {
+                if (!nestedDone && !members.isEmpty()) {
+                    nestedDone = true;
+                    for (InstComponentDecl conn : connectors) {
+                        InstComponentDecl p = conn.findExpandableAncestor();
+                        if (p != null) {
+                            InstComponentDecl c = conn.ancestorChild(p, conn);
+                            ExpandableSet set = setFor(p);
+                            set.addDeclared(c.name());
+                            set.addNested();
+                        }
+                    }
+                }
             }
             
             /**
@@ -1680,6 +1702,17 @@ aspect ExpandableConnectors {
             }
             
             /**
+             * Add a declared member to the connectors of the set.
+             * 
+             * This is only used to include nested expandable connectors.
+             */
+            public void addDeclared(String name) {
+                ConnectorMember member = members.get(name);
+                if (member == null) 
+                    members.put(name, new ConnectorMember(name));
+            }
+            
+            /**
              * Create a list with the components each connector in this set should have.
              * 
              * @param members  the members of this set, sorted by name
@@ -1700,12 +1733,16 @@ aspect ExpandableConnectors {
                 private boolean error;
                 private boolean calculated;
                 
-                public ConnectorMember(String name, InstAccess target, FArraySubscripts fas) {
+                public ConnectorMember(String name) {
                     this.name = name;
                     sources = new ArrayList<Source>();
                     template = null;
                     calculated = false;
                     error = false;
+                }
+                
+                public ConnectorMember(String name, InstAccess target, FArraySubscripts fas) {
+                    this(name);
                     addConnection(target, fas);
                 }
                 
@@ -1954,6 +1991,30 @@ aspect ExpandableConnectors {
         flushAll();
     }
     
+    
+    /**
+     * Find the closest ancestor component that is an expandable connector, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.findExpandableAncestor();
+    eq InstComponentDecl.getChild().findExpandableAncestor() = 
+        (isExpandableConnector() && !isArray()) ? this : findExpandableAncestor();
+    eq InstClassDecl.getChild().findExpandableAncestor()     = null;
+    eq InstRoot.getChild().findExpandableAncestor()          = null;
+    eq Root.getChild().findExpandableAncestor()              = null;
+    
+    /**
+     * Find the ancestor component that is a direct child of the given component.
+     * 
+     * @param a  the ancestor to find child of
+     * @param c  the child being considered, always use <code>this</code>
+     */
+    inh InstComponentDecl InstComponentDecl.ancestorChild(InstComponentDecl a, InstComponentDecl c);
+    eq InstComponentDecl.getChild().ancestorChild(InstComponentDecl a, InstComponentDecl c) = 
+        (this == a) ? c : ancestorChild(a, this);
+    eq InstClassDecl.getChild().ancestorChild(InstComponentDecl a, InstComponentDecl c)     = null;
+    eq InstRoot.getChild().ancestorChild(InstComponentDecl a, InstComponentDecl c)          = null;
+    eq Root.getChild().ancestorChild(InstComponentDecl a, InstComponentDecl c)              = null;
+    
 
     private static final BinaryOperation<CValue> FExpSubscript.INT_MAX_OP = new BinaryOperation<CValue>() {
         public CValue op(CValue a, CValue b) { 
@@ -2019,6 +2080,7 @@ aspect ExpandableConnectors {
                 }
             } else {
                 csm.getExpandable().addConnector(this);
+                super.buildConnectionSets(prefix, csm, connect);
             }
         }
     }
