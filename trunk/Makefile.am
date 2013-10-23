@@ -172,8 +172,7 @@ endif
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/jmi_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi1_me_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi1_cs_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_me_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_cs_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_master_modelica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi_code_gen_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_common_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_me_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
