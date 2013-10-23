@@ -91,6 +91,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * 
 	 * @param icd
 	 *            A reference to the model instance.
+     * @param target
+     *            The model represenation type the model should be compiled to.
 	 * 
 	 * @return FOptClass or FClass object representing the flattened model.
 	 * 
@@ -101,9 +103,9 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to flatten is not found.
 	 */
-	public FClass flattenModel(InstClassDecl icd) 
+	public FClass flattenModel(InstClassDecl icd, TargetObject target) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
-		return super.flattenModel(icd);
+		return super.flattenModel(icd, target);
 	}
 	
 	/**
@@ -130,7 +132,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 
 	@Override
 	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
-		throws JModelicaHomeNotFoundException {
+	        throws JModelicaHomeNotFoundException {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
 	}
@@ -153,16 +155,11 @@ public class OptimicaCompiler extends ModelicaCompiler {
 aspect OptimicaCompilationHelpers {
 	 
     //Overshadowing the use of templates in case of optimization.
-    refine CompilationHelpers public String Templates.getCTemplates(FClass fc) {
-        if (fc instanceof FOptClass) {
-            if (templateNbr == TemplateNbr.JMU) {
-                File dir = getTemplatesDir();
-                return new File(dir, "jmi_optimica_template.c").getPath();
-            } else {
-                return null;
-            }
-		} else {
-			return getCTemplates();
-		}
+    refine CompilationHelpers private String Templates.getCTemplateName(FClass fc) {
+        if (fc instanceof FOptClass)
+            return (this == JMU) ? "jmi_optimica_template.c" : null;
+        else
+            return template(C);
     }
+
 }

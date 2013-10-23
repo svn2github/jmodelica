@@ -513,9 +513,11 @@ aspect InstanceErrorCheck {
 	public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 	    	errorChecked = true;
+	    	boolean checkInner = isOuter() && 
+	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner);
 	    	if (isRecursed()) {
 	    		error("Recursive class structure");
-	    	} else if (isOuter()) {
+	    	} else if (checkInner) {
 	    		if (myInnerInstComponentDecl().isUnknown())
 	    			error("Cannot find inner declaration for outer " + name());
 	    		else

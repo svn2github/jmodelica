@@ -43,7 +43,7 @@ public class ErrorTestCase extends TestCase {
 		filterProblems(problems);
 		
 		if (problems.size() == 0)
-			return false;
+			return getCheckType() == ErrorCheckType.CHECK;
 		
 		String test = new CompilerException(problems).getMessage();
 		String correct = getErrorMessage();

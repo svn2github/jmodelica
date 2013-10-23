@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.Collection;
 import java.util.Arrays;
 
+import org.jmodelica.util.ErrorCheckType;
+
 aspect TestCases {
 
 /**
@@ -41,6 +43,7 @@ abstract public class TestCase {
 	
 	private boolean filter = false;
 	private boolean checkAll = false;
+	private ErrorCheckType checkType = ErrorCheckType.COMPILE;
 	
 	private OptionRegistry options;
 	private Exception exception;
@@ -201,6 +204,22 @@ abstract public class TestCase {
 	public void setCheckAll(boolean val) {
 		checkAll = val;
 	}
+    
+    /**
+     * Set type of error checking to be performed.
+     * 
+     * Available for all test types, but only logical to change for error/warning/compliance tests.
+     */
+    public void setCheckType(String val) {
+        checkType = ErrorCheckType.valueOf(ErrorCheckType.class, val);
+    }
+    
+    /**
+     * Get type of error checking being performed.
+     */
+    public ErrorCheckType getCheckType() {
+        return checkType;
+    }
 	
 	/**
 	 * \brief Perform filtering on string, if activated.
@@ -322,7 +341,7 @@ abstract public class TestCase {
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		Collection<Problem> problems = null;
 		try {
-			ipr.checkErrorsInInstClass(className, ErrorCheckType.COMPILE);
+			ipr.checkErrorsInInstClass(className, checkType);
 			problems = sr.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();
@@ -346,7 +365,7 @@ abstract public class TestCase {
 		// Transform canonical and check for errors again
 		try {
 		    fc.transformCanonical();
-			fc.errorCheck(ErrorCheckType.COMPILE);
+			fc.errorCheck(checkType);
 			problems = fc.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();
@@ -403,7 +422,7 @@ abstract public class TestCase {
 	 * 
 	 * Default implementation fails if any errors other than COMPLIANCE were found, and returns false otherwise.
 	 * 
-	 * @return  <code>true</code> if test case shoule stop after this method
+	 * @return  <code>true</code> if test case should stop after this method
 	 */
 	protected boolean testProblems(Collection<Problem> problems) {
 		filterProblems(problems);

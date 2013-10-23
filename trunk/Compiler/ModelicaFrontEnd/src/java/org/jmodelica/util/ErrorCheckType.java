@@ -1,5 +1,13 @@
 package org.jmodelica.util;
 
 public enum ErrorCheckType {
-    COMPILE, CHECK
+    COMPILE (false), 
+    CHECK   (true);
+    
+    public final boolean allowOuterWithoutInner;
+
+    private ErrorCheckType(boolean allowOuterWithoutInner) {
+        this.allowOuterWithoutInner = allowOuterWithoutInner;
+    }
+
 }

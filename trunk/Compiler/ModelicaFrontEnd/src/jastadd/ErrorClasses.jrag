@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.Iterator;
+import org.jmodelica.util.ErrorCheckType;
 
 aspect ErrorClasses {
 	
