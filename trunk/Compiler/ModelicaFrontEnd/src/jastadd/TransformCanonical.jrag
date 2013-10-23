@@ -65,7 +65,7 @@ aspect TransformCanonical {
 	 *         equations are replaced by scalar declarations and equations
 	 *    <li> Alias variables are eliminated from the model.
 	 *    <li> Derivative variables are generated and inserted in the
-	 *         list of FVariables by calling updateDerivativeVariables().
+	 *         list of FVariables by calling addFDerivativeVariables().
 	 *    <li> Generate initial equations based on start attribute.
 	 *    <li> Sort dependent parameters.
 	 *  </ul>
@@ -87,7 +87,7 @@ aspect TransformCanonical {
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
 		    aliasElimination,
-		    updateDerivativeVariables,
+		    addFDerivativeVariables,
 		    new extractEventGeneratingExps(),
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
@@ -1371,31 +1371,24 @@ aspect TransformCanonical {
          * Add derivative variables to the list of FVariables, one for each
          * differentiate variable.
          */
-        public class updateDerivativeVariables extends Transformation {
+        public class addFDerivativeVariables extends Transformation {
             public void perform() {
-                List<FVariable> l = new List<FVariable>();
-                Set<FVariable> diffedVars = new HashSet<FVariable>(differentiatedRealVariables());
-                java.util.List<FVariable> newDerVars = new ArrayList<FVariable>();
-                for (FVariable fv : getFVariables()) {
-                    if (diffedVars.contains(fv) && fv.myDerivativeVariable().isUnknown()) {
-                        FDerivativeVariable fdv = new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                                fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-                        fdv.setMeIntegrated(fv);
-                        fv.setMeDifferentiated(fdv);
-                        newDerVars.add(fdv);
-                    } else if (fv.isDerivativeVariable() && fv.uses().isEmpty()) {
-                        continue;
-                    }
-                    l.add(fv);
+                ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
+                for (FVariable fv : differentiatedRealVariables()) {
+                    FDerivativeVariable fdv = new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
+                            fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
+                    fdv.setMeIntegrated(fv);
+                    fv.setMeDifferentiated(fdv);
+                    l.add(fdv);
                 }
-                // Insert derivative variables last in variable list
-                for (FVariable var : newDerVars)
-                    l.add(var);
-                setFVariableList(l);
+                for (FVariable fv : l) {
+                    addFVariable(fv);
+                }
+//              flush();
                 root().flushAllRecursive();
             }
         }
-        public updateDerivativeVariables updateDerivativeVariables = new updateDerivativeVariables();
+        public addFDerivativeVariables addFDerivativeVariables = new addFDerivativeVariables();
     }
 
 	public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {

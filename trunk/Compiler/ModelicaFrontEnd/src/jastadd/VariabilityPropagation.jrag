@@ -321,7 +321,7 @@ aspect VariabilityPropagation {
 		
 		// Derivative
 		if (isDifferentiatedVariable()) {
-			FDerivativeVariable fDerivativeVariable = myDerivativeVariable().asDerivativeVariable();
+			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
 			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));				
 		}

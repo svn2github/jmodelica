@@ -99,9 +99,8 @@ aspect IndexReduction {
             root().flushAllRecursiveClearFinal();
 
             aliasElimination.apply();
-            
             // Add derivative variables
-            updateDerivativeVariables.apply();
+            addFDerivativeVariables.apply();
 
             root().flushAllRecursive();
 
