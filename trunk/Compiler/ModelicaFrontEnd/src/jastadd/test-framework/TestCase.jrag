@@ -322,7 +322,7 @@ abstract public class TestCase {
 	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		Collection<Problem> problems = null;
 		try {
-			ipr.checkErrorsInInstClass(className);
+			ipr.checkErrorsInInstClass(className, ErrorCheckType.COMPILE);
 			problems = sr.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();
@@ -346,7 +346,7 @@ abstract public class TestCase {
 		// Transform canonical and check for errors again
 		try {
 		    fc.transformCanonical();
-			fc.errorCheck();
+			fc.errorCheck(ErrorCheckType.COMPILE);
 			problems = fc.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();

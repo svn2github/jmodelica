@@ -480,7 +480,7 @@ abstract public class TestAnnotationizerHelper {
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
 		Collection<Problem> problems = null;
 		try {
-			ipr.checkErrorsInInstClass(className);
+			ipr.checkErrorsInInstClass(className, ErrorCheckType.COMPILE);
 			problems = root.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();
@@ -505,7 +505,7 @@ abstract public class TestAnnotationizerHelper {
 		fc.transformCanonical();
 		Collection<Problem> problems = null;
 		try {
-			fc.errorCheck();
+			fc.errorCheck(ErrorCheckType.COMPILE);
 			problems = root.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();

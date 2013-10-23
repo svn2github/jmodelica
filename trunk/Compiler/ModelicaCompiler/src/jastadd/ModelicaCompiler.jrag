@@ -598,8 +598,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileFMU(String className, String fileName[], String target, String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileUnit(className, fileName, target, "1.0" , compileTo);
 	}
     
@@ -614,8 +613,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMUX. Directory will be created if it does not exist.
 	 */
 	public void compileFMUX(String className, String fileName[], String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileUnit(className, fileName, "fmux", null , compileTo);
 	}
 	
@@ -630,8 +628,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
 	 */
 	public void compileJMU(String className, String fileName[], String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		compileUnit(className, fileName, "jmu", null, compileTo);
 	}
 
@@ -648,7 +645,7 @@ public class ModelicaCompiler {
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
 	public void compileUnit(String className, String fileName[], String target, String version, String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		//Create the target object.
 		TargetObject targetObject = TargetObject.getTarget(target, version);
 		
@@ -665,7 +662,7 @@ public class ModelicaCompiler {
      * @param compileTo Specify location of the compiled unit. Directory will be created if it does not exist..
 	 */
 	protected void compileUnit(String className, String fileName[], TargetObject makeTarget, String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling
 		// First save these options in temp options registry to reset when compiling has finished
 		OptionRegistry tempOptions = new OptionRegistry(options);    
@@ -1068,7 +1065,7 @@ public class ModelicaCompiler {
 			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
 		
 		log.info("Checking for errors...");
-		ipr.checkErrorsInInstClass(cl);
+		ipr.checkErrorsInInstClass(cl, ErrorCheckType.COMPILE);
 		handleCompilerWarnings(sr.collectWarnings());
 		
 		InstClassDecl icd = ipr.lookupInstClassQualified(cl);
@@ -1205,7 +1202,7 @@ public class ModelicaCompiler {
 			ASTNode.endStep("htmlDiagnostics()");
 		}
 		
-		fc.errorCheck();
+		fc.errorCheck(ErrorCheckType.COMPILE);
 		handleCompilerWarnings(fc.collectWarnings());
 
 		hookFlatModelChecked(fc);
@@ -1592,14 +1589,14 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10(Templates.TemplateNbr.FMUME10, "fmume10", "fmu"),
-        FMUME20(Templates.TemplateNbr.FMUME20, "fmume20", "fmu"),
-        FMUCS10(Templates.TemplateNbr.FMUCS10, "fmucs10", "fmu"),
-        FMUCS20(Templates.TemplateNbr.FMUCS20, "fmucs20", "fmu"),
-        JMU    (Templates.TemplateNbr.JMU,     "jmu",     "jmu"),
-        FMUX   (Templates.TemplateNbr.FMUX,     null,     "fmux"),
-        FMUME20a(Templates.TemplateNbr.FMUME10 , "fmume10", "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a(Templates.TemplateNbr.FMUCS10 , "fmucs10", "fmu"); //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUME10  (Templates.TemplateNbr.FMUME10, "fmume10", "fmu"),
+        FMUME20  (Templates.TemplateNbr.FMUME20, "fmume20", "fmu"),
+        FMUCS10  (Templates.TemplateNbr.FMUCS10, "fmucs10", "fmu"),
+        FMUCS20  (Templates.TemplateNbr.FMUCS20, "fmucs20", "fmu"),
+        JMU      (Templates.TemplateNbr.JMU,     "jmu",     "jmu"),
+        FMUX     (Templates.TemplateNbr.FMUX,     null,     "fmux"),
+        FMUME20a (Templates.TemplateNbr.FMUME10, "fmume10", "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a (Templates.TemplateNbr.FMUCS10, "fmucs10", "fmu"); //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
 
         private final Templates templates;
         private final String makeFileFlag;
@@ -1617,7 +1614,7 @@ public class ModelicaCompiler {
         * @param version The FMI version. Valid options are '1.0' or '2.0'.
         */
         public static TargetObject getTarget(String targetType, String version)
-            throws IllegalCompilerArgumentException {
+                throws IllegalCompilerArgumentException {
             if (targetType.equals("me")) {
                 if (version == null || version.equals("1.0")) {
                     return FMUME10;

@@ -15,6 +15,7 @@
 */
 
 import org.jmodelica.util.exceptions.BLTException;
+import org.jmodelica.util.ErrorCheckType;
 
 aspect BLT{
 	
@@ -571,7 +572,7 @@ aspect BLT{
 			out.close();
 		}
 		
-		public void complianceCheck() {
+		public void complianceCheck(ErrorCheckType checkType) {
 			for (AbstractEquationBlock block : this) {
 				if (!block.isSolvable()) {
 					for (FAbstractEquation equ : block.equations()) {

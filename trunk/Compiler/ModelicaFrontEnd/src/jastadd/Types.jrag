@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Comparator;
+import org.jmodelica.util.ErrorCheckType;
 
 aspect Types { 
 
@@ -120,14 +121,14 @@ aspect Types {
   // is introduced to detect this situation to avoid duplicate error messages.
   public boolean InstNode.typeChecked = false;
   
-  public void InstNode.typeCheck() {
+  public void InstNode.typeCheck(ErrorCheckType checkType) {
 	     if (!typeChecked) {
 	      	typeChecked = true;
-	      	typeCheckSystemResiduals();
+	      	typeCheckSystemResiduals(checkType);
 	     }
   }
   
-  public void InstComposite.typeCheck() {
+  public void InstComposite.typeCheck(ErrorCheckType checkType) {
      if (!typeChecked) {
      	typeChecked = true;
 	     // Notice that modifiers (including redeclarations) in a constraining clause
@@ -139,22 +140,22 @@ aspect Types {
      			declaredType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
 		}
   	
-		typeCheckSystemResiduals();
+		typeCheckSystemResiduals(checkType);
   	 }
   }
   
   syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
   	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
 
-    public void InstReplacingRecord.typeCheck() {
-    	typeCheckReplacingComponent(getOriginalInstComponent());
+    public void InstReplacingRecord.typeCheck(ErrorCheckType checkType) {
+    	typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
     }
 
-    public void InstReplacingComposite.typeCheck() {
-    	typeCheckReplacingComponent(getOriginalInstComponent());
+    public void InstReplacingComposite.typeCheck(ErrorCheckType checkType) {
+    	typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
     }
 
-    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType) {
+    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
     	if (!typeChecked) {
     		typeChecked = true;
      
@@ -191,12 +192,12 @@ aspect Types {
     				if (declaredSubType.hasInstConstraining()) 
     					superType = constrainingSubType;
      			}
-    			typeCheckSystemResiduals();
+    			typeCheckSystemResiduals(checkType);
     		}
     	}
     }
   
-	public void InstNode.typeCheckSystemResiduals() {
+	public void InstNode.typeCheckSystemResiduals(ErrorCheckType checkType) {
 		if (!root().options.getBooleanOption("hand_guided_tearing"))
 			return;
 		for (AnnotationNode pair : classAnnotation().vendorNode().forPath("tearingPairs")) {
@@ -205,7 +206,7 @@ aspect Types {
 			Exp enabledExp = pair.forPath("enabled").exp();
 			if (enabledExp != null) {
 				FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
-				enabledFExp.collectErrors();
+				enabledFExp.collectErrors(checkType);
 				try {
 					enabledFExp.ceval().booleanValue();
 				} catch (ConstantEvaluationException e) {
@@ -221,7 +222,7 @@ aspect Types {
 			} else {
 				InstAccess ia = iterationVariableExp.asAccess().instantiate();
 				iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
-				iterationVariable.collectErrors();
+				iterationVariable.collectErrors(checkType);
 				if (iterationVariable.isUnknown()) {
 					iterationVariable = null;
 				} else {
@@ -241,7 +242,7 @@ aspect Types {
 			} else {
 				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
 				residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
-				residualEquation.collectErrors();
+				residualEquation.collectErrors(checkType);
 				if (residualEquation.isUnknown())
 					residualEquation = null;
 			}

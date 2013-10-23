@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Iterator;
 import org.jmodelica.util.ParallelIterable;
+import org.jmodelica.util.ErrorCheckType;
 
 
 /* This causes conflicts
@@ -227,7 +228,7 @@ aspect TransformCanonical {
 			// Equations are added as part of this this method
 			computeMatchingsAndBLT();
 			computeInteractiveFMUIfSet();
-			daeBLT.complianceCheck();
+			daeBLT.complianceCheck(ErrorCheckType.COMPILE);
 		}
 	
 		root().flushAllRecursive();	
@@ -530,7 +531,7 @@ aspect TransformCanonical {
 		}
 		
 		// TODO: If no complete matching found, then try index reduction
-		collectErrors();
+		collectErrors(ErrorCheckType.COMPILE);
 		breakOnErrors();
 		
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
@@ -2997,7 +2998,7 @@ aspect TransformCanonicalErrorCheck {
 		
 	}
 	
-	public void FClass.collectErrors() {
+	public void FClass.collectErrors(ErrorCheckType checkType) {
 		checkDuplicateVariables();
 		checkFClassDimensions();
 		checkStructure();
