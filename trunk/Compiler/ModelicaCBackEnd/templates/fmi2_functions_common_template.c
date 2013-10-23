@@ -121,21 +121,21 @@ DllExport fmiStatus fmiSetFMUstate(fmiComponent c, fmiFMUstate FMUstate) {
     return fmi2_set_fmu_state(c, FMUstate);
 }
 
-DllExport fmiFreeFMUstate(fmiComponent c, fmiFMUstate* FMUstate) {
+DllExport fmiStatus fmiFreeFMUstate(fmiComponent c, fmiFMUstate* FMUstate) {
     return fmi2_free_fmu_state(c, FMUstate);
 }
 
-DllExport fmiSerializedFMUstateSize(fmiComponent c, fmiFMUstate FMUstate,
+DllExport fmiStatus fmiSerializedFMUstateSize(fmiComponent c, fmiFMUstate FMUstate,
                                     size_t* size) {
     return fmi2_serialized_fmu_state_size(c, FMUstate, size);
 }
 
-DllExport fmiSerializedFMUstate(fmiComponent c, fmiFMUstate FMUstate,
+DllExport fmiStatus fmiSerializedFMUstate(fmiComponent c, fmiFMUstate FMUstate,
                                 fmiByte serializedState[], size_t size) {
     return fmi2_serialized_fmu_state(c, FMUstate, serializedState, size);
 }
 
-DllExprot fmiDeSerializedFMUstate(fmiComponent c,
+DllExprot fmiStatus fmiDeSerializedFMUstate(fmiComponent c,
                                   const fmiByte serializedState[],
                                   size_t size, fmiFMUstate* FMUstate) {
     return fmi2_de_serialized_fmu_state(c, serializedState, size, FMUstate);

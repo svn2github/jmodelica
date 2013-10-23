@@ -321,39 +321,8 @@ class ModelicaCompiler(object):
                 java_warning.message() \
             ));
         return warnings
-
         
-    def compile_JMU(self, class_name, file_name, compile_to):
-        """
-        Compiles a model (parsing, instantiating, flattening, code generation 
-        and binary file generation) and creates a JMU on the file system.
-        
-        Parameters::
-        
-            class_name --
-                Name of model class in the model file to compile.
-            
-            file_name --
-                Path to file or list of paths to files in which the model is 
-                contained.
-                
-            compile_to --
-                Specify location of the compiled JMU. Directory will be created 
-                if it does not exist.
-            
-        Returns::
-        
-            A list of warnings given by the compiler
-        """
-        self._compiler.retreiveAndClearWarnings() # Remove old warnings
-        try:
-            self._compiler.compileJMU(class_name, file_name, compile_to)
-            self._compiler.closeLogger()
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
-        return self.get_warnings()
-        
-    def compile_FMU(self, class_name, file_name, target, version, compile_to):
+    def compile_Unit(self, class_name, file_name, target, version, compile_to):
         """
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates an FMU on the file system. Set 
@@ -388,43 +357,13 @@ class ModelicaCompiler(object):
         """
         self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
-            self._compiler.compileFMU(class_name, file_name, target, version, compile_to)
+            self._compiler.compileUnit(class_name, file_name, target, version, compile_to)
             self._compiler.closeLogger()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
         return self.get_warnings()
 
-    def compile_FMUX(self, class_name, file_name, compile_to):
-        """
-        Compiles a model (parsing, instantiating, flattening and XML code 
-        generation) and creates an FMUX on the file system.
-        
-        Parameters::
-        
-            class_name --
-                Name of model class in the model file to compile.
-            
-            file_name --
-                Path to file or list of paths to files or libraries 
-                in which the model is contained.
-                
-            compile_to --
-                Specify location of the compiled FMUX. Directory will be created 
-                if it does not exist.
-        
-        Returns::
-        
-            A list of warnings given by the compiler
-        """
-        self._compiler.retreiveAndClearWarnings() # Remove old warnings
-        try:
-            self._compiler.compileFMUX(class_name, file_name, compile_to)
-            self._compiler.closeLogger()
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
-        return self.get_warnings()
-
-    def parse_model(self,model_file_name):   
+    def parse_model(self,model_file_name):
         """ 
         Parse a model.
 
@@ -590,6 +529,10 @@ class ModelicaCompiler(object):
                         problem.message() \
                     ))
             raise CompilerError(errors, warnings)
+        
+        if ex.javaClass() is IllegalCompilerArgumentException:
+            raise IllegalCompilerArgumentError(
+                str(ex.__javaobject__.getMessage()))
         
         if ex.javaClass() is ModelicaClassNotFoundException:
             raise ModelicaClassNotFoundError(

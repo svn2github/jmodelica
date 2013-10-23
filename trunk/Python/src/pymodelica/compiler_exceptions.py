@@ -43,6 +43,11 @@ class JError(Exception):
             The error message.
         """
         return self.message
+        
+class IllegalCompilerArgumentError(JError):
+    """
+    Class for errors raised if the Compiler recives illegal arguments.
+    """
 
 class ModelicaClassNotFoundError(JError):
     """ 

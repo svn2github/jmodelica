@@ -13,19 +13,29 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "fmiModelFunctions.h"
-#include <jmi.h>
-#include <jmi_block_residual.h>
-#include <fmi1_me.h>
+
+#include "stdio.h"
+#include "stdlib.h"
+#include "math.h"
+#include "jmi.h"
+#include "jmi_block_residual.h"
 #include "jmi_log.h"
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
+#include "fmi2_me.h"
+#include "fmi2_cs.h"
+#include "fmi2_common.h"
+#include "fmiFunctions.h"
+
 $INCLUDE: fmi_code_gen_template.c$
 
-$INCLUDE: fmi2_functions_me_template.c$
-
 $INCLUDE: fmi2_functions_common_template.c$
+
+#ifdef FMUME20
+$INCLUDE: fmi2_functions_me_template.c$
+#endif
+
+#ifdef FMUCS20
+$INCLUDE: fmi2_functions_cs_template.c$
+#endif

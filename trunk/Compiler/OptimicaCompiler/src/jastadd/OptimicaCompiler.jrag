@@ -155,7 +155,7 @@ aspect OptimicaCompilationHelpers {
     //Overshadowing the use of templates in case of optimization.
     refine CompilationHelpers public String Templates.getCTemplates(FClass fc) {
         if (fc instanceof FOptClass) {
-            if (templateNbr == 4) {
+            if (templateNbr == TemplateNbr.JMU) {
                 File dir = getTemplatesDir();
                 return new File(dir, "jmi_optimica_template.c").getPath();
             } else {

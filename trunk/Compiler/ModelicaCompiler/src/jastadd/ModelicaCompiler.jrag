@@ -57,6 +57,7 @@ import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
 import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.exceptions.CompilerException;
+import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
 import org.jmodelica.util.exceptions.ModelicaClassNotFoundException;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
@@ -584,28 +585,9 @@ public class ModelicaCompiler {
 	public TargetObject createTargetObject(String target, String version) {
 		return TargetObject.getTarget(target, version);
 	}
-	
-	/**
-	 * \brief Compiles a model and creates a JMU.
-	 * 
-	 * Compiles a model (parsing, instantiating, flattening, code generation and 
-	 * binary file compilation) and packs the result in a JMU.
-	 * 
-	 * @param className Name of model class in the model file to compile.
-	 * @param fileName Array of model file or library paths.
-	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
-	 */
-	public void compileJMU(String className, String fileName[], String compileTo) 
-		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		//Create the target object.
-		TargetObject targetObject = TargetObject.getTarget("jmu", null);
-
-		//Compile.
-		compileUnit(className, fileName, targetObject, compileTo);
-	}
-
-	/**
-	 * \brief Compiles a model and creates an FMU.
+    
+    /**
+	 * Compiles a model and creates an FMU, convenience method for compileUnit that uses default version.
 	 * 
 	 * Compiles a model (parsing, instantiating, flattening, code generation and 
 	 * binary file compilation) and packs the result in a FMU.
@@ -613,20 +595,16 @@ public class ModelicaCompiler {
 	 * @param className Name of model class in the model file to compile.
 	 * @param fileName Array of model file or library paths.
 	 * @param target The compiler target. Valid options are 'me' or 'cs'.
-	 * @param version The FMI version. Valid options are '1.0' or '2.0'.
 	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
 	 */
-	public void compileFMU(String className, String fileName[], String target, String version, String compileTo) 
+	public void compileFMU(String className, String fileName[], String target, String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-		//Create the target object.
-		TargetObject targetObject = TargetObject.getTarget(target, version);
-		
-		//Compile.
-		compileUnit(className, fileName, targetObject, compileTo);
+
+		compileUnit(className, fileName, target, "1.0" , compileTo);
 	}
-	
-	/**
-	 * \brief Compiles a model and creates an FMUX.
+    
+    /**
+	 * Compiles a model and creates an FMUX, convenience method for compileUnit.
 	 * 
 	 * Compiles a model (parsing, instantiating, flattening and XML code 
 	 * generation) and packs the result in a FMUX.
@@ -637,15 +615,49 @@ public class ModelicaCompiler {
 	 */
 	public void compileFMUX(String className, String fileName[], String compileTo) 
 		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
+		compileUnit(className, fileName, "fmux", null , compileTo);
+	}
+	
+	/**
+	 * Compiles a model and creates a JMU, convenience method for compileUnit.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a JMU.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param compileTo Specify location of the compiled JMU. Directory will be created if it does not exist.
+	 */
+	public void compileJMU(String className, String fileName[], String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+
+		compileUnit(className, fileName, "jmu", null, compileTo);
+	}
+
+	/**
+	 * Compiles a JMU, FMU or FMUX. Is a wrapper.
+	 * 
+	 * Compiles a model (parsing, instantiating, flattening, code generation and 
+	 * binary file compilation) and packs the result in a FMU/JMU/FMUX.
+	 * 
+	 * @param className Name of model class in the model file to compile.
+	 * @param fileName Array of model file or library paths.
+	 * @param target The compiler target. Valid options are 'me' or 'cs'.
+	 * @param version The FMI version. Valid options are '1.0' or '2.0'.
+	 * @param compileTo Specify location of the compiled FMU. Directory will be created if it does not exist.
+	 */
+	public void compileUnit(String className, String fileName[], String target, String version, String compileTo) 
+		throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		//Create the target object.
-        TargetObject targetObject = TargetObject.getTarget("fmux", null);
+		TargetObject targetObject = TargetObject.getTarget(target, version);
 		
 		//Compile.
 		compileUnit(className, fileName, targetObject, compileTo);
 	}
 
 	/**
-	 * \brief Compiles a JMU, FMU or FMUX (helper function for compileJMU, compileFMU and compileFMUX).
+	 * Compiles a JMU, FMU or FMUX.
 	 * 
 	 * @param className Name of model class in the model file to compile.
      * @param fileName Array of model file or library paths.
@@ -1415,7 +1427,7 @@ public class ModelicaCompiler {
 					"  -log=<i or w or e> \n" +
 					"  -modelicapath=<path to modelica libraries> \n" +
 					"  -optfile=<path to XML options file> -opt=opt1:val1,opt2:val2\n" + 
-                    "  -target=<me, cs, jmu or fmux>\n" +
+                    "  -target=<fmume, me ,fmucs, cs, jmu, fmux, parse or check>\n" +
                     "  -version=<1.0 or 2.0>\n" +
 					"  -dumpmemuse[=<resolution>] -findflatinst \n" + 
 					"  -platform=<win32 or win64 or linux32 or linux64 or darwin32 or darwin64>" +
@@ -1442,11 +1454,11 @@ public class ModelicaCompiler {
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
 		
 		arg = programarguments.size();
-		if (args.length < arg+2 && !programarguments.containsKey("parse")) {
+		if (args.length < arg+2 && !programarguments.get("target").equals("parse")) {
 			log.error(compilerName + " expects a file name and a class name as command line arguments.");
 			System.exit(1);
 		}
-		if (programarguments.containsKey("parse") && args.length != arg+1) {
+		if (programarguments.get("target").equals("parse") && args.length != arg+1) {
 			log.error(compilerName + " -parse expects a list of filenames.");
 			System.exit(1);
 		}
@@ -1491,21 +1503,28 @@ public class ModelicaCompiler {
 		try {
 			if (programarguments.containsKey("target")) {
 				String targetType = programarguments.get("target");
+                if (targetType.equals("fmume")) {
+                    targetType = "me";
+                } else if (targetType.equals("fmucs")) {
+                    targetType = "cs";
+                }
+                
 				if (targetType.equals("parse")) {
 					parseFiles(name);
 				} else if (targetType.equals("check")) {
 					instantiateModel(name, cl);
 				} else {
-					//Create the target object.
-                    TargetObject targetObject = TargetObject.getTarget(targetType, programarguments.get("version"));
-				
 					//Compile
-					compileUnit(cl, name, targetObject, compileTo);
+					compileUnit(cl, name, targetType, programarguments.get("version"), compileTo);
 				} 
 			} else {
                 //If no target was set, assume jmu.
 				compileJMU(cl, name, compileTo);
 			}
+        } catch (IllegalCompilerArgumentException icae) {
+            log.error(icae.getMessage());
+            closeLogger();
+            System.exit(1);
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 				getDiagnosticsGenerator().writeProblems(ce.getProblems());
@@ -1573,31 +1592,32 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10(0, "fmume10", "fmu"),
-        FMUME20(1, "fmume20", "fmu"),
-        FMUCS10(2, "fmucs10", "fmu"),
-        FMUCS20(3, "fmucs20", "fmu"),
-        JMU(4, "jmu", "jmu"),
-        FMUX(5, null, "fmux"),
-        FMUME20a(0 , "fmume10", "fmu"), //Temporary alpha implementation of FMI 2.0, generates extra xml stuff
-        FMUCS20a(2 , "fmucs10", "fmu"); //Temporary alpha implementation of FMI 2.0, generates extra xml stuff
+        FMUME10(Templates.TemplateNbr.FMUME10, "fmume10", "fmu"),
+        FMUME20(Templates.TemplateNbr.FMUME20, "fmume20", "fmu"),
+        FMUCS10(Templates.TemplateNbr.FMUCS10, "fmucs10", "fmu"),
+        FMUCS20(Templates.TemplateNbr.FMUCS20, "fmucs20", "fmu"),
+        JMU    (Templates.TemplateNbr.JMU,     "jmu",     "jmu"),
+        FMUX   (Templates.TemplateNbr.FMUX,     null,     "fmux"),
+        FMUME20a(Templates.TemplateNbr.FMUME10 , "fmume10", "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a(Templates.TemplateNbr.FMUCS10 , "fmucs10", "fmu"); //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
 
         private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
 
-        private TargetObject(int templateNbr, String makeFileFlag, String suffix) {
+        private TargetObject(Templates.TemplateNbr templateNbr, String makeFileFlag, String suffix) {
             this.templates = new Templates(templateNbr);
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
         }
         /**
-        * \brief Returns an enum of the target that contains all relevant information for the target.
+        * Returns an enum of the target that contains all relevant information for the target.
         * 
         * @param target The compiler target. Valid options are 'me' or 'cs'.
         * @param version The FMI version. Valid options are '1.0' or '2.0'.
         */
-        public static TargetObject getTarget(String targetType, String version) {
+        public static TargetObject getTarget(String targetType, String version)
+            throws IllegalCompilerArgumentException {
             if (targetType.equals("me")) {
                 if (version == null || version.equals("1.0")) {
                     return FMUME10;
@@ -1606,7 +1626,7 @@ public class ModelicaCompiler {
                 } else if (version.equals("2.0alpha")) {
                     return FMUME20a;
                 } else {
-                    throw new IllegalArgumentException("Unknown version '" + version + "' for target '" + targetType + "'"); 
+                    throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0."); 
                 }
             } else if (targetType.equals("cs")) {
                 if (version == null || version.equals("1.0")) {
@@ -1616,19 +1636,19 @@ public class ModelicaCompiler {
                 } else if (version.equals("2.0alpha")) {
                     return FMUCS20a;
                 } else {
-                    throw new IllegalArgumentException("Unknown version '" + version + "' for target '" + targetType + "'"); 
+                    throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0alpha."); 
                 }
             } else if (targetType.equals("jmu")) {
                 return JMU;
             } else if (targetType.equals("fmux")) {
                 return FMUX;
             } else {
-                throw new IllegalArgumentException("Unknown target '" + targetType + "'"); 
+                throw new IllegalCompilerArgumentException("Unknown target '" + targetType + "'. Use me or cs to compile an FMU, jmu to compile an JMU or fmux to compile an FMUX."); 
             }
         }
     
         /**
-         * \brief get the C model description template file path.
+         * get the C model description template file path.
          * 
          * @return Reference to the c template file path attribute. 
          * 
@@ -1638,7 +1658,7 @@ public class ModelicaCompiler {
         }
         
         /**
-         * \brief get the C model description template file path.
+         * get the C model description template file path.
          * 
          * @return Reference to the c template file path attribute.
          * @param fc A reference to an FClass object. This is convenient in
@@ -1647,11 +1667,10 @@ public class ModelicaCompiler {
          */
         public String getCTemplates(FClass fc) {
             return templates.getCTemplates(fc);
-            
         }
         
         /**
-         * \brief get the XML model description template file path.
+         * get the XML model description template file path.
          * 
          * @return Reference to the XML variables template file path attribute. 
          * 
@@ -1661,7 +1680,7 @@ public class ModelicaCompiler {
         }
         
         /**
-         * \brief get the XML model description template file path.
+         * get the XML model description template file path.
          * 
          * @return Reference to the XML variables template file path attribute. 
          * @param fc A reference to an FClass object. This is convenient in
@@ -1673,7 +1692,7 @@ public class ModelicaCompiler {
         }
         
         /**
-         * \brief get the flag should be used in the Makefile.
+         * get the flag should be used in the Makefile.
          * 
          * @return The flag for the Makefile. 
          * 
@@ -1768,9 +1787,9 @@ aspect CompilationHelpers {
 public class Templates {
     
     private final static String[] cTemplates = {"fmi1_me_modelica_template.c",
-        "fmi2_me_modelica_template.c",
+        "fmi2_master_modelica_template.c",
         "fmi1_cs_modelica_template.c",
-        "fmi2_cs_modelica_template.c",
+        "fmi2_master_modelica_template.c",
         "jmi_modelica_template.c",
         null};
         
@@ -1781,9 +1800,23 @@ public class Templates {
         "jmodelica_model_description.tpl",
         "jmodelica_model_description.tpl"};
     
-    private final int templateNbr;
+    public enum TemplateNbr {
+        FMUME10(0), FMUME20(1), FMUCS10(2), FMUCS20(3), JMU(4), FMUX(5);
+        
+        private final int templateNbr;
+        
+        private TemplateNbr(int templateNbr) {
+            this.templateNbr = templateNbr;
+        }
+        
+        public int getNbr() {
+            return templateNbr;
+        }
+    }
     
-    public Templates (int templateNbr) {
+    private final TemplateNbr templateNbr;
+    
+    public Templates (TemplateNbr templateNbr) {
         this.templateNbr = templateNbr;
     }
     
@@ -1793,12 +1826,12 @@ public class Templates {
     
     public String getCTemplates() {
         File dir = getTemplatesDir();
-        return new File(dir, cTemplates[templateNbr]).getPath();
+        return new File(dir, cTemplates[templateNbr.getNbr()]).getPath();
     }
     
     public String getXMLTemplates() {
         File dir = getTemplatesDir();
-        return new File(dir, xmlTemplates[templateNbr]).getPath();
+        return new File(dir, xmlTemplates[templateNbr.getNbr()]).getPath();
     }
 }
     

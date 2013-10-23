@@ -27,6 +27,8 @@ import platform
 import logging
 from subprocess import Popen, PIPE
 from compiler_logging import CompilerLogHandler
+from compiler_exceptions import JError
+from compiler_exceptions import IllegalCompilerArgumentError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
@@ -130,6 +132,9 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         created and a list of warnings that was raised.
     
     """
+    
+    if (target != "me" and target != "cs"):
+        raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use me or cs to compile an FMU.")
     return _compile_unit(class_name, file_name, compiler, target, version,
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)       
@@ -322,14 +327,8 @@ def _compile_unit(class_name, file_name, compiler, target, version,
         comp.set_compiler_logger(compiler_log_level)
         
         # compile unit in java
-        if (target == 'me' or target == 'cs'): 
-            warnings = comp.compile_FMU(class_name, file_name, target, version, compile_to)
-        elif target == 'jmu':
-            warnings = comp.compile_JMU(class_name, file_name, compile_to)
-        elif target == 'fmux':
-            warnings = comp.compile_FMUX(class_name, file_name, compile_to)
-        else:
-            raise Exception("The target %s is not valid" %(target))
+        warnings = comp.compile_Unit(class_name, file_name, target, version, compile_to)
+
     else:
         warnings = compile_separate_process(class_name, file_name, compiler, target, version, compiler_options, 
                                  compile_to, compiler_log_level, jvm_args)
