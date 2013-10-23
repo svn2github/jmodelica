@@ -2369,5 +2369,87 @@ end IndexReduction.IndexReduction51;
 ")})));
 end IndexReduction51;
 
+model IndexReduction52
+    function F
+        input Real v;
+        input Real x;
+        input Real y;
+        input Real z;
+        output Real ax;
+        output Real ay;
+    algorithm
+        ax := v * z + x;
+        ay := v * z + y;
+    end F;
+    Real x;
+    Real y;
+    Real dx;
+    Real dy;
+    Real v, a,b;
+  equation
+    sin(der(x)) = dx;
+    cos(der(y)) = dy;
+    der(dx) = v * x;
+    der(dy) = v * y;
+    a*b = 1;
+    (a,b) = F(x + 3.14, 42, y, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction52",
+            description="Test of complicated index reduction, alias elimination and function inlining. temp_1 and _der_temp_1 is the smoking gun in this test",
+            flatModel="
+fclass IndexReduction.IndexReduction52
+ Real x;
+ Real y;
+ Real dx;
+ Real dy;
+ Real v;
+ Real a;
+ Real b;
+ Real _der_x;
+ Real _der_y;
+ Real _der_dx;
+ Real _der_dy;
+ Real _der_a;
+ Real _der_b;
+ Real _der_der_x;
+ Real _der_der_y;
+ Real _der_der_a;
+ Real _der_der_b;
+ Real _der_temp_1;
+ Real temp_1;
+ Real temp_4;
+ Real _der_temp_4;
+ Real _der_der_temp_4;
+initial equation 
+ temp_1 = 0.0;
+ _der_temp_1 = 0.0;
+equation
+ sin(_der_x) = dx;
+ cos(_der_y) = dy;
+ _der_dx = v * x;
+ _der_dy = v * y;
+ a * b = 1;
+ a = temp_1 * temp_4 + 42;
+ b = temp_1 * temp_4 + y;
+ temp_1 = x + 3.14;
+ temp_4 = time;
+ a * _der_b + _der_a * b = 0.0;
+ _der_a = temp_1 * _der_temp_4 + der(temp_1) * temp_4;
+ _der_b = temp_1 * _der_temp_4 + der(temp_1) * temp_4 + _der_y;
+ der(temp_1) = _der_x;
+ _der_temp_4 = 1.0;
+ cos(_der_x) * _der_der_x = _der_dx;
+ - sin(_der_y) * _der_der_y = _der_dy;
+ a * _der_der_b + _der_a * _der_b + (_der_a * _der_b + _der_der_a * b) = 0.0;
+ _der_der_a = temp_1 * _der_der_temp_4 + der(temp_1) * _der_temp_4 + (der(temp_1) * _der_temp_4 + der(_der_temp_1) * temp_4);
+ _der_der_b = temp_1 * _der_der_temp_4 + der(temp_1) * _der_temp_4 + (der(temp_1) * _der_temp_4 + der(_der_temp_1) * temp_4) + _der_der_y;
+ der(_der_temp_1) = _der_der_x;
+ _der_der_temp_4 = 0.0;
+ _der_temp_1 = der(temp_1);
+end IndexReduction.IndexReduction52;
+")})));
+end IndexReduction52;
 
 end IndexReduction;
