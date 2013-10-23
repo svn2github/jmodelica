@@ -395,7 +395,7 @@ public class BiPGraph {
 				}
 				found_path = false;
 				for (Eq e : l.get(v)) {
-					if (!e.isVisited()) {
+					if (!e.isVisited() && canMatch(e, v)) {
 						e.setVisited(true);
 						P_tmp.add(new Edge(e,v));
 						v = e.getMatching();
