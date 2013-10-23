@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
 project (SimulationRuntime)
 
+#Inputs through flags
+add_definitions(-DTOP_SRC)
+add_definitions(-DSUNDIALS_HOME)
+
 # Get the JModelica install directory
 set(JMODELICA_INSTALL_DIR ${CMAKE_INSTALL_DIR})
 message(STATUS JMODELICA_INSTALL_DIR=${JMODELICA_INSTALL_DIR})
@@ -18,7 +22,6 @@ if(NOT(WIN32 OR CYGWIN OR APPLE))
 endif()
 
 #Including Sundials.
-add_definitions(-DSUNDIALS_HOME)
 message(STATUS SUNDIALS_HOME=${SUNDIALS_HOME})
 include_directories(${SUNDIALS_HOME}/include)
 
@@ -27,13 +30,16 @@ set(RuntimeLibrary_BUILD ${SimulationRuntime_BINARY_DIR})
 #Add jmi
 add_subdirectory(src/jmi)
 
-#Add fmi_me
+#Add fmi2
 include_directories(src/jmi)
-add_subdirectory(src/fmi_me)
+add_subdirectory(src/fmi2)
 
-#Add fmi_cs
-include_directories(src/fmi_me)
-add_subdirectory(src/fmi_cs)
+#Add fmi1_me
+add_subdirectory(src/fmi1_me)
+
+#Add fmi1_cs
+include_directories(src/fmi1_me)
+add_subdirectory(src/fmi1_cs)
 
 
 

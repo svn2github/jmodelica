@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-add_definitions(-DTOP_SRC)
 set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
