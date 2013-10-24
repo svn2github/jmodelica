@@ -3,13 +3,6 @@ add_subdirectory(jcc)
 
 set(CXX_FLAGS "")
 
-get_directory_property(JCC_GEN_DIR
-  DIRECTORY jcc
-  DEFINITION JCC_GEN_DIR
-)
-message(STATUS "JCC_GEN_DIR=${JCC_GEN_DIR}")
-
-
 # source files
 set(TYPES_CPP
   types/RealType.cpp
@@ -82,19 +75,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CXX_FLAGS ${CXX_FLAGS} -fPIC)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
-# set up target
-include_directories(. jcc)
-include_directories(${JCC_GEN_DIR})
-
-include_directories(${CASADI_HOME})
-#include_directories(${CASADI_HOME}/swig)
-include_directories(${BOOST_HOME})
-
-include_directories(${JAVA_HOME}/include)
-
 set_source_files_properties(${JCC_GEN_DIR}/__wrap__.cpp PROPERTIES
   GENERATED ON)
-
 
 add_library(ModelicaCasADi ${MC_CPP} ${MC_HPP})
 set_target_properties(ModelicaCasADi PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})

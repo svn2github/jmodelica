@@ -73,18 +73,28 @@ configure_file (
   ${MC_PATHS_H}
 )
 
+# Set up includes etc. used by both src/ and swig/
+include_directories(src src/jcc)
+include_directories(${CASADI_HOME})
+include_directories(${BOOST_HOME})
+include_directories(${JAVA_HOME}/include)
+
+set(JCC_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/src/jcc/build")
+include_directories(${JCC_GEN_DIR})
+MESSAGE(STATUS "wrap = ${JCC_GEN_DIR}/__wrap__.cpp")
+
 
 add_subdirectory(src)
 
-# INCLUDE_DIRS is used by the test directory
-# and may be used by the parent script
+add_subdirectory(test EXCLUDE_FROM_ALL)
+
+
+
+# INCLUDE_DIRS may be used by the parent script
+# TODO: remove this and the make_dirs_absolute function once we only use
+# a standalone python wrapper
 get_directory_property(INCLUDE_DIRS
   DIRECTORY src
   INCLUDE_DIRECTORIES
 )
 make_dirs_absolute(INCLUDE_DIRS "${INCLUDE_DIRS}")
-
-
-add_subdirectory(test EXCLUDE_FROM_ALL)
-
-

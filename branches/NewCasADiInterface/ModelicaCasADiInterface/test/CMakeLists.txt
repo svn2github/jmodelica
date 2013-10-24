@@ -1,6 +1,4 @@
 
-include_directories(${INCLUDE_DIRS}) # use include dirs from src
-
 set(LIBS_OPT
   ${LIBS}
   -lcasadi_ipopt_interface

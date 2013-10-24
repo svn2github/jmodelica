@@ -86,9 +86,6 @@ set(CLASSES_optimica
 set(CLASSES ${CLASSES_common} ${CLASSES_modelica} ${CLASSES_optimica})
 #message(STATUS "CLASSES=${CLASSES}")
 
-
-# Note: The variable JCC_GEN_DIR is referenced from the parent CMakeLists.txt
-set(JCC_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/build")
 add_custom_command(
   OUTPUT ${JCC_GEN_DIR} ${JCC_GEN_DIR}/__wrap__.cpp
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}
