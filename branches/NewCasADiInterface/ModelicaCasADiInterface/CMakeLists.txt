@@ -38,8 +38,8 @@ set(LIBS "${MC_BUILD}/casadi/lib/libcasadi.so" -ldl -lpthread)
 link_directories(${MC_BUILD}/casadi/lib) 
 link_directories(${IPOPT_HOME}/lib) 
 
-get_filename_component(JM_CASADI_BACKEND "${MC_BUILD}" REALPATH)
-set(JMODELICA "${JM_CASADI_BACKEND}/JModelica.org")
+get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
+set(JMODELICA "${ABS_MC_BUILD}/JModelica.org")
 
 # todo: this might not allways be the place to find Beaver?
 set(BEAVER_JAR "${JMODELICA}/jars/beaver.jar")
@@ -85,6 +85,6 @@ get_directory_property(INCLUDE_DIRS
 make_dirs_absolute(INCLUDE_DIRS "${INCLUDE_DIRS}")
 
 
-add_subdirectory(test)
+add_subdirectory(test EXCLUDE_FROM_ALL)
 
 
