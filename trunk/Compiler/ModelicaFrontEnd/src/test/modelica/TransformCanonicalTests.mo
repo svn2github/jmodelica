@@ -2337,6 +2337,32 @@ end TransformCanonicalTests.MatchingTest2;
 ")})));
 end MatchingTest2;
 
+model MatchingTest3
+    Real a, b;
+    Integer c;
+    discrete Real d;
+equation
+    when b > pre(c) then
+        c = pre(c) + 42;
+        d = time;
+    end when;
+    a = b + c + time;
+    a = integer(time + 3.14);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="MatchingTest3",
+            description="Tests so that the matching algorithm works well with discrete variables and equation",
+            errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when b > pre(c) then
+ c = pre(c) + 42;
+end when
+")})));
+end MatchingTest3;
+
 model WhenEqu15
 	discrete Real x[3];
         Real z[3];

@@ -336,6 +336,8 @@ public class BiPGraph {
 			for (Eq s : Le_current) {
 				//System.out.println(" eq: " + s);
 				for (Var t : s.getVariables()) {
+				    if (!canMatch(s, t))
+				        continue;
 					//System.out.println("  " + t + " layer: " + t.getLayer());
 					if (t.getLayer() >= layer) {
 						//System.out.println("    adding " + t);
