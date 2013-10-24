@@ -57,6 +57,13 @@ set(JARS ${JARS_common} ${JARS_modelica} ${JARS_optimica})
 join(CLASSPATH "${SEP}" "${JARS}")
 
 
+find_library(CASADI_DLL
+  NAMES libcasadi.so libcasadi.dll
+  PATHS ${CASADI_HOME}/build/lib
+  NO_DEFAULT_PATH
+)
+
+
 # generate modelicacasadi_paths.h
 set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")

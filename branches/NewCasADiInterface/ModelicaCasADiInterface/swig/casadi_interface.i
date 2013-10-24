@@ -1,4 +1,4 @@
-%module casadi_interface
+%module modelicacasadi_wrapper
 
 %include "std_string.i"
 %include "std_vector.i"
