@@ -559,7 +559,11 @@ aspect Connections {
 		private String[] scalarNames;
 		
 		public ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
-			//log.debug("Created ConnectionSetEntry: " + cd.getName().getID());
+			//log.debug("Created ConnectionSetEntry: " + cd.name());
+		    if (cd.inOrIsOuter()) {
+		        cd = cd.myInnerInstComponentDecl();
+		        fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
+		    }
 			this.cd = cd;
 			this.outside = outside;
 			this.fqName = fqName;

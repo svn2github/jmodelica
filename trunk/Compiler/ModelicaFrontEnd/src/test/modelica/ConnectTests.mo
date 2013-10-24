@@ -1127,6 +1127,191 @@ end ConnectTests.ConnectTest23;
 end ConnectTest23;
 
 
+model ConnectOuterTest1
+    connector C = Real;
+    
+    model B
+        outer C c;
+        C c2;
+    equation
+        connect(c, c2);
+    end B;
+    
+    inner C c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest1",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest1
+ Real c;
+ Real b.c2;
+equation
+ b.c2 = c;
+end ConnectTests.ConnectOuterTest1;
+")})));
+end ConnectOuterTest1;
+
+
+model ConnectOuterTest2
+    connector C = Real;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        outer A a;
+        C c2;
+    equation
+        connect(a.c, c2);
+    end B;
+    
+    inner A a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest2",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest2
+ Real a.c;
+ Real b.c2;
+equation
+ a.c = b.c2;
+end ConnectTests.ConnectOuterTest2;
+")})));
+end ConnectOuterTest2;
+
+
+model ConnectOuterTest3
+    connector C
+        Real x;
+    end C;
+	    
+    model B
+        outer C c;
+        C c2;
+    equation
+        connect(c, c2);
+    end B;
+    
+    inner C c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest3",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest3
+ Real c.x;
+ Real b.c2.x;
+equation
+ b.c2.x = c.x;
+end ConnectTests.ConnectOuterTest3;
+")})));
+end ConnectOuterTest3;
+
+
+model ConnectOuterTest4
+    connector C
+		Real x;
+	end C;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        outer A a;
+        C c2;
+    equation
+        connect(a.c, c2);
+    end B;
+    
+    inner A a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest4",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest4
+ Real a.c.x;
+ Real b.c2.x;
+equation
+ a.c.x = b.c2.x;
+end ConnectTests.ConnectOuterTest4;
+")})));
+end ConnectOuterTest4;
+
+
+model ConnectOuterTest5
+    connector C = Real;
+    
+    model B
+        outer C[2] c;
+        C c2;
+    equation
+        connect(c[1], c2);
+    end B;
+    
+    inner C[2] c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest5",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest5
+ Real c[2];
+ Real b.c2;
+equation
+ b.c2 = c[1];
+end ConnectTests.ConnectOuterTest5;
+")})));
+end ConnectOuterTest5;
+
+
+model ConnectOuterTest6
+    connector C = Real;
+    
+    model A
+        C[2] c;
+    end A;
+    
+    model B
+        outer A[2] a;
+        C c2;
+    equation
+        connect(a[1].c[1], c2);
+    end B;
+    
+    inner A[2] a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest6",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest6
+ Real a[1].c[2];
+ Real a[2].c[2];
+ Real b.c2;
+equation
+ a[1].c[1] = b.c2;
+end ConnectTests.ConnectOuterTest6;
+")})));
+end ConnectOuterTest6;
+
+
 
 model ConnectErrTest1
     model A
