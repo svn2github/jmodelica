@@ -122,6 +122,7 @@ SHARED_LDFLAGS = -dynamiclib -Wl,-rpath,@loader_path/ -pthread
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
 RUNTIMELIBRARY_INC_DIR = ${JMODELICA_HOME}/include/RuntimeLibrary
+STANDARD_HEADER_INC_DIR = ${JMODELICA_HOME}/ThirdParty/FMI/2.0
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
@@ -147,7 +148,7 @@ LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)    $(LIB_EXTRA_AD) $(LIB_IPOP
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
+INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) -I$(STANDARD_HEADER_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))

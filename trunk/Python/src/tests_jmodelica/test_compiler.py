@@ -105,9 +105,31 @@ class Test_Compiler:
     def test_compile_FMU(self):
         """
         Test that it is possible to compile an FMU from a .mo file with 
-        ModelicaCompiler.
+        ModelicaCompiler for version 1.0 and 2.0.
         """ 
         Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '1.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        #FMI 2.0 compiler tests.
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '2.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'cs', '2.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me+cs', '2.0', '.')
         
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
@@ -173,9 +195,11 @@ class Test_Compiler:
         cl = Test_Compiler.cpath_mc 
         path = Test_Compiler.fpath_mc
         #Incorrect target.
-        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="notValid")
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="notValidTarget")
         #Incorrect target that contains the valid target 'me'.
         nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="men") 
+        #Incorrect version, correct target 'me'.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="me", version="notValidVersion") 
     '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):
