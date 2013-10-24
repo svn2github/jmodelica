@@ -42,13 +42,15 @@
 #    jmu          Build a shared object file including the low level JMI interface 
 #                 (contained in jmi.a), JMI algorithms and the Ipopt algorithm.
 #    fmume10      Build a shared object file containing the generated code and the
-#                 FMI 1.0 for Model Exchange API.
+#                 Model Exchange for API FMI 1.0.
 #    fmucs10      Build a shared object file containing the generated code and the
-#                 FMI 1.0 for co-simulation API.
+#                 co-simulation API for FMI 1.0.
 #    fmume20      Build a shared object file containing the generated code and the
-#                 FMI 2.0 for Model Exchange API.
+#                 Model Exchange for API FMI 2.0.
 #    fmucs20      Build a shared object file containing the generated code and the
-#                 FMI 2.0 for co-simulation API.
+#                 co-simulation API for FMI 2.0.
+#    fmumecs20    Build a shared object file containing the generated code and the
+#                 Model Exchange API and co-simulation API for FMI 2.0.
 #        
 # Example:
 #  make -f Makefile.linux ipopt \
@@ -180,6 +182,14 @@ fmucs20:
 	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUCS20 fmucs20_
 	
 fmucs20_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20)
+	$(RM) $(OBJS)
+	
+fmumecs20:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+	
+fmumecs20_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
 	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20)
 	$(RM) $(OBJS)

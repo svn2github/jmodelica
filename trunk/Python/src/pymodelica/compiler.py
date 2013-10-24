@@ -87,11 +87,12 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             Default: 'auto'
             
         target --
-            Compiler target. Possible values are 'me' or 'cs'.
+            Compiler target. Possible values are 'me', 'cs' or 'me+cs'.
             Default: 'me'
             
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
+            Default: '1.0'
             Note: Must currently be set to '1.0'.
             
         compiler_options --
@@ -133,8 +134,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
     
     """
     
-    if (target != "me" and target != "cs"):
-        raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use me or cs to compile an FMU.")
+    if (target != "me" and target != "cs" and target != "me+cs"):
+        raise IllegalCompilerArgumentError("Unknown target '" + target + "'. Use 'me', 'cs' or 'me+cs' to compile an FMU.")
     return _compile_unit(class_name, file_name, compiler, target, version,
                 compiler_options, compile_to, compiler_log_level,
                 separate_process, jvm_args)       
@@ -520,7 +521,7 @@ def _get_unit_name_from_target(class_name, target):
    Helper method to get unit file ending from compiler target.
    """
    # compile unit in java
-   if (target == 'me' or target == 'cs'): 
+   if (target == 'me' or target == 'cs' or target == 'me+cs'): 
        return get_fmu_name(class_name)
    elif (target == 'jmu'):
        return get_jmu_name(class_name)

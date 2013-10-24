@@ -1460,6 +1460,10 @@ public class ModelicaCompiler {
 		setFindFlatToInstanceLinks(programarguments.containsKey("findflatinst"));
 		
 		arg = programarguments.size();
+        if (!programarguments.containsKey("target")) {
+            //If no target is set, assume jmu.
+            programarguments.put("target", "jmu");
+        }
 		if (args.length < arg+2 && !programarguments.get("target").equals("parse")) {
 			log.error(compilerName + " expects a file name and a class name as command line arguments.");
 			System.exit(1);
@@ -1598,15 +1602,16 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10  (Templates.FMUME10, "fmume10", "fmu"),
-        FMUME20  (Templates.FMUME20, "fmume20", "fmu"),
-        FMUCS10  (Templates.FMUCS10, "fmucs10", "fmu"),
-        FMUCS20  (Templates.FMUCS20, "fmucs20", "fmu"),
-        JMU      (Templates.JMU,     "jmu",     "jmu"),
-        FMUX     (Templates.FMUX,     null,     "fmux"),
-        FMUME20a (Templates.FMUME10, "fmume10", "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a (Templates.FMUCS10, "fmucs10", "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK    (Templates.NULL,    null,      null, ErrorCheckType.CHECK);
+        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu"),
+        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu"),
+        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu"),
+        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu"),
+        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu"), 
+        JMU       (Templates.JMU,       "jmu",       "jmu"),
+        FMUX      (Templates.FMUX,       null,       "fmux"),
+        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        CHECK     (Templates.NULL,      null,        null, ErrorCheckType.CHECK);
 
         private final Templates templates;
         private final String makeFileFlag;
@@ -1651,6 +1656,12 @@ public class ModelicaCompiler {
                     return FMUCS20a;
                 } else {
                     throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0alpha."); 
+                }
+            } else if (targetType.equals("me+cs")) {
+                if (version == null || version.equals("2.0")) {
+                    return FMUMECS20;
+                } else {
+                    throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 2.0.");
                 }
             } else if (targetType.equals("jmu")) {
                 return JMU;
@@ -1762,6 +1773,7 @@ public class ModelicaCompiler {
                     options.setStringOption("fmi_version", "1.0");
                 case FMUME20:
                 case FMUCS20:
+                case FMUMECS20:
                     options.setStringOption("fmi_version", "2.0");
                     break;
                 case FMUME20a:
@@ -1788,13 +1800,14 @@ aspect CompilationHelpers {
  */
 public class Templates {
     
-    public static final Templates NULL    = new Templates();
-    public static final Templates FMUME10 = new Templates("fmi_model_description.tpl",       "fmi1_me_modelica_template.c");
-    public static final Templates FMUME20 = new Templates("fmi_model_description.tpl",       "fmi2_master_modelica_template.c");
-    public static final Templates FMUCS10 = new Templates("fmi1_cs_model_description.tpl",   "fmi1_cs_modelica_template.c");
-    public static final Templates FMUCS20 = new Templates("fmi1_cs_model_description.tpl",   "fmi2_master_modelica_template.c");
-    public static final Templates JMU     = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
-    public static final Templates FMUX    = new Templates("jmodelica_model_description.tpl");
+    public static final Templates NULL      = new Templates();
+    public static final Templates FMUME10   = new Templates("fmi_model_description.tpl",       "fmi1_me_modelica_template.c");
+    public static final Templates FMUME20   = new Templates("fmi_model_description.tpl",       "fmi2_master_modelica_template.c");
+    public static final Templates FMUCS10   = new Templates("fmi1_cs_model_description.tpl",   "fmi1_cs_modelica_template.c");
+    public static final Templates FMUCS20   = new Templates("fmi1_cs_model_description.tpl",   "fmi2_master_modelica_template.c");
+    public static final Templates FMUMECS20 = new Templates("fmi1_cs_model_description.tpl",   "fmi2_master_modelica_template.c");
+    public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
+    public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
     
     private static final int XML = 0;
     private static final int C   = 1;
