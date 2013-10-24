@@ -2285,4 +2285,127 @@ At line 1815, column 9:
 ")})));
 end Cardinality3;
 
+
+model ConditionalNoErrTest1
+    connector C = Real;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    C y if on;
+equation
+    connect(x[2], y);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest1",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest1
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest1;
+")})));
+end ConditionalNoErrTest1;
+
+
+model ConditionalNoErrTest2
+    connector C = Real;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    C y if on;
+equation
+    connect(y, x[2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest2",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest2
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest2;
+")})));
+end ConditionalNoErrTest2;
+
+
+model ConditionalNoErrTest3
+    connector C = Real;
+	
+	model A
+		C c;
+	end A;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    A y if on;
+equation
+    connect(x[2], y.c);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest3",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest3
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest3;
+")})));
+end ConditionalNoErrTest3;
+
+
+model ConditionalNoErrTest4
+    connector C = Real;
+    
+    model A
+        C c;
+    end A;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    A y if on;
+equation
+    connect(y.c, x[2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest4",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest4
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest4;
+")})));
+end ConditionalNoErrTest4;
+
+
+model ConditionalNoErrTest5
+    model A
+        Real y;
+    end A;
+    
+    parameter Boolean on = false;
+    
+    Real x[if on then 2 else 1];
+    A a(y=x[2]) if on;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest5",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest5
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest5;
+")})));
+end ConditionalNoErrTest5;
+
 end ConnectTests;

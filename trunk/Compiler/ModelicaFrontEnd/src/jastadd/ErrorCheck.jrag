@@ -293,16 +293,22 @@ aspect ErrorCheck {
    * if any such if exists. 
    * 
    * Any parameters used in the test will be marked as structural.
+   * 
+   * NB: This has side-effects, dispite being an inherited attribute.
    */
+  // TODO: find way to move side-effects out from inh attr
   inh boolean FExp.lockBranch();
   inh boolean FExpSubscript.lockBranch();
   inh boolean FIfEquation.lockBranch();
-  eq InstNode.getChild().lockBranch()                = false;
-  eq FClass.getChild().lockBranch()                  = false;
-  eq FIfExp.getThenExp().lockBranch()                = lockMyBranch(true);
-  eq FIfExp.getElseExp().lockBranch()                = lockMyBranch(false);
-  eq FIfEquation.getFAbstractEquation().lockBranch() = lockMyBranch(true);
-  eq FIfEquation.getElse().lockBranch()              = lockMyBranch(false);
+  eq FIfExp.getThenExp().lockBranch()                     = lockMyBranch(true);
+  eq FIfExp.getElseExp().lockBranch()                     = lockMyBranch(false);
+  eq FIfEquation.getFAbstractEquation().lockBranch()      = lockMyBranch(true);
+  eq FIfEquation.getElse().lockBranch()                   = lockMyBranch(false);
+  eq FConnectClause.getConnector1().lockBranch()          = getConnector2().isDisabled();
+  eq FConnectClause.getConnector2().lockBranch()          = getConnector1().isDisabled();
+  eq InstComponentDecl.getInstModification().lockBranch() = isDisabled();
+  eq InstNode.getChild().lockBranch()                     = false;
+  eq FClass.getChild().lockBranch()                       = false;
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
