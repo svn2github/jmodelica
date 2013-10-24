@@ -24,11 +24,13 @@
 
 
 const char* fmi2_get_types_platform() {
-    return 0;
+    const char* str = "string Literal";
+    return str;
 }
 
 const char* fmi2_get_version() {
-    return 0;
+    const char* str = "string Literal";
+    return str;
 }
 
 fmiStatus fmi2_set_debug_logging(fmiComponent    c,
@@ -45,7 +47,8 @@ fmiComponent fmi2_instatiate(fmiString instanceName,
                              const fmiCallbackFunctions* functions, 
                              fmiBoolean                  visible,
                              fmiBoolean                  loggingOn) {
-    return 0;
+    const char* str = "string Literal";
+    return str;
 }
 
 void fmi2_free_instance(fmiComponent c)  {

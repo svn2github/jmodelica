@@ -22,6 +22,32 @@
 
 #include "fmiFunctions.h"
 
+fmiStatus fmi2_enter_event_mode(fmiComponent c);
 
+fmiStatus fmi2_new_discrete_state(fmiComponent  c,
+                                  fmiEventInfo* fmiEventInfo);
+
+fmiStatus fmi2_enter_continuous_time_mode(fmiComponent c);
+
+fmiStatus fmi2_completed_integrator_step(fmiComponent c,
+                                         fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
+                                         fmiBoolean*  enterEventMode, 
+                                         fmiBoolean*   terminateSimulation);
+
+fmiStatus fmi2_set_time(fmiComponent c, fmiReal time);
+
+fmiStatus fmi2_set_continuous_states(fmiComponent c, const fmiReal x[],
+                                     size_t nx);
+                                     
+fmiStatus fmi2_get_derivatives(fmiComponent c, fmiReal derivatives[], size_t nx);
+
+fmiStatus fmi2_get_event_indicators(fmiComponent c, 
+                                    fmiReal eventIndicators[], size_t ni);
+
+fmiStatus fmi2_get_continuous_states(fmiComponent c, fmiReal x[], size_t nx);
+
+fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c, 
+                                                 fmiReal x_nominal[], 
+                                                 size_t nx);
 
 #endif

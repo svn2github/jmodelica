@@ -68,6 +68,6 @@ fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
 
 
 fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
-                                       fmiString* value) {
+                                 fmiString* value) {
     return 0;
 }

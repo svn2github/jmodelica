@@ -27,8 +27,14 @@
 #include "fmi2_cs.h"
 #include "fmi2_common.h"
 #include "fmiFunctions.h"
+#include "fmiFunctionTypes.h"
+#include "fmiTypesPlatform.h"
 
 $INCLUDE: fmi_code_gen_template.c$
+
+void _emit(log_t *log, char* message) { }
+void create_log_file_if_needed(log_t *log) { }
+BOOL emitted_category(log_t *log, category_t category) { 0; }
 
 $INCLUDE: fmi2_functions_common_template.c$
 

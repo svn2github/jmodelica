@@ -22,5 +22,35 @@
 
 #include "fmiFunctions.h"
 
+fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
+                                          const fmiValueReference vr[],
+                                          size_t nvr, const fmiInteger order[],
+                                          const fmiReal value[]);
+
+fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
+                                           const fmiValueReference vr[],
+                                           size_t nvr, const fmiInteger order[],
+                                           fmiReal value[]);
+
+fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
+                       fmiReal    communicationStepSize,
+                       fmiBoolean noSetFMUStatePriorToCurrentPoint);
+
+fmiStatus fmi2_cancel_step(fmiComponent c);
+
+fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
+                          fmiStatus* value);
+
+fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
+                               fmiReal* value);
+fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
+                                  fmiInteger* values);
+
+fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
+                                  fmiBoolean* value);
+
+
+fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
+                                 fmiString* value);
 
 #endif

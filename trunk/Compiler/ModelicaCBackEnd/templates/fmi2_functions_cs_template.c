@@ -16,53 +16,53 @@
 
 /* FMI 2.0 functions specific for CS.*/
 
-DllExport fmiStatus fmiSetRealInputDerivatives(fmiComponent c, 
-                                               const fmiValueReference vr[],
-                                               size_t nvr, const fmiInteger order[],
-                                               const fmiReal value[]) {
+FMI_Export fmiStatus fmiSetRealInputDerivatives(fmiComponent c, 
+                                                const fmiValueReference vr[],
+                                                size_t nvr, const fmiInteger order[],
+                                                const fmiReal value[]) {
 	return fmi2_set_real_input_derivatives(c, vr, nvr, order, value);
 }
 
-DllExport fmiStatus fmiGetRealOutputDerivatives(fmiComponent c,
-                                                const fmiValueReference vr[],
-                                                size_t nvr, const fmiInteger order[],
-                                                fmiReal value[]) {
+FMI_Export fmiStatus fmiGetRealOutputDerivatives(fmiComponent c,
+                                                 const fmiValueReference vr[],
+                                                 size_t nvr, const fmiInteger order[],
+                                                 fmiReal value[]) {
 	return fmi2_get_real_output_derivatives(c, vr, nvr, order, value);
 }
 
-DllExport fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint,
-                              fmiReal    communicationStepSize,
-                              fmiBoolean noSetFMUStatePriorToCurrentPoint) {
+FMI_Export fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint,
+                               fmiReal    communicationStepSize,
+                               fmiBoolean noSetFMUStatePriorToCurrentPoint) {
 	return fmi2_do_step(c, currentCommunicationPoint, communicationStepSize,
                         noSetFMUStatePriorToCurrentPoint);
 }
 
-DllExport fmiStatus fmiCancelStep(fmiComponent c) {
+FMI_Export fmiStatus fmiCancelStep(fmiComponent c) {
 	return fmi2_cancel_step(c);
 }
 
-DllExport fmiStatus fmiGetStatus(fmiComponent c, const fmiStatusKind s,
-                                 fmiStatus* value) {
+FMI_Export fmiStatus fmiGetStatus(fmiComponent c, const fmiStatusKind s,
+                                  fmiStatus* value) {
 	return fmi2_get_status(c, s, value);
 }
 
-DllExport fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s,
-                                     fmiReal* value) {
+FMI_Export fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s,
+                                      fmiReal* value) {
 	return fmi2_get_real_status(c, s, value);
 }
 
-DllExport fmiStatus fmiGetIntegerStatus(fmiComponent c, const fmiStatusKind s,
-                                        fmiInteger* values) {
+FMI_Export fmiStatus fmiGetIntegerStatus(fmiComponent c, const fmiStatusKind s,
+                                         fmiInteger* values) {
 	return fmi2_get_integer_status(c, s, values);
 }
 
-DllExport fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s,
-                                        fmiBoolean* value) {
+FMI_Export fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s,
+                                         fmiBoolean* value) {
 	return fmi2_get_boolean_status(c, s, value);
 }
 
-DllExport fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s,
-                                       fmiString* value) {
+FMI_Export fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s,
+                                        fmiString* value) {
 	return fmi2_get_string_status(c, s, value);
 	
 }

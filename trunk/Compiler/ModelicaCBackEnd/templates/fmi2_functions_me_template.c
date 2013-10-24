@@ -19,53 +19,53 @@
 
 /* FMI 2.0 functions specific for ME.*/
 
-DllExport fmiStatus fmiEnterEventMode(fmiComponent c) {
+FMI_Export fmiStatus fmiEnterEventMode(fmiComponent c) {
 	return fmi2_enter_event_mode(c);
 }
 
-DllExport fmiStatus fmiNewDiscreteStates(fmiComponent  c,
-                                         fmiEventInfo* fmiEventInfo) {
+FMI_Export fmiStatus fmiNewDiscreteStates(fmiComponent  c,
+                                          fmiEventInfo* fmiEventInfo) {
 	return fmi2_new_discrete_state(c, fmiEventInfo);
 }
 
-DllExport fmiStatus fmiEnterContinuousTimeMode(fmiComponent c) {
+FMI_Export fmiStatus fmiEnterContinuousTimeMode(fmiComponent c) {
 	return fmi2_enter_continuous_time_mode(c);
 }
 
-DllExport fmiStatus fmiCompletedIntegratorStep(fmiComponent c,
-                                               fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
-                                               fmiBoolean*  enterEventMode, 
-                                               fmiBoolean   terminateSimulation) {
+FMI_Export fmiStatus fmiCompletedIntegratorStep(fmiComponent c,
+                                                fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
+                                                fmiBoolean*  enterEventMode, 
+                                                fmiBoolean*   terminateSimulation) {
 	return fmi2_completed_integrator_step(c, noSetFMUStatePriorToCurrentPoint,
                                           enterEventMode, terminateSimulation);
 }
 
-DllExport fmiStatus fmiSetTime(fmiComponent c, fmiReal time) {
+FMI_Export fmiStatus fmiSetTime(fmiComponent c, fmiReal time) {
 	return fmi2_set_time(c, time);
 }
 
-DllExport fmiStatus fmiSetContinuousStates(fmiComponent c, cons fmiReal x[],
-                                        size_t nx) {
+FMI_Export fmiStatus fmiSetContinuousStates(fmiComponent c, const fmiReal x[],
+                                            size_t nx) {
 	return fmi2_set_continuous_states(c, x, nx);
 }
 
-DllExport fmiStatus fmiGetDerivatives(fmiComponent c, fmiReal derivatives[],
-                                      size_t nx) {
+FMI_Export fmiStatus fmiGetDerivatives(fmiComponent c, fmiReal derivatives[],
+                                       size_t nx) {
 	return fmi2_get_derivatives(c, derivatives, nx);
 }
 
-DllExport fmiStatus fmiGetEventIndicators(fmiComponent c, 
-                                          fmiReal eventIndicators[], size_t ni) {
+FMI_Export fmiStatus fmiGetEventIndicators(fmiComponent c, 
+                                           fmiReal eventIndicators[], size_t ni) {
 	return fmi2_get_event_indicators(c, eventIndicators, ni);
 }
 
-DllExport fmiStatus fmiGetContinuousStates(fmiComponent c, fmiReal x[],
-                                           size_t nx) {
+FMI_Export fmiStatus fmiGetContinuousStates(fmiComponent c, fmiReal x[],
+                                            size_t nx) {
 	return fmi2_get_continuous_states(c, x, nx);
 }
 
-DllExport fmiStatus fmiGetNominalsOfContinuousStates(fmiComponent c, 
-                                                     fmiReal x_nominal[], 
-                                                     size_t nx) {
+FMI_Export fmiStatus fmiGetNominalsOfContinuousStates(fmiComponent c, 
+                                                      fmiReal x_nominal[], 
+                                                      size_t nx) {
 	return fmi2_get_nominals_of_continuous_states(c, x_nominal, nx);
 }

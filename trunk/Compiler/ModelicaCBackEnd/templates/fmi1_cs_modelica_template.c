@@ -28,6 +28,10 @@
 
 $INCLUDE: fmi_code_gen_template.c$
 
+void _emit(log_t *log, char* message) { fmi1_me_emit(log, message); }
+void create_log_file_if_needed(log_t *log) { fmi1_me_create_log_file_if_needed(log); }
+BOOL emitted_category(log_t *log, category_t category) { fmi1_me_emitted_category(log, category); }
+
 /* FMI for co-simulation Functions*/
 
 /* Inquire version numbers of header files */

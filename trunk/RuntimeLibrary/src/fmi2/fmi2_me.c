@@ -37,7 +37,7 @@ fmiStatus fmi2_enter_continuous_time_mode(fmiComponent c) {
 fmiStatus fmi2_completed_integrator_step(fmiComponent c,
                                          fmiBoolean   noSetFMUStatePriorToCurrentPoint, 
                                          fmiBoolean*  enterEventMode, 
-                                         fmiBoolean   terminateSimulation) {
+                                         fmiBoolean*   terminateSimulation) {
     return 0;
 }
 
@@ -47,6 +47,10 @@ fmiStatus fmi2_set_time(fmiComponent c, fmiReal time) {
 
 fmiStatus fmi2_set_continuous_states(fmiComponent c, const fmiReal x[],
                                      size_t nx) {
+    return 0;
+}
+
+fmiStatus fmi2_get_derivatives(fmiComponent c, fmiReal derivatives[], size_t nx) {
     return 0;
 }
 
