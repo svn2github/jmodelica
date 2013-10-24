@@ -43,6 +43,7 @@ set(MC_CPP
   jcc/JObject.cpp
   ${JCC_GEN_DIR}/__wrap__.cpp
 )
+# MC_HPP is used by the parent script for SWIG dependencies as well
 set(MC_HPP
   AttributeExpression.hpp
   BooleanVariable.hpp
@@ -69,6 +70,9 @@ set(MC_HPP
   jcc/JObject.h
   ${MC_PATHS_H}
 )
+# Make the paths absolute since they are exported to the parent script
+make_paths_absolute(MC_HPP "${MC_HPP}")
+
 
 # compiler options
 if(CMAKE_COMPILER_IS_GNUCXX)

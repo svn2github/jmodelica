@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.6)
 project(ModelicaCasADi CXX)
 
 
-function(make_dirs_absolute DEST_VAR DIRS)  
+function(make_paths_absolute DEST_VAR DIRS)  
   set(ABS_DIRS "")
   foreach(DIR ${DIRS})
     get_filename_component(ABS_DIR ${DIR} ABSOLUTE)
@@ -86,15 +86,20 @@ MESSAGE(STATUS "wrap = ${JCC_GEN_DIR}/__wrap__.cpp")
 
 add_subdirectory(src)
 
+get_directory_property(MC_HPP
+  DIRECTORY src
+  DEFINITION MC_HPP
+)
+
 add_subdirectory(test EXCLUDE_FROM_ALL)
+add_subdirectory(swig EXCLUDE_FROM_ALL)
 
 
 
 # INCLUDE_DIRS may be used by the parent script
-# TODO: remove this and the make_dirs_absolute function once we only use
-# a standalone python wrapper
+# TODO: remove this once we only use a standalone python wrapper
 get_directory_property(INCLUDE_DIRS
   DIRECTORY src
   INCLUDE_DIRECTORIES
 )
-make_dirs_absolute(INCLUDE_DIRS "${INCLUDE_DIRS}")
+make_paths_absolute(INCLUDE_DIRS "${INCLUDE_DIRS}")
