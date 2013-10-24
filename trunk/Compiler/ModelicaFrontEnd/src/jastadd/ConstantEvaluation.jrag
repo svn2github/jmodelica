@@ -2068,7 +2068,7 @@ aspect ConstantEvaluation {
 //	  if (size().isUnknown())
 //		  getArray_computed = false;
 	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
-	  if (size().isUnknown()) {
+	  if (size().isUnknown() || isCircular()) {
 		  flushCache();
 		  size().isUnknown();
 	  }

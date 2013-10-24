@@ -861,6 +861,49 @@ Semantic error at line 846, column 20:
 end FunctionEval24;
 
 
+model FunctionEval25
+	function f
+		input Real[:] x;
+		output Integer y;
+	algorithm
+		y := 0;
+		for i in 1:(size(x,1) - 1) loop
+			y := y + i;
+		end for;
+	end f;
+	
+	Real x = f(ones(3));
+    parameter Integer n = f(ones(4));
+	Real z[n];
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval25",
+			description="Check that functions containing scalar expressions depending on unknown sizes can be evaluated after being error checked",
+			flatModel="
+fclass EvaluationTests.FunctionEval25
+ Real x = EvaluationTests.FunctionEval25.f(ones(3));
+ parameter Integer n = EvaluationTests.FunctionEval25.f(ones(4)) /* 6 */;
+ Real z[6];
+
+public
+ function EvaluationTests.FunctionEval25.f
+  input Real[:] x;
+  output Integer y;
+ algorithm
+  y := 0;
+  for i in 1:size(x, 1) - 1 loop
+   y := y + i;
+  end for;
+  return;
+ end EvaluationTests.FunctionEval25.f;
+
+end EvaluationTests.FunctionEval25;
+")})));
+end FunctionEval25;
+
+
+
 model StringConcat
  Real a = 1;
  parameter String b = "1" + "2";
