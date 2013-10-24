@@ -159,6 +159,8 @@ aspect IndexReduction {
         return der;
     }
     
+    public static final int BiPGraph.MAX_N_EQ_DIFFS = 5;
+    
     public IndexReductionResult BiPGraph.reduceIndex(boolean resetMatching) {
         IndexReductionResult result = new IndexReductionResult();
         if (resetMatching) {

@@ -2972,7 +2972,7 @@ aspect TransformCanonicalErrorCheck {
 	 * equations.
 	 */	
 	syn int FClass.numDAEInitEquations() = numDAEEquationsAtInitialization() + 
-		numInitialEquations();
+        numInitialScalarEquations();
 	
 	/**
 	 * The number of unknowns in the DAE initialization system is the 

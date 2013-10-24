@@ -2123,6 +2123,43 @@ end TransformCanonicalTests.InitialEqTest17;
 ")})));
 end InitialEqTest17;
 
+model InitialEqTest18
+    parameter Boolean p = true;
+initial algorithm
+    assert(p, "p should not be false");
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest18",
+            description="Test equation couting when initial system contains assert",
+            flatModel="
+fclass TransformCanonicalTests.InitialEqTest18
+ parameter Boolean p = true /* true */;
+initial equation 
+ algorithm
+  assert(p, \"p should not be false\");
+;
+end TransformCanonicalTests.InitialEqTest18;
+")})));
+end InitialEqTest18;
+
+model InitialEqTest19
+    parameter Boolean p = true;
+initial equation
+    assert(p, "p should not be false");
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest19",
+            description="Test equation couting when initial system contains assert",
+            flatModel="
+fclass TransformCanonicalTests.InitialEqTest19
+ parameter Boolean p = true /* true */;
+initial equation 
+ assert(p, \"p should not be false\");
+end TransformCanonicalTests.InitialEqTest19;
+")})));
+end InitialEqTest19;
 
 model ParameterDerivativeTest
  Real x(start=1);

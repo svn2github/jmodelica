@@ -37,8 +37,6 @@ aspect Graphs {
 
 public class BiPGraph {
 
-	public static final int MAX_N_EQ_DIFFS = 5;
-
 	protected Map<String,Var> variableMap = new LinkedHashMap<String,Var>();
 	protected Map<String,Eq> equationMap = new LinkedHashMap<String,Eq>();
 	protected Map<FAbstractEquation,java.util.List<Eq>> equationIndexMap = new LinkedHashMap<FAbstractEquation,java.util.List<Eq>>();
