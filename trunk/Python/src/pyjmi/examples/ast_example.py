@@ -65,8 +65,11 @@ def run_demo(with_plots=True):
     # Create a compiler
     mc = ModelicaCompiler()
     mc.set_boolean_option("enable_structural_diagnosis",False)
+    
+    # Build trees as if for an FMU for ME v 1.0
+    target = mc.create_target_object("me", "1.0")
 
-    # Don't parse the file if it har already been parsed.
+    # Don't parse the file if it has already been parsed.
     try:
         source_root.getProgramRoot()
     except:
@@ -124,7 +127,7 @@ def run_demo(with_plots=True):
     except:
         # Retrieve the node in the instance tree corresponding to the class
         # Modelica.Electrical.Analog.Examples.CauerLowPassAnalog
-        filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog")
+        filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog", target)
 
     def dump_inst_ast(inst_node, indent):
         """
@@ -176,7 +179,7 @@ def run_demo(with_plots=True):
         filter_flat_model.name()
     except:
         # Flatten the model instance filter_instance
-        filter_flat_model = mc.flatten_model(filter_instance)
+        filter_flat_model = mc.flatten_model(filter_instance, target)
     
     print(filter_flat_model.prettyPrint(""))
     

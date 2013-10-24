@@ -401,7 +401,7 @@ class ModelicaCompiler(object):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def instantiate_model(self, source_root, model_class_name):
+    def instantiate_model(self, source_root, model_class_name, target):
         """ 
         Generate an instance tree representation for a model.
 
@@ -416,6 +416,9 @@ class ModelicaCompiler(object):
                 
             model_class_name -- 
                 Name of model class in the model file to compile.
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Returns::
         
@@ -431,12 +434,12 @@ class ModelicaCompiler(object):
             Java classes.
         """    
         try:
-            ipr = self._compiler.instantiateModel(source_root, model_class_name)
+            ipr = self._compiler.instantiateModel(source_root, model_class_name, target)
             return ipr    
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def flatten_model(self, inst_class_decl):
+    def flatten_model(self, inst_class_decl, target):
         """ 
         Compute a flattened representation of a model. 
 
@@ -448,6 +451,9 @@ class ModelicaCompiler(object):
           
             inst_class_decl -- 
                 Reference to a model instance. 
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Returns::
         
@@ -466,12 +472,12 @@ class ModelicaCompiler(object):
             Java classes.
         """
         try:
-            fclass = self._compiler.flattenModel(inst_class_decl)
+            fclass = self._compiler.flattenModel(inst_class_decl, target)
             return fclass    
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def generate_code(self,fclass, target):
+    def generate_code(self, fclass, target):
         """ 
         Generate code for a model.
 
@@ -484,6 +490,9 @@ class ModelicaCompiler(object):
         
             fclass -- 
                 Reference to the flattened model object representation.  
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Raises::
         
