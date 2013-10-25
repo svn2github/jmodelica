@@ -37,18 +37,25 @@ import numpy as N
 from pyjmi.optimization.polynomial import *
 from pyjmi.common import xmlparser
 from pyjmi.common.xmlparser import XMLException
-from pyjmi.common.core import TrajectoryLinearInterpolation, TrajectoryUserFunction
+from pyjmi.common.core import TrajectoryLinearInterpolation
+from pyjmi.common.core import TrajectoryUserFunction
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
 from pyjmi.casadi_interface import convert_casadi_der_name
 
 #Check to see if pyfmi is installed so that we also catch the error generated
 #from that package
+from pymodelica.common.io import VariableNotFoundError as \
+        pymodelicaVariableNotFoundError
 try:
-    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
-    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+    from pyfmi.common.io import VariableNotFoundError as \
+            fmiVariableNotFoundError
+    VariableNotFoundError = (
+            jmiVariableNotFoundError, pymodelicaVariableNotFoundError,
+            fmiVariableNotFoundError)
 except ImportError:
-    VariableNotFoundError = jmiVariableNotFoundError
+    VariableNotFoundError = (jmiVariableNotFoundError,
+                             pymodelicaVariableNotFoundError)
 
 class CasadiCollocatorException(Exception):
     """
