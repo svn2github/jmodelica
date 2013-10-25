@@ -430,7 +430,7 @@ equation
 		ErrorTestCase(
 			name="InnerOuterTest14_Err",
 			description="Check that error is not generated for outer without inner in check mode",
-            checkType="CHECK",
+            checkType="check",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':

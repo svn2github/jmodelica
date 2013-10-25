@@ -22,6 +22,73 @@ import org.jmodelica.util.ErrorCheckType;
 aspect FlatTypeCheck {
 	
     public void ASTNode.typeCheck(ErrorCheckType checkType) {}
+    
+    public void InstNode.typeCheck(ErrorCheckType checkType) {
+          typeCheckSystemResiduals(checkType);
+          if (!isFunction())
+              getFAbstractEquations().checkArrayBounds(checkType);
+    }
+    
+    public void InstComposite.typeCheck(ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        // Note that modifiers (including redeclarations) in a constraining clause
+        // are applied to the declaration itself and is therefore also type checked.
+        if (hasInstConstraining()) {
+              InstNode superType = getInstConstraining().getInstNode();
+              InstComponentDecl declaredType = this; 
+              if (!declaredType.subType(superType))
+                   declaredType.getComponentDecl().error("In the declaration '" + declaredType.getComponentDecl() + 
+                           "', the declared class is not a subtype of the constraining class");
+        }
+    }
+
+    public void InstReplacingRecord.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingComposite.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        
+        // Type check the original component
+        InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
+        if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
+            superType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+                    declaredType.getComponentDecl());
+
+        // The environment should be traversed backwards in order to perform correct
+        // subtype tests in redeclaration chains.       
+        for (int i = myEnvironment().size() - 1; i >= 0; i--) {
+            InstModification im = myEnvironment().get(i);
+            InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
+            if (redeclare != null) { 
+                InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
+                InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
+                    
+                // Check consistency of the redeclaring component
+                if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
+                    declaredSubType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+                            declaredSubType.getComponentDecl());
+
+                // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
+                // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
+                // follows that declaredSubType is a subtype of superType by transitivity.
+                if (!constrainingSubType.subType(superType))
+                    constrainingSubType.getComponentDecl().error("In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'", 
+                            constrainingSubType.getComponentDecl(), superType.getComponentDecl());
+            
+                // If the redeclaring declaration has a constraining clause, the constraining
+                // type of the redeclaring declaration of should be used in following subtype-test 
+                // instead of the constraining type of the orignal declaration.
+                if (declaredSubType.hasInstConstraining()) 
+                    superType = constrainingSubType;
+            }
+            typeCheckSystemResiduals(checkType);
+        }
+    }
  
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
     	FExp bexp = myBindingInstExp();
@@ -47,6 +114,8 @@ aspect FlatTypeCheck {
     							" and size of binding expression is " + actualBT.size());
      				}
     			}
+    			if (!func)
+    			    bexp.checkArrayBounds(checkType);
     		}
 	    }
     	if (hasConditionalAttribute()) {
@@ -76,6 +145,7 @@ aspect FlatTypeCheck {
 		}
 		
     	typeCheckAttributes();
+    	super.typeCheck(checkType);
     }
     
     inh boolean InstComponentDecl.inRecordWithBindingExp();
@@ -358,25 +428,110 @@ aspect FlatTypeCheck {
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
-		  } else if (!inUnknownAccess()) { 
-			  // Check array bounds
-			  // TODO: Perform bounds check in functions if index has parameter variability or lower?
-			  try {
-				  int max = mySize().get(0);
-				  for (FExp e : getExpanded().iterable()) {
-					  int i = e.ceval().intValue();
-					  if (i < 1 || i > max) {
-						  if (!lockBranch())
-							  error("Array index out of bounds: " + i + ", index expression: " + getFExp());
-						  return;
-					  }
-				  }
-			  } catch (ConstantEvaluationException e) {
-				  error("Could not evaluate array index expression: " + getFExp());
-			  }
 		  }
 	  }
   }
+  
+  /**
+   * Evaluate all array indices in equations and check that they are within bounds.
+   */
+  public void ASTNode.checkArrayBounds(ErrorCheckType checkType) {
+      for (ASTNode n : this)
+          n.checkArrayBounds(checkType);
+  }
+  
+  private boolean FExpSubscript.reportedOutOfBound = false;
+  
+  public void FExpSubscript.checkArrayBounds(ErrorCheckType checkType) {
+      super.checkArrayBounds(checkType);
+      
+      if (!reportedOutOfBound && ndims() <= 1 && type().isInteger() && !inUnknownAccess() &&
+              getFExp().variability().lessOrEqual(fParameter())) {
+          // Check array bounds
+          // TODO: Perform bounds check in functions if index has parameter variability or lower?
+          try {
+              int max = mySize().get(0);
+              for (FExp e : getFExp().getArray().iterable()) {
+                  int i = e.ceval().intValue();
+                  if (i < 1 || i > max) {
+                      if (!lockBranch())
+                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
+                      reportedOutOfBound = true;
+                      return;
+                  }
+              }
+          } catch (ConstantEvaluationException e) {
+              error("Could not evaluate array index expression: " + getFExp());
+              reportedOutOfBound = true;
+          }
+      }
+  }
+  
+  public void FArraySubscripts.checkArrayBounds(ErrorCheckType checkType) {
+      if (getNumFSubscript() <= mySize().ndims()) 
+          super.checkArrayBounds(checkType);
+  }
+  
+  public void InstForClauseE.checkArrayBounds(ErrorCheckType checkType) {
+      checkArrayBoundsInFor(getFAbstractEquationList(), getInstForIndexList(), checkType);
+  }
+  
+  public void InstForStmt.checkArrayBounds(ErrorCheckType checkType) {
+      checkArrayBoundsInFor(getForStmtList(), getInstForIndexList(), checkType);
+  }
+  
+  public void FIterExp.checkArrayBounds(ErrorCheckType checkType) {
+      checkArrayBoundsInFor(getFExp(), getForIndexList(), checkType);
+  }
+  
+  public void ASTNode.checkArrayBoundsInFor(
+          ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
+      // Check array bounds in all except iterChild once
+      for (ASTNode ch : this)
+          if (ch != iterChild)
+              ch.checkArrayBounds(checkType);
+      
+      // Check array bounds in iterChild for each index combination
+      try {
+          indices.getChild(0).checkArrayBoundsForAllIndices(indices, 0, iterChild, checkType);
+      } catch (ConstantEvaluationException e) {
+          // This error is caught elsewhere
+      }
+  }
+    
+  /**
+   * Evaluate statement list over this for index during function evaluation.
+   * 
+   * @param indices  the list of indices too loop for
+   * @param i        next index to handle
+   * @param eqns     the list of equations
+   */
+  public void CommonForIndex.checkArrayBoundsForAllIndices(
+          List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+      throw new UnsupportedOperationException();
+  }
+  
+  public void InstForIndex.checkArrayBoundsForAllIndices(
+          List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+      if (hasFExp()) {
+          InstComponentDecl var = getInstPrimitive();
+          CValue oldVal = var.evaluationValue;
+          boolean last = i == indices.getNumChild() - 1;
+          CommonForIndex next = last ? null : indices.getChild(i + 1);
+          CValueArray ivals = getFExp().ceval().array();
+          for (Index j : ivals.indices()) {
+              var.setEvaluationValue(ivals.getCell(j));
+              if (last) {
+                  child.checkArrayBounds(checkType);
+                  child.flushAllRecursive();
+              } else {
+                  next.checkArrayBoundsForAllIndices(indices, i + 1, child, checkType);
+              }
+          }
+          var.setEvaluationValue(oldVal);
+      }
+  }
+  
   
   public void FExpSubscript.typeCheck(ErrorCheckType checkType) {
 	  if (isInstComponentSize()) 

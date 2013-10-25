@@ -211,7 +211,7 @@ abstract public class TestCase {
      * Available for all test types, but only logical to change for error/warning/compliance tests.
      */
     public void setCheckType(String val) {
-        checkType = ErrorCheckType.valueOf(ErrorCheckType.class, val);
+        checkType = ErrorCheckType.valueOf(ErrorCheckType.class, val.toUpperCase());
     }
     
     /**

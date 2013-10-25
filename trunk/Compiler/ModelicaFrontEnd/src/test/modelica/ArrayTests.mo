@@ -5167,6 +5167,37 @@ end ArrayTests.For.ForEquation3;
 end ForEquation3;
 
 
+// ArrayTests.For.ForEquation4
+model ForEquation4
+    parameter Integer N = 3;
+    Real x[N];
+equation
+    for i in 1:N loop
+        der(x[i]) = if i == 1 then 1 else x[i-1];
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="For_ForEquation4",
+			description="",
+			flatModel="
+fclass ArrayTests.For.ForEquation4
+ parameter Integer N = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ x[3] = 0.0;
+equation
+ der(x[1]) = 1;
+ der(x[2]) = x[1];
+ der(x[3]) = x[2];
+end ArrayTests.For.ForEquation4;
+")})));
+end ForEquation4;
+
 
 model ForInitial1
   parameter Integer N = 3;

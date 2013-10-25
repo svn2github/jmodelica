@@ -236,8 +236,7 @@ aspect ComplianceCheck {
 			compliance("For index without in expression isn't supported");
 		}
 		if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
-			compliance("For index with higher than parameter variability is not "
-					+ "supported in equations and algorithms.");
+			compliance("For index with higher than parameter variability is not supported in equations and algorithms.");
 		}
 	}
 	

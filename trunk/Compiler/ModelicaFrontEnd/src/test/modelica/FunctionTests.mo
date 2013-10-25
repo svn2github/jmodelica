@@ -2155,7 +2155,7 @@ end FunctionTests.AlgorithmFlatten7;
 end AlgorithmFlatten7;
 
 model AlgorithmFlatten8
-Real[3] x;
+  Real[3] x;
 algorithm
   for i in 1:3 loop
     x[1:i] := 1:i;

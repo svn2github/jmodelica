@@ -1197,7 +1197,7 @@ aspect InstClassRestriction {
 	/**
 	 * \brief Is this class a function?
 	 */
-	syn boolean InstClassDecl.isFunction() = false;
+	syn boolean InstNode.isFunction()      = false;
 	eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
 	eq UnknownInstClassDecl.isFunction()   = false;
 	

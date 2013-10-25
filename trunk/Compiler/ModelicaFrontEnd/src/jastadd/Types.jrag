@@ -114,88 +114,8 @@ aspect Types {
   }
   
   
-  // TODO: Shouldn't this be in TypeCheck.jrag?
-  // TODO: Does InstRecord need this?
-  // InstNodes are type checked recursively, which means if a top level component
-  // is type checked, then all sub-components are also type checked. Therefore a flag 
-  // is introduced to detect this situation to avoid duplicate error messages.
-  public boolean InstNode.typeChecked = false;
-  
-  public void InstNode.typeCheck(ErrorCheckType checkType) {
-	     if (!typeChecked) {
-	      	typeChecked = true;
-	      	typeCheckSystemResiduals(checkType);
-	     }
-  }
-  
-  public void InstComposite.typeCheck(ErrorCheckType checkType) {
-     if (!typeChecked) {
-     	typeChecked = true;
-	     // Notice that modifiers (including redeclarations) in a constraining clause
-   	  	 // are applied to the declaration itself and is therefore also type checked.
-		if (hasInstConstraining()) {
-		      InstNode superType = getInstConstraining().getInstNode();
-	     	  InstComponentDecl declaredType = this; 
-    	 	  if (!declaredType.subType(superType))
-     			declaredType.getComponentDecl().error("In the declaration '" +declaredType.getComponentDecl().prettyPrint("") +"', the declared class is not a subtype of the constraining class");
-		}
-  	
-		typeCheckSystemResiduals(checkType);
-  	 }
-  }
-  
   syn lazy InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
   	hasInstConstraining()? (InstComponentDecl)getInstConstraining().getInstNode() : this;
-
-    public void InstReplacingRecord.typeCheck(ErrorCheckType checkType) {
-    	typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
-    }
-
-    public void InstReplacingComposite.typeCheck(ErrorCheckType checkType) {
-    	typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
-    }
-
-    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
-    	if (!typeChecked) {
-    		typeChecked = true;
-     
-    		// Type check the original component
-    		InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-    		if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
-    			superType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
-    					declaredType.getComponentDecl());
-
-    		// The environment should be traversed backwards in order to perform correct
-    		// subtype tests in redeclaration chains.     	
-    		for (int i = myEnvironment().size() - 1; i >= 0; i--) {
-    			InstModification im = myEnvironment().get(i);
-    			InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
-    			if (redeclare != null) { 
-    				InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
-    				InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
-                        
-    				// Check consistency of the redeclaring component
-    				if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
-    					declaredSubType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
-    							declaredSubType.getComponentDecl());
-
-    				// It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
-    				// of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
-    				// follows that declaredSubType is a subtype of superType by transitivity.
-    				if (!constrainingSubType.subType(superType))
-    					constrainingSubType.getComponentDecl().error("In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'", 
-    							constrainingSubType.getComponentDecl(), superType.getComponentDecl());
-                
-    				// If the redeclaring declaration has a constraining clause, the constraining
-    				// type of the redeclaring declaration of should be used in following subtype-test 
-    				// instead of the constraining type of the orignal declaration.
-    				if (declaredSubType.hasInstConstraining()) 
-    					superType = constrainingSubType;
-     			}
-    			typeCheckSystemResiduals(checkType);
-    		}
-    	}
-    }
   
 	public void InstNode.typeCheckSystemResiduals(ErrorCheckType checkType) {
 		if (!root().options.getBooleanOption("hand_guided_tearing"))
@@ -207,6 +127,7 @@ aspect Types {
 			if (enabledExp != null) {
 				FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
 				enabledFExp.collectErrors(checkType);
+				enabledFExp.checkArrayBounds(checkType);
 				try {
 					enabledFExp.ceval().booleanValue();
 				} catch (ConstantEvaluationException e) {
@@ -223,6 +144,7 @@ aspect Types {
 				InstAccess ia = iterationVariableExp.asAccess().instantiate();
 				iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
 				iterationVariable.collectErrors(checkType);
+				iterationVariable.checkArrayBounds(checkType);
 				if (iterationVariable.isUnknown()) {
 					iterationVariable = null;
 				} else {
@@ -243,6 +165,7 @@ aspect Types {
 				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
 				residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
 				residualEquation.collectErrors(checkType);
+				residualEquation.checkArrayBounds(checkType);
 				if (residualEquation.isUnknown())
 					residualEquation = null;
 			}
