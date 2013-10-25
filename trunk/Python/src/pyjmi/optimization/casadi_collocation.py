@@ -1639,7 +1639,7 @@ class LocalDAECollocator(CasadiCollocator):
                     else:
                         is_variant[vr] = False
                         if mode == "attribute":
-                            d = var.getNominal()
+                            d = N.abs(var.getNominal())
                             e = 0.
                         elif mode == "linear":
                             d = max([abs(traj_max), abs(traj_min)])
@@ -1755,7 +1755,7 @@ class LocalDAECollocator(CasadiCollocator):
                 else:
                     is_variant[vr] = False
                     if mode == "attribute":
-                        d = var.getNominal()
+                        d = N.abs(var.getNominal())
                         e = 0.
                     elif mode == "linear":
                         d = max([abs(traj_max), abs(traj_min)])
@@ -1774,7 +1774,7 @@ class LocalDAECollocator(CasadiCollocator):
                             if N.allclose(traj_max, 0.):
                                 d = 1.
                             else:
-                                d = traj_max
+                                d = max([abs(traj_max), abs(traj_min)])
                             e = 0.
                         else:
                             d = traj_max - traj_min
@@ -1791,12 +1791,12 @@ class LocalDAECollocator(CasadiCollocator):
                 is_variant[vr] = False
                 name = var.getName()
                 if name == "startTime":
-                    d = self._denorm_t0_nom
+                    d = N.abs(self._denorm_t0_nom)
                     if N.allclose(d, 0.):
                         d = 1.
                     e = 0.
                 elif name == "finalTime":
-                    d = self._denorm_tf_nom
+                    d = N.abs(self._denorm_tf_nom)
                     if N.allclose(d, 0.):
                         d = 1.
                     e = 0.
@@ -1814,7 +1814,7 @@ class LocalDAECollocator(CasadiCollocator):
                             d = N.abs(nom_val)
                         e = 0.
                     else:
-                        d = data.x[0]
+                        d = N.abs(data.x[0])
                         e = 0.
                 vr_sf_map[vr] = invariant_var.numel()
                 invariant_var.append(var.var())
