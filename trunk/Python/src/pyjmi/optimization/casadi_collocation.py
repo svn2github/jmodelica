@@ -1381,23 +1381,41 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
-            t0 = self.ocp.variable('startTime').getInitialGuess()
-            tf = self.ocp.variable('finalTime').getInitialGuess()
+            t0_init = self.ocp.variable('startTime').getInitialGuess()
+            tf_init = self.ocp.variable('finalTime').getInitialGuess()
             if self.init_traj is not None:
                 try:
                     data = self.init_traj.get_variable_data("startTime")
                 except VariableNotFoundError:
-                    t0 = t0
+                    t0_init = t0_init
                 else:
-                    t0 = data.x[0]
+                    t0_init = data.x[0]
                 try:
                     data = self.init_traj.get_variable_data("finalTime")
                 except VariableNotFoundError:
-                    tf = self.ocp.variable('finalTime').getInitialGuess()
+                    tf_init = tf_init
                 else:
-                    tf = data.x[0]
-            self._denorm_t0 = t0
-            self._denorm_tf = tf
+                    tf_init = data.x[0]
+            self._denorm_t0_init = t0_init
+            self._denorm_tf_init = tf_init
+
+            t0_nom = self.ocp.variable('startTime').getNominal()
+            tf_nom = self.ocp.variable('finalTime').getNominal()
+            if self.nominal_traj is not None:
+                try:
+                    data = self.nominal_traj.get_variable_data("startTime")
+                except VariableNotFoundError:
+                    t0_nom = t0_nom
+                else:
+                    t0_nom = data.x[0]
+                try:
+                    data = self.nominal_traj.get_variable_data("finalTime")
+                except VariableNotFoundError:
+                    tf_nom = tf_nom
+                else:
+                    tf_nom = data.x[0]
+            self._denorm_t0_nom = t0_nom
+            self._denorm_tf_nom = tf_nom
         
         # Create nominal trajectories
         if self.variable_scaling and self.nominal_traj is not None:
@@ -1502,7 +1520,7 @@ class LocalDAECollocator(CasadiCollocator):
                         for k in time_points[i]:
                             tp = time_points[i][k]
                             if self._normalize_min_time:
-                                tp = t0 + (tf - t0) * tp
+                                tp = t0_nom + (tf_nom - t0_nom) * tp
                             val = float(nom_traj[vt][var_index].eval(tp))
                             values[i][k] = val
                             if val < traj_min:
@@ -1624,7 +1642,7 @@ class LocalDAECollocator(CasadiCollocator):
                     for k in time_points[i]:
                         tp = time_points[i][k]
                         if self._normalize_min_time:
-                            tp = t0 + (tf - t0) * tp
+                            tp = t0_nom + (tf_nom - t0_nom) * tp
                         val = float(nom_traj["dx"][var_index].eval(tp))
                         values[i][k] = val
                         if val < traj_min:
@@ -2334,6 +2352,23 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 raise ValueError("Unknown CasADi graph %s." % self.graph)
             
+            # Get start and final time
+            # Not sure if this works if not self._normalize_min_time!
+            t0_var = self.ocp.variable('startTime')
+            tf_var = self.ocp.variable('finalTime')
+            if t0_var.getFree():
+                vr = t0_var.getValueReference()
+                (ind, _) = self._vr_map[vr]
+                t0 = self.var_map['p_opt'][ind]
+            else:
+                t0 = t0_var.getStart()
+            if tf_var.getFree():
+                vr = tf_var.getValueReference()
+                (ind, _) = self._vr_map[vr]
+                tf = self.var_map['p_opt'][ind]
+            else:
+                tf = tf_var.getStart()
+
             # Evaluate Lagrange cost
             for i in xrange(1, self.n_e + 1):
                 for k in xrange(1, self.n_cp + 1):
@@ -2346,7 +2381,7 @@ class LocalDAECollocator(CasadiCollocator):
                     if self.variable_scaling and self.nominal_traj is not None:
                         fcn_input.append(variant_sf[i][k])
                     [lterm_val] = lterm_fcn_eval(fcn_input)
-                    self.cost_lagrange += (self.horizon * self.h[i] *
+                    self.cost_lagrange += ((tf - t0) * self.h[i] *
                                            lterm_val * self.pol.w[k])
         
         # Sum up the two cost terms
@@ -2540,8 +2575,8 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
-            t0 = self._denorm_t0
-            tf = self._denorm_tf
+            t0 = self._denorm_t0_init
+            tf = self._denorm_tf_init
         
         # Set bounds and initial guesses
         for i in xrange(1, self.n_e + 1):
@@ -2979,21 +3014,23 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Denormalize minimum time problem
         if self._normalize_min_time:
-            if self.ocp.variable('startTime').getFree():
-                vr = self.ocp.variable('startTime').getValueReference()
+            t0_var = self.ocp.variable('startTime')
+            tf_var = self.ocp.variable('finalTime')
+            if t0_var.getFree():
+                vr = t0_var.getValueReference()
                 (ind, _) = vr_map[vr]
                 t0 = var_opt['p_opt'][ind]
             else:
-                t0 = self.ocp.t0
-            if self.ocp.variable('finalTime').getFree():
-                vr = self.ocp.variable('finalTime').getValueReference()
+                t0 = t0_var.getStart()
+            if tf_var.getFree():
+                vr = tf_var.getValueReference()
                 (ind, _) = vr_map[vr]
                 tf = var_opt['p_opt'][ind]
             else:
-                tf = self.ocp.tf
+                tf = tf_var.getStart()
             t_opt = t0 + (tf - t0) * t_opt
             var_opt['dx'] /= (tf - t0)
-        
+
         # Return results
         return (t_opt, var_opt['dx'], var_opt['x'], var_opt['merged_u'],
                 var_opt['w'], var_opt['p_opt'])
