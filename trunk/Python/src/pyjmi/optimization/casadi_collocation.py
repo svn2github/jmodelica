@@ -1381,39 +1381,106 @@ class LocalDAECollocator(CasadiCollocator):
         
         # Denormalize time for minimum time problems
         if self._normalize_min_time:
-            t0_init = self.ocp.variable('startTime').getInitialGuess()
-            tf_init = self.ocp.variable('finalTime').getInitialGuess()
-            if self.init_traj is not None:
-                try:
-                    data = self.init_traj.get_variable_data("startTime")
-                except VariableNotFoundError:
-                    t0_init = t0_init
+            t0_var = self.ocp.variable('startTime')
+            tf_var = self.ocp.variable('finalTime')
+            if t0_var.getFree():
+                if self.init_traj is None:
+                    t0_init = t0_var.getInitialGuess()
                 else:
-                    t0_init = data.x[0]
-                try:
-                    data = self.init_traj.get_variable_data("finalTime")
-                except VariableNotFoundError:
-                    tf_init = tf_init
+                    try:
+                        data = self.init_traj.get_variable_data("startTime")
+                    except VariableNotFoundError:
+                        if t0_var.getInitialGuess() == 0.:
+                            print("Warning: Could not find initial guess " +
+                                  "for startTime in initial trajectories. " +
+                                  "Using end-point of provided time horizon " +
+                                  "instead.")
+                            t0_init = self.init_traj.get_variable_data(
+                                    "time").t[0]
+                        else:
+                            print("Warning: Could not find initial guess " +
+                                  "for startTime in initial trajectories. " +
+                                  "Using initialGuess attribute value " +
+                                  "instead.")
+                            t0_init = t0_var.getInitialGuess()
+                    else:
+                        t0_init = data.x[0]
+                if self.nominal_traj is None:
+                    t0_nom = t0_var.getNominal()
                 else:
-                    tf_init = data.x[0]
+                    try:
+                        mode = self.nominal_traj_mode["startTime"]
+                    except KeyError:
+                        mode = self.nominal_traj_mode["_default_mode"]
+                    if mode == "attribute":
+                        t0_nom = t0_var.getNominal()
+                    else:
+                        try:
+                            data = self.nominal_traj.get_variable_data(
+                                    "startTime")
+                        except VariableNotFoundError:
+                            print("Warning: Could not find nominal value " +
+                                  "for startTime in nominal trajectories. " +
+                                  "Using end-point of provided time horizon " +
+                                  "instead.")
+                            t0_nom = self.nominal_traj.get_variable_data(
+                                    "time").t[0]
+                        else:
+                            t0_nom = data.x[0]
+            else:
+                t0_init = t0_var.getStart()
+                t0_nom = t0_var.getStart()
+                assert tf_var.getFree(), \
+                       "Bug: Time should not have been normalized"
+            if tf_var.getFree():
+                if self.init_traj is None:
+                    tf_init = tf_var.getInitialGuess()
+                else:
+                    try:
+                        data = self.init_traj.get_variable_data("finalTime")
+                    except VariableNotFoundError:
+                        if tf_var.getInitialGuess() == 1.:
+                            print("Warning: Could not find initial guess " +
+                                  "for finalTime in initial trajectories. " +
+                                  "Using end-point of provided time horizon " +
+                                  "instead.")
+                            tf_init = self.init_traj.get_variable_data(
+                                    "time").t[-1]
+                        else:
+                            print("Warning: Could not find initial guess " +
+                                  "for finalTime in initial trajectories. " +
+                                  "Using initialGuess attribute value " +
+                                  "instead.")
+                            tf_init = tf_var.getInitialGuess()
+                    else:
+                        tf_init = data.x[0]
+                if self.nominal_traj is None:
+                    tf_nom = tf_var.getNominal()
+                else:
+                    try:
+                        mode = self.nominal_traj_mode["finalTime"]
+                    except KeyError:
+                        mode = self.nominal_traj_mode["_default_mode"]
+                    if mode == "attribute":
+                        tf_nom = tf_var.getNominal()
+                    else:
+                        try:
+                            data = self.nominal_traj.get_variable_data(
+                                    "finalTime")
+                        except VariableNotFoundError:
+                            print("Warning: Could not find nominal value " +
+                                  "for finalTime in nominal trajectories. " +
+                                  "Using end-point of provided time horizon " +
+                                  "instead.")
+                            tf_nom = self.nominal_traj.get_variable_data(
+                                    "time").t[0]
+                        else:
+                            tf_nom = data.x[0]
+            else:
+                tf_init = tf_var.getStart()
+                tf_nom = tf_var.getStart()
             self._denorm_t0_init = t0_init
             self._denorm_tf_init = tf_init
-
-            t0_nom = self.ocp.variable('startTime').getNominal()
-            tf_nom = self.ocp.variable('finalTime').getNominal()
-            if self.nominal_traj is not None:
-                try:
-                    data = self.nominal_traj.get_variable_data("startTime")
-                except VariableNotFoundError:
-                    t0_nom = t0_nom
-                else:
-                    t0_nom = data.x[0]
-                try:
-                    data = self.nominal_traj.get_variable_data("finalTime")
-                except VariableNotFoundError:
-                    tf_nom = tf_nom
-                else:
-                    tf_nom = data.x[0]
             self._denorm_t0_nom = t0_nom
             self._denorm_tf_nom = tf_nom
         
@@ -1723,21 +1790,32 @@ class LocalDAECollocator(CasadiCollocator):
                 (var_index, _) = vr_map[vr]
                 is_variant[vr] = False
                 name = var.getName()
-                try:
-                    data = self.nominal_traj.get_variable_data(name)
-                except VariableNotFoundError:
-                    print("Warning: Could not find nominal trajectory " +
-                          "for variable " + name + ". Using nominal " +
-                          "attribute value instead.")
-                    nom_val = var.getNominal()
-                    if nom_val is None:
+                if name == "startTime":
+                    d = self._denorm_t0_nom
+                    if N.allclose(d, 0.):
                         d = 1.
-                    else:
-                        d = N.abs(nom_val)
+                    e = 0.
+                elif name == "finalTime":
+                    d = self._denorm_tf_nom
+                    if N.allclose(d, 0.):
+                        d = 1.
                     e = 0.
                 else:
-                    d = data.x[0]
-                    e = 0.
+                    try:
+                        data = self.nominal_traj.get_variable_data(name)
+                    except VariableNotFoundError:
+                        print("Warning: Could not find nominal trajectory " +
+                              "for variable " + name + ". Using nominal " +
+                              "attribute value instead.")
+                        nom_val = var.getNominal()
+                        if nom_val is None:
+                            d = 1.
+                        else:
+                            d = N.abs(nom_val)
+                        e = 0.
+                    else:
+                        d = data.x[0]
+                        e = 0.
                 vr_sf_map[vr] = invariant_var.numel()
                 invariant_var.append(var.var())
                 invariant_d.append(d)
@@ -2353,7 +2431,6 @@ class LocalDAECollocator(CasadiCollocator):
                 raise ValueError("Unknown CasADi graph %s." % self.graph)
             
             # Get start and final time
-            # Not sure if this works if not self._normalize_min_time!
             t0_var = self.ocp.variable('startTime')
             tf_var = self.ocp.variable('finalTime')
             if t0_var.getFree():
@@ -2515,13 +2592,18 @@ class LocalDAECollocator(CasadiCollocator):
             # Handle initial guess
             var_init = var.getInitialGuess()
             if self.init_traj is not None:
-                name = var.getName() 
-                try: 
-                    data = self.init_traj.get_variable_data(name) 
-                except VariableNotFoundError: 
-                    pass
-                else: 
-                    var_init = data.x[0] 
+                name = var.getName()
+                if name == "startTime":
+                    var_init = self._denorm_t0_init
+                elif name == "finalTime":
+                    var_init = self._denorm_tf_init
+                else:
+                    try: 
+                        data = self.init_traj.get_variable_data(name) 
+                    except VariableNotFoundError: 
+                        pass
+                    else: 
+                        var_init = data.x[0] 
             p_init[var_index] = var_init / sf
         xx_lb[var_indices['p_opt']] = p_min
         xx_ub[var_indices['p_opt']] = p_max
@@ -2538,19 +2620,27 @@ class LocalDAECollocator(CasadiCollocator):
                     data_matrix = N.empty([n, len(var_vectors[vt])])
                     (var_index, _) = vr_map[var.getValueReference()]
                     name = var.getName()
-                    try:
-                        data = self.init_traj.get_variable_data(name)
-                    except VariableNotFoundError:
-                        print("Warning: Could not find initial trajectory " + \
-                              "for variable " + name + ". Using " + 
-                              "initialGuess attribute value instead.")
+                    if name == "startTime":
                         abscissae = N.array([0])
-                        ordinates = N.array([[var.getInitialGuess()]])
+                        ordinates = N.array([[self._denorm_t0_init]])
+                    elif name == "finalTime":
+                        abscissae = N.array([0])
+                        ordinates = N.array([[self._denorm_tf_init]])
                     else:
-                        abscissae = data.t
-                        ordinates = data.x.reshape([-1, 1])
-                    traj[vt][var_index] = \
-                            TrajectoryLinearInterpolation(abscissae, ordinates)
+                        try:
+                            data = self.init_traj.get_variable_data(name)
+                        except VariableNotFoundError:
+                            print("Warning: Could not find initial " +
+                                  "trajectory for variable " + name +
+                                  ". Using initialGuess attribute value " +
+                                  "instead.")
+                            ordinates = N.array([[var.getInitialGuess()]])
+                            abscissae = N.array([0])
+                        else:
+                            abscissae = data.t
+                            ordinates = data.x.reshape([-1, 1])
+                        traj[vt][var_index] = \
+                                TrajectoryLinearInterpolation(abscissae, ordinates)
                     
                     # Treat derivatives separately
                     if vt == "x":
