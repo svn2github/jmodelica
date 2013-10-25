@@ -2249,9 +2249,8 @@ aspect MapWhenClauses{
 		 	}
 		}
 		
-		if (eqn==null) {
-			return null;
-		}
+		if (eqn==null)
+			throw new UnsupportedOperationException("Failed to split when equation on variable '" + varName + "'\n" + this);
 		
 		List eqns = new List().add(eqn);
 		
@@ -2273,6 +2272,8 @@ aspect MapWhenClauses{
 		 		for (FIdUseExp n : e.simpleLefts()) {
 		 			l.add(createSimpleIfWhenElseEquation(n.name(),i!=0));
 		 		}
+		 	} else {
+		 	    e.compliance("Only scalar equations are supported in when equations");
 		 	}
 		 	i++;
 		}	
