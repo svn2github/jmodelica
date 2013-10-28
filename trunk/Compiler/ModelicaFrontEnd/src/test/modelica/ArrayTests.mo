@@ -5167,7 +5167,6 @@ end ArrayTests.For.ForEquation3;
 end ForEquation3;
 
 
-// ArrayTests.For.ForEquation4
 model ForEquation4
     parameter Integer N = 3;
     Real x[N];
@@ -5496,6 +5495,28 @@ fclass ArrayTests.Slices.MixedIndices2
 end ArrayTests.Slices.MixedIndices2;
 ")})));
 end MixedIndices2;
+
+
+model EmptySlice1
+    model A
+        Real x;
+    end A;
+    
+    parameter Integer n = 0;
+    A a[n];
+    Real y[n] = a.x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Slices_EmptySlice1",
+			description="Slice in empty array of components",
+			flatModel="
+fclass ArrayTests.Slices.EmptySlice1
+ parameter Integer n = 0 /* 0 */;
+ Real y[0] = a[1:0].x;
+end ArrayTests.Slices.EmptySlice1;
+")})));
+end EmptySlice1;
 
 end Slices;
 

@@ -600,6 +600,7 @@ aspect Flattening {
 	 * Check if this component should be considered during flattening.
 	 */
 	syn boolean InstComponentDecl.useInFlattening() = !isDisabled() && !(isOuter() && !isInner());
+	eq InstArrayComponentDecl.useInFlattening()     = getIndex() > 0 && super.useInFlattening();
 	
 	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
 		if (useInFlattening()) 

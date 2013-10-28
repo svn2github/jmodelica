@@ -678,9 +678,9 @@ aspect InstanceTreeConstruction {
 			// Only the first FSubscript is used to create the first layer
 			// of InstaArrayComponentDecls. The remaining are used when
 			// InstArrayComponentDecls are created further down in the tree.
-			//for (int i : getFArraySubscripts().getFSubscript(0).arrayIndices()) 
+			// For a zero length, create a dummy node with index 0 
 			int n = size().get(0);
-			for (int i = 1; i <= n; i++)
+			for (int i = (n == 0) ? 0 : 1; i <= n; i++)
 				l.add(createInstArrayComponentDecl(i));
 			return l;
 		} else { // If not array, then proceed as usual
@@ -694,7 +694,8 @@ aspect InstanceTreeConstruction {
 		List l = new List();
 		if (n > 0) {
 			// Loop over indices and create new InstArrayComponentDecls
-			for (int i = 1; i <= n; i++)
+            // For a zero length, create a dummy node with index 0 
+			for (int i = (n == 0) ? 0 : 1; i <= n; i++)
 				l.add(createInstArrayComponentDecl(i));
 		} else {
 			for (ComponentDecl cd : components()) 
