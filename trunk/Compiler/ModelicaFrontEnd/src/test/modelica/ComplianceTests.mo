@@ -636,7 +636,6 @@ model Error1
     output Real y[size(x,2),2];
   algorithm
     c := cat(2,x,x); // Concat unknown size.
-	x := c[:,1:size(x,2)]; // Slice unknown size.
 	known := x; // Assign unknown to known size.
 	x := known; // Assign known to unknown size.
 	
@@ -664,9 +663,6 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 684, column 10:
   Unknown size arg in operator cat() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 685, column 7:
-  Unknown size slice is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 686, column 2:
   Assigning an expression of unknown size to an operand of known size is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
@@ -675,9 +671,6 @@ Compliance error at line 687, column 2:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 689, column 6:
   Unknown size array as a for index is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 689, column 11:
-  Unknown size slice is not supported in functions
 ")})));
 end Error1;
 
@@ -760,6 +753,10 @@ model ArrayIterTest
 Error: in file '...':
 Semantic error at line 0, column 0:
   Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Unknown size array expressions are not supported
 
 Error: in file '...':
 Compliance error at line 0, column 0:

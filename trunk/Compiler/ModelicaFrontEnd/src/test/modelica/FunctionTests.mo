@@ -3826,6 +3826,152 @@ end FunctionTests.ArrayExpInFunc9;
 ")})));
 end ArrayExpInFunc9;
 
+model ArrayExpInFunc10
+function f
+	input Real[:,2] a;
+	output Real[size(a,1)] b;
+algorithm
+	b := a[:,2];
+end f;
+	Real[3,2] x = {{1,2},{3,4},{5,6}};
+	Real y[3];
+equation
+	y = f(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc10",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc10
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ ({y[1], y[2], y[3]}) = FunctionTests.ArrayExpInFunc10.f({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}, {x[3,1], x[3,2]}});
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
+
+public
+ function FunctionTests.ArrayExpInFunc10.f
+  input Real[:, 2] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(a, 1) loop
+   b[i1] := a[i1,2];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc10.f;
+
+end FunctionTests.ArrayExpInFunc10;
+
+")})));
+end ArrayExpInFunc10;
+
+model ArrayExpInFunc11
+	
+record R
+	Real x;
+end R;
+function f
+	input Real[2,:,2] a;
+	output Real[3,size(a,2)] b;
+algorithm
+	b[1,:] := a[2,:,1];
+	b[{2,3},:] := 2*a[:,:,1];
+end f;
+	constant Real[3,2] c = {{1,1},{1,1},{1,1}};
+	Real[2,3,2] x = {c,c};
+	Real y[3,3];
+equation
+	y = f(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc11",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc11
+ constant Real c[1,1] = 1;
+ constant Real c[1,2] = 1;
+ constant Real c[2,1] = 1;
+ constant Real c[2,2] = 1;
+ constant Real c[3,1] = 1;
+ constant Real c[3,2] = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[1,3,1];
+ Real x[1,3,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real x[2,3,1];
+ Real x[2,3,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[3,3];
+equation
+ ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}, {y[3,1], y[3,2], y[3,3]}}) = FunctionTests.ArrayExpInFunc11.f({{{x[1,1,1], x[1,1,2]}, {x[1,2,1], x[1,2,2]}, {x[1,3,1], x[1,3,2]}}, {{x[2,1,1], x[2,1,2]}, {x[2,2,1], x[2,2,2]}, {x[2,3,1], x[2,3,2]}}});
+ x[1,1,1] = 1.0;
+ x[1,1,2] = 1.0;
+ x[1,2,1] = 1.0;
+ x[1,2,2] = 1.0;
+ x[1,3,1] = 1.0;
+ x[1,3,2] = 1.0;
+ x[2,1,1] = 1.0;
+ x[2,1,2] = 1.0;
+ x[2,2,1] = 1.0;
+ x[2,2,2] = 1.0;
+ x[2,3,1] = 1.0;
+ x[2,3,2] = 1.0;
+
+public
+ function FunctionTests.ArrayExpInFunc11.f
+  input Real[2, :, 2] a;
+  output Real[3, size(a, 2)] b;
+  Integer[2] temp_1;
+ algorithm
+  for i1 in 1:size(a, 2) loop
+   b[1,i1] := a[2,i1,1];
+  end for;
+  temp_1[1] := 2;
+  temp_1[2] := 3;
+  for i1 in 1:2 loop
+   for i2 in 1:size(a, 2) loop
+    b[temp_1[i1],i2] := 2 * a[i1,i2,1];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc11.f;
+
+end FunctionTests.ArrayExpInFunc11;
+
+")})));
+end ArrayExpInFunc11;
+
 
 
 model ArrayOutputScalarization1
@@ -4707,7 +4853,7 @@ public
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
  algorithm
-  for i1 in 1:size(x2, 1) loop
+  for i1 in 1:size(a2, 1) loop
    x2[i1] := 2 * a2[i1];
   end for;
   return;
@@ -4768,7 +4914,7 @@ public
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
  algorithm
-  for i1 in 1:size(x2, 1) loop
+  for i1 in 1:size(a2, 1) loop
    x2[i1] := 2 * a2[i1];
   end for;
   return;
@@ -5535,14 +5681,14 @@ fclass FunctionTests.UnknownArray10
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray10.f({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray10.f({1,2});
 
 public
  function FunctionTests.UnknownArray10.f
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := a[i1];
   end for;
   return;
@@ -5573,14 +5719,14 @@ fclass FunctionTests.UnknownArray11
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray11.f({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray11.f({1,2});
 
 public
  function FunctionTests.UnknownArray11.f
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := a[i1];
   end for;
   return;
@@ -5623,7 +5769,7 @@ public
   input Real c;
   output Real[size(a, 1)] o;
  algorithm
-  for i1 in 1:size(o, 1) loop
+  for i1 in 1:size(a, 1) loop
    o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
@@ -5665,7 +5811,7 @@ public
   input Real c;
   output Real[size(a, 1)] o;
  algorithm
-  for i1 in 1:size(o, 1) loop
+  for i1 in 1:size(a, 1) loop
    o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
@@ -5707,8 +5853,8 @@ public
   output Real[size(a, 1), size(b, 2)] o;
   Real temp_1;
  algorithm
-  for i1 in 1:size(o, 1) loop
-   for i2 in 1:size(o, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_1 := 0.0;
     for i3 in 1:size(a, 2) loop
      temp_1 := temp_1 + a[i1,i3] * b[i3,i2];
@@ -5855,8 +6001,8 @@ public
   Real temp_1;
   Real temp_2;
  algorithm
-  for i1 in 1:size(o, 1) loop
-   for i2 in 1:size(o, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(c, 2) loop
     temp_1 := 0.0;
     for i3 in 1:size(b, 2) loop
      temp_2 := 0.0;
@@ -6145,8 +6291,8 @@ public
   Real temp_1;
   Integer[2, 2] temp_2;
  algorithm
-  for i1 in 1:size(y, 1) loop
-   for i2 in 1:size(y, 2) loop
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:2 loop
     temp_1 := 0.0;
     for i3 in 1:2 loop
      temp_2[1,1] := 1;
@@ -6457,7 +6603,7 @@ public
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := 2 * a[i1];
   end for;
   return;
@@ -6499,10 +6645,8 @@ public
   Real temp_1;
  algorithm
   size(c) := {1, size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   for i2 in 1:size(c, 2) loop
-    c[i1,i2] := 2 * a[i1,i2];
-   end for;
+  for i1 in 1:size(a, 1) loop
+   c[1,i1] := 2 * a[i1];
   end for;
   temp_1 := 0.0;
   for i1 in 1:1 loop
@@ -8059,12 +8203,12 @@ public
   Real[:] work;
  algorithm
   size(work) := {3 * size(A, 2)};
-  for i1 in 1:size(QR, 1) loop
-   for i2 in 1:size(QR, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     QR[i1,i2] := A[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(p, 1) loop
+  for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
   lda := max(1, size(A, 1));
@@ -8131,12 +8275,12 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
    (Q, tau) := Modelica.Math.Matrices.LAPACK.dgeqrf(A);
-   for i1 in 1:size(p, 1) loop
+   for i1 in 1:ncol loop
     p[i1] := i1;
    end for;
   end if;
-  for i1 in 1:size(R, 1) loop
-   for i2 in 1:size(R, 2) loop
+  for i1 in 1:ncol loop
+   for i2 in 1:ncol loop
     R[i1,i2] := 0;
    end for;
   end for;
@@ -8160,12 +8304,12 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Real[:] work;
  algorithm
   size(work) := {3 * size(A, 2)};
-  for i1 in 1:size(QR, 1) loop
-   for i2 in 1:size(QR, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     QR[i1,i2] := A[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(p, 1) loop
+  for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
   lda := max(1, size(A, 1));
@@ -8185,8 +8329,8 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Integer lda;
   Integer lwork;
  algorithm
-  for i1 in 1:size(Aout, 1) loop
-   for i2 in 1:size(Aout, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     Aout[i1,i2] := A[i1,i2];
    end for;
   end for;
@@ -8208,8 +8352,8 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Real[:] work;
  algorithm
   size(work) := {max(1, min(10, size(QR, 2)) * size(QR, 2))};
-  for i1 in 1:size(Q, 1) loop
-   for i2 in 1:size(Q, 2) loop
+  for i1 in 1:size(QR, 1) loop
+   for i2 in 1:size(QR, 2) loop
     Q[i1,i2] := QR[i1,i2];
    end for;
   end for;

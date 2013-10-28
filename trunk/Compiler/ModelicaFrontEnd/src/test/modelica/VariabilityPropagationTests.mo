@@ -758,11 +758,11 @@ no or infinitely many solutions (A is singular).\");
  algorithm
   size(Awork) := {size(A, 1), size(A, 1)};
   size(ipiv) := {size(A, 1)};
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:size(A, 1) loop
    x[i1] := b[i1];
   end for;
-  for i1 in 1:size(Awork, 1) loop
-   for i2 in 1:size(Awork, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 1) loop
     Awork[i1,i2] := A[i1,i2];
    end for;
   end for;

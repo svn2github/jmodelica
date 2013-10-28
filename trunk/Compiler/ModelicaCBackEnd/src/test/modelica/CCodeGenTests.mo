@@ -2850,7 +2850,7 @@ void func_CCodeGenTests_CUnknownArray1_f_def(jmi_array_t* a_a, jmi_array_t* b_a,
         JMI_ARRAY_DYNAMIC_INIT_1(o_an, jmi_array_size(a_a, 0), jmi_array_size(a_a, 0))
         o_a = o_an;
     }
-    i1_0ie = jmi_array_size(o_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(a_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(o_a, i1_0i) = jmi_array_val_1(a_a, i1_0i) + jmi_array_val_1(b_a, i1_0i);
     }
@@ -2897,9 +2897,9 @@ void func_CCodeGenTests_CUnknownArray2_f_def(jmi_array_t* x_a, jmi_array_t* y_a)
         JMI_ARRAY_DYNAMIC_INIT_2(y_an, jmi_array_size(x_a, 0) * 2, jmi_array_size(x_a, 0), 2)
         y_a = y_an;
     }
-    i1_0ie = jmi_array_size(y_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
-        i2_1ie = jmi_array_size(y_a, 1) + 1 / 2.0;
+        i2_1ie = 2 + 1 / 2.0;
         for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
             temp_1_v = 0.0;
             i3_2ie = 2 + 1 / 2.0;
@@ -3004,7 +3004,7 @@ void func_CCodeGenTests_CUnknownArray3_f2_def(jmi_array_t* x2_a, jmi_array_t* y2
         JMI_ARRAY_DYNAMIC_INIT_1(y2_an, jmi_array_size(x2_a, 0), jmi_array_size(x2_a, 0))
         y2_a = y2_an;
     }
-    i1_1ie = jmi_array_size(y2_a, 0) + 1 / 2.0;
+    i1_1ie = jmi_array_size(x2_a, 0) + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         jmi_array_ref_1(y2_a, i1_1i) = jmi_array_val_1(x2_a, i1_1i);
     }
@@ -10091,13 +10091,13 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def(jmi_array_t* A_a, jmi_arra
     }
     JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
-    i1_1ie = jmi_array_size(Awork_a, 0) + 1 / 2.0;
+    i1_1ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
-        i2_2ie = jmi_array_size(Awork_a, 1) + 1 / 2.0;
+        i2_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
         for (i2_2i = 1; i2_2i < i2_2ie; i2_2i += 1) {
             jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
         }
@@ -10189,16 +10189,16 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def(jmi_array_t* A_a, jmi_array_t*
     }
     JMI_ARRAY_DYNAMIC_INIT_2(Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     JMI_ARRAY_DYNAMIC_INIT_1(ipiv_a, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    i1_0ie = jmi_array_size(X_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
-        i2_1ie = jmi_array_size(X_a, 1) + 1 / 2.0;
+        i2_1ie = jmi_array_size(B_a, 1) + 1 / 2.0;
         for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
             jmi_array_ref_2(X_a, i1_0i, i2_1i) = jmi_array_val_2(B_a, i1_0i, i2_1i);
         }
     }
-    i1_2ie = jmi_array_size(Awork_a, 0) + 1 / 2.0;
+    i1_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
-        i2_3ie = jmi_array_size(Awork_a, 1) + 1 / 2.0;
+        i2_3ie = jmi_array_size(A_a, 0) + 1 / 2.0;
         for (i2_3i = 1; i2_3i < i2_3ie; i2_3i += 1) {
             jmi_array_ref_2(Awork_a, i1_2i, i2_3i) = jmi_array_val_2(A_a, i1_2i, i2_3i);
         }

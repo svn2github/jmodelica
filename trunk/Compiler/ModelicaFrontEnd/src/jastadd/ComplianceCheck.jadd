@@ -142,6 +142,11 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The " + name() + "() function-like operator is");
 	}
 	
+	public void FArray.complianceCheck(ErrorCheckType checkType) {
+		if (size().isUnknown())
+			compliance("Unknown size array expressions are not supported");
+	}
+	
 	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
 		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.HOMOTOPY) {
 			warning("The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.");
@@ -217,13 +222,6 @@ aspect ComplianceCheck {
 					compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
 				}
 			}
-		}
-	}
-	
-	public void InstComponentArrayAccess.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (isSlice() && size().isUnknown() && inFunction()) {
-			compliance("Unknown size slice is not supported in functions");
 		}
 	}
 	

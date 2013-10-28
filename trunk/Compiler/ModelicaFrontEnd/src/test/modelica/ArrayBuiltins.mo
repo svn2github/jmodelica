@@ -2787,7 +2787,7 @@ public
   input Real eps;
   output Real[size(v, 1)] result;
  algorithm
-  for i1 in 1:size(result, 1) loop
+  for i1 in 1:size(v, 1) loop
    result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
   end for;
   return;
