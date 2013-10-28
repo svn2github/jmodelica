@@ -378,7 +378,7 @@ aspect StructuralParams {
 	public void FSubscript.markAsStructuralParameter() {}
 	public void FExpSubscript.markAsStructuralParameter() {
 		getFExp().markAsStructuralParameter();
-	}
+	}  
 
 	
 	public void ASTNode.markUsesAsStructuralParameter() {
@@ -410,6 +410,10 @@ aspect StructuralParams {
 	public void InstAssignable.markAsStructuralParameter() {
 		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
+		if (!fixedAttributeCValue().reduceBooleanOr()) {
+		    compliance("Parameters with fixed=false can not be marked as structural parameter");
+		    return;
+		}
 		isStructuralParam = true;
 		// Flush cache for variability()
 		variability_computed = false;
