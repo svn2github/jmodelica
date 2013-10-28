@@ -1190,7 +1190,7 @@ aspect Scalarization {
 	protected void FType.scalarizeScalarAssignment(
 			List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
-		stmts.add(new FAssignStmt((FIdUseExp) left.scalarize(indexMap), right.scalarize(indexMap)));
+		stmts.add(new FAssignStmt((FIdUseExp) left.scalarizeExp(indexMap), right.scalarize(indexMap)));
 	}
 	
 	/**
