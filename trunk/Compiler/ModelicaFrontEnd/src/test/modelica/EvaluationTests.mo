@@ -1017,6 +1017,29 @@ end EvaluationTests.EvaluateAnnotation3;
 ")})));
 end EvaluateAnnotation3;
 
+model EvaluateAnnotation4
+    model A
+        parameter Real p = 2 annotation(Evaluate=true);
+    end A;
+    A a(p=p);
+    parameter Real p(fixed=false) annotation (Evaluate=true);
+initial equation
+    p = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation4",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation4
+ parameter Real a.p = p;
+ parameter Real p(fixed = false);
+initial equation 
+ p = 1;
+end EvaluationTests.EvaluateAnnotation4;
+")})));
+end EvaluateAnnotation4;
+
 model EvalColonSizeCell
     function f
         input Real[:] x;
