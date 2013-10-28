@@ -310,6 +310,22 @@ aspect ConstantEvaluation {
         	}
         };
 		
+        /**
+         * Reduce an array of constant boolean values to a single boolean that is the logical 
+         * and of the array.
+         * 
+         * Used for evaluation of fixed=false parameters when evalute=true.
+         */
+        public boolean reduceBooleanAnd() {
+            return reduce(AND_OPERATION, CValueBoolean.TRUE).booleanValue();
+        }
+        
+        private static final BinaryOperation<CValue> AND_OPERATION = new BinaryOperation<CValue>() {
+            public CValue op(CValue x, CValue y) {
+                return (x.booleanValue() && y.booleanValue()) ? CValueBoolean.TRUE : CValueBoolean.FALSE;
+            }
+        };
+        
 		/**
 		 * \brief Returns the array size of this constant value.
 		 */
@@ -1729,6 +1745,39 @@ aspect ConstantEvaluation {
 			return getInstModification().getInstValueMod().instValueMod();
 		return null;
 	}
+
+    /**
+     * \brief Find and evaluate the "fixed" attribute. If it is not found, use default value.
+     */
+    syn CValue InstAssignable.fixedAttributeCValue() {
+        for (InstModification im : totalMergedEnvironment()) {
+            FExp exp = im.findFixedAttribute();
+            if (exp != null)
+                return exp.ceval();
+        }
+        
+        CValue res = new CValueBoolean(true);
+        if (isArray()) {
+            CValueArray array = new CValueArray(size());
+            for (Index i : indices())
+                array.setCell(i, res);
+            res = array;
+        }
+        return res;
+    }
+    
+    /**
+     * \brief Find the expression for the fixed attribute.
+     */
+    public FExp InstModification.findFixedAttribute() { 
+        return null;
+    }
+    
+    public FExp InstComponentModification.findFixedAttribute() {
+        if (getName().name().equals("fixed") && getInstModification().hasInstValueMod())
+            return getInstModification().getInstValueMod().instValueMod();
+        return null;
+    }
 
 	/**
 	 * \brief Constant evaluation of FVariable binding expressions.

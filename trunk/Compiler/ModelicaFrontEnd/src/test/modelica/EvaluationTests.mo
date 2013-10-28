@@ -952,24 +952,70 @@ x = if a[1,1] > a[1,2] then true else false;
 end ParameterEval1;
 
 
-model EvaluateAnnotation
+model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
 	Real c = a + b;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
-			name="EvaluateAnnotation",
+			name="EvaluateAnnotation1",
 			description="Check that annotation(Evaluate=true) is honored",
 			flatModel="
-fclass EvaluationTests.EvaluateAnnotation
+fclass EvaluationTests.EvaluateAnnotation1
  parameter Real a = 1.0 /* 1.0 */;
  parameter Real b = 1.0 /* 1.0 */;
  Real c = 1.0 + 1.0;
-end EvaluationTests.EvaluateAnnotation;
+end EvaluationTests.EvaluateAnnotation1;
 ")})));
-end EvaluateAnnotation;
+end EvaluateAnnotation1;
 
+model EvaluateAnnotation2
+    parameter Real p(fixed=false) annotation (Evaluate=true);
+initial equation
+    p = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation2",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation2
+ parameter Real p(fixed = false);
+initial equation 
+ p = 1;
+end EvaluationTests.EvaluateAnnotation2;
+"), WarningTestCase(
+            name="EvaluateAnnotation2_Warn",
+            description="Check that a warning is given when annotation(Evaluate=true) and fixed equals false",
+            errorMessage="
+Warning: in file '...':
+At line 0, column 0:
+  Evaluate annotation is ignored when fixed equals false
+
+Warning: in file '...':
+At line 0, column 0:
+  The parameter p does not have a binding expression
+")})));
+end EvaluateAnnotation2;
+
+model EvaluateAnnotation3
+    parameter Real p[2](fixed={false, true}) annotation (Evaluate=true);
+initial equation
+    p[1] = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation3",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation3
+ parameter Real p[2](fixed = {false, true});
+initial equation 
+ p[1] = 1;
+end EvaluationTests.EvaluateAnnotation3;
+")})));
+end EvaluateAnnotation3;
 
 model EvalColonSizeCell
     function f
