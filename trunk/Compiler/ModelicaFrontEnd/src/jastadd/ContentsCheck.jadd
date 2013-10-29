@@ -410,7 +410,7 @@ aspect StructuralParams {
 	public void InstAssignable.markAsStructuralParameter() {
 		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
-		if (!fixedAttributeCValue().reduceBooleanOr()) {
+		if (indices().numElements() > 0 && !fixedAttributeCValue().reduceBooleanOr()) {
 		    compliance("Parameters with fixed=false can not be marked as structural parameter");
 		    return;
 		}
