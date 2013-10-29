@@ -786,6 +786,20 @@ aspect Scalarization {
 		}
 		
 		/**
+		 * \brief Pushes a copy of the top layer with first and second names switched
+		 */
+		public void createTransposedLayer() {
+			String[] lay = topLayer();
+			addLayer(lay.length);
+			for (int i = 0; i < lay.length; i++) {
+				promote(i);
+			}
+			topLayer()[0] = lay[1];
+			topLayer()[1] = lay[0];
+			
+		}
+		
+		/**
 		 * Creates nestled for loops using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
@@ -951,6 +965,12 @@ aspect Scalarization {
 		for (int i = 0; i < n; i++)
 			indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
 		super.addArrayUsesToIndexMap(indexMap, names);
+	}
+	
+	public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+		names.createTransposedLayer();
+		super.addArrayUsesToIndexMap(indexMap, names);
+		names.removeLayer();
 	}
 	
 	public void FIterExp.createArrayTemporaries(List clauses, List vars, 
@@ -2314,6 +2334,8 @@ aspect Scalarization {
 	public FExp FMathematicalFunctionCall.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FAtan2Exp.scalarizeExp(Map<String,FExp> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
 	public FExp FUnaryBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
+	public FExp FTranspose.scalarizeExp(Map<String,FExp> indexMap)    { return getFExp().scalarize(indexMap); }
+	
 	public FExp FNoArgBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createEmptyNode(); }
 	public FExp FEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap)); }
 	public FExp FBinEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap),getY().scalarize(indexMap)); }

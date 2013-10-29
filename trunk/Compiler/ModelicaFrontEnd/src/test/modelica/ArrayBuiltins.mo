@@ -1303,6 +1303,154 @@ end ArrayBuiltins.Transpose.Transpose8;
 ")})));
 end Transpose8;
 
+model Transpose9
+	function f
+		input Real[:,:] a;
+		output Real[size(a,2),size(a,1)] b;
+	algorithm
+		b := transpose(a);
+	end f;
+	
+	Real[2,3] x = f({{1,3},{5,7},{9,11}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Transpose_Transpose9",
+			description="Scalarization of transpose operator: unknown size",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Transpose.Transpose9
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+equation
+ ({{x[1,1], x[1,2], x[1,3]}, {x[2,1], x[2,2], x[2,3]}}) = ArrayBuiltins.Transpose.Transpose9.f({{1, 3}, {5, 7}, {9, 11}});
+
+public
+ function ArrayBuiltins.Transpose.Transpose9.f
+  input Real[:, :] a;
+  output Real[size(a, 2), size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(a, 2) loop
+   for i2 in 1:size(a, 1) loop
+    b[i1,i2] := a[i2,i1];
+   end for;
+  end for;
+  return;
+ end ArrayBuiltins.Transpose.Transpose9.f;
+
+end ArrayBuiltins.Transpose.Transpose9;
+
+")})));
+end Transpose9;
+
+model Transpose10
+	function f
+		input Real[:,:,:] a;
+		output Real[size(a,2),size(a,1),size(a,3)] b;
+	algorithm
+		b := transpose(a);
+	end f;
+	
+	Real[2,3,2] x = f({{{1,2},{3,4}},{{5,6},{7,8}},{{9,10},{11,12}}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Transpose_Transpose10",
+			description="Scalarization of transpose operator: unknown size",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Transpose.Transpose10
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[1,3,1];
+ Real x[1,3,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real x[2,3,1];
+ Real x[2,3,2];
+equation
+ ({{{x[1,1,1], x[1,1,2]}, {x[1,2,1], x[1,2,2]}, {x[1,3,1], x[1,3,2]}}, {{x[2,1,1], x[2,1,2]}, {x[2,2,1], x[2,2,2]}, {x[2,3,1], x[2,3,2]}}}) = ArrayBuiltins.Transpose.Transpose10.f({{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}, {{9, 10}, {11, 12}}});
+
+public
+ function ArrayBuiltins.Transpose.Transpose10.f
+  input Real[:, :, :] a;
+  output Real[size(a, 2), size(a, 1), size(a, 3)] b;
+ algorithm
+  for i1 in 1:size(a, 2) loop
+   for i2 in 1:size(a, 1) loop
+    for i3 in 1:size(a, 3) loop
+     b[i1,i2,i3] := a[i2,i1,i3];
+    end for;
+   end for;
+  end for;
+  return;
+ end ArrayBuiltins.Transpose.Transpose10.f;
+
+end ArrayBuiltins.Transpose.Transpose10;
+
+")})));
+end Transpose10;
+
+model Transpose11
+	function f
+		input Real[:,:] a;
+		output Real[size(a,2),size(a,1)] b;
+	algorithm
+		b := a*transpose(a + a[:,:]);
+	end f;
+	
+	Real[2,3] x = f({{1,3},{5,7},{9,11}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Transpose_Transpose11",
+			description="Scalarization of transpose operator: unknown size",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Transpose.Transpose11
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+equation
+ ({{x[1,1], x[1,2], x[1,3]}, {x[2,1], x[2,2], x[2,3]}}) = ArrayBuiltins.Transpose.Transpose11.f({{1, 3}, {5, 7}, {9, 11}});
+
+public
+ function ArrayBuiltins.Transpose.Transpose11.f
+  input Real[:, :] a;
+  output Real[size(a, 2), size(a, 1)] b;
+  Real temp_1;
+ algorithm
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1 := 0.0;
+    for i3 in 1:size(transpose(a + a[:,:]), 1) loop
+     temp_1 := temp_1 + a[i1,i3] * (a[i2,i3] + a[i2,i3]);
+    end for;
+    b[i1,i2] := temp_1;
+   end for;
+  end for;
+  return;
+ end ArrayBuiltins.Transpose.Transpose11.f;
+
+end ArrayBuiltins.Transpose.Transpose11;
+
+")})));
+end Transpose11;
+
 end Transpose;
 
 package Symmetric
