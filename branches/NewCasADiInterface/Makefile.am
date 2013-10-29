@@ -55,22 +55,40 @@ MC_JARS=$(MC_COMPILERS_DIR)/jars
 MC_MODELICA_JARS=$(MC_JARS)/modelica
 MC_OPTIMICA_JARS=$(MC_JARS)/optimica
 
-MODELICA_CASADI_CASADI_BUILD_DIR = $(MC_BUILD)/casadi
-CFLAGS=-I$(JAVA_HOME)/include/
-LIBCASADI=$(MODELICA_CASADI_CASADI_BUILD_DIR)/lib/libcasadi.so
+CASADI_INTERACE_CASADI_BUILD_DIR = $(MC_BUILD)/casadi
 
+IFCASADI_DIR_INCLUDE_WINDOWS=-I"$(JAVA_HOME)\include" -I"$(JAVA_HOME)\include\win32" -I"$(CASADI_HOME)" 
+IFCASADI_WINDOWS=$(MC_COMPILERS_DIR)/lib/ifcasadi.dll 
+LIBCASADI_WINDOWS=$(CASADI_INTERACE_CASADI_BUILD_DIR)/lib/libcasadi.dll 
+LIBIFCASADI_COMPILER_FLAGS_WINDOWS=-fPIC -shared -D_REENTRANT -Wl,--add-stdcall-alias 
+
+CASADI_CMAKE_FLAGS_LINUX =  $(CASADI_HOME) -DENABLE_SHARED=ON -DENABLE_STATIC=OFF 
+IFCASADI_DIR_INCLUDE_LINUX=-I$(JAVA_HOME)/include/ -I"$(CASADI_HOME)" 
+IFCASADI_LINUX=$(MC_COMPILERS_DIR)/lib/libifcasadi.so
+LIBCASADI_LINUX=$(CASADI_INTERACE_CASADI_BUILD_DIR)/lib/libcasadi.so 
+LIBIFCASADI_COMPILER_FLAGS_LINUX=-fPIC -shared -D_REENTRANT
+
+	
+	    
 # The CMake for ModelicaCasADi needs these variables.
 export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
  
-casadi_interface: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS) $(DESTDIR)$(prefix)/Python/casadi_interface
+casadi_interface: $(CASADI_INTERACE_CASADI_BUILD_DIR) $(MC_JARS) $(MC_BUILD)/modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/casadi_interface $(DESTDIR)$(prefix)/Python/casadi $(MC_BUILD)/test
 
-$(MODELICA_CASADI_CASADI_BUILD_DIR): 
+$(CASADI_INTERACE_CASADI_BUILD_DIR): 
 	mkdir -p $(MC_BUILD); cd $(MC_BUILD); \
 	rm -rf casadi ; mkdir casadi; cd casadi; \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_HOME) -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ; \
-	make
+	case $(build) in \
+	*-cygwin*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_HOME) -G "MSYS Makefiles" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ;; \
+	*-mingw*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_HOME) -G "MSYS Makefiles" -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ;; \
+	*) \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_HOME) -DENABLE_SHARED=ON -DENABLE_STATIC=OFF ;; \
+	esac
+	cd $(MC_BUILD)/casadi ;  make 
 
 $(MC_JARS):  $(MC_SRC)/src/cpp-generated/ $(MC_MODELICA_JARS) $(OC_SRC)/src/cpp-generated/ $(MC_OPTIMICA_JARS) $(MC_COMPILERS_DIR)/lib/
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(MC_JARS)
@@ -105,42 +123,72 @@ $(OC_SRC)/src/cpp-generated/:
 	swig -outdir $(OC_SRC)/src/java-generated/casadi \
              -o $(OC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
 	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
+
 	     
 $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	mkdir -p $(MC_COMPILERS_DIR)/lib
-	g++ -o $(MC_COMPILERS_DIR)/lib/libifcasadi.so $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
-	    $(LIBCASADI) \
-	    -fPIC -shared -D_REENTRANT \
-	    -I"$(CASADI_HOME)" \
-	    $(CFLAGS)
+	case $(build) in \
+	*-cygwin*) \
+	g++ -o $(MC_COMPILERS_DIR)/lib/ifcasadi.dll $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
+	$(LIBCASADI_WINDOWS)   \
+	$(LIBIFCASADI_COMPILER_FLAGS_WINDOWS)  \
+	$(IFCASADI_DIR_INCLUDE_WINDOWS) ;; \
+	*-mingw*) \
+	g++ -o $(MC_COMPILERS_DIR)/lib/ifcasadi.dll $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
+	$(LIBCASADI_WINDOWS)   \
+	$(LIBIFCASADI_COMPILER_FLAGS_WINDOWS)  \
+	$(IFCASADI_DIR_INCLUDE_WINDOWS) ;; \
+	*) \
+	g++ -o $(MC_COMPILERS_DIR)/lib/libifcasadi.so $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
+	$(LIBCASADI_LINUX)   \
+	$(LIBIFCASADI_COMPILER_FLAGS_LINUX)  \
+	$(IFCASADI_DIR_INCLUDE_LINUX) ;; \
+	esac
 
+$(MC_BUILD)/modelicacasadi_wrapper:
+	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
+	cd $(MC_BUILD)/modelicacasadi_wrapper; \
+	case $(build) in \
+	*-cygwin*) \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	*-mingw*) \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	*) \
+	cmake $(MC_INTERFACE) ;; \
+	esac 
+	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
+	
+	
+$(DESTDIR)$(prefix)/Python/casadi: 
+	cd $(CASADI_INTERACE_CASADI_BUILD_DIR) ; make python
+	mkdir -p $(DESTDIR)$(prefix)/Python/ 
+	cd $(CASADI_INTERACE_CASADI_BUILD_DIR)/python/ ; \
+	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/ 
+	
 $(DESTDIR)$(prefix)/Python/casadi_interface: 
-	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make python
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
+	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
+	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	mkdir -p $(DESTDIR)$(prefix)/Python/casadi_interface
+	rm -f $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
+	touch $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
+	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
+	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/casadi_interface
+
+$(MC_BUILD)/test: 
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
-	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
+	cd $(CASADI_INTERACE_CASADI_BUILD_DIR)/python/ ; \
 	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
 	touch $(MC_BUILD)/test/pythonTests/runtests.sh
 	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
 	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ JMODELICA_HOME=$(DESTDIR)$(prefix) nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
-	mkdir -p $(DESTDIR)$(prefix)/Python/ 
-	cd $(MODELICA_CASADI_CASADI_BUILD_DIR)/python/ ; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/ 
-	mkdir -p $(DESTDIR)$(prefix)/Python/casadi_interface
-	cp $(MC_INTERFACE)/python/*.py $(DESTDIR)$(prefix)/Python/casadi_interface
-
-MC_install_python: 
-	cd $(MODELICA_CASADI_CASADI_BUILD_DIR) ; make install_python
-
-MC_interface_cplusplus: $(MODELICA_CASADI_CASADI_BUILD_DIR) $(MC_JARS)
-	rm -rf $(MC_BUILD)/cplusplus; mkdir -p $(MC_BUILD)/cplusplus
-	cd $(MC_BUILD)/cplusplus; cmake $(MC_INTERFACE); make
-
-
-
+	
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU

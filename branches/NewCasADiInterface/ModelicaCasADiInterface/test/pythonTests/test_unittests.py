@@ -1,4 +1,4 @@
-from casadi import *
+from casadi_interface import *
 
 """ 
 As there is no function to check equality of variables this
@@ -180,9 +180,9 @@ def test_equationPrinting():
 
 def test_RealTypePrinting():
     realType = RealType()
-    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                     "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
-                     "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
+    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
+                     "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
+                     "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()")
     assert( str(realType) == expectedPrint )
     assert( realType.getAttribute("start").getValue() == 0 )
     assert( realType.hasAttribute("quantity") )
@@ -282,7 +282,7 @@ def test_RealVariableInvalidAsStateVariable():
 def test_RealVariablePrinting():
     realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS);
     realVar.setAttribute("myAttribute", MX(2));
-    assert( str(realVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" );
+    assert( str(realVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" );
     
 def test_DerivativeVariableAttributes():
     attributeNode1 = MX(1)
@@ -345,7 +345,7 @@ def test_DerivativeVariableInvalidStateVariable():
 def test_DerivativeVariablePrinting():
     derVar = DerivativeVariable(MX("node"), None)
     derVar.setAttribute("myAttribute", MX(2))
-    assert( str(derVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+    assert( str(derVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
 
 def test_IntegerVariableAttributes():
     attributeNode1 = MX(1)
@@ -384,7 +384,7 @@ def test_IntegerVariableVariableType():
 def test_IntegerVariablePrinting():
     intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     intVar.setAttribute("myAttribute", MX(2))
-    assert( str(intVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+    assert( str(intVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
     
 def test_IntegerVariableContinuousError():
     import sys
@@ -441,7 +441,7 @@ def test_BooleanVariableContinuousError():
 def test_BooleanVariablePrinting():
     boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     boolVar.setAttribute("myAttribute", MX(2))
-    assert( str(boolVar) == "MX(node), attributes:\n\tmyAttribute = MX(Const<2>(scalar))" )
+    assert( str(boolVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
     
 def test_ModelFunctionGetName():
     funcVar = MX("node")
@@ -489,7 +489,7 @@ def test_ModelFunctionPrinting():
     expectedPrint = ("ModelFunction : function(\"myFunction\")\n" +
                     " Input: 1-by-1 (dense)\n" +
                     " Output: 1-by-1 (dense)\n" +
-                    "@0 = Const<2>(scalar)\n" +
+                    "@0 = 2\n" +
                     "@1 = input[0]\n" +
                     "@0 = (@0+@1)\n" +
                     "output[0] = @0\n")
@@ -616,8 +616,8 @@ def test_OptimizationProblemPrinting():
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "-- Optimization information  --\n\n" +
-                     "Start time = MX(Const<0>(scalar))\nFinal time = MX(Const<1>(scalar))\n" +
-                     "-- Lagrange term --\nMX(Const<0>(scalar))\n-- Mayer term --\nMX(Const<0>(scalar))\n")
+                     "Start time = MX(0)\nFinal time = MX(1)\n" +
+                     "-- Lagrange term --\nMX(0)\n-- Mayer term --\nMX(0)\n")
     assert( str(simpleOptProblem) == expectedPrint )
 
 def test_ModelVariableKindsEmpty():
@@ -839,9 +839,9 @@ def test_ModelDefaultVariableTypeAssignment():
     model = Model()
     realVar = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
     model.addVariable(realVar)
-    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                           "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
-                           "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()")
+    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
+                           "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
+                           "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()")
     assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
     
 def test_ModelDefaultVariableTypeAssignmentSingletons():
@@ -989,9 +989,9 @@ def test_ModelPrinting():
     expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
                     "MX(node), declaredType : Real\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
-                    "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))" +
-                    "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))\n\tnominal = MX(Const<1>(scalar))" +
-                    "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()\n\n" +
+                    "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
+                    "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
+                    "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()\n\n" +
                     "------------------------------- Functions -------------------------------\n\n\n" +
                     "------------------------------- Equations -------------------------------\n\n" +
                     " -- Initial equations -- \nMX(node3) = MX(node4)\n -- DAE equations -- \n" +

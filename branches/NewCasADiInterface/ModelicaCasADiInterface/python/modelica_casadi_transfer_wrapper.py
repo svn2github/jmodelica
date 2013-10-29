@@ -2,6 +2,7 @@ import os
 import sys
 import platform
 from casadi import *
+from modelicacasadi_wrapper import *
 JVM_SET_UP=False
 
 
@@ -94,10 +95,10 @@ def _generate_StringVector(file_vec):
     return string_file_vec
 
 def _transfer_modelica(class_name, files, options, log_level):
-    return casadi._transferModelicaModel(class_name, files, options, log_level)
+    return modelicacasadi_wrapper._transferModelicaModel(class_name, files, options, log_level)
     
 def _transfer_optimica(class_name, files, options, log_level):
-    return casadi._transferOptimizationProblem(class_name, files, options, log_level)
+    return modelicacasadi_wrapper._transferOptimizationProblem(class_name, files, options, log_level)
 
 
 def _get_options(compiler_options):

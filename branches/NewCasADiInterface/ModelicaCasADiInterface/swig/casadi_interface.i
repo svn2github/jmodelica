@@ -6,7 +6,7 @@
 
 %import "casadi.i"
 
-/*
+
 %{
 #include <exception>
 %}
@@ -20,6 +20,6 @@
         SWIG_exception(SWIG_RuntimeError, e); \
     }
 }
-*/
+
 
 %include "ModelicaCasADi.i"

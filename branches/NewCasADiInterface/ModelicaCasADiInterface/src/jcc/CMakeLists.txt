@@ -89,7 +89,7 @@ set(CLASSES ${CLASSES_common} ${CLASSES_modelica} ${CLASSES_optimica})
 add_custom_command(
   OUTPUT ${JCC_GEN_DIR} ${JCC_GEN_DIR}/__wrap__.cpp
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_BINARY_DIR}
-    python -m jcc --classpath ${CLASSPATH} ${CLASSES} ${JCC_EXTRA_ARGS} # JCC_EXTRA_ARGS provided by parent scipts
+    python -m jcc ${CLASSPATH_WITH_PREFIX} ${CLASSES} ${JCC_EXTRA_ARGS} # JCC_EXTRA_ARGS provided by parent scipts
   DEPENDS ${JARS}
 #          ${CMAKE_CURRENT_LIST_FILE} ${JARS} # seems to force rebuild each time
 )

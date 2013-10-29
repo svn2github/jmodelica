@@ -16,13 +16,14 @@ function(join OUTPUT GLUE VALUES)
   set (${OUTPUT} "${_TMP_STR}" PARENT_SCOPE)
 endfunction()
 
+function(interleave_string_and_list DEST_VAR STRING)  
+  set(RESULT "")
+  foreach(ITEM ${ARGN})
+    list(APPEND RESULT ${STRING} ${ITEM})
+  endforeach(ITEM)
+  set(${DEST_VAR} "${RESULT}" PARENT_SCOPE)
+endfunction()
 
-# Todo: better way to choose path separator?
-if(WIN32)
-  set(SEP ;)
-else(WIN32)
-  set(SEP :)
-endif(WIN32)
 
 # import environment variables
 set(CASADI_HOME $ENV{CASADI_HOME})
@@ -31,18 +32,8 @@ set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 set(JAVA_HOME $ENV{JAVA_HOME})
 
-# LIBS is used by the test directory
-set(LIBS "${MC_BUILD}/casadi/lib/libcasadi.so" -ldl -lpthread)
-
-# Add library path for libs
-link_directories(${MC_BUILD}/casadi/lib) 
-link_directories(${IPOPT_HOME}/lib) 
-
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
 set(JMODELICA "${ABS_MC_BUILD}/JModelica.org")
-
-# todo: this might not allways be the place to find Beaver?
-set(BEAVER_JAR "${JMODELICA}/jars/beaver.jar")
 
 foreach(Target Modelica Optimica)
   string(TOLOWER ${Target} target)
@@ -51,23 +42,27 @@ foreach(Target Modelica Optimica)
   set(JARS_${target} "${COMPILER_${target}_JAR_DIR}/${Target}Compiler.jar" "${COMPILER_${target}_JAR_DIR}/util.jar")
 endforeach(Target)
 
-set(JARS_common "${BEAVER_JAR}")
-
-set(JARS ${JARS_common} ${JARS_modelica} ${JARS_optimica})
-join(CLASSPATH "${SEP}" "${JARS}")
-
+set(JARS "${JMODELICA}/jars/beaver.jar" ${JARS_modelica} ${JARS_optimica})
+# Classpath with prefix is used in JCC wrapping. 
+interleave_string_and_list(CLASSPATH_WITH_PREFIX --classpath ${JARS})
 
 find_library(CASADI_DLL
   NAMES libcasadi.so libcasadi.dll
-  PATHS ${CASADI_HOME}/build/lib
+  PATHS ${MC_BUILD}/casadi/lib
   NO_DEFAULT_PATH
 )
 
-
 # generate modelicacasadi_paths.h
+if(WIN32)
+  set(CLASSPATH ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
+  set(LIBPATH ${MC_BUILD}/casadi/lib;${JMODELICA}/lib)
+else(WIN32)
+  join(CLASSPATH ":" "${JARS}")
+  set(LIBPATH ${MC_BUILD}/casadi/lib:${JMODELICA}/lib)
+endif(WIN32)
 set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-set(LIBPATH ${JMODELICA}/lib)
+
 set(MODELPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/common")
 
 message(STATUS "CLASSPATH=${CLASSPATH}")
@@ -81,10 +76,19 @@ configure_file (
 )
 
 # Set up includes etc. used by both src/ and swig/
+# Add library path for libs
+link_directories(${MC_BUILD}/casadi/lib) 
+link_directories(${IPOPT_HOME}/lib) 
+
 include_directories(src src/jcc)
 include_directories(${CASADI_HOME})
-include_directories(${BOOST_HOME})
+#JNI
 include_directories(${JAVA_HOME}/include)
+if(WIN32)
+  include_directories(${JAVA_HOME}/include/win32)
+endif(WIN32)
+#Boost
+include_directories(${BOOST_HOME})
 
 set(JCC_GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/src/jcc/build")
 include_directories(${JCC_GEN_DIR})

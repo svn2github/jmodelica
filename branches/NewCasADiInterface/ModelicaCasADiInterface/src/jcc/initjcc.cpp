@@ -32,7 +32,7 @@ jint initJVM(const char *classpath, const char *libpath)
 
     //     ---------------- Windows ----------------
 #if defined(_MSC_VER) || defined(__WIN32)
-    string jvmpath = string(getenv_checked("JAVA_HOME32")) + "/jre/bin/client/jvm.dll";
+    string jvmpath = string(getenv_checked("JMODELICA_SDK_HOME")) + "\\Java\\jre7-i586\\bin\\client\\jvm.dll";
 
     HINSTANCE hVM = LoadLibrary(jvmpath.data());
     if (hVM == NULL) {
@@ -90,7 +90,7 @@ jint initJVM(const char *classpath, const char *libpath)
     options[0].optionString = (char *)classpathopt.data();
     options[1].optionString = (char *)libpathopt.data();
 
-    options[2].optionString = (char *)"-Xmx1024M";
+    options[2].optionString = (char *)"-Xmx600M";
     
     vm_args.options = options;
     vm_args.ignoreUnrecognized = false;
