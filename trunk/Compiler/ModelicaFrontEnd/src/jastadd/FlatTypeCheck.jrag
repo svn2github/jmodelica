@@ -152,6 +152,7 @@ aspect FlatTypeCheck {
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
     eq InstNode.getChild().inRecordWithBindingExp()               = false;
+    eq Root.getChild().inRecordWithBindingExp()                   = false;
     
     public void InstAssignable.typeCheckAttributes() {}
     
@@ -928,29 +929,29 @@ aspect FlatTypeCheck {
    *        is valid.
    */
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
-  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()         = true;
-  eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
-  eq FSymmetric.getChild().argumentDefinedTypeValid()                    = false;
-  eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
-  eq FReductionExp.getChild().argumentDefinedTypeValid()                 = false;
-  eq FHomotopyExp.getChild().argumentDefinedTypeValid()                  = false;
-  eq FSemiLinearExp.getChild().argumentDefinedTypeValid()                = false;
-  eq FNdimsExp.getChild().argumentDefinedTypeValid()                     = false;
-  eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
-  eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
-  eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
-  eq FEventGenExp.getChild().argumentDefinedTypeValid()                  = false;
-  eq FCardinality.getChild().argumentDefinedTypeValid()                  = false;
-  eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
-  eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
-  eq FStringExp.getChild(int i).argumentDefinedTypeValid()               = i > 0;
-  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
-  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
-  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
-  eq InstPreExp.getChild().argumentDefinedTypeValid()                    = false;
-  eq FEdgeExp.getChild().argumentDefinedTypeValid()                      = false;
-  eq FChangeExp.getChild().argumentDefinedTypeValid()                    = false;
+  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
+  eq FTranspose.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FSymmetric.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FMinMaxExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FReductionExp.getOriginalArg().argumentDefinedTypeValid()             = false;
+  eq FHomotopyExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FSemiLinearExp.getOriginalArg().argumentDefinedTypeValid()            = false;
+  eq FNdimsExp.getOriginalArg().argumentDefinedTypeValid()                 = false;
+  eq FInfArgsFunctionCall.getOriginalArg().argumentDefinedTypeValid()      = false;
+  eq FEnumIntegerExp.getOriginalArg().argumentDefinedTypeValid()           = false;
+  eq FVectUnaryBuiltIn.getOriginalArg().argumentDefinedTypeValid()         = false;
+  eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
+  eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
+  eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
+  eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
+  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
+  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
+  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
+  eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
+  eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.

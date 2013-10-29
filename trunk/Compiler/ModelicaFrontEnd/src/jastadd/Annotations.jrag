@@ -716,7 +716,7 @@ aspect AnnotationAPI {
 		
 	}
 	
-	abstract class ExpAnnotationNode extends AnnotationNode {
+	public abstract class ExpAnnotationNode extends AnnotationNode {
 		
 		public abstract Exp exp();
 		protected abstract void setExp(Exp exp);

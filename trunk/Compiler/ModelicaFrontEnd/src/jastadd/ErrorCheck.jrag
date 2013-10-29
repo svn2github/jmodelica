@@ -638,14 +638,14 @@ aspect InstanceErrorCheck {
 	    if (!fixedAttributeCValue().reduceBooleanAnd())
 	        return false;
 	    if (hasBindingFExp() && !getBindingFExp().canEvaluateAsStructural())
-	            return false;
+	        return false;
 	    return true;
 	}
     syn boolean FExp.canEvaluateAsStructural() {
-        boolean res = true;
         for (FExp n : childFExps())
-            res &= n.canEvaluateAsStructural();
-        return res;
+            if (n.canEvaluateAsStructural())
+                return false;
+        return true;
     }
     eq FInstAccessExp.canEvaluateAsStructural() = getInstAccess().myInstComponentDecl().canEvaluateAsStructural();
 	
@@ -1008,6 +1008,7 @@ aspect InstanceErrorCheck {
 	eq InstNode.getChild().isWithin(InstClassDecl icd)          = isOfInstClassDecl(icd);
 	eq InstComponentDecl.getChild().isWithin(InstClassDecl icd) = isOfInstClassDecl(icd) || isWithin(icd);
 	eq InstExtends.getChild().isWithin(InstClassDecl icd)       = isOfInstClassDecl(icd) || isWithin(icd);
+    eq Root.getChild().isWithin(InstClassDecl icd)              = false;
 	
 	/**
 	 * \brief Check if this node is equal to or an instance of <code>icd</code>.
