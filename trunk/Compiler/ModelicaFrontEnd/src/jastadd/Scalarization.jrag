@@ -1201,12 +1201,18 @@ aspect Scalarization {
 			Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
 		for (FRecordComponentType comp : getComponents()) {
 			FIdUseExp lExp = new FIdUseExp(left.getFIdUse().getFQName().copyAsFQNameFull().append(comp.getName()));
-			FExp rExp = right.dynamicFExp(right.scalarRecordFExp(indexMap, new FQNameFull(comp.getName())));
-			rExp.clearScalarized();
+			FExp rExp = right.dynamicFExp(right.extractRecordOrTempFExp(comp.getName()));
 			comp.getFType().scalarizeAssignment(vars, stmts, indexMap, 
 					(FIdUseExp) left.dynamicFExp(lExp),
 					rExp);
 		}
+	}
+	
+	public FExp FExp.extractRecordOrTempFExp(String suffix) {
+		if (useTempVar)
+			return (new FIdUseExp(tempVarName())).extractRecordFExp(suffix);
+		else
+			return extractRecordFExp(suffix);
 	}
 	
 	/**
@@ -1600,11 +1606,11 @@ aspect Scalarization {
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
 	public FExp FExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarize(indexMap);
+		return scalarizeExp(indexMap);
 	}
 	
 	public FExp FIdUseExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return dynamicFExp(scalarize(indexMap)).extractScalarRecordFExp(suffix);
+		return dynamicFExp(scalarizeExp(indexMap)).extractScalarRecordFExp(suffix);
 	}
 	
 	public FExp FRecordConstructor.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -1641,7 +1647,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FFunctionCall.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarize(indexMap).extractScalarRecordFExp(suffix);
+		return scalarizeExp(indexMap).extractScalarRecordFExp(suffix);
 	}
 	
 	public FExp FNoEventExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -1745,12 +1751,13 @@ aspect Scalarization {
 			List vars, Map<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		if (!isFunctionCallClause()) {
-			boolean equation = !inFunction() && !inAlgorithm();
-			FExp temp = createTemporaryExp(indexMap, !inFunction());
+			boolean equation = !inFunction();
+			FExp temp = createTemporaryExp(indexMap, equation);
 			if (temp != null) {
 				createFunctionCallClause(clauses, indexMap, temp);
 				if (addVar)
-					addTemporaryVars(vars, !inFunction());
+					addTemporaryVars(vars, equation);
+				useTempVar = !equation || inAlgorithm();
 			}
 		}
 	}
