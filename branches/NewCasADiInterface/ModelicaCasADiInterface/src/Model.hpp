@@ -124,7 +124,15 @@ class Model: public Printable {
 
         /** Calculates values for dependent parameters */
         void calculateValuesForDependentParameters();
-
+        /**
+         * Calculates the value of the supplied expression. Assumes that the 
+         * MX in the expression are either parameters or constants present
+         * in the Model.
+         * @param A MX
+         * @return A double
+         */
+        double evaluateExpression(CasADi::MX exp);        
+        
         /** 
          * Returns all initial equations in a stacked MX on the form: rhs - lhs.
          * @return A MX.
@@ -144,6 +152,10 @@ class Model: public Printable {
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
     private:
+        /// The MX for independent parameters and constants. Filled by calculateValuesForDependentParameters.
+        std::vector<CasADi::MX> paramAndConstMXVec;
+        /// The values for independent parameters and constants. Filled by calculateValuesForDependentParameters. 
+        std::vector<double> paramAndConstValVec;
         CasADi::MX timeVar;
         /// Vector containing pointers to all variables.
         std::vector<Variable*> z;  
@@ -166,9 +178,10 @@ class Model: public Printable {
         bool checkDiff(RealVariable* var) const;
         bool isDifferentiated(RealVariable* var) const;
         
-        std::pair< std::vector<CasADi::MX>, std::vector<CasADi::MX> > retrieveValuesAndNodesForIndependentParameters();
-        /// Assumes there is sufficient information in valsAndNodes to replace the symbols with values. 
-        CasADi::MX evaluateSymbolicExpression(CasADi::MX expression, std::pair< std::vector<CasADi::MX>, std::vector<CasADi::MX> > &valsAndNodes);
+        /// Adds the MX and their values for independent parameters and constants to paramAndConst(Val/MX)Vec
+        void setUpValAndSymbolVecs();
+        ///  Tries to evaluate the expression exp using values and nodes in paramAnd(ConstMX/Val)Vec
+        double evalMX(CasADi::MX exp);
                 
         typeMap typesInModel;
         void assignVariableTypeToRealVariable(Variable* var);
@@ -180,7 +193,7 @@ class Model: public Printable {
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
 inline std::vector<Variable*> Model::getAllVariables() {return z;}
-inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap() {}
+inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {}
 inline VariableType* Model::getVariableTypeByName(std::string typeName) const { return typesInModel.find(typeName) != typesInModel.end() ? typesInModel.find(typeName)->second : NULL; }
 inline void Model::setModelFunctionByItsName(ModelFunction* mf) { modelFunctionMap[mf->getName()] = mf; }
 inline ModelFunction* Model::getModelFunctionByName(std::string name) const { return modelFunctionMap.find(name) != modelFunctionMap.end() ? modelFunctionMap.find(name)->second : NULL; }

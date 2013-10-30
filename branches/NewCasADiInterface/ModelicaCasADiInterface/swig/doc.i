@@ -175,6 +175,23 @@ Returns::
 
 ";  
 
+%feature("docstring") ModelicaCasADi::Model::evaluateExpression "
+Calculates the value of the supplied expression. Assumes that the 
+MX in the expression are either parameters or constants present
+in the Model.
+
+Parameters::
+
+    MX --
+        A MX expression. 
+
+Returns::
+    
+    Double --
+        The value of the evaluated expression
+
+";  
+
 %feature("docstring") ModelicaCasADi::Model::calculateValuesForDependentParameters "
 Calculates the value of all dependent parameters. The calculated value is 
 set in the attribute evaluatedBindingExpression for dependent parameters. 

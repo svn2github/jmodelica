@@ -4,7 +4,8 @@
 #include <DerivativeVariable.hpp>
 #include <Model.hpp>
 
-using CasADi::MX; using std::vector; using std::ostream;
+using CasADi::MX; using CasADi::MXFunction; 
+using std::vector; using std::ostream;
 using std::string; using std::pair;
 
 namespace ModelicaCasADi{
@@ -262,18 +263,50 @@ vector<Variable*> Model::getAliasVariables() {
     return aliasVars;
 }
 
+double Model::evalMX(MX exp) {
+    vector<MX> expVec;
+    expVec.push_back(exp);
+    try {
+        MXFunction f(paramAndConstMXVec, expVec);
+        f.init();
+        // Would be preferable to pass in a vector with values,
+        // but that does not seem possible unless the passsed in
+        // MX is vector-valued as well. 
+        for (int i = 0; i < paramAndConstValVec.size(); ++i) {
+            f.setInput(paramAndConstValVec[i], i); 
+        }
+        f.evaluate();
+        MX out = f.output();
+        if (out.isConstant()) {
+            return out.getValue();
+        } else {
+            throw std::runtime_error("The evaluated expression could not be determined");
+        }
+    } catch (const std::exception& ex) {
+        std::stringstream ss;
+        ss << "An exception occured while evaluating the expression: " << ex.what() << "\nAre the parameter values calculated?" << std::endl;
+        throw std::runtime_error(ss.str());
+    }
+}
+
+double Model::evaluateExpression(MX exp) {
+    calculateValuesForDependentParameters();
+    return evalMX(exp); 
+}
+
 void Model::calculateValuesForDependentParameters() {
-    MX val, bindingExpression;
-    pair< vector<MX>, vector<MX> > valsAndNodes = retrieveValuesAndNodesForIndependentParameters();
+    MX bindingExpression;
+    double val;
+    setUpValAndSymbolVecs();
     for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
         Variable* var = (*it);
         if (var->getVariability() == Variable::PARAMETER) {
             if (var->hasAttributeSet("bindingExpression")) {
                 bindingExpression = *var->getAttribute("bindingExpression");
                 if (!bindingExpression.isConstant()) {
-                    val = evaluateSymbolicExpression(bindingExpression, valsAndNodes);
-                    valsAndNodes.first.push_back(val);
-                    valsAndNodes.second.push_back(var->getVar());
+                    val = evalMX(bindingExpression);
+                    paramAndConstMXVec.push_back(var->getVar());
+                    paramAndConstValVec.push_back(val);
                     var->setAttribute("evaluatedBindingExpression", val);
                 }
             }
@@ -281,46 +314,28 @@ void Model::calculateValuesForDependentParameters() {
     }
 }
 
-MX Model::evaluateSymbolicExpression(MX expression, pair< vector<MX>, vector<MX> > &valsAndNodes) {
-    vector<MX> expVec;
-    expVec.push_back(expression);
-    MX val = substitute(expVec, valsAndNodes.second, valsAndNodes.first).at(0);
-    if (!val.isConstant()) {
-        expVec.clear();
-        expVec.push_back(val);
-        CasADi::MXFunction f = CasADi::MXFunction(vector<MX>(), expVec);
-        f.init();
-        f.evaluate();
-        val = f.output();
-        if (!val.isConstant()){
-            std::stringstream ss;
-            ss << "Something went wrong when evaluating the parameter equation for expression " << expression << ", evaluated equation: " << val;
-            throw std::runtime_error(ss.str());
-        }
-    }
-    return val;
-}
 
-
-pair< vector<MX>, vector<MX> > Model::retrieveValuesAndNodesForIndependentParameters() {
-    pair< vector<MX>, vector<MX> > valsAndNodes;
+void Model::setUpValAndSymbolVecs() {
+    paramAndConstMXVec.clear();
+    paramAndConstValVec.clear();
     for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
-        if ((*it)->getVariability() == Variable::PARAMETER) {
+        if ( ((*it)->getVariability() == Variable::PARAMETER) ||
+             ((*it)->getVariability() == Variable::CONSTANT)){
             if ((*it)->hasAttributeSet("bindingExpression")) {
+                // If it's a parameter with a non constant binding expression it
+                // is a dependent parameter, and its value needs to be calculated. 
                 MX bindingExpression = *(*it)->getAttribute("bindingExpression");
                 if (bindingExpression.isConstant()) {
-                    valsAndNodes.first.push_back(bindingExpression);
-                    valsAndNodes.second.push_back((*it)->getVar());   
+                    paramAndConstMXVec.push_back((*it)->getVar());
+                    paramAndConstValVec.push_back(bindingExpression.getValue()); 
                 }
             } else {
-                valsAndNodes.first.push_back(*(*it)->getAttribute("start"));
-                valsAndNodes.second.push_back((*it)->getVar());
+                paramAndConstValVec.push_back((*it)->getAttribute("start")->getValue());
+                paramAndConstMXVec.push_back((*it)->getVar());
             }
         }
     }
-    return valsAndNodes;
 }
-
 
 const MX Model::getInitialResidual() const {
     MX intialRes;

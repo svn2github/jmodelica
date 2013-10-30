@@ -166,6 +166,53 @@ def test_DependentParameters():
     assert r3.getAttribute("evaluatedBindingExpression").getValue() == 120
     assert r4.getAttribute("evaluatedBindingExpression").getValue() == 20
 
+def test_NumericalEvaluation():
+    a = MX("a")
+    b = MX("b")
+    c = MX("c")
+    d = MX("d")
+    funcVar = MX("funcVar")
+    f = MXFunction([funcVar], [funcVar*2])
+    f.init()
+    
+    eq1 = MX(10)
+    eq2 = a + MX(2)
+    eq3 = a*b
+    eq4 = f.call([a])[0]
+    
+    r1 = RealVariable(a, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r2 = RealVariable(b, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r3 = RealVariable(c, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r4 = RealVariable(d, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    
+    r1.setAttribute("bindingExpression", eq1)
+    r2.setAttribute("bindingExpression", eq2)
+    r2.setAttribute("max", a * 2);
+    r3.setAttribute("bindingExpression", eq3)
+    r3.setAttribute("start", b)
+    r4.setAttribute("bindingExpression", eq4)
+    r4.setAttribute("nominal", c);
+    model = Model()
+    
+    model.addVariable(r1)
+    model.addVariable(r2)
+    model.addVariable(r3)
+    model.addVariable(r4)
+    
+    assert model.evaluateExpression(r2.getAttribute("max")) == 20
+    assert model.evaluateExpression(r3.getAttribute("start")) == 12
+    assert model.evaluateExpression(r4.getAttribute("nominal")) == 120
+    
+    # Try to evaluate an expression that can't be evaluated using the information
+    # in the Model. 
+    import sys
+    errorThrown = False # The exception string is platform dependent. 
+    try:
+        model.evaluateExpression(MX("notInTheModel"))
+    except:
+        errorThrown = True
+    assert errorThrown
+    
 def test_equationGetter():
     lhs = MX("lhs")
     rhs = MX("rhs")
