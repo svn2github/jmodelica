@@ -23,7 +23,7 @@ import org.jmodelica.util.NotNullPrintStream;
 aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
-	class Printer {
+    public class Printer {
 		
 		protected String step;
 		
@@ -52,7 +52,7 @@ aspect BasePrinter {
 aspect PrettyPrint {
 
 	// select first variant
-	class PrettyPrinter extends Printer {
+    public class PrettyPrinter extends Printer {
 		public PrettyPrinter() {
 			super(" ");
 		}
@@ -63,7 +63,7 @@ aspect PrettyPrint {
 	}
 	
 	// select second variant
-	class DumpTreePrinter extends Printer {
+    public class DumpTreePrinter extends Printer {
 		public DumpTreePrinter() {
 			super(" ");
 		}
@@ -1902,7 +1902,7 @@ aspect FlatPrettyPrint {
 
 aspect PrettyPrint_MC {
 	
-	class MCPrettyPrinter extends Printer {
+    public class MCPrettyPrinter extends Printer {
 		
 		public MCPrettyPrinter() {
 			super("    ");

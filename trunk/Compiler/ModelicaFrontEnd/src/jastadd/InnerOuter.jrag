@@ -2,12 +2,12 @@ aspect InnerOuterComponents {
 	
 	inh boolean InstNode.inOuter();
 	eq InstRoot.getChild().inOuter()          = false;
-	eq SourceRoot.getChild().inOuter()        = false;
+	eq Root.getChild().inOuter()              = false;
 	eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
 	
 	inh InstComponentDecl InstComponentDecl.surroundingOuterComponentDecl();
 	eq InstRoot.getChild().surroundingOuterComponentDecl()          = null;
-	eq SourceRoot.getChild().surroundingOuterComponentDecl()        = null;
+	eq Root.getChild().surroundingOuterComponentDecl()              = null;
 	eq InstComponentDecl.getChild().surroundingOuterComponentDecl() = isOuter() ? this : surroundingOuterComponentDecl();
 			
 	syn boolean InstComponentDecl.inOrIsOuter() = isOuter() || inOuter();	
@@ -24,6 +24,7 @@ aspect InnerOuterComponents {
 	inh InstComponentDecl InstNode.lookupInnerInstComponent(String name, boolean firstScope);
 	
 	eq InstRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope)   = null;
+    eq Root.getChild().lookupInnerInstComponent(String name, boolean firstScope)       = null;
 	eq SourceRoot.getChild().lookupInnerInstComponent(String name, boolean firstScope) = null;
 	
 	eq InstNode.getChild().lookupInnerInstComponent(String name, boolean firstScope) {
@@ -37,7 +38,7 @@ aspect InnerOuterComponents {
 	
 	inh InstComponentDecl InstNode.lookupInInnerInstComponent(String name);
 	eq InstRoot.getChild().lookupInInnerInstComponent(String name)          = null;
-	eq SourceRoot.getChild().lookupInInnerInstComponent(String name)        = null;
+    eq Root.getChild().lookupInInnerInstComponent(String name)              = null;
 	eq InstComponentDecl.getChild().lookupInInnerInstComponent(String name) = myInnerInstComponentDecl().memberInstComponent(name);
 	eq InstClassDecl.getChild().lookupInInnerInstComponent(String name)     = myInnerInstClassDecl().memberInstComponent(name);
 	
@@ -61,7 +62,7 @@ aspect InnerOuterClasses {
 	inh InstClassDecl InstNode.lookupInnerInstClass(String name, boolean firstScope);
 	
 	eq InstRoot.getChild().lookupInnerInstClass(String name, boolean firstScope)  = null;
-	eq SourceRoot.getChild().lookupInnerInstClass(String name, boolean firstScope) = null;
+	eq Root.getChild().lookupInnerInstClass(String name, boolean firstScope) = null;
 	
 	eq InstNode.getChild().lookupInnerInstClass(String name, boolean firstScope) {
 		if (!firstScope) {
@@ -74,7 +75,7 @@ aspect InnerOuterClasses {
 	
 	inh InstClassDecl InstNode.lookupInInnerInstClass(String name);
 	eq InstRoot.getChild().lookupInInnerInstClass(String name)          = null;
-	eq SourceRoot.getChild().lookupInInnerInstClass(String name)        = null;
+	eq Root.getChild().lookupInInnerInstClass(String name)              = null;
 	eq InstComponentDecl.getChild().lookupInInnerInstClass(String name) = myInnerInstComponentDecl().memberInstClass(name);
 	eq InstClassDecl.getChild().lookupInInnerInstClass(String name)     = myInnerInstClassDecl().memberInstClass(name);
 

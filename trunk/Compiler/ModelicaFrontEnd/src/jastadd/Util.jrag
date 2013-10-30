@@ -622,6 +622,7 @@ aspect Names {
   inh String InstNode.findLibraryName();
   eq InstNode.getChild().findLibraryName() = libraryName();
   eq InstRoot.getChild().findLibraryName() = null;
+  eq Root.getChild().findLibraryName()     = null;
   
   inh String ASTNode.packagePath(String name);
   eq Root.getChild().packagePath(String name) = null;
@@ -688,7 +689,7 @@ aspect Names {
   eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
   
   inh BaseClassDecl ASTNode.enclosingClassDecl();
-  eq SourceRoot.getProgram().enclosingClassDecl() = null;
+  eq Root.getChild().enclosingClassDecl() = null;
 
   eq FullClassDecl.getEquation().enclosingClassDecl() = this; 
   eq FullClassDecl.getAlgorithm().enclosingClassDecl() = this; 
@@ -702,10 +703,11 @@ aspect Names {
   eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
   
   inh FStatement FStatement.enclosingLoop();
-  eq FAlgorithm.getChild().enclosingLoop() = null;
+  eq FAlgorithm.getChild().enclosingLoop()     = null;
+  eq Root.getChild().enclosingLoop()           = null;
   eq FWhileStmt.getWhileStmt().enclosingLoop() = this;
-  eq FForStmt.getForStmt().enclosingLoop() = this;
-  eq InstForStmt.getForStmt().enclosingLoop() = this;
+  eq FForStmt.getForStmt().enclosingLoop()     = this;
+  eq InstForStmt.getForStmt().enclosingLoop()  = this;
   
   
     /**
@@ -1291,7 +1293,7 @@ aspect FlatNames {
     eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
     eq FEnumDecl.getChild().findVariableIndex()           = -1;
-    eq FClass.getDummyVariable().findVariableIndex()      = -1;
+    eq FClass.getChild().findVariableIndex()              = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
@@ -2273,15 +2275,17 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithm.getChild().insideBlockStmt() = false;
-     eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
-     eq FWhileStmt.getChild().insideBlockStmt()      = true;
-     eq FForStmt.getChild().insideBlockStmt()        = true;
-     eq InstForStmt.getChild().insideBlockStmt()     = true;
+     eq Root.getChild().insideBlockStmt()        = false;
+     eq FAlgorithm.getChild().insideBlockStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBlockStmt() = true;
+     eq FWhileStmt.getChild().insideBlockStmt()  = true;
+     eq FForStmt.getChild().insideBlockStmt()    = true;
+     eq InstForStmt.getChild().insideBlockStmt() = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithm.getChild().insideBranchedStmt() = false;
-     eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
+     eq Root.getChild().insideBranchedStmt()        = false;
+     eq FAlgorithm.getChild().insideBranchedStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBranchedStmt() = true;
      
      /**
       * \brief Return the index of the variable assigned by this FFunctionCallLeft among 

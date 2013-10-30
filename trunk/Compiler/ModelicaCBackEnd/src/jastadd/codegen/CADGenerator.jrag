@@ -59,7 +59,7 @@ public class CADGenerator extends CGenerator {
 		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_block_jacobian");
 	}
 
-	class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
+	public class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
 		
 		public DAETag_C_equationResidualDirectionalDerivative(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -88,7 +88,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates CAD headers for Modelica functions.
 	 */
-	class DAETag_CAD_function_headers extends DAETag {
+	public class DAETag_CAD_function_headers extends DAETag {
 		
 		public DAETag_CAD_function_headers(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_function_headers","C: CAD function headers representing Modelica functions",
@@ -108,7 +108,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates definitions for Modelica functions.
 	 */
-	class DAETag_CAD_functions extends DAETag {
+	public class DAETag_CAD_functions extends DAETag {
 		
 		public DAETag_CAD_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_functions","C: CAD functions representing Modelica functions",
@@ -128,7 +128,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates AD-code for BLT blocks
 	 */
-	class DAETag_CAD_dae_blocks_residual_functions extends DAETag {
+	public class DAETag_CAD_dae_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_dae_blocks_residual_functions","C: CAD functions for the DAE BLT block jacobians",
@@ -148,7 +148,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates AD-code for BLT blocks (DAE initialization system)
 	 */
-	class DAETag_CAD_dae_init_blocks_residual_functions extends DAETag {
+	public class DAETag_CAD_dae_init_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_dae_init_blocks_residual_functions","C: CAD functions for the DAE BLT block jacobians",
@@ -170,7 +170,7 @@ public class CADGenerator extends CGenerator {
 	 * Generates code for adding BLT AD-blocks 
 	 */
 	
-	class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
+	public class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_dae_add_blocks_residual_functions","C: Add the DAE AD-block functions to the JMI struct",
@@ -189,7 +189,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates code for adding BLT AD-blocks 
 	 */
-	class DAETag_CAD_dae_init_add_blocks_residual_functions extends DAETag {
+	public class DAETag_CAD_dae_init_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_dae_init_add_blocks_residual_functions","C: Add the DAE initialization AD-block functions to the JMI struct",
@@ -209,7 +209,7 @@ public class CADGenerator extends CGenerator {
 	/**
 	 * Generates code for solving the BLT blocks using CAD
 	 */
-	class DAETag_CAD_ode_derivatives extends DAETag {
+	public class DAETag_CAD_ode_derivatives extends DAETag {
 		
 		public DAETag_CAD_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_ode_derivatives","C: Compute derivatives of the ODE",
@@ -226,7 +226,7 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 
-	class DAETag_C_ODESparsity extends DAETag {
+	public class DAETag_C_ODESparsity extends DAETag {
 		
 		public DAETag_C_ODESparsity(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -432,7 +432,7 @@ public class CADGenerator extends CGenerator {
 		} 
 	}
 	
-	class DAETag_C_equationSparsity extends DAETag {
+	public class DAETag_C_equationSparsity extends DAETag {
 		
 		public DAETag_C_equationSparsity(AbstractGenerator myGenerator, 
 		  FClass fclass) {

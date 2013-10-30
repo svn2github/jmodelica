@@ -51,6 +51,7 @@ aspect InstLookupClasses {
 	eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
 	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClass(name);
 	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
+    eq Root.getChild().lookupInstClassFromMod(String name)                    = null;
    
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
     	getClassName().name().equals(name) ? lookupRedeclareExtendsInstClass(name) : lookupInstClass(name);
@@ -123,6 +124,7 @@ aspect InstLookupClasses {
 	 */
 	inh InstClassDecl InstNode.lookupRedeclareExtendsInstClass(String name);
 	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = null;
+    eq Root.getChild().lookupRedeclareExtendsInstClass(String name)                        = null;
 	eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
@@ -148,6 +150,7 @@ aspect InstLookupClasses {
 	inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
 	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
 	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
+    eq Root.getChild().lookupTopRedeclareExtendsInstClass(String name)           = null;
 	
 	/**
 	 * Resolve classes that are just references to other classes.
