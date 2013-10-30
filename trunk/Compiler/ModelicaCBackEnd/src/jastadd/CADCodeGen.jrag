@@ -32,7 +32,7 @@ import java.util.HashSet;
 
 aspect CADCodeGen {
 	
-	public class CADPrettyPrinter extends Printer {
+	class CADPrettyPrinter extends Printer {
 		
 		public CADPrettyPrinter() {
 			super("    ");

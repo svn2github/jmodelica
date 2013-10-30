@@ -398,7 +398,7 @@ aspect ParameterEquations {
 	eq FForIndex.getChild().parameterEquation()           = null;
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
 	eq FRecordDecl.getChild().parameterEquation()         = null;
-    eq FClass.getChild().parameterEquation()              = null;
+    eq FClass.getDummyVariable().parameterEquation()      = null;
 	
 	syn lazy Map<FAbstractVariable,FAbstractEquation> FClass.parameterEquationsMap() {
 		Map<FAbstractVariable,FAbstractEquation> map = new HashMap<FAbstractVariable,FAbstractEquation>();

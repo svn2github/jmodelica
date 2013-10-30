@@ -23,7 +23,7 @@ import org.jmodelica.util.Enumerator;
 
 aspect CCodeGen {
 	
-	public class CPrettyPrinter extends Printer {
+	class CPrettyPrinter extends Printer {
 		
 		public CPrettyPrinter() {
 			super("    ");
@@ -1449,7 +1449,7 @@ aspect CCodeGen {
 		getFExternalLanguage().genPostFuncCall(p, str, indent, this);
 	}
 			
-	public class MatrixOp {
+	class MatrixOp {
 		
 		private String function;
 		

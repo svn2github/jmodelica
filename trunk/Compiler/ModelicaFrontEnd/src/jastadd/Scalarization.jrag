@@ -786,20 +786,6 @@ aspect Scalarization {
 		}
 		
 		/**
-		 * \brief Pushes a copy of the top layer with first and second names switched
-		 */
-		public void createTransposedLayer() {
-			String[] lay = topLayer();
-			addLayer(lay.length);
-			for (int i = 0; i < lay.length; i++) {
-				promote(i);
-			}
-			topLayer()[0] = lay[1];
-			topLayer()[1] = lay[0];
-			
-		}
-		
-		/**
 		 * Creates nestled for loops using the top layer of names.
 		 *  
 		 * Adds the outermost for loop to a list of statements.
@@ -965,12 +951,6 @@ aspect Scalarization {
 		for (int i = 0; i < n; i++)
 			indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
 		super.addArrayUsesToIndexMap(indexMap, names);
-	}
-	
-	public void FTranspose.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
-		names.createTransposedLayer();
-		super.addArrayUsesToIndexMap(indexMap, names);
-		names.removeLayer();
 	}
 	
 	public void FIterExp.createArrayTemporaries(List clauses, List vars, 
@@ -1221,18 +1201,12 @@ aspect Scalarization {
 			Map<String,FExp> indexMap, FIdUseExp left, FExp right) {
 		for (FRecordComponentType comp : getComponents()) {
 			FIdUseExp lExp = new FIdUseExp(left.getFIdUse().getFQName().copyAsFQNameFull().append(comp.getName()));
-			FExp rExp = right.dynamicFExp(right.extractRecordOrTempFExp(comp.getName()));
+			FExp rExp = right.dynamicFExp(right.scalarRecordFExp(indexMap, new FQNameFull(comp.getName())));
+			rExp.clearScalarized();
 			comp.getFType().scalarizeAssignment(vars, stmts, indexMap, 
 					(FIdUseExp) left.dynamicFExp(lExp),
 					rExp);
 		}
-	}
-	
-	public FExp FExp.extractRecordOrTempFExp(String suffix) {
-		if (useTempVar)
-			return (new FIdUseExp(tempVarName())).extractRecordFExp(suffix);
-		else
-			return extractRecordFExp(suffix);
 	}
 	
 	/**
@@ -1626,11 +1600,11 @@ aspect Scalarization {
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
 	public FExp FExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarizeExp(indexMap);
+		return scalarize(indexMap);
 	}
 	
 	public FExp FIdUseExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return dynamicFExp(scalarizeExp(indexMap)).extractScalarRecordFExp(suffix);
+		return dynamicFExp(scalarize(indexMap)).extractScalarRecordFExp(suffix);
 	}
 	
 	public FExp FRecordConstructor.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -1667,7 +1641,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FFunctionCall.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-		return scalarizeExp(indexMap).extractScalarRecordFExp(suffix);
+		return scalarize(indexMap).extractScalarRecordFExp(suffix);
 	}
 	
 	public FExp FNoEventExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -1771,13 +1745,12 @@ aspect Scalarization {
 			List vars, Map<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		if (!isFunctionCallClause()) {
-			boolean equation = !inFunction();
-			FExp temp = createTemporaryExp(indexMap, equation);
+			boolean equation = !inFunction() && !inAlgorithm();
+			FExp temp = createTemporaryExp(indexMap, !inFunction());
 			if (temp != null) {
 				createFunctionCallClause(clauses, indexMap, temp);
 				if (addVar)
-					addTemporaryVars(vars, equation);
-				useTempVar = !equation || inAlgorithm();
+					addTemporaryVars(vars, !inFunction());
 			}
 		}
 	}
@@ -2334,8 +2307,6 @@ aspect Scalarization {
 	public FExp FMathematicalFunctionCall.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
 	public FExp FAtan2Exp.scalarizeExp(Map<String,FExp> indexMap) { return new FAtan2Exp(getFExp().scalarize(indexMap), getY().scalarize(indexMap)); }
 	public FExp FUnaryBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFExp().scalarize(indexMap)); }
-	public FExp FTranspose.scalarizeExp(Map<String,FExp> indexMap)    { return getFExp().scalarize(indexMap); }
-	
 	public FExp FNoArgBuiltIn.scalarizeExp(Map<String,FExp> indexMap) { return createEmptyNode(); }
 	public FExp FEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap)); }
 	public FExp FBinEventGenExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getX().scalarize(indexMap),getY().scalarize(indexMap)); }

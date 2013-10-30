@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,12 +19,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collections;
 
-aspect Environment {
-
     /**
      * TODO: Is it a good idea to inherit? Should env be a component?
      */
-    public class Environment extends ArrayList<InstModification> {
+    class Environment extends ArrayList<InstModification> {
     
         public Environment() {
         	super();
@@ -108,8 +106,6 @@ aspect Environment {
     
     }
 
-}
-
 aspect InstModifications{
 
 	public ArrayList<InstModification> InstModification.expand() {
@@ -192,7 +188,6 @@ aspect InstModifications{
 	inh int InstNode.modificationLevel();
 	eq InstNode.getChild().modificationLevel()           = modificationLevel() + 1;
 	eq InstRoot.getChild().modificationLevel()           = 0;
-    eq Root.getChild().modificationLevel()               = 0;
 	eq InstShortClassDecl.getChild().modificationLevel() = modificationLevel();
 
 }
@@ -347,8 +342,6 @@ aspect Environments {
 	 */	
 	inh Environment InstNode.myEnvironment();
 	inh Environment InstNode.myEnvironment(String name);
-    eq Root.getChild().myEnvironment()            = null;
-    eq Root.getChild().myEnvironment(String name) = null;
 	
 	/**
 	 * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
@@ -566,14 +559,12 @@ aspect Environments {
 				return icd;
 		return super.retrieveReplacingClass(name);
 	}
-    eq InstRoot.getChild().lookupReplacingClass(String name) = null;
-    eq Root.getChild().lookupReplacingClass(String name)     = null;
 
 	inh InstNode InstModification.myInstNode();
 	inh InstNode InstNode.myInstNode();
 	inh InstNode FAbstractEquation.myInstNode();
 	eq InstNode.getChild().myInstNode() = this;
-	eq Root.getChild().myInstNode() {
+	eq FlatRoot.getChild().myInstNode() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -895,7 +886,7 @@ aspect InstanceTreeConstruction {
 	inh boolean InstNode.isInInstModification();
 	eq InstModification.getChild().isInInstModification() = true;
 	eq InstRoot.getChild().isInInstModification()         = false;
-	eq Root.getChild().isInInstModification()             = false;
+	eq FlatRoot.getChild().isInInstModification()         = false;
 
 	syn boolean ExtendsClause.needsReplacingExtends()  = false;
 	eq ExtendsClauseShortClass.needsReplacingExtends() = true;
@@ -1650,7 +1641,6 @@ aspect InstanceAST_API {
 	inh boolean InstNode.enclosedBy(InstNode node);
 	eq InstNode.getChild().enclosedBy(InstNode node) = (node == this) || enclosedBy(node);
 	eq InstRoot.getChild().enclosedBy(InstNode node) = (node == this);
-    eq Root.getChild().enclosedBy(InstNode node)     = false;
 	
 	/**
 	 * \brief Find the component that this access should be evaluated in.
@@ -1664,7 +1654,7 @@ aspect InstanceAST_API {
 	eq InstComponentDecl.getChild().containingInstComponent() = this;
 	eq InstClassDecl.getChild().containingInstComponent()     = null;
 	eq InstRoot.getChild().containingInstComponent()          = null;
-	eq Root.getChild().containingInstComponent()              = null;
+	eq FlatRoot.getChild().containingInstComponent()          = null;
 
 	
 	/**
@@ -1728,7 +1718,6 @@ aspect InstanceAST_API {
 	inh InstNode InstNode.containingInstNode();
 	eq InstNode.getChild().containingInstNode() = this;
 	eq InstRoot.getChild().containingInstNode() = null;
-    eq Root.getChild().containingInstNode()     = null;
 	
 }
 

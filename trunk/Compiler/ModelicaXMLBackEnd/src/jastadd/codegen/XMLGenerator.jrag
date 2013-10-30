@@ -98,7 +98,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_rootAttributes extends DAETag {
+	class DAETag_XML_rootAttributes extends DAETag {
 		private static final String df = "yyyy-MM-dd'T'HH:mm:ss";
 		
 		public DAETag_XML_rootAttributes(AbstractGenerator myGenerator, FClass fclass) {
@@ -135,7 +135,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_namespaces extends DAETag {
+	class DAETag_XML_namespaces extends DAETag {
 		
 		public DAETag_XML_namespaces (AbstractGenerator myGenerator, FClass fclass) {
 			super("XML_namespaces","Namespaces definition",
@@ -167,7 +167,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_unitDefinitions extends DAETag {
+	class DAETag_XML_unitDefinitions extends DAETag {
 		
 		public DAETag_XML_unitDefinitions(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -224,7 +224,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_typeDefinitions extends DAETag {
+	class DAETag_XML_typeDefinitions extends DAETag {
 		
 		public DAETag_XML_typeDefinitions(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -280,7 +280,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_defaultExperiment extends DAETag {
+	class DAETag_XML_defaultExperiment extends DAETag {
 		
 		public DAETag_XML_defaultExperiment(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -312,7 +312,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_vendorAnnotations extends DAETag {
+	class DAETag_XML_vendorAnnotations extends DAETag {
 		
 		public DAETag_XML_vendorAnnotations(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -362,7 +362,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_modelVariables extends DAETag {
+	class DAETag_XML_modelVariables extends DAETag {
 		
 		public DAETag_XML_modelVariables(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -674,7 +674,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_bindingEquations extends DAETag {
+	class DAETag_XML_bindingEquations extends DAETag {
 		
 		public DAETag_XML_bindingEquations (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -737,7 +737,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_equations extends DAETag {
+	class DAETag_XML_equations extends DAETag {
 		
 		public DAETag_XML_equations (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -766,7 +766,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_initialEquations extends DAETag {
+	class DAETag_XML_initialEquations extends DAETag {
 		
 		public DAETag_XML_initialEquations (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -794,7 +794,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_Optimization extends DAETag {
+	class DAETag_XML_Optimization extends DAETag {
 		
 		public DAETag_XML_Optimization (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -819,7 +819,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_functions extends DAETag {
+	class DAETag_XML_functions extends DAETag {
 		
 		public DAETag_XML_functions (
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -849,7 +849,7 @@ public class XMLGenerator extends GenericGenerator {
 	 * 
 	 * @see DAETag
 	 */
-	public class DAETag_XML_modelStructure extends DAETag {
+	class DAETag_XML_modelStructure extends DAETag {
 		
 		public DAETag_XML_modelStructure(
 		  AbstractGenerator myGenerator, FClass fclass) {
@@ -941,7 +941,7 @@ public class XMLGenerator extends GenericGenerator {
 	}
 }
 
-public class VariableNameComparator implements Comparator<FVariable> {
+class VariableNameComparator implements Comparator<FVariable> {
 	public int compare(FVariable variable1, FVariable variable2) {
 		String name1 = variable1.getFQNameNoTransform().name();
 		String name2 = variable2.getFQNameNoTransform().name();
@@ -984,7 +984,7 @@ public class VariableNameComparator implements Comparator<FVariable> {
  * for the parts which are dynamical and therefore can not use a template.
  * 
  */
-public class TagGenerator {
+class TagGenerator {
 	private String tabs="";
 	private Stack<String> stack;
 	private String previous;

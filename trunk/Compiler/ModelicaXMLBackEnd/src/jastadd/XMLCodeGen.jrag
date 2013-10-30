@@ -25,7 +25,7 @@ import java.util.Map;
 
 aspect XMLCodeGen {
 	
-	public class XMLPrettyPrinter extends Printer {
+	class XMLPrettyPrinter extends Printer {
 		public XMLPrettyPrinter() {
 			super("\t");
 		}

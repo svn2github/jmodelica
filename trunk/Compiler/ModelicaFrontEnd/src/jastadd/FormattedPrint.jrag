@@ -12,7 +12,7 @@ aspect FormattedPrint {
 	/**
 	 * A pretty printer that prints the AST in code, with the old formatting.
 	 */
-	public class FormattedPrettyPrinter extends Printer {
+	class FormattedPrettyPrinter extends Printer {
 		/**
 		 * Creates a <code>FormattedPrettyPrinter</code>.
 		 */
@@ -42,7 +42,7 @@ aspect FormattedPrint {
 		}
 	}
 
-	public class DefaultFormattingIndentation {
+	class DefaultFormattingIndentation {
 		private String indentation;
 		private String currentIndentation;
 

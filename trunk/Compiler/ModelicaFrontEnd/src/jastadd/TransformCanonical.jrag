@@ -4434,7 +4434,7 @@ aspect FunctionInlining {
 		endStep("removeUnusedFunctions()");
 	}
 	
-	public class FFunctionDecl {
+	class FFunctionDecl {
 		public enum UseType{
 			NONE(false, false),
 			ALIAS_ATTRIBUTE_USE(false, false),

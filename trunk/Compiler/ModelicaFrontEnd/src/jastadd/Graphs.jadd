@@ -742,7 +742,7 @@ public class BiPGraph {
 		return str.toString();
 	}
 	
-    public class Edge {
+    class Edge {
     	private Var variable;
     	private Eq equation;
     	

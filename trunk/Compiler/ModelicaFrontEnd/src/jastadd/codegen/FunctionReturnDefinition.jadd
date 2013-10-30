@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009-2013 Modelon AB
+    Copyright (C) 2009 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 /**
  * \brief A class representing the return values of a function.
  */
-public class FunctionReturnDefinition {
+class FunctionReturnDefinition {
 	private ArrayList<FFunctionVariable> outputs;
 	
 	public FunctionReturnDefinition(FFunctionDecl decl) {

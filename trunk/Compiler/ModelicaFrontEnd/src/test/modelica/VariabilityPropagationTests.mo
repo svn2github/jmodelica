@@ -387,10 +387,10 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
- constant Real x2 = 0.0;
+ constant Real x2 = 0;
  Real x3;
  Real x4;
- constant Real x5 = 0.0;
+ constant Real x5 = 0;
  parameter Real x6;
  parameter Real p1 = 4 /* 4 */;
 initial equation 

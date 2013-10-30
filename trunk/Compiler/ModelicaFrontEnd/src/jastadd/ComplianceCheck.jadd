@@ -201,6 +201,7 @@ aspect ComplianceCheck {
 	}
 	
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
+	eq FTranspose.unknownSizeSupported()             = false;
 	eq FSymmetric.unknownSizeSupported()             = false;
 	eq FScalarExp.unknownSizeSupported()             = false;
 	eq FVectorExp.unknownSizeSupported()             = false;

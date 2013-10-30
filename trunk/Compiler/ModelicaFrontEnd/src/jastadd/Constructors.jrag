@@ -40,6 +40,14 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Construct a List containing the given nodes.
+	 */
+	public List.List(T... nodes) {
+		for (int i = nodes.length - 1; i >= 0; i--)
+			setChild(nodes[i], i);
+	}
+	
+	/**
 	 * \brief Constructs a real literal expression from a double.
 	 */
 	public RealLitExp.RealLitExp(double val) {

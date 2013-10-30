@@ -219,15 +219,15 @@ aspect EquationSolve {
 */
 		}
 	    	
-	    if ((duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) || 
-	            sol.isLiteralZero()) { 	   
+	    if (duringTearing && !root().options.getBooleanOption("divide_by_vars_in_tearing")) { 	   
 		    if (!mulCoeffVar.lessOrEqual(fConstant())) {
 		    	return new FNoExp();
 		    }
 		}
 	    
-	    if (mulCoeff!=null && !mulCoeff.isLiteralOne()) {
-	    	sol = new FDivExp(sol, mulCoeff);
+	    if (mulCoeff!=null && 
+	        !((mulCoeff instanceof FRealLitExp) && mulCoeff.ceval().realValue()==1)) {
+	    	sol = new FDivExp(sol,mulCoeff);
 	    }
 
 		return sol;

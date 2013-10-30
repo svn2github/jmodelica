@@ -2295,7 +2295,7 @@ fclass IndexReduction.IndexReduction50
  Real c1_w(stateSelect = c1_ss);
  Real c1_a;
  Real c2_w(stateSelect = c2_ss);
- Real c2_a;
+ parameter Real c2_a = 0 /* 0 */;
  Real _der_c2_w;
  Real _der_der_c1_phi;
 initial equation 
@@ -2306,7 +2306,6 @@ equation
  c1_a = der(c1_w);
  c2_w = der(c1_phi);
  c2_a = _der_c2_w;
- c2_a * p = 0;
  der(c1_w) = _der_der_c1_phi;
  _der_c2_w = _der_der_c1_phi;
 
@@ -2347,7 +2346,7 @@ fclass IndexReduction.IndexReduction51
  Real c1_w(stateSelect = c1_ss);
  Real c1_a;
  Real c2_w(stateSelect = c2_ss);
- Real c2_a;
+ parameter Real c2_a = 0 /* 0 */;
  Real x(start = 2);
  constant Real y = 0;
  Real _der_c2_w;
@@ -2360,7 +2359,6 @@ equation
  c1_a = der(c1_w);
  c2_w = der(x);
  c2_a = _der_c2_w;
- c2_a * p = 0;
  der(c1_w) = _der_der_c1_phi;
  _der_c2_w = _der_der_c1_phi;
 

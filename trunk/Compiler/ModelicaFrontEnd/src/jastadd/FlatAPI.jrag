@@ -1417,8 +1417,7 @@ aspect FlatTypes {
 	eq FForIndex.getChild().inRecord()   = false;
 	
 	inh boolean InstComponentDecl.inRecord();
-    eq InstNode.getInstComponentDecl().inRecord()               = false;
-    eq Root.getChild().inRecord()                               = false;
+	eq InstNode.getInstComponentDecl().inRecord()               = false;
 	eq InstForIndex.getInstPrimitive().inRecord()               = false;
 	eq InstRecord.getInstComponentDecl().inRecord()             = true;
 	eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
@@ -1437,7 +1436,7 @@ aspect FlatTypes {
 	
 	inh FRecordDecl FAbstractVariable.containingRecordDecl();
 	eq FRecordDecl.getChild().containingRecordDecl() = this;
-	eq Root.getChild().containingRecordDecl()        = null;
+	eq FlatRoot.getChild().containingRecordDecl()    = null;
 
 }
 

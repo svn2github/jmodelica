@@ -29,7 +29,7 @@ import java.io.*;
  */
 public class GenericGenerator extends AbstractGenerator {
 
-	public class DAETag_numIndependentConstants extends DAETag {
+	class DAETag_numIndependentConstants extends DAETag {
 		
 		public DAETag_numIndependentConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -43,7 +43,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentConstants extends DAETag {
+	class DAETag_numDependentConstants extends DAETag {
 		
 		public DAETag_numDependentConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -57,7 +57,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentParameters extends DAETag {
+	class DAETag_numIndependentParameters extends DAETag {
 		
 		public DAETag_numIndependentParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -71,7 +71,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentParameters extends DAETag {
+	class DAETag_numDependentParameters extends DAETag {
 		
 		public DAETag_numDependentParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -85,7 +85,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentRealConstants extends DAETag {
+	class DAETag_numIndependentRealConstants extends DAETag {
 		
 		public DAETag_numIndependentRealConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -99,7 +99,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentRealConstants extends DAETag {
+	class DAETag_numDependentRealConstants extends DAETag {
 		
 		public DAETag_numDependentRealConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -113,7 +113,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentRealParameters extends DAETag {
+	class DAETag_numIndependentRealParameters extends DAETag {
 		
 		public DAETag_numIndependentRealParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -127,7 +127,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentRealParameters extends DAETag {
+	class DAETag_numDependentRealParameters extends DAETag {
 		
 		public DAETag_numDependentRealParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -141,7 +141,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
-	public class DAETag_numIndependentIntegerConstants extends DAETag {
+	class DAETag_numIndependentIntegerConstants extends DAETag {
 		
 		public DAETag_numIndependentIntegerConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -155,7 +155,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentEnumConstants extends DAETag {
+	class DAETag_numIndependentEnumConstants extends DAETag {
 		
 		public DAETag_numIndependentEnumConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -169,7 +169,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentIntegerConstants extends DAETag {
+	class DAETag_numDependentIntegerConstants extends DAETag {
 		
 		public DAETag_numDependentIntegerConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -183,7 +183,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentEnumConstants extends DAETag {
+	class DAETag_numDependentEnumConstants extends DAETag {
 		
 		public DAETag_numDependentEnumConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -197,7 +197,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentIntegerParameters extends DAETag {
+	class DAETag_numIndependentIntegerParameters extends DAETag {
 		
 		public DAETag_numIndependentIntegerParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -211,7 +211,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentEnumParameters extends DAETag {
+	class DAETag_numIndependentEnumParameters extends DAETag {
 		
 		public DAETag_numIndependentEnumParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -225,7 +225,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentIntegerParameters extends DAETag {
+	class DAETag_numDependentIntegerParameters extends DAETag {
 		
 		public DAETag_numDependentIntegerParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -239,7 +239,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentEnumParameters extends DAETag {
+	class DAETag_numDependentEnumParameters extends DAETag {
 		
 		public DAETag_numDependentEnumParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -253,7 +253,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentBooleanConstants extends DAETag {
+	class DAETag_numIndependentBooleanConstants extends DAETag {
 		
 		public DAETag_numIndependentBooleanConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -267,7 +267,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentBooleanConstants extends DAETag {
+	class DAETag_numDependentBooleanConstants extends DAETag {
 		
 		public DAETag_numDependentBooleanConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -281,7 +281,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentBooleanParameters extends DAETag {
+	class DAETag_numIndependentBooleanParameters extends DAETag {
 		
 		public DAETag_numIndependentBooleanParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -295,7 +295,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentBooleanParameters extends DAETag {
+	class DAETag_numDependentBooleanParameters extends DAETag {
 		
 		public DAETag_numDependentBooleanParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -309,7 +309,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentStringConstants extends DAETag {
+	class DAETag_numIndependentStringConstants extends DAETag {
 		
 		public DAETag_numIndependentStringConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -323,7 +323,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentStringConstants extends DAETag {
+	class DAETag_numDependentStringConstants extends DAETag {
 		
 		public DAETag_numDependentStringConstants(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -337,7 +337,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIndependentStringParameters extends DAETag {
+	class DAETag_numIndependentStringParameters extends DAETag {
 		
 		public DAETag_numIndependentStringParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -351,7 +351,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDependentStringParameters extends DAETag {
+	class DAETag_numDependentStringParameters extends DAETag {
 		
 		public DAETag_numDependentStringParameters(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -365,7 +365,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numSwitchingFunctions extends DAETag {
+	class DAETag_numSwitchingFunctions extends DAETag {
 		
 		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -379,7 +379,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numInitialSwitchingFunctions extends DAETag {
+	class DAETag_numInitialSwitchingFunctions extends DAETag {
 		
 		public DAETag_numInitialSwitchingFunctions(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -393,7 +393,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numGuards extends DAETag {
+	class DAETag_numGuards extends DAETag {
 		
 		public DAETag_numGuards(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -407,7 +407,7 @@ public class GenericGenerator extends AbstractGenerator {
 
 	}
 
-	public class DAETag_numInitialGuards extends DAETag {
+	class DAETag_numInitialGuards extends DAETag {
 		
 		public DAETag_numInitialGuards(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -422,7 +422,7 @@ public class GenericGenerator extends AbstractGenerator {
 	}
 
 	
-	public class DAETag_numAlgebraicContinousRealVariables extends DAETag {
+	class DAETag_numAlgebraicContinousRealVariables extends DAETag {
 		
 		public DAETag_numAlgebraicContinousRealVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -436,7 +436,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteVariables extends DAETag {
+	class DAETag_numDiscreteVariables extends DAETag {
 		
 		public DAETag_numDiscreteVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -450,7 +450,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteRealVariables extends DAETag {
+	class DAETag_numDiscreteRealVariables extends DAETag {
 		
 		public DAETag_numDiscreteRealVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -464,7 +464,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numOutputs extends DAETag {
+	class DAETag_numOutputs extends DAETag {
 		
 		public DAETag_numOutputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -478,7 +478,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteIntegerVariables extends DAETag {
+	class DAETag_numDiscreteIntegerVariables extends DAETag {
 		
 		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -492,7 +492,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteEnumVariables extends DAETag {
+	class DAETag_numDiscreteEnumVariables extends DAETag {
 		
 		public DAETag_numDiscreteEnumVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -506,7 +506,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteBooleanVariables extends DAETag {
+	class DAETag_numDiscreteBooleanVariables extends DAETag {
 		
 		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -520,7 +520,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDiscreteStringVariables extends DAETag {
+	class DAETag_numDiscreteStringVariables extends DAETag {
 		
 		public DAETag_numDiscreteStringVariables(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -534,7 +534,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
-	public class DAETag_numInputs extends DAETag {
+	class DAETag_numInputs extends DAETag {
 		
 		public DAETag_numInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -548,7 +548,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numRealInputs extends DAETag {
+	class DAETag_numRealInputs extends DAETag {
 		
 		public DAETag_numRealInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -562,7 +562,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numIntegerInputs extends DAETag {
+	class DAETag_numIntegerInputs extends DAETag {
 		
 		public DAETag_numIntegerInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -576,7 +576,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numEnumInputs extends DAETag {
+	class DAETag_numEnumInputs extends DAETag {
 		
 		public DAETag_numEnumInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -590,7 +590,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numBooleanInputs extends DAETag {
+	class DAETag_numBooleanInputs extends DAETag {
 		
 		public DAETag_numBooleanInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -604,7 +604,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numStringInputs extends DAETag {
+	class DAETag_numStringInputs extends DAETag {
 		
 		public DAETag_numStringInputs(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -618,7 +618,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
-    public class DAETag_numExternalObjects extends DAETag {
+    class DAETag_numExternalObjects extends DAETag {
         
         public DAETag_numExternalObjects(AbstractGenerator myGenerator, 
           FClass fclass) {
@@ -632,7 +632,7 @@ public class GenericGenerator extends AbstractGenerator {
     
     }
 
-	public class DAETag_numEquations extends DAETag {
+	class DAETag_numEquations extends DAETag {
 		
 		public DAETag_numEquations(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -646,7 +646,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numEventIndicators extends DAETag {
+	class DAETag_numEventIndicators extends DAETag {
 		
 		public DAETag_numEventIndicators(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -663,7 +663,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	}
 	
-	public class DAETag_numInitialEquations extends DAETag {
+	class DAETag_numInitialEquations extends DAETag {
 		
 		public DAETag_numInitialEquations(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -677,7 +677,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numInitialEventIndicators extends DAETag {
+	class DAETag_numInitialEventIndicators extends DAETag {
 		
 		public DAETag_numInitialEventIndicators(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -694,7 +694,7 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	}
 
-	public class DAETag_numInitialGuessEquations extends DAETag {
+	class DAETag_numInitialGuessEquations extends DAETag {
 		
 		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 
 		  FClass fclass) {
@@ -708,7 +708,7 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
-	public class DAETag_numDifferentiatedRealVariables extends DAETag {
+	class DAETag_numDifferentiatedRealVariables extends DAETag {
 		
 		public DAETag_numDifferentiatedRealVariables(
 		  AbstractGenerator myGenerator, FClass fclass) {

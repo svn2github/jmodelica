@@ -29,7 +29,7 @@ import java.io.*;
  */
 public class OptimicaCGenerator extends CADGenerator {
 
-	public class OptTag_C_numFreeDependentParameters extends OptTag {
+	class OptTag_C_numFreeDependentParameters extends OptTag {
 		
 		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -42,7 +42,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numPointwisePenalty extends OptTag {
+	class OptTag_C_numPointwisePenalty extends OptTag {
 		
 		public OptTag_C_numPointwisePenalty(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -55,7 +55,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numLagrangeIntegrand extends OptTag {
+	class OptTag_C_numLagrangeIntegrand extends OptTag {
 		
 		public OptTag_C_numLagrangeIntegrand(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -68,7 +68,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 	
-	public class OptTag_C_numPathEqConstraints extends OptTag {
+	class OptTag_C_numPathEqConstraints extends OptTag {
 		
 		public OptTag_C_numPathEqConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -81,7 +81,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numPathIneqConstraints extends OptTag {
+	class OptTag_C_numPathIneqConstraints extends OptTag {
 		
 		public OptTag_C_numPathIneqConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -95,7 +95,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numPointEqConstraints extends OptTag {
+	class OptTag_C_numPointEqConstraints extends OptTag {
 		
 		public OptTag_C_numPointEqConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -108,7 +108,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numPointIneqConstraints extends OptTag {
+	class OptTag_C_numPointIneqConstraints extends OptTag {
 		
 		public OptTag_C_numPointIneqConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -122,7 +122,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_numTimePoints extends OptTag {
+	class OptTag_C_numTimePoints extends OptTag {
 		
 		public OptTag_C_numTimePoints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -135,7 +135,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 	
-	public class OptTag_C_pointVariableAliases extends OptTag {
+	class OptTag_C_pointVariableAliases extends OptTag {
 		
 		public OptTag_C_pointVariableAliases(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -167,7 +167,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 
-	public class OptTag_C_FreeDependentParameterResiduals extends OptTag {
+	class OptTag_C_FreeDependentParameterResiduals extends OptTag {
 		
 		public OptTag_C_FreeDependentParameterResiduals(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -185,7 +185,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 	
-	public class OptTag_C_CostFunction extends OptTag {
+	class OptTag_C_CostFunction extends OptTag {
 		
 		public OptTag_C_CostFunction(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -204,7 +204,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 
-	public class OptTag_C_LagrangeIntegrandFunction extends OptTag {
+	class OptTag_C_LagrangeIntegrandFunction extends OptTag {
 		
 		public OptTag_C_LagrangeIntegrandFunction(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -224,7 +224,7 @@ public class OptimicaCGenerator extends CADGenerator {
 	}
 
 	
-	public class OptTag_C_PathEqualityConstraints extends OptTag {
+	class OptTag_C_PathEqualityConstraints extends OptTag {
 	
 		public OptTag_C_PathEqualityConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -243,7 +243,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_PathInequalityConstraints extends OptTag {
+	class OptTag_C_PathInequalityConstraints extends OptTag {
 		
 		public OptTag_C_PathInequalityConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -268,7 +268,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_PointEqualityConstraints extends OptTag {
+	class OptTag_C_PointEqualityConstraints extends OptTag {
 		
 		public OptTag_C_PointEqualityConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
@@ -287,7 +287,7 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
-	public class OptTag_C_PointInequalityConstraints extends OptTag {
+	class OptTag_C_PointInequalityConstraints extends OptTag {
 		
 		public OptTag_C_PointInequalityConstraints(AbstractGenerator myGenerator, 
 		  FOptClass foptclass) {
