@@ -88,6 +88,61 @@
 %include "transferModelica.hpp"
 %include "transferOptimica.hpp"
 
+%extend ModelicaCasADi::Equation {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::Constraint {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::ModelFunction {
+  std::string __repr__() { return $self->repr(); }
+}
+
+%extend ModelicaCasADi::VariableType {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::PrimitiveType {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::BooleanType {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::IntegerType {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::RealType {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::UserType {
+  std::string __repr__() { return $self->repr(); }
+}
+
+%extend ModelicaCasADi::Variable {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::RealVariable {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::DerivativeVariable {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::BooleanVariable {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::IntegerVariable {
+  std::string __repr__() { return $self->repr(); }
+}
+
+%extend ModelicaCasADi::Model {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::OptimizationProblem {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::CompilerOptionsWrapper {
+  std::string __repr__() { return $self->repr(); }
+}
+
 /*
 #ifdef SWIG
     %extend ModelicaCasADi::Printable{
