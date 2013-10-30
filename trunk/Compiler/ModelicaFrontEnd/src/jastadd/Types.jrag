@@ -29,61 +29,57 @@ aspect Types {
 
    // The double dispatch pattern applied to subtype testing.
    syn boolean InstNode.subType(InstNode t) = false;
-   syn boolean InstNode.superTypeCompositeType(InstComposite subType) = false;
-   syn boolean InstNode.superTypeRecordType(InstRecord subType) = false;
-   syn boolean InstNode.superTypeClassType(InstRoot subType) = false;
+
+   syn boolean InstNode.superTypeCompositeType(InstComposite subType)          = false;
+   syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType)     = false;
+   syn boolean InstNode.superTypeRecordType(InstRecord subType)                = false;
+   syn boolean InstNode.superTypeClassType(InstRoot subType)                   = false;
    syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType) = false;
    
-   eq InstComposite.subType(InstNode t) = t.superTypeCompositeType(this);
-   eq InstRecord.subType(InstNode t) = t.superTypeRecordType(this);
-   eq InstPrimitive.subType(InstNode t) = t.superTypePrimitiveComponentType(this);
+   eq InstComposite.subType(InstNode t)          = t.superTypeCompositeType(this);
+   eq InstArrayComponentDecl.subType(InstNode t) = t.superTypeArrayType(this);
+   eq InstRecord.subType(InstNode t)             = t.superTypeRecordType(this);
+   eq InstPrimitive.subType(InstNode t)          = t.superTypePrimitiveComponentType(this);
 
-   eq InstRecord.superTypeRecordType(InstRecord subType) {
-       if (subType == this) return true;
-       if (subType.myInstClass().isUnknown()) return true;
-       InstRecord superType = this;
-   
-       // Check that all elements (here: components) in superType are in subType 
-       for (InstNode superTypeComponentInst : containedInstComponents()) {
-       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
-          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
-          if (set.size()!=1)
-          	return false;
-          InstNode subTypeComponentInst = set.iterator().next();
-          if (!subTypeComponentInst.subType(superTypeComponentInst))
-          	return false;
-	   }
-   	   return true;
-   }
-
-   eq InstComposite.superTypeCompositeType(InstComposite subType) {
-       if (subType == this) return true;
-       if (subType.myInstClass().isUnknown()) return true;
-       InstComposite superType = this;
-   
-       // Check that all elements (here: components) in superType are in subType 
-       for (InstNode superTypeComponentInst : containedInstComponents()) {
-       	  // TODO: memberComponentInst should be switched for something in the general name analysis framework
-          HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
-          if (set.size()!=1)
-          	return false;
-          InstNode subTypeComponentInst = set.iterator().next();
-          if (!subTypeComponentInst.subType(superTypeComponentInst))
-          	return false;
-	   }
-   	   return true;
-   }
-   
-   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType) = true;
-   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType) = true;
-   
+   eq InstComposite.superTypeCompositeType(InstComposite subType)               = compareCompositeTypes(this, subType);
+   eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType) = compareCompositeTypes(this, subType);
+   eq InstRecord.superTypeRecordType(InstRecord subType)                        = compareCompositeTypes(this, subType);
+   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType)          = true;
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType)    = true;
    eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
-       if (subType == this) return true;
-       InstPrimitive superType = this;
-       if (subType.className().equals(superType.className()))
-       	  return true;
-       else   
-   	      return false;
+       if (subType == this) 
+           return true;
+       return subType.className().equals(className()) && subType.ndims() == ndims();
+   }
+   
+   public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType) {
+       if (subType == superType || subType.myInstClass().isUnknown()) 
+           return true;
+       
+       if (superType.isArray() != subType.isArray())
+           return false;
+       
+       if (superType.isArray()) {
+           List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
+           List<InstComponentDecl> subComponents = subType.getInstComponentDecls();
+           if (superComponents.getNumChild() != subComponents.getNumChild())
+               return false;
+           for (int i = 0, n = superComponents.getNumChild(); i < n; i++)
+               if (!subComponents.getChild(i).subType(superComponents.getChild(i)))
+                   return false;
+       } else {
+           // Check that all elements (here: components) in superType are in subType 
+           for (InstNode superTypeComponentInst : superType.containedInstComponents()) {
+               // TODO: memberComponentInst should be switched for something in the general name analysis framework
+               HashSet<InstNode> set = subType.memberComponentInst(superTypeComponentInst.name());
+               if (set.size() != 1)
+                   return false;
+               InstNode subTypeComponentInst = set.iterator().next();
+               if (!subTypeComponentInst.subType(superTypeComponentInst))
+                   return false;
+           }
+       }
+       return true;
    }
 
   // Rudimentary name analysis framework for looking up instances

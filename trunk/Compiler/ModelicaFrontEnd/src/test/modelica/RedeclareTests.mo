@@ -3279,6 +3279,32 @@ end RedeclareTests.RedeclareTest37;
 end RedeclareTest37;
 
 
+model RedeclareTest38
+    model A
+        replaceable B b constrainedby B;
+    end A;
+    
+    model B
+        C c[1];
+    end B;
+    
+    model C
+        Real x;
+    end C;
+    
+    A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest38",
+			description="Constrainedby with model containing array of models",
+			flatModel="
+fclass RedeclareTests.RedeclareTest38
+ Real a.b.c[1].x;
+end RedeclareTests.RedeclareTest38;
+")})));
+end RedeclareTest38;
+
 
 model RedeclareElement1
   model A
