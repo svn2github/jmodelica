@@ -385,6 +385,12 @@ aspect StructuralParams {
 		for (ASTNode n : this)
 			n.markUsesAsStructuralParameter();
 	}
+    
+    public void FSizeExp.markUsesAsStructuralParameter() {
+        getDimOpt().markUsesAsStructuralParameter();
+    }
+    
+    public void FNdimsExp.markUsesAsStructuralParameter() {}
 	
 	public void InstAccess.markUsesAsStructuralParameter() {
 		myInstComponentDecl().markAsStructuralParameter();

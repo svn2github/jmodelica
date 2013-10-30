@@ -229,6 +229,31 @@ end ArrayBuiltins.Size.SizeExp12;
 ")})));
 end SizeExp12;
 
+
+model SizeStructural1
+	Real x[p1,size(p2,1)];
+	Real y = p1 + p2 * p3 + p4;
+	parameter Integer p1 = size(p3,p4);
+	parameter Real p2[1] = {1};
+	parameter Real p3[1] = {2};
+	parameter Integer p4 = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Size_SizeStructural1",
+			description="Using parameter as first arg of size() expression that is used as structural parameter should not make that parameter a structural parameter",
+			flatModel="
+fclass ArrayBuiltins.Size.SizeStructural1
+ Real x[1,1];
+ Real y = 1 + p2[1:1] * p3[1:1] + 1;
+ parameter Integer p1 = size(p3, 1) /* 1 */;
+ parameter Real p2[1] = {1} /* { 1 } */;
+ parameter Real p3[1] = {2} /* { 2 } */;
+ parameter Integer p4 = 1 /* 1 */;
+end ArrayBuiltins.Size.SizeStructural1;
+")})));
+end SizeStructural1;
+
 end Size;
 
 
@@ -2592,6 +2617,31 @@ fclass ArrayBuiltins.NdimsExp1
 end ArrayBuiltins.NdimsExp1;
 ")})));
 end NdimsExp1;
+
+
+model NdimsStructural1
+    Real x[p1,ndims(p2)];
+    Real y = p1 + p2 * p3;
+    parameter Integer p1 = ndims(p3);
+    parameter Real p2[1] = {1};
+    parameter Real p3[1] = {2};
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NdimsStructural1",
+			description="Using parameter in ndims() expression that is used as structural parameter should not make that parameter a structural parameter",
+			flatModel="
+fclass ArrayBuiltins.NdimsStructural1
+ Real x[1,1];
+ Real y = 1 + p2[1:1] * p3[1:1];
+ parameter Integer p1 = ndims(p3[1:1]) /* 1 */;
+ parameter Real p2[1] = {1} /* { 1 } */;
+ parameter Real p3[1] = {2} /* { 2 } */;
+end ArrayBuiltins.NdimsStructural1;
+")})));
+end NdimsStructural1;
+
+
 
 model ArrayIfExp1
   parameter Integer N = 3;
