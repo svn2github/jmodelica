@@ -3972,6 +3972,64 @@ end FunctionTests.ArrayExpInFunc11;
 ")})));
 end ArrayExpInFunc11;
 
+model ArrayExpInFunc12
+	
+record R
+	Real x[2];
+end R;
+function f1
+	output Real[2] o = {1,2};
+	algorithm
+end f1;
+function f2
+	output R b;
+algorithm
+	b := R(f1());
+end f2;
+	R r;
+equation
+	r = f2();
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc12",
+			description="Scalarization of functions: temp in record constructor",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc12
+ Real r.x[1];
+ Real r.x[2];
+equation
+ (FunctionTests.ArrayExpInFunc12.R({r.x[1], r.x[2]})) = FunctionTests.ArrayExpInFunc12.f2();
+
+public
+ function FunctionTests.ArrayExpInFunc12.f2
+  output FunctionTests.ArrayExpInFunc12.R b;
+  Real[2] temp_1;
+ algorithm
+  (temp_1) := FunctionTests.ArrayExpInFunc12.f1();
+  b.x[1] := temp_1[1];
+  b.x[2] := temp_1[2];
+  return;
+ end FunctionTests.ArrayExpInFunc12.f2;
+
+ function FunctionTests.ArrayExpInFunc12.f1
+  output Real[2] o;
+ algorithm
+  o[1] := 1;
+  o[2] := 2;
+  return;
+ end FunctionTests.ArrayExpInFunc12.f1;
+
+ record FunctionTests.ArrayExpInFunc12.R
+  Real x[2];
+ end FunctionTests.ArrayExpInFunc12.R;
+
+end FunctionTests.ArrayExpInFunc12;
+
+")})));
+end ArrayExpInFunc12;
 
 
 model ArrayOutputScalarization1
