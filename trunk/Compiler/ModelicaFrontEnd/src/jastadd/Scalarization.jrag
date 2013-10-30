@@ -1313,7 +1313,7 @@ aspect Scalarization {
 			leftExp.setScalarizedFlag();
 			call.createFunctionCallClause(stmts, indexMap, leftExp);
 		} else {
-			right.type().scalarizeAssignment(vars, stmts, indexMap, left, right);
+			left.type().scalarizeAssignment(vars, stmts, indexMap, left, right);
 		}
 	}
 	
