@@ -185,12 +185,7 @@ aspect FlatVariability {
 	eq InstAssignable.combinedVariability() = 
 		isStructuralParam ? fStructParameter() : super.combinedVariability();
 	
-	syn lazy FTypePrefixVariability InstComponentDecl.variability() {
-		FTypePrefixVariability var = combinedVariability();
-		if (!var.discreteOrLess() && isAssignedInWhen())
-			var = fDiscrete();
-		return var;
-	}
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();
 	
 	syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
@@ -216,23 +211,82 @@ aspect FlatVariability {
 	}
 	
 	
-	syn boolean InstComponentDecl.isAssignedInWhen() = retrieveAssignedInWhenSet().contains(this);
-	
-	inh Set<InstComponentDecl> InstComponentDecl.retrieveAssignedInWhenSet();
-	eq InstClassDecl.getChild().retrieveAssignedInWhenSet() = assignedInWhenSet();
-	eq Root.getChild().retrieveAssignedInWhenSet()          = Collections.emptySet();
-	
-	syn lazy Set<InstComponentDecl> InstNode.assignedInWhenSet() {
-		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
-		for (InstExtends ie : getInstExtendss())
-			res.addAll(ie.assignedInWhenSet());
-		for (InstComponentDecl icd : getInstComponentDecls())
-			res.addAll(icd.assignedInWhenSet());
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			if (eqn instanceof FWhenEquation)
-				res.addAll(eqn.assignedSet());
-		return res;
+	/**
+	 * Convert all continous variables that are assigned in when equations into discrete variables.
+	 */
+	public void FClass.updateVariablilityForVariablesInWhen() {
+	    for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+	        eqn.updateVariablilityForVariablesInWhen(false);
 	}
+    
+    /**
+     * Convert all continous variables that are assigned in when equations into discrete variables.
+     * 
+     * @param inWhen  is this equation in a when equation?
+     */
+    public void FAbstractEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {}
+    
+    public void FWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariablilityForVariablesInWhen(true);
+    }
+    
+    public void FEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            getLeft().makeContinuousVariablesDiscrete();
+    }
+    
+    public void FFunctionCallEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            for (FFunctionCallLeft left : getLefts())
+                if (left.hasFExp())
+                    left.getFExp().makeContinuousVariablesDiscrete();
+    }
+    
+    public void FIfWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariablilityForVariablesInWhen(inWhen);
+        if (hasElse())
+            getElse().updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FIfWhenElseEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (FAbstractEquation eqn : getFAbstractEquations())
+            eqn.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FForClauseE.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (FAbstractEquation eqn : getFAbstractEquations())
+            eqn.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    /**
+     * Convert all continous variables that are this expression refers to into discrete variables.
+     */
+    public void FExp.makeContinuousVariablesDiscrete() {}
+    
+    public void FIdUseExp.makeContinuousVariablesDiscrete() {
+        myFV().makeContinuousVariableDiscrete();
+    }
+    
+    public void FArray.makeContinuousVariablesDiscrete() {
+        for (FExp e : getFExps())
+            e.makeContinuousVariablesDiscrete();
+    }
+    
+    public void FRecordConstructor.makeContinuousVariablesDiscrete() {
+        for (FExp e : getArgs())
+            e.makeContinuousVariablesDiscrete();
+    }
+    
+    /**
+     * If this is a normal continous variable, convert it to a discrete variable.
+     */
+    public void FAbstractVariable.makeContinuousVariableDiscrete() {}
+    
+    public void FVariable.makeContinuousVariableDiscrete() {
+        if (getFTypePrefixVariability().continuousVariability())
+            setFTypePrefixVariability(fDiscrete());
+    }
+    
 	
 	protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
 		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();

@@ -82,6 +82,7 @@ aspect Flattening {
 		createAndFlattenResidualPairs(fc);
 		flattenUsedFuncsAndEnums(fc);
 		flattenInstClassDeclExtra(fc);
+		fc.updateVariablilityForVariablesInWhen();
 		fc.genConnectionEquations();
 		fc.createExperiment(annotation("experiment"));
 		root().breakOnErrors();
