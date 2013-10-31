@@ -223,13 +223,11 @@ def test_equationGetter():
     
 def test_equationPrinting(): 
     eq = Equation(MX("lhs"), MX("rhs"));
-    assert( str(eq) == "MX(lhs) = MX(rhs)" );
+    assert( str(eq) == "lhs = rhs" );
 
 def test_RealTypePrinting():
     realType = RealType()
-    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
-                     "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
-                     "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()")
+    expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
     assert( str(realType) == expectedPrint )
     assert( realType.getAttribute("start").getValue() == 0 )
     assert( realType.hasAttribute("quantity") )
@@ -327,9 +325,9 @@ def test_RealVariableInvalidAsStateVariable():
     assert(errorString == "A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable.");
     
 def test_RealVariablePrinting():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS);
-    realVar.setAttribute("myAttribute", MX(2));
-    assert( str(realVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" );
+    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar.setAttribute("myAttribute", MX(2))
+    assert( str(realVar) == "Real node(myAttribute = 2);" );
     
 def test_DerivativeVariableAttributes():
     attributeNode1 = MX(1)
@@ -392,7 +390,7 @@ def test_DerivativeVariableInvalidStateVariable():
 def test_DerivativeVariablePrinting():
     derVar = DerivativeVariable(MX("node"), None)
     derVar.setAttribute("myAttribute", MX(2))
-    assert( str(derVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
+    assert( str(derVar) == "Real node(myAttribute = 2);" )
 
 def test_IntegerVariableAttributes():
     attributeNode1 = MX(1)
@@ -431,7 +429,7 @@ def test_IntegerVariableVariableType():
 def test_IntegerVariablePrinting():
     intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     intVar.setAttribute("myAttribute", MX(2))
-    assert( str(intVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
+    assert( str(intVar) == "Discrete Integer node(myAttribute = 2);" )
     
 def test_IntegerVariableContinuousError():
     import sys
@@ -488,7 +486,7 @@ def test_BooleanVariableContinuousError():
 def test_BooleanVariablePrinting():
     boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     boolVar.setAttribute("myAttribute", MX(2))
-    assert( str(boolVar) == "MX(node), attributes:\n\tmyAttribute = MX(2)" )
+    assert( str(boolVar) == "Discrete Boolean node(myAttribute = 2);" )
     
 def test_ModelFunctionGetName():
     funcVar = MX("node")
@@ -572,7 +570,7 @@ def test_ConstraintPrinting():
     lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
     greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
     actual = str(equalityConstraint) + str(lessThanConstraint) + str(greaterThanConstraint)
-    assert( actual == "MX(lhs) == MX(rhs)MX(lhs) <= MX(rhs)MX(lhs) >= MX(rhs)" )
+    assert( actual == "lhs == rhslhs <= rhslhs >= rhs" )
 
 def test_OptimizationProblemConstructors():
     model = Model()
@@ -663,8 +661,9 @@ def test_OptimizationProblemPrinting():
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "-- Optimization information  --\n\n" +
-                     "Start time = MX(0)\nFinal time = MX(1)\n" +
-                     "-- Lagrange term --\nMX(0)\n-- Mayer term --\nMX(0)\n")
+                     "Start time = 0\n\nFinal time = 1\n" +
+                     "-- Lagrange term --\n0\n-- Mayer term --\n0")
+    print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 
 def test_ModelVariableKindsEmpty():
@@ -886,9 +885,7 @@ def test_ModelDefaultVariableTypeAssignment():
     model = Model()
     realVar = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
     model.addVariable(realVar)
-    expectedPrint = ("Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
-                           "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
-                           "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()")
+    expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
     assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
     
 def test_ModelDefaultVariableTypeAssignmentSingletons():
@@ -948,7 +945,7 @@ def test_ModelInvalidVariabilityRealVariable():
         model.getVariableByKind(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable variability when sorting for internal real variable: MX(var), declaredType : Real");
+    assert(errorString == "Invalid variable variability when sorting for internal real variable: Real var;");
     
 def test_ModelInvalidVariabilityIntegerVariable():
     import sys
@@ -960,7 +957,7 @@ def test_ModelInvalidVariabilityIntegerVariable():
         model.getVariableByKind(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable variability when sorting for internal integer variable: MX(var), declaredType : Integer");
+    assert(errorString == "Invalid variable variability when sorting for internal integer variable: Integer var;");
     
 def test_ModelInvalidVariabilityBooleanVariable():
     import sys
@@ -972,7 +969,7 @@ def test_ModelInvalidVariabilityBooleanVariable():
         model.getVariableByKind(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable variability when sorting for internal boolean variable: MX(var), declaredType : Boolean");
+    assert(errorString == "Invalid variable variability when sorting for internal boolean variable: Boolean var;");
     
 def test_ModelInvalidCausalityRealVariable():
     import sys
@@ -984,7 +981,7 @@ def test_ModelInvalidCausalityRealVariable():
         model.getVariableByKind(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Real")
+    assert(errorString == "Invalid variable causality when sorting for variable: Real var;")
     
 def test_ModelInvalidCausalityIntegerVariable():
     import sys
@@ -996,7 +993,7 @@ def test_ModelInvalidCausalityIntegerVariable():
         model.getVariableByKind(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Integer");
+    assert(errorString == "Invalid variable causality when sorting for variable: Integer var;");
     
 def test_ModelInvalidCausalityBooleanVariable():
     import sys
@@ -1008,7 +1005,7 @@ def test_ModelInvalidCausalityBooleanVariable():
         model.getVariableByKind(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
-    assert(errorString == "Invalid variable causality when sorting for variable: MX(var), declaredType : Boolean");
+    assert(errorString == "Invalid variable causality when sorting for variable: Boolean var;");
  
 def test_ModelInvalidVariableKindInGetter():
     import sys
@@ -1034,13 +1031,12 @@ def test_ModelPrinting():
     model.addDaeEquation(eq1)
     model.addInitialEquation(eq2)
     expectedPrint = ("------------------------------- Variables -------------------------------\n\n" +
-                    "MX(node), declaredType : Real\n\n" +
+                    "Real node;\n\n" +
                     "---------------------------- Variable types  ----------------------------\n\n" +
-                    "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(0)" +
-                    "\n\tmax = MX(inf)\n\tmin = MX(-inf)\n\tnominal = MX(1)" +
-                    "\n\tquantity = MX()\n\tstart = MX(0)\n\tunit = MX()\n\n" +
+                    "Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );\n\n" +
                     "------------------------------- Functions -------------------------------\n\n\n" +
                     "------------------------------- Equations -------------------------------\n\n" +
-                    " -- Initial equations -- \nMX(node3) = MX(node4)\n -- DAE equations -- \n" +
-                    "MX(node1) = MX(node2)\n\n")
+                    " -- Initial equations -- \nnode3 = node4\n -- DAE equations -- \n" +
+                    "node1 = node2\n\n")
+    print model, expectedPrint
     assert( str(model) == expectedPrint )

@@ -1,7 +1,7 @@
 #include <types/BooleanType.hpp>
 namespace ModelicaCasADi 
 {
-using std::string; using std::ostream; using CasADi::MX;
+using std::string; using CasADi::MX;
 BooleanType::BooleanType() {
     // Default attributes for non parameter/constant Boolean type, according to
     // Modelica specification.
@@ -15,10 +15,4 @@ VariableType::AttributeValue* BooleanType::getAttribute(const AttributeKey key) 
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : NULL;
 }
 
-void BooleanType::print(ostream& os) const { 
-    os <<"Type name: Boolean, attributes:";
-    for (attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
-        os <<"\n\t"<<it->first<<" = "<<it->second;
-    }
-}
 }; // End namespace

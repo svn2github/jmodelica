@@ -21,10 +21,6 @@ class IntegerType : public PrimitiveType {
          * @return A bool
          */
         bool hasAttribute(const AttributeKey key) const;
-        /** Allows the use of the operator << to print this class to a stream, through Printable */
-        virtual void print(std::ostream& os) const;
-    private:
-        attributeMap attributes;
 };
 inline const std::string IntegerType::getName() const { return "Integer"; }
 inline bool IntegerType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }

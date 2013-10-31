@@ -8,9 +8,24 @@ Constraint::Constraint(MX lhs, MX rhs,
 void Constraint::print(std::ostream& os) const {
 	using std::endl;
     switch(ct) {
-        case Constraint::EQ:  os<< lhs << " == " << rhs; break;
-        case Constraint::LEQ: os<< lhs << " <= " << rhs; break;
-        case Constraint::GEQ: os<< lhs << " >= " << rhs; break;
+        case Constraint::EQ:  {
+            lhs.print(os);
+            os << " == ";
+            rhs.print(os);
+            break;
+        }
+        case Constraint::LEQ: {
+            lhs.print(os);
+            os << " <= ";
+            rhs.print(os);
+            break;
+        } 
+        case Constraint::GEQ:  {
+            lhs.print(os);
+            os << " >= ";
+            rhs.print(os);
+            break;
+        }
     }
 }
 }; // End namespace

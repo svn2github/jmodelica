@@ -25,12 +25,12 @@ def test_ModelicaAliasVariables():
     model = transfer_to_casadi_interface("atomicModelAlias", modelFile)
     assert not model.getVariableByName("x").isNegated()
     assert model.getVariableByName("z").isNegated()
-    assert str(model.getVariableByName("x")) == "MX(x), alias: y, declaredType : Real"
-    assert str(model.getModelVariableByName("x")) == "MX(y), declaredType : Real"
-    assert str(model.getVariableByName("y")) == "MX(y), declaredType : Real"
-    assert str(model.getModelVariableByName("y")) == "MX(y), declaredType : Real"
-    assert str(model.getVariableByName("z")) == "MX(z), alias: y, declaredType : Real"
-    assert str(model.getModelVariableByName("z")) == "MX(y), declaredType : Real"
+    assert str(model.getVariableByName("x")) == "Real x(alias: y);"
+    assert str(model.getModelVariableByName("x")) == "Real y;"
+    assert str(model.getVariableByName("y")) == "Real y;"
+    assert str(model.getModelVariableByName("y")) == "Real y;"
+    assert str(model.getVariableByName("z")) == "Real z(alias: y);"
+    assert str(model.getModelVariableByName("z")) == "Real y;"
     
 
 def test_ModelicaSimpleEquation():
@@ -99,8 +99,7 @@ def test_ModelicaComment():
         
 def test_ModelicaRealDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedRealTypeVoltage", modelFile)
-    assert str(model.getVariableTypeByName("Voltage")) == ("Type name: Voltage, base type: Real, attributes:" 
-                                                           "\n\tquantity = MX(ElectricalPotential)\n\tunit = MX(V)")
+    assert str(model.getVariableTypeByName("Voltage")) == ("Voltage type = Real (quantity = ElectricalPotential, unit = V);")
    
 def test_ModelicaDerivedTypeDefaultType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedTypeAndDefaultType", modelFile)
@@ -110,15 +109,11 @@ def test_ModelicaDerivedTypeDefaultType():
     
 def test_ModelicaIntegerDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedIntegerTypeSteps", modelFile)
-    print str(model.getVariableTypeByName("Steps"))
-    assert str(model.getVariableTypeByName("Steps")) == ("Type name: Steps, base type: Integer, attributes:"
-                                                                "\n\tquantity = MX(steps)")
+    assert str(model.getVariableTypeByName("Steps")) == ("Steps type = Integer (quantity = steps);")
     
 def test_ModelicaBooleanDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedBooleanTypeIsDone", modelFile)
-    print str(model.getVariableTypeByName("IsDone"))
-    assert str(model.getVariableTypeByName("IsDone")) == ("Type name: IsDone, base type: Boolean, attributes:" 
-                                                           "\n\tquantity = MX(Done)")
+    assert str(model.getVariableTypeByName("IsDone")) == ("IsDone type = Boolean (quantity = Done);")
 
 def test_ModelicaRealConstant():
     model =  transfer_to_casadi_interface("atomicModelRealConstant", modelFile)
@@ -260,18 +255,10 @@ def test_ModelicaDependentParametersCalculated():
 def test_ModelicaFunctionCallEquationForParameterBinding():
     model =  transfer_to_casadi_interface("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
     model.calculateValuesForDependentParameters()
-    expected = ("MX(temp_1[1]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0})\n"
-                "\tevaluatedBindingExpression = MX(2)\n"
-                "MX(temp_1[2]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1})\n"
-                "\tevaluatedBindingExpression = MX(4)\n"
-                "MX(p2[1]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(temp_1[1])\n"
-                "\tevaluatedBindingExpression = MX(2)\n"
-                "MX(p2[2]), declaredType : Real, attributes:\n"
-                "\tbindingExpression = MX(temp_1[2])\n"
-                "\tevaluatedBindingExpression = MX(4)\n")
+    expected = ("Parameter Real temp_1[1](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}, evaluatedBindingExpression = 2) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}/* 2 */;\n"
+                "Parameter Real temp_1[2](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}, evaluatedBindingExpression = 4) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}/* 4 */;\n"
+                "Parameter Real p2[1](bindingExpression = temp_1[1], evaluatedBindingExpression = 2) = temp_1[1]/* 2 */;\n"
+                "Parameter Real p2[2](bindingExpression = temp_1[2], evaluatedBindingExpression = 4) = temp_1[2]/* 4 */;\n")
     actual = ""
     for var in model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT):
         actual += str(var) + "\n"
@@ -302,17 +289,17 @@ def computeStringRepresentationForContainer(myContainer):
 
 def test_OptimicaLessThanConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationLEQ", optproblemsFile);
-    expected = repr(x1) + " <= " + repr(MX(1.0))
+    expected = str(x1) + " <= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
 def test_OptimicaGreaterThanConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQ", optproblemsFile)
-    expected = repr(x1) + " >= " + repr(MX(1.0))
+    expected = str(x1) + " >= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
     
 def test_OptimicaSevaralConstraints():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQandLEQ", optproblemsFile)
-    expected = repr(x2) + " <= " + repr(MX(1.0)) +  repr(x1) + " >= " + repr(MX(1.0)) 
+    expected = str(x2) + " <= " + str(MX(1.0)) +  str(x1) + " >= " + str(MX(1.0)) 
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
 def test_OptimicaStartTime():

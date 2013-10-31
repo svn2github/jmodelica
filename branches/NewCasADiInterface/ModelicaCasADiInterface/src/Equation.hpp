@@ -34,7 +34,11 @@ class Equation: public Printable {
 inline const CasADi::MX Equation::getLhs() const { return lhs; }
 inline const CasADi::MX Equation::getRhs() const { return rhs; }
 inline const CasADi::MX Equation::getResidual() const { return rhs-lhs; }
-inline void Equation::print(std::ostream& os) const { os << lhs << " = " << rhs; }
+inline void Equation::print(std::ostream& os) const { 
+    lhs.print(os);
+    os << " = ";
+    rhs.print(os); 
+}
 
 }; // End namespace
 #endif

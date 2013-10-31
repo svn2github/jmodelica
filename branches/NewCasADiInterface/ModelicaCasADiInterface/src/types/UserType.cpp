@@ -15,9 +15,14 @@ bool UserType::hasAttribute(const AttributeKey key) const {
 }
 
 void UserType::print(ostream& os) const { 
-    os << "Type name: " << name <<", base type: " << baseType->getName() << ", attributes:";
+    os << getName() << " type = " << baseType->getName() << " (";
+    std::string sep("");
     for(attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it){
-        os <<"\n\t"<<it->first<<" = "<<it->second;
+        os << sep << (it->first) << " = ";
+        (it->second).print(os);
+        sep = ", ";
     }
+    os << ");";
 }
+
 }; 

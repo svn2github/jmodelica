@@ -21,10 +21,6 @@ class BooleanType : public PrimitiveType {
          * @return A bool
          */
         bool hasAttribute(const AttributeKey key) const;
-        /** Allows the use of the operator << to print this class to a stream, through Printable */
-        virtual void print(std::ostream& os) const;
-    private:
-        attributeMap attributes;
 };
 inline const std::string BooleanType::getName() const { return "Boolean"; }
 inline bool BooleanType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }

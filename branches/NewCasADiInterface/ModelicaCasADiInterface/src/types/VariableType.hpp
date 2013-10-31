@@ -21,6 +21,7 @@ class VariableType : public Printable {
     protected:
         typedef boost::flyweights::flyweight<std::string> AttributeKeyInternal; 
         typedef std::map<AttributeKeyInternal,AttributeValue> attributeMap;  
+        attributeMap attributes;
     public: 
         /**
          * @param An AttributeKey
@@ -31,6 +32,8 @@ class VariableType : public Printable {
         virtual const std::string getName() const = 0; 
         /** @return A bool */
         virtual bool hasAttribute(const AttributeKey key) const = 0;
+        /** Allows the use of the operator << to print this class to a stream, through Printable */
+        virtual void print(std::ostream& os) const;
 };
 }; // End namespace
 #endif

@@ -19,15 +19,23 @@ void OptimizationProblem::print(ostream& os) const {
     os << "Model contained in OptimizationProblem:\n" << endl;
     os << *model;
     os << "-- Optimization information  --\n" << endl;
-    os << "Start time = " << startTime << "\nFinal time = " << finalTime << endl;
+    os << "Start time = ";
+    startTime.print(os);
+    os << endl;
+    os << "\nFinal time = ";
+    finalTime.print(os);
+    os << endl;
     for (vector<Constraint>::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
         if (it == pathConstraints.begin()) {
             os << "-- Constraints --" << endl;
         }
         os << *it << endl;
     }
-    os << "-- Lagrange term --\n" << lagrangeTerm << endl;
-    os << "-- Mayer term --\n" << mayerTerm << endl;
+    os << "-- Lagrange term --\n";
+    lagrangeTerm.print(os);
+    os << endl;
+    os << "-- Mayer term --\n";
+    mayerTerm.print(os);
 }
 
 }; // End namespace

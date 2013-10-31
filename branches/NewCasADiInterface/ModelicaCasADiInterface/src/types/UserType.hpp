@@ -36,9 +36,8 @@ class UserType : public VariableType {
          */
         bool hasAttribute(const AttributeKey key) const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
-        virtual void print(std::ostream& os) const;
+        void print(std::ostream& os) const;
     private:
-        attributeMap attributes;
         const std::string name;
         PrimitiveType* baseType;
 };

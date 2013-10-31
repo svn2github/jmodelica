@@ -366,7 +366,9 @@ void Model::print(std::ostream& os) const {
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
     if (!timeVar.isNull()) {
-        os << "Time variable: " << timeVar << endl;
+        os << "Time variable: ";
+        timeVar.print(os);
+        os << endl;
     }
     os << generatePrintStringForVector(z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;

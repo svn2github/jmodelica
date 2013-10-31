@@ -665,6 +665,11 @@ model atomicModelRealInput
    input Real  x1;
 equation
 end atomicModelRealInput;
+
+model atomicModelRealOutput
+   output Real  x1 = 2;
+equation
+end atomicModelRealOutput;
   
 model atomicModelRealAlgebraic
     Real x1 (start = 0.5);

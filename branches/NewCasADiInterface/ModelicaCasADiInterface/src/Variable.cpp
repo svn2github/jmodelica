@@ -93,16 +93,49 @@ void Variable::setAttribute(AttributeKey key, double val) {
 
 
 void Variable::print(ostream& os) const {
-    os << var;
-    os << (isAlias() ? (std::string(", alias: ") + myModelVariable->getName()) : "");
-    os << (declaredType != NULL ? (std::string(", declaredType : ") + declaredType->getName()) : "");
-    if (!attributes.empty()) {
-        std::string lineBreak = "";
-        os <<", attributes:\n";
-        for (attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
-            os << lineBreak <<"\t"<<it->first<<" = "<<it->second;
-            lineBreak = "\n";
-        }
+    os << (getCausality() == INPUT ? "Input " : (getCausality() == OUTPUT ? "Output " : "" ));
+    os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "Discrete " : (getVariability() == PARAMETER ? "Parameter " : 
+           (getVariability() == CONSTANT ? "Constant " : ""))));
+    if (declaredType != NULL) {
+        os << declaredType->getName() << " ";
+    } else {
+        os << (getType() == REAL ? "Real " : (getType() == INTEGER ? "Integer " : (getType() == BOOLEAN ? "Boolean " : 
+              (getType() == STRING ? "String " : ""))));
     }
+    var.print(os);
+    if (!attributes.empty() || isAlias()) {
+        std::string sep = "";
+        os <<"(";
+        for (attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
+            os << sep <<it->first<<" = ";
+            (it->second).print(os);
+            sep = ", ";
+        }
+        if (isAlias()) {
+            os << sep << "alias: " <<  myModelVariable->getName();
+        }
+        os << ")";
+    }
+    if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) { 
+        os << " = ";
+        (attributes.find(AttributeKeyInternal("bindingExpression"))->second).print(os);
+    } 
+    if (attributes.find(AttributeKeyInternal("comment")) != attributes.end()) { 
+        os << " \"";
+        (attributes.find(AttributeKeyInternal("comment"))->second).print(os);
+        os << "\"";
+    }
+    if (attributes.find(AttributeKeyInternal("bindingExpression")) != attributes.end()) {
+        if (attributes.find(AttributeKeyInternal("bindingExpression"))->second.isConstant()) {
+            os << " /* ";
+            (attributes.find(AttributeKeyInternal("bindingExpression"))->second).print(os);
+            os << " */";
+        } else if (attributes.find(AttributeKeyInternal("evaluatedBindingExpression")) != attributes.end()) {
+            os << "/* ";
+            (attributes.find(AttributeKeyInternal("evaluatedBindingExpression"))->second).print(os);
+            os << " */";
+        }
+    } 
+    os << ";";
 }
 }; // End namespace

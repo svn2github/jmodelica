@@ -1,7 +1,7 @@
 #include <types/RealType.hpp>
 namespace ModelicaCasADi 
 {
-using std::string; using std::ostream; using CasADi::MX;
+using std::string; using CasADi::MX;
 RealType::RealType(){
     // Default attributes for non parameter/constant Real type, according to
     // Modelica specification.
@@ -21,11 +21,4 @@ VariableType::AttributeValue* RealType::getAttribute(const AttributeKey key) {
     return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : NULL;
 }
 
-
-void RealType::print(ostream& os) const { 
-    os <<"Type name: Real, attributes:";
-    for(attributeMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it){
-        os <<"\n\t"<<it->first<<" = "<<it->second;
-    }
-}
 }; // End namespace
