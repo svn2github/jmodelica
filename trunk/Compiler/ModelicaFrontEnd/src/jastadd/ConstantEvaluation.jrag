@@ -2112,12 +2112,8 @@ aspect ConstantEvaluation {
   }
   
   public void FExp.flushUnknownSizes() {
-// Old version - does not work when JastAdd generates one _computes/_value pair for each eq of a lazy attr
-//	  // Flush getArray() - NB: uses internal JastAdd implementation details
-//	  if (size().isUnknown())
-//		  getArray_computed = false;
 	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
-	  if (size().isUnknown() || isCircular()) {
+	  if (size().isUnknown()) {
 		  flushCache();
 		  size().isUnknown();
 	  }
@@ -2180,7 +2176,7 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
-	  for (InstComponentDecl var : getInstComponentDecls())
+	  for (InstComponentDecl var : allInstComponentDecls())
 		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
@@ -2192,7 +2188,7 @@ aspect ConstantEvaluation {
 	  try {
 		  fab.getFStatements().evaluateList(values);
 	  } finally {
-		  for (InstComponentDecl var : getInstComponentDecls())
+		  for (InstComponentDecl var : allInstComponentDecls())
 			  var.setEvaluationValue(null);
 		  if (oldVal != null)
 			  for (CommonVariableDecl var : oldVal.keySet())
@@ -3155,14 +3151,8 @@ aspect CircularExpressions {
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 	
 	eq FSizeExp.isCircularCalc() { 
-		boolean res;
-		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
-			res = true;
-		} else {
-			Size s = getFExp().size();
-			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
-		}
-		return res;
+		Size s = getFExp().size();
+		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
 	
 	syn boolean FExp.isUnknownSizeVarUse()  = false;

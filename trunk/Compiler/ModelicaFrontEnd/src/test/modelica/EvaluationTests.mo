@@ -1040,16 +1040,20 @@ end EvaluationTests.EvaluateAnnotation4;
 ")})));
 end EvaluateAnnotation4;
 
+
 model EvalColonSizeCell
     function f
         input Real[:] x;
-        output Real[size(x, 1)] y;
+        output Real[size(x, 1) + 1] y;
     algorithm
-        y := x / 2;
+		for i in 1:size(x,1) loop
+            y[i] := x[i] / 2;
+			y[i + 1] := y[i] + 1;
+		end for;
     end f;
     
     parameter Real a[1] = {1};
-    parameter Real b[1] = f(a);
+    parameter Real b[2] = f(a);
     parameter Real c[1] = if b[1] > 0.1 then {1} else {0} annotation (Evaluate=true);
 
     annotation(__JModelica(UnitTesting(tests={
@@ -1060,15 +1064,18 @@ model EvalColonSizeCell
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
  parameter Real a[1] = {1} /* { 1 } */;
- parameter Real b[1] = EvaluationTests.EvalColonSizeCell.f({1.0});
- parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* 1 */;
+ parameter Real b[2] = EvaluationTests.EvalColonSizeCell.f({1.0});
+ parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* { 1 } */;
 
 public
  function EvaluationTests.EvalColonSizeCell.f
   input Real[:] x;
-  output Real[size(x, 1)] y;
+  output Real[size(x, 1) + 1] y;
  algorithm
-  y := x / 2;
+  for i in 1:size(x, 1) loop
+   y[i] := x[i] / 2;
+   y[i + 1] := y[i] + 1;
+  end for;
   return;
  end EvaluationTests.EvalColonSizeCell.f;
 
