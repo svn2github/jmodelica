@@ -43,11 +43,15 @@ typedef struct fmi1_me_t fmi1_me_t;             /**< \brief Forward declaration 
 
 struct fmi1_me_t {
     fmiString fmi_instance_name;
-    fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
     fmiEventInfo event_info;
     jmi_t* jmi;
 };
+
+/**
+ * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
+ */
+extern const char *C_GUID;
 
 /**
  * Map between runtime option names and value references for the associated parameters - name table.

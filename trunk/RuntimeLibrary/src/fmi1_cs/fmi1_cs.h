@@ -62,6 +62,11 @@ struct fmi1_cs_input_t {
 };
 
 /**
+ * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
+ */
+extern const char *C_GUID;
+
+/**
  * \brief Returns the compatible platforms.
  *
  * This methods returns the set of compatible platforms for which the FMU was

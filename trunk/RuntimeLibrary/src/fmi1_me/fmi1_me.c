@@ -40,14 +40,11 @@ const char* fmi1_me_get_version() {
 }
 
 /* Creation and destruction of model instances and setting debug status */
-
 fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
 
     fmi1_me_t *component;
     char* tmpname;
-    char* tmpguid;
     size_t inst_name_len;
-    size_t guid_len;
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
@@ -61,6 +58,12 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
              functions.logger(0, instanceName, fmiError, "ERROR", "Memory management functions allocateMemory/freeMemory are required.");
          }
          return 0;
+    }
+    
+    if (strcmp(GUID, C_GUID) != 0) {
+        /*The raw logger callback is used here so we do not need to allocate and deallocate memory.*/
+        functions.logger(0, instanceName, fmiError, "ERROR", "The model and the description file are not consistent to each other.");
+        return 0;
     }
     
     component = (fmi1_me_t *)functions.allocateMemory(1, sizeof(fmi1_me_t));
@@ -90,11 +93,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     tmpname = (char*)(fmi1_me_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
-
-    guid_len = strlen(GUID)+1;
-    tmpguid = (char*)(fmi1_me_t *)functions.allocateMemory(guid_len, sizeof(char));
-    strncpy(tmpguid, GUID, guid_len);
-    component -> fmi_GUID = tmpguid;
     
     component -> fmi_functions = functions;
     component -> jmi = jmi;
@@ -145,7 +143,6 @@ void fmi1_me_free_model_instance(fmiComponent c) {
         jmi_delete(component->jmi);
         component->jmi = 0;
         fmi_free((void*)component -> fmi_instance_name);
-        fmi_free((void*)component -> fmi_GUID);
         fmi_free(component);
     }
 }
@@ -1339,10 +1336,6 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
 
     return fmiOK;
 }
-
-extern const char *fmi_runtime_options_map_names[];
-extern const int fmi_runtime_options_map_vrefs[];
-extern const int fmi_runtime_options_map_length;
 
 int compare_option_names(const void* a, const void* b) {
     const char** sa = (const char**)a;

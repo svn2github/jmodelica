@@ -236,6 +236,12 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     char buffer[400];
     fmiInteger i;
     
+    if (strcmp(GUID, C_GUID) != 0) {
+        /*The raw logger callback is used here so we do not need to allocate and deallocate memory.*/
+        functions.logger(0, instanceName, fmiError, "ERROR", "The model and the description file are not consistent to each other.");
+        return 0;
+    }
+    
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));
     
     component -> me_callback_functions.allocateMemory = functions.allocateMemory;
