@@ -694,9 +694,6 @@ aspect FlatTypeCheck {
   		error("Calling function pre(): argument must be variable access");
   		return;
   	}
-    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
-    	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
-    }
   }
  
   public void FAssert.typeCheck(ErrorCheckType checkType) {
@@ -718,9 +715,6 @@ aspect FlatTypeCheck {
     if (!getFExp().isAccess()) {
       error("Calling function change(): argument must be a variable access");
       return;  		
-    }
-    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
-      error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
     }
   }
 
@@ -1054,4 +1048,58 @@ aspect FlatTypeCheck {
 		if (!size.equals(expSize))
 			exp.error("Size of nominal expression %s is not the same size as the surrounding equation, size of expression %s, size of equation %s", exp, expSize, size);
 	}
+}
+
+aspect FlatVariabilityCheck {
+    
+    private FExp FPreExp.instanceTreeSource = null;
+    
+    public void FExp.setInstanceTreeSource(FExp source) {}
+    
+    public void FPreExp.setInstanceTreeSource(FExp source) {
+        instanceTreeSource = source;
+    }
+    
+    /**
+     * Surrounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
+     * 
+     * Also sets the <code>instanceTreeSource</code> field of the FPreExp (if any) 
+     * to <code>source</code>.
+     */
+    public static FExp FPreExp.create(FExp exp, FExp source) {
+        exp = create(exp);
+        exp.setInstanceTreeSource(source);
+        return exp;
+    }
+    
+    /**
+     * Check operations that are allowed on discrete expressions or variables, 
+     * but not on continuous ones.
+     * 
+     * Also breaks connections back to instance tree that was added during flattening 
+     * to be able to report these errors in the correct place.
+     */
+    public void ASTNode.checkDiscreteOperations() {
+        for (ASTNode n : this)
+            n.checkDiscreteOperations();
+    }
+    
+    public void FPreExp.checkDiscreteOperations() {
+        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen()) 
+            instanceTreeSource.discreteArgError();
+        instanceTreeSource = null;
+    }
+    
+    public void FExp.discreteArgError() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void InstPreExp.discreteArgError() {
+        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
+    }
+    
+    public void FChangeExp.discreteArgError() {
+        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+    }
+    
 }

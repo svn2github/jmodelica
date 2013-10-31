@@ -253,7 +253,7 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Surounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
+	 * Surrounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
 	 */
 	public static FExp FPreExp.create(FExp exp) {
 		return exp.isLiteralExp() ? exp : new FPreExp(exp.asFIdUse());

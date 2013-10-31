@@ -1263,13 +1263,42 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="PreTest1",
-			description="Testing that continuous variables can be accessed in pre expressions inside when clauses.",
+			description="Testing that continuous variables can be accessed in pre expressions only inside when clauses.",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1148, column 13:
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1256, column 13:
   Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
 ")})));
 end PreTest1;
+
+
+model PreTest2
+	Real x(start = 1);
+	discrete Real y;
+equation
+	when time > 1 then
+		x = 2;
+	end when;
+	y = pre(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="PreTest2",
+			description="Allow pre() on variable assigned in when",
+			flatModel="
+fclass TypeTests.PreTest2
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ when time > 1 then
+  x = 2;
+ end when;
+ y = pre(x);
+end TypeTests.PreTest2;
+")})));
+end PreTest2;
+
 
 model EdgeTest1
   Real x (start=3);
@@ -1313,7 +1342,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ChangeTest1",
-			description="Testing that continuous variables can be accessed in change expressions inside when clauses.",
+			description="Testing that continuous variables can be accessed in change expressions only inside when clauses.",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
@@ -1321,6 +1350,34 @@ Semantic error at line 1147, column 7:
   Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses
 ")})));
 end ChangeTest1;
+
+
+model ChangeTest2
+    Real x(start = 1);
+    discrete Real y;
+equation
+    when time > 1 then
+        x = 2;
+    end when;
+    y = if change(x) then 1 else x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ChangeTest2",
+			description="Allow change() on variable assigned in when",
+			flatModel="
+fclass TypeTests.ChangeTest2
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ when time > 1 then
+  x = 2;
+ end when;
+ y = if x <> pre(x) then 1 else x;
+end TypeTests.ChangeTest2;
+")})));
+end ChangeTest2;
+
 
 model HomotopyTest1
   Real x = homotopy(1, {1});

@@ -217,6 +217,7 @@ aspect FlatVariability {
 	public void FClass.updateVariablilityForVariablesInWhen() {
 	    for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
 	        eqn.updateVariablilityForVariablesInWhen(false);
+	    checkDiscreteOperations();
 	}
     
     /**
