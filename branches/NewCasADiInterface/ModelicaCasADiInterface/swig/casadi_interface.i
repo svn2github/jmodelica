@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %module modelicacasadi_wrapper
 
+%include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
+
 %include "std_string.i"
 %include "std_vector.i"
 %include "exception.i"
@@ -39,3 +41,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 %include "ModelicaCasADi.i"
+
+
+// Pull in numpy
+%{
+// to perhaps play more nicely with numpy.i
+#define SWIG_FILE_WITH_INIT
+%}
+%init %{
+// initialize numpy, should only be done once?
+import_array();
+%}

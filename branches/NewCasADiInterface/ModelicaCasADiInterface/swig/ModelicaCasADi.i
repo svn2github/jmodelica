@@ -44,6 +44,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "SharedNode.hpp"
 #include "Ref.hpp"
 %}
+
+%include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
+
 %include "doc.i"
 
 %rename(MyVariable) ModelicaCasADi::Variable;
@@ -65,9 +68,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // These must be in dependency order!
 // SWIG doesn't follow #includes in the header files
 
-%include "Ref.i" // includes Ref.hpp
-
-// Instantiate Ref<T> along with apropriate typemaps
+// Instantiate Ref<T> and vector<Ref<T>> along with apropriate typemaps.
 // All %instantiate_Ref invocations must be afer "Ref.i"
 // and befor the header for the type T in question.
 //%instantiate_Ref(ModelicaCasADi::Equation)
