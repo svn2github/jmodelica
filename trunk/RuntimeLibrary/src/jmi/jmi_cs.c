@@ -18,10 +18,10 @@
 */
 
 #include "stdio.h"
-#include "fmi2_cs.h"
-#include "fmiFunctionTypes.h"
+#include "jmi_cs.h"
+#include "jmi.h"
 
-
+/*
 fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
                                           const fmiValueReference vr[],
                                           size_t nvr, const fmiInteger order[],
@@ -33,7 +33,7 @@ fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
                                            const fmiValueReference vr[],
                                            size_t nvr, const fmiInteger order[],
                                            fmiReal value[]) {
-    return fmiError;
+    return 0;
 }
 
 fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
@@ -43,31 +43,32 @@ fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
 }
 
 fmiStatus fmi2_cancel_step(fmiComponent c) {
-    return fmiOK;
+    return 0;
 }
 
 fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
                           fmiStatus* value) {
-    return fmiDiscard;
+    return 0;
 }
 
 fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
                                fmiReal* value) {
-    return fmiDiscard;
+    return 0;
 }
 
 fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
                                   fmiInteger* values) {
-    return fmiDiscard;
+    return 0;
 }
 
 fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
                                   fmiBoolean* value) {
-    return fmiDiscard;
+    return 0;
 }
 
 
 fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
                                  fmiString* value) {
-    return fmiDiscard;
+    return 0;
 }
+*/

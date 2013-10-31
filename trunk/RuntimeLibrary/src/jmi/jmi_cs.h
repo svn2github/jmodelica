@@ -17,116 +17,41 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#ifndef fmi2_cs_h
-#define fmi2_cs_h
+#ifndef jmi_cs_h
+#define jmi_cs_h
 
-#include "fmiFunctions.h"
+#include "jmi.h"
 
-/**
- * \brief Sets the derivative of the outputs
- * 
- * @param c The FMU struct.
- * @param vr The value reference(s)
- * @param nvr The length of vr
- * @param order The derivative order
- * @param value The value(s) to set.
- * @return Error code.
- */
+/*
 fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
                                           const fmiValueReference vr[],
                                           size_t nvr, const fmiInteger order[],
                                           const fmiReal value[]);
 
-/**
- * \brief Gets the derivative of the outputs
- * 
- * @param c The FMU struct.
- * @param vr The value reference(s)
- * @param nvr The length of vr
- * @param order The order of the output derivative
- * @param value (Output) The value(s) to get.
- * @return Error code.
- */
 fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
                                            const fmiValueReference vr[],
                                            size_t nvr, const fmiInteger order[],
                                            fmiReal value[]);
 
-/**
- * \brief Performs a time-step.
- * 
- * @param c The FMU struct.
- * @param currentCommunicationPoint The current communication point.
- * @param communicationStepSize The length of the step to perform.
- * @param noSetFMUStatePriorToCurrentPoint A fmiBoolean, can be used to 
- *                                         flush earlier saved FMU states.
- * @return Error code.
- */
 fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                        fmiReal    communicationStepSize,
                        fmiBoolean noSetFMUStatePriorToCurrentPoint);
 
-/**
- * \brief Can be called in order to stop the current asynchronous execution.
- * 
- * @param c The FMU struct.
- * @return Error code.
- */
 fmiStatus fmi2_cancel_step(fmiComponent c);
 
-/**
- * \brief Retrieve status information from the FMU
- * 
- * @param c The FMU struct.
- * @param s The kind of status information.
- * @param value The output information
- * @return Error code.
- */
 fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
                           fmiStatus* value);
 
-/**
- * \brief Retrieve (real) status information from the FMU
- * 
- * @param c The FMU struct.
- * @param s The kind of status information.
- * @param value The output information
- * @return Error code.
- */
 fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
                                fmiReal* value);
-                               
-/**
- * \brief Retrieve (integer) status information from the FMU
- * 
- * @param c The FMU struct.
- * @param s The kind of status information.
- * @param value The output information
- * @return Error code.
- */
 fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
                                   fmiInteger* values);
 
-/**
- * \brief Retrieve (boolean) status information from the FMU
- * 
- * @param c The FMU struct.
- * @param s The kind of status information.
- * @param value The output information
- * @return Error code.
- */
 fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
                                   fmiBoolean* value);
 
-/**
- * \brief Retrieve (string) status information from the FMU
- * 
- * @param c The FMU struct.
- * @param s The kind of status information.
- * @param value The output information
- * @return Error code.
- */
+
 fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
                                  fmiString* value);
-
+*/
 #endif

@@ -482,13 +482,10 @@ fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueRefer
     fmi1_cs_input_t* inputs;
     fmiInteger i,j;
     fmiBoolean found_input = fmiFalse;
-    fmi1_me_t* fmi1_me;
     
     if (c == NULL) {
 		return fmiFatal;
     }
-    
-    fmi1_me = (fmi1_me_t*)(ode_problem->fmix_me);
     
     if (nvr > ode_problem -> n_real_u) {
         jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, too many inputs.");

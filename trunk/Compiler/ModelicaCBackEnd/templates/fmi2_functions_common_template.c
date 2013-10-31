@@ -39,8 +39,8 @@ FMI_Export fmiComponent fmiInstantiate(fmiString instanceName,
                                        const fmiCallbackFunctions* functions, 
                                        fmiBoolean                  visible,
                                        fmiBoolean                  loggingOn) {
-    return fmi2_instatiate(instanceName, fmuType, fmuGUID, fmuResourceLocation,
-                           functions, visible, loggingOn);
+    return fmi2_instantiate(instanceName, fmuType, fmuGUID, fmuResourceLocation,
+                            functions, visible, loggingOn);
 }
 
 FMI_Export void fmiFreeInstance(fmiComponent c) {

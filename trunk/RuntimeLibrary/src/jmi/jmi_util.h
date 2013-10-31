@@ -678,10 +678,12 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
     init_with_lbound(x, xmin, message) \
     else init_with_ubound(x, xmax, message)
 
-typedef void (*loggerCallabackFunction) (void* c, const char* instanceName, void* status,
+typedef void (*logger_callaback_function_t) (void* c, const char* instanceName, void* status,
                                           const char* category, const char* message);
                                           
-typedef void* (*globalAllocateMemory)(size_t nobj, size_t size);
+typedef void* (*allocate_memory_t) (size_t nobj, size_t size);
+
+typedef void (*free_memory_t) (void* nobj);
 
 /**
  * \brief Data structure for representing the callback functions and other
@@ -689,11 +691,12 @@ typedef void* (*globalAllocateMemory)(size_t nobj, size_t size);
  */
 
 struct jmi_callbacks_t {
-    loggerCallabackFunction    logger;           /** < \brief Logger function */
-    globalAllocateMemory       allocate_memory;  /** < \brief Allocate memory function. */
-    void*                      fmix_me;          /** < \brief Pointer to a fmi struct. */
-    const char*                fmi_name;         /** < \brief Name of the fmi. */
-    char                       logging_on;       /** < \brief The logging on / off attribute. */
+    logger_callaback_function_t  logger;           /** < \brief Logger function */
+    allocate_memory_t            allocate_memory;  /** < \brief Allocate memory function. */
+    free_memory_t                free_memory;      /** < \brief Free allocated memory function. */
+    void*                        fmix_me;          /** < \brief Pointer to a fmi struct. */
+    const char*                  fmi_name;         /** < \brief Name of the fmi. */
+    char                         logging_on;       /** < \brief The logging on / off attribute. */
 };
 
 /**

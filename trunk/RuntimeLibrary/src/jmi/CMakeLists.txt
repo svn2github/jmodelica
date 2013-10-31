@@ -9,8 +9,10 @@ set(JMISources
     jmi_array_common.h
     jmi_array_none.h
     jmi_block_residual.h
+    jmi_cs.h
     jmi_kinsol_solver.h
     jmi_linear_solver.h
+    jmi_me.h
     jmi_simple_newton.h
     jmi_ode_cvode.h
     jmi_ode_euler.h
@@ -22,8 +24,10 @@ set(JMISources
     jmi.c
     jmi_array_none.c
     jmi_block_residual.c
+    jmi_cs.c
     jmi_kinsol_solver.c
     jmi_linear_solver.c
+    jmi_me.c
     jmi_simple_newton.c
     jmi_util.c
     jmi_log.c

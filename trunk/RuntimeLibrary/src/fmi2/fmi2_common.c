@@ -19,18 +19,18 @@
 
 #include "stdio.h"
 #include "fmi2_common.h"
+
+#include "jmi_me.h"
 #include "fmiFunctionTypes.h"
 
 
 
 const char* fmi2_get_types_platform() {
-    const char* str = "string Literal";
-    return str;
+    return fmiTypesPlatform;
 }
 
 const char* fmi2_get_version() {
-    const char* str = "string Literal";
-    return str;
+    return fmiVersion;
 }
 
 fmiStatus fmi2_set_debug_logging(fmiComponent    c,
@@ -40,14 +40,14 @@ fmiStatus fmi2_set_debug_logging(fmiComponent    c,
     return 0;
 }
 
-fmiComponent fmi2_instatiate(fmiString instanceName,
-                             fmiType   fmuType, 
-                             fmiString fmuGUID, 
-                             fmiString fmuResourceLocation, 
-                             const fmiCallbackFunctions* functions, 
-                             fmiBoolean                  visible,
-                             fmiBoolean                  loggingOn) {
-    const char* str = "string Literal";
+fmiComponent fmi2_instantiate(fmiString instanceName,
+                              fmiType   fmuType, 
+                              fmiString fmuGUID, 
+                              fmiString fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn) {
+    char* str = "not implemented";
     return str;
 }
 
@@ -65,11 +65,26 @@ fmiStatus fmi2_setup_experiment(fmiComponent c,
 }
 
 fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
-    return 0;
+    if (((fmi2_t *)c)->fmi_mode != instantiatedMode) {
+        //Log that only from instantiatedMode one can go to initializationMode.
+        return fmiError;
+    }
+    
+    ((fmi2_t *)c) -> fmi_mode = initializationMode;
+    return fmiOK;
 }
 
 fmiStatus fmi2_exit_initialization_mode(fmiComponent c) {
-    return 0;
+    if (((fmi2_t *)c)->fmi_mode != initializationMode) {
+        //Log that only from initializationMode one can exit initializationMode.
+        return fmiError;
+    }
+    if (((fmi2_t *)c)->fmi_type == fmiModelExchange) {
+        ((fmi2_t *)c) -> fmi_mode = eventMode;
+    } else {
+        //TODO: what happens in the CS case?
+    }
+    return fmiOK;
 }
 
 fmiStatus fmi2_terminate(fmiComponent c) {
@@ -82,49 +97,158 @@ fmiStatus fmi2_reset(fmiComponent c) {
 
 fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
                         size_t nvr, fmiReal value[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    retval = jmi_get_real(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+
+    return fmiOK;
 }
 
 fmiStatus fmi2_get_integer(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, fmiInteger value[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    retval = jmi_get_integer(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+
+    return fmiOK;
 }
 
 fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, fmiBoolean value[]) {
-    return 0;
+    fmiInteger retval;
+    jmi_boolean* casted_values = 0;
+    int i;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    casted_values = (jmi_boolean*)calloc(nvr, sizeof(char));
+    for (i = 0; i < nvr; i++) {
+        casted_values[i] = value[i] + '0';
+    }
+
+    retval = jmi_get_boolean(((fmi2_t *)c)->jmi, vr, nvr, casted_values);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    for (i = 0; i < nvr; i++) {
+        value[i] = casted_values[i] - '0';
+    }
+    free(casted_values);
+
+    return fmiOK;
 }
 
 fmiStatus fmi2_get_string(fmiComponent c, const fmiValueReference vr[],
                           size_t nvr, fmiString value[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    retval = jmi_get_string(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+
+    /* Strings not yet supported. */
+    return fmiWarning;
 }
 
 fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
                         size_t nvr, const fmiReal value[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_set_real(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi2_set_integer(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, const fmiInteger value[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_set_integer(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, const fmiBoolean value[]) {
-    return 0;
+    fmiInteger retval;
+    jmi_boolean* casted_values = 0;
+    int i;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    casted_values = (jmi_boolean*)calloc(nvr, sizeof(char));
+    for (i = 0; i < nvr; i++) {
+        casted_values[i] = value[i] + '0';
+    }
+    
+    retval = jmi_set_boolean(((fmi2_t *)c)->jmi, vr, nvr, casted_values);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi2_set_string(fmiComponent c, const fmiValueReference vr[],
                           size_t nvr, const fmiString value[]) {
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_set_string(((fmi2_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    /* Strings not yet supported. */
+    return fmiWarning;
+}
+
+fmiStatus fmi2_get_fmu_state(fmiComponent c, fmiFMUstate* FMUstate) {
     return 0;
 }
 
-fmiStatus fmi2_get_fmu_state(fmiComponent c, fmiFMUstate FMUstate) {
-    return 0;
-}
-
-fmiStatus fmi2_set_fmu_state(fmiComponent c, fmiFMUstate* FMUstate) {
+fmiStatus fmi2_set_fmu_state(fmiComponent c, fmiFMUstate FMUstate) {
     return 0;
 }
 
@@ -152,6 +276,18 @@ fmiStatus fmi2_get_directional_derivative(fmiComponent c,
                 const fmiValueReference vUnknown_ref[], size_t nUnknown,
                 const fmiValueReference vKnown_ref[],   size_t nKnown,
                 const fmiReal dvKnown[], fmiReal dvUnknown[]) {
-    return 0;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_get_directional_derivative(((fmi2_t *)c)->jmi, vUnknown_ref,
+                    nUnknown, vKnown_ref, nKnown, dvKnown, dvUnknown);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 

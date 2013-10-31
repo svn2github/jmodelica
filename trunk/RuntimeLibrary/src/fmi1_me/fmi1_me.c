@@ -25,27 +25,11 @@
 #include "jmi.h"
 #include "jmi_block_residual.h"
 #include "jmi_log.h"
+#include "jmi_me.h"
 
 #ifdef USE_FMI_ALLOC
 #include "fmi_alloc.h"
 #endif
-
-#define indexmask 0x0FFFFFFF
-#define typemask 0xF0000000
-
-static fmiValueReference get_index_from_value_ref(fmiValueReference valueref) {
-    /* Translate a ValueReference into variable index in z-vector. */
-    fmiValueReference index = valueref & indexmask;
-    
-    return index;
-}
-
-static fmiValueReference get_type_from_value_ref(fmiValueReference valueref) {
-    /* Translate a ValueReference into variable type in z-vector. */
-    fmiValueReference type = valueref & typemask;
-    
-    return type;
-}
 
 /* Inquire version numbers of header files */
 const char* fmi1_me_get_model_types_platform() {
@@ -86,8 +70,9 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     jmi_callbacks->fmix_me = component;
     jmi_callbacks->fmi_name = instanceName;
     jmi_callbacks->logging_on = loggingOn;
-    jmi_callbacks->logger = (loggerCallabackFunction)functions.logger;
-    jmi_callbacks->allocate_memory = (globalAllocateMemory)functions.allocateMemory;
+    jmi_callbacks->logger = (logger_callaback_function_t)functions.logger;
+    jmi_callbacks->allocate_memory = (allocate_memory_t)functions.allocateMemory;
+    jmi_callbacks->free_memory = (free_memory_t)functions.freeMemory;
     
 #ifdef USE_FMI_ALLOC
     /* Set the global user functions pointer so that memory allocation functions are intercepted */
@@ -206,151 +191,62 @@ fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEven
 }
 
 fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
-    /* Get the z vector*/
-    fmiValueReference i;
-    fmiValueReference index;
-    jmi_real_t* z;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
-
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_pd && index<((fmi1_me_t *)c)->jmi->offs_integer_ci) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Real dependent parameter <variable: #r%d#>", vr[i]);
-            return fmiError;
-        }
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_ci && index<((fmi1_me_t *)c)->jmi->offs_real_pi) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Real constant <variable: #r%d#>", vr[i]);
-            return fmiError;
-        }
-
-    }
-
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
     
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-
-        /* Set value from the value array to z vector. */
-        z[index] = value[i];
-
-        if (index < (((fmi1_me_t *)c)->jmi)->offs_real_dx) {
-            jmi_init_eval_parameters(((fmi1_me_t *)c)->jmi);
-        }
-
+    retval = jmi_set_real(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
+    
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
-    /* Get the z vector*/
-    fmiValueReference i;
-    fmiValueReference index;
-    jmi_real_t* z;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_integer_pd && index<((fmi1_me_t *)c)->jmi->offs_boolean_ci) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Integer dependent parameter <variable: #i%d#>", vr[i]);
-            return fmiError;
-        }
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_integer_ci && index<((fmi1_me_t *)c)->jmi->offs_integer_pi) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Integer constant <variable: #i%d#>", vr[i]);
-            return fmiError;
-        }
-
+    retval = jmi_set_integer(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
-
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
-
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-        
-        /* Set value from the value array to z vector. */
-        z[index] = value[i];
-
-        if (index < (((fmi1_me_t *)c)->jmi)->offs_real_dx) {
-            jmi_init_eval_parameters(((fmi1_me_t *)c)->jmi);
-        }
-
-    }
+    
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
-    /* Get the z vector*/
-    fmiValueReference i;
-    fmiValueReference index;
-    jmi_real_t* z;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_boolean_pd && index<((fmi1_me_t *)c)->jmi->offs_real_dx) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Boolean dependent parameter <variable: #b%d#>", vr[i]);
-            return fmiError;
-        }
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_boolean_ci && index<((fmi1_me_t *)c)->jmi->offs_boolean_pi) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "CannotSetVariable",
-                         "Cannot set Boolean constant <variable: #b%d#>", vr[i]);
-            return fmiError;
-        }
-
+    retval = jmi_set_boolean(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
-
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
-
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-        
-        /* Set value from the value array to z vector. */
-        z[index] = value[i];
-
-        if (index<(((fmi1_me_t *)c)->jmi)->offs_real_dx) {
-            jmi_init_eval_parameters(((fmi1_me_t *)c)->jmi);
-        }
-
-    }
+    
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
+    fmiInteger retval;
+    
     if (c == NULL) {
 		return fmiFatal;
     }
     
+    retval = jmi_set_string(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
+    }
     /* Strings not yet supported. */
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
-    jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
     return fmiWarning;
 }
 
@@ -639,49 +535,32 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 }
 
 fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
-    if (c == NULL) {
-		return fmiFatal;
-    }
-    
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1) {
-        fmiInteger retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_node(((fmi1_me_t *)c)->jmi->log, logError, "Error", "Evaluating the derivatives failed at <t:%g>",
-                         jmi_get_t(((fmi1_me_t *)c)->jmi)[0]);
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
-    }
-    memcpy (derivatives, jmi_get_real_dx(((fmi1_me_t *)c)->jmi), nx*sizeof(fmiReal));
-    return fmiOK;
-}
-
-fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
-    jmi_t* jmi;
-    fmiValueReference i;
     fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    jmi = ((fmi1_me_t *)c)->jmi;
-    
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1) {
-        retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
-    }
-    retval = jmi_dae_R_perturbed(((fmi1_me_t *)c)->jmi,eventIndicators);
-    
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
+    retval = jmi_get_derivatives(((fmi1_me_t *)c)->jmi, derivatives, nx);
+    if (retval != 0) {
         return fmiError;
     }
+    
+    return fmiOK;
+}
 
+fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_get_event_indicators(((fmi1_me_t *)c)->jmi, eventIndicators, ni);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
     return fmiOK;
 }
 
@@ -964,6 +843,8 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
     
     free(output_vrefs);
     free(output_vrefs2);
+    free(z1);
+    free(z2);
     
     return fmiOK;
 }
@@ -1178,64 +1059,32 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
 
 /*Evaluate the directional derivative dz/dv dv*/
 fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
-    int i = 0;
-    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
-    jmi_real_t** dv_ = jmi->dz;
-    jmi_real_t** dz_ = jmi->dz;
-    for (i=0;i<jmi->n_v;i++) {
-        (*dv_)[i] = 0.;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
     }
-    for (i=0;i<nvvr;i++) {
-        (*dv_)[get_index_from_value_ref(v_vref[i])] = dv[i];
+    
+    retval = jmi_get_directional_derivative(((fmi1_me_t *)c)->jmi,
+                                            z_vref, nzvr, v_vref, nvvr,
+                                            dv, dz);
+    if (retval != 0) {
+        return fmiError;
     }
-    jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
-    for (i=0;i<nzvr;i++) {
-        dz[i] = (*dz_)[get_index_from_value_ref(z_vref[i])];
-    }
+    
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
     fmiInteger retval;
-    fmiValueReference i;
-    fmiValueReference index;
-    jmi_real_t* z;
-    int isParameterOrConstant = 1;
-    
+
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-    for (i = 0; i <nvr; i = i + 1) {
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_dx) {
-            isParameterOrConstant = 0;
-            break;
-        }
-    }
-
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1 && ((fmi1_me_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
-        retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
-    }
-
-    /* Get the z vector*/
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
-
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-        
-        /* Set value from z vector to return value array*/
-        value[i] = (fmiReal)z[index];
+    retval = jmi_get_real(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
 
     return fmiOK;
@@ -1243,129 +1092,47 @@ fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t 
 
 fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[]) {
     fmiInteger retval;
-    jmi_real_t* z;
-    fmiValueReference i;
-    fmiValueReference index;
-    int isParameterOrConstant = 1;
     
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-    for (i = 0; i <nvr; i = i + 1) {
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_dx) {
-            isParameterOrConstant = 0;
-            break;
-        }
+    retval = jmi_get_integer(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
-
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1 && ((fmi1_me_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
-        retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
-    }
-
-    /* Get the z vector*/
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
     
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-        
-        /* Set value from z vector to return value array*/
-        value[i] = (fmiInteger)z[index];
-    }
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[]) {
     fmiInteger retval;
-    jmi_real_t* z;
-    fmiValueReference i;
-    fmiValueReference index;
-    int isParameterOrConstant = 1;
     
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-    for (i = 0; i <nvr; i = i + 1) {
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_dx) {
-            isParameterOrConstant = 0;
-            break;
-        }
-    }
-
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1 && ((fmi1_me_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
-        retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
+    retval = jmi_get_boolean(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
     
-    /* Get the z vector*/
-    z = jmi_get_z(((fmi1_me_t *)c)->jmi);
-    
-    for (i = 0; i <nvr; i = i + 1) {
-        /* Get index in z vector from value reference. */ 
-        index = get_index_from_value_ref(vr[i]);
-        
-        /* Set value from z vector to return value array*/
-        value[i] = z[index];
-    }
     return fmiOK;
 }
 
 fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString  value[]) {
     fmiInteger retval;
-    int i;
-    int index;
-    int isParameterOrConstant = 1;
     
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-    for (i = 0; i <nvr; i = i + 1) {
-        index = get_index_from_value_ref(vr[i]);
-
-        if (index>=((fmi1_me_t *)c)->jmi->offs_real_dx) {
-            isParameterOrConstant = 0;
-            break;
-        }
-    }
-
-    if (((fmi1_me_t *)c)->jmi->recomputeVariables==1 && ((fmi1_me_t *)c)->jmi->is_initialized==1 && isParameterOrConstant==0) {
-        retval = jmi_ode_derivatives(((fmi1_me_t *)c)->jmi);
-        if(retval != 0) {
-            jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logError, "Evaluating the derivatives failed.");
-            return fmiError;
-        }
-        ((fmi1_me_t *)c)->jmi->recomputeVariables = 0;
+    retval = jmi_get_string(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    if (retval != 0) {
+        return fmiError;
     }
 
     /* Strings not yet supported. */
-    for(i = 0; i < nvr; i++) value[i] = 0;
-    
-    jmi_log_comment(((fmi1_me_t *)c)->jmi->log, logWarning, "Strings are not yet supported.");
     return fmiWarning;
 }
 
@@ -1373,189 +1140,31 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {
     return ((fmi1_me_t*)c)->jmi;
 }
 
-fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
-                              fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
-
-    fmiInteger nGuards;
-    fmiInteger nF;
-    fmiInteger nR;
-    fmiInteger retval;
-    fmiInteger i,iter, max_iterations;
-    jmi_real_t nextTimeEvent;
-    fmi1_me_t* fmi1_me = ((fmi1_me_t *)c);
-    jmi_t* jmi = fmi1_me->jmi;
-    jmi_real_t* z = jmi_get_z(jmi);
-    jmi_real_t* event_indicators;
-    jmi_real_t* switches;
-    jmi_real_t* sw_temp;
-    jmi_log_node_t top_node;
-
-    /* Allocate memory */
-    nGuards = jmi->n_guards;
-    jmi_dae_get_sizes(jmi, &nF, &nR);
-    event_indicators = fmi1_me->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-    sw_temp = fmi1_me->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-    switches = jmi_get_sw(jmi); /* Get the switches */
-
-    /* Reset eventInfo */
-    eventInfo->upcomingTimeEvent = fmiFalse;            /* No support for time events */
-    eventInfo->nextEventTime = 0.0;                     /* Not used */
-    eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
-    eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
-    eventInfo->iterationConverged = fmiFalse;           /* The iteration have not converged */
-    
-    jmi->terminate = 0; /* Reset terminate flag. */
-
-    max_iterations = 30; /* Maximum number of event iterations */
-
-    retval = jmi_ode_derivatives(jmi);
-
-    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
-                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
-
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
-        jmi_log_unwind(jmi->log, top_node);
-        return fmiError;
-    }
-
-    /* Copy all pre values */
-    jmi_copy_pre_values(jmi);
-
-    /* We are at an event -> set atEvent to true. */
-    jmi->atEvent = JMI_TRUE;
-
-    /* Iterate */
-    iter = 0;
-    while (eventInfo->iterationConverged == fmiFalse) {
-        jmi_log_node_t iter_node;
-
-        iter += 1;
-        
-        iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
-                                      "Global iteration <iter:%d>, at <t:%E>", iter, jmi_get_t(jmi)[0]);
-        
-        /* Evaluate and turn the switches */
-        retval = jmi_evaluate_switches(jmi,switches,1);
-
-        /* Evaluate the ODE again */
-        retval = jmi_ode_derivatives(jmi);
-
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return fmiError;
-        }
-
-        /* Compare new values with values
-         * with the pre values. If there is an element that differs, set
-         * eventInfo->iterationConverged to false
-         */
-        eventInfo->iterationConverged = fmiTrue; /* Assume the iteration converged */
-
-        /* Start with continuous variables - they could change due to
-         * the reinit operator. */
-
-        /*
-        for (i=jmi->offs_real_dx;i<jmi->offs_t;i++) {
-            if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
-                eventInfo->iterationConverged = fmiFalse;
-            }
-        }
-         */
-
-        for (i=jmi->offs_real_d;i<jmi->offs_pre_real_dx;i=i+1) {
-            if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
-                eventInfo->iterationConverged = fmiFalse;
-            }
-        }
-        
-        /* Evaluate the switches */
-        memcpy(sw_temp,switches,nR*sizeof(jmi_real_t));
-        retval = jmi_evaluate_switches(jmi,sw_temp,1);
-        
-        if (jmi_compare_switches(switches,sw_temp,nR) == 0){
-            eventInfo->iterationConverged = fmiFalse;
-        }
-
-        /* Copy new values to pre values */
-        jmi_copy_pre_values(jmi);
-
-        if (intermediateResults) {
-            break;
-        }
-        
-        /* No convergence under the allowed number of iterations. */
-        if (iter >= max_iterations) {
-            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point "
-                         "iteration due to too many iterations at <t:%E>",jmi_get_t(jmi)[0]);
-            jmi_log_unwind(jmi->log, top_node);
-            return fmiError;
-        }
-
-        jmi_log_leave(jmi->log, iter_node);
-    }
-
-    /* Only do the final steps if the event iteration is done. */
-    if (eventInfo->iterationConverged == fmiTrue) {
-        jmi_log_node_t final_node = jmi_log_enter(jmi->log, logInfo, "final_step");
-
-        /* Compute the next time event */
-        retval = jmi_ode_next_time_event(jmi,&nextTimeEvent);
-
-        if(retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return fmiError;
-        }
-
-        /* If there is an upcoming time event, then set the event information
-         * accordingly.
-         */
-        if (!(nextTimeEvent==JMI_INF)) {
-            eventInfo->upcomingTimeEvent = fmiTrue;
-            eventInfo->nextEventTime = nextTimeEvent;
-            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
-        } else {
-            eventInfo->upcomingTimeEvent = fmiFalse;
-        }
-
-        /* Reset atEvent flag */
-        jmi->atEvent = JMI_FALSE;
-
-        /* Evaluate the guards with the event flat set to false in order to
-         * reset guards depending on samplers before copying pre values.
-         * If this is not done, then the corresponding pre values for these guards
-         * will be true, and no event will be triggered at the next sample.
-         */
-        retval = jmi_ode_guards(jmi);
-
-        if (retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return fmiError;
-        }
-
-        jmi_log_leave(jmi->log, final_node);
-    }
-
-	/* If everything went well, check if termination of simulation was requested. */
-	eventInfo->terminateSimulation = jmi->terminate ? fmiTrue : fmiFalse;
-
-    fmi1_me->fmi_functions.freeMemory(event_indicators);
-    fmi1_me->fmi_functions.freeMemory(sw_temp);
-
-    jmi_log_leave(jmi->log, top_node);
-
-    return fmiOK;
-}
-
 fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
+    fmiInteger retval;
+    jmi_event_info_t* event_info;
+    
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    return fmi1_me_event_iteration(c, JMI_FALSE, intermediateResults, eventInfo);
+    event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
+    
+    retval = jmi_event_iteration(((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    eventInfo->iterationConverged          = event_info->iteration_converged;
+    eventInfo->stateValueReferencesChanged = event_info->state_value_references_changed;
+    eventInfo->stateValuesChanged          = event_info->state_values_changed;
+    eventInfo->terminateSimulation         = event_info->terminate_simulation;
+    eventInfo->upcomingTimeEvent           = event_info->next_event_time_defined;
+    eventInfo->nextEventTime               = event_info->next_event_time;
+    
+    free(event_info);
+    
+    return fmiOK;
 }
 
 fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t nx) {
@@ -1568,22 +1177,17 @@ fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t
 }
 
 fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nominal[], size_t nx) {
-    fmiReal* ones;
-    fmiValueReference i;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-/*    ones = ((fmi1_me_t*)c) -> fmi_functions.allocateMemory(nx, sizeof(fmiReal)); */
-
-    for(i = 0; i <nx; i = i + 1) {
-        x_nominal[i]=1.0;
+    retval = jmi_get_nominal_continuous_states(((fmi1_me_t *)c)->jmi, x_nominal, nx);
+    if (retval != 0) {
+        return fmiError;
     }
-    /*
-    memcpy (x_nominal, ones, nx*sizeof(fmiReal));
-
-    ((fmi1_me_t*)c) -> fmi_functions.freeMemory(ones); */
+    
     return fmiOK;
 }
 
