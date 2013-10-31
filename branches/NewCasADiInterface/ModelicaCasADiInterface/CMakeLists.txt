@@ -24,13 +24,33 @@ function(interleave_string_and_list DEST_VAR STRING)
   set(${DEST_VAR} "${RESULT}" PARENT_SCOPE)
 endfunction()
 
+function(interleave_string_and_list DEST_VAR STRING)  
+  set(RESULT "")
+  foreach(ITEM ${ARGN})
+    list(APPEND RESULT ${STRING} ${ITEM})
+  endforeach(ITEM)
+  set(${DEST_VAR} "${RESULT}" PARENT_SCOPE)
+endfunction()
+
+
+# Todo: better way to choose path separator?
+if(WIN32)
+  set(SEP ;)
+else(WIN32)
+  set(SEP :)
+endif(WIN32)
 
 # import environment variables
 set(CASADI_HOME $ENV{CASADI_HOME})
+set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
 set(MC_BUILD $ENV{MC_BUILD})
 set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 set(JAVA_HOME $ENV{JAVA_HOME})
+
+# Add library path for libs
+link_directories(${CASADI_BUILD_DIR}/lib) 
+link_directories(${IPOPT_HOME}/lib) 
 
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
 set(JMODELICA "${ABS_MC_BUILD}/JModelica.org")
@@ -43,12 +63,18 @@ foreach(Target Modelica Optimica)
 endforeach(Target)
 
 set(JARS "${JMODELICA}/jars/beaver.jar" ${JARS_modelica} ${JARS_optimica})
-# Classpath with prefix is used in JCC wrapping. 
+set(JARS_AND_JNI ${JARS} "${JAVA_HOME}\\include" "${JAVA_HOME}\\include\\win32")
+
+set(CLASSPATH ${JARS_AND_JNI})
 interleave_string_and_list(CLASSPATH_WITH_PREFIX --classpath ${JARS})
+
+if(NOT WIN32)
+  join(CLASSPATH "${SEP}" "${JARS_AND_JNI}")
+endif(NOT WIN32)
 
 find_library(CASADI_DLL
   NAMES libcasadi.so libcasadi.dll
-  PATHS ${MC_BUILD}/casadi/lib
+  PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
 
@@ -62,7 +88,6 @@ else(WIN32)
 endif(WIN32)
 set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-
 set(MODELPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/common")
 
 message(STATUS "CLASSPATH=${CLASSPATH}")
