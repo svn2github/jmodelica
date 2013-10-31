@@ -128,6 +128,15 @@ public class ModelicaCompiler {
 	protected int dumpMemoryUseMinSize = 2 * 1024;
 	protected boolean findFlatToInstanceLinks = false;
 	
+	// If true, assume that JMODELICA_HOME points to the source folder - for easier debugging while developing
+	protected boolean debugSrcIsHome = false;
+	protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
+	    "Compiler/ModelicaCBackEnd/templates",
+        "Compiler/ModelicaXMLBackEnd/templates",
+        "Compiler/OptimicaCBackEnd/templates",
+        "Compiler/OptimicaXMLBackEnd/templates",
+	};
+	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
 	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
@@ -1250,12 +1259,25 @@ public class ModelicaCompiler {
 	private void generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name) 
 			throws FileNotFoundException {
 		if (tmpl != null) {
+		    if (debugSrcIsHome) 
+		        tmpl = debugFindTemplateInSrcDir(tmpl);
 			hookCheckAbort();
 			hookCodeGeneratorCreated(gen);
 			String output = new File(dir, name).getPath();
 			gen.generate(tmpl, output);
 			log.debug("Generated file '" + output + "'.");
 		}
+	}
+	
+	private static String debugFindTemplateInSrcDir(String tmpl) {
+	    String name = new File(tmpl).getName();
+	    String src = getJModelicaHome();
+	    for (String dir : DEBUG_TEMPLATE_IN_SRC) {
+	        File f = new File(new File(src, dir), name);
+	        if (f.exists())
+	            return f.getPath();
+	    }
+	    return tmpl;
 	}
 	
 	/**
@@ -1472,6 +1494,9 @@ public class ModelicaCompiler {
 			log.error(compilerName + " -parse expects a list of filenames.");
 			System.exit(1);
 		}
+		
+		if (programarguments.containsKey("debugSrcIsHome")) 
+		    debugSrcIsHome = true;
 		
 		// platform argument
 		String platforms = programarguments.get("platform");
