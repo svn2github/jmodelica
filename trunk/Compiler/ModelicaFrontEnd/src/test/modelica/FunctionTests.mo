@@ -444,12 +444,13 @@ model FunctionFlatten9
     
     function f
         input Real[2] x;
+		input Integer i;
         output Real[2] y;
     algorithm
-        y := x + a[1:2] + a[1:2];
+        y := x .+ a[i] .+ a[i+1];
     end f;
     
-    Real[2] z = f({3,4});
+    Real[2] z = f({3,4}, 1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -464,19 +465,20 @@ fclass FunctionTests.FunctionFlatten9
  Real z[1];
  Real z[2];
 equation
- ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3,4});
+ ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
 
 public
  function FunctionTests.FunctionFlatten9.f
   Real[3] a;
   input Real[2] x;
+  input Integer i;
   output Real[2] y;
  algorithm
   a[1] := 1;
   a[2] := 2;
   a[3] := 3;
-  y[1] := x[1] + a[1] + a[1];
-  y[2] := x[2] + a[2] + a[2];
+  y[1] := x[1] .+ a[i] .+ a[i + 1];
+  y[2] := x[2] .+ a[i] .+ a[i + 1];
   return;
  end FunctionTests.FunctionFlatten9.f;
 
@@ -6514,10 +6516,10 @@ model UnknownArray29
     final constant Real a[:] = {1, 2, 3};
     
     function f1
+		input Integer i;
         output Real y1;
-    protected
     algorithm
-      y1 := f2(a[1:2]);
+      y1 := f2({a[i], a[i+1]});
     end f1;
     
     function f2
@@ -6526,7 +6528,7 @@ model UnknownArray29
     algorithm
     end f2;
     
-    Real x = f1();
+    Real x = f1(1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -6540,20 +6542,18 @@ fclass FunctionTests.UnknownArray29
  constant Real a[3] = 3;
  Real x;
 equation
- x = FunctionTests.UnknownArray29.f1();
+ x = FunctionTests.UnknownArray29.f1(1);
 
 public
  function FunctionTests.UnknownArray29.f1
   Real[3] a;
+  input Integer i;
   output Real y1;
-  Real[2] temp_1;
  algorithm
   a[1] := 1;
   a[2] := 2;
   a[3] := 3;
-  temp_1[1] := a[1];
-  temp_1[2] := a[2];
-  y1 := FunctionTests.UnknownArray29.f2(temp_1);
+  y1 := FunctionTests.UnknownArray29.f2({a[i], a[i + 1]});
   return;
  end FunctionTests.UnknownArray29.f1;
 

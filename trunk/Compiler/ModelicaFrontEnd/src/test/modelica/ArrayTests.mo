@@ -5198,6 +5198,34 @@ end ArrayTests.For.ForEquation4;
 end ForEquation4;
 
 
+model ForEquation5
+    parameter Integer N = 5;
+    parameter Real x[2,N] = {{1, 2, 3, 4, 3}, {0.1, 0.2, 0.1, 0.4, 0.5}};
+equation
+    for i in 1:N-1 loop
+		if x[1,i] < x[1,i+1] then
+			assert(x[2,i] < x[2,i+1], "x[:2] should rise when x[:1] rises");
+        else
+            assert(x[2,i] > x[2,i+1], "x[:2] should fall when x[:1] falls");
+		end if;
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="For_ForEquation5",
+			description="Test handling of if equation with parameter test using for index in expression in array index",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: x[:2] should fall when x[:1] falls
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: x[:2] should rise when x[:1] rises
+")})));
+end ForEquation5;
+
+
 model ForInitial1
   parameter Integer N = 3;
   Real x[N];

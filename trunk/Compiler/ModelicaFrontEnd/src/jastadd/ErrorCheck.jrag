@@ -755,41 +755,28 @@ aspect InstanceErrorCheck {
 	}
 
 	public void InstDot.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {	
-			errorChecked = true;
-			for (InstAccess ia : getInstAccesss()) {
-				ia.collectErrors(checkType);
-				if (ia.isUnknown())
-					break;
-			}
-			allChecks(checkType);
-	    }
+		for (InstAccess ia : getInstAccesss()) {
+			ia.collectErrors(checkType);
+			if (ia.isUnknown())
+				break;
+		}
+		allChecks(checkType);
 	}
 
 	public void InstClassAccess.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-		    //super.collectErrors(checkType);
-		    errorChecked = true;
-		    nameCheck(checkType);
-		}
+	    nameCheck(checkType);
 	}
 
 	public void InstComponentAccess.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-		    errorChecked = true;
-		    super.collectErrors(checkType);
-		    if (!myInstComponentDecl().isUnknown() && !isModificationName())
-		    	myInstComponentDecl().collectErrors(checkType);
-		}
+	    super.collectErrors(checkType);
+	    if (!myInstComponentDecl().isUnknown() && !isModificationName())
+	    	myInstComponentDecl().collectErrors(checkType);
 	}
 	
 	public void InstComponentArrayAccess.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-		    errorChecked = true;
-		    super.collectErrors(checkType);
-		    if (!myInstComponentDecl().isUnknown() && !isModificationName())
-		    	myInstComponentDecl().collectErrors(checkType);
-		}
+	    super.collectErrors(checkType);
+	    if (!myInstComponentDecl().isUnknown() && !isModificationName())
+	    	myInstComponentDecl().collectErrors(checkType);
 	}
 	
 	inh boolean InstAccess.isModificationName();
@@ -853,7 +840,72 @@ aspect InstanceErrorCheck {
 	    	}
 	    }
 	}
+	  
+	public void InstForClauseE.collectErrors(ErrorCheckType checkType) {
+	    collectErrorsInFor(getFAbstractEquationList(), getInstForIndexList(), checkType);
+	}
 	
+	public void InstForStmt.collectErrors(ErrorCheckType checkType) {
+	    collectErrorsInFor(getForStmtList(), getInstForIndexList(), checkType);
+	}
+	
+	public void FIterExp.collectErrors(ErrorCheckType checkType) {
+	    collectErrorsInFor(getFExp(), getForIndexList(), checkType);
+	}
+	
+	public void ASTNode.collectErrorsInFor(
+	        ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
+	    // Do the checks on the for itself
+	    allChecks(checkType);
+	    
+	    // Check everything except iterChild once
+	    for (ASTNode ch : this)
+	        if (ch != iterChild)
+	            ch.collectErrors(checkType);
+	    
+	    // Check array bounds in iterChild for each index combination
+	    try {
+	        indices.getChild(0).collectErrorsForAllIndices(indices, 0, iterChild, checkType);
+	    } catch (ConstantEvaluationException e) {
+	        // This error is caught elsewhere
+	    }
+	}
+    
+    /**
+     * Collect errors in iterated node for all combinations of for indices.
+     * 
+     * @param indices    the list of indices too loop for
+     * @param i          next index to handle
+     * @param child      the iterated node to check
+     * @param checkType  type of check to perform
+     */
+    public void CommonForIndex.collectErrorsForAllIndices(
+            List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void InstForIndex.collectErrorsForAllIndices(
+            List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+        if (hasFExp()) {
+            InstComponentDecl var = getInstPrimitive();
+            CValue oldVal = var.evaluationValue;
+            boolean last = i == indices.getNumChild() - 1;
+            CommonForIndex next = last ? null : indices.getChild(i + 1);
+            CValueArray ivals = getFExp().ceval().array();
+            for (Index j : ivals.indices()) {
+                var.setEvaluationValue(ivals.getCell(j));
+                if (last) {
+                    child.collectErrors(checkType);
+                    child.flushAllRecursive();
+                } else {
+                    next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
+                }
+            }
+            var.setEvaluationValue(oldVal);
+        }
+    }
+	
+    
 	public void InstFunctionCall.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
 	    	errorChecked = true;

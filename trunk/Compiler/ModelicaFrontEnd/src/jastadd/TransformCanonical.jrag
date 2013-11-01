@@ -78,11 +78,11 @@ aspect TransformCanonical {
 	  */
 	public void FClass.transformCanonicalBase() {
         Transformation[] transformations = new Transformation[] {
-		    new enableIfEquationElimination(),
 		    new addStateInitialEquationsIfSet(),
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
+		    new enableIfEquationElimination(),
 		    new extractEventGeneratingExps(),
 		    new transformAlgorithms(),
 		    new propagateResidualPairs(),

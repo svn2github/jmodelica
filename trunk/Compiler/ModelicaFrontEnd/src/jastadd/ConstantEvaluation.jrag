@@ -1673,7 +1673,7 @@ aspect ConstantEvaluation {
     	CValue val = CValue.UNKNOWN;
 		if (evaluationValue != null) {
 			val = evaluationValue;
-		} else if ((isConstant() || isParameter())) {
+		} else if ((isConstant() || isParameter()) && !isForIndex()) {
 	    	if (hasBindingFExp()) {
 		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())

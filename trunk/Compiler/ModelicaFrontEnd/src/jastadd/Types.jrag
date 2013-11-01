@@ -123,7 +123,6 @@ aspect Types {
 			if (enabledExp != null) {
 				FExp enabledFExp = dynamicFExp(enabledExp.instantiate());
 				enabledFExp.collectErrors(checkType);
-				enabledFExp.checkArrayBounds(checkType);
 				try {
 					enabledFExp.ceval().booleanValue();
 				} catch (ConstantEvaluationException e) {
@@ -140,7 +139,6 @@ aspect Types {
 				InstAccess ia = iterationVariableExp.asAccess().instantiate();
 				iterationVariable = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
 				iterationVariable.collectErrors(checkType);
-				iterationVariable.checkArrayBounds(checkType);
 				if (iterationVariable.isUnknown()) {
 					iterationVariable = null;
 				} else {
@@ -161,7 +159,6 @@ aspect Types {
 				InstAccess ia = residualEquationExp.asAccess().instantiate().convertToEquationAccess();
 				residualEquation = dynamicFExp(new FInstAccessExp(ia)).asInstAccess();
 				residualEquation.collectErrors(checkType);
-				residualEquation.checkArrayBounds(checkType);
 				if (residualEquation.isUnknown())
 					residualEquation = null;
 			}

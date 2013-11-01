@@ -484,19 +484,29 @@ aspect FlatAPI {
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
   	syn lazy ArrayList<FRealVariable> FClass.differentiatedRealVariables() {
   		ArrayList<FRealVariable> l = new ArrayList<FRealVariable>();
-  		for (FRealVariable fv : differentiatedRealVariablesSet()) {
+  		for (FRealVariable fv : differentiatedRealVariablesSet()) 
   			l.add(fv);
-  		}
   		return l;
   	}
   	// The LinkedHashSet is used here to avoid duplicates.
 	coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesSet() 
 	  [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
 	FDerExp contributes
- 		(FRealVariable)getFIdUse().myFV() when !getFIdUse().myFV().isUnknown()
+ 		(FRealVariable) getFIdUse().myFV() when !getFIdUse().myFV().isUnknown() && !inDeadIfBranch()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
+
+	inh boolean FExp.inDeadIfBranch();
+    eq FIfEquation.getFAbstractEquation().inDeadIfBranch() = getTest().inDeadIfBranchTest(false);
+    eq FIfEquation.getElse().inDeadIfBranch()              = getTest().inDeadIfBranchTest(true);
+    eq FIfExp.getThenExp().inDeadIfBranch()                = getIfExp().inDeadIfBranchTest(false);
+    eq FIfExp.getElseExp().inDeadIfBranch()                = getIfExp().inDeadIfBranchTest(true);
+    eq FClass.getChild().inDeadIfBranch()                  = false;
+    eq InstNode.getChild().inDeadIfBranch()                = false;
+
+    syn boolean FExp.inDeadIfBranchTest(boolean deadValue) = 
+        (isConstantExp() && ceval().booleanValue() == deadValue) || inDeadIfBranch();
 
     syn int FClass.numDerivativeVariables() = derivativeVariables().size();
 	coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 

@@ -70,6 +70,10 @@ aspect OptimicaErrorCheck {
  		}
 
   	}
+    
+    public void InstForClauseC.collectErrors(ErrorCheckType checkType) {
+        collectErrorsInFor(getFConstraintList(), getInstForIndexList(), checkType);
+    }
 	
 	eq FOptClass.numDAEEquations() = numScalarEquations() + numPathEqConstraints();
 	eq FOptClass.numDAEVariables() = numAlgebraicContinousRealVariables() + numDifferentiatedRealVariables();

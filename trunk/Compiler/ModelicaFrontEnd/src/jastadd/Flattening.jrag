@@ -124,11 +124,10 @@ aspect Flattening {
 	}
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-		if (getName().myInstClassDecl().inOrIsOuter()) {
-			getName().myInstClassDecl().myInnerInstClassDecl().flattenFunction(fc);
-		} else {
-			getName().myInstClassDecl().flattenFunction(fc);
-		}
+	    InstClassDecl target = getName().myInstClassDecl();
+		if (target.inOrIsOuter()) 
+		    target = target.myInnerInstClassDecl();
+		target.flattenFunction(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
 	
@@ -1675,13 +1674,7 @@ aspect FlatExpressions {
 	
 	// TODO: this doesn't seem to cover colon subscripts to arrays of unknown size
 	syn boolean FSubscript.isUnknownIndex() = false;
-	eq FExpSubscript.isUnknownIndex() {
-		try {
-			return ceval().intValue() == 0;
-		} catch (ConstantEvaluationException e) {
-			return true;
-		}
-	}
+	eq FExpSubscript.isUnknownIndex()       = !getFExp().canCeval();
 	
 	public FQName InstAccess.flatten(FQName prefix) { 
 		if (myInstComponentDecl().isEnumLiteral())
