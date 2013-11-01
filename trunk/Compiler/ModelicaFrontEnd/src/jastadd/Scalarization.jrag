@@ -1824,7 +1824,10 @@ aspect Scalarization {
 		if (equation) {
     	    boolean init = inInitialEquationSection();
     	    boolean param = init || inParameterEquation() || inAttributeValue();
-			type.createTempFVariables(vars, new FQNameString(tempVarName()), param, !init);
+    	    FTypePrefixVariability v = param ? fParameter() : fContinuous();
+    	    if (variability().discreteVariability())
+    	    	v = v.combineDown(variability());
+			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
 		} else {
     		if (type.isRecord()) 
     			type.createRecordTemporaries(vars, tempVarName());
@@ -1934,15 +1937,15 @@ aspect Scalarization {
 	 * @param param  if <code>true</code>, create parameters instead of variables
 	 * @param fixed  if creating parameters, use this value for the fixed attribute
 	 */
-	public void FType.createTempFVariables(List vars, FQName name, boolean param, boolean fixed) {
+	public void FType.createTempFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
 		if (isArray()) {
 			FQNameFull fqn = name.copyAsFQNameFull();
 			for (Index i : indices()) {
 				fqn.addFArraySubscripts(i.createFArraySubscripts());
-				createTempCellFVariables(vars, fqn, param, fixed);
+				createTempCellFVariables(vars, fqn, variability, fixed);
 			}
 		} else {
-			createTempCellFVariables(vars, name, param, fixed);
+			createTempCellFVariables(vars, name, variability, fixed);
 		}
 	}
 	
@@ -1954,11 +1957,11 @@ aspect Scalarization {
 	 * @param param  if <code>true</code>, create parameters instead of variables
      * @param fixed  if creating parameters, use this value for the fixed attribute
 	 */
-	public void FType.createTempCellFVariables(List vars, FQName name, boolean param, boolean fixed) {
+	public void FType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
 		FQName fqn = name.fullCopy();
 		fqn.scalarized = true;
 		
-		FVariable var = createTempFVariable(fqn, param);
+		FVariable var = createTempFVariable(fqn, variability);
 		vars.add(var);
 		if (!fixed)
 		    var.addFAttribute(new FAttribute(new FIdUse("Boolean"), new FIdDecl("fixed"), new FBooleanLitExpFalse(), true, 0));
@@ -1972,32 +1975,11 @@ aspect Scalarization {
 	 * @param param  if <code>true</code>, create parameters instead of variables
      * @param fixed  if creating parameters, use this value for the fixed attribute
 	 */
-	public void FRecordType.createTempCellFVariables(List vars, FQName name, boolean param, boolean fixed) {
+	public void FRecordType.createTempCellFVariables(List vars, FQName name, FTypePrefixVariability variability, boolean fixed) {
 		for (FRecordComponentType comp : getComponents()) {
 			FQName next = name.copyAndAppend(comp.getName());
-			comp.getFType().createTempFVariables(vars, next, param, fixed);
+			comp.getFType().createTempFVariables(vars, next, variability, fixed);
 		}
-	}
-	
-	
-	/**
-	 * \brief Creates a new temporary variable with the given name.
-	 * 
-	 * All optional children in the new variable are empty.
-	 * If param is true, then variability is parameter, otherwise continous.
-	 */
-	public FVariable FType.createTempFVariable(FQName name, boolean param) {
-		return createFVariable(new FTemporaryVisibilityType(), name, param);
-	}
-	
-	/**
-	 * \brief Creates a new variable with the given visibility and name.
-	 * 
-	 * All optional children in the new variable are empty.
-	 * If param is true, then variability is parameter, otherwise continous.
-	 */
-	public FVariable FType.createFVariable(FVisibilityType fvt, FQName name, boolean param) {
-		return createFVariable(fvt, name, param ? new FParameter() : new FContinuous());
 	}
 	
 	/**

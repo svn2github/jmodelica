@@ -83,13 +83,13 @@ aspect TransformCanonical {
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
+		    new extractEventGeneratingExps(),
 		    new transformAlgorithms(),
 		    new propagateResidualPairs(),
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
 		    aliasElimination,
 		    addFDerivativeVariables,
-		    new extractEventGeneratingExps(),
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
 		    new enableWhenEquationRewrite(),
@@ -1164,35 +1164,110 @@ aspect TransformCanonical {
 					for (FRelExp exp : algo.relExpInEquation())
 						exp.genIndicator();
 				flushAllRecursive();
-				for (FAlgorithm algo : algorithms()) {
-					algo.transformAlgorithm();
-				}
+				AlgorithmTransformer.visit(algorithms(), new BasicAlgoTransformer());
 				flushAllRecursive();
 			}
 		}
 	}
 	
 	/**
-	 * \brief Transformation of algorithm
+	 * \brief Visitor pattern for inserting new statements in an algorithm
+	 * <code>transform(FAlgorithm)</code> is called at start of algorithm
+	 * <code>transform(FStatement)</code> is called at each statement
 	 */
-	public void FAlgorithm.transformAlgorithm() {
-		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
-		/* Add initial statements for LHS variables */
-		Set<FVariable> defSet = defSet();
-		for (FVariable fv : referencedFVariablesInLHS()) {
-			if (!defSet.contains(fv)) {
-				stmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
+	public abstract class AlgorithmTransformer {
+		private ArrayList<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
+		
+		protected void add(FStatement stmt) {
+			blocks.get(blocks.size()-1).add(stmt);
+		}
+		
+		public static void visit(Collection<FAlgorithm> algs, AlgorithmTransformer tf) {
+			for (FAlgorithm alg : algs)
+				tf.visit(alg);
+		}
+		
+		public void visit(FAlgorithm alg) {
+			blocks.add(new ArrayList<FStatement>());
+			transform(alg);
+			for (FStatement stmt : alg.getFStatements())
+				stmt.acceptTransform(this);
+			alg.setFStatementList(new List<FStatement>(blocks.remove(blocks.size()-1)));
+		}
+		
+		public List<FStatement> visit(List<FStatement> stmts) {
+			blocks.add(new ArrayList<FStatement>());
+			for (FStatement stmt : stmts)
+				stmt.acceptTransform(this);
+			return new List<FStatement>(blocks.remove(blocks.size()-1));
+		}
+		
+		public void visit(FStatement stmt) {
+			transform(stmt);
+		}
+		
+		public void visit(FForStmt stmt) {
+			transform(stmt);
+			stmt.setForStmtList(visit(stmt.getForStmts()));
+		}
+		
+		public void visit(FWhileStmt stmt) {
+			transform(stmt);
+			stmt.setWhileStmtList(visit(stmt.getWhileStmts()));
+		}
+		
+		public void visit(FIfStmt stmt) {
+			transform(stmt);
+			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+				clause.setFStatementList(visit(clause.getFStatements()));
+			}
+			stmt.setElseStmtList(visit(stmt.getElseStmts()));
+		}
+		
+		public void visit(FWhenStmt stmt) {
+			transform(stmt);
+			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
+				clause.setFStatementList(visit(clause.getFStatements()));
 			}
 		}
-		/* Add initial statements for indicators */
-		for (FRelExp exp : relExpInEquation()) {
-			stmts.add(exp.indicatorInitStmt());
+		
+		public abstract void transform(FStatement stmt);
+		public void transform(FAlgorithm alg) {}
+	}
+	
+	public void FAlgorithm.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FStatement.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FAssignStmt.acceptTransform(AlgorithmTransformer tf) { tf.visit(this); }
+	public void FIfStmt.acceptTransform(AlgorithmTransformer tf)     { tf.visit(this); }
+	public void FForStmt.acceptTransform(AlgorithmTransformer tf)    { tf.visit(this); }
+	public void FWhileStmt.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
+	public void FWhenStmt.acceptTransform(AlgorithmTransformer tf)   { tf.visit(this); }
+	
+	/**
+	 * \brief Generates initial statements and indicator statements for relational expressions.
+	 */
+	public class BasicAlgoTransformer extends AlgorithmTransformer {
+		public void transform(FAlgorithm alg) {
+			/* Add initial statements for LHS variables */
+			Set<FVariable> defSet = alg.defSet();
+			for (FVariable fv : alg.referencedFVariablesInLHS()) {
+				if (!defSet.contains(fv)) {
+					add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
+				}
+			}
+			/* Add indicator initial statements */
+			for (FRelExp exp : alg.relExpInEquation()) {
+				add(exp.indicatorInitStmt());
+			}
 		}
-		/* Add indicator statements */
-		for (FStatement stmt : getFStatements()) {
-			stmt.genIndicatorStmts(stmts);
+		
+		public void transform(FStatement stmt) {
+			/* Add indicator stmts */
+			for (FRelExp exp : stmt.relExpInStmt()) {
+				add(exp.indicatorStmt());
+			}
+			add(stmt);
 		}
-		setFStatementList(new List<FStatement>(stmts));
 	}
 	
 	/**
@@ -1274,43 +1349,6 @@ aspect TransformCanonical {
 	 */
 	syn FStatement FRelExp.indicatorStmt() =
 			new FAssignStmt((FIdUseExp) getIndicator().myFV().createUseExp(), new FSubExp(getLeft(), getRight()));
-	
-	/**
-	 * \brief Generates indicator statements for relational expressions
-	 */
-	public void FStatement.genIndicatorStmts(ArrayList<FStatement> l) {
-		for (FRelExp exp : relExpInStmt()) {
-			l.add(exp.indicatorStmt());
-		}
-		l.add(this);
-	}
-	
-	/**
-	 * \brief Generates indicator statements for relational expressions
-	 */
-	public void FIfStmt.genIndicatorStmts(ArrayList<FStatement> l) {
-		super.genIndicatorStmts(l);
-		for (FIfWhenClause clause : getFIfWhenClauses()) {
-			clause.genIndicatorStmts();
-		}
-		ArrayList<FStatement> newElse = new ArrayList<FStatement>();
-		for (FStatement stmt : getElseStmts()) {
-			stmt.genIndicatorStmts(newElse);
-		}
-		setElseStmtList(new List<FStatement>(newElse));
-	}
-	
-	/**
-	 * \brief Generates indicator statements for relational expressions
-	 */
-	public void FIfWhenClause.genIndicatorStmts() {
-		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
-		for (FStatement stmt : getFStatements()) {
-			stmt.genIndicatorStmts(stmts);
-		}
-		setFStatementList(new List<FStatement>(stmts));
-	}
-	
 	
 	/**
 	 * \brief Replace one equation with another.
@@ -1546,22 +1584,6 @@ aspect TransformCanonical {
 		}
 	}
 	
-	public boolean FVariable.canBeAliasEliminated(FVariable that) {
-	
-		// The only case where it is allowed to eliminate an 
-		// alias equation containing a derivative is when the
-		// other access is to an algebraic: der(x) = w
-	
-		if ((this.isDerivativeVariable() /*&& !that.isAlgebraicVariable()*/) ||
-		    (that.isDerivativeVariable() /*&& that.isDerivativeVariable()*/)) {
-		    //System.out.println(">>>>>>>> " + this.name() + " " + that.name());
-		 	return false;   	
-		}
-	
-		return true;
-		 
-	}
-	
 	public AliasPair FAbstractEquation.aliasVariables() {
 		return null;
 	}
@@ -1593,9 +1615,12 @@ aspect TransformCanonical {
 	 * @param sign  alias sign is multiplied with this - useful for e.g. 0 = x + y
 	 */
 	public static AliasPair ASTNode.aliasVariables(FExp e1, FExp e2, int sign) {
-		if (e1.canBeAlias() && e2.canBeAlias() && e1.type().typeAliasCompatible(e2.type())) {   // x = y, etc.
+		if (e1.canBeAlias() && e2.canBeAlias() 
+				&& e1.type().typeAliasCompatible(e2.type()) 
+				&& e1.variability().aliasCompatible(e2.variability())) {   // x = y, etc.
 			FVariable fv1 = e1.variableThatCanBeAlias();
 			FVariable fv2 = e2.variableThatCanBeAlias();
+			
 			boolean negated = e1.aliasSign() * e2.aliasSign() * sign < 0;
 			return new AliasPair(fv1, fv2, negated);
 		} else {                                    // 0 = x + y, etc
@@ -1609,6 +1634,12 @@ aspect TransformCanonical {
 			else
 				return null;
 		}
+	}
+	
+	syn boolean FTypePrefixVariability.aliasCompatible(FTypePrefixVariability that) {
+		boolean l = this.discreteVariability();
+		boolean r = that.discreteVariability();
+		return (l && r) || (!l && !r);
 	}
 	
 	/**
@@ -2161,7 +2192,7 @@ aspect TransformCanonical {
 	
 	public void FExp.insertTempsInLHS(FClass fClass) {
 		String tempName = calcTempVarName();
-		fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), false));
+		fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), variability()));
 		replaceMe(new FIdUseExp(tempName));
 		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
 	}
@@ -4691,41 +4722,28 @@ aspect EventGeneratingExps {
 
     public class FClass {
         /**
-         * Extracts event generating expressions into when equations.
-         * Replaces the exp with a temp var, introduces an intial equation
-         * and a when equation for the temp var.
-         * 
-         * After this step, event generating expressions with higher than 
-         * parameter variability are only allowed in discrete locations.
+         * Extracts event generating expressions into if expressions
+         * and replaces the exp with a temp var.
          */
         public class extractEventGeneratingExps extends Transformation {
             public void perform() {
-                ArrayList<FEventGenExp> eventExps = collectEventGeneratingExps();
+                HashSet<FAlgorithm> algs = new HashSet<FAlgorithm>();
+                ArrayList<FEventGenExp> eventExps = eventGenExps();
                 Collections.reverse(eventExps);
                 
-                // Calculating type() needs to be done before expressions are changed
-                // in case of nested event generating expressions.
-                ArrayList<FVariable> tempVars = new ArrayList<FVariable>();
+                // Equations
                 for (FEventGenExp exp: eventExps) {
-                    FVariable tempVar = exp.type().createTempFVariable(
-                            new FQNameFull(exp.tempVarName()), FTypePrefixVariability.fDiscrete());
-                    tempVars.add(tempVar);
+                	addFVariable(exp.tempVar());
+                	if (exp.inAlgorithm()) {
+                		algs.add((FAlgorithm) exp.myFEquation());
+                		continue;
+                	}
+                    exp.replaceMe(exp.tempUseExp());
+                    addFEquation(new FEquation(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
                 }
                 
-                for (int i = 0; i < eventExps.size(); i++) {
-                    FEventGenExp exp = eventExps.get(i);
-                    FVariable tempVar = tempVars.get(i);
-                    
-                    addFVariable(tempVar);
-                    exp.replaceMe(tempVar.createUseExp());
-                    addFInitialEquation(new FEquation(tempVar.createUseExp(), exp.fullCopy()));
-                    
-                    // Add when equation
-                    List<FAbstractEquation> eqList = new List<FAbstractEquation>();
-                    eqList.add(new FEquation(tempVar.createUseExp(), exp.fullCopy()));
-                    addFEquation(new FWhenEquation(new FNormalEquation(), eqList, 
-                            exp.createGuardExp(tempVar), new Opt<FIfWhenElseEquation>()));
-                }
+                // Algorithms
+                AlgorithmTransformer.visit(algs, new EventAlgoTransformer());
                 
                 root().flushAllRecursive();
             }
@@ -4733,44 +4751,84 @@ aspect EventGeneratingExps {
     }
 		
 	/**
-	 * Collects event generating expressions.
+	 * Collects all event generating expressions
 	 */
-	coll ArrayList<FEventGenExp> FClass.collectEventGeneratingExps() 
+	coll ArrayList<FEventGenExp> FClass.eventGenExps() 
 		[new ArrayList<FEventGenExp>()] with add root FClass;
 	FEventGenExp contributes this
 		when generatesEvent()
-		to FClass.collectEventGeneratingExps()
+		to FClass.eventGenExps()
 		for myFClass();
+	
+	/**
+	 * Collects event generating expressions in this statements
+	 */
+	coll ArrayList<FEventGenExp> FStatement.eventGenExps() 
+		[new ArrayList<FEventGenExp>()] with add root FAlgorithm;
+	FEventGenExp contributes this
+		when generatesEvent()
+		to FStatement.eventGenExps()
+		for myFStatement();
 		
+	/**
+	 * Extracts event generating expressions into if-expressions
+	 */
+	public class EventAlgoTransformer extends AlgorithmTransformer {
+		public void transform(FStatement stmt) {
+			ArrayList<FEventGenExp> eventExps = stmt.eventGenExps();
+			Collections.reverse(eventExps);
+			for (FEventGenExp exp : eventExps) {
+				exp.replaceMe(exp.tempUseExp());
+				add(new FAssignStmt(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
+			}
+			add(stmt);
+		}
+	}
+	
+	/**
+	 * Creates an if-expression to replace this expression
+	 */
+	syn FIfExp FEventGenExp.asIfExp(FExp preExp) {
+		FExp guards = new FOrExp(createGuardExp(preExp), new FInitialExp());
+		FIfExp e = new FIfExp();
+		e.setIfExp(guards);
+		e.setThenExp(fullCopy());
+		e.setElseExp(preExp.unboundCopy());
+		return e;
+	}
+	
 	/**
 	 * Creates a guard expression for an event generating expression
 	 * extracted to a when equation. (Integer inherits from floor.)
 	 */
-	syn FExp FEventGenExp.createGuardExp(FVariable var);
-	eq FFloorFuncExp.createGuardExp(FVariable var) {
-		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(getX().fullCopy(), new FPreExp(var.createFIdUse())));
-		guards.addFExp(new FGeqExp(getX().fullCopy(), new FAddExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
+	syn FExp FEventGenExp.createGuardExp(FExp preExp);
+	eq FFloorFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLtExp(getX().fullCopy(), preExp.fullCopy()),
+			new FGeqExp(getX().fullCopy(), new FAddExp(preExp.fullCopy(), new FIntegerLitExp(1)))
+		);
 		return guards;
 	}
-	eq FCeilFuncExp.createGuardExp(FVariable var) {
-		FArray guards = new FArray();
-		guards.addFExp(new FLeqExp(getX().fullCopy(), new FSubExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
-		guards.addFExp(new FGtExp(getX().fullCopy(), new FPreExp(var.createFIdUse())));
+	eq FCeilFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLeqExp(getX().fullCopy(), new FSubExp(preExp.fullCopy(), new FIntegerLitExp(1))),
+			new FGtExp(getX().fullCopy(), preExp.fullCopy())
+		);
 		return guards;
 	}
-	eq FDivFuncExp.createGuardExp(FVariable var) {
-		FArray guards = new FArray();
-		guards.addFExp(new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FPreExp(var.createFIdUse())));
-		guards.addFExp(new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(new FPreExp(var.createFIdUse()), new FIntegerLitExp(1))));
+	eq FDivFuncExp.createGuardExp(FExp preExp) {
+		FOrExp guards = new FOrExp(
+			new FLtExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), preExp.fullCopy()),
+			new FGeqExp(new FDivFuncExp(getX().fullCopy(), getY().fullCopy()), new FAddExp(preExp.fullCopy(), new FIntegerLitExp(1)))
+		);
 		return guards;
 	} 
 	
 	// These two are rewritten to floor and div containing expressions during flattening.
-	eq FModFuncExp.createGuardExp(FVariable var) {
+	eq FModFuncExp.createGuardExp(FExp preExp) {
 		throw new UnsupportedOperationException();
 	}
-	eq FRemFuncExp.createGuardExp(FVariable var) {
+	eq FRemFuncExp.createGuardExp(FExp preExp) {
 		throw new UnsupportedOperationException();
 	}
 }

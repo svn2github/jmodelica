@@ -723,21 +723,16 @@ fclass FunctionInlining.RecordInline4
  Real y[3];
  Real y[4];
  Real x;
- discrete Integer temp_4;
- discrete Integer temp_6;
+ discrete Integer temp_1;
 initial equation 
- temp_6 = integer(y[4]);
- pre(temp_4) = 0;
+ pre(temp_1) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = temp_4 + (y[1] + y[2] + y[3]);
- temp_4 = temp_6;
- when {y[4] < pre(temp_6), y[4] >= pre(temp_6) + 1} then
-  temp_6 = integer(y[4]);
- end when;
+ x = temp_1 + (y[1] + y[2] + y[3]);
+ temp_1 = if y[4] < pre(temp_1) or y[4] >= pre(temp_1) + 1 or initial() then integer(y[4]) else pre(temp_1);
 
 public
  record FunctionInlining.RecordInline4.R
@@ -746,6 +741,7 @@ public
  end FunctionInlining.RecordInline4.R;
 
 end FunctionInlining.RecordInline4;
+			
 ")})));
     end RecordInline4;
     
@@ -880,12 +876,10 @@ fclass FunctionInlining.RecordInline7
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
- discrete Integer temp_5;
- discrete Integer temp_22;
+ discrete Integer temp_6;
 initial equation 
- temp_22 = integer(y[4]);
  x.pre(b) = 0;
- pre(temp_5) = 0;
+ pre(temp_6) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
@@ -894,11 +888,8 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- x.b = 3 + (temp_5 - temp_5);
- temp_5 = temp_22;
- when {y[4] < pre(temp_22), y[4] >= pre(temp_22) + 1} then
-  temp_22 = integer(y[4]);
- end when;
+ x.b = 3 + (temp_6 - temp_6);
+ temp_6 = if y[4] < pre(temp_6) or y[4] >= pre(temp_6) + 1 or initial() then integer(y[4]) else pre(temp_6);
 
 public
  record FunctionInlining.RecordInline7.R
@@ -907,6 +898,7 @@ public
  end FunctionInlining.RecordInline7.R;
 
 end FunctionInlining.RecordInline7;
+			
 ")})));
     end RecordInline7;
     

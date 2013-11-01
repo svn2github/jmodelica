@@ -475,17 +475,13 @@ model IntegerExp2
 fclass TypeTests.IntegerExp2
  Real x;
  discrete Integer y;
- discrete Integer temp_1;
 initial equation 
- temp_1 = integer(x);
  pre(y) = 0;
 equation
  x = time;
- y = temp_1;
- when {x < pre(temp_1), x >= pre(temp_1) + 1} then
-  temp_1 = integer(x);
- end when;
+ y = if x < pre(y) or x >= pre(y) + 1 or initial() then integer(x) else pre(y);
 end TypeTests.IntegerExp2;
+			
 ")})));
 end IntegerExp2;
 
@@ -1085,30 +1081,20 @@ fclass TypeTests.DivTest1
  constant Real aReal = 3;
  constant Integer anInt = 3;
  Real x;
- discrete Integer temp_1;
+ discrete Real temp_1;
  discrete Real temp_2;
  discrete Real temp_3;
- discrete Real temp_4;
 initial equation 
- temp_1 = 1;
- temp_2 = 1.0;
- temp_3 = 1.0;
- temp_4 = 1.0;
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
- x = temp_4 + temp_3 + temp_2 + temp_1;
- when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ x = temp_3 + temp_2 + temp_1 + 1;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1.0 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
 end TypeTests.DivTest1;
+			
 ")})));
 end DivTest1;
 
@@ -1149,25 +1135,18 @@ fclass TypeTests.ModTest1
  discrete Real temp_3;
  discrete Real temp_4;
 initial equation 
- temp_1 = 1;
- temp_2 = 1.0;
- temp_3 = 1.0;
- temp_4 = 1.0;
+ pre(temp_1) = 0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
+ pre(temp_4) = 0.0;
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {anInt / anInt < pre(temp_1), anInt / anInt >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {aReal / anInt < pre(temp_2), aReal / anInt >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {anInt / aReal < pre(temp_3), anInt / aReal >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {aReal / aReal < pre(temp_4), aReal / aReal >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
+ temp_4 = if 1.0 < pre(temp_4) or 1.0 >= pre(temp_4) + 1 or initial() then 1.0 else pre(temp_4);
 end TypeTests.ModTest1;
+			
 ")})));
 end ModTest1;
 
@@ -1203,30 +1182,20 @@ fclass TypeTests.RemTest1
  constant Real aReal = 3;
  constant Integer anInt = 3;
  Real x;
- discrete Integer temp_1;
+ discrete Real temp_1;
  discrete Real temp_2;
  discrete Real temp_3;
- discrete Real temp_4;
 initial equation 
- temp_1 = 1;
- temp_2 = 1.0;
- temp_3 = 1.0;
- temp_4 = 1.0;
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
- x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ x = 3.0 - temp_3 * 3.0 + (3 - temp_2 * 3.0) + (3.0 - temp_1 * 3) + 0;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1.0 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
 end TypeTests.RemTest1;
+			
 ")})));
 end RemTest1;
 
@@ -1755,16 +1724,25 @@ fclass TypeTests.AlgorithmType1
  discrete Boolean b;
  discrete Integer i;
  discrete Real r;
+ discrete Integer temp_1;
+ Real temp_2;
+ Real temp_3;
 initial equation 
  pre(b) = false;
  pre(i) = 0;
  pre(r) = 0.0;
+ pre(temp_1) = 0;
 algorithm
+ temp_2 := 1;
+ temp_3 := 1;
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
- i := integer(r);
+ temp_2 := r - pre(temp_1);
+ temp_3 := r - (pre(temp_1) + 1);
+ temp_1 := if r < pre(temp_1) or r >= (pre(temp_1) + 1) or initial() then integer(r) else pre(temp_1);
+ i := temp_1;
 end TypeTests.AlgorithmType1;
-
+			
 ")})));
 end AlgorithmType1;
 	

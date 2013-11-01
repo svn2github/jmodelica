@@ -5407,17 +5407,14 @@ fclass TransformCanonicalTests.EventGeneratingExps.Nested
  discrete Real temp_1;
  discrete Integer temp_2;
 initial equation 
- temp_1 = floor(time * 0.3 + 4.2);
- temp_2 = integer(3 + temp_1 * 4);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0;
 equation
  1 + x = temp_2;
- when {time * 0.3 + 4.2 < pre(temp_1), time * 0.3 + 4.2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 0.3 + 4.2);
- end when;
- when {3 + temp_1 * 4 < pre(temp_2), 3 + temp_1 * 4 >= pre(temp_2) + 1} then
-  temp_2 = integer(3 + temp_1 * 4);
- end when;
+ temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
 end TransformCanonicalTests.EventGeneratingExps.Nested;
+			
 ")})));
 end Nested;
 
@@ -5433,10 +5430,29 @@ algorithm
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
+ discrete Real temp_1;
+ discrete Integer temp_2;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+initial equation 
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0;
 algorithm
- x := integer(3 + floor(time * 0.3 + 4.2) * 4);
+ temp_3 := 1;
+ temp_4 := 1;
+ temp_5 := 1;
+ temp_6 := 1;
+ temp_3 := time * 0.3 + 4.2 - pre(temp_1);
+ temp_4 := time * 0.3 + 4.2 - (pre(temp_1) + 1);
+ temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_5 := 3 + temp_1 * 4 - pre(temp_2);
+ temp_6 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ x := temp_2;
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
-
+			
 ")})));
 end InAlgorithm;
 
@@ -5461,18 +5477,17 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
  Real x;
- discrete Real temp_1;
- discrete Integer temp_3;
+ discrete Integer temp_1;
+ discrete Real temp_2;
 initial equation 
- temp_3 = integer(0.9 + time / 10);
- pre(temp_1) = 0.0;
+ pre(temp_1) = 0;
+ pre(temp_2) = 0.0;
 equation
- x = temp_1 - noEvent(floor(temp_1 / 2)) * 2;
- temp_1 = temp_3 * 3.14;
- when {0.9 + time / 10 < pre(temp_3), 0.9 + time / 10 >= pre(temp_3) + 1} then
-  temp_3 = integer(0.9 + time / 10);
- end when;
+ x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
+ temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
+ temp_2 = temp_1 * 3.14;
 end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
+			
 ")})));
 end InFunctionCall;
 
@@ -5493,16 +5508,15 @@ fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
  discrete Real x;
  discrete Integer temp_1;
 initial equation 
- temp_1 = integer(time * 3);
  pre(x) = 0.0;
+ pre(temp_1) = 0;
 equation
- when temp_1 + noEvent(integer(time*3)) > 1 then
+ when temp_1 + noEvent(integer(time * 3)) > 1 then
   x = floor(time * 0.3 + 4.2);
  end when;
- when {time * 3 < pre(temp_1), time * 3 >= pre(temp_1) + 1} then
-  temp_1 = integer(time * 3);
- end when;
+ temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
 end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
+			
 ")})));
 end InWhenEquations;
 

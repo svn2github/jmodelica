@@ -9082,23 +9082,18 @@ fclass FunctionTests.FunctionLike.EventGen.Div1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = temp_3;
  y[1] = temp_2;
  y[2] = temp_1;
- when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
+ temp_1 = if div(time, 2) < pre(temp_1) or div(time, 2) >= pre(temp_1) + 1 or initial() then div(time, 2) else pre(temp_1);
+ temp_2 = if div(time, 2) < pre(temp_2) or div(time, 2) >= pre(temp_2) + 1 or initial() then div(time, 2) else pre(temp_2);
+ temp_3 = if div(time, 2) < pre(temp_3) or div(time, 2) >= pre(temp_3) + 1 or initial() then div(time, 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Div1;
+			
 ")})));
 end Div1;
 
@@ -9137,23 +9132,18 @@ fclass FunctionTests.FunctionLike.EventGen.Mod1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = floor(time / 2);
- temp_2 = floor(time / 2);
- temp_3 = floor(time / 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = time - temp_3 * 2;
  y[1] = time - temp_2 * 2;
  y[2] = time - temp_1 * 2;
- when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_2), time / 2 >= pre(temp_2) + 1} then
-  temp_2 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_3), time / 2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time / 2);
- end when;
+ temp_1 = if time / 2 < pre(temp_1) or time / 2 >= pre(temp_1) + 1 or initial() then floor(time / 2) else pre(temp_1);
+ temp_2 = if time / 2 < pre(temp_2) or time / 2 >= pre(temp_2) + 1 or initial() then floor(time / 2) else pre(temp_2);
+ temp_3 = if time / 2 < pre(temp_3) or time / 2 >= pre(temp_3) + 1 or initial() then floor(time / 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Mod1;
+			
 ")})));
 end Mod1;
 
@@ -9198,23 +9188,18 @@ fclass FunctionTests.FunctionLike.EventGen.Rem1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = time - temp_3 * 2;
  y[1] = time - temp_2 * 2;
  y[2] = time - temp_1 * 2;
- when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
+ temp_1 = if div(time, 2) < pre(temp_1) or div(time, 2) >= pre(temp_1) + 1 or initial() then div(time, 2) else pre(temp_1);
+ temp_2 = if div(time, 2) < pre(temp_2) or div(time, 2) >= pre(temp_2) + 1 or initial() then div(time, 2) else pre(temp_2);
+ temp_3 = if div(time, 2) < pre(temp_3) or div(time, 2) >= pre(temp_3) + 1 or initial() then div(time, 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Rem1;
+			
 ")})));
 end Rem1;
 
@@ -9259,23 +9244,18 @@ fclass FunctionTests.FunctionLike.EventGen.Ceil1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = ceil(time * 2);
- temp_2 = ceil(time);
- temp_3 = ceil(time * 0.3 + 4.2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = 4 + temp_3 * 4;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 <= pre(temp_1) - 1, time * 2 > pre(temp_1)} then
-  temp_1 = ceil(time * 2);
- end when;
- when {time <= pre(temp_2) - 1, time > pre(temp_2)} then
-  temp_2 = ceil(time);
- end when;
- when {time * 0.3 + 4.2 <= pre(temp_3) - 1, time * 0.3 + 4.2 > pre(temp_3)} then
-  temp_3 = ceil(time * 0.3 + 4.2);
- end when;
+ temp_1 = if time * 2 <= pre(temp_1) - 1 or time * 2 > pre(temp_1) or initial() then ceil(time * 2) else pre(temp_1);
+ temp_2 = if time <= pre(temp_2) - 1 or time > pre(temp_2) or initial() then ceil(time) else pre(temp_2);
+ temp_3 = if time * 0.3 + 4.2 <= pre(temp_3) - 1 or time * 0.3 + 4.2 > pre(temp_3) or initial() then ceil(time * 0.3 + 4.2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Ceil1;
+			
 ")})));
 end Ceil1;
 
@@ -9314,23 +9294,18 @@ fclass FunctionTests.FunctionLike.EventGen.Floor1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = floor(time * 2);
- temp_2 = floor(time);
- temp_3 = floor(time * 0.3 + 4.2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = 4 + temp_3 * 4;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = floor(time);
- end when;
- when {time * 0.3 + 4.2 < pre(temp_3), time * 0.3 + 4.2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time * 0.3 + 4.2);
- end when;
+ temp_1 = if time * 2 < pre(temp_1) or time * 2 >= pre(temp_1) + 1 or initial() then floor(time * 2) else pre(temp_1);
+ temp_2 = if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then floor(time) else pre(temp_2);
+ temp_3 = if time * 0.3 + 4.2 < pre(temp_3) or time * 0.3 + 4.2 >= pre(temp_3) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Floor1;
+			
 ")})));
 end Floor1;
 
@@ -9369,23 +9344,18 @@ fclass FunctionTests.FunctionLike.EventGen.Integer1
  discrete Integer temp_2;
  discrete Integer temp_3;
 initial equation 
- temp_1 = integer(time * 2);
- temp_2 = integer(time);
- temp_3 = integer((0.9 + time / 10) * 3.14);
+ pre(temp_1) = 0;
+ pre(temp_2) = 0;
+ pre(temp_3) = 0;
 equation
  x = temp_3;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = integer(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = integer(time);
- end when;
- when {(0.9 + time / 10) * 3.14 < pre(temp_3), (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1} then
-  temp_3 = integer((0.9 + time / 10) * 3.14);
- end when;
+ temp_1 = if time * 2 < pre(temp_1) or time * 2 >= pre(temp_1) + 1 or initial() then integer(time * 2) else pre(temp_1);
+ temp_2 = if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
+ temp_3 = if (0.9 + time / 10) * 3.14 < pre(temp_3) or (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1 or initial() then integer((0.9 + time / 10) * 3.14) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Integer1;
+			
 ")})));
 end Integer1;
 

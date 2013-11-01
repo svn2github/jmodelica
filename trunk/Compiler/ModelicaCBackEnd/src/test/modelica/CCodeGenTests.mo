@@ -8069,11 +8069,11 @@ equation
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
-    _der_r_6 = (0.0);
-    _temp_1_7 = (0);
+    _temp_1_6 = (0);
+    _der_r_7 = (0.0);
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
-    pre_temp_1_7 = (0);
+    pre_temp_1_6 = (0);
 ")})));
 end StartValues2;
 

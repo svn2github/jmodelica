@@ -917,9 +917,9 @@ aspect FlatAPI {
 			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
 	syn boolean FEventGenExp.generatesEvent() =
-			!inAlgorithm() && // TODO: remove when support as nonliteral in algorithms
 			!inNoEventExp() &&
 			!inSmoothExp(1) &&
+			argType().isReal() &&
 			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
 	

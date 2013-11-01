@@ -2362,6 +2362,15 @@ aspect FlatFunctionUtils {
      eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
      
      /**
+      * Creates expressions based on tempVarName();
+      */
+     syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
+     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
+     syn FVariable FExp.tempVar() = tempVar(variability(), type());
+     syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
+         = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
+     
+     /**
       * Throw away calculated temp names.
       */
      public void ASTNode.flushTempVarNames() {
