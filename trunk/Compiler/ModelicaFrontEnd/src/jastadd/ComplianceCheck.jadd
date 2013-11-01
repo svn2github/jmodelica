@@ -256,6 +256,11 @@ aspect ComplianceCheck {
 		}
 	}
 	
+	public void FRecordConstructor.complianceCheck(ErrorCheckType checkType) {
+		for (FExp e : getArgs())
+			if (e.size().isUnknown())
+				compliance("Unknown sizes in record constructors is not supported");
+	}
 	public void FLinspace.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (inFunction() && getN().ceval().isUnknown()) {
