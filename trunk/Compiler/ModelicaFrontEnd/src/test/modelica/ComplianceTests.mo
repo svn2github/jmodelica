@@ -628,16 +628,23 @@ package UnknownArraySizes
    of unknown size in functions. #2155 #698 */
 
 model Error1
+	
+record R
+	Real x;
+end R;
   function f
     input Real x[2,:];
+	input R[:] recsIn; 
 	Boolean b[size(x,2)];
     Real c[2,size(x,2)*2];
 	Real known[2,4];
     output Real y[size(x,2),2];
+	output R[size(recsIn,1)] recsOut;
   algorithm
     c := cat(2,x,x); // Concat unknown size.
 	known := x; // Assign unknown to known size.
 	x := known; // Assign known to unknown size.
+	recsIn := recsOut;
 	
 	for i in x[2,:] loop // In exp is unknown size array.
 		b[i] := x[i] > 4;
@@ -651,7 +658,7 @@ model Error1
 	end when;*/
   end f;
   
-  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}});
+  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R(1)});
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -668,6 +675,9 @@ Compliance error at line 686, column 2:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 687, column 2:
   Assigning an expression of known size to an operand of unknown size is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 647, column 2:
+  Record arrays of unknown sizes are not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 689, column 6:
   Unknown size array as a for index is not supported in functions

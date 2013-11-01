@@ -243,11 +243,16 @@ aspect ComplianceCheck {
 	
 	public void InstAssignStmt.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (getLeft().size().isUnknown() && !getRight().size().isUnknown()) {
+		boolean left  = getLeft().size().isUnknown();
+		boolean right = getRight().size().isUnknown();
+		if (left && !right) {
 			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
 		}
-		if (!getLeft().size().isUnknown() && getRight().size().isUnknown()) {
+		if (!left && right) {
 			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
+		}
+		if ((left || right) && getLeft().type().isRecord()) {
+			compliance("Record arrays of unknown sizes are not supported");
 		}
 	}
 	
