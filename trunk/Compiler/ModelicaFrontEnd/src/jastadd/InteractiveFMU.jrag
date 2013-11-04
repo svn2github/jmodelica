@@ -102,6 +102,20 @@ aspect InteractiveFMU{
 		FExp oldRhs = equation.getRight();
 		equation.setLeft(new FIdUseExp(resName));
 		equation.setRight(new FSubExp(oldLhs, oldRhs));
+        if (equation.hasName()) {
+            if (!fclass.lookupFV(equation.getName()).isUnknown()) {
+                equation.error("Unable to introduce equation name alias for equation with name '" + equation.getName() + "'");
+            } else {
+                FVariable nameVar = (FVariable) fv.fullCopy();
+                String nameName = equation.getName().toString();
+                nameVar.setFQName(new FQNameString(nameName));
+                fclass.addFVariable(nameVar);
+                
+                FEquation nameAliasEquation = new FEquation(equation.getType(), new FIdUseExp(resName), new FIdUseExp(nameName));
+                fclass.addFEquation(nameAliasEquation);
+            }
+            
+        }
 	}
 
 	public void UnsolvedFunctionCallEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {

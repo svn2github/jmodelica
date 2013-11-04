@@ -271,4 +271,48 @@ Solution:
 ")})));
 	end LocalIteration2;
 	
+	model EquationName1
+		Real x;
+		Real y;
+	equation
+		x = abs(y) + time;
+		y = x - 2 annotation(__Modelon(name=eq_1));
+
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="EquationName1_1",
+			description="Test of interactive FMU and equation name",
+			equation_sorting=true,
+			interactive_fmu=true,
+			automatic_tearing=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  abs(iter_0) + time
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  res_0
+Solution:
+  iter_0 + (- x) + 2
+-------------------------------
+"),FClassMethodTestCase(
+            name="EquationName1_2",
+            description="Test of interactive FMU and equation name",
+            equation_sorting=true,
+            interactive_fmu=true,
+            automatic_tearing=true,
+            methodName="aliasDiagnostics",
+            methodResult="
+Alias sets:
+{iter_0, y}
+{res_0, eq_1}
+2 variables can be eliminated
+")})));
+end EquationName1;
+	
 end InteractiveFMU;
