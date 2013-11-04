@@ -792,12 +792,9 @@ aspect Flattening {
 		
 		fv.setFTypePrefixVariability(variability().fullCopy());
  		
-		// Only set prefix for top level inputs and outputs
-		// TODO: Make sure that prefixes specified in short class declarations are propagated
-		if (isInput() && getFQName().numDots() == 0)
-			fv.setFTypePrefixInputOutput(new FInput());
-		if (isOutput() && getFQName().numDots() == 0)
-			fv.setFTypePrefixInputOutput(new FOutput());
+		// Only set input/output prefix for top level inputs and outputs
+		if (isTopLevelInputOutput()) 
+		    fv.setFTypePrefixInputOutput(isInput() ? new FInput() : new FOutput());
 		
 		addAttributesToFV(fv.getFAttributes());
 		if (myInstClass().extendsPrimitive())

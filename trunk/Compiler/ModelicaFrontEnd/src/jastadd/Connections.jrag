@@ -1728,6 +1728,7 @@ aspect ExpandableConnectors {
              */
             public List<InstComponentDecl> createInstComponents(ConnectorMember[] members, InstComponentDecl parent) {
                 List<InstComponentDecl> memberList = new List<InstComponentDecl>();
+                memberList.setParent(parent); // Make sure inherited attributes work at once
                 for (ConnectorMember member : members)
                     memberList.add(member.createInstComponent(parent));
                 return memberList;

@@ -218,7 +218,7 @@ aspect ConnectorTypes {
      * Check if two components have type prefixes that are compatible for connecting.
      */
     syn boolean InstComponentDecl.typePrefixesMatch(InstComponentDecl other) = 
-        (isFlow() == other.isFlow()) && (isStream() == other.isStream()) && (isParameter() == other.isParameter());
+        (isDeclaredFlow() == other.isDeclaredFlow()) && (isStream() == other.isStream()) && (isParameter() == other.isParameter());
     
 }
 

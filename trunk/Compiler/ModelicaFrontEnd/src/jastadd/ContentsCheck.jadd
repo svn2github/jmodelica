@@ -124,6 +124,21 @@ aspect ContentCheck {
 			getFArraySubscripts().markAsStructuralParameter();
 	}
 	
+    public void InstAssignable.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        if (isDeclaredInput() || isDeclaredOutput()) {
+            InstComponentDecl inherit = inheritsInputOutputFrom();
+            if (inherit != null)
+                inherit.error("Can't declare %s as %s, since it contains a component declared as input or output", 
+                        name(), (isDeclaredInput() ? "input" : "output"));
+        }
+        if (isDeclaredFlow()) {
+            InstComponentDecl inherit = inheritsFlowFrom();
+            if (inherit != null)
+                inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
+        }
+    }
+	
 	public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
 		if (isExternalObject()) {
 			checkContentsOKInExternalObject();

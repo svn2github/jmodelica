@@ -2480,106 +2480,166 @@ aspect ComponentDeclMethods {
     eq BaseClassDecl.isOuter() = hasOuter();
 
     /**
-     * Check if a ComponentDecl is declared parameter.
+     * Check if this component is declared parameter.
      */
-    syn boolean ComponentDecl.isParameter() {
-    
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Parameter)
-                return true;
-    
-        return false;
-    }
-    
+    syn boolean ComponentDecl.isParameter() = hasTypePrefixVariability() && getTypePrefixVariability().parameterVariability();
     
      /**
-     * Check if a ComponentDecl is declared constant.
+     * Check if this component is declared constant.
      */
-    syn boolean ComponentDecl.isConstant() {
+    syn boolean ComponentDecl.isConstant() = hasTypePrefixVariability() && getTypePrefixVariability().constantVariability();
     
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Constant)
-                return true;
+    /**
+     * Check if this component is declared discrete.
+     */
+    syn boolean ComponentDecl.isDiscrete() = hasTypePrefixVariability() && getTypePrefixVariability().discreteVariability();
+
+    /**
+     * Check if this component is an input component.
+     */
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
     
-        return false;
+    /**
+     * Check if this component inherits input from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsInput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredInput();
     }
     
     /**
-     * Check if a ComponentDecl is declared discrete.
+     * Check if this component is declared input.
      */
-    syn boolean ComponentDecl.isDiscrete() {
+    syn boolean InstComponentDecl.isDeclaredInput() = getComponentDecl().isInput() || myInstClass().isInput();
     
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Discrete)
-                return true;
+    /**
+     * Check if this component is declared input.
+     */
+    syn boolean ComponentDecl.isInput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isInput();
     
-        return false;
+    /**
+     * Check if this prefix is "input".
+     */
+    syn boolean TypePrefixInputOutput.isInput() = false;
+    eq Input.isInput()                          = true;
+
+    /**
+     * Check if this component is an output component.
+     */
+    syn boolean InstComponentDecl.isOutput() = isDeclaredOutput() || inheritsOutput();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsOutput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredOutput();
     }
-    
-    syn boolean InstComponentDecl.isInput() {
-        
-        if (getComponentDecl().hasTypePrefixInputOutput())
-            if (getComponentDecl().getTypePrefixInputOutput() instanceof Input)
-                return true;
-        if (myInstClass().isInput())
-            return true;
-        
-        return false;
-    }
-    
-    
  
-    syn boolean InstComponentDecl.isOutput() {
-        
-        if (getComponentDecl().hasTypePrefixInputOutput())
-            if (getComponentDecl().getTypePrefixInputOutput() instanceof Output)
-                return true;
-        if (myInstClass().isOutput())
-            return true;
-        
-        return false;
-    }
-    
-    syn boolean AbstractEquation.isInitial() {
-        if (hasAbstractEquationModifier())
-            if (getAbstractEquationModifier() instanceof Initial)
-                return true;
-        return false;
-    
-    }
-
     /**
-     * Check if a InstComponentDecl is declared flow.
+     * Check if this component is declared output.
      */
-    syn boolean InstComponentDecl.isFlow() = getComponentDecl().isFlow();
+    syn boolean InstComponentDecl.isDeclaredOutput() = getComponentDecl().isOutput() || myInstClass().isOutput();
 
     /**
-     * Check if a InstComponentDecl is declared stream.
+     * Check if this component is declared output.
+     */
+    syn boolean ComponentDecl.isOutput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isOutput();
+    
+    /**
+     * Check if this prefix is "output".
+     */
+    syn boolean TypePrefixInputOutput.isOutput() = false;
+    eq Output.isOutput()                         = true;
+    
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
+    eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
+    
+    /**
+     * Check if this component is or is part of a component that is declared input or output on the top level.
+     */
+    syn boolean InstComponentDecl.isTopLevelInputOutput() {
+        if (isTopLevel())
+            return isDeclaredInput() || isDeclaredOutput();
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isTopLevel();
+    }
+    
+    /**
+     * Check if this component is declared at the top level, i.e. not part of any other component.
+     */
+    inh boolean InstComponentDecl.isTopLevel();
+    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstClassDecl.getChild().isTopLevel()     = true;
+    eq InstRoot.getChild().isTopLevel()          = true;
+    eq Root.getChild().isTopLevel()              = true;
+
+    /**
+     * Check if this equation is declared initial.
+     */
+    syn boolean AbstractEquation.isInitial() = hasAbstractEquationModifier() && getAbstractEquationModifier().isInitial();
+    
+    /**
+     * Check if this equation modifier is "initial".
+     */
+    syn boolean AbstractEquationModifier.isInitial() = false;
+    eq Initial.isInitial()                           = true;
+    
+    /**
+     * Check if this component is a flow component.
+     */
+    syn boolean InstComponentDecl.isFlow() = isDeclaredFlow() || inheritsFlow();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsFlow() = inheritsFlowFrom() != null;
+    
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsFlowFrom();
+    eq InstComponentDecl.getChild().inheritsFlowFrom() = isDeclaredFlow() ? this : inheritsFlowFrom();
+    eq InstClassDecl.getChild().inheritsFlowFrom()     = null;
+    eq InstRoot.getChild().inheritsFlowFrom()          = null;
+
+    /**
+     * Check if this component is declared flow.
+     */
+    syn boolean InstComponentDecl.isDeclaredFlow() = getComponentDecl().isFlow();
+
+    /**
+     * Check if this component is declared stream.
      */
     syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this component is declared inner.
      */
     syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this component is declared outer.
      */
     syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
     
-        /**
-     * Check if a InstClassDecl is declared inner.
+    /**
+     * Check if this class is declared inner.
      */
     syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this component is declared outer.
      */
     syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
     
     /**
-     * Check if a component is disabled by a conditional clause
+     * Check if this component is disabled by a conditional clause
      */
     syn boolean InstComponentDecl.isDisabled() = 
     	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();

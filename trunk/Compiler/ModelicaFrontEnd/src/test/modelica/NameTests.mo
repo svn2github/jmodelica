@@ -3506,4 +3506,222 @@ end NameTests.WhenInExtendsTest;
 ")})));
 end WhenInExtendsTest;
 
+
+model InheritInputTest1
+	connector A
+		Real x;
+	end A;
+	
+	input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritInputTest1",
+			description="Check that input is propagated to child components",
+			flatModel="
+fclass NameTests.InheritInputTest1
+ input Real a.x;
+end NameTests.InheritInputTest1;
+")})));
+end InheritInputTest1;
+
+
+model InheritInputTest2
+    connector A
+        Real x;
+    end A;
+	
+	connector B
+		A a;
+	end B;
+    
+    input B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritInputTest2",
+			description="Check that input is propagated to child components: nested",
+			flatModel="
+fclass NameTests.InheritInputTest2
+ input Real b.a.x;
+end NameTests.InheritInputTest2;
+")})));
+end InheritInputTest2;
+
+
+model InheritInputTest3
+    connector A
+        input Real x;
+    end A;
+    
+    input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest3",
+			description="Check that it isn't allowed to declare a component containing an input as input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3555, column 10:
+  Can't declare x as input, since it contains a component declared as input or output
+")})));
+end InheritInputTest3;
+
+
+model InheritInputTest4
+    connector A
+        output Real x;
+    end A;
+    
+    input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest4",
+			description="Check that it isn't allowed to declare a component containing an output as input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3575, column 10:
+  Can't declare x as output, since it contains a component declared as input or output
+")})));
+end InheritInputTest4;
+
+
+model InheritOutputTest1
+    connector A
+        Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritOutputTest1",
+			description="Check that output is propagated to child components",
+			flatModel="
+fclass NameTests.InheritOutputTest1
+ output Real a.x;
+end NameTests.InheritOutputTest1;
+")})));
+end InheritOutputTest1;
+
+
+model InheritOutputTest2
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        A a;
+    end B;
+    
+    output B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritOutputTest2",
+			description="Check that output is propagated to child components: nested",
+			flatModel="
+fclass NameTests.InheritOutputTest2
+ output Real b.a.x;
+end NameTests.InheritOutputTest2;
+")})));
+end InheritOutputTest2;
+
+
+model InheritOutputTest3
+    connector A
+        output Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest3",
+			description="Check that it isn't allowed to declare a component containing an output as output",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3637, column 10:
+  Can't declare x as output, since it contains a component declared as input or output
+")})));
+end InheritOutputTest3;
+
+
+model InheritOutputTest4
+    connector A
+        input Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest4",
+			description="Check that it isn't allowed to declare a component containing an input as output",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3657, column 10:
+  Can't declare x as input, since it contains a component declared as input or output
+")})));
+end InheritOutputTest4;
+
+
+model InheritFlowTest1
+    connector A
+        Real x;
+    end A;
+
+    connector B
+		A ap;
+        flow A af;
+	end B;
+	
+	B b1, b2;
+equation
+	connect(b1, b2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritFlowTest1",
+			description="Check that flow is propagated to child components",
+			flatModel="
+fclass NameTests.InheritFlowTest1
+ Real b1.ap.x;
+ Real b1.af.x;
+ Real b2.ap.x;
+ Real b2.af.x;
+equation
+ - b1.af.x - b2.af.x = 0;
+ b1.ap.x = b2.ap.x;
+ b1.af.x = 0;
+ b2.af.x = 0;
+end NameTests.InheritFlowTest1;
+")})));
+end InheritFlowTest1;
+
+
+model InheritFlowTest2
+    connector A
+        flow Real x;
+    end A;
+    
+    flow A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritFlowTest2",
+			description="Check that it isn't allowed to declare a component containing an flow as flow",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3711, column 10:
+  Can't declare x as flow, since it contains a component declared as flow
+")})));
+end InheritFlowTest2;
+
 end NameTests;
