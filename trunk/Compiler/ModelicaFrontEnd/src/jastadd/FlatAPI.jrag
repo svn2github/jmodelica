@@ -951,7 +951,7 @@ aspect FlatAPI {
 	coll ArrayList<FRelExp> FStatement.relExpInStmt() 
 		[new ArrayList<FRelExp>()] with add root FStatement;
 	FRelExp contributes
-		this when originalFRelExp==null && generatesEvent() 
+		this when inEquationSection() && originalFRelExp==null && generatesEvent() 
 	to FStatement.relExpInStmt() for myFStatement();
 			
 	inh FStatement FExp.myFStatement();
