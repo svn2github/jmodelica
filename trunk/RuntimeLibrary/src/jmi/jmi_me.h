@@ -42,9 +42,43 @@ struct jmi_event_info_t {
     jmi_real_t  next_event_time;
 };
 
+/**
+ * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
+ */
+extern const char *C_GUID;
+
+/**
+ * Map between runtime option names and value references for the associated parameters - name table.
+ *
+ * Table is null-terminated.
+ */
+extern const char *fmi_runtime_options_map_names[];
+
+/**
+ * Map between runtime option names and value references for the associated parameters - value referece table.
+ *
+ * Table is zero-terminated, but may contain a value reference that is zero as well - use fmi_runtime_options_map_length.
+ */
+extern const int fmi_runtime_options_map_vrefs[];
+
+/**
+ * Map between runtime option names and value references for the associated parameters - table length.
+ */
+extern const int fmi_runtime_options_map_length;
+
 jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
     
 jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
+
+int jmi_me_instantiate(jmi_t** jmi, void* fmix_me, jmi_string instance_name,
+                       jmi_string GUID, allocate_memory_t allocate_memory,
+                       free_memory_t free_memory, logger_callaback_function_t logger,
+                       jmi_boolean logging_on);
+
+void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
+                          jmi_real_t relative_tolerance);
+
+int jmi_initialize(jmi_t* jmi);
 
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr, const jmi_real_t value[]);
 
@@ -74,4 +108,9 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx);
 
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results, jmi_event_info_t* event_info);
+
+/**
+ * Update run-time options specified by the user.
+ */
+void jmi_update_runtime_options(jmi_t* jmi);
 #endif

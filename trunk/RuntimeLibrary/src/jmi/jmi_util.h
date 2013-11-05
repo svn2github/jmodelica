@@ -679,7 +679,7 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
     else init_with_ubound(x, xmax, message)
 
 typedef void (*logger_callaback_function_t) (void* c, const char* instanceName, void* status,
-                                          const char* category, const char* message);
+                                          const char* category, const char* message, ...);
                                           
 typedef void* (*allocate_memory_t) (size_t nobj, size_t size);
 

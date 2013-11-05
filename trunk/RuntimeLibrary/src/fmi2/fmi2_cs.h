@@ -21,6 +21,23 @@
 #define fmi2_cs_h
 
 #include "fmiFunctions.h"
+#include "fmi2_me.h"
+
+typedef struct fmi2_cs_t fmi2_cs_t;  /**< \brief Forward declaration of struct. */
+
+struct fmi2_cs_t {
+    fmi2_me_t          fmi2_me;          /**< \brief Must be the first one in this struct so that a fmi2_cs_t pointer can be used in place of a fmi2_me_t pointer. */
+    jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
+};
+
+fmiStatus fmi2_cs_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn);
 
 /**
  * \brief Sets the derivative of the outputs

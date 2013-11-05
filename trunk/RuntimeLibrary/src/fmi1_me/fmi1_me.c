@@ -49,7 +49,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
     jmi_t* jmi = 0;
-    jmi_callbacks_t* jmi_callbacks = 0;
     fmiInteger retval;
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
@@ -60,75 +59,30 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
          return 0;
     }
     
-    if (strcmp(GUID, C_GUID) != 0) {
-        /*The raw logger callback is used here so we do not need to allocate and deallocate memory.*/
-        functions.logger(0, instanceName, fmiError, "ERROR", "The model and the description file are not consistent to each other.");
-        return 0;
+    component = (fmi1_me_t *)functions.allocateMemory(1, sizeof(fmi1_me_t));
+    
+    retval = jmi_me_instantiate(&jmi, component, instanceName, GUID,
+                                functions.allocateMemory, functions.freeMemory,
+                                (logger_callaback_function_t)functions.logger,
+                                loggingOn);
+    if (retval != 0) {
+        functions.freeMemory(component);
+        return NULL;
     }
     
-    component = (fmi1_me_t *)functions.allocateMemory(1, sizeof(fmi1_me_t));
     component->fmi_functions = functions;
-    
-    jmi_callbacks = (jmi_callbacks_t*)calloc(1,sizeof(jmi_callbacks_t));
-    jmi_callbacks->fmix_me = component;
-    jmi_callbacks->fmi_name = instanceName;
-    jmi_callbacks->logging_on = loggingOn;
-    jmi_callbacks->logger = (logger_callaback_function_t)functions.logger;
-    jmi_callbacks->allocate_memory = (allocate_memory_t)functions.allocateMemory;
-    jmi_callbacks->free_memory = (free_memory_t)functions.freeMemory;
     
 #ifdef USE_FMI_ALLOC
     /* Set the global user functions pointer so that memory allocation functions are intercepted */
     fmiFunctions = &(component -> fmi_functions);
 #endif
 
-    retval = jmi_new(&jmi, jmi_callbacks);
-    if(retval != 0) {
-        /* creating jmi struct failed */
-        functions.freeMemory(component);
-        return NULL;
-    }
-
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi1_me_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
     
-    component -> fmi_functions = functions;
     component -> jmi = jmi;
-    
-    /* set start values*/
-    if (jmi_generic_func(component->jmi, jmi_set_start_values) != 0)
-    	return NULL;
-    
-    /* Print some info about Jacobians, if available. */
-    if (jmi->color_info_A != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_A");
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian A", jmi->color_info_A->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian A", jmi->color_info_A->n_groups);
-        jmi_log_leave(jmi->log, node);
-    }
-
-    if (jmi->color_info_B != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_B");
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian B", jmi->color_info_B->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian B", jmi->color_info_B->n_groups);
-        jmi_log_leave(jmi->log, node);
-    }
-
-    if (jmi->color_info_C != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_C");
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian C", jmi->color_info_C->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian C", jmi->color_info_C->n_groups);
-        jmi_log_leave(jmi->log, node);
-    }
-
-    if (jmi->color_info_D != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi->log, logInfo, "color_info_D");
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_nonzeros: %d> in Jacobian D", jmi->color_info_D->n_nz);
-        jmi_log_fmt(jmi->log, node, logInfo, "<num_colors: %d> in Jacobian D", jmi->color_info_D->n_groups);
-        jmi_log_leave(jmi->log, node);
-    }
 
     return (fmiComponent)component;
 }
@@ -136,9 +90,11 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
 void fmi1_me_free_model_instance(fmiComponent c) {
     /* Dispose the given model instance and deallocated all the allocated memory and other resources 
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
+    fmi1_me_t* component;
+    fmiCallbackFreeMemory fmi_free;
     if (c) {
-        fmi1_me_t* component = (fmi1_me_t*)c;
-        fmiCallbackFreeMemory fmi_free = component -> fmi_functions.freeMemory;
+        component = (fmi1_me_t*)c;
+        fmi_free = component -> fmi_functions.freeMemory;
 
         jmi_delete(component->jmi);
         component->jmi = 0;
@@ -251,233 +207,26 @@ fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_
 
 fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
     fmiInteger retval;
-    fmiInteger i;                   /* Iteration variable */
-    fmiInteger nF0, nF1, nFp, nF;   /* Number of F-equations */
-    fmiInteger nR0, nR;             /* Number of R-equations */
-    fmiInteger initComplete = 0;    /* If the initialization are complete */
-    jmi_real_t nextTimeEvent;       /* Next time event instant */
-    fmiInteger iter, max_iterations;
+    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
     
-    jmi_real_t* switchesR;   /* Switches */
-    jmi_real_t* switchesR0;  /* Initial Switches */
-    jmi_real_t* switches;
-    jmi_real_t* sw_temp = 0;
-    jmi_real_t* b_mode;
-    fmi1_me_t* fmi1_me;
-    jmi_t* jmi;
-    
-    if (c == NULL) {
-		return fmiFatal;
-    }
-    
-    fmi1_me = (fmi1_me_t *)c;
-    jmi = fmi1_me->jmi;
-
-    if (((fmi1_me_t*)c)->jmi->is_initialized==1) {
-        jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one call to fmiInitialize is allowed");
-        return fmiError;
-    }
-
     /* For debugging Jacobians */
 /*
     int n_states;
     jmi_real_t* jac;
     int j;
 */
-
-    /* Update eventInfo */
-
-    eventInfo->upcomingTimeEvent = fmiFalse;            /* Next time event is computed after initialization */
-    eventInfo->nextEventTime = 0.0;                     /* Next time event is computed after initialization */
-    eventInfo->stateValueReferencesChanged = fmiFalse;  /* No support for dynamic state selection */
-    eventInfo->terminateSimulation = fmiFalse;          /* Don't terminate the simulation */
-    eventInfo->iterationConverged = fmiTrue;            /* The iteration has converged */
     
-    max_iterations = 30;
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    jmi_setup_experiment(jmi, toleranceControlled, relativeTolerance);
     
-    /* Evaluate parameters */
-    jmi_init_eval_parameters(jmi);
-
-    /* Get Sizes */
-    retval = jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the initial sizes.");
-        return fmiError;
-    }
-
-    retval = jmi_dae_get_sizes(jmi,&nF,&nR);
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the actual sizes.");
-        return fmiError;
-    }
-    /* ---- */
-    fmi_update_runtime_options(fmi1_me);
-    /* Sets the relative tolerance to a default value for use in Kinsol when tolerance controlled is false */
-    if (toleranceControlled == fmiFalse){
-        relativeTolerance = jmi->options.nle_solver_default_tol;
-        jmi->events_epsilon = jmi->options.events_default_tol; /* Used in the event detection */
-        jmi->newton_tolerance = jmi->options.nle_solver_default_tol; /* Used in the Newton iteration */
-    }
-    else {
-        jmi->events_epsilon = jmi->options.events_tol_factor*relativeTolerance; /* Used in the event detection */
-        jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relativeTolerance; /* Used in the Newton iteration */
-    }
-    
-    /* We are at the initial event TODO: is this really necessary? */
-    ((fmi1_me_t *)c)->jmi->atEvent   = JMI_TRUE;
-    ((fmi1_me_t *)c)->jmi->atInitial = JMI_TRUE;
-
-    /* Write values to the pre vector*/
-    jmi_copy_pre_values(((fmi1_me_t*)c)->jmi);
-
-    /* Set the switches */
-    b_mode =  ((fmi1_me_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
-    sw_temp =  ((fmi1_me_t*)c) -> fmi_functions.allocateMemory(nR0, sizeof(jmi_real_t));
-    retval = jmi_init_R0(((fmi1_me_t *)c)->jmi, b_mode);
-    switches = jmi_get_sw(((fmi1_me_t *)c)->jmi);
-    for (i=0; i < nR0; i=i+1){
-        if (i < nR){
-            if (jmi->relations[i] == JMI_REL_GEQ){
-                if (b_mode[i] >= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_GT){
-                if (b_mode[i] > 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_LEQ){
-                if (b_mode[i] <= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_LT){
-                if (b_mode[i] < 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-        }else{
-            if (jmi->initial_relations[i-nR] == JMI_REL_GEQ){
-                if (b_mode[i] >= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_GT){
-                if (b_mode[i] > 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_LEQ){
-                if (b_mode[i] <= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_LT){
-                if (b_mode[i] < 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-        }
-    }
-
-    ((fmi1_me_t*)c) -> fmi_functions.freeMemory(b_mode);
-    /* Call the initialization function */
-    retval = jmi_ode_initialize(((fmi1_me_t *)c)->jmi);
-
-    if(retval != 0) { /* Error check */
-        jmi_log_comment(jmi->log, logError, "Initialization failed.");
-        ((fmi1_me_t*)c) -> fmi_functions.freeMemory(sw_temp);
+    retval = jmi_initialize(jmi);
+    if (retval != 0) {
         return fmiError;
     }
     
-    iter = 0;
-    while (initComplete == 0 && nR0 > 0){                            /* Loop during event iteration */
-        iter += 1;
-        
-        if (iter > 1){
-            retval = jmi_evaluate_switches(jmi,switches,0);
-        }
-        
-        retval = jmi_ode_initialize(((fmi1_me_t *)c)->jmi);
-
-        if(retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Initialization failed.");
-            ((fmi1_me_t*)c) -> fmi_functions.freeMemory(sw_temp);
-            return fmiError;
-        }
-        
-        /* Evaluate the switches */
-        memcpy(sw_temp,switches,nR0*sizeof(jmi_real_t));
-        retval = jmi_evaluate_switches(jmi,sw_temp,0);
-        
-        if (jmi_compare_switches(switches,sw_temp,nR0)){
-            initComplete = 1;
-        }
-        
-        /* No convergence under the allowed number of iterations. */
-        if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
-                         "due to too many iterations at <t:%g> (initialization).", jmi_get_t(jmi)[0]);
-            ((fmi1_me_t*)c) -> fmi_functions.freeMemory(sw_temp);
-            return fmiError;
-        }
-    }
-    
-    ((fmi1_me_t*)c) -> fmi_functions.freeMemory(sw_temp);
-
-    /* Compute the next time event */
-    retval = jmi_ode_next_time_event(((fmi1_me_t *)c)->jmi,&nextTimeEvent);
-
-    if(retval != 0) { /* Error check */
-        jmi_log_comment(jmi->log, logError, "Computation of next time event failed.");
-        return fmiError;
-    }
-
-    if (!(nextTimeEvent==JMI_INF)) {
-        /* If there is an upcoming time event, then set the event information
-           accordingly. */
-        eventInfo->upcomingTimeEvent = fmiTrue;
-        eventInfo->nextEventTime = nextTimeEvent;
-        /*printf("fmiInitialize: nextTimeEvent: %f\n",nextTimeEvent);*/
-    } else {
-        eventInfo->upcomingTimeEvent = fmiFalse;
-    }
-
-    /* Reset atEvent flag */
-    ((fmi1_me_t *)c)->jmi->atEvent = JMI_FALSE;
-    ((fmi1_me_t *)c)->jmi->atInitial = JMI_FALSE;
-
-    /* Evaluate the guards with the event flag set to false in order to 
-     * reset guards depending on samplers before copying pre values.
-     * If this is not done, then the corresponding pre values for these guards
-     * will be true, and no event will be triggered at the next sample. 
-     */
-    retval = jmi_ode_guards(((fmi1_me_t *)c)->jmi);
-
-    if(retval != 0) { /* Error check */
-        jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
-        return fmiError;
-    }
-
-    jmi_copy_pre_values(((fmi1_me_t*)c)->jmi);
-
     /* Initialization is now complete, but we also need to handle events
      * at the start of the integration.
      */
@@ -487,7 +236,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         return fmiError;
     }
 
-    /*
+/*
     //Set the final switches (if any)
     if (nR > 0){
         jmi_real_t* a_mode =  ((fmi1_me_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
@@ -510,8 +259,9 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         }
         ((fmi1_me_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
     }
-    */
-    /*
+*/
+    /* For debugging Jacobians */
+/*
     n_states = ((fmi1_me_t *)c)->jmi->n_real_x;
     jac = (jmi_real_t*)calloc(n_states*n_states,sizeof(jmi_real_t));
     fmi_get_jacobian(c, FMI_STATES, FMI_DERIVATIVES, jac, n_states);
@@ -526,7 +276,7 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     free(jac);
 */
 
-    ((fmi1_me_t*)c)->jmi->is_initialized = 1;
+
 
     return fmiOK;
 }
@@ -1335,128 +1085,4 @@ fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
     jmi_log_leave(jmi->log, topnode);
 
     return fmiOK;
-}
-
-int compare_option_names(const void* a, const void* b) {
-    const char** sa = (const char**)a;
-    const char** sb = (const char**)b;
-    return strcmp(*sa, *sb);
-}
-
-static int get_option_index(char* option) {
-    const char** found=(const char**)bsearch(&option,fmi_runtime_options_map_names,fmi_runtime_options_map_length,sizeof(char*),compare_option_names);
-    int vr, index;
-    if(!found) return 0;
-    index = (int)(found - &fmi_runtime_options_map_names[0]);
-    if(index >= fmi_runtime_options_map_length ) return 0;
-    vr = fmi_runtime_options_map_vrefs[index];
-    return get_index_from_value_ref(vr);
-}
-
-/**
- * Update run-time options specified by the user.
- */
-void fmi_update_runtime_options(fmi1_me_t* fmi1_me) {
-    jmi_t* jmi = fmi1_me->jmi;
-    jmi_real_t* z = jmi_get_z(jmi);
-    int index;
-    int index1;
-    int index2;
-    jmi_options_t* op = &fmi1_me->jmi->options;
-    index = get_option_index("_log_level");
-    if(index)
-        op->log_level = (int)z[index]; 
-    index = get_option_index("_enforce_bounds");
-    if(index)
-        op->enforce_bounds_flag = (int)z[index]; 
-    
-    index = get_option_index("_use_jacobian_equilibration");
-    index1 = get_option_index("_use_jacobian_scaling");
-    if(index || index1 ){
-        int fl, fl1;
-        fl = fl1 = op->use_jacobian_equilibration_flag;
-        if(index) fl = (int)z[index]; 
-        if(index1) fl1 = (int)z[index1];
-        
-        op->use_jacobian_equilibration_flag = fl || fl1; 
-    }
-    
-    index = get_option_index("_residual_equation_scaling");
-    index1 = get_option_index("_use_automatic_scaling");
-    index2 = get_option_index("_use_manual_equation_scaling");
-    if(index || index1 || index2) {
-        /* to support deprecation: non-default setting given precendence*/
-        if(index2 && (int)z[index2]) {
-            op->residual_equation_scaling_mode = jmi_residual_scaling_manual;
-        }
-        else if(index1 && !(int)z[index1]){
-            op->residual_equation_scaling_mode = jmi_residual_scaling_none;
-        }
-        else if(index && ((int)z[index] != jmi_residual_scaling_auto)) {
-            op->residual_equation_scaling_mode = (int)z[index];
-        }
-        else
-            op->residual_equation_scaling_mode = jmi_residual_scaling_auto;
-    }
-    index = get_option_index("_nle_solver_max_iter");
-    if(index)
-        op->nle_solver_max_iter = (int)z[index];
-    index = get_option_index("_block_solver_experimental_mode");
-    if(index)
-        op->block_solver_experimental_mode  = (int)z[index];
-    
-    index = get_option_index("_iteration_variable_scaling");
-    if(index)
-        op->iteration_variable_scaling_mode = (int)z[index];
-    
-    index = get_option_index("_rescale_each_step");
-    if(index)
-        op->rescale_each_step_flag = (int)z[index]; 
-    index = get_option_index("_rescale_after_singular_jac");
-    if(index)
-        op->rescale_after_singular_jac_flag = (int)z[index]; 
-    index = get_option_index("_use_Brent_in_1d");
-    if(index)
-        op->use_Brent_in_1d_flag = (int)z[index]; 
-    index = get_option_index("_nle_solver_default_tol");
-    if(index)
-        op->nle_solver_default_tol = z[index]; 
-    index = get_option_index("_nle_solver_check_jac_cond");
-    if(index)
-        op->nle_solver_check_jac_cond_flag = (int)z[index]; 
-    index = get_option_index("_nle_solver_min_tol");
-    if(index)
-        op->nle_solver_min_tol = z[index]; 
-    index = get_option_index("_nle_solver_tol_factor");
-    if(index)
-        op->nle_solver_tol_factor = z[index]; 
-    index = get_option_index("_events_default_tol");
-    if(index)
-        op->events_default_tol = z[index]; 
-    index = get_option_index("_events_tol_factor");
-    if(index)
-        op->events_tol_factor = z[index];
-    index = get_option_index("_block_jacobian_check");
-    if(index)
-        op->block_jacobian_check = z[index]; 
-    index = get_option_index("_block_jacobian_check_tol");
-    if(index)
-        op->block_jacobian_check_tol = z[index];
-    index = get_option_index("_cs_solver");
-    if(index)
-        op->cs_solver = z[index];
-    index = get_option_index("_cs_rel_tol");
-    if(index)
-        op->cs_rel_tol = z[index];
-    index = get_option_index("_cs_step_size");
-    if(index)
-        op->cs_step_size = z[index]; 
-    index = get_option_index("_runtime_log_to_file");
-    if(index)
-        op->runtime_log_to_file = (int)z[index]; 
-    
-/*    op->block_solver_experimental_mode = 
-            jmi_block_solver_experimental_steepest_descent_first|
-            jmi_block_solver_experimental_converge_switches_first;
-   op->log_level = 5; */
 }

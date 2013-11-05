@@ -23,13 +23,14 @@
 #include <sundials/sundials_types.h> /* definition of realtype */
 #include <sundials/sundials_math.h>  /* contains the macros ABS, SQR, and EXP*/
 #include "jmi_ode_solver.h"
+#include "jmi_ode_problem.h"
 #include "jmi_ode_cvode.h"
 #include "jmi_log.h"
 
 int cv_rhs(realtype t, N_Vector yy, N_Vector yydot, void *problem_data){
     realtype *y, *ydot;
     int flag;
-    jmi_ode_solver_t *solver = (jmi_ode_solver_t*)problem_data;
+    jmi_ode_solver_t* solver = (jmi_ode_solver_t*)problem_data;
     jmi_ode_problem_t* problem = solver -> ode_problem;
 
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
@@ -193,7 +194,7 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
     
     if (problem->n_real_x > 0) {
         for (i = 0; i < problem->n_real_x; i++) {
-            atol_nv[i] = 0.01*integrator->rtol*solver->nominal[i];
+            atol_nv[i] = 0.01*integrator->rtol*problem->nominal[i];
         }
     }else{
         atol_nv[0] = 0.01*integrator->rtol*1.0;

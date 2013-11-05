@@ -49,35 +49,6 @@ struct fmi1_me_t {
 };
 
 /**
- * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
- */
-extern const char *C_GUID;
-
-/**
- * Map between runtime option names and value references for the associated parameters - name table.
- *
- * Table is null-terminated.
- */
-extern const char *fmi_runtime_options_map_names[];
-
-/**
- * Map between runtime option names and value references for the associated parameters - value referece table.
- *
- * Table is zero-terminated, but may contain a value reference that is zero as well - use fmi_runtime_options_map_length.
- */
-extern const int fmi_runtime_options_map_vrefs[];
-
-/**
- * Map between runtime option names and value references for the associated parameters - table length.
- */
-extern const int fmi_runtime_options_map_length;
-
-/**
- * Update run-time options specified by the user.
- */
-void fmi_update_runtime_options(fmi1_me_t* fmi1_me);
-
-/**
  * \defgroup fmi_init Creation, initialization and destruction.
  * 
  * \brief Definitions of how an FMU are created, initialized and terminated.

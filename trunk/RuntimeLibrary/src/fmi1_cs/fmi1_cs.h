@@ -26,6 +26,7 @@
 
 #include "fmi1_functions.h"
 #include "jmi.h"
+#include "jmi_cs.h"
 
 /**
  * \defgroup fmi_cs_public Public functions of the Functional Mock-up Interface for co-simulation.
@@ -36,10 +37,7 @@
 
 /* @{ */
 
-#define FMI1_CS_MAX_INPUT_DERIVATIVES 3
-
 typedef struct fmi1_cs_t fmi1_cs_t;
-typedef struct fmi1_cs_input_t fmi1_cs_input_t;
 
 struct fmi1_cs_t {
     jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
@@ -47,24 +45,11 @@ struct fmi1_cs_t {
     fmiString instance_name;             /**< \brief The fmi1_cs instance name. */
     fmiString encoded_instance_name;     /**< \brief The encoded instance name provided to the fmi1_me instance. */
     fmiString GUID;                      /**< \brief The GUID identifier. */
-    fmiCallbackFunctions callback_functions;  /**< \brief The callback functions provided by the user. */
+    fmiCallbackFunctions callback_functions;    /**< \brief The callback functions provided by the user. */
     fmiCallbackFunctions me_callback_functions; /**< \brief The modified callbacks provided to the fmi1_me instance. */
     fmiEventInfo event_info;
+    fmiBoolean logging_on;                      /** < \brief The logging on / off attribute. */
 };
-
-struct fmi1_cs_input_t {
-    fmiValueReference vr;         /**< \brief Valuereference of the input, note only reals */
-    fmiReal tn;                   /**< \brief Time when the input was specified. */
-    fmiReal input;
-    fmiBoolean active;
-    fmiReal input_derivatives[FMI1_CS_MAX_INPUT_DERIVATIVES];
-    fmiReal input_derivatives_factor[FMI1_CS_MAX_INPUT_DERIVATIVES];
-};
-
-/**
- * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
- */
-extern const char *C_GUID;
 
 /**
  * \brief Returns the compatible platforms.
@@ -361,7 +346,7 @@ fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time);
  * @param value A pointer to one input that should be initialized.
  * @return Error code.
  */
-fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value);
+fmiStatus fmi1_cs_init_input_struct(jmi_cs_input_t* value);
 
 /**
  * \brief Evaluation of the root-function of the ODE.

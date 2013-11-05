@@ -41,7 +41,7 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_cs -> ode_problem -> logging_on = loggingOn;     
+    fmi1_cs->ode_problem->log->jmi_callbacks->logging_on = loggingOn;     
     
     return fmi1_me_set_debug_logging(fmi1_cs->ode_problem ->fmix_me,loggingOn);
 }
@@ -52,7 +52,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
     fmi1_me_t* fmi1_me;
-    fmi1_cs_input_t* inputs;
+    jmi_cs_input_t* inputs;
     int flag, retval = JMI_ODE_EVENT;
     int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
@@ -65,7 +65,6 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     
     fmi1_cs = (fmi1_cs_t*)c;
     ode_problem = fmi1_cs -> ode_problem;
-    fmi1_me = (fmi1_me_t*)(ode_problem ->fmix_me);
 
     /* Check if there are upcoming time events. */
     if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue){
@@ -79,7 +78,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     }
     
     /* For the active inputs, get the initialize input */
-    inputs = (fmi1_cs_input_t*)ode_problem->inputs;
+    inputs = ode_problem->inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
         if (inputs[i].active == fmiTrue) {
             inputs[i].tn = ode_problem->time;
@@ -93,7 +92,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     
     if (communicationStepSize == 0.0) {
         /* Evaluate the equations */
-        /* retval = fmi1_me_get_derivatives(fmi1_cs->fmi1_me, fmi1_cs->states_derivative, fmi1_cs->n_real_x); */
+        /* retval = fmi1_me_get_derivatives(ode_problem->fmix_me, fmi1_cs->states_derivative, fmi1_cs->n_real_x); */
         retval = fmi1_me_event_update(ode_problem->fmix_me, fmiFalse, &(fmi1_cs->event_info));
         if (retval != fmiOK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to evaluate the derivatives with step-size zero.");
@@ -125,7 +124,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             if (flag != fmiOK) {
                 return fmiError;
             }
-            flag = fmi1_me_get_nominal_continuous_states(ode_problem->fmix_me, ode_problem->ode_solver->nominal, ode_problem->n_real_x);
+            flag = fmi1_me_get_nominal_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
             if (flag != fmiOK) {
                 jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
                 return fmiError;
@@ -167,32 +166,25 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
     if (fmi1_cs->ode_problem->ode_solver){
         jmi_delete_ode_solver(fmi1_cs->ode_problem);
     }
+    
     fmi1_me_free_model_instance(fmi1_cs->ode_problem->fmix_me);
     
     if (fmi1_cs) {
-        fmiCallbackFreeMemory fmi_free = fmi1_cs -> callback_functions.freeMemory;
-
-        fmi_free((void*)fmi1_cs -> instance_name);
-        fmi_free((void*)fmi1_cs -> encoded_instance_name);
-        fmi_free((void*)fmi1_cs -> GUID);
-        fmi_free((void*)fmi1_cs -> ode_problem -> states);
-        fmi_free((void*)fmi1_cs -> ode_problem -> states_derivative);
-        fmi_free((void*)fmi1_cs -> ode_problem -> event_indicators);
-        fmi_free((void*)fmi1_cs -> ode_problem -> event_indicators_previous);
-        fmi_free((void*)fmi1_cs -> ode_problem -> inputs);
-        
-        fmi1_cs -> ode_problem -> log = NULL;
-        /* In case log was created as:
+        /* Free the ODE problem.
+         * In case log was created as:
          * ode_problem -> log = jmi_log_init(fmi1_me->jmi, jmi_callbacks); 
          * it have to be freed by:
          * free(fmi1_cs -> ode_problem -> log);*/
+        fmi1_cs -> ode_problem -> log = NULL;
+        jmi_free_ode_problem((void*)fmi1_cs -> ode_problem);
         
-        
-        free(fmi1_cs -> ode_problem);
+        /* Free the fmi1_cs struct. */
+        fmiCallbackFreeMemory fmi_free = fmi1_cs -> callback_functions.freeMemory;
+        fmi_free((void*)fmi1_cs -> instance_name);
+        fmi_free((void*)fmi1_cs -> encoded_instance_name);
+        fmi_free((void*)fmi1_cs -> GUID);
         fmi_free(fmi1_cs);
-        
     }
-    return;
 }
 
 void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...){
@@ -226,8 +218,8 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn) {
     fmi1_cs_t *component;
-    jmi_ode_problem_t* ode_problem;
-    fmi1_cs_input_t* inputs;
+    fmiComponent fmi1_me;
+    jmi_ode_problem_t* ode_problem = 0;
     char* tmpname;
     char* tmpguid;
     char* tmp_name_encoded;
@@ -235,12 +227,6 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     size_t guid_len;
     char buffer[400];
     fmiInteger i;
-    
-    if (strcmp(GUID, C_GUID) != 0) {
-        /*The raw logger callback is used here so we do not need to allocate and deallocate memory.*/
-        functions.logger(0, instanceName, fmiError, "ERROR", "The model and the description file are not consistent to each other.");
-        return 0;
-    }
     
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));
     
@@ -264,15 +250,12 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     component -> encoded_instance_name = tmp_name_encoded;
     sprintf(tmp_name_encoded, "Encoded name: %p 123", (void*)component);
     
-    ode_problem = 0;
-    ode_problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
-    ode_problem -> logging_on = loggingOn;                                   
-    
+    component -> logging_on = loggingOn;
     component -> callback_functions = functions;
     
-    ode_problem -> fmix_me = fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
+    fmi1_me = fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
     
-    if (ode_problem -> fmix_me == NULL){
+    if (fmi1_me == NULL){
         functions.freeMemory((void*)component -> instance_name);
         functions.freeMemory((void*)component -> encoded_instance_name);
         functions.freeMemory((void*)component -> GUID);
@@ -281,25 +264,14 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     }
     
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
-    ode_problem -> n_real_x = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_real_x;
-    ode_problem -> n_sw     = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_sw;
-    ode_problem -> n_real_u = ((fmi1_me_t*)ode_problem->fmix_me)->jmi->n_real_u;
-    ode_problem -> states   = (jmi_real_t*)functions.allocateMemory(ode_problem->n_real_x, sizeof(jmi_real_t));
-    ode_problem -> states_derivative   = (fmiReal*)functions.allocateMemory(ode_problem->n_real_x, sizeof(fmiReal));
-    ode_problem -> event_indicators = (fmiReal*)functions.allocateMemory(ode_problem->n_sw, sizeof(fmiReal));
-    ode_problem -> event_indicators_previous = (fmiReal*)functions.allocateMemory(ode_problem->n_sw, sizeof(fmiReal));
-    inputs = (fmi1_cs_input_t*)functions.allocateMemory(ode_problem->n_real_u, sizeof(fmi1_cs_input_t));
-    
-    ode_problem -> log = ((fmi1_me_t*)ode_problem -> fmix_me)->jmi->log;
+    jmi_new_ode_problem(&ode_problem, fmi1_me,
+                        ((fmi1_me_t*)fmi1_me)->jmi->n_real_x,
+                        ((fmi1_me_t*)fmi1_me)->jmi->n_sw,
+                        ((fmi1_me_t*)fmi1_me)->jmi->n_real_u,
+                        ((fmi1_me_t*)fmi1_me)->jmi->log);
     /* In case fmi1_me_instantiate_model was not called, log struct have to
      * be created as:
      * ode_problem -> log = jmi_log_init(fmi1_me->jmi, jmi_callbacks); */
-    
-    /* Initialize inputs */
-    for (i = 0; i < ode_problem -> n_real_u; i++) {
-        fmi1_cs_init_input_struct(&(inputs[i]));
-    }
-    ode_problem -> inputs = (void*)inputs;
     
     component -> ode_problem = ode_problem;
     
@@ -325,7 +297,6 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     jmi_ode_problem_t* ode_problem;
     fmi1_me_t* fmi1_me;
     jmi_ode_method_t ode_method;
-    jmi_real_t* nominal;
     jmi_real_t ode_step_size;
     jmi_real_t ode_rel_tol;
     fmiBoolean toleranceControlled = fmiTrue;
@@ -347,19 +318,14 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
         return fmiError; 
     }
     
-    /*Get the states*/ 
+    /*Get the states, event indicators and the nominals for the ODE problem. Initialization. */
     fmi1_me_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
-    /*Store the time */
-    fmi1_cs->ode_problem->time = tStart;
-    
-    /*Get the event indicators */
     fmi1_me_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators, ode_problem->n_sw);
     fmi1_me_get_event_indicators(ode_problem->fmix_me, ode_problem->event_indicators_previous, ode_problem->n_sw);
-    
-    /*Callback functions for the ODE problem */
-    ode_problem -> rhs_func = fmi1_cs_rhs_fcn;
-    ode_problem -> root_func = fmi1_cs_root_fcn;
-    ode_problem -> complete_step_func = fmi1_cs_completed_integrator_step;
+    fmi1_me_get_nominal_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
+    /*The rest of the initialization for the ODE problem. */
+    jmi_init_ode_problem(ode_problem, tStart, fmi1_cs_rhs_fcn,
+                         fmi1_cs_root_fcn, fmi1_cs_completed_integrator_step);
     
     /* These options for the solver need to be found in a better way. */
     ode_method    = fmi1_me->jmi->options.cs_solver;
@@ -367,13 +333,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     ode_rel_tol   = fmi1_me->jmi->options.cs_rel_tol;
     
     /* Create solver */
-    nominal = (jmi_real_t*)calloc(ode_problem->n_real_x, sizeof(jmi_real_t));
-    retval = fmi1_me_get_nominal_continuous_states(ode_problem->fmix_me, nominal, ode_problem->n_real_x);
-    if (retval != fmiOK) {
-        jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
-        return fmiError;
-    }
-    retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, nominal);
+    retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol);
     if (retval != fmiOK){ return fmiError; }
     
     return fmiOK;
@@ -407,7 +367,7 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     
     ode_problem->fmix_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
                                                      fmi1_cs->GUID, fmi1_cs->me_callback_functions,
-                                                     ode_problem -> logging_on);
+                                                     fmi1_cs->logging_on);
     
     if (ode_problem->fmix_me == NULL){ return fmiError; }
     
@@ -485,88 +445,15 @@ fmiStatus fmi1_cs_get_real_output_derivatives(fmiComponent c, const fmiValueRefe
 fmiStatus fmi1_cs_set_real_input_derivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]){
     fmi1_cs_t* fmi1_cs = (fmi1_cs_t*)c;
     jmi_ode_problem_t* ode_problem = fmi1_cs -> ode_problem;
-    fmi1_cs_input_t* inputs;
-    fmiInteger i,j;
-    fmiBoolean found_input = fmiFalse;
+    fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    if (nvr > ode_problem -> n_real_u) {
-        jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, too many inputs.");
+    retval = jmi_cs_set_real_input_derivatives(ode_problem, vr, nvr, order, value);
+    if (retval != 0) {
         return fmiError;
-    }
-    
-    for (i = 0; i < nvr; i++) {
-        if (order[i] < 1 || order[i] > FMI1_CS_MAX_INPUT_DERIVATIVES) {
-            jmi_log_node(ode_problem->log, logError, "SetInputDerivativeFailed", "Failed to set the input derivative, un-supported order: <order:%d>",order[i]);
-            return fmiError;
-        }
-        found_input = fmiFalse;
-        
-        /* Check if there exists an active input with the value reference vr[i] */
-        inputs = (fmi1_cs_input_t*)ode_problem -> inputs;
-        for (j = 0; j < ode_problem -> n_real_u; j++) {
-            if (inputs[j].vr == vr[i] && inputs[j].active == fmiTrue) {
-                inputs[j].input_derivatives[order[i]-1] = value[i];
-                found_input = fmiTrue;
-                break;
-            }
-        }
-        
-        /* Found an active input, continue */
-        if (found_input == fmiTrue) {
-            continue;
-        }
-        
-        /* No active input found, active an available */
-        for (j = 0; j < ode_problem -> n_real_u; j++) {
-            if (inputs[j].active == fmiFalse) {
-                fmi1_cs_init_input_struct(&(inputs[j]));
-                inputs[j].active = fmiTrue;
-                inputs[j].input_derivatives[order[i]-1] = value[i];
-                inputs[j].vr = vr[i];
-                
-                found_input = fmiTrue;
-                break;
-            }
-        }
-        
-        /* No available inputs -> the user has set an input which is not an input */
-        if (found_input == fmiFalse) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, inconsistent number of inputs.");
-            return fmiError;
-        }
-        
-        /*
-        for (j = 0; j < ode_problem->n_real_u; j++) {
-            if (fmi1_cs->inputs[j].vr == vr[i]) {
-                if (ode_problem-> -> inputs[j].active == fmiFalse) {
-                    fmi1_cs_init_input_struct(&(ode_problem-> -> inputs[j]));
-                    ode_problem-> -> inputs[j].active = fmiTrue;
-                }
-                ode_problem-> -> inputs[j].input_derivatives[order[i]-1] = value[i];
-                break;
-            }
-        }
-        */
-    }
-    
-    return fmiOK;
-}
-
-fmiStatus fmi1_cs_init_input_struct(fmi1_cs_input_t* value) {
-    fmiInteger i = 0;
-    fmiReal fac[FMI1_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
-    
-    value -> active = fmiFalse;
-    value -> tn     = 0.0;
-    value -> input  = 0.0;
-    
-    for (i = 0; i < FMI1_CS_MAX_INPUT_DERIVATIVES; i++) {
-        value -> input_derivatives[i] = 0.0;
-        value -> input_derivatives_factor[i] = fac[i];
     }
     
     return fmiOK;
@@ -657,18 +544,18 @@ int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
 }
 
 fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time) {
-    fmi1_cs_input_t* inputs;
+    jmi_cs_input_t* inputs;
     fmiStatus retval;
     fmiReal value;
     fmiInteger i,j;
     
-    inputs = (fmi1_cs_input_t*)ode_problem -> inputs;
+    inputs = ode_problem -> inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
         if (inputs[i].active == fmiFalse) {
             continue;
         }
         value = inputs[i].input;
-        for (j = 0; j < FMI1_CS_MAX_INPUT_DERIVATIVES; j++) {
+        for (j = 0; j < JMI_CS_MAX_INPUT_DERIVATIVES; j++) {
             value += pow((time - inputs[i].tn),j+1.0) * (inputs[i].input_derivatives[j]) / 
                                     (inputs[i].input_derivatives_factor[j]);
         }

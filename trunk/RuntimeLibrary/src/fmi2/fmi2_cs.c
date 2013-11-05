@@ -21,12 +21,52 @@
 #include "fmi2_cs.h"
 #include "fmiFunctionTypes.h"
 
+fmiStatus fmi2_cs_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn) {
+    fmiInteger retval;
+    fmi2_cs_t* fmi2_cs;
+    jmi_t* jmi;
+    jmi_ode_problem_t* ode_problem = 0;
+    
+    retval = fmi2_me_instantiate(c, instanceName, fmuType, fmuGUID, 
+                                fmuResourceLocation, functions, visible,
+                                loggingOn);
+    if (retval != fmiOK) {
+        return retval;
+    }
+    
+    jmi = ((fmi2_me_t*)c) -> jmi;
+    fmi2_cs = (fmi2_cs_t*)c;
+    jmi_new_ode_problem(&ode_problem, c, jmi->n_real_x, jmi->n_sw, jmi->n_real_u, jmi->log);
+    fmi2_cs -> ode_problem = ode_problem;
+    
+    return fmiOK;
+}
 
 fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
                                           const fmiValueReference vr[],
                                           size_t nvr, const fmiInteger order[],
                                           const fmiReal value[]) {
-    return 0;
+    fmi2_cs_t* fmi2_cs = (fmi2_cs_t*)c;
+    jmi_ode_problem_t* ode_problem = fmi2_cs -> ode_problem;
+    fmiInteger retval;
+    
+    if (c == NULL) {
+		return fmiFatal;
+    }
+    
+    retval = jmi_cs_set_real_input_derivatives(ode_problem, vr, nvr, order, value);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    return fmiOK;
 }
 
 fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,

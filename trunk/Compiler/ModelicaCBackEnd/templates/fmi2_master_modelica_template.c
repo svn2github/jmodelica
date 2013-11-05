@@ -25,7 +25,6 @@
 
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
-#include "fmi2_common.h"
 #include "fmiFunctions.h"
 #include "fmiFunctionTypes.h"
 #include "fmiTypesPlatform.h"

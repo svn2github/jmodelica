@@ -20,55 +20,91 @@
 #include "stdio.h"
 #include "jmi_cs.h"
 #include "jmi.h"
+#include "jmi_ode_problem.h"
 
-/*
-fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
-                                          const fmiValueReference vr[],
-                                          size_t nvr, const fmiInteger order[],
-                                          const fmiReal value[]) {
+int jmi_cs_init_input_struct(jmi_cs_input_t* value) {
+    int i = 0;
+    jmi_real_t fac[JMI_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
+    
+    value -> active = FALSE;
+    value -> tn     = 0.0;
+    value -> input  = 0.0;
+    
+    for (i = 0; i < JMI_CS_MAX_INPUT_DERIVATIVES; i++) {
+        value -> input_derivatives[i] = 0.0;
+        value -> input_derivatives_factor[i] = fac[i];
+    }
+    
     return 0;
 }
 
-fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
-                                           const fmiValueReference vr[],
-                                           size_t nvr, const fmiInteger order[],
-                                           fmiReal value[]) {
+int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
+        const jmi_value_reference vr[], size_t nvr, const int order[],
+        const jmi_real_t value[]) {
+    
+    jmi_cs_input_t* inputs;
+    int i,j;
+    jmi_boolean found_input = FALSE;
+
+    if (nvr > ode_problem -> n_real_u) {
+        jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, too many inputs.");
+        return -1;
+    }
+    
+    for (i = 0; i < nvr; i++) {
+        if (order[i] < 1 || order[i] > JMI_CS_MAX_INPUT_DERIVATIVES) {
+            jmi_log_node(ode_problem->log, logError, "SetInputDerivativeFailed", "Failed to set the input derivative, un-supported order: <order:%d>",order[i]);
+            return -1;
+        }
+        found_input = FALSE;
+        
+        /* Check if there exists an active input with the value reference vr[i] */
+        inputs = ode_problem -> inputs;
+        for (j = 0; j < ode_problem -> n_real_u; j++) {
+            if (inputs[j].vr == vr[i] && inputs[j].active == TRUE) {
+                inputs[j].input_derivatives[order[i]-1] = value[i];
+                found_input = TRUE;
+                break;
+            }
+        }
+        
+        /* Found an active input, continue */
+        if (found_input == TRUE) {
+            continue;
+        }
+        
+        /* No active input found, active an available */
+        for (j = 0; j < ode_problem -> n_real_u; j++) {
+            if (inputs[j].active == FALSE) {
+                jmi_cs_init_input_struct(&(inputs[j]));
+                inputs[j].active = TRUE;
+                inputs[j].input_derivatives[order[i]-1] = value[i];
+                inputs[j].vr = vr[i];
+                
+                found_input = TRUE;
+                break;
+            }
+        }
+        
+        /* No available inputs -> the user has set an input which is not an input */
+        if (found_input == FALSE) {
+            jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, inconsistent number of inputs.");
+            return -1;
+        }
+        
+        /*
+        for (j = 0; j < ode_problem->n_real_u; j++) {
+            if (inputs[j].vr == vr[i]) {
+                if (ode_problem-> -> inputs[j].active == FALSE) {
+                    jmi_cs_init_input_struct(&(ode_problem-> -> inputs[j]));
+                    ode_problem-> -> inputs[j].active = TRUE;
+                }
+                ode_problem -> inputs[j].input_derivatives[order[i]-1] = value[i];
+                break;f
+            }
+        }
+        */
+    }
+    
     return 0;
 }
-
-fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
-                       fmiReal    communicationStepSize,
-                       fmiBoolean noSetFMUStatePriorToCurrentPoint) {
-    return 0;
-}
-
-fmiStatus fmi2_cancel_step(fmiComponent c) {
-    return 0;
-}
-
-fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
-                          fmiStatus* value) {
-    return 0;
-}
-
-fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
-                               fmiReal* value) {
-    return 0;
-}
-
-fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiInteger* values) {
-    return 0;
-}
-
-fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiBoolean* value) {
-    return 0;
-}
-
-
-fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
-                                 fmiString* value) {
-    return 0;
-}
-*/

@@ -21,37 +21,24 @@
 #define jmi_cs_h
 
 #include "jmi.h"
+#include "jmi_me.h"
 
-/*
-fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
-                                          const fmiValueReference vr[],
-                                          size_t nvr, const fmiInteger order[],
-                                          const fmiReal value[]);
+#define JMI_CS_MAX_INPUT_DERIVATIVES 3
 
-fmiStatus fmi2_get_real_output_derivatives(fmiComponent c,
-                                           const fmiValueReference vr[],
-                                           size_t nvr, const fmiInteger order[],
-                                           fmiReal value[]);
+typedef struct jmi_cs_input_t jmi_cs_input_t;
 
-fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
-                       fmiReal    communicationStepSize,
-                       fmiBoolean noSetFMUStatePriorToCurrentPoint);
+struct jmi_cs_input_t {
+    jmi_value_reference vr;         /**< \brief Valuereference of the input, note only reals */
+    jmi_real_t tn;                   /**< \brief Time when the input was specified. */
+    jmi_real_t input;
+    jmi_boolean active;
+    jmi_real_t input_derivatives[JMI_CS_MAX_INPUT_DERIVATIVES];
+    jmi_real_t input_derivatives_factor[JMI_CS_MAX_INPUT_DERIVATIVES];
+};
 
-fmiStatus fmi2_cancel_step(fmiComponent c);
+int jmi_cs_init_input_struct(jmi_cs_input_t* value);
 
-fmiStatus fmi2_get_status(fmiComponent c, const fmiStatusKind s,
-                          fmiStatus* value);
-
-fmiStatus fmi2_get_real_status(fmiComponent c, const fmiStatusKind s,
-                               fmiReal* value);
-fmiStatus fmi2_get_integer_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiInteger* values);
-
-fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
-                                  fmiBoolean* value);
-
-
-fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
-                                 fmiString* value);
-*/
+int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
+        const jmi_value_reference vr[], size_t nvr, const int order[],
+        const jmi_real_t value[]);
 #endif

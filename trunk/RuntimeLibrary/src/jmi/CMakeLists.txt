@@ -17,6 +17,7 @@ set(JMISources
     jmi_ode_cvode.h
     jmi_ode_euler.h
     jmi_ode_solver.h
+    jmi_ode_problem.h
     jmi_util.h
     jmi_log.h
     jmi_global.h
@@ -35,6 +36,7 @@ set(JMISources
     jmi_ode_cvode.c
     jmi_ode_euler.c
     jmi_ode_solver.c
+    jmi_ode_problem.c
 )
 
 set(MODELICAEXTERNALCSources

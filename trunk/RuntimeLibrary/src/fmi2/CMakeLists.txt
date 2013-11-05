@@ -9,11 +9,9 @@ set(FMISources
     ${STANDARD_HEADER_SRC}/fmiTypesPlatform.h
     ${STANDARD_HEADER_SRC}/fmiFunctions.h
     
-    fmi2_common.h
     fmi2_me.h
     fmi2_cs.h
     
-    fmi2_common.c
 	fmi2_me.c
     fmi2_cs.c
 )
