@@ -435,7 +435,7 @@ aspect ConstantEvaluation {
 	     */
         public int intValue() { 
         	// Round towards negative infinity to be compatible with integer() operator
-        	return (int) Math.floor(value); 
+        	return (int) StrictMath.floor(value); 
         }
         
         /**
@@ -1566,7 +1566,7 @@ aspect ConstantEvaluation {
   
   eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
   eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
-  eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
+  eq FSqrtExp.cevalCalc()  = new CValueReal(StrictMath.sqrt(getFExp().ceval().realValue()));
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   eq FStringExp.cevalCalc() {
 	  Object value;
@@ -1607,20 +1607,20 @@ aspect ConstantEvaluation {
   eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
   eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
   
-  eq FSinExp.cevalCalc()   = new CValueReal(Math.sin(getFExp().ceval().realValue()));
-  eq FCosExp.cevalCalc()   = new CValueReal(Math.cos(getFExp().ceval().realValue()));
-  eq FTanExp.cevalCalc()   = new CValueReal(Math.tan(getFExp().ceval().realValue()));	  
-  eq FAsinExp.cevalCalc()  = new CValueReal(Math.asin(getFExp().ceval().realValue()));
-  eq FAcosExp.cevalCalc()  = new CValueReal(Math.acos(getFExp().ceval().realValue()));
-  eq FAtanExp.cevalCalc()  = new CValueReal(Math.atan(getFExp().ceval().realValue()));	  
-  eq FAtan2Exp.cevalCalc() = new CValueReal(Math.atan2(getFExp().ceval().realValue(),
+  eq FSinExp.cevalCalc()   = new CValueReal(StrictMath.sin(getFExp().ceval().realValue()));
+  eq FCosExp.cevalCalc()   = new CValueReal(StrictMath.cos(getFExp().ceval().realValue()));
+  eq FTanExp.cevalCalc()   = new CValueReal(StrictMath.tan(getFExp().ceval().realValue()));	  
+  eq FAsinExp.cevalCalc()  = new CValueReal(StrictMath.asin(getFExp().ceval().realValue()));
+  eq FAcosExp.cevalCalc()  = new CValueReal(StrictMath.acos(getFExp().ceval().realValue()));
+  eq FAtanExp.cevalCalc()  = new CValueReal(StrictMath.atan(getFExp().ceval().realValue()));	  
+  eq FAtan2Exp.cevalCalc() = new CValueReal(StrictMath.atan2(getFExp().ceval().realValue(),
 		                                               getY().ceval().realValue()));	  
-  eq FSinhExp.cevalCalc()  = new CValueReal(Math.sinh(getFExp().ceval().realValue()));
-  eq FCoshExp.cevalCalc()  = new CValueReal(Math.cosh(getFExp().ceval().realValue()));
-  eq FTanhExp.cevalCalc()  = new CValueReal(Math.tanh(getFExp().ceval().realValue()));	  
-  eq FExpExp.cevalCalc()   = new CValueReal(Math.exp(getFExp().ceval().realValue()));
-  eq FLogExp.cevalCalc()   = new CValueReal(Math.log(getFExp().ceval().realValue()));
-  eq FLog10Exp.cevalCalc() = new CValueReal(Math.log10(getFExp().ceval().realValue()));	  
+  eq FSinhExp.cevalCalc()  = new CValueReal(StrictMath.sinh(getFExp().ceval().realValue()));
+  eq FCoshExp.cevalCalc()  = new CValueReal(StrictMath.cosh(getFExp().ceval().realValue()));
+  eq FTanhExp.cevalCalc()  = new CValueReal(StrictMath.tanh(getFExp().ceval().realValue()));	  
+  eq FExpExp.cevalCalc()   = new CValueReal(StrictMath.exp(getFExp().ceval().realValue()));
+  eq FLogExp.cevalCalc()   = new CValueReal(StrictMath.log(getFExp().ceval().realValue()));
+  eq FLog10Exp.cevalCalc() = new CValueReal(StrictMath.log10(getFExp().ceval().realValue()));	  
   
   eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
@@ -2876,7 +2876,7 @@ aspect ConstantEvaluation {
   syn CValue FType.pow(CValue v1, CValue v2) = 
 	  CValue.UNKNOWN;
   eq FRealType.pow(CValue v1, CValue v2) =
-	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
+	  new CValueReal(java.lang.StrictMath.pow(v1.realValue(),v2.realValue()));
 
   /**
    * \brief Negation of a constant value.
@@ -2898,9 +2898,9 @@ aspect ConstantEvaluation {
   syn CValue FType.abs(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.abs(CValue v) = 
-	  new CValueReal(Math.abs(v.realValue()));
+	  new CValueReal(StrictMath.abs(v.realValue()));
   eq FIntegerType.abs(CValue v) = 
-	  new CValueInteger(Math.abs(v.intValue()));
+	  new CValueInteger(StrictMath.abs(v.intValue()));
   
   /**
    * \brief Sign expression for constant values.
@@ -2911,9 +2911,9 @@ aspect ConstantEvaluation {
   syn CValue FType.sign(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.sign(CValue v) = 
-	  new CValueReal(Math.signum(v.realValue()));
+	  new CValueReal(StrictMath.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) Math.signum(v.intValue()));
+	  new CValueInteger((int) StrictMath.signum(v.intValue()));
   
   /**
    * \brief Ceil expression for constant values.
@@ -2924,9 +2924,9 @@ aspect ConstantEvaluation {
   syn CValue FType.ceil(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.ceil(CValue v) = 
-	  new CValueReal(Math.ceil(v.realValue()));
+	  new CValueReal(StrictMath.ceil(v.realValue()));
   eq FIntegerType.ceil(CValue v) = 
-	  new CValueInteger((int) Math.ceil(v.realValue()));
+	  new CValueInteger((int) StrictMath.ceil(v.realValue()));
 
   /**
    * \brief Truncation to zero for constant values.
