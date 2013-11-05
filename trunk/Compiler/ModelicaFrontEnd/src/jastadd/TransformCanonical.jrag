@@ -4757,7 +4757,7 @@ aspect EventGeneratingExps {
 	coll ArrayList<FEventGenExp> FClass.eventGenExps() 
 		[new ArrayList<FEventGenExp>()] with add root FClass;
 	FEventGenExp contributes this
-		when generatesEvent()
+		when inEquationSection() && generatesEvent()
 		to FClass.eventGenExps()
 		for myFClass();
 	
@@ -4767,7 +4767,7 @@ aspect EventGeneratingExps {
 	coll ArrayList<FEventGenExp> FStatement.eventGenExps() 
 		[new ArrayList<FEventGenExp>()] with add root FAlgorithm;
 	FEventGenExp contributes this
-		when generatesEvent()
+		when inEquationSection() && generatesEvent()
 		to FStatement.eventGenExps()
 		for myFStatement();
 		

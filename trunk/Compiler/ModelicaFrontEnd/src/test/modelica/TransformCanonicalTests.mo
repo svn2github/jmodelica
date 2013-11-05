@@ -5520,6 +5520,62 @@ end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
 ")})));
 end InWhenEquations;
 
+model InInitialAlgorithm
+       Integer x;
+initial algorithm
+	x := integer(time);
+equation
+	when (time >= 1) then
+		x = integer(time);
+	end when;
+
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InInitialAlgorithm",
+			description="Tests event generating expressions in a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm
+ discrete Integer x;
+initial equation 
+ algorithm
+  x := integer(time);
+;
+equation
+ when time >= 1 then
+  x = integer(time);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm;
+			
+")})));
+end InInitialAlgorithm;
+
+model InInitialEquation
+       Real x;
+initial equation
+	x = integer(time);
+equation
+	when (time >= 1) then
+		x = integer(time);
+	end when;
+
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InInitialEquation",
+			description="Tests event generating expressions in a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InInitialEquation
+ discrete Real x;
+initial equation 
+ x = integer(time);
+equation
+ when time >= 1 then
+  x = integer(time);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.InInitialEquation;
+			
+")})));
+end InInitialEquation;
+
 end EventGeneratingExps;
 
 
