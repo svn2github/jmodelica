@@ -2783,13 +2783,20 @@ aspect ArrayHelpers {
 		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
-			int ndims = size.length + s.size.length;
-			if (ndims == 0)
-				return Size.SCALAR;
-			int[] ns = new int[ndims];
-			System.arraycopy(s.size, 0, ns, 0, s.size.length);
-			System.arraycopy(size, 0, ns, s.size.length, size.length);
-			return new Size(ns);
+			return s.expandFrom(this);
+		}
+		
+		/**
+		 * Delegate method for expand(Size). Double dispatch is needed there.
+		 */
+		protected Size expandFrom(Size s) {
+            int ndims = size.length + s.size.length;
+            if (ndims == 0)
+                return Size.SCALAR;
+            int[] ns = new int[ndims];
+            System.arraycopy(size, 0, ns, 0, size.length);
+            System.arraycopy(s.size, 0, ns, size.length, s.size.length);
+            return new Size(ns);
 		}
 		
 		/**
@@ -3162,16 +3169,33 @@ aspect ArrayHelpers {
 		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
-			evaluate();
-			int ndims = size.length + s.size.length;
+            return createExpanded(s, this);
+        }
+        
+        /**
+         * Delegate method for expand(Size). Double dispatch is needed there.
+         */
+        protected Size expandFrom(Size s) {
+            return createExpanded(this, s);
+        }
+        
+        private static Size createExpanded(Size a, Size b) {
+			int ndims = a.size.length + b.size.length;
 			if (ndims == 0)
 				return Size.SCALAR;
 			MutableSize ns = new MutableSize(ndims);
-			System.arraycopy(s.size, 0, ns.size, 0, s.size.length);
-			System.arraycopy(size, 0, ns.size, s.size.length, size.length);
-			if (s instanceof MutableSize) 
-				System.arraycopy(((MutableSize) s).exps, 0, ns.exps, 0, s.size.length);
-			System.arraycopy(exps, 0, ns.exps, s.size.length, size.length);
+			if (a instanceof MutableSize) {
+			    MutableSize m = (MutableSize) a;
+			    m.evaluate();
+				System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
+			}
+            if (b instanceof MutableSize) {
+                MutableSize m = (MutableSize) b;
+                m.evaluate();
+                System.arraycopy(m.exps, 0, ns.exps, a.size.length, m.size.length);
+            }
+			System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
+			System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
 			return ns;
 		}
 		

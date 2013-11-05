@@ -87,6 +87,7 @@ aspect Flattening {
 		fc.createExperiment(annotation("experiment"));
 		root().breakOnErrors();
     	endStep("flattenInstClassDecl()");
+    	fc.generateStepMof("flattening");
     }
     
 

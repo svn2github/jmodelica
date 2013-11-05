@@ -5424,6 +5424,55 @@ end FunctionTests.ArrayOutputScalarization26;
 ")})));
 end ArrayOutputScalarization26;
 
+
+model ArrayOutputScalarization27
+    function f1
+        input Real c;
+        output Real d[2];
+    algorithm
+        d := {1,2} * c;
+        d[1] := d[1] + 0.1;
+    end f1;
+        
+    function f2
+        input Real c;
+        output Real d[2];
+    algorithm
+        d := {2,3} * c;
+        d[1] := d[1] + 0.1;
+    end f2;
+        
+    parameter Boolean a = false annotation(Evaluate=true);
+    Real b[2] = if a then f1(time) else f2(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization27",
+			description="Function with array output in if exp",
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization27
+ parameter Boolean a = false /* false */;
+ Real b[1];
+ Real b[2];
+equation
+ ({b[1], b[2]}) = FunctionTests.ArrayOutputScalarization27.f2(time);
+
+public
+ function FunctionTests.ArrayOutputScalarization27.f2
+  input Real c;
+  output Real[2] d;
+ algorithm
+  d[1] := 2 * c;
+  d[2] := 3 * c;
+  d[1] := d[1] + 0.1;
+  return;
+ end FunctionTests.ArrayOutputScalarization27.f2;
+
+end FunctionTests.ArrayOutputScalarization27;
+")})));
+end ArrayOutputScalarization27;
+
+
 /* ======================= Unknown array sizes ======================*/
 
 model UnknownArray1

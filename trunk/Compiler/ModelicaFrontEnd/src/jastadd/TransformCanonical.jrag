@@ -78,6 +78,7 @@ aspect TransformCanonical {
 	  */
 	public void FClass.transformCanonicalBase() {
         Transformation[] transformations = new Transformation[] {
+            new enableIfEquationElimination(),
 		    new addStateInitialEquationsIfSet(),
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
@@ -113,8 +114,6 @@ aspect TransformCanonical {
 	}
 	
 	public class FClass {
-	    
-	    private static final File TRANSFORMATION_STEP_DIR = new File("transformation_steps");
 	    
 	    /**
 	     * Base class for transformations on the flat tree.
@@ -180,26 +179,7 @@ aspect TransformCanonical {
             	        completedTransformationSteps++;
     	                endStep(name());
     	            }
-        	        generateStepMof();
-    	        }
-    	    }
-    	    
-    	    /**
-    	     * Generate a .mof file with the current flat tree.
-    	     */
-    	    private void generateStepMof() {
-    	        if (root().options.getBooleanOption("log_transformation_steps")) {
-    	            TRANSFORMATION_STEP_DIR.mkdir();
-    	            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, name());
-    	            File file = new File(TRANSFORMATION_STEP_DIR, fileName);
-    	            log.debug("Writing flat tree after step " + name() + " to " + fileName);
-                    try {
-        	            PrintStream out = new PrintStream(file);
-        	            prettyPrint(out, "");
-        	            out.close();
-                    } catch (FileNotFoundException e) {
-                        log.warning("Failed to write step info to file " + file);
-                    }
+        	        generateStepMof(name());
     	        }
     	    }
     	    
@@ -208,6 +188,27 @@ aspect TransformCanonical {
 	}
 
 	
+    /**
+     * Generate a .mof file with the current flat tree.
+     */
+    public void FClass.generateStepMof(String stepName) {
+        if (root().options.getBooleanOption("log_transformation_steps")) {
+            TRANSFORMATION_STEP_DIR.mkdir();
+            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, stepName);
+            File file = new File(TRANSFORMATION_STEP_DIR, fileName);
+            log.debug("Writing flat tree after step " + stepName + " to " + fileName);
+            try {
+                PrintStream out = new PrintStream(file);
+                prettyPrint(out, "");
+                out.close();
+            } catch (FileNotFoundException e) {
+                log.warning("Failed to write step info to file " + file);
+            }
+        }
+    }
+    
+    private static final File FClass.TRANSFORMATION_STEP_DIR = new File("transformation_steps");
+    
 	private int FClass.completedTransformationSteps = 0;
 	
 	/**
