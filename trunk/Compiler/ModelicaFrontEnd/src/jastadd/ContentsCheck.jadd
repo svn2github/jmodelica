@@ -69,11 +69,6 @@ aspect ContentCheck {
 			error("When statements are not allowed inside if, for, while and when clauses");
 	}
 	
-	public void FEventGenExp.contentCheck(ErrorCheckType checkType) {
-		if (inAlgorithm())
-			warning("Event generating function like expressions in algorithms are not fully supported (will not generate events)");
-	}
-	
 	public void FParseArray.contentCheck(ErrorCheckType checkType) {
 		// If not already rewritten to FLongArray, this is an error.
 		error("The array() operator may not be used in function call equations or function call statements");
