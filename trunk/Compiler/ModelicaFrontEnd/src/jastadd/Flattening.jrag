@@ -1484,10 +1484,11 @@ aspect FlatExpressions {
 	 * Flatten an access expression to this component.
 	 */
 	public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
-        if (inOrIsOuter()) 
-            return new FIdUseExp(myInnerInstComponentDecl().getFQName().fullCopy());
-        else
-            return new FIdUseExp(exp.getInstAccess().flatten(prefix));
+        if (inOrIsOuter()) {
+            prefix = myInnerInstComponentDecl().getFQName();
+            prefix = prefix.copyWithoutSuffix(exp.getInstAccess().numParts());
+        }
+        return new FIdUseExp(exp.getInstAccess().flatten(prefix));
 	}
 
 	public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {

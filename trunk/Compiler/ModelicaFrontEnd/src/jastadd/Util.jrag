@@ -1053,6 +1053,12 @@ aspect FlatNames {
     }
 
     /**
+     * The number of name parts.
+     */
+    syn int InstAccess.numParts() = 1;
+    eq InstDot.numParts()         = getNumInstAccess();
+
+    /**
      * The number of name parts. Will always report 1 for FQNameString.
      */
     syn int FQName.numParts()  = 0;
@@ -1651,6 +1657,13 @@ aspect FlatNames {
     	int m = numDots();
         return copyPart(m - n + 1, m);
     }
+    
+    /**
+     * Create a copy of all but the first <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutPrefix(int n) {
+        return copyPart(n, numDots());
+    }
 
     /**
      * Create a copy of the name excluding the last part.
@@ -1670,7 +1683,14 @@ aspect FlatNames {
      * Create a copy of the first <code>n</code> parts of this name.
      */
     public FQName FQName.copyPrefix(int n) {
-    	return copyPart(0, n - 1);
+        return copyPart(0, n - 1);
+    }
+
+    /**
+     * Create a copy of all but the last <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutSuffix(int n) {
+        return copyPart(0, numDots() - n);
     }
     
     /**
@@ -2576,6 +2596,7 @@ aspect ComponentDeclMethods {
     eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
     eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
     eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
+    eq Root.getChild().inheritsInputOutputFrom()              = null;
     
     /**
      * Check if this component is or is part of a component that is declared input or output on the top level.
@@ -2624,6 +2645,7 @@ aspect ComponentDeclMethods {
     eq InstComponentDecl.getChild().inheritsFlowFrom() = isDeclaredFlow() ? this : inheritsFlowFrom();
     eq InstClassDecl.getChild().inheritsFlowFrom()     = null;
     eq InstRoot.getChild().inheritsFlowFrom()          = null;
+    eq Root.getChild().inheritsFlowFrom()              = null;
 
     /**
      * Check if this component is declared flow.

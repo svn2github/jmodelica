@@ -439,4 +439,34 @@ Semantic error at line 428, column 2:
 ")})));
 end InnerOuterTest14_Err;
 
+
+model InnerOuterTest15
+    model A
+        Real x[2];      
+    end A;
+    
+    model B
+        outer A a;
+        Real y[2];
+    equation
+        a.x = y;
+    end B;
+    
+    inner A a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InnerOuterTest15",
+			description="",
+			flatModel="
+fclass InnerOuterTests.InnerOuterTest15
+ Real a.x[2];
+ Real b.y[2];
+equation
+ a.x[1:2] = b.y[1:2];
+end InnerOuterTests.InnerOuterTest15;
+")})));
+end InnerOuterTest15;
+
 end InnerOuterTests;
