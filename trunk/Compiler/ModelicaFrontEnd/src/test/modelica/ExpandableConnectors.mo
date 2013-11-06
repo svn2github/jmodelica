@@ -1229,6 +1229,56 @@ equation
 end ExpandableConnectors.Expandable32;
 ")})));
     end Expandable32;
+	
+	
+    model Expandable33
+        expandable connector EC1
+            EC2 ec2;
+        end EC1;
+        
+        expandable connector EC2
+        end EC2;
+        
+        connector C = Real;
+        
+        EC1 ec1_1, ec1_2;
+        EC2 ec2_1, ec2_2;
+        C c1, c2;
+    equation
+        connect(ec1_1, ec1_2);
+        connect(ec1_1.ec2, ec2_1);
+        connect(ec1_2.ec2, ec2_2);
+        connect(ec2_1.a, c1);
+        connect(ec2_2.b, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Expandable33",
+			description="Connect expandable connectors containing other expandable connectors",
+			flatModel="
+fclass ExpandableConnectors.Expandable33
+ Real ec1_1.ec2.a;
+ Real ec1_1.ec2.b;
+ Real ec1_2.ec2.a;
+ Real ec1_2.ec2.b;
+ Real ec2_1.a;
+ Real ec2_1.b;
+ Real ec2_2.a;
+ Real ec2_2.b;
+ Real c1;
+ Real c2;
+equation
+ c1 = ec1_1.ec2.a;
+ ec1_1.ec2.a = ec1_2.ec2.a;
+ ec1_2.ec2.a = ec2_1.a;
+ ec2_1.a = ec2_2.a;
+ c2 = ec1_1.ec2.b;
+ ec1_1.ec2.b = ec1_2.ec2.b;
+ ec1_2.ec2.b = ec2_1.b;
+ ec2_1.b = ec2_2.b;
+end ExpandableConnectors.Expandable33;
+")})));
+    end Expandable33;
 
     
     

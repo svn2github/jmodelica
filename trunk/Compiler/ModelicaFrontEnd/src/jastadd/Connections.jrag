@@ -1581,15 +1581,30 @@ aspect ExpandableConnectors {
          */
         public void addSpanningConnection(InstComponentDecl leftComp, InstComponentDecl rightComp,
                 FQName prefix, ConnectionEdge source) {
+            connectExpandableConnectors(leftComp, rightComp);
+            connections.add(new Connection(prefix, source));
+        }
+
+        /**
+         * Check if elaboration is already done.
+         */
+        public boolean isExpansionDone() {
+            return expansionDone;
+        }
+        
+        private void connectExpandableConnectors(InstComponentDecl leftComp, InstComponentDecl rightComp) {
             ExpandableSet left = setFor(leftComp);
             ExpandableSet right = setFor(rightComp);
             left.merge(right);
             
-            connections.add(new Connection(prefix, source));
-        }
-
-        public boolean isExpansionDone() {
-            return expansionDone;
+            SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
+            for (InstComponentDecl leftChild : leftComp.containedInstComponents()) {
+                if (leftChild.isExpandableConnector()) {
+                    InstComponentDecl rightChild = rightChildren.tailSet(leftComp).first();
+                    if (rightChild.isExpandableConnector())
+                        connectExpandableConnectors(leftChild, rightChild);
+                }
+            }
         }
         
         private ExpandableSet setFor(InstComponentDecl comp) {
