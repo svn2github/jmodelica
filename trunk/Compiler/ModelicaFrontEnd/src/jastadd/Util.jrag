@@ -1104,6 +1104,14 @@ aspect FlatNames {
     syn boolean FSubscript.isColon() = false;
     eq FColonSubscript.isColon()     = true;
     
+    syn boolean FSubscript.isExpSubscript() = false;
+    eq FExpSubscript.isExpSubscript()       = true;
+    
+    syn FExpSubscript FSubscript.asExpSubscript() {
+        throw new UnsupportedOperationException();
+    }
+    eq FExpSubscript.asExpSubscript() = this;
+    
     syn FQName FAbstractVariable.getFQName() = null;
 
     syn String FQName.name()         = "";
@@ -2410,6 +2418,15 @@ aspect FlatFunctionUtils {
      
      private int FFunctionDecl.nextTempVarIndex = 1;
      private int FClass.nextTempVarIndex = 1;
+
+    public String FClass.nextTempFuncName() {
+        String name;
+        do {
+            name = "temp_" + nextTempFuncIndex++;
+        } while (lookupFunc(name) != null);
+        return name;
+    }
+    private int FClass.nextTempFuncIndex = 1;
 }
 
 aspect Visibility {

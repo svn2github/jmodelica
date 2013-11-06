@@ -80,6 +80,7 @@ aspect TransformCanonical {
         Transformation[] transformations = new Transformation[] {
             new enableIfEquationElimination(),
 		    new addStateInitialEquationsIfSet(),
+		    new enableArrayAccessRewrite(),
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
@@ -3187,6 +3188,10 @@ aspect FunctionInlining {
 			if (index.isBoolValue())
 				inlineAnnotation = index.bool() ? InlineAnnotation.AFTER_INDEX : InlineAnnotation.NONE;
 		}
+		
+		public void setInlineAnnotation(InlineAnnotation ia) {
+		    inlineAnnotation = ia;
+		}
 	}
 	
 	/**
@@ -4896,4 +4901,78 @@ aspect SemiLinear {
 	FSemiLinearExp contributes this
 		to FClass.collectSemiLinearExps()
 		for myFClass();
+}
+
+aspect ArrayAccessRewrite {
+    public class FClass {
+        public class enableArrayAccessRewrite extends Transformation {
+            public void perform() {
+                enableArrayAccessRewrite();
+                root().flushAllRecursiveClearFinal();
+            }
+        }
+    }
+
+    public void ASTNode.enableArrayAccessRewrite() {
+        for (ASTNode n : this)
+            n.enableArrayAccessRewrite();
+    }
+    
+    public void FIdUseExp.enableArrayAccessRewrite() {
+        super.enableArrayAccessRewrite();
+        rewriteContinuousArrayAccess = true;
+        is$Final = false;
+    }
+    
+    private boolean FIdUseExp.rewriteContinuousArrayAccess = false;
+    
+    rewrite FIdUseExp {
+        when (rewriteContinuousArrayAccess) to FExp {
+            rewriteContinuousArrayAccess = false;
+            FQName fqName = getFIdUse().getFQName();
+            if (getFIdUse().indexVariability().parameterOrLess() || inFunction())
+                return this;
+            FQNameFull arrayArg = new FQNameFull();
+            List<FExp> args = new List<FExp>();
+            List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
+            Size inputSize = Size.SCALAR;
+            Size outputSize = Size.SCALAR;
+            FQNameFull arrayUse = new FQNameFull("x");
+            Enumerator funcVarEnumerator = new Enumerator();
+            for (FQNamePart orgPart : fqName.asFQNameFull().getFQNameParts()) {
+                FQNamePart newPart = new FQNamePart(orgPart.name());
+                if (orgPart.hasFArraySubscripts()) {
+                    for (FSubscript sub : orgPart.getFArraySubscripts().getFSubscripts()) {
+                        if (!sub.variability().parameterOrLess()) {
+                            args.add(sub.asExpSubscript().getFExp().fullCopy());
+                            String varName = "i_" + funcVarEnumerator.next();
+                            funcVars.add(new FFunctionVariable(FIntegerType.SCALAR, varName, new FInput()));
+                            arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName)));
+                            newPart = newPart.addSubscript(new FColonSubscript());
+                            inputSize = inputSize.expandRight(Size.UNKNOWN);
+                        } else if (sub.size() == Size.SCALAR) {
+                            newPart = newPart.addSubscript(sub.fullCopy());
+                        } else if(sub.size().ndims() == 1) {
+                            newPart = newPart.addSubscript(sub.fullCopy());
+                            inputSize = inputSize.expandRight(size().last());
+                            outputSize = outputSize.expandRight(size().last());
+                            arrayUse.addSubscript(new FColonSubscript());
+                        } else {
+                            throw new UnsupportedOperationException();
+                        }
+                    }
+                }
+                arrayArg.addFQNamePart(newPart);
+            }
+            args.add(new FIdUseExp(arrayArg));
+            String funcName = myFClass().nextTempFuncName();
+            FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{size()});
+            funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
+            funcVars.add(outputSize.createFunctionVariable("y", type(), new FOutput()));
+            FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)));
+            funcDecl.setInlineAnnotation(FFunctionDecl.InlineAnnotation.NONE);
+            myFClass().addFFunctionDecl(funcDecl);
+            return call;
+        }
+    }
 }

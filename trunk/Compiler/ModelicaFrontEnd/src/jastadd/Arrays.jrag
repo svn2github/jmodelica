@@ -2777,6 +2777,19 @@ aspect ArrayHelpers {
 			return new Size(ns);
 		}
 		
+        /**
+         * Creates a new Size that is a copy of this one, but with one more dimension 
+         * on the right side.
+         * 
+         * @param s  the length of the new dimension
+         */
+        public Size expandRight(int s) {
+            int[] ns = new int[size.length + 1];
+            System.arraycopy(size, 0, ns, 0, size.length);
+            ns[size.length] = s;
+            return new Size(ns);
+        }
+        
 		/**
 		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
 		 * 
@@ -2908,6 +2921,21 @@ aspect ArrayHelpers {
 					res.addFExp(createFExp(i));
 				return res;
 			}
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type) {
+		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>());
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type, FTypePrefixInputOutput inputOutput) {
+		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>(inputOutput));
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type, Opt<FTypePrefixInputOutput> inputOutput) {
+		    if (this == Size.SCALAR)
+		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FQNameString(name));
+		    else
+		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FQNameString(name));
 		}
 		
 	}

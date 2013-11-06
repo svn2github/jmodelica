@@ -708,6 +708,13 @@ aspect Constructors {
 		this(new Opt(), type, new Opt(), new FQNameString(name));
 	}
 	
+    /**
+     * \brief Create an FFunctionVariable with the given name, type and input/output prefix. 
+     */
+    public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
+        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name));
+    }
+    
 	/**
 	 * \brief Create a new FSubscriptedExp with a new FArraySubscripts, containing the 
 	 *        proper number of FSubscripts (according to <code>exp</code>).
@@ -788,6 +795,10 @@ aspect Constructors {
 		FArraySubscripts fas = new FArraySubscripts();
 		fas.addFSubscripts(index);
 		return fas;
+	}
+	
+	public FFunctionDecl.FFunctionDecl(String name, List<FFunctionVariable> vars, FStatement ... statements) {
+	    this(new FQNameString(name), vars, new FAlgorithm(new List<FStatement>(statements)), new Opt<FDerivativeFunction>());
 	}
 	
 }

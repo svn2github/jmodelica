@@ -3393,28 +3393,6 @@ end NameTests.FunctionCallLeftTest;
 end FunctionCallLeftTest;
 
 
-model PreErrorTest
-	Real x[3] = (1:3) .* time;
-	discrete Real y(start = 0);
-	Integer i(start = 1);
-equation
-	when { time > 1, time > 2, time > 3 } then
-		y = x[pre(i)];
-		i = pre(i) + 1;
-	end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="PreErrorTest",
-			description="Provoking toString() of pre() in in stance tree - caused crash",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3271, column 9:
-  Array index in equation must be constant, parameter or loop index: pre(i)
-")})));
-end PreErrorTest;
-
 model PreAliasTest1
 	discrete Real x;
 	discrete Real y;

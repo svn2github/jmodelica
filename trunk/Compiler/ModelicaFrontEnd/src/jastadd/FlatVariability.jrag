@@ -494,6 +494,16 @@ aspect FlatVariability {
    		return (other.combineLevel() < combineLevel()) ? other : this;
 	}	
 	
+    syn FTypePrefixVariability FIdUse.indexVariability() {
+        FTypePrefixVariability variability = fConstant();
+        if (getFQName().isSimple())
+            return variability;
+        for (FQNamePart part : getFQName().asFQNameFull().getFQNameParts())
+            if (part.hasFArraySubscripts())
+                for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
+                    variability = variability.combine(sub.variability());
+        return variability;
+    }
 }
 
 aspect VariabilitySingletons {

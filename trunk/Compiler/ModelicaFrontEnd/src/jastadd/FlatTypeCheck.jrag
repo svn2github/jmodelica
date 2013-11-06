@@ -423,8 +423,8 @@ aspect FlatTypeCheck {
 		  else if (!type().isUnknown())
 			  error("Array index must be Integer expression: " + getFExp());
 	  } else if (!inFunction()) { 
-		  if (!getFExp().variability().lessOrEqual(fParameter())) {
-			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
+		  if (!getFExp().variability().parameterOrLess()) {
+			  warning("Variable array index in equation can result in slow simulation time");
 		  } else if (!reportedOutOfBound && !inUnknownAccess()) {
 	          // Check array bounds
 	          // TODO: Perform bounds check in functions if index has parameter variability or lower?
