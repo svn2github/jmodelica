@@ -134,12 +134,14 @@ int jmi_initialize(jmi_t* jmi) {
     int nF0, nF1, nFp, nF;   /* Number of F-equations */
     int nR0, nR;             /* Number of R-equations */
     int initComplete = 0;    /* If the initialization are complete */
-    jmi_real_t nextTimeEvent;       /* Next time event instant */
     int iter, max_iterations;
-    
-    jmi_real_t* switchesR;   /* Switches */
-    jmi_real_t* switchesR0;  /* Initial Switches */
-    jmi_real_t* switches;
+
+/*  
+    //For setting the final switches (if any)  
+    jmi_real_t* switchesR;   // Switches
+    jmi_real_t* switchesR0;  // Initial Switches
+*/
+    jmi_real_t* switches;    /* Switches */
     jmi_real_t* sw_temp = 0;
     jmi_real_t* b_mode;
     
@@ -295,6 +297,31 @@ int jmi_initialize(jmi_t* jmi) {
     jmi_copy_pre_values(jmi);
 
     jmi->is_initialized = 1;
+ 
+/*
+    //Set the final switches (if any)
+    if (nR > 0){
+        jmi_real_t* a_mode =  jmi -> jmi_callbacks -> allocate_memory(nR, sizeof(jmi_real_t));
+        retval = jmi_dae_R(jmi,a_mode); //Get the event indicators after the initialisation
+        
+        if(retval != 0) { //Error check
+            jmi_log_comment(jmi->log, logError, "Initialization failed.");
+            return fmiError;
+        }
+        
+        switches = jmi_get_sw(jmi); //Get the switches
+        
+        for (i=0; i < nR; i=++){ //Set the final switches
+            if (a_mode[i] > 0.0){
+                switches[i] = 1.0;
+            }else{
+                switches[i] = 0.0;
+            }
+            printf("Switches (after) %d, %f\n",i,switches[i]);
+        }
+        jmi -> jmi_callbacks -> free_memory(a_mode); //Free memory
+    }
+*/
     
     return 0;
 }

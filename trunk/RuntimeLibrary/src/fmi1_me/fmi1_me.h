@@ -254,7 +254,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
  * @param njac Number of elements in jac.
  * @return Error code.
  */
-fmiStatus fmi1_me_get_jacobian(fmiComponent c, const int independents, const int dependents, fmiReal jac[], size_t njac);
+fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
 
 /**
  * \brief Evaluate directional derivative of ODE.

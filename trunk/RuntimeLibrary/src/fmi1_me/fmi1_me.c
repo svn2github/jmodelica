@@ -236,30 +236,6 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
         return fmiError;
     }
 
-/*
-    //Set the final switches (if any)
-    if (nR > 0){
-        jmi_real_t* a_mode =  ((fmi1_me_t*)c) -> fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
-        retval = jmi_dae_R(((fmi1_me_t *)c)->jmi,a_mode); //Get the event indicators after the initialisation
-        
-        if(retval != 0) { //Error check
-            jmi_log_comment(jmi->log, logError, "Initialization failed.");
-            return fmiError;
-        }
-        
-        switches = jmi_get_sw(((fmi1_me_t *)c)->jmi); //Get the switches
-        
-        for (i=0; i < nR; i=i+1){ //Set the final switches
-            if (a_mode[i] > 0.0){
-                switches[i] = 1.0;
-            }else{
-                switches[i] = 0.0;
-            }
-            printf("Switches (after) %d, %f\n",i,switches[i]);
-        }
-        ((fmi1_me_t*)c) -> fmi_functions.freeMemory(a_mode); //Free memory
-    }
-*/
     /* For debugging Jacobians */
 /*
     n_states = ((fmi1_me_t *)c)->jmi->n_real_x;
