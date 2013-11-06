@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
+if(NOT TOP_SRC)    
+    set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
+    message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
+endif()
 set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
