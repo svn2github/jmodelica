@@ -51,7 +51,6 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize, fmiBoolean newStep) {
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
-    fmi1_me_t* fmi1_me;
     jmi_cs_input_t* inputs;
     int flag, retval = JMI_ODE_EVENT;
     int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
@@ -156,6 +155,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
 
 void fmi1_cs_free_slave_instance(fmiComponent c) {
     fmi1_cs_t* fmi1_cs;
+    fmiCallbackFreeMemory fmi_free;
     
     if (c == NULL) {
 		return;
@@ -179,7 +179,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
         jmi_free_ode_problem((void*)fmi1_cs -> ode_problem);
         
         /* Free the fmi1_cs struct. */
-        fmiCallbackFreeMemory fmi_free = fmi1_cs -> callback_functions.freeMemory;
+        fmi_free = fmi1_cs -> callback_functions.freeMemory;
         fmi_free((void*)fmi1_cs -> instance_name);
         fmi_free((void*)fmi1_cs -> encoded_instance_name);
         fmi_free((void*)fmi1_cs -> GUID);
