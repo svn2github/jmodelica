@@ -4908,7 +4908,6 @@ aspect ArrayAccessRewrite {
         public class enableArrayAccessRewrite extends Transformation {
             public void perform() {
                 enableArrayAccessRewrite();
-                root().flushAllRecursiveClearFinal();
             }
         }
     }

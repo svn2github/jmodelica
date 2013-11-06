@@ -1276,7 +1276,8 @@ aspect Arrays {
 		}
 	}
 	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-		FExp e = get(Index.NULL).fullCopy();
+		FExp org = get(Index.NULL);
+		FExp e = org.dynamicFExp(org.fullCopy());
 		arr.set(i, e.replaceIndices(indexMap));
 	}
 	
