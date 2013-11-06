@@ -1599,8 +1599,8 @@ aspect ExpandableConnectors {
             
             SortedSet<InstComponentDecl> rightChildren = rightComp.containedInstComponents();
             for (InstComponentDecl leftChild : leftComp.containedInstComponents()) {
-                if (leftChild.isExpandableConnector()) {
-                    InstComponentDecl rightChild = rightChildren.tailSet(leftComp).first();
+                if (leftChild.isExpandableConnector() && rightChildren.contains(leftChild)) {
+                    InstComponentDecl rightChild = rightChildren.tailSet(leftChild).first();
                     if (rightChild.isExpandableConnector())
                         connectExpandableConnectors(leftChild, rightChild);
                 }
