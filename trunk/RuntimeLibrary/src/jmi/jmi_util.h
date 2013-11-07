@@ -105,6 +105,7 @@ typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward de
 typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
+typedef struct jmi_cs_input_t jmi_cs_input_t;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward declaration of struct. */
 typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */

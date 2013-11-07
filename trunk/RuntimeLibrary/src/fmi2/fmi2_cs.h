@@ -22,22 +22,28 @@
 
 #include "fmiFunctions.h"
 #include "fmi2_me.h"
+#include "jmi_ode_problem.h"
 
-typedef struct fmi2_cs_t fmi2_cs_t;  /**< \brief Forward declaration of struct. */
+/** \file fmi2_me.h
+ *  \brief The public FMI 2.0 model interface.
+ **/
+
+/* @{ */
+
+typedef struct fmi2_cs_t fmi2_cs_t;      /**< \brief Forward declaration of struct. */
 
 struct fmi2_cs_t {
     fmi2_me_t          fmi2_me;          /**< \brief Must be the first one in this struct so that a fmi2_cs_t pointer can be used in place of a fmi2_me_t pointer. */
     jmi_ode_problem_t* ode_problem;      /**< \brief A jmi ode problem pointer. */
 };
 
-fmiStatus fmi2_cs_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn);
+/**
+ * \defgroup The Model Exchange public functions for FMI 2.0.
+ * 
+ * \brief Definitions of the functions for Model Exchange.
+ */
+ 
+ /* @{ */
 
 /**
  * \brief Sets the derivative of the outputs
@@ -145,5 +151,39 @@ fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
  */
 fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
                                  fmiString* value);
+
+
+ /* @} */
+ 
+ /* @} */
+
+/**
+ * \brief Instantiates the CS FMU, helper function for fmi2_instantiate.
+ * 
+ * @param c The FMU struct.
+ * @param instanceName The name of the instance.
+ * @param fmuType The fmi type to instanciate.
+ * @param GUID The GUID identifier.
+ * @param fmuResourceLocation The location of the resource directory.
+ * @param functions Callback functions for logging, allocation and deallocation.
+ * @param visible A fmiBoolean, defines the amount of interaction with the user.
+ * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @return An instance of a model.
+ */                 
+fmiStatus fmi2_cs_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn);
+
+/**
+ * \brief Dispose of the CS model instance, helper function for fmi2_free_instance.
+ * 
+ * @param c The FMU struct.
+ */
+void fmi2_cs_free_instance(fmiComponent c);
 
 #endif

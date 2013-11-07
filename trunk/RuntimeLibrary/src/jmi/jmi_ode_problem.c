@@ -17,10 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi_ode_solver.h"
-#include "jmi_ode_problem.h"
-#include "jmi_log.h"
 
+#include "jmi_ode_problem.h"
 
 int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, void* fmix_me,
                        int n_real_x, int n_sw, int n_real_u, jmi_log_t* log){

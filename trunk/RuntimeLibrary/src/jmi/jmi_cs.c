@@ -19,24 +19,6 @@
 
 #include "stdio.h"
 #include "jmi_cs.h"
-#include "jmi.h"
-#include "jmi_ode_problem.h"
-
-int jmi_cs_init_input_struct(jmi_cs_input_t* value) {
-    int i = 0;
-    jmi_real_t fac[JMI_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
-    
-    value -> active = FALSE;
-    value -> tn     = 0.0;
-    value -> input  = 0.0;
-    
-    for (i = 0; i < JMI_CS_MAX_INPUT_DERIVATIVES; i++) {
-        value -> input_derivatives[i] = 0.0;
-        value -> input_derivatives_factor[i] = fac[i];
-    }
-    
-    return 0;
-}
 
 int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
@@ -104,6 +86,22 @@ int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem,
             }
         }
         */
+    }
+    
+    return 0;
+}
+
+int jmi_cs_init_input_struct(jmi_cs_input_t* value) {
+    int i = 0;
+    jmi_real_t fac[JMI_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
+    
+    value -> active = FALSE;
+    value -> tn     = 0.0;
+    value -> input  = 0.0;
+    
+    for (i = 0; i < JMI_CS_MAX_INPUT_DERIVATIVES; i++) {
+        value -> input_derivatives[i] = 0.0;
+        value -> input_derivatives_factor[i] = fac[i];
     }
     
     return 0;

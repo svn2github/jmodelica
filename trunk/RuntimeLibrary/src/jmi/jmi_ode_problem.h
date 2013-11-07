@@ -25,7 +25,6 @@
 #ifndef _JMI_ODE_PROBLEM_H
 #define _JMI_ODE_PROBLEM_H
 
-#include "jmi_util.h"
 #include "jmi.h"
 #include "jmi_log.h"
 #include "jmi_cs.h"

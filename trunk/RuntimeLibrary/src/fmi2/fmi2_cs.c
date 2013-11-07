@@ -18,36 +18,10 @@
 */
 
 #include "stdio.h"
+#include "fmi2_me.h"
 #include "fmi2_cs.h"
 #include "fmiFunctionTypes.h"
 
-fmiStatus fmi2_cs_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn) {
-    fmiInteger retval;
-    fmi2_cs_t* fmi2_cs;
-    jmi_t* jmi;
-    jmi_ode_problem_t* ode_problem = 0;
-    
-    retval = fmi2_me_instantiate(c, instanceName, fmuType, fmuGUID, 
-                                fmuResourceLocation, functions, visible,
-                                loggingOn);
-    if (retval != fmiOK) {
-        return retval;
-    }
-    
-    jmi = ((fmi2_me_t*)c) -> jmi;
-    fmi2_cs = (fmi2_cs_t*)c;
-    jmi_new_ode_problem(&ode_problem, c, jmi->n_real_x, jmi->n_sw, jmi->n_real_u, jmi->log);
-    fmi2_cs -> ode_problem = ode_problem;
-    
-    return fmiOK;
-}
 
 fmiStatus fmi2_set_real_input_derivatives(fmiComponent c, 
                                           const fmiValueReference vr[],
@@ -110,4 +84,40 @@ fmiStatus fmi2_get_boolean_status(fmiComponent c, const fmiStatusKind s,
 fmiStatus fmi2_get_string_status(fmiComponent c, const fmiStatusKind s,
                                  fmiString* value) {
     return fmiDiscard;
+}
+
+/* Helper method for fmi2_instantiate*/
+fmiStatus fmi2_cs_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn) {
+    fmiInteger retval;
+    fmi2_cs_t* fmi2_cs;
+    jmi_t* jmi;
+    jmi_ode_problem_t* ode_problem = 0;
+    
+    retval = fmi2_me_instantiate(c, instanceName, fmuType, fmuGUID, 
+                                fmuResourceLocation, functions, visible,
+                                loggingOn);
+    if (retval != fmiOK) {
+        return retval;
+    }
+    
+    jmi = ((fmi2_me_t*)c) -> jmi;
+    fmi2_cs = (fmi2_cs_t*)c;
+    jmi_new_ode_problem(&ode_problem, c, jmi->n_real_x, jmi->n_sw, jmi->n_real_u, jmi->log);
+    fmi2_cs -> ode_problem = ode_problem;
+    
+    return fmiOK;
+}
+
+/* Helper method for fmi2_free_instance. */
+void fmi2_cs_free_instance(fmiComponent c) {
+    fmi2_me_free_instance(c);
+    jmi_free_ode_problem(((fmi2_cs_t*)c) -> ode_problem);
+    
 }

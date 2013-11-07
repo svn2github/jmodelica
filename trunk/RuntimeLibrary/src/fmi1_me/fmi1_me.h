@@ -38,7 +38,7 @@
 /* @{ */
 
 /* Type definitions */
-/*typedef */
+/* typedef */
 typedef struct fmi1_me_t fmi1_me_t;             /**< \brief Forward declaration of struct. */
 
 struct fmi1_me_t {

@@ -21,11 +21,10 @@
 #define jmi_cs_h
 
 #include "jmi.h"
+#include "jmi_ode_problem.h"
 #include "jmi_me.h"
 
 #define JMI_CS_MAX_INPUT_DERIVATIVES 3
-
-typedef struct jmi_cs_input_t jmi_cs_input_t;
 
 struct jmi_cs_input_t {
     jmi_value_reference vr;         /**< \brief Valuereference of the input, note only reals */
@@ -36,9 +35,11 @@ struct jmi_cs_input_t {
     jmi_real_t input_derivatives_factor[JMI_CS_MAX_INPUT_DERIVATIVES];
 };
 
-int jmi_cs_init_input_struct(jmi_cs_input_t* value);
+
 
 int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]);
+        
+int jmi_cs_init_input_struct(jmi_cs_input_t* value);
 #endif

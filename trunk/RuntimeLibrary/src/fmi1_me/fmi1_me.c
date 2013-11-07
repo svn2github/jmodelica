@@ -27,10 +27,6 @@
 #include "jmi_log.h"
 #include "jmi_me.h"
 
-#ifdef USE_FMI_ALLOC
-#include "fmi_alloc.h"
-#endif
-
 /* Inquire version numbers of header files */
 const char* fmi1_me_get_model_types_platform() {
     return fmiModelTypesPlatform;
@@ -69,19 +65,13 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
         functions.freeMemory(component);
         return NULL;
     }
-    
-    component->fmi_functions = functions;
-    
-#ifdef USE_FMI_ALLOC
-    /* Set the global user functions pointer so that memory allocation functions are intercepted */
-    fmiFunctions = &(component -> fmi_functions);
-#endif
 
     inst_name_len = strlen(instanceName)+1;
     tmpname = (char*)(fmi1_me_t *)functions.allocateMemory(inst_name_len, sizeof(char));
     strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
     
+    component->fmi_functions = functions;
     component -> jmi = jmi;
 
     return (fmiComponent)component;

@@ -20,13 +20,7 @@
 #include "stdio.h"
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
-#include "jmi_util.h"
-#include "jmi.h"
-#include "jmi_ode_problem.h"
 
-#ifdef USE_FMI_ALLOC
-#include "fmi_alloc.h"
-#endif
 
 const char* fmi2_get_types_platform() {
     return fmiTypesPlatform;
@@ -100,66 +94,20 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
     return component;
 }
 
-fmiStatus fmi2_me_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn) {
-    fmi2_me_t* fmi2_me;
-    jmi_t* jmi = 0;
-    fmiInteger retval;
-    char* tmpname;
-    size_t inst_name_len;
-        
-    fmi2_me = (fmi2_me_t*)c;                              
-    retval = jmi_me_instantiate(&jmi, fmi2_me, instanceName, fmuGUID,
-                                functions->allocateMemory, functions->freeMemory,
-                                (logger_callaback_function_t)functions->logger,
-                                loggingOn + '0');
-    
-    if (retval != 0) {
-        return fmiError;
-    }
-    
-    fmi2_me -> fmi_functions = functions;
-    /*TODO: Check how fmiFunctions is used, Iakov */
-#ifdef USE_FMI_ALLOC
-    /* Set the global user functions pointer so that memory allocation functions are intercepted */
-    fmiFunctions = &(fmi2_me -> fmi_functions);
-#endif
-    inst_name_len = strlen(instanceName)+1;
-    tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
-    strncpy(tmpname, instanceName, inst_name_len);
-    fmi2_me -> fmi_instance_name = tmpname;
-    
-    fmi2_me -> fmu_type = fmuType;
-    fmi2_me -> jmi = jmi;
-    
-    return fmiOK;
-}
-
 void fmi2_free_instance(fmiComponent c)  {
     /* Dispose the given model instance and deallocated all the allocated memory and other resources 
      * that have been allocated by the functions of the Model Exchange Interface for instance "c".*/
-    fmi2_me_t* fmi2_me;
-    fmi2_cs_t* fmi2_cs;
     fmiCallbackFreeMemory fmi_free;
+    
     if (c) {
-        fmi2_me = (fmi2_me_t*)c;
-        fmi_free = fmi2_me -> fmi_functions->freeMemory;
-
-        jmi_delete(fmi2_me->jmi);
-        fmi2_me->jmi = 0;
-        fmi_free((void*)fmi2_me -> fmi_instance_name);
-        if (fmi2_me->fmu_type == fmiModelExchange) {
-            fmi_free(fmi2_me);
-        } else if (fmi2_me->fmu_type == fmiModelExchange) {
-            fmi2_cs = (fmi2_cs_t*)c;
-            jmi_free_ode_problem(fmi2_cs -> ode_problem);
-            fmi_free(fmi2_cs);
+        fmi_free = ((fmi2_me_t*)c)->fmi_functions->freeMemory;
+        
+        if (((fmi2_me_t*)c)->fmu_type == fmiModelExchange) {
+            fmi2_me_free_instance(c);
+            fmi_free(((fmi2_me_t*)c));
+        } else if (((fmi2_me_t*)c)->fmu_type == fmiCoSimulation) {
+            fmi2_cs_free_instance(c);
+            fmi_free(((fmi2_cs_t*)c));
         }
     }
 }
@@ -587,4 +535,51 @@ fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c,
     }
     
     return fmiOK;
+}
+
+/* Helper method for fmi2_instatiate. */
+fmiStatus fmi2_me_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn) {
+    fmi2_me_t* fmi2_me;
+    jmi_t* jmi = 0;
+    fmiInteger retval;
+    char* tmpname;
+    size_t inst_name_len;
+        
+    fmi2_me = (fmi2_me_t*)c;                              
+    retval = jmi_me_instantiate(&jmi, fmi2_me, instanceName, fmuGUID,
+                                functions->allocateMemory, functions->freeMemory,
+                                (logger_callaback_function_t)functions->logger,
+                                loggingOn + '0');
+    
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    inst_name_len = strlen(instanceName)+1;
+    tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
+    strncpy(tmpname, instanceName, inst_name_len);
+    fmi2_me -> fmi_instance_name = tmpname;
+    
+    fmi2_me -> fmi_functions = functions;
+    fmi2_me -> fmu_type = fmuType;
+    fmi2_me -> jmi = jmi;
+    
+    return fmiOK;
+}
+
+/* Helper method for fmi2_free_instance. */
+void fmi2_me_free_instance(fmiComponent c) {
+    fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
+    fmiCallbackFreeMemory fmi_free = fmi2_me->fmi_functions->freeMemory;
+
+    jmi_delete(fmi2_me->jmi);
+    fmi2_me->jmi = 0;
+    fmi_free((void*)fmi2_me -> fmi_instance_name);
 }

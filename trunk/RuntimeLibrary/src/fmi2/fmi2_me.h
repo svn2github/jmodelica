@@ -22,10 +22,17 @@
 
 #include "fmiFunctions.h"
 #include "jmi_util.h"
+#include "jmi.h"
 #include "jmi_me.h"
 
+/** \file fmi2_me.h
+ *  \brief The public FMI 2.0 model interface.
+ **/
+
+/* @{ */
+
 /* Type definitions */
-/*typedef */
+/* typedef */
 
 typedef enum {
     initializationMode,
@@ -46,9 +53,12 @@ struct fmi2_me_t {
 };
 
 /**
- * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
+ * \defgroup The shared public functions for FMI 2.0.
+ * 
+ * \brief Definitions of the shared functions for Model Exchange and Co-Simulation.
  */
-extern const char *C_GUID;
+ 
+ /* @{ */
 
 /**
  * \brief Returns the platform types compiled for.
@@ -97,15 +107,6 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
                               fmiType   fmuType, 
                               fmiString fmuGUID, 
                               fmiString fmuResourceLocation, 
-                              const fmiCallbackFunctions* functions, 
-                              fmiBoolean                  visible,
-                              fmiBoolean                  loggingOn);
-
-fmiStatus fmi2_me_instantiate(fmiComponent c,
-                              fmiString    instanceName,
-                              fmiType      fmuType, 
-                              fmiString    fmuGUID, 
-                              fmiString    fmuResourceLocation, 
                               const fmiCallbackFunctions* functions, 
                               fmiBoolean                  visible,
                               fmiBoolean                  loggingOn);
@@ -343,6 +344,17 @@ fmiStatus fmi2_get_directional_derivative(fmiComponent c,
                 const fmiValueReference vKnown_ref[],   size_t nKnown,
                 const fmiReal dvKnown[], fmiReal dvUnknown[]);
 
+ /* @} */
+
+/**
+ * \defgroup The Model Exchange public functions for FMI 2.0.
+ * 
+ * \brief Definitions of the functions for Model Exchange.
+ */
+ 
+ /* @{ */
+
+
 /**
  * \brief Makes the simulation go into event mode.
  * 
@@ -445,5 +457,41 @@ fmiStatus fmi2_get_continuous_states(fmiComponent c, fmiReal x[], size_t nx);
 fmiStatus fmi2_get_nominals_of_continuous_states(fmiComponent c, 
                                                  fmiReal x_nominal[], 
                                                  size_t nx);
+
+ /* @} */
+
+/**
+ * The Global Unique IDentifier is used to check that the XML file is compatible with the C functions.
+ */
+extern const char *C_GUID;
+
+/**
+ * \brief Instantiates the ME FMU, helper function for fmi2_instantiate.
+ * 
+ * @param c The FMU struct.
+ * @param instanceName The name of the instance.
+ * @param fmuType The fmi type to instanciate.
+ * @param GUID The GUID identifier.
+ * @param fmuResourceLocation The location of the resource directory.
+ * @param functions Callback functions for logging, allocation and deallocation.
+ * @param visible A fmiBoolean, defines the amount of interaction with the user.
+ * @param loggingOn Turn of or on logging, fmiBoolean.
+ * @return An instance of a model.
+ */                                                 
+fmiStatus fmi2_me_instantiate(fmiComponent c,
+                              fmiString    instanceName,
+                              fmiType      fmuType, 
+                              fmiString    fmuGUID, 
+                              fmiString    fmuResourceLocation, 
+                              const fmiCallbackFunctions* functions, 
+                              fmiBoolean                  visible,
+                              fmiBoolean                  loggingOn);
+
+/**
+ * \brief Dispose of the ME model instance, helper function for fmi2_free_instance.
+ * 
+ * @param c The FMU struct.
+ */
+void fmi2_me_free_instance(fmiComponent c);
 
 #endif

@@ -18,21 +18,18 @@
 */
 
 #include "jmi_me.h"
-#include "jmi.h"
-#include "jmi_util.h"
-#include "jmi_log.h"
 
 #define indexmask 0x0FFFFFFF
 #define typemask 0xF0000000
 
-jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) { //TODO: should be static later on if possible
+jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) {
     /* Translate a ValueReference into variable index in z-vector. */
     jmi_value_reference index = valueref & indexmask;
     
     return index;
 }
 
-jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) { //TODO: should be static later on if possible
+jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
     /* Translate a ValueReference into variable type in z-vector. */
     jmi_value_reference type = valueref & typemask;
     
@@ -149,8 +146,6 @@ int jmi_initialize(jmi_t* jmi) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");
         return -1;
     }
-
-    
     
     /* Evaluate parameters */
     jmi_init_eval_parameters(jmi);
@@ -167,8 +162,6 @@ int jmi_initialize(jmi_t* jmi) {
         jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the actual sizes.");
         return -1;
     }
-
-
     
     /* We are at the initial event TODO: is this really necessary? */
     jmi->atEvent   = JMI_TRUE;
@@ -325,8 +318,6 @@ int jmi_initialize(jmi_t* jmi) {
     
     return 0;
 }
-    
-
 
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  const jmi_real_t value[]) {
