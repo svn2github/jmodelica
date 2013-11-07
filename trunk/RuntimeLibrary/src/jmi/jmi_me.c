@@ -66,16 +66,14 @@ int jmi_me_instantiate(jmi_t** jmi, void* fmix_me, jmi_string instance_name,
     /* Check if the GUID is correct.*/
     if (strcmp(GUID, C_GUID) != 0) {
         jmi_log_comment(jmi_->log, logError, "The model and the description file are not consistent to each other.");
-        free_memory(jmi_callbacks);
-        /* TODO: delete_jmi*/
+        jmi_delete(jmi_);
         return -1;
     }
     
     /* set start values*/
     if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
         jmi_log_comment(jmi_->log, logError, "Failed to set start values.");
-        free_memory(jmi_callbacks);
-        /* TODO: delete_jmi*/
+        jmi_delete(jmi_);
     	return -1;
     }
     
