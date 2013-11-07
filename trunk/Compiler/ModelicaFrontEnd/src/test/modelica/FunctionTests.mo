@@ -3955,15 +3955,18 @@ public
   input Real[2, :, 2] a;
   output Real[3, size(a, 2)] b;
   Integer[2] temp_1;
+  Integer[2] temp_2;
  algorithm
   for i1 in 1:size(a, 2) loop
    b[1,i1] := a[2,i1,1];
   end for;
-  temp_1[1] := 2;
-  temp_1[2] := 3;
   for i1 in 1:2 loop
    for i2 in 1:size(a, 2) loop
-    b[temp_1[i1],i2] := 2 * a[i1,i2,1];
+    temp_1[1] := 2;
+    temp_1[2] := 3;
+    temp_2[1] := 1;
+    temp_2[2] := 2;
+    b[temp_1[i1],i2] := 2 * a[temp_2[i1],i2,1];
    end for;
   end for;
   return;
@@ -4032,6 +4035,337 @@ end FunctionTests.ArrayExpInFunc12;
 
 ")})));
 end ArrayExpInFunc12;
+
+model ArrayExpInFunc13
+	
+function f
+	input Integer[:] i;
+	input Real[:] x;
+	output Real[size(i,1)] y;
+algorithm
+	y := x[i];
+end f;
+
+Real[3] x = f({1,2,3}, {1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc13",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc13
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc13.f({1, 2, 3}, {1, 2, 3});
+
+public
+ function FunctionTests.ArrayExpInFunc13.f
+  input Integer[:] i;
+  input Real[:] x;
+  output Real[size(i, 1)] y;
+ algorithm
+  for i1 in 1:size(i, 1) loop
+   y[i1] := x[i[i1]];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc13.f;
+
+end FunctionTests.ArrayExpInFunc13;
+			
+")})));
+end ArrayExpInFunc13;
+
+model ArrayExpInFunc14
+	
+function f
+	input Integer[:] is1;
+	input Integer[size(is1,1)] is2;
+	input Real[:,:] x;
+	output Real[size(is1,1),size(is1,1)] y;
+algorithm
+	y := x[is1,is2];
+	y := x[is2,is1] + y;
+end f;
+
+Real[2,2] x = f({1,2}, {1,2}, {{1,2},{3,4}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc14",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc14
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc14.f({1, 2}, {1, 2}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.ArrayExpInFunc14.f
+  input Integer[:] is1;
+  input Integer[size(is1, 1)] is2;
+  input Real[:, :] x;
+  output Real[size(is1, 1), size(is1, 1)] y;
+ algorithm
+  for i1 in 1:size(is1, 1) loop
+   for i2 in 1:size(is1, 1) loop
+    y[i1,i2] := x[is1[i1],is2[i2]];
+   end for;
+  end for;
+  for i1 in 1:size(is1, 1) loop
+   for i2 in 1:size(is1, 1) loop
+    y[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc14.f;
+
+end FunctionTests.ArrayExpInFunc14;
+			
+")})));
+end ArrayExpInFunc14;
+
+model ArrayExpInFunc15
+	
+function f
+	input Integer[:] is1;
+	input Integer[:] is2;
+	input Real[:,:] x;
+	output Real[size(is2,1), 2] y;
+algorithm
+	y := x[is1[is2], {1,2}];
+end f;
+
+Real[2,2] x = f({1,2,3}, {2,3}, {{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc15",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc15
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc15.f({1, 2, 3}, {2, 3}, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc15.f
+  input Integer[:] is1;
+  input Integer[:] is2;
+  input Real[:, :] x;
+  output Real[size(is2, 1), 2] y;
+  Integer[2] temp_1;
+ algorithm
+  for i1 in 1:size(is2, 1) loop
+   for i2 in 1:2 loop
+    temp_1[1] := 1;
+    temp_1[2] := 2;
+    y[i1,i2] := x[is1[is2[i1]],temp_1[i2]];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc15.f;
+
+end FunctionTests.ArrayExpInFunc15;
+			
+")})));
+end ArrayExpInFunc15;
+
+model ArrayExpInFunc16
+	
+function f
+	input Integer[:] is1;
+	input Integer[:] is2;
+	input Real[:,:] x;
+	output Real[size(is2,1), 2] y;
+algorithm
+	y := x[is1[{1,2}],is2];
+end f;
+
+Real[2,2] x = f({1,2,3}, {2,3}, {{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc16",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc16
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc16.f({1, 2, 3}, {2, 3}, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc16.f
+  input Integer[:] is1;
+  input Integer[:] is2;
+  input Real[:, :] x;
+  output Real[size(is2, 1), 2] y;
+  Integer[2] temp_1;
+ algorithm
+  for i1 in 1:2 loop
+   for i2 in 1:size(is2, 1) loop
+    temp_1[1] := is1[1];
+    temp_1[2] := is1[2];
+    y[i1,i2] := x[temp_1[i1],is2[i2]];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc16.f;
+
+end FunctionTests.ArrayExpInFunc16;
+			
+")})));
+end ArrayExpInFunc16;
+
+model ArrayExpInFunc17
+	
+function f
+	input Integer is1;
+	input Integer is2;
+	input Integer n;
+	input Real[:,:] x;
+	output Real[n, size(x,2)] y;
+algorithm
+	y[:] := x[is1:is2];
+end f;
+
+Real[3,3] x = f(1,3,3,{{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc17",
+			description="Scalarization of functions: unknown size range exp as slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc17
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ ({{x[1,1], x[1,2], x[1,3]}, {x[2,1], x[2,2], x[2,3]}, {x[3,1], x[3,2], x[3,3]}}) = FunctionTests.ArrayExpInFunc17.f(1, 3, 3, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc17.f
+  input Integer is1;
+  input Integer is2;
+  input Integer n;
+  input Real[:, :] x;
+  output Real[n, size(x, 2)] y;
+ algorithm
+  for i1 in 1:max(integer(is2 - is1) + 1, 0) loop
+   y[i1] := x[is1 + (i1 - 1)];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc17.f;
+
+end FunctionTests.ArrayExpInFunc17;
+			
+")})));
+end ArrayExpInFunc17;
+
+model ArrayExpInFunc18
+	
+function f
+	input Real[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o := i;
+end f;
+
+function fw
+	input Integer[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o[{1,3,5}] := {1,1,1};
+	(o[i],) := f(o[i]);
+end fw;
+
+Real[3] ae;
+equation
+	(ae[{3,2,1}],) = fw({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc18",
+			description="Scalarization of functions: unknown size slice in function call stmt",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc18
+ Real ae[1];
+ Real ae[2];
+ Real ae[3];
+equation
+ ({ae[3], ae[2], ae[1]}, ) = FunctionTests.ArrayExpInFunc18.fw({1, 2, 3});
+
+public
+ function FunctionTests.ArrayExpInFunc18.fw
+  input Integer[:] i;
+  output Real[size(i, 1)] o;
+  output Real dummy;
+  Real[:] temp_1;
+  Real[:] temp_2;
+ algorithm
+  size(temp_1) := {:};
+  size(temp_2) := {:};
+  dummy := 1;
+  o[1] := 1;
+  o[3] := 1;
+  o[5] := 1;
+  for i1 in 1:size(i, 1) loop
+   temp_1[i1] := o[i[i1]];
+  end for;
+  (temp_2, ) := FunctionTests.ArrayExpInFunc18.f(temp_1);
+  for i1 in 1:size(i, 1) loop
+   o[i[i1]] := temp_2[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc18.fw;
+
+ function FunctionTests.ArrayExpInFunc18.f
+  input Real[:] i;
+  output Real[size(i, 1)] o;
+  output Real dummy;
+ algorithm
+  dummy := 1;
+  for i1 in 1:size(i, 1) loop
+   o[i1] := i[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc18.f;
+
+end FunctionTests.ArrayExpInFunc18;
+			
+")})));
+end ArrayExpInFunc18;
+
 
 
 model ArrayOutputScalarization1

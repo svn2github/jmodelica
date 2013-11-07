@@ -3015,6 +3015,92 @@ void func_CCodeGenTests_CUnknownArray3_f2_def(jmi_array_t* x2_a, jmi_array_t* y2
 ")})));
 end CUnknownArray3;
 
+model CUnknownArray4
+function f
+	input Real[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o := i;
+end f;
+
+function fw
+	input Integer[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o[{1,3,5}] := {1,1,1};
+	(o[i],) := f(o[i]);
+end fw;
+
+Real[3] ae;
+equation
+	(ae[{3,2,1}],) = fw({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="CUnknownArray4",
+			description="Unknown size expression",
+			variability_propagation=false,
+			inline_functions="none",
+			template="$C_functions$",
+			generatedCode="
+void func_CCodeGenTests_CUnknownArray4_fw_def(jmi_array_t* i_a, jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_DYNAMIC(o_an, 1)
+    jmi_ad_var_t dummy_v;
+    JMI_ARRAY_DYNAMIC(temp_1_a, 1)
+    JMI_ARRAY_DYNAMIC(temp_2_a, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    if (o_a == NULL) {
+        JMI_ARRAY_DYNAMIC_INIT_1(o_an, jmi_array_size(i_a, 0), jmi_array_size(i_a, 0))
+        o_a = o_an;
+    }
+    JMI_ARRAY_DYNAMIC_INIT_1(temp_1_a, jmi_array_size(i_a, 0), jmi_array_size(i_a, 0))
+    JMI_ARRAY_DYNAMIC_INIT_1(temp_2_a, jmi_array_size(i_a, 0), jmi_array_size(i_a, 0))
+    dummy_v = 1;
+    jmi_array_ref_1(o_a, 1) = 1;
+    jmi_array_ref_1(o_a, 3) = 1;
+    jmi_array_ref_1(o_a, 5) = 1;
+    i1_0ie = jmi_array_size(i_a, 0) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(temp_1_a, i1_0i) = jmi_array_val_1(o_a, jmi_array_val_1(i_a, i1_0i));
+    }
+    func_CCodeGenTests_CUnknownArray4_f_def(temp_1_a, temp_2_a, NULL);
+    i1_1ie = jmi_array_size(i_a, 0) + 1 / 2.0;
+    for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+        jmi_array_ref_1(o_a, jmi_array_ref_1(i_a, i1_1i)) = jmi_array_val_1(temp_2_a, i1_1i);
+    }
+    if (dummy_o != NULL) *dummy_o = dummy_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_CUnknownArray4_f_def(jmi_array_t* i_a, jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_DYNAMIC(o_an, 1)
+    jmi_ad_var_t dummy_v;
+    jmi_ad_var_t i1_2i;
+    jmi_ad_var_t i1_2ie;
+    if (o_a == NULL) {
+        JMI_ARRAY_DYNAMIC_INIT_1(o_an, jmi_array_size(i_a, 0), jmi_array_size(i_a, 0))
+        o_a = o_an;
+    }
+    dummy_v = 1;
+    i1_2ie = jmi_array_size(i_a, 0) + 1 / 2.0;
+    for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
+        jmi_array_ref_1(o_a, i1_2i) = jmi_array_val_1(i_a, i1_2i);
+    }
+    if (dummy_o != NULL) *dummy_o = dummy_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+			
+")})));
+end CUnknownArray4;
 
 
 model CRecordDecl1
@@ -7567,9 +7653,8 @@ void func_CCodeGenTests_Algorithm10_fw_def(jmi_array_t* o_a, jmi_ad_var_t* dummy
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(o_an, 5, 1)
     jmi_ad_var_t dummy_v;
-    JMI_ARRAY_STATIC(temp_1_a, 2, 1)
     JMI_ARRAY_STATIC(tmp_1, 2, 1)
-    JMI_ARRAY_STATIC_INIT_1(temp_1_a, 2)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
     if (o_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(o_an, 5)
         o_a = o_an;
@@ -7578,10 +7663,11 @@ void func_CCodeGenTests_Algorithm10_fw_def(jmi_array_t* o_a, jmi_ad_var_t* dummy
     jmi_array_ref_1(o_a, 1) = 1;
     jmi_array_ref_1(o_a, 3) = 1;
     jmi_array_ref_1(o_a, 5) = 1;
-    jmi_array_ref_1(temp_1_a, 1) = jmi_array_val_1(o_a, 3);
-    jmi_array_ref_1(temp_1_a, 2) = jmi_array_val_1(o_a, 5);
     JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
-    func_CCodeGenTests_Algorithm10_f_def(temp_1_a, tmp_1, NULL);
+    JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+    jmi_array_ref_1(tmp_2, 1) = jmi_array_val_1(o_a, 3);
+    jmi_array_ref_1(tmp_2, 2) = jmi_array_val_1(o_a, 5);
+    func_CCodeGenTests_Algorithm10_f_def(tmp_2, tmp_1, NULL);
     jmi_array_ref_1(o_a, 2) = (jmi_array_val_1(tmp_1, 1));
     jmi_array_ref_1(o_a, 4) = (jmi_array_val_1(tmp_1, 2));
     if (dummy_o != NULL) *dummy_o = dummy_v;
