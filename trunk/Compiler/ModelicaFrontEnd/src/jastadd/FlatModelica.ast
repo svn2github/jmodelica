@@ -32,7 +32,7 @@ FClass : BaseNode ::= FQName
                       AliasVariable:FVariable* 
                       FInitialEquation:FAbstractEquation*
                       FParameterEquation:FAbstractEquation*
-                      FEquationBlock*
+                      FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
                       FEnumDecl*
@@ -83,15 +83,6 @@ abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
-
-FAbstractEquationBlock : BaseNode;
-
-/**
- * \brief A list of equations corresponding to a BLT block.
- */
-FEquationBlock : FAbstractEquationBlock ::= FAbstractEquation*;
-
-//FSolvedEquationBlock : FAbstractEquationBlock ::= FExp;
 
 /**
  * \brief Abstract base class for flat variables.

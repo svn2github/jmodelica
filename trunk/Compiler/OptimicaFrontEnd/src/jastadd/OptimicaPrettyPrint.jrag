@@ -149,32 +149,23 @@ aspect FlatOptimicaPrettyPrint {
 			str.print(";\n");
 		}
 
-	    // TODO: print block comments here as well?
-//		int block_index = 0;
 	    boolean wroteEquation = false;
-	    for (FEquationBlock b : getFEquationBlocks()) {
-//    		if (block_index != 0)
-//    			b.printBlockComment(block_index, str);
-	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithm) {
-	    			p.print(e, str, indent);
-	    			wroteEquation = false;
-	    		} else {
-	    			if (!e.isIgnored()) {
-		    			if (!wroteEquation) {
-		    				str.print(indent);
-		    				str.print("equation\n");
-		    				wroteEquation = true;
-//	    					if (block_index == 0) 
-//	    		    			b.printBlockComment(block_index, str);
-		    			}
-		    			p.print(e, str, nextInd);
-			    		str.print(";\n");
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
 	    			}
-	    		}
-	    	}
-//	    	block_index++;
-	    }
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
 	  	
 		if (getNumFParameterEquation()>0)
 			str.print(indent + "parameter equation\n");

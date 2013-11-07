@@ -1976,7 +1976,7 @@ aspect FlatNames {
      * \brief Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
-        getFEquationBlock(0).addFAbstractEquation(feq);
+        addFAbstractEquation(feq);
     }
     
 }
@@ -2741,7 +2741,7 @@ aspect FlatExpressions {
     inh boolean FExp.inEquationSection();
     inh boolean FAbstractEquation.inEquationSection();
     inh boolean FStatement.inEquationSection();
-    eq FClass.getFEquationBlock().inEquationSection() = true;
+    eq FClass.getFAbstractEquation().inEquationSection() = true;
     eq Root.getChild().inEquationSection() = false;
     inh boolean FExp.inInitialEquationSection();
     inh boolean FAbstractEquation.inInitialEquationSection();

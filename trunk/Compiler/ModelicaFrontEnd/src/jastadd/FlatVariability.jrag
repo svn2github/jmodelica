@@ -215,7 +215,7 @@ aspect FlatVariability {
 	 * Convert all continous variables that are assigned in when equations into discrete variables.
 	 */
 	public void FClass.updateVariablilityForVariablesInWhen() {
-	    for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+	    for (FAbstractEquation eqn : getFAbstractEquations())
 	        eqn.updateVariablilityForVariablesInWhen(false);
 	    checkDiscreteOperations();
 	}

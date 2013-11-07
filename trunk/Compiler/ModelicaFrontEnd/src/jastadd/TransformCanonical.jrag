@@ -1356,9 +1356,7 @@ aspect TransformCanonical {
 	 * \brief Replace one equation with another.
 	 */
 	public void FClass.replaceEquation(FAbstractEquation oldEq, FAbstractEquation newEq) {
-		for (FEquationBlock b : getFEquationBlocks())
-			if (b.getFAbstractEquations().replaceChild(oldEq, newEq))
-				return;
+		getFAbstractEquations().replaceChild(oldEq, newEq);
 	}
 	
 	/**
@@ -1692,8 +1690,7 @@ aspect TransformCanonical {
 		if (aliasManager == null) {
 			aliasManager = new AliasManager();
 		}
-		for (FAbstractEquation equation : 
-			getFEquationBlock(0).getFAbstractEquations()) {
+		for (FAbstractEquation equation : getFAbstractEquations()) {
 			// Iterate over all equations
 			// If the equation is an alias equation, then register
 			// the alias variables in the alias manager.
@@ -1742,13 +1739,13 @@ aspect TransformCanonical {
 		}
 		
 		// Remove alias equations.
-		for (FAbstractEquation equation : getFEquationBlock(0).getFAbstractEquations()) 
+		for (FAbstractEquation equation : getFAbstractEquations()) 
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
 
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
-		getFEquationBlock(0).setFAbstractEquationList(new List(eqns));
+		setFAbstractEquationList(new List(eqns));
 		
 		aliasVariablesEliminated = true;
 		enableAliasRewrite();
@@ -2025,8 +2022,7 @@ aspect TransformCanonical {
 	public void FClass.removeMarkedEqns() {
 		setFInitialEquationList(removeMarkedEqns(getFInitialEquations()));
 		setFParameterEquationList(removeMarkedEqns(getFParameterEquations()));
-		FEquationBlock eb = getFEquationBlock(0);
-		eb.setFAbstractEquationList(removeMarkedEqns(eb.getFAbstractEquations()));
+		setFAbstractEquationList(removeMarkedEqns(getFAbstractEquations()));
 	}
 	
 	/**
@@ -2175,8 +2171,7 @@ aspect TransformCanonical {
 	}
 	
 	public void FClass.insertTempsInLHS() {
-		for (FAbstractEquation equation : 
-			getFEquationBlock(0).getFAbstractEquations()) {
+		for (FAbstractEquation equation : getFAbstractEquations()) {
 			equation.insertTempsInLHS(this);
 		}
 	}
@@ -2313,7 +2308,7 @@ aspect MapWhenClauses{
 		return l;
 	}
 
-	rewrite FWhenEquation in FEquationBlock.getFAbstractEquation() {
+	rewrite FWhenEquation in FClass.getFAbstractEquation() {
 		when (rewriteWhenEquation && getNumFAbstractEquation()>1) to List {
 			return splitWhenEquation();
 		}
@@ -2358,8 +2353,7 @@ aspect IfEquations {
                 
                 // Workaround for JastAdd bug
                 setFInitialEquationList(cleanEmptyElse(getFInitialEquations()));
-                FEquationBlock b = getFEquationBlock(0);
-                b.setFAbstractEquationList(cleanEmptyElse(b.getFAbstractEquations()));
+                setFAbstractEquationList(cleanEmptyElse(getFAbstractEquations()));
                 
                 // Remove orphaned temporaries
                 flushAllRecursive();
@@ -2439,7 +2433,7 @@ aspect IfEquations {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
 	
-	rewrite FElseEquation in FEquationBlock.getFAbstractEquation() {
+	rewrite FElseEquation in FClass.getFAbstractEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
 	
@@ -3224,7 +3218,7 @@ aspect FunctionInlining {
 			this.fc = fc;
 			this.level = level;
 			vars = fc.getFVariables();
-			normalEqns = fc.getFEquationBlock(0).getFAbstractEquations();
+			normalEqns = fc.getFAbstractEquations();
 			paramEqns = fc.getFParameterEquations();
 			// Make sure maps are calculated
 			fc.parameterEquationsMap();
@@ -4462,7 +4456,7 @@ aspect FunctionInlining {
 		getFVariables().markUsedFunctions();
 		getFInitialEquations().markUsedFunctions();
 		getFParameterEquations().markUsedFunctions();
-		getFEquationBlocks().markUsedFunctions();
+		getFAbstractEquations().markUsedFunctions();
 		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl func : getFFunctionDecls())
 			if (func.functionIsUsed())
@@ -4691,7 +4685,7 @@ aspect ResidualPairPropagation{
     public class FClass {
         public class propagateResidualPairs extends Transformation {
             public void perform() {
-                for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations()) {
+                for (FAbstractEquation eqn : getFAbstractEquations()) {
                     if (eqn.hasResidual() && eqn.getResidual().hasIterationVariable())
                         eqn.getResidual().getIterationVariable().myFV().setHGTType(FClass.HGTVariableType.PAIR);
                 }

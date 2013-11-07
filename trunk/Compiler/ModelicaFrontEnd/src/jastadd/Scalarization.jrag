@@ -98,8 +98,7 @@ aspect Scalarization {
 	}
 	
 	protected void FClass.scalarizeEquations(List<FVariable> vars) {
-		FEquationBlock eb = getFEquationBlock(0);
-		eb.setFAbstractEquationList(scalarizeEquationList(eb.getFAbstractEquations(), vars));
+		setFAbstractEquationList(scalarizeEquationList(getFAbstractEquations(), vars));
 		setFInitialEquationList(scalarizeEquationList(getFInitialEquations(), vars));
 		setFParameterEquationList(scalarizeEquationList(getFParameterEquations(), vars));
 	}
@@ -170,7 +169,7 @@ aspect Scalarization {
 	
 	protected void FClass.evaluateArraySubscripts() {
 		clearFlatNameBinding();
-		getFEquationBlock(0).makeSubscriptsLiteral();
+		getFAbstractEquations().makeSubscriptsLiteral();
 		getFInitialEquations().makeSubscriptsLiteral();
 		getFParameterEquations().makeSubscriptsLiteral();
 	}

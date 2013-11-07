@@ -45,7 +45,7 @@ aspect Connections {
 		//System.out.println(connectionSetManager.printConnectionSets());
 		
 		for (ConnectionSet set : l) 
-			set.generateEquations(getFEquationBlock(0));
+			set.generateEquations(getFAbstractEquations());
 		connectionSetManager.generateEqualityConstraints(this);
 		connectionSetManager.disconnectFromInstanceTree();
 	}
@@ -224,9 +224,9 @@ aspect Connections {
 		/**
 		 * Generate equations for this set.
 		 * 
-		 * @param eb  equation block to add equations to
+		 * @param eqns  equation list to add equations to
 		 */
-		public abstract void generateEquations(FEquationBlock eb);
+		public abstract void generateEquations(List<FAbstractEquation> eqns);
 		
 		/**
 		 * Return all ConnectionSetEntrys corresponding to flow variables based
@@ -282,12 +282,12 @@ aspect Connections {
 			return cses;
 		}
 
-		public void generateEquations(FEquationBlock eb) {
+		public void generateEquations(List<FAbstractEquation> eqns) {
 			FExp e = null;
 			for (ConnectionSetEntry cse : this) 
 				e = cse.createFIdUseExp().appendSum(e, cse.isOutside());
 			FExp zero = first().getVar().size().createZeroFExp();
-			eb.addFAbstractEquationNoTransform(new FEquation(e, zero));	
+			eqns.add(new FEquation(e, zero));	
 		}
 
 	}
@@ -302,14 +302,14 @@ aspect Connections {
 			return "stream";
 		}
 
-		public void generateEquations(FEquationBlock eb) {
+		public void generateEquations(List<FAbstractEquation> eqns) {
 			// If the connection set has two member one being inside
 			// and one being outside an additional equation should
 			// be generated.
 			if (size() == 2 && first().isOutside() != last().isOutside()) {
 				FExp e1 = first().createFIdUseExp();
 				FExp e2 = last().createFIdUseExp();
-				eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
+				eqns.add(new FEquation(e1, e2));
 			}
 		}
 		
@@ -358,20 +358,20 @@ aspect Connections {
 			return "potential";
 		}
 
-		public void generateEquations(FEquationBlock eb) {
+		public void generateEquations(List<FAbstractEquation> eqns) {
 		    if (size() == 1) {
 		        /* This case is for cells in arrays in expandable connectors that are not present.
 		         * Since we can't have arrays that are non-continous, we generate the missing ones and set them to zero.
 		         */
 		        FExp e = first().createFIdUseExp();
 		        FExp zero = new FIntegerLitExp(0);
-		        eb.addFAbstractEquationNoTransform(new FEquation(e, zero));   
+		        eqns.add(new FEquation(e, zero));   
 		    } else {
     			FExp e1 = null;
     			for (ConnectionSetEntry cse : this) {
     				FExp e2 = cse.createFIdUseExp();
     				if (e1 != null)
-    					eb.addFAbstractEquationNoTransform(new FEquation(e1, e2));
+    					eqns.add(new FEquation(e1, e2));
     				e1 = e2;
     			}
 		    }
@@ -956,7 +956,7 @@ aspect OverconstrainedConnections {
 				eqn = new FFunctionCallEquation(new List<FFunctionCallLeft>(), right);
 			else
 				eqn = new FEquation(s.createZeroFExp(), right);
-			fc.getFEquationBlock(0).addFAbstractEquation(eqn);
+			fc.addFAbstractEquationNoTransform(eqn);
 		}
 		
 	}

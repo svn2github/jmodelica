@@ -910,27 +910,23 @@ aspect FlatPrettyPrint {
 			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
 	
-		int block_index = 0;
 	    boolean wroteEquation = false;
-	    for (FEquationBlock b : getFEquationBlocks()) {
-	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithm) {
-	    			p.print(e, str, indent);
-	    			wroteEquation = false;
-	    		} else {
-	    			if (!e.isIgnored()) {
-		    			if (!wroteEquation) {
-		    				str.print(indent);
-		    				str.print("equation\n");
-		    				wroteEquation = true;
-		    			}
-		    			p.print(e, str, nextInd);
-			    		str.print(";\n");
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
 	    			}
-	    		}
-	    	}
-	    	block_index++;
-	    }
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
 	    
   		if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
   				getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
@@ -2018,27 +2014,23 @@ aspect PrettyPrint_MC {
 			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
 	*/
-		int block_index = 0;
 	    boolean wroteEquation = false;
-	    for (FEquationBlock b : getFEquationBlocks()) {
-	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithm) {
-	    			p.print(e, str, indent);
-	    			wroteEquation = false;
-	    		} else {
-	    			if (!e.isIgnored()) {
-		    			if (!wroteEquation) {
-		    				str.print(indent);
-		    				str.print("equation\n");
-		    				wroteEquation = true;
-		    			}
-		    			p.print(e, str, nextInd);
-			    		str.print(";\n");
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
 	    			}
-	    		}
-	    	}
-	    	block_index++;
-	    }
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
 	        	
   		str.print(indent);
   		str.print("end ");

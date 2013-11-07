@@ -168,7 +168,7 @@ aspect FlatAPI {
 	inh lazy int FAbstractVariable.valueReference();
 	eq FClass.getFVariable(int i).valueReference()     = valueReferenceMap().get(getFVariable(i));
 	eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
-	eq FClass.getFEquationBlock().valueReference()     = -1;
+	eq FClass.getFAbstractEquation().valueReference()  = -1;
 	eq Root.getChild().valueReference()                = -1;
 	
 	syn int FVariable.aliasValueReference() = alias()!=null? 
@@ -765,11 +765,9 @@ aspect FlatAPI {
     syn int FClass.numEquations() = equations().size();
 	syn lazy ArrayList<FAbstractEquation> FClass.equations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-		for (FEquationBlock b : getFEquationBlocks()) {
-			for (FAbstractEquation e : b.getFAbstractEquations()) {
-				if (!e.isIgnored()) {
-					l.add(e);
-				}
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			if (!e.isIgnored()) {
+				l.add(e);
 			}
 		}
 		return l;
@@ -791,11 +789,9 @@ aspect FlatAPI {
     syn int FClass.numContinousEquations() = continuousEquations().size();
 	syn lazy ArrayList<FAbstractEquation> FClass.continuousEquations() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-		for (FEquationBlock b : getFEquationBlocks()) {
-			for (FAbstractEquation e : b.getFAbstractEquations()) {
-				if (!e.isIgnored() && e.isContinuous()) {
-					l.add(e);
-				}
+		for (FAbstractEquation e : getFAbstractEquations()) {
+			if (!e.isIgnored() && e.isContinuous()) {
+				l.add(e);
 			}
 		}
 		return l;

@@ -74,7 +74,6 @@ aspect Flattening {
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
     	beginStep("flattenInstClassDecl()");
 		fc.setFQName(new FQNameString(qualifiedName()));
-		fc.addFEquationBlock(new FEquationBlock(new List()));
 		buildConnectionSets(fc);
 		root().breakOnErrors();
 		flatten(fc, false);
@@ -1251,7 +1250,7 @@ aspect FlatExpressions {
 	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
 	
 	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
-		fc.getFEquationBlock(0).addFAbstractEquationNoTransform(f);
+		fc.addFAbstractEquationNoTransform(f);
 	}
 	
 	public void FInitialEquation.addEquationTo(FClass fc, FAbstractEquation f) {

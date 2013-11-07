@@ -1081,13 +1081,13 @@ aspect AssertEval {
          */
         public class evaluateAsserts extends Transformation {
             public void perform() {
-                for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+                for (FAbstractEquation eqn : getFAbstractEquations())
                     eqn.evaluateAsserts();
                 List<FAbstractEquation> l = new List<FAbstractEquation>();
-                for (FAbstractEquation eqn : getFEquationBlock(0).getFAbstractEquations())
+                for (FAbstractEquation eqn : getFAbstractEquations())
                     if (!eqn.markedForRemoval)
                         l.add(eqn);
-                getFEquationBlock(0).setFAbstractEquationList(l);
+                setFAbstractEquationList(l);
             }
         }
     }

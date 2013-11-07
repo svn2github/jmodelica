@@ -25,7 +25,7 @@ aspect VariabilityPropagation {
 	 */
 	inh boolean FAbstractEquation.canPropagate();
 	eq Root.getChild().canPropagate() = false;
-	eq FClass.getFEquationBlock().canPropagate() = true;
+	eq FClass.getFAbstractEquation().canPropagate() = true;
 	eq FIfWhenElseEquation.getChild().canPropagate() = false;
 	
 	syn boolean FEquation.canPropagate() =
@@ -92,7 +92,7 @@ aspect VariabilityPropagation {
 
 		List<FAbstractEquation> parameterEquations = getFParameterEquations();
 		LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
-		List<FAbstractEquation> equations = getFEquationBlock(0).getFAbstractEquations();
+		List<FAbstractEquation> equations = getFAbstractEquations();
 
 		// Build worklist
 		for (FAbstractEquation equation: equations) {
@@ -124,7 +124,7 @@ aspect VariabilityPropagation {
 				newEquations.add(equation);
 			}
 		}
-		getFEquationBlock(0).setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+		setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
 
 	}
 	
