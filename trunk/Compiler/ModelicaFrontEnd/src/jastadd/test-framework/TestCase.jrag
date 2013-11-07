@@ -337,40 +337,42 @@ abstract public class TestCase {
 		sr.setFileName(getSourceFileName());
 		
 		
-		// Instantiate and check for errors
-	    InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		Collection<Problem> problems = null;
-		try {
-			ipr.checkErrorsInInstClass(className, checkType);
-			problems = sr.collectWarnings();
-		} catch (CompilerException e) {
-			problems = e.getProblems();
-		}
-		if (testSemanticProblems(problems)) return;
-		
-		
-		// Flatten class and test it
-	    InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
-		FClass fc = FClass.create(icd, getSourceFileName());
-		
-		try {
-			icd.flattenInstClassDecl(fc);
-		} catch (CompilerException e) {
-			problems = e.getProblems();
-			if (testSemanticProblems(problems)) return;
-		}
-		if (testFlattened(fc)) return;
-		
-		
-		// Transform canonical and check for errors again
-		try {
-		    fc.transformCanonical();
-			fc.errorCheck(checkType);
-			problems = fc.collectWarnings();
-		} catch (CompilerException e) {
-			problems = e.getProblems();
-		}
-		if (testTransformedProblems(problems)) return;
+        // Instantiate and check for errors
+        InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
+        Collection<Problem> problems = null;
+        try {
+            ipr.checkErrorsInInstClass(className, checkType);
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+            if (testSemanticProblems(problems)) return;
+        }
+        
+        
+        // Flatten class and check errors reported during flattening
+        InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
+        FClass fc = FClass.create(icd, getSourceFileName());
+        try {
+            icd.flattenInstClassDecl(fc);
+            problems = sr.collectWarnings();
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+        }
+        if (testSemanticProblems(problems)) return;
+        
+        
+        // Test flattened class
+        if (testFlattened(fc)) return;
+        
+        
+        // Transform canonical and check for errors again
+        try {
+            fc.transformCanonical();
+            fc.errorCheck(checkType);
+            problems = fc.collectWarnings();
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+        }
+        if (testTransformedProblems(problems)) return;
 		
 		
 		// Test transformed class

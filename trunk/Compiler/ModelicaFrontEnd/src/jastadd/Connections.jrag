@@ -755,19 +755,23 @@ aspect Connections {
 
 	public void InstComponentDecl.connectToAsPrimitive(ConnectionSetEntry left, ConnectionSetEntry right, 
 			FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-		if (buildGraph && isOverconstrainedConnection(right.getVar())) {
-			csm.getGraph().addConnection(left, right, prefix, source);
-		} else {
-		    // In the special case of members of expandable connectors, we need each cell separately.
-		    if (isArray() && (isExpandableConnectorMember() || right.getVar().isExpandableConnectorMember()) && 
-		            !left.getFQName().hasScalarSubscripts()) 
-		        for (Index i : indices())
-		            csm.addVars(left.specifyCell(i), right.specifyCell(i));
-		    else
-		        csm.addVars(left, right);
-		}
-        csm.countCardinality(left.name());
-        csm.countCardinality(right.name());
+	    if (left.equals(right)) {
+	        source.warning("Ignored connection from connector to itself");
+	    } else {
+	        if (buildGraph && isOverconstrainedConnection(right.getVar())) {
+	            csm.getGraph().addConnection(left, right, prefix, source);
+	        } else {
+	            // In the special case of members of expandable connectors, we need each cell separately.
+	            if (isArray() && (isExpandableConnectorMember() || right.getVar().isExpandableConnectorMember()) && 
+	                    !left.getFQName().hasScalarSubscripts()) 
+	                for (Index i : indices())
+	                    csm.addVars(left.specifyCell(i), right.specifyCell(i));
+	            else
+	                csm.addVars(left, right);
+	        }
+	        csm.countCardinality(left.name());
+	        csm.countCardinality(right.name());
+	    }
 	}
 	
 	syn boolean FQName.hasScalarSubscripts() {
@@ -1010,6 +1014,16 @@ aspect OverconstrainedConnections {
 		 * Does this node represent a breakable branch in the overconstrained connection graph?
 		 */
 		public boolean isBreakable();
+        
+        /**
+         * Report a warning.
+         */
+        public void warning(String msg);
+        
+        /**
+         * Report an error.
+         */
+        public void error(String msg);
 		
 	}
 	

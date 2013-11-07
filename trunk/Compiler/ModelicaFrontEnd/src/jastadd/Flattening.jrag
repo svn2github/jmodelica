@@ -1331,10 +1331,13 @@ aspect FlatExpressions {
 	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
 		if (ignoreInFlattening())
 			return null;
+		FExp call = getCall().flatten(prefix);
+		if (!(call instanceof FAbstractFunctionCall))
+		    return null;
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
-		return new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) getCall().flatten(prefix));
+		return new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) call);
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {

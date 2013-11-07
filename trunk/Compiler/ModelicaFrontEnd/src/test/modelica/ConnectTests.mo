@@ -1127,6 +1127,43 @@ end ConnectTests.ConnectTest23;
 end ConnectTest23;
 
 
+model ConnectTest24
+    connector A = Real;
+	A a = 1;
+equation
+	connect(a, a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest24",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectTest24
+ Real a = 1;
+end ConnectTests.ConnectTest24;
+")})));
+end ConnectTest24;
+
+
+model ConnectTest25
+    connector A = Real;
+    A a = 1;
+equation
+    connect(a, a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ConnectTest25",
+			description="",
+			errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+At line 1152, column 5:
+  Ignored connection from connector to itself
+")})));
+end ConnectTest25;
+
+
 model ConnectOuterTest1
     connector C = Real;
     

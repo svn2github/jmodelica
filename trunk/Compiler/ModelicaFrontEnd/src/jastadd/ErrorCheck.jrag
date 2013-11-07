@@ -240,7 +240,7 @@ aspect ErrorCheck {
    * Register an error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
-  void ASTNode.error(String s) {
+  public void ASTNode.error(String s) {
 	  root().getErrorHandler().error(s, this);
   }
   
@@ -249,7 +249,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
-  void ASTNode.error(String format, Object... args) {
+  public void ASTNode.error(String format, Object... args) {
 	  error(String.format(format, args));
   }
 
@@ -257,7 +257,7 @@ aspect ErrorCheck {
    * Register a compliance error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
-  void ASTNode.compliance(String s) {
+  public void ASTNode.compliance(String s) {
 	  root().getErrorHandler().compliance(s, this);
   }
   
@@ -266,7 +266,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
-  void ASTNode.compliance(String format, Object... args) {
+  public void ASTNode.compliance(String format, Object... args) {
 	  compliance(String.format(format, args));
   }
 
@@ -274,7 +274,7 @@ aspect ErrorCheck {
    * Register a warning. Delegates to an {@link IErrorHandler}.
    * @param s	the warning message.
    */
-  void ASTNode.warning(String s) {
+  public void ASTNode.warning(String s) {
 	  root().getErrorHandler().warning(s, this);
   }
   
@@ -283,7 +283,7 @@ aspect ErrorCheck {
    * 
    * Builds warning message using <code>format</code> as format string.
    */
-  void ASTNode.warning(String format, Object... args) {
+  public void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
   }
   
