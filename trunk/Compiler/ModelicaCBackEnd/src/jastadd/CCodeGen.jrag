@@ -1939,12 +1939,31 @@ aspect CCodeGen {
             aeb.genVarDecls_C(str, indent, visited);
     }
     
+    @Override
     protected void WhenEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
         if (visited == null)
             visited = new HashSet<ASTNode>();
         for (Iterable<? extends AbstractEquationBlock> aebl : blocks)
             for (AbstractEquationBlock aeb : aebl)
                 aeb.genVarDecls_C(str, indent, visited);
+    }
+    
+    @Override
+    protected void LinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        for (FExp[] col : jacobian)
+            for (FExp exp : col)
+                if (exp != null)
+                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        super.genVarDecls_C(str, indent, visited);
+    }
+    
+    @Override
+    protected void MixedLinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        for (FExp[] col : jacobian)
+            for (FExp exp : col)
+                if (exp != null)
+                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        super.genVarDecls_C(str, indent, visited);
     }
     
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
@@ -2108,9 +2127,11 @@ aspect CCodeGen {
 		int var_counter = 0;
 		for (int i=0;i<rows;i++) {
 			for (int j=0;j<cols;j++) {
-				if (jacobian[j][i] != null)
-					str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
-				var_counter++;
+			    if (jacobian[j][i] != null) {
+			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+			    }
+			    var_counter++;
 			}
 		}
 						
@@ -2126,9 +2147,11 @@ aspect CCodeGen {
 		int var_counter = 0;
 		for (int i=0;i<rows;i++) {
 			for (int j=0;j<cols;j++) {
-				if (jacobian[j][i] != null)
-					str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
-				var_counter++;
+			    if (jacobian[j][i] != null) {
+			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+			    }
+			    var_counter++;
 			}
 		}
 						
