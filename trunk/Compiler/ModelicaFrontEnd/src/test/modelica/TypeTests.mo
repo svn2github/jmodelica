@@ -1218,16 +1218,16 @@ Semantic error at line 1175, column 34:
 end RemTest2;
 
 model PreTest1
-	Real x (start=3);
-        Real y;
-        discrete Real z;
+    Real x (start=3);
+    Real y;
+    discrete Real z;
 equation
-        y = pre(x);
-	when time>1 then
-		z = pre(x);
-	elsewhen time>3 then
-                z = 2*pre(x);
-        end when;
+    y = pre(x);
+    when time>1 then
+        z = pre(x);
+    elsewhen time > 3 then
+        z = 2*pre(x);
+    end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -1267,6 +1267,39 @@ equation
 end TypeTests.PreTest2;
 ")})));
 end PreTest2;
+
+
+model PreTest3
+    Real x(start = 1);
+    discrete Real y;
+equation
+    y = pre(x);
+algorithm
+    when time > 1 then
+        if x < time then
+            x := 2;
+        end if;
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="PreTest3",
+			description="",
+			flatModel="
+fclass TypeTests.PreTest3
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ y = pre(x);
+algorithm
+ when time > 1 then
+  if x < time then
+   x := 2;
+  end if;
+ end when;
+end TypeTests.PreTest3;
+")})));
+end PreTest3;
 
 
 model EdgeTest1

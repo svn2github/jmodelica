@@ -2205,37 +2205,40 @@ algorithm
  when x > 2 then
 	 y3 := 2*x + y1 + y2;
  end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="AlgorithmFlatten9",
 			description="Flattening algorithms: when stmts",
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten9
- Real y1;
+ discrete Real y1;
  Real y2;
- Real y3;
+ discrete Real y3;
  Real x;
  Real temp_1;
  Real temp_2;
+initial equation 
+ pre(y1) = 0.0;
+ pre(y3) = 0.0;
 equation
  y2 = sin(y1);
  x = time;
 algorithm
- y1 := 0.0;
+ y1 := pre(y1);
  temp_1 := 1;
  temp_1 := x - 2;
  when x > 2 then
   y1 := sin(x);
  end when;
 algorithm
- y3 := 0.0;
+ y3 := pre(y3);
  temp_2 := 1;
  temp_2 := x - 2;
  when x > 2 then
   y3 := 2 * x + y1 + y2;
  end when;
 end FunctionTests.AlgorithmFlatten9;
-
 ")})));
 end AlgorithmFlatten9;
 
@@ -2254,13 +2257,16 @@ algorithm
 			description="Flattening algorithms: else-when stmts",
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten10
- Real y1;
- Real y2;
+ discrete Real y1;
+ discrete Real y2;
  Real temp_1;
  Real temp_2;
+initial equation 
+ pre(y1) = 0.0;
+ pre(y2) = 0.0;
 algorithm
- y1 := 0.0;
- y2 := 0.0;
+ y1 := pre(y1);
+ y2 := pre(y2);
  temp_1 := 1;
  temp_2 := 1;
  temp_1 := time - 1;
@@ -2271,7 +2277,6 @@ algorithm
   y2 := 2;
  end when;
 end FunctionTests.AlgorithmFlatten10;
-
 ")})));
 end AlgorithmFlatten10;
 
@@ -2464,12 +2469,11 @@ algorithm
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen4
- Real x;
+ discrete Real x;
 algorithm
- when {true,false} then
+ when {true, false} then
   x := 1.0;
  end when;
-
 end FunctionTests.AlgorithmTypeWhen4;
 ")})));
 end AlgorithmTypeWhen4;
@@ -2488,12 +2492,11 @@ algorithm
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen5
- Real x;
+ discrete Real x;
 algorithm
  when true then
   x := 1.0;
  end when;
-
 end FunctionTests.AlgorithmTypeWhen5;
 ")})));
 end AlgorithmTypeWhen5;
@@ -3679,59 +3682,6 @@ public
 end FunctionTests.ArrayExpInFunc6;
 ")})));
 end ArrayExpInFunc6;
-
-
-model ArrayExpInFunc7
- Real o;
- Real x[3];
-equation
- der(o) = time;
-algorithm
- when {o > 2.0, o > 3.0} then
-  x := { 1, 2, 3 };
- elsewhen o < 1.5 then
-  x := { 4, 5, 6 };
- end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayExpInFunc7",
-			description="Scalarization of functions: when statements",
-			variability_propagation=false,
-			algorithms_as_functions=true,
-			inline_functions="none",
-			flatModel="
-fclass FunctionTests.ArrayExpInFunc7
- Real o;
- Real x[1];
- Real x[2];
- Real x[3];
-initial equation 
- o = 0.0;
-equation
- der(o) = time;
- ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
-
-public
- function FunctionTests.ArrayExpInFunc7.algorithm_1
-  output Real[3] x;
-  input Real o;
- algorithm
-  when {o > 2.0, o > 3.0} then
-   x[1] := 1;
-   x[2] := 2;
-   x[3] := 3;
-  elsewhen o < 1.5 then
-   x[1] := 4;
-   x[2] := 5;
-   x[3] := 6;
-  end when;
-  return;
- end FunctionTests.ArrayExpInFunc7.algorithm_1;
-
-end FunctionTests.ArrayExpInFunc7;
-")})));
-end ArrayExpInFunc7;
 
 
 model ArrayExpInFunc8

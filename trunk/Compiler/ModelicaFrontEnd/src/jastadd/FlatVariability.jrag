@@ -215,19 +215,47 @@ aspect FlatVariability {
 	 * Convert all continous variables that are assigned in when equations into discrete variables.
 	 */
 	public void FClass.updateVariablilityForVariablesInWhen() {
-	    for (FAbstractEquation eqn : getFAbstractEquations())
-	        eqn.updateVariablilityForVariablesInWhen(false);
+	    getFAbstractEquations().updateVariablilityForVariablesInWhen(false);
 	    checkDiscreteOperations();
 	}
     
     /**
-     * Convert all continous variables that are assigned in when equations into discrete variables.
+     * Convert all continous variables that are assigned in when equations and statements into discrete variables.
      * 
-     * @param inWhen  is this equation in a when equation?
+     * @param inWhen  is this node in a when equation?
      */
-    public void FAbstractEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {}
+    public void ASTNode.updateVariablilityForVariablesInWhen(boolean inWhen) {}
+    
+    public void Opt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void List.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FAbstractEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FStatement.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FIfWhenClause.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
     
     public void FWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariablilityForVariablesInWhen(true);
+    }
+    
+    public void FWhenStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
         super.updateVariablilityForVariablesInWhen(true);
     }
     
@@ -242,23 +270,19 @@ aspect FlatVariability {
                 if (left.hasFExp())
                     left.getFExp().makeContinuousVariablesDiscrete();
     }
-    
-    public void FIfWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
-        super.updateVariablilityForVariablesInWhen(inWhen);
-        if (hasElse())
-            getElse().updateVariablilityForVariablesInWhen(inWhen);
+
+    public void FAssignStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            getLeft().makeContinuousVariablesDiscrete();
     }
     
-    public void FIfWhenElseEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
-        for (FAbstractEquation eqn : getFAbstractEquations())
-            eqn.updateVariablilityForVariablesInWhen(inWhen);
+    public void FFunctionCallStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            for (FFunctionCallLeft left : getLefts())
+                if (left.hasFExp())
+                    left.getFExp().makeContinuousVariablesDiscrete();
     }
-    
-    public void FForClauseE.updateVariablilityForVariablesInWhen(boolean inWhen) {
-        for (FAbstractEquation eqn : getFAbstractEquations())
-            eqn.updateVariablilityForVariablesInWhen(inWhen);
-    }
-    
+
     /**
      * Convert all continous variables that are this expression refers to into discrete variables.
      */
