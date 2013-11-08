@@ -736,7 +736,11 @@ aspect Derivatives {
 	}
 	
 	public FExp FAbsExp.diff(String name) {
-		return dynamicFExp(new FIfExp(new FGeqExp(getFExp().fullCopy(), new FRealLitExp(0)), getFExp().diff(name), new FNegExp(getFExp().diff(name))));
+	    FExp diff = getFExp().diff(name);
+	    if (diff.isLiteralZero())
+	        return dynamicFExp(diff);
+	    else
+	        return dynamicFExp(new FIfExp(new FGeqExp(getFExp().fullCopy(), new FRealLitExp(0)), diff, new FNegExp(diff.fullCopy())));
 	}
 	
 	public FExp FSignExp.diff(String name) {

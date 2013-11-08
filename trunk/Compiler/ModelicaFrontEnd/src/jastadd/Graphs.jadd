@@ -735,7 +735,7 @@ public class BiPGraph {
 			str.append(e);
 			str.append(" : ");
 			for (Var v : e.getVariables()) {
-				str.append(v + " ");
+				str.append(v + (canMatch(e, v) ? "¤ " : "# "));
 			}
 			str.append("// " + e.getEquation() + "\n");
 		}
