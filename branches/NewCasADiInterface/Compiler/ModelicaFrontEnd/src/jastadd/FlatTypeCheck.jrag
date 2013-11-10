@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,12 +17,78 @@
 import java.util.Arrays;
 import java.util.Collections;
 import org.jmodelica.util.Criteria;
+import org.jmodelica.util.ErrorCheckType;
 
 aspect FlatTypeCheck {
 	
-    public void ASTNode.typeCheck() {}
+    public void ASTNode.typeCheck(ErrorCheckType checkType) {}
+    
+    public void InstNode.typeCheck(ErrorCheckType checkType) {
+        typeCheckSystemResiduals(checkType);
+    }
+    
+    public void InstComposite.typeCheck(ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        // Note that modifiers (including redeclarations) in a constraining clause
+        // are applied to the declaration itself and is therefore also type checked.
+        if (hasInstConstraining()) {
+              InstNode superType = getInstConstraining().getInstNode();
+              InstComponentDecl declaredType = this; 
+              if (!declaredType.subType(superType))
+                   declaredType.getComponentDecl().error("In the declaration '" + declaredType.getComponentDecl() + 
+                           "', the declared class is not a subtype of the constraining class");
+        }
+    }
+
+    public void InstReplacingRecord.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingComposite.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
+        super.typeCheck(checkType);
+        
+        // Type check the original component
+        InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
+        if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
+            superType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+                    declaredType.getComponentDecl());
+
+        // The environment should be traversed backwards in order to perform correct
+        // subtype tests in redeclaration chains.       
+        for (int i = myEnvironment().size() - 1; i >= 0; i--) {
+            InstModification im = myEnvironment().get(i);
+            InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
+            if (redeclare != null) { 
+                InstComponentDecl declaredSubType = redeclare.getInstComponentDecl();
+                InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
+                    
+                // Check consistency of the redeclaring component
+                if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
+                    declaredSubType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
+                            declaredSubType.getComponentDecl());
+
+                // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
+                // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
+                // follows that declaredSubType is a subtype of superType by transitivity.
+                if (!constrainingSubType.subType(superType))
+                    constrainingSubType.getComponentDecl().error("In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'", 
+                            constrainingSubType.getComponentDecl(), superType.getComponentDecl());
+            
+                // If the redeclaring declaration has a constraining clause, the constraining
+                // type of the redeclaring declaration of should be used in following subtype-test 
+                // instead of the constraining type of the orignal declaration.
+                if (declaredSubType.hasInstConstraining()) 
+                    superType = constrainingSubType;
+            }
+            typeCheckSystemResiduals(checkType);
+        }
+    }
  
-    public void InstAssignable.typeCheck() {
+    public void InstAssignable.typeCheck(ErrorCheckType checkType) {
     	FExp bexp = myBindingInstExp();
 		boolean func = inFunction();
     	if (!size().isComplete() && !func && !inRecordDecl()) 
@@ -65,7 +131,7 @@ aspect FlatTypeCheck {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
 				FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-				enabledExp.collectErrors();
+				enabledExp.collectErrors(checkType);
 				try {
 					enabledExp.ceval().booleanValue();
 				} catch (ConstantEvaluationException e) {
@@ -75,12 +141,14 @@ aspect FlatTypeCheck {
 		}
 		
     	typeCheckAttributes();
+    	super.typeCheck(checkType);
     }
     
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
     eq InstNode.getChild().inRecordWithBindingExp()               = false;
+    eq Root.getChild().inRecordWithBindingExp()                   = false;
     
     public void InstAssignable.typeCheckAttributes() {}
     
@@ -119,8 +187,8 @@ aspect FlatTypeCheck {
     	}
     }
     
-  public void FEquation.typeCheck() {
-	  //log.debug("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
+  public void FEquation.typeCheck(ErrorCheckType checkType) {
+	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (!getLeft().type().equivalentTo(getRight().type())) {
 			  error("The right and left expression types of equation are" +
@@ -129,8 +197,35 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  // Generic typeCheck() that calls typeError() if type is unknown and no FExp child has unknown type
-  public void FExp.typeCheck() {
+  public void FConnectClause.typeCheck(ErrorCheckType checkType) {
+      InstAccess left  = getConnector1().getInstAccess();
+      InstAccess right = getConnector2().getInstAccess();
+      boolean check = true;
+      boolean expandableSame = true;
+      for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
+          if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
+              if (!access.myInstComponentDecl().isConnector())
+                  access.error("Connecting to an instance of a non-connector type is not allowed");
+          } else {
+              check = false;
+          }
+          if (access.myInstComponentDecl().isExpandableConnector())
+              expandableSame = !expandableSame;
+      }
+      if (!expandableSame && !left.isUnknown() && !right.isUnknown())
+          error("Connecting an expandable connector to a non-expandable connector is not allowed");
+      if (check) { 
+          InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
+          InstComponentDecl rightComp = right.lookupEvaluatingIndices();
+          if (!leftComp.connectableTo(rightComp))
+              error("Types of connected components do not match");
+          else if (!left.size().equivalent(right.size(), false))
+              error("Sizes do not match in connection");
+      }
+  }
+  
+  // Generic typeCheck(checkType) that calls typeError() if type is unknown and no FExp child has unknown type
+  public void FExp.typeCheck(ErrorCheckType checkType) {
 	  if (type().isUnknown()) {
 		  for (FExp exp : childFExps())
 			  if (exp.type().isUnknown())
@@ -215,12 +310,12 @@ aspect FlatTypeCheck {
 		}
   }
   
-  public void FIdUseExp.typeCheck() {
+  public void FIdUseExp.typeCheck(ErrorCheckType checkType) {
 	  if (!getFIdUse().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
   }
   
-	public void FIdUse.typeCheck() {
+	public void FIdUse.typeCheck(ErrorCheckType checkType) {
 		if (inAlgorithm() && useIsAssignment() && variability().constantVariability()) {
 			error("Assignments to constants is not allowed in algorithms");
 		}
@@ -230,7 +325,7 @@ aspect FlatTypeCheck {
 		}
 	}
   
-  public void FInstAccessExp.typeCheck() {
+  public void FInstAccessExp.typeCheck(ErrorCheckType checkType) {
 	  if (!getInstAccess().isUnknown() && type().isUnknown() && !accessToModelOK())
 		  typeError();
   }
@@ -254,14 +349,14 @@ aspect FlatTypeCheck {
   eq FMinMaxExp.getChild().iterExpMustBeScalar() = true;
   // TODO: Add product() when it is implemented
   
-  public void FIterExp.typeCheck() {
-	  super.typeCheck();
+  public void FIterExp.typeCheck(ErrorCheckType checkType) {
+	  super.typeCheck(checkType);
 	  if (iterExpMustBeScalar() && !getFExp().type().isUnknown() && getFExp().ndims() != 0)
 		  error("The expression of a reduction-expression must be scalar, except for sum(): " +
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
-  public void FStreamBuiltIn.typeCheck() {
+  public void FStreamBuiltIn.typeCheck(ErrorCheckType checkType) {
 	  if (!getFExp().isAccessToStream()) 
 		  error("Argument of " + builtInName() + "() must be a stream variable");
   }
@@ -269,6 +364,10 @@ aspect FlatTypeCheck {
   syn boolean FExp.isAccess()  = false;
   eq FIdUseExp.isAccess()      = true;
   eq FInstAccessExp.isAccess() = true;
+  syn FIdUse FExp.asFIdUse() {
+	  throw new UnsupportedOperationException("asFIdUse() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq FIdUseExp.asFIdUse() = getFIdUse();
   
 	syn boolean FExp.isInstAccess()  = false;
 	eq FInstAccessExp.isInstAccess() = true;
@@ -287,7 +386,8 @@ aspect FlatTypeCheck {
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().getComponentDecl().isStream();
   
   
-  public void InstForIndex.typeCheck() {
+  
+  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
 	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
 		  error("The expression of for index " + name() + " must be a vector expression: " + 
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
@@ -323,34 +423,48 @@ aspect FlatTypeCheck {
 		  else if (!type().isUnknown())
 			  error("Array index must be Integer expression: " + getFExp());
 	  } else if (!inFunction()) { 
-		  if (!getFExp().variability().lessOrEqual(fParameter())) {
-			  error("Array index in equation must be constant, parameter or loop index: " + getFExp());
-		  } else { 
-			  // Check array bounds
-			  // TODO: Perform bounds check in functions if index has parameter variability or lower?
-			  try {
-				  int max = mySize().get(0);
-				  for (FExp e : getExpanded().iterable()) {
-					  int i = e.ceval().intValue();
-					  if (i < 1 || i > max) {
-						  if (!lockBranch())
-							  error("Array index out of bounds: " + i + ", index expression: " + getFExp());
-						  return;
-					  }
-				  }
-			  } catch (ConstantEvaluationException e) {
-				  error("Could not evaluate array index expression: " + getFExp());
-			  }
+		  if (!getFExp().variability().parameterOrLess()) {
+			  warning("Variable array index in equation can result in slow simulation time");
+		  } else if (!reportedOutOfBound && !inUnknownAccess()) {
+	          // Check array bounds
+	          // TODO: Perform bounds check in functions if index has parameter variability or lower?
+	          try {
+	              int max = mySize().get(0);
+	              for (FExp e : getFExp().getArray().iterable()) {
+	                  int i = e.ceval().intValue();
+	                  if (i < 1 || i > max) {
+	                      if (!lockBranch())
+	                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
+	                      reportedOutOfBound = true;
+	                      return;
+	                  }
+	              }
+	          } catch (ConstantEvaluationException e) {
+	              error("Could not evaluate array index expression: " + getFExp());
+	              reportedOutOfBound = true;
+	          }
 		  }
 	  }
   }
   
-  public void FExpSubscript.typeCheck() {
+  private boolean FExpSubscript.reportedOutOfBound = false;
+  
+  
+  public void FExpSubscript.typeCheck(ErrorCheckType checkType) {
 	  if (isInstComponentSize()) 
 		  typeCheckAsSize();
 	  else 
 		  typeCheckAsIndex();
   }
+  
+  inh boolean FSubscript.inUnknownAccess();
+  eq FIdUse.getChild().inUnknownAccess()                  = myFV().isUnknown();
+  eq InstScalarAccess.getChild().inUnknownAccess()        = myInstComponentDecl().isUnknown();
+  eq InstArrayAccess.getChild().inUnknownAccess()         = myInstComponentDecl().isUnknown();
+  eq InstEquationAccess.getChild().inUnknownAccess()      = myEquation() == null;
+  eq InstEquationArrayAccess.getChild().inUnknownAccess() = myEquation() == null;
+  eq FlatRoot.getChild().inUnknownAccess()                = false;
+  eq InstRoot.getChild().inUnknownAccess()                = false;
   
   syn boolean FExp.canBeComponentSize()  = type().isInteger();
   eq FInstAccessExp.canBeComponentSize() = type().isInteger() || getInstAccess().isComponentSizeClass();
@@ -381,12 +495,12 @@ aspect FlatTypeCheck {
   eq FlatRoot.getChild().isInstComponentSize()                          = false;
 	
   
-  public void InstComponentAccess.typeCheck() {
+  public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
   }
   
   
-  public void InstAssignStmt.typeCheck() {
+  public void InstAssignStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (getLeft().isForIndex())
 			  error("Can not assign a value to a for loop index");
@@ -395,29 +509,29 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FWhileStmt.typeCheck() {
+  public void FWhileStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
 		  error("Type of test expression of while statement is not Boolean");
   }
   
-  public void FIfClause.typeCheck() {
+  public void FIfClause.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
 		  error("Type of test expression of if statement is not Boolean");
   }
   
-  public void FWhenClause.typeCheck() {
+  public void FWhenClause.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown()) {
 		  if (!getTest().type().isBoolean() || getTest().type().ndims() > 1) 
 			  error("Test expression of when statement isn't Boolean scalar or vector expression");
 	  }
   }
   
-  public void FIfEquation.typeCheck() {
+  public void FIfEquation.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
 		  error("Type of test expression of if equation is not Boolean");
   }
   
-  public void FWhenEquation.typeCheck() {
+  public void FWhenEquation.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown()) {
 		  if (!getTest().type().isBoolean() || getTest().type().ndims() > 1) 
 			  error("Test expression of when equation isn't Boolean scalar or vector expression");
@@ -425,8 +539,8 @@ aspect FlatTypeCheck {
   }
   
   
-  public void FInfArgsFunctionCall.typeCheck() {
-      super.typeCheck();
+  public void FInfArgsFunctionCall.typeCheck(ErrorCheckType checkType) {
+      super.typeCheck(checkType);
       if (getNumOriginalArg() < minNumArgs()) 
     	  error("Too few arguments to " + builtInName() + "(), must have at least " + minNumArgs());
       else 
@@ -472,9 +586,9 @@ aspect FlatTypeCheck {
   syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = 
 		  "constant or parameter";
    
-  public void FBuiltInFunctionCall.typeCheck() {
+  public void FBuiltInFunctionCall.typeCheck(ErrorCheckType checkType) {
 	  if (checkTypeAsExpression())
-		  super.typeCheck();
+		  super.typeCheck(checkType);
 	  int n = builtInHasOutput() ? 1 : 0;
 	  if (myLefts().size() > n)
 		  error("Too many components assigned from function call: " + builtInName() + 
@@ -483,25 +597,22 @@ aspect FlatTypeCheck {
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
   
-  public void FEnumIntegerExp.typeCheck() {
-	  super.typeCheck();
+  public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
+	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
 	  int n = getNumOriginalArg();
 	  if (n != 1)
 		  error("Calling function Integer(): too " + (n > 1 ? "many" : "few") + " arguments");
   }
   
-  public void FPreExp.typeCheck() {
+  public void InstPreExp.typeCheck(ErrorCheckType checkType) {
   	if (!getFExp().isAccess()) {
   		error("Calling function pre(): argument must be variable access");
   		return;
   	}
-    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
-    	error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
-    }     
   }
  
-  public void FAssert.typeCheck() {
+  public void FAssert.typeCheck(ErrorCheckType checkType) {
 	  if (hasLevel()) {
 		  if (getLevel().isParameterExp())
 			  getLevel().markAsStructuralParameter();
@@ -510,19 +621,30 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FEdgeExp.typeCheck() {
+  public void FEdgeExp.typeCheck(ErrorCheckType checkType) {
     if (!getFExp().isAccess() || !getFExp().type().isBoolean()) {
       error("Calling function edge(): argument must be a boolean variable access");	
     }
   }
   
-  public void FChangeExp.typeCheck() {
+  public void FChangeExp.typeCheck(ErrorCheckType checkType) {
     if (!getFExp().isAccess()) {
       error("Calling function change(): argument must be a variable access");
       return;  		
     }
-    if (getFExp().isContinuousExp() && !getFExp().inWhen()) {
-      error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+  }
+
+	public void FStringExp.typeCheck(ErrorCheckType checkType) {
+		FType valueType = getValue().type();
+		if (hasSignificantDigits() && !valueType.isReal())
+			error("Calling function String(): named argument significantDigits can only be used when first argument is real");
+		if (hasFormat() && (hasMinimumLength() || hasLeftJustified() || hasSignificantDigits()))
+			error("Calling function String(): named argument format can not be used together with minimumLength, leftJustified or significantDigits");
+	}
+  
+  public void FHomotopyExp.typeCheck(ErrorCheckType checkType) {
+    if (!getActual().type().equivalentTo(getSimplified().type())) {
+      error("Calling function homotopy(): arguments must be same type");
     }
   }
   
@@ -544,7 +666,7 @@ aspect FlatTypeCheck {
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;
  
-  public void InstFunctionCall.typeCheck() {
+  public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
 	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs())
 		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
 	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
@@ -554,10 +676,10 @@ aspect FlatTypeCheck {
 				  "() has " + myOutputs().size() + " output(s)");
   }
   
-  public void FFunctionCallLeft.typeCheck() {
+  public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
 	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
 		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
-			  FIdUse use = ((FIdUseExp) getFExp()).getFIdUse();
+			  FIdUse use = getFExp().asFIdUse();
 			  if (use.isForIndex())
 				  error("Can not assign a value to a for loop index");
 			  else if (size().isUnknown() && !inFunction())
@@ -576,7 +698,7 @@ aspect FlatTypeCheck {
   eq FFunctionCallEquation.getChild().functionCallDecription() = getCall().functionCallDecription();
   eq FFunctionCallStmt.getChild().functionCallDecription()     = getCall().functionCallDecription();
   
-  public void InstFunctionArgument.typeCheck() {
+  public void InstFunctionArgument.typeCheck(ErrorCheckType checkType) {
 	  boolean typeOk = true;
 	  FType type = getFExp().type();
 	  if (!type.isUnknown()) {
@@ -607,12 +729,12 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void InstMissingArgument.typeCheck() {
+  public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
 	  if (!isDestructorArgument())
 		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
   }
   
-  public void InstMultipleBoundArgument.typeCheck() {
+  public void InstMultipleBoundArgument.typeCheck(ErrorCheckType checkType) {
 	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
   }
   
@@ -623,7 +745,7 @@ aspect FlatTypeCheck {
   inh boolean InstClassDecl.inExternalObject();
   eq InstNode.getChild().inExternalObject() = isExternalObject();
   
-  public void InstDefaultArgument.typeCheck() {}
+  public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
   
   inh String InstFunctionArgument.nonBoundArgumentTypeError();
   eq FExp.getChild().nonBoundArgumentTypeError()                          = null;
@@ -644,49 +766,49 @@ aspect FlatTypeCheck {
 	  return "named argument " + getName().prettyPrint("");
   }
   
-  public void InstAccess.typeCheck() {
+  public void InstAccess.typeCheck(ErrorCheckType checkType) {
 //	  if (getTopInstAccess() == this && !type().isUnknown()) {
 		  // TODO: if this is a slice, check that all branches are of equal size
 //	  }
   }
   
-  public void InstDot.typeCheck() {
+  public void InstDot.typeCheck(ErrorCheckType checkType) {
 	  // Check for accesses to non-constant component in class
 	  int n = getNumInstAccess();
 	  for (int i = 0; i < n - 1; i++)
-		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1));
-	  super.typeCheck();
+		  getInstAccess(i).checkAccessCompInClassLeft(getInstAccess(i + 1), checkType);
+	  super.typeCheck(checkType);
   }
   
-  public void InstAccess.checkAccessCompInClassLeft(InstAccess right) {}
+  public void InstAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {}
   
-  public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right) {
-	  right.checkAccessCompInClassRight(myInstClassDecl());
+  public void InstClassAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
+	  right.checkAccessCompInClassRight(myInstClassDecl(), checkType);
   }
   
-  public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right) {
+  public void InstComponentAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
 	  if (myInstComponentDecl().isPrimitive()) {
 		  InstAccess top = getTopInstAccess();
 		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
 	  }
   }
   
-  public void InstComponentArrayAccess.checkAccessCompInClassLeft(InstAccess right) {
+  public void InstComponentArrayAccess.checkAccessCompInClassLeft(InstAccess right, ErrorCheckType checkType) {
 	  if (myInstComponentDecl().isPrimitive()) {
 		  InstAccess top = getTopInstAccess();
 		  top.error("Can not access attribute of primitive with dot notation: " + top.name());
 	  }
   }
   
-  public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd) {}
+  public void InstAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {}
   
-  public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd) {
+  public void InstComponentAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
 	  String type = null;
 	  if (icd.extendsEnum()) {
 		  if (!myInstComponentDecl().isEnumLiteral())
 			  type = "attribute of primitive with dot notation";
 	  } else if (icd.isPackage()) {
-		  icd.checkRestriction();
+		  icd.checkRestriction(checkType);
 	  } else if (!icd.isOkPackage()) {
 		  type = "component in non-package class";
 	  }
@@ -696,13 +818,13 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void InstComponentArrayAccess.checkAccessCompInClassRight(InstClassDecl icd) {
+  public void InstComponentArrayAccess.checkAccessCompInClassRight(InstClassDecl icd, ErrorCheckType checkType) {
 	  String type = null;
 	  if (icd.extendsEnum()) {
 		  if (!myInstComponentDecl().isEnumLiteral())
 			  type = "attribute of primitive with dot notation";
 	  } else if (icd.isPackage()) {
-		  icd.checkRestriction();
+		  icd.checkRestriction(checkType);
 	  } else if (!icd.isOkPackage()) {
 		  type = "component in non-package class";
 	  }
@@ -717,29 +839,29 @@ aspect FlatTypeCheck {
    *        is valid.
    */
   inh boolean InstFunctionArgument.argumentDefinedTypeValid();
-  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()         = true;
-  eq FTranspose.getChild().argumentDefinedTypeValid()                    = false;
-  eq FSymmetric.getChild().argumentDefinedTypeValid()                    = false;
-  eq FMinMaxExp.getChild().argumentDefinedTypeValid()                    = false;
-  eq FReductionExp.getChild().argumentDefinedTypeValid()                 = false;
-  eq FHomotopyExp.getChild().argumentDefinedTypeValid()                  = false;
-  eq FSemiLinearExp.getChild().argumentDefinedTypeValid()                = false;
-  eq FNdimsExp.getChild().argumentDefinedTypeValid()                     = false;
-  eq FInfArgsFunctionCall.getChild().argumentDefinedTypeValid()          = false;
-  eq FEnumIntegerExp.getChild().argumentDefinedTypeValid()               = false;
-  eq FVectUnaryBuiltIn.getChild().argumentDefinedTypeValid()             = false;
-  eq FDimensionConvert.getChild().argumentDefinedTypeValid()             = false;
-  eq FEventGenExp.getChild().argumentDefinedTypeValid()                  = false;
-  eq FCardinality.getChild().argumentDefinedTypeValid()                  = false;
-  eq FMathematicalFunctionCall.getChild().argumentDefinedTypeValid()     = false;
-  eq FConnectionsOp.getChild().argumentDefinedTypeValid()                = false;
-  eq FStringExp.getChild().argumentDefinedTypeValid()                    = false;
-  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid() = i == 1;
-  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i != 0;
-  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()         = i == 0;
-  eq FPreExp.getChild().argumentDefinedTypeValid()                       = false;
-  eq FEdgeExp.getChild().argumentDefinedTypeValid()                      = false;
-  eq FChangeExp.getChild().argumentDefinedTypeValid()                    = false;
+  eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
+  eq FTranspose.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FSymmetric.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FMinMaxExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FReductionExp.getOriginalArg().argumentDefinedTypeValid()             = false;
+  eq FHomotopyExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FSemiLinearExp.getOriginalArg().argumentDefinedTypeValid()            = false;
+  eq FNdimsExp.getOriginalArg().argumentDefinedTypeValid()                 = false;
+  eq FInfArgsFunctionCall.getOriginalArg().argumentDefinedTypeValid()      = false;
+  eq FEnumIntegerExp.getOriginalArg().argumentDefinedTypeValid()           = false;
+  eq FVectUnaryBuiltIn.getOriginalArg().argumentDefinedTypeValid()         = false;
+  eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
+  eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
+  eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
+  eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
+  eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
+  eq FConnPotentialRoot.getOriginalArg(int i).argumentDefinedTypeValid()   = i == 1;
+  eq FSizeExp.getOriginalArg(int i).argumentDefinedTypeValid()             = i != 0;
+  eq FSmoothExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i == 0;
+  eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
+  eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -770,7 +892,7 @@ aspect FlatTypeCheck {
   eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
           getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
-  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && !type.isString() && type.isPrimitive();
+  eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
   
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
@@ -803,7 +925,7 @@ aspect FlatTypeCheck {
 	  return true;
   }
 	
-	public void InstResidual.typeCheck() {
+	public void InstResidual.typeCheck(ErrorCheckType checkType) {
 		if (hasEnabled()) {
 			FExp enabledExp = getEnabled();
 			try {
@@ -824,7 +946,7 @@ aspect FlatTypeCheck {
 		}
 	}
 	
-	public void InstNominal.typeCheck() {
+	public void InstNominal.typeCheck(ErrorCheckType checkType) {
 		if (hasEnabled()) {
 			FExp enabledExp = getEnabled();
 			try {
@@ -842,4 +964,58 @@ aspect FlatTypeCheck {
 		if (!size.equals(expSize))
 			exp.error("Size of nominal expression %s is not the same size as the surrounding equation, size of expression %s, size of equation %s", exp, expSize, size);
 	}
+}
+
+aspect FlatVariabilityCheck {
+    
+    private FExp FPreExp.instanceTreeSource = null;
+    
+    public void FExp.setInstanceTreeSource(FExp source) {}
+    
+    public void FPreExp.setInstanceTreeSource(FExp source) {
+        instanceTreeSource = source;
+    }
+    
+    /**
+     * Surrounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
+     * 
+     * Also sets the <code>instanceTreeSource</code> field of the FPreExp (if any) 
+     * to <code>source</code>.
+     */
+    public static FExp FPreExp.create(FExp exp, FExp source) {
+        exp = create(exp);
+        exp.setInstanceTreeSource(source);
+        return exp;
+    }
+    
+    /**
+     * Check operations that are allowed on discrete expressions or variables, 
+     * but not on continuous ones.
+     * 
+     * Also breaks connections back to instance tree that was added during flattening 
+     * to be able to report these errors in the correct place.
+     */
+    public void ASTNode.checkDiscreteOperations() {
+        for (ASTNode n : this)
+            n.checkDiscreteOperations();
+    }
+    
+    public void FPreExp.checkDiscreteOperations() {
+        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen()) 
+            instanceTreeSource.discreteArgError();
+        instanceTreeSource = null;
+    }
+    
+    public void FExp.discreteArgError() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void InstPreExp.discreteArgError() {
+        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
+    }
+    
+    public void FChangeExp.discreteArgError() {
+        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+    }
+    
 }

@@ -310,6 +310,22 @@ aspect ConstantEvaluation {
         	}
         };
 		
+        /**
+         * Reduce an array of constant boolean values to a single boolean that is the logical 
+         * and of the array.
+         * 
+         * Used for evaluation of fixed=false parameters when evalute=true.
+         */
+        public boolean reduceBooleanAnd() {
+            return reduce(AND_OPERATION, CValueBoolean.TRUE).booleanValue();
+        }
+        
+        private static final BinaryOperation<CValue> AND_OPERATION = new BinaryOperation<CValue>() {
+            public CValue op(CValue x, CValue y) {
+                return (x.booleanValue() && y.booleanValue()) ? CValueBoolean.TRUE : CValueBoolean.FALSE;
+            }
+        };
+        
 		/**
 		 * \brief Returns the array size of this constant value.
 		 */
@@ -419,7 +435,7 @@ aspect ConstantEvaluation {
 	     */
         public int intValue() { 
         	// Round towards negative infinity to be compatible with integer() operator
-        	return (int) Math.floor(value); 
+        	return (int) StrictMath.floor(value); 
         }
         
         /**
@@ -1367,7 +1383,6 @@ aspect ConstantEvaluation {
   eq FNoEventExp.cevalCalc() = getFExp().ceval();
   eq FSmoothExp.cevalCalc()  = getFExp().ceval();
   
-  eq FPreExp.cevalCalc()     = variability().constantVariability() ? getFExp().ceval()   : CValue.UNKNOWN;
   eq FEdgeExp.cevalCalc()    = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
   eq FChangeExp.cevalCalc()  = variability().constantVariability() ? CValueBoolean.FALSE : CValue.UNKNOWN;
   eq FSampleExp.cevalCalc()  = CValue.UNKNOWN;
@@ -1491,6 +1506,7 @@ aspect ConstantEvaluation {
   eq FDerExp.cevalCalc() = 
 			getFIdUse().variability().discreteOrLess() ? new CValueInteger(0) : CValue.UNKNOWN;
   eq FInstAccessExp.cevalCalc() = getInstAccess().ceval();
+  eq FPreExp.cevalCalc()  = variability().constantVariability() ? super.cevalCalc()   : CValue.UNKNOWN;
   
   syn CValue InstAccess.ceval()        = ceval(Index.NULL);
   syn CValue InstAccess.ceval(Index i) = CValue.UNKNOWN;
@@ -1550,15 +1566,39 @@ aspect ConstantEvaluation {
   
   eq FAbsExp.cevalCalc()  = type().abs(getFExp().ceval());
   eq FSignExp.cevalCalc() = type().sign(getFExp().ceval());
-  eq FSqrtExp.cevalCalc()  = new CValueReal(Math.sqrt(getFExp().ceval().realValue()));
+  eq FSqrtExp.cevalCalc()  = new CValueReal(StrictMath.sqrt(getFExp().ceval().realValue()));
   eq FEnumIntegerExp.cevalCalc() = getFExp().ceval().convertInteger();
   eq FStringExp.cevalCalc() {
-	  // TODO: support format args
+	  Object value;
 	  if (getValue().type().isReal())
-		  return new CValueString(String.format((Locale) null, "%.6g", getValue().ceval().realValue()));
+		  value = getValue().ceval().realValue();
+	  else if (getValue().type().isInteger())
+		  value = getValue().ceval().intValue();
+	  else if (getValue().type().isBoolean() || getValue().type().isEnum())
+		  value = getValue().ceval().stringValue();
 	  else
-		  return getValue().ceval().convertString();
+		  throw new UnsupportedOperationException();
+	  return new CValueString(String.format((Locale) null, formatString(), value));
   }
+  
+  // TODO: support format args
+  syn String FStringExp.formatString() = "%" + formatFlags() + formatWidth() + formatPrecision() + formatSpecifier();
+  
+  syn String FStringExp.formatWidth() = minimumLength() > 0 ? String.valueOf(minimumLength()) : "";
+  syn String FStringExp.formatFlags() = leftJustified() && minimumLength() > 0 ? "-" : "";
+  syn String FStringExp.formatPrecision() = getValue().type().isReal() ? "." + significantDigits() : "";
+  syn String FStringExp.formatSpecifier() = getValue().type().formatSpecifier();
+  syn int FStringExp.minimumLength() = hasMinimumLength() ? getMinimumLength().ceval().intValue() : 0;
+  syn boolean FStringExp.leftJustified() = hasLeftJustified() ? getLeftJustified().ceval().booleanValue() : true;
+  syn int FStringExp.significantDigits() = hasSignificantDigits() ? getSignificantDigits().ceval().intValue() : DEFAULT_PRECISION;
+  syn String FType.formatSpecifier() {
+	  throw new UnsupportedOperationException();
+  }
+  eq FRealType.formatSpecifier()    = "g";
+  eq FIntegerType.formatSpecifier() = "d";
+  eq FBooleanType.formatSpecifier() = "s";
+  eq FEnumType.formatSpecifier()    = "s";
+  public static final int FStringExp.DEFAULT_PRECISION = 6;
   
   eq FDivFuncExp.cevalCalc()         = type().truncToZero(type().div(getX().ceval(), getY().ceval()));
   eq FModFuncExp.cevalCalc()         = type().sub(getX().ceval(), type().mul(type().div(getX().ceval(), getY().ceval()).convertInteger(),    getY().ceval()));
@@ -1567,20 +1607,20 @@ aspect ConstantEvaluation {
   eq FFloorFuncExp.cevalCalc()       = getX().ceval().convertInteger().convertReal();
   eq FIntegerFuncExp.cevalCalc()     = getX().ceval().convertInteger();
   
-  eq FSinExp.cevalCalc()   = new CValueReal(Math.sin(getFExp().ceval().realValue()));
-  eq FCosExp.cevalCalc()   = new CValueReal(Math.cos(getFExp().ceval().realValue()));
-  eq FTanExp.cevalCalc()   = new CValueReal(Math.tan(getFExp().ceval().realValue()));	  
-  eq FAsinExp.cevalCalc()  = new CValueReal(Math.asin(getFExp().ceval().realValue()));
-  eq FAcosExp.cevalCalc()  = new CValueReal(Math.acos(getFExp().ceval().realValue()));
-  eq FAtanExp.cevalCalc()  = new CValueReal(Math.atan(getFExp().ceval().realValue()));	  
-  eq FAtan2Exp.cevalCalc() = new CValueReal(Math.atan2(getFExp().ceval().realValue(),
+  eq FSinExp.cevalCalc()   = new CValueReal(StrictMath.sin(getFExp().ceval().realValue()));
+  eq FCosExp.cevalCalc()   = new CValueReal(StrictMath.cos(getFExp().ceval().realValue()));
+  eq FTanExp.cevalCalc()   = new CValueReal(StrictMath.tan(getFExp().ceval().realValue()));	  
+  eq FAsinExp.cevalCalc()  = new CValueReal(StrictMath.asin(getFExp().ceval().realValue()));
+  eq FAcosExp.cevalCalc()  = new CValueReal(StrictMath.acos(getFExp().ceval().realValue()));
+  eq FAtanExp.cevalCalc()  = new CValueReal(StrictMath.atan(getFExp().ceval().realValue()));	  
+  eq FAtan2Exp.cevalCalc() = new CValueReal(StrictMath.atan2(getFExp().ceval().realValue(),
 		                                               getY().ceval().realValue()));	  
-  eq FSinhExp.cevalCalc()  = new CValueReal(Math.sinh(getFExp().ceval().realValue()));
-  eq FCoshExp.cevalCalc()  = new CValueReal(Math.cosh(getFExp().ceval().realValue()));
-  eq FTanhExp.cevalCalc()  = new CValueReal(Math.tanh(getFExp().ceval().realValue()));	  
-  eq FExpExp.cevalCalc()   = new CValueReal(Math.exp(getFExp().ceval().realValue()));
-  eq FLogExp.cevalCalc()   = new CValueReal(Math.log(getFExp().ceval().realValue()));
-  eq FLog10Exp.cevalCalc() = new CValueReal(Math.log10(getFExp().ceval().realValue()));	  
+  eq FSinhExp.cevalCalc()  = new CValueReal(StrictMath.sinh(getFExp().ceval().realValue()));
+  eq FCoshExp.cevalCalc()  = new CValueReal(StrictMath.cosh(getFExp().ceval().realValue()));
+  eq FTanhExp.cevalCalc()  = new CValueReal(StrictMath.tanh(getFExp().ceval().realValue()));	  
+  eq FExpExp.cevalCalc()   = new CValueReal(StrictMath.exp(getFExp().ceval().realValue()));
+  eq FLogExp.cevalCalc()   = new CValueReal(StrictMath.log(getFExp().ceval().realValue()));
+  eq FLog10Exp.cevalCalc() = new CValueReal(StrictMath.log10(getFExp().ceval().realValue()));	  
   
   eq FVectorExp.cevalCalc() = getFExp().getArray().getFExp(0).ceval();
 
@@ -1633,7 +1673,7 @@ aspect ConstantEvaluation {
     	CValue val = CValue.UNKNOWN;
 		if (evaluationValue != null) {
 			val = evaluationValue;
-		} else if ((isConstant() || isParameter())) {
+		} else if ((isConstant() || isParameter()) && !isForIndex()) {
 	    	if (hasBindingFExp()) {
 		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())
@@ -1705,6 +1745,39 @@ aspect ConstantEvaluation {
 			return getInstModification().getInstValueMod().instValueMod();
 		return null;
 	}
+
+    /**
+     * \brief Find and evaluate the "fixed" attribute. If it is not found, use default value.
+     */
+    syn CValue InstAssignable.fixedAttributeCValue() {
+        for (InstModification im : totalMergedEnvironment()) {
+            FExp exp = im.findFixedAttribute();
+            if (exp != null)
+                return exp.ceval();
+        }
+        
+        CValue res = new CValueBoolean(true);
+        if (isArray()) {
+            CValueArray array = new CValueArray(size());
+            for (Index i : indices())
+                array.setCell(i, res);
+            res = array;
+        }
+        return res;
+    }
+    
+    /**
+     * \brief Find the expression for the fixed attribute.
+     */
+    public FExp InstModification.findFixedAttribute() { 
+        return null;
+    }
+    
+    public FExp InstComponentModification.findFixedAttribute() {
+        if (getName().name().equals("fixed") && getInstModification().hasInstValueMod())
+            return getInstModification().getInstValueMod().instValueMod();
+        return null;
+    }
 
 	/**
 	 * \brief Constant evaluation of FVariable binding expressions.
@@ -2039,10 +2112,6 @@ aspect ConstantEvaluation {
   }
   
   public void FExp.flushUnknownSizes() {
-// Old version - does not work when JastAdd generates one _computes/_value pair for each eq of a lazy attr
-//	  // Flush getArray() - NB: uses internal JastAdd implementation details
-//	  if (size().isUnknown())
-//		  getArray_computed = false;
 	  // Flush so that getArray() is cleared for unknown sizes, and then recaclculate size and make sure it is evaluated
 	  if (size().isUnknown()) {
 		  flushCache();
@@ -2107,7 +2176,7 @@ aspect ConstantEvaluation {
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
-	  for (InstComponentDecl var : getInstComponentDecls())
+	  for (InstComponentDecl var : allInstComponentDecls())
 		  var.setEvaluationValue(null);
 	  fab.prepareForFunctionEval();
 	  
@@ -2119,7 +2188,7 @@ aspect ConstantEvaluation {
 	  try {
 		  fab.getFStatements().evaluateList(values);
 	  } finally {
-		  for (InstComponentDecl var : getInstComponentDecls())
+		  for (InstComponentDecl var : allInstComponentDecls())
 			  var.setEvaluationValue(null);
 		  if (oldVal != null)
 			  for (CommonVariableDecl var : oldVal.keySet())
@@ -2318,6 +2387,86 @@ aspect ConstantEvaluation {
   protected CValue FAbstractVariable.evaluationValue = null;
   protected CValue InstComponentDecl.evaluationValue = null;
   
+
+    public class EvaluataionValueCache {
+
+        private Map<CommonVariableDecl,CValue> values;
+        private Map<CommonVariableDecl,CValue> old;
+
+        public EvaluataionValueCache(ASTNode source) {
+            values = source.collectEvaluationValues(null);
+        }
+        
+        public void apply() {
+            if (values != null) {
+                old = new HashMap<CommonVariableDecl,CValue>();
+                for (CommonVariableDecl var : values.keySet()) {
+                    CValue prev = var.evaluationValue();
+                    if (!prev.isUnknown())
+                        old.put(var, prev);
+                    var.setEvaluationValue(values.get(var), null);
+                }
+            }
+        }
+        
+        public void reset() {
+            if (values != null)
+                for (CommonVariableDecl var : values.keySet())
+                    var.setEvaluationValue(old.get(var), null);
+            old = null;
+        }
+
+    }
+
+    public Map<CommonVariableDecl,CValue> ASTNode.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        for (ASTNode n : this)
+            map = n.collectEvaluationValues(map);
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentAccess.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(myInstComponentDecl().collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentDecl.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> FIdUse.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+
+    public Map<CommonVariableDecl,CValue> FAbstractVariable.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+    
+    public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        return myFV().collectMyEvaluationValue(map);
+    }
+    
+    public Map<CommonVariableDecl,CValue> FIdUseInstAccess.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> InstComponentDecl.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        if (evaluationValue != null) {
+            if (map == null)
+                map = new HashMap<CommonVariableDecl,CValue>();
+            map.put(this, evaluationValue);
+        }
+        return map;
+    }
+
+    public Map<CommonVariableDecl,CValue> FAbstractVariable.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
+        if (evaluationValue != null) {
+            if (map == null)
+                map = new HashMap<CommonVariableDecl,CValue>();
+            map.put(this, evaluationValue);
+        }
+        return map;
+    }
+  
+  
   // Return values for FStatement.evaluate()
   public static final int FStatement.EVAL_CONT   = 1;
   public static final int FStatement.EVAL_RETURN = 2;
@@ -2364,6 +2513,16 @@ aspect ConstantEvaluation {
   public int InstAssignStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  getLeft().getInstAccess().assignToInFuncEval(values, getRight().ceval());
 	  return EVAL_CONT;
+  }
+
+  /**
+   * \brief Evaluate an assignment with this as the left side during function evaluation.
+   * 
+   * @param values  constant values for the variables
+   * @param right   the right hand side
+   */
+  public void FIdUseExp.assignToInFuncEval(Map<CommonVariableDecl, CValue> values, CValue right) {
+	  getFIdUse().assignToInFuncEval(values, right);
   }
 
   /**
@@ -2717,7 +2876,7 @@ aspect ConstantEvaluation {
   syn CValue FType.pow(CValue v1, CValue v2) = 
 	  CValue.UNKNOWN;
   eq FRealType.pow(CValue v1, CValue v2) =
-	  new CValueReal(java.lang.Math.pow(v1.realValue(),v2.realValue()));
+	  new CValueReal(java.lang.StrictMath.pow(v1.realValue(),v2.realValue()));
 
   /**
    * \brief Negation of a constant value.
@@ -2739,9 +2898,9 @@ aspect ConstantEvaluation {
   syn CValue FType.abs(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.abs(CValue v) = 
-	  new CValueReal(Math.abs(v.realValue()));
+	  new CValueReal(StrictMath.abs(v.realValue()));
   eq FIntegerType.abs(CValue v) = 
-	  new CValueInteger(Math.abs(v.intValue()));
+	  new CValueInteger(StrictMath.abs(v.intValue()));
   
   /**
    * \brief Sign expression for constant values.
@@ -2752,9 +2911,9 @@ aspect ConstantEvaluation {
   syn CValue FType.sign(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.sign(CValue v) = 
-	  new CValueReal(Math.signum(v.realValue()));
+	  new CValueReal(StrictMath.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) Math.signum(v.intValue()));
+	  new CValueInteger((int) StrictMath.signum(v.intValue()));
   
   /**
    * \brief Ceil expression for constant values.
@@ -2765,9 +2924,9 @@ aspect ConstantEvaluation {
   syn CValue FType.ceil(CValue v) = 
 	  CValue.UNKNOWN;
   eq FRealType.ceil(CValue v) = 
-	  new CValueReal(Math.ceil(v.realValue()));
+	  new CValueReal(StrictMath.ceil(v.realValue()));
   eq FIntegerType.ceil(CValue v) = 
-	  new CValueInteger((int) Math.ceil(v.realValue()));
+	  new CValueInteger((int) StrictMath.ceil(v.realValue()));
 
   /**
    * \brief Truncation to zero for constant values.
@@ -2992,14 +3151,8 @@ aspect CircularExpressions {
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 	
 	eq FSizeExp.isCircularCalc() { 
-		boolean res;
-		if (getFExp().isUnknownSizeVarUse() && !duringFunctionEval() && !duringFunctionInlining()) {
-			res = true;
-		} else {
-			Size s = getFExp().size();
-			res = hasDim() ? s.isCircular(dimension()) : s.isCircular();
-		}
-		return res;
+		Size s = getFExp().size();
+		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
 	
 	syn boolean FExp.isUnknownSizeVarUse()  = false;

@@ -148,26 +148,6 @@ end ArrayOfRecords_Warn;
 // Real x = f();
 //end ExternalFunction_ComplErr;
 
-
-model WhenStmt_ComplErr
- Real x;
-algorithm
- when (time < 2) then
-  x := 5;
- end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="WhenStmt_ComplErr",
-			description="Compliance error for when statements",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 126, column 2:
-  When statements are not supported
-")})));
-end WhenStmt_ComplErr;
-
 model UnsolvedWhenEqu_ComplErr
  discrete Real x;
  Real y1,y2;
@@ -349,7 +329,7 @@ model UnsupportedBuiltins_WarnErr
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 At line 306, column 3:
-  The homotopy() function like operator is not fully supported. It is replaced with its first argument.
+  The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.
 
 ")})));
 end UnsupportedBuiltins_WarnErr;
@@ -648,17 +628,24 @@ package UnknownArraySizes
    of unknown size in functions. #2155 #698 */
 
 model Error1
+	
+record R
+	Real[2] x;
+end R;
   function f
     input Real x[2,:];
+	input R[:] recsIn; 
 	Boolean b[size(x,2)];
     Real c[2,size(x,2)*2];
 	Real known[2,4];
     output Real y[size(x,2),2];
+	output R[size(recsIn,1)] recsOut;
   algorithm
     c := cat(2,x,x); // Concat unknown size.
-	x := c[:,1:size(x,2)]; // Slice unknown size.
 	known := x; // Assign unknown to known size.
 	x := known; // Assign known to unknown size.
+	recsOut := recsIn;
+	recsOut[1] := R(x[1,:]);
 	
 	for i in x[2,:] loop // In exp is unknown size array.
 		b[i] := x[i] > 4;
@@ -672,7 +659,7 @@ model Error1
 	end when;*/
   end f;
   
-  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}});
+  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -684,20 +671,20 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 684, column 10:
   Unknown size arg in operator cat() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 685, column 7:
-  Unknown size slice is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 686, column 2:
   Assigning an expression of unknown size to an operand of known size is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 687, column 2:
   Assigning an expression of known size to an operand of unknown size is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 647, column 2:
+  Record arrays of unknown sizes are not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 648, column 16:
+  Unknown sizes in record constructors is not supported
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 689, column 6:
   Unknown size array as a for index is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 689, column 11:
-  Unknown size slice is not supported in functions
 ")})));
 end Error1;
 
@@ -710,7 +697,6 @@ model Error2
 	Real c[n];
     output Real y[size(x,2),size(x,1)];
   algorithm
-	y := transpose(x);
 	y := symmetric(x);
 	b := identity(n);
 	c := linspace(1,5,n);
@@ -729,10 +715,7 @@ model Error2
 			name="UnknownArraySizes_Error2",
 			description="Test that compliance errors are given.",
 			errorMessage="
-11 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 736, column 7:
-  Unknown sizes in operator transpose() is not supported in functions
+10 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 736, column 7:
   Unknown sizes in operator symmetric() is not supported in functions
@@ -769,34 +752,6 @@ Compliance error at line 744, column 7:
 ")})));
 end Error2;
 
-model Error3
-	Real[2] x1,x2;
-equation
-	for i in 1:integer(time) loop
-		x1[i] = i;
-	end for;
-algorithm
-	for i in 1:integer(time) loop
-		x2[i] := i;
-	end for;
-	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArraySizes_Error3",
-			description="Test errors for unknown array for indices in algorithms and equations.",
-			algorithms_as_functions=false,
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
-  For index with higher than parameter variability is not supported in equations and algorithms.
-
-Error: in file '...':
-Compliance error at line 0, column 0:
-  For index with higher than parameter variability is not supported in equations and algorithms.
-			
-")})));
-end Error3;
-
 model ArrayIterTest
  Real x[1,1] = { i * j for i, j };
 
@@ -811,6 +766,10 @@ Semantic error at line 0, column 0:
 
 Error: in file '...':
 Compliance error at line 0, column 0:
+  Unknown size array expressions are not supported
+
+Error: in file '...':
+Compliance error at line 0, column 0:
   For index without in expression isn't supported
 
 Error: in file '...':
@@ -820,5 +779,73 @@ Compliance error at line 0, column 0:
 end ArrayIterTest;
 
 end UnknownArraySizes;
+
+model UnknownArrayIndex
+	Real[2] x1,x2;
+equation
+	for i in 1:integer(time) loop
+		x1[i] = i;
+	end for;
+algorithm
+	for i in 1:integer(time) loop
+		x2[i] := i;
+	end for;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="UnknownArrayIndex",
+			description="Test errors for unknown array for indices in algorithms and equations.",
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  For index with higher than parameter variability is not supported in equations and algorithms.
+			
+")})));
+end UnknownArrayIndex;
+
+model BreakInFor
+	Real[2] x;
+algorithm
+	for i in 1:2 loop
+		break;
+		x[i] := i;
+	end for;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="BreakInFor",
+			description="Test errors for break statement in scalarized for",
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Break statement in algorithm only supported in while loops
+
+")})));
+end BreakInFor;
+
+model WhileStmt
+	Real x;
+algorithm
+	while x > time loop
+		x := x - 1;
+	end while;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="WhileStmt",
+			description="Test while statement in algorithm",
+			algorithms_as_functions=false,
+			errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  Event generating expressions are not supported in while statements: x > time
+
+")})));
+end WhileStmt;
+
 
 end ComplianceTests;

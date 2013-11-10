@@ -41,10 +41,16 @@
 # The following targets are supported:
 #    jmu          Build a shared object file including the low level JMI interface 
 #                 (contained in jmi.a), JMI algorithms and the Ipopt algorithm.
-#    fmume        Build a shared object file containing the generated code and the
-#                 FMI for Model Exchange API.
-#    fmucs        Build a shared object file containing the generated code and the
-#                 FMI for co-simulation API.
+#    fmume10      Build a shared object file containing the generated code and the
+#                 Model Exchange for API FMI 1.0.
+#    fmucs10      Build a shared object file containing the generated code and the
+#                 co-simulation API for FMI 1.0.
+#    fmume20      Build a shared object file containing the generated code and the
+#                 Model Exchange for API FMI 2.0.
+#    fmucs20      Build a shared object file containing the generated code and the
+#                 co-simulation API for FMI 2.0.
+#    fmumecs20    Build a shared object file containing the generated code and the
+#                 Model Exchange API and co-simulation API for FMI 2.0.
 #        
 # Example:
 #  make -f Makefile.linux ipopt \
@@ -102,19 +108,23 @@ CC = gcc
 # Compile with or without CppAD
 JMI_AD=JMI_AD_CPPAD
 
+# Flags for which FMU type, me, cs or me+cs.
+FMU_TYPES =
+
 # C++ Compiler options
 CXXFLAGS = -g
 CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 
 # C Compiler options
 CFLAGS = -g
-CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) -fPIC
+CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC
 
 SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined -pthread
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
 RUNTIMELIBRARY_INC_DIR = ${JMODELICA_HOME}/include/RuntimeLibrary
+STANDARD_HEADER_INC_DIR = ${JMODELICA_HOME}/ThirdParty/FMI/2.0
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 
@@ -133,32 +143,58 @@ LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
-LIBS_FMUME   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_me $(LIB_JMIC) $(LIB_COMMON)
-LIBS_FMUCS   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi_cs -lfmi_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMUME10 = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi1_me $(LIB_JMIC) $(LIB_COMMON)
+LIBS_FMUCS10 = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi1_cs -lfmi1_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMU20   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi2 $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
 LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
 INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
+INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) -I$(STANDARD_HEADER_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
 
-fmume:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmume_
+fmume10:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmume10_
 
-fmume_: $(OBJS)
+fmume10_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUME10)
 	$(RM) $(OBJS)
 
-fmucs:
-	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmucs_
+fmucs10:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE fmucs10_
 
-fmucs_: $(OBJS)
+fmucs10_: $(OBJS)
 	mkdir -p $(BINARY_DIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L$(RUNTIMELIBRARY_LIB_DIR) $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMUCS10)
 	$(RM) $(OBJS)
+
+fmume20:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUME20 fmume20_
+
+fmume20_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20)
+	$(RM) $(OBJS)
+	
+fmucs20:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUCS20 fmucs20_
+	
+fmucs20_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20)
+	$(RM) $(OBJS)
+	
+fmumecs20:
+	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE FMU_TYPES+=-DFMUME20 FMU_TYPES+=-DFMUCS20 fmucs20_
+	
+fmumecs20_: $(OBJS)
+	mkdir -p $(BINARY_DIR)
+	$(CXX) $(SHARED_LDFLAGS) $(CFLAGS) -o $(SHARED) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_FMU20)
+	$(RM) $(OBJS)
+
 
 jmu: $(OBJS)
 # This is to ensure that the contents of libjmi_algorithm_cppad and

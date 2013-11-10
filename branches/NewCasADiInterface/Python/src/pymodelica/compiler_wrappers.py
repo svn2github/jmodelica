@@ -118,6 +118,25 @@ class ModelicaCompiler(object):
         """
         self._compiler.setModelicapath(path)
 
+    def create_target_object(self, target, version):
+        """ 
+        Creates a target object.
+        
+        Parameters::
+        
+            target --
+                The target type.
+            
+            version --
+                The version in case of a fmu
+        
+        """
+        try:
+            target_obj = self._compiler.createTargetObject(target, version)
+        except jpype.JavaException as ex:
+            self._handle_exception(ex)
+        return target_obj
+
     def get_boolean_option(self, key):
         """ 
         Get the boolean option set for the specific key. 
@@ -281,49 +300,6 @@ class ModelicaCompiler(object):
             self._compiler.setStringOption(key, value)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
-    
-    def get_XML_tpl(self):
-        """ 
-        Get the file path to the XML model description template.
-        
-        Returns::
-        
-            The file path for the XML model description template.
-        """
-        return self._compiler.getXMLTpl()
-
-    def set_XML_tpl(self, template):
-        """ 
-        Set the XML model description template to the file pointed out by 
-        template.
-        
-        Parameters::
-        
-            template --
-                The new XML model description template.       
-        """
-        self._compiler.setXMLTpl(template)
-        
-    def get_cTemplate(self):
-        """ 
-        Get the file path to the c code template. 
-        
-        Returns::
-        
-            The file path for the c code template.
-        """
-        return self._compiler.getCTemplate()
-    
-    def set_cTemplate(self, template):
-        """ 
-        Set the c code template to the file pointed out by template.
-        
-        Parameters::
-        
-            template --
-                The new c code template.
-        """
-        self._compiler.setCTemplate(template)
         
     def get_warnings(self):
         """ 
@@ -345,44 +321,13 @@ class ModelicaCompiler(object):
                 java_warning.message() \
             ));
         return warnings
-
         
-    def compile_JMU(self, class_name, file_name, compile_to):
-        """
-        Compiles a model (parsing, instantiating, flattening, code generation 
-        and binary file generation) and creates a JMU on the file system.
-        
-        Parameters::
-        
-            class_name --
-                Name of model class in the model file to compile.
-            
-            file_name --
-                Path to file or list of paths to files in which the model is 
-                contained.
-                
-            compile_to --
-                Specify location of the compiled JMU. Directory will be created 
-                if it does not exist.
-            
-        Returns::
-        
-            A list of warnings given by the compiler
-        """
-        self._compiler.retreiveAndClearWarnings() # Remove old warnings
-        try:
-            self._compiler.compileJMU(class_name, file_name, compile_to)
-            self._compiler.closeLogger()
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
-        return self.get_warnings()
-        
-    def compile_FMU(self, class_name, file_name, target, compile_to):
+    def compile_Unit(self, class_name, file_name, target, version, compile_to):
         """
         Compiles a model (parsing, instantiating, flattening, code generation 
         and binary file generation) and creates an FMU on the file system. Set 
         target to specify which type of FMU should be created. The different 
-        targets are "fmume" and "fmucs". 
+        targets are "me" and "cs". 
         
         Note: target must currently be set to 'model_fmume'.
         
@@ -396,8 +341,11 @@ class ModelicaCompiler(object):
                 in which the model is contained.
                 
             target --
-                The build target. Valid options are 'fmume' and 'fmucs'.
-                Note: Must currently be set to 'fmume'.
+                The build target. Valid options are 'me' and 'cs'.
+                
+            version --
+                The FMI version. Valid options are '1.0' and '2.0'.
+                Note: Must currently be set to '1.0'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
@@ -409,43 +357,13 @@ class ModelicaCompiler(object):
         """
         self._compiler.retreiveAndClearWarnings() # Remove old warnings
         try:
-            self._compiler.compileFMU(class_name, file_name, target, compile_to)
+            self._compiler.compileUnit(class_name, file_name, target, version, compile_to)
             self._compiler.closeLogger()
         except jpype.JavaException as ex:
             self._handle_exception(ex)
         return self.get_warnings()
 
-    def compile_FMUX(self, class_name, file_name, compile_to):
-        """
-        Compiles a model (parsing, instantiating, flattening and XML code 
-        generation) and creates an FMUX on the file system.
-        
-        Parameters::
-        
-            class_name --
-                Name of model class in the model file to compile.
-            
-            file_name --
-                Path to file or list of paths to files or libraries 
-                in which the model is contained.
-                
-            compile_to --
-                Specify location of the compiled FMUX. Directory will be created 
-                if it does not exist.
-        
-        Returns::
-        
-            A list of warnings given by the compiler
-        """
-        self._compiler.retreiveAndClearWarnings() # Remove old warnings
-        try:
-            self._compiler.compileFMUX(class_name, file_name, compile_to)
-            self._compiler.closeLogger()
-        except jpype.JavaException as ex:
-            self._handle_exception(ex)
-        return self.get_warnings()
-
-    def parse_model(self,model_file_name):   
+    def parse_model(self,model_file_name):
         """ 
         Parse a model.
 
@@ -483,7 +401,7 @@ class ModelicaCompiler(object):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def instantiate_model(self, source_root, model_class_name):
+    def instantiate_model(self, source_root, model_class_name, target):
         """ 
         Generate an instance tree representation for a model.
 
@@ -498,6 +416,9 @@ class ModelicaCompiler(object):
                 
             model_class_name -- 
                 Name of model class in the model file to compile.
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Returns::
         
@@ -513,12 +434,12 @@ class ModelicaCompiler(object):
             Java classes.
         """    
         try:
-            ipr = self._compiler.instantiateModel(source_root, model_class_name)
+            ipr = self._compiler.instantiateModel(source_root, model_class_name, target)
             return ipr    
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def flatten_model(self, inst_class_decl):
+    def flatten_model(self, inst_class_decl, target):
         """ 
         Compute a flattened representation of a model. 
 
@@ -530,6 +451,9 @@ class ModelicaCompiler(object):
           
             inst_class_decl -- 
                 Reference to a model instance. 
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Returns::
         
@@ -548,12 +472,12 @@ class ModelicaCompiler(object):
             Java classes.
         """
         try:
-            fclass = self._compiler.flattenModel(inst_class_decl)
+            fclass = self._compiler.flattenModel(inst_class_decl, target)
             return fclass    
         except jpype.JavaException as ex:
             self._handle_exception(ex)
 
-    def generate_code(self,fclass):
+    def generate_code(self, fclass, target):
         """ 
         Generate code for a model.
 
@@ -566,6 +490,9 @@ class ModelicaCompiler(object):
         
             fclass -- 
                 Reference to the flattened model object representation.  
+            
+            target --
+                Compilation target object returned by create_target_object()
 
         Raises::
         
@@ -576,7 +503,7 @@ class ModelicaCompiler(object):
             Java classes.
         """
         try:
-            self._compiler.generateCode(fclass)
+            self._compiler.generateCode(fclass, target)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
@@ -611,6 +538,10 @@ class ModelicaCompiler(object):
                         problem.message() \
                     ))
             raise CompilerError(errors, warnings)
+        
+        if ex.javaClass() is IllegalCompilerArgumentException:
+            raise IllegalCompilerArgumentError(
+                str(ex.__javaobject__.getMessage()))
         
         if ex.javaClass() is ModelicaClassNotFoundException:
             raise ModelicaClassNotFoundError(

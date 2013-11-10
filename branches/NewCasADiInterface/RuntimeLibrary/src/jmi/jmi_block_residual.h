@@ -25,7 +25,7 @@
 #ifndef _JMI_BLOCK_RESIDUAL_H
 #define _JMI_BLOCK_RESIDUAL_H
 
-#include "jmi_common.h"
+#include "jmi_util.h"
 
 /* Lapack function */
 extern void dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV,

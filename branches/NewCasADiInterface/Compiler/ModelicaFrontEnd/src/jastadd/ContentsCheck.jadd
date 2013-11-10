@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.ErrorCheckType;
+
 aspect ContentCheck {
 
 	/**
@@ -22,16 +24,16 @@ aspect ContentCheck {
 	 * Examples would be checking that classes follow the requirements of 
 	 * their restriction. 
 	 */
-	public void ASTNode.contentCheck() {}
+	public void ASTNode.contentCheck(ErrorCheckType checkType) {}
 	
-	public void FAbstractEquation.contentCheck() {
+	public void FAbstractEquation.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) 
 			error("Equations are not allowed in functions");
 	}
 	
-	public void FAlgorithm.contentCheck() {}
+	public void FAlgorithm.contentCheck(ErrorCheckType checkType) {}
 	
-	public void InstDerExp.contentCheck() {
+	public void InstDerExp.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) {
 			error("The der() operator is not allowed in functions");
 		} else {
@@ -43,62 +45,64 @@ aspect ContentCheck {
 		}
 	}
 	
-	public void FTerminate.contentCheck() {
+	public void FTerminate.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) 
 			error("The terminate() statement is not allowed in functions");
 	}
 	
-	public void InstExternal.contentCheck() {
+	public void InstExternal.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())
 			error("External function declarations are only allowed in functions");
 	}
 	
-	public void FReturnStmt.contentCheck() {
+	public void FReturnStmt.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())
 			error("Return statements are only allowed in functions");
 	}
 	
-	public void FWhenStmt.contentCheck() {
-		if (inFunction())
+	public void FWhenStmt.contentCheck(ErrorCheckType checkType) {
+		if (myFAlgorithm().getType() instanceof FInitialEquation || myFAlgorithm().isInitial())
+			error("When statements are not allowed in initial algorithms");
+		else if (inFunction())
 			error("When statements are not allowed in functions");
 		else if (insideBlockStmt())
 			error("When statements are not allowed inside if, for, while and when clauses");
 	}
 	
-	public void FParseArray.contentCheck() {
+	public void FParseArray.contentCheck(ErrorCheckType checkType) {
 		// If not already rewritten to FLongArray, this is an error.
 		error("The array() operator may not be used in function call equations or function call statements");
 	}
 	
-	public void FEndExp.contentCheck() {
+	public void FEndExp.contentCheck(ErrorCheckType checkType) {
 		if (!inArraySubscripts())
 			error("The end operator may only be used in array subscripts");
 	}
 	
-	public void FPreExp.contentCheck() {
+	public void InstPreExp.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) { 
 			error("The pre() operator may not be used inside functions");
 		}
 	}
 	
-	public void FEdgeExp.contentCheck() {
+	public void FEdgeExp.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) { 
 			error("The edge() operator may not be used inside functions");
 		}
 	}
 	
-	public void FChangeExp.contentCheck() {
+	public void FChangeExp.contentCheck(ErrorCheckType checkType) {
 		if (inFunction()) { 
 			error("The change() operator may not be used inside functions");
 		}
 	}
 	
-	public void InstExtends.contentCheck() {
+	public void InstExtends.contentCheck(ErrorCheckType checkType) {
 		if (myInstClass().isExternalObject())
 			error("Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition");
 	}
 	
-	public void InstFunctionCall.contentCheck() {
+	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
 		if (!generated) {
 			InstClassDecl target = getName().myInstClassDecl();
 			if (target.isConstructor() || target.isDestructor())
@@ -106,16 +110,31 @@ aspect ContentCheck {
 		}
 	}
 	
-	public void FConnRootedDep.contentCheck() {
+	public void FConnRootedDep.contentCheck(ErrorCheckType checkType) {
 		warning("The rooted() operator has been deprecated in favor of Connections.rooted()");
 	}
 	
-	public void InstComponentDecl.contentCheck() {
+	public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
 			getFArraySubscripts().markAsStructuralParameter();
 	}
 	
-	public void InstClassDecl.contentCheck() {
+    public void InstAssignable.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        if (isDeclaredInput() || isDeclaredOutput()) {
+            InstComponentDecl inherit = inheritsInputOutputFrom();
+            if (inherit != null)
+                inherit.error("Can't declare %s as %s, since it contains a component declared as input or output", 
+                        name(), (isDeclaredInput() ? "input" : "output"));
+        }
+        if (isDeclaredFlow()) {
+            InstComponentDecl inherit = inheritsFlowFrom();
+            if (inherit != null)
+                inherit.error("Can't declare %s as flow, since it contains a component declared as flow", name());
+        }
+    }
+	
+	public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
 		if (isExternalObject()) {
 			checkContentsOKInExternalObject();
 			myConstructor().checkConstructor(primitiveScalarType());
@@ -155,11 +174,11 @@ aspect ContentCheck {
 	}
 	
 	// TODO: check if this is a builtin function (with bad arguments), error otherwise
-//	public void FBuiltinExternalLanguage.contentCheck() {
+//	public void FBuiltinExternalLanguage.contentCheck(ErrorCheckType checkType) {
 //		error("The \"builtin\" external language specitication may only be used for functions that are a part of the Modelica specification");
 //	}
 	
-	public void FUnknownExternalLanguage.contentCheck() {
+	public void FUnknownExternalLanguage.contentCheck(ErrorCheckType checkType) {
 		error("The external language specification \"" + getLanguage() + "\" is not supported");
 	}
 	
@@ -171,12 +190,12 @@ aspect ContentCheck {
 	eq FMinMaxExp.getChild().iterExpUseOK()    = true;
 	eq FReductionExp.getChild().iterExpUseOK() = true;
 	
-	public void FIterExp.contentCheck() {
+	public void FIterExp.contentCheck(ErrorCheckType checkType) {
 		if (!iterExpUseOK())
 			error("Reduction-expressions are only allowed with sum(), min(), max() and product()");
 	}
 	
-	public void FOverflowIntLitExp.contentCheck() {
+	public void FOverflowIntLitExp.contentCheck(ErrorCheckType checkType) {
 		warning("Integer literal \"%s\" is too large to represent as 32-bit Integer, using Real instead.", 
 				getString(), getString(), getValue());
 	}
@@ -198,24 +217,26 @@ aspect ContentCheck {
 	eq FIfEquation.mayContainConnect()                = 
 		getTest().variability().parameterOrLess() && getTest().canCeval();
 	
-	public void FConnectClause.contentCheck() {
-		super.contentCheck();
+	public void FConnectClause.contentCheck(ErrorCheckType checkType) {
+		super.contentCheck(checkType);
 		if (!connectAllowed())
 			error("Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations"); 
 	}
 	
-	public void FWhenEquation.contentCheck() {
+	public void FWhenEquation.contentCheck(ErrorCheckType checkType) {
 		// TODO: check that two when clauses do not assign the same variable
-		super.contentCheck();
-		if (inWhen()) {
+		super.contentCheck(checkType);
+		if (inWhen())
 			error("Nestled when clauses are not allowed");
+		else if (getType() instanceof FInitialEquation || isInitial()) {
+			error("When equations are not allowed in initial equation sections");
 		} else {
 			if (!isBalancedAssignments())
 				error("All branches in when equation must assign the same variables");
 		}
 	}
 	
-	public void InstNamedModification.contentCheck() {
+	public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
 		if (getName().hasFArraySubscripts())
 			error("Modifiers of specific array elements are not allowed");
 	}
@@ -225,8 +246,8 @@ aspect ContentCheck {
 	public static final String FIfEquation.UNBALANCED_ERROR_WHEN = 
 		"All branches in if equation with non-parameter tests within when equation must assign the same variables";
 	
-	public void FIfEquation.contentCheck() {
-		super.contentCheck();
+	public void FIfEquation.contentCheck(ErrorCheckType checkType) {
+		super.contentCheck(checkType);
 		if (isTopWhenIfEquation()) {
 			boolean inWhen = inWhen();
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
@@ -248,8 +269,8 @@ aspect ContentCheck {
 		}
 	}
 	
-	public void FEquation.contentCheck() {
-		super.contentCheck();
+	public void FEquation.contentCheck(ErrorCheckType checkType) {
+		super.contentCheck(checkType);
 		if (inWhen() && !isAssignmentEqn())
 			error("Only assignment equations are allowed in when clauses");
 	}
@@ -314,7 +335,7 @@ aspect ContentCheck {
 	}
 	
 	
-	public void InstMPackage.contentCheck() {
+	public void InstMPackage.contentCheck(ErrorCheckType checkType) {
 		if (!myInstClassDecl().isOkPackage())
 			error("Packages may only contain classes and constants");
 	}
@@ -322,10 +343,10 @@ aspect ContentCheck {
 	/**
 	 * Check that the restriction of this class is fulfilled.
 	 */
-	public void InstClassDecl.checkRestriction() {}
+	public void InstClassDecl.checkRestriction(ErrorCheckType checkType) {}
 	
-	public void InstBaseClassDecl.checkRestriction() {
-		getInstRestriction().contentCheck();
+	public void InstBaseClassDecl.checkRestriction(ErrorCheckType checkType) {
+		getInstRestriction().contentCheck(checkType);
 	}
 	
 	/**
@@ -367,13 +388,19 @@ aspect StructuralParams {
 	public void FSubscript.markAsStructuralParameter() {}
 	public void FExpSubscript.markAsStructuralParameter() {
 		getFExp().markAsStructuralParameter();
-	}
+	}  
 
 	
 	public void ASTNode.markUsesAsStructuralParameter() {
 		for (ASTNode n : this)
 			n.markUsesAsStructuralParameter();
 	}
+    
+    public void FSizeExp.markUsesAsStructuralParameter() {
+        getDimOpt().markUsesAsStructuralParameter();
+    }
+    
+    public void FNdimsExp.markUsesAsStructuralParameter() {}
 	
 	public void InstAccess.markUsesAsStructuralParameter() {
 		myInstComponentDecl().markAsStructuralParameter();
@@ -399,6 +426,10 @@ aspect StructuralParams {
 	public void InstAssignable.markAsStructuralParameter() {
 		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
+		if (indices().numElements() > 0 && !fixedAttributeCValue().reduceBooleanOr()) {
+		    compliance("Parameters with fixed=false can not be marked as structural parameter");
+		    return;
+		}
 		isStructuralParam = true;
 		// Flush cache for variability()
 		variability_computed = false;

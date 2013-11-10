@@ -51,6 +51,11 @@ public class OptionRegistry {
 		public static final String TRIVIAL = "trivial";
 		public static final String ALL     = "all";
 	}
+	public interface Homotopy {
+		public static final String SIMPLIFIED = "simplified";
+		public static final String ACTUAL     = "actual";
+		public static final String HOMOTOPY   = "homotopy";
+	}
 	public interface RuntimeLogLevel {
 		public static final int NONE = 0;
 		public static final int FATAL = 1;
@@ -88,7 +93,7 @@ public class OptionRegistry {
 		AUTOMATIC_TEARING
 			("automatic_tearing", 
 			 compiler, 
-			 false, 
+			 true, 
 			 "If this option is set to true (default is false), automatic tearing of equation systems is performed."),
 		HAND_GUIDED_TEARING 
 			("hand_guided_tearing", 
@@ -206,7 +211,7 @@ public class OptionRegistry {
 		FMI_VER 
 			("fmi_version", 
 			 compiler, 
-			 1.0, 
+			 "1.0", 
 			 "Version of FMU."),
 		VAR_SCALE 
 			("enable_variable_scaling", 
@@ -268,6 +273,14 @@ public class OptionRegistry {
 			 Inlining.TRIVIAL, 
 			 "Perform function inlining on model after flattening (allowed values are none, trivial or all, default is trivial)", 
 			 Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
+		HOMOTOPY 
+			("homotopy", 
+			 compiler, 
+			 Homotopy.HOMOTOPY, 
+			 "Decides how homotopy expressions are interpreted during compilation. Default value is 'homotopy'."
+			 + "Can be set to either 'simplified' or 'actual' which will compile the model using the simplified or"
+			 + "actual expressions.", 
+			 Homotopy.HOMOTOPY, Homotopy.ACTUAL, Homotopy.SIMPLIFIED),
 		DEBUG_CSV_STEP_INFO 
 			("debug_csv_step_info", 
 			 compiler, 
@@ -294,7 +307,7 @@ public class OptionRegistry {
 		ALG_FUNCS
 			 ("algorithms_as_functions",
 			  compiler,
-			  true,
+			  false,
 			  "Convert algorithm sections to function calls"),
 		WRITE_TEARING_PAIRS
 			("write_tearing_pairs_to_file",
@@ -309,6 +322,11 @@ public class OptionRegistry {
 			 false,
 			 "Converts the DAE system into an interactive fmu where all residual equations and iteration" +
 			 "variables have been changed into top level outputs and inputs."),
+	    TRANSFORM_STEPS
+	        ("log_transformation_steps",
+	         compiler,
+	         false,
+	         "Write flat tree after each transformation step to files"),
 		
 		// Runtime options
         /*

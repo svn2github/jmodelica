@@ -25,10 +25,10 @@
 #ifndef _JMI_ODE_SOLVER_H
 #define _JMI_ODE_SOLVER_H
 
-#include "jmi_common.h"
-#include "jmi.h"
 #include "jmi_util.h"
-#include "fmi1_cs.h"
+#include "jmi_ode_problem.h"
+#include "jmi.h"
+#include "jmi_log.h"
 
 
 /**
@@ -46,15 +46,34 @@ typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_fin
   */
 typedef void (*jmi_ode_delete_func_t)(jmi_ode_solver_t* block);
 
+
+
 struct jmi_ode_solver_t {
-    fmi1_cs_t *fmi1_cs;                    /**< \brief A pointer to the corresponding jmi_t struct */
+    jmi_ode_problem_t* ode_problem;                    /**< \brief A pointer to the corresponding jmi_ode_problem_t struct */
 
     void *integrator;
+    jmi_real_t step_size;
+    jmi_real_t rel_tol;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
 };
 
-int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver);
-void jmi_delete_ode_solver(fmi1_cs_t* fmi1_cs);
+/**
+ * \brief Creates a new jmi_ode_solver_t instance.
+ *
+ * @param ode_problem A jmi_ode_problem_t struct.
+ * @param method A jmi_ode_method_t struct. 
+ * @param step_size The step size for the mehtod.
+ * @param rel_tol The relative tolerance for the method.
+ * @return Error code.
+  */
+int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method, jmi_real_t step_size, jmi_real_t rel_tol);
+
+/**
+ * \brief Deletes the jmi_ode_solver_t instance.
+ *
+ * @param ode_problem A jmi_ode_problem_t struct.
+  */
+void jmi_delete_ode_solver(jmi_ode_problem_t* problem);
 
 #endif

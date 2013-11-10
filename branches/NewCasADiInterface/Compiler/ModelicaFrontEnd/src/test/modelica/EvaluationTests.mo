@@ -861,6 +861,49 @@ Semantic error at line 846, column 20:
 end FunctionEval24;
 
 
+model FunctionEval25
+	function f
+		input Real[:] x;
+		output Integer y;
+	algorithm
+		y := 0;
+		for i in 1:(size(x,1) - 1) loop
+			y := y + i;
+		end for;
+	end f;
+	
+	Real x = f(ones(3));
+    parameter Integer n = f(ones(4));
+	Real z[n];
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionEval25",
+			description="Check that functions containing scalar expressions depending on unknown sizes can be evaluated after being error checked",
+			flatModel="
+fclass EvaluationTests.FunctionEval25
+ Real x = EvaluationTests.FunctionEval25.f(ones(3));
+ parameter Integer n = EvaluationTests.FunctionEval25.f(ones(4)) /* 6 */;
+ Real z[6];
+
+public
+ function EvaluationTests.FunctionEval25.f
+  input Real[:] x;
+  output Integer y;
+ algorithm
+  y := 0;
+  for i in 1:size(x, 1) - 1 loop
+   y := y + i;
+  end for;
+  return;
+ end EvaluationTests.FunctionEval25.f;
+
+end EvaluationTests.FunctionEval25;
+")})));
+end FunctionEval25;
+
+
+
 model StringConcat
  Real a = 1;
  parameter String b = "1" + "2";
@@ -909,35 +952,108 @@ x = if a[1,1] > a[1,2] then true else false;
 end ParameterEval1;
 
 
-model EvaluateAnnotation
+model EvaluateAnnotation1
 	parameter Real a = 1.0;
 	parameter Real b = a annotation(Evaluate=true);
 	Real c = a + b;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
-			name="EvaluateAnnotation",
+			name="EvaluateAnnotation1",
 			description="Check that annotation(Evaluate=true) is honored",
 			flatModel="
-fclass EvaluationTests.EvaluateAnnotation
+fclass EvaluationTests.EvaluateAnnotation1
  parameter Real a = 1.0 /* 1.0 */;
  parameter Real b = 1.0 /* 1.0 */;
  Real c = 1.0 + 1.0;
-end EvaluationTests.EvaluateAnnotation;
+end EvaluationTests.EvaluateAnnotation1;
 ")})));
-end EvaluateAnnotation;
+end EvaluateAnnotation1;
+
+model EvaluateAnnotation2
+    parameter Real p(fixed=false) annotation (Evaluate=true);
+initial equation
+    p = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation2",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation2
+ parameter Real p(fixed = false);
+initial equation 
+ p = 1;
+end EvaluationTests.EvaluateAnnotation2;
+"), WarningTestCase(
+            name="EvaluateAnnotation2_Warn",
+            description="Check that a warning is given when annotation(Evaluate=true) and fixed equals false",
+            errorMessage="
+Warning: in file '...':
+At line 0, column 0:
+  Evaluate annotation is ignored when fixed equals false
+
+Warning: in file '...':
+At line 0, column 0:
+  The parameter p does not have a binding expression
+")})));
+end EvaluateAnnotation2;
+
+model EvaluateAnnotation3
+    parameter Real p[2](fixed={false, true}) annotation (Evaluate=true);
+initial equation
+    p[1] = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation3",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation3
+ parameter Real p[2](fixed = {false, true});
+initial equation 
+ p[1] = 1;
+end EvaluationTests.EvaluateAnnotation3;
+")})));
+end EvaluateAnnotation3;
+
+model EvaluateAnnotation4
+    model A
+        parameter Real p = 2 annotation(Evaluate=true);
+    end A;
+    A a(p=p);
+    parameter Real p(fixed=false) annotation (Evaluate=true);
+initial equation
+    p = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EvaluateAnnotation4",
+            description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
+            flatModel="
+fclass EvaluationTests.EvaluateAnnotation4
+ parameter Real a.p = p;
+ parameter Real p(fixed = false);
+initial equation 
+ p = 1;
+end EvaluationTests.EvaluateAnnotation4;
+")})));
+end EvaluateAnnotation4;
 
 
 model EvalColonSizeCell
     function f
         input Real[:] x;
-        output Real[size(x, 1)] y;
+        output Real[size(x, 1) + 1] y;
     algorithm
-        y := x / 2;
+		for i in 1:size(x,1) loop
+            y[i] := x[i] / 2;
+			y[i + 1] := y[i] + 1;
+		end for;
     end f;
     
     parameter Real a[1] = {1};
-    parameter Real b[1] = f(a);
+    parameter Real b[2] = f(a);
     parameter Real c[1] = if b[1] > 0.1 then {1} else {0} annotation (Evaluate=true);
 
     annotation(__JModelica(UnitTesting(tests={
@@ -948,15 +1064,18 @@ model EvalColonSizeCell
             flatModel="
 fclass EvaluationTests.EvalColonSizeCell
  parameter Real a[1] = {1} /* { 1 } */;
- parameter Real b[1] = EvaluationTests.EvalColonSizeCell.f({1.0});
- parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* 1 */;
+ parameter Real b[2] = EvaluationTests.EvalColonSizeCell.f({1.0});
+ parameter Real c[1] = if 0.5 > 0.1 then {1} else {0} /* { 1 } */;
 
 public
  function EvaluationTests.EvalColonSizeCell.f
   input Real[:] x;
-  output Real[size(x, 1)] y;
+  output Real[size(x, 1) + 1] y;
  algorithm
-  y := x / 2;
+  for i in 1:size(x, 1) loop
+   y[i] := x[i] / 2;
+   y[i + 1] := y[i] + 1;
+  end for;
   return;
  end EvaluationTests.EvalColonSizeCell.f;
 

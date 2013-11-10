@@ -347,6 +347,25 @@ aspect NodeMethods {
     }
     
     /**
+     * Check if this node is a direct child (only List/Opt between) of <code>parent</code>.
+     */
+    public boolean ASTNode.isChildOf(BaseNode parent) {
+        ASTNode par = getParent();
+        return par != null && par.isChildOfHelper(parent);
+    }
+    
+    /**
+     * Helper method for {@link #isChildOf(BaseNode parent)}, should not be called directly.
+     */
+    protected boolean ASTNode.isChildOfHelper(BaseNode parent) {
+        return isChildOf(parent);
+    }
+
+    protected boolean BaseNode.isChildOfHelper(BaseNode parent) {
+        return parent == this;
+    }
+    
+    /**
      * \brief Returns an iterable, that has an iterator that iterates over all direct FExp children.
      * 
      * The iterator passes through Lists and Opts.
@@ -603,6 +622,7 @@ aspect Names {
   inh String InstNode.findLibraryName();
   eq InstNode.getChild().findLibraryName() = libraryName();
   eq InstRoot.getChild().findLibraryName() = null;
+  eq Root.getChild().findLibraryName()     = null;
   
   inh String ASTNode.packagePath(String name);
   eq Root.getChild().packagePath(String name) = null;
@@ -669,7 +689,7 @@ aspect Names {
   eq InstComponentDecl.getChild().enclosingInstClassDecl() = myInstClass();
   
   inh BaseClassDecl ASTNode.enclosingClassDecl();
-  eq SourceRoot.getProgram().enclosingClassDecl() = null;
+  eq Root.getChild().enclosingClassDecl() = null;
 
   eq FullClassDecl.getEquation().enclosingClassDecl() = this; 
   eq FullClassDecl.getAlgorithm().enclosingClassDecl() = this; 
@@ -681,6 +701,13 @@ aspect Names {
   eq FullClassDecl.getExternalClause().enclosingClassDecl() = this;     
 
   eq ShortClassDecl.getExtendsClauseShortClass().enclosingClassDecl() = this;
+  
+  inh FStatement FStatement.enclosingLoop();
+  eq FAlgorithm.getChild().enclosingLoop()     = null;
+  eq Root.getChild().enclosingLoop()           = null;
+  eq FWhileStmt.getWhileStmt().enclosingLoop() = this;
+  eq FForStmt.getForStmt().enclosingLoop()     = this;
+  eq InstForStmt.getForStmt().enclosingLoop()  = this;
   
   
     /**
@@ -1016,6 +1043,22 @@ aspect FlatNames {
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
     /**
+     * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
+     */
+    syn String FQName.prefixActualPartName();
+    eq FQNameFull.prefixActualPartName()   = prefixName(-1, null, false);
+    eq FQNameString.prefixActualPartName() = getName().lastIndexOf('.') < 0 ? "" : getName().substring(0, getName().lastIndexOf('.'));
+    eq FQNameEmpty.prefixActualPartName() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * The number of name parts.
+     */
+    syn int InstAccess.numParts() = 1;
+    eq InstDot.numParts()         = getNumInstAccess();
+
+    /**
      * The number of name parts. Will always report 1 for FQNameString.
      */
     syn int FQName.numParts()  = 0;
@@ -1064,6 +1107,17 @@ aspect FlatNames {
     	}
     }
     
+    syn boolean FSubscript.isColon() = false;
+    eq FColonSubscript.isColon()     = true;
+    
+    syn boolean FSubscript.isExpSubscript() = false;
+    eq FExpSubscript.isExpSubscript()       = true;
+    
+    syn FExpSubscript FSubscript.asExpSubscript() {
+        throw new UnsupportedOperationException();
+    }
+    eq FExpSubscript.asExpSubscript() = this;
+    
     syn FQName FAbstractVariable.getFQName() = null;
 
     syn String FQName.name()         = "";
@@ -1107,6 +1161,27 @@ aspect FlatNames {
     	return str.toString();
 	}
     
+	private static String FQName.derPrefixString = "_der_der_der_der";
+	
+	protected static String FQName.createDerPrefixString(int order) {
+		while (4 * order >= derPrefixString.length())
+			derPrefixString = derPrefixString + derPrefixString;
+		return derPrefixString.substring(0, 4 * order + 1);
+	}
+	
+	syn String FQName.derPrefixName(int order) {
+		String name = prefixActualPartName();
+		if (!name.isEmpty())
+			name += ".";
+		name += createDerPrefixString(order) + lastActualPartName();
+		if (hasFArraySubscripts())
+			name += getFArraySubscripts();
+		return name;
+	}
+	
+	syn String FDummyDerivativeVariable.derPrefixName() = getFQName().derPrefixName(order());
+	syn String FDummyDerExp.derPrefixName() = getFIdUse().getFQName().derPrefixName(order());
+	
     syn String FQNamePart.name() = getName();
 
     syn String FIdUse.name()           = getFQName().name();
@@ -1157,15 +1232,9 @@ aspect FlatNames {
     eq FPreStringVariable.name()   = getFQNameNoTransform().preName();
     eq FPreEnumVariable.name()     = getFQNameNoTransform().preName();
 
-    syn String FPreExp.preName() = getFExpNoTransform().accessPreName();
+    syn String FIdUse.preName()    = getFQNameNoTransform().preName();
+    syn String FIdUseExp.preName() = getFIdUseNoTransform().preName();
     
-    // Perhaps berrer to do like with der() and add InstPreExp?
-    syn String FExp.accessPreName() {
-    	throw new UnsupportedOperationException();
-    }
-    eq FIdUseExp.accessPreName()      = getFIdUse().getFQNameNoTransform().preName();
-    eq FInstAccessExp.accessPreName() = "pre(" + name() + ')';
-
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
 
@@ -1238,7 +1307,7 @@ aspect FlatNames {
     eq FForIndex.getFVariable().findVariableIndex()       = forIndexIndex();
     eq FRecordDecl.getFVariable().findVariableIndex()     = -1;
     eq FEnumDecl.getChild().findVariableIndex()           = -1;
-    eq FClass.getDummyVariable().findVariableIndex()      = -1;
+    eq FClass.getChild().findVariableIndex()              = -1;
     
     inh lazy int FForIndex.forIndexIndex();
     eq FClass.getChild().forIndexIndex() = nextForIndexIndex++;
@@ -1588,6 +1657,13 @@ aspect FlatNames {
     	int m = numDots();
         return copyPart(m - n + 1, m);
     }
+    
+    /**
+     * Create a copy of all but the first <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutPrefix(int n) {
+        return copyPart(n, numDots());
+    }
 
     /**
      * Create a copy of the name excluding the last part.
@@ -1607,7 +1683,14 @@ aspect FlatNames {
      * Create a copy of the first <code>n</code> parts of this name.
      */
     public FQName FQName.copyPrefix(int n) {
-    	return copyPart(0, n - 1);
+        return copyPart(0, n - 1);
+    }
+
+    /**
+     * Create a copy of all but the last <code>n</code> parts of this name.
+     */
+    public FQName FQName.copyWithoutSuffix(int n) {
+        return copyPart(0, numDots() - n);
     }
     
     /**
@@ -1694,38 +1777,30 @@ aspect FlatNames {
     }
     
     public FQName FQNameFull.copyReplacingSubscripts(Index i) {
-        StringBuilder buf = new StringBuilder();
+        FQNameFull res = new FQNameFull();
         int j = 0;
-        for (FQNamePart part : getFQNameParts()) {
-        	j = part.appendWithReplacedSubscripts(buf, i, j);
-        	buf.append('.');
-        }
-        buf.deleteCharAt(buf.length() - 1);
-        return new FQNameString(buf.toString());
+        for (FQNamePart part : getFQNameParts()) 
+        	j = part.appendWithReplacedSubscripts(res, i, j);
+        return res;
     }
     
     /**
-     * Append a string representation of this name part to <code>buf</code>, but with 
+     * Append this name part to <code>name</code>, but with 
      * all array subscripts replaced with indices from <code>i</code>.
      * 
      * The first index in <code>i</code> to use should be given in <code>j</code>, and 
      * the new value for <code>j</code> is returned.
      */
-    public int FQNamePart.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
-    	buf.append(getName());
+    public int FQNamePart.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+        name.append(getName());
     	return j;
     }
     
-    public int FQNamePartArray.appendWithReplacedSubscripts(StringBuilder buf, Index i, int j) {
-    	buf.append(getName());
-    	buf.append('[');
-    	int n = j + getFArraySubscripts().getNumFSubscript();
-    	for (int k = j; k < n; k++) {
-    		buf.append(i.get(k));
-    		buf.append(',');
-    	}
-    	buf.setCharAt(buf.length() - 1, ']');
-    	return n;
+    public int FQNamePartArray.appendWithReplacedSubscripts(FQNameFull name, Index i, int j) {
+    	int k = j + getFArraySubscripts().getNumFSubscript();
+        name.append(getName());
+        name.addFArraySubscripts(i.partIndex(j, k).createFArraySubscripts());
+    	return k;
     }
     
     /**
@@ -1797,7 +1872,7 @@ aspect FlatNames {
 	 * Create a pre() expression for this variable.
 	 */
 	public FPreExp FVariable.createFPreExp() {
-		return new FPreExp(getFQName().createUseFQName().createFIdUseExp());
+		return new FPreExp(createFIdUse());
 	}
 
     /**
@@ -1901,7 +1976,7 @@ aspect FlatNames {
      * \brief Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
-        getFEquationBlock(0).addFAbstractEquation(feq);
+        addFAbstractEquation(feq);
     }
     
 }
@@ -2207,6 +2282,7 @@ aspect FlatFunctionUtils {
      inh boolean FSubscript.inAlgorithm();
      inh boolean FFunctionCall.inAlgorithm();
      inh boolean FIdUse.inAlgorithm();
+     inh boolean FExp.inAlgorithm();
      eq FAlgorithm.getChild().inAlgorithm()   = !inFunction();
      eq InstNode.getChild().inAlgorithm()          = false;
      eq FAbstractEquation.getChild().inAlgorithm() = false;
@@ -2227,15 +2303,17 @@ aspect FlatFunctionUtils {
      eq FFunctionCallStmt.getCall().isFunctionCallClause()     = true;
      
      inh boolean FStatement.insideBlockStmt();
-     eq FAlgorithm.getChild().insideBlockStmt() = false;
-     eq FIfWhenStmt.getChild().insideBlockStmt()     = true;
-     eq FWhileStmt.getChild().insideBlockStmt()      = true;
-     eq FForStmt.getChild().insideBlockStmt()        = true;
-     eq InstForStmt.getChild().insideBlockStmt()     = true;
+     eq Root.getChild().insideBlockStmt()        = false;
+     eq FAlgorithm.getChild().insideBlockStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBlockStmt() = true;
+     eq FWhileStmt.getChild().insideBlockStmt()  = true;
+     eq FForStmt.getChild().insideBlockStmt()    = true;
+     eq InstForStmt.getChild().insideBlockStmt() = true;
      
      inh boolean FStatement.insideBranchedStmt();
-     eq FAlgorithm.getChild().insideBranchedStmt() = false;
-     eq FIfWhenStmt.getChild().insideBranchedStmt()     = true;
+     eq Root.getChild().insideBranchedStmt()        = false;
+     eq FAlgorithm.getChild().insideBranchedStmt()  = false;
+     eq FIfWhenStmt.getChild().insideBranchedStmt() = true;
      
      /**
       * \brief Return the index of the variable assigned by this FFunctionCallLeft among 
@@ -2312,6 +2390,15 @@ aspect FlatFunctionUtils {
      eq FFunctionDecl.getChild().calcTempVarName() = nextTempVarName();
      
      /**
+      * Creates expressions based on tempVarName();
+      */
+     syn FIdUseExp FExp.tempUseExp() = new FIdUseExp(tempVarName());
+     syn FPreExp   FExp.tempPreExp() = new FPreExp(new FIdUse(tempVarName()));
+     syn FVariable FExp.tempVar() = tempVar(variability(), type());
+     syn FVariable FExp.tempVar(FTypePrefixVariability variability, FType type)
+         = type.createTempFVariable(new FQNameFull(tempVarName()), variability);
+     
+     /**
       * Throw away calculated temp names.
       */
      public void ASTNode.flushTempVarNames() {
@@ -2351,6 +2438,15 @@ aspect FlatFunctionUtils {
      
      private int FFunctionDecl.nextTempVarIndex = 1;
      private int FClass.nextTempVarIndex = 1;
+
+    public String FClass.nextTempFuncName() {
+        String name;
+        do {
+            name = "temp_" + nextTempFuncIndex++;
+        } while (lookupFunc(name) != null);
+        return name;
+    }
+    private int FClass.nextTempFuncIndex = 1;
 }
 
 aspect Visibility {
@@ -2421,113 +2517,168 @@ aspect ComponentDeclMethods {
     eq BaseClassDecl.isOuter() = hasOuter();
 
     /**
-     * Check if a ComponentDecl is declared parameter.
+     * Check if this component is declared parameter.
      */
-    syn boolean ComponentDecl.isParameter() {
-    
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Parameter)
-                return true;
-    
-        return false;
-    }
-    
+    syn boolean ComponentDecl.isParameter() = hasTypePrefixVariability() && getTypePrefixVariability().parameterVariability();
     
      /**
-     * Check if a ComponentDecl is declared constant.
+     * Check if this component is declared constant.
      */
-    syn boolean ComponentDecl.isConstant() {
+    syn boolean ComponentDecl.isConstant() = hasTypePrefixVariability() && getTypePrefixVariability().constantVariability();
     
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Constant)
-                return true;
+    /**
+     * Check if this component is declared discrete.
+     */
+    syn boolean ComponentDecl.isDiscrete() = hasTypePrefixVariability() && getTypePrefixVariability().discreteVariability();
+
+    /**
+     * Check if this component is an input component.
+     */
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
     
-        return false;
+    /**
+     * Check if this component inherits input from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsInput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredInput();
     }
     
     /**
-     * Check if a ComponentDecl is declared discrete.
+     * Check if this component is declared input.
      */
-    syn boolean ComponentDecl.isDiscrete() {
+    syn boolean InstComponentDecl.isDeclaredInput() = getComponentDecl().isInput() || myInstClass().isInput();
     
-        if (hasTypePrefixVariability())
-            if (getTypePrefixVariability() instanceof Discrete)
-                return true;
+    /**
+     * Check if this component is declared input.
+     */
+    syn boolean ComponentDecl.isInput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isInput();
     
-        return false;
+    /**
+     * Check if this prefix is "input".
+     */
+    syn boolean TypePrefixInputOutput.isInput() = false;
+    eq Input.isInput()                          = true;
+
+    /**
+     * Check if this component is an output component.
+     */
+    syn boolean InstComponentDecl.isOutput() = isDeclaredOutput() || inheritsOutput();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsOutput() {
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isDeclaredOutput();
     }
-    
-    syn boolean InstComponentDecl.isInput() {
-        
-        if (getComponentDecl().hasTypePrefixInputOutput())
-            if (getComponentDecl().getTypePrefixInputOutput() instanceof Input)
-                return true;
-        if (myInstClass().isInput())
-            return true;
-        
-        return false;
-    }
-    
-    
  
-    syn boolean InstComponentDecl.isOutput() {
-        
-        if (getComponentDecl().hasTypePrefixInputOutput())
-            if (getComponentDecl().getTypePrefixInputOutput() instanceof Output)
-                return true;
-        if (myInstClass().isOutput())
-            return true;
-        
-        return false;
-    }
-    
-    syn boolean AbstractEquation.isInitial() {
-        if (hasAbstractEquationModifier())
-            if (getAbstractEquationModifier() instanceof Initial)
-                return true;
-        return false;
-    
-    }
-
     /**
-     * Check if a InstComponentDecl is declared flow.
+     * Check if this component is declared output.
      */
-    syn boolean InstComponentDecl.isFlow() {
-    
-        if (getComponentDecl().hasTypePrefixFlow())
-            return true;
-    
-        return false;
-    }
+    syn boolean InstComponentDecl.isDeclaredOutput() = getComponentDecl().isOutput() || myInstClass().isOutput();
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this component is declared output.
      */
-    syn boolean InstComponentDecl.isInner() {
+    syn boolean ComponentDecl.isOutput() = hasTypePrefixInputOutput() && getTypePrefixInputOutput().isOutput();
     
-        if (getComponentDecl().isInner())
-            return true;
+    /**
+     * Check if this prefix is "output".
+     */
+    syn boolean TypePrefixInputOutput.isOutput() = false;
+    eq Output.isOutput()                         = true;
     
-        return false;
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsInputOutputFrom();
+    eq InstComponentDecl.getChild().inheritsInputOutputFrom() = (isDeclaredInput() || isDeclaredOutput()) ? this : inheritsInputOutputFrom();
+    eq InstClassDecl.getChild().inheritsInputOutputFrom()     = null;
+    eq InstRoot.getChild().inheritsInputOutputFrom()          = null;
+    eq Root.getChild().inheritsInputOutputFrom()              = null;
+    
+    /**
+     * Check if this component is or is part of a component that is declared input or output on the top level.
+     */
+    syn boolean InstComponentDecl.isTopLevelInputOutput() {
+        if (isTopLevel())
+            return isDeclaredInput() || isDeclaredOutput();
+        InstComponentDecl source = inheritsInputOutputFrom();
+        return source != null && source.isTopLevel();
     }
+    
+    /**
+     * Check if this component is declared at the top level, i.e. not part of any other component.
+     */
+    inh boolean InstComponentDecl.isTopLevel();
+    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstClassDecl.getChild().isTopLevel()     = true;
+    eq InstRoot.getChild().isTopLevel()          = true;
+    eq Root.getChild().isTopLevel()              = true;
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this equation is declared initial.
+     */
+    syn boolean AbstractEquation.isInitial() = hasAbstractEquationModifier() && getAbstractEquationModifier().isInitial();
+    
+    /**
+     * Check if this equation modifier is "initial".
+     */
+    syn boolean AbstractEquationModifier.isInitial() = false;
+    eq Initial.isInitial()                           = true;
+    
+    /**
+     * Check if this component is a flow component.
+     */
+    syn boolean InstComponentDecl.isFlow() = isDeclaredFlow() || inheritsFlow();
+    
+    /**
+     * Check if this component inherits output from the surrounding component.
+     */
+    syn boolean InstComponentDecl.inheritsFlow() = inheritsFlowFrom() != null;
+    
+    /**
+     * Find the component that this component inherits input or output from, if any.
+     */
+    inh InstComponentDecl InstComponentDecl.inheritsFlowFrom();
+    eq InstComponentDecl.getChild().inheritsFlowFrom() = isDeclaredFlow() ? this : inheritsFlowFrom();
+    eq InstClassDecl.getChild().inheritsFlowFrom()     = null;
+    eq InstRoot.getChild().inheritsFlowFrom()          = null;
+    eq Root.getChild().inheritsFlowFrom()              = null;
+
+    /**
+     * Check if this component is declared flow.
+     */
+    syn boolean InstComponentDecl.isDeclaredFlow() = getComponentDecl().isFlow();
+
+    /**
+     * Check if this component is declared stream.
+     */
+    syn boolean InstComponentDecl.isStream() = getComponentDecl().isStream();
+
+    /**
+     * Check if this component is declared inner.
+     */
+    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
+
+    /**
+     * Check if this component is declared outer.
      */
     syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
     
-        /**
-     * Check if a InstClassDecl is declared inner.
+    /**
+     * Check if this class is declared inner.
      */
     syn boolean InstClassDecl.isInner() = getClassDecl().isInner();
 
     /**
-     * Check if a InstComponentDecl is declared inner.
+     * Check if this component is declared outer.
      */
     syn boolean InstClassDecl.isOuter() = getClassDecl().isOuter();
     
     /**
-     * Check if a component is disabled by a conditional clause
+     * Check if this component is disabled by a conditional clause
      */
     syn boolean InstComponentDecl.isDisabled() = 
     	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
@@ -2588,9 +2739,13 @@ aspect ShortClassUtil {
 aspect FlatExpressions {
     
     inh boolean FExp.inEquationSection();
-    eq FClass.getFEquationBlock().inEquationSection() = true;
+    inh boolean FAbstractEquation.inEquationSection();
+    inh boolean FStatement.inEquationSection();
+    eq FClass.getFAbstractEquation().inEquationSection() = true;
     eq Root.getChild().inEquationSection() = false;
     inh boolean FExp.inInitialEquationSection();
+    inh boolean FAbstractEquation.inInitialEquationSection();
+    inh boolean FStatement.inInitialEquationSection();
     eq FClass.getFInitialEquation().inInitialEquationSection() = true;
     eq Root.getChild().inInitialEquationSection() = false;
 
@@ -2601,7 +2756,7 @@ aspect FlatExpressions {
     inh boolean FExp.inNoEventExp();
     eq FNoEventExp.getChild().inNoEventExp() = true;
     eq FAssert.getChild().inNoEventExp() = true;
-    eq FAlgorithm.getChild().inNoEventExp() = true;
+    eq FFunctionDecl.getChild().inNoEventExp() = true;
     eq SourceRoot.getChild().inNoEventExp() = false;
     eq FlatRoot.getChild().inNoEventExp() = false;
     eq FClass.getFParameterEquation().inNoEventExp() = true;
@@ -2634,8 +2789,13 @@ aspect FlatExpressions {
     eq FClass.getChild().inWhen()                    = false;
     
     inh boolean FStatement.inWhen();
-    eq FWhenStmt.getFIfWhenClause().inWhen() = true;
+    eq FWhenClause.getFStatement().inWhen()          = true;
 
+    inh boolean FRelExp.inWhile();
+    eq FWhileStmt.getChild().inWhile() = true;
+    eq Root.getChild().inWhile() = false;
+    eq FAlgorithm.getChild().inWhile() = false;
+    
     inh boolean FAbstractEquation.isInitial();
     eq FClass.getChild().isInitial()                   = false;
     eq FClass.getFInitialEquation().isInitial()        = true;

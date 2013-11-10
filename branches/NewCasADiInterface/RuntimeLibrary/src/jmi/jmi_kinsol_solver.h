@@ -26,7 +26,7 @@
 #ifndef _JMI_KINSOL_SOLVER_H
 #define _JMI_KINSOL_SOLVER_H
 
-#include "jmi_common.h"
+#include "jmi_util.h"
 
 /*
  *  TODO: Error codes...

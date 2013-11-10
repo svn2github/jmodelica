@@ -145,8 +145,6 @@ aspect FlatTypeAnalysis {
 	eq InstEnumLiteral.type() = myInstEnumClassDecl().enumType();
 	eq FEnumLitExp.type()     = hasType() ? getType() : myFEnumDecl().type();
 	
-	syn boolean FEnumLitExp.hasType() = getType() != null;
-	
 	syn FType InstClassDecl.enumType() {
 		FEnumType type = new FEnumType(Size.SCALAR, qualifiedName(), new List());
 		for (InstEnumLiteral el : enumLiterals()) 
@@ -338,10 +336,13 @@ aspect FlatTypeAnalysis {
 	
 	eq FEventGenExp.type()    = fRealType(size());
 	eq FIntegerFuncExp.type() = fIntegerType(size());
-	eq FBinEventGenExp.type() = getX().type().numericPromotion(getY().type());
+	eq FBinEventGenExp.type() = argType();
 	
 	eq FHomotopyExp.type()    = getActual().type();
 	eq FSemiLinearExp.type()  = fRealType(size());
+	
+	syn FType FEventGenExp.argType() = getX().type();
+	eq FBinEventGenExp.argType() = getX().type().numericPromotion(getY().type());
 	
 	syn FType FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() {
@@ -1161,22 +1162,45 @@ aspect BuiltInFlatTypes {
 aspect InstClassRestriction {
 	
 	/**
-	 * \brief Is this class a connector?
+	 * Is this class a connector?
 	 */
 	syn boolean InstClassDecl.isConnector() = false;
 	eq InstBaseClassDecl.isConnector()      = getInstRestriction().isConnector();
 	eq UnknownInstClassDecl.isConnector()   = false;
 	
 	/**
-	 * \brief Is this restriction "connector"?
+	 * Is this restriction "connector"?
 	 */
 	syn boolean InstRestriction.isConnector() = false;
 	eq InstConnector.isConnector() = true;
 	
 	/**
+	 * Is this component a connector?
+	 */
+	syn boolean InstComponentDecl.isConnector() = myInstClass().isConnector();
+    
+    /**
+     * Is this class an expandable connector?
+     */
+    syn boolean InstClassDecl.isExpandableConnector() = false;
+    eq InstBaseClassDecl.isExpandableConnector()      = getInstRestriction().isExpandableConnector();
+    eq UnknownInstClassDecl.isExpandableConnector()   = false;
+    
+    /**
+     * Is this restriction "expandable connector"?
+     */
+    syn boolean InstRestriction.isExpandableConnector() = false;
+    eq InstExpandableConnector.isExpandableConnector()  = true;
+    
+    /**
+     * Is this component an expandable connector?
+     */
+    syn boolean InstComponentDecl.isExpandableConnector() = myInstClass().isExpandableConnector();
+	
+	/**
 	 * \brief Is this class a function?
 	 */
-	syn boolean InstClassDecl.isFunction() = false;
+	syn boolean InstNode.isFunction()      = false;
 	eq InstBaseClassDecl.isFunction()      = getInstRestriction().isFunction();
 	eq UnknownInstClassDecl.isFunction()   = false;
 	

@@ -135,6 +135,100 @@ end VariabilityPropagationTests.ConstantFolding2;
 ")})));
 end ConstantFolding2;
 
+model ConstantFolding3
+	function StringCompare
+		input String expected;
+		input String actual;
+	algorithm
+		assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
+	end StringCompare;
+	type E = enumeration(small, medium, large, xlarge);
+	Real realVar = 3.14;
+	Integer intVar = if realVar < 2.5 then 12 else 42;
+	Boolean boolVar = if realVar < 2.5 then true else false;
+	E enumVar = if realVar < 2.5 then E.small else E.medium;
+equation
+	StringCompare("42",           String(intVar));
+	StringCompare("42          ", String(intVar, minimumLength=12));
+	StringCompare("          42", String(intVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("3.14000",      String(realVar));
+	StringCompare("3.14000     ", String(realVar, minimumLength=12));
+	StringCompare("     3.14000", String(realVar, minimumLength=12, leftJustified=false));
+	StringCompare("3.1400000",    String(realVar, significantDigits=8));
+	StringCompare("3.1400000   ", String(realVar, minimumLength=12, significantDigits=8));
+	StringCompare("   3.1400000", String(realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("-3.14000",     String(-realVar));
+	StringCompare("-3.14000    ", String(-realVar, minimumLength=12));
+	StringCompare("    -3.14000", String(-realVar, minimumLength=12, leftJustified=false));
+	StringCompare("-3.1400000",   String(-realVar, significantDigits=8));
+	StringCompare("-3.1400000  ", String(-realVar, minimumLength=12, significantDigits=8));
+	StringCompare("  -3.1400000", String(-realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+	
+	StringCompare("false",        String(boolVar));
+	StringCompare("false       ", String(boolVar, minimumLength=12));
+	StringCompare("       false", String(boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("true",         String(not boolVar));
+	StringCompare("true        ", String(not boolVar, minimumLength=12));
+	StringCompare("        true", String(not boolVar, minimumLength=12, leftJustified=false));
+	
+	StringCompare("medium",       String(enumVar));
+	StringCompare("medium      ", String(enumVar, minimumLength=12));
+	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantFolding3",
+			description="Tests folding of string operator.",
+			flatModel="
+fclass VariabilityPropagationTests.ConstantFolding3
+ constant Real realVar = 3.14;
+ constant Integer intVar = 42;
+ constant Boolean boolVar = false;
+ constant VariabilityPropagationTests.ConstantFolding3.E enumVar = VariabilityPropagationTests.ConstantFolding3.E.medium;
+equation
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42\", \"42\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42          \", \"42          \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"          42\", \"          42\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000\", \"3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000     \", \"3.14000     \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"     3.14000\", \"     3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000\", \"3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000   \", \"3.1400000   \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"   3.1400000\", \"   3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000\", \"-3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000    \", \"-3.14000    \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"    -3.14000\", \"    -3.14000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000\", \"-3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000  \", \"-3.1400000  \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"  -3.1400000\", \"  -3.1400000\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false\", \"false\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false       \", \"false       \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"       false\", \"       false\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true\", \"true\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true        \", \"true        \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"        true\", \"        true\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium\", \"medium\");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium      \", \"medium      \");
+ VariabilityPropagationTests.ConstantFolding3.StringCompare(\"      medium\", \"      medium\");
+
+public
+ function VariabilityPropagationTests.ConstantFolding3.StringCompare
+  input String expected;
+  input String actual;
+algorithm
+  assert(actual == expected, \"Compare failed, expected: \" + expected + \", actual: \" + actual);
+  return;
+ end VariabilityPropagationTests.ConstantFolding3.StringCompare;
+
+ type VariabilityPropagationTests.ConstantFolding3.E = enumeration(small, medium, large, xlarge);
+
+end VariabilityPropagationTests.ConstantFolding3;
+")})));
+end ConstantFolding3;
+
 model NoExp
 	Real x(start=.5);
 equation
@@ -293,10 +387,10 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
- constant Real x2 = 0;
+ constant Real x2 = 0.0;
  Real x3;
  Real x4;
- constant Real x5 = 0;
+ constant Real x5 = 0.0;
  parameter Real x6;
  parameter Real p1 = 4 /* 4 */;
 initial equation 
@@ -664,11 +758,11 @@ no or infinitely many solutions (A is singular).\");
  algorithm
   size(Awork) := {size(A, 1), size(A, 1)};
   size(ipiv) := {size(A, 1)};
-  for i1 in 1:size(x, 1) loop
+  for i1 in 1:size(A, 1) loop
    x[i1] := b[i1];
   end for;
-  for i1 in 1:size(Awork, 1) loop
-   for i2 in 1:size(Awork, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 1) loop
     Awork[i1,i2] := A[i1,i2];
    end for;
   end for;

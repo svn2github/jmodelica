@@ -156,6 +156,8 @@ const int fmi_runtime_options_map_length = 1;
 
 $C_records$
 
+$C_enum_strings$
+
 $C_function_headers$
 
 $C_functions$

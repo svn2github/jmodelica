@@ -144,7 +144,7 @@ aspect OptimicaTransformCanonical {
 	}
 	
 	protected void FOptClass.scalarizeConstraints(List<FVariable> vars) {
-		List<FAbstractEquation> eqns = getFEquationBlock(0).getFAbstractEquations();
+		List<FAbstractEquation> eqns = getFAbstractEquations();
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) 
 			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());

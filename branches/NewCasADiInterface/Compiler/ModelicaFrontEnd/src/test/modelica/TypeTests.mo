@@ -464,7 +464,7 @@ end IntegerExp1;
 
 
 model IntegerExp2
- Real x = 1.0;
+ Real x = time;
  Integer y = integer(x);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -473,18 +473,15 @@ model IntegerExp2
 			description="integer() operator: continous arg",
 			flatModel="
 fclass TypeTests.IntegerExp2
- constant Real x = 1.0;
+ Real x;
  discrete Integer y;
- discrete Integer temp_1;
 initial equation 
- temp_1 = integer(x);
  pre(y) = 0;
 equation
- y = temp_1;
- when {x < pre(temp_1), x >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
+ x = time;
+ y = if x < pre(y) or x >= pre(y) + 1 or initial() then integer(x) else pre(y);
 end TypeTests.IntegerExp2;
+			
 ")})));
 end IntegerExp2;
 
@@ -1084,30 +1081,20 @@ fclass TypeTests.DivTest1
  constant Real aReal = 3;
  constant Integer anInt = 3;
  Real x;
- discrete Integer temp_1;
+ discrete Real temp_1;
  discrete Real temp_2;
  discrete Real temp_3;
- discrete Real temp_4;
 initial equation 
- temp_1 = div(anInt, anInt);
- temp_2 = div(aReal, anInt);
- temp_3 = div(anInt, aReal);
- temp_4 = div(aReal, aReal);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
- x = temp_4 + temp_3 + temp_2 + temp_1;
- when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ x = temp_3 + temp_2 + temp_1 + 1;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1.0 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
 end TypeTests.DivTest1;
+			
 ")})));
 end DivTest1;
 
@@ -1148,25 +1135,18 @@ fclass TypeTests.ModTest1
  discrete Real temp_3;
  discrete Real temp_4;
 initial equation 
- temp_1 = integer(anInt / anInt);
- temp_2 = floor(aReal / anInt);
- temp_3 = floor(anInt / aReal);
- temp_4 = floor(aReal / aReal);
+ pre(temp_1) = 0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
+ pre(temp_4) = 0.0;
 equation
  x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {anInt / anInt < pre(temp_1), anInt / anInt >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {aReal / anInt < pre(temp_2), aReal / anInt >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {anInt / aReal < pre(temp_3), anInt / aReal >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {aReal / aReal < pre(temp_4), aReal / aReal >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
+ temp_4 = if 1.0 < pre(temp_4) or 1.0 >= pre(temp_4) + 1 or initial() then 1.0 else pre(temp_4);
 end TypeTests.ModTest1;
+			
 ")})));
 end ModTest1;
 
@@ -1202,30 +1182,20 @@ fclass TypeTests.RemTest1
  constant Real aReal = 3;
  constant Integer anInt = 3;
  Real x;
- discrete Integer temp_1;
+ discrete Real temp_1;
  discrete Real temp_2;
  discrete Real temp_3;
- discrete Real temp_4;
 initial equation 
- temp_1 = div(anInt, anInt);
- temp_2 = div(aReal, anInt);
- temp_3 = div(anInt, aReal);
- temp_4 = div(aReal, aReal);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
- x = 3.0 - temp_4 * 3.0 + (3 - temp_3 * 3.0) + (3.0 - temp_2 * 3) + (3 - temp_1 * 3);
- when {div(anInt, anInt) < pre(temp_1), div(anInt, anInt) >= pre(temp_1) + 1} then
-  temp_1 = 1;
- end when;
- when {div(aReal, anInt) < pre(temp_2), div(aReal, anInt) >= pre(temp_2) + 1} then
-  temp_2 = 1.0;
- end when;
- when {div(anInt, aReal) < pre(temp_3), div(anInt, aReal) >= pre(temp_3) + 1} then
-  temp_3 = 1.0;
- end when;
- when {div(aReal, aReal) < pre(temp_4), div(aReal, aReal) >= pre(temp_4) + 1} then
-  temp_4 = 1.0;
- end when;
+ x = 3.0 - temp_3 * 3.0 + (3 - temp_2 * 3.0) + (3.0 - temp_1 * 3) + 0;
+ temp_1 = if 1.0 < pre(temp_1) or 1.0 >= pre(temp_1) + 1 or initial() then 1.0 else pre(temp_1);
+ temp_2 = if 1.0 < pre(temp_2) or 1.0 >= pre(temp_2) + 1 or initial() then 1.0 else pre(temp_2);
+ temp_3 = if 1.0 < pre(temp_3) or 1.0 >= pre(temp_3) + 1 or initial() then 1.0 else pre(temp_3);
 end TypeTests.RemTest1;
+			
 ")})));
 end RemTest1;
 
@@ -1248,27 +1218,89 @@ Semantic error at line 1175, column 34:
 end RemTest2;
 
 model PreTest1
-	Real x (start=3);
-        Real y;
-        discrete Real z;
+    Real x (start=3);
+    Real y;
+    discrete Real z;
 equation
-        y = pre(x);
-	when time>1 then
-		z = pre(x);
-	elsewhen time>3 then
-                z = 2*pre(x);
-        end when;
+    y = pre(x);
+    when time>1 then
+        z = pre(x);
+    elsewhen time > 3 then
+        z = 2*pre(x);
+    end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="PreTest1",
-			description="Testing that continuous variables can be accessed in pre expressions inside when clauses.",
+			description="Testing that continuous variables can be accessed in pre expressions only inside when clauses.",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1148, column 13:
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1256, column 13:
   Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
 ")})));
 end PreTest1;
+
+
+model PreTest2
+	Real x(start = 1);
+	discrete Real y;
+equation
+	when time > 1 then
+		x = 2;
+	end when;
+	y = pre(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="PreTest2",
+			description="Allow pre() on variable assigned in when",
+			flatModel="
+fclass TypeTests.PreTest2
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ when time > 1 then
+  x = 2;
+ end when;
+ y = pre(x);
+end TypeTests.PreTest2;
+")})));
+end PreTest2;
+
+
+model PreTest3
+    Real x(start = 1);
+    discrete Real y;
+equation
+    y = pre(x);
+algorithm
+    when time > 1 then
+        if x < time then
+            x := 2;
+        end if;
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="PreTest3",
+			description="",
+			flatModel="
+fclass TypeTests.PreTest3
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ y = pre(x);
+algorithm
+ when time > 1 then
+  if x < time then
+   x := 2;
+  end if;
+ end when;
+end TypeTests.PreTest3;
+")})));
+end PreTest3;
+
 
 model EdgeTest1
   Real x (start=3);
@@ -1312,7 +1344,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ChangeTest1",
-			description="Testing that continuous variables can be accessed in change expressions inside when clauses.",
+			description="Testing that continuous variables can be accessed in change expressions only inside when clauses.",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
@@ -1320,6 +1352,49 @@ Semantic error at line 1147, column 7:
   Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses
 ")})));
 end ChangeTest1;
+
+
+model ChangeTest2
+    Real x(start = 1);
+    discrete Real y;
+equation
+    when time > 1 then
+        x = 2;
+    end when;
+    y = if change(x) then 1 else x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ChangeTest2",
+			description="Allow change() on variable assigned in when",
+			flatModel="
+fclass TypeTests.ChangeTest2
+ discrete Real x(start = 1);
+ discrete Real y;
+equation
+ when time > 1 then
+  x = 2;
+ end when;
+ y = if x <> pre(x) then 1 else x;
+end TypeTests.ChangeTest2;
+")})));
+end ChangeTest2;
+
+
+model HomotopyTest1
+  Real x = homotopy(1, {1});
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="HomotopyTest1",
+			description="Testing error when type of homotopy arguments differ",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
+Semantic error at line 1147, column 7:
+  Calling function homotopy(): arguments must be same type
+")})));
+end HomotopyTest1;
 
 model IfExpType1
     model M
@@ -1677,25 +1752,30 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmType1",
 			description="Correct types in algorithm.",
-			algorithms_as_functions=false,
 			flatModel="
 fclass TypeTests.AlgorithmType1
  discrete Boolean b;
  discrete Integer i;
  discrete Real r;
+ discrete Integer temp_1;
+ Real temp_2;
+ Real temp_3;
 initial equation 
  pre(b) = false;
  pre(i) = 0;
  pre(r) = 0.0;
+ pre(temp_1) = 0;
 algorithm
- r := pre(r);
- b := pre(b);
- i := pre(i);
+ temp_2 := 1;
+ temp_3 := 1;
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
- i := integer(r);
-
+ temp_2 := r - pre(temp_1);
+ temp_3 := r - (pre(temp_1) + 1);
+ temp_1 := if r < pre(temp_1) or r >= (pre(temp_1) + 1) or initial() then integer(r) else pre(temp_1);
+ i := temp_1;
 end TypeTests.AlgorithmType1;
+			
 ")})));
 end AlgorithmType1;
 	
@@ -1719,7 +1799,6 @@ algorithm
 		TransformCanonicalTestCase(
 			name="AlgorithmType2",
 			description="Correct types in algorithm. Records and arrays.",
-			algorithms_as_functions=false,
 			flatModel="
 fclass TypeTests.AlgorithmType2
  discrete Real outerR[1].r;
@@ -1748,18 +1827,6 @@ initial equation
  i.pre(innerInteger[2]) = 0;
  i.pre(innerInteger[3]) = 0;
 algorithm
- outerInteger[1] := pre(outerInteger[1]);
- outerInteger[2] := pre(outerInteger[2]);
- outerInteger[3] := pre(outerInteger[3]);
- outerR[1].r := outerR[1].pre(r);
- outerR[2].r := outerR[2].pre(r);
- outerR[3].r := outerR[3].pre(r);
- i.innerR[1].r := i.innerR[1].pre(r);
- i.innerR[2].r := i.innerR[2].pre(r);
- i.innerR[3].r := i.innerR[3].pre(r);
- i.innerInteger[1] := i.pre(innerInteger[1]);
- i.innerInteger[2] := i.pre(innerInteger[2]);
- i.innerInteger[3] := i.pre(innerInteger[3]);
  outerInteger[1] := 1;
  outerInteger[2] := 2;
  outerInteger[3] := 3;
@@ -1800,7 +1867,6 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmType3",
 			description="Incorrect types in algorithm",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:
@@ -1834,7 +1900,6 @@ algorithm
 		ErrorTestCase(
 			name="AlgorithmType4",
 			description="Algorithm assigning to parameters and constants.",
-			algorithms_as_functions=false,
 			errorMessage="
 Error: in file '...':
 Semantic error at line 0, column 0:

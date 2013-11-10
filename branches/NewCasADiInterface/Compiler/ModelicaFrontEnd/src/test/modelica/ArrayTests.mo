@@ -76,11 +76,13 @@ end ArrayTests.General.ArrayTest1b;
 		TransformCanonicalTestCase(
 			name="ArrayTest1c",
 			description="Test scalarization of variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest1c
  Real x[1];
  Real x[2];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
 equation 
  der(x[1]) = 3;
  der(x[2]) = 4;
@@ -731,12 +733,15 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayTest29",
 			description="Flattening of arrays.",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest29
  Real x[1](start = 1);
  Real x[2](start = 2);
  Real x[3](start = 3);
+initial equation 
+ x[1] = 1;
+ x[2] = 2;
+ x[3] = 3;
 equation
  der(x[1]) = 1;
  der(x[2]) = 1;
@@ -756,7 +761,6 @@ equation
 		TransformCanonicalTestCase(
 			name="ArrayTest30",
 			description="Flattening of arrays.",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest30
  Real x[1,1](start = 1);
@@ -765,6 +769,13 @@ fclass ArrayTests.General.ArrayTest30
  Real x[2,2](start = 4);
  Real x[3,1](start = 5);
  Real x[3,2](start = 6);
+initial equation 
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
 equation
  der(x[1,1]) = - 1;
  der(x[1,2]) = - 2;
@@ -5156,6 +5167,64 @@ end ArrayTests.For.ForEquation3;
 end ForEquation3;
 
 
+model ForEquation4
+    parameter Integer N = 3;
+    Real x[N];
+equation
+    for i in 1:N loop
+        der(x[i]) = if i == 1 then 1 else x[i-1];
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="For_ForEquation4",
+			description="",
+			flatModel="
+fclass ArrayTests.For.ForEquation4
+ parameter Integer N = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ x[3] = 0.0;
+equation
+ der(x[1]) = 1;
+ der(x[2]) = x[1];
+ der(x[3]) = x[2];
+end ArrayTests.For.ForEquation4;
+")})));
+end ForEquation4;
+
+
+model ForEquation5
+    parameter Integer N = 5;
+    parameter Real x[2,N] = {{1, 2, 3, 4, 3}, {0.1, 0.2, 0.1, 0.4, 0.5}};
+equation
+    for i in 1:N-1 loop
+		if x[1,i] < x[1,i+1] then
+			assert(x[2,i] < x[2,i+1], "x[:2] should rise when x[:1] rises");
+        else
+            assert(x[2,i] > x[2,i+1], "x[:2] should fall when x[:1] falls");
+		end if;
+    end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="For_ForEquation5",
+			description="Test handling of if equation with parameter test using for index in expression in array index",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: x[:2] should fall when x[:1] falls
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
+Semantic error at line 0, column 0:
+  Assertion failed: x[:2] should rise when x[:1] rises
+")})));
+end ForEquation5;
+
 
 model ForInitial1
   parameter Integer N = 3;
@@ -5240,7 +5309,6 @@ algorithm
 		TransformCanonicalTestCase(
 			name="ForAlgorithm1",
 			description="Array expressions depending on for loop index",
-			algorithms_as_functions=false,
 			flatModel="
 fclass ArrayTests.For.ForAlgorithm1
  constant Integer n = 3;
@@ -5248,9 +5316,6 @@ fclass ArrayTests.For.ForAlgorithm1
  Real x[2];
  Real x[3];
 algorithm
- x[1] := 0.0;
- x[2] := 0.0;
- x[3] := 0.0;
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
@@ -5388,7 +5453,6 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices1",
 			description="Mixing for index subscripts with colon subscripts",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
  Real y[1,1,1];
@@ -5407,6 +5471,15 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real z[2,1,2] = 0;
  constant Real z[2,2,1] = 0;
  constant Real z[2,2,2] = 1;
+initial equation 
+ y[1,1,1] = 0.0;
+ y[1,1,2] = 0.0;
+ y[1,2,1] = 0.0;
+ y[1,2,2] = 0.0;
+ y[2,1,1] = 0.0;
+ y[2,1,2] = 0.0;
+ y[2,2,1] = 0.0;
+ y[2,2,2] = 0.0;
 equation
  der(y[1,1,1]) = 1.0;
  der(y[1,1,2]) = 0.0;
@@ -5451,8 +5524,378 @@ end ArrayTests.Slices.MixedIndices2;
 ")})));
 end MixedIndices2;
 
+
+model EmptySlice1
+    model A
+        Real x;
+    end A;
+    
+    parameter Integer n = 0;
+    A a[n];
+    Real y[n] = a.x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Slices_EmptySlice1",
+			description="Slice in empty array of components",
+			flatModel="
+fclass ArrayTests.Slices.EmptySlice1
+ parameter Integer n = 0 /* 0 */;
+ Real y[0] = a[1:0].x;
+end ArrayTests.Slices.EmptySlice1;
+")})));
+end EmptySlice1;
+
 end Slices;
 
+package VariableIndex
+
+model Equation
+    Real table[:] = {42, 3.14};
+    Integer i = if time > 1 then 1 else 2;
+    Real x = table[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Equation",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.Equation
+ constant Real table[1] = 42;
+ constant Real table[2] = 3.14;
+ discrete Integer i;
+ Real x;
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ x = temp_1(i, {42.0, 3.14});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.Equation;
+")})));
+end Equation;
+
+model TwoDim1
+    Real table[:,:] = {{1, 2}, {3, 4}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x = table[i,2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim1",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim1
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ discrete Integer i;
+ Real x;
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ x = temp_1(i, {2.0, 4.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim1;
+")})));
+end TwoDim1;
+
+model TwoDim2
+    Real table[:,:] = {{1, 2}, {3, 4}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x = table[1,i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim2",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim2
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ discrete Integer i;
+ Real x;
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ x = temp_1(i, {1.0, 2.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim2;
+")})));
+end TwoDim2;
+
+model TwoDim3
+    Real table[:,:] = {{1, 2}, {3, 4}};
+    Integer i1 = if time > 1 then 1 else 2;
+    Integer i2 = if time > 0.5 then 1 else 2;
+    Real x = table[i1,i2];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim3",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim3
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ discrete Integer i1;
+ discrete Integer i2;
+ Real x;
+initial equation 
+ pre(i1) = 0;
+ pre(i2) = 0;
+equation
+ i1 = if time > 1 then 1 else 2;
+ i2 = if time > 0.5 then 1 else 2;
+ x = temp_1(i1, i2, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Integer i_1;
+  input Real[:, :] x;
+  output Real y;
+ algorithm
+  y := x[i_0,i_1];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim3;
+")})));
+end TwoDim3;
+
+model TwoDim4
+    Real table[:,:] = {{1, 2}, {3, 4}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x[2] = table[i,:];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim4",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim4
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ discrete Integer i;
+ Real x[1];
+ Real x[2];
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0,1];
+  y[2] := x[i_0,2];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim4;
+")})));
+end TwoDim4;
+
+model TwoDim5
+    Real table[:,:] = {{1, 2}, {3, 4}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x[2] = table[:,i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim5",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim5
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ discrete Integer i;
+ Real x[1];
+ Real x[2];
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, :] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0];
+  y[2] := x[2,i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim5;
+")})));
+end TwoDim5;
+
+model TwoDim6
+    Real table[:,:] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x[2] = table[{2,3},i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim6",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim6
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[2,1] = 3;
+ constant Real table[2,2] = 4;
+ constant Real table[3,1] = 5;
+ constant Real table[3,2] = 6;
+ constant Real table[4,1] = 7;
+ constant Real table[4,2] = 8;
+ discrete Integer i;
+ Real x[1];
+ Real x[2];
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ ({x[1], x[2]}) = temp_1(i, {{3.0, 4.0}, {5.0, 6.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2, :] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[1,i_0];
+  y[2] := x[2,i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim6;
+")})));
+end TwoDim6;
+
+model TwoDim7
+    Real table[:,:] = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+    Integer i = if time > 1 then 1 else 2;
+    Real x[2] = table[i, {2,3}];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_TwoDim7",
+            description="Test array index with discrete variability in equation",
+            flatModel="
+fclass ArrayTests.VariableIndex.TwoDim7
+ constant Real table[1,1] = 1;
+ constant Real table[1,2] = 2;
+ constant Real table[1,3] = 3;
+ constant Real table[1,4] = 4;
+ constant Real table[2,1] = 5;
+ constant Real table[2,2] = 6;
+ constant Real table[2,3] = 7;
+ constant Real table[2,4] = 8;
+ discrete Integer i;
+ Real x[1];
+ Real x[2];
+initial equation 
+ pre(i) = 0;
+equation
+ i = if time > 1 then 1 else 2;
+ ({x[1], x[2]}) = temp_1(i, {{2.0, 3.0}, {6.0, 7.0}});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:, 2] x;
+  output Real[2] y;
+ algorithm
+  y[1] := x[i_0,1];
+  y[2] := x[i_0,2];
+ end temp_1;
+
+end ArrayTests.VariableIndex.TwoDim7;
+")})));
+end TwoDim7;
+
+model Algorithm
+    Real table[:] = {42, 3.14};
+    Integer i = if time > 1 then 1 else 2;
+    Real x;
+algorithm
+    x := table[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Algorithm",
+            description="Test array index with discrete variability in algorithm",
+            flatModel="
+fclass ArrayTests.VariableIndex.Algorithm
+ constant Real table[1] = 42;
+ constant Real table[2] = 3.14;
+ discrete Integer i;
+ Real x;
+initial equation 
+ pre(i) = 0;
+algorithm
+ x := temp_1(i, {table[1], table[2]});
+equation
+ i = if time > 1 then 1 else 2;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+ end temp_1;
+
+end ArrayTests.VariableIndex.Algorithm;
+")})));
+end Algorithm;
+
+
+end VariableIndex;
 
 
 package Other

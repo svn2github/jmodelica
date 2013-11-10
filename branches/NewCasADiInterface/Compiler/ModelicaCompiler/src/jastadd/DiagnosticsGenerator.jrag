@@ -831,7 +831,10 @@ public class DiagnosticsGenerator {
 				}
 				for (FVariable var : order) {
 					Integer pos = varFilter.get(var);
-					boolean contains = equation.variables().contains(var) && (pos == null || pos == i);
+					boolean contains = (equation.variables().contains(var) 
+							|| equation.discretePreVariables().contains(var)
+							|| equation.nonFixedParameters().contains(var))
+							&& (pos == null || pos == i);
 					out.print("		<td");
 					String style = tm.getStyle();
 					if (!style.isEmpty())
@@ -885,6 +888,22 @@ public class DiagnosticsGenerator {
 	}
 	
 	public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+		varFilter = new HashMap<FVariable, Integer>();
+		int index = 0;
+		for (FVariable var : equation().referencedFVariablesInLHS()) {
+			varFilter.put(var, -1);
+		}
+		for (FVariable var : activeVars) {
+			varFilter.put(var, index);
+			index++;
+		}
+		for (FVariable var : equation().referencedFVariablesInRHS()) {
+			varFilter.remove(var);
+		}
+		super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+	}
+	
+	public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		varFilter = new HashMap<FVariable, Integer>();
 		int index = 0;
 		for (FVariable var : equation().referencedFVariablesInLHS()) {

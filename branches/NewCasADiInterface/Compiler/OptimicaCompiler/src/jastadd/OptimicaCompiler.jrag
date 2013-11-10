@@ -74,49 +74,12 @@ import org.jmodelica.util.OptionRegistry;
  */
 public class OptimicaCompiler extends ModelicaCompiler {
 	
-	private String currOptimicaCTemplatefile = null;
-	private String userDefOptimicaCTemplatefile = null;
-	
-	public OptimicaCompiler(OptionRegistry options, String xmlTpl, 
-			String cTemplatefile, String optimicaCTemplatefile) {
-		super(options, xmlTpl, cTemplatefile);
-		userDefOptimicaCTemplatefile = optimicaCTemplatefile;
-	}
-	
 	public OptimicaCompiler(OptionRegistry options) {
 		super(options);
 	}
 	
 	protected OptimicaCompiler() {
 		super();
-	}
-	
-	private void defaultTemplateJMI() {
-		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "jmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
-	}
-    
-    private void defaultTemplateFMI() {
-		currOptimicaCTemplatefile = (userDefOptimicaCTemplatefile == null) ? new File(getTemplatesDir(), "fmi_optimica_template.c").getPath() : userDefOptimicaCTemplatefile;
-	}
-	
-	public void defaultTemplatePathsJMU() {
-		super.defaultTemplatePathsJMU();
-		defaultTemplateJMI();
-	}
-	
-	public void defaultTemplatePathsFMUME() {
-		super.defaultTemplatePathsFMUME();
-		defaultTemplateFMI();
-	}
-	
-	public void defaultTemplatePathsFMUCS() {
-		super.defaultTemplatePathsFMUCS();
-		defaultTemplateFMI();
-	}
-	
-	public void defaultTemplatePathsFMUX() {
-		super.defaultTemplatePathsFMUX();
-		currOptimicaCTemplatefile = null;
 	}
 	
 	public boolean hasModelicaFileExt(String file) {
@@ -128,6 +91,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * 
 	 * @param icd
 	 *            A reference to the model instance.
+     * @param target
+     *            The model represenation type the model should be compiled to.
 	 * 
 	 * @return FOptClass or FClass object representing the flattened model.
 	 * 
@@ -138,9 +103,9 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	 * @throws ModelicaClassNotFoundException
 	 *             If the Modelica class to flatten is not found.
 	 */
-	public FClass flattenModel(InstClassDecl icd) 
+	public FClass flattenModel(InstClassDecl icd, TargetObject target) 
 			throws CompilerException, ModelicaClassNotFoundException, IOException {
-		return super.flattenModel(icd);
+		return super.flattenModel(icd, target);
 	}
 	
 	/**
@@ -164,38 +129,12 @@ public class OptimicaCompiler extends ModelicaCompiler {
 			return new CADGenerator(new PrettyPrinter(), '$', fc);
 		}
 	}
-	
-	/**
-	 * Set the Optimica c template file path attribute.
-	 * 
-	 * @param template The new c template file path.
-	 */
-	public void setOptimicaCTemplate(String template) {
-		userDefOptimicaCTemplatefile = template;
-	}
-
-	/**
-	 * \brief get the C template. 
-	 * 
-	 * @param fc A reference to an FClass object. This is convenient in
-	 * extensions of ModelicaCompiler that need to distinguish between
-	 * different kinds of flattened classes.
-	 */
-	protected String getCTemplatefile(FClass fc) {
-		if (fc instanceof FOptClass) {
-			return (userDefOptimicaCTemplatefile == null) ? currOptimicaCTemplatefile : userDefOptimicaCTemplatefile;
-		} else {
-			return (userDefCTemplatefile == null) ? currCTemplatefile : userDefCTemplatefile;
-		}
-	}
 
 	@Override
 	protected void setArguments(String compilerName, String[] args, Hashtable<String, String> programarguments) 
-		throws JModelicaHomeNotFoundException {
+	        throws JModelicaHomeNotFoundException {
 		super.setArguments(compilerName, args, programarguments);
 		int arg = programarguments.size();
-		if (args.length >= arg+5) 
-			userDefOptimicaCTemplatefile = args[arg+4];
 	}
 	
 	public static void main(String args[]) {		
@@ -211,4 +150,16 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);
 	}	
+}
+
+aspect OptimicaCompilationHelpers {
+	 
+    //Overshadowing the use of templates in case of optimization.
+    refine CompilationHelpers private String Templates.getCTemplateName(FClass fc) {
+        if (fc instanceof FOptClass)
+            return (this == JMU) ? "jmi_optimica_template.c" : null;
+        else
+            return template(C);
+    }
+
 }

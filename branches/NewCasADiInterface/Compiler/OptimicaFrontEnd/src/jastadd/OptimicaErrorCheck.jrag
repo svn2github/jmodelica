@@ -16,10 +16,10 @@
 
 aspect OptimicaErrorCheck {
 
-  	public void InstOptClassDecl.collectErrors() {
-    	super.collectErrors();
-    	getFConstraintList().collectErrors();
-    	getInstClassModificationOpt().collectErrors();
+  	public void InstOptClassDecl.collectErrors(ErrorCheckType type) {
+    	super.collectErrors(type);
+    	getFConstraintList().collectErrors(type);
+    	getInstClassModificationOpt().collectErrors(type);
     	
     	if (hasInstClassModification()) 
     		for (InstModification im : getInstClassModification().getInstArgumentList()) 
@@ -28,11 +28,11 @@ aspect OptimicaErrorCheck {
   	
   	public void InstModification.checkOptimicaAttribute(InstOptClassDecl iocd) {
      	// TODO: Need to examine if typeCheckAttribute really fits here
-  		// TODO: Might want to handle this in InstClassAttribute.collectErrors() instead
+  		// TODO: Might want to handle this in InstClassAttribute.collectErrors(type) instead
  		typeCheckAttribute(iocd);
   	}
   	
-  	public void InstClassAttribute.collectErrors() {}
+  	public void InstClassAttribute.collectErrors(ErrorCheckType type) {}
   	
   	syn lazy boolean InstOptClassDecl.isStatic() {
     	boolean stat = false;
@@ -70,6 +70,10 @@ aspect OptimicaErrorCheck {
  		}
 
   	}
+    
+    public void InstForClauseC.collectErrors(ErrorCheckType checkType) {
+        collectErrorsInFor(getFConstraintList(), getInstForIndexList(), checkType);
+    }
 	
 	eq FOptClass.numDAEEquations() = numScalarEquations() + numPathEqConstraints();
 	eq FOptClass.numDAEVariables() = numAlgebraicContinousRealVariables() + numDifferentiatedRealVariables();
@@ -95,9 +99,9 @@ aspect OptimicaErrorCheck {
   		}
   	}
   	
-  	public void InstTimedVariable.collectErrors() {
+  	public void InstTimedVariable.collectErrors(ErrorCheckType type) {
   		log.debug("InstTimedVariable.collectErrors: " + getName().name());
-    	super.collectErrors();
+    	super.collectErrors(type);
     	/* TODO: This check is done somewhere else with a less intuitive message - where?
     	if (!getArg().variability().lessOrEqual(fParameter())) {
       		log.debug("InstTimedVariable.collectErrors: " + getName().name() + " hepp");
@@ -111,8 +115,8 @@ aspect OptimicaErrorCheck {
     
   	}
 	
-	  public void FRelationConstraint.typeCheck() {
-		  //log.debug("FEquation.typeCheck(): " + getLeft().type() + " " + getRight().type());
+	  public void FRelationConstraint.typeCheck(ErrorCheckType checkType) {
+		  //log.debug("FEquation.typeCheck(" + checkType + "): " + getLeft().type() + " " + getRight().type());
 		  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 			  if (!getLeft().type().equivalentTo(getRight().type())) {
 				  error("The right and left expression types of constraint are" +

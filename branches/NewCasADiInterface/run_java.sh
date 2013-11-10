@@ -13,4 +13,6 @@ FILE="${SRC}/Compiler/ModelicaFrontEnd/src/java/${CLS//.//}.java"
 TEMP=$(mktemp -dq /tmp/runjava.XXXXXX)
 javac -d ${TEMP} "${FILE}"
 java -cp ${TEMP} ${CLS} "$@"
+RES=$?
 rm -rf ${TEMP}
+exit ${RES}

@@ -18,35 +18,39 @@
 */
 
 #include "jmi_ode_solver.h"
+#include "jmi_ode_problem.h"
 #include "jmi_ode_cvode.h"
 #include "jmi_ode_euler.h"
-#include "fmi1_cs.h"
+#include "jmi_log.h"
 
 
-int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver){
+int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
+                       jmi_real_t step_size, jmi_real_t rel_tol){
     int flag = 0;
-    jmi_ode_solver_t* b = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
+    jmi_ode_solver_t* solver = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
 
-    if(!b) return -1;
+    if(!solver) return -1;
 
-    b->fmi1_cs = fmi1_cs;
-    fmi1_cs->ode_solver = b;
+    solver->ode_problem = problem;
+    solver->step_size = step_size;
+    solver->rel_tol = rel_tol;
+    problem->ode_solver = solver;
 
-    switch(solver) {
+    switch(method) {
     case JMI_ODE_CVODE: {
         jmi_ode_cvode_t* integrator;    
-        flag = jmi_ode_cvode_new(&integrator, b);
-        b->integrator = integrator;
-        b->solve = jmi_ode_cvode_solve;
-        b->delete_solver = jmi_ode_cvode_delete;
+        flag = jmi_ode_cvode_new(&integrator, solver);
+        solver->integrator = integrator;
+        solver->solve = jmi_ode_cvode_solve;
+        solver->delete_solver = jmi_ode_cvode_delete;
     }
         break;
     case JMI_ODE_EULER: {
         jmi_ode_euler_t* integrator;    
-        flag = jmi_ode_euler_new(&integrator, b);
-        b->integrator = integrator;
-        b->solve = jmi_ode_euler_solve;
-        b->delete_solver = jmi_ode_euler_delete;
+        flag = jmi_ode_euler_new(&integrator, solver);
+        solver->integrator = integrator;
+        solver->solve = jmi_ode_euler_solve;
+        solver->delete_solver = jmi_ode_euler_delete;
     }
         break;
 
@@ -57,9 +61,9 @@ int jmi_new_ode_solver(fmi1_cs_t* fmi1_cs, jmi_ode_solvers_t solver){
     return flag;
 }
 
-void jmi_delete_ode_solver(fmi1_cs_t* fmi1_cs){
-    if(fmi1_cs->ode_solver){
-        (fmi1_cs->ode_solver)->delete_solver(fmi1_cs->ode_solver);
-        free(fmi1_cs->ode_solver);
+void jmi_delete_ode_solver(jmi_ode_problem_t* problem){
+    if(problem->ode_solver){
+        (problem->ode_solver)->delete_solver(problem->ode_solver);
+        free(problem->ode_solver);
     }
 }

@@ -26,6 +26,7 @@
 
 #include "fmi1_functions.h"
 #include "jmi.h"
+#include "jmi_log.h"
 
 /**
  * \defgroup fmi_public Public functions of the Functional Mock-up Interface.
@@ -37,40 +38,15 @@
 /* @{ */
 
 /* Type definitions */
-/*typedef */
-struct fmi_t {
+/* typedef */
+typedef struct fmi1_me_t fmi1_me_t;             /**< \brief Forward declaration of struct. */
+
+struct fmi1_me_t {
     fmiString fmi_instance_name;
-    fmiString fmi_GUID;
     fmiCallbackFunctions fmi_functions;
     fmiEventInfo event_info;
-    fmiBoolean fmi_logging_on;
-    fmiReal fmi_newton_tolerance;
     jmi_t* jmi;
 };
-
-/**
- * Map between runtime option names and value references for the associated parameters - name table.
- *
- * Table is null-terminated.
- */
-extern const char *fmi_runtime_options_map_names[];
-
-/**
- * Map between runtime option names and value references for the associated parameters - value referece table.
- *
- * Table is zero-terminated, but may contain a value reference that is zero as well - use fmi_runtime_options_map_length.
- */
-extern const int fmi_runtime_options_map_vrefs[];
-
-/**
- * Map between runtime option names and value references for the associated parameters - table length.
- */
-extern const int fmi_runtime_options_map_length;
-
-/**
- * Update run-time options specified by the user.
- */
-void fmi_update_runtime_options(fmi_t* fmi);
 
 /**
  * \defgroup fmi_init Creation, initialization and destruction.
@@ -278,7 +254,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
  * @param njac Number of elements in jac.
  * @return Error code.
  */
-fmiStatus fmi1_me_get_jacobian(fmiComponent c, const int independents, const int dependents, fmiReal jac[], size_t njac);
+fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac);
 
 /**
  * \brief Evaluate directional derivative of ODE.
@@ -425,6 +401,11 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c);
  * @return The set of compatible platforms.
  */
 const char* fmi1_me_get_model_types_platform();
+
+/** Logging functions that are specific for fmi1_me, are used from jmi_log.c via templates */
+BOOL fmi1_me_emitted_category(log_t *log, category_t category);
+void fmi1_me_create_log_file_if_needed(log_t *log);
+void fmi1_me_emit(log_t *log, char* message);
 
 /**
  * \brief Extracts info from nl-solver to logger.

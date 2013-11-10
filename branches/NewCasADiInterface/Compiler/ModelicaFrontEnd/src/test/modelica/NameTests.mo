@@ -734,6 +734,67 @@ model NameTest23
 end NameTest23;
 
 
+model NameTest24
+    model A
+        replaceable B b constrainedby B;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+        Real x = 1;
+        Real y = x;
+    end C;
+    
+    A a(redeclare C b);
+    Real z = a.b.y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="NameTest24",
+			description="",
+			flatModel="
+fclass NameTests.NameTest24
+ Real a.b.x = 1;
+ Real a.b.y = a.b.x;
+ Real z = a.b.y;
+end NameTests.NameTest24;
+")})));
+end NameTest24;
+
+
+model NameTest25_Err
+    model A
+        replaceable B b constrainedby B;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+        Real x = 1;
+        Real y = x;
+    end C;
+    
+    A a(redeclare replaceable C b);
+    Real z = a.b.y;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="NameTest25_Err",
+			description="Check that member lookup is limited by constraining class when using redeclare replaceable",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 771, column 18:
+  Cannot find class or component declaration for y
+")})));
+end NameTest25_Err;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;
@@ -1344,6 +1405,7 @@ end NameTests.ConstantLookup25;
 end ConstantLookup25;
 
 
+// This is not a test class
 package ExtraForConstantLookup26
 	partial package A
 		extends B(d = size(b, 1), c = b[:].a);
@@ -3331,27 +3393,29 @@ end NameTests.FunctionCallLeftTest;
 end FunctionCallLeftTest;
 
 
-model PreErrorTest
-	Real x[3] = (1:3) .* time;
-	discrete Real y(start = 0);
-	Integer i(start = 1);
+model PreAliasTest1
+	discrete Real x;
+	discrete Real y;
+initial equation
+	pre(x) = 42;
 equation
-	when { time > 1, time > 2, time > 3 } then
-		y = x[pre(i)];
-		i = pre(i) + 1;
-	end when;
+	x = y;
+	x = pre(x) * pre(y) + 3.14;
 
 	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="PreErrorTest",
-			description="Provoking toString() of pre() in in stance tree - caused crash",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3271, column 9:
-  Array index in equation must be constant, parameter or loop index: pre(i)
+		TransformCanonicalTestCase(
+			name="PreAliasTest1",
+			description="Test so that pre() variables are rewritten correctly",
+			flatModel="
+fclass NameTests.PreAliasTest1
+ discrete Real x;
+initial equation 
+ pre(x) = 42;
+equation
+ x = pre(x) * pre(x) + 3.14;
+end NameTests.PreAliasTest1;
 ")})));
-end PreErrorTest;
+end PreAliasTest1;
 
 
 model AssignedInWhenRecursion
@@ -3419,5 +3483,223 @@ equation
 end NameTests.WhenInExtendsTest;
 ")})));
 end WhenInExtendsTest;
+
+
+model InheritInputTest1
+	connector A
+		Real x;
+	end A;
+	
+	input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritInputTest1",
+			description="Check that input is propagated to child components",
+			flatModel="
+fclass NameTests.InheritInputTest1
+ input Real a.x;
+end NameTests.InheritInputTest1;
+")})));
+end InheritInputTest1;
+
+
+model InheritInputTest2
+    connector A
+        Real x;
+    end A;
+	
+	connector B
+		A a;
+	end B;
+    
+    input B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritInputTest2",
+			description="Check that input is propagated to child components: nested",
+			flatModel="
+fclass NameTests.InheritInputTest2
+ input Real b.a.x;
+end NameTests.InheritInputTest2;
+")})));
+end InheritInputTest2;
+
+
+model InheritInputTest3
+    connector A
+        input Real x;
+    end A;
+    
+    input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest3",
+			description="Check that it isn't allowed to declare a component containing an input as input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3555, column 10:
+  Can't declare x as input, since it contains a component declared as input or output
+")})));
+end InheritInputTest3;
+
+
+model InheritInputTest4
+    connector A
+        output Real x;
+    end A;
+    
+    input A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritInputTest4",
+			description="Check that it isn't allowed to declare a component containing an output as input",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3575, column 10:
+  Can't declare x as output, since it contains a component declared as input or output
+")})));
+end InheritInputTest4;
+
+
+model InheritOutputTest1
+    connector A
+        Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritOutputTest1",
+			description="Check that output is propagated to child components",
+			flatModel="
+fclass NameTests.InheritOutputTest1
+ output Real a.x;
+end NameTests.InheritOutputTest1;
+")})));
+end InheritOutputTest1;
+
+
+model InheritOutputTest2
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        A a;
+    end B;
+    
+    output B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritOutputTest2",
+			description="Check that output is propagated to child components: nested",
+			flatModel="
+fclass NameTests.InheritOutputTest2
+ output Real b.a.x;
+end NameTests.InheritOutputTest2;
+")})));
+end InheritOutputTest2;
+
+
+model InheritOutputTest3
+    connector A
+        output Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest3",
+			description="Check that it isn't allowed to declare a component containing an output as output",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3637, column 10:
+  Can't declare x as output, since it contains a component declared as input or output
+")})));
+end InheritOutputTest3;
+
+
+model InheritOutputTest4
+    connector A
+        input Real x;
+    end A;
+    
+    output A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritOutputTest4",
+			description="Check that it isn't allowed to declare a component containing an input as output",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3657, column 10:
+  Can't declare x as input, since it contains a component declared as input or output
+")})));
+end InheritOutputTest4;
+
+
+model InheritFlowTest1
+    connector A
+        Real x;
+    end A;
+
+    connector B
+		A ap;
+        flow A af;
+	end B;
+	
+	B b1, b2;
+equation
+	connect(b1, b2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="InheritFlowTest1",
+			description="Check that flow is propagated to child components",
+			flatModel="
+fclass NameTests.InheritFlowTest1
+ Real b1.ap.x;
+ Real b1.af.x;
+ Real b2.ap.x;
+ Real b2.af.x;
+equation
+ - b1.af.x - b2.af.x = 0;
+ b1.ap.x = b2.ap.x;
+ b1.af.x = 0;
+ b2.af.x = 0;
+end NameTests.InheritFlowTest1;
+")})));
+end InheritFlowTest1;
+
+
+model InheritFlowTest2
+    connector A
+        flow Real x;
+    end A;
+    
+    flow A a;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InheritFlowTest2",
+			description="Check that it isn't allowed to declare a component containing an flow as flow",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
+Semantic error at line 3711, column 10:
+  Can't declare x as flow, since it contains a component declared as flow
+")})));
+end InheritFlowTest2;
 
 end NameTests;

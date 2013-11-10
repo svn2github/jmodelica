@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.ErrorCheckType;
+
 aspect ComplianceCheck {
 
 	/**
@@ -22,29 +24,35 @@ aspect ComplianceCheck {
 	 * Examples would be checking that classes follow the requirements of 
 	 * their restriction. 
 	 */
-	public void ASTNode.complianceCheck() {}
+	public void ASTNode.complianceCheck(ErrorCheckType checkType) {}
 	
-	public void FIfWhenClause.complianceCheck() {
-		super.complianceCheck();
+	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (!getTest().variability().lessOrEqual(fParameter()))
 			complianceOnlyFMU("Using if statements is");
 	}
 	
-	public void FWhileStmt.complianceCheck() {
-		super.complianceCheck();
+	public void FWhileStmt.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (!getTest().variability().lessOrEqual(fParameter()))
 			complianceOnlyFMU("Using while statements is");
 	}
 	
-	public void InstAccess.complianceCheck() {
-		super.complianceCheck();
+	public void FRelExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		if (!inFunction() && generatesEvent() && inWhile())
+			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
+	}
+	
+	public void InstAccess.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
 				!getFArraySubscripts().variability().lessOrEqual(fParameter())) {
 			complianceOnlyFMU("Using arrays of records with indices of higher than parameter variability is");
 		}
 	}
 
-	public void FWhenEquation.complianceCheck() {
+	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
 		if (hasElse()) {
 			compliance("Else clauses in when equations are currently not supported");
@@ -56,61 +64,102 @@ aspect ComplianceCheck {
 			compliance(message + " currently only supported when compiling FMUs");
 	}
 
-	public void FUnsupportedEquation.collectErrors() {
+	public void FUnsupportedEquation.collectErrors(ErrorCheckType checkType) {
 		compliance("Unsupported equation type");
 	}
 
-	public void FUnsupportedExp.collectErrors() {
+	public void FUnsupportedExp.collectErrors(ErrorCheckType checkType) {
 		compliance("Unsupported expression type");
 	}
+    
+    
+//    public void InstExpandableConnectorDecl.complianceCheck(ErrorCheckType checkType) {
+//        if (inExpandableConnector())
+//            compliance("Nested expandable connectors are not supported");
+//    }
+    
+    public void FConnectClause.complianceCheck(ErrorCheckType checkType) {
+        InstAccess left  = getConnector1().getInstAccess();
+        InstAccess right = getConnector2().getInstAccess();
+        if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
+            compliance("Adding variables to non-declared nested expandable connectors is not supported");
+//        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
+//                left.isNestledExpandableConnectorPart())
+//            compliance("Nested expandable connectors are not supported");
+//        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
+//                right.isNestledExpandableConnectorPart())
+//            compliance("Nested expandable connectors are not supported");
+    }
+    
+    syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
+    eq InstDot.isNestledExpandableConnectorPart() {
+        InstComponentDecl exp = findReferencedExpandableConnector();
+        int n = getNumInstAccess();
+        return exp != null && n > 2 && getInstAccess(n - 2).myInstComponentDecl() != exp;
+    }
+    
+    inh boolean InstComponentDecl.inExpandableConnector();
+    eq InstExpandableConnectorDecl.getChild().inExpandableConnector() = true;
+    eq InstClassDecl.getChild().inExpandableConnector()               = false;
+    eq InstRoot.getChild().inExpandableConnector()                    = false;
+    eq FlatRoot.getChild().inExpandableConnector()                    = false;
+    
 	
-	public void FWhenStmt.complianceCheck() {
-		super.complianceCheck();
-		compliance("When statements are not supported");
+	public void FBreakStmt.complianceCheck(ErrorCheckType checkType) {
+		if (!inFunction() && enclosingLoop() instanceof InstForStmt)
+			compliance("Break statement in algorithm only supported in while loops");
 	}
 	
-	public void FUnsupportedBuiltIn.complianceCheck() {
+	public void FUnsupportedBuiltIn.complianceCheck(ErrorCheckType checkType) {
 		compliance("The " + getName() + "() function-like operator is not supported");
 	}
 	
-	public void FSampleExp.complianceCheck() {
+	public void FSampleExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The sample() function-like operator is");
 	}
 
-	public void FPreExp.complianceCheck() {
+	public void InstPreExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The pre() function-like operator is");
 	}
 	
-	public void FEdgeExp.complianceCheck() {
+	public void FEdgeExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The edge() function-like operator is");
 	}
 	
-	public void FChangeExp.complianceCheck() {
+	public void FChangeExp.complianceCheck(ErrorCheckType checkType) {
 	    complianceOnlyFMU("The change() function-like operator is");
 	}
 	
-	public void FInitialExp.complianceCheck() {
+	public void FInitialExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The initial() function-like operator is");
 	}
 	
-	public void FSignExp.complianceCheck() {
+	public void FSignExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The sign() function-like operator is");
 	}
 	
-	public void FEventGenExp.complianceCheck() {
+	public void FEventGenExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The " + name() + "() function-like operator is");
 	}
 	
-	public void FHomotopyExp.complianceCheck() {
-		warning("The homotopy() function like operator is not fully supported."
-				+ " It is replaced with its first argument.");
+	public void FArray.complianceCheck(ErrorCheckType checkType) {
+		if (size().isUnknown())
+			compliance("Unknown size array expressions are not supported");
 	}
 	
-	public void FSemiLinearExp.complianceCheck() {
+	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
+		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.HOMOTOPY) {
+			warning("The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.");
+			root().options.setStringOption("homotopy", OptionRegistry.Homotopy.ACTUAL);
+			
+		}
+	}
+	
+	public void FSemiLinearExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The semiLinear() function-like operator is");
 	}
 	
-	public void FCardinality.complianceCheck() {
+	public void FCardinality.complianceCheck(ErrorCheckType checkType) {
 		warning("The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica");
 		if (!inAssert() && !inIfTestWithoutConnect()) 
 			compliance("The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()");
@@ -144,29 +193,28 @@ aspect ComplianceCheck {
 		return false;
 	}
 	
-	public void FUnaryBuiltIn.complianceCheck() {
-		super.complianceCheck();
+	public void FUnaryBuiltIn.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (!unknownSizeSupported() && inFunction() && getFExp().size().isUnknown()) {
 			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
 		}
 	}
 	
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
-	eq FTranspose.unknownSizeSupported()             = false;
 	eq FSymmetric.unknownSizeSupported()             = false;
 	eq FScalarExp.unknownSizeSupported()             = false;
 	eq FVectorExp.unknownSizeSupported()             = false;
 	eq FMatrixExp.unknownSizeSupported()             = false;
 		
-	public void FMinMaxExp.complianceCheck() {
-		super.complianceCheck();
+	public void FMinMaxExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (inFunction() && (getX().size().isUnknown() || (hasY() && getY().size().isUnknown()))) {
 			compliance("Unknown sizes in operator " + name() + "() is not supported in functions");
 		}
 	}
 	
-	public void FCatExp.complianceCheck() {
-		super.complianceCheck();
+	public void FCatExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (inFunction()) {
 			for (FExp exp: getFExpList()) {
 				if (exp.size().isUnknown()) {
@@ -176,15 +224,8 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void InstComponentArrayAccess.complianceCheck() {
-		super.complianceCheck();
-		if (isSlice() && size().isUnknown() && inFunction()) {
-			compliance("Unknown size slice is not supported in functions");
-		}
-	}
-	
-	public void InstForIndex.complianceCheck() {
-		super.complianceCheck();
+	public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {
 			compliance("Unknown size array as a for index is not supported in functions");
 		}
@@ -192,67 +233,95 @@ aspect ComplianceCheck {
 			compliance("For index without in expression isn't supported");
 		}
 		if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
-			compliance("For index with higher than parameter variability is not "
-					+ "supported in equations and algorithms.");
+			compliance("For index with higher than parameter variability is not supported in equations and algorithms.");
 		}
 	}
 	
-	public void InstForIndex.contentCheck() {
+	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
 	}
 	
 	
-	public void InstAssignStmt.complianceCheck() {
-		super.complianceCheck();
-		if (getLeft().size().isUnknown() && !getRight().size().isUnknown()) {
+	public void InstAssignStmt.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		boolean left  = getLeft().size().isUnknown();
+		boolean right = getRight().size().isUnknown();
+		if (left && !right) {
 			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
 		}
-		if (!getLeft().size().isUnknown() && getRight().size().isUnknown()) {
+		if (!left && right) {
 			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
+		}
+		if ((left || right) && getLeft().type().isRecord()) {
+			compliance("Record arrays of unknown sizes are not supported");
 		}
 	}
 	
-	public void FLinspace.complianceCheck() {
-		super.complianceCheck();
+	public void FRecordConstructor.complianceCheck(ErrorCheckType checkType) {
+		for (FExp e : getArgs())
+			if (e.size().isUnknown())
+				compliance("Unknown sizes in record constructors is not supported");
+	}
+	public void FLinspace.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (inFunction() && getN().ceval().isUnknown()) {
 			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
 		}
 	}
 	
-	public void FIdentity.complianceCheck() {
-		super.complianceCheck();
+	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (inFunction() && getFExp().ceval().isUnknown()) {
 			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
 		}
 	}
 	
-	public void FPowExp.complianceCheck() {
-		super.complianceCheck();
+	public void FPowExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (inFunction() && getLeft().size().isUnknown()) {
 			compliance("Unknown sizes in operator ^ is not supported in functions");
 		}
 	}
 	
-	public void FIgnoredBuiltIn.complianceCheck() {
+	public void FIgnoredBuiltIn.complianceCheck(ErrorCheckType checkType) {
 		warning("The " + getName() + 
 				"() function-like operator is not supported, and is currently ignored");
 	}
 	
-	public void FTerminalExp.complianceCheck() {
+	public void FTerminalExp.complianceCheck(ErrorCheckType checkType) {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
 	
-	public void FTerminate.complianceCheck() {
+	public void FTerminate.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The terminate() function-like operator is");
 	}
 	
-	public void FStringExp.complianceCheck() {
-		super.complianceCheck();
-		if (getNumFExp() > 0)
-			compliance("Formatting parameters are not supported for the String() operator");
+	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		if (hasMinimumLength()) {
+			getMinimumLength().markAsStructuralParameter();
+			if (!getMinimumLength().variability().parameterOrLess())
+				getMinimumLength().compliance("minimumLength with higher than parameter variability is not supported");
+		}
+		if (hasLeftJustified()) {
+			getLeftJustified().markAsStructuralParameter();
+			if (!getLeftJustified().variability().parameterOrLess())
+				getLeftJustified().compliance("leftJustified with higher than parameter variability is not supported");
+		}
+		if (hasSignificantDigits()) {
+			getSignificantDigits().markAsStructuralParameter();
+			if (!getSignificantDigits().variability().parameterOrLess())
+				getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
+		}
+		if (hasFormat()) {
+			getFormat().compliance("format argument is not supported");
+//			getFormat().markAsStructuralParameter();
+//			if (!getSignificantDigits().variability().parameterOrLess())
+//				getFormat().compliance("format with higher than parameter variability is not supported");
+		}
 	}
 		
-	public void InstPrimitive.complianceCheck() {
-		super.complianceCheck();
+	public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (isString()) {
 			if (inFunction()) {
 				warning("String arguments in functions are only partially supported");
@@ -272,8 +341,8 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void InstEnum.complianceCheck() {
-		super.complianceCheck();
+	public void InstEnum.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
 		if (!variability().lessOrEqual(fParameter()) && !root().options.getBooleanOption("generate_ode"))
 			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
 	}

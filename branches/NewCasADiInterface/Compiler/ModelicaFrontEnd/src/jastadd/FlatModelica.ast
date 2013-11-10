@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2013 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ FClass : BaseNode ::= FQName
                       AliasVariable:FVariable* 
                       FInitialEquation:FAbstractEquation*
                       FParameterEquation:FAbstractEquation*
-                      FEquationBlock*
+                      FAbstractEquation*
                       FFunctionDecl*
                       FRecordDecl*
                       FEnumDecl*
@@ -83,15 +83,6 @@ abstract FEnumSpecification : BaseNode;
 FEnumLiteralList : FEnumSpecification ::= FEnumLiteral*;
 FEnumUnspecified : FEnumSpecification;
 FEnumLiteral : FAbstractVariable ::= Name:FIdUse [FStringComment];
-
-FAbstractEquationBlock : BaseNode;
-
-/**
- * \brief A list of equations corresponding to a BLT block.
- */
-FEquationBlock : FAbstractEquationBlock ::= FAbstractEquation*;
-
-//FSolvedEquationBlock : FAbstractEquationBlock ::= FExp;
 
 /**
  * \brief Abstract base class for flat variables.
@@ -656,7 +647,7 @@ InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 /**
  * \brief A flattened assignment statement.
  */
-FAssignStmt : FStatement ::= Left:FIdUse Right:FExp;
+FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 
 /**
  * \brief A flattened function call statement.
@@ -886,7 +877,7 @@ abstract FBoolBinExp : FBinExp;
 /**
  * \brief Base class for relational expressions.
  */
-abstract FRelExp : FBoolBinExp;
+abstract FRelExp : FBoolBinExp ::= /[Indicator:FIdUseExp]/;
 
 /**
  * \brief Less than expression.
@@ -989,7 +980,7 @@ FStringLitExp : FLitExp ::= <String>;
  * All accesses to enumeration literals should be replaced by FEnumLitExps in flat tree.
  * Note that Type may be <code>null</code> in the flat tree - use type().
  */
-FEnumLitExp : FLitExp ::= <Enum> <Value> <Type:FEnumType>;
+FEnumLitExp : FLitExp ::= <Enum> <Value> [Type:FEnumType];
 
 
 /**
@@ -1035,7 +1026,18 @@ InstDerExp : FUnaryExp;
 /**
  * \brief The built-in function der.
  */
+
 FDerExp : FIdUseExp; 
+
+/**
+ * Pre built-in function in the instance tree.
+ */
+InstPreExp : FUnaryBuiltIn; 
+
+/**
+ * Pre built-in function.
+ */
+FPreExp : FIdUseExp;
 
 /**
  * \brief The built-in function der converted into a dummy derivative.
@@ -1252,11 +1254,6 @@ FNoEventExp : FVectUnaryBuiltIn;
  * Handled like noEvent(), but with a warning. To be implemented properly later.
  */
 FSmoothExp : FBuiltInFunctionCall ::= Order:FExp FExp;
-
-/**
- * Pre built-in function.
- */
-FPreExp : FUnaryBuiltIn;
 
 /**
  * Edge built-in function.
@@ -1531,7 +1528,7 @@ abstract FMinMaxExp : FBuiltInFunctionCall ::= X:FExp [Y:FExp];
 /**
  * String conversion operator.
  */
-FStringExp : FInfArgsFunctionCall ::= Value:FExp;
+FStringExp : FBuiltInFunctionCall ::= Value:FExp [MinimumLength:FExp] [LeftJustified:FExp] [SignificantDigits:FExp] [Format:FExp];
 
 /**
  * \brief Min built-in function.

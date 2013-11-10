@@ -32,7 +32,7 @@ import java.util.HashSet;
 
 aspect CADCodeGen {
 	
-	class CADPrettyPrinter extends Printer {
+	public class CADPrettyPrinter extends Printer {
 		
 		public CADPrettyPrinter() {
 			super("    ");
@@ -2357,7 +2357,7 @@ aspect CADCodeGen {
 
 		if (shouldBeDifferentiated()) {
 			str.print(indent);
-			str.print(getLeft().toString_der_CAD(p));
+			str.print(getLeft().getFIdUse().toString_der_CAD(p));
 			str.print(" = ");
 			getRight().genDer_CAD(p, str, indent);
 			str.print(";\n");

@@ -269,7 +269,7 @@ aspect InstFunctionBinding {
 				map.put("log10",           new BuiltInCreator(true,  new FLog10Exp(),        1));
 				map.put("noEvent",         new BuiltInCreator(false, new FNoEventExp(),      1));
 				map.put("smooth",          new BuiltInCreator(false, new FSmoothExp(),       2));
-				map.put("pre",             new BuiltInCreator(false, new FPreExp(),          1));
+				map.put("pre",             new BuiltInCreator(false, new InstPreExp(),       1));
 				map.put("edge",            new BuiltInCreator(false, new FEdgeExp(),         1));
 				map.put("change",          new BuiltInCreator(false, new FChangeExp(),       1));
 				map.put("sample",          new BuiltInCreator(false, new FSampleExp(),       2));
@@ -302,12 +302,12 @@ aspect InstFunctionBinding {
 				map.put("zeros",           new InfArgsBuiltInCreator(new FZeros(),      0));
 				map.put("fill",            new InfArgsBuiltInCreator(new FFillExp(),    1));
 				map.put("cat",             new InfArgsBuiltInCreator(new FCatExp(),     1));
-				map.put("String",          new InfArgsBuiltInCreator(new FStringExp(),  1));
-				//       name                                            node        min/max # args
-				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(), 1, 2));
-				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),  1, 2));
-				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),  1, 2));
-				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),  2, 3));
+				//       name                                            node          min/max # args
+				map.put("size",            new VarArgsBuiltInCreator(new FSizeExp(),   1, 2));
+				map.put("String",          new VarArgsBuiltInCreator(new FStringExp(), 1, 5));
+				map.put("min",             new VarArgsBuiltInCreator(new FMinExp(),    1, 2));
+				map.put("max",             new VarArgsBuiltInCreator(new FMaxExp(),    1, 2));
+				map.put("assert",          new VarArgsBuiltInCreator(new FAssert(),    2, 3));
 				//       name                                    math       node              # args
 				map.put("Connections.branch", new BuiltInCreator(false, new FConnBranch(),    2));
 				map.put("Connections.root",   new BuiltInCreator(false, new FConnRoot(),      1));

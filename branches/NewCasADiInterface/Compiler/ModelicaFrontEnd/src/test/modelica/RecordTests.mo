@@ -860,6 +860,44 @@ end RecordTests.RecordBinding10;
 ")})));
 end RecordBinding10;
 
+model RecordBinding11
+	record R
+		parameter String s1 = "";
+		parameter Boolean b1 = F(s1);
+		Boolean b2 = F(s1);
+	end R;
+	function F
+		input String name;
+		output Boolean correct;
+	algorithm
+		if name == "foobar" then
+			correct := true;
+		else
+			correct := false;
+		end if;
+	end F;
+	parameter R r(s1="foobar");
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding11",
+			description="Modification of string record member",
+			flatModel="
+fclass RecordTests.RecordBinding11
+ parameter String r.s1 = \"foobar\" /* \"foobar\" */;
+ parameter Boolean r.b1 = true /* true */;
+ parameter Boolean r.b2 = true /* true */;
+
+public
+ record RecordTests.RecordBinding11.R
+  parameter String s1;
+  parameter Boolean b1;
+  discrete Boolean b2;
+ end RecordTests.RecordBinding11.R;
+
+end RecordTests.RecordBinding11;
+")})));
+end RecordBinding11;
 
 
 model RecordArray1

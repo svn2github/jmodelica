@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.Iterator;
+import org.jmodelica.util.ErrorCheckType;
 
 aspect ErrorClasses {
 	
@@ -59,7 +60,7 @@ aspect ErrorClasses {
 			problemToReport = p;
 		}
 
-		public void collectErrors() {
+		public void collectErrors(ErrorCheckType checkType) {
 			if (problemToReport != null) {
 				// report problem (missing suupport in error handler
 			}
@@ -106,34 +107,34 @@ aspect ErrorClasses {
 	
 	// Delegate error reporting to BadInfoNode
 	
-	public void BadDefinition.collectErrors() {
+	public void BadDefinition.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
-			badNodeInfo.collectErrors();
-		super.collectErrors();
+			badNodeInfo.collectErrors(checkType);
+		super.collectErrors(checkType);
 	}
 	
-	public void BadClassDecl.collectErrors() {
+	public void BadClassDecl.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
-			badNodeInfo.collectErrors();
-		super.collectErrors();
+			badNodeInfo.collectErrors(checkType);
+		super.collectErrors(checkType);
 	}
 	
-	public void BadElement.collectErrors() {
+	public void BadElement.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
-			badNodeInfo.collectErrors();
-		super.collectErrors();
+			badNodeInfo.collectErrors(checkType);
+		super.collectErrors(checkType);
 	}
 	
-	public void BadArgument.collectErrors() {
+	public void BadArgument.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
-			badNodeInfo.collectErrors();
-		super.collectErrors();
+			badNodeInfo.collectErrors(checkType);
+		super.collectErrors(checkType);
 	}
 	
-	public void BadStatement.collectErrors() {
+	public void BadStatement.collectErrors(ErrorCheckType checkType) {
 		if (badNodeInfo != null)
-			badNodeInfo.collectErrors();
-		super.collectErrors();
+			badNodeInfo.collectErrors(checkType);
+		super.collectErrors(checkType);
 	}
 	
 }

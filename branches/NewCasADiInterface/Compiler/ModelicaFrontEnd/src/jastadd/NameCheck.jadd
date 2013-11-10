@@ -14,24 +14,28 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.ErrorCheckType;
+
 aspect SourceNameCheck {
 
-	public void ASTNode.nameCheck() {}
+	public void ASTNode.nameCheck(ErrorCheckType checkType) {}
     
 }
 
 aspect InstanceNameCheck {
 
-	public void InstAmbiguousAccess.nameCheck() {
-     	error("Cannot find class or component declaration for "+qualifiedName());
+	public void InstAmbiguousAccess.nameCheck(ErrorCheckType checkType) {
+	    if (!isExpandableConnectorMemberInConnect())
+	        error("Cannot find class or component declaration for "+qualifiedName());
   	}
 	
-	public void InstAmbiguousArrayAccess.nameCheck() {
-     	error("Cannot find class or component declaration for "+qualifiedName());
+	public void InstAmbiguousArrayAccess.nameCheck(ErrorCheckType checkType) {
+        if (!isExpandableConnectorMemberInConnect())
+            error("Cannot find class or component declaration for "+qualifiedName());
   	}
 	
-	public void InstComponentAccess.nameCheck() {
-    	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
+	public void InstComponentAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("Cannot find component declaration for "+qualifiedName());
 		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
@@ -39,8 +43,8 @@ aspect InstanceNameCheck {
 		}
     }
   
-	public void InstComponentArrayAccess.nameCheck() {
-    	//log.debug("InstComponentAccess.nameCheck(): " + name() + " " + myInstComponentDecl().name());
+	public void InstComponentArrayAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
 		if (myInstComponentDecl().isUnknown()) 
        		error("Cannot find component declaration for "+qualifiedName());
 		if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
@@ -48,16 +52,30 @@ aspect InstanceNameCheck {
 		}
     }
   
-    public void InstClassAccess.nameCheck() {
-    	//log.debug("InstClassAccess.nameCheck(): " + name() + " " + myInstClassDecl().name());
+    public void InstClassAccess.nameCheck(ErrorCheckType checkType) {
+    	//log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());
 		if (myInstClassDecl().isUnknown()) {
 			//getParent().dumpTree("");
 			error("Cannot find class declaration for "+qualifiedName());
 		}
     }
 
-	public void InstEquationAccess.nameCheck() {
+	public void InstEquationAccess.nameCheck(ErrorCheckType checkType) {
 		if (myEquation() == null)
 			error("Cannot find equation declaration for " + qualifiedName());
 	}
+	
+	
+	inh boolean InstAccess.isExpandableConnectorMemberInConnect();
+	eq InstDot.getInstAccess(int i).isExpandableConnectorMemberInConnect() = 
+	    isExpandableConnectorPart() && inConnectWithExistingComponent();
+	eq BaseNode.getChild().isExpandableConnectorMemberInConnect()          = false;
+	
+    inh boolean InstAccess.inConnectWithExistingComponent();
+    inh boolean FIdUseInstAccess.inConnectWithExistingComponent();
+	eq FIdUseInstAccess.getInstAccess().inConnectWithExistingComponent() = inConnectWithExistingComponent();
+	eq FConnectClause.getConnector1().inConnectWithExistingComponent()   = !getConnector2().getInstAccess().isExpandableConnectorPart();
+    eq FConnectClause.getConnector2().inConnectWithExistingComponent()   = !getConnector1().getInstAccess().isExpandableConnectorPart();
+	eq BaseNode.getChild().inConnectWithExistingComponent()              = false;
+	
 }

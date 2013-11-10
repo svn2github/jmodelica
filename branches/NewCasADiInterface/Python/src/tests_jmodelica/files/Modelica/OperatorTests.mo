@@ -113,4 +113,62 @@ equation
   end when;
 end ChangeTest;
 
+model StringExpHelper
+    function StringCompare
+        input String expected;
+        input String actual;
+    algorithm
+        assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
+    end StringCompare;
+    type E = enumeration(small, medium, large, xlarge);
+    Real realVar;
+    Integer intVar = if realVar < 2.5 then 12 else 42;
+    Boolean boolVar = if realVar < 2.5 then true else false;
+    E enumVar = if realVar < 2.5 then E.small else E.medium;
+equation
+    StringCompare("42",           String(intVar));
+    StringCompare("42          ", String(intVar, minimumLength=12));
+    StringCompare("          42", String(intVar, minimumLength=12, leftJustified=false));
+    
+    StringCompare("3.14159",      String(realVar));
+    StringCompare("3.14159     ", String(realVar, minimumLength=12));
+    StringCompare("     3.14159", String(realVar, minimumLength=12, leftJustified=false));
+    StringCompare("3.1415927",    String(realVar, significantDigits=8));
+    StringCompare("3.1415927   ", String(realVar, minimumLength=12, significantDigits=8));
+    StringCompare("   3.1415927", String(realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+    
+    StringCompare("-3.14159",     String(-realVar));
+    StringCompare("-3.14159    ", String(-realVar, minimumLength=12));
+    StringCompare("    -3.14159", String(-realVar, minimumLength=12, leftJustified=false));
+    StringCompare("-3.1415927",   String(-realVar, significantDigits=8));
+    StringCompare("-3.1415927  ", String(-realVar, minimumLength=12, significantDigits=8));
+    StringCompare("  -3.1415927", String(-realVar, minimumLength=12, leftJustified=false, significantDigits=8));
+    
+    StringCompare("false",        String(boolVar));
+    StringCompare("false       ", String(boolVar, minimumLength=12));
+    StringCompare("       false", String(boolVar, minimumLength=12, leftJustified=false));
+    
+    StringCompare("true",         String(not boolVar));
+    StringCompare("true        ", String(not boolVar, minimumLength=12));
+    StringCompare("        true", String(not boolVar, minimumLength=12, leftJustified=false));
+    
+    StringCompare("medium",       String(enumVar));
+    StringCompare("medium      ", String(enumVar, minimumLength=12));
+    StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
+end StringExpHelper;
+
+model StringExpConstant
+    extends StringExpHelper;
+equation
+    realVar = 3.14159265359;
+end StringExpConstant;
+
+model StringExpParameter
+    extends StringExpHelper;
+    parameter Real x = 3.14159265359;
+equation
+    realVar = x;
+end StringExpParameter;
+
+
 end OperatorTests;

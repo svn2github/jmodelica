@@ -252,19 +252,26 @@ int jmi_func_ad_init(jmi_t *jmi, jmi_func_t *func) {
     for (i=0;i<jmi->n_z;i++) {
         (*(jmi->z))[i] = (*(jmi->z_val))[i];
     }
-    CppAD::Independent(*jmi->z);
 
-    if (func->F(jmi, func->ad->F_z_dependent)!=0) {
-      return -1;
-    }
+    {
+        jmi_set_current(jmi);
+        if (jmi_try(jmi)) {
+            jmi_set_current(NULL);
+            return -1;
+        }        
 
-    jmi_set_current(jmi);
-    if (jmi_try(jmi)) {
-		jmi_set_current(NULL);
-		return -1;
+        CppAD::Independent(*jmi->z);
+
+        if (func->F(jmi, func->ad->F_z_dependent)!=0) {
+            jmi_set_current(NULL);
+            return -1;
+        }
+
+        func->ad->F_z_tape = new jmi_ad_tape_t(*jmi->z,*func->ad->F_z_dependent);
+
+        // This should conclude the call to generated code
+        jmi_set_current(NULL);
     }
-    func->ad->F_z_tape = new jmi_ad_tape_t(*jmi->z,*func->ad->F_z_dependent);
-	jmi_set_current(NULL);
 
     func->ad->tape_initialized = true;
 

@@ -42,7 +42,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
-        int scaling_method, int n_ext_objs) {
+        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
     
@@ -53,7 +53,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->dae = NULL;
     jmi_->init = NULL;
     /* jmi_->user_func = NULL; */
-    jmi_->fmi = NULL;
 
     /* Set sizes of dae vectors */
     jmi_->n_real_ci = n_real_ci;
@@ -163,7 +162,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         2*(n_real_d + n_integer_d + n_integer_u + n_boolean_d + n_boolean_u) + 
         2*n_sw + 2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
-    jmi_->z = (jmi_real_t*)calloc(1,sizeof(jmi_real_t *));
+    jmi_->z = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
     *(jmi_->z) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
     /*jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));*/
     
@@ -226,7 +225,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
-    jmi_->log = jmi_log_init(jmi_);
+    jmi_->jmi_callbacks = jmi_callbacks;
+    jmi_->log = jmi_log_init(&jmi_->options, jmi_callbacks);
 
     jmi_->terminate = 0;
 
@@ -234,11 +234,6 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     return 0;
 
-}
-
-int jmi_ad_init(jmi_t* jmi) {
-    /*return -1;*/
-    return 0;
 }
 
 int jmi_delete(jmi_t* jmi){
@@ -278,6 +273,7 @@ int jmi_delete(jmi_t* jmi){
     }
     free(jmi->variable_scaling_factors);
     free(jmi->ext_objs);
+    free(jmi->log->jmi_callbacks);
     jmi_log_delete(jmi->log);
     free(jmi);
 

@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.exceptions;
 
 /**
  * Common super class for all JModelica exceptions.

@@ -54,8 +54,7 @@
 #ifndef _JMI_LOG_H
 #define _JMI_LOG_H
 
-#include "jmi_common.h"  /* for jmi_t */
-
+#include "jmi_util.h"  /* for jmi_t */
 
 /**
  * \brief Types of log messages.
@@ -71,17 +70,60 @@ typedef struct {
     int inner_id;
 } jmi_log_node_t;
 
+/* convenience typedefs */
+typedef jmi_log_node_t     node_t;
+typedef jmi_log_category_t category_t;
+typedef jmi_log_t          log_t;
+
+typedef int BOOL;
 
 #define TRUE  1
 #define FALSE 0
 
-
 /** \brief Allocate and intialize a log, with output to `jmi` */
-jmi_log_t *jmi_log_init(jmi_t *jmi);
+jmi_log_t *jmi_log_init(jmi_options_t* options, jmi_callbacks_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
 void jmi_log_delete(jmi_log_t *log);
 
+/** \brief Raw character buffer used by jmi_log_t. */
+typedef struct {
+    char *msg;
+    int len, alloced;    
+} buf_t;
+
+/** \brief Log frame used by jmi_log_t. */
+typedef struct {
+    int id;
+    jmi_log_category_t c;
+    const char *type;
+
+    jmi_log_category_t severest_category; /* among the node's contents */
+} frame_t;
+
+/** \brief Structured logger */ 
+struct jmi_log_t {
+    buf_t buf;
+
+    BOOL filtering_enabled;
+    FILE *log_file;  /**< \brief Destination for direct file logging, or NULL. */
+    BOOL initialized;
+
+    category_t c;
+    category_t severest_category;
+    const char *next_name;
+    int leafdim;   /**< \brief  -1 when top is not a leaf, otherwise dimension of the leaf. */
+
+    frame_t *frames;
+    int topindex;  /**< \brief  Index of the top frame in frames. */
+    int alloced_frames;
+    int id_counter;
+    
+    jmi_callbacks_t* jmi_callbacks;  /**< \brief  A pointer to a callbacks the logger needs. */
+    jmi_options_t* options;          /**< \brief  A pointer to jmi options. */
+    
+    BOOL outstanding_comma;
+};
 
 /* Row primitives */
 
@@ -184,5 +226,11 @@ void jmi_log_int_(   jmi_log_t *log, int x);
 /** \brief Log a value reference of type `t` (one of `ribs`), without ending the line. */
 void jmi_log_vref_(  jmi_log_t *log, char t, int vref);
 
+/** \brief Return the one input that has the severest category. */
+category_t severest(category_t c1, category_t c2);
 
+/** \brief Logging the category and message. */
+void file_logger(FILE *out, FILE *err, 
+                        category_t category, category_t severest_category, 
+                        const char *message);
 #endif

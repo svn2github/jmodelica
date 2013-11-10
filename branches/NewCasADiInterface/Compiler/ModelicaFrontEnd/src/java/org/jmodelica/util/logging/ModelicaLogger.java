@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmodelica.util.CompilerException;
 import org.jmodelica.util.NullStream;
 import org.jmodelica.util.Problem;
+import org.jmodelica.util.exceptions.CompilerException;
 
 /**
  * \brief Base class for logging messages from the tree.
@@ -26,12 +26,12 @@ public abstract class ModelicaLogger {
 		this.level = level;
 	}
 
-	/**
-	 * Retreives the log level for this logger
-	 */
-	public final Level getLevel() {
-		return level;
-	}
+    /**
+     * Retreives the log level for this logger
+     */
+    public final Level getLevel() {
+        return level;
+    }
 
 	/**
 	 * Closes the logger and underlying streams

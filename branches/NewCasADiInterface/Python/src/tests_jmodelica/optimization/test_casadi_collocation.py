@@ -89,6 +89,9 @@ class TestLocalDAECollocator:
         
         class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
         compile_fmux(class_path, vdp_file_path)
+
+        class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
+        compile_fmux(class_path, vdp_file_path)
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
@@ -162,6 +165,11 @@ class TestLocalDAECollocator:
         fmux_vdp_unscaled_min_time = 'VDP_pack_VDP_Opt_Unscaled_Min_Time.fmux'
         self.model_vdp_unscaled_min_time = CasadiModel(
                 fmux_vdp_unscaled_min_time, verbose=False)
+
+        fmux_vdp_min_time_nonzero_start = \
+                'VDP_pack_VDP_Opt_Min_Time_Nonzero_Start.fmux'
+        self.model_vdp_min_time_nonzero_start = CasadiModel(
+                fmux_vdp_min_time_nonzero_start, verbose=False)
         
         fmu_cstr = 'CSTR_CSTR.fmu'
         self.model_cstr = load_fmu(fmu_cstr)
@@ -941,11 +949,13 @@ class TestLocalDAECollocator:
         """
         Test solving minimum time problems based on the VDP oscillator.
         
-        Tests both a problem where the time is manually scaled, and one where
-        the time is automatically scaled by the compiler.
+        Tests one problem where the time is manually scaled. Tests two where
+        the time is automatically scaled by the compiler, where one of them
+        starts at time 0 and the other starts at time 5.
         """
         model_scaled = self.model_vdp_scaled_min_time
         model_unscaled = self.model_vdp_unscaled_min_time
+        model_nonzero_start = self.model_vdp_min_time_nonzero_start
         
         # References values
         cost_ref = 2.2811590707107996e0
@@ -971,6 +981,20 @@ class TestLocalDAECollocator:
         opts['discr'] = "LG"
         res = model_unscaled.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+        # Unscaled, non-zero start, Radau
+        opts['discr'] = "LGR"
+        res = model_nonzero_start.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        N.testing.assert_allclose(res['time'][[0, -1]], [5., 7.28115907],
+                                  rtol=5e-3)
+        
+        # Unscaled, non-zero start, Gauss
+        opts['discr'] = "LG"
+        res = model_nonzero_start.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        N.testing.assert_allclose(res['time'][[0, -1]], [5., 7.28128126],
+                                  rtol=5e-3)
     
     @testattr(casadi = True)
     def test_cstr_minimum_time(self):

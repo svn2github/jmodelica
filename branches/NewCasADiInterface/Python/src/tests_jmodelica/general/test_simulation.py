@@ -45,7 +45,7 @@ class TestRLCSquareCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
@@ -62,7 +62,7 @@ class TestRLCSquareCSModified(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit_Square',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
@@ -83,7 +83,7 @@ class TestRLCCS(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'RLC_Circuit.mo', 'RLC_Circuit',target="fmucs")
+                'RLC_Circuit.mo', 'RLC_Circuit',target="cs")
 
     @testattr(stddist = True)
     def setUp(self):
@@ -158,7 +158,7 @@ class TestAlgo1(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Algorithm.mo', 'Algorithm.AlgoTest1',options={'algorithms_as_functions':False})
+            'Algorithm.mo', 'Algorithm.AlgoTest1')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -175,7 +175,7 @@ class TestAlgo2(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Algorithm.mo', 'Algorithm.AlgoTest2',options={'algorithms_as_functions':False})
+            'Algorithm.mo', 'Algorithm.AlgoTest2')
     
     @testattr(stddist = True)
     def setUp(self):
@@ -192,7 +192,7 @@ class TestAlgo3(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Algorithm.mo', 'Algorithm.AlgoTest3',options={'algorithms_as_functions':False})
+            'Algorithm.mo', 'Algorithm.AlgoTest3')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -209,7 +209,7 @@ class TestAlgo4(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-            'Algorithm.mo', 'Algorithm.AlgoTest4',options={'algorithms_as_functions':False})
+            'Algorithm.mo', 'Algorithm.AlgoTest4')
 
     @testattr(stddist = True)
     def setUp(self):
@@ -220,6 +220,41 @@ class TestAlgo4(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'd'])
+        
+class TestAlgo5(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest5')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run()
+        self.load_expected_data('Algorithm_AlgoTest5_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_all_trajectories(['rs[1].inside', 'rs[2].inside', 'rs[3].inside', 'rs[4].inside', 'rs[5].inside'])
+
+
+class TestAlgo6(SimulationTest):
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'Algorithm.mo', 'Algorithm.AlgoTest6')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=2.0, time_step = 0.05)
+        self.run(cvode_options={'atol':1.0e-6,'rtol':1.0e-4,'maxh':0.1})
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('a', 2)
+        self.assert_end_value('b', 7)
 
 class TestStreams1(SimulationTest):
 

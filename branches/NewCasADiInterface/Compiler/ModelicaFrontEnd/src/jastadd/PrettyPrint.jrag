@@ -23,7 +23,7 @@ import org.jmodelica.util.NotNullPrintStream;
 aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
-	class Printer {
+    public class Printer {
 		
 		protected String step;
 		
@@ -52,7 +52,7 @@ aspect BasePrinter {
 aspect PrettyPrint {
 
 	// select first variant
-	class PrettyPrinter extends Printer {
+    public class PrettyPrinter extends Printer {
 		public PrettyPrinter() {
 			super(" ");
 		}
@@ -63,7 +63,7 @@ aspect PrettyPrint {
 	}
 	
 	// select second variant
-	class DumpTreePrinter extends Printer {
+    public class DumpTreePrinter extends Printer {
 		public DumpTreePrinter() {
 			super(" ");
 		}
@@ -872,14 +872,16 @@ aspect PrettyPrint {
 	syn String Inner.toString() = "inner";
 	syn String Outer.toString() = "outer";
 	syn String Replaceable.toString() = "replaceable";
-	syn String TypePrefixFlow.toString() = "flow";
+	syn String TypePrefixFlow.toString();
+	eq Flow.toString()   = "flow";
+	eq Stream.toString() = "stream";
 	syn String TypePrefixInputOutput.toString();
-	eq Input.toString() = "input";
-	eq Output.toString()= "output";
+	eq Input.toString()  = "input";
+	eq Output.toString() = "output";
 	syn String TypePrefixVariability.toString();
-	eq Parameter.toString() = "parameter";
-	eq Discrete.toString() = "discrete";
-	eq Constant.toString() = "constant";
+	eq Parameter.toString()  = "parameter";
+	eq Discrete.toString()   = "discrete";
+	eq Constant.toString()   = "constant";
 	eq Continuous.toString() = "";
 	
 	syn String FType.toString() = isArray() ? name() + size() : name();
@@ -908,27 +910,23 @@ aspect FlatPrettyPrint {
 			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
 	
-		int block_index = 0;
 	    boolean wroteEquation = false;
-	    for (FEquationBlock b : getFEquationBlocks()) {
-	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithm) {
-	    			p.print(e, str, indent);
-	    			wroteEquation = false;
-	    		} else {
-	    			if (!e.isIgnored()) {
-		    			if (!wroteEquation) {
-		    				str.print(indent);
-		    				str.print("equation\n");
-		    				wroteEquation = true;
-		    			}
-		    			p.print(e, str, nextInd);
-			    		str.print(";\n");
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
 	    			}
-	    		}
-	    	}
-	    	block_index++;
-	    }
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
 	    
   		if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
   				getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
@@ -947,6 +945,14 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
+	syn String FVariable.displayName()        = getFQName().toString();
+	eq FDerivativeVariable.displayName()      = name();
+	eq FPreBooleanVariable.displayName()      = name();
+	eq FPreEnumVariable.displayName()         = name();
+	eq FPreIntegerVariable.displayName()      = name();
+	eq FPreRealVariable.displayName()         = name();
+	eq FPreStringVariable.displayName()       = name();
+	eq FDummyDerivativeVariable.displayName() = derPrefixName();
 
 	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
 		str.print(indent);
@@ -960,7 +966,7 @@ aspect FlatPrettyPrint {
 		
 		str.print(prettyPrintType());
 		str.print(" ");
-		p.print(getFQName(),str,"");
+		str.print(displayName());
 	
 		getFAttributeList().prettyPrintFAttributeList(str,p);
 		
@@ -999,29 +1005,6 @@ aspect FlatPrettyPrint {
 				str.print(attributeExp(attribute));
 			}
 		}
-	}
-
-	
-	public void FDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		if (isProtected()) {
-			str.print("protected ");
-		}
-				
-		str.print(type());
-		str.print(" ");
-		str.print(name());		
-	}
-
-	public void FDummyDerivativeVariable.prettyPrint(Printer p, PrintStream str, String indent) {
-		str.print(indent);
-		if (isProtected()) {
-			str.print("protected ");
-		}
-				
-		str.print(type());
-		str.print(" ");
-		str.print(nameUnderscore());		
 	}
 
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
@@ -1096,7 +1079,7 @@ aspect FlatPrettyPrint {
     
     public void FEquationType.prettyPrint(Printer p, PrintStream str, String indent) {}
     public void FInitialEquation.prettyPrint(Printer p, PrintStream str, String indent) {
-    	str.print(indent + "initial");
+    	str.print(indent + "initial ");
     }
     
     public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
@@ -1274,7 +1257,8 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
-		p.print(getType(),str,indent);
+		str.print(indent);
+		p.print(getType(),str,"");
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}
@@ -1640,11 +1624,7 @@ aspect FlatPrettyPrint {
 	}
 
 	protected void FDummyDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.print(nameUnderscore());
-	}
-
-	protected void FHDummyDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
-		str.print(nameUnderscore());
+		str.print(derPrefixName());
 	}
 
 	protected void FPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
@@ -1663,6 +1643,12 @@ aspect FlatPrettyPrint {
 		str.format(",%d)", getOrder());
 	}
 
+	protected void InstPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.print("pre(");
+		p.print(getFExp(),str,indent);
+		str.format(")");
+	}
+	
 	protected void FSumExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
 		str.print("sum(");
 		p.print(getFExp(), str, indent);
@@ -1787,7 +1773,7 @@ aspect FlatPrettyPrint {
 	eq FSizeExp.builtInName()            = "size";
 	eq FNoEventExp.builtInName()         = "noEvent";
 	eq FSmoothExp.builtInName()          = "smooth";
-	eq FPreExp.builtInName()             = "pre";
+	eq InstPreExp.builtInName()          = "pre";
 	eq FEdgeExp.builtInName()            = "edge";
 	eq FChangeExp.builtInName()          = "change";
 	eq FSampleExp.builtInName()          = "sample";
@@ -1912,7 +1898,7 @@ aspect FlatPrettyPrint {
 
 aspect PrettyPrint_MC {
 	
-	class MCPrettyPrinter extends Printer {
+    public class MCPrettyPrinter extends Printer {
 		
 		public MCPrettyPrinter() {
 			super("    ");
@@ -2028,27 +2014,23 @@ aspect PrettyPrint_MC {
 			str.print(indent + "parameter equation\n");
 		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
 	*/
-		int block_index = 0;
 	    boolean wroteEquation = false;
-	    for (FEquationBlock b : getFEquationBlocks()) {
-	    	for (FAbstractEquation e : b.getFAbstractEquations()) {
-	    		if (e instanceof FAlgorithm) {
-	    			p.print(e, str, indent);
-	    			wroteEquation = false;
-	    		} else {
-	    			if (!e.isIgnored()) {
-		    			if (!wroteEquation) {
-		    				str.print(indent);
-		    				str.print("equation\n");
-		    				wroteEquation = true;
-		    			}
-		    			p.print(e, str, nextInd);
-			    		str.print(";\n");
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
 	    			}
-	    		}
-	    	}
-	    	block_index++;
-	    }
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
 	        	
   		str.print(indent);
   		str.print("end ");

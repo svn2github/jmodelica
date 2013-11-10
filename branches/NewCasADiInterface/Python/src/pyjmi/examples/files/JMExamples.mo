@@ -2198,14 +2198,16 @@ Simulation time: 7200s
                   (0.5 / 1000 / 3600);
     end Distillation4Breakdown;
 
+    connector RealConnector = Real;
+	
     model Distillation4Reference
       Distillation4 d;
 
       constant Real time_constant = 35;
 
       Real cost(start=0, fixed=true);
-      Real Q_elec;
-      Real Vdot_L1;
+      RealConnector Q_elec;
+      RealConnector Vdot_L1;
 
     equation
       der(cost) = (d.Temp[28] - d.T_14_ref)^2 +

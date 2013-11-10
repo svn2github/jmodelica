@@ -444,12 +444,13 @@ model FunctionFlatten9
     
     function f
         input Real[2] x;
+		input Integer i;
         output Real[2] y;
     algorithm
-        y := x + a[1:2] + a[1:2];
+        y := x .+ a[i] .+ a[i+1];
     end f;
     
-    Real[2] z = f({3,4});
+    Real[2] z = f({3,4}, 1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -464,19 +465,20 @@ fclass FunctionTests.FunctionFlatten9
  Real z[1];
  Real z[2];
 equation
- ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3,4});
+ ({z[1],z[2]}) = FunctionTests.FunctionFlatten9.f({3, 4}, 1);
 
 public
  function FunctionTests.FunctionFlatten9.f
   Real[3] a;
   input Real[2] x;
+  input Integer i;
   output Real[2] y;
  algorithm
   a[1] := 1;
   a[2] := 2;
   a[3] := 3;
-  y[1] := x[1] + a[1] + a[1];
-  y[2] := x[2] + a[2] + a[2];
+  y[1] := x[1] .+ a[i] .+ a[i + 1];
+  y[2] := x[2] .+ a[i] .+ a[i + 1];
   return;
  end FunctionTests.FunctionFlatten9.f;
 
@@ -1927,12 +1929,10 @@ algorithm
         TransformCanonicalTestCase(
             name="AlgorithmFlatten1",
             description="Flattening algorithms: assign stmts",
-            algorithms_as_functions=false,
             flatModel="
 fclass FunctionTests.AlgorithmFlatten1
  Real x;
 algorithm
- x := 0.0;
  x := 5;
  x := x + 2;
 end FunctionTests.AlgorithmFlatten1;
@@ -1952,12 +1952,10 @@ algorithm
 			name="AlgorithmFlatten2",
 			description="Alias elimination in algorithm",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten2
  Real x(start = 1.0);
 algorithm
- x := 1.0;
  x := 5;
  x := x + 2;
 end FunctionTests.AlgorithmFlatten2;
@@ -1987,7 +1985,6 @@ algorithm
 			name="AlgorithmFlatten3",
 			description="Flattening algorithms: if stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten3
  discrete Integer x;
@@ -2035,7 +2032,6 @@ algorithm
 			name="AlgorithmFlatten4",
 			description="Flattening algorithms: when stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten4
  discrete Integer x;
@@ -2064,9 +2060,9 @@ end AlgorithmFlatten4;
 model AlgorithmFlatten5
  Real x;
 algorithm
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
+ while noEvent(x < 1) loop
+  while noEvent(x < 2) loop
+   while noEvent(x < 3) loop
     x := x + 1;
    end while;
   end while;
@@ -2077,15 +2073,14 @@ algorithm
 			name="AlgorithmFlatten5",
 			description="Flattening algorithms: while stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten5
  Real x;
 algorithm
  x := 0.0;
- while x < 1 loop
-  while x < 2 loop
-   while x < 3 loop
+ while noEvent(x < 1) loop
+  while noEvent(x < 2) loop
+   while noEvent(x < 3) loop
     x := x + 1;
    end while;
   end while;
@@ -2107,7 +2102,6 @@ algorithm
 			name="AlgorithmFlatten6",
 			description="Flattening algorithms: for stmts",
 			variability_propagation=false,
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.AlgorithmFlatten6
  Real x;
@@ -2125,6 +2119,166 @@ algorithm
 end FunctionTests.AlgorithmFlatten6;
 ")})));
 end AlgorithmFlatten6;
+
+model AlgorithmFlatten7
+function f
+	input Real[2] i;
+	output Real[2] o;
+algorithm
+	o := if i * i > 1.0E-6 then i else i;
+end f;
+
+Real[2] x = f({time,time*2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten7",
+			description="Flattening algorithms: if expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten7
+ Real x[1];
+ Real x[2];
+equation
+ ({x[1], x[2]}) = FunctionTests.AlgorithmFlatten7.f({time, time * 2});
+
+public
+ function FunctionTests.AlgorithmFlatten7.f
+  input Real[2] i;
+  output Real[2] o;
+algorithm
+  o[1] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[1] else i[1];
+  o[2] := if i[1] * i[1] + i[2] * i[2] > 1.0E-6 then i[2] else i[2];
+  return;
+ end FunctionTests.AlgorithmFlatten7.f;
+end FunctionTests.AlgorithmFlatten7;
+")})));
+end AlgorithmFlatten7;
+
+model AlgorithmFlatten8
+  Real[3] x;
+algorithm
+  for i in 1:3 loop
+    x[1:i] := 1:i;
+    x[{i,2}] := {i,2};
+  end for;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten8",
+			description="Flattening algorithms: for indices in left hand side of array assignments.",
+			variability_propagation=false,
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten8
+ Real x[1];
+ Real x[2];
+ Real x[3];
+algorithm
+ x[1] := 1;
+ x[1] := 1;
+ x[2] := 2;
+ x[1] := 1;
+ x[2] := 2;
+ x[2] := 2;
+ x[2] := 2;
+ x[1] := 1;
+ x[2] := 2;
+ x[3] := 3;
+ x[3] := 3;
+ x[2] := 2;
+end FunctionTests.AlgorithmFlatten8;
+
+")})));
+end AlgorithmFlatten8;
+
+model AlgorithmFlatten9
+ Real y1,y2,y3,x;
+algorithm
+ when x > 2 then
+  y1 := sin(x);
+ end when;
+equation
+ y2 = sin(y1);
+ x = time;
+algorithm
+ when x > 2 then
+	 y3 := 2*x + y1 + y2;
+ end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten9",
+			description="Flattening algorithms: when stmts",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten9
+ discrete Real y1;
+ Real y2;
+ discrete Real y3;
+ Real x;
+ Real temp_1;
+ Real temp_2;
+initial equation 
+ pre(y1) = 0.0;
+ pre(y3) = 0.0;
+equation
+ y2 = sin(y1);
+ x = time;
+algorithm
+ y1 := pre(y1);
+ temp_1 := 1;
+ temp_1 := x - 2;
+ when x > 2 then
+  y1 := sin(x);
+ end when;
+algorithm
+ y3 := pre(y3);
+ temp_2 := 1;
+ temp_2 := x - 2;
+ when x > 2 then
+  y3 := 2 * x + y1 + y2;
+ end when;
+end FunctionTests.AlgorithmFlatten9;
+")})));
+end AlgorithmFlatten9;
+
+model AlgorithmFlatten10
+ Real y1,y2;
+algorithm
+	when time > 1 then
+		y1 := 1;
+	elsewhen time > 2 then
+		y2 := 2;
+	end when;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AlgorithmFlatten10",
+			description="Flattening algorithms: else-when stmts",
+			flatModel="
+fclass FunctionTests.AlgorithmFlatten10
+ discrete Real y1;
+ discrete Real y2;
+ Real temp_1;
+ Real temp_2;
+initial equation 
+ pre(y1) = 0.0;
+ pre(y2) = 0.0;
+algorithm
+ y1 := pre(y1);
+ y2 := pre(y2);
+ temp_1 := 1;
+ temp_2 := 1;
+ temp_1 := time - 1;
+ temp_2 := time - 2;
+ when time > 1 then
+  y1 := 1;
+ elsewhen time > 2 then
+  y2 := 2;
+ end when;
+end FunctionTests.AlgorithmFlatten10;
+")})));
+end AlgorithmFlatten10;
 
 
 /* ====================== Algorithm type checks ====================== */
@@ -2315,12 +2469,11 @@ algorithm
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen4
- Real x;
+ discrete Real x;
 algorithm
- when {true,false} then
+ when {true, false} then
   x := 1.0;
  end when;
-
 end FunctionTests.AlgorithmTypeWhen4;
 ")})));
 end AlgorithmTypeWhen4;
@@ -2339,12 +2492,11 @@ algorithm
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.AlgorithmTypeWhen5
- Real x;
+ discrete Real x;
 algorithm
  when true then
   x := 1.0;
  end when;
-
 end FunctionTests.AlgorithmTypeWhen5;
 ")})));
 end AlgorithmTypeWhen5;
@@ -2593,6 +2745,7 @@ algorithm
 			name="AlgorithmTransformation1",
 			description="Generating functions from algorithms: simple algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation1
@@ -2637,6 +2790,8 @@ algorithm
 			name="AlgorithmTransformation2",
 			description="Generating functions from algorithms: vars used several times",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation2
  Real a;
@@ -2680,6 +2835,8 @@ algorithm
 			name="AlgorithmTransformation3",
 			description="Generating functions from algorithms: complex algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation3
  Real a;
@@ -2732,6 +2889,8 @@ algorithm
 			name="AlgorithmTransformation4",
 			description="Generating functions from algorithms: complex algorithm",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation4
  Real a;
@@ -2781,6 +2940,7 @@ algorithm
 			name="AlgorithmTransformation5",
 			description="Generating functions from algorithms: no used variables",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation5
@@ -2817,6 +2977,7 @@ algorithm
 			name="AlgorithmTransformation6",
 			description="Generating functions from algorithms: 2 algorithms",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation6
@@ -2862,6 +3023,7 @@ algorithm
 			name="AlgorithmTransformation7",
 			description="Generating functions from algorithms: generated name exists - function",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation7
@@ -2906,6 +3068,7 @@ algorithm
 			name="AlgorithmTransformation8",
 			description="Generating functions from algorithms: generated name exists - model",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation8
@@ -2942,6 +3105,7 @@ algorithm
 			name="AlgorithmTransformation9",
 			description="Generating functions from algorithms: generated name exists - component",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation9
@@ -2986,6 +3150,8 @@ equation
 			name="AlgorithmTransformation10",
 			description="Generating functions from algorithms: generated arg name exists",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation10
  Real x;
@@ -3025,6 +3191,8 @@ algorithm
 			name="AlgorithmTransformation11",
 			description="Generating functions from algorithms: assigned variable used",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation11
  Real x;
@@ -3065,6 +3233,8 @@ algorithm
 			name="AlgorithmTransformation12",
 			description="Generating functions from algorithms: assigned variables used, different start values",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation12
  Real x0;
@@ -3111,6 +3281,8 @@ algorithm
 			name="AlgorithmTransformation13",
 			description="Generating functions from algorithms: no assignments",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation13
  Real x;
@@ -3154,6 +3326,8 @@ algorithm
 			name="AlgorithmTransformation14",
 			description="Generating functions from algorithms: using for index",
 			variability_propagation=false,
+			algorithms_as_functions=true,
+			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation14
  Real x;
@@ -3200,6 +3374,7 @@ algorithm
 			name="AlgorithmTransformation15",
 			description="Generating functions from algorithms: function call statement",
 			variability_propagation=false,
+			algorithms_as_functions=true,
 			inline_functions="none",
 			flatModel="
 fclass FunctionTests.AlgorithmTransformation15
@@ -3509,57 +3684,6 @@ end FunctionTests.ArrayExpInFunc6;
 end ArrayExpInFunc6;
 
 
-model ArrayExpInFunc7
- Real o;
- Real x[3];
-equation
- der(o) = time;
-algorithm
- when {o > 2.0, o > 3.0} then
-  x := { 1, 2, 3 };
- elsewhen o < 1.5 then
-  x := { 4, 5, 6 };
- end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayExpInFunc7",
-			description="Scalarization of functions: when statements",
-			variability_propagation=false,
-			flatModel="
-fclass FunctionTests.ArrayExpInFunc7
- Real o;
- Real x[1];
- Real x[2];
- Real x[3];
-initial equation 
- o = 0.0;
-equation
- der(o) = time;
- ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc7.algorithm_1(o);
-
-public
- function FunctionTests.ArrayExpInFunc7.algorithm_1
-  output Real[3] x;
-  input Real o;
- algorithm
-  when {o > 2.0, o > 3.0} then
-   x[1] := 1;
-   x[2] := 2;
-   x[3] := 3;
-  elsewhen o < 1.5 then
-   x[1] := 4;
-   x[2] := 5;
-   x[3] := 6;
-  end when;
-  return;
- end FunctionTests.ArrayExpInFunc7.algorithm_1;
-
-end FunctionTests.ArrayExpInFunc7;
-")})));
-end ArrayExpInFunc7;
-
-
 model ArrayExpInFunc8
  function f
   output Real o = 1.0;
@@ -3653,6 +3777,544 @@ public
 end FunctionTests.ArrayExpInFunc9;
 ")})));
 end ArrayExpInFunc9;
+
+model ArrayExpInFunc10
+function f
+	input Real[:,2] a;
+	output Real[size(a,1)] b;
+algorithm
+	b := a[:,2];
+end f;
+	Real[3,2] x = {{1,2},{3,4},{5,6}};
+	Real y[3];
+equation
+	y = f(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc10",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc10
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+equation
+ ({y[1], y[2], y[3]}) = FunctionTests.ArrayExpInFunc10.f({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}, {x[3,1], x[3,2]}});
+ x[1,1] = 1;
+ x[1,2] = 2;
+ x[2,1] = 3;
+ x[2,2] = 4;
+ x[3,1] = 5;
+ x[3,2] = 6;
+
+public
+ function FunctionTests.ArrayExpInFunc10.f
+  input Real[:, 2] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(a, 1) loop
+   b[i1] := a[i1,2];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc10.f;
+
+end FunctionTests.ArrayExpInFunc10;
+
+")})));
+end ArrayExpInFunc10;
+
+model ArrayExpInFunc11
+	
+record R
+	Real x;
+end R;
+function f
+	input Real[2,:,2] a;
+	output Real[3,size(a,2)] b;
+algorithm
+	b[1,:] := a[2,:,1];
+	b[{2,3},:] := 2*a[:,:,1];
+end f;
+	constant Real[3,2] c = {{1,1},{1,1},{1,1}};
+	Real[2,3,2] x = {c,c};
+	Real y[3,3];
+equation
+	y = f(x);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc11",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc11
+ constant Real c[1,1] = 1;
+ constant Real c[1,2] = 1;
+ constant Real c[2,1] = 1;
+ constant Real c[2,2] = 1;
+ constant Real c[3,1] = 1;
+ constant Real c[3,2] = 1;
+ Real x[1,1,1];
+ Real x[1,1,2];
+ Real x[1,2,1];
+ Real x[1,2,2];
+ Real x[1,3,1];
+ Real x[1,3,2];
+ Real x[2,1,1];
+ Real x[2,1,2];
+ Real x[2,2,1];
+ Real x[2,2,2];
+ Real x[2,3,1];
+ Real x[2,3,2];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[3,1];
+ Real y[3,2];
+ Real y[3,3];
+equation
+ ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}, {y[3,1], y[3,2], y[3,3]}}) = FunctionTests.ArrayExpInFunc11.f({{{x[1,1,1], x[1,1,2]}, {x[1,2,1], x[1,2,2]}, {x[1,3,1], x[1,3,2]}}, {{x[2,1,1], x[2,1,2]}, {x[2,2,1], x[2,2,2]}, {x[2,3,1], x[2,3,2]}}});
+ x[1,1,1] = 1.0;
+ x[1,1,2] = 1.0;
+ x[1,2,1] = 1.0;
+ x[1,2,2] = 1.0;
+ x[1,3,1] = 1.0;
+ x[1,3,2] = 1.0;
+ x[2,1,1] = 1.0;
+ x[2,1,2] = 1.0;
+ x[2,2,1] = 1.0;
+ x[2,2,2] = 1.0;
+ x[2,3,1] = 1.0;
+ x[2,3,2] = 1.0;
+
+public
+ function FunctionTests.ArrayExpInFunc11.f
+  input Real[2, :, 2] a;
+  output Real[3, size(a, 2)] b;
+  Integer[2] temp_1;
+  Integer[2] temp_2;
+ algorithm
+  for i1 in 1:size(a, 2) loop
+   b[1,i1] := a[2,i1,1];
+  end for;
+  for i1 in 1:2 loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[1] := 2;
+    temp_1[2] := 3;
+    temp_2[1] := 1;
+    temp_2[2] := 2;
+    b[temp_1[i1],i2] := 2 * a[temp_2[i1],i2,1];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc11.f;
+
+end FunctionTests.ArrayExpInFunc11;
+
+")})));
+end ArrayExpInFunc11;
+
+model ArrayExpInFunc12
+	
+record R
+	Real x[2];
+end R;
+function f1
+	output Real[2] o = {1,2};
+	algorithm
+end f1;
+function f2
+	output R b;
+algorithm
+	b := R(f1());
+end f2;
+	R r;
+equation
+	r = f2();
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc12",
+			description="Scalarization of functions: temp in record constructor",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc12
+ Real r.x[1];
+ Real r.x[2];
+equation
+ (FunctionTests.ArrayExpInFunc12.R({r.x[1], r.x[2]})) = FunctionTests.ArrayExpInFunc12.f2();
+
+public
+ function FunctionTests.ArrayExpInFunc12.f2
+  output FunctionTests.ArrayExpInFunc12.R b;
+  Real[2] temp_1;
+ algorithm
+  (temp_1) := FunctionTests.ArrayExpInFunc12.f1();
+  b.x[1] := temp_1[1];
+  b.x[2] := temp_1[2];
+  return;
+ end FunctionTests.ArrayExpInFunc12.f2;
+
+ function FunctionTests.ArrayExpInFunc12.f1
+  output Real[2] o;
+ algorithm
+  o[1] := 1;
+  o[2] := 2;
+  return;
+ end FunctionTests.ArrayExpInFunc12.f1;
+
+ record FunctionTests.ArrayExpInFunc12.R
+  Real x[2];
+ end FunctionTests.ArrayExpInFunc12.R;
+
+end FunctionTests.ArrayExpInFunc12;
+
+")})));
+end ArrayExpInFunc12;
+
+model ArrayExpInFunc13
+	
+function f
+	input Integer[:] i;
+	input Real[:] x;
+	output Real[size(i,1)] y;
+algorithm
+	y := x[i];
+end f;
+
+Real[3] x = f({1,2,3}, {1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc13",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc13
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = FunctionTests.ArrayExpInFunc13.f({1, 2, 3}, {1, 2, 3});
+
+public
+ function FunctionTests.ArrayExpInFunc13.f
+  input Integer[:] i;
+  input Real[:] x;
+  output Real[size(i, 1)] y;
+ algorithm
+  for i1 in 1:size(i, 1) loop
+   y[i1] := x[i[i1]];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc13.f;
+
+end FunctionTests.ArrayExpInFunc13;
+			
+")})));
+end ArrayExpInFunc13;
+
+model ArrayExpInFunc14
+	
+function f
+	input Integer[:] is1;
+	input Integer[size(is1,1)] is2;
+	input Real[:,:] x;
+	output Real[size(is1,1),size(is1,1)] y;
+algorithm
+	y := x[is1,is2];
+	y := x[is2,is1] + y;
+end f;
+
+Real[2,2] x = f({1,2}, {1,2}, {{1,2},{3,4}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc14",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc14
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc14.f({1, 2}, {1, 2}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.ArrayExpInFunc14.f
+  input Integer[:] is1;
+  input Integer[size(is1, 1)] is2;
+  input Real[:, :] x;
+  output Real[size(is1, 1), size(is1, 1)] y;
+ algorithm
+  for i1 in 1:size(is1, 1) loop
+   for i2 in 1:size(is1, 1) loop
+    y[i1,i2] := x[is1[i1],is2[i2]];
+   end for;
+  end for;
+  for i1 in 1:size(is1, 1) loop
+   for i2 in 1:size(is1, 1) loop
+    y[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc14.f;
+
+end FunctionTests.ArrayExpInFunc14;
+			
+")})));
+end ArrayExpInFunc14;
+
+model ArrayExpInFunc15
+	
+function f
+	input Integer[:] is1;
+	input Integer[:] is2;
+	input Real[:,:] x;
+	output Real[size(is2,1), 2] y;
+algorithm
+	y := x[is1[is2], {1,2}];
+end f;
+
+Real[2,2] x = f({1,2,3}, {2,3}, {{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc15",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc15
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc15.f({1, 2, 3}, {2, 3}, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc15.f
+  input Integer[:] is1;
+  input Integer[:] is2;
+  input Real[:, :] x;
+  output Real[size(is2, 1), 2] y;
+  Integer[2] temp_1;
+ algorithm
+  for i1 in 1:size(is2, 1) loop
+   for i2 in 1:2 loop
+    temp_1[1] := 1;
+    temp_1[2] := 2;
+    y[i1,i2] := x[is1[is2[i1]],temp_1[i2]];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc15.f;
+
+end FunctionTests.ArrayExpInFunc15;
+			
+")})));
+end ArrayExpInFunc15;
+
+model ArrayExpInFunc16
+	
+function f
+	input Integer[:] is1;
+	input Integer[:] is2;
+	input Real[:,:] x;
+	output Real[size(is2,1), 2] y;
+algorithm
+	y := x[is1[{1,2}],is2];
+end f;
+
+Real[2,2] x = f({1,2,3}, {2,3}, {{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc16",
+			description="Scalarization of functions: unknown size slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc16
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+equation
+ ({{x[1,1], x[1,2]}, {x[2,1], x[2,2]}}) = FunctionTests.ArrayExpInFunc16.f({1, 2, 3}, {2, 3}, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc16.f
+  input Integer[:] is1;
+  input Integer[:] is2;
+  input Real[:, :] x;
+  output Real[size(is2, 1), 2] y;
+  Integer[2] temp_1;
+ algorithm
+  for i1 in 1:2 loop
+   for i2 in 1:size(is2, 1) loop
+    temp_1[1] := is1[1];
+    temp_1[2] := is1[2];
+    y[i1,i2] := x[temp_1[i1],is2[i2]];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc16.f;
+
+end FunctionTests.ArrayExpInFunc16;
+			
+")})));
+end ArrayExpInFunc16;
+
+model ArrayExpInFunc17
+	
+function f
+	input Integer is1;
+	input Integer is2;
+	input Integer n;
+	input Real[:,:] x;
+	output Real[n, size(x,2)] y;
+algorithm
+	y[:] := x[is1:is2];
+end f;
+
+Real[3,3] x = f(1,3,3,{{1,2,3},{4,5,6}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc17",
+			description="Scalarization of functions: unknown size range exp as slice",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc17
+ Real x[1,1];
+ Real x[1,2];
+ Real x[1,3];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[2,3];
+ Real x[3,1];
+ Real x[3,2];
+ Real x[3,3];
+equation
+ ({{x[1,1], x[1,2], x[1,3]}, {x[2,1], x[2,2], x[2,3]}, {x[3,1], x[3,2], x[3,3]}}) = FunctionTests.ArrayExpInFunc17.f(1, 3, 3, {{1, 2, 3}, {4, 5, 6}});
+
+public
+ function FunctionTests.ArrayExpInFunc17.f
+  input Integer is1;
+  input Integer is2;
+  input Integer n;
+  input Real[:, :] x;
+  output Real[n, size(x, 2)] y;
+ algorithm
+  for i1 in 1:max(integer(is2 - is1) + 1, 0) loop
+   y[i1] := x[is1 + (i1 - 1)];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc17.f;
+
+end FunctionTests.ArrayExpInFunc17;
+			
+")})));
+end ArrayExpInFunc17;
+
+model ArrayExpInFunc18
+	
+function f
+	input Real[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o := i;
+end f;
+
+function fw
+	input Integer[:] i;
+	output Real[size(i,1)] o;
+	output Real dummy = 1;
+algorithm
+	o[{1,3,5}] := {1,1,1};
+	(o[i],) := f(o[i]);
+end fw;
+
+Real[3] ae;
+equation
+	(ae[{3,2,1}],) = fw({1,2,3});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc18",
+			description="Scalarization of functions: unknown size slice in function call stmt",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc18
+ Real ae[1];
+ Real ae[2];
+ Real ae[3];
+equation
+ ({ae[3], ae[2], ae[1]}, ) = FunctionTests.ArrayExpInFunc18.fw({1, 2, 3});
+
+public
+ function FunctionTests.ArrayExpInFunc18.fw
+  input Integer[:] i;
+  output Real[size(i, 1)] o;
+  output Real dummy;
+  Real[:] temp_1;
+  Real[:] temp_2;
+ algorithm
+  size(temp_1) := {:};
+  size(temp_2) := {:};
+  dummy := 1;
+  o[1] := 1;
+  o[3] := 1;
+  o[5] := 1;
+  for i1 in 1:size(i, 1) loop
+   temp_1[i1] := o[i[i1]];
+  end for;
+  (temp_2, ) := FunctionTests.ArrayExpInFunc18.f(temp_1);
+  for i1 in 1:size(i, 1) loop
+   o[i[i1]] := temp_2[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc18.fw;
+
+ function FunctionTests.ArrayExpInFunc18.f
+  input Real[:] i;
+  output Real[size(i, 1)] o;
+  output Real dummy;
+ algorithm
+  dummy := 1;
+  for i1 in 1:size(i, 1) loop
+   o[i1] := i[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc18.f;
+
+end FunctionTests.ArrayExpInFunc18;
+			
+")})));
+end ArrayExpInFunc18;
 
 
 
@@ -4535,7 +5197,7 @@ public
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
  algorithm
-  for i1 in 1:size(x2, 1) loop
+  for i1 in 1:size(a2, 1) loop
    x2[i1] := 2 * a2[i1];
   end for;
   return;
@@ -4596,7 +5258,7 @@ public
   input Real[:] a2;
   output Real[size(a2, 1)] x2;
  algorithm
-  for i1 in 1:size(x2, 1) loop
+  for i1 in 1:size(a2, 1) loop
    x2[i1] := 2 * a2[i1];
   end for;
   return;
@@ -4916,7 +5578,6 @@ algorithm
 			description="Scalarize function call statements.",
 			variability_propagation=false,
 			inline_functions="none",
-			algorithms_as_functions=false,
 			flatModel="
 fclass FunctionTests.ArrayOutputScalarization25
  Real a[1].x[1];
@@ -4936,22 +5597,6 @@ fclass FunctionTests.ArrayOutputScalarization25
  Real temp_1[2].y[1];
  Real temp_1[2].y[2];
 algorithm
- temp_1[1].x[1] := 0.0;
- temp_1[1].x[2] := 0.0;
- temp_1[1].y[1] := 0.0;
- temp_1[1].y[2] := 0.0;
- temp_1[2].x[1] := 0.0;
- temp_1[2].x[2] := 0.0;
- temp_1[2].y[1] := 0.0;
- temp_1[2].y[2] := 0.0;
- a[1].x[1] := 0.0;
- a[1].x[2] := 0.0;
- a[1].y[1] := 0.0;
- a[1].y[2] := 0.0;
- a[2].x[1] := 0.0;
- a[2].x[2] := 0.0;
- a[2].y[1] := 0.0;
- a[2].y[2] := 0.0;
  ({FunctionTests.ArrayOutputScalarization25.R({temp_1[1].x[1], temp_1[1].x[2]}, {temp_1[1].y[1], temp_1[1].y[2]}), FunctionTests.ArrayOutputScalarization25.R({temp_1[2].x[1], temp_1[2].x[2]}, {temp_1[2].y[1], temp_1[2].y[2]})}) := FunctionTests.ArrayOutputScalarization25.fwrap({FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1}), FunctionTests.ArrayOutputScalarization25.R({1, 1}, {1, 1})});
  a[1].x[1] := temp_1[1].x[1];
  a[1].x[2] := temp_1[1].x[2];
@@ -4997,6 +5642,120 @@ end FunctionTests.ArrayOutputScalarization25;
 
 ")})));
 end ArrayOutputScalarization25;
+
+model ArrayOutputScalarization26
+record R
+	Real x;
+end R;
+
+function f
+	input Real[2] i;
+	output R[2] o;
+	output Real d = 1;
+algorithm
+	o := {R(i[1]),R(i[2])};
+end f;
+
+R[4] x;
+Real[4] y = {1,2,3,4};
+algorithm
+	(x[{4,2}],) := f(y[{4,2}]);
+	(x[{1,3}],) := f(y[{1,3}]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization26",
+			description="Slices of records in function call statements.",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization26
+ Real x[1].x;
+ Real x[2].x;
+ Real x[3].x;
+ Real x[4].x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+algorithm
+ ({FunctionTests.ArrayOutputScalarization26.R(x[4].x), FunctionTests.ArrayOutputScalarization26.R(x[2].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[4], y[2]});
+ ({FunctionTests.ArrayOutputScalarization26.R(x[1].x), FunctionTests.ArrayOutputScalarization26.R(x[3].x)}, ) := FunctionTests.ArrayOutputScalarization26.f({y[1], y[3]});
+equation
+ y[1] = 1;
+ y[2] = 2;
+ y[3] = 3;
+ y[4] = 4;
+
+public
+ function FunctionTests.ArrayOutputScalarization26.f
+  input Real[2] i;
+  output FunctionTests.ArrayOutputScalarization26.R[2] o;
+  output Real d;
+algorithm
+  d := 1;
+  o[1].x := i[1];
+  o[2].x := i[2];
+  return;
+ end FunctionTests.ArrayOutputScalarization26.f;
+
+ record FunctionTests.ArrayOutputScalarization26.R
+  Real x;
+ end FunctionTests.ArrayOutputScalarization26.R;
+
+end FunctionTests.ArrayOutputScalarization26;
+
+")})));
+end ArrayOutputScalarization26;
+
+
+model ArrayOutputScalarization27
+    function f1
+        input Real c;
+        output Real d[2];
+    algorithm
+        d := {1,2} * c;
+        d[1] := d[1] + 0.1;
+    end f1;
+        
+    function f2
+        input Real c;
+        output Real d[2];
+    algorithm
+        d := {2,3} * c;
+        d[1] := d[1] + 0.1;
+    end f2;
+        
+    parameter Boolean a = false annotation(Evaluate=true);
+    Real b[2] = if a then f1(time) else f2(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayOutputScalarization27",
+			description="Function with array output in if exp",
+			flatModel="
+fclass FunctionTests.ArrayOutputScalarization27
+ parameter Boolean a = false /* false */;
+ Real b[1];
+ Real b[2];
+equation
+ ({b[1], b[2]}) = FunctionTests.ArrayOutputScalarization27.f2(time);
+
+public
+ function FunctionTests.ArrayOutputScalarization27.f2
+  input Real c;
+  output Real[2] d;
+ algorithm
+  d[1] := 2 * c;
+  d[2] := 3 * c;
+  d[1] := d[1] + 0.1;
+  return;
+ end FunctionTests.ArrayOutputScalarization27.f2;
+
+end FunctionTests.ArrayOutputScalarization27;
+")})));
+end ArrayOutputScalarization27;
+
 
 /* ======================= Unknown array sizes ======================*/
 
@@ -5315,14 +6074,14 @@ fclass FunctionTests.UnknownArray10
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray10.f({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray10.f({1,2});
 
 public
  function FunctionTests.UnknownArray10.f
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := a[i1];
   end for;
   return;
@@ -5353,14 +6112,14 @@ fclass FunctionTests.UnknownArray11
  Real x[1];
  Real x[2];
 equation
- ({x[1],x[2]}) = FunctionTests.UnknownArray11.f({1,2});
+ ({x[1], x[2]}) = FunctionTests.UnknownArray11.f({1,2});
 
 public
  function FunctionTests.UnknownArray11.f
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := a[i1];
   end for;
   return;
@@ -5403,7 +6162,7 @@ public
   input Real c;
   output Real[size(a, 1)] o;
  algorithm
-  for i1 in 1:size(o, 1) loop
+  for i1 in 1:size(a, 1) loop
    o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
@@ -5445,7 +6204,7 @@ public
   input Real c;
   output Real[size(a, 1)] o;
  algorithm
-  for i1 in 1:size(o, 1) loop
+  for i1 in 1:size(a, 1) loop
    o[i1] := c * a[i1] + 2 * b[i1];
   end for;
   return;
@@ -5487,8 +6246,8 @@ public
   output Real[size(a, 1), size(b, 2)] o;
   Real temp_1;
  algorithm
-  for i1 in 1:size(o, 1) loop
-   for i2 in 1:size(o, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_1 := 0.0;
     for i3 in 1:size(a, 2) loop
      temp_1 := temp_1 + a[i1,i3] * b[i3,i2];
@@ -5635,8 +6394,8 @@ public
   Real temp_1;
   Real temp_2;
  algorithm
-  for i1 in 1:size(o, 1) loop
-   for i2 in 1:size(o, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(c, 2) loop
     temp_1 := 0.0;
     for i3 in 1:size(b, 2) loop
      temp_2 := 0.0;
@@ -5925,8 +6684,8 @@ public
   Real temp_1;
   Integer[2, 2] temp_2;
  algorithm
-  for i1 in 1:size(y, 1) loop
-   for i2 in 1:size(y, 2) loop
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:2 loop
     temp_1 := 0.0;
     for i3 in 1:2 loop
      temp_2[1,1] := 1;
@@ -6090,10 +6849,10 @@ model UnknownArray29
     final constant Real a[:] = {1, 2, 3};
     
     function f1
+		input Integer i;
         output Real y1;
-    protected
     algorithm
-      y1 := f2(a[1:2]);
+      y1 := f2({a[i], a[i+1]});
     end f1;
     
     function f2
@@ -6102,7 +6861,7 @@ model UnknownArray29
     algorithm
     end f2;
     
-    Real x = f1();
+    Real x = f1(1);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -6116,20 +6875,18 @@ fclass FunctionTests.UnknownArray29
  constant Real a[3] = 3;
  Real x;
 equation
- x = FunctionTests.UnknownArray29.f1();
+ x = FunctionTests.UnknownArray29.f1(1);
 
 public
  function FunctionTests.UnknownArray29.f1
   Real[3] a;
+  input Integer i;
   output Real y1;
-  Real[2] temp_1;
  algorithm
   a[1] := 1;
   a[2] := 2;
   a[3] := 3;
-  temp_1[1] := a[1];
-  temp_1[2] := a[2];
-  y1 := FunctionTests.UnknownArray29.f2(temp_1);
+  y1 := FunctionTests.UnknownArray29.f2({a[i], a[i + 1]});
   return;
  end FunctionTests.UnknownArray29.f1;
 
@@ -6237,7 +6994,7 @@ public
   input Real[:] a;
   output Real[size(a, 1)] b;
  algorithm
-  for i1 in 1:size(b, 1) loop
+  for i1 in 1:size(a, 1) loop
    b[i1] := 2 * a[i1];
   end for;
   return;
@@ -6279,10 +7036,8 @@ public
   Real temp_1;
  algorithm
   size(c) := {1, size(a, 1)};
-  for i1 in 1:size(c, 1) loop
-   for i2 in 1:size(c, 2) loop
-    c[i1,i2] := 2 * a[i1,i2];
-   end for;
+  for i1 in 1:size(a, 1) loop
+   c[1,i1] := 2 * a[i1];
   end for;
   temp_1 := 0.0;
   for i1 in 1:1 loop
@@ -7839,12 +8594,12 @@ public
   Real[:] work;
  algorithm
   size(work) := {3 * size(A, 2)};
-  for i1 in 1:size(QR, 1) loop
-   for i2 in 1:size(QR, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     QR[i1,i2] := A[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(p, 1) loop
+  for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
   lda := max(1, size(A, 1));
@@ -7905,18 +8660,18 @@ public
   size(tau) := {size(A, 2)};
   nrow := size(A, 1);
   ncol := size(A, 2);
-  assert(nrow >= ncol, \"\\nInput matrix A[\" + String() + \",\" + String() + \"] has more columns as rows.
+  assert(nrow >= ncol, \"\\nInput matrix A[\" + String(nrow) + \",\" + String(ncol) + \"] has more columns as rows.
 This is not allowed when calling Modelica.Matrices.QR(A).\");
   if pivoting then
    (Q, tau, p) := Modelica.Math.Matrices.LAPACK.dgeqpf(A);
   else
    (Q, tau) := Modelica.Math.Matrices.LAPACK.dgeqrf(A);
-   for i1 in 1:size(p, 1) loop
+   for i1 in 1:ncol loop
     p[i1] := i1;
    end for;
   end if;
-  for i1 in 1:size(R, 1) loop
-   for i2 in 1:size(R, 2) loop
+  for i1 in 1:ncol loop
+   for i2 in 1:ncol loop
     R[i1,i2] := 0;
    end for;
   end for;
@@ -7940,12 +8695,12 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Real[:] work;
  algorithm
   size(work) := {3 * size(A, 2)};
-  for i1 in 1:size(QR, 1) loop
-   for i2 in 1:size(QR, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     QR[i1,i2] := A[i1,i2];
    end for;
   end for;
-  for i1 in 1:size(p, 1) loop
+  for i1 in 1:size(A, 2) loop
    p[i1] := 0;
   end for;
   lda := max(1, size(A, 1));
@@ -7965,8 +8720,8 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Integer lda;
   Integer lwork;
  algorithm
-  for i1 in 1:size(Aout, 1) loop
-   for i2 in 1:size(Aout, 2) loop
+  for i1 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     Aout[i1,i2] := A[i1,i2];
    end for;
   end for;
@@ -7988,8 +8743,8 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   Real[:] work;
  algorithm
   size(work) := {max(1, min(10, size(QR, 2)) * size(QR, 2))};
-  for i1 in 1:size(Q, 1) loop
-   for i2 in 1:size(Q, 2) loop
+  for i1 in 1:size(QR, 1) loop
+   for i2 in 1:size(QR, 2) loop
     Q[i1,i2] := QR[i1,i2];
    end for;
   end for;
@@ -8660,23 +9415,18 @@ fclass FunctionTests.FunctionLike.EventGen.Div1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = temp_3;
  y[1] = temp_2;
  y[2] = temp_1;
- when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
+ temp_1 = if div(time, 2) < pre(temp_1) or div(time, 2) >= pre(temp_1) + 1 or initial() then div(time, 2) else pre(temp_1);
+ temp_2 = if div(time, 2) < pre(temp_2) or div(time, 2) >= pre(temp_2) + 1 or initial() then div(time, 2) else pre(temp_2);
+ temp_3 = if div(time, 2) < pre(temp_3) or div(time, 2) >= pre(temp_3) + 1 or initial() then div(time, 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Div1;
+			
 ")})));
 end Div1;
 
@@ -8715,23 +9465,18 @@ fclass FunctionTests.FunctionLike.EventGen.Mod1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = floor(time / 2);
- temp_2 = floor(time / 2);
- temp_3 = floor(time / 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = time - temp_3 * 2;
  y[1] = time - temp_2 * 2;
  y[2] = time - temp_1 * 2;
- when {time / 2 < pre(temp_1), time / 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_2), time / 2 >= pre(temp_2) + 1} then
-  temp_2 = floor(time / 2);
- end when;
- when {time / 2 < pre(temp_3), time / 2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time / 2);
- end when;
+ temp_1 = if time / 2 < pre(temp_1) or time / 2 >= pre(temp_1) + 1 or initial() then floor(time / 2) else pre(temp_1);
+ temp_2 = if time / 2 < pre(temp_2) or time / 2 >= pre(temp_2) + 1 or initial() then floor(time / 2) else pre(temp_2);
+ temp_3 = if time / 2 < pre(temp_3) or time / 2 >= pre(temp_3) + 1 or initial() then floor(time / 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Mod1;
+			
 ")})));
 end Mod1;
 
@@ -8776,23 +9521,18 @@ fclass FunctionTests.FunctionLike.EventGen.Rem1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = div(time, 2);
- temp_2 = div(time, 2);
- temp_3 = div(time, 2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = time - temp_3 * 2;
  y[1] = time - temp_2 * 2;
  y[2] = time - temp_1 * 2;
- when {div(time, 2) < pre(temp_1), div(time, 2) >= pre(temp_1) + 1} then
-  temp_1 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_2), div(time, 2) >= pre(temp_2) + 1} then
-  temp_2 = div(time, 2);
- end when;
- when {div(time, 2) < pre(temp_3), div(time, 2) >= pre(temp_3) + 1} then
-  temp_3 = div(time, 2);
- end when;
+ temp_1 = if div(time, 2) < pre(temp_1) or div(time, 2) >= pre(temp_1) + 1 or initial() then div(time, 2) else pre(temp_1);
+ temp_2 = if div(time, 2) < pre(temp_2) or div(time, 2) >= pre(temp_2) + 1 or initial() then div(time, 2) else pre(temp_2);
+ temp_3 = if div(time, 2) < pre(temp_3) or div(time, 2) >= pre(temp_3) + 1 or initial() then div(time, 2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Rem1;
+			
 ")})));
 end Rem1;
 
@@ -8837,23 +9577,18 @@ fclass FunctionTests.FunctionLike.EventGen.Ceil1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = ceil(time * 2);
- temp_2 = ceil(time);
- temp_3 = ceil(time * 0.3 + 4.2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = 4 + temp_3 * 4;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 <= pre(temp_1) - 1, time * 2 > pre(temp_1)} then
-  temp_1 = ceil(time * 2);
- end when;
- when {time <= pre(temp_2) - 1, time > pre(temp_2)} then
-  temp_2 = ceil(time);
- end when;
- when {time * 0.3 + 4.2 <= pre(temp_3) - 1, time * 0.3 + 4.2 > pre(temp_3)} then
-  temp_3 = ceil(time * 0.3 + 4.2);
- end when;
+ temp_1 = if time * 2 <= pre(temp_1) - 1 or time * 2 > pre(temp_1) or initial() then ceil(time * 2) else pre(temp_1);
+ temp_2 = if time <= pre(temp_2) - 1 or time > pre(temp_2) or initial() then ceil(time) else pre(temp_2);
+ temp_3 = if time * 0.3 + 4.2 <= pre(temp_3) - 1 or time * 0.3 + 4.2 > pre(temp_3) or initial() then ceil(time * 0.3 + 4.2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Ceil1;
+			
 ")})));
 end Ceil1;
 
@@ -8892,23 +9627,18 @@ fclass FunctionTests.FunctionLike.EventGen.Floor1
  discrete Real temp_2;
  discrete Real temp_3;
 initial equation 
- temp_1 = floor(time * 2);
- temp_2 = floor(time);
- temp_3 = floor(time * 0.3 + 4.2);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0.0;
+ pre(temp_3) = 0.0;
 equation
  x = 4 + temp_3 * 4;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = floor(time);
- end when;
- when {time * 0.3 + 4.2 < pre(temp_3), time * 0.3 + 4.2 >= pre(temp_3) + 1} then
-  temp_3 = floor(time * 0.3 + 4.2);
- end when;
+ temp_1 = if time * 2 < pre(temp_1) or time * 2 >= pre(temp_1) + 1 or initial() then floor(time * 2) else pre(temp_1);
+ temp_2 = if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then floor(time) else pre(temp_2);
+ temp_3 = if time * 0.3 + 4.2 < pre(temp_3) or time * 0.3 + 4.2 >= pre(temp_3) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Floor1;
+			
 ")})));
 end Floor1;
 
@@ -8947,23 +9677,18 @@ fclass FunctionTests.FunctionLike.EventGen.Integer1
  discrete Integer temp_2;
  discrete Integer temp_3;
 initial equation 
- temp_1 = integer(time * 2);
- temp_2 = integer(time);
- temp_3 = integer((0.9 + time / 10) * 3.14);
+ pre(temp_1) = 0;
+ pre(temp_2) = 0;
+ pre(temp_3) = 0;
 equation
  x = temp_3;
  y[1] = temp_2;
  y[2] = temp_1;
- when {time * 2 < pre(temp_1), time * 2 >= pre(temp_1) + 1} then
-  temp_1 = integer(time * 2);
- end when;
- when {time < pre(temp_2), time >= pre(temp_2) + 1} then
-  temp_2 = integer(time);
- end when;
- when {(0.9 + time / 10) * 3.14 < pre(temp_3), (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1} then
-  temp_3 = integer((0.9 + time / 10) * 3.14);
- end when;
+ temp_1 = if time * 2 < pre(temp_1) or time * 2 >= pre(temp_1) + 1 or initial() then integer(time * 2) else pre(temp_1);
+ temp_2 = if time < pre(temp_2) or time >= pre(temp_2) + 1 or initial() then integer(time) else pre(temp_2);
+ temp_3 = if (0.9 + time / 10) * 3.14 < pre(temp_3) or (0.9 + time / 10) * 3.14 >= pre(temp_3) + 1 or initial() then integer((0.9 + time / 10) * 3.14) else pre(temp_3);
 end FunctionTests.FunctionLike.EventGen.Integer1;
+			
 ")})));
 end Integer1;
 
@@ -9271,8 +9996,8 @@ end Math;
 package Special
 
 model Homotopy1
-  Real x = homotopy(sin(time*10),2);
-  Real y[2] = homotopy({sin(time*10),time},{2,2});
+  Real x = homotopy(sin(time*10) .+ 1, 1);
+  Real y[2] = homotopy({sin(time*10),time} .+ 1, {1,1});
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9280,19 +10005,19 @@ model Homotopy1
 			description="Basic test of the homotopy() operator.",
 			flatModel="
 fclass FunctionTests.FunctionLike.Special.Homotopy1
-  Real x;
-  Real y[1];
-  Real y[2];
+ Real x;
+ Real y[1];
+ Real y[2];
 equation
-  x = homotopy(sin(time*10),2);
-  y[1] = homotopy(sin(time*10),2);
-  y[2] = homotopy(time,2);
+ x = sin(time * 10) .+ 1;
+ y[1] = sin(time * 10) .+ 1;
+ y[2] = time .+ 1;
 end FunctionTests.FunctionLike.Special.Homotopy1;
 ")})));
 end Homotopy1;
 
 model Homotopy2
-  Real x = homotopy(1,2);
+  Real x = homotopy(1,time);
 
   annotation(__JModelica(UnitTesting(tests={
 		EvalTestCase(
@@ -9310,6 +10035,15 @@ end Homotopy2;
 model SemiLinear1
   Real x = semiLinear(sin(time*10),2,-10);
   Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});
+  parameter Real a;
+  parameter Real p = semiLinear(a,1,2);
+  discrete Real k;
+initial equation
+  k = semiLinear(time,1,2);
+equation
+	when time > 1 then
+		k = semiLinear(time,1,2);
+	end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9320,7 +10054,17 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  Real x;
  Real y[1];
  Real y[2];
+ parameter Real a;
+ parameter Real p;
+ discrete Real k;
+initial equation 
+ k = if time >= 0.0 then time else time * 2;
+parameter equation
+ p = if a >= 0.0 then a else a * 2;
 equation
+ when time > 1 then
+  k = if time >= 0.0 then time else time * 2;
+ end when;
  x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[2] = if time >= 0.0 then time * 2 else time * 3;
@@ -9348,9 +10092,20 @@ model SemiLinear3
   Real x = 0;
   Real y = 0;
   Real sa,sb;
+  parameter Real p1(fixed=false);
+  parameter Real p2 = 2;
+  discrete Real r1,r2;
+initial equation
+	y = semiLinear(x,r1,r2);
+	y = semiLinear(x,p1,p2);
 equation
   sa = time;
   y = semiLinear(x,sa,sb);
+  
+  when time > 1 then
+	  r2 = 2;
+	  r1 = 2;
+  end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -9362,9 +10117,23 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real y = 0;
  Real sa;
  Real sb;
+ parameter Real p1(fixed = false);
+ parameter Real p2 = 2 /* 2 */;
+ discrete Real r1;
+ discrete Real r2;
+initial equation 
+ r1 = r2;
+ p1 = p2;
+ pre(r2) = 0.0;
 equation
  sa = time;
  sa = sb;
+ when time > 1 then
+  r2 = 2;
+ end when;
+ when time > 1 then
+  r1 = 2;
+ end when;
 end FunctionTests.FunctionLike.Special.SemiLinear3;
 ")})));
 end SemiLinear3;
@@ -9466,6 +10235,33 @@ equation
 end FunctionTests.FunctionLike.EventRel.Smooth;
 ")})));
 end Smooth;
+
+model Smooth2
+    Real a,b,c, d;
+equation
+    b = time;
+    c = b * 2;
+    d = c + b;
+    a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
+    
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_EventRel_Smooth2",
+			description="",
+			flatModel="
+fclass FunctionTests.FunctionLike.EventRel.Smooth2
+ Real a;
+ Real b;
+ Real c;
+ Real d;
+equation
+ b = time;
+ c = b * 2;
+ d = c + b;
+ a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
+end FunctionTests.FunctionLike.EventRel.Smooth2;
+")})));
+end Smooth2;
 
 model Pre1
 	parameter Integer x = 1;

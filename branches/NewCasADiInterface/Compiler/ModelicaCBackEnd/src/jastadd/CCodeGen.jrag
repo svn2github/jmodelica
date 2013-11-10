@@ -23,7 +23,7 @@ import org.jmodelica.util.Enumerator;
 
 aspect CCodeGen {
 	
-	class CPrettyPrinter extends Printer {
+	public class CPrettyPrinter extends Printer {
 		
 		public CPrettyPrinter() {
 			super("    ");
@@ -114,12 +114,12 @@ aspect CCodeGen {
 		if (myFV().isReal() && !inFunction() && 
 				root().options.getBooleanOption("enable_variable_scaling")) {
 			str.print("(");
-			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
+			str.print(myFV().name_C());
 			str.print("*sf(");
-			str.print(((FIdUseExp)getFExp()).myFV().valueReference());
+			str.print(myFV().valueReference());
 			str.print("))");
 		} else {
-			str.print("pre" + ((FIdUseExp)getFExp()).myFV().name_C());
+			str.print(myFV().name_C());
 		}
 	}
 	
@@ -169,9 +169,9 @@ aspect CCodeGen {
 	inh boolean FIdUse.isAssignUse();
 	eq InstNode.getChild().isAssignUse()          = false;
 	eq FClass.getChild().isAssignUse()            = false;
-	eq FIdUseExp.getChild().isAssignUse()         = false;
 	eq FFunctionCallLeft.getChild().isAssignUse() = true;
-	eq FAssignStmt.getChild().isAssignUse()       = true;
+	eq FAssignStmt.getLeft().isAssignUse()        = true;
+	eq FAssignStmt.getRight().isAssignUse()       = false;
 	
 	syn String FIdUse.name_C() = toString_C(printer_C);
 	
@@ -848,6 +848,9 @@ aspect CCodeGen {
 		if (!getCall().isIgnored()) {
 			genTempVars_C(p, str, indent);
 			p.print(getCall(), str, indent);
+			for (FFunctionCallLeft l : getLefts()) {
+				l.genWriteBackAssignment_C(str, indent, null);
+			}
 		}
 	}
 	
@@ -874,14 +877,25 @@ aspect CCodeGen {
 		str.print(indent + "return;\n");
 	}
 	
+	public void FBreakStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print(indent + "break;\n");
+	}
+	
 	public void FIfWhenStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		for (FIfWhenClause clause : getFIfWhenClauses())
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
 			clause.getTest().genTempVars_C(p, str, indent);
+			clause.genWhenGuards_C(p, str, indent);
+		}
 		str.print(indent);
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "} else ");
 		prettyPrintElse_C(p, str, indent);
 		str.print(indent);
 		str.print("}\n");
+	}
+	
+	public void FIfWhenClause.genWhenGuards_C(Printer p, PrintStream str, String indent) {}
+	public void FWhenClause.genWhenGuards_C(Printer p, PrintStream str, String indent) {
+		FExp.genWhenGuards_C(getTest().guards(), indent, str);
 	}
 	
 	protected void FIfWhenStmt.prettyPrintElse_C(Printer p, PrintStream str, String indent) {}
@@ -898,6 +912,11 @@ aspect CCodeGen {
 		str.print("if (");
 		p.print(getTest(), str, indent);
 		str.print(") {\n");
+		p.print(getFStatements(), str, p.indent(indent));
+	}
+	
+	public void FWhenClause.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		FExp.genWhenClause_C(getTest().guards(), indent, str);
 		p.print(getFStatements(), str, p.indent(indent));
 	}
 	
@@ -1073,8 +1092,6 @@ aspect CCodeGen {
 		str.print("\""+prettyPrint("")+"\")");
 	}
 	
-	// TODO: support format args
-    
     public void FStringLitExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
         str.print('"');
         str.print(string_C());
@@ -1087,7 +1104,7 @@ aspect CCodeGen {
 	
 	public void FStringAddExp.genTempVars_C(Printer p, PrintStream str, String indent) {
 		super.genTempVars_C(p, str, indent);
-		if (isTopStringAdd()) {
+		if (isTopStringOp()) {
 			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
 			genStringParts_C(p, str, indent);
 			str.print(");\n");
@@ -1096,28 +1113,45 @@ aspect CCodeGen {
 	
 	public void FStringAddExp.genVarDecls_C(Printer p, PrintStream str, String indent) {
 		super.genVarDecls_C(p, str, indent);
-		if (isTopStringAdd())
+		if (isTopStringOp())
+			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
+	}
+
+	public void FStringExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		str.print(tempName_C());
+	}
+	
+	public void FStringExp.genTempVars_C(Printer p, PrintStream str, String indent) {
+		super.genTempVars_C(p, str, indent);
+		if (isTopStringOp()) {
+			str.format("%ssnprintf(%s, %d, \"%s\"", indent, tempName_C(), maxStringLength_C() + 1, formatString_C());
+			genStringParts_C(p, str, indent);
+			str.print(");\n");
+		}
+	}
+	
+	public void FStringExp.genVarDecls_C(Printer p, PrintStream str, String indent) {
+		super.genVarDecls_C(p, str, indent);
+		if (isTopStringOp())
 			str.format("%schar %s[%d];\n", indent, tempName_C(), maxStringLength_C() + 1);
 	}
 
 	public void FExp.genStringParts_C(Printer p, PrintStream str, String indent) {
-		if (!isConstantExp()) {
-			str.print(", ");
-			FType t = type();
-			if (t.isEnum()) {
-				str.print(t.enumNames_C());
-				str.print("[(int) ");
-				p.print(this, str, indent);
-				str.print("]");
-			} else if (t.isBoolean()) {
-				str.print("COND_EXP_EQ(");
-				p.print(this, str, indent);
-				str.print(", JMI_TRUE, \"true\", \"false\")");
-			} else {
-				if (t.isInteger())
-					str.print("(int) ");
-				p.print(this, str, indent);
-			}
+		str.print(", ");
+		FType t = type();
+		if (t.isEnum()) {
+			str.print(t.enumNames_C());
+			str.print("[(int) ");
+			p.print(this, str, indent);
+			str.print("]");
+		} else if (t.isBoolean()) {
+			str.print("COND_EXP_EQ(");
+			p.print(this, str, indent);
+			str.print(", JMI_TRUE, \"true\", \"false\")");
+		} else {
+			if (t.isInteger())
+				str.print("(int) ");
+			p.print(this, str, indent);
 		}
 	}
 	
@@ -1130,13 +1164,15 @@ aspect CCodeGen {
 		getRight().genStringParts_C(p, str, indent);
 	}
 	
+	public void FStringLitExp.genStringParts_C(Printer p, PrintStream str, String indent) {}
 	/**
-	 * Check if this string concatenation is the top node in an expression consisting of 
+	 * Check if this string concatenation or String operator is the top node in an expression consisting of 
 	 * one or more string concatenations, i.e. returns true if parent is not an FStringAddExp.
 	 */
-	inh boolean FStringAddExp.isTopStringAdd();
-	eq FStringAddExp.getChild().isTopStringAdd() = false;
-	eq BaseNode.getChild().isTopStringAdd()      = true;
+	inh boolean FStringAddExp.isTopStringOp();
+	inh boolean FStringExp.isTopStringOp();
+	eq FStringAddExp.getChild().isTopStringOp() = false;
+	eq BaseNode.getChild().isTopStringOp()      = true;
 	
 	/**
 	 * The value of this string, encoded as UTF-8.
@@ -1167,54 +1203,52 @@ aspect CCodeGen {
 	/**
 	 * The maximum length string the representation of the value of this expression can have in C.
 	 */
-	syn int FExp.maxStringLength_C()               = 
-		isConstantExp() ? ceval().stringValue().length() : type().maxStringLength_C();
-	syn lazy int FStringAddExp.maxStringLength_C() = 
-		Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), FStringType.MAX_STRING_LENGTH_C);
-	eq FStringExp.maxStringLength_C()              = 
-		isConstantExp() ? ceval().stringValue().length() : getValue().maxStringLength_C();
+	syn int FExp.maxStringLength_C() { 
+		if (type().isString())
+			return MAX_STRING_LENGTH_C;
+		else
+			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+	}
+	syn lazy int FStringAddExp.maxStringLength_C() = Math.min(getLeft().maxStringLength_C() + getRight().maxStringLength_C(), MAX_STRING_LENGTH_C);
 	eq FStringLitExp.maxStringLength_C()           = stringUtf8().length;
+	eq FStringExp.maxStringLength_C()              = Math.max(getValue().type().maxStringLength_C(significantDigits()), minimumLength());
 	
 	/**
 	 * The maximum length string representations of values of this type can have in C.
 	 */
-	syn int FType.maxStringLength_C()   = 0;
-	eq FIntegerType.maxStringLength_C() = 10;
-	eq FRealType.maxStringLength_C()    = 13;
-	eq FBooleanType.maxStringLength_C() = 5;
-	eq FStringType.maxStringLength_C()  = MAX_STRING_LENGTH_C;
-	eq FEnumType.maxStringLength_C() {
+	syn int FType.maxStringLength_C(int precision) {
+		throw new UnsupportedOperationException();
+	}
+	eq FRealType.maxStringLength_C(int precision)    = 7 + precision;
+	eq FIntegerType.maxStringLength_C(int precision) = 10;
+	eq FBooleanType.maxStringLength_C(int precision) = 5;
+	eq FEnumType.maxStringLength_C(int precision) {
 		int res = 0;
 		for (FEnumLiteralType lit : getFEnumLiteralTypes())
 			res = Math.max(res, lit.getName().length());
 		return res;
 	}
 	
-	public static final int FStringType.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
+	public static final int FExp.MAX_STRING_LENGTH_C = 16 * 1024 - 1;
 	
     /**
      * The format string to use for this expression with the printf family of functions in C.
      */
-	syn String FExp.formatString_C()               = isConstantExp() ? ceval().stringValue() : type().formatString_C();
+	syn String FExp.formatString_C() {
+		if (type().isString())
+			return "%s";
+		else
+			throw new IllegalArgumentException("Trying to use expression '" + toString() + "' in string type expression!");
+	}
 	syn lazy String FStringAddExp.formatString_C() = getLeft().formatString_C() + getRight().formatString_C();
-	eq FStringExp.formatString_C()                 = isConstantExp() ? ceval().stringValue() : getValue().formatString_C();
+	eq FStringExp.formatString_C()                 = formatString();
 	eq FStringLitExp.formatString_C()              = string_C();
-
-    /**
-     * The format string to use for this type with the printf family of functions in C.
-     */
-	syn String FType.formatString_C() = "%s";
-	eq FIntegerType.formatString_C()  = "%d";
-	eq FRealType.formatString_C()     = "%.6g";
 
 	
 	public void FEnumDecl.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		str.format("%schar* %s[] = { ", indent, name_C());
-		boolean first = true;
-		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals()) {
-			str.format(first ? "\"%s\"" : ", \"%s\"", el.name());
-			first = false;
-		}
+		str.format("%schar* %s[] = { \"\"", indent, name_C());
+		for (FEnumLiteral el : ((FEnumLiteralList) getFEnumSpecification()).getFEnumLiterals())
+			str.format(", \"%s\"", el.name());
 		str.print(" };\n");
 	}
 
@@ -1300,6 +1334,10 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+	public void FSemiLinearExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException("Untransformed semiLinear() expression");
+	}
+	
 	syn String FBoolBinExp.macro_C();
 	eq FEqExp.macro_C()  = "COND_EXP_EQ";
 	eq FNeqExp.macro_C() = "COND_EXP_EQ";
@@ -1314,7 +1352,15 @@ aspect CCodeGen {
 	eq FNeqExp.relIsInverted_C() = true;
 	
 	public void FRelExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (!generatesEvent()) {
+		if (cevalType().isString()) {
+			str.print("strcmp(");
+			p.print(getLeft(), str, indent);
+			str.print(", ");
+			p.print(getRight(), str, indent);
+			str.print(")");
+			str.print(op_C());
+			str.print("0");
+		} else if (!generatesEvent()) {
 			str.print(macro_C()+"(");
 			p.print(getLeft(), str, indent);
 			str.print(", ");
@@ -1330,6 +1376,9 @@ aspect CCodeGen {
 			}
 		}
 	}
+	
+	syn String FRelExp.op_C() = op();
+	eq FNeqExp.op_C() = " != ";
 	
 	public void FLogBinExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print(macro_C());
@@ -1400,7 +1449,7 @@ aspect CCodeGen {
 		getFExternalLanguage().genPostFuncCall(p, str, indent, this);
 	}
 			
-	class MatrixOp {
+	public class MatrixOp {
 		
 		private String function;
 		
@@ -1649,14 +1698,14 @@ aspect CCodeGen {
 			getFExp().genTempOutput_C(p, str, indent);
 	}
 	
-	syn lazy String FExp.tempName_C() {
-		return "tmp_" + nextTempNbr_C();
-	}
+	syn lazy String FExp.tempName_C() = "tmp_" + nextTempNbr_C();
+	syn lazy String FAlgorithm.tempName_C() = "tmp_" + nextTempNbr_C();
 	
 	private int FClass.nextTempNbr_C        = 1;
 	private int FFunctionDecl.nextTempNbr_C = 1;
 	
 	inh int FExp.nextTempNbr_C();
+	inh int FAlgorithm.nextTempNbr_C();
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
 	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
@@ -1890,12 +1939,31 @@ aspect CCodeGen {
             aeb.genVarDecls_C(str, indent, visited);
     }
     
+    @Override
     protected void WhenEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
         if (visited == null)
             visited = new HashSet<ASTNode>();
         for (Iterable<? extends AbstractEquationBlock> aebl : blocks)
             for (AbstractEquationBlock aeb : aebl)
                 aeb.genVarDecls_C(str, indent, visited);
+    }
+    
+    @Override
+    protected void LinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        for (FExp[] col : jacobian)
+            for (FExp exp : col)
+                if (exp != null)
+                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        super.genVarDecls_C(str, indent, visited);
+    }
+    
+    @Override
+    protected void MixedLinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        for (FExp[] col : jacobian)
+            for (FExp exp : col)
+                if (exp != null)
+                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        super.genVarDecls_C(str, indent, visited);
     }
     
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
@@ -1995,16 +2063,7 @@ aspect CCodeGen {
 	
 	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
 			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		FAlgorithm alg = equation();
-		boolean firstVisit = visited == null || visited.add(alg);
-		if (firstVisit) {
-			alg.genTempVars_C(ASTNode.printer_C, str, indent);
-			alg.prettyPrint_C(str, indent);
-			for (FVariable fv : activeVariables()) {
-				str.format("%s(*res)[%d] = %s - %s;\n", indent, enumerator.next(), fv.name_C(), solverArrayMap.get(fv));
-				str.format("%s%s = %s;\n", indent, fv.name_C(), solverArrayMap.get(fv));
-			}
-		}
+		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {
@@ -2021,6 +2080,10 @@ aspect CCodeGen {
 	}
 	
 	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
+	}
+	
+	public void SolvedAlgorithmBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
 		equation().genAssignment_C(indent, str, visited, new HashSet<FVariable>(activeVars));
 	}
 	
@@ -2048,31 +2111,47 @@ aspect CCodeGen {
 		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
 	}
 	
+	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
+		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
+	}
+	
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
 
 	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		String innerIndent = ASTNode.printer_C.indent(indent);
+		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
+		int rows = equations().size();
+		int cols = activeVariables().size();
+		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
 		// Output Jacobian
 		int var_counter = 0;
-		for (int i=0;i<activeVariables().size();i++) {
-			for (int j=0;j<activeVariables().size();j++) {
-				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
-				var_counter++;
+		for (int i=0;i<rows;i++) {
+			for (int j=0;j<cols;j++) {
+			    if (jacobian[j][i] != null) {
+			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+			    }
+			    var_counter++;
 			}
 		}
 						
 	}
 
 	public void MixedLinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		
-		str.print(indent + "} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n");
+		String innerIndent = ASTNode.printer_C.indent(indent);
+		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
 		// Output Jacobian
+		int rows = continuousEquations().size();
+		int cols = activeContinuousVariables().size();
+		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
 		int var_counter = 0;
-		for (int i=0;i<activeContinuousVariables().size();i++) {
-			for (int j=0;j<activeContinuousVariables().size();j++) {
-				str.print(indent + indent + "residual[" + var_counter + "] = " + jacobian[j][i].prettyPrint_C("") + ";\n");
-				var_counter++;
+		for (int i=0;i<rows;i++) {
+			for (int j=0;j<cols;j++) {
+			    if (jacobian[j][i] != null) {
+			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+			    }
+			    var_counter++;
 			}
 		}
 						
@@ -2144,26 +2223,48 @@ aspect CCodeGen {
 	}
 
 	public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-	    equation().genTempVars_C(ASTNode.printer_C, str, indent);
+		equation().genTempVars_C(ASTNode.printer_C, str, indent);
 		equation().prettyPrint_C(ASTNode.printer_C, str, indent);
 	}
 
 	public void WhenEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-		 // if (guard and !pre(guard)) {
-		 // 	_x = _pre_x + 1;
-		 // }
-		
+		// if (guard and !pre(guard)) {
+		// 	_x = _pre_x + 1;
+		// }
 		// TODO: Add support for else when clauses
-		for (FExp g : equation().guards()) {		
+		FExp.genWhenGuards_C(equation().guards(), indent, str);
+		FExp.genWhenClause_C(equation().guards(), indent, str);
+		
+		for (SimpleEquationBlock b : blocks.iterator().next()) {
+			b.genBlock_C(inInitial, indent + "  ", str);
+		}
+		str.print("} else {\n");
+		for (FVariable fv : activeVariables()) {
+			str.print(indent);
+			str.print(fv.name_C());
+			str.print(" = ");
+			str.print("pre");
+			str.print(fv.name_C());
+			str.print(";\n");
+			str.print(indent);
+		}
+		str.print("}\n");
+	}
+	
+	public static void FExp.genWhenGuards_C(Collection<FExp> guards, String indent, PrintStream str) {
+		for (FExp g : guards) {		
 			g.genTempVars_C(ASTNode.printer_C, str, indent);
 			str.format("%s_guards(%d) = ", indent, g.guardExpInEquationsIndex());
 			g.prettyPrint_C(str,"");
 			str.print(";\n");
 		}
-		int j = equation().guards().size();
+	}
+
+	public static void FExp.genWhenClause_C(Collection<FExp> guards, String indent, PrintStream str) {
+		int j = guards.size();
 		str.print("  if(");
-		for (FExp g : equation().guards()) {
-			if (j>1) {
+		for (FExp g : guards) {
+			if (j > 1) {
 				str.print("LOG_EXP_OR(");
 			}		
 			str.print("COND_EXP_EQ(LOG_EXP_AND(_guards(");
@@ -2176,24 +2277,10 @@ aspect CCodeGen {
 			}		
 			j--;
 		}		
-		for (int k = 0;k<equation().guards().size()-1;k++) {
+		for (int k = 0; k < guards.size() - 1; k++) {
 			str.print(")");
 		}
 		str.print(") {\n");
-		for (SimpleEquationBlock b : blocks.iterator().next()) {
-			b.genBlock_C(inInitial,indent + " ",str);
-		}
-		str.print("  } else {\n");
-		for (FVariable fv : activeVariables()) {
-			str.print(indent);
-			str.print(fv.name_C());
-			str.print(" = ");
-			str.print("pre");
-			str.print(fv.name_C());
-			str.print(";\n");
-			str.print(indent);
-		}
-		str.print("}\n");
 	}
 
 	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
@@ -2230,6 +2317,41 @@ aspect CCodeGen {
 				l.genWriteBack_C(str, indent, enumerator, forIndices, indexCounter);
 		}
 	}
+		
+	public void FAlgorithm.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+		if (!visited.contains(this)) {
+			visited.add(this);
+			genTempVars_C(printer_C, str, indent);
+			genResidualPrint_C(str, indent);
+		}
+		Enumerator indexCounter = new Enumerator();
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			use.genWriteBack_C(str, indent, use.tempName_C(), enumerator, forIndices, indexCounter);
+	}
+	
+	public void FAlgorithm.genResidualPrint_C(PrintStream str, String indent) {
+		String switchTemp = this.tempName_C();
+		boolean first = true;
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			if (first) {
+				first = false;
+				use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
+			}
+			use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
+		}
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
+		prettyPrint_C(str, indent);
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
+			FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
+			FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
+		}
+	}
+	
+	public static void FStatement.printAssignStmt_C(PrintStream str, String indent, String dst, String src) {
+		str.print(indent + dst + " = " + src + ";\n");
+	}
 
 	public void FAbstractEquation.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {}
 	
@@ -2247,6 +2369,11 @@ aspect CCodeGen {
 			for (FFunctionCallLeft l : getLefts())
 				l.genWriteNominal_C(str, indent, enumerator, forVariables);
 		}
+	}
+	
+	public void FAlgorithm.genNominal_C(Enumerator enumerator, String indent, PrintStream str, Set<FVariable> forVariables) {
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+			use.genCellWriteNominal_C(str, indent, enumerator, forVariables);
 	}
 	
 	public void FFunctionCallLeft.genWriteNominal_C(PrintStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
@@ -2332,6 +2459,18 @@ aspect CCodeGen {
 			}
 		}
 	}
+	
+	public void FAlgorithm.genAssignment_C(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+		if (!visited.contains(this)) {
+			visited.add(this);
+			genTempVars_C(printer_C, str, indent);
+			genResidualPrint_C(str, indent);
+		}
+
+		for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+			use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
+		}
+	}
 
 	private int FFunctionCallLeft.equationIndex = -1;
 	public void FFunctionCallLeft.setBaseIndex(int i) {
@@ -2397,6 +2536,9 @@ aspect CCodeGen {
 	public void FIdUseExp.genWriteBack_C(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
 		if (forIndices == null || forIndices.contains(index)) {
+			if (!myFV().isReal()) 
+				throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable");
+			
 			// This variable is in the set of variables to generate code for.
 			str.print(indent);
 			str.print("(*res)[");
@@ -2410,7 +2552,7 @@ aspect CCodeGen {
 	}
 	
 	public void FFunctionCallLeft.genWriteBackAssignment_C(PrintStream str, String indent, Set<FVariable> forVariables) {
-		if (hasFExp()) 
+		if (hasFExp() && !getFExp().keepAsArray()) 
 			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), forVariables);
 	}
 	
@@ -2469,10 +2611,15 @@ aspect CCodeGen {
 
 	public void FRelExp.genResidual_C(Enumerator enumerator, String indent, PrintStream str) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		getLeft().prettyPrint_C(str,"");
-		str.print(" - (");
-		getRight().prettyPrint_C(str,"");
-		str.print(");\n");
+		if (hasIndicator()) {
+			getIndicator().prettyPrint_C(str, "");
+		} else {
+			getLeft().prettyPrint_C(str, "");
+			str.print(" - (");
+			getRight().prettyPrint_C(str, "");
+			str.print(")");
+		}
+		str.print(";\n");
 	}	
 
 	public void FRealVariable.genStartAttributeResidual_C(Enumerator enumerator, String indent, PrintStream str) {

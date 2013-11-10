@@ -23,8 +23,6 @@ aspect InstLookupClasses {
     syn InstClassDecl InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
     eq InstClassDecl.lookupInstClassRedirect(String name)                   = actualInstClass().genericLookupInstClass(name);
     eq InstEnumClassDecl.lookupInstClassRedirect(String name)               = lookupInstBuiltInClass(name);
-    eq InstReplacingComposite.lookupInstClassRedirect(String name)          = lookupInstClass(name);
-    eq InstReplacingRecord.lookupInstClassRedirect(String name)             = lookupInstClass(name);
     eq InstReplacingPrimitive.lookupInstClassRedirect(String name)          = lookupInstClass(name);
     eq InstExtends.lookupInstClassRedirect(String name)                     = genericLookupInstClassInExtends(name);
     syn InstClassDecl InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);
@@ -53,6 +51,7 @@ aspect InstLookupClasses {
 	eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
 	eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClass(name);
 	eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
+    eq Root.getChild().lookupInstClassFromMod(String name)                    = null;
    
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
     	getClassName().name().equals(name) ? lookupRedeclareExtendsInstClass(name) : lookupInstClass(name);
@@ -82,8 +81,10 @@ aspect InstLookupClasses {
 	eq InstReplacingComposite.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	eq InstReplacingPrimitive.getClassName().lookupInstClass(String name) = getInstComponentRedeclare().lookupInstClass(name);
 	
-	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = getLookupNode().lookupInstClassRedirect(name);
-	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = getLookupNode().lookupInstClassRedirect(name);
+	eq InstCreateComponentDecl.getChild().lookupInstClass(String name)     = 
+	    (getLookupNode() == null) ? lookupInstClass(name) : getLookupNode().lookupInstClassRedirect(name);
+	eq InstCreateForIndexPrimitive.getChild().lookupInstClass(String name) = 
+	    (getLookupNode() == null) ? lookupInstClass(name) : getLookupNode().lookupInstClassRedirect(name);
 	
 	eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
@@ -123,6 +124,7 @@ aspect InstLookupClasses {
 	 */
 	inh InstClassDecl InstNode.lookupRedeclareExtendsInstClass(String name);
 	eq InstNode.getChild().lookupRedeclareExtendsInstClass(String name)                    = null;
+    eq Root.getChild().lookupRedeclareExtendsInstClass(String name)                        = null;
 	eq InstExtendClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)         = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingFullClassDecl.getChild().lookupRedeclareExtendsInstClass(String name)  = lookupRedeclareExtendsInstClass(name);
 	eq InstReplacingShortClassDecl.getChild().lookupRedeclareExtendsInstClass(String name) = lookupRedeclareExtendsInstClass(name);
@@ -148,6 +150,7 @@ aspect InstLookupClasses {
 	inh InstClassDecl InstExtends.lookupTopRedeclareExtendsInstClass(String name);
 	eq InstExtends.getChild().lookupTopRedeclareExtendsInstClass(String name)    = lookupTopRedeclareExtendsInstClass(name);
 	eq InstNode.getInstExtends().lookupTopRedeclareExtendsInstClass(String name) = lookupLastRedeclareExtendsInstClass(name);
+    eq Root.getChild().lookupTopRedeclareExtendsInstClass(String name)           = null;
 	
 	/**
 	 * Resolve classes that are just references to other classes.
@@ -406,7 +409,7 @@ aspect InstLookupClasses {
 	 * \brief Check if any constraining class/component has the given class.
 	 */
 	syn boolean InstNode.constrainMemberInstClass(String name) {
-		if (!hasInstConstraining())
+		if (!hasInstConstraining() || !isReplaceable())
 			return true;
 		return getInstConstraining().getInstNode().memberInstClass(name) != null;
 	}

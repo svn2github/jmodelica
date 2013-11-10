@@ -8,8 +8,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.jmodelica.util.ModelicaException;
 import org.jmodelica.util.Problem;
+import org.jmodelica.util.exceptions.ModelicaException;
 
 public class StreamingLogger extends ModelicaLogger {
 	
@@ -115,6 +115,7 @@ public class StreamingLogger extends ModelicaLogger {
 			sb.append("Unknown program error, " + throwable.getClass().getName());
 			if (throwable.getMessage() != null)
 				sb.append(": " + throwable.getMessage());
+			write(level, sb.toString());
 		}
 		if (getLevel().shouldLog(Level.DEBUG)) {
 			StringWriter str = new StringWriter();

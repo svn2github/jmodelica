@@ -492,7 +492,7 @@ equation
 			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -526,7 +526,7 @@ equation
 			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -561,7 +561,7 @@ equation
 			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -2198,7 +2198,7 @@ void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_
     jmi_ad_var_t i1_1ie;
     JMI_ARRAY_DYNAMIC_INIT_1(t_var_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
     JMI_ARRAY_DYNAMIC_INIT_1(t_der_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
-    v_0 = jmi_array_size(t_var_a, 0);
+    v_0 = jmi_array_size(x_var_a, 0);
     i1_0ie = v_0 + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(t_var_a, i1_0i) = jmi_array_val_1(x_var_a, i1_0i) * 23;
@@ -2214,7 +2214,6 @@ void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_
     }
     y_var_v = temp_1_var_v;
     y_der_v = temp_1_der_v;
-
     if (y_var_o != NULL) *y_var_o = y_var_v;
     if (y_der_o != NULL) *y_der_o = y_der_v;
     JMI_DYNAMIC_FREE()
@@ -2607,7 +2606,7 @@ equation
 			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -2726,7 +2725,7 @@ equation
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -2827,7 +2826,7 @@ equation
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -2999,7 +2998,7 @@ equation
 			name="CADRes4",
 			description="Test cad code gen for mixed unsolved block with discrete variables",
 			generate_ode_jacobian=true,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -3068,7 +3067,7 @@ equation
 			variability_propagation=false,
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			automatic_tearing=true,
@@ -3574,7 +3573,7 @@ equation
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="$CAD_ode_derivatives$",
@@ -3686,7 +3685,7 @@ model CADOde2
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			generate_only_initial_system=true,
@@ -3927,7 +3926,8 @@ equation
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			automatic_tearing=false,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -4064,7 +4064,7 @@ equation
 			variability_propagation=false,
 			inline_functions="none",
 			generate_block_jacobian=true,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			automatic_tearing=true,
@@ -4128,7 +4128,7 @@ equation
 			description="",
 			inline_functions="none",
 			generate_block_jacobian=true,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			automatic_tearing=true,
@@ -4200,7 +4200,8 @@ equation
 			inline_functions="none",
 			generate_ode_jacobian=true,
 			eliminate_alias_variables=false,
-			fmi_version=2.0,
+			automatic_tearing=false,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			template="
@@ -4401,7 +4402,7 @@ equation
 			variability_propagation=false,
 			inline_functions="none",
 			generate_block_jacobian=true,
-			fmi_version=2.0,
+			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
 			automatic_tearing=true,

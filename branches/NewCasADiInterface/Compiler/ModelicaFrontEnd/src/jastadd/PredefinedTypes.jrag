@@ -315,6 +315,10 @@ aspect PredefinedTypes {
     		+ "end Integer;\n"
     		+ "function String"
     		+ "  input Real x;\n"      // Type not used
+    		+ "  input Integer minimumLength = 0;\n"
+    		+ "  input Boolean leftJustified = true;\n"
+    		+ "  input Integer significantDigits = 6;\n"
+    		+ "  input String format = \"\";\n"
     		+ "  output String y;\n"
     		+ "end String;\n"
     		+ "function delay end delay;\n"

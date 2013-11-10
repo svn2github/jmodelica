@@ -57,7 +57,7 @@ class Test_Compiler:
         Test that it is possible to compile a JMU from a .mo file with 
         ModelicaCompiler.
         """
-        Test_Compiler.mc.compile_JMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], '.')
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'jmu', None,  '.')
         
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.jmu',os.F_OK) == True, fname+'.jmu'+" was not created."
@@ -69,7 +69,7 @@ class Test_Compiler:
         Test that it is possible to compile a JMU from a .mop file with 
         OptimicaCompiler. 
         """     
-        Test_Compiler.oc.compile_JMU(Test_Compiler.cpath_oc, [Test_Compiler.fpath_oc], '.')
+        Test_Compiler.oc.compile_Unit(Test_Compiler.cpath_oc, [Test_Compiler.fpath_oc], 'jmu', None, '.')
         
         fname = Test_Compiler.cpath_oc.replace('.','_',1)
         assert os.access(fname+'.jmu',os.F_OK) == True, \
@@ -105,9 +105,31 @@ class Test_Compiler:
     def test_compile_FMU(self):
         """
         Test that it is possible to compile an FMU from a .mo file with 
-        ModelicaCompiler.
+        ModelicaCompiler for version 1.0 and 2.0.
         """ 
-        Test_Compiler.mc.compile_FMU(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'fmume', '.')
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '1.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        #FMI 2.0 compiler tests.
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me', '2.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'cs', '2.0', '.')
+        
+        fname = Test_Compiler.cpath_mc.replace('.','_',1)
+        assert os.access(fname+'.fmu',os.F_OK) == True, \
+               fname+'.fmu'+" was not created."
+        os.remove(fname+'.fmu')
+        
+        Test_Compiler.mc.compile_Unit(Test_Compiler.cpath_mc, [Test_Compiler.fpath_mc], 'me+cs', '2.0', '.')
         
         fname = Test_Compiler.cpath_mc.replace('.','_',1)
         assert os.access(fname+'.fmu',os.F_OK) == True, \
@@ -142,28 +164,42 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_stepbystep(self):
         """ Test that it is possible to compile step-by-step with ModelicaCompiler. """
+        target = Test_Compiler.mc.create_target_object("me", "1.0")
         sourceroot = Test_Compiler.mc.parse_model(Test_Compiler.fpath_mc)
-        icd = Test_Compiler.mc.instantiate_model(sourceroot, Test_Compiler.cpath_mc)
-        fclass = Test_Compiler.mc.flatten_model(icd)
-        Test_Compiler.mc.generate_code(fclass)
+        icd = Test_Compiler.mc.instantiate_model(sourceroot, Test_Compiler.cpath_mc, target)
+        fclass = Test_Compiler.mc.flatten_model(icd, target)
+        Test_Compiler.mc.generate_code(fclass, target)
 
     @testattr(stddist = True)
     def test_optimica_stepbystep(self):
         """ Test that it is possible to compile step-by-step with OptimicaCompiler. """
+        target = Test_Compiler.oc.create_target_object("me", "1.0")
         sourceroot = Test_Compiler.oc.parse_model(Test_Compiler.fpath_oc)
-        icd = Test_Compiler.oc.instantiate_model(sourceroot, Test_Compiler.cpath_oc)
-        fclass = Test_Compiler.oc.flatten_model(icd)
-        Test_Compiler.oc.generate_code(fclass)
+        icd = Test_Compiler.oc.instantiate_model(sourceroot, Test_Compiler.cpath_oc, target)
+        fclass = Test_Compiler.oc.flatten_model(icd, target)
+        Test_Compiler.oc.generate_code(fclass, target)
 
     @testattr(stddist = True)
     def test_compiler_error(self):
         """ Test that a CompilerError is raised if compilation errors are found in the model."""
         path = os.path.join(get_files_path(), 'Modelica','CorruptCodeGenTests.mo')
         cl = 'CorruptCodeGenTests.CorruptTest1'
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.mc.compile_JMU, cl, [path], '.')
-        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_JMU, cl, [path], '.')
+        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.mc.compile_Unit, cl, [path], 'jmu', None, '.')
+        nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, Test_Compiler.oc.compile_Unit, cl, [path], 'jmu', None, '.')
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_fmu, cl, path, separate_process=True)
         nose.tools.assert_raises(pym.compiler_exceptions.CompilerError, pym.compile_jmu, cl, path, separate_process=True)
+        
+    @testattr(stddist = True)
+    def test_compile_fmu_illegal_target_error(self):
+        """Test that an exception is raised when an incorrect target is given to compile_fmu"""
+        cl = Test_Compiler.cpath_mc 
+        path = Test_Compiler.fpath_mc
+        #Incorrect target.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="notValidTarget")
+        #Incorrect target that contains the valid target 'me'.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="men") 
+        #Incorrect version, correct target 'me'.
+        nose.tools.assert_raises(pym.compiler_exceptions.IllegalCompilerArgumentError, pym.compile_fmu, cl, path, target="me", version="notValidVersion") 
     '''
     @testattr(stddist = True)
     def test_class_not_found_error(self):
@@ -203,7 +239,7 @@ class Test_Compiler:
         """ Test that it is possible to compile two model files. """
         lib = os.path.join(get_files_path(), 'Modelica','CSTRLib.mo')
         opt = os.path.join(get_files_path(), 'Modelica','CSTR2_Opt.mo')
-        Test_Compiler.oc.compile_JMU('CSTR2_Opt', [lib,opt], '.')
+        Test_Compiler.oc.compile_Unit('CSTR2_Opt', [lib,opt], 'jmu', None, '.')
 
     @testattr(stddist = True)
     def test_setget_boolean_option(self):
@@ -295,7 +331,7 @@ class Test_Compiler:
         MODELICAPATH) works.
         """
         cpath = "Modelica.Electrical.Analog.Examples.CauerLowPassAnalog"
-        Test_Compiler.mc.compile_JMU(cpath, [], '.')        
+        Test_Compiler.mc.compile_Unit(cpath, [], 'jmu', None, '.')        
         fname = cpath.replace('.','_')
         assert os.access(fname+'.jmu',os.F_OK) == True, \
                fname+'.jmu'+" was not created."

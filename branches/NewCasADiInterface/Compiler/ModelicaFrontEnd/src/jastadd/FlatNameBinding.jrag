@@ -369,6 +369,7 @@ aspect FlatNameBinding {
 	}
 	
 	syn boolean FIdUse.isForIndex()            = myFV().isForIndex();
+	syn boolean FIdUseExp.isForIndex()         = getFIdUse().isForIndex();
 	syn boolean FIdUseInstAccess.isForIndex()  = getInstAccess().isForIndex();
 	syn boolean FInstAccessExp.isForIndex()    = getInstAccess().isForIndex();
 	syn boolean InstAccess.isForIndex()        = myInstComponentDecl().isForIndex();
@@ -397,7 +398,7 @@ aspect ParameterEquations {
 	eq FForIndex.getChild().parameterEquation()           = null;
 	eq FFunctionDecl.getChild().parameterEquation()       = null;
 	eq FRecordDecl.getChild().parameterEquation()         = null;
-    eq FClass.getDummyVariable().parameterEquation()      = null;
+    eq FClass.getChild().parameterEquation()              = null;
 	
 	syn lazy Map<FAbstractVariable,FAbstractEquation> FClass.parameterEquationsMap() {
 		Map<FAbstractVariable,FAbstractEquation> map = new HashMap<FAbstractVariable,FAbstractEquation>();
@@ -566,15 +567,8 @@ aspect FlatPreBinding {
 	inh FAbstractVariable FIdUse.lookupPreFV(FQName fqn);	
 	inh FAbstractVariable FExp.lookupPreFV(FQName fqn);	
 	inh FAbstractVariable FAbstractVariable.lookupPreFV(FQName fqn);	
-	syn FAbstractVariable FPreExp.myFV() {
-		if (getFExp() instanceof FIdUseExp) {
-		    //System.out.println("FPreExp.myFV(): " + name());
-			return getFExp().lookupPreFV(((FIdUseExp) getFExp()).getFIdUse().getFQName());
-    	} else {
-    		return unknownFVariable();
-    	}
-    }
-    
+	syn FAbstractVariable FPreExp.myFV() = lookupPreFV(getFIdUse().getFQName());
+	syn FAbstractVariable FPreExp.myNonPreFV() = lookupFV(getFIdUse().getFQName());
 	eq Root.getChild().lookupPreFV(FQName fqn)   = null;
 	eq FClass.getChild().lookupPreFV(FQName fqn) = lookupFV(fqn.preName());
 
@@ -619,7 +613,7 @@ aspect FlatFEquationBinding {
 	
 	syn lazy Map<String, FAbstractEquation> FClass.equationMap() {
 		Map<String, FAbstractEquation> equationMap = new HashMap<String, FAbstractEquation>();
-		for (FAbstractEquation fae : getFEquationBlock(0).getFAbstractEquations()) {
+		for (FAbstractEquation fae : getFAbstractEquations()) {
 			if (fae.hasName())
 				equationMap.put(fae.getName().toString(), fae);
 		}

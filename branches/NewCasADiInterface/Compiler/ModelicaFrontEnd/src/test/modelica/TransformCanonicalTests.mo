@@ -916,10 +916,11 @@ end TransformCanonicalTests.AliasTest22;
 		TransformCanonicalTestCase(
 			name="AliasTest23",
 			description="Test elimination of alias variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest23
  Real x1;
+initial equation 
+ x1 = 0.0;
 equation
  - der(x1) = 0;
 end TransformCanonicalTests.AliasTest23;
@@ -937,11 +938,12 @@ end TransformCanonicalTests.AliasTest23;
 		TransformCanonicalTestCase(
 			name="AliasTest24",
 			description="Test elimination of alias variables",
-			automatic_add_initial_equations=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest24
  Real x1;
  input Real u;
+initial equation 
+ x1 = 0.0;
 equation 
  der(x1) = u;
 
@@ -2121,6 +2123,43 @@ end TransformCanonicalTests.InitialEqTest17;
 ")})));
 end InitialEqTest17;
 
+model InitialEqTest18
+    parameter Boolean p = true;
+initial algorithm
+    assert(p, "p should not be false");
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest18",
+            description="Test equation couting when initial system contains assert",
+            flatModel="
+fclass TransformCanonicalTests.InitialEqTest18
+ parameter Boolean p = true /* true */;
+initial equation 
+ algorithm
+  assert(p, \"p should not be false\");
+;
+end TransformCanonicalTests.InitialEqTest18;
+")})));
+end InitialEqTest18;
+
+model InitialEqTest19
+    parameter Boolean p = true;
+initial equation
+    assert(p, "p should not be false");
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest19",
+            description="Test equation couting when initial system contains assert",
+            flatModel="
+fclass TransformCanonicalTests.InitialEqTest19
+ parameter Boolean p = true /* true */;
+initial equation 
+ assert(p, \"p should not be false\");
+end TransformCanonicalTests.InitialEqTest19;
+")})));
+end InitialEqTest19;
 
 model ParameterDerivativeTest
  Real x(start=1);
@@ -2152,15 +2191,15 @@ model UnbalancedTest1_Err
 			name="UnbalancedTest1_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest1_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
-   y
-   z
+     y
+     z
 ")})));
 end UnbalancedTest1_Err;
 
@@ -2177,16 +2216,17 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: Maximum number of differentiations reached
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest2_Err.mof':
-Semantic error at line 0, column 0:  The system is structurally singular. The following varible(s) could not be matched to any equation:
-   y
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     y
 
   The following equation(s) could not be matched to any variable:
-   x = 1 + 2
+    x = 1 + 2
 ")})));
 end UnbalancedTest2_Err;
 
@@ -2201,14 +2241,14 @@ equation
 			name="UnbalancedTest3_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest3_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   4.0 = 5
+    4.0 = 5
 ")})));
 end UnbalancedTest3_Err;
 
@@ -2221,16 +2261,14 @@ equation
 			name="UnbalancedTest4_Err",
 			description="Test error messages for unbalanced systems.",
 			errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: No continuous equations was given
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest4_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
-   x
+     x
 ")})));
 end UnbalancedTest4_Err;
 
@@ -2246,19 +2284,39 @@ equation
 			description="Test error messages for unbalanced systems.",
 			variability_propagation=false,
 			errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
-
-Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Index reduction failed
+  Index reduction failed: Maximum number of differentiations reached
 
-Error: in file 'TransformCanonicalTests.UnbalancedTest5_Err.mof':
+Error: in file '...':
 Semantic error at line 0, column 0:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
-   x = 0
+    x = 0
 ")})));
 end UnbalancedTest5_Err;
 
+model UnbalancedInitTest1
+	parameter Real x(fixed=false);
+	parameter Real y(fixed=false);
+initial equation
+	x = 0;
+	x = x * 3.14;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="UnbalancedInitTest1",
+			description="Test error messages for unbalanced initial systems.",
+			errorMessage="
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The initialization system is structurally singular. The following varible(s) could not be matched to any equation:
+     y
+
+  The following equation(s) could not be matched to any variable:
+    x = x * 3.14
+
+")})));
+end UnbalancedInitTest1;
 
 model MatchingTest1
 	Real x(start=1);
@@ -2315,6 +2373,32 @@ equation
 end TransformCanonicalTests.MatchingTest2;
 ")})));
 end MatchingTest2;
+
+model MatchingTest3
+    Real a, b;
+    Integer c;
+    discrete Real d;
+equation
+    when b > pre(c) then
+        c = pre(c) + 42;
+        d = time;
+    end when;
+    a = b + c + time;
+    a = integer(time + 3.14);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="MatchingTest3",
+            description="Tests so that the matching algorithm works well with discrete variables and equation",
+            errorMessage="
+Error: in file '...':
+Compliance error at line 0, column 0:
+  When-clause in unsolved equations is not supported. 
+when b > pre(c) then
+ c = pre(c) + 42;
+end when
+")})));
+end MatchingTest3;
 
 model WhenEqu15
 	discrete Real x[3];
@@ -4367,6 +4451,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
@@ -4445,6 +4530,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
@@ -4503,6 +4589,7 @@ equation
 			methodName="printDAEBLT",
 			equation_sorting=true,
 			inline_functions="none",
+			automatic_tearing=false,
 			description="
 Test of correct creation of blocks containing functions returning records", methodResult="
 -------------------------------
@@ -4782,6 +4869,30 @@ Solution:
 -------------------------------
 ")})));
 end BlockTest10;
+
+model BlockTest11
+	Real x;
+equation
+	12 = if x < 0.5 then 0.5 else x * time;
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest11",
+			description="Test linear block with single equation",
+			equation_sorting=true,
+			methodName="printDAEBLT",
+			methodResult="
+-------------------------------
+Non-solved linear block of 1 variables:
+Coefficient variability: Continuous
+Unknown variables:
+  x
+Equations:
+  12 = if x < 0.5 then 0.5 else x * time
+Jacobian:
+  |- (if x < 0.5 then 0.0 else time)|
+-------------------------------
+")})));
+end BlockTest11;
 
 model VarDependencyTest1
   Real x[15];
@@ -5296,19 +5407,54 @@ fclass TransformCanonicalTests.EventGeneratingExps.Nested
  discrete Real temp_1;
  discrete Integer temp_2;
 initial equation 
- temp_1 = floor(time * 0.3 + 4.2);
- temp_2 = integer(3 + temp_1 * 4);
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0;
 equation
  1 + x = temp_2;
- when {time * 0.3 + 4.2 < pre(temp_1), time * 0.3 + 4.2 >= pre(temp_1) + 1} then
-  temp_1 = floor(time * 0.3 + 4.2);
- end when;
- when {3 + temp_1 * 4 < pre(temp_2), 3 + temp_1 * 4 >= pre(temp_2) + 1} then
-  temp_2 = integer(3 + temp_1 * 4);
- end when;
+ temp_1 = if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_2 = if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= pre(temp_2) + 1 or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
 end TransformCanonicalTests.EventGeneratingExps.Nested;
+			
 ")})));
 end Nested;
+
+model InAlgorithm
+	Real x;
+algorithm
+	x := integer(3 + floor((time * 0.3) + 4.2) * 4);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="EventGeneratingExps_InAlgorithm",
+			description="Tests extraction of event generating expressions in algorithms.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
+ Real x;
+ discrete Real temp_1;
+ discrete Integer temp_2;
+ Real temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+initial equation 
+ pre(temp_1) = 0.0;
+ pre(temp_2) = 0;
+algorithm
+ temp_3 := 1;
+ temp_4 := 1;
+ temp_5 := 1;
+ temp_6 := 1;
+ temp_3 := time * 0.3 + 4.2 - pre(temp_1);
+ temp_4 := time * 0.3 + 4.2 - (pre(temp_1) + 1);
+ temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_5 := 3 + temp_1 * 4 - pre(temp_2);
+ temp_6 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
+ x := temp_2;
+end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
+			
+")})));
+end InAlgorithm;
 
 model InFunctionCall
 
@@ -5331,18 +5477,17 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InFunctionCall
  Real x;
- discrete Real temp_1;
- discrete Integer temp_3;
+ discrete Integer temp_1;
+ discrete Real temp_2;
 initial equation 
- temp_3 = integer(0.9 + time / 10);
- pre(temp_1) = 0.0;
+ pre(temp_1) = 0;
+ pre(temp_2) = 0.0;
 equation
- x = temp_1 - noEvent(floor(temp_1 / 2)) * 2;
- temp_1 = temp_3 * 3.14;
- when {0.9 + time / 10 < pre(temp_3), 0.9 + time / 10 >= pre(temp_3) + 1} then
-  temp_3 = integer(0.9 + time / 10);
- end when;
+ x = temp_2 - noEvent(floor(temp_2 / 2)) * 2;
+ temp_1 = if 0.9 + time / 10 < pre(temp_1) or 0.9 + time / 10 >= pre(temp_1) + 1 or initial() then integer(0.9 + time / 10) else pre(temp_1);
+ temp_2 = temp_1 * 3.14;
 end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
+			
 ")})));
 end InFunctionCall;
 
@@ -5363,18 +5508,73 @@ fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
  discrete Real x;
  discrete Integer temp_1;
 initial equation 
- temp_1 = integer(time * 3);
  pre(x) = 0.0;
+ pre(temp_1) = 0;
 equation
- when temp_1 + noEvent(integer(time*3)) > 1 then
+ when temp_1 + noEvent(integer(time * 3)) > 1 then
   x = floor(time * 0.3 + 4.2);
  end when;
- when {time * 3 < pre(temp_1), time * 3 >= pre(temp_1) + 1} then
-  temp_1 = integer(time * 3);
- end when;
+ temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
 end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
+			
 ")})));
 end InWhenEquations;
+
+model InInitialAlgorithm
+       Integer x;
+initial algorithm
+	x := integer(time);
+equation
+	when (time >= 1) then
+		x = integer(time);
+	end when;
+
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InInitialAlgorithm",
+			description="Tests event generating expressions in a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm
+ discrete Integer x;
+initial equation 
+ algorithm
+  x := integer(time);
+;
+equation
+ when time >= 1 then
+  x = integer(time);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm;
+			
+")})));
+end InInitialAlgorithm;
+
+model InInitialEquation
+       Real x;
+initial equation
+	x = integer(time);
+equation
+	when (time >= 1) then
+		x = integer(time);
+	end when;
+
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InInitialEquation",
+			description="Tests event generating expressions in a when equation.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InInitialEquation
+ discrete Real x;
+initial equation 
+ x = integer(time);
+equation
+ when time >= 1 then
+  x = integer(time);
+ end when;
+end TransformCanonicalTests.EventGeneratingExps.InInitialEquation;
+			
+")})));
+end InInitialEquation;
 
 end EventGeneratingExps;
 
@@ -5480,5 +5680,126 @@ Semantic error at line 0, column 0:
 ")})));
 end AssertEval2;
 
+model NonFixedParameterTest1
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y = x;
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest1",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest1
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest1;
+")})));
+end NonFixedParameterTest1;
+
+model NonFixedParameterTest2
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false) = x;
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest2",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest2
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ z = y;
+ y = x;
+end TransformCanonicalTests.NonFixedParameterTest2;
+")})));
+end NonFixedParameterTest2;
+
+model NonFixedParameterTest3
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false);
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+    y = x + 42;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest3",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest3
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x + 42;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest3;
+")})));
+end NonFixedParameterTest3;
+
+model NonFixedParameterTest4
+    parameter Real x(fixed=false, start=3.14);
+    parameter Real y(fixed=false);
+    parameter Real z(start=1) = y;
+initial equation
+    x = 3.14;
+    y = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest4",
+            description="Test propagation of non-fixed parameter attribute",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest4
+ parameter Real x(fixed = false,start = 3.14);
+ parameter Real y(fixed = false);
+ parameter Real z(start = 1,fixed = false);
+initial equation 
+ x = 3.14;
+ y = x;
+ z = y;
+end TransformCanonicalTests.NonFixedParameterTest4;
+")})));
+end NonFixedParameterTest4;
+
+model NonFixedParameterTest5
+    parameter Real x(fixed=false);
+    Real y;
+initial equation
+    y = 23;
+equation
+    y = x + time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonFixedParameterTest5",
+            description="Test matching of non-fixed parameter",
+            flatModel="
+fclass TransformCanonicalTests.NonFixedParameterTest5
+ parameter Real x(fixed = false);
+ Real y;
+initial equation 
+ y = 23;
+equation
+ y = x + time;
+end TransformCanonicalTests.NonFixedParameterTest5;
+")})));
+end NonFixedParameterTest5;
 
 end TransformCanonicalTests;

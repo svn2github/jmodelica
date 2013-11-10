@@ -77,7 +77,7 @@
 		</classpath>
 	</taskdef>
 	<!-- "jastadd" is an ant task class in jastadd2.jar -->
-	<taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
+	<taskdef classname="org.jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
 	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
 	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
 	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -98,6 +98,7 @@
 				<include name="org/jmodelica/util/*.class" />
 				<include name="org/jmodelica/util/formattedPrint/*.class" />
 				<include name="org/jmodelica/util/logging/*.class" />
+                <include name="org/jmodelica/util/exceptions/*.class" />
 			</fileset>
 		</jar>
 		<jar destfile="${jar_output_dir}/graphs.jar">
@@ -147,14 +148,17 @@
 		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" 
 				NoCacheCycle="false" ComponentCheck="false" visitcheck="false" LazyMaps="true" 
 				Deterministic="true" NoStatic="false" Debug="false">
-			<fileset dir="${local_ast}">
+			<fileset dir="${ast}">
 				<patternset id="jastadd.files">
 					<include name="*.ast" />
 					<include name="*.jadd" />
 					<include name="*.jrag" />
 				</patternset>
 			</fileset>
-			<fileset dir="${ast}">
+			<fileset dir="${modelica_compiler_ast}">
+				<patternset refid="jastadd.files"/>
+			</fileset>
+			<fileset dir="${local_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${ast}/codegen">
@@ -187,9 +191,6 @@
 				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}/test-framework">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${modelica_compiler_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
 

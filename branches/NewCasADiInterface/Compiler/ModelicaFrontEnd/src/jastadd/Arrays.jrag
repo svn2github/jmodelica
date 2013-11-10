@@ -1276,7 +1276,8 @@ aspect Arrays {
 		}
 	}
 	protected void ScalarAsArray.fillSubset(Array arr, Index i, Map<String,FExp> indexMap) {
-		FExp e = get(Index.NULL).fullCopy();
+		FExp org = get(Index.NULL);
+		FExp e = org.dynamicFExp(org.fullCopy());
 		arr.set(i, e.replaceIndices(indexMap));
 	}
 	
@@ -1917,6 +1918,15 @@ aspect Arrays {
 		}
 	}
 	
+	public void FExp.setScalarizedFlag() {
+		for (FExp child : childFExps())
+			child.setScalarizedFlag();
+	}
+	
+	public void FIdUseExp.setScalarizedFlag() {
+		getFIdUse().getFQName().scalarized = true;
+	}
+	
 	/**
 	 * \brief Returns a scalar FIdUseInstAccess, as specified by an index.
 	 * 
@@ -1967,7 +1977,9 @@ aspect Arrays {
 	 * @param scalarize  <code>true</code> if the FQName should be marked as scalarized 
 	 */
 	public FQName FQName.specify(Index i, boolean scalarize) {
-		return copyAndAddFas(i.createFArraySubscripts());
+		FQName fqn = copyAndAddFas(i.createFArraySubscripts());
+		fqn.scalarized = scalarize;
+		return fqn;
 	}
 	
 	public FQName FQNameFull.specify(Index i, boolean scalarize) {
@@ -2766,19 +2778,39 @@ aspect ArrayHelpers {
 			return new Size(ns);
 		}
 		
+        /**
+         * Creates a new Size that is a copy of this one, but with one more dimension 
+         * on the right side.
+         * 
+         * @param s  the length of the new dimension
+         */
+        public Size expandRight(int s) {
+            int[] ns = new int[size.length + 1];
+            System.arraycopy(size, 0, ns, 0, size.length);
+            ns[size.length] = s;
+            return new Size(ns);
+        }
+        
 		/**
 		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
 		 * 
 		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
-			int ndims = size.length + s.size.length;
-			if (ndims == 0)
-				return Size.SCALAR;
-			int[] ns = new int[ndims];
-			System.arraycopy(s.size, 0, ns, 0, s.size.length);
-			System.arraycopy(size, 0, ns, s.size.length, size.length);
-			return new Size(ns);
+			return s.expandFrom(this);
+		}
+		
+		/**
+		 * Delegate method for expand(Size). Double dispatch is needed there.
+		 */
+		protected Size expandFrom(Size s) {
+            int ndims = size.length + s.size.length;
+            if (ndims == 0)
+                return Size.SCALAR;
+            int[] ns = new int[ndims];
+            System.arraycopy(size, 0, ns, 0, size.length);
+            System.arraycopy(s.size, 0, ns, size.length, s.size.length);
+            return new Size(ns);
 		}
 		
 		/**
@@ -2790,6 +2822,27 @@ aspect ArrayHelpers {
 		public FExp createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
 			return createFExp(d);
 		}
+        
+        /**
+         * Create an FArraySubscripts that defines this size as used in variable declarations.
+         * 
+         * Dimension that nothing is known about get an FColonSubscript.
+         */
+        public FArraySubscripts createFArraySubscripts() {
+            FArraySubscripts res = new FArraySubscripts();
+            for (int i = 0; i < ndims(); i++)
+                res.addFSubscript(createFSubscript(i));
+            return res;
+        }
+        
+        /**
+         * Create an FSubscript that defines the length of dimension <code>d</code>.
+         * 
+         * If nothing is known of the length of the dimension, an FColonSubscript is created.
+         */
+        public FSubscript createFSubscript(int d) {
+            return hasValue(d) ? new FExpSubscript(createFExp(d)) : new FColonSubscript();
+        }
 		
 		/**
 		 * \brief Create an FArraySubscripts that spans this size.
@@ -2869,6 +2922,21 @@ aspect ArrayHelpers {
 					res.addFExp(createFExp(i));
 				return res;
 			}
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type) {
+		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>());
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type, FTypePrefixInputOutput inputOutput) {
+		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>(inputOutput));
+		}
+		
+		public FFunctionVariable createFunctionVariable(String name, FType type, Opt<FTypePrefixInputOutput> inputOutput) {
+		    if (this == Size.SCALAR)
+		        return new FFunctionVariable(inputOutput, type.scalarType(), new Opt<FExp>(), new FQNameString(name));
+		    else
+		        return new FFunctionArray(inputOutput, type.arrayType(this), new Opt<FExp>(), new FQNameString(name));
 		}
 		
 	}
@@ -3130,16 +3198,33 @@ aspect ArrayHelpers {
 		 * <code>s</code> is added on the left side.
 		 */
 		public Size expand(Size s) {
-			evaluate();
-			int ndims = size.length + s.size.length;
+            return createExpanded(s, this);
+        }
+        
+        /**
+         * Delegate method for expand(Size). Double dispatch is needed there.
+         */
+        protected Size expandFrom(Size s) {
+            return createExpanded(this, s);
+        }
+        
+        private static Size createExpanded(Size a, Size b) {
+			int ndims = a.size.length + b.size.length;
 			if (ndims == 0)
 				return Size.SCALAR;
 			MutableSize ns = new MutableSize(ndims);
-			System.arraycopy(s.size, 0, ns.size, 0, s.size.length);
-			System.arraycopy(size, 0, ns.size, s.size.length, size.length);
-			if (s instanceof MutableSize) 
-				System.arraycopy(((MutableSize) s).exps, 0, ns.exps, 0, s.size.length);
-			System.arraycopy(exps, 0, ns.exps, s.size.length, size.length);
+			if (a instanceof MutableSize) {
+			    MutableSize m = (MutableSize) a;
+			    m.evaluate();
+				System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
+			}
+            if (b instanceof MutableSize) {
+                MutableSize m = (MutableSize) b;
+                m.evaluate();
+                System.arraycopy(m.exps, 0, ns.exps, a.size.length, m.size.length);
+            }
+			System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
+			System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
 			return ns;
 		}
 		
@@ -3715,14 +3800,25 @@ aspect ArrayHelpers {
 		 * @param level  the first index to copy. Must be between 0 and ndims(), inclusive.
 		 */
 		public Index subIndex(int level) {
-			if (level == 0)
-				return this;
-			if (level == index.length)
-				return NULL;
-			Index copy = new Index(index.length - level);
-			System.arraycopy(index, level, copy.index, 0, copy.index.length);
-			return copy;
+			return partIndex(level, index.length);
 		}
+        
+        /**
+         * Returns an Index that describes dimensions from <code>i</code>, inclusively, 
+         * to <code>j</code>, excludingly, of this Index.
+         * 
+         * @param i  the first index to copy. Must be between 0 and ndims(), inclusively.
+         * @param j  the index after the last to copy. Must be between <code>i</code> and ndims(), inclusively.
+         */
+        public Index partIndex(int i, int j) {
+            if (i == 0 && j == index.length)
+                return this;
+            if (i == j)
+                return NULL;
+            Index copy = new Index(j - i);
+            System.arraycopy(index, i, copy.index, 0, copy.index.length);
+            return copy;
+        }
 		
 		/**
 		 * Creates a new Index that is a copy of this Index, but promoted to <code>ndims</code> 

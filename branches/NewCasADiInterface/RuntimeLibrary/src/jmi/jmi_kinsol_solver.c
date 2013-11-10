@@ -29,7 +29,6 @@
 #include <kinpinv.h>  */
 
 #include "jmi.h"
-#include "fmi1_me.h"
 #include "jmi_kinsol_solver.h"
 #include "jmi_block_residual.h"
 #include "jmi_util.h"
@@ -457,7 +456,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     
     /* set tolerances */
     if((block->n > 1) || !jmi->options.use_Brent_in_1d_flag) {
-        solver->kin_stol = jmi->fmi->fmi_newton_tolerance;
+        solver->kin_stol = jmi->newton_tolerance;
         if(solver->kin_stol < jmi->options.nle_solver_min_tol) {
             solver->kin_stol = jmi->options.nle_solver_min_tol;
         }
@@ -465,7 +464,7 @@ static int jmi_kinsol_init(jmi_block_residual_t * block) {
     else
         solver->kin_stol = jmi->options.nle_solver_min_tol;
     
-    solver->kin_ftol = jmi->fmi->fmi_newton_tolerance;
+    solver->kin_ftol = jmi->newton_tolerance;
 
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
@@ -985,8 +984,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_residual_t
     solver->kin_f_scale = N_VNew_Serial(n);
     solver->kin_scale_update_time = -1.0;
     solver->kin_jac_update_time = -1.0;
-    /*NOTE: it'd be nice to use "jmi->fmi->fmi_newton_tolerance" here
-      However, fmi pointer is not set yet at this point.
+    /*NOTE: it'd be nice to use "jmi->newton_tolerance" here
+      However, newton_tolerance is not set yet at this point.
     */
     solver->kin_ftol = block->jmi->options.nle_solver_min_tol;
     solver->kin_stol = block->jmi->options.nle_solver_min_tol;

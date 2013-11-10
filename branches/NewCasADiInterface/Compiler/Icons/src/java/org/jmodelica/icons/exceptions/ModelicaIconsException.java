@@ -1,6 +1,6 @@
 package org.jmodelica.icons.exceptions;
 
-import org.jmodelica.util.ModelicaException;
+import org.jmodelica.util.exceptions.ModelicaException;
 
 @SuppressWarnings("serial")
 public class ModelicaIconsException extends ModelicaException {

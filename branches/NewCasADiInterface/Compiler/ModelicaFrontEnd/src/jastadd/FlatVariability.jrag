@@ -165,6 +165,7 @@ aspect FlatVariability {
     
     inh TypePrefixVariability InstNode.overrideVariability(TypePrefixVariability var);
     eq InstNode.getChild().overrideVariability(TypePrefixVariability var)      = var;
+    eq Root.getChild().overrideVariability(TypePrefixVariability var)          = var;
     eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
     eq InstExtends.getChild().overrideVariability(TypePrefixVariability var)   = overrideVariability(var);
     eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
@@ -184,12 +185,7 @@ aspect FlatVariability {
 	eq InstAssignable.combinedVariability() = 
 		isStructuralParam ? fStructParameter() : super.combinedVariability();
 	
-	syn lazy FTypePrefixVariability InstComponentDecl.variability() {
-		FTypePrefixVariability var = combinedVariability();
-		if (!var.discreteOrLess() && isAssignedInWhen())
-			var = fDiscrete();
-		return var;
-	}
+	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();
 	
 	syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fConstant();
@@ -215,23 +211,107 @@ aspect FlatVariability {
 	}
 	
 	
-	syn boolean InstComponentDecl.isAssignedInWhen() = retrieveAssignedInWhenSet().contains(this);
-	
-	inh Set<InstComponentDecl> InstComponentDecl.retrieveAssignedInWhenSet();
-	eq InstClassDecl.getChild().retrieveAssignedInWhenSet() = assignedInWhenSet();
-	eq Root.getChild().retrieveAssignedInWhenSet()          = Collections.emptySet();
-	
-	syn lazy Set<InstComponentDecl> InstNode.assignedInWhenSet() {
-		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
-		for (InstExtends ie : getInstExtendss())
-			res.addAll(ie.assignedInWhenSet());
-		for (InstComponentDecl icd : getInstComponentDecls())
-			res.addAll(icd.assignedInWhenSet());
-		for (FAbstractEquation eqn : getFAbstractEquations())
-			if (eqn instanceof FWhenEquation)
-				res.addAll(eqn.assignedSet());
-		return res;
+	/**
+	 * Convert all continous variables that are assigned in when equations into discrete variables.
+	 */
+	public void FClass.updateVariablilityForVariablesInWhen() {
+	    getFAbstractEquations().updateVariablilityForVariablesInWhen(false);
+	    checkDiscreteOperations();
 	}
+    
+    /**
+     * Convert all continous variables that are assigned in when equations and statements into discrete variables.
+     * 
+     * @param inWhen  is this node in a when equation?
+     */
+    public void ASTNode.updateVariablilityForVariablesInWhen(boolean inWhen) {}
+    
+    public void Opt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void List.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FAbstractEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FStatement.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FIfWhenClause.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this)
+            n.updateVariablilityForVariablesInWhen(inWhen);
+    }
+    
+    public void FWhenEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariablilityForVariablesInWhen(true);
+    }
+    
+    public void FWhenStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        super.updateVariablilityForVariablesInWhen(true);
+    }
+    
+    public void FEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            getLeft().makeContinuousVariablesDiscrete();
+    }
+    
+    public void FFunctionCallEquation.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            for (FFunctionCallLeft left : getLefts())
+                if (left.hasFExp())
+                    left.getFExp().makeContinuousVariablesDiscrete();
+    }
+
+    public void FAssignStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            getLeft().makeContinuousVariablesDiscrete();
+    }
+    
+    public void FFunctionCallStmt.updateVariablilityForVariablesInWhen(boolean inWhen) {
+        if (inWhen) 
+            for (FFunctionCallLeft left : getLefts())
+                if (left.hasFExp())
+                    left.getFExp().makeContinuousVariablesDiscrete();
+    }
+
+    /**
+     * Convert all continous variables that are this expression refers to into discrete variables.
+     */
+    public void FExp.makeContinuousVariablesDiscrete() {}
+    
+    public void FIdUseExp.makeContinuousVariablesDiscrete() {
+        myFV().makeContinuousVariableDiscrete();
+    }
+    
+    public void FArray.makeContinuousVariablesDiscrete() {
+        for (FExp e : getFExps())
+            e.makeContinuousVariablesDiscrete();
+    }
+    
+    public void FRecordConstructor.makeContinuousVariablesDiscrete() {
+        for (FExp e : getArgs())
+            e.makeContinuousVariablesDiscrete();
+    }
+    
+    /**
+     * If this is a normal continous variable, convert it to a discrete variable.
+     */
+    public void FAbstractVariable.makeContinuousVariableDiscrete() {}
+    
+    public void FVariable.makeContinuousVariableDiscrete() {
+        if (getFTypePrefixVariability().continuousVariability())
+            setFTypePrefixVariability(fDiscrete());
+    }
+    
 	
 	protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
 		Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
@@ -379,6 +459,8 @@ aspect FlatVariability {
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
 	eq FDerExp.expVariability() = 
 			getFIdUse().variability().discreteOrLess() ? fConstant() : getFIdUse().variability();
+	eq FPreExp.expVariability() = super.expVariability().combineDown(fDiscrete());
+	eq InstPreExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	
 	syn FTypePrefixVariability FIdUse.variability() {
 		FAbstractVariable variable = myFV();
@@ -410,7 +492,6 @@ aspect FlatVariability {
 	eq FZeros.expVariability()     = fConstant();
 	eq FFillExp.expVariability()   = getFillExp().variability();
 	
-	eq FPreExp.expVariability()    = getFExp().variability().combineDown(fDiscrete());
 	eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
 	eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 	eq FSampleExp.expVariability() = fDiscrete();
@@ -437,6 +518,16 @@ aspect FlatVariability {
    		return (other.combineLevel() < combineLevel()) ? other : this;
 	}	
 	
+    syn FTypePrefixVariability FIdUse.indexVariability() {
+        FTypePrefixVariability variability = fConstant();
+        if (getFQName().isSimple())
+            return variability;
+        for (FQNamePart part : getFQName().asFQNameFull().getFQNameParts())
+            if (part.hasFArraySubscripts())
+                for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
+                    variability = variability.combine(sub.variability());
+        return variability;
+    }
 }
 
 aspect VariabilitySingletons {

@@ -948,11 +948,13 @@ end ConnectTest18;
 
 model ConnectTest19
     model A
-        Real a1;
-        Real a2[1];
+        B a1;
+        B a2[1];
     equation
         connect(a1, a2[1]);
-    end B;
+    end A;
+	
+	connector B = Real;
     
     A b[2];
 
@@ -976,13 +978,15 @@ end ConnectTest19;
 
 model ConnectTest20
     model A
-        Real a1;
-        Real a2;
-        Real a3[2];
+        B a1;
+        B a2;
+        B a3[2];
     equation
         connect(a1, a3[1]);
         connect(a2, a3[2]);
     end B;
+    
+    connector B = Real;
     
     A b[2];
 
@@ -1010,11 +1014,13 @@ end ConnectTest20;
 
 model ConnectTest21
     model A
-        Real a1[3];
-        Real a2[3];
+        B a1[3];
+        B a2[3];
     equation
         connect(a1[1:2], a2[2:3]);
     end A;
+    
+    connector B = Real;
     
     A b[2];
 
@@ -1045,7 +1051,7 @@ model ConnectTest22
         connect(a1[1:2].b1[1,:], a2[2:3].b1[2,:]);
     end A;
 	
-	model B
+	connector B
 		Real b1[2,2];
 	end B;
     
@@ -1084,9 +1090,11 @@ end ConnectTest22;
 
 
 model ConnectTest23
-    Real x[4];
-	Real y[4];
-	Real z[4];
+    connector A = Real;
+    
+	A x[4];
+	A y[4];
+	A z[4];
 equation
 	x = 1:4;
 	z = 5:8;
@@ -1120,26 +1128,497 @@ end ConnectTest23;
 
 
 model ConnectTest24
-	Real x;
-	Real y = time;
+    connector A = Real;
+	A a = 1;
 equation
-	if time < 2 then
-        x = y + 2;
-    else
-        connect(x,y);
-	end if;
+	connect(a, a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest24",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectTest24
+ Real a = 1;
+end ConnectTests.ConnectTest24;
+")})));
+end ConnectTest24;
+
+
+model ConnectTest25
+    connector A = Real;
+    A a = 1;
+equation
+    connect(a, a);
+
+	annotation(__JModelica(UnitTesting(tests={
+		WarningTestCase(
+			name="ConnectTest25",
+			description="",
+			errorMessage="
+1 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+At line 1152, column 5:
+  Ignored connection from connector to itself
+")})));
+end ConnectTest25;
+
+
+model ConnectOuterTest1
+    connector C = Real;
+    
+    model B
+        outer C c;
+        C c2;
+    equation
+        connect(c, c2);
+    end B;
+    
+    inner C c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest1",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest1
+ Real c;
+ Real b.c2;
+equation
+ b.c2 = c;
+end ConnectTests.ConnectOuterTest1;
+")})));
+end ConnectOuterTest1;
+
+
+model ConnectOuterTest2
+    connector C = Real;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        outer A a;
+        C c2;
+    equation
+        connect(a.c, c2);
+    end B;
+    
+    inner A a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest2",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest2
+ Real a.c;
+ Real b.c2;
+equation
+ a.c = b.c2;
+end ConnectTests.ConnectOuterTest2;
+")})));
+end ConnectOuterTest2;
+
+
+model ConnectOuterTest3
+    connector C
+        Real x;
+    end C;
+	    
+    model B
+        outer C c;
+        C c2;
+    equation
+        connect(c, c2);
+    end B;
+    
+    inner C c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest3",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest3
+ Real c.x;
+ Real b.c2.x;
+equation
+ b.c2.x = c.x;
+end ConnectTests.ConnectOuterTest3;
+")})));
+end ConnectOuterTest3;
+
+
+model ConnectOuterTest4
+    connector C
+		Real x;
+	end C;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        outer A a;
+        C c2;
+    equation
+        connect(a.c, c2);
+    end B;
+    
+    inner A a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest4",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest4
+ Real a.c.x;
+ Real b.c2.x;
+equation
+ a.c.x = b.c2.x;
+end ConnectTests.ConnectOuterTest4;
+")})));
+end ConnectOuterTest4;
+
+
+model ConnectOuterTest5
+    connector C = Real;
+    
+    model B
+        outer C[2] c;
+        C c2;
+    equation
+        connect(c[1], c2);
+    end B;
+    
+    inner C[2] c;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest5",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest5
+ Real c[2];
+ Real b.c2;
+equation
+ b.c2 = c[1];
+end ConnectTests.ConnectOuterTest5;
+")})));
+end ConnectOuterTest5;
+
+
+model ConnectOuterTest6
+    connector C = Real;
+    
+    model A
+        C[2] c;
+    end A;
+    
+    model B
+        outer A[2] a;
+        C c2;
+    equation
+        connect(a[1].c[1], c2);
+    end B;
+    
+    inner A[2] a;
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest6",
+			description="",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest6
+ Real a[1].c[2];
+ Real a[2].c[2];
+ Real b.c2;
+equation
+ a[1].c[1] = b.c2;
+end ConnectTests.ConnectOuterTest6;
+")})));
+end ConnectOuterTest6;
+
+
+
+model ConnectErrTest1
+    model A
+        Real x;
+    end A;
+    
+    connector B
+        Real x;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
-			name="ConnectTest24",
-			description="Connect clause in else branch of if with non-parameter test",
+			name="ConnectErrTest1",
+			description="",
 			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1168, column 13:
+  Connecting to an instance of a non-connector type is not allowed
+")})));
+end ConnectErrTest1;
+
+
+model ConnectErrTest2
+    Real a;
+    Real b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest2",
+			description="",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1187, column 13:
+  Connecting to an instance of a non-connector type is not allowed
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1187, column 16:
+  Connecting to an instance of a non-connector type is not allowed
+")})));
+end ConnectErrTest2;
+
+
+model ConnectErrTest3
+    connector A
+        Real x;
+	    Real y;
+    end A;
+    
+    connector B
+        Real x;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest3",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1218, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest3;
+
+
+model ConnectErrTest4
+    connector A
+        Real x;
+        Real y;
+    end A;
+    
+    connector B
+        Real x;
+    end B;
+	
+	connector C
+		A a;
+		Real z;
+	end C;
+    
+    connector D
+        B a;
+        Real z;
+    end D;
+    
+    C a;
+    D b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest4",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1256, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest4;
+
+
+model ConnectErrTest5
+    connector A
+        Real x[3];
+    end A;
+    
+    connector B
+        Real x[4];
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest5",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1272, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest5;
+
+
+model ConnectErrTest6
+    connector A
+        Real x;
+    end A;
+    
+    A a1[3], a2[3];
+equation
+    connect(a1, a2[1:2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest6",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1294, column 5:
+  Sizes do not match in connection
+")})));
+end ConnectErrTest6;
+
+
+model ConnectErrTest7
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        Boolean x;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest7",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1332, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest7;
+
+
+model ConnectErrTest8
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        flow Real x;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest8",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1359, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest8;
+
+
+model ConnectErrTest9
+    connector A
+        stream Real x;
+    end A;
+    
+    connector B
+        flow Real x;
+    end B;
+    
+    A a;
+    B b;
+equation
+    connect(a, b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ConnectErrTest9",
+			description="",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1386, column 5:
+  Types of connected components do not match
+")})));
+end ConnectErrTest9;
+
+
+model ConnectErrTest10
+    connector A = Real;
+    
+    A x;
+    A y = time;
+equation
+    if time < 2 then
+        x = y + 2;
+    else
+        connect(x,y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest10",
+            description="Connect clause in else branch of if with non-parameter test",
+            errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 1129, column 9:
   Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
 ")})));
-end ConnectTest24;
+end ConnectErrTest10;
+
 
 
 model Electrical
@@ -1721,9 +2200,11 @@ end StreamTest5;
 
 
 model Cardinality1
-    Real x;
-    Real y;
-    Real z;
+	connector A = Real;
+
+    A x;
+    A y;
+    A z;
 equation
     connect(x, y);
     connect(y, z);
@@ -1840,5 +2321,128 @@ At line 1815, column 9:
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;
+
+
+model ConditionalNoErrTest1
+    connector C = Real;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    C y if on;
+equation
+    connect(x[2], y);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest1",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest1
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest1;
+")})));
+end ConditionalNoErrTest1;
+
+
+model ConditionalNoErrTest2
+    connector C = Real;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    C y if on;
+equation
+    connect(y, x[2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest2",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest2
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest2;
+")})));
+end ConditionalNoErrTest2;
+
+
+model ConditionalNoErrTest3
+    connector C = Real;
+	
+	model A
+		C c;
+	end A;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    A y if on;
+equation
+    connect(x[2], y.c);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest3",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest3
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest3;
+")})));
+end ConditionalNoErrTest3;
+
+
+model ConditionalNoErrTest4
+    connector C = Real;
+    
+    model A
+        C c;
+    end A;
+    
+    parameter Boolean on = false;
+    
+    C x[if on then 2 else 1];
+    A y if on;
+equation
+    connect(y.c, x[2]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest4",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest4
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest4;
+")})));
+end ConditionalNoErrTest4;
+
+
+model ConditionalNoErrTest5
+    model A
+        Real y;
+    end A;
+    
+    parameter Boolean on = false;
+    
+    Real x[if on then 2 else 1];
+    A a(y=x[2]) if on;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConditionalNoErrTest5",
+			description="",
+			flatModel="
+fclass ConnectTests.ConditionalNoErrTest5
+ parameter Boolean on = false /* false */;
+ Real x[1];
+end ConnectTests.ConditionalNoErrTest5;
+")})));
+end ConditionalNoErrTest5;
 
 end ConnectTests;
