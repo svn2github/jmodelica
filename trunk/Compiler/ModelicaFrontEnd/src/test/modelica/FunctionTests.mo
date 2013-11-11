@@ -4316,6 +4316,312 @@ end FunctionTests.ArrayExpInFunc18;
 ")})));
 end ArrayExpInFunc18;
 
+model ArrayExpInFunc19
+	
+function f
+	input Real[:,:] x1;
+	input Real[:,:] x2;
+	output Real[2,size(x1,1),size(x1,2)] y;
+algorithm
+	y := {x1, x2};
+end f;
+
+Real[2,2,2] ae = f({{1,2},{3,4}},{{1,2},{3,4}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc19",
+			description="Scalarization of functions: unknown size array expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc19
+ Real ae[1,1,1];
+ Real ae[1,1,2];
+ Real ae[1,2,1];
+ Real ae[1,2,2];
+ Real ae[2,1,1];
+ Real ae[2,1,2];
+ Real ae[2,2,1];
+ Real ae[2,2,2];
+equation
+ ({{{ae[1,1,1], ae[1,1,2]}, {ae[1,2,1], ae[1,2,2]}}, {{ae[2,1,1], ae[2,1,2]}, {ae[2,2,1], ae[2,2,2]}}}) = FunctionTests.ArrayExpInFunc19.f({{1, 2}, {3, 4}}, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.ArrayExpInFunc19.f
+  input Real[:, :] x1;
+  input Real[:, :] x2;
+  output Real[2, size(x1, 1), size(x1, 2)] y;
+  Real[:,:,:] temp_1;
+ algorithm
+  size(temp_1) := {2, :, :};
+  for i1 in 1:2 loop
+   for i2 in 1:size(x1, 1) loop
+    for i3 in 1:size(x1, 2) loop
+     temp_1[1,i2,i3] := x1[i2,i3];
+     temp_1[2,i2,i3] := x2[i2,i3];
+     y[i1,i2,i3] := temp_1[i1,i2,i3];
+    end for;
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc19.f;
+
+end FunctionTests.ArrayExpInFunc19;
+			
+")})));
+end ArrayExpInFunc19;
+
+model ArrayExpInFunc20
+	
+function f
+	input Real[:] x1;
+	output Real[2,size(x1,1)+2] o;
+algorithm
+	o := [{x1}, 1, 2; 3,{x1},4];
+end f;
+
+Real[2,4] ae = f({1,2});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc20",
+			description="Scalarization of functions: unknown size matrix expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc20
+ Real ae[1,1];
+ Real ae[1,2];
+ Real ae[1,3];
+ Real ae[1,4];
+ Real ae[2,1];
+ Real ae[2,2];
+ Real ae[2,3];
+ Real ae[2,4];
+equation
+ ({{ae[1,1], ae[1,2], ae[1,3], ae[1,4]}, {ae[2,1], ae[2,2], ae[2,3], ae[2,4]}}) = FunctionTests.ArrayExpInFunc20.f({1, 2});
+
+public
+ function FunctionTests.ArrayExpInFunc20.f
+  input Real[:] x1;
+  output Real[2, size(x1, 1) + 2] o;
+  Real[:,:] temp_1;
+  Integer temp_2;
+  Integer temp_3;
+  Real[:,:] temp_4;
+  Real[:,:] temp_5;
+ algorithm
+  size(temp_1) := {2, size(x1, 1) + 1 + 1};
+  size(temp_4) := {1, :};
+  size(temp_5) := {1, :};
+  for i1 in 1:2 loop
+   for i2 in 1:size(x1, 1) + 1 + 1 loop
+    temp_2 := 0;
+    temp_3 := 0;
+    for i1 in 1:1 loop
+     for i2 in 1:size(x1, 1) loop
+      temp_4[1,i2] := x1[i2];
+      temp_1[temp_2 + i1,temp_3 + i2] := temp_4[i1,i2];
+     end for;
+    end for;
+    temp_3 := temp_3 + size(x1, 1);
+    temp_1[temp_2 + 1,temp_3 + 1] := 1;
+    temp_3 := temp_3 + 1;
+    temp_1[temp_2 + 1,temp_3 + 1] := 2;
+    temp_2 := temp_2 + 1;
+    temp_3 := 0;
+    temp_1[temp_2 + 1,temp_3 + 1] := 3;
+    temp_3 := temp_3 + 1;
+    for i1 in 1:1 loop
+     for i2 in 1:size(x1, 1) loop
+      temp_5[1,i2] := x1[i2];
+      temp_1[temp_2 + i1,temp_3 + i2] := temp_5[i1,i2];
+     end for;
+    end for;
+    temp_3 := temp_3 + size(x1, 1);
+    temp_1[temp_2 + 1,temp_3 + 1] := 4;
+    o[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc20.f;
+
+end FunctionTests.ArrayExpInFunc20;
+			
+")})));
+end ArrayExpInFunc20;
+
+model ArrayExpInFunc21
+	
+function f
+	input Real[:] x1;
+	input Real[:,:] x2;
+	input Real[:,:] x3;
+	output Real[size(x1,1)+size(x2,1)+1,size(x2,2)+1] y;
+algorithm
+	y := [x1, x2; x2, x1; x3];
+end f;
+
+Real[5,3] ae = f({1,2},{{3,4},{5,6}},{{10,11,12}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc21",
+			description="Scalarization of functions: unknown size matrix expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc21
+ Real ae[1,1];
+ Real ae[1,2];
+ Real ae[1,3];
+ Real ae[2,1];
+ Real ae[2,2];
+ Real ae[2,3];
+ Real ae[3,1];
+ Real ae[3,2];
+ Real ae[3,3];
+ Real ae[4,1];
+ Real ae[4,2];
+ Real ae[4,3];
+ Real ae[5,1];
+ Real ae[5,2];
+ Real ae[5,3];
+equation
+ ({{ae[1,1], ae[1,2], ae[1,3]}, {ae[2,1], ae[2,2], ae[2,3]}, {ae[3,1], ae[3,2], ae[3,3]}, {ae[4,1], ae[4,2], ae[4,3]}, {ae[5,1], ae[5,2], ae[5,3]}}) = FunctionTests.ArrayExpInFunc21.f({1, 2}, {{3, 4}, {5, 6}}, {{10, 11, 12}});
+
+public
+ function FunctionTests.ArrayExpInFunc21.f
+  input Real[:] x1;
+  input Real[:, :] x2;
+  input Real[:, :] x3;
+  output Real[size(x1, 1) + size(x2, 1) + 1, size(x2, 2) + 1] y;
+  Real[:,:] temp_1;
+  Integer temp_2;
+  Integer temp_3;
+ algorithm
+  size(temp_1) := {size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)};
+  for i1 in 1:size(x1, 1) + size(x2, 1) + size(x3, 1) loop
+   for i2 in 1:1 + size(x2, 2) loop
+    temp_2 := 0;
+    temp_3 := 0;
+    for i1 in 1:size(x1, 1) loop
+     temp_1[temp_2 + i1,temp_3 + 1] := x1[i1];
+    end for;
+    temp_3 := temp_3 + 1;
+    for i1 in 1:size(x2, 1) loop
+     for i2 in 1:size(x2, 2) loop
+      temp_1[temp_2 + i1,temp_3 + i2] := x2[i1,i2];
+     end for;
+    end for;
+    temp_2 := temp_2 + size(x2, 1);
+    temp_3 := 0;
+    for i1 in 1:size(x2, 1) loop
+     for i2 in 1:size(x2, 2) loop
+      temp_1[temp_2 + i1,temp_3 + i2] := x2[i1,i2];
+     end for;
+    end for;
+    temp_3 := temp_3 + size(x2, 2);
+    for i1 in 1:size(x1, 1) loop
+     temp_1[temp_2 + i1,temp_3 + 1] := x1[i1];
+    end for;
+    temp_2 := temp_2 + size(x1, 1);
+    temp_3 := 0;
+    for i1 in 1:size(x3, 1) loop
+     for i2 in 1:size(x3, 2) loop
+      temp_1[temp_2 + i1,temp_3 + i2] := x3[i1,i2];
+     end for;
+    end for;
+    y[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc21.f;
+
+end FunctionTests.ArrayExpInFunc21;
+			
+")})));
+end ArrayExpInFunc21;
+
+model ArrayExpInFunc22
+	
+function f
+	input Integer[:] i1;
+	input Integer[size(i1,1)] i2;
+	input Real[:,:] x;
+	output Real[size(i1,1),size(i1,1)] y;
+algorithm
+	y := transpose([x[i1,i1]]);
+	y := transpose([x[i1,i2]]);
+end f;
+
+Real[2,2] ae = f({1,2},{2,1},{{3,4},{5,6},{7,8}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayExpInFunc22",
+			description="Scalarization of functions: unknown size matrix expression",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.ArrayExpInFunc22
+ Real ae[1,1];
+ Real ae[1,2];
+ Real ae[2,1];
+ Real ae[2,2];
+equation
+ ({{ae[1,1], ae[1,2]}, {ae[2,1], ae[2,2]}}) = FunctionTests.ArrayExpInFunc22.f({1, 2}, {2, 1}, {{3, 4}, {5, 6}, {7, 8}});
+
+public
+ function FunctionTests.ArrayExpInFunc22.f
+  input Integer[:] i1;
+  input Integer[size(i1, 1)] i2;
+  input Real[:, :] x;
+  output Real[size(i1, 1), size(i1, 1)] y;
+  Real[:,:] temp_1;
+  Integer temp_2;
+  Integer temp_3;
+  Real[:,:] temp_4;
+  Integer temp_5;
+  Integer temp_6;
+ algorithm
+  size(temp_1) := {:, :};
+  size(temp_4) := {:, size(i1, 1)};
+  for i3 in 1:size(i1, 1) loop
+   for i4 in 1:size(i1, 1) loop
+    temp_2 := 0;
+    temp_3 := 0;
+    for i3 in 1:size(i1, 1) loop
+     for i4 in 1:size(i1, 1) loop
+      temp_1[temp_2 + i3,temp_3 + i4] := x[i1[i4],i1[i4]];
+     end for;
+    end for;
+    y[i3,i4] := temp_1[i4,i3];
+   end for;
+  end for;
+  for i3 in 1:size(i1, 1) loop
+   for i4 in 1:size(i1, 1) loop
+    temp_5 := 0;
+    temp_6 := 0;
+    for i3 in 1:size(i1, 1) loop
+     for i4 in 1:size(i1, 1) loop
+      temp_4[temp_5 + i3,temp_6 + i4] := x[i1[i3],i2[i4]];
+     end for;
+    end for;
+    y[i3,i4] := temp_4[i4,i3];
+   end for;
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc22.f;
+
+end FunctionTests.ArrayExpInFunc22;
+			
+")})));
+end ArrayExpInFunc22;
+
+
+
 
 
 model ArrayOutputScalarization1
@@ -6021,7 +6327,8 @@ model UnknownArray9
   input Real a[:,:];
   input Real b[:,size(a,2)];
   output Real c[size(d,1), size(d,2)];
-  protected Real d[:,:] = cat(1, a, b);
+ protected Real d[:,:] = cat(1, a, b);
+ protected Real e[:,:] = [a; b];
  algorithm
   c := d;
  end f;
@@ -6035,14 +6342,15 @@ model UnknownArray9
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.UnknownArray9
- Real x[5,2] = FunctionTests.UnknownArray9.f({{1,2},{3,4}}, {{5,6},{7,8},{9,0}});
+ Real x[5,2] = FunctionTests.UnknownArray9.f({{1, 2}, {3, 4}}, {{5, 6}, {7, 8}, {9, 0}});
 
 public
  function FunctionTests.UnknownArray9.f
   input Real[:, :] a;
   input Real[:, size(a, 2)] b;
   output Real[size(d, 1), size(d, 2)] c;
-  Real[size(cat(1, a, b), 1), size(cat(1, a, b), 2)] d := cat(1, a, b);
+  Real[size(a, 1) + size(b, 1), size(a, 2)] d := cat(1, a, b);
+  Real[size(a, 1) + size(b, 1), size(a, 2)] e := [a; b];
  algorithm
   c := d;
   return;
