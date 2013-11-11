@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "jmi_log.h"
+#include "jmi_log_impl.h"
 
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
@@ -199,7 +199,7 @@ static INLINE buf_t *bufof(log_t *log)    { return &(log->buf); }
 
 
 /* constructor */
-static void init_log(log_t *log, jmi_options_t* options, jmi_callbacks_t* jmi_callbacks);
+static void init_log(log_t *log, jmi_log_options_t* options, jmi_callbacks_t* jmi_callbacks);
 static void initialize(log_t *log); /* extra initialization */
 
 /* logging primitives */
@@ -260,7 +260,30 @@ static void emit(log_t *log) {
     buf_t *buf = bufof(log);
     force_commas(log);
     if (!isempty(buf)) {
-        _emit(log, buf->msg);
+        jmi_callbacks_t* cb = log->jmi_callbacks;
+
+        if (!emitted_category(log, log->c)) return;
+
+        cb->emit_log(cb, log->c, log->severest_category,buf->msg);            
+
+    /* create_log_file_if_needed(log); */
+        if (log->log_file) {
+            file_logger(log->log_file, log->log_file, 
+                        log->c, log->severest_category, buf->msg);
+            fflush(log->log_file);
+        }
+    /*
+    if ((fmi1_me_t *)(jmi_callbacks->fmix_me)) {
+        ((fmiCallbackLogger)(jmi_callbacks->logger))((fmi1_me_t *)(jmi_callbacks->fmix_me),
+                                   jmi_callbacks->fmi_name,
+                                   category_to_fmiStatus(category),
+                                   category_to_fmiCategory(severest_category),
+                                   message);
+        
+    } else {
+        file_logger(stdout, stderr, category, severest_category, message);
+    }
+    */
         clear(buf);
         log->severest_category = logInfo;
     }
@@ -336,7 +359,7 @@ static frame_t *push_frame(log_t *log, category_t c, const char *type, int leafd
 
 
 /** log_t constructor. */
-static void init_log(log_t *log, jmi_options_t* options, jmi_callbacks_t* jmi_callbacks) {
+static void init_log(log_t *log, jmi_log_options_t* options, jmi_callbacks_t* jmi_callbacks) {
     log->options = options;
     init_buffer(bufof(log));
 
@@ -357,6 +380,23 @@ static void init_log(log_t *log, jmi_options_t* options, jmi_callbacks_t* jmi_ca
     log-> jmi_callbacks = jmi_callbacks;
 
     log->initialized = FALSE;  /* More initialization to do later */
+}
+
+static void create_log_file_if_needed(log_t *log) {
+    if (log->log_file != NULL) return;
+    if (log->options->copy_log_to_file_flag) {
+        /* Create new log file */
+        jmi_callbacks_t *cb = log->jmi_callbacks;
+        const char *instance_name = cb->instance_name;
+        char filename[8000];
+
+        sprintf(filename, "%s_%s.log", cb->model_name,
+                                       instance_name);
+        /* TODO: fopen returns NULL on error
+           ==> will try to reopen the file at the next emit. Do we want this? 
+           Not an issue if create_log_file_if_needed is only called once.*/
+        log->log_file = fopen(filename, "w");
+    }
 }
 
 /** Additional log_t initialization */
@@ -387,6 +427,7 @@ static void delete_log(log_t *log) {
 static BOOL _leave_frame_(log_t *log) {
     frame_t *top = topof(log);
     frame_t *newtop;
+    jmi_callbacks_t* cb = log->jmi_callbacks;
 
     log->next_name = NULL;
     log->leafdim = -1;
@@ -397,7 +438,6 @@ static BOOL _leave_frame_(log_t *log) {
     newtop = topof(log);
     newtop->severest_category = severest(newtop->severest_category,
                                          top->severest_category);
-
     if (emitted_category(log, top->c)) {
         cancel_commas(log);
         set_category(log, top->c);
@@ -450,6 +490,7 @@ static void close_leaf(log_t *log) {
 /** \brief Enter a frame for a node. */
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
                      const char *name, const char *name_end) {
+    jmi_callbacks_t* cb = log->jmi_callbacks;
     close_leaf(log);
     log->next_name = NULL;
 
@@ -506,6 +547,14 @@ static void log_string_literal_(log_t *log, const char *value) {
     defer_comma(log);
 }
 
+static int emitted_category(log_t *log, category_t c) {
+    jmi_callbacks_t* cb = log->jmi_callbacks;
+    if (!log->filtering_enabled) {
+        return TRUE;
+    }
+    return cb->is_log_category_emitted(cb, c);
+}
+
 static void log_comment_(log_t *log, category_t c, const char *msg) {
     close_leaf(log);
     if (!emitted_category(log, c)) return;
@@ -540,7 +589,8 @@ static void logging_error(log_t *log, const char *msg) {
 
  /* User constructor, destructor */
 
-jmi_log_t *jmi_log_init(jmi_options_t* options, jmi_callbacks_t* jmi_callbacks) {
+jmi_log_t *jmi_log_init(jmi_callbacks_t* jmi_callbacks) {
+    jmi_log_options_t* options = &jmi_callbacks->log_options;
     log_t *log = (log_t *)malloc(sizeof(log_t));
     init_log(log, options, jmi_callbacks);
     return log;

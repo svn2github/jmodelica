@@ -36,32 +36,19 @@ jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
     return type;
 }
 
-int jmi_me_instantiate(jmi_t** jmi, void* fmix_me, jmi_string instance_name,
-                       jmi_string GUID, allocate_memory_t allocate_memory,
-                       free_memory_t free_memory, logger_callaback_function_t logger,
-                       jmi_boolean logging_on) {
+int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
                        
-    jmi_callbacks_t* jmi_callbacks = 0;
-    jmi_t* jmi_ ;
+    jmi_t* jmi_ = jmi;
     int retval;
-    
-    jmi_callbacks = (jmi_callbacks_t*)calloc(1,sizeof(jmi_callbacks_t));
-    jmi_callbacks->fmix_me = fmix_me;
-    jmi_callbacks->fmi_name = instance_name;
-    jmi_callbacks->logging_on = logging_on;
-    jmi_callbacks->logger = logger;
-    jmi_callbacks->allocate_memory = allocate_memory;
-    jmi_callbacks->free_memory = free_memory;
-    
-    retval = jmi_new(jmi, jmi_callbacks);
+      
+    retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
         /* creating jmi struct failed */
         jmi_log_comment(jmi_->log, logError, "Creating internal struct failed.");
-        free_memory(jmi_callbacks);
-        return -1;
+        return retval;
     }
     
-    jmi_ = *jmi;
+    jmi_ = jmi;
     
     /* Check if the GUID is correct.*/
     if (strcmp(GUID, C_GUID) != 0) {
@@ -169,8 +156,8 @@ int jmi_initialize(jmi_t* jmi) {
     jmi_copy_pre_values(jmi);
 
     /* Set the switches */
-    b_mode =  jmi -> jmi_callbacks -> allocate_memory(nR0, sizeof(jmi_real_t));
-    sw_temp =  jmi -> jmi_callbacks -> allocate_memory(nR0, sizeof(jmi_real_t));
+    b_mode =  jmi -> jmi_callbacks.allocate_memory(nR0, sizeof(jmi_real_t));
+    sw_temp =  jmi -> jmi_callbacks.allocate_memory(nR0, sizeof(jmi_real_t));
     retval = jmi_init_R0(jmi, b_mode);
     switches = jmi_get_sw(jmi);
     for (i=0; i < nR0; i=i+1){
@@ -235,13 +222,13 @@ int jmi_initialize(jmi_t* jmi) {
         }
     }
 
-    jmi -> jmi_callbacks -> free_memory(b_mode);
+    jmi -> jmi_callbacks.free_memory(b_mode);
     /* Call the initialization function */
     retval = jmi_ode_initialize(jmi);
 
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Initialization failed.");
-        jmi -> jmi_callbacks -> free_memory(sw_temp);
+        jmi -> jmi_callbacks.free_memory(sw_temp);
         return -1;
     }
     
@@ -258,7 +245,7 @@ int jmi_initialize(jmi_t* jmi) {
 
         if(retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Initialization failed.");
-            jmi -> jmi_callbacks -> free_memory(sw_temp);
+            jmi -> jmi_callbacks.free_memory(sw_temp);
             return -1;
         }
         
@@ -274,12 +261,12 @@ int jmi_initialize(jmi_t* jmi) {
         if(iter >= max_iterations){
             jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
                          "due to too many iterations at <t:%g> (initialization).", jmi_get_t(jmi)[0]);
-            jmi -> jmi_callbacks -> free_memory(sw_temp);
+            jmi -> jmi_callbacks.free_memory(sw_temp);
             return -1;
         }
     }
     
-    jmi -> jmi_callbacks -> free_memory(sw_temp);
+    jmi -> jmi_callbacks.free_memory(sw_temp);
 
     /* Reset atEvent flag */
     jmi->atEvent = JMI_FALSE;
@@ -708,8 +695,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* Allocate memory */
     nGuards = jmi->n_guards;
     jmi_dae_get_sizes(jmi, &nF, &nR);
-    event_indicators = jmi->jmi_callbacks->allocate_memory(nR, sizeof(jmi_real_t));
-    sw_temp = jmi->jmi_callbacks->allocate_memory(nR, sizeof(jmi_real_t));
+    event_indicators = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
+    sw_temp = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
     switches = jmi_get_sw(jmi); /* Get the switches */
 
     /* Reset eventInfo */
@@ -860,8 +847,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 	/* If everything went well, check if termination of simulation was requested. */
 	event_info->terminate_simulation = jmi->terminate ? TRUE : FALSE;
 
-    jmi->jmi_callbacks->free_memory(event_indicators);
-    jmi->jmi_callbacks->free_memory(sw_temp);
+    jmi->jmi_callbacks.free_memory(event_indicators);
+    jmi->jmi_callbacks.free_memory(sw_temp);
 
     jmi_log_leave(jmi->log, top_node);
 
@@ -897,22 +884,24 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     int index1;
     int index2;
     jmi_options_t* op = &jmi->options;
+    jmi_block_solver_options_t* bsop = &op->block_solver_options;
     index = get_option_index("_log_level");
-    if(index)
-        op->log_level = (int)z[index]; 
+    if(index) {
+        op->log_options->log_level = (int)z[index];
+    }
     index = get_option_index("_enforce_bounds");
     if(index)
-        op->enforce_bounds_flag = (int)z[index]; 
+        op->block_solver_options.enforce_bounds_flag = (int)z[index]; 
     
     index = get_option_index("_use_jacobian_equilibration");
     index1 = get_option_index("_use_jacobian_scaling");
     if(index || index1 ){
         int fl, fl1;
-        fl = fl1 = op->use_jacobian_equilibration_flag;
+        fl = fl1 = bsop->use_jacobian_equilibration_flag;
         if(index) fl = (int)z[index]; 
         if(index1) fl1 = (int)z[index1];
         
-        op->use_jacobian_equilibration_flag = fl || fl1; 
+        bsop->use_jacobian_equilibration_flag = fl || fl1; 
     }
     
     index = get_option_index("_residual_equation_scaling");
@@ -921,43 +910,43 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     if(index || index1 || index2) {
         /* to support deprecation: non-default setting given precendence*/
         if(index2 && (int)z[index2]) {
-            op->residual_equation_scaling_mode = jmi_residual_scaling_manual;
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
         }
         else if(index1 && !(int)z[index1]){
-            op->residual_equation_scaling_mode = jmi_residual_scaling_none;
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_none;
         }
         else if(index && ((int)z[index] != jmi_residual_scaling_auto)) {
-            op->residual_equation_scaling_mode = (int)z[index];
+            bsop->residual_equation_scaling_mode = (int)z[index];
         }
         else
-            op->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
     }
     index = get_option_index("_nle_solver_max_iter");
     if(index)
-        op->nle_solver_max_iter = (int)z[index];
+        bsop->max_iter = (int)z[index];
     index = get_option_index("_block_solver_experimental_mode");
     if(index)
-        op->block_solver_experimental_mode  = (int)z[index];
+        bsop->experimental_mode  = (int)z[index];
     
     index = get_option_index("_iteration_variable_scaling");
     if(index)
-        op->iteration_variable_scaling_mode = (int)z[index];
+        bsop->iteration_variable_scaling_mode = (int)z[index];
     
     index = get_option_index("_rescale_each_step");
     if(index)
-        op->rescale_each_step_flag = (int)z[index]; 
+        bsop->rescale_each_step_flag = (int)z[index]; 
     index = get_option_index("_rescale_after_singular_jac");
     if(index)
-        op->rescale_after_singular_jac_flag = (int)z[index]; 
+        bsop->rescale_after_singular_jac_flag = (int)z[index]; 
     index = get_option_index("_use_Brent_in_1d");
     if(index)
-        op->use_Brent_in_1d_flag = (int)z[index]; 
+        bsop->use_Brent_in_1d_flag = (int)z[index]; 
     index = get_option_index("_nle_solver_default_tol");
     if(index)
         op->nle_solver_default_tol = z[index]; 
     index = get_option_index("_nle_solver_check_jac_cond");
     if(index)
-        op->nle_solver_check_jac_cond_flag = (int)z[index]; 
+        bsop->check_jac_cond_flag = (int)z[index]; 
     index = get_option_index("_nle_solver_min_tol");
     if(index)
         op->nle_solver_min_tol = z[index]; 
@@ -987,7 +976,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->cs_step_size = z[index]; 
     index = get_option_index("_runtime_log_to_file");
     if(index)
-        op->runtime_log_to_file = (int)z[index]; 
+        op->log_options->copy_log_to_file_flag = (int)z[index]; 
     
 /*    op->block_solver_experimental_mode = 
             jmi_block_solver_experimental_steepest_descent_first|

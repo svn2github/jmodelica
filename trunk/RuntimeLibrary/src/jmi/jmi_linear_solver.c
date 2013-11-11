@@ -74,7 +74,7 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
             }
             return -1;
         }
-        if((n_x>1)  && block->jmi->options.use_jacobian_equilibration_flag) {
+        if((n_x>1)  && block->options->use_jacobian_equilibration_flag) {
             double rowcnd, colcnd, amax;
             dgeequ_(&n_x, &n_x, solver->factorization, &n_x, solver->rScale, solver->cScale, 
                     &rowcnd, &colcnd, &amax, &info);

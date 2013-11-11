@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include "fmi1_me.h"
 #include "jmi.h"
@@ -35,10 +36,14 @@ const char* fmi1_me_get_version() {
     return fmiVersion;
 }
 
+void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message);
+BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category);
+
 /* Creation and destruction of model instances and setting debug status */
 fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
 
     fmi1_me_t *component;
+    jmi_callbacks_t* cb;
     char* tmpname;
     size_t inst_name_len;
 
@@ -56,11 +61,27 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     }
     
     component = (fmi1_me_t *)functions.allocateMemory(1, sizeof(fmi1_me_t));
+    if(!component) {
+         if(functions.logger) {
+             /* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
+             functions.logger(0, instanceName, fmiError, "ERROR", "Could not allocate memory for the model instance.");
+         }
+         return 0;
+    }
+    component->fmi_functions = functions;
+    cb = &component->jmi.jmi_callbacks;
+
+    cb->emit_log = fmi1_me_emit_log;
+    cb->is_log_category_emitted = fmi1_me_is_log_category_emitted;
+    cb->log_options.logging_on_flag = loggingOn;
+    cb->log_options.log_level = logWarning;
+    cb->allocate_memory = functions.allocateMemory;
+    cb->free_memory = functions.freeMemory;
+    cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */
+    cb->instance_name = instanceName;    /** < \brief Name of this model instance. */
+    cb->model_data = component;
     
-    retval = jmi_me_instantiate(&jmi, component, instanceName, GUID,
-                                functions.allocateMemory, functions.freeMemory,
-                                (logger_callaback_function_t)functions.logger,
-                                loggingOn);
+    retval = jmi_me_init(cb, &component->jmi, GUID);
     if (retval != 0) {
         functions.freeMemory(component);
         return NULL;
@@ -71,10 +92,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     strncpy(tmpname, instanceName, inst_name_len);
     component -> fmi_instance_name = tmpname;
     
-    component->fmi_functions = functions;
-    component -> jmi = jmi;
-
-    return (fmiComponent)component;
+    return component;
 }
 
 void fmi1_me_free_model_instance(fmiComponent c) {
@@ -86,41 +104,45 @@ void fmi1_me_free_model_instance(fmiComponent c) {
         component = (fmi1_me_t*)c;
         fmi_free = component -> fmi_functions.freeMemory;
 
-        jmi_delete(component->jmi);
-        component->jmi = 0;
+        jmi_delete(&component->jmi);
         fmi_free((void*)component -> fmi_instance_name);
         fmi_free(component);
     }
 }
 
 fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    ((fmi1_me_t*)c) -> jmi -> log -> jmi_callbacks -> logging_on = loggingOn;
+    self->jmi.jmi_callbacks.log_options.logging_on_flag = loggingOn;
     return fmiOK;
 }
 
 /* Providing independent variables and re-initialization of caching */
 
 fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    *(jmi_get_t(((fmi1_me_t *)c)->jmi)) = time;
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
+    *(jmi_get_t(jmi)) = time;
+    jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    memcpy (jmi_get_real_x(((fmi1_me_t *)c)->jmi), x, nx*sizeof(fmiReal));
-    ((fmi1_me_t *)c)->jmi->recomputeVariables = 1;
+    memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
+    jmi->recomputeVariables = 1;
     return fmiOK;
 }
 
@@ -134,13 +156,15 @@ fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEven
 }
 
 fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[]) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_set_real(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_set_real(jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -149,13 +173,15 @@ fmiStatus fmi1_me_set_real(fmiComponent c, const fmiValueReference vr[], size_t 
 }
 
 fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[]) {
-    fmiInteger retval;
+     fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
+   fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    retval = jmi_set_integer(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_set_integer(jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -164,13 +190,15 @@ fmiStatus fmi1_me_set_integer (fmiComponent c, const fmiValueReference vr[], siz
 }
 
 fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[]) {
-    fmiInteger retval;
+     fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
+   fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_set_boolean(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_set_boolean(jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -179,13 +207,15 @@ fmiStatus fmi1_me_set_boolean (fmiComponent c, const fmiValueReference vr[], siz
 }
 
 fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[]) {
-    fmiInteger retval;
+     fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
+   fmiInteger retval;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_set_string(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_set_string(jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -197,7 +227,8 @@ fmiStatus fmi1_me_set_string(fmiComponent c, const fmiValueReference vr[], size_
 
 fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmiReal relativeTolerance, fmiEventInfo* eventInfo) {
     fmiInteger retval;
-    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     
     /* For debugging Jacobians */
 /*
@@ -249,12 +280,14 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
 
 fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t nx) {
     fmiInteger retval;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_get_derivatives(((fmi1_me_t *)c)->jmi, derivatives, nx);
+    retval = jmi_get_derivatives(jmi, derivatives, nx);
     if (retval != 0) {
         return fmiError;
     }
@@ -264,12 +297,14 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
 
 fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     fmiInteger retval;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_get_event_indicators(((fmi1_me_t *)c)->jmi, eventIndicators, ni);
+    retval = jmi_get_event_indicators(jmi, eventIndicators, ni);
     if (retval != 0) {
         return fmiError;
     }
@@ -283,8 +318,8 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     
     fmiStatus fmiFlag;
     fmiReal* jac;
-    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
-    fmi1_me_t* fmi1_me = (fmi1_me_t *)c;
+    fmi1_me_t* fmi1_me = (fmi1_me_t*)c;
+    jmi_t* jmi = &fmi1_me->jmi;
     int nA;
     int nB;
     int nC;
@@ -467,7 +502,8 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
     int n_outputs2;
     int* output_vrefs2;
     
-    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     
     n_outputs = jmi->n_outputs;
     n_outputs2 = n_outputs;
@@ -505,7 +541,7 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
     z1 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
     z2 = (fmiReal*)calloc(nzvr, sizeof(fmiReal));
     
-    for(i = 0; i < nvvr; i++){
+    for(i = 0; (size_t)i < nvvr; i++){
         k = 0;
         if((*(jmi->z))[offs+i] != 0){
             h = (*(jmi->z))[offs+i]*0.000000015;
@@ -548,7 +584,7 @@ fmiStatus fmi1_me_get_jacobian_fd(fmiComponent c, int independents, int dependen
         }
         (*(jmi->z))[offs+i] += h;
         
-        for(j = 0; j < nzvr;j++){
+        for(j = 0; (size_t)j < nzvr;j++){
             jac[i*nzvr+j] = (z1[j] - z2[j])/(2*h);
         }
         
@@ -574,8 +610,8 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int passed = 0;
     int failed = 0;
     
-    fmiReal rel_tol;
-    fmiReal abs_tol;
+/**    fmiReal rel_tol;
+    fmiReal abs_tol; */
     
     int offs;
     jmi_real_t** dv;
@@ -593,7 +629,8 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int* output_vrefs;
     int n_outputs_real;
     int* output_vrefs_real;
-    jmi_t* jmi = ((fmi1_me_t *)c)->jmi;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     clock_t c0, c1;
 
     c0 = clock();
@@ -693,7 +730,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
         }
 
         /*For every x and/or u variable...*/
-        for(i = 0; i < nvvr; i++){
+        for(i = 0; (size_t)i < nvvr; i++){
             (*dv)[i+offs] = 1;
             jmi->block_level = 0; /* to recover from errors */
 
@@ -773,12 +810,14 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
 /*Evaluate the directional derivative dz/dv dv*/
 fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
     fmiInteger retval;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_get_directional_derivative(((fmi1_me_t *)c)->jmi,
+    retval = jmi_get_directional_derivative(jmi,
                                             z_vref, nzvr, v_vref, nvvr,
                                             dv, dz);
     if (retval != 0) {
@@ -790,12 +829,14 @@ fmiStatus fmi1_me_get_directional_derivative(fmiComponent c, const fmiValueRefer
 
 fmiStatus fmi1_me_get_real(fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[]) {
     fmiInteger retval;
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
 
     if (c == NULL) {
 		return fmiFatal;
     }
 
-    retval = jmi_get_real(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_get_real(jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -810,7 +851,7 @@ fmiStatus fmi1_me_get_integer(fmiComponent c, const fmiValueReference vr[], size
 		return fmiFatal;
     }
 
-    retval = jmi_get_integer(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_get_integer(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -825,7 +866,7 @@ fmiStatus fmi1_me_get_boolean(fmiComponent c, const fmiValueReference vr[], size
 		return fmiFatal;
     }
 
-    retval = jmi_get_boolean(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_get_boolean(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -840,7 +881,7 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
 		return fmiFatal;
     }
 
-    retval = jmi_get_string(((fmi1_me_t *)c)->jmi, vr, nvr, value);
+    retval = jmi_get_string(&((fmi1_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
     }
@@ -850,7 +891,7 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
 }
 
 jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {
-    return ((fmi1_me_t*)c)->jmi;
+    return &((fmi1_me_t*)c)->jmi;
 }
 
 fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
@@ -863,7 +904,7 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
     
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
     
-    retval = jmi_event_iteration(((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
+    retval = jmi_event_iteration(&((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
     if (retval != 0) {
         return fmiError;
     }
@@ -885,7 +926,7 @@ fmiStatus fmi1_me_get_continuous_states(fmiComponent c, fmiReal states[], size_t
 		return fmiFatal;
     }
     
-    memcpy (states, jmi_get_real_x(((fmi1_me_t *)c)->jmi), nx*sizeof(fmiReal));
+    memcpy (states, jmi_get_real_x(&((fmi1_me_t *)c)->jmi), nx*sizeof(fmiReal));
     return fmiOK;
 }
 
@@ -896,7 +937,7 @@ fmiStatus fmi1_me_get_nominal_continuous_states(fmiComponent c, fmiReal x_nomina
 		return fmiFatal;
     }
     
-    retval = jmi_get_nominal_continuous_states(((fmi1_me_t *)c)->jmi, x_nominal, nx);
+    retval = jmi_get_nominal_continuous_states(&((fmi1_me_t *)c)->jmi, x_nominal, nx);
     if (retval != 0) {
         return fmiError;
     }
@@ -912,7 +953,7 @@ fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference v
 		return fmiFatal;
     }
         
-    offset = ((fmi1_me_t *)c)->jmi->offs_real_x;
+    offset = ((fmi1_me_t *)c)->jmi.offs_real_x;
     
     for(i = 0; i<nx; i = i + 1) {
         vrx[i] = offset + i;
@@ -922,44 +963,35 @@ fmiStatus fmi1_me_get_state_value_references(fmiComponent c, fmiValueReference v
 
 fmiStatus fmi1_me_terminate(fmiComponent c) {
     /* Release all resources that have been allocated since fmi_initialize has been called. */
-    jmi_terminate(((fmi1_me_t *)c)->jmi);
+    jmi_terminate(&((fmi1_me_t *)c)->jmi);
     return fmiOK;
 }
 
-BOOL fmi1_me_emitted_category(log_t *log, category_t category) {
-    jmi_callbacks_t* jmi_callbacks = log->jmi_callbacks;
-    if (((fmi1_me_t *)(jmi_callbacks->fmix_me) != NULL) && !jmi_callbacks->logging_on) {
+BOOL fmi1_me_emitted_category(jmi_log_t *log, jmi_log_category_t category) {
+    assert(0);
+    return 0;
+}
+
+BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
+
+    jmi_callbacks_t* jmi_callbacks = cb;
+    fmi1_me_t * self = (fmi1_me_t *)cb->model_data;
+    if ((self != NULL) && !jmi_callbacks->log_options.logging_on_flag) {
         return FALSE;
-    }
-    if (!log->filtering_enabled) {
-        return TRUE;
     }
     
     switch (category) {
         case logError:   break;
-        case logWarning: if(log->options->log_level < 3) return FALSE; break;
-        case logInfo:    if(log->options->log_level < 4) return FALSE; break;
+        case logWarning: if(cb->log_options.log_level < 3) return FALSE; break;
+        case logInfo:    if(cb->log_options.log_level < 4) return FALSE; break;
     }
     return TRUE;
 }
 
-void fmi1_me_create_log_file_if_needed(log_t *log) {
-    if (log->log_file != NULL) return;
-    if (log->options->runtime_log_to_file) {
-        /* Create new log file */
-        const char *instance_name = log->jmi_callbacks->fmi_name;
-        char filename[1024];
-
-        sprintf(filename, "%s_%s.log", jmi_get_model_identifier(),
-                                       instance_name);
-        /* TODO: fopen returns NULL on error
-           ==> will try to reopen the file at the next emit. Do we want this? 
-           Not an issue if create_log_file_if_needed is only called once.*/
-        log->log_file = fopen(filename, "w");
-    }
+void fmi1_me_create_log_file_if_needed(jmi_log_t *log) {
 }
 
-static fmiStatus category_to_fmiStatus(category_t c) {
+static fmiStatus category_to_fmiStatus(jmi_log_category_t c) {
     switch (c) {
     case logError:   return fmiError;
     case logWarning: return fmiWarning;
@@ -968,7 +1000,7 @@ static fmiStatus category_to_fmiStatus(category_t c) {
     }
 }
 
-static const char *category_to_fmiCategory(category_t c) {
+static const char *category_to_fmiCategory(jmi_log_category_t c) {
     switch (c) {
     case logError:   return "ERROR";
     case logWarning: return "WARNING";
@@ -977,36 +1009,39 @@ static const char *category_to_fmiCategory(category_t c) {
     }
 }
 
-void fmi1_me_emit(log_t *log, char* message) {
-    jmi_callbacks_t* jmi_callbacks = log->jmi_callbacks;
-    category_t category = log->c;
-    category_t severest_category = severest(category, log->severest_category);
+void fmi1_me_emit(jmi_log_t *log, char* message) {
+}
 
-    if (!emitted_category(log, category)) return;
+void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
 
-    /* create_log_file_if_needed(log); */
-    if (log->log_file) {
-        file_logger(log->log_file, log->log_file, 
-                    category, severest_category, message);
-        fflush(log->log_file);
-    }
-    if ((fmi1_me_t *)(jmi_callbacks->fmix_me)) {
-        ((fmiCallbackLogger)(jmi_callbacks->logger))((fmi1_me_t *)(jmi_callbacks->fmix_me),
-                                   jmi_callbacks->fmi_name,
-                                   category_to_fmiStatus(category),
+    fmi1_me_t* c = (fmi1_me_t*)(jmi_callbacks->model_data);
+  
+    if(c){
+        if(c->fmi_functions.logger)
+            c->fmi_functions.logger(c,jmi_callbacks->instance_name, 
+                                    category_to_fmiStatus(category),
                                    category_to_fmiCategory(severest_category),
-                                   message);
-        
+                                   message);       
     } else {
-        file_logger(stdout, stderr, category, severest_category, message);
+        switch (category) {
+            case logError:
+                fprintf(stderr, "<!-- ERROR:   --> %s\n", message);
+            break;
+            case logWarning:
+                fprintf(stderr, "<!-- WARNING: --> %s\n", message);
+            break;
+            case logInfo:
+                fprintf(stdout, "%s\n", message);
+            break;
+        }
     }
 }
 
 fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
     fmiInteger nniters;
-    fmiReal avg_nniters;
+/*    fmiReal avg_nniters; */
     fmi1_me_t* fmi1_me = ((fmi1_me_t*)c);
-    jmi_t* jmi = fmi1_me->jmi;
+    jmi_t* jmi = &fmi1_me->jmi;
     jmi_block_residual_t* block;
     int i;
     jmi_log_node_t topnode = jmi_log_enter(jmi->log, logInfo, "FMIDebugInfo");

@@ -1149,8 +1149,7 @@ void jmi_delete_init(jmi_init_t** pinit) {
 }
 
 int jmi_variable_type(jmi_t *jmi, int col_index) {
-    int i;
-
+    
     if (col_index>=jmi->offs_real_ci && col_index<jmi->offs_real_cd) {
         return JMI_DER_CI;
     } else if (col_index >= jmi->offs_real_cd && col_index < jmi->offs_real_pi) {
@@ -1438,18 +1437,19 @@ int jmi_with_cad_derivatives(jmi_t* jmi)
 }
 
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
-    op->log_level = 3 ;           /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
-    op->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    op->use_jacobian_equilibration_flag = 0; 
-    op->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
-    op->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
-    op->block_solver_experimental_mode = 0;
-    op->nle_solver_max_iter = 100;
-    op->rescale_each_step_flag = 0;
-    op->rescale_after_singular_jac_flag = 0;
-    op->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
+    jmi_block_solver_options_t* bsop = &op->block_solver_options;
+
+    bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
+    bsop->use_jacobian_equilibration_flag = 0; 
+    bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
+    bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+    bsop->experimental_mode = 0;
+    bsop->max_iter = 100;
+    bsop->rescale_each_step_flag = 0;
+    bsop->rescale_after_singular_jac_flag = 0;
+    bsop->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
     op->nle_solver_default_tol = 1e-10;      /**< \brief Default tolerance for the equation block solver */
-    op->nle_solver_check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
+    bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
     /* Default Kinsol tolerance (machine precision pwr 1/3)  -> 1e-6 */
     /* We use tighter:  1e-12 */
     op->nle_solver_min_tol = 1e-12;       /**< \brief Minimum tolerance for the equation block solver */
@@ -1459,7 +1459,8 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     op->cs_solver = JMI_ODE_CVODE;        /** < \brief Option for changing the internal CS solver. */
     op->cs_rel_tol = 1e-6;                /** < \brief Default tolerance for the adaptive solvers in the CS case. */
     op->cs_step_size = 1e-3;              /** < \brief Default step-size for the non-adaptive solvers in the CS case. */   
-    op->runtime_log_to_file = 0;          /** < \brief Write the runtime log directly to a file as well? */
+
+    op->log_options = &jmi->jmi_callbacks.log_options;
 }
 
 int jmi_get_index_from_value_ref(int vref) {

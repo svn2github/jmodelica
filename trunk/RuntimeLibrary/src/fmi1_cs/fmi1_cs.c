@@ -41,7 +41,7 @@ fmiStatus fmi1_cs_set_debug_logging(fmiComponent c, fmiBoolean loggingOn){
     }
     
     fmi1_cs = (fmi1_cs_t*)c;
-    fmi1_cs->ode_problem->log->jmi_callbacks->logging_on = loggingOn;     
+    fmi1_cs->ode_problem->jmi_callbacks->log_options.logging_on_flag = loggingOn;     
     
     return fmi1_me_set_debug_logging(fmi1_cs->ode_problem ->fmix_me,loggingOn);
 }
@@ -53,7 +53,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     jmi_ode_problem_t* ode_problem;
     jmi_cs_input_t* inputs;
     int flag, retval = JMI_ODE_EVENT;
-    int initialize = JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
+    int initialize = (int)JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
     fmiReal time_event;
     fmiInteger i;
@@ -141,7 +141,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             }
             
             /* Event handled, initialize again */
-            initialize = JMI_TRUE;
+            initialize = (int)JMI_TRUE;
         }
     }
     
@@ -172,7 +172,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
     if (fmi1_cs) {
         /* Free the ODE problem.
          * In case log was created as:
-         * ode_problem -> log = jmi_log_init(fmi1_me->jmi, jmi_callbacks); 
+         * ode_problem -> log = jmi_log_init( jmi_callbacks); 
          * it have to be freed by:
          * free(fmi1_cs -> ode_problem -> log);*/
         fmi1_cs -> ode_problem -> log = NULL;
@@ -218,8 +218,9 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
                                    fmiReal timeout, fmiBoolean visible, fmiBoolean interactive, fmiCallbackFunctions functions, 
                                    fmiBoolean loggingOn) {
     fmi1_cs_t *component;
-    fmiComponent fmi1_me;
+    fmi1_me_t * fmi1_me;
     jmi_ode_problem_t* ode_problem = 0;
+    jmi_t* jmi;
     char* tmpname;
     char* tmpguid;
     char* tmp_name_encoded;
@@ -253,7 +254,7 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     component -> logging_on = loggingOn;
     component -> callback_functions = functions;
     
-    fmi1_me = fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
+    fmi1_me = (fmi1_me_t *)fmi1_me_instantiate_model(component -> encoded_instance_name, GUID, component -> me_callback_functions, loggingOn);
     
     if (fmi1_me == NULL){
         functions.freeMemory((void*)component -> instance_name);
@@ -262,16 +263,17 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
         functions.freeMemory(component);
         return NULL;
     }
-    
+    jmi = &(fmi1_me->jmi);
     /* NEEDS TO COME FROM OUTSIDE, FROM THE XML FILE*/
-    jmi_new_ode_problem(&ode_problem, fmi1_me,
-                        ((fmi1_me_t*)fmi1_me)->jmi->n_real_x,
-                        ((fmi1_me_t*)fmi1_me)->jmi->n_sw,
-                        ((fmi1_me_t*)fmi1_me)->jmi->n_real_u,
-                        ((fmi1_me_t*)fmi1_me)->jmi->log);
+    jmi_new_ode_problem(&ode_problem, &(fmi1_me->jmi.jmi_callbacks),
+                        fmi1_me,
+                        jmi->n_real_x,
+                        jmi->n_sw,
+                        jmi->n_real_u,
+                        jmi->log);
     /* In case fmi1_me_instantiate_model was not called, log struct have to
      * be created as:
-     * ode_problem -> log = jmi_log_init(fmi1_me->jmi, jmi_callbacks); */
+     * ode_problem -> log = jmi_log_init(jmi_callbacks); */
     
     component -> ode_problem = ode_problem;
     
@@ -328,9 +330,9 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                          fmi1_cs_root_fcn, fmi1_cs_completed_integrator_step);
     
     /* These options for the solver need to be found in a better way. */
-    ode_method    = fmi1_me->jmi->options.cs_solver;
-    ode_step_size = fmi1_me->jmi->options.cs_step_size;
-    ode_rel_tol   = fmi1_me->jmi->options.cs_rel_tol;
+    ode_method    = fmi1_me->jmi.options.cs_solver;
+    ode_step_size = fmi1_me->jmi.options.cs_step_size;
+    ode_rel_tol   = fmi1_me->jmi.options.cs_rel_tol;
     
     /* Create solver */
     retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol);
