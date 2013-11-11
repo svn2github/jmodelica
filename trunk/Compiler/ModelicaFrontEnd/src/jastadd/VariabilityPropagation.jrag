@@ -18,7 +18,7 @@
 aspect VariabilityPropagation {
 	
 	public boolean FAbstractEquation.taggedForRemoval = false;
-	public boolean FVariable.taggedForRemoval = false;
+	public boolean FAbstractVariable.taggedForRemoval = false;
 	
 	/**
 	 * Checks if equation is eligible for var. prop.
@@ -125,7 +125,15 @@ aspect VariabilityPropagation {
 			}
 		}
 		setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
-
+		
+		// Clean initial equations
+		newEquations = new ArrayList<FAbstractEquation>();
+		for (FAbstractEquation equation: initialEquations()) {
+			if (!equation.taggedForRemoval) {
+				newEquations.add(equation);
+			}
+		}
+		setFInitialEquationList(new List<FAbstractEquation>(newEquations));
 	}
 	
 	public void FAbstractEquation.variabilityPropagation(
@@ -301,6 +309,7 @@ aspect VariabilityPropagation {
 			FExp bindingExp) {
 		
 		FAbstractEquation equation;
+		boolean wasDiscrete = isDiscrete();
 		
 		// Declaration
 		setFTypePrefixVariability(variability);
@@ -315,15 +324,25 @@ aspect VariabilityPropagation {
 				equation.variables().remove(this);
 				if (equation.canPropagate()) {
 					worklist.add(equation);
+				} else if (equation.inInitialEquationSection() && equation.variables().size() == 0
+						&& equation.nonFixedParameters().size() == 0) {
+					equation.taggedForRemoval = true; // Initial equation
 				}
 			}
+		}
+		
+		// Pre var
+		if (wasDiscrete) {
+			FAbstractVariable pre = myPreVariable();
+			pre.taggedForRemoval = true;
+			pre.variabilityPropagation(worklist, variability, bindingExp);
 		}
 		
 		// Derivative
 		if (isDifferentiatedVariable()) {
 			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
-			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));				
+			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
 		}
 	}
 }
