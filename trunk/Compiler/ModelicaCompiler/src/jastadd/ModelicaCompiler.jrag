@@ -590,8 +590,8 @@ public class ModelicaCompiler {
 	/**
 	 * \brief Creates a target object.
 	 * 
-	 * @param target The type of target: me, cs, jmu, ect.
-	 * @param version The version in case of a fmu.
+	 * @param target The type of target: me, cs, jmu, ect. Use nocodegen for a NOCODEGEN target.
+	 * @param version The version in case of a fmu. Use null for a NOCODEGEN.
 	 */
 	public TargetObject createTargetObject(String target, String version) {
 		return TargetObject.getTarget(target, version);
@@ -691,6 +691,12 @@ public class ModelicaCompiler {
 			
 			// compile mo-file + generate code for all templates that are not null
 			FClass fc = compileModel(fileName, className, target);
+			
+			if (!target.getCodeGenFlag()) {
+				//No code have been generated.
+				options.copyAllOptions(tempOptions);
+				return;
+			}
 			
 			// compile c code if Makefile flag is not null
 			hookCheckAbort();
@@ -897,8 +903,10 @@ public class ModelicaCompiler {
 			fc = flattenModel(buf.pass(), target);
 
 			// Generate code 
-			generateCode(fc, target);
-			dumpMemoryUseFile(fc, "generated", false);
+			if (target.getCodeGenFlag()) {
+				generateCode(fc, target);
+				dumpMemoryUseFile(fc, "generated", false);
+			}
 			
 		} finally {
 //          logCompilationInfo();
@@ -1636,23 +1644,31 @@ public class ModelicaCompiler {
         FMUX      (Templates.FMUX,       null,       "fmux"),
         FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (Templates.NULL,      null,        null, ErrorCheckType.CHECK);
+        CHECK     (Templates.NULL,      null,        null, ErrorCheckType.CHECK),
+        NOCODEGEN (Templates.NULL,      null,        null, ErrorCheckType.COMPILE, false);
 
         private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
         private final ErrorCheckType checkType;
+        private final boolean codeGen;
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType) {
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType, boolean codeGen) {
             this.templates = templates;
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
             this.checkType = checkType;
+            this.codeGen = codeGen;
         }
 
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType) {
+            this(templates, makeFileFlag, suffix, checkType, true);
+        }
+        
         private TargetObject(Templates templates, String makeFileFlag, String suffix) {
             this(templates, makeFileFlag, suffix, ErrorCheckType.COMPILE);
         }
+
         
         /**
         * Returns an enum of the target that contains all relevant information for the target.
@@ -1662,7 +1678,9 @@ public class ModelicaCompiler {
         */
         public static TargetObject getTarget(String targetType, String version)
                 throws IllegalCompilerArgumentException {
-            if (targetType.equals("me")) {
+        	if (targetType.equals("nocodegen")) {
+        		return NOCODEGEN;
+            } else if (targetType.equals("me")) {
                 if (version == null || version.equals("1.0")) {
                     return FMUME10;
                 } else if (version.equals("2.0")) {
@@ -1743,6 +1761,13 @@ public class ModelicaCompiler {
          */
         public ErrorCheckType getCheckType() {
             return checkType;
+        }
+        
+        /**
+         * Get a flag that determines if there should be any code-generation.
+         */
+        public boolean getCodeGenFlag() {
+            return codeGen;
         }
         
         /**
