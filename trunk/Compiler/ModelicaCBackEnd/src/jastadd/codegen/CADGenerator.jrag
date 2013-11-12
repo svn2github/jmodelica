@@ -208,10 +208,11 @@ public class CADGenerator extends CGenerator {
 		
 		public DAETag_CAD_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
 			super("CAD_ode_derivatives", myGenerator, fclass);
+            addOptions("!generate_only_initial_system");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && shouldGenerateODEJacobians(fclass)) {
+			if (shouldGenerateODEJacobians(fclass)) {
 				genPrinter.print("\n/******** Declarations *******/\n");
 				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
 				genPrinter.print("\njmi_real_t** dz = jmi->dz;\n");

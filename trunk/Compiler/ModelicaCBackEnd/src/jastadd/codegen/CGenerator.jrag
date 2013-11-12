@@ -135,16 +135,15 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_DAE_equation_residuals", myGenerator, fclass);
+			addOptions("generate_dae");
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")) {
-				for (FAbstractEquation e : fclass.equations()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				Enumerator enumerator = new Enumerator();
-				for (FAbstractEquation e : fclass.equations())
-					e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
-			}
+			for (FAbstractEquation e : fclass.equations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			Enumerator enumerator = new Enumerator();
+			for (FAbstractEquation e : fclass.equations())
+				e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
 		}
 	
 	}
@@ -179,20 +178,19 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_DAE_initial_equation_residuals", myGenerator, fclass);
+            addOptions("generate_dae");
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")) {
-				for (FAbstractEquation e : fclass.equations()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				for (FAbstractEquation e : fclass.initialEquations()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				Enumerator enumerator = new Enumerator();
-				for (FAbstractEquation e : fclass.equations())
-					e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
-				for (FAbstractEquation e : fclass.initialEquations())
-					e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
-			}
+			for (FAbstractEquation e : fclass.equations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			for (FAbstractEquation e : fclass.initialEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			Enumerator enumerator = new Enumerator();
+			for (FAbstractEquation e : fclass.equations())
+				e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
+			for (FAbstractEquation e : fclass.initialEquations())
+				e.genResidual_C(enumerator,INDENT,genPrinter, null, null);
 		}	
 	}
 
@@ -246,14 +244,13 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_initialDependentParameterResiduals(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_DAE_initial_dependent_parameter_residuals", myGenerator, fclass);
+            addOptions("generate_dae");
 		}
 	
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_dae")) {
-				Enumerator enumerator = new Enumerator();
-				for (FAbstractEquation e : fclass.getFParameterEquations())
-					e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
-			}
+			Enumerator enumerator = new Enumerator();
+			for (FAbstractEquation e : fclass.getFParameterEquations())
+				e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
 		}
 	
 	}
@@ -395,14 +392,13 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_dae_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
-				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-					block.genBlockResidualFunction_C(false, "", genPrinter);
-			}
+			fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
+			for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
+				block.genBlockResidualFunction_C(false, "", genPrinter);
 		}
 	}
 
@@ -416,10 +412,11 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_dae_add_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode") && !CADGenerator.shouldGenerateBlockJacobians(fclass)) {
+			if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
 					block.genBlockAddCall_C(false, false, ASTNode.printer_C.indent(""), genPrinter);
@@ -458,14 +455,13 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_dae_init_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlockResidualFunction_C(true, "", genPrinter); 
-			}
+			fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+			for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+				block.genBlockResidualFunction_C(true, "", genPrinter); 
 		}
 	}
 
@@ -479,10 +475,11 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_dae_init_add_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode") && !CADGenerator.shouldGenerateBlockJacobians(fclass)) {
+			if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
 					block.genBlockAddCall_C(false, true, ASTNode.printer_C.indent(""), genPrinter);
@@ -521,10 +518,11 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_guards(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_guards", myGenerator, fclass);
+			addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
 				for (FExp e : fclass.guardExpInEquations()) 
 					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 				int i=0;
@@ -534,7 +532,7 @@ public class CGenerator extends GenericGenerator {
 					genPrinter.print(";\n");		
 					i++;
 				}
-			} else if (fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
+			} else {
 				genPrinter.print("  model_ode_guards_init(jmi);\n");
 			}
 		}
@@ -550,19 +548,18 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_guards_init(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_guards_init", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				for (FExp e : fclass.guardExpInInitialEquations()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				int i=0;
-				for (FExp e : fclass.guardExpInInitialEquations()) {
-				    genPrinter.print("  _guards_init(" + i + ") = ");
-					e.prettyPrint_C(genPrinter,"");		
-					genPrinter.print(";\n");		
-					i++;
-				}
+			for (FExp e : fclass.guardExpInInitialEquations()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			int i=0;
+			for (FExp e : fclass.guardExpInInitialEquations()) {
+			    genPrinter.print("  _guards_init(" + i + ") = ");
+				e.prettyPrint_C(genPrinter,"");		
+				genPrinter.print(";\n");		
+				i++;
 			}
 		}
 	}
@@ -577,62 +574,62 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_time_events(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_time_events", myGenerator, fclass);
+            addOptions("!generate_only_initial_system", "generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (!fclass.root().options.getBooleanOption("generate_only_initial_system") && fclass.root().options.getBooleanOption("generate_ode")) {
-				for (FSampleExp e : fclass.samplers()) 
-					e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				genPrinter.print("  jmi_real_t nextTimeEvent;\n");
-				genPrinter.print("  jmi_real_t nextTimeEventTmp;\n");				
-				genPrinter.print("  jmi_real_t nSamp;\n");	
-				genPrinter.print("  nextTimeEvent = JMI_INF;\n");
-				
-				
-				/*
-					There are three cases to consider for each sampler:
-					 1) The current time is (surely) before the offset of 
-					    the sampler. In this case, the next time event occurs
-					    at time offset.
-					 2) The current time is a sample instant of the sampler
-					    in which case next time event is the next sample
-					    instant.
-					 3) If neither of the above holds true, then the current
-					    time is in between two sample instants of the sampler.
-					    In this case, the next time event is the next sample
-					    instant.
-				
-				*/
-				
-	//			genPrinter.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
-				for (FSampleExp s : fclass.samplers()) {
-					genPrinter.print("  nextTimeEventTmp = JMI_INF;\n");
-					// Case 1: time is before offset 
-					genPrinter.print("  if (SURELY_LT_ZERO(_t - ");
-					s.getOffset().prettyPrint_C(genPrinter,"");
-					genPrinter.print(")) {\n");
-					genPrinter.print("    nextTimeEventTmp = ");
-					s.getOffset().prettyPrint_C(genPrinter,"");
-					genPrinter.print(";\n");
-					//genPrinter.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
-				    genPrinter.print("  } ");	
-				    // Case 2: we are at a sample			    					
-					genPrinter.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - ");
-					s.getOffset().prettyPrint_C(genPrinter,"");
-					genPrinter.print(",");
-					s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print("))) {\n");
-					// nSamp should be almost an integer - round to get it exact
-					genPrinter.print("    nSamp = jmi_dround((_t-");
-				    s.getOffset().prettyPrint_C(genPrinter,"");
-				    genPrinter.print(")/(");
-				    s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print("));\n");
-					genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
-					s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print(" + ");
-				    s.getOffset().prettyPrint_C(genPrinter,"");
-				    genPrinter.print(";\n");
+			for (FSampleExp e : fclass.samplers()) 
+				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+			genPrinter.print("  jmi_real_t nextTimeEvent;\n");
+			genPrinter.print("  jmi_real_t nextTimeEventTmp;\n");				
+			genPrinter.print("  jmi_real_t nSamp;\n");	
+			genPrinter.print("  nextTimeEvent = JMI_INF;\n");
+			
+			
+			/*
+				There are three cases to consider for each sampler:
+				 1) The current time is (surely) before the offset of 
+				    the sampler. In this case, the next time event occurs
+				    at time offset.
+				 2) The current time is a sample instant of the sampler
+				    in which case next time event is the next sample
+				    instant.
+				 3) If neither of the above holds true, then the current
+				    time is in between two sample instants of the sampler.
+				    In this case, the next time event is the next sample
+				    instant.
+			
+			*/
+			
+//			genPrinter.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
+			for (FSampleExp s : fclass.samplers()) {
+				genPrinter.print("  nextTimeEventTmp = JMI_INF;\n");
+				// Case 1: time is before offset 
+				genPrinter.print("  if (SURELY_LT_ZERO(_t - ");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print(")) {\n");
+				genPrinter.print("    nextTimeEventTmp = ");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print(";\n");
+				//genPrinter.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
+			    genPrinter.print("  } ");	
+			    // Case 2: we are at a sample			    					
+				genPrinter.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - ");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print(",");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("))) {\n");
+				// nSamp should be almost an integer - round to get it exact
+				genPrinter.print("    nSamp = jmi_dround((_t-");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(")/(");
+			    s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("));\n");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" + ");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(";\n");
 /*----*//*
 					genPrinter.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
 					genPrinter.print("(_t-");
@@ -642,26 +639,26 @@ public class CGenerator extends GenericGenerator {
 					genPrinter.print("));\n");
 
 *//*---*/
-				    genPrinter.print("  } ");
+			    genPrinter.print("  } ");
 
-					// Case 3: Neither of the above: in between samples
-					genPrinter.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - ");
-					s.getOffset().prettyPrint_C(genPrinter,"");
-					genPrinter.print(",");
-					s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print("))) {\n");
-					// User the floor function to get the number of previous
-					// samples
-					genPrinter.print("    nSamp = floor((_t-");
-				    s.getOffset().prettyPrint_C(genPrinter,"");
-				    genPrinter.print(")/(");
-				    s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print("));\n");
-					genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
-					s.getInterval().prettyPrint_C(genPrinter,"");
-					genPrinter.print(" + ");
-				    s.getOffset().prettyPrint_C(genPrinter,"");
-				    genPrinter.print(";\n");
+				// Case 3: Neither of the above: in between samples
+				genPrinter.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - ");
+				s.getOffset().prettyPrint_C(genPrinter,"");
+				genPrinter.print(",");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("))) {\n");
+				// User the floor function to get the number of previous
+				// samples
+				genPrinter.print("    nSamp = floor((_t-");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(")/(");
+			    s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print("));\n");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
+				s.getInterval().prettyPrint_C(genPrinter,"");
+				genPrinter.print(" + ");
+			    s.getOffset().prettyPrint_C(genPrinter,"");
+			    genPrinter.print(";\n");
 /*----*//*
 					genPrinter.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
 					genPrinter.print("(_t-");
@@ -671,17 +668,16 @@ public class CGenerator extends GenericGenerator {
 					genPrinter.print("));\n");
 
 *//*---*/
-				    genPrinter.print("  }\n ");
+			    genPrinter.print("  }\n ");
 
 
-				    genPrinter.print("  if (nextTimeEventTmp<nextTimeEvent) {\n");
-				    genPrinter.print("    nextTimeEvent = nextTimeEventTmp;\n");
-				    genPrinter.print("  }\n");				    						
-				}
-	//			genPrinter.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
-
-				genPrinter.print("  *nextTime = nextTimeEvent;\n");
+			    genPrinter.print("  if (nextTimeEventTmp<nextTimeEvent) {\n");
+			    genPrinter.print("    nextTimeEvent = nextTimeEventTmp;\n");
+			    genPrinter.print("  }\n");				    						
 			}
+//			genPrinter.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
+
+			genPrinter.print("  *nextTime = nextTimeEvent;\n");
 		}
 	}
 
@@ -695,17 +691,16 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_derivatives", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				if (fclass.root().options.getBooleanOption("generate_only_initial_system")) {
-					genPrinter.print("  ef = model_ode_initialize(jmi);\n");
-				} else {
-					fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
-					genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
-					fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
-				}
+			if (fclass.root().options.getBooleanOption("generate_only_initial_system")) {
+				genPrinter.print("  ef = model_ode_initialize(jmi);\n");
+			} else {
+				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
+				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						
+				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(genPrinter);
 			}
 		}
 	}
@@ -720,16 +715,15 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_initialization(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_initialization", myGenerator, fclass);
+            addOptions("generate_ode");
 		}
 
 		public void generate(PrintStream genPrinter) {
-			if (fclass.root().options.getBooleanOption("generate_ode")) {
-				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
-				fclass.getDAEInitBLT().genVarDecls_C(genPrinter, INDENT);
-				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlock_C(true, ASTNode.printer_C.indent(""), genPrinter);
-			}
+			fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
+			fclass.getDAEInitBLT().genVarDecls_C(genPrinter, INDENT);
+			genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
+			for (AbstractEquationBlock block : fclass.getDAEInitBLT())
+				block.genBlock_C(true, ASTNode.printer_C.indent(""), genPrinter);
 		}
 	}
 
@@ -831,13 +825,13 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_export_functions(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_export_functions", myGenerator, fclass);
+            addOptions("export_functions");
 		}
 
 		public void generate(PrintStream out) {
-			if (fclass.root().options.getBooleanOption("export_functions"))
-				for (FFunctionDecl func : fclass.getFFunctionDecls())
-					if (func.hasExportWrapper_C())
-						func.exportWrapper_C(out, "");
+			for (FFunctionDecl func : fclass.getFFunctionDecls())
+				if (func.hasExportWrapper_C())
+					func.exportWrapper_C(out, "");
 		}
 	}
 	
@@ -854,58 +848,57 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_export_wrappers(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_export_wrappers", myGenerator, fclass);
+            addOptions("export_functions_vba");
 		}
 
 		public void generate(PrintStream out) {
-			if (fclass.root().options.getBooleanOption("export_functions_vba")) {
-				// TODO: refactor out parts not specific to VBA to make it 
-				//       easier to support other platforms with special needs
-				int i = 0;
-				String ind = ASTNode.printer_C.indent("");
-				for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
-					FFunctionDecl first = grp.get(0);
-					String type = first.exportWrapperType_C();
-					String name = "select_vba_" + (++i);
-					
-					out.format("char* %s_names[] = { ", name);
-					String fmt = "\"%s\"";
-					for (FFunctionDecl f : grp) {
-						out.format(fmt, f.getFQName().nameUnderscore());
-						fmt = ", \"%s\"";
-					}
-					out.print(" };\n");
-					
-					out.format("int %s_lengths[] = { ", name);
-					fmt = "%d";
-					for (FFunctionDecl f : grp) {
-						out.format(fmt, f.getFQName().nameUnderscore().length());
-						fmt = ", %d";
-					}
-					out.print(" };\n");
-					
-					out.format("%s (*%s_funcs[])(", type, name);
-					first.exportWrapperArgumentTypeDecl_C(out);
-					out.print(") = { ");
-					fmt = "*%s";
-					for (FFunctionDecl f : grp) {
-						out.format(fmt, f.funcNameExportWrapper());
-						fmt = ", *%s";
-					}
-					out.print(" };\n");
-					
-					String sep = first.myInputs().isEmpty() ? "" : ", "; 
-					out.format("DllExport %s __stdcall %s(char* name%s", type, name, sep);
-					first.exportWrapperArgumentDecl_C(out);
-					out.print(") {\n");
-					out.format("%sint i, j;\n", ind);
-					out.format("%sfor (i = 0, j = 0; name[i] != 0; i++) \n", ind);
-					out.format("%s%swhile (j < %d && i <= %s_lengths[j] && name[i] > %s_names[j][i]) j++;\n", ind, ind, grp.size(), name, name);
-					out.format("%sif (j >= %d || strcmp(%s_names[j], name)) return 0;\n", ind, grp.size(), name);
-					out.format("%sreturn %s_funcs[j](", ind, name);
-					first.exportWrapperArgumentCall_C(out);
-					out.print(");\n");
-					out.print("}\n\n");
+			// TODO: refactor out parts not specific to VBA to make it 
+			//       easier to support other platforms with special needs
+			int i = 0;
+			String ind = ASTNode.printer_C.indent("");
+			for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
+				FFunctionDecl first = grp.get(0);
+				String type = first.exportWrapperType_C();
+				String name = "select_vba_" + (++i);
+				
+				out.format("char* %s_names[] = { ", name);
+				String fmt = "\"%s\"";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.getFQName().nameUnderscore());
+					fmt = ", \"%s\"";
 				}
+				out.print(" };\n");
+				
+				out.format("int %s_lengths[] = { ", name);
+				fmt = "%d";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.getFQName().nameUnderscore().length());
+					fmt = ", %d";
+				}
+				out.print(" };\n");
+				
+				out.format("%s (*%s_funcs[])(", type, name);
+				first.exportWrapperArgumentTypeDecl_C(out);
+				out.print(") = { ");
+				fmt = "*%s";
+				for (FFunctionDecl f : grp) {
+					out.format(fmt, f.funcNameExportWrapper());
+					fmt = ", *%s";
+				}
+				out.print(" };\n");
+				
+				String sep = first.myInputs().isEmpty() ? "" : ", "; 
+				out.format("DllExport %s __stdcall %s(char* name%s", type, name, sep);
+				first.exportWrapperArgumentDecl_C(out);
+				out.print(") {\n");
+				out.format("%sint i, j;\n", ind);
+				out.format("%sfor (i = 0, j = 0; name[i] != 0; i++) \n", ind);
+				out.format("%s%swhile (j < %d && i <= %s_lengths[j] && name[i] > %s_names[j][i]) j++;\n", ind, ind, grp.size(), name, name);
+				out.format("%sif (j >= %d || strcmp(%s_names[j], name)) return 0;\n", ind, grp.size(), name);
+				out.format("%sreturn %s_funcs[j](", ind, name);
+				first.exportWrapperArgumentCall_C(out);
+				out.print(");\n");
+				out.print("}\n\n");
 			}
 		}
 	}

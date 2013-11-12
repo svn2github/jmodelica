@@ -50,13 +50,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
          */
         public METag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
             super(name, xml, myGenerator, fclass);
-        }
-        
-        /**
-         * Check if this tag should be generated.
-         */
-        public boolean isActive() {
-            return fclass.root().options.getBooleanOption("generate_fmi_me_xml");
+            addOptions("generate_fmi_me_xml");
         }
         
     }
@@ -76,13 +70,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
          */
         public CSTag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
             super(name, xml, myGenerator, fclass);
-        }
-        
-        /**
-         * Check if this tag should be generated.
-         */
-        public boolean isActive() {
-            return fclass.root().options.getBooleanOption("generate_fmi_cs_xml");
+            addOptions("generate_fmi_cs_xml");
         }
         
     }

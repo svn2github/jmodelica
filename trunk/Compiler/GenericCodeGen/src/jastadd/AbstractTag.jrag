@@ -36,7 +36,7 @@ public abstract class AbstractTag {
 	/**
 	 * A reference to the tag's generator
 	 */
-	protected AbstractGenerator myGenerator;	
+	protected AbstractGenerator myGenerator;
 		
 	/**
 	 * Constructor.

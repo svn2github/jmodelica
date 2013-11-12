@@ -30,6 +30,10 @@ public abstract class DAETag extends AbstractTag {
 	 * FClass object.
 	 */
 	protected FClass fclass;
+    
+    private String[] options;
+    private boolean optionsChecked;
+    private boolean active;
 	
 	/**
 	 * Default constructor.
@@ -41,7 +45,60 @@ public abstract class DAETag extends AbstractTag {
 	public DAETag(String name, AbstractGenerator myGenerator, FClass fclass) {
 		super(name, myGenerator);
 		this.fclass = fclass;
+        options = new String[0];
+        optionsChecked = false;
 	}
+    
+    /**
+     * Set list of options that must be true for tag to be active.
+     * 
+     * If an option is prefixed with '!', then it must be false instead.
+     */
+    protected void setOptions(String... opts) {
+        options = opts;
+    }
+	
+	/**
+	 * Add options to list of options that must be true for tag to be active.
+     * 
+     * If an option is prefixed with '!', then it must be false instead.
+	 */
+	protected void addOptions(String... opts) {
+	    if (options.length == 0) {
+	        options = opts;
+	    } else {
+	        String[] old = options;
+	        options = new String[old.length + opts.length];
+            System.arraycopy(old, 0, options, 0, old.length);
+            System.arraycopy(opts, 0, options, old.length, opts.length);
+	    }
+	}
+    
+    /**
+     * Check if this tag should be generated.
+     */
+    public boolean isActive() {
+        if (!optionsChecked) 
+            active = checkOptions();
+        return active;
+    }
+    
+    /**
+     * Check if all options needed are active.
+     */
+    private boolean checkOptions() {
+        optionsChecked = true;
+        for (String opt : options) {
+            boolean flip = false;
+            if (opt.charAt(0) == '!') {
+                flip = true;
+                opt = opt.substring(1);
+            }
+            if (fclass.root().options.getBooleanOption(opt) == flip)
+                return false;
+        }
+        return true;
+    }
 	
 	/**
 	 * Get the FClass object.
