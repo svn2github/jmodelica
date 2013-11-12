@@ -1916,6 +1916,77 @@ Semantic error at line 1223, column 24:
 ")})));
 end BuiltInCallType10;
 
+model FunctionVariability1
+    function IsXPositive
+        input Real x;
+        output Boolean y;
+    algorithm
+        if x >= 0 then
+            y := true;
+        else
+            y := false;
+        end if;
+    end IsXPositive;
+    Boolean x = IsXPositive(time - 0.5);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionVariability1",
+            description="Function variability test",
+            flatModel="
+fclass FunctionTests.FunctionVariability1
+ discrete Boolean x = FunctionTests.FunctionVariability1.IsXPositive(time - 0.5);
+
+public
+ function FunctionTests.FunctionVariability1.IsXPositive
+  input Real x;
+  output Boolean y;
+ algorithm
+  if x >= 0 then
+   y := true;
+  else
+   y := false;
+  end if;
+  return;
+ end FunctionTests.FunctionVariability1.IsXPositive;
+
+end FunctionTests.FunctionVariability1;
+")})));
+end FunctionVariability1;
+
+model FunctionVariability2
+    function count
+        input Real x;
+        output Integer y = 0;
+    algorithm
+        while x > y loop
+            y := y + 1;
+        end while;
+    end count;
+    Integer x = count(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionVariability2",
+            description="Function variability test",
+            flatModel="
+fclass FunctionTests.FunctionVariability2
+ discrete Integer x = FunctionTests.FunctionVariability2.count(time);
+
+public
+ function FunctionTests.FunctionVariability2.count
+  input Real x;
+  output Integer y := 0;
+ algorithm
+  while x > y loop
+   y := y + 1;
+  end while;
+  return;
+ end FunctionTests.FunctionVariability2.count;
+
+end FunctionTests.FunctionVariability2;
+")})));
+end FunctionVariability2;
 
 /* ====================== Algorithm flattening ====================== */
 
