@@ -135,6 +135,13 @@ public abstract class AbstractGenerator {
 	}
 	
 	/**
+	 * Get the escape character.
+	 */
+	public char escapeChar() {
+	    return (char) escapeCharacter;
+	}
+	
+	/**
 	 * Add a hook tag handler.
 	 * 
 	 * If it is already added, nothing happends.

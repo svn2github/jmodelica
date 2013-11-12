@@ -99,16 +99,16 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     /**
      * Get the root tag, used to generate the file if no template file is given.
      * 
-     * Default implementation returns the tag with the name returned by {@link #rootTagName()}.
+     * Default implementation returns the tag with the name returned by {@link #root()}.
      */
     protected AbstractTag rootTag() {
-        return getTag(rootTagName());
+        return getTag(root());
     }
     
     /**
      * The name of the root tag to use if no template file is given.
      */
-    protected abstract String rootTagName();
+    protected abstract String root();
     
     /**
      * Get an array of tags from an array of tag names.
@@ -189,6 +189,15 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     
     /**
      * Base class for tags used to generate XML files.
+     * 
+     * For an XML tag that has attributes described by their own tag classes, 
+     * override {@link #attributes()} to return their names.
+     * For an XML tag that contains child tags described by their own tag classes, 
+     * override {@link #children()} to return their names.
+     * For an XML attribute, override {@link #value()} to return its value.
+     * 
+     * If no specific behavior is needed (looping, etc.), then that is enough. 
+     * Otherwise, override {@link #generate(java.io.PrintStream)}.
      */
     protected abstract class XMLTag extends DAETag {
         
@@ -196,15 +205,21 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         private AbstractTag[] attributeTags;
         
         /**
-         * Default constructor.
+         * The name to use for the xml tag or attribute.
+         */
+        protected final String xml;
+        
+        /**
+         * Construct a tag.
          * 
          * @param name        tag name
-         * @param description tag description
+         * @param xmlName     name to use for the xml tag or attribute
          * @param myGenerator the tag's generator
          * @param fclass      an FClass to generate code for
          */
-        public XMLTag(String name, String description, AbstractGenerator myGenerator, FClass fclass) {
-            super(name, description, myGenerator, fclass);
+        public XMLTag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, myGenerator, fclass);
+            this.xml = xml;
         }
         
         /**
@@ -245,6 +260,15 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          */
         public String[] attributes() {
             return new String[] {};
+        }
+        
+        /**
+         * The value of the attribute described by this tag.
+         * 
+         * Subclasses that represent an XML attribute should override and return non-null.
+         */
+        public String value() {
+            return null;
         }
         
         /**
@@ -299,6 +323,30 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
             generateTagStart(name, printer);
             generateAttributes(printer);
             generateClosedEnd(printer);
+        }
+
+        /**
+         * Method for generating code corresponding to the tag.
+         * 
+         * Default implementation does:
+         * <ul>
+         * <li>If {@link #value()} returns non-null, generate an XML attribute with that value.
+         * <li>Otherwise if {@link #childTags()} returns an empty array, generate an XML node as 
+         * per {@link #generateNode(String, java.io.PrintStream)}.
+         * <li>Otherwise generate a closed XML tag, as per 
+         * {@link #generateClosed(String, java.io.PrintStream)}.
+         * </ul>
+         * 
+         * @param printer A PrintStream object for output of the generated code.
+         */
+        public void generate(PrintStream printer) {
+            String val = value();
+            if (val != null)
+                generateAttribute(xml, val, printer);
+            else if (childTags().length == 0)
+                generateNode(xml, printer);
+            else
+                generateClosed(xml, printer);
         }
         
     }

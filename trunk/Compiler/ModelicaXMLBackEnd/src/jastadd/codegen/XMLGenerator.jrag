@@ -102,7 +102,7 @@ public class XMLGenerator extends GenericGenerator {
 		private static final String df = "yyyy-MM-dd'T'HH:mm:ss";
 		
 		public DAETag_XML_rootAttributes(AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_rootAttributes", "Model attributes.", myGenerator, fclass);
+			super("XML_rootAttributes", myGenerator, fclass);
 		}
 		
 		/*
@@ -137,9 +137,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_namespaces extends DAETag {
 		
-		public DAETag_XML_namespaces (AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_namespaces","Namespaces definition",
-			  myGenerator,fclass);
+		public DAETag_XML_namespaces(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_namespaces", myGenerator, fclass);
 		}
 		
 		/*
@@ -169,10 +168,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_unitDefinitions extends DAETag {
 		
-		public DAETag_XML_unitDefinitions(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_unitDefinitions","Unit definitions (optional).",
-			  myGenerator,fclass);
+		public DAETag_XML_unitDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_unitDefinitions", myGenerator, fclass);
 		}
 				
 		/*
@@ -226,10 +223,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_typeDefinitions extends DAETag {
 		
-		public DAETag_XML_typeDefinitions(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_typeDefinitions","Type definitions (optional).",
-			  myGenerator,fclass);
+		public DAETag_XML_typeDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_typeDefinitions", myGenerator, fclass);
 		}
 		
 		/*
@@ -282,10 +277,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_defaultExperiment extends DAETag {
 		
-		public DAETag_XML_defaultExperiment(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_defaultExperiment","Default experiment (optional).",
-			  myGenerator,fclass);
+		public DAETag_XML_defaultExperiment(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_defaultExperiment", myGenerator, fclass);
 		}
 		
 		/*
@@ -314,10 +307,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_vendorAnnotations extends DAETag {
 		
-		public DAETag_XML_vendorAnnotations(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_vendorAnnotations","Vendor annotations (optional).",
-			  myGenerator,fclass);
+		public DAETag_XML_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_vendorAnnotations", myGenerator, fclass);
 		}
 		
 		/*
@@ -364,10 +355,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_modelVariables extends DAETag {
 		
-		public DAETag_XML_modelVariables(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_variables","Model variables. (Optional)",
-			  myGenerator,fclass);
+		public DAETag_XML_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_variables", myGenerator, fclass);
 		}
 	
 		/*
@@ -676,10 +665,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_bindingEquations extends DAETag {
 		
-		public DAETag_XML_bindingEquations (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_bindingEquations","List of binding equations for parameters",
-			  myGenerator,fclass);
+		public DAETag_XML_bindingEquations(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_bindingEquations", myGenerator, fclass);
 		}
 		
 		/*
@@ -739,10 +726,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_equations extends DAETag {
 		
-		public DAETag_XML_equations (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_Equations","List of equations",
-			  myGenerator,fclass);
+		public DAETag_XML_equations(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Equations", myGenerator, fclass);
 		}
 		
 		/*
@@ -768,10 +753,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_initialEquations extends DAETag {
 		
-		public DAETag_XML_initialEquations (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_initialEquations","List of initial equations",
-			  myGenerator,fclass);
+		public DAETag_XML_initialEquations(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_initialEquations", myGenerator, fclass);
 		}
 		
 		/*
@@ -796,10 +779,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_Optimization extends DAETag {
 		
-		public DAETag_XML_Optimization (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_Optimization","Optimization problem's representation",
-			  myGenerator,fclass);
+		public DAETag_XML_Optimization(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Optimization", myGenerator, fclass);
 		}
 		
 		/*
@@ -821,10 +802,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_functions extends DAETag {
 		
-		public DAETag_XML_functions (
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_Functions","Functions Declaration",
-			  myGenerator,fclass);
+		public DAETag_XML_functions(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_Functions", myGenerator, fclass);
 		}
 		
 		/*
@@ -851,10 +830,8 @@ public class XMLGenerator extends GenericGenerator {
 	 */
 	public class DAETag_XML_modelStructure extends DAETag {
 		
-		public DAETag_XML_modelStructure(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("XML_modelStructure","ModelStructure for FMI 2.0",
-			  myGenerator,fclass);
+		public DAETag_XML_modelStructure(AbstractGenerator myGenerator, FClass fclass) {
+			super("XML_modelStructure", myGenerator, fclass);
 		}
 		
 		/*

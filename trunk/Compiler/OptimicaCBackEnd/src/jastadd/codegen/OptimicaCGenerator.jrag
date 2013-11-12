@@ -29,12 +29,13 @@ import java.io.*;
  */
 public class OptimicaCGenerator extends CADGenerator {
 
+	/**
+	 * Number of free dependent parameters
+	 */
 	public class OptTag_C_numFreeDependentParameters extends OptTag {
 		
-		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_free_dependent_real_parameters","Number of free dependent parameters",
-			  myGenerator,foptclass);
+		public OptTag_C_numFreeDependentParameters(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_free_dependent_real_parameters", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -42,12 +43,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of pointwise penalty functions
+	 */
 	public class OptTag_C_numPointwisePenalty extends OptTag {
 		
-		public OptTag_C_numPointwisePenalty(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_j","Number of pointwise penalty functions",
-			  myGenerator,foptclass);
+		public OptTag_C_numPointwisePenalty(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_j", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -55,12 +57,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of Lagrange integrands
+	 */
 	public class OptTag_C_numLagrangeIntegrand extends OptTag {
 		
-		public OptTag_C_numLagrangeIntegrand(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_l","Number of Lagrange integrands",
-			  myGenerator,foptclass);
+		public OptTag_C_numLagrangeIntegrand(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_l", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -68,12 +71,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 	
+	/**
+	 * Number of path equality constraints
+	 */
 	public class OptTag_C_numPathEqConstraints extends OptTag {
 		
-		public OptTag_C_numPathEqConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_ceq","Number of path equality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_numPathEqConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_ceq", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -81,12 +85,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of path inequality constraints
+	 */
 	public class OptTag_C_numPathIneqConstraints extends OptTag {
 		
-		public OptTag_C_numPathIneqConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_cineq","Number of path inequality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_numPathIneqConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_cineq", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -95,12 +100,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of point equality constraints
+	 */
 	public class OptTag_C_numPointEqConstraints extends OptTag {
 		
-		public OptTag_C_numPointEqConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_heq","Number of point equality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_numPointEqConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_heq", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -108,12 +114,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of point inequality constraints
+	 */
 	public class OptTag_C_numPointIneqConstraints extends OptTag {
 		
-		public OptTag_C_numPointIneqConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_hineq","Number of point inequality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_numPointIneqConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_hineq", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -122,12 +129,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * Number of point time points
+	 */
 	public class OptTag_C_numTimePoints extends OptTag {
 		
-		public OptTag_C_numTimePoints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("n_tp","Number of point time points",
-			  myGenerator,foptclass);
+		public OptTag_C_numTimePoints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("n_tp", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -135,12 +143,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 	
+	/**
+	 * C: macros for C point variable aliases
+	 */
 	public class OptTag_C_pointVariableAliases extends OptTag {
 		
-		public OptTag_C_pointVariableAliases(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_point_variable_aliases","C: macros for C point variable aliases",
-			  myGenerator,foptclass);
+		public OptTag_C_pointVariableAliases(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_point_variable_aliases", myGenerator, foptclass);
 		}
 	
 		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
@@ -167,12 +176,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 
+	/**
+	 * C: dependent parameter residuals
+	 */
 	public class OptTag_C_FreeDependentParameterResiduals extends OptTag {
 		
-		public OptTag_C_FreeDependentParameterResiduals(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_dependent_free_parameter_residuals","C: dependent parameter residuals",
-			  myGenerator,foptclass);
+		public OptTag_C_FreeDependentParameterResiduals(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_dependent_free_parameter_residuals", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -185,12 +195,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 	
+	/**
+	 * C: cost function
+	 */
 	public class OptTag_C_CostFunction extends OptTag {
 		
-		public OptTag_C_CostFunction(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_cost_function","C: cost function",
-			  myGenerator,foptclass);
+		public OptTag_C_CostFunction(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_cost_function", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -204,12 +215,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}
 	}
 
+	/**
+	 * C: Lagrange integrand function
+	 */
 	public class OptTag_C_LagrangeIntegrandFunction extends OptTag {
 		
-		public OptTag_C_LagrangeIntegrandFunction(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_lagrange_integrand","C: Lagrange integrand function",
-			  myGenerator,foptclass);
+		public OptTag_C_LagrangeIntegrandFunction(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_lagrange_integrand", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -224,12 +236,13 @@ public class OptimicaCGenerator extends CADGenerator {
 	}
 
 	
+	/**
+	 * C: path equality constraints
+	 */
 	public class OptTag_C_PathEqualityConstraints extends OptTag {
 	
-		public OptTag_C_PathEqualityConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_path_equality_constraints","C: path equality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_PathEqualityConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_path_equality_constraints", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -243,12 +256,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * C: path inequality constraints (leq)
+	 */
 	public class OptTag_C_PathInequalityConstraints extends OptTag {
 		
-		public OptTag_C_PathInequalityConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_path_inequality_constraints","C: path inequality constraints (leq)",
-			  myGenerator,foptclass);
+		public OptTag_C_PathInequalityConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_path_inequality_constraints", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -268,12 +282,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * C: point equality constraints
+	 */
 	public class OptTag_C_PointEqualityConstraints extends OptTag {
 		
-		public OptTag_C_PointEqualityConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_point_equality_constraints","C: point equality constraints",
-			  myGenerator,foptclass);
+		public OptTag_C_PointEqualityConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_point_equality_constraints", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -287,12 +302,13 @@ public class OptimicaCGenerator extends CADGenerator {
 		}	
 	}
 
+	/**
+	 * C: point inequality constraints (leq)
+	 */
 	public class OptTag_C_PointInequalityConstraints extends OptTag {
 		
-		public OptTag_C_PointInequalityConstraints(AbstractGenerator myGenerator, 
-		  FOptClass foptclass) {
-			super("C_Opt_point_inequality_constraints","C: point inequality constraints (leq)",
-			  myGenerator,foptclass);
+		public OptTag_C_PointInequalityConstraints(AbstractGenerator myGenerator, FOptClass foptclass) {
+			super("C_Opt_point_inequality_constraints", myGenerator, foptclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {

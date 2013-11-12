@@ -35,13 +35,11 @@ public abstract class DAETag extends AbstractTag {
 	 * Default constructor.
 	 * 
 	 * @param name Tag name.
-	 * @param description Tag description.
 	 * @param myGenerator The tag's generator.
 	 * @param fclass An FClass object used as a basis in the code generation.
 	 */
-	public DAETag(String name, String description, 
-	  AbstractGenerator myGenerator, FClass fclass) {
-		super(name,description,myGenerator);
+	public DAETag(String name, AbstractGenerator myGenerator, FClass fclass) {
+		super(name, myGenerator);
 		this.fclass = fclass;
 	}
 	

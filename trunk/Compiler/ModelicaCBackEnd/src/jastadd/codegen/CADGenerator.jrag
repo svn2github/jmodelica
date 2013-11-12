@@ -59,12 +59,13 @@ public class CADGenerator extends CGenerator {
 		return opt.getBooleanOption("generate_ode_jacobian") || opt.getBooleanOption("generate_block_jacobian");
 	}
 
+	/**
+	 * C: equation residuals
+	 */
 	public class DAETag_C_equationResidualDirectionalDerivative extends DAETag {
 		
-		public DAETag_C_equationResidualDirectionalDerivative(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_equation_directional_derivative","C: equation residuals",
-			  myGenerator,fclass);
+		public DAETag_C_equationResidualDirectionalDerivative(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_equation_directional_derivative", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -91,8 +92,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_function_headers extends DAETag {
 		
 		public DAETag_CAD_function_headers(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_function_headers","C: CAD function headers representing Modelica functions",
-			  myGenerator,fclass);
+			super("CAD_function_headers", myGenerator, fclass);
 		}
 		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
 		// therefore be generated if one of them is true. 
@@ -111,8 +111,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_functions extends DAETag {
 		
 		public DAETag_CAD_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_functions","C: CAD functions representing Modelica functions",
-			  myGenerator,fclass);
+			super("CAD_functions", myGenerator, fclass);
 		}
 		// Function calls might appear in dae_dir_df, in model_ode_derivatives or in blocks and should
 		// therefore be generated if one of them is true. 
@@ -131,8 +130,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_dae_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_blocks_residual_functions","C: CAD functions for the DAE BLT block jacobians",
-			  myGenerator,fclass);
+			super("CAD_dae_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -151,8 +149,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_dae_init_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_init_blocks_residual_functions","C: CAD functions for the DAE BLT block jacobians",
-			  myGenerator,fclass);
+			super("CAD_dae_init_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -173,8 +170,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_dae_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_add_blocks_residual_functions","C: Add the DAE AD-block functions to the JMI struct",
-			  myGenerator,fclass);
+			super("CAD_dae_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -192,8 +188,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_dae_init_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_CAD_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_dae_init_add_blocks_residual_functions","C: Add the DAE initialization AD-block functions to the JMI struct",
-			  myGenerator,fclass);
+			super("CAD_dae_init_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -212,8 +207,7 @@ public class CADGenerator extends CGenerator {
 	public class DAETag_CAD_ode_derivatives extends DAETag {
 		
 		public DAETag_CAD_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
-			super("CAD_ode_derivatives","C: Compute derivatives of the ODE",
-			  myGenerator,fclass);
+			super("CAD_ode_derivatives", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -226,12 +220,13 @@ public class CADGenerator extends CGenerator {
 		}
 	}
 
+	/**
+	 * C: DAE ODE Jacobian sparsity
+	 */
 	public class DAETag_C_ODESparsity extends DAETag {
 		
-		public DAETag_C_ODESparsity(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_ODE_jacobian_sparsity","C: DAE ODE Jacobian sparsity",
-			  myGenerator,fclass);
+		public DAETag_C_ODESparsity(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_ODE_jacobian_sparsity", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -432,12 +427,13 @@ public class CADGenerator extends CGenerator {
 		} 
 	}
 	
+	/**
+	 * C: DAE equation sparsity
+	 */
 	public class DAETag_C_equationSparsity extends DAETag {
 		
-		public DAETag_C_equationSparsity(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_equation_sparsity","C: DAE equation sparsity",
-			  myGenerator,fclass);
+		public DAETag_C_equationSparsity(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_equation_sparsity", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {

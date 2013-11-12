@@ -25,12 +25,13 @@ public class CGenerator extends GenericGenerator {
 	
 	protected static final String INDENT = "    ";
 	
+	/**
+	 * C: external function includes
+	 */
 	public class DAETag_C_externalFuncIncludes extends DAETag {
 		
-		public DAETag_C_externalFuncIncludes(AbstractGenerator myGenerator,
-				FClass fclass) {
-			super("external_func_includes","C: external function includes",
-					myGenerator,fclass);
+		public DAETag_C_externalFuncIncludes(AbstractGenerator myGenerator, FClass fclass) {
+			super("external_func_includes", myGenerator, fclass);
 		}
 		
 		public void generate(PrintStream genPrinter) {
@@ -39,12 +40,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * C: scaling_method
+	 */
 	public class DAETag_C_scalingMethod extends DAETag {
 		
-		public DAETag_C_scalingMethod(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_scaling_method","C: scaling_method",
-			  myGenerator,fclass);
+		public DAETag_C_scalingMethod(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_scaling_method", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -57,12 +59,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: relational operator kind, <, >, <=, <=
+	 */
 	public class DAETag_C_initial_relations extends DAETag {
 		
-		public DAETag_C_initial_relations(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_relations","C: relational operator kind, <, >, <=, <=",
-			  myGenerator,fclass);
+		public DAETag_C_initial_relations(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_relations", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -90,12 +93,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: relational operator kind, <, >, <=, <=
+	 */
 	public class DAETag_C_relations extends DAETag {
 		
-		public DAETag_C_relations(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_relations","C: relational operator kind, <, >, <=, <=",
-			  myGenerator,fclass);
+		public DAETag_C_relations(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_relations", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -124,12 +128,13 @@ public class CGenerator extends GenericGenerator {
 	}
 
 	
+	/**
+	 * C: equation residuals
+	 */
 	public class DAETag_C_equationResiduals extends DAETag {
 		
-		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_equation_residuals","C: equation residuals",
-			  myGenerator,fclass);
+		public DAETag_C_equationResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_equation_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -144,12 +149,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: event indicator residuals in equations
+	 */
 	public class DAETag_C_eventIndicatorResiduals extends DAETag {
 		
-		public DAETag_C_eventIndicatorResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_event_indicator_residuals","C: event indicator residuals in equations",
-			  myGenerator,fclass);
+		public DAETag_C_eventIndicatorResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_event_indicator_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -166,12 +172,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: initial equation residuals
+	 */
 	public class DAETag_C_initialEquationResiduals extends DAETag {
 		
-		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_equation_residuals","C: initial equation residuals",
-			  myGenerator,fclass);
+		public DAETag_C_initialEquationResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_equation_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -189,12 +196,13 @@ public class CGenerator extends GenericGenerator {
 		}	
 	}
 
+	/**
+	 * C: event indicator residuals in initial equations
+	 */
 	public class DAETag_C_initialEventIndicatorResiduals extends DAETag {
 		
-		public DAETag_C_initialEventIndicatorResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_event_indicator_residuals","C: event indicator residuals in initial equations",
-			  myGenerator,fclass);
+		public DAETag_C_initialEventIndicatorResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_event_indicator_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -210,12 +218,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 	
+	/**
+	 * C: initial guess equation residuals
+	 */
 	public class DAETag_C_initialGuessEquationResiduals extends DAETag {
 		
-		public DAETag_C_initialGuessEquationResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_guess_equation_residuals","C: initial guess equation residuals",
-			  myGenerator,fclass);
+		public DAETag_C_initialGuessEquationResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_guess_equation_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -230,12 +239,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: dependent parameter residuals
+	 */
 	public class DAETag_C_initialDependentParameterResiduals extends DAETag {
 		
-		public DAETag_C_initialDependentParameterResiduals(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_dependent_parameter_residuals","C: dependent parameter residuals",
-			  myGenerator,fclass);
+		public DAETag_C_initialDependentParameterResiduals(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_dependent_parameter_residuals", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -248,12 +258,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: dependent parameter assignments
+	 */
 	public class DAETag_C_initialDependentParameterAssignments extends DAETag {
 		
-		public DAETag_C_initialDependentParameterAssignments(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_initial_dependent_parameter_assignments","C: dependent parameter assignments",
-			  myGenerator,fclass);
+		public DAETag_C_initialDependentParameterAssignments(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_initial_dependent_parameter_assignments", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -268,12 +279,13 @@ public class CGenerator extends GenericGenerator {
 	
 	}
 
+	/**
+	 * C: macros for C variable aliases
+	 */
 	public class DAETag_C_variableAliases extends DAETag {
 		
-		public DAETag_C_variableAliases(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_variable_aliases","C: macros for C variable aliases",
-			  myGenerator,fclass);
+		public DAETag_C_variableAliases(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_variable_aliases", myGenerator, fclass);
 		}
 		
 		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
@@ -376,11 +388,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for BLT block residuals
 	 */
+	/**
+	 * C: C functions for the DAE BLT block residuals
+	 */
 	public class DAETag_C_dae_blocks_residual_functions extends DAETag {
 		
 		public DAETag_C_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_blocks_residual_functions","C: C functions for the DAE BLT block residuals",
-			  myGenerator,fclass);
+			super("C_dae_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -395,11 +409,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for adding BLT blocks 
 	 */
+	/**
+	 * C: Add the DAE block functions to the JMI struct
+	 */
 	public class DAETag_C_dae_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_C_dae_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_add_blocks_residual_functions","C: Add the DAE block functions to the JMI struct",
-			  myGenerator,fclass);
+			super("C_dae_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -414,11 +430,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Number of DAE blocks
 	 */
+	/**
+	 * C: Number of DAE blocks
+	 */
 	public class DAETag_C_dae_n_blocks extends DAETag {
 		
 		public DAETag_C_dae_n_blocks(AbstractGenerator myGenerator, FClass fclass) {
-			super("n_dae_blocks","C: Number of DAE blocks",
-			  myGenerator,fclass);
+			super("n_dae_blocks", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -433,11 +451,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for BLT block residuals (DAE initialization system)
 	 */
+	/**
+	 * C: C functions for the DAE BLT block residuals
+	 */
 	public class DAETag_C_dae_init_blocks_residual_functions extends DAETag {
 		
 		public DAETag_C_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_init_blocks_residual_functions","C: C functions for the DAE BLT block residuals",
-			  myGenerator,fclass);
+			super("C_dae_init_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -452,11 +472,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for adding BLT blocks 
 	 */
+	/**
+	 * C: Add the DAE initialization block functions to the JMI struct
+	 */
 	public class DAETag_C_dae_init_add_blocks_residual_functions extends DAETag {
 		
 		public DAETag_C_dae_init_add_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_init_add_blocks_residual_functions","C: Add the DAE initialization block functions to the JMI struct",
-			  myGenerator,fclass);
+			super("C_dae_init_add_blocks_residual_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -471,11 +493,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Number of DAE initialization blocks
 	 */
+	/**
+	 * C: Number of DAE initialization blocks
+	 */
 	public class DAETag_C_dae_init_n_blocks extends DAETag {
 		
 		public DAETag_C_dae_init_n_blocks(AbstractGenerator myGenerator, FClass fclass) {
-			super("n_dae_init_blocks","C: Number of DAE initialization blocks",
-			  myGenerator,fclass);
+			super("n_dae_init_blocks", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -490,11 +514,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for computing the guard expressions
 	 */
+	/**
+	 * C: Compute guard expressions ODE
+	 */
 	public class DAETag_C_ode_guards extends DAETag {
 		
 		public DAETag_C_ode_guards(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_guards","C: Compute guard expressions ODE",
-			  myGenerator,fclass);
+			super("C_ode_guards", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -517,11 +543,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for computing the guard expressions in the initial equations
 	 */
+	/**
+	 * C: Compute guard expressions ODE initialization system
+	 */
 	public class DAETag_C_ode_guards_init extends DAETag {
 		
 		public DAETag_C_ode_guards_init(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_guards_init","C: Compute guard expressions ODE initialization system",
-			  myGenerator,fclass);
+			super("C_ode_guards_init", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -542,11 +570,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for computation of the nect time event.
 	 */
+	/**
+	 * C: Compute the next time event.
+	 */
 	public class DAETag_C_ode_time_events extends DAETag {
 		
 		public DAETag_C_ode_time_events(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_time_events","C: Compute the next time event.",
-			  myGenerator,fclass);
+			super("C_ode_time_events", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -658,11 +688,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for solving the BLT blocks
 	 */
+	/**
+	 * C: Compute derivatives of the ODE
+	 */
 	public class DAETag_C_ode_derivatives extends DAETag {
 		
 		public DAETag_C_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_derivatives","C: Compute derivatives of the ODE",
-			  myGenerator,fclass);
+			super("C_ode_derivatives", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -681,11 +713,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for solving the BLT blocks in the initialization system
 	 */
+	/**
+	 * C: Solve the initialization system
+	 */
 	public class DAETag_C_ode_initialization extends DAETag {
 		
 		public DAETag_C_ode_initialization(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_initialization","C: Solve the initialization system",
-			  myGenerator,fclass);
+			super("C_ode_initialization", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -702,11 +736,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates code for solving the BLT blocks for computing the outputs
 	 */
+	/**
+	 * C: Compute the ODE outputs
+	 */
 	public class DAETag_C_ode_outputs extends DAETag {
 		
 		public DAETag_C_ode_outputs(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_ode_outputs","C: Compute the ODE outputs",
-			  myGenerator,fclass);
+			super("C_ode_outputs", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -716,11 +752,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates headers for Modelica functions.
 	 */
+	/**
+	 * C: C function headers representing Modelica functions
+	 */
 	public class DAETag_C_function_headers extends DAETag {
 		
 		public DAETag_C_function_headers(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_function_headers","C: C function headers representing Modelica functions",
-			  myGenerator,fclass);
+			super("C_function_headers", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -732,11 +770,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates definitions for Modelica functions.
 	 */
+	/**
+	 * C: C functions representing Modelica functions
+	 */
 	public class DAETag_C_functions extends DAETag {
 		
 		public DAETag_C_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_functions","C: C functions representing Modelica functions",
-			  myGenerator,fclass);
+			super("C_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -748,11 +788,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates structs for Modelica records.
 	 */
+	/**
+	 * C: C structs representing Modelica records
+	 */
 	public class DAETag_C_records extends DAETag {
 		
 		public DAETag_C_records(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_records","C: C structs representing Modelica records",
-			  myGenerator,fclass);
+			super("C_records", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -764,11 +806,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates string representations of enumeration literals.
 	 */
+	/**
+	 * C: string representations of enumeration literals
+	 */
 	public class DAETag_C_enums_strings extends DAETag {
 		
 		public DAETag_C_enums_strings(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_enum_strings","C: string representations of enumeration literals",
-			  myGenerator,fclass);
+			super("C_enum_strings", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -780,11 +824,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates wrappers for Modelica functions for exporting in a shared library.
 	 */
+	/**
+	 * C: C functions wrapping internal representation of Modelica functions
+	 */
 	public class DAETag_C_export_functions extends DAETag {
 		
 		public DAETag_C_export_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_export_functions","C: C functions wrapping internal representation of Modelica functions",
-			  myGenerator,fclass);
+			super("C_export_functions", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream out) {
@@ -801,11 +847,13 @@ public class CGenerator extends GenericGenerator {
 	 * Allows less functions to be imported from resulting shared library. 
 	 * Requires $C_export_functions$, and must be after it.
 	 */
+	/**
+	 * C: C functions wrapping groups of export function with same signature
+	 */
 	public class DAETag_C_export_wrappers extends DAETag {
 		
 		public DAETag_C_export_wrappers(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_export_wrappers","C: C functions wrapping groups of export function with same signature",
-			  myGenerator,fclass);
+			super("C_export_wrappers", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream out) {
@@ -862,12 +910,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	}
 
+	/**
+	 * C: DAE output value references
+	 */
 	public class DAETag_C_outputVrefs extends DAETag {
 		
-		public DAETag_C_outputVrefs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("C_DAE_output_vrefs","C: DAE output value references",
-			  myGenerator,fclass);
+		public DAETag_C_outputVrefs(AbstractGenerator myGenerator, FClass fclass) {
+			super("C_DAE_output_vrefs", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -894,11 +943,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates MODEL_IDENTIFIER.
 	 */
+	/**
+	 * C: Model identifier
+	 */
 	public class DAETag_C_model_id extends DAETag {
 		
 		public DAETag_C_model_id(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_model_id","C: Model identifier",
-			  myGenerator,fclass);
+			super("C_model_id", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -909,11 +960,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates GUID.
 	 */
+	/**
+	 * C: GUID
+	 */
 	public class DAETag_C_guid extends DAETag {
 		
 		public DAETag_C_guid(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_guid","C: GUID",
-			  myGenerator,fclass);
+			super("C_guid", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -924,11 +977,13 @@ public class CGenerator extends GenericGenerator {
 	/**
 	 * Generates start values.
 	 */
+	/**
+	 * C: start values
+	 */
 	public class DAETag_C_set_start_values extends DAETag {
 		
 		public DAETag_C_set_start_values(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_set_start_values","C: start values",
-			  myGenerator,fclass);
+			super("C_set_start_values", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -963,11 +1018,13 @@ public class CGenerator extends GenericGenerator {
 	 * Generates mapping between runtime option names and value references for the 
 	 * associated parameters.
 	 */
+	/**
+	 * C: runtime option name map
+	 */
 	public class DAETag_C_runtime_option_map extends DAETag {
 		
 		public DAETag_C_runtime_option_map(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_runtime_option_map","C: runtime option name map",
-			  myGenerator,fclass);
+			super("C_runtime_option_map", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
@@ -992,8 +1049,7 @@ public class CGenerator extends GenericGenerator {
 	public class DAETag_C_destruct_external_object extends DAETag {
 		
 		public DAETag_C_destruct_external_object(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_destruct_external_object","C: external object destructor calls",
-			  myGenerator,fclass);
+			super("C_destruct_external_object", myGenerator, fclass);
 		}
 
 		public void generate(PrintStream genPrinter) {
