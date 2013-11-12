@@ -217,31 +217,28 @@ public class BiPGraph {
 			// the left hand side variables depends on all the right-hand side ones, 
 			// but not on the other left-hand side ones
 			Set<FVariable> rhsVars = emptySet;
-			Map<FVariable, Integer> lhsVars = emptyMap;
+			FVariable lhsVars[] = new FVariable[n_eq];
 			if (n_eq > 1) {
 				rhsVars = e.referencedFVariablesInRHS();
-				lhsVars = new HashMap<FVariable, Integer>();
 				int i = 0;
-				for (FVariable fv : e.referencedFVariablesInLHS()) 
-					lhsVars.put(fv,i++);
+				for (FVariable fv : e.referencedFVariablesInLHS())
+				    lhsVars[i++] = fv;
 				if (e.lhsVarsAreSolved())
-					rhsVars.removeAll(lhsVars.keySet());
+				    rhsVars.removeAll(Arrays.asList(lhsVars));
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
-				eqn = addEquation(eqNamePrefix+k, e, i);
-				groupMembers.add(eqn);
-				k++;
+			    eqn = addEquation(eqNamePrefix+k, e, i);
+			    groupMembers.add(eqn);
+			    k++;
 
-				for (VarType t : variableTypes) {
-					for (FVariable y : t.variables(e)) {
-						Integer pos = lhsVars.get(y);
-						if (pos == null || pos == i || rhsVars.contains(y)) {
-							v = getVariable(y.name());
-							addEdge(eqn, v);
-						}
-					}
-				}
+			    for (FVariable fVar : ASTNode.lookupFVariablesInSet(e.findFIdUseExpsInTree())) {
+			        Var var = getVariable(fVar.name());
+			        if (var == null)
+			            continue;
+			        if (lhsVars[i] == null || lhsVars[i] == fVar || rhsVars.contains(fVar))
+			            addEdge(eqn, var);
+			    }
 			}
 			for (Eq ee : groupMembers) {
 				for (Eq eee : groupMembers) {
