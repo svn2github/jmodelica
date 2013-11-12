@@ -303,7 +303,7 @@ public abstract class AbstractGenerator {
 					    	Set<AbstractTag> set = hookTagMap.get(name);
 					    	if (set != null)
 					    		for (AbstractTag tag : set)
-					    			tag.generate(genPrinter);
+					    			tag.generateTag(genPrinter);
                         } else if (name.startsWith(INCLUDE_PREFIX)) {
                             if (includeDir == null)
                                 throw new IllegalArgumentException("Can't include template file without include dir.");
@@ -311,7 +311,7 @@ public abstract class AbstractGenerator {
                             File subTemplateFile = new File(includeDir, name);
                             generate(openTemplate(subTemplateFile), genPrinter, includeDir);
 					    } else {
-					        getTag(name).generate(genPrinter);
+					        getTag(name).generateTag(genPrinter);
 					    }
 					} else {
 						tag_name.append((char) c);

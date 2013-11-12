@@ -48,13 +48,34 @@ public abstract class AbstractTag {
 		this.name = name;
 		this.myGenerator = myGenerator;
 	}
+	
+	/**
+	 * Generate the code for this tag if it is active.
+	 * 
+	 * @param printer A PrintStream object for output of the generated code.
+	 */
+    public void generateTag(PrintStream printer) {
+        if (isActive())
+            generate(printer);
+    }
+	
 
 	/**
-	 * Method for generating code corresponding to the tag.
+	 * Method for implementing the code generation corresponding to the tag.
 	 * 
-	 * @param genPrinter A PrintStream object for output of the generated code.
+	 * This method should not be called directly, 
+	 * see {@link #generateTag(java.io.PrintStream)} instead.
+	 * 
+	 * @param printer A PrintStream object for output of the generated code.
 	 */
-	public abstract void generate(PrintStream genPrinter);
+	public abstract void generate(PrintStream printer);
+    
+    /**
+     * Check if this tag should be generated.
+     */
+    public boolean isActive() {
+        return true;
+    }
 	
 	/**
 	 * Get the name of the tag.

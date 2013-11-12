@@ -276,7 +276,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          */
         public void generateChildren(PrintStream printer) {
             for (AbstractTag child : childTags()) 
-                child.generate(printer);
+                child.generateTag(printer);
         }
         
         /**
@@ -284,7 +284,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          */
         public void generateAttributes(PrintStream printer) {
             for (AbstractTag attribute : attributeTags()) 
-                attribute.generate(printer);
+                attribute.generateTag(printer);
         }
         
         /**

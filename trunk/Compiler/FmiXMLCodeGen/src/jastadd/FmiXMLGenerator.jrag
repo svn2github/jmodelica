@@ -1,0 +1,90 @@
+import java.io.PrintStream;
+
+/*
+    Copyright (C) 2013 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+/**
+ * A generator class containing common functionality for generating the 
+ * modelDescription.xml files for different FMI versions.
+ */
+public abstract class FmiXMLGenerator extends GenericXMLGenerator {
+    
+    
+    /**
+     * Constructor.
+     * 
+     * @param expPrinter Printer object used to generate code for expressions.
+     * @param escapeCharacter Escape characters used to decode tags.
+     * @param fclass An FClass object used as a basis for the code generation.
+     */
+    public FmiXMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
+        super(expPrinter,escapeCharacter, fclass);
+    }
+    
+    /**
+     * Base class for tags used to generate XML that should only be present in ME FMUs.
+     */
+    public abstract class METag extends XMLTag {
+        
+        /**
+         * Construct a tag.
+         * 
+         * @param name        tag name
+         * @param xmlName     name to use for the xml tag or attribute
+         * @param myGenerator the tag's generator
+         * @param fclass      an FClass to generate code for
+         */
+        public METag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, xml, myGenerator, fclass);
+        }
+        
+        /**
+         * Check if this tag should be generated.
+         */
+        public boolean isActive() {
+            return fclass.root().options.getBooleanOption("generate_fmi_me_xml");
+        }
+        
+    }
+    
+    /**
+     * Base class for tags used to generate XML that should only be present in CS FMUs.
+     */
+    public abstract class CSTag extends XMLTag {
+        
+        /**
+         * Construct a tag.
+         * 
+         * @param name        tag name
+         * @param xmlName     name to use for the xml tag or attribute
+         * @param myGenerator the tag's generator
+         * @param fclass      an FClass to generate code for
+         */
+        public CSTag(String name, String xml, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, xml, myGenerator, fclass);
+        }
+        
+        /**
+         * Check if this tag should be generated.
+         */
+        public boolean isActive() {
+            return fclass.root().options.getBooleanOption("generate_fmi_cs_xml");
+        }
+        
+    }
+    
+}
