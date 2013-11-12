@@ -265,7 +265,7 @@ aspect IndexReduction {
                     }
                     // Add the differentiated equation
                     int groupNumber = eqn.groupNumber();
-                    Eq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber);
+                    Eq diffedEqn = addEquation("eq_" + (getEquations().size() + 1), diffedFEqn, groupNumber, diffedFEqn.variability());
                     
                     // Add edges
                     Collection<Var> variables = lookupVarsInSet(diffedFEqn.findFIdUseExpsInTree());
@@ -432,7 +432,7 @@ aspect IndexReduction {
                 
                 for (int i=0;i<n_eq;i++) {
                     ASTNode.log.info("*** %s", e);
-                    eqn = gd.addEquation("eq_" + k, e, i);
+                    eqn = gd.addEquation("eq_" + k, e, i, e.variability());
                     k++;
                 
                     for (FVariable y : e.variables()) { 

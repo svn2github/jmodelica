@@ -5802,4 +5802,100 @@ end TransformCanonicalTests.NonFixedParameterTest5;
 ")})));
 end NonFixedParameterTest5;
 
+model MixedVariabilityFunction1
+    function F
+        input Real x;
+        output Real y = 0;
+        output Integer z = 0;
+    algorithm
+        while x > z loop
+            y := y + 1;
+            z := z + 1;
+        end while;
+    end F;
+    Real x;
+    Integer y;
+equation
+    (x, y) = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MixedVariabilityFunction1",
+            description="Test matching of mixed variability function call",
+            flatModel="
+fclass TransformCanonicalTests.MixedVariabilityFunction1
+ Real x;
+ discrete Integer y;
+initial equation 
+ pre(y) = 0;
+equation
+ (x, y) = TransformCanonicalTests.MixedVariabilityFunction1.F(time);
+
+public
+ function TransformCanonicalTests.MixedVariabilityFunction1.F
+  input Real x;
+  output Real y;
+  output Integer z;
+ algorithm
+  y := 0;
+  z := 0;
+  while x > z loop
+   y := y + 1;
+   z := z + 1;
+  end while;
+  return;
+ end TransformCanonicalTests.MixedVariabilityFunction1.F;
+
+end TransformCanonicalTests.MixedVariabilityFunction1;
+")})));
+
+end MixedVariabilityFunction1;
+
+model MixedVariabilityFunction2
+    function F
+        input Real x;
+        output Real y = 2;
+        output Boolean z = false;
+    algorithm
+        while x > y loop
+            y := y + 1;
+            z := true;
+        end while;
+    end F;
+    Real x;
+    Boolean y;
+equation
+    (x, y) = F(time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MixedVariabilityFunction2",
+            description="Test matching of mixed variability function call",
+            flatModel="
+fclass TransformCanonicalTests.MixedVariabilityFunction2
+ Real x;
+ discrete Boolean y;
+initial equation 
+ pre(y) = false;
+equation
+ (x, y) = TransformCanonicalTests.MixedVariabilityFunction2.F(time);
+
+public
+ function TransformCanonicalTests.MixedVariabilityFunction2.F
+  input Real x;
+  output Real y;
+  output Boolean z;
+ algorithm
+  y := 2;
+  z := false;
+  while x > y loop
+   y := y + 1;
+   z := true;
+  end while;
+  return;
+ end TransformCanonicalTests.MixedVariabilityFunction2.F;
+
+end TransformCanonicalTests.MixedVariabilityFunction2;
+")})));
+
+end MixedVariabilityFunction2;
+
 end TransformCanonicalTests;
