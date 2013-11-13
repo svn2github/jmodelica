@@ -70,8 +70,9 @@ ModelicaCasADi::Model* transferModelicaModel(string modelName, vector<string> mo
     compiler.setLogger(StringFromUTF(log_level.c_str()));
 
     try {
-        mc::FClass fclass =  compiler.compileModel(new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
-                                                   StringFromUTF(modelName.c_str()));
+        mc::FClass fclass = compiler.compileModelNoCodeGen(
+            new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
+            StringFromUTF(modelName.c_str()));
         
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable

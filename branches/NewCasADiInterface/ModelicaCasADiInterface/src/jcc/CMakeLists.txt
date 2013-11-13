@@ -39,7 +39,6 @@ set(CLASSES_modelica
   org.jmodelica.modelica.compiler.InstClassDecl
   org.jmodelica.modelica.compiler.FClass
   org.jmodelica.modelica.compiler.List
-  org.jmodelica.modelica.compiler.FEquationBlock
   org.jmodelica.modelica.compiler.FAbstractEquation
   org.jmodelica.modelica.compiler.FEquation
   org.jmodelica.modelica.compiler.FFunctionCallEquation
@@ -77,7 +76,6 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FConstraintLeq
   org.jmodelica.optimica.compiler.FConstraintGeq
   org.jmodelica.optimica.compiler.List
-  org.jmodelica.optimica.compiler.FEquationBlock
   org.jmodelica.optimica.compiler.FAbstractEquation
   org.jmodelica.optimica.compiler.FEquation
   org.jmodelica.optimica.compiler.FFunctionCallEquation

@@ -96,8 +96,9 @@ OptimizationProblem* transferOptimizationProblem(string modelName, vector<string
     compiler.setLogger(StringFromUTF(log_level.c_str()));
     
     try {
-        oc::FOptClass fclass =  oc::FOptClass(compiler.compileModel(new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
-                                                                    StringFromUTF(modelName.c_str())).this$);
+        oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
+            new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
+            StringFromUTF(modelName.c_str())).this$);
        
        if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");

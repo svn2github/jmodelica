@@ -29,14 +29,16 @@
 	<property name="java_version" value="1.5"/>
 	<property name="java_compiler" value="javac${java_version}"/>
 
-	<property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
+    <property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
+    <property name="generic_codegen_path" value="../GenericCodeGen" />
+    <property name="fmi_xml_codegen_path" value="../FmiXMLCodeGen" />
+    <property name="test_framework_path" value="../TestFramework" />
 	<property name="modelica_xml_back_end_path" value="../ModelicaXMLBackEnd" />
 	<property name="modelica_c_back_end_path" value="../ModelicaCBackEnd" />
 
+	<property name="modelica_compiler_path" value="../ModelicaCompiler" />
 	<property name="modelica_casadi_back_end_path" value="." /> 
 
-
-	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.modelica.compiler" />
 
     <property name="base_output" value="src/java-generated" />
@@ -44,7 +46,6 @@
     <property name="ast_output" value="${common_output}/compiler" />
     <property name="parser_output" value="${common_output}/parser" />
 
-	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
 	<property name="jar_output_dir" value="bin" />
 	<property name="jastadd_dir" value="../../ThirdParty/JastAdd" />
 	<property name="junit_dir" value="../../ThirdParty/Junit" />
@@ -52,14 +53,18 @@
 	<property name="beaver_dir" value="../../ThirdParty/Beaver/beaver-0.9.6.1" />
 	<property name="ant-contrib_dir" value="../../ThirdParty/Ant-Contrib/ant-contrib-1.0b3" />
 	<property name="jmodelica_parser" value="${modelica_front_end_path}/src/parser" />
-	<property name="local_ast" value="src/jastadd" />
+	<property name="local_ast" value="${modelica_compiler_path}/src/jastadd" />
 	<property name="ast" value="${modelica_front_end_path}/src/jastadd" />
+    <property name="generic_codegen" value="${generic_codegen_path}/src/jastadd" />
+    <property name="fmi_xml_codegen" value="${fmi_xml_codegen_path}/src/jastadd" />
+    <property name="test_framework" value="${test_framework_path}/src/jastadd" />
 	<property name="modelica_xml_back_end_ast" value="${modelica_xml_back_end_path}/src/jastadd" />
 	<property name="modelica_c_back_end_ast" value="${modelica_c_back_end_path}/src/jastadd" />
+
 	<property name="modelica_casadi_back_end_ast" value="${modelica_casadi_back_end_path}/src/jastadd" />
 
-	<property name="test_junit_dir" value="src/test/junit" />
-	<property name="test_junit-gen_dir" value="src/test/junit-generated" />
+	<property name="test_junit_dir" value="${modelica_compiler_path}/src/test/junit" />
+	<property name="test_junit-gen_dir" value="${modelica_compiler_path}/src/test/junit-generated" />
 
 	<property name="applications" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/applications" />
 	<property name="debug" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/debug" />
@@ -71,7 +76,7 @@
 		</classpath>
 	</taskdef>
 	<!-- "jastadd" is an ant task class in jastadd2.jar -->
-	<taskdef classname="jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
+	<taskdef classname="org.jastadd.JastAddTask" name="jastadd" classpath="${jastadd_dir}/jastadd2.jar" />
 	<!-- "jflex" is an ant task class for the scanner generator in JFlex.jar -->
 	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
 	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
@@ -92,6 +97,7 @@
 				<include name="org/jmodelica/util/*.class" />
 				<include name="org/jmodelica/util/formattedPrint/*.class" />
 				<include name="org/jmodelica/util/logging/*.class" />
+                <include name="org/jmodelica/util/exceptions/*.class" />
 				<include name="casadi/*.class" />
 			</fileset>
 		</jar>
@@ -104,8 +110,7 @@
 
 	<target name="compile-ast" depends="gen">
 		<mkdir dir="bin" />
-		<javac classpath="${beaver_dir}/lib/beaver.jar"
-                                compiler="${java_compiler}" source="${java_version}" 
+		<javac classpath="${beaver_dir}/lib/beaver.jar" compiler="${java_compiler}" source="${java_version}" 
 				target="${java_version}" debug="true" destdir="bin" includeantruntime="false">
 			<src path="${base_output}" />
 			<src path="${modelica_front_end_path}/src/java" />
@@ -144,64 +149,31 @@
 				NoCacheCycle="false" ComponentCheck="false" visitcheck="false" LazyMaps="true" 
 				Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+                <patternset id="jastadd.files">
+                    <include name="**/*.ast" />
+                    <include name="**/*.jadd" />
+                    <include name="**/*.jrag" />
+                </patternset>
 			</fileset>
-			<fileset dir="${ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+			<fileset dir="${generic_codegen}">
+                <patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+			<fileset dir="${test_framework}">
+                <patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${ast}/structural">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-			</fileset>
+            <fileset dir="${fmi_xml_codegen}">
+                <patternset refid="jastadd.files"/>
+            </fileset>
 			<fileset dir="${modelica_xml_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
-			</fileset>
-			<fileset dir="${modelica_xml_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
-			</fileset>
-			<fileset dir="${modelica_xml_back_end_ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-				<exclude name="TestFramework.jrag" />
+                <patternset refid="jastadd.files"/>
 			</fileset>
 
 			<fileset dir="${local_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+                <patternset refid="jastadd.files"/>
 			</fileset>
 
 			<fileset dir="${modelica_c_back_end_ast}">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-			</fileset>
-			<fileset dir="${modelica_c_back_end_ast}/codegen">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
-			</fileset>
-			<fileset dir="${modelica_c_back_end_ast}/test-framework">
-				<include name="*.ast" />
-				<include name="*.jadd" />
-				<include name="*.jrag" />
+                <patternset refid="jastadd.files"/>
 			</fileset>
 
 			<fileset dir="${modelica_casadi_back_end_ast}">
@@ -312,6 +284,9 @@
 				<fileset dir="${modelica_xml_back_end_path}/src/test/modelica">
 					<include name="*.mo" />
 				</fileset>
+                <fileset dir="${fmi_xml_codegen_path}/src/test/modelica">
+                    <include name="*.mo" />
+                </fileset>
 			</path>
 			<sequential>
 				<java classname="org.jmodelica.modelica.compiler.JunitGenerator" 

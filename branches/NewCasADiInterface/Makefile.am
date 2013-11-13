@@ -77,9 +77,9 @@ export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
  
-casadi_interface: casadi install_casadi $(MC_JARS) $(MC_BUILD)/modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/casadi_interface $(MC_BUILD)/test
+casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/casadi_interface $(MC_BUILD)/test
 
-$(MC_JARS):  $(MC_SRC)/src/cpp-generated/ $(MC_MODELICA_JARS) $(OC_SRC)/src/cpp-generated/ $(MC_OPTIMICA_JARS) $(MC_COMPILERS_DIR)/lib/
+$(MC_JARS):  $(MC_SRC)/src/cpp-generated/ $(MC_MODELICA_JARS) $(OC_SRC)/src/cpp-generated/ $(MC_OPTIMICA_JARS) ifcasadi
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(MC_JARS)
 
 $(MC_MODELICA_JARS): 
@@ -114,7 +114,7 @@ $(OC_SRC)/src/cpp-generated/:
 	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
 
 	     
-$(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
+ifcasadi: $(MC_SRC)/src/cpp-generated/
 	mkdir -p $(MC_COMPILERS_DIR)/lib
 	case $(build) in \
 	*-cygwin*) \
@@ -134,7 +134,7 @@ $(MC_COMPILERS_DIR)/lib/: $(MC_SRC)/src/cpp-generated/
 	$(IFCASADI_DIR_INCLUDE_LINUX) ;; \
 	esac
 
-$(MC_BUILD)/modelicacasadi_wrapper:
+modelicacasadi_wrapper:
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
@@ -405,3 +405,5 @@ docs:
 docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
 
+
+.PHONY: modelicacasadi_wrapper ifcasadi

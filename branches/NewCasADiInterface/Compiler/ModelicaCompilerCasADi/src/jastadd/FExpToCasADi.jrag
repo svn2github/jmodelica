@@ -24,6 +24,16 @@ import casadi.MXVector;
 
 aspect FExpToCasADi {
 
+    // Workaround since it's troublesome to wrap the ModelicaCompiler-nested
+    // class TargetObject with jcc
+    public class ModelicaCompiler {
+        public FClass compileModelNoCodeGen(String name[], String cl)
+          throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
+            return compileModel(name, cl, createTargetObject("nocodegen", null));
+        }
+    }
+
+
     /******** MXFunction ********/
     
     /**
