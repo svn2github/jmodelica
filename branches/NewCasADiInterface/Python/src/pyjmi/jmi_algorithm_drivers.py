@@ -2169,3 +2169,739 @@ class LocalDAECollocationAlgResult(JMResultBase):
             return 1.
         else:
             return 1. / sigma_inv
+
+class LocalDAECollocationAlg2(AlgorithmBase):
+    
+    """
+    The algorithm is based on orthogonal collocation and relies on the solver 
+    IPOPT for solving the arising non-linear programming problem.
+    """
+    
+    def __init__(self, model, options):
+        """
+        Create a LocalDAECollocationAlg algorithm.
+        
+        Parameters::
+              
+            model -- 
+                Model object
+                
+                Type: pyjmi.casadi_interface.CasadiModel
+
+            options -- 
+                The options that should be used by the algorithm. For 
+                details on the options, see:
+                
+                model.optimize_options('LocalDAECollocationAlgOptions')
+                
+                or look at the docstring with help:
+                
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
+                
+                Valid values are: 
+                - A dict that overrides some or all of the default values
+                  provided by LocalDAECollocationAlgOptions. An empty
+                  dict will thus give all options with default values.
+                - A LocalDAECollocationAlgOptions object.
+        """
+        self._t0 = time.clock()
+        self.model = model
+        
+        # handle options argument
+        if isinstance(options, dict):
+            # user has passed dict with options or empty dict = default
+            self.options = LocalDAECollocationAlgOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOptions):
+            # user has passed LocalDAECollocationAlgOptions instance
+            self.options = options
+        else:
+            raise InvalidAlgorithmOptionException(options)
+
+        # set options
+        self._set_options()
+            
+        if not casadi_present:
+            raise Exception(
+                    'Could not find CasADi. Check pyjmi.check_packages()')
+        
+        self.nlp = LocalDAECollocator(model, self.options)
+            
+        # set solver options
+        self._set_solver_options()
+        
+    def _set_options(self):
+        """ 
+        Set algorithm options and assert their validity.
+        """
+        self.__dict__.update(self.options)
+        defaults = self.get_default_options()
+        
+        # Check validity of element lengths
+        if self.hs != "free" and self.hs is not None:
+            self.hs = list(self.hs)
+            if len(self.hs) != self.n_e:
+                raise ValueError("The number of specified element lengths " +
+                                 "must be equal to the number of elements.")
+            if not N.allclose(N.sum(self.hs), 1):
+                raise ValueError("The sum of all elements lengths must be" +
+                                 "(almost) equal to 1.")
+        if self.h_bounds != defaults['h_bounds']:
+            if self.hs != "free":
+                raise ValueError("h_bounds is only used if algorithm " + \
+                                 'option hs is set to "free".')
+        
+        # Check validity of free_element_lengths_data
+        if self.free_element_lengths_data is None:
+            if self.hs == "free":
+                raise ValueError("free_element_lengths_data must be given " + \
+                                 'if self.hs == "free".')
+        if self.free_element_lengths_data is not None:
+            if self.hs != "free":
+                raise ValueError("free_element_lengths_data can only be " + \
+                                 'given if self.hs == "free".')
+        
+        # Check validity of discr
+        if self.discr == "LGL":
+            raise NotImplementedError("Lobatto collocation is currently " + \
+                                      "not supported.")
+        elif self.discr != "LG" and self.discr != "LGR":
+            raise ValueError("Unknown discretization scheme %s." % self.discr)
+
+        # Check validity of rename_vars
+        if self.rename_vars:
+            if self.graph != "SX":
+                raise NotImplementedError('rename_vars is only compatible ' + \
+                                          'with graph == "SX".')
+            print("Warning: Variable renaming is currently activated.")
+        
+        # Check validity of quadrature_constraint
+        if (self.discr == "LG" and self.eliminate_der_var and
+            self.quadrature_constraint):
+            raise NotImplementedError("quadrature_constraint is not " + \
+                                      "compatible with eliminate_der_var.")
+        
+        # Check validity of blocking_factors
+        if (self.blocking_factors is not None and 
+            N.sum(self.blocking_factors) != self.n_e):
+            raise ValueError("The sum of all elements in blocking factors " +
+                             "must be the same as the number of elements.")
+        
+        # Check validity of nominal_traj_mode
+        var_vectors = self.model._var_vectors
+        ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
+        ocp_names = reduce(list.__add__, ocp_names)
+        ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
+        for name in self.nominal_traj_mode.keys():
+            if name not in ocp_names:
+                if name != "_default_mode":
+                    aliases = self.model.xmldoc.get_aliases_for_variable(name)
+                    found_alias = False
+                    if aliases is not None:
+                        for alias in aliases[0]:
+                            if alias in ocp_names:
+                                self.nominal_traj_mode[alias] = \
+                                        self.nominal_traj_mode[name]
+                                del self.nominal_traj_mode[name]
+                                found_alias = True
+                                break
+                    if not found_alias:
+                        raise XMLException("Could not find variable " + name +
+                                           ", as referenced by " +
+                                           "nominal_traj_mode.")
+        
+        # Solver options
+        self.solver_options = self.IPOPT_options
+        
+    def _set_solver_options(self):
+        """ 
+        Helper function that sets options for the solver.
+        """
+        for (k, v) in self.solver_options.iteritems():
+            self.nlp.set_ipopt_option(k, v)
+            
+    def solve(self):
+        """ 
+        Solve the optimization problem using ipopt solver. 
+        """
+        times = {}
+        times['sol'] = self.nlp.ipopt_solve()
+        self._write_result()
+        
+        # Calculate times
+        times['tot'] = time.clock() - self._t0
+        times['init'] = times['tot'] - times['sol']
+        
+        # Store times as data attribute
+        self.times = times
+        
+    def _write_result(self):
+        """
+        Helper method. Write result to file.
+        """
+        self.nlp.export_result_dymola(self.result_file_name)
+        
+        # Set result file name
+        if not self.result_file_name:
+            self.result_file_name = self.model.get_identifier()+'_result.txt'
+        
+    def get_result(self):
+        """ 
+        Load result data and create a LocalDAECollocationAlgResult object.
+        
+        Returns::
+        
+            The LocalDAECollocationAlgResult object.
+        """
+        resultfile = self.result_file_name
+        res = ResultDymolaTextual(resultfile)
+        
+        # Get optimized element lengths
+        h_opt = self.nlp.get_h_opt()
+        
+        # Calculate post-processing and total time
+        times = self.times
+        times['post_processing'] = time.clock() - self._t0 - times['tot']
+        times['tot'] += times['post_processing']
+        
+        # Create and return result object
+        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
+                                            res, self.options, self.times,
+                                            h_opt)
+    
+    @classmethod
+    def get_default_options(cls):
+        """ 
+        Get an instance of the options class for the LocalDAECollocationAlg
+        algorithm, prefilled with default values. (Class method.)
+        """
+        return LocalDAECollocationAlgOptions()
+    
+class LocalDAECollocationAlg2Options(OptionBase):
+    
+    """
+    Options for optimizing CasADi models using a collocation algorithm. 
+
+    Collocation algorithm options::
+    
+        n_e --
+            Number of finite elements.
+            
+            Type: int
+            Default: 50
+        
+        hs --
+            Element lengths.
+            
+            Possible values: None, iterable of floats and "free"
+            
+            None: The element lengths are uniformly distributed.
+            
+            iterable of floats: Component i of the iterable specifies the
+            length of element i. The lengths must be normalized in the sense
+            that the sum of all lengths must be equal to 1.
+            
+            "free": The element lengths become optimization variables and are
+            optimized according to the algorithm option
+            free_element_lengths_data.
+            WARNING: This option is very experimental and will not always give
+            desirable results.
+            
+            Type: None, iterable of floats or string
+            Default: None
+        
+        free_element_lengths_data --
+            Data used for optimizing the element lengths if they are free.
+            Should be None when hs != "free".
+            
+            Type: None or
+            pyjmi.optimization.casadi_collocation.FreeElementLengthsData
+            Default: None
+        
+        n_cp --
+            Number of collocation points in each element.
+            
+            Type: int
+            Default: 3
+        
+        discr --
+            Determines the collocation scheme used to discretize the problem.
+            
+            Possible values: "LG" and "LGR".
+            
+            "LG": Gauss collocation (Legendre-Gauss).
+            
+            "LGR": Radau collocation (Legendre-Gauss-Radau).
+            
+            Type: str
+            Default: "LGR"
+        
+        graph --
+            CasADi graph type. Possible values are "SX" and "MX".
+            
+            Type: str
+            Default: "SX"
+
+        rename_vars --
+            Rename NLP variables according to their corresponding
+            Modelica/Optimica names. This only works if graph == "SX". This is
+            done in an inefficient manner and should only be used for
+            investigative purposes.
+
+            Type: bool
+            Default: False
+        
+        init_traj --
+            Variable trajectory data used for initialization of the NLP
+            variables.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Default: None
+        
+        variable_scaling --
+            Whether to scale the variables according to their nominal values or
+            the trajectories provided with the nominal_traj option.
+            
+            Type: bool
+            Default: True
+        
+        nominal_traj --
+            Variable trajectory data used for scaling of the NLP variables.
+            This option is only applicable if variable scaling is enabled.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual
+            Default: None
+        
+        nominal_traj_mode --
+            Mode for computing scaling factors for each variable based on
+            nominal trajectories. Four possible modes:
+            
+            "attribute": Time-invariant, linear scaling based on Nominal
+            attribute
+            
+            "linear": Time-invariant, linear scaling
+            
+            "affine": Time-invariant, affine scaling
+            
+            "time-variant": Time-variant, linear scaling
+            
+            Option is a dictionary with variable names as keys and
+            corresponding scaling modes as values. For all variables
+            not occuring in the keys of the dictionary, the mode specified by
+            the "_default_mode" entry will be used, which by default is
+            "linear".
+            
+            Type: {str: str}
+            Default: {"_default_mode": "linear"}
+        
+        result_file_name --
+            Specifies the name of the file where the result is written. Setting
+            this option to an empty string results in a default file name that
+            is based on the name of the model class.
+
+            Type: str
+            Default: ""
+
+        print_condition_numbers --
+            Prints the condition numbers of the Jacobian of the constraints and
+            of the simplified KKT matrix at the initial and optimal points.
+            Note that this is only feasible for very small problems.
+
+            Type: bool
+            Default: False
+        
+        write_scaled_result --
+            Return the scaled optimization result if set to True, otherwise
+            return the unscaled optimization result. This option is 
+            only applicable when the CasadiModel has been instantiated with
+            scale_variables=True. This option is only intended for debugging.
+            
+            Type: bool
+            Default: False
+        
+        result_mode --
+            Specifies the output format of the optimization result.
+            
+            Possible values: "collocation_points", "element_interpolation" and
+            "mesh_points"
+            
+            "collocation_points": The optimization result is given at the
+            collocation points as well as the start and final time point.
+            
+            "element_interpolation": The values of the variable trajectories
+            are calculated by evaluating the collocation polynomials. The
+            algorithm option n_eval_points is used to specify the
+            evaluation points within each finite element.
+            
+            "mesh_points": The optimization result is given at the
+            mesh points.
+            
+            Type: str
+            Default: "collocation_points"
+        
+        n_eval_points --
+            The number of evaluation points used in each element when the
+            algorithm option result_mode is set to "element_interpolation". One
+            evaluation point is placed at each element end-point (hence the
+            option value must be at least 2) and the rest are distributed
+            uniformly.
+            
+            Type: int
+            Default: 20
+        
+        blocking_factors --
+            The iterable of blocking factors, where each element corresponds to
+            the number of collocation elements for which all the control
+            profiles should be constant. For example, if blocking_factors ==
+            [2, 1, 5], then u_0 = u_1 and u_3 = u_4 = u_5 = u_6 = u_7. The sum
+            of all elements in the iterable must be the same as the number of
+            elements.
+            
+            If blocking_factors is None, then the usual collocation polynomials
+            are instead used to represent the controls.
+            
+            Type: None or iterable of ints
+            Default: None
+        
+        quadrature_constraint --
+            Whether to use quadrature continuity constraints. This option is
+            only applicable when using Gauss collocation. It is incompatible
+            with eliminate_der_var set to True.
+            
+            True: Quadrature is used to get the values of the states at the
+            mesh points.
+            
+            False: The Lagrange basis polynomials for the state collocation
+            polynomials are evaluated to get the values of the states at the
+            mesh points.
+            
+            Type: bool
+            Default: True
+        
+        eliminate_der_var --
+            True: The variables representing the derivatives are eliminated
+            via the collocation equations and are thus not a part of the NLP,
+            with the exception of \dot{x}_{1, 0}, which is not eliminated since
+            the collocation equations are not enforced at t_0.
+            
+            False: The variables representing the derivatives are kept as NLP
+            variables and the collocation equations enter as constraints.
+            
+            Type: bool
+            Default: False
+        
+        eliminate_cont_var --
+            True: Let the same variables represent both the values of the
+            states at the start of each element and the end of the previous
+            element.
+            
+            False:
+            For Radau collocation, the extra variables x_{i, 0}, representing
+            the states at the start of each element, are created and then
+            constrained to be equal to the corresponding variable at the end of
+            the previous element for continuity.
+            
+            For Gauss collocation, the extra variables x_{i, n_cp + 1},
+            representing the states at the end of each element, are created
+            and then constrained to be equal to the corresponding variable at
+            the start of the succeeding element for continuity.
+            
+            Type: bool
+            Default: False
+        
+        measurement_data --
+            Data used to penalize, constraint or eliminate certain variables.
+            
+            Type: None or
+            pyjmi.optimization.casadi_collocation.MeasurementData
+            Default: None
+    
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.optimize_options()
+        >>> opts['n_e'] = 100
+    
+    IPOPT options can be provided in the option IPOPT_options. Since CasADi's
+    IPOPT interface is used for this algorithm, which includes more options
+    than just the original IPOPT options, please see the documentation for
+    CasADi's IpoptSolver class for a complete list of the available IPOPT
+    options, which is available at
+    http://casadi.sourceforge.net/api/html/dd/df1/classCasADi_1_1IpoptSolver.html
+    
+    IPOPT options are set using the syntax for dictionaries::
+        
+        >>> opts['IPOPT_options']['max_iter'] = 500
+    """
+    
+    def __init__(self, *args, **kw):
+        _defaults = {
+                'n_e': 50,
+                'hs': None,
+                'free_element_lengths_data': None,
+                'h_bounds': (0.7, 1.3),
+                'n_cp': 3,
+                'discr': "LGR",
+                'graph': 'SX',
+                'rename_vars': False,
+                'init_traj': None,
+                'variable_scaling': True,
+                'nominal_traj': None,
+                'nominal_traj_mode': {"_default_mode": "linear"},
+                'result_file_name': "",
+                'write_scaled_result': False,
+                'print_condition_numbers': False,
+                'result_mode': "collocation_points",
+                'n_eval_points': 20,
+                'blocking_factors': None,
+                'quadrature_constraint': True,
+                'eliminate_der_var': False,
+                'eliminate_cont_var': False,
+                'measurement_data': None,
+                'IPOPT_options': {}}
+        
+        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
+        self._update_keep_dict_defaults(*args, **kw)
+
+class LocalDAECollocationAlg2Result(JMResultBase):
+    
+    """
+    A JMResultBase object with the additional attributes times and h_opt.
+    
+    Attributes::
+    
+        times --
+            A dictionary with the keys 'init', 'sol', 'post_processing' and
+            'tot', which measure CPU time consumed during different algorithm
+            stages.
+
+            times['init'] is the time spent creating the NLP.
+            
+            times['sol'] is the time spent solving the NLP (total Ipopt
+            time).
+            
+            times['post_processing'] is the time spent processing the NLP
+            solution before it is returned.
+            
+            times['tot'] is the sum of all the other times.
+            
+            Type: dict
+        
+        h_opt --
+            An array with the normalized optimized element lengths.
+            
+            The element lengths are only optimized (and stored in a class
+            instance) if the algorithm option "hs" == free. Otherwise this
+            attribute is None.
+            
+            Type: ndarray of floats or None
+    """
+    
+    def __init__(self, model=None, result_file_name=None, solver=None, 
+                 result_data=None, options=None, times=None, h_opt=None):
+        super(LocalDAECollocationAlgResult, self).__init__(
+                model, result_file_name, solver, result_data, options)
+        self.h_opt = h_opt
+        self.times = times
+        
+        # Print times
+        print("\nTotal time: %.2f seconds" % times['tot'])
+        print("Initialization time: %.2f seconds" % times['init'])
+        print("Solution time: %.2f seconds" % times['sol'])
+        print("Post-processing time: %.2f seconds" % times['post_processing'])
+
+        # Print condition numbers
+        if self.options['print_condition_numbers']:
+            J_init_cond = N.linalg.cond(self.get_J("init"))
+            J_opt_cond = N.linalg.cond(self.get_J("opt"))
+            KKT_init_cond = N.linalg.cond(self.get_KKT("init"))
+            KKT_opt_cond = N.linalg.cond(self.get_KKT("opt"))
+            print("\nJacobian condition number at the initial guess: %.3g" %
+                  J_init_cond)
+            print("Jacobian condition number at the optimum: %.3g" %
+                  J_opt_cond)
+            print("KKT matrix condition number at the initial guess: %.3g" %
+                  KKT_init_cond)
+            print("KKT matrix condition number at the optimum: %.3g" %
+                  KKT_opt_cond)
+    
+    def get_J(self, point="fcn"):
+        """
+        Get the Jacobian of the constraints.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+        """
+        J_fcn = self.solver.solver.jacG()
+        if point == "fcn":
+            return J_fcn
+        elif point == "init":
+            J_fcn.setInput(self.solver.xx_init, 0)
+        elif point == "opt":
+            J_fcn.setInput(self.solver.primal_opt, 0)
+        elif point == "sym":
+            return J_fcn.eval([self.solver.xx, 0])[0]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        J_fcn.setInput([], 1)
+        J_fcn.evaluate()
+        return J_fcn.output(0).toArray()
+    
+    def get_H(self, point="fcn"):
+        """
+        Get the Hessian of the Lagrangian.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        H_fcn = self.solver.solver.hessLag()
+        if point == "fcn":
+            return H_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            sigma = self._compute_sigma()
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput([], 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "opt":
+            x = self.solver.primal_opt
+            sigma = self._compute_sigma()
+            dual = self.solver.dual_opt
+            H_fcn.setInput(x, 0)
+            H_fcn.setInput([], 1)
+            H_fcn.setInput(sigma, 2)
+            H_fcn.setInput(dual, 3)
+        elif point == "sym":
+            nu = casadi.ssym("nu", self.solver.c_e.numel())
+            sigma = casadi.ssym("sigma")
+            lam = casadi.ssym("lambda", self.solver.c_i.numel())
+            dual = casadi.vertcat([nu, lam])
+            return [H_fcn.eval([self.solver.xx, 0, sigma, dual])[0], sigma,
+                    dual]
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        H_fcn.evaluate()
+        return H_fcn.output(0).toArray()
+
+    def get_KKT(self, point="fcn"):
+        """
+        Get the KKT matrix.
+
+        This only constructs the simple KKT system [H, J^T; J, 0]; not the full
+        KKT system used by IPOPT. However, if the problem has no inequality
+        constraints (including bounds), they coincide.
+        
+        Parameters::
+            
+            point --
+                Evaluation point. Possible values: "fcn", "init", "opt",
+                "sym"
+                
+                "fcn": Returns an SXFunction
+                
+                "init": Numerical evaluation at the initial guess
+                
+                "opt": Numerical evaluation at the found optimum
+                
+                "sym": Symbolic evaluation
+                
+                Type: str
+                Default: "function"
+        
+        Returns::
+            
+            matrix --
+                Matrix value
+
+            sigma --
+                Symbolic sigma. Only returned if point is "sym".
+
+            dual --
+                Symbolic dual variables. Only returned if point is "sym".
+        """
+        if point == "fcn" or point == "sym":
+            x = self.solver.xx
+            J = self.get_J("sym")
+            [H, sigma, dual] = self.get_H("sym")
+            zeros = N.zeros([dual.numel(), dual.numel()])
+            KKT = casadi.blockcat([[H, J.T], [J, zeros]])
+            if point == "sym":
+                return KKT
+            else:
+                KKT_fcn = casadi.SXFunction([x, [], sigma, dual], [KKT])
+                return KKT_fcn
+        elif point == "init":
+            x = self.solver.xx_init
+            dual = N.zeros(self.solver.c_e.numel() +
+                           self.solver.c_i.numel())
+        elif point == "opt":
+            x = self.solver.primal_opt
+            dual = self.solver.dual_opt
+        else:
+            raise ValueError("Unkonwn point value: " + repr(point))
+        sigma = self._compute_sigma()
+        J = self.get_J(point)
+        H = self.get_H(point)
+        zeros = N.zeros([len(dual), len(dual)])
+        KKT = N.bmat([[H, J.T], [J, zeros]])
+        return KKT
+
+    def _compute_sigma(self):
+        """
+        Computes the objective scaling factor sigma.
+        """
+        grad_fcn = self.solver.solver.gradF()
+        grad_fcn.setInput(self.solver.xx_init, 0)
+        grad_fcn.setInput([], 1)
+        grad_fcn.evaluate()
+        grad = grad_fcn.output(0).toArray()
+        sigma_inv = N.linalg.norm(grad, N.inf)
+        if sigma_inv < 1000.:
+            return 1.
+        else:
+            return 1. / sigma_inv
