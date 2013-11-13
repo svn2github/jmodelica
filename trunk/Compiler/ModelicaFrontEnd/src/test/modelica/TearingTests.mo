@@ -2793,6 +2793,179 @@ Residual equations:
 ")})));
 end HandGuidedTearing31;
 
+model HandGuidedTearing32
+    constant Integer n = 4;
+    Real x[n] annotation(__Modelon(IterationVariable(each enabled=true)));
+    Real y[n];
+equation
+    x = abs(y) .+ 3 annotation(__Modelon(ResidualEquation));
+    x .+ y = fill(4, n);
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing32",
+            description="Test of hand guided tearing and alias elimination.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]()
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = abs(y[1]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[2]
+Iteration variables:
+  x[2]()
+Solved equations:
+  x[2] .+ y[2] = 4
+Residual equations:
+ Iteration variables: x[2]
+  x[2] = abs(y[2]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[3]
+Iteration variables:
+  x[3]()
+Solved equations:
+  x[3] .+ y[3] = 4
+Residual equations:
+ Iteration variables: x[3]
+  x[3] = abs(y[3]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[4]
+Iteration variables:
+  x[4]()
+Solved equations:
+  x[4] .+ y[4] = 4
+Residual equations:
+ Iteration variables: x[4]
+  x[4] = abs(y[4]) .+ 3
+-------------------------------
+")})));
+end HandGuidedTearing32;
+
+model HandGuidedTearing33
+    constant Integer n = 4;
+    Real x[n] annotation(__Modelon(IterationVariable(enabled=fill(true, n))));
+    Real y[n];
+equation
+    x = abs(y) .+ 3 annotation(__Modelon(ResidualEquation));
+    x .+ y = fill(4, n);
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing33",
+            description="Test of hand guided tearing and alias elimination.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]()
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = abs(y[1]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[2]
+Iteration variables:
+  x[2]()
+Solved equations:
+  x[2] .+ y[2] = 4
+Residual equations:
+ Iteration variables: x[2]
+  x[2] = abs(y[2]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[3]
+Iteration variables:
+  x[3]()
+Solved equations:
+  x[3] .+ y[3] = 4
+Residual equations:
+ Iteration variables: x[3]
+  x[3] = abs(y[3]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[4]
+Iteration variables:
+  x[4]()
+Solved equations:
+  x[4] .+ y[4] = 4
+Residual equations:
+ Iteration variables: x[4]
+  x[4] = abs(y[4]) .+ 3
+-------------------------------
+")})));
+end HandGuidedTearing33;
+
+model HandGuidedTearing34
+    constant Integer n = 2;
+    Real x[n] annotation(__Modelon(IterationVariable(enabled=if n == 2 then {true,false} else fill(true, n))));
+    Real y[n] annotation(__Modelon(IterationVariable(enabled=if n == 2 then {false,true} else fill(false, n))));
+equation
+    x = abs(y) .+ 3 annotation(__Modelon(ResidualEquation));
+    x .+ y = fill(4, n);
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing34",
+            description="Test of hand guided tearing and alias elimination.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]()
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = abs(y[1]) .+ 3
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  x[2]
+Iteration variables:
+  y[2]()
+Solved equations:
+  x[2] .+ y[2] = 4
+Residual equations:
+ Iteration variables: y[2]
+  x[2] = abs(y[2]) .+ 3
+-------------------------------
+")})));
+end HandGuidedTearing34;
+
 model HandGuidedTearingError1
 	Real x;
 	Real y;
@@ -2817,7 +2990,7 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8432, column 56:
-  Cannot evaluate boolean enabled expression: 1
+  The type of the HGT enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8436, column 56:
@@ -2853,11 +3026,11 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8464, column 56:
-  Cannot evaluate boolean enabled expression: unknownParameter1
+  Cannot find class or component declaration for unknownParameter1
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8464, column 56:
-  Cannot find class or component declaration for unknownParameter1
+  The type of the HGT enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8468, column 56:

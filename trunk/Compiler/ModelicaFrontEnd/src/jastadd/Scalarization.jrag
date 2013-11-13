@@ -287,8 +287,6 @@ aspect Scalarization {
 		name.scalarized = true;
 		fv.setFQName(name);
 
-		fv.setHGTType(getHGTType());
-		
 		return fv;
 	}
 	

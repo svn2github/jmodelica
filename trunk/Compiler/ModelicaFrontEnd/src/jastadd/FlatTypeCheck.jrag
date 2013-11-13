@@ -91,7 +91,8 @@ aspect FlatTypeCheck {
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
     	FExp bexp = myBindingInstExp();
 		boolean func = inFunction();
-    	if (!size().isComplete() && !func && !inRecordDecl()) 
+        Size componentSize = size();
+        if (!componentSize.isComplete() && !func && !inRecordDecl()) 
     		error("Can not infer array size of the variable " + name());
     	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
@@ -130,13 +131,25 @@ aspect FlatTypeCheck {
 			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
-				FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-				enabledExp.collectErrors(checkType);
-				try {
-					enabledExp.ceval().booleanValue();
-				} catch (ConstantEvaluationException e) {
-					enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-				}
+			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+			    enabledExp.collectErrors(checkType);
+			    if (!enabledExp.type().isBoolean()) {
+			        enabledExp.error("The type of the HGT enabled expression is not boolean");
+			    } else if (!enabledNode.isEachSet() && !type().dimensionCompatible(enabledExp.type())) { 
+			        if (ndims() == 0) {
+			            enabledExp.warning("Assuming 'each' for enabled expression");
+			        } else {
+			            enabledExp.error("Array size mismatch for the enabled attribute" +
+			                    ", size of component declaration is " + size() + 
+			                    " and size of expression is " + enabledExp.size());
+			        }
+			    } else if (enabledNode.isEachSet()) { 
+			        if (ndims() == 0) {
+			            error("The 'each' keyword cannot be applied to attributes of scalar components");
+			        } else if (enabledExp.ndims() > 0) {
+			            error("The enabled attribute is declared 'each' and the expression is not scalar");
+			        }
+			    }
 			}
 		}
 		

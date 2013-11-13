@@ -979,7 +979,7 @@ aspect FlatPrettyPrint {
 		
 		p.print(getFStringCommentOpt(),str,indent);
 		
-		if (getHGTType() == FClass.HGTVariableType.COMPONENT || getHGTType() == FClass.HGTVariableType.PAIR)
+		if (isHGTVar())
 			str.print(" annotation(__Modelon(IterationVariable))");
 
 		if (isIndependentParameter() && hasBindingExp()) {
@@ -1006,35 +1006,24 @@ aspect FlatPrettyPrint {
 			}
 		}
 	}
+	
+	syn boolean FAttribute.shouldPrettyPrint() = !name().equals(HGT);
 
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
-	
-	    boolean attrSet = false;
-	    	boolean firstAttr = true;
-	    	
-	    	for (int i=0;i<getNumChild();i++) {
-	    		if (((FAttribute)getChild(i)).getAttributeSet()) {
-					attrSet=true;
-					break;
-	 		   	}
-	    	}
-	    
-	    	if (attrSet){
-	    		str.print("(");
-	    		for (int i=0;i<getNumChild();i++) {
-	    
-	    			if (((FAttribute)getChild(i)).getAttributeSet()) {
-	
-						if (!firstAttr)	
-							str.print(",");
-						p.print(((FAttribute)getChild(i)),str,"");
-						
-						firstAttr = false;
-	 		   		}
-	    		}
-	    		str.print(")");
-	   		}
-	
+	    boolean firstAttr = true;
+	    for (ASTNode astNode : this) {
+	        FAttribute attr = (FAttribute)astNode;
+	        if (attr.getAttributeSet() && attr.shouldPrettyPrint()) {
+	            if (!firstAttr)	
+	                str.print(",");
+	            else
+	                str.print("(");
+	            firstAttr = false;
+	            p.print(attr, str, "");
+	        }
+	    }
+	    if (!firstAttr)
+	        str.print(")");
 	}
 	
     public void FAttribute.prettyPrint(Printer p, PrintStream str, String indent) {

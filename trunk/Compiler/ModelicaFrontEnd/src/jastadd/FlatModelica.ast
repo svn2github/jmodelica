@@ -124,8 +124,7 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName
-                                           <HGTType:FClass.HGTVariableType>;
+                                           FQName;
 
 /**
  * Represents a set of attributes that can be used by several variables.

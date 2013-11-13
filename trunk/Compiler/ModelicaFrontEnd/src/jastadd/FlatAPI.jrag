@@ -1537,12 +1537,17 @@ aspect Attributes {
 	}
 	
 	public void FVariable.setAttribute(String name, String type, FExp exp) {
+	    setAttribute(name, type, exp, 0);
+	}
+	
+	public void FVariable.setAttribute(String name, String type, FExp exp, int level) {
 		FAttribute attr = findMatching(getFAttributes(), name);
 		if (attr == null) {
-			attr = new FAttribute(new FIdUse(type), new FIdDecl(name), exp, true, 0);
+			attr = new FAttribute(new FIdUse(type), new FIdDecl(name), exp, true, level);
 			addFAttribute(attr);
 		} else {
 			attr.setValue(exp);
+			attr.setLevel(level);
 		}
 	}
 

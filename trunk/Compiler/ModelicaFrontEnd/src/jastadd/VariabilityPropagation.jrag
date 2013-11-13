@@ -59,9 +59,7 @@ aspect VariabilityPropagation {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() 
-			&& getHGTType() != FClass.HGTVariableType.COMPONENT 
-			&& getHGTType() != FClass.HGTVariableType.PAIR;
+	eq FVariable.canPropagate() = !isOutput() && !isHGTVar();
 	eq FDerivativeVariable.canPropagate() = false;
 	
 	// Hook for checks that are needed in optimica

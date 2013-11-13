@@ -288,6 +288,22 @@ aspect AnnotationAPI {
 		}
 		
 		/**
+		 * Returns true if the each keyword is set
+		 * @return true if each is set
+		 */
+		public boolean isEachSet() {
+		    return false;
+		}
+		
+		/**
+		 * Returns true if the final keyword is set
+		 * @return true if final is set
+		 */
+		public boolean isFinalSet() {
+		    return false;
+		}
+		
+		/**
 		 * Returns the vendor specific node for jmodelica. forPath("__Modelon") is done.
 		 */
 		public AnnotationNode vendorNode() {
@@ -912,6 +928,17 @@ aspect AnnotationAPI {
 			else
 				return createSetableNullPath(this, path, i);
 		}
+		
+		@Override
+		public boolean isEachSet() {
+		    return mod.hasEach();
+		}
+		
+		@Override
+		public boolean isFinalSet() {
+		    return mod.hasFinal();
+		}
+		
 	}
 	
 	/**
@@ -972,7 +999,7 @@ aspect AnnotationAPI {
 		protected AnnotationNode forPath(String[] path, int i) {
 			return mod.getClassModification().annotationNode().forPath(path, i);
 		}
-
+		
 	}
 	
 	/**

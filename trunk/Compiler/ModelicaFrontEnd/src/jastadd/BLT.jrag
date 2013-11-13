@@ -178,7 +178,7 @@ aspect BLT{
 					unmatchedHGTEquations.add(eqn);
 			}
 			for (Var var : varsInBlock.values()) {
-				if (var.getVariable().getHGTType() == FClass.HGTVariableType.COMPONENT)
+				if (var.getVariable().isHGTVarComponent())
 					unmatchedHGTVariables.add(var);
 			}
 			if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
@@ -188,7 +188,7 @@ aspect BLT{
 					Eq eqn = eqnIt.next();
 					Var var = varIt.next();
 					eqn.getEquation().getResidual().setIterationVariable(new FIdUse(var.getName()));
-					var.getVariable().setHGTType(FClass.HGTVariableType.PAIR);
+					var.getVariable().setHGTAsPair();
 				}
 			} else {
 				StringBuilder sb = new StringBuilder();
@@ -1908,7 +1908,7 @@ aspect BLT{
 				boolean equationHasHGT = block.equation().hasResidual();
 				FVariable iterVar = (equationHasHGT) ? block.equation().getResidual().iterationVariable() : null;
 				for (FVariable var : block.activeVariables()) {
-					boolean variableHasHGT = var.getHGTType() == FClass.HGTVariableType.COMPONENT || var == iterVar;
+					boolean variableHasHGT = var.isHGTVarComponent() || var == iterVar;
 					str.print(" (");
 					str.print(variableHasHGT ? 'M' : 'A');
 					str.print(") " + (counter++) + " " + var.name() + " (");

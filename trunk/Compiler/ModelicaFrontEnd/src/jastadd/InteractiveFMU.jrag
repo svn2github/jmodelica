@@ -26,7 +26,7 @@ aspect InteractiveFMU{
 			for (FAbstractEquation equation : equations())
 				equation.setResidualOpt(new Opt<FResidual>());
 			for (FVariable variable : variables())
-				variable.setHGTType(HGTVariableType.NONE);
+				variable.unsetHGT();
 			
 			// Flush cache
 			root().flushAllRecursive();

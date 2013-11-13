@@ -697,7 +697,7 @@ aspect AliasVariables {
 			return score;
 		score--;
 		
-		if (getHGTType() == FClass.HGTVariableType.PAIR || getHGTType() == FClass.HGTVariableType.COMPONENT)
+		if (isHGTVar())
 			return score;
 		score--;
 		
