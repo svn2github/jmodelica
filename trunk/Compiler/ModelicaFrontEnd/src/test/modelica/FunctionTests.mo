@@ -2107,23 +2107,30 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten4
  discrete Integer x;
  discrete Integer y;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(x) = 0;
  pre(y) = 0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 algorithm
  x := pre(x);
  y := pre(y);
- when x == 4 then
+ temp_1 := x == 4;
+ temp_2 := x == 3;
+ if not initial() and (temp_1 and not pre(temp_1)) then
   x := 1;
   y := 2;
- elsewhen x == 3 then
+ elseif not initial() and (temp_2 and not pre(temp_2)) then
   x := 2;
   y := 3;
   if x == 2 then
    x := 3;
   end if;
- end when;
+ end if;
 end FunctionTests.AlgorithmFlatten4;
+			
 ")})));
 end AlgorithmFlatten4;
 
@@ -2287,28 +2294,32 @@ fclass FunctionTests.AlgorithmFlatten9
  Real y2;
  discrete Real y3;
  Real x;
- Real temp_1;
- Real temp_2;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ Real temp_3;
+ Real temp_4;
 initial equation 
  pre(y1) = 0.0;
  pre(y3) = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
  y2 = sin(y1);
  x = time;
 algorithm
  y1 := pre(y1);
- temp_1 := 1;
- temp_1 := x - 2;
- when x > 2 then
+ temp_3 := x - 2;
+ temp_1 := x > 2;
+ if not initial() and (temp_1 and not pre(temp_1)) then
   y1 := sin(x);
- end when;
+ end if;
 algorithm
  y3 := pre(y3);
- temp_2 := 1;
- temp_2 := x - 2;
- when x > 2 then
+ temp_4 := x - 2;
+ temp_2 := x > 2;
+ if not initial() and (temp_2 and not pre(temp_2)) then
   y3 := 2 * x + y1 + y2;
- end when;
+ end if;
 end FunctionTests.AlgorithmFlatten9;
 ")})));
 end AlgorithmFlatten9;
@@ -2330,23 +2341,27 @@ algorithm
 fclass FunctionTests.AlgorithmFlatten10
  discrete Real y1;
  discrete Real y2;
- Real temp_1;
- Real temp_2;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ Real temp_3;
+ Real temp_4;
 initial equation 
  pre(y1) = 0.0;
  pre(y2) = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 algorithm
  y1 := pre(y1);
  y2 := pre(y2);
- temp_1 := 1;
- temp_2 := 1;
- temp_1 := time - 1;
- temp_2 := time - 2;
- when time > 1 then
+ temp_3 := time - 1;
+ temp_1 := time > 1;
+ temp_4 := time - 2;
+ temp_2 := time > 2;
+ if not initial() and (temp_1 and not pre(temp_1)) then
   y1 := 1;
- elsewhen time > 2 then
+ elseif not initial() and (temp_2 and not pre(temp_2)) then
   y2 := 2;
- end when;
+ end if;
 end FunctionTests.AlgorithmFlatten10;
 ")})));
 end AlgorithmFlatten10;

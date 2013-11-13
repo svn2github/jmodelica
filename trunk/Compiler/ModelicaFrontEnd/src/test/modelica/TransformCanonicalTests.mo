@@ -5440,10 +5440,6 @@ initial equation
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
- temp_3 := 1;
- temp_4 := 1;
- temp_5 := 1;
- temp_6 := 1;
  temp_3 := time * 0.3 + 4.2 - pre(temp_1);
  temp_4 := time * 0.3 + 4.2 - (pre(temp_1) + 1);
  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
@@ -5492,7 +5488,7 @@ end TransformCanonicalTests.EventGeneratingExps.InFunctionCall;
 end InFunctionCall;
 
 
-model InWhenEquations
+model InWhenClauses1
        Real x;
 equation
     when integer(time*3) + noEvent(integer(time*3)) > 1 then
@@ -5501,10 +5497,10 @@ equation
 
        annotation(__JModelica(UnitTesting(tests={
                TransformCanonicalTestCase(
-                       name="EventGeneratingExps_InWhenEquations",
+                       name="EventGeneratingExps_InWhenClauses1",
 			description="Tests event generating expressions in a when equation.",
 			flatModel="
-fclass TransformCanonicalTests.EventGeneratingExps.InWhenEquations
+fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses1
  discrete Real x;
  discrete Integer temp_1;
 initial equation 
@@ -5515,10 +5511,46 @@ equation
   x = floor(time * 0.3 + 4.2);
  end when;
  temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
-end TransformCanonicalTests.EventGeneratingExps.InWhenEquations;
+end TransformCanonicalTests.EventGeneratingExps.InWhenClauses1;
 			
 ")})));
-end InWhenEquations;
+end InWhenClauses1;
+
+model InWhenClauses2
+       Real x;
+algorithm
+    when integer(time*3) + noEvent(integer(time*3)) > 1 then
+        x := floor(time * 0.3 + 4.2);
+    end when;
+
+       annotation(__JModelica(UnitTesting(tests={
+               TransformCanonicalTestCase(
+                       name="EventGeneratingExps_InWhenClauses2",
+			description="Tests event generating expressions in a when statement.",
+			flatModel="
+fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses2
+ discrete Real x;
+ discrete Boolean temp_1;
+ discrete Integer temp_2;
+ Real temp_3;
+ Real temp_4;
+initial equation 
+ pre(x) = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = 0;
+algorithm
+ x := pre(x);
+ temp_3 := time * 3 - pre(temp_2);
+ temp_4 := time * 3 - (pre(temp_2) + 1);
+ temp_2 := if time * 3 < pre(temp_2) or time * 3 >= (pre(temp_2) + 1) or initial() then integer(time * 3) else pre(temp_2);
+ temp_1 := temp_2 + noEvent(integer(time * 3)) > 1;
+ if not initial() and (temp_1 and not pre(temp_1)) then
+  x := noEvent(floor(time * 0.3 + 4.2));
+ end if;
+end TransformCanonicalTests.EventGeneratingExps.InWhenClauses2;
+			
+")})));
+end InWhenClauses2;
 
 model InInitialAlgorithm
        Integer x;

@@ -2790,11 +2790,6 @@ aspect FlatExpressions {
     
     inh boolean FStatement.inWhen();
     eq FWhenClause.getFStatement().inWhen()          = true;
-
-    inh boolean FRelExp.inWhile();
-    eq FWhileStmt.getChild().inWhile() = true;
-    eq Root.getChild().inWhile() = false;
-    eq FAlgorithm.getChild().inWhile() = false;
     
     inh boolean FAbstractEquation.isInitial();
     eq FClass.getChild().isInitial()                   = false;

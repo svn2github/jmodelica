@@ -1766,8 +1766,6 @@ initial equation
  pre(r) = 0.0;
  pre(temp_1) = 0;
 algorithm
- temp_2 := 1;
- temp_3 := 1;
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
  temp_2 := r - pre(temp_1);

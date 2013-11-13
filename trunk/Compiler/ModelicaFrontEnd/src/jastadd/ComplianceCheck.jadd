@@ -44,6 +44,19 @@ aspect ComplianceCheck {
 			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
 	}
 	
+	public void FEventGenExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		complianceOnlyFMU("The " + name() + "() function-like operator is");
+		if (!inFunction() && generatesEvent() && inWhile())
+			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
+	}
+	
+    inh boolean FRelExp.inWhile();
+    inh boolean FEventGenExp.inWhile();
+    eq FWhileStmt.getChild().inWhile() = true;
+    eq Root.getChild().inWhile() = false;
+    eq FAlgorithm.getChild().inWhile() = false;
+	
 	public void InstAccess.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
@@ -136,10 +149,6 @@ aspect ComplianceCheck {
 	
 	public void FSignExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The sign() function-like operator is");
-	}
-	
-	public void FEventGenExp.complianceCheck(ErrorCheckType checkType) {
-		complianceOnlyFMU("The " + name() + "() function-like operator is");
 	}
 	
 	public void FArray.complianceCheck(ErrorCheckType checkType) {

@@ -8138,8 +8138,6 @@ $C_DAE_event_indicator_residuals$
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _y_1 = _time;
-    _temp_1_3 = 1;
-    _temp_2_4 = 1;
     _x_0 = 1;
     _temp_1_3 = _y_1 - _x_0 * 3;
     _temp_2_4 = _y_1 - 1 - _x_0;
@@ -8187,10 +8185,8 @@ $C_DAE_event_indicator_residuals$
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _r1_0 = 0.0;
-    _temp_1_1 = 1;
-    _temp_2_2 = 1;
-    _temp_3_3 = 1;
-    _temp_4_4 = 1;
+	_temp_3_3 = 1;
+	_temp_4_4 = 1;
     _temp_1_1 = _time - 0.5;
     _temp_2_2 = _time - 1;
     if (_sw(0)) {
@@ -8217,7 +8213,39 @@ $C_DAE_event_indicator_residuals$
 ")})));
 end Algorithm13;
 
+model Algorithm14
+	Real x;
+algorithm
+	when time > 1 then
+		x := 2;
+	end when;
 
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm14",
+			description="C code generation of when statement",
+			generate_ode=true,
+			equation_sorting=true,
+			inline_functions="none",
+			variability_propagation=false,
+			automatic_tearing=false,
+			template="
+$C_ode_derivatives$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = pre_x_0;
+    _temp_2_2 = _time - 1;
+    _temp_1_1 = _sw(0);
+    if (LOG_EXP_AND(LOG_EXP_NOT(_atInitial), LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)))) {
+        _x_0 = 2;
+    }
+")})));
+end Algorithm14;
 
 model OutputTest1
 

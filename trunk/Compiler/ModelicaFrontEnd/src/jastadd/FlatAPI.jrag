@@ -916,17 +916,27 @@ aspect FlatAPI {
 			indexOf(this);
 	}
 
-	syn boolean FRelExp.generatesEvent() =
+	/**
+	 * Check if an expression will generate an event
+	 */
+	syn boolean FExp.generatesEvent() =
+			generatesEventExp() &&
+			!inWhen();
+	
+	/**
+	 * Check if an expression will generate an event.
+	 * Does not check context further than expressions.
+	 */
+	syn boolean FExp.generatesEventExp() = false;
+	eq FRelExp.generatesEventExp() = 
 			!inNoEventExp() &&
 			!inSmoothExp(1) &&
 			isRealComparison() &&
-			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
-	syn boolean FEventGenExp.generatesEvent() =
+	eq FEventGenExp.generatesEventExp() =
 			!inNoEventExp() &&
 			!inSmoothExp(1) &&
 			argType().isReal() &&
-			!inWhen() &&
 			!variability().lessOrEqual(fParameter());
 	
 	syn int FClass.numEventIndicators() = numRelExpInEquations();

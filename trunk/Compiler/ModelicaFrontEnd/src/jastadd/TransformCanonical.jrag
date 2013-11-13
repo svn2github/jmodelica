@@ -84,6 +84,7 @@ aspect TransformCanonical {
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
+		    new enableWhenClauseRewrite(),
 		    new enableIfEquationElimination(),
 		    new extractEventGeneratingExps(),
 		    new transformAlgorithms(),
@@ -94,7 +95,6 @@ aspect TransformCanonical {
 		    addFDerivativeVariables,
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
-		    new enableWhenEquationRewrite(),
 		    new variabilityPropagationIfSet(),
 		    new evaluateAsserts(),
 		    new enableSemiLinearRewrite(),
@@ -1209,32 +1209,32 @@ aspect TransformCanonical {
 		}
 		
 		public void visit(FForStmt stmt) {
-			transform(stmt);
 			stmt.setForStmtList(visit(stmt.getForStmts()));
+			transform(stmt);
 		}
 		
 		public void visit(FWhileStmt stmt) {
-			transform(stmt);
 			stmt.setWhileStmtList(visit(stmt.getWhileStmts()));
+			transform(stmt);
 		}
 		
 		public void visit(FIfStmt stmt) {
-			transform(stmt);
 			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
 				clause.setFStatementList(visit(clause.getFStatements()));
 			}
 			stmt.setElseStmtList(visit(stmt.getElseStmts()));
+			transform(stmt);
 		}
 		
 		public void visit(FWhenStmt stmt) {
-			transform(stmt);
 			for (FIfWhenClause clause : stmt.getFIfWhenClauses()) {
 				clause.setFStatementList(visit(clause.getFStatements()));
 			}
+			transform(stmt);
 		}
 		
-		public abstract void transform(FStatement stmt);
 		public void transform(FAlgorithm alg) {}
+		public void transform(FStatement stmt) {add(stmt);}
 	}
 	
 	public void FAlgorithm.acceptTransform(AlgorithmTransformer tf)  { tf.visit(this); }
@@ -1252,15 +1252,15 @@ aspect TransformCanonical {
 		public void transform(FAlgorithm alg) {
 			/* Add initial statements for LHS variables */
 			Set<FVariable> defSet = alg.defSet();
-			for (FVariable fv : alg.referencedFVariablesInLHS()) {
-				if (!defSet.contains(fv)) {
+			for (FVariable fv : alg.referencedFVariablesInLHS())
+				if (!defSet.contains(fv))
 					add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
-				}
-			}
+			
 			/* Add indicator initial statements */
-			for (FRelExp exp : alg.relExpInEquation()) {
-				add(exp.indicatorInitStmt());
-			}
+			for (FRelExp exp : alg.relExpInEquation())
+				if (exp.needsIndicatorInit())
+					add(exp.indicatorInitStmt());
+			
 		}
 		
 		public void transform(FStatement stmt) {
@@ -1271,6 +1271,14 @@ aspect TransformCanonical {
 			add(stmt);
 		}
 	}
+	
+	inh boolean FRelExp.needsIndicatorInit();
+	eq FlatRoot.getChild().needsIndicatorInit()            = false;
+	eq FAlgorithm.getChild().needsIndicatorInit()          = false;
+	eq FForStmt.getForStmt().needsIndicatorInit()          = true;
+	eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
+	eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
+	eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
 	
 	/**
 	 * \brief Find LHS variables which are definetly assigned to before any use.
@@ -1335,7 +1343,7 @@ aspect TransformCanonical {
 	 * \brief Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
-		FVariable v = new FRealVariable(new FTemporaryVisibilityType(), fContinuous(), new FQNameFull(tempVarName()));
+		FVariable v = new FRealVariable(new FTemporaryVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
 		myFClass().addFVariable(v);
 		setIndicatorOpt(new Opt<FIdUseExp>(v.createUseExp()));
 	}
@@ -2207,28 +2215,141 @@ aspect TransformCanonical {
 }
 
 aspect MapWhenClauses{
-
-	public void ASTNode.enableWhenEquationRewrite() {
-		for (ASTNode n : this)
-			n.enableWhenEquationRewrite();
-	}
-
-    public class FClass {
-        public class enableWhenEquationRewrite extends Transformation {
-            public void perform() {
-                enableWhenEquationRewrite();
-            }
-        }
-    }
-
 	
-	public void FWhenEquation.enableWhenEquationRewrite() {
-		super.enableWhenEquationRewrite();
-		rewriteWhenEquation = true;
+	public class FClass {
+		public class enableWhenClauseRewrite extends Transformation {
+			public void perform() {
+				createGuardTemporaries();
+				enableWhenClauseRewrite();
+				flushAllRecursive();
+			}
+			
+			public void createGuardTemporaries() {
+				for (FExp e : guardExpInEquations())
+					if (e.inAlgorithm())
+						addFVariable(e.tempVar());
+			}
+		}
+	}
+	
+	public void ASTNode.enableWhenClauseRewrite() {
+		for (ASTNode n : this)
+			n.enableWhenClauseRewrite();
+	}
+	
+	boolean FWhenEquation.rewriteWhenClause = false;
+	boolean FWhenStmt.rewriteWhenClause     = false;
+	boolean FRelExp.rewriteWhenClause       = false;
+	boolean FEventGenExp.rewriteWhenClause  = false;
+	
+	public void FWhenEquation.enableWhenClauseRewrite() {
+//		super.enableWhenClauseRewrite();
+		rewriteWhenClause = true;
 		is$Final = false;
 	}
 	
-	boolean FWhenEquation.rewriteWhenEquation = false;
+	public void FWhenStmt.enableWhenClauseRewrite() {
+		super.enableWhenClauseRewrite();
+		rewriteWhenClause = true;
+		is$Final = false;
+	}
+	
+	public void FRelExp.enableWhenClauseRewrite() {
+		if (generatesEventExp() && inWhen()) {
+			rewriteWhenClause = true;
+			is$Final = false;
+		} else {
+			super.enableWhenClauseRewrite();
+		}
+	}
+	
+	public void FEventGenExp.enableWhenClauseRewrite() {
+		if (generatesEventExp() && inWhen()) {
+			rewriteWhenClause = true;
+			is$Final = false;
+		} else {
+			super.enableWhenClauseRewrite();
+		}
+	}
+	
+	rewrite FWhenEquation in FClass.getFAbstractEquation() {
+		when (rewriteWhenClause && getNumFAbstractEquation()>1) to List {
+			rewriteWhenClause = false;
+			return splitWhenEquation();
+		}
+	}
+	
+	rewrite FWhenStmt in FAlgorithm.getFStatement() {
+		when (rewriteWhenClause) to List {
+			rewriteWhenClause = false;
+			return asIfClause();
+		}
+	}
+	
+	rewrite FRelExp {
+		when (rewriteWhenClause) to FExp {
+			rewriteWhenClause = false;
+			return new FNoEventExp(this);
+		}
+	}
+	
+	rewrite FEventGenExp {
+		when (rewriteWhenClause) to FExp {
+			rewriteWhenClause = false;
+			return new FNoEventExp(this);
+		}
+	}
+	
+	public List<FStatement> FWhenStmt.asIfClause() {
+		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
+		ArrayList<FIfWhenClause> clauses = new ArrayList<FIfWhenClause>();
+		
+		for (FIfWhenClause clause : getFIfWhenClauses()) {	
+			FIfClause c = new FIfClause();
+			FExp g = clause.getTest().asGuard(stmts, false);
+			if (!g.isInitialGuard()) {
+				g = new FAndExp(new FNotExp(new FInitialExp()), g);
+			}
+			c.setTest(g);
+			c.setFStatementList(clause.getFStatements());
+			clauses.add(c);
+		}
+		
+		FIfStmt e = new FIfStmt();
+		e.setFIfWhenClauseList(new List<FIfWhenClause>(clauses));
+		
+		stmts.add(e);
+		
+		return new List<FStatement>(stmts);
+	}
+	
+	syn boolean FExp.isInitialGuard() = false;
+	eq FInitialExp.isInitialGuard() = true;
+	eq FOrExp.isInitialGuard() = getLeft().isInitialGuard() || getRight().isInitialGuard();
+	
+	public FExp FExp.asGuard(ArrayList l, boolean equation) {
+		if (equation)
+			l.add(new FEquation(tempUseExp(), fullCopy()));
+		else
+			l.add(new FAssignStmt(tempUseExp(), fullCopy()));
+		return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
+	}
+	
+	public FExp FArray.asGuard(ArrayList l, boolean equation) {
+		FExp e = getFExp(0).asGuard(l, equation);
+		for (int i = 1; i < getNumFExp(); i++)
+			e = new FOrExp(e,getFExp(i).asGuard(l, equation));
+		return e;
+	}
+	
+	public FExp FInitialExp.asGuard(ArrayList l, boolean equation) {
+		return fullCopy();
+	}
+	
+	public FExp FIdUseExp.asGuard(ArrayList l, boolean equation) {
+		return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFIdUse().fullCopy())));
+	}
+	
 
 	public abstract FIfWhenElseEquation FIfWhenElseEquation.createIfWhenElseEquation(List eqns, 
 	                         FExp guard, Opt elseClause);
@@ -2306,12 +2427,6 @@ aspect MapWhenClauses{
 		 	i++;
 		}	
 		return l;
-	}
-
-	rewrite FWhenEquation in FClass.getFAbstractEquation() {
-		when (rewriteWhenEquation && getNumFAbstractEquation()>1) to List {
-			return splitWhenEquation();
-		}
 	}
 	
 	syn lazy boolean FAbstractEquation.isSimple() = false;
