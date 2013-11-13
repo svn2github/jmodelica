@@ -2255,8 +2255,10 @@ equation
 fclass FunctionInlining.IfEquationInline7
  Real x;
  Real y;
+ Real temp_1.p;
 equation
- x = if time > 0 then 4 else time;
+ temp_1.p = if time > 0 then 0.0 else time;
+ x = if time > 0 then 4 else temp_1.p;
  0.0 = if time > 0 then y - 2 else time - (y + 1);
 
 public
@@ -2344,9 +2346,13 @@ fclass FunctionInlining.TrivialInline2
  Real x[1];
  Real x[2];
  Real z;
+ Real temp_1[1];
+ Real temp_1[2];
 equation
- x[1] = if z > 2 then 3 else z + 3;
- x[2] = if z > 2 then 4 else z - 3;
+ temp_1[1] = if z > 2 then 0.0 else z + 3;
+ temp_1[2] = if z > 2 then 0.0 else z - 3;
+ x[1] = if z > 2 then 3 else temp_1[1];
+ x[2] = if z > 2 then 4 else temp_1[2];
  z = 1;
 end FunctionInlining.TrivialInline2;
 ")})));
@@ -2387,9 +2393,13 @@ fclass FunctionInlining.TrivialInline3
  Real x.a;
  Real x.b;
  Real z;
+ Real temp_1.a;
+ Real temp_1.b;
 equation
- x.a = if z > 2 then 3 else z + 3;
- x.b = if z > 2 then 4 else z * 3;
+ temp_1.a = if z > 2 then 0.0 else z + 3;
+ temp_1.b = if z > 2 then 0.0 else z * 3;
+ x.a = if z > 2 then 3 else temp_1.a;
+ x.b = if z > 2 then 4 else temp_1.b;
  z = 1;
 
 public
@@ -2438,9 +2448,13 @@ fclass FunctionInlining.TrivialInline4
  Real x.a;
  Real x.b;
  Real z;
+ Real temp_1.a;
+ Real temp_1.b;
 equation
- x.a = if z > 2 then 3 else z + 3;
- x.b = if z > 2 then 4 else z * 3;
+ temp_1.a = if z > 2 then 0.0 else z + 3;
+ temp_1.b = if z > 2 then 0.0 else z * 3;
+ x.a = if z > 2 then 3 else temp_1.a;
+ x.b = if z > 2 then 4 else temp_1.b;
  z = 1;
 
 public
@@ -2486,10 +2500,16 @@ fclass FunctionInlining.TrivialInline5
  Real z[1];
  Real z[2];
  Real z[3];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
 equation
- x[1] = if z[1] > 2 then z[3] else z[1] * 3;
- x[2] = if z[1] > 2 then z[2] else z[2] * 3;
- x[3] = if z[1] > 2 then z[1] else z[3] * 3;
+ temp_1[1] = if z[1] > 2 then 0.0 else z[1] * 3;
+ temp_1[2] = if z[1] > 2 then 0.0 else z[2] * 3;
+ temp_1[3] = if z[1] > 2 then 0.0 else z[3] * 3;
+ x[1] = if z[1] > 2 then z[3] else temp_1[1];
+ x[2] = if z[1] > 2 then z[2] else temp_1[2];
+ x[3] = if z[1] > 2 then z[1] else temp_1[3];
  z[1] = 1;
  z[2] = 2;
  z[3] = 3;
@@ -2621,10 +2641,16 @@ fclass FunctionInlining.TrivialInline8
  Real z[1];
  Real z[2];
  Real z[3];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
 equation
- x[1] = if z[1] > 2 then z[3] else z[1] * 3;
- x[2] = if z[1] > 2 then z[2] else z[2] * 3;
- x[3] = if z[1] > 2 then z[1] else z[3] * 3;
+ temp_1[1] = if z[1] > 2 then 0.0 else z[1] * 3;
+ temp_1[2] = if z[1] > 2 then 0.0 else z[2] * 3;
+ temp_1[3] = if z[1] > 2 then 0.0 else z[3] * 3;
+ x[1] = if z[1] > 2 then z[3] else temp_1[1];
+ x[2] = if z[1] > 2 then z[2] else temp_1[2];
+ x[3] = if z[1] > 2 then z[1] else temp_1[3];
  z[1] = 1;
  z[2] = 2;
  z[3] = 3;

@@ -1890,9 +1890,75 @@ aspect Scalarization {
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		FIfWhenEquation res2 = (FIfWhenEquation) res;
 		res2.setTest(getTest().scalarize(indexMap));
-		if (hasElse())
+		if (hasElse()) {
+	        ArrayList<FExp> tempsToAddToElse = branchTemporaries;
+	        branchTemporaries = null;
 			res2.setElse(getElse().scalarize(vars, indexMap));
+			res2.addDummyEqnsForTemps(branchTemporaries, tempsToAddToElse);
+		}
+        branchTemporaries = null;
 	}
+	
+	public void FIfWhenElseEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
+        if (tempsForThen != null) 
+            for (FExp e : tempsForThen)
+                e.type().addDummyEqnsForTemp(getFAbstractEquations(), e.tempVarName(), getType());
+	}
+    
+    public void FIfWhenEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
+        super.addDummyEqnsForTemps(tempsForThen, tempsForElse);
+        if (hasElse())
+            getElse().addDummyEqnsForTemps(tempsForElse, tempsForElse);
+    }
+    
+    public void FType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+        if (isArray()) {
+            FType scalar = scalarType();
+            for (Index i : indices()) 
+                scalar.addDummyEqnsForTemp(l, name + i, eqType);
+        } else {
+            l.add(new FEquation(eqType.fullCopy(), new FIdUseExp(name), zeroLiteral()));
+        }
+    }
+    
+    public void FRecordType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+        if (isArray()) {
+            super.addDummyEqnsForTemp(l, name, eqType);
+        } else {
+            for (FRecordComponentType comp : getComponents())
+                comp.getFType().addDummyEqnsForTemp(l, name + '.' + comp.getName(), eqType);
+        }
+    }
+	
+	public void FExp.notifyIfWhenEquationsOfTemporaryVar() {
+	    FIfWhenEquation myIf = surroundingIfOrElse();
+	    if (myIf != null) 
+	        myIf.addBranchTemporary(this);
+	}
+	
+	public void FIfWhenEquation.addBranchTemporary(FExp e) {
+	    if (branchTemporaries == null)
+	        branchTemporaries = new ArrayList<FExp>();
+	    branchTemporaries.add(e);
+        FIfWhenEquation myIf = surroundingIfOrElse();
+        if (myIf != null) 
+            myIf.addBranchTemporary(e);
+	}
+	
+	private ArrayList<FExp> FIfWhenEquation.branchTemporaries = null;
+	
+	/**
+	 * Surrounding if or else equation, if any.
+	 * 
+	 * Only valid in flat tree.
+	 */
+    inh FIfWhenEquation FExp.surroundingIfOrElse();
+    inh FIfWhenEquation FAbstractEquation.surroundingIfOrElse();
+    eq FClass.getChild().surroundingIfOrElse()                      = null;
+    eq InstNode.getChild().surroundingIfOrElse()                    = null;
+    eq Root.getChild().surroundingIfOrElse()                        = null;
+    eq FIfWhenEquation.getFAbstractEquation().surroundingIfOrElse() = this;
+    eq FIfWhenEquation.getElse().surroundingIfOrElse()              = this;
 	
 	
 	public FFunctionCallLeft FFunctionCallLeft.scalarize(Map<String,FExp> indexMap) {
@@ -1922,12 +1988,12 @@ aspect Scalarization {
 			List vars, Map<String,FExp> indexMap, boolean addVar) {
 		super.createArrayTemporaries(clauses, vars, indexMap, addVar);
 		if (!isFunctionCallClause()) {
-			boolean equation = !inFunction() && !inAlgorithm();
-			FExp temp = createTemporaryExp(indexMap, !inFunction());
+			boolean notFunc = !inFunction();
+			FExp temp = createTemporaryExp(indexMap, notFunc);
 			if (temp != null) {
 				createFunctionCallClause(clauses, indexMap, temp);
 				if (addVar)
-					addTemporaryVars(vars, !inFunction());
+					addTemporaryVars(vars, notFunc);
 			}
 		}
 	}
@@ -1985,6 +2051,7 @@ aspect Scalarization {
     	    if (variability().discreteVariability())
     	    	v = v.combineDown(variability());
 			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
+			notifyIfWhenEquationsOfTemporaryVar();
 		} else {
     		if (type.isRecord()) 
     			type.createRecordTemporaries(vars, tempVarName());

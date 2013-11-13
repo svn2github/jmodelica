@@ -664,7 +664,8 @@ aspect MunkersProblem {
         
         private int nextStep = COVER_MATCHED_COLUMNS;
 
-        /** Implementation of the Munkres (Hungarian) algorithm: based on the description at:
+        /** 
+         * Implementation of the Munkres (Hungarian) algorithm: based on the description at:
          * http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
          */
         public MunkresProblem(long[][] cost) {
@@ -678,18 +679,18 @@ aspect MunkersProblem {
             starred = new boolean[n][m];
             primed = new boolean[n][m]; 
             
-            for (int i=0;i<n;i++) {
-                for (int j=0;j<m;j++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
                     this.cost[i][j] = cost[i][j];
                     originalCost[i][j] = cost[i][j];
                     starred[i][j] = false;
                     primed[i][j] = false;
                 }
             }
-            for (int i=0;i<n;i++) { 
+            for (int i = 0; i < n; i++) { 
                 rowCover[i] = false;
             }
-            for (int j=0;j<m;j++) { 
+            for (int j = 0; j < m; j++) { 
                 columnCover[j] = false;
             }       
             //System.out.println(this);
@@ -723,7 +724,7 @@ aspect MunkersProblem {
                         break;
                     case AUGMENT_PATH:
                         //System.out.println("Step: AUGMENT_PATH");
-                        augmentPath(rp,cp);
+                        augmentPath(rp, cp);
                         //System.out.println(this);
                         break;
                     case ADD_SUB_MIN_VALUE:
@@ -737,10 +738,10 @@ aspect MunkersProblem {
                 }
             }
             
-            int[][] result = new int[n][2];
+            int[][] result = new int[k][2];
             int ind = 0;
-            for (int i=0;i<n;i++) {
-                for (int j=0;j<m;j++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
                     if (starred[i][j]) {
                         result[ind][0] = i;
                         result[ind][1] = j;

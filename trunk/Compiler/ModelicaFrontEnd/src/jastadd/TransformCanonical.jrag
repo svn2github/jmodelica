@@ -2683,7 +2683,7 @@ aspect IfEquations {
 		}
 		
 		public static <T> Set<T> intersection(Set<T> a, Set<T> b) {
-			// TODO: use runtime type of a instead
+			// TODO: use runtime type of a instead - problematic if it is something like HashMap.KeySet
 			Set<T> res = new HashSet<T>();
 			res.addAll(a);
 			res.retainAll(b);
@@ -2706,10 +2706,41 @@ aspect IfEquations {
 		unMatchedAssign.addAll(ifEqn.nonAssignmentEquationSet());
 		return toSortedList(unMatchedAssign, CHILD_ORDER_COMPARATOR);
 	}
+	
+	private int[][] FIfEquation.matchEquationsMinimizeIncidences(ArrayList<FEquation> left, ArrayList<FEquation> right) {
+        int nl = left.size();
+        int nr = right.size();
+        if (nl == 0 || nr == 0)
+            return new int[0][0];
+        long[][] weights = new long[nl][nr];
+        for (int i = 0; i < nl; i++) {
+            for (int j = 0; j < nr; j++) {
+                Set<FVariable> rightVars = right.get(j).variables();
+                weights[i][j] = rightVars.size();
+                for (FVariable var : left.get(i).variables()) 
+                    weights[i][j] += rightVars.contains(var) ? -1 : 1;
+            }
+        }
+        return new MunkresProblem(weights).solve();
+	}
+	
+	private void FIfEquation.sortOutMatchedEquations(ArrayList<FEquation> eqns, int[][] match, int col, 
+	        ArrayList<FEquation> matched, List<FAbstractEquation> remaining) {
+	    int n = eqns.size();
+        boolean used[] = new boolean[n];
+        for (int i = 0; i < match.length; i++) {
+            matched.add(eqns.get(match[i][col]));
+            used[match[i][col]] = true;
+        }
+        for (int i = 0; i < n; i++)
+            if (!used[i])
+                remaining.add(eqns.get(i));
+	}
 
 	syn List FIfEquation.createIfExpEquationList() {
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		
+		// Generate equations for assignment equations that can be matched
 		Set<FAbstractVariable> varsInBoth = 
 			intersection(assignmentEquationMap().keySet(), getElse().assignmentEquationMap().keySet()); 
 		for (FAbstractVariable v : toSortedList(varsInBoth, FAbstractVariable.NAME_COMPARATOR)) {
@@ -2719,22 +2750,40 @@ aspect IfEquations {
 			l.add(new FEquation(getType().fullCopy(), v.createUseExp(), ifExp));
 		}
 		
-		ParallelIterable<FEquation> unmatched = new ParallelIterable(new FEquation[2], true, 
-				unmatchedEquations(this, varsInBoth), unmatchedEquations(getElse(), varsInBoth));
-		for (FEquation[] eqs : unmatched) {
+		// Find equations to match up among remaining FEquations based on indices
+        ArrayList<FEquation> unmatchedLeft = unmatchedEquations(this, varsInBoth);
+        ArrayList<FEquation> unmatchedRight = unmatchedEquations(getElse(), varsInBoth);
+        int[][] match = matchEquationsMinimizeIncidences(unmatchedLeft, unmatchedRight);
+        
+		// Sort remaining equations into those that should remain in if equation and those that should become residual eqns
+        // Left side
+		ArrayList<FEquation> residualLeft = new ArrayList<FEquation>();
+        List<FAbstractEquation> keepLeft = new List<FAbstractEquation>();
+        sortOutMatchedEquations(unmatchedLeft, match, 0, residualLeft, keepLeft);
+        keepLeft.addAll(nonFEquationSet());
+        // Right side
+        ArrayList<FEquation> residualRight = new ArrayList<FEquation>();
+        List<FAbstractEquation> keepRight = new List<FAbstractEquation>();
+        sortOutMatchedEquations(unmatchedRight, match, 1, residualRight, keepRight);
+        keepRight.addAll(getElse().nonFEquationSet());
+        
+        // Generate residual equations
+		for (FEquation[] eqs : new ParallelIterable<FEquation>(new FEquation[2], true, residualLeft, residualRight)) {
 			FExp left = eqs[0].createResidualExp();
 			FExp right = eqs[1].createResidualExp();
 			FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
 			l.add(new FEquation(getType().fullCopy(), eqs[0].type().zeroLiteral(), ifExp));
 		}
 		
-		// TODO: handle this better once we have support for if equation that can't be rewritten in later steps
-		for (FAbstractEquation eqn : nonFEquationSet())
-			if (eqn.allowGlobalOnIfRewrite())
-				l.add(eqn);
-		for (FAbstractEquation eqn : getElse().nonFEquationSet())
-			if (eqn.allowGlobalOnIfRewrite())
-				l.add(eqn);
+		// Generate new if equation with remaining equations
+		if (keepLeft.getNumChild() > 0) {
+		    Opt<FIfWhenElseEquation> elseOpt = new Opt<FIfWhenElseEquation>();
+		    if (keepRight.getNumChild() > 0) 
+		        elseOpt.addChild(new FElseEquation(getType().fullCopy(), keepRight));
+		    l.add(new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt));
+		} else if (keepRight.getNumChild() > 0) {
+            l.add(new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt()));
+		}
 		
 		return l;
 	}
