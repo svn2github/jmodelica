@@ -119,17 +119,26 @@ public abstract class AbstractGenerator {
 		Class<?> cur = getClass();
 		while (!cur.equals(AbstractGenerator.class)) {
 			for (Class<?> inner : cur.getDeclaredClasses()) {
-				for (Constructor<?> con : inner.getConstructors()) {
-					try {
-						AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
-						if (!tagMap.containsKey(tag.getName()))
-							tagMap.put(tag.getName(), tag);
-					} catch (Exception e) {
-					}
-				}
+			    if (!java.lang.reflect.Modifier.isAbstract(inner.getModifiers())) {
+    				for (Constructor<?> con : inner.getConstructors()) {
+    					try {
+    						AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
+    						if (!tagMap.containsKey(tag.getName()))
+    							tagMap.put(tag.getName(), tag);
+    					} catch (Exception e) {
+    					}
+    				}
+			    }
 			}
 			cur = cur.getSuperclass();
 		}
+	}
+	
+	/**
+	 * Get the escape character.
+	 */
+	public char escapeChar() {
+	    return (char) escapeCharacter;
 	}
 	
 	/**
@@ -190,11 +199,15 @@ public abstract class AbstractGenerator {
 	public void generate(String templateFile, String outputFile) 
 	  throws FileNotFoundException {
 		try {
-		    File tFile = new File(templateFile);
-			Reader template = openTemplate(tFile);
 			PrintStream output = new NotNullPrintStream(new File(outputFile), "UTF-8");
-			generate(template, output, tFile.getParentFile());
-			template.close();
+			if (templateFile == null) {
+                generate(null, output, null);
+			} else {
+    		    File tFile = new File(templateFile);
+    			Reader template = openTemplate(tFile);
+    			generate(template, output, tFile.getParentFile());
+    			template.close();
+			}
 			output.close();
 		} catch (IOException e) { // TODO: introduce specific exception type
 			throw new RuntimeException("File I/O problem during code generation", e);
@@ -290,7 +303,7 @@ public abstract class AbstractGenerator {
 					    	Set<AbstractTag> set = hookTagMap.get(name);
 					    	if (set != null)
 					    		for (AbstractTag tag : set)
-					    			tag.generate(genPrinter);
+					    			tag.generateTag(genPrinter);
                         } else if (name.startsWith(INCLUDE_PREFIX)) {
                             if (includeDir == null)
                                 throw new IllegalArgumentException("Can't include template file without include dir.");
@@ -298,11 +311,7 @@ public abstract class AbstractGenerator {
                             File subTemplateFile = new File(includeDir, name);
                             generate(openTemplate(subTemplateFile), genPrinter, includeDir);
 					    } else {
-							AbstractTag tag = tagMap.get(name);
-							if (tag != null)
-								tag.generate(genPrinter);
-							else // TODO: introduce specific exception type
-								throw new RuntimeException("Unknown tag: " + name);
+					        getTag(name).generateTag(genPrinter);
 					    }
 					} else {
 						tag_name.append((char) c);
@@ -364,7 +373,18 @@ public abstract class AbstractGenerator {
 		} catch (IOException e) { // TODO: introduce specific exception type
 			throw new RuntimeException("File I/O problem during code generation", e);
 		}
-	}	
+	}
+	
+	/**
+	 * Fetch a tag from the map, and throw an exception if it was not found.
+	 */
+	protected AbstractTag getTag(String name) {
+        AbstractTag tag = tagMap.get(name);
+        if (tag != null)
+            return tag;
+        else // TODO: introduce specific exception type
+            throw new RuntimeException("Unknown tag: " + name);
+	}
 
 	/**
 	 * \brief Prints out all registered tags in the generator.	

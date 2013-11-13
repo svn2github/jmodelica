@@ -29,12 +29,13 @@ import java.io.*;
  */
 public class GenericGenerator extends AbstractGenerator {
 
+	/**
+	 * Number of independent constants
+	 */
 	public class DAETag_numIndependentConstants extends DAETag {
 		
-		public DAETag_numIndependentConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_ci","Number of independent constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -43,12 +44,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent constants
+	 */
 	public class DAETag_numDependentConstants extends DAETag {
 		
-		public DAETag_numDependentConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_cd","Number of dependent constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -57,12 +59,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent parameters
+	 */
 	public class DAETag_numIndependentParameters extends DAETag {
 		
-		public DAETag_numIndependentParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_pi","Number of independent parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -71,12 +74,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent parameters
+	 */
 	public class DAETag_numDependentParameters extends DAETag {
 		
-		public DAETag_numDependentParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_pd","Number of dependent parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -85,12 +89,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent real constants
+	 */
 	public class DAETag_numIndependentRealConstants extends DAETag {
 		
-		public DAETag_numIndependentRealConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_ci","Number of independent real constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentRealConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -99,12 +104,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent real constants
+	 */
 	public class DAETag_numDependentRealConstants extends DAETag {
 		
-		public DAETag_numDependentRealConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_cd","Number of dependent real constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentRealConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -113,12 +119,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent real parameters
+	 */
 	public class DAETag_numIndependentRealParameters extends DAETag {
 		
-		public DAETag_numIndependentRealParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_pi","Number of independent real parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentRealParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -127,12 +134,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent real parameters
+	 */
 	public class DAETag_numDependentRealParameters extends DAETag {
 		
-		public DAETag_numDependentRealParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_pd","Number of dependent real parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentRealParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -141,12 +149,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
+	/**
+	 * Number of independent integer constants
+	 */
 	public class DAETag_numIndependentIntegerConstants extends DAETag {
 		
-		public DAETag_numIndependentIntegerConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_ci","Number of independent integer constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentIntegerConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -155,12 +164,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent enum constants
+	 */
 	public class DAETag_numIndependentEnumConstants extends DAETag {
 		
-		public DAETag_numIndependentEnumConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_ci","Number of independent enum constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentEnumConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -169,12 +179,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent integer constants
+	 */
 	public class DAETag_numDependentIntegerConstants extends DAETag {
 		
-		public DAETag_numDependentIntegerConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_cd","Number of dependent integer constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentIntegerConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -183,12 +194,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent enum constants
+	 */
 	public class DAETag_numDependentEnumConstants extends DAETag {
 		
-		public DAETag_numDependentEnumConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_cd","Number of dependent enum constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentEnumConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -197,12 +209,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent integer parameters
+	 */
 	public class DAETag_numIndependentIntegerParameters extends DAETag {
 		
-		public DAETag_numIndependentIntegerParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_pi","Number of independent integer parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentIntegerParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -211,12 +224,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent enum parameters
+	 */
 	public class DAETag_numIndependentEnumParameters extends DAETag {
 		
-		public DAETag_numIndependentEnumParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_pi","Number of independent enum parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentEnumParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -225,12 +239,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent integer parameters
+	 */
 	public class DAETag_numDependentIntegerParameters extends DAETag {
 		
-		public DAETag_numDependentIntegerParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_pd","Number of dependent integer parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentIntegerParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -239,12 +254,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent enum parameters
+	 */
 	public class DAETag_numDependentEnumParameters extends DAETag {
 		
-		public DAETag_numDependentEnumParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_pd","Number of dependent enum parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentEnumParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -253,12 +269,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent boolean constants
+	 */
 	public class DAETag_numIndependentBooleanConstants extends DAETag {
 		
-		public DAETag_numIndependentBooleanConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_ci","Number of independent boolean constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentBooleanConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -267,12 +284,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent boolean constants
+	 */
 	public class DAETag_numDependentBooleanConstants extends DAETag {
 		
-		public DAETag_numDependentBooleanConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_cd","Number of dependent boolean constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentBooleanConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -281,12 +299,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent boolean parameters
+	 */
 	public class DAETag_numIndependentBooleanParameters extends DAETag {
 		
-		public DAETag_numIndependentBooleanParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_pi","Number of independent boolean parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentBooleanParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -295,12 +314,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent boolean parameters
+	 */
 	public class DAETag_numDependentBooleanParameters extends DAETag {
 		
-		public DAETag_numDependentBooleanParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_pd","Number of dependent boolean parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentBooleanParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -309,12 +329,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent string constants
+	 */
 	public class DAETag_numIndependentStringConstants extends DAETag {
 		
-		public DAETag_numIndependentStringConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_ci","Number of independent string constants",
-			  myGenerator,fclass);
+		public DAETag_numIndependentStringConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_ci", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -323,12 +344,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent string constants
+	 */
 	public class DAETag_numDependentStringConstants extends DAETag {
 		
-		public DAETag_numDependentStringConstants(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_cd","Number of dependent string constants",
-			  myGenerator,fclass);
+		public DAETag_numDependentStringConstants(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_cd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -337,12 +359,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of independent string parameters
+	 */
 	public class DAETag_numIndependentStringParameters extends DAETag {
 		
-		public DAETag_numIndependentStringParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_pi","Number of independent string parameters",
-			  myGenerator,fclass);
+		public DAETag_numIndependentStringParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_pi", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -351,12 +374,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of dependent string parameters
+	 */
 	public class DAETag_numDependentStringParameters extends DAETag {
 		
-		public DAETag_numDependentStringParameters(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_pd","Number of dependent string parameters",
-			  myGenerator,fclass);
+		public DAETag_numDependentStringParameters(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_pd", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -365,12 +389,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number switching functions
+	 */
 	public class DAETag_numSwitchingFunctions extends DAETag {
 		
-		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_switches","Number switching functions",
-			  myGenerator,fclass);
+		public DAETag_numSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_switches", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -379,12 +404,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number switching functions in the initial equations
+	 */
 	public class DAETag_numInitialSwitchingFunctions extends DAETag {
 		
-		public DAETag_numInitialSwitchingFunctions(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_initial_switches","Number switching functions in the initial equations",
-			  myGenerator,fclass);
+		public DAETag_numInitialSwitchingFunctions(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_initial_switches", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -393,12 +419,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number guards
+	 */
 	public class DAETag_numGuards extends DAETag {
 		
-		public DAETag_numGuards(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_guards","Number guards",
-			  myGenerator,fclass);
+		public DAETag_numGuards(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_guards", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -407,12 +434,13 @@ public class GenericGenerator extends AbstractGenerator {
 
 	}
 
+	/**
+	 * Number guards in the initial equations
+	 */
 	public class DAETag_numInitialGuards extends DAETag {
 		
-		public DAETag_numInitialGuards(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_guards_init","Number guards in the initial equations",
-			  myGenerator,fclass);
+		public DAETag_numInitialGuards(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_guards_init", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -422,12 +450,13 @@ public class GenericGenerator extends AbstractGenerator {
 	}
 
 	
+	/**
+	 * Number of continous algebraic real variables
+	 */
 	public class DAETag_numAlgebraicContinousRealVariables extends DAETag {
 		
-		public DAETag_numAlgebraicContinousRealVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_w","Number of continous algebraic real variables",
-			  myGenerator,fclass);
+		public DAETag_numAlgebraicContinousRealVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_w", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -436,12 +465,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete variables
+	 */
 	public class DAETag_numDiscreteVariables extends DAETag {
 		
-		public DAETag_numDiscreteVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_d","Number of discrete variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -450,12 +480,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete real variables
+	 */
 	public class DAETag_numDiscreteRealVariables extends DAETag {
 		
-		public DAETag_numDiscreteRealVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_d","Number of discrete real variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteRealVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -464,12 +495,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of output variables
+	 */
 	public class DAETag_numOutputs extends DAETag {
 		
-		public DAETag_numOutputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_outputs","Number of output variables",
-			  myGenerator,fclass);
+		public DAETag_numOutputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_outputs", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -478,12 +510,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete integer variables
+	 */
 	public class DAETag_numDiscreteIntegerVariables extends DAETag {
 		
-		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_d","Number of discrete integer variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteIntegerVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -492,12 +525,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete enum variables
+	 */
 	public class DAETag_numDiscreteEnumVariables extends DAETag {
 		
-		public DAETag_numDiscreteEnumVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_d","Number of discrete enum variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteEnumVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -506,12 +540,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete boolean variables
+	 */
 	public class DAETag_numDiscreteBooleanVariables extends DAETag {
 		
-		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_d","Number of discrete boolean variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteBooleanVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -520,12 +555,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of discrete string variables
+	 */
 	public class DAETag_numDiscreteStringVariables extends DAETag {
 		
-		public DAETag_numDiscreteStringVariables(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_d","Number of discrete string variables",
-			  myGenerator,fclass);
+		public DAETag_numDiscreteStringVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_d", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -534,12 +570,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
+	/**
+	 * Number of inputs
+	 */
 	public class DAETag_numInputs extends DAETag {
 		
-		public DAETag_numInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_u","Number of inputs",
-			  myGenerator,fclass);
+		public DAETag_numInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -548,12 +585,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of real inputs
+	 */
 	public class DAETag_numRealInputs extends DAETag {
 		
-		public DAETag_numRealInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_real_u","Number of real inputs",
-			  myGenerator,fclass);
+		public DAETag_numRealInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -562,12 +600,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of integer inputs
+	 */
 	public class DAETag_numIntegerInputs extends DAETag {
 		
-		public DAETag_numIntegerInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_integer_u","Number of integer inputs",
-			  myGenerator,fclass);
+		public DAETag_numIntegerInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_integer_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -576,12 +615,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of enum inputs
+	 */
 	public class DAETag_numEnumInputs extends DAETag {
 		
-		public DAETag_numEnumInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_enum_u","Number of enum inputs",
-			  myGenerator,fclass);
+		public DAETag_numEnumInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_enum_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -590,12 +630,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of boolean inputs
+	 */
 	public class DAETag_numBooleanInputs extends DAETag {
 		
-		public DAETag_numBooleanInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_boolean_u","Number of boolean inputs",
-			  myGenerator,fclass);
+		public DAETag_numBooleanInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_boolean_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -604,12 +645,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of string inputs
+	 */
 	public class DAETag_numStringInputs extends DAETag {
 		
-		public DAETag_numStringInputs(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_string_u","Number of string inputs",
-			  myGenerator,fclass);
+		public DAETag_numStringInputs(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_string_u", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -618,12 +660,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 	
+    /**
+     * Number of external objects
+     */
     public class DAETag_numExternalObjects extends DAETag {
         
-        public DAETag_numExternalObjects(AbstractGenerator myGenerator, 
-          FClass fclass) {
-            super("n_ext_objs","Number of external objects",
-              myGenerator,fclass);
+        public DAETag_numExternalObjects(AbstractGenerator myGenerator, FClass fclass) {
+            super("n_ext_objs", myGenerator, fclass);
         }
     
         public void generate(PrintStream genPrinter) {
@@ -632,12 +675,13 @@ public class GenericGenerator extends AbstractGenerator {
     
     }
 
+	/**
+	 * Number of equations
+	 */
 	public class DAETag_numEquations extends DAETag {
 		
-		public DAETag_numEquations(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_equations","Number of equations",
-			  myGenerator,fclass);
+		public DAETag_numEquations(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_equations", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -646,12 +690,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of event indicators in DAE equations
+	 */
 	public class DAETag_numEventIndicators extends DAETag {
 		
-		public DAETag_numEventIndicators(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_event_indicators","Number of event indicators in DAE equations",
-			  myGenerator,fclass);
+		public DAETag_numEventIndicators(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_event_indicators", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -663,12 +708,13 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	}
 	
+	/**
+	 * Number of initial equations
+	 */
 	public class DAETag_numInitialEquations extends DAETag {
 		
-		public DAETag_numInitialEquations(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_initial_equations","Number of initial equations",
-			  myGenerator,fclass);
+		public DAETag_numInitialEquations(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_initial_equations", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -677,12 +723,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of event indicators in DAE initialization equations
+	 */
 	public class DAETag_numInitialEventIndicators extends DAETag {
 		
-		public DAETag_numInitialEventIndicators(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_initial_event_indicators","Number of event indicators in DAE initialization equations",
-			  myGenerator,fclass);
+		public DAETag_numInitialEventIndicators(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_initial_event_indicators", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -694,12 +741,13 @@ public class GenericGenerator extends AbstractGenerator {
 		}
 	}
 
+	/**
+	 * Number of initial guess equations
+	 */
 	public class DAETag_numInitialGuessEquations extends DAETag {
 		
-		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, 
-		  FClass fclass) {
-			super("n_initial_guess_equations","Number of initial guess equations",
-			  myGenerator,fclass);
+		public DAETag_numInitialGuessEquations(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_initial_guess_equations", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {
@@ -708,12 +756,13 @@ public class GenericGenerator extends AbstractGenerator {
 	
 	}
 
+	/**
+	 * Number of differentiated Real variables
+	 */
 	public class DAETag_numDifferentiatedRealVariables extends DAETag {
 		
-		public DAETag_numDifferentiatedRealVariables(
-		  AbstractGenerator myGenerator, FClass fclass) {
-			super("n_real_x","Number of differentiated Real variables",
-			  myGenerator,fclass);
+		public DAETag_numDifferentiatedRealVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("n_real_x", myGenerator, fclass);
 		}
 	
 		public void generate(PrintStream genPrinter) {

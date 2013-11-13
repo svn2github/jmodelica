@@ -42,10 +42,10 @@
 typedef struct fmi1_me_t fmi1_me_t;             /**< \brief Forward declaration of struct. */
 
 struct fmi1_me_t {
+    jmi_t jmi;                  /* should be the first one so that jmi* and fmi1_me* point at the same address */
     fmiString fmi_instance_name;
     fmiCallbackFunctions fmi_functions;
-    fmiEventInfo event_info;
-    jmi_t* jmi;
+    fmiEventInfo event_info;    
 };
 
 /**
@@ -403,9 +403,9 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c);
 const char* fmi1_me_get_model_types_platform();
 
 /** Logging functions that are specific for fmi1_me, are used from jmi_log.c via templates */
-BOOL fmi1_me_emitted_category(log_t *log, category_t category);
-void fmi1_me_create_log_file_if_needed(log_t *log);
-void fmi1_me_emit(log_t *log, char* message);
+BOOL fmi1_me_emitted_category(jmi_log_t *log, jmi_log_category_t category);
+void fmi1_me_create_log_file_if_needed(jmi_log_t *log);
+void fmi1_me_emit(jmi_log_t *log, char* message);
 
 /**
  * \brief Extracts info from nl-solver to logger.

@@ -58,6 +58,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 
     b->jacobian_variability = jacobian_variability;
     b->jmi = jmi;
+    b->options = &(jmi->options.block_solver_options);
     b->F = F;
     b->dF = dF;
     b->n = n;
@@ -145,7 +146,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_real_t* real_vrs = (jmi_real_t*)calloc(block->n,sizeof(jmi_real_t));
         /* Initialize the work vectors */
         for(i=0; i < block->n; ++i) {
-            if(jmi->options.iteration_variable_scaling_mode == jmi_iter_var_scaling_heuristics) {
+            if(jmi->options.block_solver_options.iteration_variable_scaling_mode == jmi_iter_var_scaling_heuristics) {
                 block->nominal[i] = BIG_REAL;
             }
             else {
@@ -154,7 +155,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->max[i] = BIG_REAL;
             block->min[i] = -block->max[i];
         }
-        if(jmi->options.iteration_variable_scaling_mode != jmi_iter_var_scaling_none) {
+        if(jmi->options.block_solver_options.iteration_variable_scaling_mode != jmi_iter_var_scaling_none) {
             block->F(jmi,block->nominal,block->res,JMI_BLOCK_NOMINAL);
         }
         block->F(jmi,block->min,block->res,JMI_BLOCK_MIN);
@@ -266,7 +267,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         iter = 0;
         converged = 0;
         ef = 0;
-        if(jmi->options.block_solver_experimental_mode & jmi_block_solver_experimental_converge_switches_first) {
+        if(jmi->options.block_solver_options.experimental_mode & jmi_block_solver_experimental_converge_switches_first) {
             while(1) {
                 jmi_log_node_t iter_node;
                 iter += 1;

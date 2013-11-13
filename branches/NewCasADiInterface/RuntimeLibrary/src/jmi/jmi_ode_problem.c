@@ -20,13 +20,14 @@
 
 #include "jmi_ode_problem.h"
 
-int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, void* fmix_me,
+int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me,
                        int n_real_x, int n_sw, int n_real_u, jmi_log_t* log){
     int i;
     jmi_ode_problem_t* problem;
     
     *ode_problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
     problem = *ode_problem;
+    problem-> jmi_callbacks = cb;
     problem -> fmix_me  = fmix_me;     
     problem -> n_real_x = n_real_x;
     problem -> n_sw     = n_sw;

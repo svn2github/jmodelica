@@ -210,6 +210,16 @@ aspect FlatVariability {
 		return var;
 	}
 	
+	syn FTypePrefixVariability FType.funcOutputVariability() = fDiscrete();
+	eq FRealType.funcOutputVariability() = fContinuous();
+	eq FRecordType.funcOutputVariability() {
+	    FTypePrefixVariability var = fConstant();
+	    for (FRecordComponentType component : getComponents()) {
+	        var = var.combine(component.getFType().funcOutputVariability());
+	    }
+	    return var;
+	}
+	
 	
 	/**
 	 * Convert all continous variables that are assigned in when equations into discrete variables.
@@ -497,6 +507,9 @@ aspect FlatVariability {
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();
+	
+	eq FFunctionCall.expVariability() = inputVariability().combineDown(type().funcOutputVariability());
+	syn FTypePrefixVariability FFunctionCall.inputVariability() = super.expVariability();
 	
 	syn int FTypePrefixVariability.combineLevel() = variabilityLevel() * 10;
 	

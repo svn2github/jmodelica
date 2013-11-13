@@ -104,6 +104,7 @@ typedef void (*jmi_block_residual_delete_func_t)(jmi_block_residual_t* block);
 
 struct jmi_block_residual_t {
     jmi_t *jmi;                    /**< \brief A pointer to the corresponding jmi_t struct */
+    jmi_block_solver_options_t * options; /**< \brief block solver options */
     jmi_block_residual_func_t F;   /**< \brief A function pointer to the block residual function */
     jmi_block_dir_der_func_t dF;   /**< \brief A function pointer to the block AD-function */
     int n;                         /**< \brief The number of real unknowns in the equation system */

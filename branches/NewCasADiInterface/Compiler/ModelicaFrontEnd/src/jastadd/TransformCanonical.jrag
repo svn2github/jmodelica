@@ -511,7 +511,7 @@ aspect TransformCanonical {
 				FEquation fe = new FEquation(lhs, rhs);
 				addFInitialEquation(fe);
 				
-				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0);
+				eqn = g.addEquation("eq_" + (g.getEquations().size() + 1), fe, 0, fe.variability());
 				v = g.getVariable(lhs.name());
 				g.addEdge(eqn,v);
 			}

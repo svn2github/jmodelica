@@ -107,9 +107,11 @@ fmiStatus fmi2_cs_instantiate(fmiComponent c,
         return retval;
     }
     
-    jmi = ((fmi2_me_t*)c) -> jmi;
+    jmi = &((fmi2_me_t*)c) -> jmi;
     fmi2_cs = (fmi2_cs_t*)c;
-    jmi_new_ode_problem(&ode_problem, c, jmi->n_real_x, jmi->n_sw, jmi->n_real_u, jmi->log);
+    /* jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me,
+                       int n_real_x, int n_sw, int n_real_u, jmi_log_t* log): */
+    jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks,c, jmi->n_real_x, jmi->n_sw, jmi->n_real_u, jmi->log);
     fmi2_cs -> ode_problem = ode_problem;
     
     return fmiOK;

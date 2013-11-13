@@ -1766,6 +1766,11 @@ class LocalDAECollocator(CasadiCollocator):
                         e = 0.
                     elif mode == "linear":
                         d = max([abs(traj_max), abs(traj_min)])
+                        if d == 0.0:
+                            d = 1.
+                            print("Warning: Nominal trajectory for " +
+                                  "variable %s is identically " % name + 
+                                  "zero.")
                         e = 0.
                     elif mode in ["affine", "time-variant"]:
                         if N.allclose(traj_max, traj_min):
@@ -2690,8 +2695,8 @@ class LocalDAECollocator(CasadiCollocator):
                     for var in var_vectors[vt]:
                         vr = var.getValueReference()
                         (var_index, _) = vr_map[vr]
-                        d = 1
-                        e = 0
+                        d = 1.
+                        e = 0.
                         if self.variable_scaling:
                             if self.nominal_traj is None:
                                 d = sfs[vt][var_index]
@@ -2715,8 +2720,8 @@ class LocalDAECollocator(CasadiCollocator):
                             name = convert_casadi_der_name(str(var.der()))
                             vr = self.model.xmldoc.get_value_reference(name)
                             (var_index, _) = vr_map[vr]
-                            d = 1
-                            e = 0
+                            d = 1.
+                            e = 0.
                             if self.variable_scaling:
                                 if self.nominal_traj is None:
                                     d = sfs["dx"][var_index]
@@ -2728,7 +2733,7 @@ class LocalDAECollocator(CasadiCollocator):
                                         d = invariant_d[sf_index]
                                         e = invariant_e[sf_index]
                             if self.init_traj is None:
-                                var_initial = 0
+                                var_initial = 0.
                             else:
                                 var_initial = traj["dx"][var_index].eval(time)
                             var_init_der[var_index] = (var_initial - e) / d

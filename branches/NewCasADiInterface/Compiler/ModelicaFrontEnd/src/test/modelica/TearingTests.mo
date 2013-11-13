@@ -3186,4 +3186,36 @@ Residual equations:
 ")})));
 end TearingLocalLoopTest1;
 
+model TearingFixedFalse1
+    parameter Real a(fixed = false);
+    parameter Real b(fixed = false);
+    parameter Real c(fixed = false);
+initial equation
+    20 = c * a;
+    23 = c * b;
+    c = a + b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="TearingFixedFalse1",
+            methodName="printDAEInitBLT",
+            methodResult="
+-------------------------------
+Torn block of 2 iteration variables and 1 solved variables.
+Solved variables:
+  c
+Iteration variables:
+  a()
+  b()
+Solved equations:
+  c = a + b
+Residual equations:
+ Iteration variables: a
+  23 = c * b
+ Iteration variables: b
+  20 = c * a
+-------------------------------
+")})));
+end TearingFixedFalse1;
+
 end TearingTests;

@@ -7,36 +7,47 @@ endif()
 set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
 
-set(JMISources
-	
+set(JMISources   
     jmi.h
     jmi_array_common.h
     jmi_array_none.h
     jmi_block_residual.h
-    jmi_cs.h
-    jmi_kinsol_solver.h
-    jmi_linear_solver.h
     jmi_me.h
-    jmi_simple_newton.h
-    jmi_ode_cvode.h
-    jmi_ode_euler.h
-    jmi_ode_solver.h
-    jmi_ode_problem.h
     jmi_util.h
-    jmi_log.h
     jmi_global.h
     
+    jmi_util.c
+    jmi_global.c
     jmi.c
     jmi_array_none.c
     jmi_block_residual.c
     jmi_cs.c
+    jmi_me.c
+
+    # Logging sources
+	jmi_callbacks.h
+    jmi_log.h
+    jmi_log_impl.h
+    jmi_log.c
+
+    # Block solver sources
+    jmi_block_solver.h
+    jmi_kinsol_solver.h
+    jmi_linear_solver.h
+    jmi_simple_newton.h
+
+    jmi_block_solver.c
     jmi_kinsol_solver.c
     jmi_linear_solver.c
-    jmi_me.c
     jmi_simple_newton.c
-    jmi_util.c
-    jmi_log.c
-    jmi_global.c
+
+    # Co-simulation support sources
+    jmi_cs.h    
+    jmi_ode_cvode.h
+    jmi_ode_euler.h
+    jmi_ode_solver.h
+    jmi_ode_problem.h
+    
     jmi_ode_cvode.c
     jmi_ode_euler.c
     jmi_ode_solver.c

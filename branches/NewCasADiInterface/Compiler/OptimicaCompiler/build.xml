@@ -30,6 +30,9 @@
 	<property name="java_compiler" value="javac${java_version}"/>
 
 	<property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
+    <property name="generic_codegen_path" value="../GenericCodeGen" />
+    <property name="fmi_xml_codegen_path" value="../FmiXMLCodeGen" />
+    <property name="test_framework_path" value="../TestFramework" />
 	<property name="optimica_front_end_path" value="../OptimicaFrontEnd" />
 	<property name="modelica_xml_back_end_path" value="../ModelicaXMLBackEnd" />
 	<property name="modelica_c_back_end_path" value="../ModelicaCBackEnd" />
@@ -37,7 +40,6 @@
 	<property name="optimica_c_back_end_path" value="../OptimicaCBackEnd" />
 	<property name="modelica_compiler_path" value="../ModelicaCompiler" />
 
-	<!-- "package" is the directory where generated files will be stored -->
 	<property name="ast_package" value="org.jmodelica.optimica.compiler" />
 
     <property name="base_output" value="src/java-generated" />
@@ -45,7 +47,6 @@
     <property name="ast_output" value="${common_output}/compiler" />
     <property name="parser_output" value="${common_output}/parser" />
 
-	<!-- "tools" is the directory where the needed tools (lexing, parsing, jastadd2, junit.jar) are located. -->
 	<property name="jar_output_dir" value="bin" />
 	<property name="jastadd_dir" value="../../ThirdParty/JastAdd" />
 	<property name="junit_dir" value="../../ThirdParty/Junit" />
@@ -58,6 +59,9 @@
 	<property name="local_ast" value="src/jastadd" />
 	<property name="ast" value="${modelica_front_end_path}/src/jastadd" />
 	<property name="modelica_xml_back_end_ast" value="${modelica_xml_back_end_path}/src/jastadd" />
+    <property name="generic_codegen" value="${generic_codegen_path}/src/jastadd" />
+    <property name="fmi_xml_codegen" value="${fmi_xml_codegen_path}/src/jastadd" />
+    <property name="test_framework" value="${test_framework_path}/src/jastadd" />
 	<property name="modelica_c_back_end_ast" value="${modelica_c_back_end_path}/src/jastadd" />
 	<property name="modelica_compiler_ast" value="${modelica_compiler_path}/src/jastadd" />
 	<property name="optimica_xml_back_end_ast" value="${optimica_xml_back_end_path}/src/jastadd" />
@@ -150,9 +154,9 @@
 				Deterministic="true" NoStatic="false" Debug="false">
 			<fileset dir="${ast}">
 				<patternset id="jastadd.files">
-					<include name="*.ast" />
-					<include name="*.jadd" />
-					<include name="*.jrag" />
+					<include name="**/*.ast" />
+					<include name="**/*.jadd" />
+					<include name="**/*.jrag" />
 				</patternset>
 			</fileset>
 			<fileset dir="${modelica_compiler_ast}">
@@ -161,36 +165,16 @@
 			<fileset dir="${local_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${ast}/codegen">
+			<fileset dir="${generic_codegen}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${ast}/test-framework">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${ast}/structural">
+			<fileset dir="${test_framework}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_xml_back_end_ast}">
-				<patternset id="jastadd.files.notestframework">
-					<include name="*.ast" />
-					<include name="*.jadd" />
-					<include name="*.jrag" />
-					<exclude name="TestFramework.jrag" />
-				</patternset>
-			</fileset>
-			<fileset dir="${modelica_xml_back_end_ast}/codegen">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${modelica_xml_back_end_ast}/test-framework">
-				<patternset refid="jastadd.files"/>
+                <patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${modelica_c_back_end_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${modelica_c_back_end_ast}/codegen">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${modelica_c_back_end_ast}/test-framework">
 				<patternset refid="jastadd.files"/>
 			</fileset>
 
@@ -198,15 +182,9 @@
 				<patternset refid="jastadd.files"/>
 			</fileset>
 			<fileset dir="${optimica_xml_back_end_ast}">
-				<patternset refid="jastadd.files.notestframework"/>
-			</fileset>
-			<fileset dir="${optimica_xml_back_end_ast}/codegen">
-				<patternset refid="jastadd.files.notestframework"/>
-			</fileset>
-			<fileset dir="${optimica_c_back_end_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
-			<fileset dir="${optimica_c_back_end_ast}/codegen">
+			<fileset dir="${optimica_c_back_end_ast}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
 
@@ -368,6 +346,9 @@
 				<fileset dir="${modelica_xml_back_end_path}/src/test/modelica">
 					<include name="*.mo" />
 				</fileset>
+                <fileset dir="${fmi_xml_codegen_path}/src/test/modelica">
+                    <include name="*.mo" />
+                </fileset>
 				<fileset dir="${optimica_front_end_path}/src/test/modelica">
 					<include name="*.mo" />
 				</fileset>

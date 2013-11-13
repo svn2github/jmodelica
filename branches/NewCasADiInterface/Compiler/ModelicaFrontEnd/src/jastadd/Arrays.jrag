@@ -632,7 +632,9 @@ aspect Arrays {
 	}
 	
 	public void FColonSubscript.addDeclarationSize(MutableSize s) {
-		s.append(new FUnknownSizeExp(surroundingVariableDecl(), myDim()));
+		FExp e = new FUnknownSizeExp(surroundingVariableDecl(), myDim());
+		e.setParent(this);
+		s.append(e);
 	}
 	
 	public void FIntegerSubscript.addDeclarationSize(MutableSize s) {
@@ -3085,8 +3087,8 @@ aspect ArrayHelpers {
 				exps[d] = null;
 			} else if (size[d] != UNKNOWN) {
 				size[d] += s;
-			} else if (okExp(exps[d])) {
-				FExp e = new FAddExp(exps[d].unboundCopy(), new FIntegerLitExp(s));
+			} else if (exps[d] != null) {
+				FExp e = new FAddExp(exps[d].createSizeFExp(), new FIntegerLitExp(s));
 				exps[d] = exps[d].dynamicFExp(e);
 			}
 		}
@@ -3098,7 +3100,7 @@ aspect ArrayHelpers {
 			try {
 				add(d, e.ceval().intValue());
 			} catch (ConstantEvaluationException uoe) {
-				FExp e2 = new FAddExp(createFExp(d), e.unboundCopy());
+				FExp e2 = new FAddExp(createFExp(d), e.createSizeFExp());
 				exps[d] = e.dynamicFExp(e2);
 			}
 		}
@@ -3109,7 +3111,7 @@ aspect ArrayHelpers {
 		 */
 		public void add(int d1, Size s, int d2) {
 			FExp e = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
-			if (okExp(e)) 
+			if (e != null)
 				add(d1, e);
 			else
 				add(d1, s.size[d2]);
@@ -3151,6 +3153,8 @@ aspect ArrayHelpers {
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
 			set(d1, exp.size(), d2);
+			if (exps[d1] != null && exps[d1] instanceof FUnknownSizeExp)
+				exps[d1] = exps[d1].dynamicFExp(exps[d1].createSizeFExp());
 			if (!hasValue(d1)) {
 				FExp copyExp = exp.fullCopy();
 				Opt dimExp = new Opt(new FIntegerLitExp(d2 + 1));

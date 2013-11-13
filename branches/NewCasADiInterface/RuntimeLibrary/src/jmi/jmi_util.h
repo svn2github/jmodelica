@@ -29,7 +29,11 @@
 #include <string.h>
 #include <math.h>
 #include <setjmp.h>
-/*#include <sundials/sundials_types.h>*/
+
+#include "jmi_callbacks.h"
+
+#include "jmi_log.h"
+#include "jmi_block_solver.h"
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -110,17 +114,7 @@ typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward de
 typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
 typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
-typedef struct jmi_log_t jmi_log_t;                       /**< \brief Forward declaration of struct. */
-typedef struct jmi_callbacks_t jmi_callbacks_t;           /**< \brief Forward declaration of struct. */
 
-
-/* Typedef for the doubles used in the interface. */
-typedef double jmi_real_t; /*< Typedef for the real number
-               < representation used in the Runtime
-               < Library. */
-typedef int jmi_int_t; /*< Typedef for the integer number
-               < representation used in the Runtime
-               < Library. */
 
 /* Masks for maping vref to indices. */               
 #define VREF_INDEX_MASK 0x0FFFFFFF
@@ -128,7 +122,6 @@ typedef int jmi_int_t; /*< Typedef for the integer number
 
 /* These are a temporary remnants of CppAD*/            
 #define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
-typedef jmi_real_t jmi_ad_var_t;
 
 #define COND_EXP_EQ(op1,op2,th,el) ((op1==op2)? (th): (el)) /**< \brief Macro for conditional expression == <br> */
 #define COND_EXP_LE(op1,op2,th,el) ((op1<=op2)? (th): (el)) /**< \brief Macro for conditional expression <= <br> */
@@ -593,80 +586,49 @@ int jmi_func_fd_dF_dim(jmi_t *jmi, jmi_func_t *func, int sparsity,
                     int independent_vars, int *mask,
             int *dF_n_cols, int *dF_n_nz);
 
-typedef enum jmi_residual_equation_scaling_mode_t {
-    jmi_residual_scaling_none = 0,
-    jmi_residual_scaling_auto = 1,
-    jmi_residual_scaling_manual = 2
-} jmi_residual_equation_scaling_mode_t;
-
-
-typedef enum jmi_iteration_var_scaling_mode_t {
-    jmi_iter_var_scaling_none = 0,
-    jmi_iter_var_scaling_nominal = 1,
-    jmi_iter_var_scaling_heuristics = 2
-} jmi_iteration_var_scaling_mode_t;
-
-typedef enum jmi_block_solver_experimental_mode_t {
-    jmi_block_solver_experimental_none = 0,
-    jmi_block_solver_experimental_converge_switches_first = 1,
-    jmi_block_solver_experimental_steepest_descent = 2,
-    jmi_block_solver_experimental_steepest_descent_first = 4
-} jmi_block_solver_experimental_mode_t;
-
 /**< \brief Run-time options. */
 typedef struct jmi_options_t {
-    int log_level;                                                       /**< \brief Log level for jmi_log 0 - none, 1 - fatal error, 2 - error, 3 - warning, 4 - info, 5 -verbose, 6 - debug */
-    int enforce_bounds_flag;                                             /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    int use_jacobian_equilibration_flag;                                 /**< \brief If jacobian equlibration should be used in equation block solvers */
-    
-    jmi_residual_equation_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
-    int iteration_variable_scaling_mode;                                 /**< \brief Iteration variables scaling mode in equation block solvers:
-                                                                         0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc. */
-    int block_solver_experimental_mode;                                  /**< \brief  Activate experimental features of equation block solvers */
-    int nle_solver_max_iter;                                             /**< \brief Maximum number of iterations for the equation block solver before failure */
+    jmi_block_solver_options_t block_solver_options; /**< \bried Equation block solver options */
+    jmi_log_options_t* log_options;                  /**< \bried  Logger options */
 
-    int rescale_each_step_flag;             /**< \brief If scaling should be updated at every step (only active if use_automatic_scaling_flag is set) */
-    int rescale_after_singular_jac_flag;    /**< \brief If scaling should be updated after singular jac was detected (only active if use_automatic_scaling_flag is set) */
-    int use_Brent_in_1d_flag;               /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
     double nle_solver_default_tol;          /**< \brief Default tolerance for the equation block solver */
-    int nle_solver_check_jac_cond_flag;     /**< \brief Flag if NLE solver should check Jacobian condition number and log it. */
     double nle_solver_min_tol;              /**< \brief Minimum tolerance for the equation block solver */
     double nle_solver_tol_factor;           /**< \brief Tolerance safety factor for the non-linear equation block solver. */
+
     double events_default_tol;              /**< \brief Default tolerance for the event iterations. */        
     double events_tol_factor;               /**< \brief Tolerance safety factor for the event iterations. */
 
     int block_jacobian_check;               /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
     double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
+
     int cs_solver;                          /**< \brief Option for changing the internal CS solver */
     double cs_rel_tol;                      /** < \brief Default tolerance for the adaptive solvers in the CS case. */
-    double cs_step_size;                    /** < \brief Default step-size for the non-adaptive solvers in the CS case. */   
-    
-    int runtime_log_to_file;                /** < \brief Write the runtime log directly to a file as well? */
+    double cs_step_size;                    /** < \brief Default step-size for the non-adaptive solvers in the CS case. */      
 } jmi_options_t;
 
 /**< \brief Initialize run-time options. */
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
 
 #define check_lbound(x, xmin, message) \
-    if(jmi->options.enforce_bounds_flag && (x < xmin)) \
+    if(jmi->options.block_solver_options.enforce_bounds_flag && (x < xmin)) \
         { jmi_log_node(jmi->log, logInfo, "LBoundExceeded", "<message:%s>", \
                        message);                                        \
             return 1; }
 
 #define check_ubound(x, xmax, message) \
-    if(jmi->options.enforce_bounds_flag && (x > xmax)) \
+    if(jmi->options.block_solver_options.enforce_bounds_flag && (x > xmax)) \
         { jmi_log_node(jmi->log, logInfo, "UBoundExceeded", "<message:%s>", \
                        message);                                        \
             return 1; }
 
 #define init_with_lbound(x, xmin, message) \
-    if(jmi->options.enforce_bounds_flag && (x < xmin)) \
+    if(jmi->options.block_solver_options.enforce_bounds_flag && (x < xmin)) \
         { jmi_log_node(jmi->log, logInfo, "LBoundSaturation", "<message:%s>", \
                        message); \
             x = xmin; }
 
 #define init_with_ubound(x, xmax, message) \
-    if(jmi->options.enforce_bounds_flag && (x > xmax)) \
+    if(jmi->options.block_solver_options.enforce_bounds_flag && (x > xmax)) \
         { jmi_log_node(jmi->log, logInfo, "UBoundSaturation", "<message:%s>", \
                        message);                                        \
             x = xmax; }
@@ -678,27 +640,6 @@ void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op);
 #define init_with_bounds(x, xmin, xmax, message) \
     init_with_lbound(x, xmin, message) \
     else init_with_ubound(x, xmax, message)
-
-typedef void (*logger_callaback_function_t) (void* c, const char* instanceName, void* status,
-                                          const char* category, const char* message, ...);
-                                          
-typedef void* (*allocate_memory_t) (size_t nobj, size_t size);
-
-typedef void (*free_memory_t) (void* nobj);
-
-/**
- * \brief Data structure for representing the callback functions and other
- * pointers the jmi interface may need.
- */
-
-struct jmi_callbacks_t {
-    logger_callaback_function_t  logger;           /** < \brief Logger function */
-    allocate_memory_t            allocate_memory;  /** < \brief Allocate memory function. */
-    free_memory_t                free_memory;      /** < \brief Free allocated memory function. */
-    void*                        fmix_me;          /** < \brief Pointer to a fmi struct. */
-    const char*                  fmi_name;         /** < \brief Name of the fmi. */
-    char                         logging_on;       /** < \brief The logging on / off attribute. */
-};
 
 /**
  * \brief Data structure for representing a single function
@@ -1009,6 +950,8 @@ void jmi_delete_init(jmi_init_t** pinit);
  * the DAE, DAE initialization and Optimization interfaces.
  */
 struct jmi_t {
+    jmi_callbacks_t jmi_callbacks;      /**< \brief Struct containing callbacks the jmi runtime needs. */
+
     jmi_dae_t* dae;                      /**< \brief A jmi_dae_t struct pointer. */
     jmi_init_t* init;                    /**< \brief A jmi_init_t struct pointer. */
 
@@ -1152,12 +1095,13 @@ struct jmi_t {
     jmi_simple_color_info_t* color_info_C;  /**< \brief CPR coloring info for the ODE Jacobian C */
     jmi_simple_color_info_t* color_info_D;  /**< \brief CPR coloring info for the ODE Jacobian D */
 
+    jmi_log_t* log;                      /**< \brief Struct containing the structured logger. */
+
     jmi_options_t options;               /**< \brief Runtime options */
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
-    jmi_log_t* log;                      /**< \brief Struct containing the structured logger. */
-    jmi_callbacks_t* jmi_callbacks;      /**< \brief Struct containing callbacks the jmi runtime needs. */
+
 
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
     int terminate;                       /**< \brief Flag to trigger termination of the simulation. */

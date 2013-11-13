@@ -63,6 +63,7 @@ typedef int (*root_func_t)(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_rea
 typedef int (*complete_step_func_t)(jmi_ode_problem_t* ode_problem, char* step_event);
 
 struct jmi_ode_problem_t {
+    jmi_callbacks_t*      jmi_callbacks;
     void*                 fmix_me;                     /**< \brief Reference to a fmix_me instance. */
     jmi_ode_solver_t*     ode_solver;                  /**< \brief Struct containing the ODE solver. */
     jmi_log_t*            log;                         /**< \brief A pointer to the corresponding log_t struct */
@@ -87,6 +88,7 @@ struct jmi_ode_problem_t {
  * \brief Creates a new jmi_ode_problem_t instance.
  *
  * @param ode_problem A jmi_ode_problem_t struct.
+ * @param cb A jmi_callbacks_t pointer.
  * @param fmix_me A pointer to a FMI ME struct. 
  * @param n_real_x The number of continuous states.
  * @param n_sw The number of switches.
@@ -94,7 +96,7 @@ struct jmi_ode_problem_t {
  * @param log A pointer to a log struct.
  * @return Error code.
   */
-int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, void* fmix_me, int n_real_x, int n_sw, int n_real_u, jmi_log_t* log);
+int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, void* fmix_me, int n_real_x, int n_sw, int n_real_u, jmi_log_t* log);
 
 /**
  * \brief Initializes the jmi_ode_problem_t instance.

@@ -874,5 +874,24 @@ end VariabilityPropagationTests.ConstantStartFunc1;
 ")})));
 end ConstantStartFunc1;
 
+model InitialEquation1
+    parameter Boolean c = false;
+    Boolean b = c;
+initial equation
+    pre(b) = false;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEquation1",
+			description="Tests that corresponding initial equations are removed",
+			flatModel="
+fclass VariabilityPropagationTests.InitialEquation1
+ parameter Boolean c = false /* false */;
+ parameter Boolean b;
+parameter equation
+ b = c;
+end VariabilityPropagationTests.InitialEquation1;
+")})));
+end InitialEquation1;
 
 end VariabilityPropagationTests;

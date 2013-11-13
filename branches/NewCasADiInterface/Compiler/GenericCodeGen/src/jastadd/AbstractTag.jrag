@@ -32,35 +32,50 @@ public abstract class AbstractTag {
 	 * Name of the tag
 	 */
 	protected String name;
-	/**
-	 * Description of the tag
-	 */
-	protected String description;
+
 	/**
 	 * A reference to the tag's generator
 	 */
-	protected AbstractGenerator myGenerator;	
+	protected AbstractGenerator myGenerator;
 		
 	/**
 	 * Constructor.
 	 * 
 	 * @param name Name of the tag.
-	 * @param description Description of the tag.
 	 * @param myGenerator The generator of the tag.
 	 */
-	public AbstractTag(String name, String description, 
-	  AbstractGenerator myGenerator) {
+	public AbstractTag(String name, AbstractGenerator myGenerator) {
 		this.name = name;
-		this.description = description;
 		this.myGenerator = myGenerator;
 	}
+	
+	/**
+	 * Generate the code for this tag if it is active.
+	 * 
+	 * @param printer A PrintStream object for output of the generated code.
+	 */
+    public void generateTag(PrintStream printer) {
+        if (isActive())
+            generate(printer);
+    }
+	
 
 	/**
-	 * Method for generating code corresponding to the tag.
+	 * Method for implementing the code generation corresponding to the tag.
 	 * 
-	 * @param genPrinter A PrintStream object for output of the generated code.
+	 * This method should not be called directly, 
+	 * see {@link #generateTag(java.io.PrintStream)} instead.
+	 * 
+	 * @param printer A PrintStream object for output of the generated code.
 	 */
-	public abstract void generate(PrintStream genPrinter);
+	public abstract void generate(PrintStream printer);
+    
+    /**
+     * Check if this tag should be generated.
+     */
+    public boolean isActive() {
+        return true;
+    }
 	
 	/**
 	 * Get the name of the tag.
@@ -72,19 +87,11 @@ public abstract class AbstractTag {
 	}
 
 	/**
-	 * Get the description of the tag.
-	 * 
-	 * @return The description.
-	 */
-	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * Return a string composed of the name of the tag and its description.
+	 * Returns a string describing how this tag looks in the template file.
 	 */
 	public String toString() {
-		return "\'"+name+"\': " + description; 
+	    char esc = myGenerator.escapeChar();
+		return esc + name + esc; 
 	}
 	
 }

@@ -47,7 +47,7 @@ public class BiPGraph {
 	
 	public BiPGraph(Collection<Eq> eqs, Collection<Var> vars) {
 		for (Eq oldE : eqs)
-			addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber());
+			addEquation(oldE.getName(), oldE.getEquation(), oldE.groupNumber(), oldE.variability());
 		for (Var oldV : vars)
 			addVariable(oldV.getName(), oldV.getVariable());
 		for (Eq oldE : eqs) {
@@ -99,10 +99,10 @@ public class BiPGraph {
 		return (list == null) ? Collections.<Eq>emptyList() : list;
 	}
 
-	public Eq addEquation(String name, FAbstractEquation eqn, int groupNumber) {
+	public Eq addEquation(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
 		Eq e = equationMap.get(name);
 		if (e==null) {
-			e = new Eq(name, eqn, groupNumber);
+			e = new Eq(name, eqn, groupNumber, variability);
 			equationMap.put(name,e);
 			insertIntoEquationIndexMap(eqn,e);
 		}
@@ -168,10 +168,12 @@ public class BiPGraph {
 		DERIVATIVE_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.derivativeVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.derivativeVariables(); }
+			public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
 		},
 		DIFFERENTIATED_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.differentiatedRealVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.differentiatedRealVariables(); }
+			public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
 		}, 
 		ALGEBRAIC_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicVariables(); }
@@ -180,22 +182,27 @@ public class BiPGraph {
 		CONTINUOUS_ALGEBRAIC_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.algebraicContinousRealVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.algebraicContinousRealVariables(); }
+			public boolean isOk(FTypePrefixVariability variability)               { return variability.continuousVariability(); }
 		}, 
 		DISCRETE_ALGEBRAIC_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.discreteVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discreteVariables(); }
+			public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
 		}, 
 		DISCRETE_PRE_VARIABLES { 
 			public Collection<? extends FVariable> variables(FClass c)            { return c.discretePreVariables(); }
 			public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.discretePreVariables(); }
-	    },
-	    NON_FIXED_PARAMETERS {
-	        public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
-	        public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
+			public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
+		},
+		NON_FIXED_PARAMETERS {
+		    public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
+		    public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
+		    public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
 		};
 		
 		public abstract Collection<? extends FVariable> variables(FClass c);
 		public abstract Collection<? extends FVariable> variables(FAbstractEquation e);
+		public boolean isOk(FTypePrefixVariability e) { return true; }
 	}
 		
 	public void addVariables(FClass fclass, EnumSet<VarType> variableTypes) {
@@ -217,31 +224,35 @@ public class BiPGraph {
 			// the left hand side variables depends on all the right-hand side ones, 
 			// but not on the other left-hand side ones
 			Set<FVariable> rhsVars = emptySet;
-			Map<FVariable, Integer> lhsVars = emptyMap;
+			FVariable lhsVars[] = new FVariable[n_eq];
 			if (n_eq > 1) {
 				rhsVars = e.referencedFVariablesInRHS();
-				lhsVars = new HashMap<FVariable, Integer>();
 				int i = 0;
-				for (FVariable fv : e.referencedFVariablesInLHS()) 
-					lhsVars.put(fv,i++);
+				for (FVariable fv : e.referencedFVariablesInLHS())
+				    lhsVars[i++] = fv;
 				if (e.lhsVarsAreSolved())
-					rhsVars.removeAll(lhsVars.keySet());
+				    rhsVars.removeAll(Arrays.asList(lhsVars));
 			}
 			for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
 				                                  // need to reverse here to preserve the initial order.
-				eqn = addEquation(eqNamePrefix+k, e, i);
-				groupMembers.add(eqn);
-				k++;
+                FTypePrefixVariability variability = lhsVars[i] != null ? lhsVars[i].variability().combineDown(lhsVars[i].type().funcOutputVariability()) : e.variability();
+			    boolean add = false;
+			    for (VarType varType : variableTypes)
+			        if (varType.isOk(variability))
+			            add = true;
+			    if (!add)
+			        continue;
+			    eqn = addEquation(eqNamePrefix+k, e, i, variability);
+			    groupMembers.add(eqn);
+			    k++;
 
-				for (VarType t : variableTypes) {
-					for (FVariable y : t.variables(e)) {
-						Integer pos = lhsVars.get(y);
-						if (pos == null || pos == i || rhsVars.contains(y)) {
-							v = getVariable(y.name());
-							addEdge(eqn, v);
-						}
-					}
-				}
+			    for (FVariable fVar : ASTNode.lookupFVariablesInSet(e.findFIdUseExpsInTree())) {
+			        Var var = getVariable(fVar.name());
+			        if (var == null)
+			            continue;
+			        if (lhsVars[i] == null || lhsVars[i] == fVar || rhsVars.contains(fVar))
+			            addEdge(eqn, var);
+			    }
 			}
 			for (Eq ee : groupMembers) {
 				for (Eq eee : groupMembers) {
@@ -275,9 +286,7 @@ public class BiPGraph {
 		
 		// Discrete variables can only be matched to discrete equations.
 		// Except discrete reals in initial system.
-		return variable.isContinuous() ||
-				equation.isDiscrete() ||
-				equation.isInitial();
+		return variable.isContinuous() || e.variability().discreteVariability() || equation.isInitial();
 	}
 	
 	public void addInsidence(Eq e, Var v) {
@@ -816,6 +825,7 @@ public class Eq implements Comparable<Eq> {
 	private final String name;
 	private final FAbstractEquation eqn;
 	private final int groupNumber;
+	private final FTypePrefixVariability variability;
 	private java.util.List<Var> variables = new ArrayList<Var>();
 	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
 	private int analyticallySolvableOccurrences = 0;
@@ -841,10 +851,11 @@ public class Eq implements Comparable<Eq> {
 	*/
 	private Set<Eq> groupMembers = new LinkedHashSet<Eq>();
 
-	public Eq(String name, FAbstractEquation eqn, int groupNumber) {
+	public Eq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
 		this.name = name;
 		this.eqn = eqn;
 		this.groupNumber = groupNumber;
+		this.variability = variability;
 		this.groupMembers.add(this);
 	}
 			
@@ -1001,6 +1012,10 @@ public class Eq implements Comparable<Eq> {
 	
 	public boolean markedAsResidualEquation() {
 		return getEquation().hasResidual();
+	}
+	
+	public FTypePrefixVariability variability() {
+	    return variability;
 	}
 	
 	/**

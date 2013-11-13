@@ -27,8 +27,6 @@
 #include "jmi_log.h"
 
 typedef unsigned int jmi_value_reference;
-typedef char jmi_boolean;
-typedef const char* jmi_string;
 
 typedef struct jmi_event_info_t jmi_event_info_t;
 
@@ -70,10 +68,7 @@ jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* T
     
 jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
 
-int jmi_me_instantiate(jmi_t** jmi, void* fmix_me, jmi_string instance_name,
-                       jmi_string GUID, allocate_memory_t allocate_memory,
-                       free_memory_t free_memory, logger_callaback_function_t logger,
-                       jmi_boolean logging_on);
+int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID);
 
 void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
                           jmi_real_t relative_tolerance);

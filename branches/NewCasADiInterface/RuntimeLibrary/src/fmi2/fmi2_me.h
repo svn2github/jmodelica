@@ -44,7 +44,7 @@ typedef enum {
 typedef struct fmi2_me_t fmi2_me_t;  /**< \brief Forward declaration of struct. */
 
 struct fmi2_me_t {
-    jmi_t*  jmi;
+    jmi_t jmi;                  /* should be the first one so that jmi* and fmi1_me* point at the same address */
     fmi_mode_t fmi_mode;
     fmiType fmu_type;
     fmiString fmi_instance_name;

@@ -19,6 +19,8 @@ file(MAKE_DIRECTORY ${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary)
 if(NOT(WIN32 OR CYGWIN OR APPLE))
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")
     SET(WITH_PIC ON)
+elseif(MSVC)
+    add_definitions(/D _CRT_SECURE_NO_WARNINGS)
 endif()
 
 #Including Sundials.

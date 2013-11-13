@@ -46,8 +46,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_t* jmi_ ;
     int i;
     
-    /* Create jmi struct */
-    *jmi = (jmi_t*)calloc(1,sizeof(jmi_t));
+    /* Create jmi struct */    
     jmi_ = *jmi;
     /* Set struct pointers in jmi */
     jmi_->dae = NULL;
@@ -225,8 +224,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->events_epsilon = jmi_->options.events_default_tol;
     jmi_->recomputeVariables = 1;
 
-    jmi_->jmi_callbacks = jmi_callbacks;
-    jmi_->log = jmi_log_init(&jmi_->options, jmi_callbacks);
+    jmi_->log = jmi_log_init(jmi_callbacks);
 
     jmi_->terminate = 0;
 
@@ -273,9 +271,7 @@ int jmi_delete(jmi_t* jmi){
     }
     free(jmi->variable_scaling_factors);
     free(jmi->ext_objs);
-    free(jmi->log->jmi_callbacks);
     jmi_log_delete(jmi->log);
-    free(jmi);
 
     return 0;
 }
@@ -420,7 +416,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t *t = jmi_get_t(jmi);
 
-    if((jmi->options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
@@ -428,7 +424,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi->block_level = 0; /* to recover from errors */
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
 
-    if((jmi->options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
     }
@@ -461,14 +457,14 @@ int jmi_ode_initialize(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t* t = jmi_get_t(jmi);
 
-    if((jmi->options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
     return_status = jmi_generic_func(jmi, jmi->dae->ode_initialize);
 
-    if((jmi->options.log_level >= 5)) {
+    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
     }
