@@ -286,7 +286,7 @@ public class BiPGraph {
 		
 		// Discrete variables can only be matched to discrete equations.
 		// Except discrete reals in initial system.
-		return variable.isContinuous() || e.variability().discreteVariability();
+		return variable.isContinuous() || e.variability().discreteVariability() || equation.isInitial();
 	}
 	
 	public void addInsidence(Eq e, Var v) {
