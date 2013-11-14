@@ -729,11 +729,10 @@ aspect Flattening {
         if (iterationNode.exists() && root().options.getBooleanOption("hand_guided_tearing")) {
             AnnotationNode enabledNode = iterationNode.forPath("enabled");
             if (!enabledNode.exists() || enabledNode.exp() == null) {
-                attr.add(new FInternalAttribute(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(FAttribute.HGT)), new Opt<FExp>(new FBooleanLitExpTrue()), 
-                        true, FInternalAttribute.HGTVarLevel_COMPONENT, isArray() ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>()));
+                attr.add(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, isArray()));
             } else {
-                attr.add(new FInternalAttribute(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(FAttribute.HGT)), new Opt<FExp>(containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(getFQNamePrefix())), 
-                        true, FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet() ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>()));
+                attr.add(new FInternalAttribute(FAttribute.HGT, containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(getFQNamePrefix()), 
+                        FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet()));
             }
         }
 		addAttributes(attr, totalMergedEnvironment(), mut, false);

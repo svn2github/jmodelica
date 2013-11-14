@@ -136,7 +136,7 @@ aspect FlatTypeCheck {
 			    if (!enabledExp.type().isBoolean()) {
 			        enabledExp.error("The type of the HGT enabled expression is not boolean");
 			    } else if (!enabledNode.isEachSet() && !type().dimensionCompatible(enabledExp.type())) { 
-			        if (ndims() == 0) {
+			        if (enabledExp.ndims() == 0) {
 			            enabledExp.warning("Assuming 'each' for enabled expression");
 			        } else {
 			            enabledExp.error("Array size mismatch for the enabled attribute" +

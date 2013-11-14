@@ -675,6 +675,15 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create an FInternalAttribute with only the children that are 
+	 *        valid for them.
+	 */
+	public FInternalAttribute.FInternalAttribute(String name, FExp exp, int level, boolean eachKey) {
+	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	            true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
+	}
+	
+	/**
 	 * Create an attribute with only the required children.
 	 */
 	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
