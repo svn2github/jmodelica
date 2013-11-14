@@ -1684,8 +1684,6 @@ aspect FVariableUses {
 		with add root FlatRoot;
 	
 	FIdUseExp contributes this to FAbstractVariable.uses() for myFV();
-	FRelExp contributes getIndicator() when hasIndicator() to
-		FAbstractVariable.uses() for getIndicator().myFV();
 	
 	/**
 	 * All uses of this variable that are not the left-hand side of an equation. 
@@ -1773,7 +1771,6 @@ aspect FVariableUses {
 	inh boolean FIdUseExp.isLeftHandSide();
 	eq BaseNode.getChild().isLeftHandSide()    = false;
 	eq FEquation.getLeft().isLeftHandSide()    = true;
-	eq FRelExp.getIndicator().isLeftHandSide() = true;
 	
 	/**
 	 * Check if this is the left hand side of an assignment or function call statement.

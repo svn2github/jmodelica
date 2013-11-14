@@ -1343,7 +1343,7 @@ aspect TransformCanonical {
 	 * \brief Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
-		FVariable v = new FRealVariable(new FTemporaryVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
+		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
 		myFClass().addFVariable(v);
 		setIndicatorOpt(new Opt<FIdUseExp>(v.createUseExp()));
 	}
@@ -2227,7 +2227,8 @@ aspect MapWhenClauses{
 			public void createGuardTemporaries() {
 				for (FExp e : guardExpInEquations())
 					if (e.inAlgorithm())
-						addFVariable(e.tempVar());
+						addFVariable(e.type().createFVariable(new FPublicVisibilityType(), 
+								new FQNameFull(e.tempVarName()), e.variability()));
 			}
 		}
 	}
@@ -4920,7 +4921,8 @@ aspect EventGeneratingExps {
                 
                 // Equations
                 for (FEventGenExp exp: eventExps) {
-                	addFVariable(exp.tempVar());
+					addFVariable(exp.type().createFVariable(new FPublicVisibilityType(), 
+							new FQNameFull(exp.tempVarName()), exp.variability()));
                 	if (exp.inAlgorithm()) {
                 		algs.add((FAlgorithm) exp.myFEquation());
                 		continue;

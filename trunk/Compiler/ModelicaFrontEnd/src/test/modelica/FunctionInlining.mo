@@ -876,10 +876,10 @@ fclass FunctionInlining.RecordInline7
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
- discrete Integer temp_6;
+ discrete Integer temp_2;
 initial equation 
  x.pre(b) = 0;
- pre(temp_6) = 0;
+ pre(temp_2) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
@@ -888,8 +888,8 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- x.b = 3 + (temp_6 - temp_6);
- temp_6 = if y[4] < pre(temp_6) or y[4] >= pre(temp_6) + 1 or initial() then integer(y[4]) else pre(temp_6);
+ x.b = 3 + (temp_2 - temp_2);
+ temp_2 = if y[4] < pre(temp_2) or y[4] >= pre(temp_2) + 1 or initial() then integer(y[4]) else pre(temp_2);
 
 public
  record FunctionInlining.RecordInline7.R
