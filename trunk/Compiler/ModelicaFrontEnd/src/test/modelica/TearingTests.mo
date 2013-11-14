@@ -191,7 +191,7 @@ equation
 Warning: in file '...':
 At line 0, column 0:
   Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
-  Real u2 annotation(__Modelon(IterationVariable))
+  Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
 
 Warning: in file '...':
 At line 0, column 0:
@@ -2966,6 +2966,30 @@ Residual equations:
 ")})));
 end HandGuidedTearing34;
 
+model HandGuidedTearing35
+    constant Integer n = 4;
+    Real x[n] annotation(__Modelon(IterationVariable(enabled=fill(true, n))));
+    Real y[n];
+equation
+    x = abs(y) .+ 3 annotation(__Modelon(ResidualEquation));
+    x .* y = fill(4, n);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="HandGuidedTearing35",
+            description="Test of prettyprinting of the enabled exp",
+            hand_guided_tearing=true,
+            flatModel="
+fclass TearingTests.HandGuidedTearing35
+ constant Integer n = 4;
+ Real x[4] annotation(__Modelon(IterationVariable(enabled={ true, true, true, true })));
+ Real y[4];
+equation
+ x[1:4] = abs(y[1:4]) .+ 3;
+ x[1:4] .* y[1:4] = fill(4, 4);
+end TearingTests.HandGuidedTearing35;
+")})));
+end HandGuidedTearing35;
+
 model HandGuidedTearingError1
 	Real x;
 	Real y;
@@ -3420,7 +3444,7 @@ At line 0, column 0:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 At line 0, column 0:
   Hand guided tearing variable 'y' has been alias eliminated. Selected model variable is:
-    Real x(start = 1) annotation(__Modelon(IterationVariable))
+    Real x(start = 1) annotation(__Modelon(IterationVariable(enabled=true)))
 ")})));
 end HandGuidedTearingWarning1;
 

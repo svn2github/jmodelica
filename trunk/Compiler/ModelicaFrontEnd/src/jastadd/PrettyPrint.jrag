@@ -979,8 +979,9 @@ aspect FlatPrettyPrint {
 		
 		p.print(getFStringCommentOpt(),str,indent);
 		
-		if (isHGTVar())
-			str.print(" annotation(__Modelon(IterationVariable))");
+		CValue hgt = HGTVarCValue();
+		if (hgt != null)
+			str.format(" annotation(__Modelon(IterationVariable(enabled=%s)))", hgt);
 
 		if (isIndependentParameter() && hasBindingExp()) {
 			str.print(" /* ");
