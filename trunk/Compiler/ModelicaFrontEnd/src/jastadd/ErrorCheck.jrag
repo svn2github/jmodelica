@@ -531,8 +531,6 @@ aspect InstanceErrorCheck {
 	    	} else if (inOuter()) {
 	    		surroundingOuterComponentDecl().collectErrors(checkType);
 	    	} else {
-  		  		errorChecked = false;
-	    		super.collectErrors(checkType);
   		  		collectErrorsInClassName(checkType);
   		  		if (hasFArraySubscripts())
   		  		    getFArraySubscripts().collectErrors(checkType);
@@ -540,8 +538,14 @@ aspect InstanceErrorCheck {
 	    			getConditionalAttribute().collectErrors(checkType);
 	    		if (isActive() && hasInstModification())
 	    			getInstModification().collectErrors(checkType);
-	    		if (hasInstConstraining())
-	    			getInstConstraining().collectErrors(checkType);
+	    		
+	    		if (!isDisabled() || checkType.checkInactiveComponents || 
+	    		        root().options.getBooleanOption("check_inactive_contitionals")) {
+  		  		    errorChecked = false;
+    	    		super.collectErrors(checkType);
+    	    		if (hasInstConstraining())
+    	    			getInstConstraining().collectErrors(checkType);
+	    		}
 	    	}
 		}
 	}

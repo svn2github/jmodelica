@@ -326,7 +326,13 @@ public class OptionRegistry {
 	        ("log_transformation_steps",
 	         compiler,
 	         false,
-	         "Write flat tree after each transformation step to files"),
+	         "Write flat tree after each transformation step to separate files."),
+	    CHECK_INACTIVE
+	        ("check_inactive_contitionals",
+	         compiler,
+	         false,
+	         "Check for errors in inactive conditional components when compiling. When checking a class, " +
+	         "this is always done. Default is false."),
 		
 		// Runtime options
         /*

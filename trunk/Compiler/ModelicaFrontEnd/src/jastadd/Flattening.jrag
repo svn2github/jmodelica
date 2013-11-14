@@ -114,6 +114,11 @@ aspect Flattening {
 		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
 		super.flattenUsedFuncsAndEnums(fc);
     }
+    
+    public void InstComponentDecl.flattenUsedFuncsAndEnums(FClass fc) {
+        if (useInFlattening())
+            super.flattenUsedFuncsAndEnums(fc);
+    }
 
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
     	actualInstClass().flattenUsedFuncsAndEnums(fc);

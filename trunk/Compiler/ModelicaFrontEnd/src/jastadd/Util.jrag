@@ -2680,8 +2680,13 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is disabled by a conditional clause
      */
-    syn boolean InstComponentDecl.isDisabled() = 
-    	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+    syn boolean InstComponentDecl.isDisabled() {
+        try {
+            return hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+        } catch (ConstantEvaluationException e) {
+            return false;
+        }
+    }
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;

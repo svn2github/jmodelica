@@ -417,29 +417,6 @@ Semantic error at line 407, column 10:
 end InnerOuterTest13_Err;
 
 
-model InnerOuterTest14_Err
-    model A
-        Real y = true;
-    end A;
-    
-    outer Real x;
-equation
-	x = true; // To generate another error to show up in an error check
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuterTest14_Err",
-			description="Check that error is not generated for outer without inner in check mode",
-            checkType="check",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
-Semantic error at line 428, column 2:
-  The right and left expression types of equation are not compatible
-")})));
-end InnerOuterTest14_Err;
-
-
 model InnerOuterTest15
     model A
         Real x[2];      
