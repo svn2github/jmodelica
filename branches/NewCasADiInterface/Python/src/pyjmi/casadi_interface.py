@@ -70,6 +70,90 @@ def unzip_fmux(archive, path='.'):
     
     return fmux_files
 
+class OptimizationProblem(ModelBase):
+
+    """
+    Python wrapper for OptimizationProblem.
+    """
+
+    def __init__(self, optimization_problem):
+        self.op = optimization_problem
+        self.model = self.op.getModel()
+        
+    def _default_options(self, algorithm):
+        """ 
+        Help method. Gets the options class for the algorithm specified in 
+        'algorithm'.
+        """
+        base_path = 'pyjmi.jmi_algorithm_drivers'
+        algdrive = __import__(base_path)
+        algdrive = getattr(algdrive, 'jmi_algorithm_drivers')
+        algorithm = getattr(algdrive, algorithm)
+        return algorithm.get_default_options()
+
+    def optimize_options(self, algorithm='LocalDAECollocationAlg2'):
+        """
+        Returns an instance of the optimize options class containing options 
+        default values. If called without argument then the options class for 
+        the default optimization algorithm will be returned.
+        
+        Parameters::
+        
+            algorithm --
+                The algorithm for which the options class should be returned. 
+                Possible values are: 'LocalDAECollocationAlg' and
+                'CasadiPseudoSpectralAlg'
+                Default: 'LocalDAECollocationAlg'
+                
+        Returns::
+        
+            Options class for the algorithm specified with default values.
+        """
+        return self._default_options(algorithm)    
+    
+    def optimize(self, algorithm='LocalDAECollocationAlg2', options={}):
+        """
+        Solve an optimization problem.
+            
+        Parameters::
+            
+            algorithm --
+                The algorithm which will be used for the optimization is 
+                specified by passing the algorithm class name as string or class 
+                object in this argument. 'algorithm' can be any class which 
+                implements the abstract class AlgorithmBase (found in 
+                algorithm_drivers.py). In this way it is possible to write 
+                custom algorithms and to use them with this function.
+
+                The following algorithms are available:
+                - 'LocalDAECollocationAlg2'. This algorithm is based on direct
+                  collocation on finite elements and the algorithm IPOPT is
+                  used to obtain a numerical solution to the problem.
+                Default: 'LocalDAECollocationAlg2'
+                
+            options -- 
+                The options that should be used in the algorithm. The options
+                documentation can be retrieved from an options object:
+                
+                    >>> myModel = CasadiModel(...)
+                    >>> opts = myModel.optimize_options(algorithm)
+                    >>> opts?
+
+                Valid values are: 
+                - A dict that overrides some or all of the algorithm's default
+                  values. An empty dict will thus give all options with default
+                  values.
+                - An Options object for the corresponding algorithm, e.g.
+                  LocalDAECollocationAlgOptions2 for LocalDAECollocationAlg2.
+                Default: Empty dict
+            
+        Returns::
+            
+            A result object, subclass of algorithm_drivers.ResultBase.
+        """
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
+                                    algorithm, options)
+
 class CasadiModel(ModelBase):
     
     """
