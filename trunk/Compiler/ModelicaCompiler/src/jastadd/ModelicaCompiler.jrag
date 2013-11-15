@@ -1238,15 +1238,6 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new XMLGenerator object.
-	 * 
-	 * Override for subclasses needing another subclass of XMLGenerator.
-	 */
-	protected XMLGenerator createXMLGenerator(FClass fc) {
-		return new XMLGenerator(new PrettyPrinter(), '$', fc);
-	}
-	
-	/**
 	 * \brief Create a new CGenerator object.
 	 * 
 	 * Override for subclasses needing another subclass of CGenerator.
@@ -1308,7 +1299,7 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		generateFile(fc, target.getXMLTemplates(fc), createXMLGenerator(fc), 
+		generateFile(fc, target.getXMLTemplates(fc), target.getXMLGenerator(fc),
 					outDir, "modelDescription.xml");
 		generateFile(fc, target.getCTemplates(fc), createCGenerator(fc), 
 					sourceDir, name + ".c");
@@ -1635,38 +1626,41 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu"),
-        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu"),
-        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu"),
-        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu"),
-        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu"), 
-        JMU       (Templates.JMU,       "jmu",       "jmu"),
-        FMUX      (Templates.FMUX,       null,       "fmux"),
-        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (Templates.NULL,      null,        null, ErrorCheckType.CHECK),
-        NOCODEGEN (Templates.NULL,      null,        null, ErrorCheckType.COMPILE, false);
+        
+        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
+        JMU       (Templates.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
+        FMUX      (Templates.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
+        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.FMI1, ErrorCheckType.CHECK),
+        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false);
 
         private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
+        private final XMLGeneratorHolder xmlGenerator;
         private final ErrorCheckType checkType;
         private final boolean codeGen;
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType, boolean codeGen) {
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType, boolean codeGen) {
             this.templates = templates;
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
             this.checkType = checkType;
             this.codeGen = codeGen;
+            this.xmlGenerator = xmlGenerator;
         }
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType) {
-            this(templates, makeFileFlag, suffix, checkType, true);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, checkType, true);
         }
         
-        private TargetObject(Templates templates, String makeFileFlag, String suffix) {
-            this(templates, makeFileFlag, suffix, ErrorCheckType.COMPILE);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
 
         
@@ -1738,6 +1732,15 @@ public class ModelicaCompiler {
         public String getXMLTemplates(FClass fc) {
             return templates.getXMLTemplates(fc);
         }
+        
+    	/**
+    	 * \brief Create a new XMLGenerator object.
+    	 * 
+    	 * Override for subclasses needing another subclass of XMLGenerator.
+    	 */
+    	public XMLGenerator getXMLGenerator(FClass fc) {
+    		return xmlGenerator.getXMLGenerator(fc);
+    	}
         
         /**
          * get the flag should be used in the Makefile.
@@ -1894,6 +1897,33 @@ private String Templates.getCTemplateName(FClass fc) {
 
 public String Templates.getXMLTemplateName(FClass fc) {
     return template(XML);
+}
+
+public class XMLGeneratorHolder extends java.lang.Object {
+
+    public static final XMLGeneratorHolder NULL  = new XMLGeneratorHolder();
+    public static final XMLGeneratorHolder FMI1  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder FMI2  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder JMI   = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder FMIX  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+
+    private final GenericXMLGenerator.Creator xmlGen;
+
+    private XMLGeneratorHolder(GenericXMLGenerator.Creator xmlGen) {
+        this.xmlGen = xmlGen;
+    }
+    
+    private XMLGeneratorHolder() {
+        this.xmlGen = null;
+    }
+}
+    
+public XMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
+    if (xmlGen == null) {
+    	return null;
+    }
+	
+	return (XMLGenerator) xmlGen.create(new PrettyPrinter(), '$', fc);
 }
 
 /**

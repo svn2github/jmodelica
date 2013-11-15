@@ -109,17 +109,6 @@ public class OptimicaCompiler extends ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new OptimicaXMLGenerator object.
-	 */
-	protected XMLGenerator createXMLGenerator(FClass fc) {
-		if (fc instanceof FOptClass) {
-			return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
-		} else {
-			return new XMLGenerator(new PrettyPrinter(), '$', fc);
-		}
-	}
-	
-	/**
 	 * \brief Create a new OptimicaCGenerator object.
 	 */
 	protected CGenerator createCGenerator(FClass fc) {
@@ -161,5 +150,12 @@ aspect OptimicaCompilationHelpers {
         else
             return template(C);
     }
-
+    
+    //Overshadowing the use of XMLgenerator in case of optimization.
+    refine CompilationHelpers public XMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
+        if (fc instanceof FOptClass)
+        	return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+        else
+            return refined(fc);
+    }
 }

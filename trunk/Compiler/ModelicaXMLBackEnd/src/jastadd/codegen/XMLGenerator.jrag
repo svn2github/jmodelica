@@ -44,7 +44,14 @@ import java.util.Stack;
  * @see AbstractGenerator
  * 
  */
-public class XMLGenerator extends GenericGenerator {
+public class XMLGenerator extends GenericXMLGenerator {
+	
+    public static final Creator CREATOR = new Creator()
+    {
+        public XMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass) {
+            return new XMLGenerator(expPrinter, escapeCharacter, fclass);
+        }
+    };
 	
 	private HashMap<Character,String> illegalCharsSub;
 	
@@ -916,6 +923,14 @@ public class XMLGenerator extends GenericGenerator {
 
 		}
 	}
+	
+    /**
+     * The name of the root tag to use if no template file is given, not 
+     * supported for this generator.
+     */
+    protected String root() {
+    	return null;
+    }
 }
 
 public class VariableNameComparator implements Comparator<FVariable> {

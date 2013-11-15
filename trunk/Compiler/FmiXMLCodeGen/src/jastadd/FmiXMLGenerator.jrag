@@ -23,7 +23,6 @@ import java.io.PrintStream;
  */
 public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     
-    
     /**
      * Constructor.
      * 

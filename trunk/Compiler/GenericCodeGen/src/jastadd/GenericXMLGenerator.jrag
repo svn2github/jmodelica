@@ -28,6 +28,10 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     private String indentStep;
     private int indentation;
     
+    public interface Creator {
+        public GenericXMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass);
+    }
+    
     /**
      * Returns the string denoting the beginning of the copyright blurb.
      */
