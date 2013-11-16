@@ -33,6 +33,7 @@ try:
     from casadi_interface import transfer_to_casadi_interface
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi.casadi_interface import CasadiModel, OptimizationProblem
+    import casadi
 except (NameError, ImportError):
     pass
 
@@ -1621,97 +1622,97 @@ class TestLocalDAECollocator2:
     """
     
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         """Compile the test models."""
         vdp_file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange"
         model_vdp_bounds_lagrange = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_bounds_lagrange_op = \
+        self.vdp_bounds_lagrange_op = \
                 OptimizationProblem(model_vdp_bounds_lagrange)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange_Renamed_Input"
         model_vdp_bounds_lagrange_renamed = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_bounds_lagrange_renamed_op = \
+        self.vdp_bounds_lagrange_renamed_op = \
                 OptimizationProblem(model_vdp_bounds_lagrange_renamed)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
         model_vdp_bounds_mayer = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_bounds_mayer_op = \
+        self.vdp_bounds_mayer_op = \
                 OptimizationProblem(model_vdp_bounds_mayer)
         
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
         model_vdp_constraints_mayer = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_constraints_mayer_op = \
+        self.vdp_constraints_mayer_op = \
                 OptimizationProblem(model_vdp_constraints_mayer)
         
         class_path = "VDP_pack.VDP_Opt_Initial_Equations"
         model_vdp_initial_equations = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_initial_equations_op = \
+        self.vdp_initial_equations_op = \
                 OptimizationProblem(model_vdp_initial_equations)
         
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
         model_vdp_scaled_min_time = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_scaled_min_time_op = \
+        self.vdp_scaled_min_time_op = \
                 OptimizationProblem(model_vdp_scaled_min_time)
         
         class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
         model_vdp_unscaled_min_time = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_unscaled_min_time_op = \
+        self.vdp_unscaled_min_time_op = \
                 OptimizationProblem(model_vdp_unscaled_min_time)
 
         class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
         model_vdp_min_time_nonzero_start = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
-        cls.vdp_min_time_nonzero_start_op = \
+        self.vdp_min_time_nonzero_start_op = \
                 OptimizationProblem(model_vdp_min_time_nonzero_start)
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
         fmu_cstr = compile_fmu(class_path, cstr_file_path,
                                separate_process=True)
-        cls.cstr_model = load_fmu(fmu_cstr)
+        self.cstr_model = load_fmu(fmu_cstr)
         
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
         model_cstr_lagrange = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_lagrange_op = \
+        self.cstr_lagrange_op = \
                 OptimizationProblem(model_cstr_lagrange)
         
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
         model_cstr_mayer = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_mayer_op = \
+        self.cstr_mayer_op = \
                 OptimizationProblem(model_cstr_mayer)
         
         class_path = "CSTR.CSTR_Opt_Dependent_Parameter"
         model_cstr_dependent_parameter = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_dependent_parameter_op = \
+        self.cstr_dependent_parameter_op = \
                 OptimizationProblem(model_cstr_dependent_parameter)
         
         class_path = "CSTR.CSTR_Opt_Extends"
         model_cstr_extends = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_extends_op = \
+        self.cstr_extends_op = \
                 OptimizationProblem(model_cstr_extends)
         
         class_path = "CSTR.CSTR_Opt_Scaled_Min_Time"
         model_cstr_scaled_min_time = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_scaled_min_time_op = \
+        self.cstr_scaled_min_time_op = \
                 OptimizationProblem(model_cstr_scaled_min_time)
         
         class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
         model_cstr_unscaled_min_time = \
                 transfer_to_casadi_interface(class_path, cstr_file_path)
-        cls.cstr_unscaled_min_time_op = \
+        self.cstr_unscaled_min_time_op = \
                 OptimizationProblem(model_cstr_unscaled_min_time)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
@@ -1719,12 +1720,12 @@ class TestLocalDAECollocator2:
         class_path = "ParEst.SecondOrder"
         fmu_second_order = compile_fmu(class_path, pe_file_path,
                                        separate_process=True)
-        cls.second_order_model = load_fmu(fmu_second_order)
+        self.second_order_model = load_fmu(fmu_second_order)
         
         class_path = "ParEst.ParEstCasADi"
         model_second_order_par_est = \
                 transfer_to_casadi_interface(class_path, pe_file_path)
-        cls.second_order_par_est_op = \
+        self.second_order_par_est_op = \
                 OptimizationProblem(model_second_order_par_est)
         
         qt_file_path = os.path.join(get_files_path(), 'Modelica',
@@ -1732,28 +1733,28 @@ class TestLocalDAECollocator2:
         class_path = "QuadTankPack.Sim_QuadTank"
         fmu_qt_sim = compile_fmu(class_path, qt_file_path,
                                  separate_process=True)
-        cls.qt_sim_model = load_fmu(fmu_qt_sim)
+        self.qt_model = load_fmu(fmu_qt_sim)
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi"
         model_qt_par_est = \
                 transfer_to_casadi_interface(class_path, qt_file_path)
-        cls.qt_par_est_op = \
+        self.qt_par_est_op = \
                 OptimizationProblem(model_qt_par_est)
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
         model_qt_par_est_degenerate = \
                 transfer_to_casadi_interface(class_path, qt_file_path)
-        cls.qt_par_est_degenerate_op = \
+        self.qt_par_est_degenerate_op = \
                 OptimizationProblem(model_qt_par_est_degenerate)
         
-        cls.algorithm = "LocalDAECollocationAlg2"
+        self.algorithm = "LocalDAECollocationAlg2"
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_init_traj_sim(self):
         """Test initial trajectories based on an existing simulation."""
-        model = TestLocalDAECollocator2.cstr_model
+        model = self.cstr_model
         model.reset()
-        op = TestLocalDAECollocator2.cstr_extends_op
+        op = self.cstr_extends_op
         model.set(['c_init', 'T_init'], op.get(['c_init', 'T_init']))
         
         # Create input trajectory
@@ -1778,10 +1779,10 @@ class TestLocalDAECollocator2:
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
                 [435.4425832, 333.42862629], rtol=1e-5)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_init_traj_opt(self):
         """Test optimizing based on an existing optimization reult."""
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         # References values
         cost_ref = 3.19495079586595e0
@@ -1804,10 +1805,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_nominal_traj_vdp(self):
         """Test optimizing a VDP using nominal and initial trajectories."""
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         # References values
         cost_ref_traj = 3.19495079586595e0
@@ -1861,10 +1862,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_nominal_traj_cstr(self):
         """Test optimizing a CSTR using nominal and initial trajectories."""
-        op = TestLocalDAECollocator2.cstr_lagrange_op
+        op = self.cstr_lagrange_op
         
         # References values
         cost_ref_traj = 1.8549259545339369e3
@@ -1919,10 +1920,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_nominal_traj_mode(self):
         """Test nominal_traj_mode on the CSTR."""
-        op = TestLocalDAECollocator2.cstr_lagrange_op
+        op = self.cstr_lagrange_op
         
         # References values
         cost_ref = 1.8549259545339369e3
@@ -1988,7 +1989,7 @@ class TestLocalDAECollocator2:
         N.testing.assert_raises(XMLException, op.optimize, self.algorithm,
                                 opts)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_cstr(self):
         """
         Test optimizing the CSTR.
@@ -1996,8 +1997,8 @@ class TestLocalDAECollocator2:
         Tests both a Mayer cost with Gauss collocation and a Lagrange cost with
         Radau collocation.
         """
-        mayer_op = TestLocalDAECollocator2.cstr_mayer_op
-        lagrange_op = TestLocalDAECollocator2.cstr_lagrange_op
+        mayer_op = self.cstr_mayer_op
+        lagrange_op = self.cstr_lagrange_op
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -2014,7 +2015,7 @@ class TestLocalDAECollocator2:
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_parameter_estimation(self):
         """
         Test a parameter estimation example with and without scaling.
@@ -2022,7 +2023,7 @@ class TestLocalDAECollocator2:
         WARNING: This test is very slow when using IPOPT with the linear solver
         MUMPS.
         """
-        op = TestLocalDAECollocator2.second_order_par_est_op
+        op = self.second_order_par_est_op
         
         # Reference values
         w_ref = 1.048589
@@ -2061,14 +2062,14 @@ class TestLocalDAECollocator2:
         N.testing.assert_allclose(w_scaled, w_ref, 1e-2)
         N.testing.assert_allclose(z_scaled, z_ref, 1e-2)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_parameter_estimation_traj(self):
         """
         Test estimation with and without initial and nominal trajectories.
         """
-        model = TestLocalDAECollocator2.second_order_model
+        model = self.second_order_model
         model.reset()
-        op = TestLocalDAECollocator2.second_order_par_est_op
+        op = self.second_order_par_est_op
         
         # Simulate with initial guesses
         sim_model.set('w', 1.3)
@@ -2113,15 +2114,15 @@ class TestLocalDAECollocator2:
         N.testing.assert_allclose(w_traj, w_ref, 1e-2)
         N.testing.assert_allclose(z_traj, z_ref, 1e-2)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_qt_par_est_unconstrained(self):
         """
         Test parameter estimation for the quad tank with unconstrained inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
-        model = TestLocalDAECollocator2.qt_model
+        model = self.qt_model
         model.reset()
-        op = TestLocalDAECollocator2.qt_par_est_op
+        op = self.qt_par_est_op
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
@@ -2135,8 +2136,8 @@ class TestLocalDAECollocator2:
         
         # Simulate
         u = N.transpose(N.vstack((t_meas, u1, u2)))
-        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
-                                     final_time=60.)
+        sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                 final_time=60.)
         
         # Create measurement data
         Q = N.diag([1., 1., 10., 10.])
@@ -2169,16 +2170,16 @@ class TestLocalDAECollocator2:
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-4)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_qt_par_est_eliminated(self):
         """
         Test parameter estimation for the quad tank with eliminated inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
-        model = TestLocalDAECollocator2.qt_model
+        model = self.qt_model
         model.reset()
-        op = TestLocalDAECollocator2.qt_par_est_op
-        op_2 = TestLocalDAECollocator2.qt_par_est_degenerate_op
+        op = self.qt_par_est_op
+        op_2 = self.qt_par_est_degenerate_op
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
@@ -2192,8 +2193,8 @@ class TestLocalDAECollocator2:
         
         # Simulate
         u = N.transpose(N.vstack((t_meas, u1, u2)))
-        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
-                                     final_time=60.)
+        sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                 final_time=60.)
         
         # Create measurement data
         Q = N.diag([1., 1.])
@@ -2243,7 +2244,7 @@ class TestLocalDAECollocator2:
                                 op_2.optimize, self.algorithm, opts2)
         
         # Eliminate state
-        Q = N.array([[1.]])
+        Q = N.diag([1.])
         unconstrained = OrderedDict()
         unconstrained['qt.x1'] = data_x1
         eliminated = OrderedDict()
@@ -2254,18 +2255,45 @@ class TestLocalDAECollocator2:
                                            unconstrained=unconstrained,
                                            eliminated=eliminated)
         opts['measurement_data'] = measurement_data
+        N.testing.assert_raises(ValueError,
+                                op.optimize, self.algorithm, opts)
+
+        # Eliminate non-existing variable
+        del eliminated['qt.x2']
+        eliminated['does_not_exist'] = data_x2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['measurement_data'] = measurement_data
         N.testing.assert_raises(VariableNotFoundError,
                                 op.optimize, self.algorithm, opts)
+
+        # Eliminate input alias
+        Q = N.diag([1., 1.])
+        unconstrained = OrderedDict()
+        unconstrained['qt.x1'] = data_x1
+        unconstrained['qt.x2'] = data_x2
+        eliminated = OrderedDict()
+        eliminated['u1'] = data_u1
+        eliminated['qt.u2'] = data_u2
+        measurement_data = MeasurementData(Q=Q,
+                                           unconstrained=unconstrained,
+                                           eliminated=eliminated)
+        opts['measurement_data'] = measurement_data
+        opt_res = op.optimize(self.algorithm, opts)
+        N.testing.assert_allclose(1e4 * N.array([opt_res.final("qt.a1"),
+                                                 opt_res.final("qt.a2")]),
+                                  a_ref, rtol=1e-3)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_qt_par_est_constrained(self):
         """
         Test parameter estimation for the quad tank with constrained inputs.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
-        model = TestLocalDAECollocator2.qt_model
+        model = self.qt_model
         model.reset()
-        op = TestLocalDAECollocator2.qt_par_est_op
+        op = self.qt_par_est_op
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
@@ -2279,8 +2307,8 @@ class TestLocalDAECollocator2:
         
         # Simulate
         u = N.transpose(N.vstack((t_meas, u1, u2)))
-        sim_res = sim_model.simulate(input=(['u1', 'u2'], u), start_time=0.,
-                                     final_time=60.)
+        sim_res = model.simulate(input=(['u1', 'u2'], u), start_time=0.,
+                                 final_time=60.)
         
         # Create measurement data
         Q = N.diag([1., 1., 10., 10.])
@@ -2335,15 +2363,15 @@ class TestLocalDAECollocator2:
         N.testing.assert_raises(VariableNotFoundError,
                                 op.optimize, self.algorithm, opts)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_qt_par_est_semi_eliminated(self):
         """
         Test parameter estimation for the quad tank with 1 eliminated input.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
-        model = TestLocalDAECollocator2.qt_sim_model
+        model = self.qt_model
         model.reset()
-        op = TestLocalDAECollocator2.qt_par_est_op
+        op = self.qt_par_est_op
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
@@ -2417,15 +2445,15 @@ class TestLocalDAECollocator2:
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-4)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_qt_par_est_user_interpolator(self):
         """
         Test parameter estimation for the quad tank with user-defined function.
         """
         data = loadmat(path_to_data + '/qt_par_est_data.mat', appendmat=False)
-        model = TestLocalDAECollocator2.qt_sim_model
+        model = self.qt_model
         model.reset()
-        op = TestLocalDAECollocator2.qt_par_est_op
+        op = self.qt_par_est_op
         a_ref = [0.02656702, 0.02713898]
         
         # Extract data series
@@ -2475,7 +2503,7 @@ class TestLocalDAECollocator2:
                                 op.optimize, self.algorithm, opts)
         op.set_min('u1', -N.inf)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_vdp_minimum_time(self):
         """
         Test solving minimum time problems based on the VDP oscillator.
@@ -2484,10 +2512,10 @@ class TestLocalDAECollocator2:
         the time is automatically scaled by the compiler, where one of them
         starts at time 0 and the other starts at time 5.
         """
-        scaled_op = TestLocalDAECollocator2.vdp_scaled_min_time_op
-        unscaled_op = TestLocalDAECollocator2.vdp_unscaled_min_time_op
+        scaled_op = self.vdp_scaled_min_time_op
+        unscaled_op = self.vdp_unscaled_min_time_op
         nonzero_start_op = \
-                TestLocalDAECollocator2.vdp_min_time_nonzero_start_op
+                self.vdp_min_time_nonzero_start_op
         
         # References values
         cost_ref = 2.2811590707107996e0
@@ -2528,7 +2556,7 @@ class TestLocalDAECollocator2:
         N.testing.assert_allclose(res['time'][[0, -1]], [5., 7.28128126],
                                   rtol=5e-3)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_cstr_minimum_time(self):
         """
         Test solving minimum time problems based on the CSTR.
@@ -2536,8 +2564,8 @@ class TestLocalDAECollocator2:
         Tests both a problem where the time is manually scaled, and one where
         the time is automatically scaled by the compiler.
         """
-        scaled_op = TestLocalDAECollocator2.cstr_scaled_min_time_op
-        unscaled_op = TestLocalDAECollocator2.cstr_unscaled_min_time_op
+        scaled_op = self.cstr_scaled_min_time_op
+        unscaled_op = self.cstr_unscaled_min_time_op
         
         # References values
         cost_ref = 1.1637020114180874e2
@@ -2567,10 +2595,10 @@ class TestLocalDAECollocator2:
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2,
                        input_name="Tc")
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_path_constraints(self):
         """Test a simple path constraint with and without exact Hessian."""
-        op = TestLocalDAECollocator2.vdp_constraints_mayer_op
+        op = self.vdp_constraints_mayer_op
         
         # References values
         cost_ref = 5.273481330869811e0
@@ -2587,10 +2615,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_initial_equations(self):
         """Test initial equations with and without eliminated derivatives."""
-        op = TestLocalDAECollocator2.vdp_initial_equations_op
+        op = self.vdp_initial_equations_op
         
         # References values
         cost_ref = 4.7533158101416788e0
@@ -2607,10 +2635,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_element_lengths(self):
         """Test non-uniformly distributed elements."""
-        op = TestLocalDAECollocator2.vdp_bounds_mayer_op
+        op = self.vdp_bounds_mayer_op
         
         opts = op.optimize_options(self.algorithm)
         opts['n_e'] = 23
@@ -2619,10 +2647,10 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, 3.174936706809e0, 3.707273799325e-1)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_free_element_lengths(self):
         """Test optimized element lengths with both result modes."""
-        op = TestLocalDAECollocator2.vdp_bounds_mayer_op
+        op = self.vdp_bounds_mayer_op
         
         # References values
         cost_ref = 4.226631156609e0
@@ -2653,14 +2681,14 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=3e-2)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_rename_vars(self):
         """
         Test variable renaming.
 
         This test is by no means thorough.
         """
-        op = TestLocalDAECollocator2.vdp_bounds_mayer_op
+        op = self.vdp_bounds_mayer_op
         
         # References values
         cost_ref = 1.353983656973385e0
@@ -2687,7 +2715,7 @@ class TestLocalDAECollocator2:
                 "Matrix<SX>((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
                 "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der_x2_1_3)))")
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_scaling(self):
         """
         Test optimizing the CSTR with and without scaling.
@@ -2696,7 +2724,7 @@ class TestLocalDAECollocator2:
         eliminating derivative variables and setting nominal values
         post-compilation.
         """
-        op = TestLocalDAECollocator2.cstr_lagrange_op
+        op = self.cstr_lagrange_op
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -2740,12 +2768,12 @@ class TestLocalDAECollocator2:
         N.testing.assert_allclose(c_unscaled, 500. * c_scaled,
                                   rtol=0, atol=1e-5)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_result_file_name(self):
         """
         Test different result file names.
         """
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         # Default file name
         try:
@@ -2765,7 +2793,7 @@ class TestLocalDAECollocator2:
         op.optimize(self.algorithm, opts)
         assert(os.path.exists("vdp_custom_file_name.txt"))
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_result_mode(self):
         """
         Test the two different result modes.
@@ -2774,7 +2802,7 @@ class TestLocalDAECollocator2:
         should be very small if n_e * n_cp is sufficiently large. Eliminating
         derivative variables is also tested.
         """
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         # References values
         cost_ref = 3.17495094634053e0
@@ -2801,11 +2829,15 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_parameter_setting(self):
-        """Test setting parameters post-compilation."""
-        op = TestLocalDAECollocator2.cstr_dependent_parameter_op
-        N.testing.assert_raises(XMLException, op.set, 'cstr.F', 500)
+        """
+        Test setting parameters post-compilation.
+        """
+        op = self.cstr_dependent_parameter_op
+        N.testing.assert_raises(RuntimeError,
+                op.model.getVariableByName('cstr.F').setAttribute,
+                "bindingExpression", 500)
         
         # Reference values
         cost_ref_low = 1.2391821615924346e3
@@ -2814,19 +2846,21 @@ class TestLocalDAECollocator2:
         u_norm_ref_default = 3.0556730059139556e2
         
         # Test lower EdivR
-        op.set('cstr.EdivR', 8200)
+        op.model.getVariableByName('cstr.EdivR').setAttribute(
+                "bindingExpression", 8200)
         res_low = op.optimize(self.algorithm)
         assert_results(res_low, cost_ref_low, u_norm_ref_low)
         
         # Test default EdviR
-        op.set('cstr.EdivR', 8750)
+        op.model.getVariableByName('cstr.EdivR').setAttribute(
+                "bindingExpression", 8750)
         res_default = op.optimize(self.algorithm)
         assert_results(res_default, cost_ref_default, u_norm_ref_default)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_blocking_factors(self):
         """Test blocking factors."""
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         opts = op.optimize_options(self.algorithm)
         opts['n_e'] = 40
@@ -2843,13 +2877,13 @@ class TestLocalDAECollocator2:
         assert_results(res, 3.620908059907745e0, 3.049446667587375e-1,
                        cost_rtol=8e-2, u_norm_rtol=3e-2)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_eliminate_der_var(self):
         """
         Test that results are consistent regardless of eliminate_der_var.
         """
-        mayer_op = TestLocalDAECollocator2.vdp_bounds_mayer_op
-        lagrange_op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        mayer_op = self.vdp_bounds_mayer_op
+        lagrange_op = self.vdp_bounds_lagrange_op
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -2872,14 +2906,14 @@ class TestLocalDAECollocator2:
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_eliminate_cont_var(self):
         """
         Test that results are consistent regardless of eliminate_cont_var.
         
         This is tested for both Gauss and Radau collocation.
         """
-        op = TestLocalDAECollocator2._vdp_bounds_mayerop
+        op = self._vdp_bounds_mayerop
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -2913,13 +2947,13 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref_gauss)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_quadrature_constraint(self):
         """
         Test that optimization results of the CSTR is consistent regardless of
         quadrature_constraint and eliminate_cont_var for Gauss collocation.
         """
-        op = TestLocalDAECollocator2.cstr_mayer_op
+        op = self.cstr_mayer_op
         
         # References values
         cost_ref = 1.8576873858261e3
@@ -2951,12 +2985,12 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_n_cp(self):
         """
         Test varying n_e and n_cp.
         """
-        op = TestLocalDAECollocator2.vdp_bounds_mayer_op
+        op = self.vdp_bounds_mayer_op
         opts = op.optimize_options(self.algorithm)
         
         # n_cp = 1
@@ -2979,7 +3013,7 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, 3.17620203643878e0, 2.803233013e-1)
         
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_graphs_and_hessian(self):
         """
         Test that results are consistent regardless of graph and Hessian.
@@ -2987,7 +3021,7 @@ class TestLocalDAECollocator2:
         The test also checks the elimination of derivative and continuity
         variables.
         """
-        op = TestLocalDAECollocator2.vdp_bounds_lagrange_op
+        op = self.vdp_bounds_lagrange_op
         
         # References values
         cost_ref = 3.17619580332244e0
@@ -3052,12 +3086,12 @@ class TestLocalDAECollocator2:
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref)
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_ipopt_statistics(self):
         """
         Test getting IPOPT statistics
         """
-        op = TestLocalDAECollocator2.vdp_bounds_mayer_op
+        op = self.vdp_bounds_mayer_op
         
         cost_ref = 3.17619580332244e0
         
@@ -3070,14 +3104,14 @@ class TestLocalDAECollocator2:
         N.testing.assert_array_less([total_exec_time, -total_exec_time],
                                     [1., 0.])
     
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_input_interpolator(self):
         """
         Test the input interpolator for simulation purposes
         """
-        model = TestLocalDAECollocator2.cstr_model
+        model = self.cstr_model
         model.reset()
-        op = TestLocalDAECollocator2.cstr_extends_op
+        op = self.cstr_extends_op
         model.set(['c_init', 'T_init'], op.get(['c_init', 'T_init']))
         
         # Optimize
@@ -3095,12 +3129,12 @@ class TestLocalDAECollocator2:
         N.testing.assert_allclose([res.final("T"), res.final("c")],
                                   [284.62140206, 345.22510435], rtol=5e-4)
 
-    @testattr(casadi = True)
+    @testattr(new_casadi = True)
     def test_matrix_evaluations(self):
         """
         Test evaluating NLP matrices.
         """
-        op = TestLocalDAECollocator2.cstr_lagrange_op
+        op = self.cstr_lagrange_op
 
         # References values
         cost_ref = 1.852527678e3

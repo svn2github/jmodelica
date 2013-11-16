@@ -30,6 +30,7 @@ from collections import OrderedDict
     
 try:
     import casadi
+    import casadi.tools as ct
 except ImportError:
     logging.warning('Could not find CasADi package, aborting.')
 import numpy as N
@@ -56,7 +57,7 @@ try:
 except ImportError:
     VariableNotFoundError = (jmiVariableNotFoundError,
                              pymodelicaVariableNotFoundError)
-
+        
 class CasadiCollocatorException(Exception):
     """
     A CasadiCollocator Exception.
@@ -663,6 +664,9 @@ class MeasurementData(object):
                              "constrained and unconstrained variables.")
         
         # Transform data into trajectories
+        eliminated = copy.copy(eliminated)
+        constrained = copy.copy(constrained)
+        unconstrained = copy.copy(unconstrained)
         for variable_list in [eliminated, constrained, unconstrained]:
             for (name, data) in variable_list.items():
                 if (isinstance(data, types.FunctionType) or
@@ -3147,21 +3151,52 @@ class LocalDAECollocator2(CasadiCollocator):
     
     """Solves an optimal control problem using local collocation."""
     
-    def __init__(self, model, options):
-        super(LocalDAECollocator, self).__init__(model)
-        
-        # Check normalization of minimum time problems
-        t0 = self.ocp.variable('startTime')
-        tf = self.ocp.variable('finalTime')
-        if (t0.getFree() and self.ocp.t0_free or
-            tf.getFree() and self.ocp.tf_free):
-            raise CasadiCollocatorException(
-                    "Problems with free start or final time must be " +
-                    'compiled with the compiler option "normalize_minimum_' +
-                    'time_problems" enabled.')
-        
+    def __init__(self, op, options):
         # Get the options
         self.__dict__.update(options)
+        
+        # Store model and op objects
+        # Remove unneeded_op if unneeded! FIX!!!
+        self.unneeded_op = op
+        op = op.op
+        self.op = op
+        model = op.getModel()
+        self.model = model        
+        
+        # Check if minimum time normalization has occured
+        print("WARNING: Free time horizons are currently not supported")
+        #~ t0 = self.ocp.variable('startTime')
+        #~ tf = self.ocp.variable('finalTime')
+        #~ if (t0.getFree() and not self.ocp.t0_free or
+            #~ tf.getFree() and not self.ocp.tf_free):
+            #~ self._normalize_min_time = True
+        #~ else:
+            #~ self._normalize_min_time = False
+        #~ 
+        #~ # Get start and final time
+        #~ if self._normalize_min_time:
+            #~ self.t0 = self.ocp.t0
+            #~ self.tf = self.ocp.tf
+        #~ else:
+            #~ self.t0 = t0.getStart()
+            #~ self.tf = tf.getStart()
+
+        # Change this once the above works! FIX!!!
+        self.t0 = model.getVariableByName('startTime').getAttribute(
+                'bindingExpression')
+        self.tf = model.getVariableByName('finalTime').getAttribute(
+                'bindingExpression')
+
+        # Not sure if needed? FIX!!!
+        #~ # Check normalization of minimum time problems
+        #~ t0 = self.ocp.variable('startTime')
+        #~ tf = self.ocp.variable('finalTime')
+        #~ if (t0.getFree() and self.ocp.t0_free or
+            #~ tf.getFree() and self.ocp.tf_free):
+            #~ raise CasadiCollocatorException(
+                    #~ "Problems with free start or final time must be " +
+                    #~ 'compiled with the compiler option "normalize_minimum_' +
+                    #~ 'time_problems" enabled.')
         
         # Define element lengths
         self.horizon = self.tf - self.t0
@@ -3180,9 +3215,6 @@ class LocalDAECollocator2(CasadiCollocator):
         else:
             raise ValueError("Unknown discretization scheme %s." % self.discr)
         
-        # Update scaling factors
-        self.model._update_sf()
-        
         # Get to work
         self._create_nlp()
     
@@ -3190,6 +3222,9 @@ class LocalDAECollocator2(CasadiCollocator):
         """
         Wrapper for creating the NLP.
         """
+        self._create_model_variable_map()
+        self._eliminate_nonfree_parameters()
+        self._update_sf()
         self._get_ocp_expressions()
         self._define_collocation()
         self._create_nlp_variables()
@@ -3198,6 +3233,162 @@ class LocalDAECollocator2(CasadiCollocator):
         self._create_cost()
         self._compute_bounds_and_init()
         self._create_solver()
+
+    def _create_model_variable_map(self):
+        """
+        Create map of model variables.
+
+        Create vectorized model variables unless named_vars is enabled.
+        """
+        # Get model variable vectors
+        model = self.model
+        op = self.op
+        var_kinds = {'dx': model.DERIVATIVE,
+                     'x': model.DIFFERENTIATED,
+                     'u': model.REAL_INPUT,
+                     'w': model.REAL_ALGEBRAIC}
+        mvar_vectors = {'dx': N.array([var for var in
+                                       model.getVariableByKind(var_kinds['dx'])
+                                       if not var.isAlias()]),
+                        'x': N.array([var for var in
+                                      model.getVariableByKind(var_kinds['x'])
+                                      if not var.isAlias()]),
+                        'u': N.array([var for var in
+                                      model.getVariableByKind(var_kinds['u'])
+                                      if not var.isAlias()]),
+                        'w': N.array([var for var in
+                                      model.getVariableByKind(var_kinds['w'])
+                                      if not var.isAlias()])}
+
+        # Count variables (uneliminated inputs and free parameters are counted
+        # later)
+        n_var = {'dx': len(mvar_vectors["dx"]),
+                 'x': len(mvar_vectors["x"]),
+                 'u': len(mvar_vectors["u"]),
+                 'w': len(mvar_vectors["w"])}
+
+        # Create eliminated and uneliminated input lists
+        if (self.measurement_data is None or
+            len(self.measurement_data.eliminated) == 0):
+            elim_input_indices = []
+        else:
+            input_names = [u.getName() for u in mvar_vectors['u']]
+            elim_names = self.measurement_data.eliminated.keys()
+            elim_vars = [model.getModelVariableByName(elim_name)
+                         for elim_name in elim_names]
+            for (i, elim_var) in enumerate(elim_vars):
+                if elim_var is None:
+                    raise jmiVariableNotFoundError(
+                            "Eliminated input %s is " % elim_names[i] +
+                            "not a model variable.")
+                if elim_var.getCausality() != elim_var.INPUT:
+                    raise ValueError(
+                            "Eliminated input %s is " % elim_var.getName() +
+                            "not a model input.")
+            elim_var_names = [elim_var.getName() for elim_var in elim_vars]
+            elim_input_indices = [input_names.index(u) for u in elim_var_names]
+        unelim_input_indices = [i for i in range(n_var['u']) if
+                                i not in elim_input_indices]
+        self._unelim_input_indices = unelim_input_indices
+        self._elim_input_indices = elim_input_indices
+        mvar_vectors["unelim_u"] = mvar_vectors['u'][unelim_input_indices]
+        mvar_vectors["elim_u"] = mvar_vectors['u'][elim_input_indices]
+        n_var['unelim_u'] = len(unelim_input_indices)
+        n_var['elim_u'] = len(elim_input_indices)
+        
+        # Identify free parameters
+        # Make sure that startTime and finalTime enter var_vectors of free
+        # parameters! FIX!!!
+        indep_pars = \
+                list(model.getVariableByKind(model.REAL_PARAMETER_INDEPENDENT))
+        dep_pars = \
+                list(model.getVariableByKind(model.REAL_PARAMETER_DEPENDENT))
+        mvar_vectors['p_opt'] =  N.array([par for par in indep_pars + dep_pars
+                                          if par.getAttribute("free")])
+        mvar_vectors['p'] = N.array([par for par in indep_pars + dep_pars
+                                     if not par.getAttribute("free")])
+        n_var['p_opt'] = len(mvar_vectors['p_opt'])
+        
+        # Create named symbolic variable structure
+        named_mvar_struct = OrderedDict()
+        named_mvar_struct["time"] = [model.getTimeVariable()]
+        named_mvar_struct["dx"] = [mvar.getVar() for
+                                   mvar in mvar_vectors['dx']]
+        named_mvar_struct["x"] = [mvar.getVar() for mvar in mvar_vectors['x']]
+        named_mvar_struct["unelim_u"] = \
+                [mvar.getVar() for mvar in
+                 mvar_vectors['u'][unelim_input_indices]]
+        named_mvar_struct["w"] = [mvar.getVar() for mvar in mvar_vectors['w']]
+        named_mvar_struct["p_opt"] = [mvar.getVar() for
+                                      mvar in mvar_vectors['p_opt']]
+        named_mvar_struct["elim_u"] = \
+                [mvar.getVar() for mvar in
+                 mvar_vectors['u'][elim_input_indices]]
+
+        # Get optimization and model expressions
+        initial = model.getInitialResidual()
+        dae = model.getDaeResidual()
+        path = casadi.vertcat([constr.getResidual() for
+                               constr in op.getPathConstraints()])
+        mterm = op.getMayerTerm()
+        lterm = op.getLagrangeTerm()
+
+        # Substitute named variables with vector variables in expressions
+        if self.named_vars:
+            self.mvar_struct = named_mvar_struct
+        else:
+            # Create vector variables
+            mvar_struct = ct.struct_msym(
+                    [ct.entry("time", shape=1),
+                     ct.entry("dx", shape=n_var['dx']),
+                     ct.entry("x", shape=n_var['x']),
+                     ct.entry("unelim_u", shape=n_var['unelim_u']),
+                     ct.entry("w", shape=n_var['w']),
+                     ct.entry("p_opt", shape=n_var['p_opt']),
+                     ct.entry("elim_u", shape=n_var['elim_u'])])
+            named_vars = reduce(list.__add__, named_mvar_struct.values())
+            vector_vars = [mvar_struct.cat[i] for
+                           i in range(mvar_struct.cat.numel())]
+
+            # Substitute
+            # Point constraints here! FIX!!!
+            op_expressions = [initial, dae, path, mterm, lterm]
+            [initial, dae, path, mterm, lterm] = casadi.substitute(
+                    op_expressions, named_vars, vector_vars)
+            self.mvar_struct = mvar_struct
+
+        # Store expressions and variable vectors
+        self.initial = initial
+        self.dae = dae
+        self.path = path
+        self.mterm = mterm
+        self.lterm = lterm
+        self.mvar_vectors = mvar_vectors
+        self.n_var = n_var
+
+    def _eliminate_nonfree_parameters(self):
+        # Update dependent parameters
+        model = self.model
+        model.calculateValuesForDependentParameters()
+        
+        # Update optimization expressions
+        # Point constraints here! FIX!!!
+        op_expressions = [self.initial, self.dae, self.path, self.mterm,
+                          self.lterm]
+        parameters = casadi.vertcat([p.getVar() for
+                                     p in self.mvar_vectors["p"]])
+        parameter_values = \
+                [p.getAttribute("evalutedBindingExpression").getValue() for
+                 p in self.mvar_vectors["p"]]
+        [self.initial,
+         self.dae,
+         self.path,
+         self.mterm,
+         self.lterm] = casadi.substitute(op_expressions, [parameters],
+                                         [parameter_values])
+
+    def _update_sf(self):
+        self.model._update_sf()
     
     def _get_ocp_expressions(self):
         """

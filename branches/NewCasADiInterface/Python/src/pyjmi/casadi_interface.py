@@ -73,10 +73,16 @@ def unzip_fmux(archive, path='.'):
 class OptimizationProblem(ModelBase):
 
     """
-    Python wrapper for OptimizationProblem.
+    Python wrapper for the CasADi interface class OptimizationProblem.
     """
 
     def __init__(self, optimization_problem):
+        """
+        Parameters::
+
+            optimization_problem --
+                OptimizationProblem from the CasADi interface
+        """
         self.op = optimization_problem
         self.model = self.op.getModel()
         

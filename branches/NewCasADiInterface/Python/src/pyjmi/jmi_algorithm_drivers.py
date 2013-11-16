@@ -2179,7 +2179,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
     
     def __init__(self, model, options):
         """
-        Create a LocalDAECollocationAlg algorithm.
+        Create a LocalDAECollocationAlg2 algorithm.
         
         Parameters::
               
@@ -2192,17 +2192,17 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                model.optimize_options('LocalDAECollocationAlgOptions')
+                model.optimize_options('LocalDAECollocationAlg2Options')
                 
                 or look at the docstring with help:
                 
-                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlg2Options)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by LocalDAECollocationAlgOptions. An empty
+                  provided by LocalDAECollocationAlg2Options. An empty
                   dict will thus give all options with default values.
-                - A LocalDAECollocationAlgOptions object.
+                - A LocalDAECollocationAlg2Options object.
         """
         self._t0 = time.clock()
         self.model = model
@@ -2210,9 +2210,9 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = LocalDAECollocationAlgOptions(options)
-        elif isinstance(options, LocalDAECollocationAlgOptions):
-            # user has passed LocalDAECollocationAlgOptions instance
+            self.options = LocalDAECollocationAlg2Options(options)
+        elif isinstance(options, LocalDAECollocationAlg2Options):
+            # user has passed LocalDAECollocationAlg2Options instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -2224,7 +2224,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator(model, self.options)
+        self.nlp = LocalDAECollocator2(model, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -2268,11 +2268,11 @@ class LocalDAECollocationAlg2(AlgorithmBase):
             raise ValueError("Unknown discretization scheme %s." % self.discr)
 
         # Check validity of rename_vars
-        if self.rename_vars:
+        if self.named_vars:
             if self.graph != "SX":
-                raise NotImplementedError('rename_vars is only compatible ' + \
+                raise NotImplementedError('named_vars is only compatible ' + \
                                           'with graph == "SX".')
-            print("Warning: Variable renaming is currently activated.")
+            print("Warning: Variable names are currently activated.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2287,27 +2287,27 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                              "must be the same as the number of elements.")
         
         # Check validity of nominal_traj_mode
-        var_vectors = self.model._var_vectors
-        ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
-        ocp_names = reduce(list.__add__, ocp_names)
-        ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
-        for name in self.nominal_traj_mode.keys():
-            if name not in ocp_names:
-                if name != "_default_mode":
-                    aliases = self.model.xmldoc.get_aliases_for_variable(name)
-                    found_alias = False
-                    if aliases is not None:
-                        for alias in aliases[0]:
-                            if alias in ocp_names:
-                                self.nominal_traj_mode[alias] = \
-                                        self.nominal_traj_mode[name]
-                                del self.nominal_traj_mode[name]
-                                found_alias = True
-                                break
-                    if not found_alias:
-                        raise XMLException("Could not find variable " + name +
-                                           ", as referenced by " +
-                                           "nominal_traj_mode.")
+        #~ var_vectors = self.model._var_vectors
+        #~ ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
+        #~ ocp_names = reduce(list.__add__, ocp_names)
+        #~ ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
+        #~ for name in self.nominal_traj_mode.keys():
+            #~ if name not in ocp_names:
+                #~ if name != "_default_mode":
+                    #~ aliases = self.model.xmldoc.get_aliases_for_variable(name)
+                    #~ found_alias = False
+                    #~ if aliases is not None:
+                        #~ for alias in aliases[0]:
+                            #~ if alias in ocp_names:
+                                #~ self.nominal_traj_mode[alias] = \
+                                        #~ self.nominal_traj_mode[name]
+                                #~ del self.nominal_traj_mode[name]
+                                #~ found_alias = True
+                                #~ break
+                    #~ if not found_alias:
+                        #~ raise XMLException("Could not find variable " + name +
+                                           #~ ", as referenced by " +
+                                           #~ "nominal_traj_mode.")
         
         # Solver options
         self.solver_options = self.IPOPT_options
@@ -2346,11 +2346,11 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlgResult object.
+        Load result data and create a LocalDAECollocationAlg2Result object.
         
         Returns::
         
-            The LocalDAECollocationAlgResult object.
+            The LocalDAECollocationAlg2Result object.
         """
         resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
@@ -2364,17 +2364,17 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         times['tot'] += times['post_processing']
         
         # Create and return result object
-        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
+        return LocalDAECollocationAlg2Result(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
-                                            h_opt)
+                                             h_opt)
     
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg
+        Get an instance of the options class for the LocalDAECollocationAlg2
         algorithm, prefilled with default values. (Class method.)
         """
-        return LocalDAECollocationAlgOptions()
+        return LocalDAECollocationAlg2Options()
     
 class LocalDAECollocationAlg2Options(OptionBase):
     
@@ -2441,11 +2441,10 @@ class LocalDAECollocationAlg2Options(OptionBase):
             Type: str
             Default: "SX"
 
-        rename_vars --
-            Rename NLP variables according to their corresponding
-            Modelica/Optimica names. This only works if graph == "SX". This is
-            done in an inefficient manner and should only be used for
-            investigative purposes.
+        named_vars --
+            Whether to name the NLP variables according to their corresponding
+            Modelica/Optimica names. This is heavily inefficient and should
+            only be done for investigative purposes.
 
             Type: bool
             Default: False
@@ -2641,7 +2640,7 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'n_cp': 3,
                 'discr': "LGR",
                 'graph': 'SX',
-                'rename_vars': False,
+                'named_vars': False,
                 'init_traj': None,
                 'variable_scaling': True,
                 'nominal_traj': None,
@@ -2658,7 +2657,7 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'measurement_data': None,
                 'IPOPT_options': {}}
         
-        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
+        super(LocalDAECollocationAlg2Options, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
 class LocalDAECollocationAlg2Result(JMResultBase):
@@ -2697,7 +2696,7 @@ class LocalDAECollocationAlg2Result(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlgResult, self).__init__(
+        super(LocalDAECollocationAlg2Result, self).__init__(
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times

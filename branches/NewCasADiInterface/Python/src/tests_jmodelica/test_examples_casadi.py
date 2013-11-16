@@ -26,6 +26,11 @@ def test_ccpp():
     """Run the Combined Cycle Power Plant example."""
     ccpp.run_demo(False)
 
+@testattr(casadi_new = True)
+def test_ccpp_new():
+    """Run the Combined Cycle Power Plant example."""
+    ccpp_new.run_demo(False)
+
 @testattr(casadi = True)
 def test_cstr_casadi():
     """Run the CSTR CasADi example."""
