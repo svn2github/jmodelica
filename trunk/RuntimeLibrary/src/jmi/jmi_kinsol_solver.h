@@ -26,7 +26,7 @@
 #ifndef _JMI_KINSOL_SOLVER_H
 #define _JMI_KINSOL_SOLVER_H
 
-#include "jmi_util.h"
+#include "jmi_block_solver.h"
 
 /*
  *  TODO: Error codes...
@@ -40,15 +40,11 @@
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
-int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_residual_t* block);
+int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_solver_t* block_solver);
 
-int jmi_kinsol_solver_solve(jmi_block_residual_t* block);
+int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 
-int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
-
-int jmi_kinsol_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization);
-
-void jmi_kinsol_solver_delete(jmi_block_residual_t* block);
+void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
 struct jmi_kinsol_solver_t {
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */

@@ -232,6 +232,8 @@
 
 #include "jmi_util.h"
 #include "jmi_global.h"
+#include "jmi_block_solver.h"
+
 
 /* @{ */
 
@@ -289,38 +291,14 @@
 #define JMI_SCALING_NONE 1        /**< \brief No scaling.*/
 #define JMI_SCALING_VARIABLES 2   /**< \brief Scale real variables by multiplying incoming variables in residual functions by the scaling factors in jmi_t->variable_scaling_factors */
 
-/** \brief */
-#define JMI_BLOCK_INITIALIZE 0
-#define JMI_BLOCK_EVALUATE 1
-#define JMI_BLOCK_WRITE_BACK 2
-#define JMI_BLOCK_EVALUATE_INACTIVE 4
-#define JMI_BLOCK_EVALUATE_NON_REALS 8
-#define JMI_BLOCK_MIN 16
-#define JMI_BLOCK_MAX 32
-#define JMI_BLOCK_NOMINAL 64
-#define JMI_BLOCK_EVALUATE_JACOBIAN 128
-#define JMI_BLOCK_EQUATION_NOMINAL 256
-#define JMI_BLOCK_VALUE_REFERENCE 512
-
 #define JMI_REL_GT 0
 #define JMI_REL_GEQ 2
 #define JMI_REL_LT 4
 #define JMI_REL_LEQ 8
 
-#define JMI_CONSTANT_VARIABILITY 0
-#define JMI_PARAMETER_VARIABILITY 1
-#define JMI_DISCRETE_VARIABILITY 2
-#define JMI_CONTINUOUS_VARIABILITY 4
-
 #define JMI_ODE_OK 0
 #define JMI_ODE_EVENT 1
 #define JMI_ODE_ERROR -1
-
- typedef enum {
-     JMI_SIMPLE_NEWTON_SOLVER,
-     JMI_KINSOL_SOLVER,
-     JMI_LINEAR_SOLVER
- } jmi_block_solvers_t;
 
  typedef enum {
      JMI_ODE_CVODE,

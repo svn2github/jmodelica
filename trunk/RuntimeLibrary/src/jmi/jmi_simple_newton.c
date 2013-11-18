@@ -19,15 +19,15 @@
 
 
 #include "jmi_simple_newton.h"
-#include "jmi_util.h"
+#include "jmi_block_solver_impl.h"
 
 #define JMI_SIMPLE_NEWTON_TOL 1e-8
 #define JMI_SIMPLE_NEWTON_MAX_ITER 100
 #define JMI_SIMPLE_NEWTON_FD_TOL 1e-4
 
-void jmi_simple_newton_delete(jmi_block_residual_t *block) {}
+void jmi_simple_newton_delete(jmi_block_solver_t *block) {}
 
-int jmi_simple_newton_solve(jmi_block_residual_t *block) {
+int jmi_simple_newton_solve(jmi_block_solver_t *block) {
 
     int i, INCX, nbr_iter;
     double err_norm;
@@ -39,10 +39,10 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
     int INFO = 0;
 
     /* Initialize the work vector */
-    block->F(block->jmi,block->x,block->res,JMI_BLOCK_INITIALIZE);
+    block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
 
     /* Evaluate */
-    block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+    block->F(block->problem_data,block->x,block->res,JMI_BLOCK_EVALUATE);
 
 /*  for (i=0;i<block->n;i++) {
         printf(" %f, %f\n",block->x[i],block->res[i]);
@@ -73,7 +73,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
         /* Compute jacobian */
         jmi_simple_newton_jac(block);
 
-        block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+        block->F(block->problem_data,block->x,block->res,JMI_BLOCK_EVALUATE);
 
         /*
         printf("-- Jacobian at iteration %d --\n",nbr_iter);
@@ -114,7 +114,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
         }
 
         /* Evaluate residual with new x */
-        block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+        block->F(block->problem_data,block->x,block->res,JMI_BLOCK_EVALUATE);
 
         /* Compute norm of the residual */
         INCX = 1;
@@ -128,7 +128,7 @@ int jmi_simple_newton_solve(jmi_block_residual_t *block) {
     return 0;
 }
 
-int jmi_simple_newton_jac(jmi_block_residual_t *block) {
+int jmi_simple_newton_jac(jmi_block_solver_t *block) {
 
     int i,j;
 
@@ -141,7 +141,7 @@ int jmi_simple_newton_jac(jmi_block_residual_t *block) {
 
     for (i=0;i<block->n;i++) {
         block->x[i] += JMI_SIMPLE_NEWTON_FD_TOL;
-        block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+        block->F(block->problem_data,block->x,block->res,JMI_BLOCK_EVALUATE);
         for (j=0;j<block->n;j++) {
 /*          printf(" * %12.12f\n",block->res[j]); */
             block->jac[i*(block->n) + j] = (block->res[j]-block->jac[i*(block->n) + j])/(JMI_SIMPLE_NEWTON_FD_TOL);

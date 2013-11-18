@@ -28,6 +28,19 @@
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
 
+const char* jmi_callback_log_category_to_string(jmi_log_category_t c) {
+    switch(c){
+    case logError:
+        return "ERROR";
+    case logWarning:
+        return "WARNING";
+    case logInfo:
+        return "INFO";
+    default:
+        return "FATAL";
+    }   
+}
+
 category_t severest(category_t c1, category_t c2) {
     /* Smaller is more severe. */
     return c1 <= c2 ? c1 : c2;
@@ -510,6 +523,13 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     push_frame(log, c, type, leafdim);
     return node_from_top(log);
 }
+
+jmi_log_node_t jmi_log_get_current_node(jmi_log_t *log) {
+    jmi_log_node_t node;
+    node.inner_id = topof(log)->id;
+    return node;
+}
+
 
 static BOOL ok_label_parent(jmi_log_t *log, jmi_log_node_t node) {
     if (topof(log)->id != node.inner_id) {

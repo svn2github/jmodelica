@@ -24,6 +24,8 @@
 #ifndef _JMI_CALLBACKS_H
 #define _JMI_CALLBACKS_H
 
+#include <stdlib.h>
+
 typedef struct jmi_callbacks_t jmi_callbacks_t;           /**< \brief Forward declaration of struct. */
 
 /**
@@ -35,6 +37,8 @@ typedef enum {
     logWarning,
     logInfo
 } jmi_log_category_t;
+
+const char* jmi_callback_log_category_to_string(jmi_log_category_t c);
 
 typedef void (*jmi_callback_emit_log_ft) (jmi_callbacks_t* c, jmi_log_category_t category, jmi_log_category_t severest_category, char* message);
 

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-if(NOT TOP_SRC)    
+if(NOT TOP_SRC)
     set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
@@ -32,6 +32,7 @@ set(JMISources
 
     # Block solver sources
     jmi_block_solver.h
+    jmi_block_solver_impl.h
     jmi_kinsol_solver.h
     jmi_linear_solver.h
     jmi_simple_newton.h
@@ -86,18 +87,29 @@ set(STANDARDTABLESSources
 )
 #Build jmi library
 add_library(jmi STATIC ${JMISources})
-set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
+if(NOT MSVC)
+    set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
+endif()
+
+if(JMFMI_FMU_EXTRA_LIBS)
+    add_executable(jmi_block_solver_test jmi_block_solver_test.c)
+    target_link_libraries(jmi_block_solver_test jmi sundials_kinsol_static sundials_nvecserial_static ${JMFMI_FMU_EXTRA_LIBS})
+endif()
 
 #Build ModelicaExternalC library
 include_directories(${MSLCSOURCES})
 include_directories(${MSLCSOURCES}/zlib)
 add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
-set_target_properties(ModelicaExternalC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic")
+if(NOT MSVC)
+    set_target_properties(ModelicaExternalC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic")
+endif()
 
 #Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
 add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
-set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+if(NOT MSVC)
+    set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
 
 #Install the libraries
 install(TARGETS jmi ModelicaExternalC ModelicaStandardTables

@@ -17,13 +17,11 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#include "jmi.h"
 #include "jmi_linear_solver.h"
-#include "jmi_block_residual.h"
-#include "jmi_util.h"
+#include "jmi_block_solver_impl.h"
 #include "jmi_log.h"
 
-int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_residual_t* block) {
+int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver= (jmi_linear_solver_t*)calloc(1,sizeof(jmi_linear_solver_t));
 /*    jmi_t* jmi = block->jmi;
     int i = 0;
@@ -45,32 +43,31 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_residual_t
     return info==0? 0: -1;
 }
 
-int jmi_linear_solver_solve(jmi_block_residual_t * block){
+int jmi_linear_solver_solve(jmi_block_solver_t * block){
     int n_x = block->n;
     int info;
     int i;
 /*    int j; */
     char trans;
     jmi_linear_solver_t* solver = block->solver;
-    jmi_t * jmi = block->jmi;
     
     /* If needed, reevaluate and factorize Jacobian */
     if (solver->cached_jacobian != 1) {
 
-        /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->index);*/
+        /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->id);*/
           /*
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        info = block->F(jmi,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
+        info = block->F(block->problem_data,NULL,solver->factorization,JMI_BLOCK_EVALUATE_JACOBIAN);
         if(info) {
             if(block->init) {
-                jmi_log_node(jmi->log, logError, "Error", "Failed in Jacobian calculation for <block: %d>", 
-                             block->index);
+                jmi_log_node(block->log, logError, "Error", "Failed in Jacobian calculation for <block: %d>", 
+                             block->id);
             }
             else {
-                jmi_log_node(jmi->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %d>", 
-                             block->index);
+                jmi_log_node(block->log, logWarning, "Warning", "Failed in Jacobian calculation for <block: %d>", 
+                             block->id);
             }
             return -1;
         }
@@ -96,12 +93,12 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
         dgetrf_(&n_x, &n_x, solver->factorization, &n_x, solver->ipiv, &info);
         if(info) {
             if(block->init) {
-                jmi_log_node(jmi->log, logError, "Error", "Singular Jacobian detected for <block: %d>", 
-                             block->index);
+                jmi_log_node(block->log, logError, "Error", "Singular Jacobian detected for <block: %d>", 
+                             block->id);
             }
             else {
-                jmi_log_node(jmi->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d>", 
-                             block->index);
+                jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d>", 
+                             block->id);
             }
             return -1;
         }
@@ -125,13 +122,13 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
         block->x[i] = 0.; 
     } */
  
-    info = block->F(block->jmi,block->initial, block->res, JMI_BLOCK_EVALUATE);
+    info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE);
     if(info) {
         if(block->init) {
-            jmi_log_node(jmi->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->index);
+            jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->id);
         }
         else {
-            jmi_log_node(jmi->log, logWarning, "Warning", "Failed to evaluate equations in <block: %d>", block->index);
+            jmi_log_node(block->log, logWarning, "Warning", "Failed to evaluate equations in <block: %d>", block->id);
         }
         return -1;
     }
@@ -150,7 +147,7 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
 
     if(info) {
         /* can only be "bad param" -> internal error */
-        jmi_log_node(jmi->log, logError, "Error", "Internal error when solving <block: %d>", block->index);
+        jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d>", block->id);
         return -1;
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {
@@ -165,47 +162,12 @@ int jmi_linear_solver_solve(jmi_block_residual_t * block){
     }
         
     /* Write solution back to model */
-    block->F(block->jmi,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
 
     return info==0? 0: -1;
 }
 
-int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian) {
-    /* jmi_linear_solver_t* solver = block->solver; */
-    jmi_t * jmi = block->jmi;
-    int i;
-    /* TODO: This code does not propagate errors. Besides it should also be merged with jmi_linear_solver_solve() */
-    block->F(jmi,NULL,jacobian,JMI_BLOCK_EVALUATE_JACOBIAN);
-    for (i=0;i<block->n*block->n;i++) {
-        jacobian[i] = -jacobian[i];
-    }
-    return 0;
-}
-
-int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization) {
-    jmi_linear_solver_t* solver = block->solver;
-/*    jmi_t * jmi = block->jmi; */
-    int i;
-    /* ,j; */
-    for (i=0;i<block->n*block->n;i++) {
-        factorization[i] = solver->factorization[i];
-    }
-
-    /*
-    for (i=0;i<block->n;i++) {
-        for (j=0;j<block->n;j++) {
-            if (i<j) {
-                factorization[i + block->n*j] = solver->factorization[i + block->n*j];
-            } else {
-                factorization[i + block->n*j] = solver->factorization[i + block->n*j];
-            }
-        }
-    }*/
-    return 0;
-}
-
-
-void jmi_linear_solver_delete(jmi_block_residual_t* block) {
+void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
     free(solver->ipiv);
     free(solver->factorization);

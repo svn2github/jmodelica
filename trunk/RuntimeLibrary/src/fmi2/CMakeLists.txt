@@ -23,7 +23,9 @@ set(FMISources
 #Build fmi2 library
 include_directories(${STANDARD_HEADER_SRC})
 add_library(fmi2 STATIC ${FMISources})
-set_target_properties(fmi2 PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
+if(NOT MSVC)
+    set_target_properties(fmi2 PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
+endif()
 
 #Install the libraries
 install(TARGETS fmi2 DESTINATION "${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary")

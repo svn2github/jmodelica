@@ -592,14 +592,10 @@ typedef struct jmi_options_t {
     jmi_log_options_t* log_options;                  /**< \bried  Logger options */
 
     double nle_solver_default_tol;          /**< \brief Default tolerance for the equation block solver */
-    double nle_solver_min_tol;              /**< \brief Minimum tolerance for the equation block solver */
     double nle_solver_tol_factor;           /**< \brief Tolerance safety factor for the non-linear equation block solver. */
 
     double events_default_tol;              /**< \brief Default tolerance for the event iterations. */        
     double events_tol_factor;               /**< \brief Tolerance safety factor for the event iterations. */
-
-    int block_jacobian_check;               /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
-    double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
 
     int cs_solver;                          /**< \brief Option for changing the internal CS solver */
     double cs_rel_tol;                      /** < \brief Default tolerance for the adaptive solvers in the CS case. */

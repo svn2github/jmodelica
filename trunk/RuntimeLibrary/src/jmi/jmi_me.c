@@ -108,6 +108,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
+    jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -946,7 +947,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         bsop->check_jac_cond_flag = (int)z[index]; 
     index = get_option_index("_nle_solver_min_tol");
     if(index)
-        op->nle_solver_min_tol = z[index]; 
+        bsop->min_tol = z[index]; 
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 
@@ -958,10 +959,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->events_tol_factor = z[index];
     index = get_option_index("_block_jacobian_check");
     if(index)
-        op->block_jacobian_check = z[index]; 
+         bsop->block_jacobian_check = z[index]; 
     index = get_option_index("_block_jacobian_check_tol");
     if(index)
-        op->block_jacobian_check_tol = z[index];
+         bsop->block_jacobian_check_tol = z[index];
     index = get_option_index("_cs_solver");
     if(index)
         op->cs_solver = z[index];
@@ -975,6 +976,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     if(index)
         op->log_options->copy_log_to_file_flag = (int)z[index]; 
     
+    bsop->res_tol = jmi->newton_tolerance;
 /*    op->block_solver_experimental_mode = 
             jmi_block_solver_experimental_steepest_descent_first|
             jmi_block_solver_experimental_converge_switches_first;

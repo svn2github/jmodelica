@@ -24,7 +24,7 @@
 #ifndef _JMI_LINEAR_SOLVER_H
 #define _JMI_LINEAR_SOLVER_H
 
-#include "jmi_util.h"
+#include "jmi_block_solver.h"
 
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
@@ -37,15 +37,15 @@ extern int dlaqge_(int *m, int *n, double *a, int * lda, double *r__, double *c_
 
 typedef struct jmi_linear_solver_t jmi_linear_solver_t;
 
-int jmi_linear_solver_new(jmi_linear_solver_t** solver, jmi_block_residual_t* block);
+int jmi_linear_solver_new(jmi_linear_solver_t** solver, jmi_block_solver_t* block);
 
-int jmi_linear_solver_solve(jmi_block_residual_t* block);
+int jmi_linear_solver_solve(jmi_block_solver_t* block);
 
-int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
+int jmi_linear_solver_evaluate_jacobian(jmi_block_solver_t* block, jmi_real_t* jacobian);
 
-int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization);
+int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_solver_t* block, jmi_real_t* factorization);
 
-void jmi_linear_solver_delete(jmi_block_residual_t* block);
+void jmi_linear_solver_delete(jmi_block_solver_t* block);
 
 struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
