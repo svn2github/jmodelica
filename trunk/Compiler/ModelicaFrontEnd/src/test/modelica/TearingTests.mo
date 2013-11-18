@@ -462,14 +462,10 @@ Iteration variables:
   z()
 Solved equations:
   algorithm
- x := 0.0;
- y := 0.0;
  x := x + y + z;
  y := y - x + z;
 
   algorithm
- x := 0.0;
- y := 0.0;
  x := x + y + z;
  y := y - x + z;
 
@@ -507,7 +503,6 @@ Iteration variables:
   z()
 Solved equations:
   algorithm
- y := 0.0;
  y := y * z + 1;
 
   x = 2 * z + y

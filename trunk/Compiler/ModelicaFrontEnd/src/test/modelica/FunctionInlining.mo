@@ -878,8 +878,8 @@ fclass FunctionInlining.RecordInline7
  discrete Integer x.b;
  discrete Integer temp_2;
 initial equation 
- x.pre(b) = 0;
  pre(temp_2) = 0;
+ x.pre(b) = 0;
 equation
  y[1] = 1;
  y[2] = 2;

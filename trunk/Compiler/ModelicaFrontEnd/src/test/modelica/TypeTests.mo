@@ -1761,10 +1761,10 @@ fclass TypeTests.AlgorithmType1
  Real temp_2;
  Real temp_3;
 initial equation 
+ pre(temp_1) = 0;
  pre(b) = false;
  pre(i) = 0;
  pre(r) = 0.0;
- pre(temp_1) = 0;
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);

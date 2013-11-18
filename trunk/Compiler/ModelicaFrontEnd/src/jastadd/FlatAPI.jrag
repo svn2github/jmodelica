@@ -1129,6 +1129,12 @@ aspect FlatAPI {
 
 	syn boolean FAbstractEquation.replacedAtInitialization() = false;
 	eq FWhenEquation.replacedAtInitialization() = true;
+	eq FAlgorithm.replacedAtInitialization() {
+		for (FStatement stmt : getFStatements())
+			if (stmt.isWhen)
+				return true;
+		return false;
+	}
 	
 	syn List FAbstractEquation.getInitialEquationList() = new List();
 	
@@ -1147,6 +1153,107 @@ aspect FlatAPI {
 			}		
 		}
 		return l;
+	}
+	eq FAlgorithm.getInitialEquationList() {
+		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+		
+		// Keeps fiduseexps in lhs which have not been removed
+		Set<FIdUseExp> usesLHS = FIdUseExpsInLHS();
+		
+		// Keeps track of which variables are definetly set
+		Set<FVariable> fvSet  = new HashSet<FVariable>();
+		Set<FVariable> fvUse  = new HashSet<FVariable>();
+		
+		// Create a new algorithm with some statements removed
+		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
+		for (FStatement stmt : getFStatements()) {
+			stmt.addAsInitial(stmts, usesLHS, fvSet, fvUse);
+		}
+		
+		Set<FVariable> lhs = lookupFVariablesInSet(usesLHS);
+
+		// Add initial statements for variables which are not definetly set
+		// in the new algorithm
+		ArrayList<FStatement> initStmts = new ArrayList<FStatement>();
+		for (FVariable fv : lhs)
+			if (!fvSet.contains(fv))
+				initStmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
+		for (FStatement stmt : stmts)
+			initStmts.add(stmt);
+		FAlgorithm initAlgo = new FAlgorithm(new List<FStatement>(initStmts));
+		l.add(initAlgo);
+		
+		// Create equations for variables which are no longer assigned 
+		// in the new algorithm
+		Set<FVariable> removedFVs = referencedFVariablesInLHS();
+		removedFVs.removeAll(lhs);
+		for (FVariable fv : removedFVs)
+			l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
+		
+		return new List<FAbstractEquation>(l);
+	}
+	
+	
+	public void FStatement.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
+			Set<FVariable> fvSet, Set<FVariable> fvUse) {
+		
+		defSet(fvSet, fvUse);
+		stmts.add(this);
+	}
+	public void FIfStmt.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
+			Set<FVariable> fvSet, Set<FVariable> fvUse) {
+		
+		if (!isWhen) {
+			super.addAsInitial(stmts, usesLHS, fvSet, fvUse);
+			return;
+		}
+		
+		boolean first = true;
+		for (FIfWhenClause c : getFIfWhenClauses()) {
+			if (c.getTest().isInitialGuard() && first) {
+				for (FStatement s : c.getFStatements()) {
+					s.defSet(fvSet, fvUse);
+					stmts.add(s.fullCopy());
+				}
+				first = false;
+			} else {
+				usesLHS.removeAll(c.findFIdUseExpsInTree());
+			}
+		}
+	}
+	
+	syn boolean FExp.isInitialGuard() = false;
+	eq FInitialExp.isInitialGuard() = true;
+	eq FOrExp.isInitialGuard() = getLeft().isInitialGuard() || getRight().isInitialGuard();
+	
+	/**
+	 * \brief Find LHS variables which are definetly assigned to before any use.
+	 */
+	public Set<FVariable> FAlgorithm.defSet() {
+		HashSet<FVariable> fvSet = new HashSet<FVariable>();
+		HashSet<FVariable> fvUse = new HashSet<FVariable>();
+		for (FStatement stmt : getFStatements()) {
+			stmt.defSet(fvSet, fvUse);
+		}
+		return fvSet;
+	}
+	public void FStatement.defSetAdd(Set<FVariable> s1, Set<FVariable> s2, Collection<FVariable> fvs) {
+		for (FVariable fv : fvs)
+			if (!s1.contains(fv))
+				s2.add(fv);
+	}
+	public void FStatement.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, lookupFVariablesInSet(FIdUseExpsInRHS()));
+	}
+	public void FAssignStmt.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getRight().findFIdUseExpsInTree()));
+		defSetAdd(fvUse, fvSet, lookupFVariablesInSet(getLeft().findFIdUseExpsInTree()));
+	}
+	public void FFunctionCallStmt.defSet(Set<FVariable> fvSet, Set<FVariable> fvUse) {
+		defSetAdd(fvSet, fvUse, lookupFVariablesInSet(getCall().findFIdUseExpsInTree()));
+		for (FFunctionCallLeft left : getLefts())
+			if (left.hasFExp())
+				defSetAdd(fvUse, fvSet, lookupFVariablesInSet(left.getFExp().findFIdUseExpsInTree()));
 	}
 	
     /**
@@ -1280,7 +1387,13 @@ aspect ReferencedVariables {
 	eq FFunctionCallEquation.FIdUseExpsInRHS()             = getCall().findFIdUseExpsInTree();
 	eq FAlgorithm.FIdUseExpsInRHS() {
 		Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-		for (FIdUseExp use : containedFIdUseExps())
+		for (FStatement stmt : getFStatements())
+			res.addAll(stmt.FIdUseExpsInRHS());
+		return res;
+	}
+	syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() {
+		Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+		for (FIdUseExp use : findFIdUseExpsInTree())
 			if (!use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add(use);
 		res.removeAll(FIdUseExpsInLHS());
@@ -1292,7 +1405,14 @@ aspect ReferencedVariables {
 	eq FFunctionCallEquation.FIdUseExpsInLHS()             = getLefts().findFIdUseExpsInTree();
 	eq FAlgorithm.FIdUseExpsInLHS() {
 		Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-		for (FIdUseExp use : containedFIdUseExps())
+		for (FStatement stmt : getFStatements())
+			res.addAll(stmt.FIdUseExpsInLHS());
+		return res;
+	}
+	
+	syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() {
+		Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+		for (FIdUseExp use : findFIdUseExpsInTree())
 			if (use.useIsAssignment() && !use.myFV().isForIndex())
 				res.add(use);
 		return res;
@@ -2571,6 +2691,8 @@ aspect FlatAlgorithmAPI {
 	syn FAlgorithm FIdUseExp.myFAlgorithm() = getFIdUse().myFAlgorithm();
 	inh lazy FAlgorithm FIdUse.myFAlgorithm();
 	inh lazy FAlgorithm FStatement.myFAlgorithm();
+	inh FAlgorithm FExp.myFAlgorithm();
+	eq FAbstractEquation.getChild().myFAlgorithm() = null;
 	eq FAlgorithm.getChild().myFAlgorithm() = this;
 	eq Root.getChild().myFAlgorithm() = null;
 	
@@ -2578,10 +2700,6 @@ aspect FlatAlgorithmAPI {
 	    [new ArrayList<FAlgorithm>()] with add root FClass;
 	FAlgorithm contributes this when !inFunction()
 	    to FClass.myAlgorithms() for myFClass();
-
-	coll ArrayList<FIdUseExp> FAlgorithm.containedFIdUseExps() 
-		[new ArrayList<FIdUseExp>()] with add root FAlgorithm;
-	FIdUseExp contributes this to FAlgorithm.containedFIdUseExps() for myFAlgorithm();
 	
 	inh boolean FIdUse.useIsAssignment();
 	inh boolean FIdUseExp.useIsAssignment();

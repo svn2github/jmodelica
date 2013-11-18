@@ -5363,17 +5363,13 @@ fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  discrete Integer temp_2;
  Real temp_3;
  Real temp_4;
- Real temp_5;
- Real temp_6;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
- temp_3 := time * 0.3 + 4.2 - pre(temp_1);
- temp_4 := time * 0.3 + 4.2 - (pre(temp_1) + 1);
- temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= (pre(temp_1) + 1) or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_5 := 3 + temp_1 * 4 - pre(temp_2);
- temp_6 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
+ temp_3 := 3 + temp_1 * 4 - pre(temp_2);
+ temp_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
  temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
@@ -5433,8 +5429,8 @@ fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses1
  discrete Real x;
  discrete Integer temp_1;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = 0;
+ pre(x) = 0.0;
 equation
  when temp_1 + noEvent(integer(time * 3)) > 1 then
   x = floor(time * 0.3 + 4.2);
@@ -5459,21 +5455,16 @@ algorithm
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses2
  discrete Real x;
- discrete Boolean temp_1;
- discrete Integer temp_2;
- Real temp_3;
- Real temp_4;
+ discrete Integer temp_1;
+ discrete Boolean temp_2;
 initial equation 
+ pre(temp_1) = 0;
  pre(x) = 0.0;
- pre(temp_1) = false;
- pre(temp_2) = 0;
+ pre(temp_2) = false;
 algorithm
- x := pre(x);
- temp_3 := time * 3 - pre(temp_2);
- temp_4 := time * 3 - (pre(temp_2) + 1);
- temp_2 := if time * 3 < pre(temp_2) or time * 3 >= (pre(temp_2) + 1) or initial() then integer(time * 3) else pre(temp_2);
- temp_1 := temp_2 + noEvent(integer(time * 3)) > 1;
- if not initial() and (temp_1 and not pre(temp_1)) then
+ temp_1 := if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
+ temp_2 := temp_1 + noEvent(integer(time * 3)) > 1;
+ if temp_2 and not pre(temp_2) then
   x := noEvent(floor(time * 0.3 + 4.2));
  end if;
 end TransformCanonicalTests.EventGeneratingExps.InWhenClauses2;

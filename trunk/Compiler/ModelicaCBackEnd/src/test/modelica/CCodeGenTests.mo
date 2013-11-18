@@ -8185,19 +8185,13 @@ $C_DAE_event_indicator_residuals$
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _r1_0 = 0.0;
-	_temp_3_3 = 1;
-	_temp_4_4 = 1;
-    _temp_1_1 = _time - 0.5;
-    _temp_2_2 = _time - 1;
     if (_sw(0)) {
         _r1_0 = 1;
     } else if (_sw(1)) {
-        _temp_3_3 = _time - 0.7;
         if (_sw(2)) {
             _r1_0 = 2;
         }
     } else {
-        _temp_4_4 = _time - 1.5;
         if (_sw(3)) {
             _r1_0 = 3;
         } else {
@@ -8205,11 +8199,11 @@ $C_DAE_event_indicator_residuals$
         }
     }
 
-    (*res)[0] = _temp_1_1;
-    (*res)[1] = _temp_2_2;
-    (*res)[2] = _temp_3_3;
-    (*res)[3] = _temp_4_4;
-
+    (*res)[0] = _time - (0.5);
+    (*res)[1] = _time - (1);
+    (*res)[2] = _time - (0.7);
+    (*res)[3] = _time - (1.5);
+			
 ")})));
 end Algorithm13;
 
@@ -8231,6 +8225,8 @@ algorithm
 			automatic_tearing=false,
 			template="
 $C_ode_derivatives$
+$C_ode_initialization$
+$C_DAE_event_indicator_residuals$
 ",
 			generatedCode="
     model_ode_guards(jmi);
@@ -8238,14 +8234,152 @@ $C_ode_derivatives$
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _x_0 = pre_x_0;
-    _temp_2_2 = _time - 1;
     _temp_1_1 = _sw(0);
-    if (LOG_EXP_AND(LOG_EXP_NOT(_atInitial), LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)))) {
+    _x_0 = pre_x_0;
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
         _x_0 = 2;
     }
+
+    model_ode_guards(jmi);
+    _temp_1_1 = _sw(0);
+    pre_x_0 = 0.0;
+    _x_0 = pre_x_0;
+    pre_temp_1_1 = JMI_FALSE;
+
+    (*res)[0] = _time - (1);
+
+			
 ")})));
 end Algorithm14;
+
+model Algorithm15
+	Real x;
+initial equation
+	x = 1;
+algorithm
+	when time > 1 then
+		x := 2;
+	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm15",
+			description="C code generation of when statement and initial equation",
+			generate_ode=true,
+			equation_sorting=true,
+			inline_functions="none",
+			variability_propagation=false,
+			automatic_tearing=false,
+			template="
+$C_ode_derivatives$
+$C_ode_initialization$
+$C_DAE_event_indicator_residuals$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _temp_1_1 = _sw(0);
+    _x_0 = pre_x_0;
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
+        _x_0 = 2;
+    }
+
+    model_ode_guards(jmi);
+    _temp_1_1 = _sw(0);
+    _x_0 = 1;
+    pre_x_0 = jmi_divide_equation(jmi, (- _x_0),(- 1.0),\"(- x) / (- 1.0)\");
+    pre_temp_1_1 = JMI_FALSE;
+
+    (*res)[0] = _time - (1);
+
+			
+")})));
+end Algorithm15;
+
+model Algorithm16
+  Real x;
+  discrete Real a,b;
+equation
+  x = sin(time*10);
+algorithm
+  when {x >= 0.7} then
+    a := a + 1;
+  elsewhen {initial(), x < 0.7} then
+    a := a - 1;
+  elsewhen {x >= 0.7, x >= 0.8, x < 0.8, x < 0.7} then
+    b := b + 1;
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm16",
+			description="C code generation of elsewhen statement",
+			generate_ode=true,
+			equation_sorting=true,
+			inline_functions="none",
+			variability_propagation=false,
+			automatic_tearing=false,
+			template="
+$C_ode_derivatives$
+$C_ode_initialization$
+$C_DAE_event_indicator_residuals$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _temp_1_3 = _sw(0);
+    _temp_2_4 = _sw(1);
+    _temp_3_5 = _sw(2);
+    _temp_4_6 = _sw(3);
+    _temp_5_7 = _sw(4);
+    _temp_6_8 = _sw(5);
+    _a_1 = pre_a_1;
+    _b_2 = pre_b_2;
+    if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
+        _a_1 = _a_1 + 1;
+    } else if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4)))) {
+        _a_1 = _a_1 - 1;
+    } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
+        _b_2 = _b_2 + 1;
+    }
+
+    model_ode_guards(jmi);
+    _x_0 = sin(_time * AD_WRAP_LITERAL(10));
+    _temp_1_3 = _sw(0);
+    _temp_2_4 = _sw(1);
+    _temp_3_5 = _sw(2);
+    _temp_4_6 = _sw(3);
+    _temp_5_7 = _sw(4);
+    _temp_6_8 = _sw(5);
+    pre_a_1 = 0.0;
+    _a_1 = pre_a_1;
+    _a_1 = _a_1 - 1;
+    pre_b_2 = 0.0;
+    _b_2 = pre_b_2;
+    pre_temp_1_3 = JMI_FALSE;
+    pre_temp_2_4 = JMI_FALSE;
+    pre_temp_3_5 = JMI_FALSE;
+    pre_temp_4_6 = JMI_FALSE;
+    pre_temp_5_7 = JMI_FALSE;
+    pre_temp_6_8 = JMI_FALSE;
+
+    (*res)[0] = _x_0 - (0.7);
+    (*res)[1] = _x_0 - (0.7);
+    (*res)[2] = _x_0 - (0.7);
+    (*res)[3] = _x_0 - (0.8);
+    (*res)[4] = _x_0 - (0.8);
+    (*res)[5] = _x_0 - (0.7);
+
+			
+")})));
+end Algorithm16;
 
 model OutputTest1
 

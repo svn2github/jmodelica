@@ -84,10 +84,10 @@ aspect TransformCanonical {
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
-		    new enableWhenClauseRewrite(),
 		    new enableIfEquationElimination(),
 		    new extractEventGeneratingExps(),
 		    new transformAlgorithms(),
+		    new enableWhenClauseRewrite(),
 		    new propagateResidualPairs(),
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
@@ -1162,11 +1162,7 @@ aspect TransformCanonical {
 	public class FClass {
 		public class transformAlgorithms extends Transformation {
 			public void perform() {
-				for (FAlgorithm algo : algorithms())
-					for (FRelExp exp : algo.relExpInEquation())
-						exp.genIndicator();
-				flushAllRecursive();
-				AlgorithmTransformer.visit(algorithms(), new BasicAlgoTransformer());
+				AlgorithmTransformer.visit(algorithms(), new IndicatorAlgoTransformer());
 				flushAllRecursive();
 			}
 		}
@@ -1191,9 +1187,12 @@ aspect TransformCanonical {
 		
 		public void visit(FAlgorithm alg) {
 			blocks.add(new ArrayList<FStatement>());
-			transform(alg);
-			for (FStatement stmt : alg.getFStatements())
-				stmt.acceptTransform(this);
+			if (transform(alg))
+				for (FStatement stmt : alg.getFStatements())
+					stmt.acceptTransform(this);
+			else
+				for (FStatement stmt : alg.getFStatements())
+					add(stmt);
 			alg.setFStatementList(new List<FStatement>(blocks.remove(blocks.size()-1)));
 		}
 		
@@ -1233,7 +1232,11 @@ aspect TransformCanonical {
 			transform(stmt);
 		}
 		
-		public void transform(FAlgorithm alg) {}
+		/**
+		 * Returns true if other statements should be visited
+		 */
+		public boolean transform(FAlgorithm alg) {return true;}
+		
 		public void transform(FStatement stmt) {add(stmt);}
 	}
 	
@@ -1248,90 +1251,43 @@ aspect TransformCanonical {
 	/**
 	 * \brief Generates initial statements and indicator statements for relational expressions.
 	 */
-	public class BasicAlgoTransformer extends AlgorithmTransformer {
-		public void transform(FAlgorithm alg) {
-			/* Add initial statements for LHS variables */
-			Set<FVariable> defSet = alg.defSet();
-			for (FVariable fv : alg.referencedFVariablesInLHS())
-				if (!defSet.contains(fv))
-					add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
-			
-			/* Add indicator initial statements */
+	public class IndicatorAlgoTransformer extends AlgorithmTransformer {
+		public boolean transform(FAlgorithm alg) {
+			// Generate indicator ntas
 			for (FRelExp exp : alg.relExpInEquation())
-				if (exp.needsIndicatorInit())
+				if (exp.dependsOn(alg.referencedFVariablesInLHS()))
+					exp.genIndicator();
+			// Add indicator initial statements
+			for (FRelExp exp : alg.relExpInEquation())
+				if (exp.hasIndicator() && exp.needsIndicatorInit())
 					add(exp.indicatorInitStmt());
-			
+			return true;
 		}
 		
 		public void transform(FStatement stmt) {
-			/* Add indicator stmts */
-			for (FRelExp exp : stmt.relExpInStmt()) {
-				add(exp.indicatorStmt());
-			}
+			// Add indicator stmts
+			for (FRelExp exp : stmt.relExpInStmt())
+				if (exp.hasIndicator())
+					add(exp.indicatorStmt());
 			add(stmt);
 		}
 	}
+
+	syn boolean FExp.dependsOn(Set<FVariable> fvs) {
+		for (FVariable fv : lookupFVariablesInSet(findFIdUseExpsInTree()))
+			if (fvs.contains(fv))
+				return true;
+		return false;
+	}
+	
 	
 	inh boolean FRelExp.needsIndicatorInit();
-	eq FlatRoot.getChild().needsIndicatorInit()            = false;
+	eq Root.getChild().needsIndicatorInit()                = false;
 	eq FAlgorithm.getChild().needsIndicatorInit()          = false;
 	eq FForStmt.getForStmt().needsIndicatorInit()          = true;
 	eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
 	eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
 	eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
-	
-	/**
-	 * \brief Find LHS variables which are definetly assigned to before any use.
-	 */
-	public Set<FVariable> FAlgorithm.defSet() {
-		HashSet<FVariable> fvSet = new HashSet<FVariable>();
-		HashSet<FVariable> fvUse = new HashSet<FVariable>();
-		for (FStatement stmt : getFStatements()) {
-			stmt.defSet(fvSet,fvUse);
-		}
-		return fvSet;
-	}
-	public void FStatement.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-
-	}
-	public void FStatement.defSetBlock(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse, List<FStatement> l) {
-		HashSet<FVariable> fvSetBlock = new HashSet<FVariable>(fvSet);
-		for (FStatement stmt : l) {
-			stmt.defSet(fvSetBlock, fvUse);
-		}
-	}
-	public void FStatement.defSetAdd(HashSet<FVariable> s1, HashSet<FVariable> s2, Collection<FVariable> fvs) {
-		for (FVariable fv : fvs)
-			if (!s1.contains(fv))
-				s2.add(fv);
-	}
-	public void FAssignStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-		defSetAdd(fvSet, fvUse, getRight().referencedFVariablesInFExp());
-		defSetAdd(fvUse, fvSet, getLeft().referencedFVariablesInFExp());
-	}
-	public void FFunctionCallStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-		defSetAdd(fvSet, fvUse, getCall().referencedFVariablesInFExp());
-		for (FFunctionCallLeft left : getLefts())
-			if (left.hasFExp())
-				defSetAdd(fvUse, fvSet, left.getFExp().referencedFVariablesInFExp());
-	}
-	public void FIfStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-		for (FIfWhenClause clause : getFIfWhenClauses()) {
-			defSetAdd(fvSet, fvUse, clause.getTest().referencedFVariablesInFExp());
-			defSetBlock(fvSet, fvUse, clause.getFStatements());
-		}
-		defSetBlock(fvSet, fvUse, getElseStmts());
-	}
-	public void FWhileStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-		defSetAdd(fvSet, fvUse, getTest().referencedFVariablesInFExp());
-		defSetBlock(fvSet, fvUse, getWhileStmts());
-	}
-	public void FWhenStmt.defSet(HashSet<FVariable> fvSet, HashSet<FVariable> fvUse) {
-		for (FIfWhenClause clause : getFIfWhenClauses()) {
-			defSetAdd(fvSet, fvUse, clause.getTest().referencedFVariablesInFExp());
-			defSetBlock(fvSet, fvUse, clause.getFStatements());
-		}
-	}
 	
 	/**
 	 * \brief A reference to the FVariable set as indicator for a FRelExp
@@ -1352,13 +1308,13 @@ aspect TransformCanonical {
 	 * \brief Creates an initial assign statement for the indicator
 	 */
 	syn FStatement FRelExp.indicatorInitStmt() = 
-			new FAssignStmt((FIdUseExp) getIndicator().myFV().createUseExp(), new FIntegerLitExp(1));
+			new FAssignStmt(getIndicator().fullCopy(), new FIntegerLitExp(1));
 	
 	/**
 	 * \brief Creates an assign statement for the indicator
 	 */
 	syn FStatement FRelExp.indicatorStmt() =
-			new FAssignStmt((FIdUseExp) getIndicator().myFV().createUseExp(), new FSubExp(getLeft(), getRight()));
+			new FAssignStmt(getIndicator().fullCopy(), new FSubExp(getLeft(), getRight()));
 	
 	/**
 	 * \brief Replace one equation with another.
@@ -2225,13 +2181,21 @@ aspect MapWhenClauses{
 			}
 			
 			public void createGuardTemporaries() {
-				for (FExp e : guardExpInEquations())
-					if (e.inAlgorithm())
+				for (FExp e : guardExpInEquations()) {
+					if (!e.isInitialGuard() && e.inAlgorithm()) {
 						addFVariable(e.type().createFVariable(new FPublicVisibilityType(), 
 								new FQNameFull(e.tempVarName()), e.variability()));
+						
+						if (!e.dependsOn(e.myFAlgorithm().referencedFVariablesInLHS())) {
+							addFAbstractEquation(new FEquation(e.tempUseExp(), e.fullCopy()));
+						}
+					}
+				}
 			}
 		}
 	}
+	
+	boolean FStatement.isWhen = false;
 	
 	public void ASTNode.enableWhenClauseRewrite() {
 		for (ASTNode n : this)
@@ -2307,16 +2271,13 @@ aspect MapWhenClauses{
 		
 		for (FIfWhenClause clause : getFIfWhenClauses()) {	
 			FIfClause c = new FIfClause();
-			FExp g = clause.getTest().asGuard(stmts, false);
-			if (!g.isInitialGuard()) {
-				g = new FAndExp(new FNotExp(new FInitialExp()), g);
-			}
-			c.setTest(g);
-			c.setFStatementList(clause.getFStatements());
+			c.setTest(clause.getTest().asGuard(stmts, false));
+			c.setFStatementList(clause.getFStatements().fullCopy());
 			clauses.add(c);
 		}
 		
 		FIfStmt e = new FIfStmt();
+		e.isWhen = true;
 		e.setFIfWhenClauseList(new List<FIfWhenClause>(clauses));
 		
 		stmts.add(e);
@@ -2324,14 +2285,10 @@ aspect MapWhenClauses{
 		return new List<FStatement>(stmts);
 	}
 	
-	syn boolean FExp.isInitialGuard() = false;
-	eq FInitialExp.isInitialGuard() = true;
-	eq FOrExp.isInitialGuard() = getLeft().isInitialGuard() || getRight().isInitialGuard();
-	
 	public FExp FExp.asGuard(ArrayList l, boolean equation) {
 		if (equation)
 			l.add(new FEquation(tempUseExp(), fullCopy()));
-		else
+		else if(dependsOn(myFAlgorithm().referencedFVariablesInLHS()))
 			l.add(new FAssignStmt(tempUseExp(), fullCopy()));
 		return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
 	}
@@ -4926,8 +4883,10 @@ aspect EventGeneratingExps {
                 
                 // Equations
                 for (FEventGenExp exp: eventExps) {
-					addFVariable(exp.type().createFVariable(new FPublicVisibilityType(), 
-							new FQNameFull(exp.tempVarName()), exp.variability()));
+                	FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(), 
+							new FQNameFull(exp.tempVarName()), exp.variability());
+					addFVariable(fv);
+					addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
                 	if (exp.inAlgorithm()) {
                 		algs.add((FAlgorithm) exp.myFEquation());
                 		continue;

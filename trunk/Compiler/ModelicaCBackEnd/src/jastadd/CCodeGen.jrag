@@ -831,7 +831,26 @@ aspect CCodeGen {
 	
 	
 	public void FAlgorithm.prettyPrint_C(Printer p, PrintStream str, String indent) {
+		if (!inFunction()) {
+			// Print initialization stmts for variables which might not be set before use
+			Set<FVariable> defSet = defSet();
+			for (FVariable fv : referencedFVariablesInLHS()) {
+				if (!defSet.contains(fv)) {
+					FStatement.printAssignStmt_C(str, indent, fv.name_C(), fv.algorithmInit_C());
+				}
+			}
+		}
+		// Print the algorithm
 		p.print(getFStatements(), str, indent);
+	}
+	
+	public String FVariable.algorithmInit_C() {
+		if (isContinuous()) {
+			FExp e = startAttributeExp();
+			return (e == null) ? "0.0" : e.prettyPrint("");
+		} else {
+			return myPreVariable().name_C();
+		}
 	}
 	
 	public void FInitArrayStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
