@@ -253,7 +253,7 @@ fmiStatus fmi2_exit_initialization_mode(fmiComponent c) {
     if (((fmi2_me_t *)c)->fmu_type == fmiModelExchange) {
         ((fmi2_me_t *)c)->fmi_mode = eventMode;
     } else {
-        //TODO: what happens in the CS case?
+        /* TODO: what happens in the CS case? */
     }
     return fmiOK;
 }
@@ -525,7 +525,7 @@ fmiStatus fmi2_completed_integrator_step(fmiComponent c,
     }
     
     *enterEventMode = fmiFalse;
-    *terminateSimulation = fmiFalse; //TODO: Should be able to use the stopTime to determine if the simulations should stop?
+    *terminateSimulation = fmiFalse; /* TODO: Should be able to use the stopTime to determine if the simulations should stop? */
     return fmiOK;
 }
 
@@ -617,7 +617,6 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
                               fmiBoolean                  visible,
                               fmiBoolean                  loggingOn) {
     fmi2_me_t* fmi2_me;
-    jmi_t* jmi = 0;
     fmiInteger retval;
     char* tmpname;
     size_t inst_name_len;

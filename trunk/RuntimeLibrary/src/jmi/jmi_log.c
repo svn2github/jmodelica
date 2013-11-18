@@ -427,7 +427,6 @@ static void delete_log(log_t *log) {
 static BOOL _leave_frame_(log_t *log) {
     frame_t *top = topof(log);
     frame_t *newtop;
-    jmi_callbacks_t* cb = log->jmi_callbacks;
 
     log->next_name = NULL;
     log->leafdim = -1;
@@ -490,7 +489,6 @@ static void close_leaf(log_t *log) {
 /** \brief Enter a frame for a node. */
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
                      const char *name, const char *name_end) {
-    jmi_callbacks_t* cb = log->jmi_callbacks;
     close_leaf(log);
     log->next_name = NULL;
 
@@ -616,10 +614,14 @@ static node_t enter_value_(log_t *log, node_t node, category_t c,
     return enter_(log, c, "value", 0, name, name_end);
 }
 /* could be exported */
+/* Un-used function */
+/*
 static node_t jmi_log_enter_value_(log_t *log, node_t node, category_t c, 
                                    const char *name) {
     return enter_value_(log, node, c, name, NULL);
 }
+*/
+
 node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c, 
                              const char *name) {
     if (!ok_label_parent(log, node)) { name = NULL; }

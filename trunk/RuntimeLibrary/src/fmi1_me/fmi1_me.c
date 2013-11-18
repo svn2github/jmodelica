@@ -49,7 +49,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
-    jmi_t* jmi = 0;
     fmiInteger retval;
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
@@ -335,10 +334,10 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     int n_outputs;
     int* output_vrefs;
 
-    clock_t c0, c1, d0, d1;
+    clock_t /*c0, c1,*/ d0, d1;
     jmi_real_t setElementTime;
 
-    c0 = clock();
+    /* c0 = clock(); */
 
     setElementTime = 0;
 
@@ -478,7 +477,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
 
     fmi1_me -> fmi_functions.freeMemory(jac);
 
-    c1 = clock();
+    /* c1 = clock(); */
     /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     /*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
     return fmiOK;
@@ -607,8 +606,10 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int index;
     int output_off = 0;
     
+    /*
     int passed = 0;
     int failed = 0;
+    */
     
 /**    fmiReal rel_tol;
     fmiReal abs_tol; */
@@ -631,9 +632,9 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int* output_vrefs_real;
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
-    clock_t c0, c1;
+    /* clock_t c0, c1; */
 
-    c0 = clock();
+    /* c0 = clock(); */
     n_outputs = jmi->n_outputs;
     n_outputs_real = n_outputs;
     
@@ -690,7 +691,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
                 (*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
             }
         }
-        c1 = clock();
+        /* c1 = clock(); */
 
         /*printf("Jac A eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
 
@@ -801,8 +802,10 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     free(jac2);
     */
     
+    /*
     c1 = clock();
-
+    */
+    
     /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     return fmiOK;
 }

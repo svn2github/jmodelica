@@ -565,7 +565,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             xxd[index] = 0;
-            solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; /* distance to the bound */
+            /* distance to the bound */
+            solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; */
         }
         else
             max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
@@ -771,7 +772,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     }
     if(solver->use_steepest_descent_flag) {
         realtype **jac = solver->J->cols;
-        realtype*  s = N_VGetArrayPointer(solver->kin_f_scale);
         int N = block->n;
         int j;
         

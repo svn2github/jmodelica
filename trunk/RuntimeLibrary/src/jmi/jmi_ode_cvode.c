@@ -83,15 +83,18 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
     int flag = 0,retval = 0;
     jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
     jmi_ode_problem_t* problem = solver -> ode_problem;
-    realtype tret,*y;
+    realtype tret/*,*y*/;
     realtype time;
     char step_event = 0; /* boolean step_event = FALSE */
     
     if (initialize==JMI_TRUE){
+        /* statements unused*/
+        /*
         if (problem->n_real_x > 0) {
             y = NV_DATA_S(integrator->y_work);
             y = problem->states;
         }
+        */
         time = problem->time;
         flag = CVodeReInit(integrator->cvode_mem, time, integrator->y_work);
         if (flag<0){

@@ -646,7 +646,6 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
 }
 
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
-    jmi_value_reference i;
     int retval;
 
     if (jmi->recomputeVariables == 1) {
@@ -666,7 +665,7 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
     return 0;
 }
 
-//TODO: is not implemented.
+/* TODO: is not implemented. */
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx) {
     int i;
     
@@ -680,7 +679,6 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
-    jmi_int_t nGuards;
     jmi_int_t nF;
     jmi_int_t nR;
     jmi_int_t retval;
@@ -693,7 +691,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_log_node_t top_node;
 
     /* Allocate memory */
-    nGuards = jmi->n_guards;
     jmi_dae_get_sizes(jmi, &nF, &nR);
     event_indicators = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
     sw_temp = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));

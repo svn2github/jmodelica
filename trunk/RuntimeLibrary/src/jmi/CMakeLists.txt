@@ -86,15 +86,18 @@ set(STANDARDTABLESSources
 )
 #Build jmi library
 add_library(jmi STATIC ${JMISources})
+set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
 
 #Build ModelicaExternalC library
 include_directories(${MSLCSOURCES})
 include_directories(${MSLCSOURCES}/zlib)
 add_library(ModelicaExternalC STATIC ${MODELICAEXTERNALCSources})
+set_target_properties(ModelicaExternalC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic")
 
 #Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
 add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
+set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
 
 #Install the libraries
 install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
