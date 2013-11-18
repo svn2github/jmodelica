@@ -637,10 +637,6 @@ WITH_MINGW_TRUE
 ECLIPSE_HOME
 WITH_ECLIPSE_FALSE
 WITH_ECLIPSE_TRUE
-WITH_TABLES
-TABLES_HOME
-WITH_TABLES_FALSE
-WITH_TABLES_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
@@ -792,7 +788,6 @@ with_ipopt
 with_casadi
 with_sundials
 with_superlu
-with_tables
 with_eclipse
 with_mingw
 with_cppad
@@ -1453,7 +1448,6 @@ Optional Packages:
                           [default=check]
   --with-sundials         SUNDIALS installation directory [default=check]
   --with-superlu          SuperLU installation directory [default=check]
-  --with-tables           Tables installation directory [default=check]
   --with-eclipse          Eclipse installation directory [default=no]
   --with-mingw            MinGW installation directory. [default=no]
   --with-cppad            CppAD installation directory [default=no]
@@ -18910,55 +18904,6 @@ fi
 SUPERLU_HOME=$superlu
 
 
-# Check whether --with-tables was given.
-if test "${with_tables+set}" = set; then :
-  withval=$with_tables; tables=$withval
-else
-  with_tables=no
-fi
-
-
-if test "x$with_tables" = xno; then :
-  tables="ThirdParty/Tables/"
-fi
-
-if test "x$with_tables" = xno; then :
-  with_tables=automatic
-fi
-
-if test "x$with_tables" = xno; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Tables installation not specified." >&5
-$as_echo "Tables installation not specified." >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Tables installation specified." >&5
-$as_echo "Tables installation specified." >&6; }
-fi
-
- if test "x$with_tables" != xno; then
-  WITH_TABLES_TRUE=
-  WITH_TABLES_FALSE='#'
-else
-  WITH_TABLES_TRUE='#'
-  WITH_TABLES_FALSE=
-fi
-
-
-
-
-
-if test "x$with_tables" = xautomatic; then :
-  TABLES_HOME=`cd $srcdir; pwd`/$tables
-else
-  TABLES_HOME=$tables
-fi
-
-if test "x$with_tables" != xno; then :
-  WITH_TABLES="true"
-else
-  WITH_TABLES="false"
-fi
-
-
 # Check whether --with-eclipse was given.
 if test "${with_eclipse+set}" = set; then :
   withval=$with_eclipse; eclipse=$withval
@@ -19733,10 +19678,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_SUPERLU_TRUE}" && test -z "${WITH_SUPERLU_FALSE}"; then
   as_fn_error $? "conditional \"WITH_SUPERLU\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${WITH_TABLES_TRUE}" && test -z "${WITH_TABLES_FALSE}"; then
-  as_fn_error $? "conditional \"WITH_TABLES\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${WITH_ECLIPSE_TRUE}" && test -z "${WITH_ECLIPSE_FALSE}"; then

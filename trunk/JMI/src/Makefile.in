@@ -111,33 +111,24 @@ libModelicaExternalC_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(libModelicaExternalC_la_CFLAGS) $(CFLAGS) \
 	$(libModelicaExternalC_la_LDFLAGS) $(LDFLAGS) -o $@
 libModelicaStandardTables_la_LIBADD =
-am__libModelicaStandardTables_la_SOURCES_DIST =  \
-	$(MSLCSOURCES)/ModelicaStandardTables.c \
-	$(MSLCSOURCES)/ModelicaMatIO.c $(MSLCSOURCES)/zlib/adler32.c \
-	$(MSLCSOURCES)/zlib/compress.c $(MSLCSOURCES)/zlib/crc32.c \
-	$(MSLCSOURCES)/zlib/deflate.c $(MSLCSOURCES)/zlib/gzclose.c \
-	$(MSLCSOURCES)/zlib/gzlib.c $(MSLCSOURCES)/zlib/gzread.c \
-	$(MSLCSOURCES)/zlib/gzwrite.c $(MSLCSOURCES)/zlib/infback.c \
-	$(MSLCSOURCES)/zlib/inffast.c $(MSLCSOURCES)/zlib/inflate.c \
-	$(MSLCSOURCES)/zlib/inftrees.c $(MSLCSOURCES)/zlib/trees.c \
-	$(MSLCSOURCES)/zlib/uncompr.c $(MSLCSOURCES)/zlib/zutil.c
-@WITH_TABLES_TRUE@am_libModelicaStandardTables_la_OBJECTS = libModelicaStandardTables_la-ModelicaStandardTables.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-ModelicaMatIO.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-adler32.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-compress.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-crc32.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-deflate.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-gzclose.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-gzlib.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-gzread.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-gzwrite.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-infback.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-inffast.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-inflate.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-inftrees.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-trees.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-uncompr.lo \
-@WITH_TABLES_TRUE@	libModelicaStandardTables_la-zutil.lo
+am_libModelicaStandardTables_la_OBJECTS =  \
+	libModelicaStandardTables_la-ModelicaStandardTables.lo \
+	libModelicaStandardTables_la-ModelicaMatIO.lo \
+	libModelicaStandardTables_la-adler32.lo \
+	libModelicaStandardTables_la-compress.lo \
+	libModelicaStandardTables_la-crc32.lo \
+	libModelicaStandardTables_la-deflate.lo \
+	libModelicaStandardTables_la-gzclose.lo \
+	libModelicaStandardTables_la-gzlib.lo \
+	libModelicaStandardTables_la-gzread.lo \
+	libModelicaStandardTables_la-gzwrite.lo \
+	libModelicaStandardTables_la-infback.lo \
+	libModelicaStandardTables_la-inffast.lo \
+	libModelicaStandardTables_la-inflate.lo \
+	libModelicaStandardTables_la-inftrees.lo \
+	libModelicaStandardTables_la-trees.lo \
+	libModelicaStandardTables_la-uncompr.lo \
+	libModelicaStandardTables_la-zutil.lo
 libModelicaStandardTables_la_OBJECTS =  \
 	$(am_libModelicaStandardTables_la_OBJECTS)
 libModelicaStandardTables_la_LINK = $(LIBTOOL) --tag=CC \
@@ -262,9 +253,9 @@ SOURCES = $(libModelicaExternalC_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
 DIST_SOURCES = $(libModelicaExternalC_la_SOURCES) \
-	$(am__libModelicaStandardTables_la_SOURCES_DIST) \
-	$(libfmi_la_SOURCES) $(libfmi_cs_la_SOURCES) \
-	$(libjmi_la_SOURCES) $(libjmi_algorithm_la_SOURCES) \
+	$(libModelicaStandardTables_la_SOURCES) $(libfmi_la_SOURCES) \
+	$(libfmi_cs_la_SOURCES) $(libjmi_la_SOURCES) \
+	$(libjmi_algorithm_la_SOURCES) \
 	$(libjmi_algorithm_cppad_la_SOURCES) \
 	$(libjmi_cppad_la_SOURCES) $(libjmi_solver_la_SOURCES) \
 	$(libjmi_solver_cppad_la_SOURCES)
@@ -367,12 +358,10 @@ SHELL = @SHELL@
 STRIP = @STRIP@
 SUNDIALS_HOME = @SUNDIALS_HOME@
 SUPERLU_HOME = @SUPERLU_HOME@
-TABLES_HOME = @TABLES_HOME@
 VERSION = @VERSION@
 WITH_CASADI = @WITH_CASADI@
 WITH_CPPAD = @WITH_CPPAD@
 WITH_SUNDIALS = @WITH_SUNDIALS@
-WITH_TABLES = @WITH_TABLES@
 _JAVA_HOME_ = @_JAVA_HOME_@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -531,30 +520,22 @@ libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
 libModelicaExternalC_la_LDFLAGS = -no-undefined -static-libtool-libs
-@WITH_TABLES_TRUE@libModelicaStandardTables_la_SOURCES =  \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/ModelicaStandardTables.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/ModelicaMatIO.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/adler32.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/compress.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/crc32.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/deflate.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/gzclose.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/gzlib.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/gzread.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/gzwrite.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/infback.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/inffast.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/inflate.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/inftrees.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/trees.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/uncompr.c \
-@WITH_TABLES_TRUE@	$(MSLCSOURCES)/zlib/zutil.c
-@WITH_TABLES_TRUE@libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -I$(MSLCSOURCES)
+libModelicaStandardTables_la_SOURCES =  \
+	$(MSLCSOURCES)/ModelicaStandardTables.c \
+	$(MSLCSOURCES)/ModelicaMatIO.c $(MSLCSOURCES)/zlib/adler32.c \
+	$(MSLCSOURCES)/zlib/compress.c $(MSLCSOURCES)/zlib/crc32.c \
+	$(MSLCSOURCES)/zlib/deflate.c $(MSLCSOURCES)/zlib/gzclose.c \
+	$(MSLCSOURCES)/zlib/gzlib.c $(MSLCSOURCES)/zlib/gzread.c \
+	$(MSLCSOURCES)/zlib/gzwrite.c $(MSLCSOURCES)/zlib/infback.c \
+	$(MSLCSOURCES)/zlib/inffast.c $(MSLCSOURCES)/zlib/inflate.c \
+	$(MSLCSOURCES)/zlib/inftrees.c $(MSLCSOURCES)/zlib/trees.c \
+	$(MSLCSOURCES)/zlib/uncompr.c $(MSLCSOURCES)/zlib/zutil.c
+libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall -g -I$(MSLCSOURCES)
 
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
-@WITH_TABLES_TRUE@libModelicaStandardTables_la_LDFLAGS = -no-undefined -static-libtool-libs
+libModelicaStandardTables_la_LDFLAGS = -no-undefined -static-libtool-libs
 libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_opt_coll_ipopt.cpp \
                            jmi_opt_coll_TNLP.cpp \
