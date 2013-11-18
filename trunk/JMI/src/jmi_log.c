@@ -690,10 +690,14 @@ static node_t enter_value_(log_t *log, node_t node, category_t c,
     return enter_(log, c, "value", 0, name, name_end);
 }
 /* could be exported */
+/* Currently unused function */
+/*
 static node_t jmi_log_enter_value_(log_t *log, node_t node, category_t c, 
                                    const char *name) {
     return enter_value_(log, node, c, name, NULL);
 }
+*/
+
 node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c, 
                              const char *name) {
     if (!ok_label_parent(log, node)) { name = NULL; }

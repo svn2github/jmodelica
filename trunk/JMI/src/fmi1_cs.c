@@ -175,7 +175,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
 void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...){
     void *tmp;
     fmi1_cs_t* fmi1_cs;
-    int verification, length;
+    int verification;
     va_list args;
     char buffer[50000];
     
@@ -183,7 +183,7 @@ void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status,
 
     va_start(args, message);
     /* vsnprintf(buffer, sizeof buffer, message, args); */ /* Cannot be used due to C89 */
-    length = vsprintf (buffer,message, args);
+    vsprintf (buffer, message, args);
     va_end(args);
   
     
@@ -208,7 +208,6 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     char* tmp_name_encoded;
     size_t inst_name_len;
     size_t guid_len;
-    char buffer[400];
     fmiInteger i;
     
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));

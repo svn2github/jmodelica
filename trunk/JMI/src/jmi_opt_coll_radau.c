@@ -329,9 +329,10 @@ static int dh_blocking_eq_offs(jmi_opt_coll_t *jmi_opt_coll, int i) {
 
 
 /* Forward declarations */
-static void print_problem_stats(jmi_opt_coll_t *jmi_opt_coll);
+/* Debug code */
+/* static void print_problem_stats(jmi_opt_coll_t *jmi_opt_coll); */
 
-static void print_lp_pols(jmi_opt_coll_t *jmi_opt_coll);
+/* static void print_lp_pols(jmi_opt_coll_t *jmi_opt_coll); */
 
 /* Copy optimization parameters */
 static void lp_radau_copy_p(jmi_opt_coll_t *jmi_opt_coll) {
@@ -873,7 +874,6 @@ static int lp_radau_h(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *res) {
 
             /* Compute element length, taking into account if the initial or
              terminal time, or the element lengths are free. */
-            jmi_real_t el_length;
             if (jmi->opt->final_time_free == 0 &&
                     jmi->opt->start_time_free == 0 &&
                     jmi_opt_coll->hs_free ==0) {
@@ -1108,7 +1108,6 @@ static int lp_radau_dh(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac) {
 
             /* Compute element length, taking into account if the initial or
              terminal time, or the element lengths are free. */
-            jmi_real_t el_length;
             if (jmi->opt->final_time_free == 0 &&
                     jmi->opt->start_time_free == 0 &&
                     jmi_opt_coll->hs_free ==0) {
@@ -1162,7 +1161,6 @@ static int lp_radau_dh(jmi_opt_coll_t *jmi_opt_coll, jmi_real_t *jac) {
     for (i=0;i<jmi->n_tp;i++) {
         /* Compute element length, taking into account if the initial or
          terminal time, or the element lengths are free. */
-        jmi_real_t el_length;
         if (jmi->opt->final_time_free == 0 &&
                 jmi->opt->start_time_free == 0 &&
                 jmi_opt_coll->hs_free ==0) {
@@ -3456,7 +3454,8 @@ int jmi_opt_coll_radau_delete(jmi_opt_coll_t *jmi_opt_coll) {
 
 
 
-
+/* Debug function */
+/*
 static void print_problem_stats(jmi_opt_coll_t *jmi_opt_coll) {
     jmi_opt_coll_radau_t *opt = (jmi_opt_coll_radau_t*)jmi_opt_coll;
 
@@ -3498,14 +3497,16 @@ static void print_problem_stats(jmi_opt_coll_t *jmi_opt_coll) {
     }
 
 }
+*/
 
+/* Debug code */
+/*
 static void print_lp_pols(jmi_opt_coll_t *jmi_opt_coll) {
 
     int i, j;
 
     jmi_opt_coll_radau_t *opt = (jmi_opt_coll_radau_t*)jmi_opt_coll;
 
-    /* Print Lagrange polynomials */
     printf("cp = {");
     for (i=0;i<opt->n_cp;i++) {
         printf("%4.16e",opt->cp[i]);
@@ -3630,9 +3631,8 @@ static void print_lp_pols(jmi_opt_coll_t *jmi_opt_coll) {
         }
     }
     printf("}\n\n");
-
-
 }
+*/
 
 jmi_real_t jmi_opt_coll_radau_eval_pol(jmi_real_t tau, int n, jmi_real_t* pol, int k) {
     int i;

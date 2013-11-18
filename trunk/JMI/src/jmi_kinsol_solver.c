@@ -161,7 +161,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
     struct KINMemRec * kin_mem = solver->kin_mem;    
     int i, j, ret = 0;
     realtype curtime = *(jmi_get_t(block->jmi));
-    realtype *jac_fd;
+    realtype *jac_fd = NULL;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
@@ -287,7 +287,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_residual_t * bloc
 }
 
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-    jmi_log_category_t category;
+    jmi_log_category_t category = logInfo;
     jmi_block_residual_t *block = eh_data;
     jmi_t *jmi = block->jmi;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -566,7 +566,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             xxd[index] = 0;
-            solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; /* distance to the bound */
+             /* distance to the bound */
+            solver->active_bounds[index] = pbi; /*  (kind == 1)? pbi:-pbi ; */
         }
         else
             max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
@@ -772,7 +773,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     }
     if(solver->use_steepest_descent_flag) {
         realtype **jac = solver->J->cols;
-        realtype*  s = N_VGetArrayPointer(solver->kin_f_scale);
+        /*realtype*  s = N_VGetArrayPointer(solver->kin_f_scale);*/
         int N = block->n;
         int j;
         

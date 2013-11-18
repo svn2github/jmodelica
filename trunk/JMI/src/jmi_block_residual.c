@@ -122,7 +122,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 
 
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
-    int ef,retval;
+    int ef;
     clock_t c0,c1; /*timers*/
     jmi_t* jmi = block->jmi;
     jmi_real_t* switches;
@@ -285,7 +285,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 
                 jmi_write_back_to_z_val(jmi); 
                 
-                retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+                /* TODO: Check return value of jmi_evaluate_switches */
+                jmi_evaluate_switches(jmi,switches,mode_sw);
                 jmi_write_back_to_z(jmi);
                 
                 ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -336,7 +337,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             if (ef!=0){ jmi_log_leave(jmi->log, iter_node); break; }
             jmi_write_back_to_z_val(jmi);
             
-            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+            /* TODO: Check return value of jmi_evaluate_switches */
+            jmi_evaluate_switches(jmi,switches,mode_sw);
             jmi_write_back_to_z(jmi);
         
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -402,7 +404,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             
             memcpy(x_new,block->x,block->n*sizeof(jmi_real_t));
             
-            retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+            /* TODO: Check return value of jmi_evaluate_switches */
+            jmi_evaluate_switches(jmi,switches,mode_sw);
             jmi_write_back_to_z(jmi);
             
             block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -418,12 +421,14 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
                 iter += 1;
                 
                 h = jmi_compute_minimal_step(block, x, x_new, &sw_old[(iter-1)*nbr_sw], &bool_old[(iter-1)*nbr_bool],nbr_sw, 1e-4);
-                retval = jmi_compute_reduced_step(h,x_new,x,x,block->n);
+                /* TODO: Check return value of jmi_compute_reduced_step */
+                jmi_compute_reduced_step(h,x_new,x,x,block->n);
                 
                 block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
                 jmi_write_back_to_z_val(jmi);
                 
-                retval = jmi_evaluate_switches(jmi,switches,mode_sw);
+                /* TODO: Check return value of jmi_evaluate_switches */
+                jmi_evaluate_switches(jmi,switches,mode_sw);
                 jmi_write_back_to_z(jmi);
             
                 block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
@@ -526,26 +531,27 @@ jmi_real_t jmi_compute_minimal_step(jmi_block_residual_t* block, jmi_real_t* x, 
     jmi_real_t b = 1.0;
     jmi_real_t h;
     jmi_real_t *sw;
-    jmi_real_t *booleans;
+    /*jmi_real_t *booleans;*/
     jmi_real_t *x_temp;
     jmi_t* jmi = block->jmi;
-    jmi_int_t retval=0;
     
     sw = (jmi_real_t*)calloc(nR, sizeof(jmi_real_t));
     x_temp = (jmi_real_t*)calloc(block->n, sizeof(jmi_real_t));
     memcpy(sw,sw_init,nR*sizeof(jmi_real_t));
-    booleans = jmi_get_boolean_d(jmi);
+    /*booleans = jmi_get_boolean_d(jmi);*/
     
     while (1){
         h = (b-a)/2.0;
         
-        retval = jmi_compute_reduced_step(a+h,x_new,x,x_temp,block->n);
+        /* TODO: Check return value of jmi_compute_reduced_step */
+        jmi_compute_reduced_step(a+h,x_new,x,x_temp,block->n);
         
         /*jmi_write_block_x(block,x);*/
         block->F(jmi,x_temp,NULL,JMI_BLOCK_WRITE_BACK);
         jmi_write_back_to_z_val(jmi);
         
-        retval = jmi_evaluate_switches(jmi,sw,1);
+        /* TODO: Check return value of jmi_evaluate_switches */
+        jmi_evaluate_switches(jmi,sw,1);
         jmi_write_back_to_z(jmi);
         
         /*
