@@ -876,22 +876,6 @@ class Test_FMI_Compile:
         compile_fmu('RLC_Circuit', os.path.join(path_to_mofiles,'RLC_Circuit.mo'),
             compiler_options = co)
 
-class TestDiscreteVariableRefs(object):
-    """
-    Test that variable references for discrete variables are computed correctly
-    """
-
-    def __init__(self):
-        self._fpath = os.path.join(get_files_path(), 'Modelica', "DiscreteVar.mo")
-        self._cpath = "DiscreteVar"
-
-    def setUp(self):
-        """
-        Sets up the test class.
-        """
-        self.fmu_name = compile_fmu(self._cpath, self._fpath,compiler_options={'compliance_as_warning':True, 'generate_runtime_option_parameters':False})
-        self.model = FMUModelME1(self.fmu_name)
-
 class TestDependentParameters(object):
     """
     Test that dependent variables are recomputed when an independent varaible is set.
