@@ -42,6 +42,7 @@
 
 #include <time.h>
 #include "jmi.h"
+#include "jmi_log.h"
 
 int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_real_pd, int n_integer_ci, int n_integer_cd,
@@ -230,6 +231,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->atEvent = JMI_FALSE;
     jmi_->atInitial = JMI_FALSE;
 
+    jmi_->log = jmi_log_init(jmi_);
+    
     jmi_->terminate = 0;
 
     return 0;
