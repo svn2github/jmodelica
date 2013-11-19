@@ -92,7 +92,7 @@ aspect TransformCanonical {
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
 		    aliasElimination,
-		    addFDerivativeVariables,
+		    new addFDerivativeVariablesPreBLT(),
 		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
 		    new variabilityPropagationIfSet(),
@@ -1375,9 +1375,13 @@ aspect TransformCanonical {
          * differentiate variable.
          */
         public class addFDerivativeVariables extends Transformation {
+            protected Set<FVariable> variablesToVisit() {
+                return new LinkedHashSet<FVariable>(differentiatedRealVariablesSet());
+            }
+            
             public void perform() {
                 ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
-                for (FVariable fv : differentiatedRealVariables()) {
+                for (FVariable fv : variablesToVisit()) {
                     FDerivativeVariable fdv = new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
                             fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
                     fdv.setMeIntegrated(fv);
@@ -1387,11 +1391,30 @@ aspect TransformCanonical {
                 for (FVariable fv : l) {
                     addFVariable(fv);
                 }
-//              flush();
                 root().flushAllRecursive();
             }
         }
-        public addFDerivativeVariables addFDerivativeVariables = new addFDerivativeVariables();
+        /**
+         * Add derivative variables to the list of FVariables.
+         * Derivative variable is added for a variable of either of the following is true:
+         *  - Occurres differentiated
+         *  - Have StateSelect always or prefer
+         */
+        public class addFDerivativeVariablesPreBLT extends addFDerivativeVariables {
+            @Override
+            protected Set<FVariable> variablesToVisit() {
+                Set<FVariable> fvsToVisit = super.variablesToVisit();
+                for (FVariable fv : variables()) {
+                    if (!fv.isReal())
+                        continue;
+                    FRealVariable.StateSelect ss = ((FRealVariable)fv).stateSelectAttribute();
+                    if (ss != FRealVariable.StateSelect.ALWAYS && ss != FRealVariable.StateSelect.PREFER)
+                        continue;
+                    fvsToVisit.add(fv);
+                }
+                return fvsToVisit;
+            }
+        }
     }
 
 	public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {

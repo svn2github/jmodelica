@@ -100,7 +100,7 @@ aspect IndexReduction {
 
             aliasElimination.apply();
             // Add derivative variables
-            addFDerivativeVariables.apply();
+            new addFDerivativeVariables().apply();
 
             root().flushAllRecursive();
 
