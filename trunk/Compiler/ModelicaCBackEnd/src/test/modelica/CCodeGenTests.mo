@@ -8381,6 +8381,46 @@ $C_DAE_event_indicator_residuals$
 ")})));
 end Algorithm16;
 
+model Algorithm17
+	parameter Real x(fixed=false);
+	parameter Real y(fixed=false) = 1;
+	parameter Boolean b = false;
+initial algorithm
+	if b then
+		x := 2;
+	end if;
+initial algorithm
+	if b then
+		y := 2;
+	end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="Algorithm17",
+			description="C code generation for initial statement of non-fixed parameter",
+			generate_ode=true,
+			equation_sorting=true,
+			inline_functions="none",
+			variability_propagation=false,
+			automatic_tearing=false,
+			template="
+$C_ode_initialization$
+",
+			generatedCode="
+    model_ode_guards(jmi);
+    _x_0 = 0.0;
+    if (_b_2) {
+        _x_0 = 2;
+    }
+    _y_1 = 1;
+    if (_b_2) {
+        _y_1 = 2;
+    }
+
+			
+")})));
+end Algorithm17;
+
 model OutputTest1
 
   output Real x_1(start=0.951858508368);

@@ -845,11 +845,13 @@ aspect CCodeGen {
 	}
 	
 	public String FVariable.algorithmInit_C() {
-		if (isContinuous()) {
+		if (isDiscrete()) {
+			return myPreVariable().name_C();
+		} else if (isParameter() && hasBindingExp()) {
+			return getBindingExp().prettyPrint_C("");
+		} else {
 			FExp e = startAttributeExp();
 			return (e == null) ? "0.0" : e.prettyPrint("");
-		} else {
-			return myPreVariable().name_C();
 		}
 	}
 	
