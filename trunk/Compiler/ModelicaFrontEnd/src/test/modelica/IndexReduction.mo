@@ -2620,4 +2620,36 @@ end IndexReduction.IndexReduction56;
 ")})));
 end IndexReduction56;
 
+model IndexReduction57
+    Real a_s;
+    Real a_v(stateSelect = StateSelect.always);
+    Real a_a;
+    Real b_s;
+    Real b_v;
+    Real v1;
+equation
+    b_s = a_s - 3.14;
+    a_v = der(a_s);
+    a_a = der(a_v);
+    b_v = b_s;
+    v1 = 42 * (b_s - 3.14);
+    21 = v1 * b_v;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="IndexReduction57",
+            description="Test warnings for state select.",
+            errorMessage="
+2 warnings found:
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"b_v\" is missing start value!
+
+Warning: in file '...':
+At line 0, column 0:
+  a_v have StateSelect always and in not used as state
+")})));
+end IndexReduction57;
+
 end IndexReduction;

@@ -108,9 +108,18 @@ aspect IndexReduction {
             log.info(aliasManager.printAliasSets());
 
             log.info("States:");
+            Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
+            for (FVariable fv : variables())
+                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+                    stateSelectAlwaysVars.add(fv);
             for (FVariable fv : differentiatedRealVariables()) {
+                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
+                    fv.warning(fv.name() + " have StateSelect never and is used as state");
+                stateSelectAlwaysVars.remove(fv);
                 log.info(new PrettyPrintDelegate(fv, "  "));
             }
+            for (FVariable fv : stateSelectAlwaysVars)
+                fv.warning(fv.name() + " have StateSelect always and in not used as state");
             
             // Calculate new graph
             g = new BiPGraph();
@@ -520,7 +529,8 @@ aspect IndexReduction {
         return weight;
     }
     
-    syn StateSelect FRealVariable.stateSelectAttribute() = StateSelect.values()[stateSelectAttributeInt() - 1];
+    syn FRealVariable.StateSelect FVariable.stateSelectAttribute() = FRealVariable.StateSelect.DEFAULT;
+    eq FRealVariable.stateSelectAttribute() = StateSelect.values()[stateSelectAttributeInt() - 1];
     
     public class FRealVariable {
         public enum StateSelect {
