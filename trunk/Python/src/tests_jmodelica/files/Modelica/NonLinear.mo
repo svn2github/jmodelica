@@ -655,7 +655,7 @@ package NonLinear
         Icon(coordinateSystem(preserveAspectRatio=true, extent={{-200,-100},{200,
               100}}), graphics));
   end CLPANL;
-  annotation (uses(Modelica(version="3.2")));
+
   model TwoSystems
     CLPANL cLPANL
       annotation (Placement(transformation(extent={{-80,-4},{-40,16}})));

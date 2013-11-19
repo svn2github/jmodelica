@@ -235,11 +235,13 @@ aspect ContentCheck {
 				error("All branches in when equation must assign the same variables");
 		}
 	}
-	
-	public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
-		if (getName().hasFArraySubscripts())
-			error("Modifiers of specific array elements are not allowed");
-	}
+    
+    public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
+        if (getName().hasFArraySubscripts())
+            error("Modifiers of specific array elements are not allowed");
+    }
+    
+    public void InstComponentRedeclare.contentCheck(ErrorCheckType checkType) {}
 	
 	public static final String FIfEquation.UNBALANCED_ERROR = 
 		"All branches in if equation with non-parameter tests must have the same number of equations";

@@ -75,10 +75,11 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
+                                          new Opt(),
                                           getEndDecl());
             
             if (hasAnnotation())
-            	fc.addAnnotation(getAnnotation());
+            	fc.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
             
             if (hasRedeclare())
@@ -127,6 +128,7 @@
                                           new List(),
                                           new List(),
                                           new Opt(),
+                                          new Opt(),
                                           getEndDecl());
             
             ClassAccess ca = new ClassAccess(getName().getID());
@@ -134,7 +136,7 @@
             		new PublicVisibilityType(), ca, getClassModificationOpt(), new Opt());
             ec.addSuper(iec);
             if (hasAnnotation())
-            	ec.addAnnotation(getAnnotation());
+            	ec.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(ec);
             if (!hasRedeclare())
             	ec.setRedeclare(copyLocationTo(new Redeclare()));
@@ -167,7 +169,7 @@
         	ecd.setReplaceableOpt(getReplaceableOpt());
         	ecd.setStringCommentOpt(getComment().getStringCommentOpt());
         	if (getComment().hasAnnotation())
-        		ecd.addAnnotation(getComment().getAnnotation());
+        		ecd.setAnnotation(getComment().getAnnotation());
         	ecd.setEndDecl(new EndDecl(getName().getID()));
         	ecd.setSymbol(getSymbol());
         	
@@ -207,24 +209,19 @@
         for (Clause cl : getClauses()) 
 			cl.addToFullClassDecl(fcd);
         
-        if (hasExternalClause()) {
-        	ExternalClause ext = getExternalClause();
-        	fcd.setExternalClause(ext);
-        	if (ext.hasAnnotation2()) {
-        		ext.originalAnnotation2 = ext.getAnnotation2();
-        		fcd.addAnnotation(ext.getAnnotation2());
-        		ext.setAnnotation2Opt(new Opt());
-        	}
-        }
+        if (hasExternalClause()) 
+        	fcd.setExternalClause(getExternalClause());
     }
-    
-    // For preserved formatting.
-    protected Annotation ExternalClause.originalAnnotation2 = null;
     
     public void Clause.addToFullClassDecl(FullClassDecl fcd) {}
     
     public void ComponentDecl.addToFullClassDecl(FullClassDecl fcd) {
-    	fcd.addComponentDecl(this);
+        if (hasRedeclare()) {
+            ComponentAccess ca = new ComponentAccess(getName().getID(), getVarArraySubscriptsOpt().fullCopy());
+            fcd.addElementModification(new ComponentRedeclare(new Opt(), new Opt(), ca, this));
+        } else {
+            fcd.addComponentDecl(this);
+        }
     }
     
     public void Algorithm.addToFullClassDecl(FullClassDecl fcd) {
@@ -240,7 +237,7 @@
     
     public void AlgorithmAnnotation.addToFullClassDecl(FullClassDecl fcd, Algorithm algo) {
     	getAnnotation().setLocationNoTree(getAnnotation(), this);
-    	fcd.addAnnotation(getAnnotation());
+    	fcd.setAnnotation(getAnnotation());
     }
     
     public void ExtendsClause.addToFullClassDecl(FullClassDecl fcd) {
@@ -248,16 +245,12 @@
     }
     
     public void ClassDecl.addToFullClassDecl(FullClassDecl fcd) {
+        // TODO: add redeclared to ElementModifications instead of class list
     	fcd.addClassDecl(this);
     }
     
     public void ImportClause.addToFullClassDecl(FullClassDecl fcd) {
         fcd.addImport(this);
-    }
-    
-    public void ElementAnnotation.addToFullClassDecl(FullClassDecl fcd) {
-    	getAnnotation().setLocationNoTree(getAnnotation(), this);
-    	fcd.addAnnotation(getAnnotation());
     }
     
     public void EquationClause.addToFullClassDecl(FullClassDecl fcd) {
@@ -267,11 +260,6 @@
     
     public void AbstractEquation.addToFullClassDecl(FullClassDecl fcd) {
         fcd.addEquation(this);
-    }
-    
-    public void EquationAnnotation.addToFullClassDecl(FullClassDecl fcd) {
-    	getAnnotation().setLocationNoTree(getAnnotation(), this);
-        fcd.addAnnotation(getAnnotation());
     }
     
     /**
@@ -408,23 +396,23 @@
 			siblings.add(sc);
 			c = sc;
 		}
-		c.setRedeclareOpt((Opt) getRedeclareOpt().fullCopy());
-		c.setFinalOpt((Opt) getFinalOpt().fullCopy());
-		c.setInnerOpt((Opt) getInnerOpt().fullCopy());
-		c.setOuterOpt((Opt) getOuterOpt().fullCopy());
-		c.setReplaceableOpt((Opt) getReplaceableOpt().fullCopy());
-		c.setTypePrefixFlowOpt((Opt) getTypePrefixFlowOpt().fullCopy());
-		c.setTypePrefixVariabilityOpt((Opt) getTypePrefixVariabilityOpt().fullCopy());
-		c.setTypePrefixInputOutputOpt((Opt) getTypePrefixInputOutputOpt().fullCopy());
-		c.setClassName((Access) getClassName().fullCopy());
-		c.setTypeArraySubscriptsOpt(new Opt());
-		c.setVisibilityType((VisibilityType) getVisibilityType().fullCopy());
+		c.setRedeclareOpt(getRedeclareOpt().fullCopy());
+		c.setFinalOpt(getFinalOpt().fullCopy());
+		c.setInnerOpt(getInnerOpt().fullCopy());
+		c.setOuterOpt(getOuterOpt().fullCopy());
+		c.setReplaceableOpt(getReplaceableOpt().fullCopy());
+		c.setTypePrefixFlowOpt(getTypePrefixFlowOpt().fullCopy());
+		c.setTypePrefixVariabilityOpt(getTypePrefixVariabilityOpt().fullCopy());
+		c.setTypePrefixInputOutputOpt(getTypePrefixInputOutputOpt().fullCopy());
+		c.setClassName(getClassName().fullCopy());
+		c.setVisibilityType(getVisibilityType().fullCopy());
 		c.setName(name.getName());
-		c.setVarArraySubscripts(new ArraySubscripts(as));
+		if (as.getNumChild() > 0)
+		    c.setVarArraySubscripts(new ArraySubscripts(as));
 		c.setModificationOpt(name.getModificationOpt());
 		c.setConditionalAttributeOpt(name.getConditionalAttributeOpt());
 		c.setComment(name.getComment());
-		c.setConstrainingClauseOpt((Opt) getConstrainingClauseOpt().fullCopy());
+		c.setConstrainingClauseOpt( getConstrainingClauseOpt().fullCopy());
 		c.setCCComment(getComment());
 		c.setLocationNoTree(this, this, name);
 		return c;

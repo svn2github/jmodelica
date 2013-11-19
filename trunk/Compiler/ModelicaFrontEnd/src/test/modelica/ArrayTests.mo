@@ -965,6 +965,29 @@ end ArrayTests.General.ArrayTest36;
 ")})));
 end ArrayTest36;
 
+
+model ArrayTest37
+    package A
+        constant Integer n = 2;
+        type B = Real[n];
+    end A;
+    
+    A.B x = 1:A.n;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="General_ArrayTest37",
+			description="",
+			flatModel="
+fclass ArrayTests.General.ArrayTest37
+ ArrayTests.General.ArrayTest37.A.B x[2] = 1:2;
+
+public
+ type ArrayTests.General.ArrayTest37.A.B = Real;
+end ArrayTests.General.ArrayTest37;
+")})));
+end ArrayTest37;
+
 end General;
 
 

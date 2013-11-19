@@ -1219,6 +1219,20 @@ Alias sets:
   end AliasTest33;
 
 model AliasFuncTest1
+    function f
+        input Real a;
+        output Real[3] b;
+    algorithm
+        b := {1, 2, 3} * a;
+    end f;
+    
+    model A
+        Real x;
+    end A;
+    
+    A[3] y(x=f(z));
+    Real z = 1;
+
  annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
      JModelica.UnitTesting.TransformCanonicalTestCase(
          name="AliasFuncTest1",
@@ -1254,20 +1268,6 @@ public
 
 end TransformCanonicalTests.AliasFuncTest1;
 ")})));
-
-	function f
-		input Real a;
-		output Real[3] b;
-	algorithm
-		b := {1, 2, 3} * a;
-	end f;
-	
-	model A
-		Real x;
-	end A;
-	
-	A[3] y(x=f(z));
-	Real z = 1;
 end AliasFuncTest1;
 
 

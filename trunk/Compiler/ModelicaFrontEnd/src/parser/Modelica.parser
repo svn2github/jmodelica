@@ -399,12 +399,8 @@ ExternalClause external_clause =
 	external_language?
 	external_function_call?
 	annotation.a1?
-	SEMICOLON
-	annotation_sc.a2?  {:  return new ExternalClause(external_language, external_function_call, a1, a2); :}
+	SEMICOLON   {:  return new ExternalClause(external_language, external_function_call, a1); :}
 	;
-/* TODO: When we change the allowed possition of class annotations to be at the end of the class as MLS 3.2 speecifies, 
- *       we will need to remove the second annotation here. It shouldn't be there anyway, but both changes need to be 
- *       done at the same time. */
 
 	
 ExternalLanguage external_language =
@@ -516,7 +512,6 @@ Element element
             component_list,
             constraining_clause,comment); 
   :}
-  | annotation SEMICOLON                  {: return new ElementAnnotation(annotation); :} 
   | error SEMICOLON						  {: return new BadElement(); :}
   ;
   
@@ -811,7 +806,6 @@ AbstractEquation abstract_equation =
   | LPAREN function_call_left_list RPAREN EQUALS function_call comment SEMICOLON
                                       {: return new FunctionCallEquation(new Opt(),comment,function_call_left_list,function_call); :}
   | function_call comment SEMICOLON   {: return new FunctionCallEquation(new Opt(),comment,new List(),function_call); :}
-  | annotation SEMICOLON              {: return new EquationAnnotation(new Opt(),new Comment(new Opt(), new Opt()), annotation); :}
   ;
 
 List function_call_left_list =
@@ -926,8 +920,6 @@ Statement statement =
   | when_stmt SEMICOLON              {: return when_stmt; :}
   | for_stmt SEMICOLON               {: return for_stmt; :}
   | while_stmt SEMICOLON             {: return while_stmt; :}
-  | annotation SEMICOLON             {: return new AlgorithmAnnotation(new Comment(new Opt(), new Opt()), 
-                                                                       annotation); :}
   | error                            {: return new BadStatement(); :}
   ;
   

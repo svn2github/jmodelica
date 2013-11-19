@@ -17,7 +17,9 @@
 package CorruptCodeGenTests
 
 	model CorruptTest1
-	
+    equation
+       der(x) =1;
+	   
 	annotation(__JModelica(UnitTesting(tests={
 		GenericCodeGenTestCase(
 			name="CorruptTest1",
@@ -25,9 +27,6 @@ package CorruptCodeGenTests
 			template="$n_real_x$",
 			generatedCode="
 1")})));
-
-    equation
-       der(x) =1;
 	end CorruptTest1;
 
 

@@ -510,12 +510,6 @@ optimization DIMinTime (objective=cost(finalTime),
                                15.5808, -25.6296, 10.0488, 0;
                                -8.9141, 10.2963, -1.3821, 0;
                                3.3333, -2.6667, 0.3333, 0];
-  annotation(__Optimica(DirectCollocationLagrange(
-                        mesh=m,
-                        collocationPoints=c_p,
-                        lagrangeCoefficientsAlgebraic=l_c_a,
-                        lagrangeCoefficientsDynamic=l_c_d)));
-
 equation
   der(cost) = 1;
 constraint
@@ -525,6 +519,12 @@ constraint
   di.v(finalTime)=0;
   di.v<=0.5;
   di.u>=-1; di.u<=1;
+  
+  annotation(__Optimica(DirectCollocationLagrange(
+                        mesh=m,
+                        collocationPoints=c_p,
+                        lagrangeCoefficientsAlgebraic=l_c_a,
+                        lagrangeCoefficientsDynamic=l_c_d)));
 end DIMinTime;
 
 model CSTR "A CSTR"

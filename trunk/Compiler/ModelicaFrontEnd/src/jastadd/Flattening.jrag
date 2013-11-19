@@ -2285,8 +2285,7 @@ aspect InstantiatedExpressions {
 	public static List Statement.instantiateStatementList(List<Statement> l) {
 		List l2 = new List();
 		for (Statement s : l) 
-			if (!(s instanceof AlgorithmAnnotation))
-				l2.add(s.instantiate());
+			l2.add(s.instantiate());
 		return l2;
 	}
 	

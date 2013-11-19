@@ -333,8 +333,6 @@ package StreamExample
            points={{-4,32},{6,32},{6,44},{15,44}},
            color={0,0,127},
            smooth=Smooth.None));
-       annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-                  -100},{100,100}}),     graphics));
         connect(reservoir.flowPort, linearResistanceWrap.port_b) annotation (
             Line(
             points={{-32,54},{-6,54},{-6,40}},

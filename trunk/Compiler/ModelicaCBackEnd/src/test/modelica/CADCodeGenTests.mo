@@ -2301,11 +2301,11 @@ model CADDerAnno2
 			output Integer i1;
 			output Boolean b1;
 			output Real y;
-			annotation(derivative = f_der);
 		algorithm
 			i1 := 1;
 			b1 := true;
 			y  := if(b) then x1^2 else x1^3;
+			annotation(derivative = f_der);
 		end f2;
 		
 		function f_der

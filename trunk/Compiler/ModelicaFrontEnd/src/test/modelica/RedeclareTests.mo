@@ -4906,4 +4906,161 @@ end RedeclareTests.ShortClassDeclClass1;
 ")})));
 end ShortClassDeclClass1;
 
+
+model ReplacableArray1
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A;
+	    redeclare D b;
+	end C;
+    
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray1",
+			description="Redeclaring array of components as element in subclass, omitting size",
+			flatModel="
+fclass RedeclareTests.ReplacableArray1
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.ReplacableArray1;
+")})));
+end ReplacableArray1;
+
+
+model ReplacableArray2
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A(redeclare D b);
+	end C;
+    
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray2",
+			description="Redeclaring array of components in modification on extends, omitting size",
+			flatModel="
+fclass RedeclareTests.ReplacableArray2
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.ReplacableArray2;
+")})));
+end ReplacableArray2;
+
+
+model ReplacableArray3
+    model A
+        replaceable B b[2];
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+	model C
+	    extends A(redeclare D b[2]);
+	end C;
+	
+    model D
+        Real x;
+        Real y;
+    end D;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray3",
+			description="Redeclaring array of components in modification on extends, including size",
+			flatModel="
+fclass RedeclareTests.ReplacableArray3
+ Real c.b[1].x;
+ Real c.b[1].y;
+ Real c.b[2].x;
+ Real c.b[2].y;
+end RedeclareTests.ReplacableArray3;
+")})));
+end ReplacableArray3;
+
+
+model ReplacableArray4
+    model A
+        replaceable Real x[2];
+    end A;
+    
+    model B
+        extends A(redeclare Real x(each start = 1));
+    end B;
+    
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray4",
+			description="Redeclare of primitive array ommitting size, with each on modifier on redeclaration",
+			flatModel="
+fclass RedeclareTests.ReplacableArray4
+ Real b.x[2](each start = 1);
+end RedeclareTests.ReplacableArray4;
+")})));
+end ReplacableArray4;
+
+
+model ReplacableArray5
+    package A
+        constant Integer n = 2;
+		
+		model B
+            replaceable Real x[n];
+	    end B;
+    end A;
+    
+    model C
+        extends A.B(redeclare Real x(each start = 1));
+    end C;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray5",
+			description="Redeclare of array with size depending on constant not reachable from redeclaration",
+			flatModel="
+fclass RedeclareTests.ReplacableArray5
+ Real c.x[2](each start = 1);
+end RedeclareTests.ReplacableArray5;
+")})));
+end ReplacableArray5;
+
+
 end RedeclareTests;

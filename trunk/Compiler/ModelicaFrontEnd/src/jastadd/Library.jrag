@@ -186,7 +186,7 @@ aspect Library {
 		setImportList(fcd.getImportList());
 		setClassDeclList(fcd.getClassDeclList());
 		setComponentDeclList(fcd.getComponentDeclList());
-		setAnnotationList(fcd.getAnnotationList());
+		setAnnotationOpt(fcd.getAnnotationOpt());
 		setExternalClauseOpt(fcd.getExternalClauseOpt());
 		setEndDecl(fcd.getEndDecl());
 		setLocation(fcd);

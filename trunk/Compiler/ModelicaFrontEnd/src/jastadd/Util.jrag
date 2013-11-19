@@ -3001,10 +3001,12 @@ aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
 	abstract public FQName FQName.fullCopy();
+    abstract public Access Access.fullCopy();
 	abstract public InstAccess InstAccess.fullCopy();
 	abstract public InstNamedAccess InstNamedAccess.fullCopy();
 	abstract public InstScalarAccess InstScalarAccess.fullCopy();
 	abstract public InstArrayAccess InstArrayAccess.fullCopy();
+    abstract public VisibilityType VisibilityType.fullCopy();
 	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
 	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();

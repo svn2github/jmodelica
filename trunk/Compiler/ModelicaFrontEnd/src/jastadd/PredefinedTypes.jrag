@@ -131,8 +131,9 @@ aspect PredefinedTypes {
                         cd.getImportList(),
                         cd.getClassDeclList(),
                         cd.getComponentDeclList(),
-                        cd.getAnnotationList(),
+                        cd.getElementModificationList(),
                         new Opt(),
+                        cd.getAnnotationOpt(),
                         cd.getEndDecl());
             	l.add(pcd); 
             } else {
@@ -155,8 +156,9 @@ aspect PredefinedTypes {
                         cd.getImportList(),
                         cd.getClassDeclList(),
                         cd.getComponentDeclList(),
-                        cd.getAnnotationList(),
+                        cd.getElementModificationList(),
                         new Opt(),
+                        cd.getAnnotationOpt(),
                         cd.getEndDecl(),
                         new Symbol("enumeration"));
             	pcd.originalComposition = cd.originalComposition;
@@ -218,8 +220,9 @@ aspect PredefinedTypes {
                                    cd.getImportList(),
                                    cd.getClassDeclList(),
                                    cd.getComponentDeclList(),
-                                   cd.getAnnotationList(),
+                                   cd.getElementModificationList(),
                                    new Opt(),
+                                   cd.getAnnotationOpt(),
                                    cd.getEndDecl(),
                                    new Symbol("enumeration"));
             ecd.originalComposition = cd.originalComposition;
@@ -527,7 +530,7 @@ aspect PredefinedTypes {
             SourceRoot sr = ph.parseString(BUILTIN_FUNCS, "");
             Program p = sr.getProgram();
             
-            ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt(), new Opt());
+            ExternalClause builtin = new ExternalClause(new Opt(new ExternalLanguage("builtin")), new Opt(), new Opt());
             for (Element e : p.getUnstructuredEntity(0).getElements()) 
             	e.addBuiltinFunctions(l, builtin);
         } catch (Exception e) {}
@@ -605,8 +608,9 @@ aspect PredefinedTypes {
                                                     getImportList(),
                                                     getClassDeclList(),
                                                     getComponentDeclList(),
-                                                    getAnnotationList(),
+                                                    getElementModificationList(),
                                                     getExternalClauseOpt(),
+                                                    getAnnotationOpt(),
                                                     getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
@@ -635,8 +639,9 @@ aspect PredefinedTypes {
                                                     getImportList(),
                                                     getClassDeclList(),
                                                     getComponentDeclList(),
-                                                    getAnnotationList(),
+                                                    getElementModificationList(),
                                                     getExternalClauseOpt(),
+                                                    getAnnotationOpt(),
                                                     getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
@@ -665,8 +670,9 @@ aspect PredefinedTypes {
                                                     getImportList(),
                                                     getClassDeclList(),
                                                     getComponentDeclList(),
-                                                    getAnnotationList(),
+                                                    getElementModificationList(),
                                                     getExternalClauseOpt(),
+                                                    getAnnotationOpt(),
                                                     getEndDecl());
                 rcd.rewritten = true;
                 return rcd;
@@ -695,8 +701,9 @@ aspect PredefinedTypes {
                                                     getImportList(),
                                                     getClassDeclList(),
                                                     getComponentDeclList(),
-                                                    getAnnotationList(),
+                                                    getElementModificationList(),
                                                     getExternalClauseOpt(),
+                                                    getAnnotationOpt(),
                                                     getEndDecl());
                 rcd.rewritten = true;
                 return rcd;

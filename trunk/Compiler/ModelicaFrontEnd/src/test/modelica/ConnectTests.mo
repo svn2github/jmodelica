@@ -1877,37 +1877,21 @@ end ConnectTests.CircuitTest2;
 model ConnectorTest
    model A
  
-     RealInput u
-      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
-     RealOutput y
-      annotation (Placement(transformation(extent={{100,-10},{120,10}})));
+     RealInput u;
+     RealOutput y;
      parameter Real k = 1;
    equation 
      y = k*u;
    end A;
  
    model B
-		FirstOrder firstOrder
-		  annotation (Placement(transformation(extent={{30,12},{50,32}})));
-    Feedback feedback
-      annotation (Placement(transformation(extent={{-46,12},{-26,32}})));
-    annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{
-              -100,-100},{100,100}}), graphics));
-    RealInput u
-      annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
+	 FirstOrder firstOrder;
+     Feedback feedback;
+     RealInput u;
    equation 
-    connect(feedback.y, firstOrder.u) annotation (Line(
-        points={{-27,22},{28,22}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    connect(firstOrder.y, feedback.u2) annotation (Line(
-        points={{51,22},{74,22},{74,-22},{-36,-22},{-36,14}},
-        color={0,0,127},
-        smooth=Smooth.None));
-    connect(feedback.u1, u) annotation (Line(
-        points={{-44,22},{-66,22},{-66,0},{-100,0}},
-        color={0,0,127},
-        smooth=Smooth.None));
+    connect(feedback.y, firstOrder.u);
+    connect(firstOrder.y, feedback.u2);
+    connect(feedback.u1, u);
    end B;
 
 
@@ -1973,16 +1957,10 @@ model ConnectorTest
 	
    end SO;
     model C
-    B b annotation (Placement(transformation(extent={{28,6},{48,26}})));
-    Constant const(k=1)
-      annotation (Placement(transformation(extent={{-60,8},{-40,28}})));
-    annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{
-              -100,-100},{100,100}}), graphics));
+    B b;
+    Constant const(k=1);
   equation 
-    connect(const.y, b.u) annotation (Line(
-        points={{-39,18},{-6,18},{-6,16},{28,16}},
-        color={0,0,127},
-        smooth=Smooth.None));
+    connect(const.y, b.u);
   end C;
   
   C c;

@@ -50,10 +50,10 @@ aspect AnnotationAPI {
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
 	eq Modification.annotation()    = annotationNode();
 	
-	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
+	eq ExternalClause.annotation() = getAnnotationOpt().annotation();
 	eq InstExternal.annotation()   = getExternalClause().annotation();
 	
-	eq FullClassDecl.annotation()            = getAnnotations().annotation();
+	eq FullClassDecl.annotation()            = getAnnotationOpt().annotation();
 	eq InstClassDecl.annotation()            = getClassDecl().annotation();
 	eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
 	eq ExtendsClauseShortClass.annotation()  = getComment().annotation();
@@ -656,7 +656,7 @@ aspect AnnotationAPI {
 			@Override
 			protected void createRealNode() {
 				ClassModification cm = new ClassModification();
-				fullClassDecl.addAnnotation(new ParseAnnotation(cm));
+				fullClassDecl.setAnnotation(new ParseAnnotation(cm));
 				realNode = new ClassModAnnotationNode(cm);
 			}
 		}

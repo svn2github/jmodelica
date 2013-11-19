@@ -39,6 +39,7 @@ aspect UnknownDeclarations {
 		                            new List(),
 		                            new List(),
 		                            new List(),
+                                    new Opt(),
 		                            new Opt(),
 		                            new EndDecl("Unknown"));
 	}

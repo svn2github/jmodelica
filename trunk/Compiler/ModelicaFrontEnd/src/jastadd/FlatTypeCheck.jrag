@@ -177,28 +177,38 @@ aspect FlatTypeCheck {
 			FExp val_mod = getInstModification().instValueMod();
 			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
 				FType attr_type = owner.attributeType(this);
+				boolean checkSize = !owner.isInRedeclareMod();
 				if (!type().typeCompatible(val_mod.type().scalarType())) {
 					error("The type of the binding expression of the attribute " + name() +
 					  " does not match the declared type of the variable");
-				} else if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-					if (val_mod.ndims() == 0) {
-						warning("Assuming 'each' for the attribute " + name());
-					} else {
-						error("Array size mismatch for the attribute " + name() +
-								", size of declaration is " + attr_type.size() + 
-								" and size of " + name() + " expression is " + val_mod.size());
-					}
-				} else if (getEach()) { 
-					if (owner.ndims() == 0) {
-						error("The 'each' keyword cannot be applied to attributes of scalar components");
-					} else if (val_mod.ndims() > 0) {
-						error("The attribute " + name() + 
-								" is declared 'each' and the binding expression is not scalar");
-					}
+				} else if (checkSize) {
+				    if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
+    					if (val_mod.ndims() == 0) {
+    						warning("Assuming 'each' for the attribute " + name());
+    					} else {
+    						error("Array size mismatch for the attribute " + name() +
+    								", size of declaration is " + attr_type.size() + 
+    								" and size of " + name() + " expression is " + val_mod.size());
+    					}
+    				} else if (getEach()) { 
+    					if (owner.ndims() == 0) {
+    						error("The 'each' keyword cannot be applied to attributes of scalar components");
+    					} else if (val_mod.ndims() > 0) {
+    						error("The attribute " + name() + 
+    								" is declared 'each' and the binding expression is not scalar");
+    					}
+    				}
 				}
 			}
     	}
     }
+    
+    inh boolean InstNode.isInRedeclareMod();
+    eq InstElementRedeclare.getChild().isInRedeclareMod() = true;
+    eq InstClassDecl.getChild().isInRedeclareMod()        = false;
+    eq InstRoot.getChild().isInRedeclareMod()             = false;
+    eq Root.getChild().isInRedeclareMod()                 = false;
+    
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
 	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());

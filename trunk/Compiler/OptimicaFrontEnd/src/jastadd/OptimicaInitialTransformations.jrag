@@ -40,12 +40,13 @@ aspect OptimicaInitialTransformations {
                       new List(),
                       new List(),
                       new Opt(),
+                      new Opt(),
                       getEndDecl(),
                       getClassModificationOpt(),
                       new List());
   			
             if (hasAnnotation())
-            	fc.addAnnotation(getAnnotation());
+            	fc.setAnnotation(getAnnotation());
             getComposition().extractElementsTo(fc);
  	     	fc.setLocationNoTree(getRestriction(), this);
  	     	return fc;
