@@ -378,19 +378,8 @@ aspect IndexReduction {
                 
                 // Step 2: Extract all active variables, i.e., highest order 
                 // derivatives for each variable
-                for (FVariable fv : eb.activeVariables()) {
-                    if (fv.isDerivativeVariable()) {
-                        // If the stateSelect attribute equals StateSelect.always,
-                        // then don't add the variable so that it cannot be
-                        // selected as dummy derivative.
-                        FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
-                        if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-                            z.add(fv);
-                        }
-                    } else {
-                        z.add(fv);
-                    }
-                }
+                for (FVariable fv : eb.activeVariables())
+                    z.add(fv);
             }
         }
         
@@ -477,18 +466,8 @@ aspect IndexReduction {
             
             // Get the "integrated" variables 
             z = new ArrayList<FVariable>();
-            for (FVariable fv : zHat) {
-                FVariable z_test = fv.getMeIntegrated();
-                if (z_test.isDerivativeVariable()) {
-                    // Take into account user defined state selection
-                    FRealVariable frv = (FRealVariable)z_test.getMeIntegrated();
-                    if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-                        z.add(z_test);
-                    }
-                } else {
-                    z.add(z_test);
-                }
-            }
+            for (FVariable fv : zHat)
+                z.add(fv.getMeIntegrated());
             
             // Check if there are remaining differentiated equations
             remainingDifferentiatedEquations = false;

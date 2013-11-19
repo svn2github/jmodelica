@@ -2512,4 +2512,112 @@ end IndexReduction.IndexReduction54;
 ")})));
 end IndexReduction54;
 
+model IndexReduction55
+    Real a_s;
+    Real a_v(stateSelect = StateSelect.always);
+    Real a_a;
+    Real b_s;
+    Real b_v;
+    Real v1;
+equation
+    b_s = a_s - 3.14;
+    a_v = der(a_s);
+    a_a = der(a_v);
+    b_v = b_s;
+    v1 = 42 * (b_s - 3.14);
+    21 = v1 * b_v;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction55",
+            description="Test of indexreduction with SS always",
+            flatModel="
+fclass IndexReduction.IndexReduction55
+ Real a_s;
+ Real a_v(stateSelect = StateSelect.always);
+ Real a_a;
+ Real b_v;
+ Real v1;
+ Real _der_a_s;
+ Real _der_a_v;
+ Real _der_b_v;
+ Real _der_v1;
+ Real _der_der_a_s;
+ Real _der_der_b_v;
+ Real _der_der_v1;
+equation
+ b_v = a_s - 3.14;
+ a_v = _der_a_s;
+ a_a = _der_a_v;
+ v1 = 42 * (b_v - 3.14);
+ 21 = v1 * b_v;
+ _der_b_v = _der_a_s;
+ _der_v1 = 42 * _der_b_v;
+ 0.0 = v1 * _der_b_v + _der_v1 * b_v;
+ _der_a_v = _der_der_a_s;
+ _der_der_b_v = _der_der_a_s;
+ _der_der_v1 = 42 * _der_der_b_v;
+ 0.0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.IndexReduction55;
+")})));
+end IndexReduction55;
+
+model IndexReduction56
+    Real a_s(stateSelect = StateSelect.always);
+    Real a_v;
+    Real a_a;
+    Real b_s;
+    Real b_v;
+    Real v1;
+equation
+    b_s = a_s - 3.14;
+    a_v = der(a_s);
+    a_a = der(a_v);
+    b_v = b_s;
+    v1 = 42 * (b_s - 3.14);
+    21 = v1 * b_v;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction56",
+            description="Test of indexreduction with SS always",
+            flatModel="
+fclass IndexReduction.IndexReduction56
+ Real a_s(stateSelect = StateSelect.always);
+ Real a_v;
+ Real a_a;
+ Real b_v;
+ Real v1;
+ Real _der_a_s;
+ Real _der_a_v;
+ Real _der_b_v;
+ Real _der_v1;
+ Real _der_der_a_s;
+ Real _der_der_b_v;
+ Real _der_der_v1;
+equation
+ b_v = a_s - 3.14;
+ a_v = _der_a_s;
+ a_a = _der_a_v;
+ v1 = 42 * (b_v - 3.14);
+ 21 = v1 * b_v;
+ _der_b_v = _der_a_s;
+ _der_v1 = 42 * _der_b_v;
+ 0.0 = v1 * _der_b_v + _der_v1 * b_v;
+ _der_a_v = _der_der_a_s;
+ _der_der_b_v = _der_der_a_s;
+ _der_der_v1 = 42 * _der_der_b_v;
+ 0.0 = v1 * _der_der_b_v + _der_v1 * _der_b_v + (_der_v1 * _der_b_v + _der_der_v1 * b_v);
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.IndexReduction56;
+")})));
+end IndexReduction56;
+
 end IndexReduction;
