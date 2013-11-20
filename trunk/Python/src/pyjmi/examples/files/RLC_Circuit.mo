@@ -8,6 +8,9 @@ block Square "Generate a square-wave"
   extends Modelica.Blocks.Interfaces.SO;
 protected
   constant Real pi=Modelica.Constants.pi;
+equation
+  y = offset + (if Modelica.Math.sin(2*pi*freqHz*time + phase) > 0.0 then amplitude else -1.0*amplitude);
+
   annotation (
     Icon(coordinateSystem(
     preserveAspectRatio=true,
@@ -107,9 +110,6 @@ The Real output y is a square-wave:
 </p>
 </html>"),
     uses(Modelica(version="3.1")));
-
-equation
-  y = offset + (if Modelica.Math.sin(2*pi*freqHz*time + phase) > 0.0 then amplitude else -1.0*amplitude);
 end Square;
 
 
@@ -180,8 +180,6 @@ equation
       points={{-58,8},{-58,-28},{-44,-28}},
       color={0,0,255},
       smooth=Smooth.None));
-  annotation (uses(Modelica(version="3.1")), Diagram(coordinateSystem(
-          preserveAspectRatio=true, extent={{-100,-100},{100,100}}), graphics));
   connect(square.y, signalVoltage.v) annotation (Line(
       points={{-75,18},{-65,18}},
       color={0,0,127},
@@ -190,20 +188,20 @@ end RLC_Circuit_Square;
 
 model RLC_Circuit
 
-  annotation (uses(Modelica(version="3.0.1")), Diagram(coordinateSystem(
-          preserveAspectRatio=true, extent={{-100,-100},{100,100}}), graphics));
+    block Sine "Generate sine signal"
+        parameter Real amplitude=1 "Amplitude of sine wave";
+        parameter Modelica.SIunits.Frequency freqHz(start=1) = 1
+            "Frequency of sine wave";
+        parameter Modelica.SIunits.Angle phase=0 "Phase of sine wave";
+        parameter Real offset=0 "Offset of output signal";
+        parameter Modelica.SIunits.Time startTime=0
+            "Output = offset for time < startTime";
+        extends Modelica.Blocks.Interfaces.SO;
+    protected
+        constant Real pi=Modelica.Constants.pi;
+    equation
+        y = offset + amplitude*Modelica.Math.sin(2*pi*freqHz*(time - startTime) + phase);
 
-          block Sine "Generate sine signal"
-            parameter Real amplitude=1 "Amplitude of sine wave";
-            parameter Modelica.SIunits.Frequency freqHz(start=1) = 1
-      "Frequency of sine wave";
-            parameter Modelica.SIunits.Angle phase=0 "Phase of sine wave";
-            parameter Real offset=0 "Offset of output signal";
-            parameter Modelica.SIunits.Time startTime=0
-      "Output = offset for time < startTime";
-            extends Modelica.Blocks.Interfaces.SO;
-  protected
-            constant Real pi=Modelica.Constants.pi;
     annotation (
       Icon(coordinateSystem(
           preserveAspectRatio=true,
@@ -312,9 +310,6 @@ The Real output y is a sine signal:
 <img src=\"../Images/Blocks/Sources/Sine.png\">
 </p>
 </html>"));
-
-          equation
-            y = offset + amplitude*Modelica.Math.sin(2*pi*freqHz*(time - startTime) + phase);
           end Sine;
 
   Modelica.Electrical.Analog.Basic.Ground ground 
@@ -390,10 +385,6 @@ end RLC_Circuit;
 
 
 model RLC_Circuit_Input
-
-  annotation (uses(Modelica(version="3.0.1")), Diagram(coordinateSystem(
-          preserveAspectRatio=true, extent={{-100,-100},{100,100}}), graphics));
-
 
   Modelica.Electrical.Analog.Basic.Ground ground 
     annotation (Placement(transformation(extent={{-54,-48},{-34,-28}})));
