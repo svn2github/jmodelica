@@ -530,7 +530,7 @@ aspect IndexReduction {
     }
     
     syn FRealVariable.StateSelect FVariable.stateSelectAttribute() = FRealVariable.StateSelect.DEFAULT;
-    eq FRealVariable.stateSelectAttribute() = StateSelect.values()[stateSelectAttributeInt() - 1];
+    eq FRealVariable.stateSelectAttribute() = isTemporary() ? FRealVariable.StateSelect.AVOID : StateSelect.values()[stateSelectAttributeInt() - 1];
     
     public class FRealVariable {
         public enum StateSelect {
