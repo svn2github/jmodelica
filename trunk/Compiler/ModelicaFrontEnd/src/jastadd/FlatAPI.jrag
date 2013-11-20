@@ -1605,8 +1605,10 @@ aspect Attributes {
 	eq FAttribute.matches(String str)   = getName().name().equals(str);
 	eq FDerivedType.matches(String str) = getName().equals(str);
 	
+	syn FAttribute FVariable.findAttributeLocal(String name) = findMatching(getFAttributes(), name);
+	
 	syn lazy FAttribute FVariable.findAttribute(String name) {
-		FAttribute res = findMatching(getFAttributes(), name);
+		FAttribute res = findAttributeLocal(name);
 		if (res == null && myFDerivedType() != null)
 			res = myFDerivedType().findAttribute(name);
 		return res;

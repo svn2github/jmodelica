@@ -1405,18 +1405,21 @@ aspect TransformCanonical {
 	}
 
 	public FVariable FRealVariable.createFDerivativeVariable() {
-		return new FDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
+	    FDerivativeVariable fdv = new FDerivativeVariable(getFVisibilityType().fullCopy(),
+	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
+	    FAttribute ss = findAttributeLocal(FAttribute.STATE_SELECT);
+	    if (ss != null)
+	        fdv.addFAttribute(ss.fullCopy());
+	    return fdv;
 	}
 
 	public FVariable FDerivativeVariable.createFDerivativeVariable() {
-		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), 2);
-	}
-
-	public FVariable FHDerivativeVariable.createFDerivativeVariable() {
-		return new FHDerivativeVariable((FVisibilityType)getFVisibilityType().fullCopy(),
-					getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), getOrder() + 1);
+	    FHDerivativeVariable fhdv = new FHDerivativeVariable(getFVisibilityType().fullCopy(),
+	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
+	    FAttribute ss = findAttributeLocal(FAttribute.STATE_SELECT);
+	    if (ss != null)
+	        fhdv.addFAttribute(ss.fullCopy());
+	    return fhdv;
 	}
 
     public class FClass {
