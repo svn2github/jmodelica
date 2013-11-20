@@ -2454,64 +2454,6 @@ end IndexReduction.IndexReduction52;
 ")})));
 end IndexReduction52;
 
-model IndexReduction53
-    Real x,y(stateSelect=StateSelect.prefer);
-equation
-    der(x) = -x;
-    y=100*x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IndexReduction53",
-            description="Test of system with non differentiated variable with StateSelect always and prefer",
-            flatModel="
-fclass IndexReduction.IndexReduction53
- Real x;
- Real y(stateSelect = StateSelect.prefer);
- Real _der_x;
-initial equation 
- y = 0.0;
-equation
- _der_x = - x;
- y = 100 * x;
- der(y) = 100 * _der_x;
-
-public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-
-end IndexReduction.IndexReduction53;
-")})));
-end IndexReduction53;
-
-model IndexReduction54
-    Real x(stateSelect=StateSelect.always),y(stateSelect=StateSelect.prefer);
-equation
-    der(x) = -x;
-    y=100*x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IndexReduction54",
-            description="Test of system with non differentiated variable with StateSelect always and prefer",
-            flatModel="
-fclass IndexReduction.IndexReduction54
- Real x(stateSelect = StateSelect.always);
- Real y(stateSelect = StateSelect.prefer);
- Real _der_y;
-initial equation 
- x = 0.0;
-equation
- der(x) = - x;
- y = 100 * x;
- _der_y = 100 * der(x);
-
-public
- type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
-
-end IndexReduction.IndexReduction54;
-")})));
-end IndexReduction54;
-
 model IndexReduction55
     Real a_s;
     Real a_v(stateSelect = StateSelect.always);
