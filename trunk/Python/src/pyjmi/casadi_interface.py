@@ -853,21 +853,21 @@ class CasadiModel(ModelBase):
                                       "supported.")
         
         # Identify variables
-        names = {'x': self.xmldoc.get_x_variable_names,
-                 'u': self.xmldoc.get_u_variable_names,
-                 'w': self.xmldoc.get_w_variable_names,
-                 'p_opt': self.xmldoc.get_p_opt_variable_names}
         variables = {}
         variables['x'] = self.ocp.x
         variables['u'] = self.ocp.u
         variables['w'] = self.ocp.z
         variables['p_opt'] = self.ocp.pf
+        names = {}
+        for vt in variables:
+            names[vt] = [(var.getValueReference(), var.getName()) for
+                         var in variables[vt]]
         
         # Make sure the variables appear in value reference order
         var_vectors = {}
         for var_type in names:
             var_dict = dict((repr(v), v) for v in variables[var_type])
-            name_dict = dict((x[0], x[1]) for x in names[var_type](False))
+            name_dict = dict((x[0], x[1]) for x in names[var_type])
             if var_type == 'p_opt':
                 free_times = 0
                 if self.xmldoc.get_opt_finaltime_free():
