@@ -1437,22 +1437,9 @@ int jmi_with_cad_derivatives(jmi_t* jmi)
 }
 
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
-    jmi_block_solver_options_t* bsop = &op->block_solver_options;
+    jmi_block_solver_init_default_options(&op->block_solver_options);
 
-    bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
-    bsop->use_jacobian_equilibration_flag = 0; 
-    bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
-    bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
-    bsop->experimental_mode = 0;
-    bsop->max_iter = 100;
-    bsop->rescale_each_step_flag = 0;
-    bsop->rescale_after_singular_jac_flag = 0;
-    bsop->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
     op->nle_solver_default_tol = 1e-10;      /**< \brief Default tolerance for the equation block solver */
-    bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
-    /* Default Kinsol tolerance (machine precision pwr 1/3)  -> 1e-6 */
-    /* We use tighter:  1e-12 */
-    bsop->min_tol = 1e-12;       /**< \brief Minimum tolerance for the equation block solver */
     op->nle_solver_tol_factor = 0.0001;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
     op->events_default_tol = 1e-10;       /**< \brief Default tolerance for the event iterations. */        
     op->events_tol_factor = 0.0001;       /**< \brief Tolerance safety factor for the event iterations. */

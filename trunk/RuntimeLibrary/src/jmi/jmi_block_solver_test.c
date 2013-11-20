@@ -36,6 +36,21 @@ int is_log_category_emitted (jmi_callbacks_t* c, jmi_log_category_t category) {
     return 1;
 }
 
+/*
+Solving:
+FX = if(x < -1) 
+        x + (x+1)*COEFF;
+    else
+        if(x > 1)
+            x + (x - 1)*COEFF;
+        else
+            x;
+    FX, COEFF defined below, INITX - initial X
+*/
+#define FX 2
+#define COEFF 2
+#define INITX -2
+
 typedef struct switch_state_t {
     jmi_callbacks_t* cb;
     jmi_log_t* log;
@@ -62,9 +77,9 @@ int f(switch_state_t *sw, double* x, double* res, int evaluation_mode) {
         double xx = *x;
         double v;
         if(sw->sw[0] != 0)
-            v = xx + (xx + 1)*2;
+            v = xx + (xx + 1)*COEFF;
         else if(sw->sw[1] != 0)
-            v = xx + (xx - 1)*2;
+            v = xx + (xx - 1)*COEFF;
         else
             v = xx;
        
@@ -83,7 +98,8 @@ jmi_block_solver_status_t update_discrete_variables(switch_state_t *sw, int* non
     sw->sw[1] = (sw->x >  1);
     jmi_log_reals(sw->log, jmi_log_get_current_node(sw->log), logInfo, "switches", sw->sw, 2);
     *non_reals_changed_flag = (sw->sw[0] != sw_old.sw[0]) || (sw->sw[1] != sw_old.sw[1]);
-    return 0;
+    sw->iter++;
+    return jmi_block_solver_status_success;
 }
 
 int main() {
@@ -92,6 +108,11 @@ int main() {
     switch_state_t sw;
     jmi_callbacks_t cb;
     jmi_log_t* log;
+    int flag;
+
+    sw.b = FX;
+    sw.x = INITX;
+
     cb.log_options.logging_on_flag = 1;
     cb.log_options.log_level = 5;
     cb.log_options.copy_log_to_file_flag = 1;
@@ -107,6 +128,9 @@ int main() {
     log = jmi_log_init(&cb);
     sw.log = log;
     sw.cb = &cb;
+    jmi_block_solver_init_default_options(&options);
+    update_discrete_variables(&sw, &flag);
+
     jmi_new_block_solver(&block_solver, 
                           &cb, 
                           log,                          
@@ -118,5 +142,7 @@ int main() {
                           1,                            
                            &options,
                            &sw);
+    jmi_block_solver_solve(block_solver, 0, 1);
+    jmi_delete_block_solver(&block_solver);
     return 0;
 }

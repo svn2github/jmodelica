@@ -34,11 +34,6 @@
 #include "jmi_linear_solver.h"
 #include "jmi_block_solver_impl.h"
 
-int jmi_block_solver_init(jmi_block_solver_t* solver) {
-    int ret = 0;
-    return ret;
-}
-
 /**
  * \brief Allocate the internal structure for the block solver.
  */
@@ -386,13 +381,21 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                                           iter, cur_time);
             /* Solve block */
             ef = block_solver->solve(block_solver); 
+            if(block_solver->init) {
+            /* 
+                This needs to be done after "solve" so that block 
+                can finalize initialization at the first step.
+            */
+                block_solver->init = 0;
+            }
 
             if (ef!=0){ jmi_log_leave(log, iter_node); break; }
             
             ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
             
             jmi_log_reals(log, iter_node, logInfo, "ivs", block_solver->x, block_solver->n);
-            block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+            if(block_solver->log_discrete_variables)
+                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
             if(ef != 0) { 
                 jmi_log_fmt(log, iter_node, logError, "Error in discrete variables update"
@@ -414,7 +417,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
                
         /* ENHANCED FIXED POINT ITERATION */
-        if (converged==0 && ef==0){
+        if (converged==0 && ef==0 && block_solver->check_discrete_variables_change){
             int non_reals_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
                 "Starting enhanced block iteration at <t:%E>", cur_time);
@@ -510,8 +513,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
     if(block_solver->init) {
         /* 
-            This needs to be done after "solve" so that block 
-            can finalize initialization at the first step.
+        This needs to be done after "solve" so that block 
+        can finalize initialization at the first step.
         */
         block_solver->init = 0;
     }
@@ -521,4 +524,29 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     block_solver->nb_calls++;
     block_solver->time_spent += ((double)(c1-c0))/(CLOCKS_PER_SEC);
     return ef;
+}
+
+void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
+    bsop->res_tol = 1e-6;
+    /* Default Kinsol tolerance (machine precision pwr 1/3)  -> 1e-6 */
+    /* We use tighter:  1e-12 */
+    bsop->min_tol = 1e-12;       /**< \brief Minimum tolerance for the equation block solver */
+    bsop->max_iter = 100;
+
+    bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
+    bsop->use_jacobian_equilibration_flag = 0; 
+    bsop->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
+
+    bsop->block_jacobian_check = 0;
+    bsop->block_jacobian_check_tol = 1e-6;
+
+    bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;  
+    bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+    bsop->rescale_each_step_flag = 0;
+    bsop->rescale_after_singular_jac_flag = 0;
+    bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
+    bsop->experimental_mode = 0;
+    bsop->solver = JMI_KINSOL_SOLVER;
+    bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
+    bsop->id = 0;
 }

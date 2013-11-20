@@ -326,7 +326,7 @@ static INLINE BOOL can_pop(log_t *log)   { return log->topindex > 0; } /* always
   * Also calls indent_line().
   */
 static void set_category(log_t *log, category_t c) {
-    frame_t *top = topof(log);
+    frame_t *top;
 
     if (!log->initialized) {
         /* Hook to do some more initialization once everthing is set up.
@@ -335,7 +335,7 @@ static void set_category(log_t *log, category_t c) {
         log->initialized = TRUE;
         initialize(log);
     }
-
+    top = topof(log);
     if (log->c != c) emit(log);
     log->c = c;
     top->severest_category = severest(top->severest_category, c);

@@ -215,8 +215,11 @@ struct jmi_block_solver_options_t {
 
 };
 
-int jmi_block_solver_init(jmi_block_solver_t* solver);
+/** \brief Solve the eqautions in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+
+/** \brief Initialize the options with defaults */
+void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
 
 
 #endif /* _JMI_BLOCK_SOLVER_H */
