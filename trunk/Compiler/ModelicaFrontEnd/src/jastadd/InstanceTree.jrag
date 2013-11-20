@@ -1628,6 +1628,38 @@ aspect InstanceAST_API {
 	}
 	
 	/**
+	 * Check if this node is a class declaration or an extends in one.
+	 */
+	syn boolean InstNode.isClassDecl() = false;
+	eq InstClassDecl.isClassDecl()     = true;
+	eq InstExtends.isClassDecl()       = isInClassDecl();
+	
+	/**
+	 * Check if this extends is part of a class declaration.
+	 */
+	inh boolean InstExtends.isInClassDecl();
+    eq InstExtends.getChild().isInClassDecl()   = isInClassDecl();
+    eq InstClassDecl.getChild().isInClassDecl() = true;
+    eq InstNode.getChild().isInClassDecl()      = false;
+    eq Root.getChild().isInClassDecl()          = false;
+    
+    /**
+     * Check if this node is a component declaration or an extends in one.
+     */
+    syn boolean InstNode.isComponentDecl() = false;
+    eq InstComponentDecl.isComponentDecl() = true;
+    eq InstExtends.isComponentDecl()       = isInComponentDecl();
+    
+    /**
+     * Check if this extends is part of a component declaration.
+     */
+    inh boolean InstExtends.isInComponentDecl();
+    eq InstExtends.getChild().isInComponentDecl()       = isInComponentDecl();
+    eq InstComponentDecl.getChild().isInComponentDecl() = true;
+    eq InstNode.getChild().isInComponentDecl()          = false;
+    eq Root.getChild().isInComponentDecl()              = false;
+	
+	/**
 	 * Check if this node is, is of, or extends a primitive type.
 	 */
 	syn boolean InstNode.isOrExtendsPrimitive() = isPrimitive() || extendsPrimitive();
@@ -1650,7 +1682,29 @@ aspect InstanceAST_API {
 	eq InstNode.getChild().enclosedBy(InstNode node) = (node == this) || enclosedBy(node);
 	eq InstRoot.getChild().enclosedBy(InstNode node) = (node == this);
     eq Root.getChild().enclosedBy(InstNode node)     = false;
-	
+    
+    syn InstNode InstNode.commonAncestor(InstNode node) {
+        HashSet<InstNode> theirs = new HashSet<InstNode>(node.instAncestors());
+        for (InstNode mine : instAncestors())
+            if (theirs.contains(mine))
+                return mine;
+        return null;
+    }
+    
+    syn java.util.List<InstNode> InstNode.instAncestors() {
+        ArrayList<InstNode> list = new ArrayList<InstNode>();
+        InstNode cur = this;
+        while (cur != null) {
+            list.add(cur);
+            cur = cur.instNodeParent();
+        }
+        return list;
+    }
+
+    inh InstNode InstNode.instNodeParent();
+    eq InstNode.getChild().instNodeParent() = this;
+    eq Root.getChild().instNodeParent()     = null;
+    
 	/**
 	 * \brief Find the component that this access should be evaluated in.
 	 */

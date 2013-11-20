@@ -5063,4 +5063,55 @@ end RedeclareTests.ReplacableArray5;
 end ReplacableArray5;
 
 
+model ReplacableArray6
+    model A
+        replaceable Real x[2];
+    end A;
+    
+    model B
+        extends A(redeclare Real x(start = 1:2));
+    end B;
+    
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray6",
+			description="Redeclare of primitive array ommitting size, with array modifier on redeclaration",
+			flatModel="
+fclass RedeclareTests.ReplacableArray6
+ Real b.x[2](start = 1:2);
+end RedeclareTests.ReplacableArray6;
+")})));
+end ReplacableArray6;
+
+
+model ReplacableArray7
+    model A
+        replaceable B b[2];
+    end A;
+	
+	model B
+		Real x;
+	end B;
+    
+    model C
+        extends A(redeclare B b(x(start = 1:2) = 3:4));
+    end C;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ReplacableArray7",
+			description="Redeclare of composite array ommitting size, with array modifier on scalar member on redeclaration",
+			flatModel="
+fclass RedeclareTests.ReplacableArray7
+ Real c.b[1].x(start = (1:2)[1]) = (3:4)[1];
+ Real c.b[2].x(start = (1:2)[2]) = (3:4)[2];
+end RedeclareTests.ReplacableArray7;
+")})));
+end ReplacableArray7;
+
+
 end RedeclareTests;

@@ -637,10 +637,13 @@ aspect InstBindingType {
 	 */
 	syn FType InstAssignable.bindingType() {
 		InstNode decl = myInstValueMod().myInstNode();
-		if (myBindingExpHasEach() || decl == this) 
+		if (myBindingExpHasEach() || decl == this) {
 			return type();
-		else
+		} else {
+		    if (!decl.isClassDecl())
+		        decl = commonAncestor(decl);
 			return expandBindingType(type(), decl);
+		}
 	}
 		
 	/**
@@ -662,30 +665,32 @@ aspect InstBindingType {
 		InstNode decl = icm.myInstNode();
 		if (decl == this)
 			return res.sizedType(size());
-		if (icm.getEach()) 
-			return res;
-		else if (!enclosedBy(decl))
-			return res.sizedType(res.size().expand(decl.size()));
-		else
-			return expandBindingType(res.arrayType(size()), decl);
+        if (icm.getEach()) {
+            return res;
+        } else {
+            if (decl.isClassDecl()) {
+                return res.sizedType(res.size().expand(decl.size()));
+            } else {
+                decl = commonAncestor(decl);
+                if (decl != null)
+                    return expandBindingType(res.sizedType(size()), decl);
+                else
+                    return res.sizedType(res.size().expand(size()));
+            }
+        }
 	}
 	
 	/**
 	 * \brief Add array dimensions for surrounding InstArrayComponentDecls to 
 	 *        type for binding expression.
 	 */
-	inh FType InstAssignable.expandBindingType(FType type, InstNode node);
-	inh FType InstArrayComponentDecl.expandBindingType(FType type, InstNode node);
-	inh FType InstComposite.expandBindingType(FType type, InstNode node);
-	
+	inh FType InstNode.expandBindingType(FType type, InstNode node);
 	eq InstClassDecl.getChild().expandBindingType(FType type, InstNode node) = type;
 	eq InstRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
-	eq FlatRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
+	eq Root.getChild().expandBindingType(FType type, InstNode node)          = type;
 	eq InstArrayComponentDecl.getChild().expandBindingType(FType type, InstNode node) = 
 		expandBindingType(type.enclosingArrayType(myDimensionLength()), node);
-	eq InstComposite.getChild().expandBindingType(FType type, InstNode node) = 
-		(node == this) ? type : expandBindingType(type, node);
-	eq InstRecord.getChild().expandBindingType(FType type, InstNode node) = 
+	eq InstNode.getChild().expandBindingType(FType type, InstNode node) = 
 		(node == this) ? type : expandBindingType(type, node);
 	
 	inh boolean InstAssignable.inArrayComponent();

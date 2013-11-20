@@ -726,8 +726,9 @@ aspect Flattening {
 			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
-				return (isEach || decl == InstAssignable.this || !enclosedBy(decl)) ? 
-						exp : exp.dynamicFExp(splitBindingFExp(exp, decl));
+                InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
+				return (isEach || decl == InstAssignable.this) ? 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
 			}
 		};
         AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
@@ -849,8 +850,12 @@ aspect Flattening {
 			FExp fe = im.getFExp();
 			boolean hasEach = im.hasEach() || 
 				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
-			if (!hasEach && im.myInstNode() != this)
-				fe = splitBindingFExp(fe, im.myInstNode());
+            InstNode decl = im.myInstNode();
+			if (!hasEach && decl != this) {
+			    if (!decl.isClassDecl())
+			        decl = commonAncestor(decl);
+				fe = splitBindingFExp(fe, decl);
+			}
 			return fe.unboundCopy();
 		}
 		return null;
@@ -873,18 +878,13 @@ aspect Flattening {
 	 * @param fe    the expression to split
 	 * @param node  the node where the binding expression was declared 
 	 */
-	inh FExp InstAssignable.splitBindingFExp(FExp fe, InstNode node);
-	inh FExp InstArrayComponentDecl.splitBindingFExp(FExp fe, InstNode node);
-	inh FExp InstComposite.splitBindingFExp(FExp fe, InstNode node);
-	
+	inh FExp InstNode.splitBindingFExp(FExp fe, InstNode node);
 	eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
 	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
-	eq FlatRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq Root.getChild().splitBindingFExp(FExp fe, InstNode node)          = fe;
 	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
-	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
-		(node == this) ? fe : splitBindingFExp(fe, node);
-	eq InstRecord.getChild().splitBindingFExp(FExp fe, InstNode node) =
+	eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		(node == this) ? fe : splitBindingFExp(fe, node);
 	
 	/**
@@ -1124,7 +1124,7 @@ aspect Flattening {
 				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
 				if (getInstModification().hasInstValueMod()) {
-					InstValueModification ivm = getInstModification().getInstValueMod();
+					InstValueModification ivm = im.getInstValueMod();
 					a.setValue(aer.retrieve(ivm, isEach).flatten(prefix));
 				}
 				if (isEach)

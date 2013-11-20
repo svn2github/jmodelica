@@ -94,7 +94,7 @@ aspect FlatTypeCheck {
         Size componentSize = size();
         if (!componentSize.isComplete() && !func && !inRecordDecl()) 
     		error("Can not infer array size of the variable " + name());
-    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
+    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			bexp.error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
