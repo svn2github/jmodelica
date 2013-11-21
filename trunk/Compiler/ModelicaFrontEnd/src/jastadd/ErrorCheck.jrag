@@ -539,8 +539,7 @@ aspect InstanceErrorCheck {
 	    		if (isActive() && hasInstModification())
 	    			getInstModification().collectErrors(checkType);
 	    		
-	    		if (!isDisabled() || checkType.checkInactiveComponents || 
-	    		        root().options.getBooleanOption("check_inactive_contitionals")) {
+	    		if (shouldCheckInto(checkType)) {
   		  		    errorChecked = false;
     	    		super.collectErrors(checkType);
     	    		if (hasInstConstraining())
@@ -549,6 +548,9 @@ aspect InstanceErrorCheck {
 	    	}
 		}
 	}
+	
+	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
+	        !isDisabled() || checkType.checkInactiveComponents || root().options.getBooleanOption("check_inactive_contitionals");
 	
 	// TODO: move to better place (InstanceTree.jrag?)
 	syn boolean InstComponentDecl.isActive() {
@@ -738,15 +740,63 @@ aspect InstanceErrorCheck {
     	  errorChecked = true;
 		  getOriginalInstClass().collectErrors(checkType);
 		}
-		
 	}
 
 	public void InstBuiltIn.collectErrors(ErrorCheckType checkType) {}
 
 	public void InstComponentRedeclare.collectErrors(ErrorCheckType checkType) {
-		super.collectErrors(checkType);
-		getInstComponentDecl().collectErrors(checkType);
+		if (!errorChecked) {
+		    super.collectErrors(checkType);
+		    errorChecked = true;
+		    // TODO: The InstComponentDecl doesn't really have enough information to check this, 
+		    //       as it doesn't know about the original declaration or constraining type.
+		    //       Fixing that might need redesign of this part of the instance tree
+		    getInstComponentDecl().checkRedeclares(checkType);
+		}
 	}
+	
+	public void InstNode.checkRedeclares(ErrorCheckType checkType) {
+	    if (!errorChecked) {
+	        for (InstNode n : getInstComponentDecls()) 
+	            n.checkRedeclares(checkType);
+	        for (InstNode n : getInstExtendss()) 
+	            n.checkRedeclares(checkType);
+	      }
+	}
+
+    public void InstReplacingRecord.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingComposite.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingPrimitive.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingExpandableConnectorDecl.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstComponentDecl.checkRedeclares(ErrorCheckType checkType) {
+        if (isActive() && hasInstModification())
+            getInstModification().collectErrors(checkType);
+        if (shouldCheckInto(checkType)) {
+            if (hasInstConstraining())
+                getInstConstraining().collectErrors(checkType);
+            super.checkRedeclares(checkType);
+        }
+    }
 
 	public void InstClassRedeclare.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);

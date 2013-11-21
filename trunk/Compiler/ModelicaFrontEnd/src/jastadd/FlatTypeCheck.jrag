@@ -48,6 +48,14 @@ aspect FlatTypeCheck {
         typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
     }
 
+    public void InstReplacingPrimitive.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingExpandableConnectorDecl.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
     public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
         super.typeCheck(checkType);
         

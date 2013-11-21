@@ -3306,6 +3306,60 @@ end RedeclareTests.RedeclareTest38;
 end RedeclareTest38;
 
 
+// TODO: add another test where call to f() is in binding expression of x
+model RedeclareTest39
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+    algorithm
+        y := x + 1;
+    end f2;
+    
+    model A
+        replaceable function f = f1;
+        Real x;
+    equation
+        x = f(time);
+    end A;
+    
+    model B
+        replaceable A a constrainedby A(redeclare function f = f2);
+    end B;
+    
+    model C
+        B b(redeclare A a);
+    end C;
+    
+    C c;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareTest39",
+			description="Error check of redeclare that needs the modifications from the constrainedby clause to be valid",
+			flatModel="
+fclass RedeclareTests.RedeclareTest39
+ Real c.b.a.x;
+equation
+ c.b.a.x = RedeclareTests.RedeclareTest39.f2(time);
+
+public
+ function RedeclareTests.RedeclareTest39.f2
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end RedeclareTests.RedeclareTest39.f2;
+
+end RedeclareTests.RedeclareTest39;
+")})));
+end RedeclareTest39;
+
+
 model RedeclareElement1
   model A
     replaceable model B
