@@ -81,6 +81,29 @@ aspect EquationSolve {
 			return Solvability.UNSOLVABLE;
 	}
 
+    eq FIfWhenElseEquation.isSolved(String name, boolean duringTearing) {
+        Set<FVariable> leftVars = referencedFVariablesInLHS();
+        
+        boolean inLeft = false;
+        for (FVariable fv : leftVars) {
+            if (fv.name().equals(name))
+                inLeft = true;
+        }
+        
+        Set<FVariable> argVars = referencedFVariablesInRHS();
+
+        boolean inArgs = false;
+        for (FVariable fv : argVars) {
+            if (fv.name().equals(name))
+                inArgs = true;
+        }
+
+        if (inLeft && !inArgs)
+            return Solvability.ANALYTICALLY_SOLVABLE;
+        else
+            return Solvability.UNSOLVABLE;
+    }
+    
 	syn nta FExp FEquation.solution(String name) {
 		return solution(name, false);
 	}

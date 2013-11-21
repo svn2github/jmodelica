@@ -1400,6 +1400,21 @@ aspect ReferencedVariables {
 		return res;
 	}
 	
+    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInRHS() {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+        for (FAbstractEquation fae : getFAbstractEquations())
+            res.addAll(fae.FIdUseExpsInRHS());
+        return res;
+    }
+    
+    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInRHS() {
+        Set<FIdUseExp> res = super.FIdUseExpsInRHS();
+        getTest().findFIdUseExpsInTree(res);
+        if (hasElse())
+            res.addAll(getElse().FIdUseExpsInRHS());
+        return res;
+    }
+    
 	syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = Collections.emptySet();
 	eq FEquation.FIdUseExpsInLHS()                         = getLeft().findFIdUseExpsInTree();
 	eq FFunctionCallEquation.FIdUseExpsInLHS()             = getLefts().findFIdUseExpsInTree();
@@ -1418,6 +1433,20 @@ aspect ReferencedVariables {
 		return res;
 	}
 	
+    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInLHS() {
+        Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
+        for (FAbstractEquation fae : getFAbstractEquations())
+            res.addAll(fae.FIdUseExpsInLHS());
+        return res;
+    }
+    
+    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInLHS() {
+        Set<FIdUseExp> res = super.FIdUseExpsInLHS();
+        if (hasElse())
+            res.addAll(getElse().FIdUseExpsInLHS());
+        return res;
+    }
+    
 	syn ArrayList<FIdUseExp> FAbstractEquation.uniqueFIdUseExpsInLHS() {
 		ArrayList<FIdUseExp>   res   = new ArrayList<FIdUseExp>();
 		Set<FAbstractVariable> visit = new LinkedHashSet<FAbstractVariable>();

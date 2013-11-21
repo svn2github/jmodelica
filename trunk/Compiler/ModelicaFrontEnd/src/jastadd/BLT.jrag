@@ -450,7 +450,7 @@ aspect BLT{
 	 * Create a simple equation block from a single equation. 
 	 */
 	public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
-		return null;
+		throw new UnsupportedOperationException("Unable to construct equation block from equation type " + getClass().getSimpleName());
 	}
 
 	public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
@@ -496,6 +496,19 @@ aspect BLT{
 		}
 	}
 	
+    public SimpleEquationBlock FIfEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+        if (numScalarEquations() == 0)
+            return new MetaEquationBlock(this);
+        for (Integer assignedIndex : assignedIndices)
+            if (assignedIndex == null)
+                throw new IllegalArgumentException("FIfEquation, AssignedIndex must be set for this class type! equation: " + this);
+        if (solvability.isAnalyticallySolvable()) {
+            return new SolvedIfEquationBlock(this, fvs, assignedIndices);
+        } else {
+            return new UnsolvedIfEquationBlock(this, fvs, assignedIndices);
+        }
+    }
+
 	
 	public class BiPGraph{}
 	
@@ -1783,6 +1796,77 @@ aspect BLT{
 
 	}
 	
+    /**
+     * Base class for blocks representing an algorithm block.
+     */
+    public abstract class IfEquationBlock extends SimpleEquationBlock {
+        
+        protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+        protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
+        
+        public IfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation);
+            this.activeVars.addAll(activeVariables);
+            this.assignedIndices.addAll(assignedIndices);
+        }
+    
+        public FIfEquation equation() {
+            return (FIfEquation) super.equation();
+        }
+        
+        public Collection<FVariable> activeVariables() {
+            return activeVars;
+        }   
+                
+        public boolean isMixed() {
+            return false;
+        }
+        
+        public Collection<FAbstractEquation> differentiatedEquations() {
+            return new ArrayList<FAbstractEquation>();
+        }
+        
+        public void prettyPrint(PrintStream str) {
+            String prefix = isSolvable() ? "Solved" : "Non-solved";
+            str.format("%s if equation block of %d variables:\n", prefix, activeVariables().size());
+            str.println("Unknown variables:");
+            prettyPrintActiveVariables(str);
+            str.println("If Equation:");
+            prettyPrintEquation(str);
+        }
+        
+    }
+
+    /**
+     * An algorithm block that is solved in its active variables.
+     */
+    public class SolvedIfEquationBlock extends IfEquationBlock {
+        
+        public SolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation, activeVariables, assignedIndices);
+        }
+        
+        public boolean isSolvable() {
+            return true;
+        }
+        
+    }
+
+    /** 
+     * An algorithm block that isn't solved in its active variables.
+     */
+    public class UnsolvedIfEquationBlock extends IfEquationBlock {
+        
+        public UnsolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation, activeVariables, assignedIndices);
+        }
+
+        public boolean isSolvable() {
+            return false;
+        }
+
+    }
+    
 	/**
 	 * TornEquationBlock represents an equation block resulting from tearing.
 	 */
