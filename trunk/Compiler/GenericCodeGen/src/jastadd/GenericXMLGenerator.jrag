@@ -94,10 +94,37 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param includeDir      directory to look for included files in. If null, includes are not supported
      */
     public void generate(Reader templateReader, PrintStream genPrinter, File includeDir) {
-        if (templateReader == null) 
+        if (templateReader == null) {
+        	generateXMLDeclaration(genPrinter);
             rootTag().generate(genPrinter);
-        else 
+        	
+        } else {
             super.generate(templateReader, genPrinter, includeDir);
+        }
+    }
+    
+    /**
+     * Generates the XML Declaration.
+     */
+    protected void generateXMLDeclaration(PrintStream printer) {	
+		printer.print("<?xml");		
+		printer.format(" %s=\"%s\"", "version", getXMLVersion());
+		printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
+		printer.print("?>\n");
+    }
+    
+    /**
+     * Get the version for the XML Declaration, defalut implementation returns "1.0".
+     */
+    protected String getXMLVersion() {
+    	return "1.0";
+    }
+    
+    /**
+     * Get the encoding for the XML Declaration, defalut implementation returns "UTF-8".
+     */
+    protected String getXMLEncoding() {
+    	return "UTF-8";
     }
     
     /**
@@ -354,5 +381,4 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         }
         
     }
-
 }
