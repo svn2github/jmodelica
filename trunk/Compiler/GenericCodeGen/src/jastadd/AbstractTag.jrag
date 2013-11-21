@@ -94,4 +94,52 @@ public abstract class AbstractTag {
 		return esc + name + esc; 
 	}
 	
+	/**
+	 * Add this tag to tag map.
+	 * 
+	 * Also instantiates and adds any internal tag classes.
+	 */
+	public void addTo(Map<String,AbstractTag> map) {
+		if (!map.containsKey(getName())) {
+			map.put(getName(), this);
+			instantiateTags(map);
+		}
+	}
+	
+	/**
+	 * Instantiates all inner classes, of this tag, that inherits AbstractTag and adds them to the tag map.
+	 */
+	protected void instantiateTags(Map<String,AbstractTag> map) {
+		instantiateTags(getClass(), map, this, myGenerator, null);
+	}
+	
+	/**
+	 * Instantiates all inner classes, of the given class, that inherits AbstractTag and adds them to the tag map.
+	 * 
+	 * @param cl      the Class to search for tags in
+	 * @param map     the map to add them to
+	 * @param parent  the object that the tags are inner classes of
+	 * @param gen     the code generator instance
+	 * @param fclass  an FClass object used as a basis for the code generation
+	 */
+	public static void instantiateTags(Class cl, Map<String,AbstractTag> map, Object parent, AbstractGenerator gen, FClass fclass) {
+		Class<?> cur = cl;
+		while (!cur.equals(Object.class)) {
+			for (Class<?> inner : cur.getDeclaredClasses()) {
+			    if (!java.lang.reflect.Modifier.isAbstract(inner.getModifiers())) {
+    				for (Constructor<?> con : inner.getConstructors()) {
+    					try {
+    						AbstractTag tag = (AbstractTag) con.newInstance(parent, gen, fclass);
+    						tag.addTo(map);
+    						if (!map.containsKey(tag.getName()))
+    							map.put(tag.getName(), tag);
+    					} catch (Exception e) {
+    					}
+    				}
+			    }
+			}
+			cur = cur.getSuperclass();
+		}
+	}
+	
 }

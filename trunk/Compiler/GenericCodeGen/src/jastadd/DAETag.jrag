@@ -107,5 +107,13 @@ public abstract class DAETag extends AbstractTag {
 	public FClass getFClass() {
 		return fclass;
 	}
+	
+	/**
+	 * Instantiates all inner classes, of this tag, that inherits AbstractTag and adds them to the tag map.
+	 */
+	protected void instantiateTags(Map<String,AbstractTag> map) {
+		instantiateTags(getClass(), map, this, myGenerator, fclass);
+	}
+
 }
 

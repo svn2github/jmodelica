@@ -177,7 +177,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param value    the value of the attribute
      * @param printer  the print stream to use
      */
-    protected void generateAttribute(String name, String value, PrintStream printer) {
+    protected void generateAttribute(String name, Object value, PrintStream printer) {
         printer.format(" %s=\"%s\"", name, value);
     }
     
@@ -211,7 +211,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         /**
          * The name to use for the xml tag or attribute.
          */
-        protected final String xml;
+        protected String xml;
         
         /**
          * Construct a tag.
@@ -271,7 +271,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * 
          * Subclasses that represent an XML attribute should override and return non-null.
          */
-        public String value() {
+        public Object value() {
             return null;
         }
         
@@ -344,10 +344,10 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * @param printer A PrintStream object for output of the generated code.
          */
         public void generate(PrintStream printer) {
-            String val = value();
+        	Object val = value();
             if (val != null)
                 generateAttribute(xml, val, printer);
-            else if (childTags().length == 0)
+            else if (childTags().length != 0)
                 generateNode(xml, printer);
             else
                 generateClosed(xml, printer);

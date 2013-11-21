@@ -152,9 +152,9 @@ aspect OptimicaCompilationHelpers {
     }
     
     //Overshadowing the use of XMLgenerator in case of optimization.
-    refine CompilationHelpers public XMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
-        if (fc instanceof FOptClass)
-        	return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
+    refine CompilationHelpers public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
+        if (fc instanceof FOptClass && (this == JMI || this == FMIX))
+            return new OptimicaXMLGenerator(new PrettyPrinter(), '$', (FOptClass) fc);
         else
             return refined(fc);
     }

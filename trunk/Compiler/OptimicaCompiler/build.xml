@@ -171,6 +171,9 @@
 			<fileset dir="${test_framework}">
 				<patternset refid="jastadd.files"/>
 			</fileset>
+            <fileset dir="${fmi_xml_codegen}">
+                <patternset refid="jastadd.files"/>
+            </fileset>
 			<fileset dir="${modelica_xml_back_end_ast}">
                 <patternset refid="jastadd.files"/>
 			</fileset>

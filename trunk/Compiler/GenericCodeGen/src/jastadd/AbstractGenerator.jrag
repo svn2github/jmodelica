@@ -116,22 +116,7 @@ public abstract class AbstractGenerator {
 	 * @param fclass An FClass object used as a basis for the code generation.
 	 */
 	private void instantiateTags(FClass fclass) {
-		Class<?> cur = getClass();
-		while (!cur.equals(AbstractGenerator.class)) {
-			for (Class<?> inner : cur.getDeclaredClasses()) {
-			    if (!java.lang.reflect.Modifier.isAbstract(inner.getModifiers())) {
-    				for (Constructor<?> con : inner.getConstructors()) {
-    					try {
-    						AbstractTag tag = (AbstractTag) con.newInstance(this, this, fclass);
-    						if (!tagMap.containsKey(tag.getName()))
-    							tagMap.put(tag.getName(), tag);
-    					} catch (Exception e) {
-    					}
-    				}
-			    }
-			}
-			cur = cur.getSuperclass();
-		}
+		AbstractTag.instantiateTags(getClass(), tagMap, this, this, fclass);
 	}
 	
 	/**

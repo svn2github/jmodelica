@@ -235,8 +235,4 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 			genPrinter.println(indent + "</opt:TimePoint>");              
 		}
 	}
-	
-	
-	
 }
-
