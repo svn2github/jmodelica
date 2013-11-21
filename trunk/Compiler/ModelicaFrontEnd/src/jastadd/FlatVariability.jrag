@@ -93,7 +93,14 @@ aspect FlatVariability {
 	protected static final int Continuous.VARIABILITY_LEVEL = 30;
 	
 	syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
-	eq FEquation.variability() = getLeft().variability().combine(getRight().variability());
+	eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
+	eq FIfEquation.variability() {
+		if (isWhen())
+			return fDiscrete();
+		
+		// TODO: implement
+		return super.variability();
+	}
 	eq FFunctionCallEquation.variability() {
 		FTypePrefixVariability var = fConstant();
 		// Check all output arguments

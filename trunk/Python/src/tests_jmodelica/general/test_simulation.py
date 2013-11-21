@@ -735,4 +735,54 @@ class TestQR2(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['Q[1,1]','p[1]'],rel_tol=1e-4, abs_tol=1e-4)
 
+class TestWhenInLoop1(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest1')
 
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', -1)
+        self.assert_end_value('y', -0.4)
+
+class TestWhenInLoop2(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest2')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', -0.75)
+        self.assert_end_value('y', -0.25)
+    
+class TestWhenInLoop4(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest4')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', 1)
+        self.assert_end_value('y', 3)
+        self.assert_end_value('z', 2)

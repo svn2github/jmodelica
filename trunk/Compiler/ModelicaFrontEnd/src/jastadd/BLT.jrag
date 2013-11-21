@@ -589,11 +589,12 @@ aspect BLT{
 			for (AbstractEquationBlock block : this) {
 				if (!block.isSolvable()) {
 					for (FAbstractEquation equ : block.equations()) {
-						if (equ instanceof FWhenEquation) {
-							if (block.equations().size() == 1) {
-								equ.compliance("Unsolved equations in when-clause is not supported. \n" + equ.prettyPrint(""));
-							} else {
-								equ.compliance("When-clause in unsolved equations is not supported. \n" + equ.prettyPrint(""));
+						if (equ.isWhen()) {
+							for (FExp guard : equ.transformedGuards()) {
+								if (guard.dependsOn(block.activeVariables())) {
+									equ.error("A when-guard is involved in an algebraic loop, "
+											+ "consider breaking it using pre() expressions");
+								}
 							}
 						}
 					}
@@ -1686,7 +1687,7 @@ aspect BLT{
 				Collection<FVariable> fvs = new ArrayList<FVariable>();
 				Collection<Integer> assignedIndices = new ArrayList<Integer>();
 				int i = 0;
-				for (FIdUseExp e : eqn.simpleLefts()) {
+				for (FIdUseExp e : eqn.FIdUseExpsInLHS()) {
 					fvs.add((FVariable)e.myFV());
 					assignedIndices.add(i++);
 				}

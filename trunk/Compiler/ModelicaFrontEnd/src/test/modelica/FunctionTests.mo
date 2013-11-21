@@ -10437,18 +10437,20 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  parameter Real a;
  parameter Real p;
  discrete Real k;
+ discrete Boolean temp_1;
 initial equation 
  k = if time >= 0.0 then time else time * 2;
+ pre(temp_1) = false;
 parameter equation
  p = if a >= 0.0 then a else a * 2;
 equation
- when time > 1 then
-  k = if time >= 0.0 then time else time * 2;
- end when;
+ temp_1 = time > 1;
+ k = if temp_1 and not pre(temp_1) then if time >= 0.0 then time else time * 2 else pre(k);
  x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
  y[2] = if time >= 0.0 then time * 2 else time * 3;
 end FunctionTests.FunctionLike.Special.SemiLinear1;
+			
 ")})));
 end SemiLinear1;
 
@@ -10501,20 +10503,20 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear3
  parameter Real p2 = 2 /* 2 */;
  discrete Real r1;
  discrete Real r2;
+ discrete Boolean temp_1;
 initial equation 
  r1 = r2;
  p1 = p2;
  pre(r2) = 0.0;
+ pre(temp_1) = false;
 equation
  sa = time;
  sa = sb;
- when time > 1 then
-  r2 = 2;
- end when;
- when time > 1 then
-  r1 = 2;
- end when;
+ temp_1 = time > 1;
+ r1 = if temp_1 and not pre(temp_1) then 2 else pre(r1);
+ r2 = if temp_1 and not pre(temp_1) then 2 else pre(r2);
 end FunctionTests.FunctionLike.Special.SemiLinear3;
+			
 ")})));
 end SemiLinear3;
 

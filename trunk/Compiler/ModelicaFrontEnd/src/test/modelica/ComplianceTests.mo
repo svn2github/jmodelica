@@ -148,62 +148,6 @@ end ArrayOfRecords_Warn;
 // Real x = f();
 //end ExternalFunction_ComplErr;
 
-model UnsolvedWhenEqu_ComplErr
- discrete Real x;
- Real y1,y2;
- Real z1,z2,z3;
-equation
- when time > 3 then
-  x = sin(x) +3;
- end when;
- 
-  y1 + y2 = 5;
-  when time > 3 then 
-    y1 = 7 - 2*y2;
-  end when;
-  
-  z1 + z2 + z3 = 5;
-  when time > 3 then 
-    z1 = 7 - 2*z2;
-    z3 = 7 - 2*z2;
-  end when;
-
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnsolvedWhenEqu_ComplErr",
-			description="Compliance error for when statements",
-			errorMessage="
-4 errors found:
-Error: in file '...':
-Compliance error at line 0, column 0:
-  Unsolved equations in when-clause is not supported. 
-when time > 3 then
- x = sin(x) + 3;
-end when
-
-Error: in file '...':
-Compliance error at line 0, column 0:
-  When-clause in unsolved equations is not supported. 
-when time > 3 then
- y1 = 7 - 2 * y2;
-end when
-
-Error: in file '...':
-Compliance error at line 0, column 0:
-  When-clause in unsolved equations is not supported. 
-when time > 3 then
- z1 = 7 - 2 * z2;
-end when
-
-Error: in file '...':
-Compliance error at line 0, column 0:
-  When-clause in unsolved equations is not supported. 
-when time > 3 then
- z3 = 7 - 2 * z2;
-end when
-")})));
-end UnsolvedWhenEqu_ComplErr;
-
 model ElseWhenEq_ComplErr
  Real x;
 equation
@@ -486,6 +430,10 @@ fclass ComplianceTests.HybridFMU1
  discrete Boolean z(start = true);
  parameter Real p1 = 1.2 /* 1.2 */;
  parameter Real p2;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ discrete Boolean temp_3;
+ discrete Boolean temp_4;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
@@ -493,26 +441,25 @@ initial equation
  pre(v) = true;
  pre(z) = true;
  xx = 2;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
+ pre(temp_3) = false;
+ pre(temp_4) = false;
 parameter equation
  p2 = floor(p1);
 equation
  der(xx) = - x;
- when y > 2 and pre(z) then
-  w = false;
- end when;
- when y > 2 and z then
-  v = false;
- end when;
- when x > 2 then
-  z = false;
- end when;
- when sample(0, 1) then
-  x = pre(x) + 1.1;
- end when;
- when sample(0, 1) then
-  y = pre(y) + 1.1;
- end when;
+ temp_1 = y > 2 and pre(z);
+ w = if temp_1 and not pre(temp_1) then false else pre(w);
+ temp_2 = y > 2 and z;
+ v = if temp_2 and not pre(temp_2) then false else pre(v);
+ temp_3 = x > 2;
+ z = if temp_3 and not pre(temp_3) then false else pre(z);
+ temp_4 = sample(0, 1);
+ x = if temp_4 and not pre(temp_4) then pre(x) + 1.1 else pre(x);
+ y = if temp_4 and not pre(temp_4) then pre(y) + 1.1 else pre(y);
 end ComplianceTests.HybridFMU1;
+			
 ")})));
 end HybridFMU1;
 
@@ -586,19 +533,19 @@ fclass ComplianceTests.HybridFMU2
  discrete Real x;
  discrete Real y;
  Real dummy;
+ discrete Boolean temp_1;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
  dummy = 0.0;
+ pre(temp_1) = false;
 equation
  der(dummy) = 0;
- when sample(0, 1 / 3) then
-  x = pre(x) + 1;
- end when;
- when initial() then
-  y = pre(y) + 1;
- end when;
+ temp_1 = sample(0, 0.3333333333333333);
+ x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
+ y = if initial() then pre(y) + 1 else pre(y);
 end ComplianceTests.HybridFMU2;
+			
 ")})));
 end HybridFMU2;
 

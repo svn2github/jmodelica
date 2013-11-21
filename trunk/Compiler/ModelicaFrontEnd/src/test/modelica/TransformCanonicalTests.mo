@@ -2006,28 +2006,23 @@ fclass TransformCanonicalTests.InitialEqTest14
  discrete Boolean m.b1(start = false,fixed = true);
  discrete Integer m.i1(start = 4,fixed = true);
  discrete Real m.x2(start = 2);
+ discrete Boolean temp_1;
 initial equation 
  m.pre(x1) = 1;
  m.pre(b1) = false;
  m.pre(i1) = 4;
  m.pre(x2) = 2;
  m.t = 0;
+ pre(temp_1) = false;
 equation
  m.der(t) = 1;
- when time > 1 then
-  m.b1 = true;
- end when;
- when time > 1 then
-  m.i1 = 3;
- end when;
- when time > 1 then
-  m.x1 = m.pre(x1) + 1;
- end when;
- when time > 1 then
-  m.x2 = m.pre(x2) + 1;
- end when;
-
+ temp_1 = time > 1;
+ m.b1 = if temp_1 and not pre(temp_1) then true else m.pre(b1);
+ m.i1 = if temp_1 and not pre(temp_1) then 3 else m.pre(i1);
+ m.x1 = if temp_1 and not pre(temp_1) then m.pre(x1) + 1 else m.pre(x1);
+ m.x2 = if temp_1 and not pre(temp_1) then m.pre(x2) + 1 else m.pre(x2);
 end TransformCanonicalTests.InitialEqTest14;
+			
 ")})));
   end InitialEqTest14;
 
@@ -2391,12 +2386,12 @@ equation
             name="MatchingTest3",
             description="Tests so that the matching algorithm works well with discrete variables and equation",
             errorMessage="
+1 errors found:
+
 Error: in file '...':
-Compliance error at line 0, column 0:
-  When-clause in unsolved equations is not supported. 
-when b > pre(c) then
- c = pre(c) + 42;
-end when
+Semantic error at line 0, column 0:
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+			
 ")})));
 end MatchingTest3;
 
@@ -2461,6 +2456,13 @@ fclass TransformCanonicalTests.WhenEqu1
  Real z[1];
  Real z[2];
  Real z[3];
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ discrete Boolean temp_3;
+ discrete Boolean temp_4;
+ discrete Boolean temp_5;
+ discrete Boolean temp_6;
+ discrete Boolean temp_7;
 initial equation 
  pre(x[1]) = 0.0;
  pre(x[2]) = 0.0;
@@ -2468,32 +2470,29 @@ initial equation
  z[1] = 0.0;
  z[2] = 0.0;
  z[3] = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
+ pre(temp_3) = false;
+ pre(temp_4) = false;
+ pre(temp_5) = false;
+ pre(temp_6) = false;
+ pre(temp_7) = false;
 equation
  der(z[1]) = z[1] .* 0.1;
  der(z[2]) = z[2] .* 0.2;
  der(z[3]) = z[3] .* 0.3;
- when {z[1] > 2, z[2] > 2, z[3] > 2} then
-  x[1] = 1;
- elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
-  x[1] = 4;
- elsewhen z[1] + z[2] + z[3] > 4.5 then
-  x[1] = 7;
- end when;
- when {z[1] > 2, z[2] > 2, z[3] > 2} then
-  x[2] = 2;
- elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
-  x[2] = 5;
- elsewhen z[1] + z[2] + z[3] > 4.5 then
-  x[2] = 8;
- end when;
- when {z[1] > 2, z[2] > 2, z[3] > 2} then
-  x[3] = 3;
- elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
-  x[3] = 6;
- elsewhen z[1] + z[2] + z[3] > 4.5 then
-  x[3] = 9;
- end when;
+ temp_1 = z[1] > 2;
+ temp_2 = z[2] > 2;
+ temp_3 = z[3] > 2;
+ temp_4 = z[1] < 0;
+ temp_5 = z[2] < 0;
+ temp_6 = z[3] < 0;
+ temp_7 = z[1] + z[2] + z[3] > 4.5;
+ x[1] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 1 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 4 elseif temp_7 and not pre(temp_7) then 7 else pre(x[1]);
+ x[2] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 2 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 5 elseif temp_7 and not pre(temp_7) then 8 else pre(x[2]);
+ x[3] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 3 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 6 elseif temp_7 and not pre(temp_7) then 9 else pre(x[3]);
 end TransformCanonicalTests.WhenEqu1;
+			
 ")})));
 end WhenEqu1;
 
@@ -2533,6 +2532,10 @@ fclass TransformCanonicalTests.WhenEqu2
  discrete Boolean w(start = true);
  discrete Boolean v(start = true);
  discrete Boolean z(start = true);
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ discrete Boolean temp_3;
+ discrete Boolean temp_4;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
@@ -2540,24 +2543,23 @@ initial equation
  pre(v) = true;
  pre(z) = true;
  xx = 2;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
+ pre(temp_3) = false;
+ pre(temp_4) = false;
 equation
  der(xx) = - x;
- when y > 2 and pre(z) then
-  w = false;
- end when;
- when y > 2 and z then
-  v = false;
- end when;
- when x > 2 then
-  z = false;
- end when;
- when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
-  x = pre(x) + 1.1;
- end when;
- when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
-  y = pre(y) + 1.1;
- end when;
+ temp_1 = y > 2 and pre(z);
+ w = if temp_1 and not pre(temp_1) then false else pre(w);
+ temp_2 = y > 2 and z;
+ v = if temp_2 and not pre(temp_2) then false else pre(v);
+ temp_3 = x > 2;
+ z = if temp_3 and not pre(temp_3) then false else pre(z);
+ temp_4 = time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1;
+ x = if temp_4 and not pre(temp_4) then pre(x) + 1.1 else pre(x);
+ y = if temp_4 and not pre(temp_4) then pre(y) + 1.1 else pre(y);
 end TransformCanonicalTests.WhenEqu2;
+			
 ")})));
 end WhenEqu2;
 
@@ -2600,6 +2602,9 @@ fclass TransformCanonicalTests.WhenEqu3
  discrete Boolean v(start = true);
  discrete Boolean z(start = true);
  discrete Boolean b1;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+ discrete Boolean temp_3;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
@@ -2608,25 +2613,22 @@ initial equation
  pre(z) = true;
  xx = 2;
  pre(b1) = false;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
+ pre(temp_3) = false;
 equation
  der(xx) = - x;
- when b1 and pre(z) then
-  w = false;
- end when;
- when b1 and z then
-  v = false;
- end when;
- when b1 then
-  z = false;
- end when;
- when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
-  x = pre(x) + 1.1;
- end when;
- when time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1 then
-  y = pre(y) + 1.1;
- end when;
+ temp_1 = b1 and pre(z);
+ w = if temp_1 and not pre(temp_1) then false else pre(w);
+ temp_2 = b1 and z;
+ v = if temp_2 and not pre(temp_2) then false else pre(v);
+ z = if b1 and not pre(b1) then false else pre(z);
+ temp_3 = time > 1 and time < 1.1 or time > 2 and time < 2.1 or time > 3 and time < 3.1;
+ x = if temp_3 and not pre(temp_3) then pre(x) + 1.1 else pre(x);
+ y = if temp_3 and not pre(temp_3) then pre(y) + 1.1 else pre(y);
  b1 = y > 2;
 end TransformCanonicalTests.WhenEqu3;
+			
 ")})));
 end WhenEqu3;
 
@@ -2654,41 +2656,31 @@ equation
 			equation_sorting=true,
 			flatModel="
 fclass TransformCanonicalTests.WhenEqu4
-discrete Real x;
-discrete Real y;
-discrete Real z;
-discrete Real v;
-Real t;
+ discrete Real x;
+ discrete Real y;
+ discrete Real z;
+ discrete Real v;
+ Real t;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
-pre(x) = 0.0;
-pre(y) = 0.0;
-pre(z) = 0.0;
-pre(v) = 0.0;
-t = 0.0;
+ pre(x) = 0.0;
+ pre(y) = 0.0;
+ pre(z) = 0.0;
+ pre(v) = 0.0;
+ t = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
-der(t) = 1;
-when time > 3 then
-x = 1;
-elsewhen time > 4 then
-x = 4;
-end when;
-when time > 3 then
-y = 2;
-elsewhen time > 4 then
-y = 3;
-end when;
-when time > 3 then
-z = 3;
-elsewhen time > 4 then
-z = 2;
-end when;
-when time > 3 then
-v = 4;
-elsewhen time > 4 then
-v = 1;
-end when;
-
+ der(t) = 1;
+ temp_1 = time > 3;
+ temp_2 = time > 4;
+ v = if temp_1 and not pre(temp_1) then 4 elseif temp_2 and not pre(temp_2) then 1 else pre(v);
+ x = if temp_1 and not pre(temp_1) then 1 elseif temp_2 and not pre(temp_2) then 4 else pre(x);
+ y = if temp_1 and not pre(temp_1) then 2 elseif temp_2 and not pre(temp_2) then 3 else pre(y);
+ z = if temp_1 and not pre(temp_1) then 3 elseif temp_2 and not pre(temp_2) then 2 else pre(z);
 end TransformCanonicalTests.WhenEqu4;
+			
 ")})));
 end WhenEqu4;
 
@@ -2710,24 +2702,24 @@ equation
 			description="Basic test of when equations",
 			equation_sorting=true,
 			flatModel="
-		 
 fclass TransformCanonicalTests.WhenEqu45
  discrete TransformCanonicalTests.WhenEqu45.E e(start = TransformCanonicalTests.WhenEqu45.E.b);
  Real t(start = 0);
+ discrete Boolean temp_1;
 initial equation 
  t = 0;
  pre(e) = TransformCanonicalTests.WhenEqu45.E.b;
+ pre(temp_1) = false;
 equation
  der(t) = 1;
- when time > 1 then
-  e = TransformCanonicalTests.WhenEqu45.E.c;
- end when;
+ temp_1 = time > 1;
+ e = if temp_1 and not pre(temp_1) then TransformCanonicalTests.WhenEqu45.E.c else pre(e);
 
 public
  type TransformCanonicalTests.WhenEqu45.E = enumeration(a, b, c);
 
 end TransformCanonicalTests.WhenEqu45;
-		 
+			
 ")})));
 end WhenEqu45;
 
@@ -2775,16 +2767,11 @@ equation
  der(x) = a * x;
  h1 = x >= 2;
  h2 = der(x) >= 4;
- when h1 then
-  y = true;
- end when;
- when y then
-  a = 2;
- end when;
- when h2 then
-  z = true;
- end when;
+ y = if h1 and not pre(h1) then true else pre(y);
+ a = if y and not pre(y) then 2 else pre(a);
+ z = if h2 and not pre(h2) then true else pre(z);
 end TransformCanonicalTests.WhenEqu5;
+			
 ")})));
 end WhenEqu5; 
 
@@ -2807,15 +2794,17 @@ equation
 fclass TransformCanonicalTests.WhenEqu7
  discrete Real x(start = 0);
  Real dummy;
+ discrete Boolean temp_1;
 initial equation 
  pre(x) = 0;
  dummy = 0.0;
+ pre(temp_1) = false;
 equation
  der(dummy) = 0;
- when dummy > - 1 then
-  x = pre(x) + 1;
- end when;
+ temp_1 = dummy > -1;
+ x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
 end TransformCanonicalTests.WhenEqu7;
+			
 ")})));
 end WhenEqu7; 
 
@@ -2842,19 +2831,22 @@ fclass TransformCanonicalTests.WhenEqu8
  discrete Real x;
  discrete Real y;
  Real dummy;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
  dummy = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
  der(dummy) = 0;
- when sample(0, 1 / 3) then
-  x = pre(x) + 1;
- end when;
- when sample(0, 2 / 3) then
-  y = pre(y) + 1;
- end when;
+ temp_1 = sample(0, 0.3333333333333333);
+ x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
+ temp_2 = sample(0, 0.6666666666666666);
+ y = if temp_2 and not pre(temp_2) then pre(y) + 1 else pre(y);
 end TransformCanonicalTests.WhenEqu8;
+			
 ")})));
 end WhenEqu8; 
 
@@ -2889,20 +2881,20 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real K = 1 /* 1 */;
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
+ discrete Boolean temp_1;
 initial equation 
  pre(u) = 0.0;
  x = 0.0;
  pre(I) = 0.0;
+ pre(temp_1) = false;
 equation
  der(x) = - x + u;
- when sample(0, h) then
-  I = pre(I) + h * (ref - x);
- end when;
- when sample(0, h) then
-  u = K * (ref - x) + 1 / Ti * I;
- end when;
+ temp_1 = sample(0, h);
+ I = if temp_1 and not pre(temp_1) then pre(I) + h * (ref - x) else pre(I);
+ u = if temp_1 and not pre(temp_1) then K * (ref - x) + 1 / Ti * I else pre(u);
  ref = if time < 1 then 0 else 1;
 end TransformCanonicalTests.WhenEqu9;
+			
 ")})));
 end WhenEqu9; 
 
@@ -2942,7 +2934,7 @@ fclass TransformCanonicalTests.WhenEqu10
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
- parameter Real a_p = - 1 /* -1 */;
+ parameter Real a_p = -1 /* -1 */;
  parameter Real b_p = 1 /* 1 */;
  parameter Real c_p = 1 /* 1 */;
  parameter Real a_c = 0.8 /* 0.8 */;
@@ -2958,13 +2950,10 @@ equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
  sampleTrigger = sample(0, h);
- when {initial(), sampleTrigger} then
-  u_c = c_p * x_p;
- end when;
- when {initial(), sampleTrigger} then
-  x_c = a_c * pre(x_c) + b_c * u_c;
- end when;
+ u_c = if initial() or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
+ x_c = if initial() or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
 end TransformCanonicalTests.WhenEqu10;
+			
 ")})));
 end WhenEqu10;
 
@@ -3005,7 +2994,7 @@ fclass TransformCanonicalTests.WhenEqu11
  Real u_p;
  discrete Real x_c;
  discrete Real u_c;
- parameter Real a_p = - 1 /* -1 */;
+ parameter Real a_p = -1 /* -1 */;
  parameter Real b_p = 1 /* 1 */;
  parameter Real c_p = 1 /* 1 */;
  parameter Real a_c = 0.8 /* 0.8 */;
@@ -3015,22 +3004,19 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Boolean atInit;
 initial equation 
  x_c = pre(x_c);
+ pre(u_c) = 0.0;
  x_p = 1;
  pre(sampleTrigger) = false;
- pre(u_c) = 0.0;
 parameter equation
  atInit = true and initial();
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
  sampleTrigger = sample(0, h);
- when {atInit, sampleTrigger} then
-  u_c = c_p * x_p;
- end when;
- when {atInit, sampleTrigger} then
-  x_c = a_c * pre(x_c) + b_c * u_c;
- end when;
+ u_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
+ x_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
 end TransformCanonicalTests.WhenEqu11;
+			
 ")})));
 end WhenEqu11;
 
@@ -3117,6 +3103,7 @@ fclass TransformCanonicalTests.WhenEqu13
  discrete Real y(start = 1);
  discrete Integer i(start = 0);
  discrete Boolean up(start = true);
+ discrete Boolean temp_1;
 initial equation 
  v1 = 0;
  v2 = 1;
@@ -3125,21 +3112,18 @@ initial equation
  pre(y) = 1;
  pre(up) = true;
  pre(i) = 0;
+ pre(temp_1) = false;
 equation
- when sample(0.1, 1) then
-  i = if up then pre(i) + 1 else pre(i) - 1;
- end when;
- when sample(0.1, 1) then
-  up = if pre(i) == 2 then false elseif pre(i) == - 2 then true else pre(up);
- end when;
- when sample(0.1, 1) then
-  y = i;
- end when;
+ temp_1 = sample(0.1, 1);
+ i = if temp_1 and not pre(temp_1) then if up then pre(i) + 1 else pre(i) - 1 else pre(i);
+ up = if temp_1 and not pre(temp_1) then if pre(i) == 2 then false elseif pre(i) == -2 then true else pre(up) else pre(up);
+ y = if temp_1 and not pre(temp_1) then i else pre(y);
  der(v1) = if y <= 0 then 0 else 1;
  der(v2) = if y < 0 then 0 else 1;
  der(v3) = if y >= 0 then 0 else 1;
  der(v4) = if y > 0 then 0 else 1;
 end TransformCanonicalTests.WhenEqu13;
+			
 ")})));		
 end WhenEqu13;
 
@@ -3698,13 +3682,15 @@ Compliance error at line 3265, column 7:
 			flatModel="
 fclass TransformCanonicalTests.IfEqu19
  discrete Real x;
+ discrete Boolean temp_1;
 initial equation 
  pre(x) = 0.0;
+ pre(temp_1) = false;
 equation
- when sample(1, 0) then
-  x = if time >= 3 then pre(x) + 1 else pre(x) + 5;
- end when;
+ temp_1 = sample(1, 0);
+ x = if temp_1 and not pre(temp_1) then if time >= 3 then pre(x) + 1 else pre(x) + 5 else pre(x);
 end TransformCanonicalTests.IfEqu19;
+			
 ")})));
   end IfEqu19;
 
@@ -3990,13 +3976,15 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.WhenVariability1
  discrete Real x(start = 1);
+ discrete Boolean temp_1;
 initial equation 
  pre(x) = 1;
+ pre(temp_1) = false;
 equation
- when time > 2 then
-  x = 2;
- end when;
+ temp_1 = time > 2;
+ x = if temp_1 and not pre(temp_1) then 2 else pre(x);
 end TransformCanonicalTests.WhenVariability1;
+			
 ")})));
 end WhenVariability1;
 
@@ -5502,13 +5490,14 @@ equation
 fclass TransformCanonicalTests.EventGeneratingExps.InWhenClauses1
  discrete Real x;
  discrete Integer temp_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
  pre(x) = 0.0;
+ pre(temp_2) = false;
 equation
- when temp_1 + noEvent(integer(time * 3)) > 1 then
-  x = floor(time * 0.3 + 4.2);
- end when;
+ temp_2 = temp_1 + noEvent(integer(time * 3)) > 1;
+ x = if temp_2 and not pre(temp_2) then floor(time * 0.3 + 4.2) else pre(x);
  temp_1 = if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
 end TransformCanonicalTests.EventGeneratingExps.InWhenClauses1;
 			
@@ -5539,7 +5528,7 @@ algorithm
  temp_1 := if time * 3 < pre(temp_1) or time * 3 >= pre(temp_1) + 1 or initial() then integer(time * 3) else pre(temp_1);
  temp_2 := temp_1 + noEvent(integer(time * 3)) > 1;
  if temp_2 and not pre(temp_2) then
-  x := noEvent(floor(time * 0.3 + 4.2));
+  x := floor(time * 0.3 + 4.2);
  end if;
 end TransformCanonicalTests.EventGeneratingExps.InWhenClauses2;
 			
@@ -5562,14 +5551,15 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm
  discrete Integer x;
+ discrete Boolean temp_1;
 initial equation 
  algorithm
   x := integer(time);
 ;
+ pre(temp_1) = false;
 equation
- when time >= 1 then
-  x = integer(time);
- end when;
+ temp_1 = time >= 1;
+ x = if temp_1 and not pre(temp_1) then integer(time) else pre(x);
 end TransformCanonicalTests.EventGeneratingExps.InInitialAlgorithm;
 			
 ")})));
@@ -5591,12 +5581,13 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InInitialEquation
  discrete Real x;
+ discrete Boolean temp_1;
 initial equation 
  x = integer(time);
+ pre(temp_1) = false;
 equation
- when time >= 1 then
-  x = integer(time);
- end when;
+ temp_1 = time >= 1;
+ x = if temp_1 and not pre(temp_1) then integer(time) else pre(x);
 end TransformCanonicalTests.EventGeneratingExps.InInitialEquation;
 			
 ")})));
@@ -5923,5 +5914,93 @@ end TransformCanonicalTests.MixedVariabilityFunction2;
 ")})));
 
 end MixedVariabilityFunction2;
+
+model IllegalWhen1_Err
+    discrete Real x(start=1);
+  equation
+    when time > x then
+      x = pre(x) + 1;
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen1_Err",
+			description="Test illegal when, guard in loop",
+			errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+			
+")})));
+end IllegalWhen1_Err;
+
+model IllegalWhen2_Err
+    Real x(start=-1);
+    Real y(start=-1);
+    Real z(start=0);
+  equation
+
+    when {time >= 1,x >= 0.5} then
+      z = 2;
+    end when;
+
+    when z >= 1 then
+      y = 3;
+    end when;
+
+	x = y - 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen2_Err",
+			description="Test illegal when, guard in loop",
+			errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+			
+")})));
+end IllegalWhen2_Err;
+  
+model IllegalWhen3_Err
+    Real x(start=0);
+    Real y(start=0);
+    Real z(start=0);
+  equation
+
+    when time >= 1 then
+      x = 2*x + y - 3;
+      y = 2*x + 6*y - 1 - z;
+    end when;
+
+    y + 3 = time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="IllegalWhen3_Err",
+			description="Test illegal when-matching",
+			errorMessage="
+2 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Index reduction failed: Maximum number of differentiations reached
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     z
+
+  The following equation(s) could not be matched to any variable:
+    y + 3 = time
+	
+			
+")})));
+end IllegalWhen3_Err;
+
 
 end TransformCanonicalTests;

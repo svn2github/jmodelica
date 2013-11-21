@@ -113,13 +113,14 @@ fclass VariabilityPropagationTests.ConstantFolding2
  input Real i;
  Real x;
  discrete Real y;
+ discrete Boolean temp_1;
 initial equation 
  pre(y) = 0.0;
+ pre(temp_1) = false;
 equation
  x = VariabilityPropagationTests.ConstantFolding2.f(i, {{1, 1, 1}, {1, 1, 1}});
- when x > 1 then
-  y = VariabilityPropagationTests.ConstantFolding2.f(i, fill(0, 0, 2));
- end when;
+ temp_1 = x > 1;
+ y = if temp_1 and not pre(temp_1) then VariabilityPropagationTests.ConstantFolding2.f(i, fill(0, 0, 2)) else pre(y);
 
 public
  function VariabilityPropagationTests.ConstantFolding2.f
@@ -130,8 +131,9 @@ public
   o := i[1,1];
   return;
  end VariabilityPropagationTests.ConstantFolding2.f;
- 
+
 end VariabilityPropagationTests.ConstantFolding2;
+			
 ")})));
 end ConstantFolding2;
 
@@ -421,13 +423,15 @@ fclass VariabilityPropagationTests.WhenEq1
  parameter Real p1 = 4 /* 4 */;
  discrete Real x1;
  constant Real x2 = 3;
-initial equation
+ parameter Boolean temp_1;
+initial equation 
  pre(x1) = 0.0;
+parameter equation
+ temp_1 = p1 > 3;
 equation
- when p1 > 3 then
-  x1 = 4.0;
- end when;
+ x1 = if temp_1 and not pre(temp_1) then 4.0 else pre(x1);
 end VariabilityPropagationTests.WhenEq1;
+			
 ")})));
 end WhenEq1;
 

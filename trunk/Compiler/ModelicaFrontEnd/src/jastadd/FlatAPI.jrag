@@ -883,6 +883,14 @@ aspect FlatAPI {
 		guards() when inEquationSection()
 	to FClass.guardExpInEquations() for myFClass();	
 		
+	coll Set<FExp> FAbstractEquation.transformedGuards() [new HashSet<FExp>()] 
+		with add root FAbstractEquation;
+	FIfExp contributes getIfExp() when isWhen() 
+		to FAbstractEquation.transformedGuards() for myFEquation() ;
+	FIfEquation contributes getTest() when isWhen() 
+		to FAbstractEquation.transformedGuards() for this;
+	
+	
 	syn ArrayList<FExp> FWhenEquation.guards() = getTest().guards();
 	syn ArrayList<FExp> FWhenStmt.guards() {
 		ArrayList<FExp> l = new ArrayList<FExp>();
@@ -962,6 +970,7 @@ aspect FlatAPI {
 			
 	inh FStatement FExp.myFStatement();
 	inh FStatement FStatement.myFStatement();
+	inh FStatement FIfWhenClause.myFStatement();
 	eq FStatement.getChild().myFStatement()        = this;
 	eq FAbstractEquation.getChild().myFStatement() = null;
 	eq Root.getChild().myFStatement()              = null;
@@ -1127,22 +1136,54 @@ aspect FlatAPI {
 		return false;
 	}	
 
-	syn boolean FAbstractEquation.replacedAtInitialization() = false;
+	syn boolean FAbstractEquation.replacedAtInitialization() = isWhen();
 	eq FWhenEquation.replacedAtInitialization() = true;
 	eq FAlgorithm.replacedAtInitialization() {
-		for (FStatement stmt : getFStatements())
-			if (stmt.isWhen)
+		if (super.replacedAtInitialization())
+			return true;
+		
+		/* 
+		 * Even if there are no when statements, there might still be discrete 
+		 * variables which are dependent on their pre() variables 
+		 */
+		Set<FVariable> notDefSet = referencedFVariablesInLHS();
+		notDefSet.removeAll(defSet());
+		for (FVariable fv : notDefSet)
+			if (fv.isDiscrete())
 				return true;
 		return false;
 	}
 	
-	syn List FAbstractEquation.getInitialEquationList() = new List();
+	syn List<FAbstractEquation> FAbstractEquation.getInitialEquationList() {
+		List<FAbstractEquation> l = new List<FAbstractEquation>();
+		if (replacedAtInitialization()) {
+			l.add((FAbstractEquation) fullCopy());
+		}
+		return l;
+	}
+	
+	rewrite FIfEquation in FAbstractEquation.getInitialEquation() {
+		when (isWhen() && isInitial()) to List {
+			if (getTest().isInitialGuard())
+				return getFAbstractEquations();
+			else
+				return getElse().getFAbstractEquations();
+		}
+	}
+	rewrite FIfExp {
+		when (isWhen() && isInitial()) to FExp {
+			if (getIfExp().isInitialGuard())
+				return getThenExp();
+			else
+				return getElseExp();
+		}
+	}
 	
 	eq FWhenEquation.getInitialEquationList() {
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		if (!activeAtInitialization()) {
 			for (FAbstractEquation e : getFAbstractEquations()) {
-				for (FIdUseExp id : e.simpleLefts()) {
+				for (FIdUseExp id : e.FIdUseExpsInLHS()) {
 					l.add(new FEquation(id.fullCopy(),
 					   new FPreExp(id.getFIdUse().fullCopy())));
 				}
@@ -1198,12 +1239,12 @@ aspect FlatAPI {
 			Set<FVariable> fvSet, Set<FVariable> fvUse) {
 		
 		defSet(fvSet, fvUse);
-		stmts.add(this);
+		stmts.add(fullCopy());
 	}
 	public void FIfStmt.addAsInitial(ArrayList<FStatement> stmts, Set<FIdUseExp> usesLHS, 
 			Set<FVariable> fvSet, Set<FVariable> fvUse) {
 		
-		if (!isWhen) {
+		if (!isWhen()) {
 			super.addAsInitial(stmts, usesLHS, fvSet, fvUse);
 			return;
 		}
@@ -1225,7 +1266,7 @@ aspect FlatAPI {
 	syn boolean FExp.isInitialGuard() = false;
 	eq FInitialExp.isInitialGuard() = true;
 	eq FOrExp.isInitialGuard() = getLeft().isInitialGuard() || getRight().isInitialGuard();
-	
+			
 	/**
 	 * \brief Find LHS variables which are definetly assigned to before any use.
 	 */
