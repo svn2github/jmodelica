@@ -24,6 +24,8 @@
 #include "ModelicaUtilities.h"
 #include "ModelicaStandardTables.h"
 
+#define MODEL_IDENTIFIER $C_model_id$
+
 $INCLUDE: fmi_code_gen_template.c$
 /*
 void _emit(log_t *log, char* message) { fmi1_me_emit(log, message); }

@@ -74,6 +74,114 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         
     }
     
+    /**
+	 * Internal class used to generate a DefaultExperiment tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_defaultExperiment extends XMLTag {
+		
+		private FClass.Experiment e = fclass.experiment;
+		
+		public XMLTag_defaultExperiment(AbstractGenerator myGenerator, FClass fclass) {
+			super("defaultExperiment", "DefaultExperiment", myGenerator, fclass);
+		}
+		
+		public void generate(PrintStream genPrinter) {
+			if (e != null) {
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateAttributes(PrintStream genPrinter) {
+			if (e.hasStart)
+				generateAttribute("startTime", Double.toString(e.start),     genPrinter);
+			if (e.hasStop)
+				generateAttribute("stopTime",  Double.toString(e.stop),      genPrinter);
+			if (e.hasTolerance)
+				generateAttribute("tolerance", Double.toString(e.tolerance), genPrinter);
+		}
+	}
+    
+    /**
+	 * Internal class used to generate a VendorAnnotations tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_vendorAnnotations extends XMLTag {
+		
+		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
+			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"tool"}; }
+	}
+	
+	/**
+	 * Internal class used to generate a Tool tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_tool extends XMLTag {
+		
+		public XMLTag_tool(AbstractGenerator myGenerator, FClass fclass) {
+			super("tool", "Tool", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"annotation"}; }
+		
+		public void generateAttributes(PrintStream genPrinter) {
+			generateAttribute("name", "JModelica", genPrinter);
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a Annotation tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_annotation extends XMLTag {
+		
+		private String name;
+		private String value;
+		
+		public XMLTag_annotation(AbstractGenerator myGenerator, FClass fclass) {
+			super("annotation", "Annotation", myGenerator, fclass);
+		}
+		
+		public void generate(PrintStream genPrinter) {
+			HashSet<String> extLibraries = fclass.externalLibraries();
+			HashSet<String> extIncludes = fclass.externalIncludes();
+			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
+			HashSet<String> extInclDirs = fclass.externalIncludeDirectories();
+			
+			name = "Library";
+			for(String lib : extLibraries) {
+				value = lib;
+				super.generate(genPrinter);
+			}
+			name = "Include";
+			for(String inc : extIncludes) {
+				value = inc;
+				super.generate(genPrinter);
+			}
+			name = "LibraryDirectory";
+			for(String libdir : extLibDirs) {
+				value = libdir;
+				super.generate(genPrinter);
+			}
+			name = "IncludeDirectory";
+			for(String incdir : extInclDirs) {
+				value = incdir;
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateAttributes(PrintStream genPrinter) {
+			generateAttribute("name", name, genPrinter);
+            generateAttribute("value", replaceIllegalChars(value), genPrinter);
+		}
+	}
 }
 
 
@@ -325,115 +433,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 					}
 				}
 			}
-		}
-	}
-	
-	/**
-	 * Internal class used to generate a DefaultExperiment tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_defaultExperiment extends XMLTag {
-		
-		private FClass.Experiment e = fclass.experiment;
-		
-		public XMLTag_defaultExperiment(AbstractGenerator myGenerator, FClass fclass) {
-			super("defaultExperiment", "DefaultExperiment", myGenerator, fclass);
-		}
-		
-		public void generate(PrintStream genPrinter) {
-			if (e != null) {
-				super.generate(genPrinter);
-			}
-		}
-		
-		public void generateAttributes(PrintStream genPrinter) {
-			if (e.hasStart)
-				generateAttribute("startTime", Double.toString(e.start),     genPrinter);
-			if (e.hasStop)
-				generateAttribute("stopTime",  Double.toString(e.stop),      genPrinter);
-			if (e.hasTolerance)
-				generateAttribute("tolerance", Double.toString(e.tolerance), genPrinter);
-		}
-	}
-	
-	/**
-	 * Internal class used to generate a VendorAnnotations tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_vendorAnnotations extends XMLTag {
-		
-		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
-			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
-		}
-		
-		public String[] children() { return new String[] {"tool"}; }
-	}
-	
-	/**
-	 * Internal class used to generate a Tool tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_tool extends XMLTag {
-		
-		public XMLTag_tool(AbstractGenerator myGenerator, FClass fclass) {
-			super("tool", "Tool", myGenerator, fclass);
-		}
-		
-		public String[] children() { return new String[] {"annotation"}; }
-		
-		public void generateAttributes(PrintStream genPrinter) {
-			generateAttribute("name", "JModelica", genPrinter);
-		}
-	}
-	
-	/**
-	 * Internal class used to generate a Annotation tag.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_annotation extends XMLTag {
-		
-		private String name;
-		private String value;
-		
-		public XMLTag_annotation(AbstractGenerator myGenerator, FClass fclass) {
-			super("annotation", "Annotation", myGenerator, fclass);
-		}
-		
-		public void generate(PrintStream genPrinter) {
-			HashSet<String> extLibraries = fclass.externalLibraries();
-			HashSet<String> extIncludes = fclass.externalIncludes();
-			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
-			HashSet<String> extInclDirs = fclass.externalIncludeDirectories();
-			
-			name = "Library";
-			for(String lib : extLibraries) {
-				value = lib;
-				super.generate(genPrinter);
-			}
-			name = "Include";
-			for(String inc : extIncludes) {
-				value = inc;
-				super.generate(genPrinter);
-			}
-			name = "LibraryDirectory";
-			for(String libdir : extLibDirs) {
-				value = libdir;
-				super.generate(genPrinter);
-			}
-			name = "IncludeDirectory";
-			for(String incdir : extInclDirs) {
-				value = incdir;
-				super.generate(genPrinter);
-			}
-		}
-		
-		public void generateAttributes(PrintStream genPrinter) {
-			generateAttribute("name", name, genPrinter);
-            generateAttribute("value", replaceIllegalChars(value), genPrinter);
 		}
 	}
 	
@@ -887,4 +886,84 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		}
 	}
 }
+
+/**
+ * A generator class for XML-generation for FMI 1.0 which takes a model described by
+ * <FClass> and provides an XML document for the meta-data in the model.
+ * 
+ * @see AbstractGenerator
+ * 
+ */
+public class Fmi2XMLGenerator extends FmiXMLGenerator {
+	
+    public static final Creator CREATOR = new Creator()
+    {
+        public Fmi2XMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass) {
+            return new Fmi2XMLGenerator(expPrinter, escapeCharacter, fclass);
+        }
+    };
+    
+	/**
+	 * Constructor.
+	 * 
+	 * @param expPrinter Printer object used to generate code for expressions.
+	 * @param escapeCharacter Escape characters used to decode tags.
+	 * @param fclass An FClass object used as a basis for the code generation.
+	 */
+	public Fmi2XMLGenerator(Printer expPrinter, char escapeCharacter,
+			FClass fclass) {
+		super(expPrinter,escapeCharacter, fclass);
+	}
+	
+	/**
+	 * Gets the root-tag for FMI 1.0 XML-generation.
+	 * 
+	 * @see XMLTag
+	 */
+    protected String root() {
+    	return "fmiModelDescription";
+    }
+
+	/**
+	 * Internal class used to generate a fmiModelDescription tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_fmiModelDescription extends XMLTag {
+		
+		private final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		
+		public XMLTag_fmiModelDescription(AbstractGenerator myGenerator, FClass fclass) {
+			super("fmiModelDescription", "fmiModelDescription", myGenerator, fclass);
+		}
+		
+		public String[] children() {
+            return new String[] { "defaultExperiment", "vendorAnnotations" };
+        }
+		
+		public void generateAttributes(PrintStream genPrinter) {		
+            generateAttribute("fmiVersion",               "2.0",                                   genPrinter);
+            generateAttribute("modelName",                fclass.name(),                           genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                           genPrinter);
+            generateAttribute("generationTool",           "JModelica.org",                         genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                            genPrinter);
+            generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators() ,              genPrinter);
+        }
+		
+		private int numberOfEventIndicators() {
+			if (!fclass.root().options.getBooleanOption("generate_only_initial_system"))
+				return fclass.numEventIndicators();
+			else
+				return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
+		}
+	}
+}
+
+
+
+
+
+
 

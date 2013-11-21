@@ -16,7 +16,6 @@
 
 $external_func_includes$
 
-#define MODEL_IDENTIFIER $C_model_id$
 const char *C_GUID = $C_guid$;
 
 static int model_ode_guards_init(jmi_t* jmi);

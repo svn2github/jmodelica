@@ -1810,6 +1810,14 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_cs_xml", true);
                     options.setBooleanOption("generate_xml_equations", false);
                     break;
+                case FMUMECS20:
+                	options.setBooleanOption("generate_ode", true);
+                    options.setBooleanOption("generate_dae", false);
+                    options.setBooleanOption("equation_sorting", true);
+                    options.setBooleanOption("generate_fmi_me_xml", true);
+                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                    options.setBooleanOption("generate_xml_equations", false);
+                    break;
                 case JMU:
                     options.setBooleanOption("generate_ode", false);
                     options.setBooleanOption("generate_dae", true);
@@ -1829,18 +1837,15 @@ public class ModelicaCompiler {
             }
             
             switch (this) {
+                case FMUME20a:
+                case FMUCS20a:
+                    options.setStringOption("fmi_version", "2.0alpha"); //TODO: Temporary option.
+                    break;
                 case FMUME10:
                 case FMUCS10:
-                    options.setStringOption("fmi_version", "1.0");
                 case FMUME20:
                 case FMUCS20:
                 case FMUMECS20:
-                    options.setStringOption("fmi_version", "2.0");
-                    break;
-                case FMUME20a:
-                case FMUCS20a:
-                    options.setStringOption("fmi_version", "2.0alpha");
-                    break;
                 case JMU:
                 case FMUX:
                     break;
@@ -1911,7 +1916,7 @@ public class XMLGeneratorHolder {
 
     public static final XMLGeneratorHolder NULL  = new XMLGeneratorHolder();
     public static final XMLGeneratorHolder FMI1  = new XMLGeneratorHolder(Fmi1XMLGenerator.CREATOR);
-    public static final XMLGeneratorHolder FMI2  = new XMLGeneratorHolder(Fmi1XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder FMI2  = new XMLGeneratorHolder(Fmi2XMLGenerator.CREATOR);
     public static final XMLGeneratorHolder JMI   = new XMLGeneratorHolder(XMLGenerator.CREATOR);
     public static final XMLGeneratorHolder FMIX  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
 
