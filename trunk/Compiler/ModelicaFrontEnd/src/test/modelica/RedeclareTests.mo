@@ -5168,4 +5168,67 @@ end RedeclareTests.ReplacableArray7;
 end ReplacableArray7;
 
 
+model RedeclareConditional1
+    model A
+        parameter Boolean use_b;
+        B b if use_b;
+    end A;
+    
+    model B
+        Real x = time;
+    end B;
+    
+    model C
+        extends B;
+        Real y = x + 1;
+    end C;
+    
+    A a(use_b = false, redeclare C b);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareConditional1",
+			description="Redeclaring inactive conditional as modification",
+			flatModel="
+fclass RedeclareTests.RedeclareConditional1
+ parameter Boolean a.use_b = false /* false */;
+end RedeclareTests.RedeclareConditional1;
+")})));
+end RedeclareConditional1;
+
+
+model RedeclareConditional2
+    model A
+        parameter Boolean use_b;
+        B b if use_b;
+    end A;
+    
+    model B
+        Real x = time;
+    end B;
+    
+    model C
+        extends B;
+        Real y = x + 1;
+    end C;
+    
+	model D
+        extends A(use_b = false);
+		redeclare C b;
+	end D;
+	
+	D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RedeclareConditional2",
+			description="Redeclaring inactive conditional as element",
+			flatModel="
+fclass RedeclareTests.RedeclareConditional2
+ parameter Boolean d.use_b = false /* false */;
+end RedeclareTests.RedeclareConditional2;
+")})));
+end RedeclareConditional2;
+
+
 end RedeclareTests;

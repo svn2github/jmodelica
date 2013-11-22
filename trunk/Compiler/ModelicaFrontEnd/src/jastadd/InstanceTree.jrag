@@ -982,8 +982,8 @@ aspect InstanceTreeConstruction {
 		if (replacingDecl.hasVarArraySubscripts()) 
 			fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(), 0);
 		Opt cond_attr_opt = new Opt();
-		if (replacingDecl.hasConditionalAttribute()) 
-			cond_attr_opt.setChild(replacingDecl.getConditionalAttribute().getExp().instantiate(), 0);
+		if (originalDecl.hasConditionalAttribute()) 
+			cond_attr_opt.setChild(originalDecl.getConditionalAttribute().getExp().instantiate(), 0);
 
 		if (isOrExtendsPrimitive()) {
 			InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
