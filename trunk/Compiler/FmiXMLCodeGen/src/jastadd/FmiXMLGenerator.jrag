@@ -182,6 +182,35 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
             generateAttribute("value", replaceIllegalChars(value), genPrinter);
 		}
 	}
+	
+	// Extract all units and beloning unit definitions
+	protected String unit;
+	protected Iterator<String> itr;
+	protected HashMap<String,HashSet<String>> map;
+	
+	protected void extractUnits(FClass fclass) {
+		map = new HashMap<String,HashSet<String>>();
+		for(FVariable variable:fclass.allVariables()) {
+			if(variable instanceof FRealVariable && ((FRealVariable)variable).unitAttributeSet() && ((FRealVariable)variable).displayUnitAttributeSet()) {
+				String attribute = ((FRealVariable)variable).unitAttribute();
+				if(map.containsKey(attribute)) {
+					HashSet<String> temp=map.get(attribute);
+					temp.add(((FRealVariable)variable).displayUnitAttribute());
+				} else {
+					HashSet<String> set = new HashSet<String>();
+					set.add(((FRealVariable)variable).displayUnitAttribute());
+					map.put(attribute, set);
+				}
+			}
+		}
+		// Set iterator.
+		Set<String> units = map.keySet();
+		if(!units.isEmpty()) {
+			itr = units.iterator();
+		} else {
+			itr = null;
+		}
+	}
 }
 
 
@@ -268,34 +297,9 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 	 */
 	public class XMLTag_unitDefinitions extends XMLTag {
 		
-		private String unit;
-		private Iterator<String> itr;
-		private HashMap<String,HashSet<String>> map;
-		
 		public XMLTag_unitDefinitions(AbstractGenerator myGenerator, FClass fclass) {
 			super("unitDefinitions", "UnitDefinitions", myGenerator, fclass);
-			// Extract all units and beloning unit definitions
-			map = new HashMap<String,HashSet<String>>();
-			for(FVariable variable:fclass.allVariables()) {
-				if(variable instanceof FRealVariable && ((FRealVariable)variable).unitAttributeSet() && ((FRealVariable)variable).displayUnitAttributeSet()) {
-					String attribute = ((FRealVariable)variable).unitAttribute();
-					if(map.containsKey(attribute)) {
-						HashSet<String> temp=map.get(attribute);
-						temp.add(((FRealVariable)variable).displayUnitAttribute());
-					} else {
-						HashSet<String> set = new HashSet<String>();
-						set.add(((FRealVariable)variable).displayUnitAttribute());
-						map.put(attribute, set);
-					}
-				}
-			}
-			// Set iterator.
-			Set<String> units = map.keySet();
-			if(!units.isEmpty()) {
-				itr = units.iterator();
-			} else {
-				itr = null;
-			}
+			extractUnits(fclass);
 		}
 		
 		public String[] children() { return new String[] {"baseUnit"}; }
@@ -313,41 +317,41 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super.generateChildren(genPrinter);
 			}
 		}
-		
-		public class XMLTag_baseUnit extends XMLTag {
-			
-			private String def;
-			
-			public XMLTag_baseUnit(AbstractGenerator myGenerator, FClass fclass) {
-				super("baseUnit", "BaseUnit", myGenerator, fclass);
+	}
+	
+	public class XMLTag_baseUnit extends XMLTag {
+
+		private String def;
+
+		public XMLTag_baseUnit(AbstractGenerator myGenerator, FClass fclass) {
+			super("baseUnit", "BaseUnit", myGenerator, fclass);
+		}
+
+		public String[] children() { return new String[] {"displayUnitDefinition"}; }
+
+		public void generateAttributes(PrintStream genPrinter) {
+			generateAttribute("unit", unit, genPrinter);
+		}
+
+		public void generateChildren(PrintStream genPrinter) {
+			HashSet<String> defs = map.get(unit);
+			Iterator<String> defsit = defs.iterator();
+			while(defsit.hasNext()) {
+				def = defsit.next();
+				super.generateChildren(genPrinter);
 			}
-			
-			public String[] children() { return new String[] {"displayUnitDefinition"}; }
-		
+		}
+
+		public class XMLTag_displayUnitDefinition extends XMLTag {
+
+			public XMLTag_displayUnitDefinition(AbstractGenerator myGenerator, FClass fclass) {
+				super("displayUnitDefinition", "DisplayUnitDefinition", myGenerator, fclass);
+			}
+
 			public void generateAttributes(PrintStream genPrinter) {
-				generateAttribute("unit", unit, genPrinter);
-			}
-			
-			public void generateChildren(PrintStream genPrinter) {
-				HashSet<String> defs = map.get(unit);
-				Iterator<String> defsit = defs.iterator();
-				while(defsit.hasNext()) {
-					def = defsit.next();
-					super.generateChildren(genPrinter);
-				}
-			}
-			
-			public class XMLTag_displayUnitDefinition extends XMLTag {
-				
-				public XMLTag_displayUnitDefinition(AbstractGenerator myGenerator, FClass fclass) {
-					super("displayUnitDefinition", "DisplayUnitDefinition", myGenerator, fclass);
-				}
-			
-				public void generateAttributes(PrintStream genPrinter) {
-					generateAttribute("displayUnit", def, genPrinter);
-					generateAttribute("gain",        "1", genPrinter);
-					generateAttribute("offset",      "0", genPrinter);
-				}
+				generateAttribute("displayUnit", def, genPrinter);
+				generateAttribute("gain",        "1", genPrinter);
+				generateAttribute("offset",      "0", genPrinter);
 			}
 		}
 	}
@@ -938,7 +942,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "defaultExperiment", "vendorAnnotations" };
+            return new String[] { "unitDefinitions", "defaultExperiment", "vendorAnnotations" };
         }
 		
 		public void generateAttributes(PrintStream genPrinter) {		
@@ -959,11 +963,70 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
 		}
 	}
+	
+	/**
+	 * Internal class used to generate a UnitDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_unitDefinitions extends XMLTag {
+		
+		public XMLTag_unitDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("unitDefinitions", "UnitDefinitions", myGenerator, fclass);
+			extractUnits(fclass);
+		}
+		
+		public String[] children() { return new String[] {"unit"}; }
+		
+		public void generate(PrintStream genPrinter) {
+			//Generate code if any units are defined.
+			if(itr != null) {
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateChildren(PrintStream genPrinter) {
+			while(itr.hasNext()) {
+				unit = itr.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+	}
+		
+	public class XMLTag_unit extends XMLTag {
+
+		private String def;
+
+		public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
+			super("unit", "unit", myGenerator, fclass);
+		}
+
+		public String[] children() { return new String[] {"displayUnit"}; }
+
+		public void generateAttributes(PrintStream genPrinter) {
+			generateAttribute("name", unit, genPrinter);
+		}
+
+		public void generateChildren(PrintStream genPrinter) {
+			HashSet<String> defs = map.get(unit);
+			Iterator<String> defsit = defs.iterator();
+			while(defsit.hasNext()) {
+				def = defsit.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+
+		public class XMLTag_displayUnit extends XMLTag {
+
+			public XMLTag_displayUnit(AbstractGenerator myGenerator, FClass fclass) {
+				super("displayUnit", "DisplayUnit", myGenerator, fclass);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				generateAttribute("name",   def, genPrinter);
+				generateAttribute("factor", "1", genPrinter);
+				generateAttribute("offset", "0", genPrinter);
+			}
+		}
+	}
 }
-
-
-
-
-
-
-
