@@ -129,7 +129,5 @@ equation
   connect(u, plant.load);
 end Startup7;
 
-end StartupOptimization;
-
-
+end CombinedCycleStartup;
 
