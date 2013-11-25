@@ -71,6 +71,7 @@ class Test_Events:
         compile_fmu("EventIter.EventInfiniteIteration1", file_name)
         compile_fmu("EventIter.EventInfiniteIteration2", file_name)
         compile_fmu("EventIter.EventInfiniteIteration3", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -86,6 +87,19 @@ class Test_Events:
     def test_event_infinite_iteration_3(self):
         model = load_fmu("EventIter_EventInfiniteIteration3.fmu")
         nose.tools.assert_raises(FMUException, model.simulate)
+        
+    @testattr(stddist = True)
+    def test_enhanced_event_iteration_1(self):
+        model = load_fmu("EventIter_EnhancedEventIteration.fmu")
+        res = model.simulate()
+        
+        nose.tools.assert_almost_equal(res["x[1]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[2]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[3]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[4]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[5]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[6]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[7]"][-1], 0.94)
 
 class Test_Relations:
     @classmethod

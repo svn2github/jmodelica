@@ -67,5 +67,44 @@ equation
     y = if x >= 1 then 0 else 1;
 end EventInfiniteIteration3;
 
+model EnhancedEventIteration
+
+  Real x[7](each start=4);
+    parameter Real b_locked[7] = {0.94,0,0,0,0,0,0.5};
+    parameter Real b_startforward[7] = {0.94,0,0,1.0,1.0,0.0,0.5};
+    parameter Real b_startbackward[7] = {0.94,0,0,-1.0,-1.0,0.0,0.5};
+    parameter Real b[7] = {2,2,2,2,2,2,2};
+
+  parameter Real A_locked[7,7] = {{1,0,0,0,0,0,1},
+                 {-1,1,0,0,0,0,0},
+                 {0,-1,1,0,0,0,0},
+                 {0,0,-1,0,0,0,0},
+                 {0,0,0,-1,1,0,0},
+                 {0,0,0,0,-1,1,0},
+                 {0,0,0,0,0,-1,0.1}};
+
+ parameter Real A_not_locked[7,7] = {{1,0,0,0,0,0,1},
+                        {-1,1,0,0,0,0,0},
+                        {0,-1,1,0,0,0,0},
+                        {0,0,-1,1,0,0,0},
+                        {0,0,0,0,1,0,0},
+                        {0,0,0,0,-1,1,0},
+                        {0,0,0,0,0,-1,0.1}};
+ Real y(start=1);
+equation 
+  der(y) = -y;
+  if y > 0.5 then
+    x = b;
+  elseif x[4]>1.0 then
+    A_not_locked*x=b_startforward;
+  elseif x[4]<-1.0 then
+    A_not_locked*x=b_startbackward;
+  else
+    A_locked*x = b_locked;
+  end if;
+
+end EnhancedEventIteration;
+
+
 end EventIter;
 

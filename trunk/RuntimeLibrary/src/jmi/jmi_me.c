@@ -772,6 +772,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 event_info->iteration_converged = FALSE;
             }
         }
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_reals(jmi->log, iter_node, logInfo, "z_values", &z[jmi->offs_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
+            jmi_log_reals(jmi->log, iter_node, logInfo, "pre(z)_values", &z[jmi->offs_pre_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
+        }
         
         /* Evaluate the switches */
         memcpy(sw_temp, switches, nR*sizeof(jmi_real_t));

@@ -132,26 +132,28 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     }
 
     /* Check for consistency */
-    if (jmi_compare_switches(sw_last,switches,block->n_sw) 
-        && jmi_compare_switches(bool_last,booleans,nbr_bool)){
+    if (jmi_compare_switches(sw_last,switches,block->n_sw) && jmi_compare_switches(bool_last,booleans,nbr_bool)){
         *non_reals_changed_flag = 0;
     }
     else {
         /* Check for infinite loop */
-        if((iter >= nbr_allocated_iterations/2) &&  jmi_check_infinite_loop(sw_last,switches,block->n_sw,iter)){
+        /* if(iter >= nbr_allocated_iterations/2 && jmi_check_infinite_loop(sw_last,switches,block->n_sw,iter)){ */
+        if(jmi_check_infinite_loop(block->sw_old,switches,block->n_sw,iter)){
             jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
+            block->event_iter = 0;
             return jmi_block_solver_status_inf_event_loop;
         }
         if(iter >= nbr_allocated_iterations){
             jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
+            block->event_iter = 0;
             return jmi_block_solver_status_event_non_converge;
         }
 
         block->event_iter++;
     }
 
-    jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "switches", switches, block->n_sw);
-    jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "booleans", booleans, jmi->n_boolean_d);
+    /* jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "switches", switches, block->n_sw);
+    jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "booleans", booleans, jmi->n_boolean_d); */
 
     return jmi_block_solver_status_success;
 }
