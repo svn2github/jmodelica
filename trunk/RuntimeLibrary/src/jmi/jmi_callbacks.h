@@ -32,7 +32,7 @@ typedef struct jmi_callbacks_t jmi_callbacks_t;           /**< \brief Forward de
  * \brief Types of log messages.
  * Higher value = less severe
  */
-typedef enum {
+typedef enum jmi_log_category_t {
     logError,
     logWarning,
     logInfo

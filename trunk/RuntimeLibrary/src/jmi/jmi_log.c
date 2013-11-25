@@ -412,6 +412,10 @@ static void create_log_file_if_needed(log_t *log) {
     }
 }
 
+char* jmi_log_get_build_date() {
+    return __DATE__ " " __TIME__;
+}
+
 /** Additional log_t initialization */
 static void initialize(log_t *log) {
     create_log_file_if_needed(log);
