@@ -419,6 +419,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         /* ENHANCED FIXED POINT ITERATION */
         if (converged==0 && (ef==0 || ef==jmi_block_solver_status_event_non_converge || ef==jmi_block_solver_status_inf_event_loop) && block_solver->check_discrete_variables_change){
             int non_reals_changed_flag;
+            int non_reals_not_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
                 "Starting enhanced block iteration at <t:%E>", cur_time);
 
@@ -472,7 +473,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 }
 
                 ef = block_solver->solve(block_solver); 
-
                 if (ef!=0){ jmi_log_leave(log, iter_node); break; }
 
                 memcpy(x_new, block_solver->x, block_solver->n*sizeof(jmi_real_t));
@@ -480,10 +480,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 jmi_log_reals(log, iter_node, logInfo, "ivs", block_solver->x, block_solver->n);
                 block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
-                non_reals_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, x_new);
+                non_reals_not_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, x_new);
 
                 /* Check for consistency */
-                if (non_reals_changed_flag){
+                if (non_reals_not_changed_flag){
                     jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration at "
                         "<t:%E>", cur_time);
                     converged = 1;
