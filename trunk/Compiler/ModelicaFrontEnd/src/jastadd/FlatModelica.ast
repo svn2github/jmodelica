@@ -315,6 +315,11 @@ FRecordComponentType : BaseNode ::= <Name> FType;
 abstract FPrimitiveType : FType;
 
 /**
+ * Type representing no value at all, equivalent to the void type in C-like languages.
+ */
+FNoType : FType;
+
+/**
  * \brief Base class for the numeric types Real and Integer.
  */
 abstract FPrimitiveNumericType : FPrimitiveType;
@@ -1263,6 +1268,11 @@ FEdgeExp : FUnaryBuiltIn;
  * Change built-in function.
  */
 FChangeExp : FUnaryBuiltIn;
+
+/**
+ * Reinit built-in function.
+ */
+FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 
 /**
  * Sample built-in function.

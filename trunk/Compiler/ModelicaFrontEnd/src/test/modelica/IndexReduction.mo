@@ -2590,7 +2590,7 @@ At line 0, column 0:
 
 Warning: in file '...':
 At line 0, column 0:
-  a_v have StateSelect always and in not used as state
+  a_v has stateSelect=always, but could not be selected as state
 ")})));
 end IndexReduction57;
 

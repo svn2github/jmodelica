@@ -84,6 +84,7 @@ aspect TransformCanonical {
 		    new genAlgorithmFunctionsIfSet(),
 		    new genBindingEquations(),
 		    new scalarize(),
+		    new MakeReinitedVarsStates(),
 		    new enableIfEquationElimination(),
 		    new extractEventGeneratingExps(),
 		    new transformAlgorithms(),
@@ -5075,4 +5076,87 @@ aspect ArrayAccessRewrite {
             return call;
         }
     }
+}
+
+
+aspect ReinitStates {
+    
+    public class FClass {
+        /**
+         * Transformation for marking up variables that have reinit() applied on them as states
+         * (by setting stateSelect=always).
+         */
+        public class MakeReinitedVarsStates extends Transformation {
+            public void perform() {
+                for (FAbstractEquation eqn : getFAbstractEquations())
+                    eqn.makeReinitedVarsStates();
+            }
+        }
+    }
+    
+    /**
+     * Mark all variables reinited in this equation as states.
+     */
+    public void FAbstractEquation.makeReinitedVarsStates() {}
+    
+    public void FIfWhenElseEquation.makeReinitedVarsStates() {
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.makeReinitedVarsStates();
+    }
+    
+    public void FIfWhenEquation.makeReinitedVarsStates() {
+        if (hasElse())
+            getElse().makeReinitedVarsStates();
+    }
+    
+    public void FFunctionCallEquation.makeReinitedVarsStates() {
+        getCall().makeReinitedVarsStates();
+    }
+    
+    /**
+     * It this is a reinit(), mark reinited variable as state.
+     */
+    public void FAbstractFunctionCall.makeReinitedVarsStates() {}
+
+    /**
+     * Mark reinited variable as state.
+     */
+    public void FReinit.makeReinitedVarsStates() {
+        getVar().markReferencedVarAsState();
+    }
+    
+    /**
+     * Mark referenced variable as state.
+     * 
+     * Only valid for variable accesses, default implementation throws exception.
+     */
+    public void FExp.markReferencedVarAsState() {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Mark referenced variable as state.
+     */
+    public void FIdUseExp.markReferencedVarAsState() {
+        myFV().markAsState();
+    }
+    
+    /**
+     * Mark this variable as a state, by setting stateSelect=always.
+     */
+    public void FAbstractVariable.markAsState() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void FVariable.markAsState() {
+        FAttribute newA = new FInternalAttribute(FAttribute.STATE_SELECT, new FEnumLitExp(FAttribute.STATE_SELECT_TYPE, "always"));
+        FAttribute oldA = findAttributeLocal(FAttribute.STATE_SELECT);
+        if (oldA != null) {
+            oldA.replaceMe(newA);
+            addFAttribute(oldA);
+        } else {
+            addFAttribute(newA);
+        }
+    }
+    
 }

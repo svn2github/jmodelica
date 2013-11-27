@@ -595,6 +595,7 @@ aspect XMLTagBinding{
         eq FArray.xmlTag() = "Array";   
         eq FFunctionCall.xmlTag() = "FunctionCall";
         eq FAssert.xmlTag() = "Assert";
+        eq FReinit.xmlTag() = "Reinit";
         //unsupported expressions       
         eq FExp.xmlTag() = "Unsupported";
        

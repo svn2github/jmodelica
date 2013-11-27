@@ -114,12 +114,15 @@ aspect IndexReduction {
                     stateSelectAlwaysVars.add(fv);
             for (FVariable fv : differentiatedRealVariables()) {
                 if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
-                    fv.warning(fv.name() + " have StateSelect never and is used as state");
+                    fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
                 stateSelectAlwaysVars.remove(fv);
                 log.info(new PrettyPrintDelegate(fv, "  "));
             }
-            for (FVariable fv : stateSelectAlwaysVars)
-                fv.warning(fv.name() + " have StateSelect always and in not used as state");
+            for (FVariable fv : stateSelectAlwaysVars) 
+                if (fv.isSetInReinit())
+                    fv.error(fv.name() + " is assigned in reinit(), but could not be selected as state");
+                else
+                    fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
             
             // Calculate new graph
             g = new BiPGraph();
@@ -558,8 +561,22 @@ aspect IndexReduction {
     eq FRealVariable.stateSelectionWeight() {
         FRealVariable frv = (FRealVariable) getMeIntegrated();
         StateSelect ss = (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
-        return ss.weight();
+        long weight = ss.weight();
+        // Slightly increase weight for variables used in reinit(), since they give errors if they do not become states
+        if (isSetInReinit())
+            weight++;
+        return weight;
     }
+    
+    /**
+     * Check if this variable is marked as being set by a reinit().
+     */
+    syn boolean FAbstractVariable.isSetInReinit() = false;
+    eq FRealVariable.isSetInReinit() {
+        FAttribute a = findAttribute(FAttribute.STATE_SELECT);
+        return a != null && a.isInternal();
+    }
+    
     
     public class IndexReductionResult {
 

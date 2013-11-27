@@ -44,11 +44,16 @@ aspect ContentCheck {
 			}
 		}
 	}
-	
-	public void FTerminate.contentCheck(ErrorCheckType checkType) {
-		if (inFunction()) 
-			error("The terminate() statement is not allowed in functions");
-	}
+    
+    public void FTerminate.contentCheck(ErrorCheckType checkType) {
+        if (inFunction()) 
+            error("The terminate() statement is not allowed in functions");
+    }
+    
+    public void FReinit.contentCheck(ErrorCheckType checkType) {
+        if (!inWhen() || inAlgorithm()) 
+            error("The reinit() operator is only allowed in when equations");
+    }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())

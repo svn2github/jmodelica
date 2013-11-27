@@ -172,7 +172,7 @@ end ElseWhenEq_ComplErr;
 model UnsupportedBuiltins1_ComplErr
  equation
   delay(1);
-  reinit(1);
+  spatialDistribution();
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -185,13 +185,14 @@ Compliance error at line 214, column 3:
   The delay() function-like operator is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 216, column 3:
-  The reinit() function-like operator is not supported
+  The spatialDistribution() function-like operator is not supported
 ")})));
 end UnsupportedBuiltins1_ComplErr;
 
 
 model UnsupportedBuiltins2_ComplErr
   parameter Boolean x;
+  parameter Real y;
  equation
   sign(1);
   div(1,1);
@@ -207,57 +208,67 @@ model UnsupportedBuiltins2_ComplErr
   edge(x);
   change(x);
   terminate("");
+  der(y) = time;
+  when y > time then
+    reinit(y, 2);
+end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="UnsupportedBuiltins2_ComplErr",
-			description="Compliance error for unsupported builtins",
+			description="Compliance error for builtins that are only supported for FMUs",
 			generate_ode=false,
 			generate_dae=true,
 			errorMessage="
-12 errors found:
+16 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 280, column 3:
+Compliance error at line 193, column 3:
   The sign() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 213, column 3:
+Compliance error at line 194, column 3:
   The div() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 214, column 3:
+Compliance error at line 195, column 3:
   The mod() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 215, column 3:
+Compliance error at line 196, column 3:
   The rem() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 280, column 3:
+Compliance error at line 197, column 3:
   The ceil() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 280, column 3:
+Compliance error at line 198, column 3:
   The floor() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 289, column 3:
+Compliance error at line 199, column 3:
   The integer() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 280, column 3:
+Compliance error at line 200, column 3:
   The semiLinear() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 281, column 3:
+Compliance error at line 201, column 3:
   The initial() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 284, column 3:
+Compliance error at line 202, column 3:
   The sample() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 285, column 3:
+Compliance error at line 203, column 3:
   The pre() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 286, column 3:
+Compliance error at line 204, column 3:
   The edge() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 286, column 3:
+Compliance error at line 205, column 3:
   The change() function-like operator is currently only supported when compiling FMUs
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 288, column 3:
+Compliance error at line 206, column 3:
   The terminate() function-like operator is currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 208, column 3:
+  When equations are currently only supported when compiling FMUs
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
+Compliance error at line 209, column 5:
+  The reinit() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins2_ComplErr;
 

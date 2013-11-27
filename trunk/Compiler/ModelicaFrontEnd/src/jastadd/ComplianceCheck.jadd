@@ -299,10 +299,16 @@ aspect ComplianceCheck {
 	public void FTerminalExp.complianceCheck(ErrorCheckType checkType) {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
-	
-	public void FTerminate.complianceCheck(ErrorCheckType checkType) {
-		complianceOnlyFMU("The terminate() function-like operator is");
-	}
+    
+    public void FTerminate.complianceCheck(ErrorCheckType checkType) {
+        complianceOnlyFMU("The terminate() function-like operator is");
+    }
+    
+    public void FReinit.complianceCheck(ErrorCheckType checkType) {
+        complianceOnlyFMU("The reinit() function-like operator is");
+        if (root().options.getBooleanOption("generate_ode") && getVar().isArray())
+            compliance("The reinit() function-like operator if currently not supported for arrays");
+    }
 	
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

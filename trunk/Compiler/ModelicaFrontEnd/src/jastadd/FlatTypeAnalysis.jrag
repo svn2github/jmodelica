@@ -477,14 +477,14 @@ aspect FlatTypeAnalysis {
 	
 	eq FSmoothExp.type() = getFExp().type();
 	
-	// TODO: Maybe there should be a special type for "no return value"
-	eq FConnectionsOp.type() = null;
+	eq FConnectionsOp.type() = fNoType();
 	eq FConnBoolOp.type()    = fBooleanScalarType();
 	
 	eq FCardinality.type() = fIntegerScalarType();
 
-	eq FTerminate.type() = null;
-	eq FAssert.type() = null;
+    eq FTerminate.type() = fNoType();
+    eq FReinit.type() = fNoType();
+	eq FAssert.type() = fNoType();
 	eq FGetInstanceName.type() = fStringScalarType();
 
 	/**
@@ -961,6 +961,7 @@ aspect BuiltInFlatTypes {
 	public static final FStringType  FStringType.SCALAR  				= new FStringType(Size.SCALAR);
 	public static final FUnknownType FUnknownType.SCALAR 				= new FUnknownType(Size.SCALAR);
 	public static final FExternalObjectType FExternalObjectType.SCALAR 	= new FExternalObjectType(Size.SCALAR);
+    public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
 
 	syn boolean FType.isReal()    				= false;
 	eq FRealType.isReal()						= true;
@@ -1087,7 +1088,8 @@ aspect BuiltInFlatTypes {
   		copy.setSize(Size.SCALAR);
   		return copy;
 	}
-	eq FUnknownType.scalarType() 		= FUnknownType.SCALAR;
+    eq FUnknownType.scalarType()        = this;
+    eq FNoType.scalarType()             = this;
 	eq FRealType.scalarType()    		= FRealType.SCALAR;
 	eq FIntegerType.scalarType() 		= FIntegerType.SCALAR;
 	eq FBooleanType.scalarType()		= FBooleanType.SCALAR;
@@ -1097,7 +1099,8 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;
  	
-	syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+    syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+    syn FType ASTNode.fNoType()      = FNoType.SCALAR;
 	
 	syn FPrimitiveType ASTNode.fRealScalarType()    		= FRealType.SCALAR;
 	syn FPrimitiveType ASTNode.fIntegerScalarType() 		= FIntegerType.SCALAR;
@@ -1127,7 +1130,8 @@ aspect BuiltInFlatTypes {
   		copy.setSize(size);
   		return copy;
  	}
- 	eq FUnknownType.arrayType(Size size)  		= this;
+    eq FUnknownType.arrayType(Size size)        = this;
+    eq FNoType.arrayType(Size size)             = this;
 	eq FRealType.arrayType(Size size)     		= fRealArrayType(size);
  	eq FIntegerType.arrayType(Size size)  		= fIntegerArrayType(size);
  	eq FStringType.arrayType(Size size)   		= fStringArrayType(size);

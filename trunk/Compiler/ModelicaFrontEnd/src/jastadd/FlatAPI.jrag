@@ -1662,7 +1662,9 @@ aspect Attributes {
 	public static final String FAttribute.NOMINAL      = "nominal";
 	public static final String FAttribute.STATE_SELECT = "stateSelect";
 	public static final String FAttribute.SIZE         = "size()";
-	
+
+	public static final String FAttribute.STATE_SELECT_TYPE = "StateSelect";
+
 	syn lazy FDerivedType FVariable.myFDerivedType() = findFDerivedType(getDerivedType());
 	syn FDerivedType FEnumDecl.myFDerivedType()      = findFDerivedType(name());
 	eq FRecordVariable.myFDerivedType()              = null;
@@ -1826,10 +1828,10 @@ aspect Attributes {
 	syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
 	
 	// State Select attribute
-	syn boolean     FRealVariable.stateSelectAttributeSet()    = attributeSet(FAttribute.STATE_SELECT);
-	syn FExp        FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
-	syn CValue      FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
-	syn int         FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
+	syn boolean FRealVariable.stateSelectAttributeSet()    = attributeSet(FAttribute.STATE_SELECT);
+	syn FExp    FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
+	syn CValue  FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
+	syn int     FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
 	
 	public void FVariable.warnStartAttributeNotSet() {
 		if (!startAttributeSet())

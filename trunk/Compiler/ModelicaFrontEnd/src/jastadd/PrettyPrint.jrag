@@ -1770,6 +1770,7 @@ aspect FlatPrettyPrint {
 	eq FInitialExp.builtInName()         = "initial";
 	eq FTerminalExp.builtInName()        = "terminal";
 	eq FTerminate.builtInName()          = "terminate";
+    eq FReinit.builtInName()             = "reinit";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";

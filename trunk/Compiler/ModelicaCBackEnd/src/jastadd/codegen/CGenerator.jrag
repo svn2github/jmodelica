@@ -696,7 +696,7 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(PrintStream genPrinter) {
 			if (fclass.root().options.getBooleanOption("generate_only_initial_system")) {
-				genPrinter.print("  ef = model_ode_initialize(jmi);\n");
+				genPrinter.print(INDENT + "ef = model_ode_initialize(jmi);\n");
 			} else {
 				fclass.getDAEStructuredBLT().genVarDecls_C(genPrinter, INDENT);
 				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");						

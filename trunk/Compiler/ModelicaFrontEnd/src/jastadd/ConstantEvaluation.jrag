@@ -1321,7 +1321,10 @@ aspect ConstantEvaluation {
   eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
 
   eq FTerminate.cevalCalc() {
-	  throw new ConstantEvaluationException();
+      throw new ConstantEvaluationException();
+  }
+  eq FReinit.cevalCalc() {
+      throw new ConstantEvaluationException();
   }
   eq FAssert.cevalCalc() {
 	  throw new ConstantEvaluationException();

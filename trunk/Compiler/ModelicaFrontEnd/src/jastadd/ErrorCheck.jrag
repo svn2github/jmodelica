@@ -1187,3 +1187,101 @@ aspect AssertEval {
     }
     
 }
+
+aspect ScalarizationErrorCheck {
+    
+    /**
+     * Check errors that can only be detected after scalarization.
+     */
+    public void FClass.scalarizationErrorCheck() {
+        checkMultipleReinit();
+        breakOnErrors();
+    }
+    
+    /**
+     * Check for variables with multiple reinits.
+     */
+    public void FClass.checkMultipleReinit() {
+        Map<FAbstractVariable,Set<FReinit>> reinitMap = new HashMap<FAbstractVariable,Set<FReinit>>();
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.collectReinits(reinitMap);
+        for (FAbstractVariable fv : reinitMap.keySet()) {
+            if (!fv.isUnknown()) {
+                Set<FWhenEquation> whens = new HashSet<FWhenEquation>();
+                Set<FReinit> reinits = reinitMap.get(fv);
+                for (FReinit r : reinits) {
+                    FWhenEquation w = r.myWhen();
+                    if (!whens.contains(w))
+                        whens.add(w);
+                }
+                if (whens.size() > 1) {
+                    StringBuilder buf = new StringBuilder();
+                    buf.append("The variable ");
+                    buf.append(fv.name());
+                    buf.append(" is assigned in reinit() clauses in more than one when clause:\n");
+                    for (FReinit r : reinits) {
+                        buf.append("    ");
+                        buf.append(r);
+                        buf.append(";\n");
+                    }
+                    fv.error(buf.toString());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Find all reinits and map them to the assigned variable.
+     */
+    public void FAbstractEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
+    
+    public void FIfEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
+    
+    public void FWhenEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        super.collectReinits(map);
+        if (hasElse())
+            getElse().collectReinits(map);
+    }
+    
+    public void FIfWhenElseEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.collectReinits(map);
+    }
+    
+    public void FFunctionCallEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        getCall().collectReinits(map);
+    }
+    
+    public void FExp.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
+    
+    public void FReinit.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        Set<FReinit> set = map.get(myFV());
+        if (set == null) {
+            set = new LinkedHashSet<FReinit>();
+            map.put(myFV(), set);
+        }
+        set.add(this);
+    }
+    
+    /**
+     * Get the when-equation that this reinit() belongs to.
+     * 
+     * Gets the top when in a when-elsewhen-else.
+     * Not valid after when-equations have been converted to if-equations.
+     */
+    inh FWhenEquation FReinit.myWhen();
+    eq FWhenEquation.getChild().myWhen() = findTopWhen(this);
+    eq FClass.getChild().myWhen()        = null;
+    eq InstNode.getChild().myWhen()      = null;
+    
+    /**
+     * Find the top when-equation in a when-elsewhen-else equation.
+     * 
+     * @param last  will be returned if parent is not a when equation
+     */
+    inh FWhenEquation FWhenEquation.findTopWhen(FWhenEquation last);
+    eq FWhenEquation.getChild().findTopWhen(FWhenEquation last) = findTopWhen(this);
+    eq FClass.getChild().findTopWhen(FWhenEquation last)        = last;
+    eq InstNode.getChild().findTopWhen(FWhenEquation last)      = last;
+    
+}

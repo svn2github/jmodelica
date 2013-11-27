@@ -652,6 +652,13 @@ aspect FlatTypeCheck {
 	  }
   }
   
+  public void FReinit.typeCheck(ErrorCheckType checkType) {
+      if (!getVar().isAccess() || !getVar().type().isReal())
+          error("First argument to reinit() must be an access to a Real variable");
+      else if (!getVar().type().typeCompatible(getFExp().type()))
+          error("Arguments to reinit() must be of compatible types");
+  }
+  
   public void FEdgeExp.typeCheck(ErrorCheckType checkType) {
     if (!getFExp().isAccess() || !getFExp().type().isBoolean()) {
       error("Calling function edge(): argument must be a boolean variable access");	
@@ -893,6 +900,7 @@ aspect FlatTypeCheck {
   eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
   eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
   eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FReinit.getOriginalArg().argumentDefinedTypeValid()                   = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -924,6 +932,7 @@ aspect FlatTypeCheck {
   eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
           getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+  eq FReinit.getChild().argumentTypeValid(FType type)               = true;  // Type checked in Reinit.typeCheck()
   
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
@@ -1000,10 +1009,15 @@ aspect FlatTypeCheck {
 aspect FlatVariabilityCheck {
     
     private FExp FPreExp.instanceTreeSource = null;
+    private FExp FReinit.instanceTreeSource = null;
     
     public void FExp.setInstanceTreeSource(FExp source) {}
     
     public void FPreExp.setInstanceTreeSource(FExp source) {
+        instanceTreeSource = source;
+    }
+    
+    public void FReinit.setInstanceTreeSource(FExp source) {
         instanceTreeSource = source;
     }
     
@@ -1021,7 +1035,7 @@ aspect FlatVariabilityCheck {
     
     /**
      * Check operations that are allowed on discrete expressions or variables, 
-     * but not on continuous ones.
+     * but not on continuous ones or vice-versa.
      * 
      * Also breaks connections back to instance tree that was added during flattening 
      * to be able to report these errors in the correct place.
@@ -1037,6 +1051,15 @@ aspect FlatVariabilityCheck {
         instanceTreeSource = null;
     }
     
+    public void FReinit.checkDiscreteOperations() {
+        if (instanceTreeSource != null && !myFV().isContinuous()) 
+            instanceTreeSource.discreteArgError();
+        instanceTreeSource = null;
+    }
+    
+    /**
+     * Generate error for operator that got wrong variability of argument
+     */
     public void FExp.discreteArgError() {
         throw new UnsupportedOperationException();
     }
@@ -1047,6 +1070,10 @@ aspect FlatVariabilityCheck {
     
     public void FChangeExp.discreteArgError() {
         error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+    }
+    
+    public void FReinit.discreteArgError() {
+        error("Built-in operator reinit() must have a continuous variable access as its first argument");
     }
     
 }

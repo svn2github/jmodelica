@@ -1084,6 +1084,81 @@ aspect CCodeGen {
 		str.print("}\n");
 	}
 	
+	
+    public void FReinit.genVarDecls_C(Printer p, PrintStream str, String indent) {
+        str.format("%sjmi_ad_var_t %s;\n", indent, tempName_C());
+    }
+    
+    public void FReinit.prettyPrint_C(Printer p, PrintStream str, String indent) {
+        str.format("%s%s = ", indent, tempName_C());
+        p.print(getFExp(), str, indent);
+        str.print(";\n");
+    }
+    
+    public void FReinit.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {
+        str.print(indent);
+        p.print(getVar(), str, indent);
+        str.format(" = %s;\n", tempName_C());
+    }
+    
+    public void FAbstractFunctionCall.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {}
+    
+    public void FAbstractEquation.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {}
+    
+    public void FFunctionCallEquation.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {
+        getCall().genReinitWritebacks_C(p, str, indent);
+    }
+    
+    public void FIfWhenElseEquation.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {
+        if (containsReinit()) {
+            genIfStart_C(p, str, indent);
+            String nextInd = p.indent(indent);
+            for (FAbstractEquation e : getFAbstractEquations())
+                e.genReinitWritebacks_C(p, str, nextInd);
+        }
+    }
+    
+    public void FIfWhenEquation.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {
+        if (containsReinit()) {
+            super.genReinitWritebacks_C(p, str, indent);
+            if (hasElse() && getElse().containsReinit())
+                getElse().genReinitWritebacks_C(p, str, indent);
+            genIfEnd_C(p, str, indent);
+        }
+    }
+    
+    public void AbstractEquationBlock.genReinitWritebacks_C(Printer p, String indent, PrintStream str) {}
+    
+    public void MetaEquationBlock.genReinitWritebacks_C(Printer p, String indent, PrintStream str) {
+        equation().genReinitWritebacks_C(p, str, indent);
+    }
+    
+    public void FunctionCallEquationBlock.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {
+        equation().genReinitWritebacks_C(p, str, indent);
+    }
+
+    public void WhenEquationBlock.genReinitWritebacks_C(Printer p, String indent, PrintStream str) {
+        // TODO: Remove once all when equations are converted to if equations
+        if (equation().containsReinit()) {
+            FExp.genWhenClause_C(equation().guards(), indent, str);
+            String nextInd = p.indent(indent);
+            for (SimpleEquationBlock b : blocks.iterator().next()) 
+                b.genReinitWritebacks_C(p, nextInd, str);
+            str.print(indent);
+            str.print("}\n");
+        }
+    }
+    
+    syn boolean ASTNode.containsReinit() {
+        for (ASTNode n : this)
+            if (n.containsReinit())
+                return true;
+        return false;
+    }
+    eq FExp.containsReinit()    = false;
+    eq FReinit.containsReinit() = true;
+
+	
 	public void FExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {}
 	
 	public void FIdUseExp.prettyPrintSize_C(Printer p, PrintStream str, String indent, int dim) {
@@ -2304,6 +2379,31 @@ aspect CCodeGen {
 		str.print(") {\n");
 	}
 
+    
+    public void FIfWhenElseEquation.genIfStart_C(Printer p, PrintStream str, String indent) {
+        str.print(indent);
+        str.print("} else {\n");
+    }
+    
+    public void FIfWhenEquation.genIfStart_C(Printer p, PrintStream str, String indent) {
+        str.print(indent);
+        if (isElse())
+            str.print("} else ");
+        str.print("if (");
+        p.print(getTest(), str, p.indent(indent));
+        str.print(") {\n");
+   }
+    
+    public void FIfWhenElseEquation.genIfEnd_C(Printer p, PrintStream str, String indent) {}
+    
+    public void FIfWhenEquation.genIfEnd_C(Printer p, PrintStream str, String indent) {
+        if (!isElse()) {
+            str.print(indent);
+            str.print("}\n");
+        }
+    }
+
+
 	public void FAbstractEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {}
     
 	public void FEquation.genSolvedBlock_C(FVariable v, String indent, PrintStream str) {
@@ -2753,23 +2853,29 @@ aspect CCodeGen {
 	}
 
 	public void StructuredBLT.genOdeDerivativeBlocks(PrintStream str) {
+	    Printer p = ASTNode.printer_C;
+	    String indent = p.indent("");
 		genEnumerateResidualBlocks_C();
 		str.append("/************* ODE section *********/\n");
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
-			eb.genBlock_C(false, ASTNode.printer_C.indent(""), str);
+			eb.genBlock_C(false, indent, str);
 		}
 		str.append("/************ Real outputs *********/\n");
 		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
-			eb.genBlock_C(false, ASTNode.printer_C.indent(""), str);
+			eb.genBlock_C(false, indent, str);
 		}
 		str.append("/****Integer and boolean outputs ***/\n");
 		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
-			eb.genBlock_C(false, ASTNode.printer_C.indent(""), str);
+			eb.genBlock_C(false, indent, str);
 		}
 		str.append("/**** Other variables ***/\n");
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
-			eb.genBlock_C(false, ASTNode.printer_C.indent(""), str);
+			eb.genBlock_C(false, indent, str);
 		}
+        str.append("/********* Write back reinits *******/\n");
+        for (AbstractEquationBlock eb : getAllBlocks()) {
+            eb.genReinitWritebacks_C(p, indent, str);
+        }
 	}
 }

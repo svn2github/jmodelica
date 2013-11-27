@@ -689,6 +689,13 @@ aspect Constructors {
 	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
 		this(typeName, name, new Opt(), isSet, level, new Opt(), new Opt(), new List());
 	}
+    
+    /**
+     * Create an attribute with only the required children.
+     */
+    public FAttribute.FAttribute(String typeName, String name, boolean isSet, int level) {
+        this(new FIdUse(typeName), new FIdDecl(name), isSet, level);
+    }
 	
 	/**
 	 * Create an attribute with only the required children and a value.
@@ -700,6 +707,15 @@ aspect Constructors {
 				(value == null ? new Opt() : new Opt(value)), 
 				isSet, level, new Opt(), new Opt(), new List());
 	}
+    
+    /**
+     * Create an attribute with only the required children and a value.
+     * 
+     * The value may be <code>null</code>, then no value is set.
+     */
+    public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
+        this(new FIdUse(typeName), new FIdDecl(name), value, isSet, level);
+    }
 	
 	/**
 	 * \brief Create an FFunctionArray with the given name and type. 
@@ -882,7 +898,8 @@ aspect InheritedFactoryMethods {
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
 	public FEdgeExp        FEdgeExp.createEmptyNode()        { return new FEdgeExp();        }
-	public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }
 	public FTerminalExp    FTerminalExp.createEmptyNode()    { return new FTerminalExp();    }

@@ -1930,6 +1930,12 @@ aspect FlatExpressions {
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	
+    public FReinit FReinit.flatten(FQName prefix) {
+        FReinit res = new FReinit(getVar().flatten(prefix), getFExp().flatten(prefix));
+        res.setInstanceTreeSource(this);
+        return res;
+    }
+	
 	
 	public FAssert FAssert.flatten(FQName prefix) {
 		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();

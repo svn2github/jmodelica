@@ -264,7 +264,10 @@ aspect PredefinedTypes {
     		+ "  input Real x;\n"      // Type not used
     		+ "  output Real y;\n"     // Type not used
     		+ "end change;\n"
-    		+ "function reinit end reinit;\n"
+    		+ "function reinit\n"
+            + "  input Real x;\n"      // Type not used
+            + "  input Real expr;\n"     // Type not used
+            + "end reinit;\n"
     		+ "function assert\n"
     		+ "  input Boolean condition;\n"
     		+ "  input String message;\n"
@@ -324,7 +327,8 @@ aspect PredefinedTypes {
     		+ "  input String format = \"\";\n"
     		+ "  output String y;\n"
     		+ "end String;\n"
-    		+ "function delay end delay;\n"
+            + "function delay end delay;\n"
+            + "function spatialDistribution end spatialDistribution;\n"
     		+ "function cardinality"
     		+ "  input Real x;\n"      // Type not used
     		+ "  output Integer y;\n"  // Type not used

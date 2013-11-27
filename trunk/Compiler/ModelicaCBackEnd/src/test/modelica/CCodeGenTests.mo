@@ -441,6 +441,7 @@ equation
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _x_2 = COND_EXP_EQ(_atInitial, JMI_TRUE, _c_1_0 + _c_2_1, pre_x_2);
+/********* Write back reinits *******/
 			
 ")})));
 end CCodeGenTest14;
@@ -1639,6 +1640,7 @@ void func_CCodeGenTests_CFunctionTest13_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
   _z_2_3 = (jmi_array_val_1(tmp_1, 2));
   _y_1_5 = (jmi_array_val_1(tmp_2, 1));
   _y_2_6 = (jmi_array_val_1(tmp_2, 2));
+/********* Write back reinits *******/
 ")})));
 end CFunctionTest13;
 
@@ -1707,6 +1709,7 @@ void func_CCodeGenTests_CFunctionTest14_F_def(jmi_array_t* x_a, jmi_ad_var_t u_v
 /**** Other variables ***/
   _u_4 = 3;
    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 ")})));
 end CFunctionTest14;
 
@@ -5167,6 +5170,7 @@ $C_ode_guards$
     _z_5 = COND_EXP_EQ(LOG_EXP_AND(_temp_3_8, LOG_EXP_NOT(pre_temp_3_8)), JMI_TRUE, JMI_FALSE, pre_z_5);
     _temp_2_7 = LOG_EXP_AND(_sw(1), _z_5);
     _v_4 = COND_EXP_EQ(LOG_EXP_AND(_temp_2_7, LOG_EXP_NOT(pre_temp_2_7)), JMI_TRUE, JMI_FALSE, pre_v_4);
+/********* Write back reinits *******/
  
                        model_ode_guards(jmi);
     pre_x_1 = 0.0;
@@ -5314,6 +5318,7 @@ $C_ode_time_events$
     _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3)), JMI_TRUE, pre_x_0 + AD_WRAP_LITERAL(1), pre_x_0);
     _temp_2_4 = jmi_sample(jmi,AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\"));
     _y_1 = COND_EXP_EQ(LOG_EXP_AND(_temp_2_4, LOG_EXP_NOT(pre_temp_2_4)), JMI_TRUE, pre_y_1 + AD_WRAP_LITERAL(1), pre_y_1);
+/********* Write back reinits *******/
  
                        model_ode_guards(jmi);
     _der_dummy_5 = 0;
@@ -5413,6 +5418,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
     _x_p_1 = 1;
@@ -5511,6 +5517,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
     ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
@@ -5572,6 +5579,7 @@ $C_dae_init_blocks_residual_functions$
   _x_0 = pre_x_0;
     _y_1 = pre_y_1;
   }
+/********* Write back reinits *******/
 		 
       model_ode_guards(jmi);
   pre_x_0 = 0.0;
@@ -5626,6 +5634,7 @@ equation
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
     _temp_3_8 = _sw(2);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
+/********* Write back reinits *******/
  
                        model_ode_guards(jmi);
     _temp_1_6 = _sw(0);
@@ -5746,6 +5755,139 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 			
 ")})));
 end WhenEqu7;
+
+
+model ReinitCTest1
+    Real x;
+equation
+    der(x) = 1;
+    when time > 2 then
+        reinit(x, 1);
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ReinitCTest1",
+			description="",
+			variability_propagation=false,
+			template="
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+			generatedCode="
+    jmi_ad_var_t tmp_1;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_1 = 1;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _guards(0) = _sw(0);
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+      tmp_1 = AD_WRAP_LITERAL(1);
+} else {
+}
+/********* Write back reinits *******/
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+        _x_0 = tmp_1;
+    }
+
+-----
+    model_ode_guards(jmi);
+    _der_x_1 = 1;
+    _x_0 = 0.0;
+
+-----
+
+-----
+")})));
+end ReinitCTest1;
+
+
+model ReinitCTest2
+    Real x,y;
+equation
+    der(x) = 1;
+	der(y) = 2;
+    when y > 2 then
+        reinit(x, 1);
+    end when;
+    when x > 2 then
+        reinit(y, 1);
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ReinitCTest2",
+			description="",
+			variability_propagation=false,
+			template="
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+			generatedCode="
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+    _der_x_2 = 1;
+    _der_y_3 = 2;
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _guards(0) = _sw(0);
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+      tmp_1 = AD_WRAP_LITERAL(1);
+} else {
+}
+    _guards(1) = _sw(1);
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+      tmp_2 = AD_WRAP_LITERAL(1);
+} else {
+}
+/********* Write back reinits *******/
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+        _x_0 = tmp_1;
+    }
+  if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+        _y_1 = tmp_2;
+    }
+
+-----
+    model_ode_guards(jmi);
+    _der_x_2 = 1;
+    _der_y_3 = 2;
+    _x_0 = 0.0;
+    _y_1 = 0.0;
+
+-----
+
+-----
+")})));
+end ReinitCTest2;
+
+
+// This requires conversion of all when clauses to if clauses (or other elsewhen support), see #3199
+model ReinitCTest3
+    Real x;
+equation
+    der(x) = 1;
+    when time > 2 then
+        reinit(x, 1);
+    elsewhen time > 1 then
+        reinit(y, 1);
+    end when;
+end ReinitCTest3;
 
 
 model NoDAEGenerationTest1
@@ -5871,6 +6013,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /**** Other variables ***/
    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
   _z_2 = _x_0 + _y_1;
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
@@ -6027,6 +6170,7 @@ static int dae_init_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
@@ -6200,6 +6344,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
   _mode_10 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(1), JMI_TRUE, JMI_FALSE), _startFor_8), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_OR(COND_EXP_EQ(pre_mode_10, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), _startBack_9), _sw(3)), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(2)));
+/********* Write back reinits *******/
 
       model_ode_guards(jmi);
   _der_dummy_12 = 1;
@@ -7096,6 +7241,7 @@ $C_ode_derivatives$
 /**** Other variables ***/
     _x_0 = 5;
     _y_1 = _x_0 + 2;
+/********* Write back reinits *******/
 ")})));
 end Algorithm1;
 
@@ -7132,6 +7278,7 @@ $C_ode_derivatives$
     _x_0 = 5;
     _x_0 = _x_0 + 2;
     _y_1 = _x_0 + 2;
+/********* Write back reinits *******/
 ")})));
 end Algorithm2;
 
@@ -7239,6 +7386,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 
 "),
 		CCodeGenTestCase(
@@ -7323,6 +7471,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm3;
@@ -7452,6 +7601,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 
 "),
 		CCodeGenTestCase(
@@ -7548,6 +7698,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm4;
@@ -7592,6 +7743,7 @@ $C_ode_derivatives$
             }
         }
     }
+/********* Write back reinits *******/
 ")})));
 end Algorithm5;
 
@@ -7707,6 +7859,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm7;
@@ -7840,6 +7993,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     _x_0 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)), JMI_TRUE, AD_WRAP_LITERAL(2), pre_x_0);
     _y_1 = _x_0 * 2;
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+/********* Write back reinits *******/
 
 			
 ")})));
@@ -7976,6 +8130,7 @@ void func_CCodeGenTests_Algorithm9_fw_def(R_0_r* r_v) {
     _temp_1_2_7 = (jmi_array_val_1(tmp_5, 2));
     _re_a_2_4 = _temp_1_1_6;
     _re_a_3_5 = _temp_1_2_7;
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm9;
@@ -8098,6 +8253,7 @@ void func_CCodeGenTests_Algorithm10_f_def(jmi_array_t* i_a, jmi_array_t* o_a, jm
     _ae_3_7 = (jmi_array_val_1(tmp_4, 3));
     _ae_2_6 = (jmi_array_val_1(tmp_4, 4));
     _ae_1_5 = (jmi_array_val_1(tmp_4, 5));
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm10;
@@ -8217,6 +8373,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 /**** Other variables ***/
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+/********* Write back reinits *******/
 
 ")})));
 end Algorithm11;
@@ -8252,6 +8409,7 @@ $C_DAE_event_indicator_residuals$
     _temp_1_3 = _y_1 - _x_0 * 3;
     _temp_2_4 = _y_1 - 1 - _x_0;
     _b_2 = LOG_EXP_OR(_sw(0), _sw(1));
+/********* Write back reinits *******/
 
     (*res)[0] = _temp_1_3;
     (*res)[1] = _temp_2_4;
@@ -8308,6 +8466,7 @@ $C_DAE_event_indicator_residuals$
             _r1_0 = 4;
         }
     }
+/********* Write back reinits *******/
 
     (*res)[0] = _time - (0.5);
     (*res)[1] = _time - (1);
@@ -8349,6 +8508,7 @@ $C_DAE_event_indicator_residuals$
     if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
         _x_0 = 2;
     }
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
     _temp_1_1 = _sw(0);
@@ -8396,6 +8556,7 @@ $C_DAE_event_indicator_residuals$
     if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
         _x_0 = 2;
     }
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
     _temp_1_1 = _sw(0);
@@ -8459,6 +8620,7 @@ $C_DAE_event_indicator_residuals$
     } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
         _b_2 = _b_2 + 1;
     }
+/********* Write back reinits *******/
 
     model_ode_guards(jmi);
     _x_0 = sin(_time * AD_WRAP_LITERAL(10));
@@ -11503,6 +11665,7 @@ static const int DAE_relations[1]= {JMI_REL_GEQ};
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
+/********* Write back reinits *******/
 ")})));
 
 end TestRelationalOp5;
@@ -11658,6 +11821,7 @@ char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
     _i_3 = (_e_2);
     snprintf(tmp_1, 45, \"x %.6g y %s z %s v %d w\", _r_0, COND_EXP_EQ(_b_1, JMI_TRUE, \"true\", \"false\"), E_0_e[(int) _e_2], (int) _i_3);
     _dummy_4 = func_CCodeGenTests_StringOperations1_f_exp(tmp_1);
+/********* Write back reinits *******/
 ")})));
 end StringOperations1;
 
@@ -11694,6 +11858,7 @@ char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 /**** Other variables ***/
     snprintf(tmp_1, 43, \"x 0.123457 y true z a v 42 w %.6g\", _time);
     _dummy_0 = func_CCodeGenTests_StringOperations2_f_exp(tmp_1);
+/********* Write back reinits *******/
 ")})));
 end StringOperations2;
 
@@ -11730,6 +11895,7 @@ char* E_0_e[] = { \"\", \"a\", \"bb\", \"ccc\" };
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _dummy_1 = func_CCodeGenTests_StringOperations3_f_exp(\"x 0.123457 y true z a v 42 w\");
+/********* Write back reinits *******/
 ")})));
 end StringOperations3;
 
@@ -11783,6 +11949,7 @@ jmi_ad_var_t func_CCodeGenTests_StringOperations4_f_exp(char* s_v) {
 /**** Other variables ***/
     snprintf(tmp_1, 17, \"abc%.6g\", _time);
     _y_0 = func_CCodeGenTests_StringOperations4_f_exp(tmp_1);
+/********* Write back reinits *******/
 ")})));
 end StringOperations4;
 
@@ -11815,6 +11982,7 @@ $C_dae_blocks_residual_functions$
      jmi_flag_termination(jmi, \"X is high enough.\");
   } else {
 }
+/********* Write back reinits *******/
 
 ")})));
 end TestTerminate1;
@@ -11901,6 +12069,7 @@ equation
     if (COND_EXP_LT(_x_0 + _y_1, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
         jmi_assert_failed(\"sum is a bit high.\", JMI_ASSERT_WARNING);
     }
+/********* Write back reinits *******/
 ")})));
 end TestAssert2;
 
@@ -11927,6 +12096,7 @@ Auml: Ä\nbell: \a");
     if (COND_EXP_LT(_x_0, AD_WRAP_LITERAL(5), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
         jmi_assert_failed(\"euro: \\xe2\\x82\\xac\\naring: \\xc3\\xa5\\nAuml: \\xc3\\x84\\nbell: \\a\", JMI_ASSERT_ERROR);
     }
+/********* Write back reinits *******/
 ")})));
 end TestStringWithUnicode1;
 
@@ -11962,6 +12132,7 @@ $C_DAE_initial_dependent_parameter_assignments$
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _y_1 = _x_0 * _time;
+/********* Write back reinits *******/
 
 ***Initialization:
     model_ode_guards(jmi);
