@@ -954,7 +954,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         bsop->step_limit_factor = z[index];
     index = get_option_index("_nle_solver_min_tol");
     if(index)
-        bsop->min_tol = z[index]; 
+        bsop->min_tol = z[index];
+    index = get_option_index("_nle_solver_regularization_tolerance");
+    if(index)
+        bsop->regularization_tolerance = z[index];
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 

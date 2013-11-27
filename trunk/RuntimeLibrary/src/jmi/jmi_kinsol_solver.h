@@ -55,6 +55,7 @@ struct jmi_kinsol_solver_t {
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
     realtype kin_stol;             /**< \brief Tolerance for Step-size */
+    realtype kin_reg_tol;
     
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */

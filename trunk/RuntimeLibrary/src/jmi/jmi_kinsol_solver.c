@@ -448,6 +448,13 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
         solver->kin_stol = block->options->min_tol;
     
     solver->kin_ftol = block->options->res_tol;
+    
+    /* If not set, set the default */
+    if (block->options->regularization_tolerance == -1){
+        solver->kin_reg_tol = 1.0/block->options->res_tol;
+    } else {
+        solver->kin_reg_tol = block->options->regularization_tolerance;
+    }
 
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);

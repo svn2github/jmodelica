@@ -430,6 +430,12 @@ public class OptionRegistry {
             10,
             "Factor limiting the step-size taken by the nonlinear solver",
             0,1e10),
+        NLE_SOLVER_REGULARIZATION_TOLERANCE
+            ("nle_solver_regularization_tolerance",
+            runtime,
+            -1,
+            "Tolerance for deciding when regularization should kick in (i.e. when condition number > reg tol)",
+            -1,1e20),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               runtime,
