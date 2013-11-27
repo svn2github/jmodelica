@@ -424,6 +424,12 @@ public class OptionRegistry {
             100,
             "Maximum number of iterations for the equation block solver before failure",
             2,500),
+        NLE_SOLVER_STEP_LIMIT_FACTOR
+            ("nle_solver_step_limit_factor",
+            runtime,
+            10,
+            "Factor limiting the step-size taken by the nonlinear solver",
+            0,1e10),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               runtime,

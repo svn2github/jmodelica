@@ -11258,6 +11258,7 @@ const char *fmi_runtime_options_map_names[] = {
     \"_nle_solver_log_level\",
     \"_nle_solver_max_iter\",
     \"_nle_solver_min_tol\",
+    \"_nle_solver_step_limit_factor\",
     \"_nle_solver_tol_factor\",
     \"_rescale_after_singular_jac\",
     \"_rescale_each_step\",
@@ -11269,12 +11270,12 @@ const char *fmi_runtime_options_map_names[] = {
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870927, 0, 268435464, 1, 268435465, 2, 536870928, 3, 4, 268435466,
-    268435467, 536870929, 5, 268435468, 268435469, 6, 7, 536870930, 536870931, 268435470,
-    536870932, 536870933, 536870934, 0
+    536870928, 0, 268435465, 1, 268435466, 2, 536870929, 3, 4, 268435467,
+    268435468, 536870930, 5, 268435469, 268435470, 6, 7, 8, 536870931, 536870932,
+    268435471, 536870933, 536870934, 536870935, 0
 };
 
-const int fmi_runtime_options_map_length = 23;
+const int fmi_runtime_options_map_length = 24;
 ")})));
 end TestRuntimeOptions1;
 

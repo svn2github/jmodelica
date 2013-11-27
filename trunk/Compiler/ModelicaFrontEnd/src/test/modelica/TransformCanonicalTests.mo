@@ -5367,6 +5367,7 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Integer _nle_solver_log_level = 0 /* 0 */;
  parameter Integer _nle_solver_max_iter = 100 /* 100 */;
  parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
+ parameter Real _nle_solver_step_limit_factor = 10.0 /* 10.0 */;
  parameter Real _nle_solver_tol_factor = 0.001 /* 0.001 */;
  parameter Boolean _rescale_after_singular_jac = true /* true */;
  parameter Boolean _rescale_each_step = false /* false */;

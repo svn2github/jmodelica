@@ -949,6 +949,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_check_jac_cond");
     if(index)
         bsop->check_jac_cond_flag = (int)z[index]; 
+    index = get_option_index("_nle_solver_step_limit_factor");
+    if(index)
+        bsop->step_limit_factor = z[index];
     index = get_option_index("_nle_solver_min_tol");
     if(index)
         bsop->min_tol = z[index]; 

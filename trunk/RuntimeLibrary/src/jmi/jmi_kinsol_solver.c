@@ -431,7 +431,8 @@ static int get_print_level(jmi_block_solver_t* bs) {
 
 static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
-    int ef;
+    int ef, i;
+    double max_nominal;
     struct KINMemRec * kin_mem = solver->kin_mem; 
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
@@ -451,6 +452,15 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
     KINSetNumMaxIters(solver->kin_mem, block->options->max_iter);
+    
+    /* Allow long steps */
+    max_nominal = 1;
+    for(i=0;i< block->n;++i){
+        if (RAbs(block->nominal[i]) > max_nominal) {
+            max_nominal = RAbs(block->nominal[i]);
+        }
+    }
+    KINSetMaxNewtonStep(solver->kin_mem, block->options->step_limit_factor*max_nominal);
     
     if(block->options->iteration_variable_scaling_mode)
     {
@@ -1019,9 +1029,6 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     
     /*Stepsize tolerance*/
     KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
-    
-    /* Allow long steps */
-    KINSetMaxNewtonStep(solver->kin_mem, 1);
     
     /* Max number of iters */
     KINSetNumMaxIters(solver->kin_mem, block->options->max_iter);
