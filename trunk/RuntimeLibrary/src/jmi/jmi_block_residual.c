@@ -74,15 +74,20 @@ int jmi_block_dir_der(void* b, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residua
 int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
     jmi_t* jmi = block->jmi;
-
     jmi_real_t* sw_current = jmi_get_sw(jmi);
-    jmi_real_t* sw_new = &block->sw_old[block->event_iter+1];
-    int ef;
+    jmi_real_t* sw_new;
 
-    block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
+    if (x != NULL) {
+        block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
 
-    ef = jmi_evaluate_switches(jmi,sw_new,block->mode_sw);
-    return ef || jmi_compare_switches(sw_current,sw_new,block->n_sw);
+        sw_new = &block->sw_old[(block->event_iter+1)*block->n_sw];
+        jmi_evaluate_switches(jmi,sw_new,block->mode_sw);
+    } else {
+        sw_new = &block->sw_old[(block->event_iter-1)*block->n_sw];
+    }
+    
+    return jmi_compare_switches(sw_current,sw_new,block->n_sw); 
+    
 }
 
 int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
@@ -118,21 +123,21 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     memcpy(bool_last, booleans, nbr_bool*sizeof(jmi_real_t));
 
     ef = jmi_evaluate_switches(jmi,switches,mode_sw);
-
     if (ef) {
-        jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Error evaluating switches <block:%d, iter:%d> at <t:%E>",
+        jmi_log_node(log, logError, "Error", "Error evaluating switches <block:%d, iter:%d> at <t:%E>",
             block->index, iter, cur_time);
         return jmi_block_solver_status_err_event_eval;
     }
+    
     ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
     if (ef) {
-        jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
+        jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
              block->index, iter, cur_time);
         return jmi_block_solver_status_err_f_eval;
     }
 
     if(iter >= nbr_allocated_iterations){
-        jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
+        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
         block->event_iter = 0;
         return jmi_block_solver_status_event_non_converge;
     }
@@ -142,18 +147,14 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         *non_reals_changed_flag = 0;
     } else {
         /* Check for infinite loop */
-        /* if(iter >= nbr_allocated_iterations/2 && jmi_check_infinite_loop(sw_last,switches,block->n_sw,iter)){ */
-        if(jmi_check_infinite_loop(block->sw_old,switches,block->n_sw,iter)){
-            jmi_log_fmt(log, jmi_log_get_current_node(log), logError, "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
+        if(jmi_check_infinite_loop(block->sw_old,switches,block->n_sw,iter) && jmi_check_infinite_loop(block->bool_old,booleans,nbr_bool,iter)){
+            jmi_log_node(log, logWarning, "Warning", "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
             block->event_iter = 0;
             return jmi_block_solver_status_inf_event_loop;
         }
     }
     
     block->event_iter++;
-
-    /* jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "switches", switches, block->n_sw);
-    jmi_log_reals(jmi->log, jmi_log_get_current_node(log), logInfo, "booleans", booleans, jmi->n_boolean_d); */
 
     return jmi_block_solver_status_success;
 }
