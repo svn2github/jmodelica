@@ -941,7 +941,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "modelExchange", "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
+            return new String[] { "modelExchange", "coSimulation", "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
         }
 		
 		public void generateAttributes(PrintStream genPrinter) {		
@@ -979,11 +979,37 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
 			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
-			generateAttribute("canBeInstantiatedOnlyOncePerProcess", false,                   genPrinter);
+			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
 			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
 			generateAttribute("canSerializeFMUState",                false,                   genPrinter);
 			generateAttribute("providesDirectionalDerivative",       true,                    genPrinter);
+        }
+	}
+	
+	/**
+	 * Internal class used to generate a CoSimulation tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_coSimulation extends CSTag {
+		
+		
+		public XMLTag_coSimulation(AbstractGenerator myGenerator, FClass fclass) {
+			super("coSimulation", "CoSimulation", myGenerator, fclass);
+		}
+		
+		public void generateAttributes(PrintStream genPrinter) {		
+			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
+			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
+			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
+			generateAttribute("canInterpolateInputs",                   true,                    genPrinter);
+			generateAttribute("maxOutputDerivativeOrder",               0,                       genPrinter);
+			generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
+			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
+			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
+			generateAttribute("canSerializeFMUState",                   false,                   genPrinter);
+			generateAttribute("providesDirectionalDerivative",          true,                    genPrinter);
         }
 	}
 	
