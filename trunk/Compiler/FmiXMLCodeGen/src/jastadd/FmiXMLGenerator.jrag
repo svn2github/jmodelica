@@ -941,7 +941,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
+            return new String[] { "modelExchange", "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
         }
 		
 		public void generateAttributes(PrintStream genPrinter) {		
@@ -961,6 +961,30 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			else
 				return fclass.numEventIndicators() + fclass.numInitialEventIndicators();
 		}
+	}
+	
+	/**
+	 * Internal class used to generate a ModelExchange tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelExchange extends METag {
+		
+		
+		public XMLTag_modelExchange(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelExchange", "ModelExchange", myGenerator, fclass);
+		}
+		
+		public void generateAttributes(PrintStream genPrinter) {		
+			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
+			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
+			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
+			generateAttribute("canBeInstantiatedOnlyOncePerProcess", false,                   genPrinter);
+			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
+			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
+			generateAttribute("canSerializeFMUState",                false,                   genPrinter);
+			generateAttribute("providesDirectionalDerivative",       true,                    genPrinter);
+        }
 	}
 	
 	/**
