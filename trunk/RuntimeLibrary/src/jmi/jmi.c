@@ -505,10 +505,7 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
     jmi_real_t t = jmi_get_t(jmi)[0];
-    /* This is a workaround for an issue with gcc 4.5.1: http://trac.jmodelica.org/ticket/1349 */
-        /* The original code is: if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) */
-    jmi_real_t tmp = ((t-offset)<=-1e-6)? JMI_TRUE: JMI_FALSE;
-    if (!jmi->atEvent || tmp) {
+    if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
       /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
         return JMI_FALSE;
     }
