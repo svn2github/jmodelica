@@ -842,7 +842,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 	 * @see XMLTag
 	 */
 	public class XMLTag_implementation extends CSTag {
-		private AbstractTag[] childTags;
 		
 		public XMLTag_implementation(AbstractGenerator myGenerator, FClass fclass) {
 			super("implementation", "Implementation", myGenerator, fclass);
@@ -942,7 +941,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "unitDefinitions", "defaultExperiment", "vendorAnnotations" };
+            return new String[] { "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
         }
 		
 		public void generateAttributes(PrintStream genPrinter) {		
@@ -1026,6 +1025,88 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("name",   def, genPrinter);
 				generateAttribute("factor", "1", genPrinter);
 				generateAttribute("offset", "0", genPrinter);
+			}
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a TypeDefinitions tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_typeDefinitions extends XMLTag {
+		
+		private FEnumDecl enumdecl;
+		
+		public XMLTag_typeDefinitions(AbstractGenerator myGenerator, FClass fclass) {
+			super("typeDefinitions", "TypeDefinitions", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"simpleType"}; }
+		
+		public void generate(PrintStream genPrinter) {
+			if (fclass.getNumFEnumDecl() > 0) {
+				super.generate(genPrinter);
+			}
+		}
+		
+		public void generateChildren(PrintStream genPrinter) {
+			Iterator<FEnumDecl> itr = fclass.getFEnumDecls().iterator();
+			while (itr.hasNext()) {
+				enumdecl = itr.next();
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+		public class XMLTag_type extends XMLTag {
+			
+			public XMLTag_type(AbstractGenerator myGenerator, FClass fclass) {
+				super("simpleType", "SimpleType", myGenerator, fclass);
+			}
+            
+            public String[] children() { return new String[] {"enumeration"}; }
+			
+			public void generateAttributes(PrintStream genPrinter) {
+				generateAttribute("name", enumdecl.name(), genPrinter);
+				if (enumdecl.hasFStringComment()) {
+					generateAttribute("description", enumdecl.getFStringComment().getComment(), genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_enumerationType extends XMLTag {
+			
+			private FEnumLiteral literal;
+			private int itemIndex; 
+			
+			public XMLTag_enumerationType(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public String[] children() { return new String[] {"item"}; }
+			
+			public void generateChildren(PrintStream genPrinter) {		
+				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
+				itemIndex = 0;
+				while (itr.hasNext()) {
+					literal = itr.next();
+					super.generateChildren(genPrinter);
+				}
+			}
+			
+			public class XMLTag_item extends XMLTag {
+				
+				public XMLTag_item(AbstractGenerator myGenerator, FClass fclass) {
+					super("item", "Item", myGenerator, fclass);
+				}
+				
+				public void generateAttributes(PrintStream genPrinter) {
+                    generateAttribute("name",  literal.name(), genPrinter);
+                    generateAttribute("value", itemIndex++,    genPrinter);
+					if (literal.hasFStringComment()) {
+						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
+					}
+				}
 			}
 		}
 	}
