@@ -62,6 +62,8 @@ struct jmi_kinsol_solver_t {
     int J_is_singular_flag;         /**< \brief A flag indicating that J is singular. Regularized JTJ is setup */
     int use_steepest_descent_flag;  /**< \brief A flag indicating that steepest descent and not Newton direction should be used */
     int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
+    int using_max_min_scaling_flag; /**< \brief A flag indicating if either the maximum scaling is used of the minimum */
+    int updated_jacobian_flag;      /**< \brief A flag indicating if an updated Jacobian is used to solve the system */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
 

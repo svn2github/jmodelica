@@ -672,6 +672,18 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     }
 }
 
+static realtype jmi_calculate_condition_number(jmi_block_solver_t * block, realtype* A) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    char norm = 'I';
+    int N = block->n;
+    double Jnorm = 1.0, Jcond = 1.0;
+    int info;
+    
+    dgecon_(&norm, &N, A, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);
+    
+    return 1.0/Jcond;
+}
+
 static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -684,6 +696,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
 
     /* Evaluate Jacobian */
     ret = kin_dF(N, solver->kin_y, kin_mem->kin_fval, solver->J, block, kin_mem->kin_vtemp1, kin_mem->kin_vtemp2);
+    solver->updated_jacobian_flag = 1; /* The Jacobian is current */
     
     if(ret != 0 ) return ret;
     
@@ -714,8 +727,13 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
                      "Will try to regularize the equations in <block: %d>", block->id);
         jmi_kinsol_reg_matrix(block);
         dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
-    }
-    else {
+    } else {
+        /* if (solver->using_max_min_scaling_flag) {
+            realtype cond = jmi_calculate_condition_number(block, solver->J->data);
+            jmi_log_node(block->log, logWarning, "JacobianConditioningNumber",
+                             "<JacobianConditionEstimate:%E> large values may lead to convergence problems.", cond);
+        }
+        */
         solver->J_is_singular_flag = 0;        
     }
     
@@ -734,10 +752,13 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     jmi_kinsol_solver_t* solver = block->solver;
     realtype*  bd = N_VGetArrayPointer(b);
     realtype*  xd = N_VGetArrayPointer(x);
+    jmi_log_node_t node;
     
     int N = block->n;
     char trans = 'N';
     int ret, i;
+    
+    solver->updated_jacobian_flag = 0; /* The Jacobian is no longer current */
     
     if(solver->force_new_J_flag) {        
         return 1;
@@ -755,7 +776,9 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
   
        sfdotJp is the dot product of the scaled f vector and the scaled
        vector J*p, where the scaling uses fscale. */
-  
+    if((block->callbacks->log_options.log_level >= 6)) {
+        node = jmi_log_enter_fmt(block->log, logInfo, "KinsolLinearSolver", "Solving the linear system in <block:%d>", block->id);
+    }
   
     kin_mem->kin_sJpnorm = N_VWL2Norm(b,solver->kin_f_scale);
     N_VProd(b, solver->kin_f_scale, x);
@@ -812,11 +835,27 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         i = 1;
         dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
         solver->force_new_J_flag = 1;
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
+            jmi_log_leave(block->log, node);
+        }
     }
     else {
         N_VScale(ONE, b, x);
         i = 1;
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J_LU->data, N, N);
+            jmi_log_reals(block->log, node, logInfo, "b", xd, N);
+        }
+        
         dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_reals(block->log, node, logInfo, "x", xd, N);
+            jmi_log_leave(block->log, node);
+        }
     }
     
     if(ret) return ret;
@@ -899,15 +938,18 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     }
     
     if(use_scaling_flag) {
+        solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
         /* check that scaling factors has reasonable magnitude */
         for(i = 0; i < N; i++) {
             if(scale_ptr[i] < tol) {
                 scale_ptr[i] = 1/tol; /* Singular Jacobian? */
+                solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
                 jmi_log_node(block->log, logWarning, "Warning", "Using maximum scaling factor in <block: %d>, "
                              "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->id, i);
             }
             else if(scale_ptr[i] > 1/tol) {
                 scale_ptr[i] = tol;
+                solver->using_max_min_scaling_flag = 1; /* Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "Warning", "Using minimal scaling factor in <block: %d>, "
                              "<equation: %d> Consider rescaling in the model or tighter tolerance.", block->id, i);
             }
@@ -924,6 +966,20 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             jmi_log_leave(block->log, outer);
         }
     }
+    
+    if (solver->using_max_min_scaling_flag) {
+        realtype cond = jmi_calculate_condition_number(block, solver->J->data);
+        
+        jmi_log_node(block->log, logInfo, "ConditionNumber",
+                         "Calculated condition number in <block: %d>. Regularizing if <cond: %E> greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
+        if (cond > solver->kin_reg_tol) {
+            int info;
+            jmi_kinsol_reg_matrix(block);
+            dgetrf_(  &block->n, &block->n, solver->JTJ->data, &block->n, solver->lapack_ipiv, &info);
+            solver->J_is_singular_flag = 1;
+        }
+    }
+    
     /* estimate condition number of the scaled jacobian 
         and scale function tolerance with it. */
     if((N > 1) && block->options->check_jac_cond_flag){
@@ -985,6 +1041,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     */
     solver->kin_ftol = block->options->min_tol;
     solver->kin_stol = block->options->min_tol;
+    solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
     
     solver->J = NewDenseMat(n ,n);
     solver->JTJ = NewDenseMat(n ,n);
