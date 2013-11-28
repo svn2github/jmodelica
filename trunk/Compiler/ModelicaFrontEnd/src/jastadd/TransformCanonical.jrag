@@ -2483,6 +2483,7 @@ aspect IfEquations {
         public class enableIfEquationRewrite extends Transformation {
             public void perform() {
                 enableIfEquationRewrite();
+                checkIfEquationCompliance();
             }
         }
     }
@@ -2495,6 +2496,19 @@ aspect IfEquations {
 	
 	private boolean FIfEquation.rewriteIfEquation = false;
 	
+    public void ASTNode.checkIfEquationCompliance() {
+        for (ASTNode n : this)
+            n.checkIfEquationCompliance();
+    }
+    
+    public void FIfEquation.checkIfEquationCompliance() {
+        int numAssigned = referencedFVariablesInLHS().size();
+        int numEqs = numScalarEquations();
+        if (numAssigned != numEqs)
+            compliance("If equations that has non-parameter tests and contains function calls using multiple " +
+                    "outputs must assign the same variables in all branches");
+    }
+
 	syn Map<FAbstractVariable,FEquation> FIfWhenElseEquation.assignmentEquationMap() {
 		calcAssignmentEquations();
 		return assignmentEquationMap;
@@ -2673,12 +2687,12 @@ aspect IfEquations {
 		ArrayList<FEquation> residualLeft = new ArrayList<FEquation>();
         List<FAbstractEquation> keepLeft = new List<FAbstractEquation>();
         sortOutMatchedEquations(unmatchedLeft, match, 0, residualLeft, keepLeft);
-        keepLeft.addAll(nonFEquationSet());
+        keepLeft.addAll(toSortedList(nonFEquationSet(), CHILD_ORDER_COMPARATOR));
         // Right side
         ArrayList<FEquation> residualRight = new ArrayList<FEquation>();
         List<FAbstractEquation> keepRight = new List<FAbstractEquation>();
         sortOutMatchedEquations(unmatchedRight, match, 1, residualRight, keepRight);
-        keepRight.addAll(getElse().nonFEquationSet());
+        keepRight.addAll(toSortedList(getElse().nonFEquationSet(), CHILD_ORDER_COMPARATOR));
         
         // Generate residual equations
 		for (FEquation[] eqs : new ParallelIterable<FEquation>(new FEquation[2], true, residualLeft, residualRight)) {

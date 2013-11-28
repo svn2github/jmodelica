@@ -3635,31 +3635,35 @@ end TransformCanonicalTests.IfEqu17;
 
 
   model IfEqu18
-      function f
-          output Real x1 = 1;
-          output Real x2 = 2;
-      algorithm
-      end f;
-      
-      Real y1;
-      Real y2;
-  equation
-      if time > 1 then
-          y1 = 3;
-          y2 = 3;
-      else
-          (y1, y2) = f();
-      end if;
+    function F
+            input Real x;
+            output Real a;
+            output Real b;
+    algorithm
+            a := x + 1;
+            b := x - 42;
+            annotation(Inline = false);
+    end F;
+    
+    Real x,a,b;
+equation
+    x = time * 23;
+    if time > 0.5 then
+        (a, b) = F(x);
+    else
+        (a, x) = F(b);
+    end if;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
 			name="IfEqu18",
-			description="Check that if equations with function call equations and non-param tests are rejected",
+			description="Check compliance warning for if equations",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Compliance error at line 3265, column 7:
-  If equations that has non-parameter tests and contains function calls using multiple outputs are not supported
+
+Error: in file '...':
+Compliance error at line 0, column 0:
+  If equations that has non-parameter tests and contains function calls using multiple outputs must assign the same variables in all branches
 ")})));
   end IfEqu18;
 
@@ -3940,6 +3944,215 @@ public
 end TransformCanonicalTests.IfEqu25;
 ")})));
 end IfEqu25;
+
+model IfEqu26
+    function F
+            input Real x;
+            output Real a;
+            output Real b;
+    algorithm
+            a := x + 1;
+            b := x - 42;
+            annotation(Inline = false);
+    end F;
+    
+    Real x,a,b;
+equation
+    x = time * 23;
+    if time > 0.5 then
+        (a, b) = F(x);
+    else
+        a = 5;
+        b = 2;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IfEqu26",
+            description="Test if equation in BLT",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  time * 23
+-------------------------------
+Solved if equation block of 2 variables:
+Unknown variables:
+  a
+  b
+If Equation:
+  if time > 0.5 then
+ (a, b) = TransformCanonicalTests.IfEqu26.F(x);
+else
+ a = 5;
+ b = 2;
+end if
+-------------------------------
+")})));
+end IfEqu26;
+
+model IfEqu27
+        function F
+                input Real x;
+                output Real a;
+                output Real b;
+        algorithm
+                a := x + 1;
+                b := x - 42;
+                annotation(Inline = false);
+        end F;
+        
+        Real x,a,b;
+equation
+    x = time * 23;
+    if time > 0.5 then
+        (a, b) = F(x);
+    else
+        (a, b) = F(x - 2);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IfEqu27",
+            description="Test if equation in BLT",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  time * 23
+-------------------------------
+Solved if equation block of 2 variables:
+Unknown variables:
+  a
+  b
+If Equation:
+  if time > 0.5 then
+ (a, b) = TransformCanonicalTests.IfEqu27.F(x);
+else
+ (a, b) = TransformCanonicalTests.IfEqu27.F(x - 2);
+end if
+-------------------------------
+")})));
+end IfEqu27;
+
+model IfEqu28
+    function F
+            input Real x;
+            output Real a;
+            output Real b;
+    algorithm
+            a := x + 1;
+            b := x - 42;
+            annotation(Inline = false);
+    end F;
+    
+    Real x,a,b,c,d;
+equation
+    x = time * 23;
+    if time > 0.5 then
+        (a, b) = F(x);
+        (c, d) = F(x);
+    else
+        a = 2;
+        b = 3;
+        c = 4;
+        d = 5;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IfEqu28",
+            description="Test if equation in BLT",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  time * 23
+-------------------------------
+Solved if equation block of 4 variables:
+Unknown variables:
+  a
+  b
+  c
+  d
+If Equation:
+  if time > 0.5 then
+ (a, b) = TransformCanonicalTests.IfEqu28.F(x);
+ (c, d) = TransformCanonicalTests.IfEqu28.F(x);
+else
+ a = 2;
+ b = 3;
+ c = 4;
+ d = 5;
+end if
+-------------------------------
+")})));
+end IfEqu28;
+
+model IfEqu29
+        function F
+                input Real x;
+                output Real a;
+                output Real b;
+        algorithm
+                a := x + 1;
+                b := x - 42;
+                annotation(Inline = false);
+        end F;
+        
+        Real x,a,b,c,d;
+equation
+    x = time * 23;
+    if time > 0.5 then
+        (a, b) = F(x);
+        (c, d) = F(x);
+    else
+        a = 2;
+        (b, c) = F(x);
+        d = 5;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="IfEqu29",
+            description="Test if equation in BLT",
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  time * 23
+-------------------------------
+Solved if equation block of 4 variables:
+Unknown variables:
+  a
+  b
+  c
+  d
+If Equation:
+  if time > 0.5 then
+ (a, b) = TransformCanonicalTests.IfEqu29.F(x);
+ (c, d) = TransformCanonicalTests.IfEqu29.F(x);
+else
+ a = 2;
+ d = 5;
+ (b, c) = TransformCanonicalTests.IfEqu29.F(x);
+end if
+-------------------------------
+")})));
+end IfEqu29;
+
 
 
 model IfExpLeft1

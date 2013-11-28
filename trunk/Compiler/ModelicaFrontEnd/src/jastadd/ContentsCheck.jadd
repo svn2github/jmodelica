@@ -264,13 +264,6 @@ aspect ContentCheck {
 			} else {
 				if (!balanced) {
 					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-				} else if (functionCallEqu) {
-					if (hasFunctionCallEquationsWithLefts())
-						compliance("If equations that has non-parameter tests and contains " + 
-								"function calls using multiple outputs are not supported");
-					else
-						warning("Function calls without outputs in if equations that has " + 
-								"non-parameter tests are not supported, and are currently ignored");
 				}
 			}
 		}
