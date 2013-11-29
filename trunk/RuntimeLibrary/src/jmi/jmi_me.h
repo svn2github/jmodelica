@@ -68,6 +68,8 @@ jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* T
     
 jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
 
+jmi_value_reference is_negated(jmi_value_reference valueref);
+
 int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID);
 
 void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,

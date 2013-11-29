@@ -151,12 +151,13 @@ aspect FlatAPI {
 		return map;
 	}
 	
-	/**
+    /**
 	 * The value reference value is represented by a 32 bit unsigned integer 
-	 * variable. The lowest 28 bits is used to represent the index of a 
+	 * variable. The lowest 27 bits is used to represent the index of a 
 	 * variable of the corresponding variable vector. Real, Integer, Boolean and 
 	 * enumeration variables share a vector, while String variables has their 
 	 * own vector. 
+	 * Bit 28 is reserved for representing negated/not negated.
 	 * Bits 29-31 represents the primitive type, where:
 	 * 0: Real
 	 * 1: Integer or enumeration
@@ -174,7 +175,7 @@ aspect FlatAPI {
 	syn int FVariable.aliasValueReference() = alias()!=null? 
 		alias().valueReference(): -1;
 
-	syn int FVariable.indexInZ() = valueReference() & 0x0FFFFFFF;
+	syn int FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
 
 	syn int FClass.independentRealConstantsOffset() = 0;
 	syn int FClass.independentIntegerConstantsOffset() = 

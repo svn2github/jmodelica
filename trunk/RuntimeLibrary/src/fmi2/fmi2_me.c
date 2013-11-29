@@ -21,7 +21,6 @@
 #include "fmi2_me.h"
 #include "fmi2_cs.h"
 
-
 const char* fmi2_get_types_platform() {
     return fmiTypesPlatform;
 }
@@ -276,6 +275,7 @@ fmiStatus fmi2_reset(fmiComponent c) {
 fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
                         size_t nvr, fmiReal value[]) {
     fmiInteger retval;
+    int i;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -284,6 +284,13 @@ fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
     retval = jmi_get_real(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
         return fmiError;
+    }
+    
+    /* Negate the values of the retrieved "negate alias" variables. */
+    for (i = 0; i < nvr; i++) {
+        if (is_negated(vr[i])) {
+            value[i] = -value[i];
+        }
     }
 
     return fmiOK;
@@ -353,12 +360,23 @@ fmiStatus fmi2_get_string(fmiComponent c, const fmiValueReference vr[],
 fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
                         size_t nvr, const fmiReal value[]) {
     fmiInteger retval;
+    fmiReal* negated_value;
+    int i;
+    
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
+    /* Negate the values before setting the "negate alias" variables. */
+    negated_value = (fmiReal*)calloc(nvr, sizeof(fmiReal));
+    for (i = 0; i < nvr; i++) {
+        if (is_negated(vr[i])) {
+            negated_value[i] = -value[i];
+        }
+    }
+    
+    retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, negated_value);
     if (retval != 0) {
         return fmiError;
     }

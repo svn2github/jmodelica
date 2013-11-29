@@ -19,8 +19,9 @@
 
 #include "jmi_me.h"
 
-#define indexmask 0x0FFFFFFF
-#define typemask 0xF0000000
+#define indexmask  0x07FFFFFF
+#define negatemask 0x08000000
+#define typemask   0xF0000000
 
 jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) {
     /* Translate a ValueReference into variable index in z-vector. */
@@ -34,6 +35,13 @@ jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
     jmi_value_reference type = valueref & typemask;
     
     return type;
+}
+
+jmi_value_reference is_negated(jmi_value_reference valueref) {
+    /* Translate a ValueReference into variable type in z-vector. */
+    jmi_value_reference negated = valueref & negatemask;
+    
+    return negated;
 }
 
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
