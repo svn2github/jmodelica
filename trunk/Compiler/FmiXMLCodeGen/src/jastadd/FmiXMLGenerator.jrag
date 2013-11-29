@@ -475,8 +475,10 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("variables", "ScalarVariable", myGenerator, fclass);
 			}
 
-			public String[] children() { return new String[] {"primitiveType", "directDependency"}; }
-
+			public String[] children() {
+				return new String[] {"real", "integer", "boolean", "string", "enumeration", "directDependency"};
+			}
+			
 			public void generateAttributes(PrintStream genPrinter) {
 				generateAttribute("name",           variable.name(),           genPrinter);
 				generateAttribute("valueReference", variable.valueReference(), genPrinter);
@@ -516,49 +518,169 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				}
 			}
 		}
-	
-		public class XMLTag_primitiveType extends XMLTag {
-			
-			public XMLTag_primitiveType(AbstractGenerator myGenerator, FClass fclass) {
-				super("primitiveType", null, myGenerator, fclass);
+
+		public class XMLTag_real extends XMLTag {
+
+			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
+				super("real", "Real", myGenerator, fclass);
 			}
 			
 			public void generate(PrintStream genPrinter) {
-				//Reset the name of this tag.
-				if (variable.isReal()) {
-					xml = "Real";
-				} else if (variable.isInteger()) {
-					xml = "Integer";
-				} else if (variable.isBoolean()) {
-					xml = "Boolean";
-				} else if (variable.isString()) {
-					xml = "String";
-				} else if (variable.isEnum()) {
-					xml = "Enumeration";
+				if(variable.isReal())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				FRealVariable realvariable = (FRealVariable)variable;
+
+				if(realvariable.quantityAttributeSet()) {
+					generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
 				}
-				 else {
-					//TODO: errorhandling
-					System.err.println("Invalid or missing variable type definition");
+				if(realvariable.unitAttributeSet()) {
+					generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
 				}
-				super.generate(genPrinter);
+				if(realvariable.displayUnitAttributeSet()) {
+					generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+				}		
+				generateAttribute("relativeQuantity", "false", genPrinter);
+
+				if(realvariable.minAttributeSet()) {
+					generateAttribute("min", realvariable.minAttribute(), genPrinter);
+				}
+				if(realvariable.maxAttributeSet()) {
+					generateAttribute("max", realvariable.maxAttribute(), genPrinter);
+				}
+				if(realvariable.nominalAttributeSet()) {
+					generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
+				}
+				
+				generateStartAndFixedAttribute(genPrinter, realvariable);
+			}
+		}
+
+		public class XMLTag_integer extends XMLTag {
+
+			public XMLTag_integer(AbstractGenerator myGenerator, FClass fclass) {
+				super("integer", "Integer", myGenerator, fclass);
 			}
 			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isInteger())
+					super.generate(genPrinter);
+			}
+
 			public void generateAttributes(PrintStream genPrinter) {
-				if (variable.isReal()) {
-					// TODO: move this to a method on FVariable that is overridden in subclasses
-					generateRealAttributes(genPrinter, (FRealVariable)variable);
-				} else if (variable.isInteger()) {
-					generateIntegerAttributes(genPrinter, (FIntegerVariable)variable);
-				} else if (variable.isBoolean()) {
-					generateBooleanAttributes(genPrinter, (FBooleanVariable)variable);
-				} else if (variable.isString()) {
-					generateStringAttributes(genPrinter, (FStringVariable)variable);
-				} else if (variable.isEnum()) {
-					generateEnumAttributes(genPrinter, (FEnumVariable)variable);
+				FIntegerVariable integervariable = (FIntegerVariable)variable;
+				
+				if(integervariable.quantityAttributeSet()) {
+					generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+				}					
+				if(integervariable.minAttributeSet()) {
+					generateAttribute("min", integervariable.minAttribute(), genPrinter);
 				}
+				if(integervariable.maxAttributeSet()) {
+					generateAttribute("max", integervariable.maxAttribute(), genPrinter);
+				}
+				
+				generateStartAndFixedAttribute(genPrinter, integervariable);
+			}
+		}
+
+		public class XMLTag_boolean extends XMLTag {
+
+			public XMLTag_boolean(AbstractGenerator myGenerator, FClass fclass) {
+				super("boolean", "Boolean", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isBoolean())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				generateStartAndFixedAttribute(genPrinter, variable);
+			}
+		}
+
+		public class XMLTag_string extends XMLTag {
+
+			public XMLTag_string(AbstractGenerator myGenerator, FClass fclass) {
+				super("string", "String", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isString())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				generateStartAndFixedAttribute(genPrinter, variable);
+			}
+		}
+
+		public class XMLTag_enumeration extends XMLTag {
+
+			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isEnum())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				FEnumVariable enumvariable = (FEnumVariable)variable;
+				//declaredType
+				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
+
+				if(enumvariable.quantityAttributeSet()) {
+					generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+				}					
+				if(enumvariable.minAttributeSet()) {
+					generateAttribute("min", enumvariable.minAttribute(), genPrinter);
+				}
+				if(enumvariable.maxAttributeSet()) {
+					generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
+				}
+				
+				generateStartAndFixedAttribute(genPrinter, enumvariable);
 			}
 		}
 		
+		protected void generateStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
+			FExp e_start = null;
+			FExp e_fixed = null;
+			Boolean isFixed = null; // null = fixed is not set
+
+			if (var.fixedAttributeSet()) {
+				e_fixed = var.fixedAttributeExp();
+				isFixed = e_fixed.ceval().booleanValue();
+			}
+
+			if (isFixed == null || (isFixed != null && !isFixed)) {
+				boolean startGenerated = false;
+				if (var.useBindingExpAsStart()) 
+					e_start = var.getBindingExp();
+				else if (var.startAttributeSet() && !var.isDependentParameter())
+					e_start = var.startAttributeExp();
+				else if (var.isInput())
+					e_start = var.createStartAttributeExp();
+
+				if (e_start != null && !e_start.isConstantExp())
+					e_start = null;
+				if (e_start != null) {
+					generateAttribute("start", var.type().convert(e_start.ceval()).xmlValue(), genPrinter);
+					startGenerated = true;
+				}
+
+				if (isFixed != null && startGenerated) {
+					// fixed is set and start is generated (i.e. fixed is false)
+					generateAttribute("fixed", e_fixed.type().convert(e_fixed.ceval()).xmlValue(), genPrinter);
+				}
+			}
+		}
+
 		//direct dependency - not supported
 		public class XMLTag_directDependency extends XMLTag {
 			
@@ -582,153 +704,8 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			}
 		}
 	}
+
 	
-	
-	
-	protected void generateRealAttributes(PrintStream genPrinter, FRealVariable realvariable) {
-		//declaredType
-		//generateAttribute("declaredType", "String", genPrinter);		
-		//quantity
-		if(realvariable.quantityAttributeSet()) {
-			generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
-		}
-		if(realvariable.unitAttributeSet()) {
-			generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
-		}
-		if(realvariable.displayUnitAttributeSet()) {
-			generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
-		}		
-		//relativeQuantity
-		generateAttribute("relativeQuantity", "false", genPrinter);
-
-		if(realvariable.minAttributeSet()) {
-			generateAttribute("min", realvariable.minAttribute(), genPrinter);
-		}
-		if(realvariable.maxAttributeSet()) {
-			generateAttribute("max", realvariable.maxAttribute(), genPrinter);
-		}
-		if(realvariable.nominalAttributeSet()) {
-			generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
-		}
-		//start and fixed
-		generateStartAndFixedAttribute(genPrinter, realvariable);
-		// fixed
-		//if (realvariable.fixedAttributeSet()) {
-		//generateAttribute("fixed", realvariable.fixedAttribute(), genPrinter);
-		//}
-	}
-
-	/*
-	 * Helper method generating all integer attributes.
-	 */
-	protected void generateIntegerAttributes(PrintStream genPrinter, FIntegerVariable integervariable) {
-		//declaredType
-		//generateAttribute("declaredType", "String", genPrinter);
-		//quantity
-		if(integervariable.quantityAttributeSet()) {
-			generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
-		}					
-		//min
-		if(integervariable.minAttributeSet()) {
-			generateAttribute("min", integervariable.minAttribute(), genPrinter);
-		}
-		//max
-		if(integervariable.maxAttributeSet()) {
-			generateAttribute("max", integervariable.maxAttribute(), genPrinter);
-		}
-		//start
-		generateStartAndFixedAttribute(genPrinter, integervariable);
-		// fixed
-		//if (integervariable.fixedAttributeSet()) {
-		//generateAttribute("fixed", integervariable.fixedAttribute(), genPrinter);
-		//}
-	}
-
-	/*
-	 * Helper method generating all enum attributes.
-	 */
-	protected void generateEnumAttributes(PrintStream genPrinter, FEnumVariable enumvariable) {
-		//declaredType
-		generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
-
-		if(enumvariable.quantityAttributeSet()) {
-			generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
-		}					
-		if(enumvariable.minAttributeSet()) {
-			generateAttribute("min", enumvariable.minAttribute(), genPrinter);
-		}
-		if(enumvariable.maxAttributeSet()) {
-			generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
-		}
-		//start and fixed
-		generateStartAndFixedAttribute(genPrinter, enumvariable);
-		// fixed
-		//if (enumvariable.fixedAttributeSet()) {
-		//generateAttribute("fixed", enumvariable.fixedAttribute(), genPrinter);
-		//}
-	}
-
-
-	/*
-	 * Helper method generating all boolean attributes.
-	 */
-	protected void generateBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
-		//declaredType
-		//generateAttribute("declaredType", "String", genPrinter);
-		//start and fixed attribute
-		generateStartAndFixedAttribute(genPrinter, booleanvariable);
-		//fixed
-		//if (booleanvariable.fixedAttributeSet()) {
-		//generateAttribute("fixed", booleanvariable.fixedAttribute(), genPrinter);
-		//}
-	}
-
-	/*
-	 * Helper class generating all string attributes.
-	 */
-	protected void generateStringAttributes(PrintStream genPrinter, FStringVariable stringvariable) {
-		//declaredType
-		//generateAttribute("declaredType", "String", genPrinter);
-		//start attribute
-		generateStartAndFixedAttribute(genPrinter, stringvariable);
-		// fixed - not supported
-		//if (stringvariable.fixedAttributeSet()) {
-		//generateAttribute("fixed", stringvariable.fixedAttribute(), genPrinter);
-		//}		
-	}
-
-	protected void generateStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
-		FExp e_start = null;
-		FExp e_fixed = null;
-		Boolean isFixed = null; // null = fixed is not set
-
-		if (var.fixedAttributeSet()) {
-			e_fixed = var.fixedAttributeExp();
-			isFixed = e_fixed.ceval().booleanValue();
-		}
-
-		if (isFixed == null || (isFixed != null && !isFixed)) {
-			boolean startGenerated = false;
-			if (var.useBindingExpAsStart()) 
-				e_start = var.getBindingExp();
-			else if (var.startAttributeSet() && !var.isDependentParameter())
-				e_start = var.startAttributeExp();
-			else if (var.isInput())
-				e_start = var.createStartAttributeExp();
-
-			if (e_start != null && !e_start.isConstantExp())
-				e_start = null;
-			if (e_start != null) {
-				generateAttribute("start", var.type().convert(e_start.ceval()).xmlValue(), genPrinter);
-				startGenerated = true;
-			}
-
-			if (isFixed != null && startGenerated) {
-				// fixed is set and start is generated (i.e. fixed is false)
-				generateAttribute("fixed", e_fixed.type().convert(e_fixed.ceval()).xmlValue(), genPrinter);
-			}
-		}
-	}
 	
 	/*** TODO: Temporary FMI 2.0 Code Gen ***/	
 	
