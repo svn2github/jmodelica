@@ -2208,7 +2208,7 @@ aspect WhenClauses{
 	/**
 	 * Should this guard expression be extracted into a temp variable?
 	 */
-	syn boolean FExp.shouldExtractGuard() = inAlgorithm() || !myFEquation().hasFunctionCallEquations();
+	syn boolean FExp.shouldExtractGuard() = true;
 	eq FInitialExp.shouldExtractGuard() = false;
 	eq FIdUseExp.shouldExtractGuard() = false;
 	
@@ -2243,11 +2243,9 @@ aspect WhenClauses{
 	}
 	
 	public void FWhenEquation.enableWhenClauseRewrite() {
-		if (!hasFunctionCallEquations()) {
-			super.enableWhenClauseRewrite();
-			rewriteWhenClause = true;
-			is$Final = false;
-		}
+		super.enableWhenClauseRewrite();
+		rewriteWhenClause = true;
+		is$Final = false;
 	}
 	
 	public void FWhenStmt.enableWhenClauseRewrite() {
@@ -2706,13 +2704,20 @@ aspect IfEquations {
 		}
 		
 		// Generate new if equation with remaining equations
+		FIfEquation e;
 		if (keepLeft.getNumChild() > 0) {
 		    Opt<FIfWhenElseEquation> elseOpt = new Opt<FIfWhenElseEquation>();
 		    if (keepRight.getNumChild() > 0) 
 		        elseOpt.addChild(new FElseEquation(getType().fullCopy(), keepRight));
-		    l.add(new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt));
+		    e = new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt);
+		    if (isWhen())
+		    	e.setWhen();
+		    l.add(e);
 		} else if (keepRight.getNumChild() > 0) {
-            l.add(new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt()));
+            e = new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt());
+		    if (isWhen())
+		    	e.setWhen();
+            l.add(e);
 		}
 		
 		return l;

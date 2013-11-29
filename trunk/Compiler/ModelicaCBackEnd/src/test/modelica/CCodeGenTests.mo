@@ -5559,33 +5559,36 @@ model WhenEqu6
 			equation_sorting=true,
 			variability_propagation=false,
 			template="
-$C_dae_init_blocks_residual_functions$
+                   $C_dae_blocks_residual_functions$
                    $C_ode_derivatives$ 
-                   $C_ode_initialization$",               
+                   $C_ode_initialization$",
          generatedCode=" 
-		       jmi_ad_var_t tmp_1;
+                       jmi_ad_var_t tmp_1;
     jmi_ad_var_t tmp_2;
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-  _guards(0) = jmi_sample(jmi,AD_WRAP_LITERAL(0),AD_WRAP_LITERAL(1));
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
-   func_CCodeGenTests_WhenEqu6_F_def(_time, &tmp_1, &tmp_2);
-   _x_0 = (tmp_1);
-   _y_1 = (tmp_2);
-  } else {
-  _x_0 = pre_x_0;
-    _y_1 = pre_y_1;
-  }
+    _temp_1_2 = jmi_sample(jmi,AD_WRAP_LITERAL(0),AD_WRAP_LITERAL(1));
+    if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
+      func_CCodeGenTests_WhenEqu6_F_def(_time, &tmp_1, &tmp_2);
+      _x_0 = (tmp_1);
+      _y_1 = (tmp_2);
+    } else {
+      _x_0 = pre_x_0;
+      _y_1 = pre_y_1;
+    }
 /********* Write back reinits *******/
+ 
+                       model_ode_guards(jmi);
+    _temp_1_2 = jmi_sample(jmi,AD_WRAP_LITERAL(0),AD_WRAP_LITERAL(1));
+    pre_x_0 = 0.0;
+    _x_0 = pre_x_0;
+    pre_y_1 = 0.0;
+    _y_1 = pre_y_1;
+    pre_temp_1_2 = JMI_FALSE;
 		 
-      model_ode_guards(jmi);
-  pre_x_0 = 0.0;
-  _x_0 = pre_x_0;
-  pre_y_1 = 0.0;
-  _y_1 = pre_y_1;		 
 ")})));
 end WhenEqu6;
 
@@ -5756,6 +5759,560 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end WhenEqu7;
 
+model WhenEqu8
+	
+function f
+	input Real x;
+	input Real y;
+	output Real a;
+	output Real b;
+ algorithm
+	 a := y;
+	 b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+	a = time;
+	b = time*2;
+  when {initial(), time > 1} then
+    (x,y) = f(a,b);
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="WhenTest8",
+			description="Test code generation unsolved when equations",
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+                   $C_ode_derivatives$ 
+                   $C_ode_initialization$
+                   $C_dae_blocks_residual_functions$
+                   $C_dae_init_blocks_residual_functions$
+",
+			generatedCode="
+                       jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _temp_1_4 = _sw(0);
+    if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)))) {
+      func_CCodeGenTests_WhenEqu8_f_def(_a_2, _b_3, &tmp_1, &tmp_2);
+      _x_0 = (tmp_1);
+      _y_1 = (tmp_2);
+    } else {
+      _x_0 = pre_x_0;
+      _y_1 = pre_y_1;
+    }
+    _a_2 = _time;
+    _b_3 = _time * 2;
+/********* Write back reinits *******/
+ 
+                       jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    model_ode_guards(jmi);
+    _a_2 = _time;
+    _b_3 = _time * 2;
+    _temp_1_4 = _sw(0);
+    func_CCodeGenTests_WhenEqu8_f_def(_a_2, _b_3, &tmp_3, &tmp_4);
+    _x_0 = (tmp_3);
+    _y_1 = (tmp_4);
+    pre_x_0 = 0.0;
+    pre_y_1 = 0.0;
+    pre_temp_1_4 = JMI_FALSE;
+
+                   
+                   
+			
+")})));
+end WhenEqu8;
+
+model WhenEqu9
+	
+function f
+	input Real x;
+	input Real y;
+	output Real a;
+	output Real b;
+ algorithm
+	 a := y;
+	 b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+  a = time;
+  b = time*x;
+  when time > 2 then
+    (x,y) = f(a,b);
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="WhenEqu9",
+			description="Test code generation unsolved when equations",
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+                   $C_dae_blocks_residual_functions$
+",
+			generatedCode="
+                   static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_3;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_3 = x[0];
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+          func_CCodeGenTests_WhenEqu9_f_def(_a_2, _b_3, &tmp_1, &tmp_2);
+          _y_1 = (tmp_2);
+        } else {
+          _y_1 = pre_y_1;
+        }
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+          _x_0 = (tmp_1);
+        } else {
+          _x_0 = pre_x_0;
+        }
+        (*res)[0] = _time * _x_0 - (_b_3);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_3 = x[0];
+    }
+    return ef;
+}
+
+
+			
+")})));
+end WhenEqu9;
+
+model WhenEqu10
+	
+function f
+	input Real x;
+	input Real y;
+	output Real a;
+	output Real b;
+ algorithm
+	 a := y;
+	 b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+  when time > 2 then
+    (a,b) = f(x,y);
+  end when;
+  when {initial(), time > 2} then
+    (x,y) = f(a,b);
+  end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="WhenEqu10",
+			description="Test code generation unsolved when equations",
+			generate_ode=true,
+			equation_sorting=true,
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+                   $C_dae_blocks_residual_functions$
+                   $C_dae_init_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+        x[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        x[1] = _x_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+          func_CCodeGenTests_WhenEqu10_f_def(_x_0, _y_1, &tmp_1, &tmp_2);
+          _b_3 = (tmp_2);
+        } else {
+          _b_3 = pre_b_3;
+        }
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+          _a_2 = (tmp_1);
+        } else {
+          _a_2 = pre_a_2;
+        }
+        if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_5, LOG_EXP_NOT(pre_temp_2_5)))) {
+          func_CCodeGenTests_WhenEqu10_f_def(_a_2, _b_3, &tmp_3, &tmp_4);
+          (*res)[0] = tmp_4 - (_y_1);
+        } else {
+          (*res)[0] = pre_y_1 - (_y_1);
+        }
+        if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_5, LOG_EXP_NOT(pre_temp_2_5)))) {
+          (*res)[1] = tmp_3 - (_x_0);
+        } else {
+          (*res)[1] = pre_x_0 - (_x_0);
+        }
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+        _x_0 = x[1];
+    }
+    return ef;
+}
+
+
+                   
+			
+")})));
+end WhenEqu10;
+
+
+
+function dummyFunc
+	input Real i;
+	output Real x = i;
+	output Real y = i;
+	algorithm
+end dummyFunc;
+
+model IfEqu1
+
+    Real x,y;
+equation
+    if time >= 2 then
+        (x,y) = dummyFunc(time*time*time/2);
+    elseif time >= 1 then
+        (x,y) = dummyFunc(time*time);
+    else
+        (x,y) = dummyFunc(time);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="IfEqu1",
+			description="Code generation for if equation",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$C_ode_derivatives$
+",
+			generatedCode="
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    jmi_ad_var_t tmp_5;
+    jmi_ad_var_t tmp_6;
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    if (_sw(0)) {
+      func_CCodeGenTests_dummyFunc_def(jmi_divide_equation(jmi, _time * _time * _time,AD_WRAP_LITERAL(2),\"time * time * time / 2\"), &tmp_1, &tmp_2);
+      _x_0 = (tmp_1);
+      _y_1 = (tmp_2);
+    } else {
+      if (_sw(1)) {
+        func_CCodeGenTests_dummyFunc_def(_time * _time, &tmp_3, &tmp_4);
+        _x_0 = (tmp_3);
+        _y_1 = (tmp_4);
+      } else {
+        func_CCodeGenTests_dummyFunc_def(_time, &tmp_5, &tmp_6);
+        _x_0 = (tmp_5);
+        _y_1 = (tmp_6);
+      }
+    }
+/********* Write back reinits *******/
+")})));
+end IfEqu1;
+
+model IfEqu2
+    Real x,y,t;
+equation
+    t = time;
+    if time >= 1 then
+        (x,t) = dummyFunc(y);
+    else
+        (x,t) = dummyFunc(y);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="IfEqu2",
+			description="Code generation for if equation, numerically solved",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$C_dae_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _y_1 = x[0];
+        if (_sw(0)) {
+          func_CCodeGenTests_dummyFunc_def(_y_1, &tmp_1, &tmp_2);
+          _x_0 = (tmp_1);
+        } else {
+          func_CCodeGenTests_dummyFunc_def(_y_1, &tmp_3, &tmp_4);
+          _x_0 = (tmp_3);
+        }
+        if (_sw(0)) {
+          (*res)[0] = tmp_2 - (_t_2);
+        } else {
+          (*res)[0] = tmp_4 - (_t_2);
+        }
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _y_1 = x[0];
+    }
+    return ef;
+}
+
+
+			
+")})));
+end IfEqu2;
+
+model IfEqu3
+    Real x,y,a,b;
+equation
+    if time >= 1 then
+        (x,y) = dummyFunc(a);
+    else
+        (x,y) = dummyFunc(b);
+    end if;
+    if time >= 1 then
+        (a,b) = dummyFunc(x);
+    else
+        (a,b) = dummyFunc(y);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="IfEqu3",
+			description="Code generation for if equation, in block",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$C_dae_blocks_residual_functions$
+",
+			generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    jmi_ad_var_t tmp_5;
+    jmi_ad_var_t tmp_6;
+    jmi_ad_var_t tmp_7;
+    jmi_ad_var_t tmp_8;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 3;
+        x[1] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_3;
+        x[1] = _a_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _b_3 = x[0];
+        _a_2 = x[1];
+        if (_sw(0)) {
+          func_CCodeGenTests_dummyFunc_def(_a_2, &tmp_1, &tmp_2);
+          _y_1 = (tmp_2);
+        } else {
+          func_CCodeGenTests_dummyFunc_def(_b_3, &tmp_3, &tmp_4);
+          _y_1 = (tmp_4);
+        }
+        if (_sw(0)) {
+          _x_0 = (tmp_1);
+        } else {
+          _x_0 = (tmp_3);
+        }
+        if (_sw(1)) {
+          func_CCodeGenTests_dummyFunc_def(_x_0, &tmp_5, &tmp_6);
+          (*res)[0] = tmp_6 - (_b_3);
+        } else {
+          func_CCodeGenTests_dummyFunc_def(_y_1, &tmp_7, &tmp_8);
+          (*res)[0] = tmp_8 - (_b_3);
+        }
+        if (_sw(1)) {
+          (*res)[1] = tmp_5 - (_a_2);
+        } else {
+          (*res)[1] = tmp_7 - (_a_2);
+        }
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _b_3 = x[0];
+        _a_2 = x[1];
+    }
+    return ef;
+}
+
+
+			
+")})));
+end IfEqu3;
+
+model IfEqu4
+function f
+	input Real[:] i;
+	output Real[size(i,1)] x = i;
+	output Real[size(i,1)] y = i;
+	algorithm
+end f;
+    Real[2] x,y;
+equation
+    if time >= 1 then
+        (x,y) = f({time,time});
+    else
+        (x[1:end],y[{2,1}]) = f({time,time});
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="IfEqu4",
+			description="Code generation for if equation, temp vars",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$C_ode_derivatives$
+",
+			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_3, 2, 1)
+    JMI_ARRAY_STATIC(tmp_4, 2, 1)
+    JMI_ARRAY_STATIC(tmp_5, 2, 1)
+    JMI_ARRAY_STATIC(tmp_6, 2, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    if (_sw(0)) {
+      JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_2, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_3, 2)
+      jmi_array_ref_1(tmp_3, 1) = _time;
+      jmi_array_ref_1(tmp_3, 2) = _time;
+      func_CCodeGenTests_IfEqu4_f_def(tmp_3, tmp_1, tmp_2);
+      _x_1_0 = (jmi_array_val_1(tmp_1, 1));
+      _x_2_1 = (jmi_array_val_1(tmp_1, 2));
+      _y_1_2 = (jmi_array_val_1(tmp_2, 1));
+      _y_2_3 = (jmi_array_val_1(tmp_2, 2));
+    } else {
+      JMI_ARRAY_STATIC_INIT_1(tmp_4, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_5, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_6, 2)
+      jmi_array_ref_1(tmp_6, 1) = _time;
+      jmi_array_ref_1(tmp_6, 2) = _time;
+      func_CCodeGenTests_IfEqu4_f_def(tmp_6, tmp_4, tmp_5);
+      _x_1_0 = (jmi_array_val_1(tmp_4, 1));
+      _x_2_1 = (jmi_array_val_1(tmp_4, 2));
+      _y_2_3 = (jmi_array_val_1(tmp_5, 1));
+      _y_1_2 = (jmi_array_val_1(tmp_5, 2));
+    }
+/********* Write back reinits *******/
+
+			
+")})));
+end IfEqu4;
+
+model IfEqu5
+    Real x;
+    parameter Real y(fixed=false,start=3);
+initial equation
+    if time >= 1 then
+        (x,) = dummyFunc(1);
+    else
+        (x,) = dummyFunc(2);
+    end if;
+equation
+    when time > 1 then
+		x = 1;
+	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="IfEqu5",
+			description="Code generation for if equation, initial equation",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$C_ode_initialization$
+",
+			generatedCode="
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    model_ode_guards(jmi);
+    _temp_1_2 = _sw(0);
+    if (_sw_init(0)) {
+      func_CCodeGenTests_dummyFunc_def(AD_WRAP_LITERAL(1), &tmp_1, NULL);
+      _x_0 = (tmp_1);
+    } else {
+      func_CCodeGenTests_dummyFunc_def(AD_WRAP_LITERAL(2), &tmp_2, NULL);
+      _x_0 = (tmp_2);
+    }
+    pre_x_0 = jmi_divide_equation(jmi, (- _x_0),(- 1.0),\"(- x) / (- 1.0)\");
+    pre_temp_1_2 = JMI_FALSE;
+    _y_1 = 3;
+
+			
+")})));
+end IfEqu5;
+
+
 
 model ReinitCTest1
     Real x;
@@ -5780,31 +6337,34 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
 			generatedCode="
-    jmi_ad_var_t tmp_1;
+     jmi_ad_var_t tmp_1;
     model_ode_guards(jmi);
 /************* ODE section *********/
-    _der_x_1 = 1;
+    _der_x_2 = 1;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _guards(0) = _sw(0);
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    _temp_1_1 = _sw(0);
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
       tmp_1 = AD_WRAP_LITERAL(1);
-} else {
-}
+    }
 /********* Write back reinits *******/
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
         _x_0 = tmp_1;
     }
 
 -----
     model_ode_guards(jmi);
-    _der_x_1 = 1;
+    _der_x_2 = 1;
+    _temp_1_1 = _sw(0);
     _x_0 = 0.0;
+    pre_temp_1_1 = JMI_FALSE;
 
 -----
 
 -----
+
+	
 ")})));
 end ReinitCTest1;
 
@@ -5840,39 +6400,43 @@ $C_dae_init_blocks_residual_functions$
     jmi_ad_var_t tmp_2;
     model_ode_guards(jmi);
 /************* ODE section *********/
-    _der_x_2 = 1;
-    _der_y_3 = 2;
+    _der_x_4 = 1;
+    _der_y_5 = 2;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _guards(0) = _sw(0);
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    _temp_1_2 = _sw(0);
+    _temp_2_3 = _sw(1);
+    if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
       tmp_1 = AD_WRAP_LITERAL(1);
-} else {
-}
-    _guards(1) = _sw(1);
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    }
+    if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
       tmp_2 = AD_WRAP_LITERAL(1);
-} else {
-}
+    }
 /********* Write back reinits *******/
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
         _x_0 = tmp_1;
     }
-  if(COND_EXP_EQ(LOG_EXP_AND(_guards(1),LOG_EXP_NOT(_pre_guards(1))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
+    if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
         _y_1 = tmp_2;
     }
 
 -----
     model_ode_guards(jmi);
-    _der_x_2 = 1;
-    _der_y_3 = 2;
-    _x_0 = 0.0;
+    _der_x_4 = 1;
+    _der_y_5 = 2;
     _y_1 = 0.0;
+    _temp_1_2 = _sw(0);
+    _x_0 = 0.0;
+    _temp_2_3 = _sw(1);
+    pre_temp_1_2 = JMI_FALSE;
+    pre_temp_2_3 = JMI_FALSE;
 
 -----
 
 -----
+
+			
 ")})));
 end ReinitCTest2;
 
@@ -5888,6 +6452,7 @@ equation
         reinit(y, 1);
     end when;
 end ReinitCTest3;
+
 
 
 model NoDAEGenerationTest1
@@ -7415,15 +7980,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _y_1;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _y_1 = x[0];
-        jmi_ad_var_t tmp_1;
-        jmi_ad_var_t tmp_2;
-        tmp_2 = _x_0;
         _x_0 = _y_1;
         _x_0 = _x_0 * 2;
-        tmp_1 = _x_0;
-        _x_0 = tmp_2;
-        tmp_2 = tmp_1;
-        _x_0 = (tmp_2);
         (*res)[0] = _x_0 + 2 - (_y_1);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -7447,15 +8005,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = _y_1;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _y_1 = x[0];
-        jmi_ad_var_t tmp_1;
-        jmi_ad_var_t tmp_2;
-        tmp_2 = _x_0;
         _x_0 = _y_1;
         _x_0 = _x_0 * 2;
-        tmp_1 = _x_0;
-        _x_0 = tmp_2;
-        tmp_2 = tmp_1;
-        _x_0 = (tmp_2);
         (*res)[0] = _x_0 + 2 - (_y_1);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -11973,17 +12524,19 @@ $C_dae_blocks_residual_functions$
 			generatedCode="
     model_ode_guards(jmi);
 /************* ODE section *********/
-    _der_x_1 = _time;
+    _der_x_2 = _time;
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _guards(0) = _sw(0);
-     if(COND_EXP_EQ(LOG_EXP_AND(_guards(0),LOG_EXP_NOT(_pre_guards(0))),JMI_TRUE,JMI_TRUE,JMI_FALSE)) {
-     jmi_flag_termination(jmi, \"X is high enough.\");
-  } else {
-}
+    _temp_1_1 = _sw(0);
+    if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
+      jmi_flag_termination(jmi, \"X is high enough.\");
+    }
 /********* Write back reinits *******/
 
+
+			
+			
 ")})));
 end TestTerminate1;
 

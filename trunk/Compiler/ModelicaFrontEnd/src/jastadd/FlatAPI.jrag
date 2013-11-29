@@ -1163,14 +1163,23 @@ aspect FlatAPI {
 		return l;
 	}
 	
-	rewrite FIfEquation in FAbstractEquation.getInitialEquation() {
-		when (isWhen() && isInitial()) to List {
-			if (getTest().isInitialGuard())
-				return getFAbstractEquations();
-			else
-				return getElse().getFAbstractEquations();
-		}
+	eq FIfEquation.getInitialEquationList() {
+		return createInitialEquationList();
 	}
+	
+	syn List<FAbstractEquation> FIfWhenElseEquation.createInitialEquationList() {
+		return getFAbstractEquations().fullCopy();
+	}
+	eq FIfWhenEquation.createInitialEquationList() {
+		if (getTest().isInitialGuard())
+			return super.createInitialEquationList();
+		else if (hasElse())
+			return getElse().createInitialEquationList();
+		else
+			return new List<FAbstractEquation>();
+	}
+	
+
 	rewrite FIfExp {
 		when (isWhen() && isInitial()) to FExp {
 			if (getIfExp().isInitialGuard())
@@ -1180,22 +1189,6 @@ aspect FlatAPI {
 		}
 	}
 	
-	eq FWhenEquation.getInitialEquationList() {
-		List<FAbstractEquation> l = new List<FAbstractEquation>();
-		if (!activeAtInitialization()) {
-			for (FAbstractEquation e : getFAbstractEquations()) {
-				for (FIdUseExp id : e.FIdUseExpsInLHS()) {
-					l.add(new FEquation(id.fullCopy(),
-					   new FPreExp(id.getFIdUse().fullCopy())));
-				}
-			}
-		} else {
-			for (FAbstractEquation e : getFAbstractEquations()) {
-				l.add(e);
-			}		
-		}
-		return l;
-	}
 	eq FAlgorithm.getInitialEquationList() {
 		ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
 		
@@ -1222,8 +1215,8 @@ aspect FlatAPI {
 				initStmts.add(new FAssignStmt(fv.createUseExp(), fv.createAlgorithmArgument(true)));
 		for (FStatement stmt : stmts)
 			initStmts.add(stmt);
-		FAlgorithm initAlgo = new FAlgorithm(new List<FStatement>(initStmts));
-		l.add(initAlgo);
+		if (initStmts.size() > 0)
+			l.add(new FAlgorithm(new List<FStatement>(initStmts)));
 		
 		// Create equations for variables which are no longer assigned 
 		// in the new algorithm
@@ -2257,6 +2250,7 @@ aspect LinearFVariables {
     	}
     	return true;
     }
+    eq FIfEquation.checkLinearity(Set<FVariable> vars) = false;
     eq FWhenEquation.checkLinearity(Set<FVariable> vars) = false;
     eq FAlgorithm.checkLinearity(Set<FVariable> vars) = false;
     

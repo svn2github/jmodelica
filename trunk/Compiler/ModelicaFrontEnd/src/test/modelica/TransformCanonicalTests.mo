@@ -3040,17 +3040,24 @@ model WhenEqu12
 		TransformCanonicalTestCase(
 			name="WhenEqu12",
 			description="Basic test of when equations",
+			inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.WhenEqu12
  discrete Real x;
  discrete Real y;
+ discrete Boolean temp_1;
 initial equation 
  pre(x) = 0.0;
  pre(y) = 0.0;
+ pre(temp_1) = false;
 equation
- when sample(0, 1) then
+ temp_1 = sample(0, 1);
+ if temp_1 and not pre(temp_1) then
   (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
- end when;
+ else
+  x = pre(x);
+  y = pre(y);
+ end if;
 
 public
  function TransformCanonicalTests.WhenEqu12.F
@@ -3062,7 +3069,9 @@ public
   y2 := 2;
   return;
  end TransformCanonicalTests.WhenEqu12.F;
- end TransformCanonicalTests.WhenEqu12;
+
+end TransformCanonicalTests.WhenEqu12;
+			
 ")})));		
 end WhenEqu12;
 

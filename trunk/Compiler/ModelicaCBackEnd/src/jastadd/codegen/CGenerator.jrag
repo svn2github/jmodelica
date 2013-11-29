@@ -268,7 +268,7 @@ public class CGenerator extends GenericGenerator {
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FAbstractEquation e : fclass.getFParameterEquations()) 
-				e.genAssignment_C(INDENT, genPrinter, null, null);
+				e.genAssignment_C(INDENT, genPrinter);
             if (!fclass.externalObjectVariables().isEmpty()) {
                 genPrinter.print(INDENT + "jmi->dep_extobjs_initialized = 1;\n");
             }

@@ -94,12 +94,19 @@ aspect FlatVariability {
 	
 	syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
 	eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
+	eq FIfWhenElseEquation.variability() {
+		FTypePrefixVariability var = fConstant();
+		for (FAbstractEquation equation : getFAbstractEquations())
+			var = var.combine(equation.variability());
+		return var;
+	}
 	eq FIfEquation.variability() {
 		if (isWhen())
 			return fDiscrete();
-		
-		// TODO: implement
-		return super.variability();
+		FTypePrefixVariability var = super.variability();
+		if (hasElse())
+			var = var.combine(getElse().variability());
+		return var;
 	}
 	eq FFunctionCallEquation.variability() {
 		FTypePrefixVariability var = fConstant();

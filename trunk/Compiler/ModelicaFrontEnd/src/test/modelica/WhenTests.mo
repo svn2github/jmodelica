@@ -306,14 +306,18 @@ equation
 			flatModel="
 fclass WhenTests.ReinitTest1
  Real x;
+ discrete Boolean temp_1;
 initial equation 
  x = 0.0;
+ pre(temp_1) = false;
 equation
  der(x) = 1;
- when time > 2 then
+ temp_1 = time > 2;
+ if temp_1 and not pre(temp_1) then
   reinit(x, 1);
- end when;
+ end if;
 end WhenTests.ReinitTest1;
+			
 ")})));
 end ReinitTest1;
 

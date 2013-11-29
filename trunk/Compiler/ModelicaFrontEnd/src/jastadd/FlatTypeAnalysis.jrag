@@ -219,6 +219,17 @@ aspect FlatTypeAnalysis {
 		return true;
 	}
 	
+	eq FIfWhenElseEquation.isReal() {
+		for (FAbstractEquation equation : getFAbstractEquations())
+			if (!equation.isReal())
+				return false;
+		return true;
+	}
+	eq FIfEquation.isReal() {
+		return super.isReal() && (!hasElse() || getElse().isReal());
+	}
+	// TODO: isInteger(), etc. for if equation
+	
 	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
 	// TODO: isInteger(), etc. for algorithm
 	

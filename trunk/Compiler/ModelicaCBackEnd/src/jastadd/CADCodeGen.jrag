@@ -1301,6 +1301,14 @@ aspect CADCodeGen {
 		}
 	}
 	
+    private int FFunctionCallLeft.equationIndex = -1;
+    public void FFunctionCallLeft.setBaseIndex(int i) {
+        equationIndex = i + myIndex();
+    }
+    public void FFunctionCallLeft.setEquationIndex(int i) {
+        equationIndex = i;
+    }
+	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
@@ -2115,7 +2123,7 @@ aspect CADCodeGen {
 				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator.copy(), forIndices, indexCounter.copy());
 				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
 			} else {
-				getFExp().type().genWriteBack_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
+				getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
 			}
 		}
 	}
