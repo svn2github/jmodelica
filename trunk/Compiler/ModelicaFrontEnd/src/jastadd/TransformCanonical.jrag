@@ -1378,17 +1378,10 @@ aspect TransformCanonical {
         public class addFDerivativeVariables extends Transformation {
             public void perform() {
                 ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
-                for (FVariable fv : differentiatedRealVariables()) {
-                    FDerivativeVariable fdv = new FDerivativeVariable(fv.getFVisibilityType().fullCopy(),
-                            fv.getFTypePrefixVariability().fullCopy(), fv.getFQName().fullCopy());
-                    fdv.setMeIntegrated(fv);
-                    fv.setMeDifferentiated(fdv);
-                    l.add(fdv);
-                }
-                for (FVariable fv : l) {
+                for (FVariable fv : differentiatedRealVariables())
+                    l.add(fv.createFDerivativeVariable());
+                for (FVariable fv : l)
                     addFVariable(fv);
-                }
-//              flush();
                 root().flushAllRecursive();
             }
         }
@@ -1401,25 +1394,35 @@ aspect TransformCanonical {
 		root().flushAllRecursive();
 	}
 
-	public FVariable FVariable.createFDerivativeVariable() {
-		return null;
+	public FDerivativeVariable FVariable.createFDerivativeVariable() {
+	    throw new UnsupportedOperationException("Trying to create a derivative variable from the non real variable " + name() + "! Java class type: '" + getClass().getSimpleName() + "'");
 	}
 
-	public FVariable FRealVariable.createFDerivativeVariable() {
+	public FDerivativeVariable FRealVariable.createFDerivativeVariable() {
 	    FDerivativeVariable fdv = new FDerivativeVariable(getFVisibilityType().fullCopy(),
 	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy());
-	    FAttribute ss = findAttributeLocal(FAttribute.STATE_SELECT);
-	    if (ss != null)
-	        fdv.addFAttribute(ss.fullCopy());
+	    fdv.setMeIntegrated(this);
+	    this.setMeDifferentiated(fdv);
+        FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
+        if (ssAttr != null) {
+            StateSelect ss = stateSelectAttribute();
+            if (ss == StateSelect.NEVER || ss == StateSelect.AVOID)
+                fdv.addFAttribute(ssAttr.fullCopy());
+        }
 	    return fdv;
 	}
 
-	public FVariable FDerivativeVariable.createFDerivativeVariable() {
+	public FDerivativeVariable FDerivativeVariable.createFDerivativeVariable() {
 	    FHDerivativeVariable fhdv = new FHDerivativeVariable(getFVisibilityType().fullCopy(),
 	            getFTypePrefixVariability().fullCopy(), getFQName().fullCopy(), order() + 1);
-	    FAttribute ss = findAttributeLocal(FAttribute.STATE_SELECT);
-	    if (ss != null)
-	        fhdv.addFAttribute(ss.fullCopy());
+	    fhdv.setMeIntegrated(this);
+	    this.setMeDifferentiated(fhdv);
+        FAttribute ssAttr = findAttributeLocal(FAttribute.STATE_SELECT);
+        if (ssAttr != null) {
+            StateSelect ss = stateSelectAttribute();
+            if (ss == StateSelect.NEVER || ss == StateSelect.AVOID)
+                fhdv.addFAttribute(ssAttr.fullCopy());
+        }
 	    return fhdv;
 	}
 

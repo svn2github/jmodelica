@@ -1607,6 +1607,60 @@ end IndexReduction.IndexReduction32_PlanarPendulum_StatePreferNever;
 ")})));
   end IndexReduction32_PlanarPendulum_StatePreferNever;
 
+model IndexReduction32_PlanarPendulum_StateAvoidNever
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x(stateSelect=StateSelect.never) "Cartesian x coordinate";
+    Real y(stateSelect=StateSelect.avoid) "Cartesian x coordinate";
+    Real vx(stateSelect=StateSelect.avoid) "Velocity in x coordinate";
+    Real vy(stateSelect=StateSelect.avoid) "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IndexReduction32_PlanarPendulum_StateAvoidNever",
+            description="Test of index reduction",
+            flatModel="
+fclass IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x(stateSelect = StateSelect.never) \"Cartesian x coordinate\";
+ Real y(stateSelect = StateSelect.avoid) \"Cartesian x coordinate\";
+ Real vx(stateSelect = StateSelect.avoid) \"Velocity in x coordinate\";
+ Real vy(stateSelect = StateSelect.avoid) \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real _der_x;
+ Real _der_vx;
+ Real _der_vy;
+ Real _der_der_x;
+ Real _der_y;
+initial equation 
+ y = 0.0;
+ _der_y = 0.0;
+equation
+ _der_x = vx;
+ der(y) = vy;
+ _der_vx = lambda * x;
+ _der_vy = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+ 2 * x * _der_x + 2 * y * der(y) = 0.0;
+ _der_der_x = _der_vx;
+ der(_der_y) = _der_vy;
+ 2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * der(_der_y) + 2 * der(y) * der(y)) = 0.0;
+ _der_y = der(y);
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.IndexReduction32_PlanarPendulum_StateAvoidNever;
+")})));
+end IndexReduction32_PlanarPendulum_StateAvoidNever;
+
  model IndexReduction33_Div
   Real x1,x2;
   parameter Real p = 2;
