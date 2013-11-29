@@ -1105,6 +1105,7 @@ aspect CCodeGen {
         str.print(indent);
         p.print(getVar(), str, indent);
         str.format(" = %s;\n", tempName_C());
+        str.format("%sjmi->reinit_triggered = 1;\n", indent);
     }
     
     public void FAbstractFunctionCall.genReinitWritebacks_C(Printer p, PrintStream str, String indent) {}

@@ -698,6 +698,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
     jmi_log_node_t top_node;
+    jmi_log_node_t iter_node;
 
     /* Allocate memory */
     jmi_dae_get_sizes(jmi, &nF, &nR);
@@ -709,10 +710,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
     event_info->next_event_time = 0.0;                   /* A reset. */
     event_info->state_value_references_changed = FALSE;  /* No support for dynamic state selection */
-    event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation */
-    event_info->iteration_converged = FALSE;             /* The iteration have not converged */
+    event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation unless flagged to. */
+    event_info->iteration_converged = FALSE;             /* The iteration has not converged */
     event_info->nominals_of_states_changed = FALSE;      /* Not used, get_nominals is not implemented. */
-    event_info->state_values_changed = FALSE;            /* Not used, the reinit operator is not supported. */
+    event_info->state_values_changed = FALSE;            /* State variables have not been changed by reinit. */
     
     jmi->terminate = 0; /* Reset terminate flag. */
 
@@ -738,7 +739,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* Iterate */
     iter = 0;
     while (event_info->iteration_converged == FALSE) {
-        jmi_log_node_t iter_node;
+        jmi->reinit_triggered = 0; /* Reset reinit flag. */
 
         iter += 1;
         
@@ -757,23 +758,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
 
-        /* Compare new values with values
-         * with the pre values. If there is an element that differs, set
-         * eventInfo->iterationConverged to false
-         */
+        /* Compare new values with the pre values. If there is an element that differs, set
+         * event_info->iteration_converged to false. */
         event_info->iteration_converged = TRUE; /* Assume the iteration converged */
-
-        /* Start with continuous variables - they could change due to
-         * the reinit operator. */
-
-        /*
-        for (i = jmi->offs_real_dx; i < jmi->offs_t; i++) {
-            if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
-                event_info->iteration_converged = FALSE;
-                event_info->state_values_changed = TRUE;
-            }
-        }
-         */
 
         for (i = jmi->offs_real_d; i < jmi->offs_pre_real_dx; i++) {
             if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
@@ -785,6 +772,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_reals(jmi->log, iter_node, logInfo, "pre(z)_values", &z[jmi->offs_pre_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
         }
         
+        /* Check if a reinit triggered - this would mean that state variables changed. */
+        if (jmi->reinit_triggered) {
+            event_info->iteration_converged = FALSE;
+            event_info->state_values_changed = TRUE;
+        }
+
         /* Evaluate the switches */
         memcpy(sw_temp, switches, nR*sizeof(jmi_real_t));
         retval = jmi_evaluate_switches(jmi, sw_temp, 1);
@@ -838,7 +831,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
-        /* Evaluate the guards with the event flat set to false in order to
+        /* Evaluate the guards with the event flag set to false in order to
          * reset guards depending on samplers before copying pre values.
          * If this is not done, then the corresponding pre values for these guards
          * will be true, and no event will be triggered at the next sample.

@@ -6351,6 +6351,7 @@ $C_dae_init_blocks_residual_functions$
 /********* Write back reinits *******/
     if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
         _x_0 = tmp_1;
+		jmi->reinit_triggered = 1;
     }
 
 -----
@@ -6416,9 +6417,11 @@ $C_dae_init_blocks_residual_functions$
 /********* Write back reinits *******/
     if (LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2))) {
         _x_0 = tmp_1;
+		jmi->reinit_triggered = 1;
     }
     if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
         _y_1 = tmp_2;
+		jmi->reinit_triggered = 1;
     }
 
 -----
