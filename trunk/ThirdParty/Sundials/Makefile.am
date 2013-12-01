@@ -1,4 +1,4 @@
-SUNDIALS_DIR=sundials-2.4.0
+SUNDIALS_DIR=sundials-2.5.0
 
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed

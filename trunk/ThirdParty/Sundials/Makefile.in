@@ -194,7 +194,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUNDIALS_DIR = sundials-2.4.0
+SUNDIALS_DIR = sundials-2.5.0
 all: all-am
 
 .SUFFIXES:
