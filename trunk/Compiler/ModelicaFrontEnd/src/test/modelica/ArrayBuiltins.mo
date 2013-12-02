@@ -199,7 +199,7 @@ model SizeExp11
 fclass ArrayBuiltins.Size.SizeExp11
  Real y[1].x = 1;
  Real y[2].x = 1;
- parameter Integer z = size(zeros(2), 1) /* 2 */;
+ parameter Integer z = 2 /* 2 */;
 end ArrayBuiltins.Size.SizeExp11;
 ")})));
 end SizeExp11;
@@ -218,7 +218,7 @@ model SizeExp12
 			description="Size operator: array of records",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp12
- ArrayBuiltins.Size.SizeExp12.A y[2] = fill(ArrayBuiltins.Size.SizeExp12.A(1), size(y, 1));
+ ArrayBuiltins.Size.SizeExp12.A y[2] = fill(ArrayBuiltins.Size.SizeExp12.A(1), 2);
 
 public
  record ArrayBuiltins.Size.SizeExp12.A
@@ -246,7 +246,7 @@ model SizeStructural1
 fclass ArrayBuiltins.Size.SizeStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1] + 1;
- parameter Integer p1 = size(p3, 1) /* 1 */;
+ parameter Integer p1 = 1 /* 1 */;
  parameter Real p2[1] = {1} /* { 1 } */;
  parameter Real p3[1] = {2} /* { 2 } */;
  parameter Integer p4 = 1 /* 1 */;
@@ -2862,7 +2862,7 @@ model ScalarSize1
 			description="Size of zero-length vector",
 			flatModel="
 fclass ArrayBuiltins.ScalarSize1
- Real x[1] = cat(1, {1}, size(3.141592653589793));
+ Real x[1] = cat(1, {1}, {});
 
 end ArrayBuiltins.ScalarSize1;
 ")})));

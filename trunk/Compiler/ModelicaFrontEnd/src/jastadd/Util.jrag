@@ -3025,6 +3025,7 @@ aspect GeneralHelpers {
 	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	abstract public FSubscript FSubscript.fullCopy();
+    abstract public CommonForIndex CommonForIndex.fullCopy();
 	
 	abstract public FExp FExp.copy();
 	abstract public InstAccess InstAccess.copy();

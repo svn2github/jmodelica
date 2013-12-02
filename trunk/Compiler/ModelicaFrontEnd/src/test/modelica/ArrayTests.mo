@@ -5304,7 +5304,7 @@ fclass ArrayTests.For.ForStructural1
  Real x[2];
 equation
  for i in 1:2 loop
-  if ({true, false})[i] then
+  if p[i] then
    x[i] = time;
   else
    x[i] = 1;

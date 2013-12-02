@@ -905,7 +905,7 @@ aspect Flattening {
 	 * Will not create new nodes unless necessary.
 	 */
 	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
-	eq FArray.splitArrayExp(int index)         = isIterArray() ? super.splitArrayExp(index) : getFExp(index - 1);
+	eq FArray.splitArrayExp(int index)         = isIterArray() ? getFExp(0).splitArrayExp(index) : getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
@@ -927,6 +927,18 @@ aspect Flattening {
 		FSubscriptedExp exp = (FSubscriptedExp) unboundCopy();
 		exp.getFArraySubscripts().specifyNext(index);
 		return exp;
+	}
+	eq FIterExp.splitArrayExp(int index) {
+	    Map<String,FExp> repl = new HashMap<String,FExp>();
+	    repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
+	    FExp res = getFExp().fullCopy().replaceIndices(repl);
+	    if (getNumForIndex() > 1) {
+	        List<CommonForIndex> indices = new List<CommonForIndex>();
+	        for (int i = 1, n = getNumForIndex(); i < n; i++)
+	            indices.add(getForIndex(i).fullCopy());
+	        res = new FArray(new List(new FIterExp(res, indices)));
+	    }
+	    return res;
 	}
 	// TODO: consider if expressions
 	
@@ -1511,7 +1523,8 @@ aspect FlatExpressions {
                 if (!size().isEmpty()) {
                     // Check if we have non-constant array subscripts
                     if (ia.hasUnknownIndices()) {
-                        if (!ia.inFunction()) {
+                        // If this is a package constant, then the variable will not be available in the flattened model 
+                        if (!ia.inFunction() && variability().constantVariability()) {
                             // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
                             FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
                             FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
@@ -1978,11 +1991,17 @@ aspect FlatExpressions {
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
 	}
 	
-	public FSizeExp FSizeExp.flatten(FQName prefix) {
+	public FExp FSizeExp.flatten(FQName prefix) {
 		FExp exp = getFExp();
-		exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
-		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
-		return new FSizeExp(exp, dim);
+		if (exp.size().isUnknown()) {
+	        exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
+	        Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
+	        return new FSizeExp(exp, dim);
+		} else {
+		    Size s = exp.size();
+		    FExp se = hasDim() ? s.createFExp(dimension()) : s.createFExp();
+		    return dynamicFExp(se).flatten(prefix);
+		}
 	}
 	
 	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {
