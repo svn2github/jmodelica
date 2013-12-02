@@ -650,15 +650,15 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		
 		protected void generateStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
 			FExp e_start = null;
-			FExp e_fixed = null;
-			Boolean isFixed = null; // null = fixed is not set
+			Boolean isFixed; // null = fixed is not set
 
 			if (var.fixedAttributeSet()) {
-				e_fixed = var.fixedAttributeExp();
-				isFixed = e_fixed.ceval().booleanValue();
+				isFixed = var.fixedAttributeExp().ceval().booleanValue();
+			} else {
+				isFixed = false; //The default value.
 			}
 
-			if (isFixed == null || (isFixed != null && !isFixed)) {
+			if (!isFixed) {
 				boolean startGenerated = false;
 				if (var.useBindingExpAsStart()) 
 					e_start = var.getBindingExp();
@@ -674,9 +674,9 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 					startGenerated = true;
 				}
 
-				if (isFixed != null && startGenerated) {
-					// fixed is set and start is generated (i.e. fixed is false)
-					generateAttribute("fixed", e_fixed.type().convert(e_fixed.ceval()).xmlValue(), genPrinter);
+				if (startGenerated && !variable.fixedAttribute()) {
+                    //Start is generated and fixed equals false => generate this.
+					generateAttribute("fixed", "false", genPrinter);
 				}
 			}
 		}

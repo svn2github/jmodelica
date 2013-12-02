@@ -1760,7 +1760,6 @@ aspect Attributes {
 	syn boolean FVariable.fixedAttributeSet()           = attributeSet(FAttribute.FIXED);
 	syn FExp    FVariable.fixedAttributeExp()           = attributeExp(FAttribute.FIXED);
 	syn CValue  FVariable.fixedAttributeCValue()        = attributeCValueBoolean(FAttribute.FIXED, isParameter() || isConstant());
-	eq          FStringVariable.fixedAttributeCValue()  = CValue.UNKNOWN;
 	syn boolean FVariable.fixedAttribute()              = fixedAttributeCValue().reduceBooleanOr();
 	public void FVariable.setFixedAttribute(boolean value) { setFixedAttribute(FBooleanLitExp.create(value)); }
 	public void FVariable.setFixedAttribute(FExp value)    { setAttribute(FAttribute.FIXED, "Boolean", value); }

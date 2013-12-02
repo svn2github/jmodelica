@@ -511,15 +511,15 @@ public class XMLGenerator extends GenericXMLGenerator {
 	
 	protected void addStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
 		FExp e_start = null;
-		FExp e_fixed = null;
-		Boolean isFixed = null; // null = fixed is not set
+		Boolean isFixed;
 		
 		if (var.fixedAttributeSet()) {
-		    e_fixed = var.fixedAttributeExp();
-		    isFixed = e_fixed.ceval().booleanValue();
-		}
-		
-		if (isFixed == null || (isFixed != null && !isFixed)) {
+		    isFixed = var.fixedAttributeExp().ceval().booleanValue();
+		} else {
+            isFixed = false; //The default value.
+        }
+        
+		if (!isFixed) {
 		    boolean startGenerated = false;
 		    if (var.useBindingExpAsStart()) 
 		        e_start = var.getBindingExp();
@@ -535,10 +535,10 @@ public class XMLGenerator extends GenericXMLGenerator {
 		        startGenerated = true;
 		    }
 		    
-		    if (isFixed != null && startGenerated) {
-		        // fixed is set and start is generated (i.e. fixed is false)
-		        genPrinter.print("fixed=\"" + e_fixed.type().convert(e_fixed.ceval()).xmlValue() + "\" ");
-		    }
+            if (startGenerated && !var.fixedAttribute()) {
+                //Start is generated and fixed equals false => generate this.
+                genPrinter.print("fixed=\"false\" ");
+            }
 		}
 	}
 
