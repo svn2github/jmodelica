@@ -372,10 +372,16 @@ aspect ConstantFolding {
 		getRight().enableConstantFolding();
 	}
 	
-	public void FWhenEquation.enableConstantFolding() {
+	public void FIfWhenElseEquation.enableConstantFolding() {
 		for (FAbstractEquation equation : getFAbstractEquations()) {
 			equation.enableConstantFolding();
 		}
+	}
+	
+	public void FIfWhenEquation.enableConstantFolding() {
+	    super.enableConstantFolding();
+	    if (hasElse())
+	        getElse().enableConstantFolding();
 	}
 	
 	public void FExp.enableConstantFolding() {	

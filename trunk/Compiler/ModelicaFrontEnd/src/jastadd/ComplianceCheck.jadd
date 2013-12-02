@@ -67,9 +67,6 @@ aspect ComplianceCheck {
 
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
-		if (hasElse()) {
-			compliance("Else clauses in when equations are currently not supported");
-		}
 	}
 	
 	public void ASTNode.complianceOnlyFMU(String message) {

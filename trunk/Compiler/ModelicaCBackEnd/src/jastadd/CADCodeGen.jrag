@@ -1082,14 +1082,6 @@ aspect CADCodeGen {
 	public void SolvedFunctionCallEquationBlock.genBlockResidualFunction_CAD(boolean inInit, String indent, PrintStream str) {}
 	
 	/**
-	 * When equation blocks should not have any residual block.
-	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator, java.lang.String, java.io.PrintStream, java.util.Set<FAbstractEquation>, java.util.Set<FVariable>).
-	 */
-	@Override
-	public void WhenEquationBlock.genBlockResidualFunction_CAD(boolean inInit, String indent, PrintStream str) {}
-
-	
-	/**
 	 * Used to generate AD code for blocks, called mainly from model_ode_derivatives or model_ode_initialize_dir_der.
 	 * The default implementation prints code for calls to blocks that require iteration, e.g. EquationBlock,TornEquationBlock. 
 	 * Other blocks suchs as solvedFunctionCallEquationBlock:s override this method by generally printing standard AD-code. 

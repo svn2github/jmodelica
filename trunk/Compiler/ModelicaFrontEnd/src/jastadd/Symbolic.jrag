@@ -22,13 +22,6 @@ aspect EquationSolve {
 	
 	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
 
-	eq FWhenEquation.isSolved(String name, boolean duringTearing) {
-		if (getNumFAbstractEquation()>1)
-			return Solvability.UNSOLVABLE;
-		else
-			return getFAbstractEquation(0).isSolved(name);
-	}
-
 	eq FEquation.isSolved(String name, boolean duringTearing) {
 		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
 		if (solvable)

@@ -459,14 +459,17 @@ aspect CCodeGen {
 	eq FVariable.name_C()           = isForIndex() ? 
 										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
 										name_C(""); 
-	eq FPreRealVariable.name_C()    = name_C("pre");
-	eq FPreBooleanVariable.name_C() = name_C("pre");
-	eq FPreIntegerVariable.name_C() = name_C("pre");
-	eq FPreStringVariable.name_C()  = name_C("pre");
-	eq FPreEnumVariable.name_C()    = name_C("pre");
+	eq FPreRealVariable.name_C()    = preName_C();
+	eq FPreBooleanVariable.name_C() = preName_C();
+	eq FPreIntegerVariable.name_C() = preName_C();
+	eq FPreStringVariable.name_C()  = preName_C();
+	eq FPreEnumVariable.name_C()    = preName_C();
 
 	eq FFunctionVariable.name_C()   = name_C(null, C_SUFFIX_VARIABLE);
 	eq FFunctionArray.name_C()      = name_C(null, C_SUFFIX_ARRAY);
+	
+	syn String FAbstractVariable.preName_C() = null; 
+	eq FVariable.preName_C() = name_C("pre");
 	
 	protected String FVariable.name_C(String prefix) {
 		return name_C(prefix, Integer.toString(variableIndex()));
@@ -2028,15 +2031,6 @@ aspect CCodeGen {
             aeb.genVarDecls_C(str, indent, visited);
         for (AbstractEquationBlock aeb : getUnsolvedBlocks())
             aeb.genVarDecls_C(str, indent, visited);
-    }
-    
-    @Override
-    protected void WhenEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-        if (visited == null)
-            visited = new HashSet<ASTNode>();
-        for (Iterable<? extends AbstractEquationBlock> aebl : blocks)
-            for (AbstractEquationBlock aeb : aebl)
-                aeb.genVarDecls_C(str, indent, visited);
     }
     
     @Override

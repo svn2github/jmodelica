@@ -2221,6 +2221,7 @@ aspect WhenClauses{
 	private boolean FIfExp.isWhen            = false;
 	
 	syn boolean FAbstractEquation.isWhen() = isWhen;
+	eq FWhenEquation.isWhen()              = true;
 	syn boolean FStatement.isWhen()        = isWhen;
 	syn boolean FIfExp.isWhen()            = isWhen;
 	public void FAbstractEquation.setWhen() { isWhen = true; }
@@ -2312,7 +2313,7 @@ aspect WhenClauses{
 		
 		for (FIfWhenClause clause : getFIfWhenClauses()) {	
 			FIfClause c = new FIfClause();
-			c.setTest(clause.getTest().asGuard(stmts, false));
+			c.setTest(clause.getTest().transformGuard(stmts, false));
 			c.setFStatementList(clause.getFStatements().fullCopy());
 			clauses.add(c);
 		}
@@ -2329,7 +2330,7 @@ aspect WhenClauses{
 	
 	public void FIfWhenElseEquation.convertGuard(ArrayList l, boolean equation) {}
 	public void FIfWhenEquation.convertGuard(ArrayList l, boolean equation) {
-		setTest(getTest().asGuard(l,equation));
+		setTest(getTest().transformGuard(l,equation));
 		if (hasElse())
 			getElse().convertGuard(l,equation);
 	}
@@ -2338,19 +2339,19 @@ aspect WhenClauses{
 	 * Converts this guard expression from a when clause to a guard expression
 	 * to be used in an if clause.
 	 */
+    public FExp FExp.transformGuard(ArrayList l, boolean equation) {
+        Iterator<FExp> it = guards().iterator();
+        FExp res = it.next().asGuard(l, equation);
+        while (it.hasNext())
+            res = new FOrExp(res,it.next().asGuard(l, equation));
+        return res;
+    }
 	public FExp FExp.asGuard(ArrayList l, boolean equation) {
 		if (equation)
 			l.add(new FEquation(tempUseExp(), fullCopy()));
 		else if(dependsOn(myFAlgorithm().referencedFVariablesInLHS()))
 			l.add(new FAssignStmt(tempUseExp(), fullCopy()));
 		return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
-	}
-	
-	public FExp FArray.asGuard(ArrayList l, boolean equation) {
-		FExp e = getFExp(0).asGuard(l, equation);
-		for (int i = 1; i < getNumFExp(); i++)
-			e = new FOrExp(e,getFExp(i).asGuard(l, equation));
-		return e;
 	}
 	
 	public FExp FInitialExp.asGuard(ArrayList l, boolean equation) {
@@ -3694,8 +3695,9 @@ aspect FunctionInlining {
 		getLeft().hasInlinableFunctions(fi) || getRight().hasInlinableFunctions(fi);
 	eq FIfEquation.hasInlinableFunctions(FunctionInliner fi)                = 
 		super.hasInlinableFunctions(fi) || (hasElse() && getElse().hasInlinableFunctions(fi));
-	eq FWhenEquation.hasInlinableFunctions(FunctionInliner fi)              = false;
 	eq FIfWhenElseEquation.hasInlinableFunctions(FunctionInliner fi) {
+	    if (isWhen())
+	        return false;
 		for (FAbstractEquation eqn : getFAbstractEquations())
 			if (eqn.hasInlinableFunctions(fi))
 				return true;
@@ -4517,7 +4519,7 @@ aspect FunctionInlining {
 	 * We must be able to tell the difference between discrete and continous expressions 
 	 * during function inlining. Normally all expressions in functions are considered discrete.
 	 */
-	refine FlatVariability eq FFunctionDecl.getChild().inDiscreteLocation() = !duringInlining;
+	refine FlatVariability eq FExp.inDiscreteLocation() = inWhen() || (inFunction() && !duringFunctionInlining());
 	
 	/*
 	 * We want to be able to scalarize all expressions (except size exps) fully during inlining.

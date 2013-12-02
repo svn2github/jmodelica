@@ -2270,7 +2270,62 @@ end FunctionInlining.IfEquationInline7;
 ")})));
 end IfEquationInline7;
     
-    
+model WhenEquationInline1
+    function F
+        input Real x;
+        output Real y1;
+        output Real y2;
+    algorithm
+        y1 := 1 + x;
+        y2 := 2 + x;
+    end F;
+    Real x,y;
+equation
+    when sample(0,1) then
+        (x,y) = F(time);
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEquationInline1",
+			description="Check variability of argument moved out of when equation",
+			inline_functions="trivial",
+			flatModel="
+fclass FunctionInlining.WhenEquationInline1
+ discrete Real x;
+ discrete Real y;
+ discrete Boolean temp_1;
+initial equation 
+ pre(x) = 0.0;
+ pre(y) = 0.0;
+ pre(temp_1) = false;
+equation
+ temp_1 = sample(0, 1);
+ if temp_1 and not pre(temp_1) then
+  (x, y) = FunctionInlining.WhenEquationInline1.F(time);
+ else
+  x = pre(x);
+  y = pre(y);
+ end if;
+
+public
+ function FunctionInlining.WhenEquationInline1.F
+  input Real x;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y1 := 1 + x;
+  y2 := 2 + x;
+  return;
+ end FunctionInlining.WhenEquationInline1.F;
+
+end FunctionInlining.WhenEquationInline1;
+			
+")})));
+end WhenEquationInline1;
+	
+	
+
     
     model TrivialInline1
         function f

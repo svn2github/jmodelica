@@ -435,12 +435,16 @@ equation
 			variability_propagation=false,
 			template="$C_ode_derivatives$",
 			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 2, 1)
     model_ode_guards(jmi);
 /************* ODE section *********/
 /************ Real outputs *********/
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
-    _x_2 = COND_EXP_EQ(_atInitial, JMI_TRUE, _c_1_0 + _c_2_1, pre_x_2);
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _c_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _c_2_1;
+    _x_2 = COND_EXP_EQ(_atInitial, JMI_TRUE, func_CCodeGenTests_CCodeGenTest14_f_exp(tmp_1), pre_x_2);
 /********* Write back reinits *******/
 			
 ")})));
@@ -5802,6 +5806,8 @@ equation
 /****Integer and boolean outputs ***/
 /**** Other variables ***/
     _temp_1_4 = _sw(0);
+    _a_2 = _time;
+    _b_3 = _time * 2;
     if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4)))) {
       func_CCodeGenTests_WhenEqu8_f_def(_a_2, _b_3, &tmp_1, &tmp_2);
       _x_0 = (tmp_1);
@@ -5810,8 +5816,6 @@ equation
       _x_0 = pre_x_0;
       _y_1 = pre_y_1;
     }
-    _a_2 = _time;
-    _b_3 = _time * 2;
 /********* Write back reinits *******/
  
                        jmi_ad_var_t tmp_3;

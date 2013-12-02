@@ -870,60 +870,51 @@ aspect FlatAPI {
 			indexOf(this.originalFSampleExp==null? this: this.originalFSampleExp);
 	}
 	
-	syn int FClass.numGuardExpInEquations() = 
-		guardExpInEquations().size();
-
-	coll ArrayList<FExp> FClass.guardExpInEquations() 
-	  [new ArrayList<FExp>()] with addAll root FlatRoot;
-	FWhenEquation contributes
-    // Only include relational in the equation section which are 
-    // not inside a noEvent operator
- 		guards() when getTest().inEquationSection()
-	to FClass.guardExpInEquations() for myFClass();	
-	FWhenStmt contributes
-		guards() when inEquationSection()
-	to FClass.guardExpInEquations() for myFClass();	
-		
-	coll Set<FExp> FAbstractEquation.transformedGuards() [new HashSet<FExp>()] 
-		with add root FAbstractEquation;
-	FIfExp contributes getIfExp() when isWhen() 
-		to FAbstractEquation.transformedGuards() for myFEquation() ;
-	FIfEquation contributes getTest() when isWhen() 
-		to FAbstractEquation.transformedGuards() for this;
-	
-	
-	syn ArrayList<FExp> FWhenEquation.guards() = getTest().guards();
-	syn ArrayList<FExp> FWhenStmt.guards() {
-		ArrayList<FExp> l = new ArrayList<FExp>();
-		for (FIfWhenClause clause : getFIfWhenClauses()) {
-			l.addAll(clause.getTest().guards());
-		}
-		return l;
-	}
-	
-	syn ArrayList<FExp> FExp.guards() {
-		ArrayList<FExp> l = new ArrayList<FExp>();
-		if (!isArray()) {
-			l.add(this);
-		} else {
-			for (FExp e : getArray().iterable()) {
-				l.add(e);
-			}
-		}
-		return l;
-	}
-	eq FArray.guards() {
-		ArrayList<FExp> l = new ArrayList<FExp>();
-		for (FExp e : childFExps()) {
-			l.add(e);
-		}
-		return l;
-	}
-		
-	public int FExp.guardExpInEquationsIndex() {
-		return myFClass().guardExpInEquations().
-			indexOf(this);
-	}
+	syn int FClass.numGuardExpInEquations() = guardExpInEquations().size();
+	syn int FClass.numGuardExpInInitialEquations() = guardExpInInitialEquations().size();
+    syn int FExp.guardExpInEquationsIndex() = myFClass().guardExpInEquations().indexOf(this);
+    syn int FExp.guardExpInInitialEquationsIndex() = myFClass().guardExpInInitialEquations().indexOf(this);
+    
+    coll ArrayList<FExp> FClass.guardExpInEquations() 
+        [new ArrayList<FExp>()] with addAll root FlatRoot;
+    FWhenEquation contributes getTest().guards() when getTest().inEquationSection()
+        to FClass.guardExpInEquations() for myFClass();
+    FWhenStmt contributes guards() when inEquationSection()
+        to FClass.guardExpInEquations() for myFClass();
+                
+    coll ArrayList<FExp> FClass.guardExpInInitialEquations() 
+      [new ArrayList<FExp>()] with addAll root FlatRoot;
+    FWhenEquation contributes getTest().guards() when getTest().inInitialEquationSection()
+        to FClass.guardExpInInitialEquations() for myFClass();
+    FWhenStmt contributes guards() when inInitialEquationSection()
+        to FClass.guardExpInInitialEquations() for myFClass(); 
+    
+    coll Set<FExp> FAbstractEquation.transformedGuards() [new HashSet<FExp>()] 
+        with add root FAbstractEquation;
+    FIfExp contributes getIfExp() when isWhen()
+        to FAbstractEquation.transformedGuards() for myFEquation();
+    FIfEquation contributes getTest() when isWhen()
+        to FAbstractEquation.transformedGuards() for this;
+    
+    syn ArrayList<FExp> FWhenStmt.guards() {
+        ArrayList<FExp> l = new ArrayList<FExp>();
+        for (FIfWhenClause clause : getFIfWhenClauses()) {
+            l.addAll(clause.getTest().guards());
+        }
+        return l;
+    }
+    
+    syn ArrayList<FExp> FExp.guards() {
+        ArrayList<FExp> l = new ArrayList<FExp>();
+        l.add(this);
+        return l;
+    }
+    eq FArray.guards() {
+        ArrayList<FExp> l = new ArrayList<FExp>();
+        for (FExp e : childFExps())
+            l.add(e);
+        return l;
+    }
 
 	/**
 	 * Check if an expression will generate an event
@@ -1019,24 +1010,6 @@ aspect FlatAPI {
 		return myFClass().relExpInInitialEquations().
 			indexOf(this.originalFRelExp==null? this: this.originalFRelExp);
 	}
- 
- 	syn int FClass.numGuardExpInInitialEquations() = 
-		guardExpInInitialEquations().size();
-
-	coll ArrayList<FExp> FClass.guardExpInInitialEquations() 
-	  [new ArrayList<FExp>()] with addAll root FlatRoot;
-	FWhenEquation contributes
-    // Only include relational in the equation section which are 
-    // not inside a noEvent operator
- 		guards() when getTest().inInitialEquationSection()
-	to FClass.guardExpInInitialEquations() for myFClass();	
-		
-	public int FExp.guardExpInInitialEquationsIndex() {
-		return myFClass().guardExpInInitialEquations().
-			indexOf(this);
-	}
- 
- 
 /*	
 
 	coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
@@ -1117,28 +1090,9 @@ aspect FlatAPI {
 	eq FClass.getFParameterEquation().isParameterEquation() = true;
 	eq Root.getChild().isParameterEquation() = false;
 	
-	syn boolean FAbstractEquation.activeAtInitialization() = true;
-	eq FWhenEquation.activeAtInitialization() {
-		for (FExp g: guards()) {
-			if (g.variability().parameterOrLess()) {
-				// Set initial() to false and evaluate
-				myFClass().setIsInitial(false);
-				boolean before = g.ceval().booleanValue();
-				// Set initial() to false and evaluate
-				myFClass().setIsInitial(true);
-				boolean after = g.ceval().booleanValue();
-				// The when clause is considered to be active at initialization
-				// if before is false and after is true.
-				if (!before && after) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}	
-
+	
+	
 	syn boolean FAbstractEquation.replacedAtInitialization() = isWhen();
-	eq FWhenEquation.replacedAtInitialization() = true;
 	eq FAlgorithm.replacedAtInitialization() {
 		if (super.replacedAtInitialization())
 			return true;
@@ -2012,13 +1966,20 @@ aspect FVariableUses {
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.inputs() = 
 	    retrieveInputs();
 	
-	eq FWhenEquation.inputs()  {
+	eq FIfWhenElseEquation.inputs()  {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		s.addAll(retrieveInputs());
 		for (FAbstractEquation e : getFAbstractEquations()) {
 			s.addAll(e.inputs());
 		}
 		return s;
+	}
+	eq FIfWhenEquation.inputs()  {
+	    LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+        s.addAll(super.inputs());
+        if (hasElse())
+            s.addAll(getElse().inputs());
+        return s;
 	}
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.realInputs() = 
@@ -2046,7 +2007,7 @@ aspect FVariableUses {
 	syn LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
 	    retrieveAlgebraicVariables();
 	
-	syn lazy LinkedHashSet<FVariable> FWhenEquation.algebraicVariables() {
+	syn lazy LinkedHashSet<FVariable> FIfWhenElseEquation.algebraicVariables() {
 		LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
 		s.addAll(retrieveAlgebraicVariables());
 		for (FAbstractEquation e : getFAbstractEquations()) {
@@ -2054,6 +2015,14 @@ aspect FVariableUses {
 		}
 		return s;
 	}
+	
+   syn lazy LinkedHashSet<FVariable> FIfWhenEquation.algebraicVariables() {
+        LinkedHashSet<FVariable> s = new LinkedHashSet<FVariable>();
+        s.addAll(super.algebraicVariables());
+        if (hasElse())
+            s.addAll(getElse().algebraicVariables());
+        return s;
+   }
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.algebraicContinousRealVariables() = 
 		new LinkedHashSet<FVariable>(FClass.intersectFVColl(myFClass().algebraicContinousRealVariables(),algebraicVariables()));
@@ -2250,8 +2219,7 @@ aspect LinearFVariables {
     	}
     	return true;
     }
-    eq FIfEquation.checkLinearity(Set<FVariable> vars) = false;
-    eq FWhenEquation.checkLinearity(Set<FVariable> vars) = false;
+    eq FIfWhenElseEquation.checkLinearity(Set<FVariable> vars) = false;
     eq FAlgorithm.checkLinearity(Set<FVariable> vars) = false;
     
     inh boolean FExp.isLinear(Set<FVariable> vars);
@@ -2269,7 +2237,7 @@ aspect LinearFVariables {
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
-    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = true;
+    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = !isWhen();
     
 	syn boolean FExp.isIndependent(Set<FVariable> set) {
 		for (FExp e : childFExps()) {

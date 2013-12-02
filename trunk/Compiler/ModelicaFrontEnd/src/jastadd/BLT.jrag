@@ -65,7 +65,7 @@ aspect BLT{
 
 		/**
 		 * This method takes a list of Eq objects and create equation blocks
-		 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
 		 */
 		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
 			return createSimpleEquationBlock(component, solve, false);
@@ -74,7 +74,7 @@ aspect BLT{
 		/**
 		 * This method takes an equation <code>eqn</code> and variable
 		 * <code>var</code> and produces an unsolved block of types
-		 * ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+		 * ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
 		 */
 		public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
 			return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
@@ -82,7 +82,7 @@ aspect BLT{
 		
 		/**
 		 * This method takes a list of Eq objects and create equation blocks
-		 * of types ScalarEquationBlock, WhenEquationBlock or FFunctionCallEquationBlock.
+		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
 		 */
 		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
 			Collection<FVariable> fvs = new ArrayList<FVariable>();
@@ -462,12 +462,6 @@ aspect BLT{
 		} else { // Unsolved scalar equation
 			return new UnsolvedScalarEquationBlock(this, fv);
 		}
-	}
-
-	// If equation TODO
-
-	public SimpleEquationBlock FWhenEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
-		return new WhenEquationBlock(this);
 	}
 
 	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
@@ -1365,7 +1359,7 @@ aspect BLT{
 	
 	/**
 	 * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
-	 * AlgorithmBLock and WhenEquationBlock.
+	 * AlgorithmBLock and IfEquationBlock.
 	 */
 	public abstract class SimpleEquationBlock extends AbstractEquationBlock {
 		private FAbstractEquation equation;
@@ -1669,61 +1663,6 @@ aspect BLT{
 			return false;
 		}
 
-	}
-
-	/**
-	 * A when equation block.
-	 */
-	public class WhenEquationBlock extends SimpleEquationBlock {
-		// One list of blocks for each when branch
-		protected Collection<Collection<SimpleEquationBlock>> blocks = new ArrayList<Collection<SimpleEquationBlock>>(); 
-		protected Collection<FVariable> fvars = new ArrayList<FVariable>();
-				
-		public WhenEquationBlock(FWhenEquation whenEquation) {
-			super(whenEquation);
-		
-			blocks.add(new ArrayList<SimpleEquationBlock>());
-			for (FAbstractEquation eqn : equation().getFAbstractEquations()) {
-				Collection<FVariable> fvs = new ArrayList<FVariable>();
-				Collection<Integer> assignedIndices = new ArrayList<Integer>();
-				int i = 0;
-				for (FIdUseExp e : eqn.FIdUseExpsInLHS()) {
-					fvs.add((FVariable)e.myFV());
-					assignedIndices.add(i++);
-				}
-				fvars.addAll(fvs);
-				blocks.iterator().next().add(EquationBlockFactory.createSimpleEquationBlock(eqn, fvs, assignedIndices, true));
-			}
-			
-			// TODO: handle else when clauses 
-		}
-		
-		public boolean isSolvable() {
-			boolean solvable = true;
-			for (Collection<SimpleEquationBlock> c: blocks) {
-				for (SimpleEquationBlock b: c) {
-					solvable = solvable && b.isSolvable();
-				}
-			}
-			return solvable;
-		}
-		
-		public FWhenEquation equation() {
-			return (FWhenEquation) super.equation();
-		}
-		
-		public Collection<FVariable> activeVariables() {
-			return new ArrayList<FVariable>(fvars);
-		}
-		
-		public void prettyPrint(PrintStream str) {
-			str.println("When equation block of " + activeVariables().size() + " variables:");
-			str.println("Unknown variables:");
-			prettyPrintActiveVariables(str);
-			str.println("Equations:");
-			prettyPrintEquation(str);
-		}
-		
 	}
 
 	/**

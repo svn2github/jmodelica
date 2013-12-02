@@ -2789,11 +2789,9 @@ aspect FlatExpressions {
     eq FlatRoot.getChild().inIfCondition()          = false;
 
     inh boolean FAbstractEquation.inWhen();
-    eq FClass.getChild().inWhen()                      = false;
-    eq InstNode.getChild().inWhen()                    = false;
-    eq FWhenEquation.getFAbstractEquation().inWhen()   = true;
-    eq FIfEquation.getFAbstractEquation().inWhen()     = isWhen() || inWhen();
-    eq FElseEquation.getFAbstractEquation().inWhen()   = isWhen() || inWhen();
+    eq FClass.getChild().inWhen()                          = false;
+    eq InstNode.getChild().inWhen()                        = false;
+    eq FIfWhenElseEquation.getFAbstractEquation().inWhen() = isWhen() || inWhen();
     
     inh boolean FStatement.inWhen();
     inh boolean FIfClause.inWhen();
