@@ -503,9 +503,10 @@ aspect CCodeGen {
 	eq FStringType.scalarType_C()   		= "char*"; // Tentative support.
 	eq FExternalObjectType.scalarType_C()	= "void*";
 	
-	syn String FType.arrayType_C() = "jmi_array_t*";
-	eq FRecordType.arrayType_C()   = nameArray_C() + "*";
-	eq FStringType.arrayType_C()   = null; // Make sure this throws an exception
+	syn String FType.arrayType_C() 			= "jmi_array_t*";
+	eq FRecordType.arrayType_C()   			= nameArray_C() + "*";
+	eq FExternalObjectType.arrayType_C()	= "jmi_extobj_array_t*";
+	eq FStringType.arrayType_C()   			= null; // Make sure this throws an exception
 
 	syn String FFunctionVariable.typeReturn_C() = isRecord() ? type_C() : (type_C() + "*");
 	eq FFunctionArray.typeReturn_C()            = type_C();
@@ -600,11 +601,12 @@ aspect CCodeGen {
 		}
 	}
 	
-	syn String FType.arrayMacroType_C() = "JMI_ARRAY";
-	eq FRecordType.arrayMacroType_C()   = "JMI_RECORD_ARRAY";
+	syn String FType.arrayMacroType_C()			= "JMI_ARRAY";
+	eq FRecordType.arrayMacroType_C()   		= "JMI_RECORD_ARRAY";
+	eq FExternalObjectType.arrayMacroType_C() 	= "JMI_EXTOBJ_ARRAY";
 
-	syn String FType.arrayExternMacroType_C() = arrayMacroType_C();
-	eq FIntegerType.arrayExternMacroType_C() = "JMI_INT_ARRAY";
+	syn String FType.arrayExternMacroType_C()	= arrayMacroType_C();
+	eq FIntegerType.arrayExternMacroType_C()	= "JMI_INT_ARRAY";
 
 	syn String FType.arrayDeclExtraArgs_C() = "";
 	eq FRecordType.arrayDeclExtraArgs_C()   = name_C() + ", " + nameArray_C() + ", ";

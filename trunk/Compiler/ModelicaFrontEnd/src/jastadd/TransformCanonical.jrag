@@ -3968,11 +3968,23 @@ aspect FunctionInlining {
 	syn boolean FFunctionDecl.isInlinable(FunctionInliner fi) =
 		fi.isInlinable(this);
 	
+	
+	private boolean FFunctionDecl.containsExtObjArrays(ArrayList<FFunctionVariable> variables) {
+		for (FFunctionVariable var : variables)
+			if (var.getType().isExternalObjectArray())
+				return true;
+		return false;
+	}
+	
+	private boolean FFunctionDecl.hasInlinableIO() {
+		return !containsExtObjArrays(myInputs()) && !containsExtObjArrays(myOutputs());
+	}
+	
 	/**
 	 * Check if we can inline this function.
 	 */
 	syn lazy boolean FFunctionDecl.isInlinable() =
-		inlineAnnotation.may() && isAllInlinable(getFAlgorithm().getFStatements());
+		inlineAnnotation.may() && isAllInlinable(getFAlgorithm().getFStatements()) && hasInlinableIO();
 	// TODO: Add warning if a function where user suggests inlining can't be inlined?
 
 	/**
@@ -3984,6 +3996,8 @@ aspect FunctionInlining {
 		if (inlineAnnotation.always())
 			return isInlinable();
 		if (myProtected().size() > 0)
+			return false;
+		if (!hasInlinableIO())
 			return false;
 		for (FStatement stmt : getFAlgorithm().getFStatements())
 			if (!stmt.isOkTrivialInline())

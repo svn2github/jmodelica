@@ -163,8 +163,40 @@ class TestExternalObject:
              os.remove('test_ext_object.marker')
         else:
             assert False, 'External object destructor not called.'
-
-     
+            
+class TestExternalObject2:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.dir = build_ext('ext_objects', 'ExtFunctionTests.mo')
+        cls.fpath = path(cls.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(TestExternalObject2.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtObjectDestructor(self):
+        """ 
+        Test compiling a model with external object functions in a static library.
+        """
+        cpath = 'ExtFunctionTests.ExternalObjectTests2'
+        fmu_name = compile_fmu(cpath, TestExternalObject2.fpath)
+        model = load_fmu(fmu_name)
+        model.simulate()
+        model.terminate()
+        if (os.path.exists('test_ext_object_array1.marker') and os.path.exists('test_ext_object_array2.marker')):
+             os.remove('test_ext_object_array1.marker')
+             os.remove('test_ext_object_array2.marker')
+        else:
+            assert False, 'External object destructor not called.'
+            
 class TestAssertEqu(SimulationTest):
     
     @classmethod

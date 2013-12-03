@@ -4,7 +4,7 @@
 void* constructor_string(const char* str) {
 	void* res = malloc(strlen(str) + 1);
 	strcpy(res, str);
-	printf(stderr, "Constructing external object for file '%s'.\n", str);
+	fprintf(stderr, "Constructing external object for file '%s'.\n", str);
 	return res;
 }
 

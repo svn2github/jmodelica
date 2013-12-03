@@ -998,22 +998,24 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isPrimitive() = false;
 	eq FPrimitiveType.isPrimitive() = true;
 	
-	syn boolean FType.isRealScalar()      = isReal() && isScalar();
-	syn boolean FType.isRealArray()       = isReal() && isArray();
-	syn boolean FType.isIntegerScalar()   = isInteger() && isScalar();
-	syn boolean FType.isIntegerArray()    = isInteger() && isArray();
-	syn boolean FType.isBooleanScalar()   = isBoolean() && isScalar();
-	syn boolean FType.isBooleanArray()    = isBoolean() && isArray();
-	syn boolean FType.isStringScalar()    = isString() && isScalar();
-	syn boolean FType.isStringArray()     = isString() && isArray();
-	syn boolean FType.isRecordScalar()    = isRecord() && isScalar();
-	syn boolean FType.isRecordArray()     = isRecord() && isArray();
-	syn boolean FType.isEnumScalar()      = isEnum() && isScalar();
-	syn boolean FType.isEnumArray()       = isEnum() && isArray();
-	syn boolean FType.isNumericScalar()   = isNumeric() && isScalar();
-	syn boolean FType.isNumericArray()    = isNumeric() && isArray();
-	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
-	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
+	syn boolean FType.isRealScalar()      		= isReal() && isScalar();
+	syn boolean FType.isRealArray()       		= isReal() && isArray();
+	syn boolean FType.isIntegerScalar()   		= isInteger() && isScalar();
+	syn boolean FType.isIntegerArray()    		= isInteger() && isArray();
+	syn boolean FType.isBooleanScalar()   		= isBoolean() && isScalar();
+	syn boolean FType.isBooleanArray()    		= isBoolean() && isArray();
+	syn boolean FType.isStringScalar()    		= isString() && isScalar();
+	syn boolean FType.isStringArray()     		= isString() && isArray();
+	syn boolean FType.isRecordScalar()    		= isRecord() && isScalar();
+	syn boolean FType.isRecordArray()     		= isRecord() && isArray();
+	syn boolean FType.isEnumScalar()      		= isEnum() && isScalar();
+	syn boolean FType.isEnumArray()       		= isEnum() && isArray();
+	syn boolean FType.isNumericScalar()   		= isNumeric() && isScalar();
+	syn boolean FType.isNumericArray()    		= isNumeric() && isArray();
+	syn boolean FType.isPrimitiveScalar() 		= isPrimitive() && isScalar();
+	syn boolean FType.isPrimitiveArray() 		= isPrimitive() && isArray();
+	syn boolean FType.isExternalObjectScalar()	= isExternalObject() && isScalar();
+	syn boolean FType.isExternalObjectArray()	= isExternalObject() && isArray();
 	
 	syn boolean FType.containsReal() = isReal();
 	eq FRecordType.containsReal() {

@@ -1107,20 +1107,20 @@ end FunctionInlining.RecordInline11;
 ")})));
     end RecordInline11;
 	
+
+	class O
+		extends ExternalObject;
+        function constructor
+        	output O o;
+        	external "C";
+        end constructor;
+        function destructor
+        	input O o;
+            external "C";
+        end destructor;
+	end O;
 	
-	model ExternalInline1
-		class O
-			extends ExternalObject;
-            function constructor
-                output O o;
-                external "C";
-            end constructor;
-            function destructor
-                input O o;
-                external "C";
-            end destructor;
-		end O;
-		
+	model ExternalInline1		
 		function f
 			input O o;
 			input Real y;
@@ -1146,7 +1146,7 @@ end FunctionInlining.RecordInline11;
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.ExternalInline1
- parameter FunctionInlining.ExternalInline1.O o1 = FunctionInlining.ExternalInline1.O.constructor() /* (unknown value) */;
+ parameter FunctionInlining.O o1 = FunctionInlining.O.constructor() /* (unknown value) */;
  Real x;
  Real temp_1;
 equation
@@ -1154,19 +1154,19 @@ equation
  temp_1 = time;
 
 public
- function FunctionInlining.ExternalInline1.O.destructor
+ function FunctionInlining.O.destructor
   input ExternalObject o;
  algorithm
   external \"C\" destructor(o);
   return;
- end FunctionInlining.ExternalInline1.O.destructor;
+ end FunctionInlining.O.destructor;
 
- function FunctionInlining.ExternalInline1.O.constructor
+ function FunctionInlining.O.constructor
   output ExternalObject o;
  algorithm
   external \"C\" o = constructor();
   return;
- end FunctionInlining.ExternalInline1.O.constructor;
+ end FunctionInlining.O.constructor;
 
  function FunctionInlining.ExternalInline1.f
   input ExternalObject o;
@@ -1177,11 +1177,79 @@ public
   return;
  end FunctionInlining.ExternalInline1.f;
 
- type FunctionInlining.ExternalInline1.O = ExternalObject;
+ type FunctionInlining.O = ExternalObject;
 end FunctionInlining.ExternalInline1;
 ")})));
 	end ExternalInline1;
 	
+	model ExternalInline2
+		function f
+			input O o;
+			input Real y;
+			output Real x;
+			external "C";
+		end f;
+		
+		function g
+			input Real y;
+			input O os[:];
+			output Real x;
+		algorithm
+			x := y + f(os[1], y);
+		end g;
+		
+		O myOs[2] = { O(), O() };
+		Real x = g(time, myOs);
+		
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ExternalInline2",
+			description="Test that function with array of external objects as input should not be inlined",
+			flatModel="
+fclass FunctionInlining.ExternalInline2
+ parameter FunctionInlining.O myOs[1] = FunctionInlining.O.constructor() /* (unknown value) */;
+ parameter FunctionInlining.O myOs[2] = FunctionInlining.O.constructor() /* (unknown value) */;
+ Real x;
+equation
+ x = FunctionInlining.ExternalInline2.g(time, {myOs[1], myOs[2]});
+
+public
+ function FunctionInlining.O.destructor
+  input ExternalObject o;
+ algorithm
+  external \"C\" destructor(o);
+  return;
+ end FunctionInlining.O.destructor;
+
+ function FunctionInlining.O.constructor
+  output ExternalObject o;
+ algorithm
+  external \"C\" o = constructor();
+  return;
+ end FunctionInlining.O.constructor;
+
+ function FunctionInlining.ExternalInline2.g
+  input Real y;
+  input ExternalObject[:] os;
+  output Real x;
+ algorithm
+  x := y + FunctionInlining.ExternalInline2.f(os[1], y);
+  return;
+ end FunctionInlining.ExternalInline2.g;
+
+ function FunctionInlining.ExternalInline2.f
+  input ExternalObject o;
+  input Real y;
+  output Real x;
+ algorithm
+  external \"C\" x = f(o, y);
+  return;
+ end FunctionInlining.ExternalInline2.f;
+
+ type FunctionInlining.O = ExternalObject;
+end FunctionInlining.ExternalInline2;
+")})));
+	end ExternalInline2;
 	
 	model UninlinableFunction1
 		function f1

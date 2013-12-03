@@ -11978,6 +11978,96 @@ equation
 ")})));
 end TestExtObject6;
 
+model TestExtObjectArray1
+    ExtObject myEOs[2] = { ExtObject(), ExtObject() };
+    Real z;
+
+ function get_y
+    input ExtObject eos[:];
+    output Real y;
+ algorithm
+    y := useMyEO(eos[1]);
+ end get_y;
+ 
+equation
+    z = get_y(myEOs);    
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="TestExtObjectArray1",
+			description="",
+			template="
+$C_variable_aliases$
+$C_DAE_initial_dependent_parameter_assignments$
+$C_functions$
+",
+			generatedCode="
+#define _z_2 ((*(jmi->z))[jmi->offs_real_pd+0])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define _myEOs_1_0 ((jmi->ext_objs)[0])
+#define _myEOs_2_1 ((jmi->ext_objs)[1])
+
+    JMI_EXTOBJ_ARRAY_STATIC(tmp_1, 2, 1)
+    JMI_EXTOBJ_ARRAY_STATIC_INIT_1(tmp_1, 2)
+    jmi_array_ref_1(tmp_1, 1) = _myEOs_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _myEOs_2_1;
+    _z_2 = (func_CCodeGenTests_TestExtObjectArray1_get_y_exp(tmp_1));
+    jmi->dep_extobjs_initialized = 1;
+
+void func_CCodeGenTests_ExtObject_destructor_def(void* eo_v) {
+    JMI_DYNAMIC_INIT()
+    close_myEO(eo_v);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CCodeGenTests_ExtObject_constructor_def(void** eo_o) {
+    JMI_DYNAMIC_INIT()
+    void* eo_v;
+    eo_v = init_myEO();
+    if (eo_o != NULL) *eo_o = eo_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void* func_CCodeGenTests_ExtObject_constructor_exp() {
+    void* eo_v;
+    func_CCodeGenTests_ExtObject_constructor_def(&eo_v);
+    return eo_v;
+}
+
+void func_CCodeGenTests_TestExtObjectArray1_get_y_def(jmi_extobj_array_t* eos_a, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = func_CCodeGenTests_useMyEO_exp(jmi_array_val_1(eos_a, 1));
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_TestExtObjectArray1_get_y_exp(jmi_extobj_array_t* eos_a) {
+    jmi_ad_var_t y_v;
+    func_CCodeGenTests_TestExtObjectArray1_get_y_def(eos_a, &y_v);
+    return y_v;
+}
+
+void func_CCodeGenTests_useMyEO_def(void* eo_v, jmi_ad_var_t* r_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t r_v;
+    r_v = useMyEO(eo_v);
+    if (r_o != NULL) *r_o = r_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_useMyEO_exp(void* eo_v) {
+    jmi_ad_var_t r_v;
+    func_CCodeGenTests_useMyEO_def(eo_v, &r_v);
+    return r_v;
+}
+
+")})));
+end TestExtObjectArray1;
 
 model TestRuntimeOptions1
     Real x = 1;

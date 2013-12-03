@@ -105,4 +105,19 @@ model ExternalObjectTests1
 	Real x = use_FOD(obj);
 end ExternalObjectTests1;
 
+model ExternalObjectTests2
+    FileOnDelete myEOs[2] = { FileOnDelete("test_ext_object_array1.marker"), FileOnDelete("test_ext_object_array2.marker")};
+    Real z;
+
+ function get_y
+    input FileOnDelete eos[:];
+    output Real y;
+ algorithm
+    y := use_FOD(eos[1]);
+ end get_y;
+ 
+equation
+    z = get_y(myEOs);  
+end ExternalObjectTests2;
+
 end ExtFunctionTests;
