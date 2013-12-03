@@ -998,24 +998,33 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
-//      noteUsedMemory();
 		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options.copyAllOptions(this.options);
 		for (String name : names) {
-			if (new File(name).isDirectory()) {
-				if (!sr.getProgram().getLibraryList().addLibrary(name))
-					log.error(String.format("The directory '%s' is not a Modelica library.", name));
+		    File f = new File(name);
+		    String name_tmp = name;
+		    if (f.isDirectory()) 
+		        name_tmp = LibNode.isStructuredLib(f) ? new File(f, LibNode.PACKAGE_FILE).getPath() : null;
+            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
+            if (!options.getBooleanOption("ignore_within") && sr_tmp != null && sr_tmp.isFileInLibrary()) {
+                String lib = sr_tmp.findOutermostLibraryDir();
+                String type = f.isDirectory() ? "Directory" : "File";
+                log.warning("%s '%s' is part of library at '%s', using library instead.", type, f.getPath(), lib);
+                name = lib;
+                f = new File(name);
+            }
+			if (f.isDirectory()) {
+				if (!sr.getProgram().getLibraryList().addLibrary(name)) 
+					log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
 			} else {
-				SourceRoot sr_tmp = parseModel(name);
-				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+				for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
 					sr.getProgram().addUnstructuredEntity(sd);
 			}
 		}
 		
 		hookFilesParsed(sr);
-//      noteUsedMemory();
 		ASTNode.endStep("parseModel()");
 		
 		return sr;
@@ -1856,7 +1865,43 @@ public class ModelicaCompiler {
 
 }
 
+
 aspect CompilationHelpers {
+
+
+syn boolean SourceRoot.isFileInLibrary() = findOutermostLibraryDir() != null;
+
+syn lazy String SourceRoot.findOutermostLibraryDir() {
+    if (getProgram().getNumUnstructuredEntity() != 1) 
+        return null;
+    else
+        return getProgram().getUnstructuredEntity(0).findOutermostLibraryDir();
+}
+
+syn String StoredDefinition.findOutermostLibraryDir() {
+    if (!hasWithin() || !getWithin().hasPackageName())
+        return null;
+    File me = new File(fileName());
+    if (me.getName().equals(LibNode.PACKAGE_FILE))
+        me = me.getParentFile();
+    File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
+    return (lib != null) ? lib.getPath() : null;
+}
+
+syn File Access.findOutermostLibraryDirForWithin(File f) = null;
+eq Dot.findOutermostLibraryDirForWithin(File f) {
+    for (int i = getNumAccess() - 1; i >= 0 && f != null; i--)
+        f = getAccess(i).findOutermostLibraryDirForWithin(f);
+    return f;
+}
+eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
+    f = f.getParentFile();
+    if (f.getName().equals(getID()) && LibNode.isStructuredLib(f))
+        return f;
+    else 
+        return null;
+}
+
 
 /**
  * Class for all templates.

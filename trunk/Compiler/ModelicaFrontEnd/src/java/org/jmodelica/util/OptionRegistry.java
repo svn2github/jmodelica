@@ -333,6 +333,11 @@ public class OptionRegistry {
 	         false,
 	         "Check for errors in inactive conditional components when compiling. When checking a class, " +
 	         "this is always done. Default is false."),
+	    IGNORE_WITHIN
+	        ("ignore_within",
+	         compiler,
+	         false,
+	         "Ignore within clauses, both when reading input files and when error-checking. Default is false."),
 		
 		// Runtime options
         /*
