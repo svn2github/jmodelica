@@ -111,18 +111,15 @@ aspect CCodeGen {
 		}
 	}
 
-	public void FPreExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
-		if (myFV().isReal() && !inFunction() && 
-				root().options.getBooleanOption("enable_variable_scaling")) {
-			str.print("(");
-			str.print(myFV().name_C());
-			str.print("*sf(");
-			str.print(myFV().valueReference());
-			str.print("))");
-		} else {
-			str.print(myFV().name_C());
-		}
-	}
+    public void FPreExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
+        FAbstractVariable fv = myFV();
+        if (fv.isUnknown()) {
+            fv = myNonPreFV();
+            if (!fv.isContinuous())
+                throw new UnsupportedOperationException();
+        }
+        str.print(fv.preName_C());
+    }
 	
 	public void FSampleExp.prettyPrint_C(Printer p, PrintStream str, String indent) {
 		str.print("jmi_sample(jmi,");

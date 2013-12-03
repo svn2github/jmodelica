@@ -6001,6 +6001,36 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end WhenEqu10;
 
+model WhenTest11
+    Real x = time;
+    discrete Real z;
+equation
+    when time >= 2 then
+        z = pre(x);
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="WhenTest11",
+			equation_sorting=true,
+			description="Code generation for use of pre on continuous variable",
+			generate_ode=true,
+			template="
+$C_ode_derivatives$
+",
+         generatedCode="
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _x_0 = _time;
+    _temp_1_2 = _sw(0);
+    _z_1 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, pre_x_0, pre_z_1);
+/********* Write back reinits *******/
+")})));
+end WhenTest11; 
+
 
 
 function dummyFunc
