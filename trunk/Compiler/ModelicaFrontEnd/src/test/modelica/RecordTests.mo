@@ -4584,4 +4584,34 @@ end RecordTests.RecordEval6;
 ")})));
 end RecordEval6;
 
+
+model RecordModification1
+  record R
+    Real x;
+  end R;
+
+  Real y = time;
+  R z(x = y + 2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordModification1",
+			description="Modification on record with continuous variability",
+			flatModel="
+fclass RecordTests.RecordModification1
+ Real y;
+ Real z.x;
+equation
+ y = time;
+ z.x = y + 2;
+
+public
+ record RecordTests.RecordModification1.R
+  Real x;
+ end RecordTests.RecordModification1.R;
+
+end RecordTests.RecordModification1;
+")})));
+end RecordModification1;
+
 end RecordTests;
