@@ -34,7 +34,7 @@ set(CMAKE_Fortran_SCHEME_WITH_UNDERSCORES "")
 
 include(CMakeDetermineFortranCompiler)
 
-if(CMAKE_Fortran_COMPILER)
+if(CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER_WITH_PATH)
   message(STATUS "Searching for a Fortran compiler... ${CMAKE_Fortran_COMPILER}")
   # Enable the language for next steps
   enable_language(Fortran)
@@ -170,7 +170,7 @@ if(CMAKE_Fortran_COMPILER)
   else(FTEST_OK)
     message(STATUS "Trying to compile and link a simple Fortran program... FAILED")
   endif(FTEST_OK)
-else(CMAKE_Fortran_COMPILER)
+else(CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER_WITH_PATH)
   message(STATUS "Searching for a Fortran compiler... FAILED")
-endif(CMAKE_Fortran_COMPILER)
+endif(CMAKE_Fortran_COMPILER  AND CMAKE_Fortran_COMPILER_WITH_PATH)
 
