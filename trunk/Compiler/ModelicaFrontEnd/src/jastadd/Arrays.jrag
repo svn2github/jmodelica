@@ -1793,6 +1793,18 @@ aspect Arrays {
 		return arr;
 	}
 	
+	eq FReinit.getArray() {
+        if (!getVar().isArray())
+            return super.getArray();
+        
+        Array arr = new Array(getVar().indices());
+        Array inner1 = getVar().getArray();
+        Array inner2 = getFExp().getArray();
+        for (Index i : arr.indices())
+            arr.set(i, new FReinit(inner1.get(i), inner2.get(i)));
+        return arr;
+	}
+	
 	/**
 	 * \brief Add a copy of this expression to arr at position i. 
 	 */

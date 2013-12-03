@@ -255,7 +255,6 @@ Semantic error at line 206, column 9:
 end ReinitErr11;
 
 
-// This requires vectorization of function call equations, see #3271
 model ReinitErr12
     Real x[2];
 equation
@@ -264,8 +263,22 @@ equation
         reinit(x, ones(2));
     end when;
     when time > 4 then
-        reinit(x[1], 1);
+        reinit(x[2], 1);
     end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ReinitErr12",
+			description="several reinit() of same cell of array",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
+Semantic error at line 0, column 0:
+  The variable x[2] is assigned in reinit() clauses in more than one when clause:
+    reinit(x[2], 1);
+    reinit(x[2], 1);
+
+")})));
 end ReinitErr12;
 
 
@@ -289,6 +302,27 @@ Semantic error at line 278, column 9:
   The right and left expression types of equation are not compatible
 ")})));
 end ReinitErr13;
+
+
+model ReinitErr14
+    Real x[2];
+equation
+    der(x) = ones(2);
+    when time > 2 then
+        reinit(x, zeros(3));
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ReinitErr14",
+			description="reinit() with wrong size expression",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
+Semantic error at line 299, column 9:
+  Arguments to reinit() must be of compatible types
+")})));
+end ReinitErr14;
 
 
 model ReinitTest1
@@ -322,7 +356,6 @@ end WhenTests.ReinitTest1;
 end ReinitTest1;
 
 
-// This requires vectorization of function call equations, see #3271
 model ReinitTest2
     Real x[2];
 equation
@@ -330,6 +363,30 @@ equation
     when time > 2 then
         reinit(x, ones(2));
     end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ReinitTest2",
+			description="reinit() with array args",
+			flatModel="
+fclass WhenTests.ReinitTest2
+ Real x[1];
+ Real x[2];
+ discrete Boolean temp_1;
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+ pre(temp_1) = false;
+equation
+ der(x[1]) = 1;
+ der(x[2]) = 1;
+ temp_1 = time > 2;
+ if temp_1 and not pre(temp_1) then
+  reinit(x[1], 1);
+  reinit(x[2], 1);
+ end if;
+end WhenTests.ReinitTest2;
+")})));
 end ReinitTest2;
 
 

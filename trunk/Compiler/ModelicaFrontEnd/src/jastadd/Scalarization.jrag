@@ -1846,11 +1846,22 @@ aspect Scalarization {
 	 */
 	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-		for (FFunctionCallLeft id : getLefts())
-			lefts.add(id.scalarize(indexMap));
-		eqns.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(indexMap)));
+	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
+	        for (FExp e : getCall().getArray().iterable()) {
+	            FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(indexMap);
+	            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+	            eqns.add(new FFunctionCallEquation(lefts, call));
+	        }
+	    } else {
+	        List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+	        for (FFunctionCallLeft id : getLefts())
+	            lefts.add(id.scalarize(indexMap));
+	        eqns.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(indexMap)));
+	    }
 	}
+	
+	syn boolean FAbstractFunctionCall.isVectorizedOperatorWithoutOutputs() = false;
+	eq FReinit.isVectorizedOperatorWithoutOutputs()                        = getVar().isArray();
 	
 	public void FForClauseE.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {

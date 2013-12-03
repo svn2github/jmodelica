@@ -303,8 +303,6 @@ aspect ComplianceCheck {
     
     public void FReinit.complianceCheck(ErrorCheckType checkType) {
         complianceOnlyFMU("The reinit() function-like operator is");
-        if (root().options.getBooleanOption("generate_ode") && getVar().isArray())
-            compliance("The reinit() function-like operator if currently not supported for arrays");
     }
 	
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
