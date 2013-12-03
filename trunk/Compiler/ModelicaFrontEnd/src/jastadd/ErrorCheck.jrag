@@ -1202,9 +1202,7 @@ aspect ScalarizationErrorCheck {
      * Check for variables with multiple reinits.
      */
     public void FClass.checkMultipleReinit() {
-        Map<FAbstractVariable,Set<FReinit>> reinitMap = new HashMap<FAbstractVariable,Set<FReinit>>();
-        for (FAbstractEquation e : getFAbstractEquations())
-            e.collectReinits(reinitMap);
+        Map<FAbstractVariable, Set<FReinit>> reinitMap = collectReinits();
         for (FAbstractVariable fv : reinitMap.keySet()) {
             if (!fv.isUnknown()) {
                 Set<FWhenEquation> whens = new HashSet<FWhenEquation>();
@@ -1233,14 +1231,23 @@ aspect ScalarizationErrorCheck {
     /**
      * Find all reinits and map them to the assigned variable.
      */
+    syn boolean FVariable.isReinit() = myFClass().collectReinits().keySet().contains(this);
+    
+    syn lazy Map<FAbstractVariable,Set<FReinit>> FClass.collectReinits() {
+        Map<FAbstractVariable,Set<FReinit>> reinitMap = new HashMap<FAbstractVariable,Set<FReinit>>();
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.collectReinits(reinitMap);
+        return reinitMap;
+    }
+    
     public void FAbstractEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
     
-    public void FIfEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
-    
-    public void FWhenEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
-        super.collectReinits(map);
-        if (hasElse())
-            getElse().collectReinits(map);
+    public void FIfWhenEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+    	if (isWhen()) {
+	        super.collectReinits(map);
+	        if (hasElse())
+	            getElse().collectReinits(map);
+    	}
     }
     
     public void FIfWhenElseEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {

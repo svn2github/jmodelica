@@ -655,7 +655,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			if (var.fixedAttributeSet()) {
 				isFixed = var.fixedAttributeExp().ceval().booleanValue();
 			} else {
-				isFixed = false; //The default value.
+				isFixed = false;
 			}
 
 			if (!isFixed) {
@@ -918,7 +918,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "modelExchange", "coSimulation", "unitDefinitions", "typeDefinitions", "defaultExperiment", "vendorAnnotations" };
+            return new String[] { "modelExchange",     "coSimulation",      "unitDefinitions", "typeDefinitions", 
+            		              "defaultExperiment", "vendorAnnotations", "modelVariables" };
         }
 		
 		public void generateAttributes(PrintStream genPrinter) {		
@@ -1133,6 +1134,271 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 					if (literal.hasFStringComment()) {
 						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
 					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Internal class used to generate a ModelVariables tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_modelVariables extends XMLTag {
+		
+		private FVariable variable;
+		private String startValue = null;
+		
+		public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+			super("modelVariables", "ModelVariables", myGenerator, fclass);
+		}
+		
+		public String[] children() { return new String[] {"variables"}; }
+		
+		public void generateChildren(PrintStream genPrinter) {
+			// get and sort all FVariables
+			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
+			VariableNameComparator comp = new VariableNameComparator();			
+			Collections.sort(variables, comp);
+
+			for (FVariable var : variables) {
+				if (!var.isPreVariable() && !var.isExternalObject()) {
+					variable = var;
+					super.generateChildren(genPrinter);
+				}
+			}
+		}
+		
+		public class XMLTag_variables extends XMLTag {
+
+			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
+				super("variables", "ScalarVariable", myGenerator, fclass);
+			}
+
+			public String[] children() {
+				return new String[] {"real", "integer", "boolean", "string", "enumeration"};
+			}
+			
+			public void generateAttributes(PrintStream genPrinter) {
+				
+				//Modify the negated bit of the valuReference if the variable is a negated alias.
+				int valueReference = variable.valueReference();
+				if (variable.isAlias() && variable.isNegated()) {
+					valueReference = valueReference ^ 0x08000000;
+				}
+				
+				generateAttribute("name",           variable.name(), genPrinter);
+				generateAttribute("valueReference", valueReference,  genPrinter);
+				if (variable.hasFStringComment()) {
+                    generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
+				}
+				
+				//Find the attribute for initial, is generated later.
+				String initialType;
+				FExp e_start = null;
+				Boolean isFixed;
+
+				if (variable.fixedAttributeSet()) {
+					isFixed = variable.fixedAttributeExp().ceval().booleanValue();
+				} else {
+					isFixed = false; //The default value.
+				}
+
+				if (!isFixed) {
+					if (variable.useBindingExpAsStart())
+						e_start = variable.getBindingExp();
+					else if (variable.startAttributeSet() && !variable.isDependentParameter())
+						e_start = variable.startAttributeExp();
+					else if (variable.isInput())
+						e_start = variable.createStartAttributeExp();
+					
+					if (e_start != null && !e_start.isConstantExp())
+						e_start = null;
+					
+					if (e_start != null) {
+						startValue = variable.type().convert(e_start.ceval()).xmlValue();
+						if (variable.fixedAttribute()) {
+							initialType = "exact";
+						} else {
+							initialType = "approx";
+						}
+					} else {
+						initialType = "calculated";
+					}
+				} else {			
+					startValue = variable.startAttributeCValue().toString();
+					initialType = "exact";
+				}
+				
+				
+				//Generate the causality attribute.
+				if (variable.isInput()) {
+					generateAttribute("causality", "input", genPrinter);
+				} else if (variable.isOutput()) {
+					generateAttribute("causality", "output", genPrinter);
+				} else if (variable.isParameter()) {
+					if (initialType.equals("calculated")) {
+						generateAttribute("causality", "calculatedParameter", genPrinter);
+					} else {
+						generateAttribute("causality", "parameter", genPrinter);
+					}
+				} else {
+					//default
+					generateAttribute("causality", "local", genPrinter);
+				}
+
+				//Generate the variability attribute. No tunable parameters as for now.
+				if (variable.isConstant()) {
+					generateAttribute("variability", "constant", genPrinter);
+				} else if (variable.isParameter()) {
+					generateAttribute("variability", "fixed", genPrinter);
+				} else if (variable.isDiscrete()) {
+					generateAttribute("variability", "discrete", genPrinter);
+				} else {
+					//default
+					generateAttribute("variability", "continuous", genPrinter);
+				}
+				
+				//Generate the initial attribute.
+				generateAttribute("initial", initialType, genPrinter);
+			}
+		}
+
+		public class XMLTag_real extends XMLTag {
+
+			public XMLTag_real(AbstractGenerator myGenerator, FClass fclass) {
+				super("real", "Real", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if (variable.isReal())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				FRealVariable realvariable = (FRealVariable)variable;
+
+				if (realvariable.quantityAttributeSet()) {
+					generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
+				}
+				if (realvariable.unitAttributeSet()) {
+					generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
+				}
+				if (realvariable.displayUnitAttributeSet()) {
+					generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+				}		
+				generateAttribute("relativeQuantity", "false", genPrinter);
+
+				if (realvariable.minAttributeSet()) {
+					generateAttribute("min", realvariable.minAttribute(), genPrinter);
+				}
+				if (realvariable.maxAttributeSet()) {
+					generateAttribute("max", realvariable.maxAttribute(), genPrinter);
+				}
+				if (realvariable.nominalAttributeSet()) {
+					generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
+				}
+				if (startValue != null) {
+					generateAttribute("start", startValue, genPrinter);
+				}
+				if (realvariable.isReinit()) {
+					generateAttribute("reinit", "true", genPrinter);
+				}
+			}
+		}
+
+		public class XMLTag_integer extends XMLTag {
+
+			public XMLTag_integer(AbstractGenerator myGenerator, FClass fclass) {
+				super("integer", "Integer", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isInteger())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				FIntegerVariable integervariable = (FIntegerVariable)variable;
+				
+				if(integervariable.quantityAttributeSet()) {
+					generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+				}					
+				if(integervariable.minAttributeSet()) {
+					generateAttribute("min", integervariable.minAttribute(), genPrinter);
+				}
+				if(integervariable.maxAttributeSet()) {
+					generateAttribute("max", integervariable.maxAttribute(), genPrinter);
+				}
+				if (startValue != null) {
+					generateAttribute("start", startValue, genPrinter);
+				}
+			}
+		}
+
+		public class XMLTag_boolean extends XMLTag {
+
+			public XMLTag_boolean(AbstractGenerator myGenerator, FClass fclass) {
+				super("boolean", "Boolean", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isBoolean())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				if (startValue != null) {
+					generateAttribute("start", startValue, genPrinter);
+				}
+			}
+		}
+
+		public class XMLTag_string extends XMLTag {
+
+			public XMLTag_string(AbstractGenerator myGenerator, FClass fclass) {
+				super("string", "String", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isString())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				if (startValue != null) {
+					generateAttribute("start", startValue, genPrinter);
+				}
+			}
+		}
+
+		public class XMLTag_enumeration extends XMLTag {
+
+			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
+				super("enumeration", "Enumeration", myGenerator, fclass);
+			}
+			
+			public void generate(PrintStream genPrinter) {
+				if(variable.isEnum())
+					super.generate(genPrinter);
+			}
+
+			public void generateAttributes(PrintStream genPrinter) {
+				FEnumVariable enumvariable = (FEnumVariable)variable;
+				//declaredType
+				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
+
+				if(enumvariable.quantityAttributeSet()) {
+					generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+				}					
+				if(enumvariable.minAttributeSet()) {
+					generateAttribute("min", enumvariable.minAttribute(), genPrinter);
+				}
+				if(enumvariable.maxAttributeSet()) {
+					generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
+				}
+				if (startValue != null) {
+					generateAttribute("start", startValue, genPrinter);
 				}
 			}
 		}
