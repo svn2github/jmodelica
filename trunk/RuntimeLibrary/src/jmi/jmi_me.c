@@ -884,8 +884,6 @@ static int get_option_index(char* option) {
 void jmi_update_runtime_options(jmi_t* jmi) {
     jmi_real_t* z = jmi_get_z(jmi);
     int index;
-    int index1;
-    int index2;
     jmi_options_t* op = &jmi->options;
     jmi_block_solver_options_t* bsop = &op->block_solver_options;
     index = get_option_index("_log_level");
@@ -897,32 +895,23 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->block_solver_options.enforce_bounds_flag = (int)z[index]; 
     
     index = get_option_index("_use_jacobian_equilibration");
-    index1 = get_option_index("_use_jacobian_scaling");
-    if(index || index1 ){
-        int fl, fl1;
-        fl = fl1 = bsop->use_jacobian_equilibration_flag;
-        if(index) fl = (int)z[index]; 
-        if(index1) fl1 = (int)z[index1];
-        
-        bsop->use_jacobian_equilibration_flag = fl || fl1; 
+    if(index ){
+        bsop->use_jacobian_equilibration_flag = (int)z[index]; 
     }
     
     index = get_option_index("_residual_equation_scaling");
-    index1 = get_option_index("_use_automatic_scaling");
-    index2 = get_option_index("_use_manual_equation_scaling");
-    if(index || index1 || index2) {
-        /* to support deprecation: non-default setting given precendence*/
-        if(index2 && (int)z[index2]) {
-            bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
-        }
-        else if(index1 && !(int)z[index1]){
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_residual_scaling_none:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_none;
-        }
-        else if(index && ((int)z[index] != jmi_residual_scaling_auto)) {
-            bsop->residual_equation_scaling_mode = (int)z[index];
-        }
-        else
+            break;
+        case jmi_residual_scaling_manual:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
+            break;
+        default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+        }
     }
     index = get_option_index("_nle_solver_max_iter");
     if(index)
@@ -932,9 +921,18 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         bsop->experimental_mode  = (int)z[index];
     
     index = get_option_index("_iteration_variable_scaling");
-    if(index)
-        bsop->iteration_variable_scaling_mode = (int)z[index];
-    
+    if(index) {
+        switch((int)z[index]) {
+        case jmi_iter_var_scaling_none:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_none;
+            break;
+        case jmi_iter_var_scaling_heuristics:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_heuristics;
+            break;
+        default:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+        }
+    }
     index = get_option_index("_rescale_each_step");
     if(index)
         bsop->rescale_each_step_flag = (int)z[index]; 

@@ -351,12 +351,6 @@ public class OptionRegistry {
             runtime,
             false,
             "Enforce min-max bounds on variables in the equation blocks."),
-        NLE_SOLVER_LOG_LEVEL
-            ("nle_solver_log_level",
-              runtime, 
-              0,
-              "Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity.",
-              0,3),
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
              runtime,

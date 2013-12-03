@@ -5586,7 +5586,6 @@ fclass TransformCanonicalTests.TestRuntimeOptions1
  parameter Integer _log_level = 3 /* 3 */;
  parameter Boolean _nle_solver_check_jac_cond = false /* false */;
  parameter Real _nle_solver_default_tol = 1.0E-10 /* 1.0E-10 */;
- parameter Integer _nle_solver_log_level = 0 /* 0 */;
  parameter Integer _nle_solver_max_iter = 100 /* 100 */;
  parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
  parameter Real _nle_solver_regularization_tolerance = -1.0 /* -1.0 */;
