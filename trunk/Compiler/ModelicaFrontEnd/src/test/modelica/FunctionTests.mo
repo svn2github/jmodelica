@@ -10646,29 +10646,44 @@ end FunctionTests.FunctionLike.EventRel.Smooth2;
 end Smooth2;
 
 model Pre1
-	parameter Integer x = 1;
+	discrete Integer x;
 	Real y = pre(x);
-	parameter Integer x2[2] = ones(2);
+	discrete Integer x2[2] = {x, x};
 	Real y2[2] = pre(x2);
 equation
+	when time > 1 then
+		x = 1;
+	end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="FunctionLike_EventRel_Pre1",
 			description="pre(): basic test",
+			eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Pre1
- parameter Integer x = 1 /* 1 */;
- parameter Real y;
- parameter Integer x2[1] = 1 /* 1 */;
- parameter Integer x2[2] = 1 /* 1 */;
- parameter Real y2[1];
- parameter Real y2[2];
-parameter equation
+ discrete Integer x;
+ Real y;
+ discrete Integer x2[1];
+ discrete Integer x2[2];
+ Real y2[1];
+ Real y2[2];
+ discrete Boolean temp_1;
+initial equation 
+ pre(x) = 0;
+ pre(x2[1]) = 0;
+ pre(x2[2]) = 0;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ x = if temp_1 and not pre(temp_1) then 1 else pre(x);
  y = pre(x);
+ x2[1] = x;
+ x2[2] = x;
  y2[1] = pre(x2[1]);
  y2[2] = pre(x2[2]);
 end FunctionTests.FunctionLike.EventRel.Pre1;
+			
 ")})));
 end Pre1;
 
@@ -10686,9 +10701,9 @@ model Pre2
 end Pre2;
 
 model Edge1
-	parameter Boolean x = true;
+	Boolean x = time > 1;
 	Boolean y = edge(x);
-	parameter Boolean x2[2] = {true,true};
+	Boolean x2[2] = {x, x};
 	Boolean y2[2] = edge(x2);
 equation
 
@@ -10696,19 +10711,31 @@ equation
 		TransformCanonicalTestCase(
 			name="FunctionLike_EventRel_Edge1",
 			description="edge(): basic test",
+			eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Edge1
- parameter Boolean x = true /* true */;
- parameter Boolean y;
- parameter Boolean x2[1] = true /* true */;
- parameter Boolean x2[2] = true /* true */;
- parameter Boolean y2[1];
- parameter Boolean y2[2];
-parameter equation
+ discrete Boolean x;
+ discrete Boolean y;
+ discrete Boolean x2[1];
+ discrete Boolean x2[2];
+ discrete Boolean y2[1];
+ discrete Boolean y2[2];
+initial equation 
+ pre(x) = false;
+ pre(y) = false;
+ pre(x2[1]) = false;
+ pre(x2[2]) = false;
+ pre(y2[1]) = false;
+ pre(y2[2]) = false;
+equation
+ x = time > 1;
  y = x and not pre(x);
+ x2[1] = x;
+ x2[2] = x;
  y2[1] = x2[1] and not pre(x2[1]);
  y2[2] = x2[2] and not pre(x2[2]);
 end FunctionTests.FunctionLike.EventRel.Edge1;
+			
 ")})));
 end Edge1;
 
@@ -10725,11 +10752,15 @@ model Edge2
 end Edge2;
 
 model Change1
-	parameter Real x = 1;
-	Boolean y = change(x);
-	parameter Real x2[2] = ones(2);
-	Boolean y2[2] = change(x2);
+	Real x = time;
+	Boolean y;
+	Real x2[2] = ones(2)*time;
+	Boolean y2[2];
 equation
+	when time > 1 then
+		y = change(x);
+		y2 = change(x2);
+	end when;
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
@@ -10737,17 +10768,28 @@ equation
 			description="change(): basic test",
 			flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Change1
- parameter Real x = 1 /* 1 */;
- parameter Boolean y;
- parameter Real x2[1] = 1 /* 1 */;
- parameter Real x2[2] = 1 /* 1 */;
- parameter Boolean y2[1];
- parameter Boolean y2[2];
-parameter equation
- y = x <> pre(x);
- y2[1] = x2[1] <> pre(x2[1]);
- y2[2] = x2[2] <> pre(x2[2]);
+ Real x;
+ discrete Boolean y;
+ Real x2[1];
+ Real x2[2];
+ discrete Boolean y2[1];
+ discrete Boolean y2[2];
+ discrete Boolean temp_1;
+initial equation 
+ pre(y) = false;
+ pre(y2[1]) = false;
+ pre(y2[2]) = false;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ y = if temp_1 and not pre(temp_1) then x <> pre(x) else pre(y);
+ y2[1] = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y2[1]);
+ y2[2] = if temp_1 and not pre(temp_1) then x2[2] <> pre(x2[2]) else pre(y2[2]);
+ x = time;
+ x2[1] = time;
+ x2[2] = time;
 end FunctionTests.FunctionLike.EventRel.Change1;
+			
 ")})));
 end Change1;
 

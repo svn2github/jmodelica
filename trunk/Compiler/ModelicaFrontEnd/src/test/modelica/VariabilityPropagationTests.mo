@@ -231,6 +231,34 @@ end VariabilityPropagationTests.ConstantFolding3;
 ")})));
 end ConstantFolding3;
 
+model ConstantFolding4
+	Real x;
+	parameter Real y;
+equation
+	when y > 1 then
+		x = 1;
+	end when;
+	
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ConstantFolding4",
+			description="Rewrite parameter pre expressions",
+			flatModel="
+fclass VariabilityPropagationTests.ConstantFolding4
+ discrete Real x;
+ parameter Real y;
+ parameter Boolean temp_1;
+initial equation 
+ pre(x) = 0.0;
+parameter equation
+ temp_1 = y > 1;
+equation
+ x = if temp_1 and not temp_1 then 1 else pre(x);
+end VariabilityPropagationTests.ConstantFolding4;
+			
+")})));
+end ConstantFolding4;
+
 model NoExp
 	Real x(start=.5);
 equation
@@ -407,10 +435,9 @@ end VariabilityPropagationTests.Der1;
 end Der1;
 
 model WhenEq1
-	parameter Real p1 = 4;
 	Real x1,x2;
 equation
-	when p1 > 3 then
+	when time > 3 then
 		x1 = x2 + 1;
 	end when;
 	x2 = 3;
@@ -420,15 +447,14 @@ equation
 			description="Tests that folding occurs, but not propagation, in when equations.",
 			flatModel="
 fclass VariabilityPropagationTests.WhenEq1
- parameter Real p1 = 4 /* 4 */;
  discrete Real x1;
  constant Real x2 = 3;
- parameter Boolean temp_1;
-initial equation 
+ discrete Boolean temp_1;
+initial equation
  pre(x1) = 0.0;
-parameter equation
- temp_1 = p1 > 3;
+ pre(temp_1) = false;
 equation
+ temp_1 = time > 3;
  x1 = if temp_1 and not pre(temp_1) then 4.0 else pre(x1);
 end VariabilityPropagationTests.WhenEq1;
 			

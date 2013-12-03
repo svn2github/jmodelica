@@ -512,6 +512,7 @@ aspect FlatVariability {
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();
+	eq FInitialExp.expVariability()             = fDiscrete();
 	
 	eq FFunctionCall.expVariability() = inputVariability().combineDown(type().funcOutputVariability());
 	syn FTypePrefixVariability FFunctionCall.inputVariability() = super.expVariability();

@@ -414,6 +414,13 @@ aspect ConstantFolding {
 		}
 		super.enableConstantFolding();
 	}
+	public void FPreExp.enableConstantFolding() {
+		if (variability().parameterOrLess()) {
+			constantFoldingEnabled = true;
+			is$Final = false;
+			return;
+		}
+	}
 
 	rewrite FAbstractExp {
 		when (constantFoldingEnabled && isConstantExp()) to FExp {
@@ -439,6 +446,12 @@ aspect ConstantFolding {
 			}
 			constantFoldingEnabled = false;
 			return this;
+		}
+	}
+	
+	rewrite FPreExp {
+		when (constantFoldingEnabled) to FExp {
+			return new FIdUseExp(getFIdUse().fullCopy());
 		}
 	}
 	

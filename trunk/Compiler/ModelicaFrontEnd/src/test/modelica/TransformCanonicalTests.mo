@@ -3001,20 +3001,20 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Real b_c = 1 /* 1 */;
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
- parameter Boolean atInit;
+ discrete Boolean atInit;
 initial equation 
  x_c = pre(x_c);
  pre(u_c) = 0.0;
  x_p = 1;
  pre(sampleTrigger) = false;
-parameter equation
- atInit = true and initial();
+ pre(atInit) = false;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
  sampleTrigger = sample(0, h);
  u_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
+ atInit = true and initial();
 end TransformCanonicalTests.WhenEqu11;
 			
 ")})));

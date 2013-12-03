@@ -2211,6 +2211,9 @@ aspect WhenClauses{
 	syn boolean FExp.shouldExtractGuard() = true;
 	eq FInitialExp.shouldExtractGuard() = false;
 	eq FIdUseExp.shouldExtractGuard() = false;
+	eq FPreExp.shouldExtractGuard() = true;
+	eq FDerExp.shouldExtractGuard() = true;
+	eq FDummyDerExp.shouldExtractGuard() = true;
 	
 	/**
 	 * Flag for whether or not this if clause/expression 
@@ -2359,7 +2362,10 @@ aspect WhenClauses{
 	}
 	
 	public FExp FIdUseExp.asGuard(ArrayList l, boolean equation) {
-		return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFIdUse().fullCopy())));
+		if (!shouldExtractGuard())
+			return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFIdUse().fullCopy())));
+		else
+			return super.asGuard(l, equation);
 	}
 }
 
