@@ -889,9 +889,9 @@ aspect CCodeGen {
     public void FIfEquation.prettyPrint_C(Printer p, PrintStream str, String indent) {
         genIfStart_C(p, str, indent);
         for (FAbstractEquation equation : getFAbstractEquations())
-            equation.prettyPrint_C(p, str, indent+ "  ");
+            p.print(equation, str, p.indent(indent));
         if (hasElse()) {
-            getElse().prettyPrint_C(p, str, indent);
+            p.print(getElse(), str,indent);
         }
         genIfEnd_C(p, str, indent);
     }
@@ -899,7 +899,7 @@ aspect CCodeGen {
     public void FElseEquation.prettyPrint_C(Printer p, PrintStream str, String indent) {
         genIfStart_C(p, str, indent);
         for (FAbstractEquation equation : getFAbstractEquations())
-            equation.prettyPrint_C(p, str, indent+ "  ");
+            p.print(equation, str, p.indent(indent));
     }
 
 	public void FAssignStmt.prettyPrint_C(Printer p, PrintStream str, String indent) {
@@ -2121,12 +2121,6 @@ aspect CCodeGen {
 			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap);
 	
 	@Override
-	public void SimpleEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		equation().genResidual_C(enumerator,indent,str, visited, null);
-	}
-	
-	@Override
 	public void EquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
 			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
 		for (SimpleEquationBlock block : blockResidualBlocks_C())
@@ -2140,20 +2134,12 @@ aspect CCodeGen {
 			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
 	}
 	
-	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
-	}
+    @Override
+    public void SimpleEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
+            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+        equation().genResidual_C(enumerator, indent, str, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
+    }
 	
-	public void UnsolvedAlgorithmBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
-	}
-	
-	public void UnsolvedIfEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		equation().genResidual_C(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
-	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {
 	}
@@ -2169,7 +2155,6 @@ aspect CCodeGen {
             equation().genBlock_C(indent, str, visited, activeVariables(), assignedIndices());
     }
     
-
     public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         genBlockResidualFunctionBeforeEqns_C(indent, str, inInitial, visited);
     }
@@ -2295,14 +2280,11 @@ aspect CCodeGen {
         equation().prettyPrint_C(ASTNode.printer_C, str, indent);
     }
     
-    public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
-    public boolean SolvedScalarEquationBlock.genBlockEnabled()       { return true; }
-    public boolean SolvedAlgorithmBlock.genBlockEnabled()            { return true; }
-    public boolean SolvedFunctionCallEquationBlock.genBlockEnabled() { return true; }
-    public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
-    
-    public Collection<Integer> SimpleEquationBlock.assignedIndices()   { return null; }
-    public Collection<Integer> SolvedIfEquationBlock.assignedIndices() { return assignedIndices; }
+     public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
+     public boolean SolvedScalarEquationBlock.genBlockEnabled()       { return true; }
+     public boolean SolvedAlgorithmBlock.genBlockEnabled()            { return true; }
+     public boolean SolvedFunctionCallEquationBlock.genBlockEnabled() { return true; }
+     public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
     
     /**
      * \brief Generate block code for equations
@@ -2361,7 +2343,7 @@ aspect CCodeGen {
         Iterator<FVariable> fvIt = forVariables.iterator();
         Iterator<Integer> fiIt = forIndices.iterator();
         int i = 0;
-        int n = fiIt.next();
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
         for (FAbstractEquation equation : getFAbstractEquations()) {
             Collection<Integer> fis   = new ArrayList<Integer>();
             Collection<FVariable> fvs = new ArrayList<FVariable>();
@@ -2370,7 +2352,7 @@ aspect CCodeGen {
                     fvs.add(fvIt.next());
                     n = fiIt.hasNext() ? fiIt.next() : -1;
             }
-            if (fis.size() > 0) {
+            if (forIndices.size() == 0 || fis.size() > 0) {
                 equation.genBlock_C(indent + "  ", str, visited, fvs, fis);
             }
             i += equation.numScalarEquations();
@@ -2419,28 +2401,24 @@ aspect CCodeGen {
     }
     
     public void FIfWhenElseEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
-        Enumerator enumCopy = enumerator.copy();
         genIfStart_C(printer_C, str, indent);
         Iterator<Integer> fiIt = forIndices.iterator();
         int i = 0;
-        int n = fiIt.next();
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
         for (FAbstractEquation equation : getFAbstractEquations()) {
             Set<Integer> fis = new HashSet<Integer>();
             while (n >= i && n < i + equation.numScalarEquations()) {
                 fis.add(n - i);
                 n = fiIt.hasNext() ? fiIt.next() : -1;
             }
-            if (fis.size() > 0) {
-                enumCopy = enumerator.copy();
-                equation.genResidual_C(enumCopy, indent + "  ", str, visited, fis);
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genResidual_C(enumerator, indent + "  ", str, visited, fis);
             }
             i += equation.numScalarEquations();
         }
-        while (enumerator.peek() < enumCopy.peek())
-            enumerator.next();
     }
     
-    public void FIfEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+    public void FIfWhenEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         Enumerator enumCopy = enumerator.copy();
         super.genResidual_C(enumerator, indent, str, visited, forIndices);
         if (hasElse())

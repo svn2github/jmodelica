@@ -1380,6 +1380,10 @@ aspect BLT{
 			prettyPrintActiveVariables(str, false);
 		}
 		
+        public Collection<Integer> assignedIndices() {
+            return null;
+        }
+		
 		/**
 		 * This method is call on blocks that are used in iterations. This
 		 * method should check the start values of its variable and verify
@@ -1601,6 +1605,10 @@ aspect BLT{
 			return new ArrayList<FVariable>(activeVars);
 		}
 		
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
+		
 		public boolean mergeBlock(AbstractEquationBlock block) {
 			if (!(block instanceof FunctionCallEquationBlock))
 				return false;
@@ -1685,7 +1693,11 @@ aspect BLT{
 		
 		public Collection<FVariable> activeVariables() {
 			return activeVars;
-		}	
+		}
+		
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
 				
 		public boolean isMixed() {
 			return false;
@@ -1757,6 +1769,10 @@ aspect BLT{
         public Collection<FVariable> activeVariables() {
             return activeVars;
         }   
+        
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
                 
         public boolean isMixed() {
             return false;

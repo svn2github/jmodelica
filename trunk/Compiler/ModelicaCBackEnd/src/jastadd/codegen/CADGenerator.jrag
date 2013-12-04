@@ -80,7 +80,7 @@ public class CADGenerator extends CGenerator {
 				}
 				Enumerator enumerator = new Enumerator();
 				for (FAbstractEquation e : fclass.equations()) {
-					e.genResidual_CAD(enumerator, INDENT, genPrinter, null, null);
+					e.genResidual_CAD(enumerator, INDENT, genPrinter, null, new HashSet<Integer>());
 				}
 			}
 		}

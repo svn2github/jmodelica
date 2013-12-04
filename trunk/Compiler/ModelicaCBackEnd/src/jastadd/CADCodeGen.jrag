@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 /*
  * This aspect is used to generate AD code used when generating jacobians
@@ -887,14 +888,14 @@ aspect CADCodeGen {
 	 *    FFunctionCallEquation so that it may be split into different subblocks.
 	 *    All residual equation for all variales should be genereated if null is specified.
 	 */
-	public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {}
+	public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {}
 		
 	/**
 	 * Generates AD-code for a single equation. 
 	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
 	 */
 	@Override
-	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if(!shouldBeDifferentiated()){
 			genResidual_C(enumerator, indent, str, null, null);
@@ -930,7 +931,7 @@ aspect CADCodeGen {
 	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
 	 */
 	@Override
-	public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+	public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
 			if (firstVisit) {
@@ -942,6 +943,43 @@ aspect CADCodeGen {
 		}
 	}
 	
+	
+	/**
+     * Generates AD-code for an if-equation.
+     * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
+     */
+    public void FIfWhenElseEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+        genIfStart_C(printer_CAD, str, indent);
+        if (forIndices == null)
+            forIndices = Collections.emptySet();
+        Iterator<Integer> fiIt = forIndices.iterator();
+        int i = 0;
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            ArrayList<Integer> fis = new ArrayList<Integer>();
+            while (n >= i && n < i + equation.numScalarEquations()) {
+                fis.add(n - i);
+                n = fiIt.hasNext() ? fiIt.next() : -1;
+            }
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genResidual_CAD(enumerator, indent + "  ", str, visited, fis);
+            }
+            i += equation.numScalarEquations();
+        }
+    }
+    
+    public void FIfWhenEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+        if (!isElse()) {
+            boolean firstVisit = visited == null ? true : visited.add(this);
+            if (firstVisit)
+                genTempVars_CAD(printer_CAD, str, indent);
+        }
+        Enumerator enumCopy = enumerator.copy();
+        super.genResidual_CAD(enumerator, indent, str, visited, forIndices);
+        if (hasElse())
+            getElse().genResidual_CAD(enumCopy, indent, str, visited, forIndices);
+        genIfEnd_C(printer_CAD, str, indent);
+    }
 	
 	
 	//Methods to handle blocks starts here
@@ -1068,20 +1106,6 @@ aspect CADCodeGen {
 	}
 	
 	/**
-	 * Solved scalar equation blocks should not have any residual block.
-	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator, java.lang.String, java.io.PrintStream, java.util.Set<FAbstractEquation>, java.util.Set<FVariable>).
-	 */
-	@Override
-	public void SolvedScalarEquationBlock.genBlockResidualFunction_CAD(boolean inInit, String indent, PrintStream str) {}
-
-	/**
-	 * Solved function call equation blocks should not have any residual block.
-	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator, java.lang.String, java.io.PrintStream, java.util.Set<FAbstractEquation>, java.util.Set<FVariable>).
-	 */
-	@Override
-	public void SolvedFunctionCallEquationBlock.genBlockResidualFunction_CAD(boolean inInit, String indent, PrintStream str) {}
-	
-	/**
 	 * Used to generate AD code for blocks, called mainly from model_ode_derivatives or model_ode_initialize_dir_der.
 	 * The default implementation prints code for calls to blocks that require iteration, e.g. EquationBlock,TornEquationBlock. 
 	 * Other blocks suchs as solvedFunctionCallEquationBlock:s override this method by generally printing standard AD-code. 
@@ -1100,21 +1124,13 @@ aspect CADCodeGen {
 		}
 	}
 	
-	/**
-	 * Generates AD code by calling genFuncCall for the corresponding functionCallEquation.
-	 * Note that called methods assumes that variables are already declared.
-	 * 
-	 * For argument descriptions @see FAbstractEquation#genBlock_CAD(int, boolean, String, PrintStream).
-	 */
-	@Override
-	public void SolvedFunctionCallEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {
-	 	if (!equation().getCall().isIgnored()) {
-			equation().genTempVars_CAD(ASTNode.printer_CAD, str, indent);
-			for (FFunctionCallLeft l : equation().getLefts()) 
-				l.genWriteBackAssignment_CAD(str, indent, null);
-		}
-	}
-	
+    /**
+     * @see FAbstractEquation#genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Set<FVariable>).
+     */
+    public void SimpleEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str){
+        equation().genBlock_CAD(indent, str, null, activeVariables(), assignedIndices());
+    }
+
 	/**
 	 * Generates AD code by calling prettyPrint_CAD for the corresponding equation.
 	 * Note that called methods assumes that variables are already declared.
@@ -1127,53 +1143,6 @@ aspect CADCodeGen {
 	}
 	
 	
-	/**
-	 * Generates AD code by calling genSolvedBlocks which prints AD code for solved blocks.
-	 * Note that called methods assumes that variables are already declared.
-	 * 
-	 * For argument descriptions @see FAbstractEquation#genBlock_CAD(int, boolean, String, PrintStream).
-	 */
-	@Override
-	public void SolvedScalarEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {	
-		equation().genSolvedBlock_CAD(fv,indent,str);
-	}
-	
-	
-	/**
-	 * Generates AD code for this equation and a variable in it. Typically called from within 
-	 * a solved block when printing AD code. Empty standard implementation and other blocks override. 
-	 * 
-	 * @param FVariable v, the variable that is assigned value
-	 * @param String indent,  used to get a consistently formated c-code
-	 * @param PrintStream str, the c-code is written to this stream
-	 */
-	public void FAbstractEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {}
-
-	/**
-	 * Generates AD code for this equation and a variable in it. If the variable isn't
-	 * of type real then the non AD code is written instead (since it lacks directional derivative)
-	 * Note that called methods assumes that variables are already declared.
-	 * 
-	 * For argument descriptions @see FAbstractEquation#genSolvedBlock_CAD(FVariable, java.lang.String, java.io.PrintStream).
-	 */
-	@Override
-	public void FEquation.genSolvedBlock_CAD(FVariable v, String indent, PrintStream str) {
-		FExp solution = solution(v.name());
-		if(v.shouldBeDifferentiated()){
-			solution.genTempVars_CAD(printer_CAD, str, indent);
-			str.print(indent + v.name_C() + " = ");
-			solution.genVar_CAD(printer_CAD, str, indent);
-			str.print(";\n");
-			str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] = ");
-			solution.genDer_CAD(printer_CAD, str, indent);
-			str.print(";\n");
-		} else {
-			solution.genTempVars_CAD(printer_CAD, str, indent);
-			str.format("%s%s = ", indent, v.name_C());
-			solution.genVar_CAD(printer_CAD, str, indent);
-			str.print(";\n");
-		}
-	}
 	
 	/**
 	 * Used to generate seeds w.r.t. the unsolved variables in a TornEquationBlock. 
@@ -1182,32 +1151,32 @@ aspect CADCodeGen {
 	 * @param boolean Indicates wether a initial block is generated
 	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
 	 */
-	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {}
+	public abstract void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited);
 	
-	/**
-	 * @see AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
-	 */
-	@Override
-	public void SolvedFunctionCallEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		equation().genAssignment_CAD(indent, str, visited, new HashSet<FVariable>(activeVars));
-	}
-	
-	/**
-	 * @see AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
-	 */
-	@Override
-	public void SolvedScalarEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		equation().genSolvedBlock_CAD(fv,indent,str);
-	}
-	
-	/**
-	 * @see AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
-	 */
-	@Override
-	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		for (AbstractEquationBlock aeb : solvedBlocks)
-			aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
-	}
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    public void EquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        for (SimpleEquationBlock block : blockResidualBlocks_C())
+            block.genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
+    }
+    
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    @Override
+    public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        for (AbstractEquationBlock aeb : solvedBlocks)
+            aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
+    }
+    
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        if (genBlockEnabled())
+            equation().genBlock_CAD(indent, str, visited, activeVariables(), assignedIndices());
+    }
 	
 	/**
 	 * Sub method for generating seeds w.r.t the unsolved variables.
@@ -1240,11 +1209,15 @@ aspect CADCodeGen {
 	 * @param PrintStream output stream
 	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
 	 */
-	public void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		for (FAbstractEquation e : blockResidualEquations_C()) {
-			e.genResidual_CAD(enumerator, indent, str, visited, null);
-		}
-	}
+	public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited);
+	
+    /**
+     * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
+     */
+    public void EquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
+        for (SimpleEquationBlock block : blockResidualBlocks_C())
+            block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
+    }
 	
 	/**
 	 * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
@@ -1255,32 +1228,56 @@ aspect CADCodeGen {
 			block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
 	}
 	
-	/**
-	 * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
-	 */
-	@Override
-	public void UnsolvedFunctionCallEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		equation().genResidual_CAD(enumerator,indent,str, visited, new HashSet<Integer>(assignedIndices));
-	}
-	
-	
-	/**
-	 * Produces the assignment for a solved function call equation block.
-	 * Default implementation is empty.
-	 * 
+    /**
+     * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
+     */
+    public void SimpleEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
+        equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices());
+    }
+    
+    /**
+     * Generates AD code for this equation and a variable in it. Typically called from within 
+     * a solved block when printing AD code. Empty standard implementation and other blocks override. 
+     * 
 	 * @param String indentation that should be used
 	 * @param PrintStream output stream
 	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
-	 * @param Set<FAbstractEquation> forVariables, a set that contains the variables that an
-	 *     assignment should be generated for. Can be null!
+	 * @param Collection<FAbstractEquation> forVariables, variables to generate assignments for.
+	 * @param Collection<Integer> forIndices, indices to generate assignments for.
 	 */
-	public void FAbstractEquation.genAssignment_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {}
+	public void FAbstractEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+	        Collection<FVariable> forVariables, Collection<Integer> forIndices) {}
+	
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    @Override
+    public void FEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        FVariable v = forVariables.iterator().next();
+        FExp solution = solution(v.name());
+        if(v.shouldBeDifferentiated()){
+            solution.genTempVars_CAD(printer_CAD, str, indent);
+            str.print(indent + v.name_C() + " = ");
+            solution.genVar_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+            str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] = ");
+            solution.genDer_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+        } else {
+            solution.genTempVars_CAD(printer_CAD, str, indent);
+            str.format("%s%s = ", indent, v.name_C());
+            solution.genVar_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+        }
+    }
 	
 	/**
-	 * @see FAbstractEquation.genAssignment_CAD(String, PrintStream, Set<FAbstractEquation>, Set<FVariable>).
+	 * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
 	 */
 	@Override
-	public void FFunctionCallEquation.genAssignment_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited, Set<FVariable> forVariables) {
+	public void FFunctionCallEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+	        Collection<FVariable> forVariables, Collection<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
 			if (firstVisit)
@@ -1288,7 +1285,7 @@ aspect CADCodeGen {
 			int i = 0;
 			for (FFunctionCallLeft l : getLefts()) {
 				l.setEquationIndex(i++);
-				l.genWriteBackAssignment_CAD(str, indent, forVariables);
+				l.genWriteBackAssignment_CAD(str, indent, new HashSet<FVariable>(forVariables));
 			}
 		}
 	}
@@ -1300,11 +1297,52 @@ aspect CADCodeGen {
     public void FFunctionCallLeft.setEquationIndex(int i) {
         equationIndex = i;
     }
+    
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    public void FIfWhenElseEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        genIfStart_C(printer_CAD, str, indent);
+        Iterator<FVariable> fvIt = forVariables.iterator();
+        Iterator<Integer> fiIt = forIndices.iterator();
+        int i = 0;
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            ArrayList<Integer> fis   = new ArrayList<Integer>();
+            ArrayList<FVariable> fvs = new ArrayList<FVariable>();
+            while (n >= i && n < i + equation.numScalarEquations()) {
+                    fis.add(n - i);
+                    fvs.add(fvIt.next());
+                    n = fiIt.hasNext() ? fiIt.next() : -1;
+            }
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genBlock_CAD(indent + "  ", str, visited, fvs, fis);
+            }
+            i += equation.numScalarEquations();
+        }
+    }
+    
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    public void FIfWhenEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        if (!isElse()) {
+            boolean firstVisit = visited == null ? true : visited.add(this);
+            if (firstVisit)
+                genTempVars_CAD(printer_CAD, str, indent);
+        }
+        super.genBlock_CAD(indent, str, visited, forVariables, forIndices);
+        if (hasElse())
+            getElse().genBlock_CAD(indent, str, visited, forVariables, forIndices);
+        genIfEnd_C(printer_CAD, str, indent);
+    }
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FFunctionCallLeft.genWriteBackAssignment_CAD(PrintStream str, String indent, Set<FVariable> forVariables){
+	public void FFunctionCallLeft.genWriteBackAssignment_CAD(PrintStream str, String indent, Collection<FVariable> forVariables){
 		if (hasFExp()) {
 			getFExp().type().genWriteBackAssignment_var_CAD(str, indent, varName_CAD(), getFExp(), forVariables);
 			getFExp().type().genWriteBackAssignment_der_CAD(str, indent, derName_CAD(), getFExp(), forVariables);
@@ -1314,7 +1352,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FType.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -1331,7 +1369,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FType.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -1348,21 +1386,21 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		exp.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
 	}
 		
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
+	public void FExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FIdUseExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
+	public void FIdUseExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
 		if (forVariables != null && !forVariables.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
 		str.print(indent);
@@ -1374,22 +1412,22 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		exp.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
 	}
 		
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
+	public void FExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FIdUseExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Set<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
+	public void FIdUseExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()) || !shouldBeDifferentiated())
 			return; // This variable is not in the set of variables to generate code for.
 		str.print(indent);
 		str.print(derName_CAD());
@@ -1401,7 +1439,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FRecordType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FRecordType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -1412,7 +1450,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FRecordType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Set<FVariable> forVariables) {
+	public void FRecordType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -1600,6 +1638,13 @@ aspect CADCodeGen {
 			node.genTempVars_CAD(p, str, indent);
 		}
 	}
+	
+    public void FIfWhenElseEquation.genTempVars_CAD(Printer p, PrintStream str, String indent) {}
+    public void FIfWhenEquation.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+        super.genTempVars_CAD(p, str, indent);
+        if (hasElse())
+            getElse().genTempVars_CAD(p, str, indent);
+    }
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
@@ -2109,13 +2154,15 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		if (hasFExp()) {
 			if (getFExp().type().shouldBeDifferentiated()) {
-				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator.copy(), forIndices, indexCounter.copy());
-				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
+			    Enumerator enumeratorCopy = enumerator.copy();
+			    Enumerator indexCounterCopy = indexCounter.copy();
+				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
+				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumeratorCopy, forIndices, indexCounterCopy);
 			} else {
-				getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
+				getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, new LinkedHashSet<Integer>(forIndices), indexCounter);
 			}
 		}
 	}
@@ -2131,7 +2178,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -2156,7 +2203,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -2178,7 +2225,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		exp.genWriteBack_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
 	}
 	
@@ -2190,7 +2237,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FRecordType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FRecordType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -2207,7 +2254,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FRecordType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FRecordType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -2223,7 +2270,7 @@ aspect CADCodeGen {
 	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		exp.genWriteBack_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
 	}
 	
@@ -2236,12 +2283,12 @@ aspect CADCodeGen {
 	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
-	public void FIdUseExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FIdUseExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
-		if (forIndices == null || forIndices.contains(index)) {
+		if (forIndices.size() == 0 || forIndices.contains(index)) {
 			// This variable is in the set of variables to generate code for.
 			str.print(indent);
 			str.print("(*res)[");
@@ -2262,12 +2309,12 @@ aspect CADCodeGen {
 	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
 	 * @param int index, determines which index in the reisdual 
 	 */
-	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
-	public void FIdUseExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+	public void FIdUseExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
-		if (forIndices == null || forIndices.contains(index)) {
+		if ((forIndices.size() == 0 || forIndices.contains(index)) && shouldBeDifferentiated()) {
 			str.print(indent);
 			str.print("(*dF)[");
 			str.print(enumerator.next());

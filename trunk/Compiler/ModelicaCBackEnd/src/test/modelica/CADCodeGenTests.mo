@@ -4165,9 +4165,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         func_CADCodeGenTests_CADTornRecord2_F_der_AD(_x_0, _y_1, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
         (*res)[0] = tmp_var_0 - (_c1_2);
-        (*dF)[0] = tmp_der_0 - (AD_WRAP_LITERAL(0));
         (*res)[1] = tmp_var_1 - (_c1_2);
-        (*dF)[1] = tmp_der_1 - (AD_WRAP_LITERAL(0));
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
         (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
     }
@@ -4781,5 +4779,720 @@ func_CADCodeGenTests_TestExtObject1_f_der_def(eo_v, x_var_v, x_der_v,  &r_der_v)
 ")})));
 end TestExtObject1;
 
+
+model WhenEqu8
+    
+function f
+    input Real x;
+    input Real y;
+    output Real a;
+    output Real b;
+ algorithm
+     a := y;
+     b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+    a = time;
+    b = time*2;
+  when {initial(), time > 1} then
+    (x,y) = f(a,b);
+  end when;
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="WhenTest8",
+            description="Test code generation unsolved when equations",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            generate_dae_jacobian=true,
+            inline_functions="none",
+            template="
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t v_3;
+jmi_ad_var_t tmp_var_0;
+jmi_ad_var_t tmp_der_0;
+jmi_ad_var_t tmp_var_1;
+jmi_ad_var_t tmp_der_1;
+    (*res)[0] = _time - (_a_2);
+    (*dF)[0] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+    v_0 = _time;
+    d_0 = (*dz)[jmi->offs_t];
+    (*res)[1] = v_0 * 2 - (_b_3);
+    (*dF)[1] = d_0 * 2 + v_0 * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    (*res)[2] = _sw(0) - (_temp_1_4);
+    if (LOG_EXP_OR(v_1, v_2)) {
+      func_CADCodeGenTests_WhenEqu8_f_der_AD(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      (*res)[3] = tmp_var_0 - (_x_0);
+      (*res)[4] = tmp_var_1 - (_y_1);
+    } else {
+      (*res)[3] = pre_x_0 - (_x_0);
+      (*res)[4] = pre_y_1 - (_y_1);
+    }
+
+			
+")})));
+end WhenEqu8;
+
+model WhenEqu9
+    
+function f
+    input Real x;
+    input Real y;
+    output Real a;
+    output Real b;
+ algorithm
+     a := y;
+     b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+  a = time;
+  b = time*x;
+  when time > 2 then
+    (x,y) = f(a,b);
+  end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="WhenEqu9",
+            description="Test code generation unsolved when equations",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_der_0;
+    jmi_ad_var_t tmp_var_1;
+    jmi_ad_var_t tmp_der_1;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_3;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[0];
+        _b_3 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+      func_CADCodeGenTests_WhenEqu9_f_der_AD(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      _y_1 = tmp_var_1;
+    } else {
+      _y_1 = pre_y_1;
+    }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+      _x_0 = tmp_var_0;
+    } else {
+      _x_0 = pre_x_0;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        v_1 = _time;
+        d_1 = (*dz)[jmi->offs_t];
+        (*res)[0] = v_1 * _x_0 - (_b_3);
+        (*dF)[0] = d_1 * _x_0 + v_1 * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+
+			
+")})));
+end WhenEqu9;
+
+model WhenEqu10
+    
+function f
+    input Real x;
+    input Real y;
+    output Real a;
+    output Real b;
+ algorithm
+     a := y;
+     b := x;
+end f;
+
+ discrete Real x,y;
+ Real a,b;
+equation
+  when time > 2 then
+    (a,b) = f(x,y);
+  end when;
+  when {initial(), time > 2} then
+    (x,y) = f(a,b);
+  end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="WhenEqu10",
+            description="Test code generation unsolved when equations",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_der_0;
+    jmi_ad_var_t tmp_var_1;
+    jmi_ad_var_t tmp_der_1;
+    jmi_ad_var_t tmp_var_2;
+    jmi_ad_var_t tmp_der_2;
+    jmi_ad_var_t tmp_var_3;
+    jmi_ad_var_t tmp_der_3;
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t v_3;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        x[1] = _x_0;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[0];
+        _y_1 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[1];
+        _x_0 = x[1];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[1];
+    } else {
+        return -1;
+    }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+      func_CADCodeGenTests_WhenEqu10_f_der_AD(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      _b_3 = tmp_var_1;
+    } else {
+      _b_3 = pre_b_3;
+    }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+      _a_2 = tmp_var_0;
+    } else {
+      _a_2 = pre_a_2;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        if (LOG_EXP_OR(v_1, v_2)) {
+          func_CADCodeGenTests_WhenEqu10_f_der_AD(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+          (*res)[0] = tmp_var_3 - (_y_1);
+        } else {
+          (*res)[0] = pre_y_1 - (_y_1);
+        }
+        if (LOG_EXP_OR(v_1, v_2)) {
+          (*res)[1] = tmp_var_2 - (_x_0);
+        } else {
+          (*res)[1] = pre_x_0 - (_x_0);
+        }
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+
+			
+")})));
+end WhenEqu10;
+
+model WhenTest11
+    Real x = time;
+    discrete Real z;
+equation
+    when time >= 2 then
+        z = pre(x);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="WhenTest11",
+            equation_sorting=true,
+            description="Code generation for use of pre on continuous variable",
+            generate_ode=true,
+            generate_dae_jacobian=true,
+            template="
+$C_DAE_equation_directional_derivative$
+",
+         generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    (*res)[0] = _sw(0) - (_temp_1_2);
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, pre_x_0, pre_z_1) - (_z_1);
+    (*res)[2] = _time - (_x_0);
+    (*dF)[2] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+
+	
+")})));
+end WhenTest11; 
+
+
+
+function dummyFunc
+    input Real i;
+    output Real x = i;
+    output Real y = i;
+    algorithm
+end dummyFunc;
+
+model IfEqu1
+
+    Real x,y;
+equation
+    if time >= 2 then
+        (x,y) = dummyFunc(time*time*time/2);
+    elseif time >= 1 then
+        (x,y) = dummyFunc(time*time);
+    else
+        (x,y) = dummyFunc(time);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu1",
+            description="Code generation for if equation",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            template="
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t d_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t d_4;
+    jmi_ad_var_t v_5;
+    jmi_ad_var_t d_5;
+    jmi_ad_var_t v_6;
+    jmi_ad_var_t d_6;
+    jmi_ad_var_t v_7;
+    jmi_ad_var_t d_7;
+    jmi_ad_var_t v_8;
+    jmi_ad_var_t d_8;
+    jmi_ad_var_t v_9;
+    jmi_ad_var_t d_9;
+jmi_ad_var_t tmp_var_0;
+jmi_ad_var_t tmp_der_0;
+jmi_ad_var_t tmp_var_1;
+jmi_ad_var_t tmp_der_1;
+jmi_ad_var_t tmp_var_2;
+jmi_ad_var_t tmp_der_2;
+jmi_ad_var_t tmp_var_3;
+jmi_ad_var_t tmp_der_3;
+jmi_ad_var_t tmp_var_4;
+jmi_ad_var_t tmp_der_4;
+jmi_ad_var_t tmp_var_5;
+jmi_ad_var_t tmp_der_5;
+    if (_sw(0)) {
+      v_3 = _time;
+      d_3 = (*dz)[jmi->offs_t];
+      v_4 = _time;
+      d_4 = (*dz)[jmi->offs_t];
+      v_2 = v_3 * v_4;
+      d_2 = d_3 * v_4 + v_3 * d_4;
+      v_5 = _time;
+      d_5 = (*dz)[jmi->offs_t];
+      v_1 = v_2 * v_5;
+      d_1 = d_2 * v_5 + v_2 * d_5;
+      v_0 = jmi_divide_equation(jmi, v_1,AD_WRAP_LITERAL(2),\"time * time * time / 2\");
+      d_0 = (d_1 * AD_WRAP_LITERAL(2) - v_1 * AD_WRAP_LITERAL(0)) / (AD_WRAP_LITERAL(2) * AD_WRAP_LITERAL(2));
+      func_CADCodeGenTests_dummyFunc_der_AD(v_0, d_0, &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      (*res)[0] = tmp_var_0 - (_x_0);
+      (*dF)[0] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+      (*res)[1] = tmp_var_1 - (_y_1);
+      (*dF)[1] = tmp_der_1 - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+    } else {
+      if (_sw(1)) {
+        v_7 = _time;
+        d_7 = (*dz)[jmi->offs_t];
+        v_8 = _time;
+        d_8 = (*dz)[jmi->offs_t];
+        v_6 = v_7 * v_8;
+        d_6 = d_7 * v_8 + v_7 * d_8;
+        func_CADCodeGenTests_dummyFunc_der_AD(v_6, d_6, &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+        (*res)[0] = tmp_var_2 - (_x_0);
+        (*dF)[0] = tmp_der_2 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*res)[1] = tmp_var_3 - (_y_1);
+        (*dF)[1] = tmp_der_3 - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+      } else {
+        v_9 = _time;
+        d_9 = (*dz)[jmi->offs_t];
+        func_CADCodeGenTests_dummyFunc_der_AD(v_9, d_9, &tmp_var_4, &tmp_var_5, &tmp_der_4, &tmp_der_5);
+        (*res)[0] = tmp_var_4 - (_x_0);
+        (*dF)[0] = tmp_der_4 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*res)[1] = tmp_var_5 - (_y_1);
+        (*dF)[1] = tmp_der_5 - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+      }
+    }
+
+			
+")})));
+end IfEqu1;
+
+model IfEqu2
+    Real x,y,t;
+equation
+    t = time;
+    if time >= 1 then
+        (x,t) = dummyFunc(y);
+    else
+        (x,t) = dummyFunc(y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu2",
+            description="Code generation for if equation, numerically solved",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_der_0;
+    jmi_ad_var_t tmp_var_1;
+    jmi_ad_var_t tmp_der_1;
+    jmi_ad_var_t tmp_var_2;
+    jmi_ad_var_t tmp_der_2;
+    jmi_ad_var_t tmp_var_3;
+    jmi_ad_var_t tmp_der_3;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[0];
+        _y_1 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    if (_sw(0)) {
+      func_CADCodeGenTests_dummyFunc_der_AD(_y_1, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      _x_0 = tmp_var_0;
+      (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = tmp_der_0;
+    } else {
+      func_CADCodeGenTests_dummyFunc_der_AD(_y_1, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+      _x_0 = tmp_var_2;
+      (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = tmp_der_2;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        if (_sw(0)) {
+          (*res)[0] = tmp_var_1 - (_t_2);
+          (*dF)[0] = tmp_der_1 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+        } else {
+          (*res)[0] = tmp_var_3 - (_t_2);
+          (*dF)[0] = tmp_der_3 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+        }
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+
+			
+")})));
+end IfEqu2;
+
+model IfEqu3
+    Real x,y,a,b;
+equation
+    if time >= 1 then
+        (x,y) = dummyFunc(a);
+    else
+        (x,y) = dummyFunc(b);
+    end if;
+    if time >= 1 then
+        (a,b) = dummyFunc(x);
+    else
+        (a,b) = dummyFunc(y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu3",
+            description="Code generation for if equation, in block",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    jmi_ad_var_t tmp_var_0;
+    jmi_ad_var_t tmp_der_0;
+    jmi_ad_var_t tmp_var_1;
+    jmi_ad_var_t tmp_der_1;
+    jmi_ad_var_t tmp_var_2;
+    jmi_ad_var_t tmp_der_2;
+    jmi_ad_var_t tmp_var_3;
+    jmi_ad_var_t tmp_der_3;
+    jmi_ad_var_t tmp_var_4;
+    jmi_ad_var_t tmp_der_4;
+    jmi_ad_var_t tmp_var_5;
+    jmi_ad_var_t tmp_der_5;
+    jmi_ad_var_t tmp_var_6;
+    jmi_ad_var_t tmp_der_6;
+    jmi_ad_var_t tmp_var_7;
+    jmi_ad_var_t tmp_der_7;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _b_3;
+        x[1] = _a_2;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = dx[0];
+        _b_3 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[1];
+        _a_2 = x[1];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[1];
+    } else {
+        return -1;
+    }
+    if (_sw(0)) {
+      func_CADCodeGenTests_dummyFunc_der_AD(_a_2, (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+      _y_1 = tmp_var_1;
+      (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = tmp_der_1;
+    } else {
+      func_CADCodeGenTests_dummyFunc_der_AD(_b_3, (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx], &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+      _y_1 = tmp_var_3;
+      (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = tmp_der_3;
+    }
+    if (_sw(0)) {
+      _x_0 = tmp_var_0;
+      (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = tmp_der_0;
+    } else {
+      _x_0 = tmp_var_2;
+      (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = tmp_der_2;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        if (_sw(1)) {
+          func_CADCodeGenTests_dummyFunc_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx], &tmp_var_4, &tmp_var_5, &tmp_der_4, &tmp_der_5);
+          (*res)[0] = tmp_var_5 - (_b_3);
+          (*dF)[0] = tmp_der_5 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+        } else {
+          func_CADCodeGenTests_dummyFunc_der_AD(_y_1, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &tmp_var_6, &tmp_var_7, &tmp_der_6, &tmp_der_7);
+          (*res)[0] = tmp_var_7 - (_b_3);
+          (*dF)[0] = tmp_der_7 - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+        }
+        if (_sw(1)) {
+          (*res)[1] = tmp_var_4 - (_a_2);
+          (*dF)[1] = tmp_der_4 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+        } else {
+          (*res)[1] = tmp_var_6 - (_a_2);
+          (*dF)[1] = tmp_der_6 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+        }
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = 0;
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+
+			
+")})));
+end IfEqu3;
+
+model IfEqu4
+function f
+    input Real[:] i;
+    output Real[size(i,1)] x = i;
+    output Real[size(i,1)] y = i;
+    algorithm
+end f;
+    Real[2] x,y;
+equation
+    if time >= 1 then
+        (x,y) = f({time,time});
+    else
+        (x[1:end],y[{2,1}]) = f({time,time});
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu4",
+            description="Code generation for if equation, temp vars",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            template="
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+    JMI_ARRAY_STATIC(tmp_var_0, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_0, 2, 1)
+    JMI_ARRAY_STATIC(tmp_var_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_1, 2, 1)
+    JMI_ARRAY_STATIC(tmp_var_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_2, 2, 1)
+    JMI_ARRAY_STATIC(tmp_var_3, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_3, 2, 1)
+    JMI_ARRAY_STATIC(tmp_var_4, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_4, 2, 1)
+    JMI_ARRAY_STATIC(tmp_var_5, 2, 1)
+    JMI_ARRAY_STATIC(tmp_der_5, 2, 1)
+    if (_sw(0)) {
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_0, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_0, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_1, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_1, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_2, 2)
+      jmi_array_ref_1(tmp_var_2, 1) = _time;
+      jmi_array_ref_1(tmp_var_2, 2) = _time;
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_2, 2)
+      jmi_array_ref_1(tmp_der_2, 1) = (*dz)[jmi->offs_t];
+      jmi_array_ref_1(tmp_der_2, 2) = (*dz)[jmi->offs_t];
+      func_CADCodeGenTests_IfEqu4_f_der_AD(tmp_var_2, tmp_der_2, tmp_var_0, tmp_var_1, tmp_der_0, tmp_der_1);
+      (*res)[0] = jmi_array_val_1(tmp_var_0, 1) - (_x_1_0);
+      (*res)[1] = jmi_array_val_1(tmp_var_0, 2) - (_x_2_1);
+      (*dF)[0] = jmi_array_val_1(tmp_der_0, 1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+      (*dF)[1] = jmi_array_val_1(tmp_der_0, 2) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+      (*res)[2] = jmi_array_val_1(tmp_var_1, 1) - (_y_1_2);
+      (*res)[3] = jmi_array_val_1(tmp_var_1, 2) - (_y_2_3);
+      (*dF)[2] = jmi_array_val_1(tmp_der_1, 1) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+      (*dF)[3] = jmi_array_val_1(tmp_der_1, 2) - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+    } else {
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_3, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_3, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_4, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_4, 2)
+      JMI_ARRAY_STATIC_INIT_1(tmp_var_5, 2)
+      jmi_array_ref_1(tmp_var_5, 1) = _time;
+      jmi_array_ref_1(tmp_var_5, 2) = _time;
+      JMI_ARRAY_STATIC_INIT_1(tmp_der_5, 2)
+      jmi_array_ref_1(tmp_der_5, 1) = (*dz)[jmi->offs_t];
+      jmi_array_ref_1(tmp_der_5, 2) = (*dz)[jmi->offs_t];
+      func_CADCodeGenTests_IfEqu4_f_der_AD(tmp_var_5, tmp_der_5, tmp_var_3, tmp_var_4, tmp_der_3, tmp_der_4);
+      (*res)[0] = jmi_array_val_1(tmp_var_3, 1) - (_x_1_0);
+      (*res)[1] = jmi_array_val_1(tmp_var_3, 2) - (_x_2_1);
+      (*dF)[0] = jmi_array_val_1(tmp_der_3, 1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+      (*dF)[1] = jmi_array_val_1(tmp_der_3, 2) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+      (*res)[2] = jmi_array_val_1(tmp_var_4, 1) - (_y_2_3);
+      (*res)[3] = jmi_array_val_1(tmp_var_4, 2) - (_y_1_2);
+      (*dF)[2] = jmi_array_val_1(tmp_der_4, 1) - ((*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx]);
+      (*dF)[3] = jmi_array_val_1(tmp_der_4, 2) - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    }
+
+			
+")})));
+end IfEqu4;
+
+model IfEqu5
+    Real x;
+    parameter Real y(fixed=false,start=3);
+initial equation
+    if time >= 1 then
+        (x,) = dummyFunc(1);
+    else
+        (x,) = dummyFunc(2);
+    end if;
+equation
+    when time > 1 then
+        x = 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="IfEqu5",
+            description="Code generation for if equation, initial equation",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+			generate_ode_jacobian=true,
+            template="
+$CAD_ode_derivatives$
+",
+            generatedCode="
+/******** Declarations *******/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+
+jmi_real_t** dz = jmi->dz;
+/*********** ODE section ***********/
+/*********** Real outputs **********/
+/*** Integer and boolean outputs ***/
+/********* Other variables *********/
+  _temp_1_2 = _sw(0);
+  v_1 = LOG_EXP_NOT(pre_temp_1_2);
+  if (LOG_EXP_AND(_temp_1_2, v_1)) {
+      v_0 = AD_WRAP_LITERAL(1);
+  } else {
+      v_0 = pre_x_0;
+  }
+  _x_0 = v_0;
+
+			
+")})));
+end IfEqu5;
 
 end CADCodeGenTests;
