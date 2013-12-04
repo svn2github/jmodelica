@@ -582,6 +582,7 @@ fclass OptimicaTransformCanonicalTests.DAETest1
  Real x[4](start = 3,fixed = dynamic[4]) \"States/algebraics\";
  Real x[5](start = 3,fixed = dynamic[5]) \"States/algebraics\";
  input Real u \"Control input\";
+ output Real y \"Output\";
  parameter Real a[1] = 3.0 \"Time constants\" /* 3.0 */;
  parameter Real a[2] = 2.5 \"Time constants\" /* 2.5 */;
  parameter Real a[3] = 2.0 \"Time constants\" /* 2.0 */;
@@ -608,6 +609,7 @@ equation
  der(x[3]) = (- a[3]) * x[3] + a[3] * x[4];
  0 = (- a[4]) * x[4] + a[4] * x[5];
  0 = (- a[5]) * x[5] + a[5] * u;
+ y = x[1];
 end OptimicaTransformCanonicalTests.DAETest1;
 ")})));
   end DAETest1;

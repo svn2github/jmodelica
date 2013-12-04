@@ -300,6 +300,12 @@ Computed variable:
 Solution:
   iter_0 + (- x) + 2
 -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  eq_1
+Solution:
+  (- res_0) / (- 1.0)
+-------------------------------
 "),FClassMethodTestCase(
             name="EquationName1_2",
             description="Test of interactive FMU and equation name",
@@ -310,8 +316,7 @@ Solution:
             methodResult="
 Alias sets:
 {iter_0, y}
-{res_0, eq_1}
-2 variables can be eliminated
+1 variables can be eliminated
 ")})));
 end EquationName1;
 	
