@@ -325,7 +325,7 @@ class Test_FMUModelCS1:
     @testattr(stddist = True)
     def test_simulation_with_reset_cs_2(self):
         """
-        Tests a simulation with reset of an JModelica generated CS FMU.
+        Tests a simulation with reset of an JModelica generated CS FMU (final_time = 30).
         """
         res1 = self.rlc.simulate(final_time=30)
         resistor_v = res1['resistor.v']
@@ -1101,7 +1101,6 @@ class Test_RaisesIfNonConverge:
         m = self.m
         m.set('_log_level',5)
         m.set_fmil_log_level(5)
-        m.set('_nle_solver_log_level',3)
 
         m.set('u1',3)
 
