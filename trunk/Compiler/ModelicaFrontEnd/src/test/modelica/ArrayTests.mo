@@ -988,6 +988,26 @@ end ArrayTests.General.ArrayTest37;
 ")})));
 end ArrayTest37;
 
+
+model ArrayTest38
+    model A
+        Real x;
+    end A;
+    
+    parameter Integer n = 0;
+    A[n] a(x = ones(n));
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="General_ArrayTest38",
+			description="Modification on variable in zero-size component array",
+			flatModel="
+fclass ArrayTests.General.ArrayTest38
+ parameter Integer n = 0 /* 0 */;
+end ArrayTests.General.ArrayTest38;
+")})));
+end ArrayTest38;
+
 end General;
 
 
