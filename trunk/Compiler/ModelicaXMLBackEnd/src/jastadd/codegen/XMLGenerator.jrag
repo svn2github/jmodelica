@@ -377,7 +377,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 			Collections.sort(variables, comp);
 			
 			for (FVariable variable : variables) {	
-				if (!variable.isPreVariable() && !variable.isExternalObject()) {
+				if (!variable.isPreVariable() && !variable.isExternalObject() && !variable.isTemporary()) {
 					genPrinter.print("\n\t\t<ScalarVariable ");
 					genPrinter.print("name=\""+variable.name()+"\" ");
 					genPrinter.print("valueReference=\""+variable.valueReference()+"\" ");

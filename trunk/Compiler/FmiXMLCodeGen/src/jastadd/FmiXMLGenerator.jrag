@@ -464,7 +464,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			Collections.sort(variables, comp);
 
 			for (FVariable var : variables) {
-				if (!var.isPreVariable() && !var.isExternalObject()) {
+				if (!var.isPreVariable() && !var.isExternalObject() && !var.isTemporary()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1168,13 +1168,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			variableIndexMap = new HashMap<String, Integer>();
 			int index = 1;
 			for (FVariable var : variables) {
-				if (!var.isPreVariable() && !var.isExternalObject()) {
+				if (!var.isPreVariable() && !var.isExternalObject() && !var.isTemporary()) {
 					variableIndexMap.put(var.name(), index++);
 				}
 			}
 
 			for (FVariable var : variables) {
-				if (!var.isPreVariable() && !var.isExternalObject()) {
+				if (!var.isPreVariable() && !var.isExternalObject() && !var.isTemporary()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1486,7 +1486,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				//Find the initial unknowns.
 				initialUnknowns = new LinkedList<FVariable>();
 				for (FVariable var : fclass.allVariables()) {
-					if (!var.isPreVariable() && !var.isExternalObject()) {
+					if (!var.isPreVariable() && !var.isExternalObject() && !var.isTemporary()) {
 						
 						//Duplicated code for finding if initial != exact.
 						FExp e_start = null;
