@@ -5114,6 +5114,46 @@ Semantic error at line 1960, column 16:
 ")})));
 end ArrayIterTest5;
 
+model ArrayIterTestUnknown1
+    function f
+		input Integer a;
+		output Real x[:] = { i^2 for i in 1:a/2 };
+    algorithm
+    end f;
+    
+	Real x[3] = f(6);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Constructors_Iterators_ArrayIterTestUnknown1",
+			description="Array constructor with iterators: vectors of length 1",
+			flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1
+ parameter Real x[1];
+ parameter Real x[2];
+ parameter Real x[3];
+parameter equation
+ ({x[1], x[2], x[3]}) = ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f(6);
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f
+  input Integer a;
+  output Real[max(integer(a / 2 - 1) + 1, 0)] x;
+  Real[:] temp_1;
+ algorithm
+  size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
+  for i1 in 1:max(integer(a / 2 - 1) + 1, 0) loop
+   temp_1[i1] := i1 ^ 2;
+   x[i1] := temp_1[i1];
+  end for;
+  return;
+ end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
+
+end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;
+			
+")})));
+end ArrayIterTestUnknown1;
+
 end Iterators;
 
 end Constructors;

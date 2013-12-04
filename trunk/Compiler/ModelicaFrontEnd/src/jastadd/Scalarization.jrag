@@ -1042,34 +1042,42 @@ aspect Scalarization {
 	public void FArray.createArrayTemporaries(List clauses, List vars, 
 			Map<String,FExp> indexMap, boolean addVar) {
 		
-		if (useTempVar) {
-			if (!size().isUnknown()) {
-				defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
-			} else {
-				FIdUseExp t = new FIdUseExp(tempVarName(), indexNames.createFArraySubscripts());
-				if (addVar) 
-					vars.add(new FFunctionArray(type(), tempVarName()));
-				
-				ForNames names = indexNames;
-				// Promote top layer without first name
-				int s = names.size();
-				names.addLayer(s-1);
-				for (int i = 1; i < s; i++)
-					names.promote(i);
-				
-				for (int i = 0; i < getNumFExp(); i++) {
-					FIdUseExp left = t.fullCopy();
-					left.getFArraySubscripts().setFSubscript(new FIntegerSubscript(i+1), 0);
-					FExp right = getFExp(i);
-					right.addArrayUsesToIndexMap(indexMap, names);
-					right.createArrayTemporaries(clauses, vars, indexMap, addVar);
-					clauses.add(new FAssignStmt(left, right.scalarize(indexMap)));
-				}
-				names.removeLayer();
-			}
-		} else {
-			super.createArrayTemporaries(clauses, vars, indexMap, addVar);
-		}
+        if (useTempVar) {
+            if (!size().isUnknown()) {
+                defaultFunctionArrayTemporaries(clauses, vars, indexMap, addVar);
+            } else {
+                FIdUseExp t = new FIdUseExp(tempVarName(), indexNames.createFArraySubscripts());
+                if (addVar) 
+                    vars.add(new FFunctionArray(type(), tempVarName()));
+                
+                ForNames names = indexNames;
+                if (!isIterArray()) {
+                    // Promote top layer without first name
+                    int s = names.size();
+                    names.addLayer(s-1);
+                    for (int i = 1; i < s; i++)
+                        names.promote(i);
+                }
+                
+                for (int i = 0; i < getNumFExp(); i++) {
+                    FIdUseExp left = t.fullCopy();
+                    FSubscript leftSub;
+                    if (!isIterArray())
+                        leftSub = new FIntegerSubscript(i+1);
+                    else
+                        leftSub = new FExpSubscript(new FIdUseExp(names.get(0)));
+                    left.getFArraySubscripts().setFSubscript(leftSub, 0);
+                    FExp right = getFExp(i);
+                    right.addArrayUsesToIndexMap(indexMap, names);
+                    right.createArrayTemporaries(clauses, vars, indexMap, addVar);
+                    clauses.add(new FAssignStmt(left, right.scalarize(indexMap)));
+                }
+                if (!isIterArray())
+                    names.removeLayer();
+            }
+        } else {
+            super.createArrayTemporaries(clauses, vars, indexMap, addVar);
+        }
 	}
 	
 	public void FMatrix.createArrayTemporaries(List clauses, List vars, 

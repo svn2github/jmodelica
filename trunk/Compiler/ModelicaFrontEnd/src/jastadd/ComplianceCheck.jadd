@@ -148,11 +148,6 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The sign() function-like operator is");
 	}
 	
-	public void FArray.complianceCheck(ErrorCheckType checkType) {
-		if (size().isUnknown())
-			compliance("Unknown size array expressions are not supported");
-	}
-	
 	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
 		if (root().options.getStringOption("homotopy") == OptionRegistry.Homotopy.HOMOTOPY) {
 			warning("The 'homotopy' setting of the homotopy option is not supported. Setting to 'actual'.");

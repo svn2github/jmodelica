@@ -703,10 +703,6 @@ Semantic error at line 0, column 0:
 
 Error: in file '...':
 Compliance error at line 0, column 0:
-  Unknown size array expressions are not supported
-
-Error: in file '...':
-Compliance error at line 0, column 0:
   For index without in expression isn't supported
 
 Error: in file '...':
