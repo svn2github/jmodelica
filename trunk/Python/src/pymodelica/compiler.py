@@ -422,7 +422,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     
     PLATFORM = "-platform=" + _get_platform()
     
-    OUT = "-out=" + compile_to 
+    OUT = "-out=" + compile_to
+    
+    MODELICAPATH = "-modelicapath=" + pym.environ['MODELICAPATH']
     
     MODEL_FILES = ",".join(file_name)
     
@@ -430,9 +432,9 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         
     # create cmd
     if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, VERSION, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, VERSION, PLATFORM, OUT, MODELICAPATH, MODEL_FILES, MODELICA_CLASS]
     else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, VERSION, PLATFORM, OUT, MODEL_FILES, MODELICA_CLASS]
+        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, VERSION, PLATFORM, OUT, MODELICAPATH, MODEL_FILES, MODELICA_CLASS]
     
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()
