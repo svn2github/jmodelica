@@ -239,6 +239,13 @@ aspect TransformCanonical {
 
 		endStep("transformCanonical()");
 	}
+	
+	syn lazy Set<FVariable> FVariable.initDependsOn() {
+		if (myDAEInitEquationBlock() != null)
+			return myDAEInitEquationBlock().dependsOn();
+		else
+			return new LinkedHashSet<FVariable>();
+	}
 		
 	syn lazy Set<FVariable> FVariable.dependsOn() {
 		if (myDAEEquationBlock() != null)
