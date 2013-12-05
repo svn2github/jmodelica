@@ -29,6 +29,8 @@
 /* Lapack function */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+extern void dgelss_(int* M, int* N, int* NRHS, double* A, int* LDA, double* B, int* LDB,double* S,double* RCOND,int* RANK,double* WORK,int* LWORK, int* INFO);
+extern void dgels_(char* TRANS, int* M, int* N, int* NRHS,double* A,int* LDA, double* B,int* LDB,double* WORK,int* LWORK,int* INFO );
 extern int dgeequ_(int *m, int *n, double *a, int * lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, int *info);
 
@@ -55,6 +57,9 @@ struct jmi_linear_solver_t {
     double* cScale;               /**< \brief Column scaling of the Jacobian matrix */
     char equed;                    /**< \brief If scaling of the Jacobian matrix used ('N' - no scaling, 'R' - rows, 'C' - cols, 'B' - both */
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
+    int singular_jacobian;   /**< \brief Indicates if the Jacobian is singular or not */
+    int iwork;
+    jmi_real_t* rwork;
 };
 
 #endif /* _JMI_LINEAR_SOLVER_H */

@@ -71,7 +71,9 @@ class Test_Events:
         compile_fmu("EventIter.EventInfiniteIteration1", file_name)
         compile_fmu("EventIter.EventInfiniteIteration2", file_name)
         compile_fmu("EventIter.EventInfiniteIteration3", file_name)
-        compile_fmu("EventIter.EnhancedEventIteration", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration1", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration2", file_name)
+        compile_fmu("EventIter.SingularSystem1", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -89,8 +91,18 @@ class Test_Events:
         nose.tools.assert_raises(FMUException, model.simulate)
         
     @testattr(stddist = True)
+    def test_singular_system_event_1(self):
+        model = load_fmu("EventIter_SingularSystem1.fmu")
+        
+        #Check that we can initialize without error!
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("mode"), 0.0)
+        nose.tools.assert_almost_equal(model.get("sa"), 0.0)
+        
+    @testattr(stddist = True)
     def test_enhanced_event_iteration_1(self):
-        model = load_fmu("EventIter_EnhancedEventIteration.fmu")
+        model = load_fmu("EventIter_EnhancedEventIteration1.fmu")
         res = model.simulate()
         
         nose.tools.assert_almost_equal(res["x[1]"][-1], 0)
@@ -100,6 +112,20 @@ class Test_Events:
         nose.tools.assert_almost_equal(res["x[5]"][-1], -0.406)
         nose.tools.assert_almost_equal(res["x[6]"][-1], -0.406)
         nose.tools.assert_almost_equal(res["x[7]"][-1], 0.94)
+        
+    @testattr(stddist = True)
+    def test_enhanced_event_iteration_2(self):
+        pass
+        #THIS SHOULD BE ACTIVATED!
+        #model = load_fmu("EventIter_EnhancedEventIteration2.fmu")
+        #res = model.simulate(final_time=2.0)
+        
+        #nose.tools.assert_almost_equal(res["y"][0], 1.0)
+        #nose.tools.assert_almost_equal(res["w"][0], 0.0)
+        #nose.tools.assert_almost_equal(res["x"][-1], 2.0)
+        #nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
+        #nose.tools.assert_almost_equal(res["z"][-1], 0.0)
+        #nose.tools.assert_almost_equal(res["w"][-1], 1.0)
 
 class Test_Relations:
     @classmethod
