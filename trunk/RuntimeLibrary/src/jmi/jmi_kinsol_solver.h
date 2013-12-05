@@ -40,11 +40,17 @@
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
+/**< \brief Kinsol solver constructor function */
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_solver_t* block_solver);
 
+/**< \brief Kinsol solver main solve function */
 int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 
+/**< \brief Kinsol solver destructor */
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
+
+/**< \brief Convert Kinsol return flag to readable name */
+const char *jmi_kinsol_flag_to_name(int flag);
 
 struct jmi_kinsol_solver_t {
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */

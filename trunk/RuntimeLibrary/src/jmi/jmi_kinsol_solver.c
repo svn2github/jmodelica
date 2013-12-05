@@ -42,7 +42,11 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
 
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2);
 
-/* Interface to the residual function that is compatible with Brent search */
+/* Interface to the residual function that is compatible with Brent search.
+   @param y - input - function argument
+   @param f - output - residual value
+   @param problem_data - solver object propagated as opaques data
+*/
 int brentf(realtype y, realtype* f, void* problem_data) {
     jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
     int ret = 0;
@@ -73,7 +77,11 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     return ret;
 }
 
-/*Kinsol function wrapper*/
+/*Kinsol function wrapper
+    @param yy - Input - function argument
+    @param ff - Output - residuals
+    @param problem_data - solver object propagated as opaque data
+*/
 int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     
     realtype *y, *f;
@@ -240,6 +248,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     }
     
     if (block->options->block_jacobian_check) {
+        /* compare analytical and finite differences Jacobians */
         if (block->dF) {
             for (i = 0; i < N; i++) {
                 for (j = 0; j < N; j++) {
@@ -269,6 +278,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     return ret;
 }
 
+/* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category;
     jmi_block_solver_t *block = eh_data;
@@ -332,6 +342,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 */
 }
 
+/* Logging callback used by KINSOL to report progress att higher log levels */
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
     int i;
     long int nniters;
@@ -373,9 +384,10 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
     jmi_log_leave(log, topnode);
 }
 
+/* Print out meaningfull message based on KINSOL return flag */
 void jmi_kinsol_error_handling(jmi_block_solver_t * block, int flag){
     if (flag != 0) {
-        jmi_log_node(block->log, logError, "KinsolError", "KINSOL returned with <kinsol_flag: %s>", KINGetReturnFlagName(flag));
+        jmi_log_node(block->log, logError, "KinsolError", "KINSOL returned with <kinsol_flag: %s>", jmi_kinsol_flag_to_name(flag));
     }
 }
 
@@ -406,13 +418,15 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
 
     for(i=0; i < block->n; ++i) {
         if(block->max[i] != BIG_REAL) {
-            solver->bound_vindex[num_bounds] = i;
+            /* upper bound on a variable */
+            solver->bound_vindex[num_bounds] = i; /* variable index */
             solver->bound_kind[num_bounds] = 1;
             solver->bounds[num_bounds] = block->max[i];
             num_bounds++;
         }
         if(block->min[i] != -BIG_REAL) {
-            solver->bound_vindex[num_bounds] = i;
+            /* lower bound on a variable */
+            solver->bound_vindex[num_bounds] = i; /* variable index */
             solver->bound_kind[num_bounds] = -1;
             solver->bounds[num_bounds] = block->min[i];
             num_bounds++;
@@ -422,6 +436,7 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
     return 0;
 }
 
+/* Helper to convert log_level used in the logger to print level in KINSOL */
 static int get_print_level(jmi_block_solver_t* bs) {
     int log_level = bs->callbacks->log_options.log_level;
     if (log_level <= 2) return 0;
@@ -429,6 +444,7 @@ static int get_print_level(jmi_block_solver_t* bs) {
     else return 3;
 }
 
+/* Initialize solver structures */
 static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     int ef, i;
@@ -513,16 +529,22 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     realtype min_step_ratio; /* fraction of the Newton step that is still over minimal step*/
     realtype max_step_ratio; /* maximum step length ratio limited by bounds */
 
-    realtype* xxd = N_VGetArrayPointer(x);
-    realtype* xd = N_VGetArrayPointer(b);
+    realtype* xxd = N_VGetArrayPointer(x); /* Newton step on input, may be modified if step is projected */
+    realtype* xd = N_VGetArrayPointer(b); /* used as a buffer */
     booleantype activeBounds = FALSE;
     booleantype limitingBounds = FALSE;
     int i;
     jmi_log_t *log = block->log;
 
+    /* MAX_NETON_STEP_RATIO is used just to ensure that full Newton step can 
+    be taken when no bounds are present. 
+    TODO: Consider addionally limiting the Newton step length set
+    based on the nominal values of the IVs.
+    Consider using block->options->step_limit_factor instead
+    */
 #define MAX_NETON_STEP_RATIO 10.0
 
-    xnorm = N_VWL2Norm(x, kin_mem->kin_uscale);
+    xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
     
     if((solver->num_bounds == 0) || (xnorm == 0.0)) 
     {
@@ -535,14 +557,18 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         return;
     }
 
-    /*  scale the step up so that step multiplier is 1.0 at the beginning*/
+    /*  Scale the step up so that step multiplier is 1.0 at the beginning.
+        The "long" step is now saved into "b", pointed by "xd"
+    */
     N_VScale(MAX_NETON_STEP_RATIO, x, b);
     
     /* minimal/maximal allowed step multiplier */
     max_step_ratio = 1.0;
     min_step_ratio = 2*solver->kin_stol;
 
-    /* Without logging */
+    /* 
+        Go over the list of bounds and reduce "max_step_ratio" 
+    */
     for(i = 0; i < solver->num_bounds; ++i) {
         int index = solver->bound_vindex[i]; /* variable index */
         int kind = solver->bound_kind[i];   /* min or max */
@@ -571,7 +597,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             max_step_ratio = MIN(max_step_ratio, step_ratio_i);          /* reduce the step */
     }
 
-
+    /* log the bounds that limit the step */
     if (block->callbacks->log_options.log_level >= 5 && limitingBounds) {
         /* Print limiting bounds */
         jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "LimitationBounds");
@@ -590,6 +616,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         }
         jmi_log_leave(log, outer);
     }
+    /* log the bounds that we are following */
     if (block->callbacks->log_options.log_level >= 5 && activeBounds) {        
         /* Print active bounds*/
         jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "ActiveBounds");
@@ -611,8 +638,15 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         jmi_log_leave(log, outer);
     }
 
+    /* 
+        Since analysis was done with x = MAX_NETON_STEP_RATIO * Newton step
+        the actual Newton step ration is also MAX_NETON_STEP_RATIO larger
+    */
     max_step_ratio *= MAX_NETON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
     
+    /* If the step is limited by a bound or we're following the bound it
+    should be allowed to take the full step length more than 5 times
+    which is a fixed check in KINSOL */
     if((max_step_ratio < 1) || activeBounds) {
         kin_mem->kin_ncscmx = 0; /* allow for more steps of kin_mxnewtstep length in this case */
     }
@@ -626,11 +660,11 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     /* Update the x to be the maximum vector within bounds */ 
     for(i = 0; i < block->n; ++i) {
         realtype bnd = solver->active_bounds[i];
-        if(bnd != 0.0) {
+        if(bnd != 0.0) { /* the maximum step should keep us on this active bound */
             xd[i] = bnd;
             solver->active_bounds[i] = 0;
         }
-        else if(max_step_ratio < 1.0) {
+        else if(max_step_ratio < 1.0) { /* update the step length for other vars */
             xd[i] = xxd[i] * max_step_ratio;
         }
         else xd[i] = xxd[i];
@@ -640,7 +674,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         kin_mem->kin_sfdotJp *= max_step_ratio;
         kin_mem->kin_sJpnorm *= max_step_ratio;
     }
-    /* The maximum newton step leads to the bound   */
+    /* The maximum newton step leads to the bound  
+    -> store the "x" and set maximum step to be L2 norm of x */
     N_VScale(1.0, b, x);
     kin_mem->kin_mxnewtstep =  N_VWL2Norm(x, kin_mem->kin_uscale)*(1 - UNIT_ROUNDOFF);
 }
@@ -672,6 +707,7 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     }
 }
 
+/* Estimate condition number utilizing dgecon from LAPACK*/
 static realtype jmi_calculate_condition_number(jmi_block_solver_t * block, realtype* A) {
     jmi_kinsol_solver_t* solver = block->solver;
     char norm = 'I';
@@ -680,10 +716,12 @@ static realtype jmi_calculate_condition_number(jmi_block_solver_t * block, realt
     int info;
     
     dgecon_(&norm, &N, A, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);
-    
+    if(Jcond < 0) Jcond = -Jcond;
+    if(Jcond == 0.0) Jcond = 1e-30;
     return 1.0/Jcond;
 }
 
+/* Callback from KINSOL called to calculate Jacobian */
 static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -698,11 +736,11 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     ret = kin_dF(N, solver->kin_y, kin_mem->kin_fval, solver->J, block, kin_mem->kin_vtemp1, kin_mem->kin_vtemp2);
     solver->updated_jacobian_flag = 1; /* The Jacobian is current */
     
-    if(ret != 0 ) return ret;
+    if(ret != 0 ) return ret; /* There was an error in calculation of Jacobian */
     
-    if(solver->use_steepest_descent_flag) return ret;
+    if(solver->use_steepest_descent_flag) return ret; /* No further processing when using steepest descent */
 
-    DenseCopy(solver->J, solver->J_LU);
+    DenseCopy(solver->J, solver->J_LU); /* make at copy of the Jacobian that will be used for LU factorization */
 
     /* Equillibrate if corresponding option is set */
     if((N>1) && block->options->use_jacobian_equilibration_flag) {
@@ -738,6 +776,9 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     }
     
     if(solver->force_new_J_flag ) {
+        /* If the Jacobian was caluclated due to the singularity in the previous point
+        update the residual scales if corresponding option is set
+       */
         solver->force_new_J_flag = 0;
         if(block->options->rescale_after_singular_jac_flag)
             jmi_update_f_scale(block);
@@ -747,11 +788,12 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
         
 }
 
+/* Callback from KINSOL to solver linear system and calculate the step */
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
-    realtype*  bd = N_VGetArrayPointer(b);
-    realtype*  xd = N_VGetArrayPointer(x);
+    realtype*  bd = N_VGetArrayPointer(b); /* residuals */
+    realtype*  xd = N_VGetArrayPointer(x); /* iteration vars */
     jmi_log_node_t node;
     
     int N = block->n;
@@ -786,12 +828,14 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     
     kin_mem->kin_sfdotJp = N_VDotProd(kin_mem->kin_fval, x);
 
+    /* if the Jacobian was equilibrated then scale the residuals accordingly */
     if((solver->equed == 'R') || (solver->equed == 'B')) {
         for(i = 0; i < N; i++) {
             bd[i] *= solver->rScale[i];
         }
     }
     if(solver->use_steepest_descent_flag) {
+        /* Make step in steepest descent direction and not Newton*/
         realtype **jac = solver->J->cols;
         int N = block->n;
         int j;
@@ -842,6 +886,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
     else {
+        /* Normal linear system solve (with LU) to get Newton step */
         N_VScale(ONE, b, x);
         i = 1;
         
@@ -858,9 +903,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
     
-    if(ret) return ret;
+    if(ret) return ret; /* Break out on error */
     
     if((solver->equed == 'C') || (solver->equed == 'B')) {
+        /* scale solution if the Jacobian was equilibrated */
         int i;
         for(i = 0; i < block->n; i++) {
             xd[i] *= solver->cScale[i];
@@ -1160,7 +1206,12 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_solver_t * block,
     }
 }
 
-const char *kinsol_flag_to_name(int flag) {
+const char *jmi_kinsol_flag_to_name(int flag) {
+    /*
+        char* name = KINGetReturnFlagName(flag);
+        KINGetReturnFlagName(flag) allocates memory and may cause memleak
+     */
+
     switch (flag) {
     case KIN_SUCCESS: return "KIN_SUCCESS";
     case KIN_INITIAL_GUESS_OK: return "KIN_INITIAL_GUESS_OK";
@@ -1180,7 +1231,7 @@ const char *kinsol_flag_to_name(int flag) {
     case KIN_LSOLVE_FAIL: return "KIN_LSOLVE_FAIL";
     case KIN_SYSFUNC_FAIL: return "KIN_SYSFUNC_FAIL";
     case KIN_FIRST_SYSFUNC_ERR: return "KIN_FIRST_SYSFUNC_ERR";
-    default: return NULL;
+    default: return "UNKNOWN";
     }
 }
 
@@ -1192,7 +1243,7 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
     /* NB: must match the condition in jmi_kinsol_solver_print_solve_start exactly! */
     if((block->callbacks->log_options.log_level >= 5)) {
         jmi_log_t *log = block->log;
-        const char *flagname = kinsol_flag_to_name(flag);
+        const char *flagname = jmi_kinsol_flag_to_name(flag);
         if (flagname != NULL) jmi_log_fmt(log, *node, logInfo, "Newton solver finished with <kinsol_exit_flag:%s>", flagname);
         else jmi_log_fmt(log, *node, logInfo, "Newton solver finished with unrecognized <kinsol_exit_flag:%d>", flag);
         jmi_log_leave(log, *node);
@@ -1341,7 +1392,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                 struct KINMemRec * kin_mem = solver->kin_mem;
                 
                 printf("Could not converge in block %d,KINSOL error:%s,fnorm=%g,stol=%g,ftol=%g:\n"
-                       "x = N.array([\n",block->id, KINGetReturnFlagName(flag), fnorm, solver->kin_stol,solver->kin_ftol);
+                       "x = N.array([\n",block->id, jmi_kinsol_flag_to_name(flag), fnorm, solver->kin_stol,solver->kin_ftol);
                 for (i=0;i<block->n;i++) {
                     printf("%.16e\n",x[i]);
                 }
