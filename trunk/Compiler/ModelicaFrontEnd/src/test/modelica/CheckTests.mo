@@ -153,4 +153,124 @@ Semantic error at line 111, column 12:
 ")})));
 end ConditionalError4;
 
+
+model ParamBinding1
+	type B = enumeration(a,b,c);
+	model A
+	    parameter B b;
+	    Real x;
+		parameter Real z[if b == B.b then 2 else 1] = ones(size(z,1));
+	equation
+		if b == B.b then
+			x = z[2];
+	    else
+		    x = time;
+		end if;
+	end A;
+	
+    parameter B b2;
+	A a(b = b2);
+	Integer y = 1.2; // Generate an error to be able to use error test case
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ParamBinding1",
+			description="Check that no error messages are generated for structural parameters without binding expression in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 173, column 14:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end ParamBinding1;
+
+
+model ArraySize1
+    Real x[:];
+    Integer y = 1.2; // Generate an error to be able to use error test case
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ArraySize1",
+			description="Check that no error message is generated for incomplete array size in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 191, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end ArraySize1;
+
+
+model FunctionNoAlgorithm1
+    replaceable function f
+        input Real x;
+        output Real y;
+    end f;
+    
+    Real z = f(time);
+    Integer y = 1.2; // Generate an error to be able to use error test case
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm1",
+			description="Check that no error message is generated replaceable incomplete function in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 214, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FunctionNoAlgorithm1;
+
+
+model FunctionNoAlgorithm2
+    replaceable package A
+		function f
+	        input Real x;
+	        output Real y;
+	    end f;
+    end A;
+    
+    Real z = A.f(time);
+    Integer y = 1.2; // Generate an error to be able to use error test case
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm2",
+			description="Check that no error message is generated incomplete function in replaceable package in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 239, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FunctionNoAlgorithm2;
+
+
+model FunctionNoAlgorithm3
+    function f
+        input Real x;
+        output Real y;
+    end f;
+    
+    Real z = f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="FunctionNoAlgorithm3",
+			description="Check that errors are generated for use of incomplete non-replaceable function in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 261, column 14:
+  Calling function f(): can only call functions that have one algorithm section or external function specification
+")})));
+end FunctionNoAlgorithm3;
+
 end CheckTests;

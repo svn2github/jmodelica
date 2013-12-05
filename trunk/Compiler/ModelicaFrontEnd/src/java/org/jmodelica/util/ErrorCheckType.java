@@ -1,15 +1,27 @@
 package org.jmodelica.util;
 
 public enum ErrorCheckType {
-    COMPILE (false, false), 
-    CHECK   (true,  true);
+    COMPILE, 
+    CHECK;
     
-    public final boolean allowOuterWithoutInner;
-    public final boolean checkInactiveComponents;
+    public boolean allowOuterWithoutInner() {
+        return this == CHECK;
+    }
     
-    private ErrorCheckType(boolean allowOuterWithoutInner, boolean checkInactiveComponents) {
-        this.allowOuterWithoutInner = allowOuterWithoutInner;
-        this.checkInactiveComponents = checkInactiveComponents;
+    public boolean allowStructParamNoValue() {
+        return this == CHECK;
+    }
+    
+    public boolean allowIncompleteSizes() {
+        return this == CHECK;
+    }
+    
+    public boolean allowIncompleteReplaceableFunc() {
+        return this == CHECK;
+    }
+    
+    public boolean checkInactiveComponents() {
+        return this == CHECK;
     }
 
 }

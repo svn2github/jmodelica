@@ -1716,6 +1716,7 @@ aspect ConstantEvaluation {
 	}
 	
 	syn CValue InstAssignable.startAttributeCValueDefault() = CValue.UNKNOWN;
+	eq InstEnum.startAttributeCValueDefault()               = new CValueEnum(type(), 1);
 	eq InstPrimitive.startAttributeCValueDefault() {
 		CValue res = CValue.UNKNOWN;
 		if (isReal())

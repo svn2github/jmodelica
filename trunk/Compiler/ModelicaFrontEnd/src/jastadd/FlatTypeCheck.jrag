@@ -100,7 +100,7 @@ aspect FlatTypeCheck {
     	FExp bexp = myBindingInstExp();
 		boolean func = inFunction();
         Size componentSize = size();
-        if (!componentSize.isComplete() && !func && !inRecordDecl()) 
+        if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
     		error("Can not infer array size of the variable " + name());
     	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {

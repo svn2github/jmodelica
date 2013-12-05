@@ -520,7 +520,7 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 	    	errorChecked = true;
 	    	boolean checkInner = isOuter() && 
-	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner);
+	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
 	    	if (isRecursed()) {
 	    		error("Recursive class structure");
 	    	} else if (checkInner) {
@@ -550,7 +550,7 @@ aspect InstanceErrorCheck {
 	}
 	
 	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
-	        !isDisabled() || checkType.checkInactiveComponents || root().options.getBooleanOption("check_inactive_contitionals");
+	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
 	
 	// TODO: move to better place (InstanceTree.jrag?)
 	syn boolean InstComponentDecl.isActive() {
@@ -978,8 +978,9 @@ aspect InstanceErrorCheck {
 	    			error("The class " + name + " is not a function");
 	    	} else if (!func.isRecord() && !func.isCompleteFunction()) {
 	    		// TODO: add check if function is partial?
-	    		error("Calling function " + getName().name() + 
-	    				"(): can only call functions that have one algorithm section or external function specification");
+	    	    if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func))
+	    	        error("Calling function " + getName().name() + 
+	    	                "(): can only call functions that have one algorithm section or external function specification");
 	    	} else {
 	    		// Function exists, check everything
 	    		super.collectErrors(checkType);
@@ -995,7 +996,31 @@ aspect InstanceErrorCheck {
 	    	}
 	    }
 	}
+    
+    /**
+     * Can <code>node</code> be replaced as seen from here?
+     */
+    inh boolean ASTNode.canBeReplacedForMe(InstNode node);
+    eq InstNode.getChild().canBeReplacedForMe(InstNode node) = node.canBeReplacedFor(this);
+    eq Root.getChild().canBeReplacedForMe(InstNode node)     = false;
 	
+	/**
+	 * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
+	 */
+	syn boolean InstNode.canBeReplacedFor(InstNode source) = canBeReplacedIn(commonAncestor(source));
+	
+    /**
+     * Is this class or any class before <code>ancestor</code> replaceable?
+     */
+	syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
+
+    /**
+     * Helper method for {@link #canBeReplacedIn(InstNode)} - use it instead.
+     */
+    inh boolean InstNode.canBeReplacedInHelper(InstNode ancestor);
+    eq InstNode.getChild().canBeReplacedInHelper(InstNode ancestor) = (ancestor != this) && canBeReplacedIn(ancestor);
+    eq Root.getChild().canBeReplacedInHelper(InstNode ancestor)     = false;
+
 	public void FInfArgsFunctionCall.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);
 		if (unbindableArgs != null) {
