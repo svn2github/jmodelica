@@ -35,6 +35,32 @@ Semantic error at line 22, column 5:
 end InnerOuter1;
 
 
+model InnerOuter2
+	model A
+		function f
+			input Real x;
+			output Real y;
+		algorithm
+			y := x + 1;
+		end f;
+	end A;
+	
+	outer A a;
+	Real z = a.f(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="InnerOuter2",
+			description="Check that no extra errors are generated for function called through outer withour inner",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 46, column 7:
+  Cannot find inner declaration for outer a
+")})));
+end InnerOuter2;
+
+
 model ConditionalError1
 	model A
 		Real x = true;
