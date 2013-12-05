@@ -1154,7 +1154,7 @@ aspect BuiltInFlatTypes {
  	/**
  	 * \brief Create a literal with the zero value for this type, if applicable.
  	 */
- 	public FExp FType.zeroLiteral()        { return null; }
+ 	public FExp FType.zeroLiteral()        { throw new UnsupportedOperationException("Unable to create zero literal from type " + this); }
  	public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
  	public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
  	public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }

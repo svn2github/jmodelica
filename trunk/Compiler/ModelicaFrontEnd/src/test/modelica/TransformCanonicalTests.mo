@@ -4320,8 +4320,30 @@ equation
  z + 2 * y = 0;
 end TransformCanonicalTests.StateInitialPars4;
 ")})));
-end StateInitialPars4;		
-	
+end StateInitialPars4;
+
+model StateInitialPars5
+   Real x;
+equation 
+  der(x) = -x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StateInitialPars5",
+            description="Test the state initial equations option and variable without start value",
+            state_initial_equations=true,
+            flatModel="
+fclass TransformCanonicalTests.StateInitialPars5
+ Real x;
+ parameter Real _start_x = 0.0 /* 0.0 */;
+initial equation 
+ x = _start_x;
+equation
+ der(x) = - x;
+end TransformCanonicalTests.StateInitialPars5;
+")})));
+end StateInitialPars5;
+
 model DuplicateVariables1
   model A
     Real x(start=1, min=2) = 3;

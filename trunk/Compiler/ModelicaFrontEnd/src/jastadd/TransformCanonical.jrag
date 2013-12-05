@@ -4696,7 +4696,10 @@ aspect StateInitialEquations {
 		for (FRealVariable fv : differentiatedRealVariables()) {
 			FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
 			FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
-			fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
+			if (fv.startAttributeSet())
+			    fvToAdd.setBindingExp(fv.startAttributeExp().fullCopy());
+			else
+			    fvToAdd.setBindingExp(fv.type().zeroLiteral());
 			addFVariable(fvToAdd);
 			FEquation eqnToAdd = new FEquation(fv.createUseExp(), fvToAdd.createUseExp());
 			addFInitialEquation(eqnToAdd);
