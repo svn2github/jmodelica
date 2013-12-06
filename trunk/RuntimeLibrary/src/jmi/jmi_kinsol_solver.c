@@ -763,8 +763,10 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
         solver->J_is_singular_flag = 1;
         jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected when factorizing in linear solver. "
                      "Will try to regularize the equations in <block: %d>", block->id);
-        jmi_kinsol_reg_matrix(block);
-        dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+        if(N > 1) {
+            jmi_kinsol_reg_matrix(block);
+            dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+        }
     } else {
         /* if (solver->using_max_min_scaling_flag) {
             realtype cond = jmi_calculate_condition_number(block, solver->J->data);
@@ -869,20 +871,25 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         /* solve the regularized problem */
         
         realtype** jac = solver->J->cols;
-        int i,j;
-        for (i=0;i<N;i++){
-            xd[i] = 0;
-            for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j];
-         }
-        /* Back-solve and get solution in x */
-        trans = 'N'; /* No transposition */
-        i = 1;
-        dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
-        solver->force_new_J_flag = 1;
-        
-        if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
-            jmi_log_leave(block->log, node);
+        if(N > 1) {
+            int i,j;
+            for (i=0;i<N;i++){
+                xd[i] = 0;
+                for (j=0;j<N;j++) xd[i] += jac[i][j]*bd[j];
+            }
+            /* Back-solve and get solution in x */
+            trans = 'N'; /* No transposition */
+            i = 1;
+            dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+            solver->force_new_J_flag = 1;
+
+            if((block->callbacks->log_options.log_level >= 6)) {
+                jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
+                jmi_log_leave(block->log, node);
+            }
+        }
+        else {
+            xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
         }
     }
     else {
@@ -1015,16 +1022,19 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     
     if (solver->using_max_min_scaling_flag) {
         realtype cond = jmi_calculate_condition_number(block, solver->J->data);
-        
+
         jmi_log_node(block->log, logInfo, "ConditionNumber",
-                         "Calculated condition number in <block: %d>. Regularizing if <cond: %E> greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
+            "Calculated condition number in <block: %d>. Regularizing if <cond: %E> greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
         if (cond > solver->kin_reg_tol) {
-            int info;
-            jmi_kinsol_reg_matrix(block);
-            dgetrf_(  &block->n, &block->n, solver->JTJ->data, &block->n, solver->lapack_ipiv, &info);
+            if(N > 1) {
+                int info;
+                jmi_kinsol_reg_matrix(block);
+                dgetrf_(  &block->n, &block->n, solver->JTJ->data, &block->n, solver->lapack_ipiv, &info);
+            }
             solver->J_is_singular_flag = 1;
         }
     }
+    
     
     /* estimate condition number of the scaled jacobian 
         and scale function tolerance with it. */
