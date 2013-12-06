@@ -8,7 +8,7 @@ public enum ErrorCheckType {
         return this == CHECK;
     }
     
-    public boolean allowStructParamNoValue() {
+    public boolean allowConstantNoValue() {
         return this == CHECK;
     }
     

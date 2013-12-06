@@ -186,9 +186,36 @@ Semantic error at line 173, column 14:
 end ParamBinding1;
 
 
-model ArraySize1
-    Real x[:];
+model ParamBinding2
+	replaceable function f
+		input Real x;
+		output real y; 
+	end f;
+	
+	constant Real p = f(1);
     Integer y = 1.2; // Generate an error to be able to use error test case
+
+	annotation(__JModelica(UnitTesting(tests={
+		ComplianceErrorTestCase(
+			name="ParamBinding2",
+			description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
+			checkType=check,
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
+Semantic error at line 197, column 17:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end ParamBinding2;
+
+
+model ArraySize1
+	parameter Integer n = size(x, 1);
+    Real x[:];
+    Real y[n];
+    Real z[size(x, 1)];
+	
+    Integer e = 1.2; // Generate an error to be able to use error test case
 
 	annotation(__JModelica(UnitTesting(tests={
 		ComplianceErrorTestCase(
@@ -198,8 +225,8 @@ model ArraySize1
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 191, column 17:
-  The binding expression of the variable y does not match the declared type of the variable
+Semantic error at line 219, column 17:
+  The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ArraySize1;
 

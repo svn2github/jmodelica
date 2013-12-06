@@ -121,7 +121,7 @@ aspect ContentCheck {
 	
 	public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
-			getFArraySubscripts().markAsStructuralParameter();
+			getFArraySubscripts().markAsStructuralParameter(checkType);
 	}
 	
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
@@ -260,7 +260,7 @@ aspect ContentCheck {
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
 			if (hasOnlyParamTests()) {
-				setEliminateOnParamTest();
+				setEliminateOnParamTest(checkType);
 			} else {
 				if (!balanced) {
 					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
@@ -372,58 +372,58 @@ aspect StructuralParams {
 	
 	private boolean InstAssignable.isStructuralParam = false;
 	
-	public void FExp.markAsStructuralParameter() {
+	public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
 		if (inFunction())
 			return;
-		if (!canCeval())
+		if (!checkType.allowConstantNoValue() && !canCeval())
 			compliance("Could not evaluate expression used as structural parameter: " + this);
-		markUsesAsStructuralParameter();
+		markUsesAsStructuralParameter(checkType);
 	}
 	
-	public void FArraySubscripts.markAsStructuralParameter() {
+	public void FArraySubscripts.markAsStructuralParameter(ErrorCheckType checkType) {
 		for (FSubscript s : getFSubscripts())
-			s.markAsStructuralParameter();
+			s.markAsStructuralParameter(checkType);
 	}
 	
-	public void FSubscript.markAsStructuralParameter() {}
-	public void FExpSubscript.markAsStructuralParameter() {
-		getFExp().markAsStructuralParameter();
+	public void FSubscript.markAsStructuralParameter(ErrorCheckType checkType) {}
+	public void FExpSubscript.markAsStructuralParameter(ErrorCheckType checkType) {
+		getFExp().markAsStructuralParameter(checkType);
 	}  
 
 	
-	public void ASTNode.markUsesAsStructuralParameter() {
+	public void ASTNode.markUsesAsStructuralParameter(ErrorCheckType checkType) {
 		for (ASTNode n : this)
-			n.markUsesAsStructuralParameter();
+			n.markUsesAsStructuralParameter(checkType);
 	}
     
-    public void FSizeExp.markUsesAsStructuralParameter() {
-        getDimOpt().markUsesAsStructuralParameter();
+    public void FSizeExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {
+        getDimOpt().markUsesAsStructuralParameter(checkType);
     }
     
-    public void FNdimsExp.markUsesAsStructuralParameter() {}
+    public void FNdimsExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {}
 	
-	public void InstAccess.markUsesAsStructuralParameter() {
-		myInstComponentDecl().markAsStructuralParameter();
-		markUsesInSubscriptsAsStructuralParameter();
+	public void InstAccess.markUsesAsStructuralParameter(ErrorCheckType checkType) {
+		myInstComponentDecl().markAsStructuralParameter(checkType);
+		markUsesInSubscriptsAsStructuralParameter(checkType);
 	}
 	
-	public void InstAccess.markUsesInSubscriptsAsStructuralParameter() {}
+	public void InstAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {}
 	
-	public void InstDot.markUsesInSubscriptsAsStructuralParameter() {
+	public void InstDot.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
 		for (InstAccess ia : getInstAccesss())
-			ia.markUsesInSubscriptsAsStructuralParameter();
+			ia.markUsesInSubscriptsAsStructuralParameter(checkType);
 	}
 	
-	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter() {
-		getFArraySubscripts().markUsesAsStructuralParameter();
+	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
+		getFArraySubscripts().markUsesAsStructuralParameter(checkType);
 	}
 	
 	
-	public void InstComponentDecl.markAsStructuralParameter() {
+	public void InstComponentDecl.markAsStructuralParameter(ErrorCheckType checkType) {
 		// TODO: should probably do something constructive here?
 	}
 	
-	public void InstAssignable.markAsStructuralParameter() {
+	public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
 		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
 		if (indices().numElements() > 0 && !fixedAttributeCValue().reduceBooleanOr()) {
@@ -435,9 +435,9 @@ aspect StructuralParams {
 		variability_computed = false;
 		if (hasBindingFExp()) {
 			FExp e = getBindingFExp();
-			if (!e.canCeval())
+			if (!checkType.allowConstantNoValue() && !e.canCeval())
 				compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
-			e.markUsesAsStructuralParameter();
+			e.markUsesAsStructuralParameter(checkType);
 		}
 	}
 	

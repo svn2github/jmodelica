@@ -424,7 +424,7 @@ aspect FlatTypeCheck {
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
-  public void FExpSubscript.typeCheckAsSize() {
+  public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
@@ -435,7 +435,7 @@ aspect FlatTypeCheck {
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array size must be constant or parameter: " + getFExp());
-		  } else {
+		  } else if (!checkType.allowIncompleteSizes()) {
 			  try {
 				  getFExp().ceval().intValue();
 			  } catch (ConstantEvaluationException e) {
@@ -445,7 +445,7 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FExpSubscript.typeCheckAsIndex() {
+  public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
 	  if (ndims() > 1) { 
 		  error("Array index must be scalar or vector expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
@@ -464,7 +464,7 @@ aspect FlatTypeCheck {
 	              for (FExp e : getFExp().getArray().iterable()) {
 	                  int i = e.ceval().intValue();
 	                  if (i < 1 || i > max) {
-	                      if (!lockBranch())
+	                      if (!lockBranch(checkType))
 	                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
 	                      reportedOutOfBound = true;
 	                      return;
@@ -483,9 +483,9 @@ aspect FlatTypeCheck {
   
   public void FExpSubscript.typeCheck(ErrorCheckType checkType) {
 	  if (isInstComponentSize()) 
-		  typeCheckAsSize();
+		  typeCheckAsSize(checkType);
 	  else 
-		  typeCheckAsIndex();
+		  typeCheckAsIndex(checkType);
   }
   
   inh boolean FSubscript.inUnknownAccess();
@@ -646,7 +646,7 @@ aspect FlatTypeCheck {
   public void FAssert.typeCheck(ErrorCheckType checkType) {
 	  if (hasLevel()) {
 		  if (getLevel().isParameterExp())
-			  getLevel().markAsStructuralParameter();
+			  getLevel().markAsStructuralParameter(checkType);
 		  else if (!getLevel().isConstantExp())
 			  error("Level of assert() must be constant or parameter");
 	  }

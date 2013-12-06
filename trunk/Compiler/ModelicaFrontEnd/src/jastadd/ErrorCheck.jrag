@@ -295,54 +295,58 @@ aspect ErrorCheck {
    * Any parameters used in the test will be marked as structural.
    * 
    * NB: This has side-effects, dispite being an inherited attribute.
+   * 
+   * @param checkType  the type of error checks to use when marking structural parameters
    */
   // TODO: find way to move side-effects out from inh attr
-  inh boolean FExp.lockBranch();
-  inh boolean FExpSubscript.lockBranch();
-  inh boolean FIfEquation.lockBranch();
-  eq FIfExp.getThenExp().lockBranch()                     = lockMyBranch(true);
-  eq FIfExp.getElseExp().lockBranch()                     = lockMyBranch(false);
-  eq FIfEquation.getFAbstractEquation().lockBranch()      = lockMyBranch(true);
-  eq FIfEquation.getElse().lockBranch()                   = lockMyBranch(false);
-  eq FConnectClause.getConnector1().lockBranch()          = getConnector2().isDisabled();
-  eq FConnectClause.getConnector2().lockBranch()          = getConnector1().isDisabled();
-  eq InstComponentDecl.getInstModification().lockBranch() = isDisabled();
-  eq InstNode.getChild().lockBranch()                     = false;
-  eq FClass.getChild().lockBranch()                       = false;
+  inh boolean FExp.lockBranch(ErrorCheckType checkType);
+  inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+  inh boolean FIfEquation.lockBranch(ErrorCheckType checkType);
+  eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
+  eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
+  eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
+  eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
+  eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled();
+  eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled();
+  eq InstComponentDecl.getInstModification().lockBranch(ErrorCheckType checkType) = isDisabled();
+  eq InstNode.getChild().lockBranch(ErrorCheckType checkType)                     = false;
+  eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
    * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch()}.
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
    * 
    * Any parameters used in the test will be marked as structural.
    * 
-   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
-  public boolean FIfExp.lockMyBranch(boolean then) {
+  public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
 	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
-		  getIfExp().markAsStructuralParameter();
+		  getIfExp().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
-		  return lockBranch();
+		  return lockBranch(checkType);
 	  }
   }
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
    * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch()}.
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
    * 
    * Any parameters used in the test will be marked as structural.
    * 
-   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
-  public boolean FIfEquation.lockMyBranch(boolean then) {
+  public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
 	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
-		  getTest().markAsStructuralParameter();
+		  getTest().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
-		  return lockBranch();
+		  return lockBranch(checkType);
 	  }
   }
 
@@ -578,13 +582,14 @@ aspect InstanceErrorCheck {
 		//       need that for other things as well, but is there problems with it?
 	}	
 	
-	public void FExp.checkConstantExpression(String varKind, String varName) {
+	public void FExp.checkConstantExpression(ErrorCheckType checkType, String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
 		boolean failed = false;
 		try {
 			if (isCircular()) {
-				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
-						varKind, varName, exp);
+			    if (!checkType.allowConstantNoValue())
+    				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
+    						varKind, varName, exp);
 			} else {
 				CValue val = ceval();
 				if (val.isUnknown()) {
@@ -601,7 +606,7 @@ aspect InstanceErrorCheck {
 		} catch (ConstantEvaluationException e) {
 			failed = true;
 		}
-		if (failed)
+		if (failed && !checkType.allowConstantNoValue())
 			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
 	}
 	
@@ -618,7 +623,7 @@ aspect InstanceErrorCheck {
 	    		// TODO: Check structural parameters as well
 				// Check if the binding expression of constants can be evaluated
 				if (isConstant()) 
-					bexp.checkConstantExpression("constant", qualifiedName());
+					bexp.checkConstantExpression(checkType, "constant", qualifiedName());
 				else if (isParameter() && bexp.isCircular())
 					bexp.error("Circularity in binding expression of parameter: %s = %s", 
 							qualifiedName(), bexp);
@@ -634,7 +639,7 @@ aspect InstanceErrorCheck {
     		// Mark parameters with Evaluate=true as structural
     		if (isParameter() && annotation().forPath("Evaluate").bool())
     		    if (canEvaluateAsStructural())
-    		        markAsStructuralParameter();
+    		        markAsStructuralParameter(checkType);
     		    else
     		        warning("Evaluate annotation is ignored when fixed equals false");
 			
@@ -643,7 +648,7 @@ aspect InstanceErrorCheck {
 			getLocalFArraySubscriptsOpt().collectErrors(checkType);
 			
 			// Check attributes for primitive variables
-			checkAttributes();
+			checkAttributes(checkType);
 		}
 	}
 	
@@ -663,9 +668,9 @@ aspect InstanceErrorCheck {
     }
     eq FInstAccessExp.canEvaluateAsStructural() = getInstAccess().myInstComponentDecl().canEvaluateAsStructural();
 	
-	public void InstAssignable.checkAttributes() {}
+	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
 	
-	public void InstPrimitive.checkAttributes() {
+	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {
 		// Check if the expressions of the attributes can be evaluated
 		// Note that this check has to be done locally in the
 		// context of an InstAssignable node in order to avoid
@@ -678,11 +683,11 @@ aspect InstanceErrorCheck {
 				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
 					if (val_mod.variability().lessOrEqual(fConstant())) 
-						val_mod.checkConstantExpression("attribute", icm.getName().name());
+						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
 					else if (!val_mod.variability().lessOrEqual(fParameter())) 
 						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
 								icm.getName().name(), val_mod);
-					if (val_mod.isCircular())
+					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
 						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
 								icm.getName().name(), val_mod);
 				}

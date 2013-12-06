@@ -83,22 +83,11 @@ aspect ComplianceCheck {
 	}
     
     
-//    public void InstExpandableConnectorDecl.complianceCheck(ErrorCheckType checkType) {
-//        if (inExpandableConnector())
-//            compliance("Nested expandable connectors are not supported");
-//    }
-    
     public void FConnectClause.complianceCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1().getInstAccess();
         InstAccess right = getConnector2().getInstAccess();
         if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
             compliance("Adding variables to non-declared nested expandable connectors is not supported");
-//        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
-//                left.isNestledExpandableConnectorPart())
-//            compliance("Nested expandable connectors are not supported");
-//        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
-//                right.isNestledExpandableConnectorPart())
-//            compliance("Nested expandable connectors are not supported");
     }
     
     syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
@@ -303,23 +292,23 @@ aspect ComplianceCheck {
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (hasMinimumLength()) {
-			getMinimumLength().markAsStructuralParameter();
+			getMinimumLength().markAsStructuralParameter(checkType);
 			if (!getMinimumLength().variability().parameterOrLess())
 				getMinimumLength().compliance("minimumLength with higher than parameter variability is not supported");
 		}
 		if (hasLeftJustified()) {
-			getLeftJustified().markAsStructuralParameter();
+			getLeftJustified().markAsStructuralParameter(checkType);
 			if (!getLeftJustified().variability().parameterOrLess())
 				getLeftJustified().compliance("leftJustified with higher than parameter variability is not supported");
 		}
 		if (hasSignificantDigits()) {
-			getSignificantDigits().markAsStructuralParameter();
+			getSignificantDigits().markAsStructuralParameter(checkType);
 			if (!getSignificantDigits().variability().parameterOrLess())
 				getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
 		}
 		if (hasFormat()) {
 			getFormat().compliance("format argument is not supported");
-//			getFormat().markAsStructuralParameter();
+//			getFormat().markAsStructuralParameter(checkType);
 //			if (!getSignificantDigits().variability().parameterOrLess())
 //				getFormat().compliance("format with higher than parameter variability is not supported");
 		}
@@ -333,7 +322,7 @@ aspect ComplianceCheck {
 			} else if (variability().lessOrEqual(fParameter())) {
 				warning("String parameters are only partially supported");
 				if (isParameter())
-					markAsStructuralParameter();
+					markAsStructuralParameter(checkType);
 			} else {
 				compliance("String variables are not supported");
 			}
