@@ -455,6 +455,14 @@ aspect InstanceErrorCheck {
     eq InstClassDecl.getChild().inInstComponent()     = false;
     eq InstRoot.getChild().inInstComponent()          = false;
     eq FlatRoot.getChild().inInstComponent()          = false;
+    
+    
+    public void FExp.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
+            super.collectErrors(checkType);
+        }
+    }
 
   	public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
@@ -949,6 +957,7 @@ aspect InstanceErrorCheck {
             for (Index j : ivals.indices()) {
                 var.setEvaluationValue(ivals.getCell(j));
                 if (last) {
+                    child.resetCollectErrors();
                     child.collectErrors(checkType);
                     child.flushAllRecursive();
                 } else {
@@ -983,6 +992,7 @@ aspect InstanceErrorCheck {
 	    	                "(): can only call functions that have one algorithm section or external function specification");
 	    	} else {
 	    		// Function exists, check everything
+	            errorChecked = false; // super also uses errorChecked
 	    		super.collectErrors(checkType);
 	    		
 	    		// We need to check the function definition as well.

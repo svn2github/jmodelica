@@ -1666,9 +1666,12 @@ aspect ConstantEvaluation {
 	 * consequence, identifiers in expressions refers to InstAssignable nodes,
 	 * and accordingly, it it necessary to compute the constant value 
 	 * corresponding to an InstAssignable node. If the assignable is a
-	 * constant or a parametes, and if it has a binding expression, then
+	 * constant or a parameter, and if it has a binding expression, then
 	 * a corresponding CValue object is returned, otherwise, CValueUnknown
-	 * is returned.
+	 * is returned. If the variable has <code>evaluationValue</code> set, 
+	 * then that value is always returned.
+	 * 
+	 * Outside of functions, the calculated value is cached.
 	 * 
 	 * @return The constant value.
 	 */
@@ -1677,13 +1680,16 @@ aspect ConstantEvaluation {
 		if (evaluationValue != null) {
 			val = evaluationValue;
 		} else if ((isConstant() || isParameter()) && !isForIndex()) {
+		    boolean func = inFunction();
 	    	if (hasBindingFExp()) {
 		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())
-	    			val = bexp.ceval(i);
+	    			val = bexp.ceval(func ? i : Index.NULL);
 	    	} else {
 	    		val = startAttributeCValue();
 	    	}
+	    	if (!func)
+	    	    evaluationValue = val;
 		}
 		return val;
 	}
