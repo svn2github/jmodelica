@@ -429,10 +429,9 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             /* Solve block */
             ef = block_solver->solve(block_solver);
-            
             memcpy(x_new,block_solver->x,block_solver->n*sizeof(jmi_real_t));
             
-            ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
+            /* ef = block_solver->update_discrete_variables(block_Wsolver->problem_data, &non_reals_changed_flag); */
 
             iter = 0;
             while (1 && ef==0){
@@ -442,16 +441,21 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                     iter, cur_time);
 
                 iter += 1;
-
+                
                 h = compute_minimal_step(block_solver, x, x_new, 1e-4);
                 compute_reduced_step(h,x_new,x,x,block_solver->n);
-                
                 jmi_log_reals(log, iter_node, logInfo, "step", &h, 1);
 
                 block_solver->F(block_solver->problem_data,x,NULL,JMI_BLOCK_WRITE_BACK);
 
                 ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
-
+                if (non_reals_changed_flag == 0){
+                    jmi_log_node(log, logError, "Error", "Error updating discrete variables with the new x <block:%d, iter:%d> at <t:%E>",
+                        block_solver->id, iter, cur_time);
+                    jmi_log_leave(log, iter_node);
+                    break;
+                }
+                
                 if(ef != 0) { 
                     switch(ef) {
                     case jmi_block_solver_status_err_event_eval:
@@ -480,13 +484,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 memcpy(x_new, block_solver->x, block_solver->n*sizeof(jmi_real_t));
 
-                jmi_log_reals(log, iter_node, logInfo, "ivs", block_solver->x, block_solver->n);
+                jmi_log_reals(log, iter_node, logInfo, "ivs (old)", x, block_solver->n);
+                jmi_log_reals(log, iter_node, logInfo, "ivs (new)", x_new, block_solver->n);
                 block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 non_reals_not_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, x_new);
-                /* non_reals_not_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, NULL); */
                 
-                jmi_log_reals(log, iter_node, logInfo, "ivs (next)", x_new, block_solver->n);
                 block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 /* Check for consistency */

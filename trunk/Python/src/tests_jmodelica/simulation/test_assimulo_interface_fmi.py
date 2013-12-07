@@ -115,17 +115,15 @@ class Test_Events:
         
     @testattr(stddist = True)
     def test_enhanced_event_iteration_2(self):
-        pass
-        #THIS SHOULD BE ACTIVATED!
-        #model = load_fmu("EventIter_EnhancedEventIteration2.fmu")
-        #res = model.simulate(final_time=2.0)
+        model = load_fmu("EventIter_EnhancedEventIteration2.fmu")
+        res = model.simulate(final_time=2.0)
         
-        #nose.tools.assert_almost_equal(res["y"][0], 1.0)
-        #nose.tools.assert_almost_equal(res["w"][0], 0.0)
-        #nose.tools.assert_almost_equal(res["x"][-1], 2.0)
-        #nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
-        #nose.tools.assert_almost_equal(res["z"][-1], 0.0)
-        #nose.tools.assert_almost_equal(res["w"][-1], 1.0)
+        nose.tools.assert_almost_equal(res["y"][0], 1.0)
+        nose.tools.assert_almost_equal(res["w"][0], 0.0)
+        nose.tools.assert_almost_equal(res["x"][-1], 2.0)
+        nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
+        nose.tools.assert_almost_equal(res["z"][-1], 0.0)
+        nose.tools.assert_almost_equal(res["w"][-1], 1.0)
 
 class Test_Relations:
     @classmethod

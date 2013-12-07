@@ -77,17 +77,13 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     jmi_real_t* sw_current = jmi_get_sw(jmi);
     jmi_real_t* sw_new;
 
-    if (x != NULL) {
-        block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
+    block->F(jmi,x,NULL,JMI_BLOCK_WRITE_BACK);
 
-        sw_new = &block->sw_old[(block->event_iter+1)*block->n_sw];
-        jmi_evaluate_switches(jmi,sw_new,block->mode_sw);
-    } else {
-        sw_new = &block->sw_old[(block->event_iter-1)*block->n_sw];
-    }
+    sw_new = &block->sw_old[(block->event_iter+1)*block->n_sw];
+    memcpy(sw_new, sw_current, block->n_sw*sizeof(jmi_real_t));
+    jmi_evaluate_switches(jmi,sw_new,block->mode_sw);
     
-    return jmi_compare_switches(sw_current,sw_new,block->n_sw); 
-    
+    return jmi_compare_switches(sw_current,sw_new,block->n_sw);
 }
 
 int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
