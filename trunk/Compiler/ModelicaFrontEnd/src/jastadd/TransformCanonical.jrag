@@ -5124,7 +5124,7 @@ aspect ArrayAccessRewrite {
             FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{size()});
             funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
             funcVars.add(outputSize.createFunctionVariable("y", type(), new FOutput()));
-            FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)));
+            FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)), new FReturnStmt());
             funcDecl.setInlineAnnotation(FFunctionDecl.InlineAnnotation.NONE);
             myFClass().addFFunctionDecl(funcDecl);
             return call;

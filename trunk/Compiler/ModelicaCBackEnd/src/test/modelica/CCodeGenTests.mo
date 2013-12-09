@@ -12152,6 +12152,36 @@ model TestEmptyArray1
 ")})));
 end TestEmptyArray1;
 
+model VariableArrayIndex1
+    Real table[:] = {42, 3.14};
+    Integer i = if time > 1 then 1 else 2;
+    Real x = table[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex1",
+            description="Test of variable array index access",
+            template="$C_functions$",
+            generatedCode="
+void func_temp_1_def(jmi_ad_var_t i_0_v, jmi_array_t* x_a, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_v;
+    y_v = jmi_array_val_1(x_a, i_0_v);
+    if (y_o != NULL) *y_o = y_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_temp_1_exp(jmi_ad_var_t i_0_v, jmi_array_t* x_a) {
+    jmi_ad_var_t y_v;
+    func_temp_1_def(i_0_v, x_a, &y_v);
+    return y_v;
+}
+
+")})));
+end VariableArrayIndex1;
+
+
 model TestRelationalOp1
 Real v1(start=-1);
 Real v2(start=-1);

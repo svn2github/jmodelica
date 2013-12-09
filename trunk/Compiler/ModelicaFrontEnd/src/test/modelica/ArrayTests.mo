@@ -5661,6 +5661,7 @@ public
   output Real y;
  algorithm
   y := x[i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.Equation;
@@ -5697,6 +5698,7 @@ public
   output Real y;
  algorithm
   y := x[i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim1;
@@ -5733,6 +5735,7 @@ public
   output Real y;
  algorithm
   y := x[i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim2;
@@ -5774,6 +5777,7 @@ public
   output Real y;
  algorithm
   y := x[i_0,i_1];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim3;
@@ -5812,6 +5816,7 @@ public
  algorithm
   y[1] := x[i_0,1];
   y[2] := x[i_0,2];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim4;
@@ -5850,6 +5855,7 @@ public
  algorithm
   y[1] := x[1,i_0];
   y[2] := x[2,i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim5;
@@ -5892,6 +5898,7 @@ public
  algorithm
   y[1] := x[1,i_0];
   y[2] := x[2,i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim6;
@@ -5934,6 +5941,7 @@ public
  algorithm
   y[1] := x[i_0,1];
   y[2] := x[i_0,2];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.TwoDim7;
@@ -5971,6 +5979,7 @@ public
   output Real y;
  algorithm
   y := x[i_0];
+  return;
  end temp_1;
 
 end ArrayTests.VariableIndex.Algorithm;
