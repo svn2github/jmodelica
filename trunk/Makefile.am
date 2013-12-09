@@ -150,6 +150,13 @@ endif
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
+if WITH_MINGW
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+endif
+
 	mkdir -p $(DESTDIR)$(prefix)/Options
 	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty

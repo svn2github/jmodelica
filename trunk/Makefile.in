@@ -889,6 +889,11 @@ install-exec-local: install-python-packages
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
+@WITH_MINGW_TRUE@	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+@WITH_MINGW_TRUE@	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+@WITH_MINGW_TRUE@	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+@WITH_MINGW_TRUE@	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+
 	mkdir -p $(DESTDIR)$(prefix)/Options
 	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
