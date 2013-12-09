@@ -282,6 +282,7 @@ int jmi_initialize(jmi_t* jmi) {
     jmi->atInitial = JMI_FALSE;
 
     jmi_copy_pre_values(jmi);
+    jmi_save_last_successful_values(jmi);
 
     jmi->is_initialized = 1;
  
@@ -645,6 +646,8 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
         if(retval != 0) {
             jmi_log_node(jmi->log, logError, "Error",
                 "Evaluating the derivatives failed at <t:%g>", jmi_get_t(jmi)[0]);
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_last_successful_values(jmi);
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -654,13 +657,25 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     return 0;
 }
 
+int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
+    int retval = 0;
+    
+    /* Save the z values to the z_last vector */
+    jmi_save_last_successful_values(jmi);
+    
+    *triggered_event = JMI_FALSE;
+    return retval;
+}
+
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
     int retval;
 
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "Error",
+                "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>", jmi_get_t(jmi)[0]);
+            jmi_reset_last_successful_values(jmi);
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -788,7 +803,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* Copy new values to pre values */
         jmi_copy_pre_values(jmi);
-
+        
         if (intermediate_results) {
             break;
         }

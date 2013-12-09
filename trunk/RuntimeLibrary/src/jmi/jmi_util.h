@@ -1060,6 +1060,7 @@ struct jmi_t {
     int offs_pre_guards_init;            /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
 
     jmi_real_t** z;                      /**< \brief  This vector contains the actual values. */
+    jmi_real_t** z_last;                 /**< \brief  This vector contains the values from the last successful integration step. */
     jmi_real_t** dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
     int dz_active_index;                 /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
     int block_level;                     /**< \brief Block level for nested equation blocks. Currently 0 or 1. */

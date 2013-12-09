@@ -103,8 +103,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
                              block->id);
             }
             else {
-                jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d>", 
-                             block->id);
+                jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected for <block: %d> at <t: %f>", 
+                             block->id, block->cur_time);
             }
             /* return -1; */
             solver->singular_jacobian = 1;

@@ -486,6 +486,22 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
 int jmi_copy_pre_values(jmi_t *jmi);
 
 /**
+ * \brief Reset the z vector to the last successful state.
+ *
+ * @param jmi The jmi_t struct.
+ * @return Error code.
+ */
+int jmi_reset_last_successful_values(jmi_t *jmi);
+
+/**
+ * \brief Save the complete z vector.
+ *
+ * @param jmi The jmi_t struct.
+ * @return Error code.
+ */
+int jmi_save_last_successful_values(jmi_t *jmi);
+
+/**
  * \brief Get a pointer to the z vector containing all variables.
  *
  * @param jmi The jmi_t struct.
@@ -493,6 +509,15 @@ int jmi_copy_pre_values(jmi_t *jmi);
  *
  */
 jmi_real_t* jmi_get_z(jmi_t* jmi);
+
+/**
+ * \brief Get a pointer to the last successful z vector containing all variables.
+ *
+ * @param jmi The jmi_t struct.
+ * @return A pointer to the \f$z\f$ vector.
+ *
+ */
+jmi_real_t* jmi_get_z_last(jmi_t* jmi);
 
 /**
  * \brief Get a pointer to the real independent constants vector.

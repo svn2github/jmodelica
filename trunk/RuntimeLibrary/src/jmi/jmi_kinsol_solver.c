@@ -1393,7 +1393,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                              "re-scaled equations failed in <block: %d>", block->id); 
             } else {
                 jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %d>",
-                             block->id); 
+                             block->id);
             }
 #ifdef JMI_KINSOL_PRINT_ON_FAIL
             {

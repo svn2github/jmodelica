@@ -159,11 +159,25 @@ fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_
 }
 
 fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
+    fmiInteger retval;
+    fmiReal triggered_event;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    *callEventUpdate = fmiFalse;
+    retval = jmi_completed_integrator_step(jmi, &triggered_event);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    if (triggered_event == 1.0){
+        *callEventUpdate = fmiTrue;
+    }else{
+        *callEventUpdate = fmiFalse;
+    }
+    
     return fmiOK;
 }
 
