@@ -532,6 +532,42 @@ $C_ode_initialization$
 ")})));
 end CCodeGenTest16;
 
+
+model CCodeGenTest17
+	type A = enumeration(a, b, c);
+	A a;
+equation
+	when time > 2 then
+		a = pre(a);
+	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="CCodeGenTest17",
+			description="Test C code compilation for pre() of enum variable",
+			variability_propagation=false,
+			template="
+$C_variable_aliases$
+-----
+$C_ode_initialization$
+",
+			generatedCode="
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define _a_0 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _temp_1_1 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define pre_a_0 ((*(jmi->z))[jmi->offs_pre_integer_d+0])
+#define pre_temp_1_1 ((*(jmi->z))[jmi->offs_pre_boolean_d+0])
+
+-----
+    model_ode_guards(jmi);
+    _temp_1_1 = _sw(0);
+    pre_a_0 = 1;
+    _a_0 = pre_a_0;
+    pre_temp_1_1 = JMI_FALSE;
+")})));
+end CCodeGenTest17;
+
+
 model CLogExp1
  Boolean x = true;
  Boolean y = false;

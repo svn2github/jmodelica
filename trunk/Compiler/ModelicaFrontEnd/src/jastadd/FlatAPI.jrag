@@ -2134,7 +2134,8 @@ aspect FVariableUses {
 	eq FPreBooleanVariable.myNonPreVariable() = lookupFV(getFQName());
 	eq FPreIntegerVariable.myNonPreVariable() = lookupFV(getFQName());
 	eq FPreRealVariable.myNonPreVariable()    = lookupFV(getFQName());
-	eq FPreStringVariable.myNonPreVariable()  = lookupFV(getFQName());
+    eq FPreStringVariable.myNonPreVariable()  = lookupFV(getFQName());
+    eq FPreEnumVariable.myNonPreVariable()    = lookupFV(getFQName());
 	
 }
 

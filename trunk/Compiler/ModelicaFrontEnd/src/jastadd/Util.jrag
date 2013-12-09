@@ -1300,6 +1300,7 @@ aspect FlatNames {
     eq FPreIntegerVariable.variableIndex()    = myNonPreVariable().variableIndex();
     eq FPreRealVariable.variableIndex()       = myNonPreVariable().variableIndex();
     eq FPreStringVariable.variableIndex()     = myNonPreVariable().variableIndex();
+    eq FPreEnumVariable.variableIndex()       = myNonPreVariable().variableIndex();
     
     inh int FAbstractVariable.findVariableIndex();
     eq FClass.getFVariable(int i).findVariableIndex()     = i;
