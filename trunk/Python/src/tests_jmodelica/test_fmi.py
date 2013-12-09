@@ -480,7 +480,32 @@ class Test_FMUModelME1:
         self._dq.initialize()
         self.dep = load_fmu("DepParTests_DepPar1.fmu")
         self.dep.initialize()
+    
+    @testattr(stddist = True)
+    def test_check_against_unneccesary_derivatives_eval(self):
+        name = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"), compiler_options={"generate_html_diagnostics":True, "log_level":6})
 
+        model = load_fmu(name, log_level=6)
+        model.set("_log_level", 6)
+        model.initialize()
+        
+        len_log = len(model.get_log())
+        model.time = 1e-4
+        model.get_derivatives()
+        assert len(model.get_log()) > len_log
+        len_log = len(model.get_log())
+        model.time = 1e-4
+        model.get_derivatives()
+        assert len(model.get_log()) == len_log
+        len_log = len(model.get_log())
+        model.continuous_states = model.continuous_states
+        model.get_derivatives()
+        assert len(model.get_log()) == len_log
+        len_log = len(model.get_log())
+        model.continuous_states = model.continuous_states+1
+        model.get_derivatives()
+        assert len(model.get_log()) > len_log
+    
     @testattr(stddist = True)
     def test_custom_result_handler(self):
         model = self.rlc
