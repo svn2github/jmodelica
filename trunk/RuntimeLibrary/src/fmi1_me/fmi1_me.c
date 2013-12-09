@@ -124,24 +124,37 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
+    jmi_real_t* time_old = (jmi_get_t(jmi));
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    *(jmi_get_t(jmi)) = time;
-    jmi->recomputeVariables = 1;
+    if (*time_old != time) {
+        *time_old = time;
+        jmi->recomputeVariables = 1;
+    }
+    /* *(jmi_get_t(jmi)) = time; 
+    jmi->recomputeVariables = 1; */
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
+    jmi_real_t* x_cur = jmi_get_real_x(jmi);
+    fmiInteger i;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
-    jmi->recomputeVariables = 1;
+    for (i = 0; i < nx; i++){
+        if (x_cur[i] != x[i]){
+            x_cur[i] = x[i];
+            jmi->recomputeVariables = 1;
+        }
+    }
+    /* memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
+    jmi->recomputeVariables = 1; */
     return fmiOK;
 }
 
