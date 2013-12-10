@@ -1,14 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
+<appendix version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
   <title>Release notes</title>
+
+  <section>
+    <title>Release notes for JModelica.org version 1.12</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Modelica.Mechanics.MultiBody</para>
+          </listitem>
+
+          <listitem>
+            <para>expandable connectors</para>
+          </listitem>
+
+          <listitem>
+            <para>when statements</para>
+          </listitem>
+
+          <listitem>
+            <para>event generating functions</para>
+          </listitem>
+
+          <listitem>
+            <para>over-constrained connection graphs</para>
+          </listitem>
+
+          <listitem>
+            <para>reinit() operator</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compilers</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Simulation</title>
+
+      <para/>
+    </section>
+
+    <section>
+      <title>Contributors</title>
+
+      <para>Bengt-Arne Andersson</para>
+
+      <para>Christian Andersson</para>
+
+      <para>Tove Bergdahl</para>
+
+      <para>Emil Fredriksson</para>
+
+      <para>Magnus Gäfvert</para>
+
+      <para>Toivo Henningsson</para>
+
+      <para>Jonathan Kämpe</para>
+
+      <para>Fredrik Magnusson</para>
+
+      <para>Jesper Mattsson</para>
+
+      <para>Iakov Nakhimovski</para>
+
+      <para>Jon Sten</para>
+
+      <para>Johan Ylikiiskilä</para>
+
+      <para>Johan Åkesson</para>
+
+      <section>
+        <title>Previous contributors</title>
+
+        <para>Sofia Gedda</para>
+
+        <para>Björn Lennernäs</para>
+
+        <para>Petter Lindgren</para>
+
+        <para>John Lindskog</para>
+
+        <para>Tobias Mattsson</para>
+
+        <para>Lennart Moraeus</para>
+
+        <para>Philip Nilsson</para>
+
+        <para>Teo Nilsson</para>
+
+        <para>Patrik Meijer</para>
+
+        <para>Kristina Olsson</para>
+
+        <para>Roberto Parrotto</para>
+
+        <para>Jens Rantil</para>
+
+        <para>Philip Reuterswärd</para>
+
+        <para>Jonas Rosenqvist</para>
+      </section>
+    </section>
+  </section>
 
   <section>
     <title>Release notes for JModelica.org version 1.11</title>
@@ -2327,4 +2435,4 @@ parameter Real p2 = p1;
       </section>
     </section>
   </section>
-</chapter>
+</appendix>
