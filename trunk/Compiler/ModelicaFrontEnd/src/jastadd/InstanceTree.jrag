@@ -1804,8 +1804,24 @@ aspect SourceAST_API {
     syn Iterable<Modification> BaseClassDecl.elementModifications() = Collections.<Modification>emptyList();
     eq FullClassDecl.elementModifications()                         = getElementModifications();
 
+    public class ASTNode {
+        protected static final Criteria<ASTNode> NOT_ERROR_NODE_CRITERIA = new Criteria<ASTNode>() {
+            public boolean test(ASTNode elem) {
+                return !elem.isError();
+            }
+        };
+    
+        public static <N extends ASTNode> Iterable<N> filterErrorNodes(final Iterable<N> parent) {
+            return new Iterable<N>() {
+                public Iterator<N> iterator() {
+                    return new FilteredIterator<N>(parent.iterator(), NOT_ERROR_NODE_CRITERIA);
+                }
+            };
+        }
+    }
+
 	syn Iterable<ClassDecl> ClassDecl.classes() = Collections.<ClassDecl>emptyList();
-	eq FullClassDecl.classes()                  = getClassDecls();
+	eq FullClassDecl.classes()                  = filterErrorNodes(getClassDecls());
 	syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
 		// Imposes ordering specified in LibClassDecl.order
 		Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
@@ -1814,7 +1830,8 @@ aspect SourceAST_API {
 		for (LibNode ln : getLibNodes()) {
 		    for (Element e : ln.getStoredDefinition().getElements()) {
 		    	ClassDecl cd = (ClassDecl) e;
-				map.put(cd.name(), cd);
+                if (!cd.isError())
+                    map.put(cd.name(), cd);
 			}
 		}
 		
@@ -1833,9 +1850,10 @@ aspect SourceAST_API {
 	}
     syn Iterable<ClassDecl> Program.classes() {
     	ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
-    	for (StoredDefinition sd : getUnstructuredEntitys()) 
-    		for (Element e : sd.getElements()) 
-    			l.add((ClassDecl) e);
+        for (StoredDefinition sd : getUnstructuredEntitys()) 
+            for (Element e : sd.getElements()) 
+                if (!e.isError())
+                    l.add((ClassDecl) e);
     	// Libraries are loaded when needed in instance lookup instead
     	return l;
     } 

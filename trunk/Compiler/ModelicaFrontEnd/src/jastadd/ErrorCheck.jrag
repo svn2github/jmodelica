@@ -58,6 +58,15 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @see ASTNode#warning(String)
 	   */
 	  public void warning(String s, ASTNode n);
+      
+      /**
+       * Called when a problem is generated though other means than the other methods in this interface, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p);
 	  
 	  /**
 	   * Connect error handler to a Root.
@@ -112,13 +121,26 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void warning(String s, ASTNode n) {
 		  problem(s, n, root.warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
 	  }
-	  
-	  protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
-		  Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
-		  if (!list.contains(p))
-			  list.add(p);
-	  }
-	  
+
+      /**
+       * Called when a problem is generated though other means than the other methods in this class, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p) {
+          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? root.warnings : root.errors;
+          if (!list.contains(p))
+              list.add(p);
+      }
+
+      protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
+          Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
+          if (!list.contains(p))
+              list.add(p);
+      }
+
 	  public IErrorHandler connectTo(Root root) {
 		  IErrorHandler eh = new DefaultErrorHandler(root);
 		  root.setErrorHandler(eh);
@@ -169,6 +191,17 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void warning(String s, ASTNode n) {
 		  delegate.warning(s, n);
 	  }
+
+      /**
+       * Called when a problem is generated though other means than the other methods in this class, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p) {
+          delegate.problem(p);
+      }
 	  
 	  public IErrorHandler connectTo(Root root) {
 		  delegate = delegate.connectTo(root);
@@ -285,6 +318,14 @@ aspect ErrorCheck {
    */
   public void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
+  }
+
+  /**
+   * Register a problem. Delegates to an {@link IErrorHandler}.
+   * @param p   the problem.
+   */
+  public void ASTNode.problem(Problem p) {
+      root().getErrorHandler().problem(p);
   }
   
   /**
