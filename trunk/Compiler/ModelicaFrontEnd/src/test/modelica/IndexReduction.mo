@@ -355,7 +355,7 @@ equation
 
 Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction4_Err.F(x2)' in equation:
+  Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.IndexReduction4_Err.F(x2)' in equation:
    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
 ")})));
 end IndexReduction4_Err;
@@ -384,7 +384,7 @@ equation
 
 Error: in file 'IndexReduction.IndexReduction5_Err.mof':
 Semantic error at line 0, column 0:
-  Cannot differentiate call to function without derivative annotation 'IndexReduction.IndexReduction5_Err.F(x2)' in equation:
+  Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.IndexReduction5_Err.F(x2)' in equation:
    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
 ")})));
 end IndexReduction5_Err;
@@ -2647,5 +2647,158 @@ At line 0, column 0:
   a_v has stateSelect=always, but could not be selected as state
 ")})));
 end IndexReduction57;
+
+package AlgorithmDifferentiation
+
+model Simple
+  function F
+    input Real x;
+    output Real y;
+  algorithm
+    y := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_Simple",
+            description="Test differentiation of simple function",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.Simple
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.Simple.F(x2) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.Simple._der_F(x2, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.Simple.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Simple.F;
+
+ function IndexReduction.AlgorithmDifferentiation.Simple._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  y := sin(x);
+  _der_y := cos(x) * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Simple._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.Simple;
+")})));
+end Simple;
+
+  model PlanarPendulum
+    function square
+      input Real x;
+      output Real y;
+    algorithm
+      y := x ^ 2;
+      annotation(Inline=false, smoothOrder=2);
+    end square;
+  
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    square(x) + square(y) = L;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_PlanarPendulum",
+            description="Test differentiation of simple function twice",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.PlanarPendulum
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ Real _der_y;
+ Real _der_vy;
+ Real _der_der_x;
+ Real _der_der_y;
+initial equation 
+ x = 0.0;
+ vx = 0.0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ der(vx) = lambda * x;
+ _der_vy = lambda * y - g;
+ IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square(y) = L;
+ IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(x, der(x)) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square(y, _der_y) = 0.0;
+ _der_der_x = der(vx);
+ _der_der_y = _der_vy;
+ IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(x, der(x), _der_der_x) + IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square(y, _der_y, _der_der_y) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square
+  input Real x;
+  output Real y;
+ algorithm
+  y := x ^ 2;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.PlanarPendulum.square;
+
+ function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  y := x ^ 2;
+  _der_y := 2 * x * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square;
+
+ function IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square
+  input Real x;
+  input Real _der_x;
+  input Real _der_der_x;
+  output Real _der_der_y;
+  Real _der_y;
+  Real y;
+ algorithm
+  y := x ^ 2;
+  _der_y := 2 * x * _der_x;
+  _der_der_y := 2 * x * _der_der_x + 2 * _der_x * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square;
+
+end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
+")})));
+  end PlanarPendulum;
+
+
+
+end AlgorithmDifferentiation;
+
 
 end IndexReduction;

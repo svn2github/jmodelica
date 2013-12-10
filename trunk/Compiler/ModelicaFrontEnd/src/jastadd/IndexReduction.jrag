@@ -161,7 +161,10 @@ aspect IndexReduction {
      */
     public FQName FQName.createDerPrefixedName(int order) {
         FQName pref = copyPrefix();
-        String name = createDerPrefixString(order) + lastActualPartName();
+        String name = lastActualPartName();
+        if (name.startsWith("_"))
+            name = name.substring(1);
+        name = createDerPrefixString(order) + name;
         FQName der;
         if (hasFArraySubscripts())
             der = pref.copyAndAppend(name, getFArraySubscripts().fullCopy());

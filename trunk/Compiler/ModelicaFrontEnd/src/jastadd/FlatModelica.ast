@@ -98,6 +98,12 @@ FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           FQName;
 
 /**
+ * A flat derivative variable in a function.
+ * Created when a FFunctionVariabe is differentiated.
+ */
+FFunctionDerivativeVariable : FFunctionVariable ::= <Order:int>;
+
+/**
  * \brief An array variable in a function. 
  */
 FFunctionArray : FFunctionVariable;
@@ -637,6 +643,11 @@ FElseEquation : FIfWhenElseEquation;
  */
 FAlgorithm : FAbstractEquation ::= FStatement*;
 
+/**
+ * A flattened derivative algorithm clause.
+ * Created when a FAlgorithm is differentiated.
+ */
+FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 
 /**
  * \brief Base class for statements in flattened algorithms.
@@ -652,6 +663,12 @@ InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
  * \brief A flattened assignment statement.
  */
 FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
+
+/**
+ * A flattened derivative assignment statement.
+ * Created when a FAssignStmt is differentiated.
+ */
+FDerivativeAssignStmt : FAssignStmt ::= <Order:int>;
 
 /**
  * \brief A flattened function call statement.

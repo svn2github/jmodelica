@@ -400,6 +400,11 @@ aspect FlatTypeCheck {
   }
   eq FIdUseExp.asFIdUse() = getFIdUse();
   
+  syn FIdUseExp FExp.asFIdUseExp() {
+      throw new UnsupportedOperationException("asFIdUseExp() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq FIdUseExp.asFIdUseExp() = this;
+  
 	syn boolean FExp.isInstAccess()  = false;
 	eq FInstAccessExp.isInstAccess() = true;
 	syn InstAccess FExp.asInstAccess() {

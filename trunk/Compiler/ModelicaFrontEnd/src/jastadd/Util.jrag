@@ -1173,7 +1173,10 @@ aspect FlatNames {
 		String name = prefixActualPartName();
 		if (!name.isEmpty())
 			name += ".";
-		name += createDerPrefixString(order) + lastActualPartName();
+		String last = lastActualPartName();
+		if (last.startsWith("_"))
+		    last = last.substring(1);
+		name += createDerPrefixString(order) + last;
 		if (hasFArraySubscripts())
 			name += getFArraySubscripts();
 		return name;

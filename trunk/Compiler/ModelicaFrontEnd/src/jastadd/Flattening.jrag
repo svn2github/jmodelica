@@ -206,6 +206,7 @@ aspect Flattening {
 				ffd.setFDerivativeFunction(der);
 			// TODO: should we look in extends as well?
 			ffd.readInlineAnnotation(annotation());
+			ffd.readSmoothOrderAnnotation(annotation());
 			
 			fc.addFFunctionDecl(ffd);
 			ffd.ensureFQNamesFull();

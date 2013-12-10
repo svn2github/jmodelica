@@ -492,8 +492,7 @@ aspect FlatAPI {
   	// The LinkedHashSet is used here to avoid duplicates.
 	coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesSet() 
 	  [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
-	FDerExp contributes
- 		(FRealVariable) getFIdUse().myFV() when !getFIdUse().myFV().isUnknown() && !inDeadIfBranch()
+	FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
@@ -1264,6 +1263,12 @@ aspect FlatAPI {
 	
 	syn boolean FVariable.isVariable() = !isParameter() && !isConstant();
 	
+	syn boolean FAbstractVariable.isFVariable() = false;
+	eq FVariable.isFVariable()                  = true;
+
+    syn boolean FAbstractVariable.isFFunctionVariable() = false;
+    eq FFunctionVariable.isFFunctionVariable()          = true;
+
 	syn boolean FAbstractVariable.isDifferentiatedVariable() = false;
 	syn lazy boolean FVariable.isDifferentiatedVariable() = 
 	  myFClass().differentiatedRealVariables().contains(this);
@@ -1934,8 +1939,7 @@ aspect FVariableUses {
 	  [new LinkedHashSet<FVariable>()] 
 		with addAll root FlatRoot;
 	
-	FIdUseExp contributes boundParameters() 
-		when !myFV().isUnknown() && myFV().isParameter()
+	FIdUseExp contributes boundParameters() when myFV().isParameter()
 		to FAbstractVariable.dependentParameters() for myFV();
 	
 	syn lazy ArrayList<FRealVariable> FAbstractVariable.dependentRealParameters() =
@@ -1959,7 +1963,7 @@ aspect FVariableUses {
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when 
-        !myFV().isUnknown() && myFV().isInput() to 
+        myFV().isFVariable() && myFV().isInput() to 
         FAbstractEquation.retrieveInputs() for myFEquation();
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.inputs() = 
@@ -2049,8 +2053,7 @@ aspect FVariableUses {
 	coll LinkedHashSet<FDerivativeVariable> FAbstractEquation.derivativeVariables() 
 		[new LinkedHashSet<FDerivativeVariable>()] with add root FAbstractEquation;
 
-	FDerExp contributes (FDerivativeVariable) myFV() when !myFV().isUnknown() && 
-		myFV().isDerivativeVariable() to 
+	FDerExp contributes (FDerivativeVariable) myFV() when myFV().isDerivativeVariable() to 
 		FAbstractEquation.derivativeVariables() for myFEquation();
 
 	/**
@@ -2060,8 +2063,7 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.differentiatedRealVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when 
-        !myFV().isUnknown() && myFV().isDifferentiatedVariable() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDifferentiatedVariable() to 
         FAbstractEquation.differentiatedRealVariables() for myFEquation();
 
 	/**
@@ -2071,8 +2073,7 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.discreteVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when 
-        !myFV().isUnknown() && myFV().isDiscreteVariable() to 
+    FIdUseExp contributes (FVariable) myFV() when myFV().isDiscreteVariable() to 
         FAbstractEquation.discreteVariables() for myFEquation();
 
     /**
@@ -2082,8 +2083,7 @@ aspect FVariableUses {
     coll LinkedHashSet<FVariable> FAbstractEquation.nonFixedParameters()
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when
-        !myFV().isUnknown() && myFV().isNonFixedParameter() to
+    FIdUseExp contributes (FVariable) myFV() when myFV().isNonFixedParameter() to
         FAbstractEquation.nonFixedParameters() for myFEquation();
 
 	/**
@@ -2093,8 +2093,7 @@ aspect FVariableUses {
 	coll LinkedHashSet<FVariable> FAbstractEquation.discretePreVariables() 
 		[new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FPreExp contributes (FVariable) myFV() when 
-        !myFV().isUnknown() && myFV().isPreVariable() to 
+    FPreExp contributes (FVariable) myFV() when myFV().isPreVariable() to 
         FAbstractEquation.discretePreVariables() for myFEquation();
 
 	syn lazy LinkedHashSet<FVariable> FAbstractEquation.variables() {

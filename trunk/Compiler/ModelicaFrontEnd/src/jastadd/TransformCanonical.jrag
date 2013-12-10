@@ -1771,7 +1771,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FIdUseExp {
-		when (rewriteAlias && myFV().isAlias()) to FExp {
+		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
 			FExp new_exp = fv.alias().createUseExp();
 			if (fv.isNegated()) 
@@ -1781,7 +1781,7 @@ aspect TransformCanonical {
 	}
 	
 	rewrite FPreExp {
-		when (rewriteAlias && myNonPreFV().isAlias()) to FExp {
+		when (rewriteAlias && myNonPreFV().isFVariable() && myNonPreFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myNonPreFV();
 			FExp new_exp = fv.alias().createFPreExp();
 			if (fv.isNegated()) 
@@ -1791,7 +1791,7 @@ aspect TransformCanonical {
 	}
 	
 	rewrite FAssignStmt {
-		when (rewriteAlias && getLeft().myFV().isAlias()) to FAssignStmt {
+		when (rewriteAlias && getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) to FAssignStmt {
 			FVariable fv = (FVariable) getLeft().myFV();
 			setLeft(fv.alias().createUseExp());
 			if (fv.isNegated()) 
@@ -1810,8 +1810,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FDerExp {
-		when (rewriteAlias && !getFIdUse().myFV().isUnknown() && 
-				(myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
+		when (rewriteAlias && getFIdUse().myFV().isFVariable() && (myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
 			if (myFV().isAlias()) {
 				FVariable fv = (FVariable) myFV();
 				FExp new_exp = fv.alias().createUseExp();
@@ -1838,7 +1837,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FDummyDerExp {
-		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
 			FExp new_exp = fv.alias().createUseExp();
 			if (myFV().isNegated()) 
@@ -1857,7 +1856,7 @@ aspect TransformCanonical {
 	 * method ASTNode.flushAllRecursiveClearFinal. 
 	 */
 	rewrite FHDummyDerExp {
-		when (rewriteAlias && !myFV().isUnknown() && myFV().isAlias()) to FExp {
+		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
 			FVariable fv = (FVariable) myFV();
 			FExp new_exp = fv.alias().createUseExp();
 			if (myFV().isNegated()) 
@@ -1870,8 +1869,7 @@ aspect TransformCanonical {
 	 * Rewrite derivatives of parameters to zeros.
 	 */
 	rewrite FDerExp {
-		when (!getFIdUse().myFV().isUnknown() &&
-				((FVariable)getFIdUse().myFV()).variability().lessOrEqual(fParameter())) to FExp {
+		when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().lessOrEqual(fParameter())) to FExp {
 			return new FRealLitExp(0.0);
 		}
 	}

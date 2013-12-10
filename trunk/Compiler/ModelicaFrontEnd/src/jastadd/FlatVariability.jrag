@@ -393,7 +393,10 @@ aspect FlatVariability {
 	eq FIdUseExp.assignedFV()               = myFV();
 	
 	
-	syn FTypePrefixVariability FVariable.variability() = getFTypePrefixVariability();
+	syn FTypePrefixVariability FAbstractVariable.variability() {
+	    throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
+	}
+	eq FVariable.variability() = getFTypePrefixVariability();
 		
 		
 	syn boolean FExp.isConstantExp()   = variability().constantVariability();

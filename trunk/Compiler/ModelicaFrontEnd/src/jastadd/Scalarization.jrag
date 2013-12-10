@@ -1584,6 +1584,7 @@ aspect Scalarization {
 		if (hasFDerivativeFunction())
 			fd.setFDerivativeFunction(getFDerivativeFunction().fullCopy());
 		fd.inlineAnnotation = inlineAnnotation;
+		fd.smoothOrderAnnotation = smoothOrderAnnotation;
 		return fd;
 	}
 	
