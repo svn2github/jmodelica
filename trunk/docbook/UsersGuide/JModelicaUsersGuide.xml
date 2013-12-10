@@ -11,9 +11,9 @@
   <info>
     <title><productname>JModelica.org</productname> User Guide</title>
 
-    <subtitle>Version <productnumber>1.11</productnumber></subtitle>
+    <subtitle>Version <productnumber>1.12</productnumber></subtitle>
 
-    <pubdate>2013-09-05</pubdate>
+    <pubdate>2013-12-17</pubdate>
 
     <copyright>
       <year>2013</year>
@@ -205,5 +205,4 @@
       </biblioset>
     </biblioentry>
   </bibliography>
-
 </book>

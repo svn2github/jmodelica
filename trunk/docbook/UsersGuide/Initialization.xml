@@ -43,11 +43,11 @@
       which initializes the JMUModel. The function is called after compiling
       and creating a JMUModel:</para>
 
-      <programlisting language="python"># Compile the stationary initialization model into a DLL
+      <programlisting language="python"># Compile the stationary initialization model into a JMU
 from pymodelica import compile_jmu
 model_name = compile_jmu("My.Model", "/path/to/MyModel.mo")
 
-# Load a model instance into Python
+# Load the model instance into Python
 from pyjmi import JMUModel
 init_model = JMUModel(model_name)
     
@@ -293,7 +293,7 @@ y = init_result['y']
         <para>JModelica.org also provides a method for DAE initialization
         based on the non-linear equation solver KINSOL from the SUNDIALS
         suite. KINSOL is currently comprised in the <link
-        xlink:href="http://www.jmodelica.org/page/199">Assimulo</link>
+        xlink:href="http://www.jmodelica.org/assimulo">Assimulo</link>
         package, included when installing JModelica.org. KINSOL is based on
         Newtons method for solving non-linear equations and is thus locally
         convergent. Attempts are made to make KInitSolveAlg as robust as

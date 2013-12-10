@@ -40,41 +40,35 @@
     <title>Technology</title>
 
     <para>JModelica.org relies on the modeling language <link
-    xlink:href="http://www.modelica.org">Modelica</link><indexterm
-        class="singular">
-        <primary>Modelica</primary>
-      </indexterm>. Modelica targets modeling of complex heterogeneous
-    physical systems, and is becoming a de facto standard for dynamic model
-    development and exchange. There are numerous model libraries for Modelica,
-    both free and commercial, including the freely available Modelica Standard
-    Library (MSL).</para>
+    xlink:href="http://www.modelica.org">Modelica</link>. Modelica targets
+    modeling of complex heterogeneous physical systems, and is becoming a de
+    facto standard for dynamic model development and exchange. There are
+    numerous model libraries for Modelica, both free and commercial, including
+    the freely available Modelica Standard Library (MSL).</para>
 
     <para>A unique feature of JModelica.org is the support for the extension
-    Optimica<indexterm class="singular">
-        <primary>Optimica</primary>
-      </indexterm>. Optimica enables users to conveniently formulate
-    optimization problems based on Modelica models using simple but powerful
-    constructs for encoding of optimization interval, cost function and
-    constraints.</para>
+    Optimica. Optimica enables users to conveniently formulate optimization
+    problems based on Modelica models using simple but powerful constructs for
+    encoding of optimization interval, cost function and constraints.</para>
 
     <para>The JModelica.org compilers are developed in the compiler
-    construction framework JastAdd<indexterm class="singular">
-        <primary>JastAdd</primary>
-      </indexterm>. JastAdd is based on a number of different concepts,
-    including object-orientation, aspect-orientation and reference attributed
-    grammars. Compilers developed in JastAdd are specified in terms of
-    declarative attributes and equations which together forms an executable
-    specification of the language semantics. In addition, JastAdd targets
-    extensible compiler development which makes it easy to experiment with
-    language extensions.</para>
+    construction framework <link
+    xlink:href="http://jastadd.org">JastAdd</link>. JastAdd is based on a
+    number of different concepts, including object-orientation,
+    aspect-orientation and reference attributed grammars. Compilers developed
+    in JastAdd are specified in terms of declarative attributes and equations
+    which together forms an executable specification of the language
+    semantics. In addition, JastAdd targets extensible compiler development
+    which makes it easy to experiment with language extensions.</para>
 
-    <para>For user interaction JModelica.org relies on the Python language.
-    Python offers an interactive environment suitable for scripting,
-    development of custom applications and prototype algorithm integration.
-    The Python packages Numpy and Scipy provide support for numerical
-    computation, including matrix and vector operations, basic linear algebra
-    and plotting. The JModelica.org compilers as well as the model
-    executables/dlls integrate seamlessly with Python and Numpy.</para>
+    <para>For user interaction JModelica.org relies on the <link
+    xlink:href="http://www.python.org/">Python</link> language. Python offers
+    an interactive environment suitable for scripting, development of custom
+    applications and prototype algorithm integration. The Python packages
+    Numpy and Scipy provide support for numerical computation, including
+    matrix and vector operations, basic linear algebra and plotting. The
+    JModelica.org compilers as well as the model executables/dlls integrate
+    seamlessly with Python and Numpy.</para>
 
     <para>JModelica.org offers strong support for the <link
     xlink:href="https://www.fmi-standard.org/">Functional Mock-up
@@ -103,7 +97,7 @@
     <title>Architecture</title>
 
     <para><figure>
-        <title>JModelica platform architecture.</title>
+        <title>JModelica.org platform architecture.</title>
 
         <mediaobject>
           <imageobject>
@@ -126,36 +120,31 @@
         <para>The compiler back-ends generates C code and XML code for
         Modelica and Optimica. The C code contains the model equations, cost
         functions and constraints whereas the XML code contains model meta
-        data such as variable names and parameter values. There is also the
-        option to export flattened Modelica models, including equations, in
-        XML format. Export of Functional Mock-up Units (FMUs) is
-        supported.</para>
+        data such as variable names and parameter values. Export of Functional
+        Mock-up Units (FMUs) is supported. There is also the option to export
+        flattened Modelica models, including equations, in XML format. </para>
       </listitem>
 
       <listitem>
         <para>The JModelica.org runtime library is written in C and contains
         supporting functions needed to compile the generated model C code.
-        Also, the runtime library contains an integration with CppAD<indexterm
-            class="singular">
-            <primary>CppAD</primary>
-          </indexterm>, a tool for computation of high accuracy derivatives by
-        means of automatic differentiation to provide derivatives for
-        optimization algorithm. The runtime system also contains the functions
-        provided in the FMI API.</para>
+        Also, the runtime library contains an integration with CppAD, a tool
+        for computation of high accuracy derivatives by means of automatic
+        differentiation to provide derivatives for optimization algorithm. The
+        runtime system also contains the functions provided in the FMI
+        API.</para>
       </listitem>
 
       <listitem>
         <para>Currently, JModelica.org features four different algorithms for
         solving dynamic optimization problems. There are three different
-        algorithms based on direct collocation, which rely on the solver
-        IPOPT<indexterm class="singular">
-            <primary>IPOPT</primary>
-          </indexterm> for obtaining a solution to the resulting NLP. The
-        default algorithm is encoded in C and relies on CppAD for computing
-        the NLP derivatives. The other two algorithms are developed in Python
-        and rely on CasADi for computing derivatives. There is also a
-        derivative free optimization algorithm for model calibration based on
-        measurement data that is applicable to FMUs.</para>
+        algorithms based on direct collocation, which rely on the solver IPOPT
+        for obtaining a solution to the resulting NLP. The default algorithm
+        is encoded in C and relies on CppAD for computing the NLP derivatives.
+        The other two algorithms are developed in Python and rely on CasADi
+        for computing derivatives. There is also a derivative free
+        optimization algorithm for model calibration based on measurement data
+        that is applicable to FMUs.</para>
       </listitem>
 
       <listitem>
@@ -185,18 +174,10 @@
         which are compliant with the FMI standard. In addition, JModelica.org
         features a C interface for efficient evaluation of model equations,
         the cost function and the constraints: the JModelica Model Interface
-        (JMI)<indexterm class="singular">
-            <primary>JModelica Model Interface</primary>
-
-            <see>JMI</see>
-          </indexterm><indexterm class="singular">
-            <primary>JMI</primary>
-
-            <seealso>JModelica Model Interface</seealso>
-          </indexterm>. JMI also contains functions for evaluation of
-        derivatives and sparsity and is intended to offer a convenient
-        interface for integration of numerical algorithms. FMI is the default
-        format for simulation, whereas JMI is the default interface for
+        (JMI). JMI also contains functions for evaluation of derivatives and
+        sparsity and is intended to offer a convenient interface for
+        integration of numerical algorithms. FMI is the default format for
+        simulation, whereas JMI is the default interface for
         optimization.</para>
       </listitem>
 

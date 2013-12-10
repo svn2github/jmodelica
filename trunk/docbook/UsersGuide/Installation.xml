@@ -186,8 +186,8 @@
     <section xml:id="inst_sec_win_inst">
       <title>Installation</title>
 
-      <para>The following step-by-step instructions describe how to install
-      JModelica.org using the Windows binary distribution.</para>
+      <para>Follow these step-by-step instructions to install JModelica.org
+      using the Windows binary distribution.</para>
 
       <procedure>
         <step>
@@ -235,7 +235,7 @@
       interface.<programlisting language="python"># Import all examples from the pyjmi package
 from pyjmi.examples import *
 
-# Run the VDP_sim example and plot results.
+# Run the VDP_sim example and plot results
 VDP_sim.run_demo()
 
 # Run the CSTR example and plot results

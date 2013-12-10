@@ -152,7 +152,7 @@ my_fmu = compile_fmu(model_name, mo_file)
         </step>
 
         <step>
-          <para>Set the parameter <literal>target = 'fmucs'</literal></para>
+          <para>Set the parameter <literal>target = 'cs'</literal></para>
         </step>
 
         <step>
@@ -169,7 +169,7 @@ model_name = 'myPackage.myModel'
 mo_file = 'myModelFile.mo'
 
 # Compile the model and save the return argument, which is the file name of the FMU
-my_fmu = compile_fmu(model_name, mo_file, target='fmucs')
+my_fmu = compile_fmu(model_name, mo_file, target='cs')
 </programlisting></para>
 
       <para>In a Co-Simulation FMU, the integrator for solving the system is
@@ -212,7 +212,7 @@ my_jmu = compile_jmu(model_name, mo_file)
 </programlisting></para>
 
       <para>As in the FMU case, when the compilation has completed
-      successfully an JMU file will have been created on the file system. The
+      successfully a JMU file will have been created on the file system. The
       return argument is also the full file path of the JMU that has just been
       created, which will be useful later when we want to create model
       objects. More about the JMU file and loading models can be found in
@@ -258,7 +258,7 @@ my_fmux = compile_fmux(model_name, mo_file)
     <section>
       <title>Compiling from libraries</title>
 
-      <para>The model to be compiled might not be in a loose .mo file, but
+      <para>The model to be compiled might not be in a loose '.mo' file, but
       rather part of a library consisting of a directory structure containing
       several Modelica files. In this case, the file within the library that
       contains the model should <emphasis>not</emphasis> be given on the
@@ -294,10 +294,10 @@ my_fmux = compile_fmux(model_name, mo_file)
       </itemizedlist>
 
       <para>By default, the script starting a JModelica.org Python shell sets
-      the MODELICAPATH to the directory containing the version of the Modelica
-      Standard Library (MSL) that is included in the installation. Thus, all
-      classes in the MSL are available without any need to specify its
-      location.</para>
+      the <code>MODELICAPATH</code> to the directory containing the version of
+      the Modelica Standard Library (MSL) that is included in the
+      installation. Thus, all classes in the MSL are available without any
+      need to specify its location.</para>
 
       <para>The Python code example below demonstrates these methods:</para>
 
@@ -338,8 +338,9 @@ from pymodelica import compile_fmu
 help(compile_fmu)
 Help on function compile_fmu in module pymodelica.compiler:
 
-compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', compiler_options={}, 
-            compile_to='.', compiler_log_level='warning', separate_process=False, jvm_args='')
+compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
+            compiler_options={}, compile_to='.', compiler_log_level='warning', 
+            separate_process=False, jvm_args='')
     Compile a Modelica model to an FMU.
 
     A model class name must be passed, all other arguments have default values.
@@ -365,9 +366,10 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', compiler_
     Other options for the compiler should also be listed in the compiler_options
     dict.
 
-    The compiler target is 'fmume' by default which means that the shared
+    The compiler target is 'me' by default which means that the shared
     file contains the FMI for Model Exchange API. Setting this parameter to
-    'fmucs' will generate an FMU containing the FMI for Co-Simulation API.
+    'cs' will generate an FMU containing the FMI for Co-Simulation API.
+
     Parameters::
 
         class_name --
@@ -387,8 +389,13 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', compiler_
             Default: 'auto'
 
         target --
-            Compiler target. Possible values are 'fmume' or 'fmucs'.
-            Default: 'fmume'
+            Compiler target. Possible values are 'me', 'cs' or 'me+cs'.
+            Default: 'me'
+
+        version --
+            The FMI version. Valid options are '1.0' and '2.0'.
+            Default: '1.0'
+            Note: Must currently be set to '1.0'.
 
         compiler_options --
             Options for the compiler.
@@ -420,7 +427,6 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='fmume', compiler_
             String of arguments to be passed to the JVM when compiling in a
             separate process.
             Default: Empty string
-
 
     Returns::
 
@@ -484,6 +490,15 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
               <tbody>
                 <row>
+                  <entry><literal>algorithms_as_functions</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>When this option is <literal>true</literal>,
+                  algorithm sections are converted to function calls.</entry>
+                </row>
+
+                <row>
                   <entry><literal>automatic_add_initial_equations</literal></entry>
 
                   <entry><literal>boolean / true</literal></entry>
@@ -496,6 +511,44 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>automatic_tearing</literal></entry>
+
+                  <entry><literal>boolean / true</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  automatic tearing of equation systems is performed.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>block_jacobian_check</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Compares the analytic block jacobians with the finite
+                  difference block jacobians during block evaluation. An error
+                  is given if the relative error is to big.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>block_jacobian_check_tol</literal></entry>
+
+                  <entry><literal>real / 1.0E-6</literal></entry>
+
+                  <entry>Specifies the relative tolerance for block jacobian
+                  check.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>check_inactive_contitionals</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Check for errors in inactive conditional components
+                  when compiling. When checking a class, this is always
+                  done.</entry>
+                </row>
+
+                <row>
                   <entry><literal>convert_free_dependent_
                   parameters_to_algebraics</literal></entry>
 
@@ -504,6 +557,33 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   <entry>If this option is set to <literal>true</literal>,
                   free dependent parameters are converted to algebraic
                   variables.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>cs_solver</literal></entry>
+
+                  <entry><literal>integer / 0</literal></entry>
+
+                  <entry>Specifies the internal solver used in co-simulation.
+                  0 == CVode, 1 == Euler.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>cs_rel_tol</literal></entry>
+
+                  <entry><literal>real / 1.0E-6</literal></entry>
+
+                  <entry>Default tolerance for the adaptive solvers in the CS
+                  case.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>cs_step_size</literal></entry>
+
+                  <entry><literal>real / 0.001</literal></entry>
+
+                  <entry>Default step-size for the non-adaptive solvers in the
+                  CS case.</entry>
                 </row>
 
                 <row>
@@ -528,31 +608,12 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>hand_guided_tearing</literal></entry>
-
-                  <entry><literal>boolean / false</literal></entry>
-
-                  <entry>If this option is set to <literal>true</literal>,
-                  hand guided tearing annotations are parsed and hand guided
-                  tearing is performed.</entry>
-                </row>
-
-                <row>
                   <entry><literal>enable_structural_diagnosis</literal></entry>
 
                   <entry><literal>boolean / true</literal></entry>
 
                   <entry>Enable this option to invoke the structural error
                   diagnosis based on the matching algorithm.</entry>
-                </row>
-
-                <row>
-                  <entry><literal>automatic_tearing</literal></entry>
-
-                  <entry><literal>boolean / false</literal></entry>
-
-                  <entry>If this option is set to <literal>true</literal>,
-                  automatic tearing of equation systems is performed.</entry>
                 </row>
 
                 <row>
@@ -716,6 +777,25 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>hand_guided_tearing</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>,
+                  hand guided tearing annotations are parsed and hand guided
+                  tearing is performed.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>ignore_within</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>Ignore within clauses, both when reading input files
+                  and when error-checking.</entry>
+                </row>
+
+                <row>
                   <entry><literal>index_reduction</literal></entry>
 
                   <entry><literal>boolean / true</literal></entry>
@@ -744,6 +824,16 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   solvers: 0 - no scaling, 1 - scaling based on nominals only
                   (default), 2 - utilize heuristics to guess nominal based on
                   min,max,start, etc.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>local_iteration_in_tearing</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to true, equations that can be
+                  solved with local fixedpoint iteration will be considered
+                  solved.</entry>
                 </row>
 
                 <row>
@@ -789,17 +879,6 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
-                  <entry><literal>nle_solver_log_level</literal></entry>
-
-                  <entry><literal>integer / 0</literal></entry>
-
-                  <entry>Log level for non-linear equation solver:
-                  <literal>0</literal> - no progress messages,
-                  <literal>1</literal>,<literal>2</literal>,<literal>3</literal>
-                  - different levels of verbosity</entry>
-                </row>
-
-                <row>
                   <entry><literal>nle_solver_max_iter</literal></entry>
 
                   <entry><literal>integer / 100</literal></entry>
@@ -817,6 +896,24 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   that, for instance, default Kinsol tolerance is machine
                   precision pwr 1/3, i.e., 1e-6. Tighter tolerance is default
                   in JModelica.org.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_regularization_tolerance</literal></entry>
+
+                  <entry><literal>real / -1.0</literal></entry>
+
+                  <entry>Tolerance for deciding when regularization should
+                  kick in (i.e. when condition number &gt; reg tol).</entry>
+                </row>
+
+                <row>
+                  <entry><literal>nle_solver_step_limit_factor</literal></entry>
+
+                  <entry><literal>real / 10.0</literal></entry>
+
+                  <entry>Factor limiting the step-size taken by the nonlinear
+                  solver.</entry>
                 </row>
 
                 <row>
@@ -933,6 +1030,18 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   for the DAE and the DAE initialization system respectively.
                   The files are output to the resource directory.</entry>
                 </row>
+
+                <row>
+                  <entry><literal>write_tearing_pairs_to_file</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If the option is set to true, two text files
+                  containing tearing pairs is written to disk. The files
+                  contains the tearing pairs for the DAE and theDAE
+                  initialization system respectively. The files are outputed
+                  to the working directory.</entry>
+                </row>
               </tbody>
             </tgroup>
           </table></para>
@@ -952,11 +1061,11 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
       <para>Another option is to compile the model in a separate process, that
       is not via JPype. This means that a specific JRE (Java Runtime
-      Environment) can be used. For those on a 64 bit Windows this is can be
-      very useful as the default JRE used with JPype is 32 bit. Also, in most
-      cases, the JVM (Java Virtual Machine) can be given a larger heap space
-      (especially when using a 64 bit JRE instead of a 32 bit) which enables
-      compilation of larger models.</para>
+      Environment) can be used for the compilation. For those on a 64 bit
+      Windows this is can be very useful as the default JRE used with JPype is
+      32 bit. Also, in most cases, the JVM (Java Virtual Machine) can be given
+      a larger heap space (especially when using a 64 bit JRE instead of a 32
+      bit) which enables compilation of larger models.</para>
 
       <para>Set the environment variable
       <literal>SEPARATE_PROCESS_JVM</literal> to point at a specific Java
