@@ -26,19 +26,14 @@
 
 <project name="OptimicaCompiler" default="build" basedir=".">
 	
+	<property name="modules" 
+		value="ModelicaFrontEnd,OptimicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaXMLBackEnd,OptimicaXMLBackEnd,ModelicaCBackEnd,OptimicaCBackEnd,ModelicaCompiler,OptimicaCompiler" />
+	
 	<property name="java_version" value="1.6"/>
 	<property name="java_compiler" value="javac${java_version}"/>
 
 	<property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
-    <property name="generic_codegen_path" value="../GenericCodeGen" />
-    <property name="fmi_xml_codegen_path" value="../FmiXMLCodeGen" />
-    <property name="test_framework_path" value="../TestFramework" />
 	<property name="optimica_front_end_path" value="../OptimicaFrontEnd" />
-	<property name="modelica_xml_back_end_path" value="../ModelicaXMLBackEnd" />
-	<property name="modelica_c_back_end_path" value="../ModelicaCBackEnd" />
-	<property name="optimica_xml_back_end_path" value="../OptimicaXMLBackEnd" />
-	<property name="optimica_c_back_end_path" value="../OptimicaCBackEnd" />
-	<property name="modelica_compiler_path" value="../ModelicaCompiler" />
 
 	<property name="ast_package" value="org.jmodelica.optimica.compiler" />
 
@@ -56,23 +51,9 @@
 	<property name="jmodelica_parser" value="${modelica_front_end_path}/src/parser" />
 	<property name="parser" value="${optimica_front_end_path}/src/parser" />
 
-	<property name="local_ast" value="src/jastadd" />
-	<property name="ast" value="${modelica_front_end_path}/src/jastadd" />
-	<property name="modelica_xml_back_end_ast" value="${modelica_xml_back_end_path}/src/jastadd" />
-    <property name="generic_codegen" value="${generic_codegen_path}/src/jastadd" />
-    <property name="fmi_xml_codegen" value="${fmi_xml_codegen_path}/src/jastadd" />
-    <property name="test_framework" value="${test_framework_path}/src/jastadd" />
-	<property name="modelica_c_back_end_ast" value="${modelica_c_back_end_path}/src/jastadd" />
-	<property name="modelica_compiler_ast" value="${modelica_compiler_path}/src/jastadd" />
-	<property name="optimica_xml_back_end_ast" value="${optimica_xml_back_end_path}/src/jastadd" />
-	<property name="optimica_c_back_end_ast" value="${optimica_c_back_end_path}/src/jastadd" />
-	<property name="optimica_front_end_ast" value="${optimica_front_end_path}/src/jastadd" />
-
 	<property name="test_junit_dir" value="src/test/junit" />
 	<property name="test_junit-gen_dir" value="src/test/junit-generated" />
 
-	<property name="applications" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/applications" />
-	<property name="debug" value="${modelica_front_end_path}/${default_src_dir}/org/jmodelica/debug" />
 
 	<!-- for ant-contrib (foreach, etc) -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml">
@@ -86,6 +67,30 @@
 	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${jflex_dir}/lib/JFlex.jar" />
 	<!-- "beaver" is an ant task class for the parser generator in beaver.jar -->
 	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${beaver_dir}/lib/beaver.jar" />
+    
+    <var name="index" value="0"/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <math result="index" operand1="${index}" operation="+" operand2="1" datatype="int" />
+            <fileset dir=".." id="jastadd_files_temp">
+                <include name="@{module}/**/*.ast" />
+                <include name="@{module}/**/*.jadd" />
+                <include name="@{module}/**/*.jrag" />
+            </fileset>
+            <if>
+                <equals arg1="${index}" arg2="1" />
+                <then>
+                    <property name="jastadd_files_list_${index}" value="${toString:jastadd_files_temp}" />
+                </then>
+                <else>
+                    <property name="jastadd_files_list_${index}" value="${last};${toString:jastadd_files_temp}" />
+                </else>
+            </if>
+            <propertycopy name="last" from="jastadd_files_list_${index}" override="true" />
+        </sequential>
+    </for>
+    <propertyregex property="jastadd_files_temp" input="${last}" regexp=";" replace=" ../" />
+	<property name="jastadd_files" value="../${jastadd_files_temp}" />
 
 
 	<!-- TARGET build -->
@@ -124,9 +129,9 @@
 			<exclude name="**/*.aj" />
 		</javac>
 	</target>
-	
-	<!-- Meta target for generating all java files -->
-	<target name="gen" depends="patch,parser,scanner" />
+    
+    <!-- Meta target for generating all java files -->
+    <target name="gen" depends="patch,parser,scanner" />
 
     <target name="compile-patcher">
         <mkdir dir="bin" />
@@ -149,51 +154,25 @@
 		<!-- create a directory for the generated files -->
 		<mkdir dir="${base_output}" />
 		<!-- run jastadd to generate AST files -->
+        <java classname="org.jastadd.JastAdd" classpath="${jastadd_dir}/jastadd2.jar" failonerror="true">
+            <arg value="--package=${ast_package}" />
+            <arg value="--o=${base_output}" />
+            <arg value="--beaver" />
+            <arg value="--rewrite" />
+            <arg value="--cacheCycle" />
+            <arg value="--noComponentCheck" />
+            <arg value="--noVisitCheck" />
+            <arg value="--lazyMaps" />
+            <arg value="--deterministic" />
+            <arg line="${jastadd_files}" />
+        </java>
+		<!--
 		<jastadd package="${ast_package}" beaver="true" rewrite="true" outdir="${base_output}" 
 				NoCacheCycle="false" ComponentCheck="false" visitcheck="false" LazyMaps="true" 
 				Deterministic="true" NoStatic="false" Debug="false">
-			<fileset dir="${ast}">
-				<patternset id="jastadd.files">
-					<include name="**/*.ast" />
-					<include name="**/*.jadd" />
-					<include name="**/*.jrag" />
-				</patternset>
-			</fileset>
-			<fileset dir="${modelica_compiler_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${local_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${generic_codegen}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${test_framework}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-            <fileset dir="${fmi_xml_codegen}">
-                <patternset refid="jastadd.files"/>
-            </fileset>
-			<fileset dir="${modelica_xml_back_end_ast}">
-                <patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${modelica_c_back_end_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-
-			<fileset dir="${optimica_front_end_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${optimica_xml_back_end_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-			<fileset dir="${optimica_c_back_end_ast}">
-				<patternset refid="jastadd.files"/>
-			</fileset>
-
-
+            <fileset dir=".." files="${jastadd_files}" />
 		</jastadd>
-
+        -->
 	</target>
 
 	<target name="check_uptodate">
@@ -338,39 +317,25 @@
 	<!-- TARGET gen-test -->
 	<target name="gen-test" depends="build">
 		<mkdir dir="${test_junit-gen_dir}/org/jmodelica/test/optimica/junitgenerated" />
-		<for param="gen-test.path">
-			<path>
-				<fileset dir="${modelica_front_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-				<fileset dir="${modelica_c_back_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-				<fileset dir="${modelica_xml_back_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-                <fileset dir="${fmi_xml_codegen_path}/src/test/modelica">
-                    <include name="*.mo" />
-                </fileset>
-				<fileset dir="${optimica_front_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-				<fileset dir="${optimica_c_back_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-				<fileset dir="${optimica_xml_back_end_path}/src/test/modelica">
-					<include name="*.mo" />
-				</fileset>
-			</path>
-			<sequential>
-				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
-						classpath=".:bin/OptimicaCompiler.jar:bin/util.jar:bin/graphs.jar:${beaver_dir}/lib/beaver.jar:../ModelicaCompiler/bin/ModelicaCompiler.jar" 
-						fork="true" failonerror="true" dir="." maxmemory="768M">
-					<arg value="@{gen-test.path}" />
-					<arg value="${test_junit-gen_dir}/org/jmodelica/test/optimica/junitgenerated" />
-				</java>
-			</sequential>
-		</for>
+		<for param="module" list="${modules}">
+            <sequential>
+        		<for param="gen-test.path">
+        			<path>
+        				<fileset dir="../@{module}/src/test">
+        					<include name="*.mo" />
+        				</fileset>
+        			</path>
+        			<sequential>
+        				<java classname="org.jmodelica.optimica.compiler.JunitGenerator" 
+        						classpath=".:bin/OptimicaCompiler.jar:bin/util.jar:bin/graphs.jar:${beaver_dir}/lib/beaver.jar" 
+        						fork="true" failonerror="true" dir="." maxmemory="768M">
+        					<arg value="@{gen-test.path}" />
+        					<arg value="${test_junit-gen_dir}/org/jmodelica/test/optimica/junitgenerated" />
+        				</java>
+        			</sequential>
+        		</for>
+            </sequential>
+	    </for>
 		<javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
 				destdir="bin" classpath="${junit_dir}/junit-4.5.jar" includeantruntime="false">
 			<src path="${test_junit-gen_dir}/" />
@@ -394,10 +359,10 @@
 					<include name="junit-4.5.jar" />
 				</fileset>
 				<fileset dir="bin">
+					<include name="graphs.jar" />
+					<include name="util.jar" />
 					<include name="OptimicaCompiler.jar" />
 					<include name="junit-tests.jar" />
-					<include name="util.jar" />
-					<include name="graphs.jar" />
 				</fileset>
 				<fileset dir="${beaver_dir}/lib">
 					<include name="beaver.jar" />
