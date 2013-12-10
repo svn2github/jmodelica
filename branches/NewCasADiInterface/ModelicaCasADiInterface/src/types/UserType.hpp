@@ -17,8 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_USER_TYPE
 #define _MODELICACASADI_USER_TYPE
 
-#include <types/VariableType.hpp>
-#include <types/PrimitiveType.hpp>
+#include "types/VariableType.hpp"
+#include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 
 {
 /**
@@ -33,7 +33,7 @@ class UserType : public VariableType {
          * @param A string
          * @param A pointer to a PrimitiveType
          */
-        UserType(std::string name, PrimitiveType* baseType); 
+        UserType(std::string name, Ref<PrimitiveType> baseType); 
         /** @return A string */
         const std::string getName() const;
         /**
@@ -55,7 +55,7 @@ class UserType : public VariableType {
         void print(std::ostream& os) const;
     private:
         const std::string name;
-        PrimitiveType* baseType;
+        Ref<PrimitiveType> baseType;
 };
 inline const std::string UserType::getName() const { return name; }
 inline void UserType::setAttribute(AttributeKey key, AttributeValue val) { attributes.insert(std::pair<AttributeKeyInternal, AttributeValue>(AttributeKeyInternal(key), val)); }

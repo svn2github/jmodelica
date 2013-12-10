@@ -26,17 +26,18 @@ class DerivativeVariable : public RealVariable {
          * its corresponding state variable as argument.
          * @param A symbolic MX
          * @param A pointer to a Variable
-         * @param A pointer to a VariableType, default is NULL
+         * @param A VariableType, default is a reference to NULL. 
          */
-        DerivativeVariable(CasADi::MX var, Variable* diffVar, VariableType* = NULL); 
+        DerivativeVariable(CasADi::MX var, Ref<Variable> diffVar, 
+                           Ref<VariableType> declaredType = Ref<VariableType>()); 
         /** @return A pointer to a Variable */
-        const Variable* getMyDifferentiatedVariable() const;
+        const Ref<Variable> getMyDifferentiatedVariable() const;
         /** @return True */
         bool isDerivative() const;
     private:
-        Variable* myDifferentiatedVariable;
+        Ref<Variable> myDifferentiatedVariable;
 };
 inline bool DerivativeVariable::isDerivative() const { return true; }
-inline const Variable* DerivativeVariable::getMyDifferentiatedVariable() const { return myDifferentiatedVariable; }
+inline const Ref<Variable> DerivativeVariable::getMyDifferentiatedVariable() const { return myDifferentiatedVariable; }
 }; // End namespace
 #endif

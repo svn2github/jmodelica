@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <cassert>
 
-#define MODELICACASADI_RC_DEBUG(code) code
-//#define MODELICACASADI_RC_DEBUG(code)
+//#define MODELICACASADI_RC_DEBUG(code) code
+#define MODELICACASADI_RC_DEBUG(code)
 #include <iostream> // if MODELICACASADI_RC_DEBUG
 
 #include "Printable.hpp"

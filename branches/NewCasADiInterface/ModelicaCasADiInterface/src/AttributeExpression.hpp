@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_ATTRIBUTE_EXPRESSION
 #define _MODELICACASADI_ATTRIBUTE_EXPRESSION
-#include <symbolic/casadi.hpp>
+#include "symbolic/casadi.hpp"
 namespace ModelicaCasADi
 {
 struct AttributeProxy {

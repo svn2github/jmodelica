@@ -16,17 +16,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_CONSTRAINT
 #define _MODELICACASADI_CONSTRAINT
-#include <symbolic/casadi.hpp>
 #include <iostream>
-#include <Printable.hpp>
+
+#include "symbolic/casadi.hpp"
+#include "SharedNode.hpp"
 namespace ModelicaCasADi{
-class Constraint : public Printable {
+class Constraint : public SharedNode {
     public:
         enum Type {
             EQ,
             LEQ,
             GEQ
         };
+        /// Default constructor needed by Swig
         Constraint();
         /**
          * Create a constraint from MX for the left and right hand side, 

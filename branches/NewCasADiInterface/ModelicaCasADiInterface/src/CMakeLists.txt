@@ -35,20 +35,20 @@ set(TYPES_HPP
 )
 
 set(MC_CPP
+  BooleanVariable.cpp
   CompilerOptionsWrapper.cpp
   Constraint.cpp
-  OptimizationProblem.cpp
-  Model.cpp
   DerivativeVariable.cpp
-  RealVariable.cpp
-  IntegerVariable.cpp
-  BooleanVariable.cpp
-  Variable.cpp
   Equation.cpp
+  IntegerVariable.cpp
+  Model.cpp
   ModelFunction.cpp
+  OptimizationProblem.cpp
+  RealVariable.cpp
+  sharedTransferFunctionality.cpp
   transferModelica.cpp
   transferOptimica.cpp
-  sharedTransferFunctionality.cpp
+  Variable.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
   jcc/jccutils.cpp
@@ -60,6 +60,7 @@ set(MC_CPP
 set(MC_HPP
   AttributeExpression.hpp
   BooleanVariable.hpp
+  CompilerOptionsWrapper.hpp
   Constraint.hpp
   DerivativeVariable.hpp
   Equation.hpp
@@ -67,10 +68,13 @@ set(MC_HPP
   ModelFunction.hpp
   Model.hpp
   OptimizationProblem.hpp
+  Printable.hpp
   RealVariable.hpp
+  Ref.hpp
+  SharedNode.hpp
+  sharedTransferFunctionality.hpp
   transferModelica.hpp
   transferOptimica.hpp
-  sharedTransferFunctionality.hpp
   Variable.hpp
   ${TYPES_HPP}
   jcc/initjcc.h

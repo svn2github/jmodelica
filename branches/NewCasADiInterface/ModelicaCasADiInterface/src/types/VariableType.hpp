@@ -16,12 +16,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_VARIABLE_TYPE
 #define _MODELICACASADI_VARIABLE_TYPE
-#include <symbolic/casadi.hpp>
-#include <boost/flyweight.hpp>
+//System includes
 #include <iostream>
 #include <map>
 #include <string>
-#include <Printable.hpp>
+
+//Other
+#include "symbolic/casadi.hpp"
+#include "boost/flyweight.hpp"
+
+//ModelicaCasADi
+#include "SharedNode.hpp"
+#include "Ref.hpp"
 
 namespace ModelicaCasADi 
 {
@@ -30,7 +36,7 @@ namespace ModelicaCasADi
  * Modelica and Optimica variables, or user defined types. 
  * 
  */
-class VariableType : public Printable {
+class VariableType : public SharedNode {
     public:
         typedef std::string AttributeKey; 
         typedef CasADi::MX AttributeValue;

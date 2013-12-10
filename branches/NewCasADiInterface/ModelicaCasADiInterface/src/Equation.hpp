@@ -16,14 +16,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_EQUATION
 #define _MODELICACASADI_EQUATION
-#include <symbolic/casadi.hpp>
 #include <iostream>
 
-#include "Printable.hpp"
-
+#include "symbolic/casadi.hpp"
+#include "SharedNode.hpp"
 namespace ModelicaCasADi 
 {
-class Equation: public Printable {
+class Equation: public SharedNode {
     public:
         /** 
          * Create an equation with MX expressions for the left and right hand side

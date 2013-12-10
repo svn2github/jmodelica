@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi 
 {
 RealVariable::RealVariable(CasADi::MX var, Variable::Causality causality,
-                           Variable::Variability variability, VariableType* declaredType /* = NULL */) :
+                           Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
                            Variable(var, causality, variability, declaredType) { 
-    myDerivativeVariable = NULL;
+    myDerivativeVariable = Ref<Variable>(NULL);
 }
 }; // End namespace

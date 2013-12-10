@@ -16,7 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_BOOLEAN_VAR
 #define _MODELICACASADI_BOOLEAN_VAR
-#include <Variable.hpp>
+#include "Variable.hpp"
 namespace ModelicaCasADi
 {
 class BooleanVariable : public Variable {
@@ -27,11 +27,11 @@ class BooleanVariable : public Variable {
          * @param A symbolic MX
          * @param A Causality enum
          * @param A Variability enum
-         * @param A pointer to a VariableType, dafault is NULL. 
+         * @param A VariableType, default is a reference to NULL. 
          */
         BooleanVariable(CasADi::MX var, Causality causality, 
                      Variability variability,
-                     VariableType* declaredType = NULL);
+                      Ref<VariableType> declaredType = Ref<VariableType>());
         /** @return The Boolean Type enum */
         const Type getType() const;
 };

@@ -21,13 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // and implemented with templates.
 #include "sharedTransferFunctionality.hpp"
 
+// The ModelicaCasADiModel
+#include "Ref.hpp"
 #include "OptimizationProblem.hpp"
 #include "CompilerOptionsWrapper.hpp"
 
 // Creates an optimica compiler and transfers the model modelName in the file modelFile. Optional compiler options.
-ModelicaCasADi::OptimizationProblem* transferOptimizationProblem(std::string modelName,
-                                                                 std::vector<std::string> modelFiles, 
-                                                                 ModelicaCasADi::CompilerOptionsWrapper options, 
+ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> transferOptimizationProblem(std::string modelName,
+                                                                 const std::vector<std::string> &modelFiles, 
+                                                                 ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options, 
                                                                  std::string log_level);
 
 #endif

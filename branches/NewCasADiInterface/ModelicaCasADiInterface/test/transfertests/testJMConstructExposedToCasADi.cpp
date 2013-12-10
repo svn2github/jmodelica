@@ -51,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mxwrap.hpp" // Must be included after FExp.h
 #include "mxfunctionwrap.hpp" 
 
-#include <sharedTransferFunctionality.hpp>
+#include "sharedTransferFunctionality.hpp"
 
 // Paths needed to run the test
 #include "modelicacasadi_paths.h"
@@ -72,8 +72,6 @@ using namespace CasADi;
 void assertNear(double val1, double val2, double error) {
     assert( std::abs(val1-val2) < std::abs(error) );
 }
-
-
 
 
 mc::FClass compileModelicaModelFromAtomicModelicaModelsToFclass(string modelName) {

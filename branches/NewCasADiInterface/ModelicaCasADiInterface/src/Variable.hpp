@@ -24,7 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "boost/flyweight.hpp"
 
 #include "types/VariableType.hpp"
-#include "Printable.hpp"
+#include "SharedNode.hpp"
+#include "Ref.hpp"
 namespace ModelicaCasADi
 {
 /** 
@@ -36,7 +37,7 @@ namespace ModelicaCasADi
  * A variable can also hold a VariableType that contains information about 
  * its default attributes or the attributes of its user defined type. 
  */
-class Variable : public Printable {
+class Variable : public SharedNode {
     public:
         typedef std::string AttributeKey; 
         typedef CasADi::MX AttributeValue;
@@ -68,11 +69,11 @@ class Variable : public Printable {
          * @param A symbolic MX.
          * @param An entry of the enum Causality
          * @param An entry of the enum Variability
-         * @param A pointer to a VariableType, default is NULL. 
+         * @param A VariableType, default is a reference to NULL. 
          */
         Variable(CasADi::MX var, Causality causality,
                 Variability variability, 
-                VariableType* = NULL);
+                Ref<VariableType> declaredType = Ref<VariableType>());
         
         /** @return True if this variable is an alias */
         bool isAlias() const;
@@ -81,9 +82,9 @@ class Variable : public Printable {
         /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
         /** @param Sets an alias for this variable, making this an alias variable */
-        void setAlias(Variable* var);
+        void setAlias(Ref<Variable> var);
         /** @return This variable's alias, or NULL */
-        Variable* getAlias() const;
+        Ref<Variable> getAlias() const;
         
         
         /**
@@ -113,12 +114,12 @@ class Variable : public Printable {
          * or it may be a user defined type.
          * @return A pointer to a VariableType. 
          */
-        VariableType* getDeclaredType() const;
+        Ref<VariableType> getDeclaredType() const;
         /**
          * Sets the declared type
          * @param A pointer to a VariableType
          */
-        void setDeclaredType(VariableType* declaredType);
+        void setDeclaredType(Ref<VariableType> declaredType);
         
         /** 
          * Looks at local attributes, then at attributes for is declared type,
@@ -155,9 +156,9 @@ class Variable : public Printable {
         virtual void print(std::ostream& os) const;
         
     protected:
-        Variable* myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
+        Ref<Variable> myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;
-        VariableType* declaredType;
+        Ref<VariableType> declaredType;
         CasADi::MX var;
         attributeMap attributes;
         AttributeValue* getAttributeForAlias(AttributeKey key);
@@ -167,7 +168,7 @@ class Variable : public Printable {
         Causality causality;
         Variability variability;
 };
-inline bool Variable::isAlias() const { return myModelVariable != NULL; }
+inline bool Variable::isAlias() const { return myModelVariable != Ref<Variable>(NULL); }
 inline bool Variable::isNegated() const { return negated; }
 inline void Variable::setNegated(bool negated) { 
     if (!isAlias()) {
@@ -175,12 +176,12 @@ inline void Variable::setNegated(bool negated) {
     }
     this->negated = negated; 
 }
-inline void Variable::setAlias(Variable* modelVariable) { this->myModelVariable = modelVariable; }
-inline Variable* Variable::getAlias() const { return myModelVariable; }
+inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
+inline Ref<Variable> Variable::getAlias() const { return myModelVariable; }
 inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
-inline void Variable::setDeclaredType(VariableType* declaredType) { this->declaredType = declaredType; }
-inline VariableType* Variable::getDeclaredType() const { return declaredType; }
+inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }
+inline Ref<VariableType> Variable::getDeclaredType() const { return declaredType; }
 inline const CasADi::MX Variable::getVar() const { return var; }
 inline const Variable::Causality Variable::getCausality() const { return causality; }
 inline const Variable::Variability Variable::getVariability() const { return variability; }

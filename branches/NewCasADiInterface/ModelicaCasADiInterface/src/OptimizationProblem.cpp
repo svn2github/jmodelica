@@ -19,8 +19,8 @@ using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
 
-OptimizationProblem::OptimizationProblem(Model* model, 
-                                        std::vector<Constraint> pathConstraints,
+OptimizationProblem::OptimizationProblem(Ref<Model> model, 
+                                        const std::vector< Ref<Constraint> > &pathConstraints,
                                         MX startTime, MX finalTime,
                                         MX lagrangeTerm  /*= MX(0)*/,
                                         MX mayerTerm  /*= MX(0)*/) : model(model)  {
@@ -33,7 +33,7 @@ OptimizationProblem::OptimizationProblem(Model* model,
 void OptimizationProblem::print(ostream& os) const { 
     using namespace std;
     os << "Model contained in OptimizationProblem:\n" << endl;
-    os << *model;
+    os << *(model.getNode());
     os << "-- Optimization information  --\n" << endl;
     os << "Start time = ";
     startTime.print(os);
@@ -41,11 +41,11 @@ void OptimizationProblem::print(ostream& os) const {
     os << "\nFinal time = ";
     finalTime.print(os);
     os << endl;
-    for (vector<Constraint>::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
+    for (vector< Ref<Constraint> >::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
         if (it == pathConstraints.begin()) {
             os << "-- Constraints --" << endl;
         }
-        os << *it << endl;
+        os << *(*it).getNode() << endl;
     }
     os << "-- Lagrange term --\n";
     lagrangeTerm.print(os);

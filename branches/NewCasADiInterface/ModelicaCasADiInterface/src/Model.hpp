@@ -16,25 +16,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_MODEL 
 #define _MODELICACASADI_MODEL
-#include <symbolic/casadi.hpp>
-#include <ModelFunction.hpp>
-#include <types/VariableType.hpp>
-#include <Variable.hpp>
-#include <RealVariable.hpp>
-#include <Equation.hpp>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "Printable.hpp"
+#include "symbolic/casadi.hpp"
+
+#include "ModelFunction.hpp"
+#include "types/VariableType.hpp"
+#include "Variable.hpp"
+#include "RealVariable.hpp"
+#include "Equation.hpp"
+#include "SharedNode.hpp"
+#include "Ref.hpp"
 
 namespace ModelicaCasADi 
 {  
-class Model: public Printable {
+class Model: public SharedNode {
     private:
-        typedef std::map<std::string,ModelFunction*> functionMap;
-        typedef std::map<std::string,VariableType*> typeMap;
+        typedef std::map< std::string, Ref<ModelFunction> > functionMap;
+        typedef std::map< std::string, Ref<VariableType> > typeMap;
     public:
         enum VariableKind {
             REAL_CONSTANT,       
@@ -81,25 +83,25 @@ class Model: public Printable {
          * Variables are assigned a default VariableType if they do not have one set. 
          * @param A pointer to a Variable. 
          */
-        void addVariable(Variable* var);
+        void addVariable(Ref<Variable> var);
         /** @param A pointer to an equation */    
-        void addInitialEquation(Equation* eq);
+        void addInitialEquation(Ref<Equation> eq);
         /** @param A pointer to an equation */ 
-        void addDaeEquation(Equation* eq);
+        void addDaeEquation(Ref<Equation> eq);
         /** @param A pointer to a ModelFunction */
-        void setModelFunctionByItsName(ModelFunction* mf);
+        void setModelFunctionByItsName(Ref<ModelFunction> mf);
         /** 
          * Adds a new VariableType. VariableTypes are singletons and all variable 
          * types must have unique names.
-         * @param A pointer to a VariableType
+         * @param A reference to a VariableType
          */
-        void addNewVariableType(VariableType* type);
+        void addNewVariableType(Ref<VariableType> variableType);
         
         /** 
          * @param The name of the type
-         * @return A pointer to a VariableType. Returns NULL if not present 
+         * @return A reference to a VariableType, a reference to NULL if not present. 
          * */
-        VariableType* getVariableTypeByName(std::string typeName) const;
+        Ref<VariableType> getVariableTypeByName(std::string typeName) const;
 
         /** 
          * Get a vector of pointers to variables of a specific kind, as defined in 
@@ -107,15 +109,15 @@ class Model: public Printable {
          * @param A VariableKind enum
          * @return An std::vector of pointers to Variables
          */
-        std::vector<Variable*> getVariableByKind(VariableKind kind);
+        std::vector< Ref<Variable> > getVariableByKind(VariableKind kind);
         
         /** @return A vector of pointers to Variables. */
-        std::vector<Variable*> getAllVariables();
+        std::vector< Ref<Variable> > getAllVariables();
         
         /** @return A vector of pointers to all model variables (i.e. that haven't been aliaseliminated). */
-        std::vector<Variable*> getModelVariables();
+        std::vector< Ref<Variable> > getModelVariables();
         /** @return A vector of pointers to all alias variables in the model. */
-        std::vector<Variable*> getAliasVariables();
+        std::vector< Ref<Variable> > getAliasVariables();
 
         /**
          * Returns the Variable with a certain name in the Model.
@@ -125,7 +127,7 @@ class Model: public Printable {
          * @param String name of a Variable
          * @return A pointer to a Variable
          */
-        Variable* getVariableByName(std::string name);
+        Ref<Variable> getVariableByName(std::string name);
         
         /**
          * Returns the Variable with a certain name in the Model.
@@ -135,7 +137,7 @@ class Model: public Printable {
          * @param String name of a Variable
          * @return A pointer to a Variable
          */
-        Variable* getModelVariableByName(std::string name);
+        Ref<Variable> getModelVariableByName(std::string name);
         
 
         /** Calculates values for dependent parameters */
@@ -163,7 +165,7 @@ class Model: public Printable {
          * @param The name of the ModelFunction
          * @return A pointer to a ModelFunction. Returns NULL if not present 
          */
-        ModelFunction* getModelFunctionByName(std::string name) const; 
+        Ref<ModelFunction> getModelFunctionByName(std::string name) const; 
         
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
@@ -174,25 +176,26 @@ class Model: public Printable {
         std::vector<double> paramAndConstValVec;
         CasADi::MX timeVar;
         /// Vector containing pointers to all variables.
-        std::vector<Variable*> z;  
+        std::vector< Ref<Variable> > z;  
         /// Vector containing pointers to DAE equations
-        std::vector<Equation*> daeEquations; 
+        std::vector< Ref<Equation> > daeEquations; 
         /// Vector containing pointers to all initial equations
-        std::vector<Equation*> initialEquations; 
+        std::vector< Ref<Equation> > initialEquations; 
         /// A map for ModelFunction, key is ModelFunction's name.
         functionMap modelFunctionMap;  
         /// For classification according to the VariableKind enum. Differentiated variables may have their 
         /// myDerivativeVariable field set in the process. 
-        VariableKind classifyVariable(Variable* var) const; 
-        VariableKind classifyInternalRealVariable(Variable* var) const; 
-        VariableKind classifyInternalIntegerVariable(Variable* var) const; 
-        VariableKind classifyInternalBooleanVariable(Variable* var) const; 
-        VariableKind classifyInternalStringVariable(Variable* var) const; 
-        VariableKind classifyInputVariable(Variable* var) const;
-        VariableKind classifyInternalVariable(Variable* var) const;
+        VariableKind classifyVariable(Ref<Variable> var) const; 
+        VariableKind classifyInternalRealVariable(Ref<Variable> var) const; 
+        VariableKind classifyInternalIntegerVariable(Ref<Variable> var) const; 
+        VariableKind classifyInternalBooleanVariable(Ref<Variable> var) const; 
+        VariableKind classifyInternalStringVariable(Ref<Variable> var) const; 
+        VariableKind classifyInputVariable(Ref<Variable> var) const;
+        VariableKind classifyInternalVariable(Ref<Variable> var) const;
         
-        bool checkDiff(RealVariable* var) const;
-        bool isDifferentiated(RealVariable* var) const;
+        bool checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const;
+        /// May assign derivative variable to a state variable.
+        bool isDifferentiated(Ref<RealVariable>  var) const;
         
         /// Adds the MX and their values for independent parameters and constants to paramAndConst(Val/MX)Vec
         void setUpValAndSymbolVecs();
@@ -200,20 +203,28 @@ class Model: public Printable {
         double evalMX(CasADi::MX exp);
                 
         typeMap typesInModel;
-        void assignVariableTypeToRealVariable(Variable* var);
-        void assignVariableTypeToIntegerVariable(Variable* var);
-        void assignVariableTypeToBooleanVariable(Variable* var);
-        void handleVariableTypeForAddedVariable(Variable* var);
-        void assignVariableTypeToVariable(Variable* var);
+        void assignVariableTypeToRealVariable(Ref<Variable> var);
+        void assignVariableTypeToIntegerVariable(Ref<Variable> var);
+        void assignVariableTypeToBooleanVariable(Ref<Variable> var);
+        void handleVariableTypeForAddedVariable(Ref<Variable> var);
+        void assignVariableTypeToVariable(Ref<Variable> var);
 };
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
-inline std::vector<Variable*> Model::getAllVariables() {return z;}
+inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
 inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {}
-inline VariableType* Model::getVariableTypeByName(std::string typeName) const { return typesInModel.find(typeName) != typesInModel.end() ? typesInModel.find(typeName)->second : NULL; }
-inline void Model::setModelFunctionByItsName(ModelFunction* mf) { modelFunctionMap[mf->getName()] = mf; }
-inline ModelFunction* Model::getModelFunctionByName(std::string name) const { return modelFunctionMap.find(name) != modelFunctionMap.end() ? modelFunctionMap.find(name)->second : NULL; }
-inline void Model::addInitialEquation(Equation* eq) { initialEquations.push_back(eq); }
-inline void Model::addDaeEquation(Equation* eq) { daeEquations.push_back(eq); }
+inline Ref<VariableType> Model::getVariableTypeByName(std::string typeName) const { 
+    return typesInModel.find(typeName) != typesInModel.end() ? 
+                typesInModel.find(typeName)->second : 
+                Ref<VariableType>(); 
+}
+inline void Model::setModelFunctionByItsName(Ref<ModelFunction> mf) { modelFunctionMap[mf->getName()] = mf; }
+inline Ref<ModelFunction> Model::getModelFunctionByName(std::string name) const { 
+    return modelFunctionMap.find(name) != modelFunctionMap.end() ? 
+                modelFunctionMap.find(name)->second :
+                NULL; 
+}
+inline void Model::addInitialEquation(Ref<Equation>eq) { initialEquations.push_back(eq); }
+inline void Model::addDaeEquation(Ref<Equation>eq) { daeEquations.push_back(eq); }
 }; // End namespace
 #endif

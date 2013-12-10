@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_REF
 #define _MODELICACASADI_REF
 
+//#include <iostream>
 #include <cassert>
 #include <cstddef>  // for NULL
 
@@ -44,7 +45,12 @@ template <class T> class Ref {
         
         const T *getNode() const { return node; }
         T *getNode() { return node; }
-
+        
+        template <class S>
+        bool operator==(const Ref<S>& ref) const { return node == ref.getNode(); }
+        template <class S>
+        bool operator!=(const Ref<S>& ref) const { return node != ref.getNode(); }
+        
         void setNode(T *node) {
             if (this->node == node) return;
             
@@ -58,5 +64,11 @@ template <class T> class Ref {
         void incRef() { incRefNode(node); }
         void decRef() { if (decRefNode(node)) node = NULL; }
 };
+template <class T>
+inline std::ostream &operator<<(std::ostream &os, Ref<T> t) {
+    os << *t.getNode();
+    return os;
+}
+
 }; // End namespace
 #endif

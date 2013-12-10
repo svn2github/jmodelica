@@ -16,12 +16,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_MODEL_FUNCTION
 #define _MODELICACASADI_MODEL_FUNCTION
-#include <symbolic/casadi.hpp>
 #include <map>
-#include <Printable.hpp>
+
+#include "symbolic/casadi.hpp"
+#include "SharedNode.hpp"
 namespace ModelicaCasADi 
 {
-class ModelFunction : public Printable {
+class ModelFunction : public SharedNode {
     public:
         /** 
          * Create a ModelFunction, which is basically a wrapper around an MXFunction
@@ -35,7 +36,7 @@ class ModelFunction : public Printable {
          * @param A vector of MX
          * @return A vector of MX
          */
-        std::vector<CasADi::MX> call(std::vector<CasADi::MX> arg);
+        std::vector<CasADi::MX> call(const std::vector<CasADi::MX> &arg);
         /** Returns the name of the MXFunction */
         std::string getName() const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */

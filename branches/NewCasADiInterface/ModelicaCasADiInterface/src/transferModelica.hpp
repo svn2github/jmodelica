@@ -22,12 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sharedTransferFunctionality.hpp"
 
 // The ModelicaCasADiModel
+#include "Ref.hpp"
 #include "Model.hpp"
 #include "CompilerOptionsWrapper.hpp"
 
-ModelicaCasADi::Model* transferModelicaModel(std::string modelName,
-                                             std::vector<std::string> modelFiles, 
-                                             ModelicaCasADi::CompilerOptionsWrapper options, 
+ModelicaCasADi::Ref<ModelicaCasADi::Model> transferModelicaModel(std::string modelName,
+                                             const std::vector<std::string> &modelFiles, 
+                                             ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options, 
                                              std::string log_level);
 
 #endif

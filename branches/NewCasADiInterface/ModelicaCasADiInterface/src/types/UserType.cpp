@@ -18,16 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using std::string; using std::ostream;
 namespace ModelicaCasADi 
 {
-UserType::UserType(string name, PrimitiveType* baseType) : name(name), baseType(baseType) {
+UserType::UserType(string name, Ref<PrimitiveType> baseType) : name(name), baseType(baseType) {
 }
 
 VariableType::AttributeValue* UserType::getAttribute(const AttributeKey key) { 
-    return attributes.find(AttributeKeyInternal(key))!=attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : baseType->getAttribute(key);
+    return attributes.find(AttributeKeyInternal(key)) != attributes.end() ? &attributes.find(AttributeKeyInternal(key))->second : baseType.getNode()->getAttribute(key);
 }
 
 
 bool UserType::hasAttribute(const AttributeKey key) const { 
-    return (attributes.find(AttributeKeyInternal(key))!=attributes.end() || baseType->hasAttribute(key));
+    return (attributes.find(AttributeKeyInternal(key)) != attributes.end() || baseType.getNode()->hasAttribute(key));
 }
 
 void UserType::print(ostream& os) const { 

@@ -20,20 +20,20 @@ namespace ModelicaCasADi
 {
 Variable::Variable() : negated(false) {
     var = MX();
-    myModelVariable = NULL;
-    declaredType = NULL;
+    myModelVariable = Ref<Variable>(NULL);
+    declaredType = Ref<VariableType>(NULL);
 }
 
 Variable::Variable(MX var, Variable::Causality causality, 
                  Variable::Variability variability,
-                 VariableType* declaredType) : 
+                 Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
                  causality(causality),
                  variability(variability),
                  negated(false) {
     if (var.isConstant()) {
         throw std::runtime_error("A variable must have a symbolic MX");
     }
-    myModelVariable = NULL;
+    myModelVariable = Ref<Variable>(NULL);
     this->var = var;
     this->declaredType = declaredType;
 }
@@ -46,7 +46,7 @@ Variable::AttributeValue* Variable::getAttribute(AttributeKey key) {
         return getAttributeForAlias(key);
     } else {
         return hasAttributeSet(key) ? &attributes.find(AttributeKeyInternal(key))->second :
-                                  (declaredType != NULL ? declaredType->getAttribute(key) : NULL);
+                                  (declaredType != Ref<VariableType>(NULL) ? declaredType->getAttribute(key) : NULL);
     }
 }
 
@@ -112,7 +112,7 @@ void Variable::print(ostream& os) const {
     os << (getCausality() == INPUT ? "Input " : (getCausality() == OUTPUT ? "Output " : "" ));
     os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "Discrete " : (getVariability() == PARAMETER ? "Parameter " : 
            (getVariability() == CONSTANT ? "Constant " : ""))));
-    if (declaredType != NULL) {
+    if (declaredType != Ref<VariableType>(NULL)) {
         os << declaredType->getName() << " ";
     } else {
         os << (getType() == REAL ? "Real " : (getType() == INTEGER ? "Integer " : (getType() == BOOLEAN ? "Boolean " : 

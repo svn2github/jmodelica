@@ -26,11 +26,11 @@ class RealVariable : public Variable {
          * @param A symbolic MX.
          * @param An entry of the enum Causality
          * @param An entry of the enum Variability
-         * @param A pointer to a VariableType, default is NULL.
+         * @param A VariableType, default is a reference to NULL. 
          */
         RealVariable(CasADi::MX var, Causality causality, 
                      Variability variability,
-                     VariableType* declaredType = NULL);
+                     Ref<VariableType> declaredType = Ref<VariableType>());
         /**
          * @return The type Real.
          */
@@ -39,20 +39,20 @@ class RealVariable : public Variable {
          * If this is a state variable, set its derivative variable
          * @param A pointer to a Variable. 
          */
-        void setMyDerivativeVariable(Variable* derVar);
+        void setMyDerivativeVariable(Ref<Variable> derVar);
         /**
          * @return Returns a pointer, which may be NULL, to the derivative variable
          */
-        const Variable* getMyDerivativeVariable() const;
+        const Ref<Variable> getMyDerivativeVariable() const;
         /** @return False */
         virtual bool isDerivative() const;
     private:
-        Variable* myDerivativeVariable;
+        Ref<Variable> myDerivativeVariable;
 };
 inline const Variable::Type RealVariable::getType() const { return Variable::REAL; }
-inline void RealVariable::setMyDerivativeVariable(Variable* diffVar) { 
-	RealVariable* dVar = dynamic_cast<RealVariable*>(diffVar);
-	if (dVar != NULL ) {
+inline void RealVariable::setMyDerivativeVariable(Ref<Variable> diffVar) { 
+	Ref<RealVariable> dVar = dynamic_cast< RealVariable* >(diffVar.getNode());
+	if (dVar != Ref<RealVariable>(NULL)) {
 		if( !dVar->isDerivative()) {
 			throw std::runtime_error("A Variable that is set as a derivative variable must be a DerivativeVariable");
 		}
@@ -64,7 +64,7 @@ inline void RealVariable::setMyDerivativeVariable(Variable* diffVar) {
     }
     myDerivativeVariable = diffVar; 	
 }
-inline const Variable* RealVariable::getMyDerivativeVariable() const { return myDerivativeVariable; }
+inline const Ref<Variable> RealVariable::getMyDerivativeVariable() const { return myDerivativeVariable; }
 inline bool RealVariable::isDerivative() const { return false; }
 }; // End namespace
 #endif

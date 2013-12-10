@@ -21,10 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Model.hpp"
 #include "Constraint.hpp"
 #include "vector"
-#include "Printable.hpp"
+#include "SharedNode.hpp"
 namespace ModelicaCasADi 
 {
-class OptimizationProblem : public Printable {
+class OptimizationProblem : public SharedNode {
     public:
         /**
          * Create an OptimizationProblem from the constraints and objective
@@ -36,8 +36,8 @@ class OptimizationProblem : public Printable {
          * @param An MX for Lagrange term, default MX(0)
          * @param An MX for Mayer term, default MX(0)
          */ 
-        OptimizationProblem(Model* model, 
-                           std::vector<Constraint> pathConstraints,
+        OptimizationProblem(Ref<Model> model, 
+                           const std::vector< Ref<Constraint> > &pathConstraints,
                            CasADi::MX startTime, CasADi::MX finalTime,
                            CasADi::MX lagrangeTerm = CasADi::MX(0),
                            CasADi::MX mayerTerm = CasADi::MX(0)) ;
@@ -46,7 +46,7 @@ class OptimizationProblem : public Printable {
          * optimization problem
          * @return A pointer to a Model.
          */ 
-        Model* getModel() const;
+        Ref<Model> getModel() const;
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */
@@ -55,7 +55,7 @@ class OptimizationProblem : public Printable {
          * Returns a vector with the Path constraints
          * @return A std::vector of Constraint
          */ 
-        std::vector<Constraint>  getPathConstraints() const;
+        std::vector< Ref<Constraint> >  getPathConstraints() const;
         /** @return An MX  */
         CasADi::MX getLagrangeTerm() const;
         /** @return An MX  */
@@ -68,7 +68,7 @@ class OptimizationProblem : public Printable {
          * Set path constraints
          * @param A vector with constraints
          */ 
-        void setPathConstraint(std::vector<Constraint> pathConstraints);
+        void setPathConstraint(const std::vector< Ref<Constraint> > &pathConstraints);
         /** @param An MX */
         void setLagrangeTerm(CasADi::MX lagrangeTerm);
         /** @param An MX */
@@ -77,23 +77,23 @@ class OptimizationProblem : public Printable {
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
     private:
-        Model* model; /// Aggregation
+        Ref<Model> model; /// Aggregation
         CasADi::MX startTime; /// Start time can be an expression
         CasADi::MX finalTime; /// Final time can be an expression
         CasADi::MX lagrangeTerm;
         CasADi::MX mayerTerm;
-        std::vector<Constraint> pathConstraints;
+        std::vector< Ref<Constraint> >  pathConstraints;
 };
-inline Model* OptimizationProblem::getModel() const { return model; } 
+inline Ref<Model> OptimizationProblem::getModel() const { return model; } 
 inline CasADi::MX OptimizationProblem::getStartTime() const { return startTime; }
 inline CasADi::MX OptimizationProblem::getFinalTime() const { return finalTime; }
 inline CasADi::MX OptimizationProblem::getLagrangeTerm() const { return lagrangeTerm; }
 inline CasADi::MX OptimizationProblem::getMayerTerm() const { return mayerTerm; }
-inline std::vector<Constraint> OptimizationProblem::getPathConstraints() const { return pathConstraints; }
+inline std::vector< Ref<Constraint> >  OptimizationProblem::getPathConstraints() const { return pathConstraints; }
 
 inline void OptimizationProblem::setStartTime(CasADi::MX startTime) { this->startTime = startTime; }
 inline void OptimizationProblem::setFinalTime(CasADi::MX finalTime) { this->finalTime = finalTime; }
-inline void OptimizationProblem::setPathConstraint(std::vector<Constraint> pathConstraints) { this->pathConstraints = pathConstraints; }
+inline void OptimizationProblem::setPathConstraint(const std::vector< Ref<Constraint> > &pathConstraints) { this->pathConstraints = pathConstraints; }
 inline void OptimizationProblem::setLagrangeTerm(CasADi::MX lagrangeTerm) { this->lagrangeTerm = lagrangeTerm; } 
 inline void OptimizationProblem::setMayerTerm(CasADi::MX mayerTerm) { this->mayerTerm = mayerTerm; } 
 }; // End namespace

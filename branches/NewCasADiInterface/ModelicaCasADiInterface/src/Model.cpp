@@ -26,14 +26,15 @@ using std::string; using std::pair;
 
 namespace ModelicaCasADi{
 
-bool Model::checkDiff(RealVariable* var) const {
+bool Model::checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const {
     // Since the variables are not sorted all variables are looped over.
-    for(vector<Variable*>::const_iterator it = z.begin(); it != z.end(); ++it){
+    // Note:  May assign derivative variable to a state variable
+    for(vector< Ref<Variable> >::const_iterator it = z.begin(); it != z.end(); ++it){
         if((*it)->getType() == Variable::REAL) {
-            RealVariable* realTemp = (RealVariable*)(*it);
+            Ref<RealVariable> realTemp = (RealVariable*)it->getNode();
             if(realTemp->isDerivative()) {
-                DerivativeVariable* derTemp = (DerivativeVariable*)realTemp;
-                if(var == derTemp->getMyDifferentiatedVariable() ){
+                Ref<DerivativeVariable> derTemp = (DerivativeVariable*)realTemp.getNode();
+                if(var.getNode() == derTemp->getMyDifferentiatedVariable().getNode()){
                     var->setMyDerivativeVariable(derTemp);
                     return true;
                 }
@@ -44,18 +45,19 @@ bool Model::checkDiff(RealVariable* var) const {
 }
 
 
-bool Model::isDifferentiated(RealVariable* var) const {
-    if (var->getMyDerivativeVariable() != NULL) { 
+bool Model::isDifferentiated(Ref<RealVariable> var) const {
+    // Note: May assign derivative variable to a state variable in checkIfRealVarIsReferencedAsStateVar
+    if (var->getMyDerivativeVariable().getNode() != NULL) { 
          return true;
     } else {
-        return checkDiff(var);
+        return checkIfRealVarIsReferencedAsStateVar(var);
     }
 }
 
-Model::VariableKind Model::classifyInternalRealVariable(Variable* var) const {
+Model::VariableKind Model::classifyInternalRealVariable(Ref<Variable> var) const {
     switch(var->getVariability()) {
         case(Variable::CONTINUOUS):  { // Variable initialization, need to add { because of scope. 
-                RealVariable* v = (RealVariable*)var;
+                Ref<RealVariable> v = (RealVariable*)var.getNode();
                 return ( v->isDerivative() ? DERIVATIVE : (isDifferentiated(v) ? DIFFERENTIATED : REAL_ALGEBRAIC) );
             } break;
         case(Variable::DISCRETE): return REAL_DISCRETE; break;
@@ -70,12 +72,12 @@ Model::VariableKind Model::classifyInternalRealVariable(Variable* var) const {
         case(Variable::CONSTANT): return REAL_CONSTANT; break;
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal real variable: " << (*var);
+            errorMessage << "Invalid variable variability when sorting for internal real variable: " << (*var.getNode());
             throw std::runtime_error(errorMessage.str());
             break;
     } 
 }
-Model::VariableKind Model::classifyInternalIntegerVariable(Variable* var) const {
+Model::VariableKind Model::classifyInternalIntegerVariable(Ref<Variable> var) const {
     switch(var->getVariability()) {
         case(Variable::DISCRETE): return INTEGER_DISCRETE; break;
         case(Variable::PARAMETER): {
@@ -89,12 +91,12 @@ Model::VariableKind Model::classifyInternalIntegerVariable(Variable* var) const 
         case(Variable::CONSTANT): return INTEGER_CONSTANT; break;  
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal integer variable: " << (*var);
+            errorMessage << "Invalid variable variability when sorting for internal integer variable: " << (*var.getNode());
             throw std::runtime_error(errorMessage.str());
             break;
     }
 }
-Model::VariableKind Model::classifyInternalBooleanVariable(Variable* var) const {
+Model::VariableKind Model::classifyInternalBooleanVariable(Ref<Variable> var) const {
     switch(var->getVariability()) {
         case(Variable::DISCRETE):  return BOOLEAN_DISCRETE; break;
         case(Variable::PARAMETER): {
@@ -108,19 +110,19 @@ Model::VariableKind Model::classifyInternalBooleanVariable(Variable* var) const 
         case(Variable::CONSTANT): return BOOLEAN_CONSTANT; break;  
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal boolean variable: " << (*var);
+            errorMessage << "Invalid variable variability when sorting for internal boolean variable: " << (*var.getNode());
             throw std::runtime_error(errorMessage.str());
             break;
     }
 }
-Model::VariableKind Model::classifyInternalStringVariable(Variable* var) const {
+Model::VariableKind Model::classifyInternalStringVariable(Ref<Variable> var) const {
     switch(var->getVariability()) {
         case(Variable::DISCRETE): return STRING_DISCRETE; break;
         case(Variable::PARAMETER): throw std::runtime_error("Not implemented string parameters"); break;     
         case(Variable::CONSTANT): return STRING_CONSTANT; break;  
     }
 }
-Model::VariableKind Model::classifyInputVariable(Variable* var) const {
+Model::VariableKind Model::classifyInputVariable(Ref<Variable> var) const {
     switch(var->getType()) {
         case(Variable::REAL):    return REAL_INPUT;    break;
         case(Variable::INTEGER): return INTEGER_INPUT; break;
@@ -128,12 +130,12 @@ Model::VariableKind Model::classifyInputVariable(Variable* var) const {
         case(Variable::STRING):  return STRING_INPUT;  break;
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable type when sorting for input variable: " << (*var);
+            errorMessage << "Invalid variable type when sorting for input variable: " << (*var.getNode());
             throw std::runtime_error(errorMessage.str());
             break;
     } 
 }
-Model::VariableKind Model::classifyInternalVariable(Variable* var) const {
+Model::VariableKind Model::classifyInternalVariable(Ref<Variable> var) const {
     switch(var->getType()) {
         case(Variable::REAL):    return classifyInternalRealVariable(var);    break;
         case(Variable::INTEGER): return classifyInternalIntegerVariable(var); break;
@@ -141,26 +143,27 @@ Model::VariableKind Model::classifyInternalVariable(Variable* var) const {
         case(Variable::STRING):  return classifyInternalStringVariable(var);  break; 
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable type when sorting for internal variable: " << (*var);
+            errorMessage << "Invalid variable type when sorting for internal variable: " << (*var.getNode());
             throw std::runtime_error(errorMessage.str());
             break;         
     } 
 }
 
 
-Model::VariableKind Model::classifyVariable(Variable* var) const {
+Model::VariableKind Model::classifyVariable(Ref<Variable> var) const {
     switch(var->getCausality()) {
         case Variable::OUTPUT: return OUTPUT; break;
         case Variable::INPUT:  return classifyInputVariable(var); break;
         case Variable::INTERNAL: return classifyInternalVariable(var); break;
     }
     std::stringstream errorMessage;
-    errorMessage << "Invalid variable causality when sorting for variable: " << (*var);
+    errorMessage << "Invalid variable causality when sorting for variable: " << (*var.getNode());
     throw std::runtime_error(errorMessage.str());
 }
 
-void Model::addNewVariableType(VariableType* variableType) {
-    if (getVariableTypeByName(variableType->getName()) != NULL && getVariableTypeByName(variableType->getName()) !=variableType ){
+void Model::addNewVariableType(Ref<VariableType> variableType) {
+    if (getVariableTypeByName(variableType->getName()).getNode() != NULL && 
+        getVariableTypeByName(variableType->getName()).getNode() != variableType.getNode() ){
         throw std::runtime_error("A VariableType with the same name as a type in the Model can not be "
                                  "added if those types are not the same object");
     } else {
@@ -168,24 +171,24 @@ void Model::addNewVariableType(VariableType* variableType) {
     }
 }
 
-void Model::assignVariableTypeToRealVariable(Variable* var) {
-    if (getVariableTypeByName("Real") != NULL) {
+void Model::assignVariableTypeToRealVariable(Ref<Variable> var) {
+    if (getVariableTypeByName("Real").getNode() != NULL) {
         var->setDeclaredType(getVariableTypeByName("Real"));
     } else {
         typesInModel["Real"] = new RealType();
         var->setDeclaredType(getVariableTypeByName("Real"));
     }
 }
-void Model::assignVariableTypeToIntegerVariable(Variable* var) {
-    if (getVariableTypeByName("Integer") != NULL) {
+void Model::assignVariableTypeToIntegerVariable(Ref<Variable> var) {
+    if (getVariableTypeByName("Integer").getNode() != NULL) {
         var->setDeclaredType(getVariableTypeByName("Integer"));
     } else {
         typesInModel["Integer"] = new IntegerType();
         var->setDeclaredType(getVariableTypeByName("Integer"));
     }    
 }
-void Model::assignVariableTypeToBooleanVariable(Variable* var) {
-    if (getVariableTypeByName("Boolean") != NULL) {
+void Model::assignVariableTypeToBooleanVariable(Ref<Variable> var) {
+    if (getVariableTypeByName("Boolean").getNode() != NULL) {
         var->setDeclaredType(getVariableTypeByName("Boolean"));
     } else {
         typesInModel["Boolean"] = new BooleanType();
@@ -193,7 +196,7 @@ void Model::assignVariableTypeToBooleanVariable(Variable* var) {
     }    
 }
 
-void Model::assignVariableTypeToVariable(Variable* var){
+void Model::assignVariableTypeToVariable(Ref<Variable> var){
     switch(var->getType())  {
         case Variable::REAL : assignVariableTypeToRealVariable(var); break;
         case Variable::INTEGER : assignVariableTypeToIntegerVariable(var); break;
@@ -202,17 +205,15 @@ void Model::assignVariableTypeToVariable(Variable* var){
     }
 }
 
-void Model::handleVariableTypeForAddedVariable(Variable* var){
-    if (var->getDeclaredType() != NULL) {
+void Model::handleVariableTypeForAddedVariable(Ref<Variable> var){
+    if (var->getDeclaredType().getNode() != NULL) {
         addNewVariableType(var->getDeclaredType());
     } else {
         assignVariableTypeToVariable(var);
     }
 }
 
-
-
-void Model::addVariable(Variable* var) {
+void Model::addVariable(Ref<Variable> var) {
     if (!var->getVar().isSymbolic()) {
         throw std::runtime_error("The supplied variable is not symbolic and can not be variable"); 
     }
@@ -220,13 +221,13 @@ void Model::addVariable(Variable* var) {
     z.push_back(var);
 }
 
-vector<Variable*> Model::getVariableByKind(VariableKind kind) {
+vector< Ref<Variable> > Model::getVariableByKind(VariableKind kind) {
 	if (kind < 0 || kind >= NUM_OF_VARIABLE_KIND) {
 		throw std::runtime_error("Invalid VariableKind");
 	}
     // Special case for last variable, due to size of offsets.
-    vector<Variable*> varVec;
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+    vector< Ref<Variable> > varVec;
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if (classifyVariable(*it) == kind) {
             varVec.push_back(*it);
         }
@@ -234,9 +235,9 @@ vector<Variable*> Model::getVariableByKind(VariableKind kind) {
     return varVec;
 }
 
-Variable* Model::getVariableByName(std::string name) {
-    Variable* returnVar = NULL;
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+Ref<Variable> Model::getVariableByName(std::string name) {
+    Ref<Variable> returnVar = Ref<Variable>(NULL);
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
             returnVar = *it;
             break;
@@ -245,9 +246,9 @@ Variable* Model::getVariableByName(std::string name) {
     return returnVar;
 }
 
-Variable* Model::getModelVariableByName(std::string name) {
-    Variable* returnVar = NULL;
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+Ref<Variable> Model::getModelVariableByName(std::string name) {
+    Ref<Variable> returnVar;
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
             if( (*it)->isAlias()) {
                 returnVar = (*it)->getAlias();
@@ -260,18 +261,18 @@ Variable* Model::getModelVariableByName(std::string name) {
     return returnVar;
 }
 
-vector<Variable*> Model::getModelVariables() {
-    vector<Variable*> modelVars;
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+vector< Ref<Variable> > Model::getModelVariables() {
+    vector< Ref<Variable> > modelVars;
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if (!(*it)->isAlias()) {
             modelVars.push_back(*it);
         }
     }
     return modelVars;
 }
-vector<Variable*> Model::getAliasVariables() {
-    vector<Variable*> aliasVars;
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+vector< Ref<Variable> > Model::getAliasVariables() {
+    vector< Ref<Variable> > aliasVars;
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->isAlias()) {
             aliasVars.push_back(*it);
         }
@@ -314,8 +315,8 @@ void Model::calculateValuesForDependentParameters() {
     MX bindingExpression;
     double val;
     setUpValAndSymbolVecs();
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
-        Variable* var = (*it);
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+        Ref<Variable> var = (*it);
         if (var->getVariability() == Variable::PARAMETER) {
             if (var->hasAttributeSet("bindingExpression")) {
                 bindingExpression = *var->getAttribute("bindingExpression");
@@ -334,7 +335,7 @@ void Model::calculateValuesForDependentParameters() {
 void Model::setUpValAndSymbolVecs() {
     paramAndConstMXVec.clear();
     paramAndConstValVec.clear();
-    for (vector<Variable*>::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ( ((*it)->getVariability() == Variable::PARAMETER) ||
              ((*it)->getVariability() == Variable::CONSTANT)){
             if ((*it)->hasAttributeSet("bindingExpression")) {
@@ -355,25 +356,26 @@ void Model::setUpValAndSymbolVecs() {
 
 const MX Model::getInitialResidual() const {
     MX intialRes;
-    for (vector<Equation*>::const_iterator it = initialEquations.begin(); it!= initialEquations.end(); ++it) {
+    for (vector< Ref<Equation> >::const_iterator it = initialEquations.begin(); it != initialEquations.end(); ++it) {
         intialRes.append((*it)->getResidual());
     }
     return intialRes;
 }
 const MX Model::getDaeResidual() const {
     MX daeRes;
-    for (vector<Equation*>::const_iterator it = daeEquations.begin(); it!= daeEquations.end(); ++it) {
+    for (vector< Ref<Equation> >::const_iterator it = daeEquations.begin(); it != daeEquations.end(); ++it) {
         daeRes.append((*it)->getResidual());
     }
     return daeRes;
 }
 
+
 template <class T> 
-string generatePrintStringForVector(const vector<T*> &makeStringOf) {
+string generatePrintStringForVector(const vector<T> &makeStringOf) {
     std::stringstream result;
-    typename vector<T*>::const_iterator it;
+    typename vector<T>::const_iterator it;
     for ( it = makeStringOf.begin(); it < makeStringOf.end(); ++it) {
-         result << *(*it) << "\n";
+         result << *(*it).getNode() << "\n";
     }
     return result.str();
 }
@@ -389,11 +391,11 @@ void Model::print(std::ostream& os) const {
     os << generatePrintStringForVector(z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
     for (Model::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
-            os << *(it->second) << endl;
+            os << *(it->second.getNode()) << endl;
     }
     os << "\n------------------------------- Functions -------------------------------\n" << endl;
     for (Model::functionMap::const_iterator it = modelFunctionMap.begin(); it != modelFunctionMap.end(); ++it){
-            os << *(it->second) << endl;
+            os << *(it->second.getNode()) << endl;
     }
     os << "\n------------------------------- Equations -------------------------------\n" << endl;
     if (!initialEquations.empty()) {

@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iostream>
 
-#include "Printable.hpp"
+#include "SharedNode.hpp"
 #include "org/jmodelica/util/OptionRegistry.h"
 
 namespace ModelicaCasADi 
 {
-class CompilerOptionsWrapper: public Printable {
+class CompilerOptionsWrapper: public SharedNode {
     public:
         CompilerOptionsWrapper(); 
         void setStringOption(std::string opt, std::string val);

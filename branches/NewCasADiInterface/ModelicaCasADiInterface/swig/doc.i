@@ -110,7 +110,7 @@ Returns::
 
 
 %feature("docstring") ModelicaCasADi::Model::getVariableByKind "
-Returns a tuple with all Variables of a certain kind, as specified in the Model.
+Returns a numpy array with all Variables of a certain kind, as specified in the Model.
 
 Parameters::
 
@@ -119,8 +119,8 @@ Parameters::
 
 Returns::
     
-    Tuple(Variable) --
-        A tuple with zero or more Variables. 
+    numpy.array(Variable) --
+        A numpy array with zero or more Variables. 
 
 ";
 
@@ -164,32 +164,32 @@ Returns::
 ";
     
 %feature("docstring") ModelicaCasADi::Model::getAllVariables "
-Returns a tuple with all Variables present in the Model. 
+Returns a numpy array with all Variables present in the Model. 
 
 Returns::
     
-    Tuple(Variable) --
-        A tuple with zero or more Variables. 
+    numpy.array(Variable) --
+        A numpy array with zero or more Variables. 
 
 ";  
 
 %feature("docstring") ModelicaCasADi::Model::getModelVariables "
-Returns a tuple with all model variables, i.e. that have not been 
+Returns a numpy array with all model variables, i.e. that have not been 
 alias eliminated, present in the Model.  
 
 Returns::
     
-    Tuple(Variable) --
-        A tuple with zero or more Variables. 
+    numpy.array(Variable) --
+        A numpy array with zero or more Variables. 
 
 ";  
 %feature("docstring") ModelicaCasADi::Model::getAliasVariables "
-Returns a tuple with all alias variables present in the Model. 
+Returns a numpy array with all alias variables present in the Model. 
 
 Returns::
     
-    Tuple(Variable) --
-        A tuple with zero or more Variables. 
+    numpy.array(Variable) --
+        A numpy array with zero or more Variables. 
 
 ";  
 
@@ -490,7 +490,7 @@ Parameters::
 
 %feature("docstring") ModelicaCasADi::ModelFunction::call "
 Call the MXFunction kept in this class with a vector of MX as arguments.  
-Returns a tuple with MX representing the outputs of the function call.
+Returns an MXVector with MX representing the outputs of the function call.
 
 Parameters::
     
@@ -499,8 +499,8 @@ Parameters::
     
 Returns::
 
-    tuple(MX) --
-        A tuple with MX for the outputs of the call
+    MXVector--
+        A MXVector with MX for the outputs of the call
         
 "; 
 
@@ -686,8 +686,8 @@ Parameters::
     Model --
         A Model.
         
-    ConstraintVector --
-        A vector with the path constraints. 
+    numpy.array(Constraint) --
+        A numpy array with the path constraints. 
    
     MX --
         A MX for the start time
@@ -738,8 +738,8 @@ Returns the path constraints
 
 Returns::
 
-    tuple(Constraint) --
-        A tuple with the path constraints
+    numpy.array(Constraint) --
+        A numpy array with the path constraints
         
 "; 
 
@@ -788,7 +788,7 @@ Sets the path constraints
 
 Parameters::
 
-    ConstraintVector --
+    numpy.array(Constraint) --
         The path constraints
         
 "; 
@@ -816,7 +816,7 @@ Parameters::
 /********** Constraint  **********/
 %feature("docstring") ModelicaCasADi::Constraint::Constraint "
 Create a constraint from MX for the left and right hand side, 
-and a relation type (<, >, ==).
+and a relation type (i.e. less than, greateer than and equal).
 
 Parameters::
 
@@ -909,46 +909,5 @@ Returns::
     
     OptimizationProblem --
         The transferred optimization problem
-        
-"; 
-
-/********** transferModelica **********/
-%feature("docstring") ModelicaCasADi::transferModelicaModel "
-Transfers the specified Modelica model
-
-Parameters::
-
-    string --
-        The name of the model.
-    
-    string --
-        The file that contains the model.
-    
-    OptionRegistry --
-        An OptionRegistry for passing compiler options to the JModelica compiler.
-        Currently not accessible from Python. 
-        
-Returns::
-    
-    Model --
-        The transferred model
-        
-";
-
-%feature("docstring") ModelicaCasADi::transferModelicaModelWithoutInlining "
-Transfers the specified Modelica model, with function inlining turned off. 
-
-Parameters::
-
-    string --
-        The name of the model.
-    
-    string --
-        The file that contains the model.
-        
-Returns::
-    
-    Model --
-        The transferred model
         
 "; 

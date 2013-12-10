@@ -60,34 +60,34 @@ using ModelicaCasADi::Model;
 using ModelicaCasADi::Constraint;
 using ModelicaCasADi::OptimizationProblem;
 using ModelicaCasADi::CompilerOptionsWrapper;
+using ModelicaCasADi::Ref;
 
 
 
-vector<Constraint>* transferConstraints(oc::FOptClass &fc){
+vector< Ref<Constraint> >* transferConstraints(oc::FOptClass &fc){
     java::util::ArrayList pcsList;
-    vector<Constraint>* pcs = new vector<Constraint>();
+    vector< Ref<Constraint> >* pcs = new vector< Ref<Constraint> >();
     Constraint::Type type;
     for(int i = 0; i < 3; ++i){
         pcsList = (i==0 ? fc.pathLeqConstraints() : (i==1 ? fc.pathGeqConstraints() : fc.pathEqConstraints()));
         type = (i==0? Constraint::LEQ: (i==1? Constraint::GEQ : Constraint::EQ));
         for(int j = 0; j < pcsList.size(); ++j){
             oc::FRelationConstraint fr = oc::FRelationConstraint(pcsList.get(j).this$);
-            Constraint c(toMX(fr.getLeft()), toMX(fr.getRight()),type); 
-            pcs->push_back(c);
+            pcs->push_back(new Constraint(toMX(fr.getLeft()), toMX(fr.getRight()),type));
         }
     }
     return pcs;
 }
 
-OptimizationProblem* transferOptimizationProblem(string modelName, vector<string> modelFiles, CompilerOptionsWrapper options, string log_level) {
+Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
     // initalizeClass is needed on classes where static variables are acessed. 
     // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
     jl::System::initializeClass(false);
     oc::OptimicaCompiler::initializeClass(false);
     
     // Create a model and optimica compiler
-    Model* m = new Model();
-    oc::OptimicaCompiler compiler(options.getOptionRegistry());
+    Ref<Model> m = new Model();
+    oc::OptimicaCompiler compiler(options->getOptionRegistry());
     
     java::lang::String fileVecJava[modelFiles.size()];
     for (int i = 0; i < modelFiles.size(); ++i) {

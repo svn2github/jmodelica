@@ -63,7 +63,7 @@ foreach(Target Modelica Optimica)
 endforeach(Target)
 
 set(JARS "${JMODELICA}/jars/beaver.jar" ${JARS_modelica} ${JARS_optimica})
-set(JARS_AND_JNI ${JARS} "${JAVA_HOME}\\include" "${JAVA_HOME}\\include\\win32")
+set(JARS_AND_JNI ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
 
 set(CLASSPATH ${JARS_AND_JNI})
 interleave_string_and_list(CLASSPATH_WITH_PREFIX --classpath ${JARS})

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_BOOLEAN_TYPE
 #define _MODELICACASADI_BOOLEAN_TYPE
 
-#include <types/PrimitiveType.hpp>
+#include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 
 {
 class BooleanType : public PrimitiveType { 
