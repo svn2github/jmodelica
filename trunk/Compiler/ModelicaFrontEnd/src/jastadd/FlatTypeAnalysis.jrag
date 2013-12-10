@@ -166,7 +166,9 @@ aspect FlatTypeAnalysis {
 	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
 	
 	syn lazy FType FStatement.type() = fUnknownType();
-	eq FAssignStmt.type() = getRight().type().numericPromotion(getLeft().type());
+	eq FAssignStmt.type()            = getRight().type().numericPromotion(getLeft().type());
+	eq FFunctionCallStmt.type()      = getCall().type();
+	eq FInitArrayStmt.type()         = getFIdUseExp().type();
 	
 	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
 	//       over *any* reals. Probably needs refactoring.

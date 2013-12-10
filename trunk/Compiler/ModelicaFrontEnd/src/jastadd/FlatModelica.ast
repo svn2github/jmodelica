@@ -681,6 +681,12 @@ FDerivativeAssignStmt : FAssignStmt ::= <Order:int>;
 FFunctionCallStmt : FStatement ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
 
 /**
+ * A flattened derivative function call statement.
+ * Created when a FFunctionCallStmt is differentiated.
+ */
+FDerivativeFunctionCallStmt : FFunctionCallStmt ::= <Order:int>;
+
+/**
  * \brief Flattened break statement.
  */
 FBreakStmt : FStatement;
@@ -694,6 +700,11 @@ FReturnStmt : FStatement;
  * Class for array initalization statements.
  */
 FInitArrayStmt : FStatement ::= FIdUseExp;
+
+/**
+ * Class for derivated array initalization statements.
+ */
+FDerivatedInitArrayStmt : FInitArrayStmt ::= <Order:int>;
 
 /**
  * \brief Base class for flattened if and when statements.

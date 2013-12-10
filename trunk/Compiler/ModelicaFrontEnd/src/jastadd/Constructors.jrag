@@ -201,13 +201,13 @@ aspect Constructors {
 		this(type, new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts);
 	}
 	
-    /**
-     * \brief Constructs a derivative algorithm block that is not initial.
-     */
-    public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
-        this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts, order);
-    }
-    
+	/**
+	 * \brief Constructs a derivative algorithm block that is not initial.
+	 */
+	public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
+	    this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts, order);
+	}
+	
 	/**
 	 * \brief Constructs a boolean literal expression from a boolean.
 	 */

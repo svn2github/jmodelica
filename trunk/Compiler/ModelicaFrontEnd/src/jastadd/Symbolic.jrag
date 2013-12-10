@@ -835,11 +835,11 @@ aspect Derivatives {
 				for (FExp e : getArgs()) {
 					if (!e.isIndependent(s)) {
 						isIndependent = false;
-						break;			
+						break;
 					}
-				}				
+				}
 				if (isIndependent) {
-					return new FRealLitExp(0);	
+					return new FRealLitExp(0);
 				}
 			}
 		}
@@ -865,7 +865,7 @@ aspect Derivatives {
 	public FExp FArray.diff(String name) {
 		FArray diff_farray = new FArray();
 		for (FExp e : getFExps()) {
-			diff_farray.addFExp(e.diff(name));	
+			diff_farray.addFExp(e.diff(name));
 		}
 		return dynamicFExp(diff_farray);
 	}
@@ -920,11 +920,11 @@ aspect AlgorithmDifferentiation{
         variables.addAll(derivatedInputs);
         variables.addAll(outputs);
         variables.addAll(others);
-        FAlgorithm algorithm = getFAlgorithm().diff();
-        FFunctionDecl function = new FFunctionDecl(name, variables, algorithm, new Opt<FDerivativeFunction>());
+        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>());
         function.smoothOrderAnnotation = Math.max(smoothOrderAnnotation - 1, 0);
         myFClass().addFFunctionDecl(function);
         setFDerivativeFunction(new FDerivativeFunction(name.createFIdUse(), order, new List<FIdUse>(), new List<FIdUse>()));
+        function.setFAlgorithm(getFAlgorithm().diff());
         return function;
     }
     
@@ -939,16 +939,84 @@ aspect AlgorithmDifferentiation{
         throw new UnsupportedOperationException("Can not differentiate statment: " + this);
     }
     
+    @Override
     public void FAssignStmt.diff(List<FStatement> diffed) {
         diffed.add(fullCopy());
-        if (order() == myFAlgorithm().order())
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
             diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFIdUseExp(), getRight().diff("time"), order() + 1));
     }
    
+    @Override
+    public void FBreakStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+    }
+    
+    @Override
+    public void FForStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getForStmts())
+            statement.diff(statements);
+        diffed.add(new FForStmt(getIndex().fullCopy(), statements));
+    }
+    
+    @Override
+    public void FFunctionCallStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
+            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+            for (FFunctionCallLeft l : getLefts()) {
+                Opt<FExp> lopt = l.hasFExp() ? new Opt<FExp>(l.getFExp().diff("time")) : new Opt<FExp>();
+                lefts.add(new FFunctionCallLeft(lopt));
+            }
+            FExp diffedCall = getCall().diff("time");
+            diffed.add(new FDerivativeFunctionCallStmt(lefts, (FAbstractFunctionCall) diffedCall, order() + 1));
+        }
+    }
+    
+    syn FIfWhenStmt FIfWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses);
+    eq FIfStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) {
+        List<FStatement> elseStatements = new List<FStatement>();
+        for (FStatement statement : getElseStmts())
+            statement.diff(elseStatements);
+        return new FIfStmt(differentiatedClauses, elseStatements);
+    }
+    eq FWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) = new FWhenStmt(differentiatedClauses);
+    
+    @Override
+    public void FIfWhenStmt.diff(List<FStatement> diffed) {
+        List<FIfWhenClause> clauses = new List<FIfWhenClause>();
+        for (FIfWhenClause clause : getFIfWhenClauses())
+            clauses.add(clause.diff());
+        diffed.add(createDifferentiated(clauses));
+    }
+    
+    public FIfWhenClause FIfWhenClause.diff() {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getFStatements())
+            statement.diff(statements);
+        return createNode(getTest().fullCopy(), statements);
+    }
+    
+//    @Override
+//    public void FInitArrayStmt.diff(List<FStatement> diffed) {
+//        diffed.add(fullCopy());
+//        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+//            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
+//    }
+    
+    @Override
     public void FReturnStmt.diff(List<FStatement> diffed) {
         diffed.add(fullCopy());
     }
-   
+    
+    @Override
+    public void FWhileStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getWhileStmts())
+            statement.diff(statements);
+        diffed.add(new FWhileStmt(getTest().fullCopy(), statements));
+    }
+    
     syn FFunctionVariable FFunctionVariable.createDerivative() {
         FFunctionVariable ffv = new FFunctionDerivativeVariable(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), getFQName().createDerPrefixedName(1), order() + 1);
         if (hasBindingExp())
@@ -971,6 +1039,12 @@ aspect AlgorithmDifferentiation{
     
     syn int FAssignStmt.order()      = 0;
     eq FDerivativeAssignStmt.order() = getOrder();
+    
+    syn int FFunctionCallStmt.order()      = 0;
+    eq FDerivativeFunctionCallStmt.order() = getOrder();
+    
+    syn int FInitArrayStmt.order()     = 0;
+    eq FDerivatedInitArrayStmt.order() = getOrder();
 }
 
  aspect ExpressionSimplification {

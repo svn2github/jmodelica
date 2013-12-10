@@ -2704,13 +2704,555 @@ end IndexReduction.AlgorithmDifferentiation.Simple;
 ")})));
 end Simple;
 
-  model PlanarPendulum
-    function square
-      input Real x;
-      output Real y;
+model For
+  function F
+    input Real x;
+    output Real y;
+    output Real c = 0;
+  algorithm
+    for i in 1:10 loop
+        if i > x then
+            break;
+        end if;
+        c := c + 0.5;
+    end for;
+    y := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_For",
+            description="Test differentiation of function with for statement",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.For
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.For.F(x2) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.For._der_F(x2, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.For.F
+  input Real x;
+  output Real y;
+  output Real c;
+ algorithm
+  c := 0;
+  for i in 1:10 loop
+   if i > x then
+    break;
+   end if;
+   c := c + 0.5;
+  end for;
+  y := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.For.F;
+
+ function IndexReduction.AlgorithmDifferentiation.For._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  output Real _der_c;
+  Real y;
+  Real c;
+ algorithm
+  c := 0;
+  _der_c := 0.0;
+  for i in 1:10 loop
+   if i > x then
+    break;
+   end if;
+   c := c + 0.5;
+   _der_c := _der_c;
+  end for;
+  y := sin(x);
+  _der_y := cos(x) * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.For._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.For;
+")})));
+end For;
+
+model FunctionCall
+  function F1
+    input Real x1;
+    input Real x2;
+    output Real y;
+    Real a;
+    Real b;
+  algorithm
+    (a, b) := F2(x1, x2);
+    y := a + b;
+    annotation(Inline=false, smoothOrder=1);
+  end F1;
+  function F2
+    input Real x1;
+    input Real x2;
+    output Real a = x1;
+    output Real b = sin(x2);
+  algorithm
+  end F2;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  F1(x1, x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_FunctionCall",
+            description="Test differentiation of function with function call statement",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.FunctionCall
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ IndexReduction.AlgorithmDifferentiation.FunctionCall.F1(x1, x2) = 1;
+ IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1(x1, x2, _der_x1, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.FunctionCall.F1
+  input Real x1;
+  input Real x2;
+  output Real y;
+  Real a;
+  Real b;
+ algorithm
+  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
+  y := a + b;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.FunctionCall.F1;
+
+ function IndexReduction.AlgorithmDifferentiation.FunctionCall.F2
+  input Real x1;
+  input Real x2;
+  output Real a;
+  output Real b;
+ algorithm
+  a := x1;
+  b := sin(x2);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.FunctionCall.F2;
+
+ function IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1
+  input Real x1;
+  input Real x2;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real _der_y;
+  Real y;
+  Real a;
+  Real _der_a;
+  Real b;
+  Real _der_b;
+ algorithm
+  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
+  (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2(x1, x2, _der_x1, _der_x2);
+  y := a + b;
+  _der_y := _der_a + _der_b;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1;
+
+ function IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2
+  input Real x1;
+  input Real x2;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real _der_a;
+  output Real _der_b;
+  Real a;
+  Real b;
+ algorithm
+  a := x1;
+  _der_a := _der_x1;
+  b := sin(x2);
+  _der_b := cos(x2) * _der_x2;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2;
+
+end IndexReduction.AlgorithmDifferentiation.FunctionCall;
+")})));
+end FunctionCall;
+
+model If
+  function F
+    input Real x;
+    output Real y;
+    output Real b;
+  algorithm
+    if 10 > x then
+        b := 1;
+    else
+        b := 2;
+    end if;
+    y := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_If",
+            description="Test differentiation of function with if statement",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.If
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.If.F(x2) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.If._der_F(x2, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.If.F
+  input Real x;
+  output Real y;
+  output Real b;
+ algorithm
+  if 10 > x then
+   b := 1;
+  else
+   b := 2;
+  end if;
+  y := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.If.F;
+
+ function IndexReduction.AlgorithmDifferentiation.If._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  output Real _der_b;
+  Real y;
+  Real b;
+ algorithm
+  if 10 > x then
+   b := 1;
+   _der_b := 0.0;
+  else
+   b := 2;
+   _der_b := 0.0;
+  end if;
+  y := sin(x);
+  _der_y := cos(x) * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.If._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.If;
+")})));
+end If;
+
+model InitArray
+    function F
+        input Real[:] x;
+        output Real y;
+        Real[:] a = x .^ 2;
     algorithm
-      y := x ^ 2;
-      annotation(Inline=false, smoothOrder=2);
+        y := a[1];
+        annotation(Inline=false, smoothOrder=3);
+    end F;
+    Real x1;
+    Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F({x2}) = 1;
+
+    annotation(__JModelica_disabled(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_InitArray",
+            description="Test differentiation of function with initial array statement",
+            flatModel="
+")})));
+end InitArray;
+
+model While
+  function F
+    input Real x;
+    output Real y;
+    output Real c = 0;
+  algorithm
+    while c < x loop
+        c := c + 0.5;
+    end while;
+    y := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_While",
+            description="Test differentiation of function with while statement",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.While
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.While.F(x2) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.While._der_F(x2, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.While.F
+  input Real x;
+  output Real y;
+  output Real c;
+ algorithm
+  c := 0;
+  while c < x loop
+   c := c + 0.5;
+  end while;
+  y := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.While.F;
+
+ function IndexReduction.AlgorithmDifferentiation.While._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  output Real _der_c;
+  Real y;
+  Real c;
+ algorithm
+  c := 0;
+  _der_c := 0.0;
+  while c < x loop
+   c := c + 0.5;
+   _der_c := _der_c;
+  end while;
+  y := sin(x);
+  _der_y := cos(x) * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.While._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.While;
+")})));
+end While;
+
+model Recursive
+  function F1
+    input Real x1;
+    input Real x2;
+    output Real y;
+    Real a;
+    Real b;
+  algorithm
+    (a, b) := F2(x1, x2, 0);
+    y := a + b;
+    annotation(Inline=false, smoothOrder=1);
+  end F1;
+  function F2
+    input Real x1;
+    input Real x2;
+    input Integer c;
+    output Real a;
+    output Real b;
+  algorithm
+    if c < 10 then
+        (a, b) := F2(x1, x2, c + 1);
+    else
+        a := x1;
+        b := sin(x2);
+    end if;
+  end F2;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  F1(x1, x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_Recursive",
+            description="Test differentiation of Recursive function",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.Recursive
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ IndexReduction.AlgorithmDifferentiation.Recursive.F1(x1, x2) = 1;
+ IndexReduction.AlgorithmDifferentiation.Recursive._der_F1(x1, x2, _der_x1, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.Recursive.F1
+  input Real x1;
+  input Real x2;
+  output Real y;
+  Real a;
+  Real b;
+ algorithm
+  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
+  y := a + b;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Recursive.F1;
+
+ function IndexReduction.AlgorithmDifferentiation.Recursive.F2
+  input Real x1;
+  input Real x2;
+  input Integer c;
+  output Real a;
+  output Real b;
+ algorithm
+  if c < 10 then
+   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
+  else
+   a := x1;
+   b := sin(x2);
+  end if;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Recursive.F2;
+
+ function IndexReduction.AlgorithmDifferentiation.Recursive._der_F1
+  input Real x1;
+  input Real x2;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real _der_y;
+  Real y;
+  Real a;
+  Real _der_a;
+  Real b;
+  Real _der_b;
+ algorithm
+  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
+  (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, 0, _der_x1, _der_x2);
+  y := a + b;
+  _der_y := _der_a + _der_b;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Recursive._der_F1;
+
+ function IndexReduction.AlgorithmDifferentiation.Recursive._der_F2
+  input Real x1;
+  input Real x2;
+  input Integer c;
+  input Real _der_x1;
+  input Real _der_x2;
+  output Real _der_a;
+  output Real _der_b;
+  Real a;
+  Real b;
+ algorithm
+  if c < 10 then
+   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
+   (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, c + 1, _der_x1, _der_x2);
+  else
+   a := x1;
+   _der_a := _der_x1;
+   b := sin(x2);
+   _der_b := cos(x2) * _der_x2;
+  end if;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.Recursive._der_F2;
+
+end IndexReduction.AlgorithmDifferentiation.Recursive;
+")})));
+end Recursive;
+
+model DiscreteComponents
+  function F
+    input Real x;
+    output Real y;
+    output Integer c = 0;
+  algorithm
+    c := if x > 23 then 2 else -2;
+    c := c + 23;
+    y := sin(x);
+    annotation(Inline=false, smoothOrder=1);
+  end F;
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + F(x2) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_DiscreteComponents",
+            description="Test differentiation of function with discrete components",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.DiscreteComponents
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F(x2) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F(x2, der(x2)) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F
+  input Real x;
+  output Real y;
+  output Integer c;
+ algorithm
+  c := 0;
+  c := if x > 23 then 2 else - 2;
+  c := c + 23;
+  y := sin(x);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.DiscreteComponents.F;
+
+ function IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+  Integer c;
+ algorithm
+  c := 0;
+  c := if x > 23 then 2 else - 2;
+  c := c + 23;
+  y := sin(x);
+  _der_y := cos(x) * _der_x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.DiscreteComponents;
+")})));
+end DiscreteComponents;
+
+model PlanarPendulum
+    function square
+        input Real x;
+        output Real y;
+    algorithm
+        y := x ^ 2;
+        annotation(Inline=false, smoothOrder=2);
     end square;
   
     parameter Real L = 1 "Pendulum length";
@@ -2720,7 +3262,7 @@ end Simple;
     Real vx "Velocity in x coordinate";
     Real vy "Velocity in y coordinate";
     Real lambda "Lagrange multiplier";
-  equation
+equation
     der(x) = vx;
     der(y) = vy;
     der(vx) = lambda*x;
