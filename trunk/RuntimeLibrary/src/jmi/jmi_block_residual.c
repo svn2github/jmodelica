@@ -259,8 +259,8 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
             block->n_sw = nR;
             block->mode_sw = 1; /* NOT INITIALIZE MODE */
         }
-        block->sw_old = (double*)calloc( (nbr_allocated_iterations +1)*block->n_sw, sizeof(double));
-        block->bool_old= (double*)calloc( (nbr_allocated_iterations +1)*nbr_bool, sizeof(double));
+        block->sw_old = (double*)calloc( (nbr_allocated_iterations +2)*block->n_sw, sizeof(double));
+        block->bool_old= (double*)calloc( (nbr_allocated_iterations +2)*nbr_bool, sizeof(double));
 
     }
     ef = jmi_block_solver_solve(block->block_solver,jmi_get_t(jmi)[0],

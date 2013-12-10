@@ -377,6 +377,7 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
     }
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, negated_value);
+    free(negated_value);
     if (retval != 0) {
         return fmiError;
     }

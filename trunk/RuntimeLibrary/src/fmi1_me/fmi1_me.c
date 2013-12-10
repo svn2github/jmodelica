@@ -936,6 +936,7 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
     
     retval = jmi_event_iteration(&((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
     if (retval != 0) {
+        free(event_info);
         return fmiError;
     }
     

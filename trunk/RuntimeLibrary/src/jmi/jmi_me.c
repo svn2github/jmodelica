@@ -38,7 +38,7 @@ jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
 }
 
 jmi_value_reference is_negated(jmi_value_reference valueref) {
-    /* Translate a ValueReference into variable type in z-vector. */
+    /* Checks for a valueReference if it is negated. */
     jmi_value_reference negated = valueref & negatemask;
     
     return negated;
