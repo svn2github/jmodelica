@@ -35,6 +35,7 @@
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
 #define ONE RCONST(1.0)
 #define Ith(v,i)    NV_Ith_S(v,i)
+#define UROUND 1e-15
 
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 static void jmi_update_f_scale(jmi_block_solver_t *block);
@@ -278,6 +279,21 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     return ret;
 }
 
+static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    jmi_log_node_t node = jmi_log_enter(block->log, logError, "KinsolError");
+    realtype fnorm, snorm;
+    KINGetFuncNorm(solver->kin_mem, &fnorm);
+    KINGetStepLength(solver->kin_mem, &snorm);
+    
+    jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %d>",
+        "KINSol", block->cur_time, block->id);
+    jmi_log_fmt(block->log, node, logError, "<msg: %s>", "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
+    jmi_log_fmt(block->log, node, logError, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+                fnorm, snorm, solver->kin_stol);
+    jmi_log_leave(block->log, node);
+}
+
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category;
@@ -299,6 +315,8 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         category = logError;
     }
     
+    if (err_code != KIN_LINESEARCH_NONCONV) /* If the error is LINSEARCH_NONCONV it might not be an error depending 
+                                               in on the fnorm, so post-pone this error message in these cases */
     {
         jmi_log_node_t node = jmi_log_enter(block->log, category, "KinsolError");
         jmi_log_fmt(block->log, node, category, "Error occured in <function: %s> at <t: %f> when solving <block: %d>",
@@ -463,7 +481,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     else
         solver->kin_stol = block->options->min_tol;
     
-    solver->kin_ftol = block->options->res_tol;
+    solver->kin_ftol = UROUND; /* block->options->res_tol; */
     
     /* If not set, set the default */
     if (block->options->regularization_tolerance == -1){
@@ -495,7 +513,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
             double nominal = RAbs(block->nominal[i]);
             if(nominal != 1.0) {
                 if(nominal == 0.0)
-                    nominal = 1/solver->kin_ftol;
+                    nominal = 1/solver->kin_stol;
                 else
                     nominal = 1/nominal;
                 Ith(solver->kin_y_scale,i)=nominal;
@@ -1096,7 +1114,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     /*NOTE: it'd be nice to use "jmi->newton_tolerance" here
       However, newton_tolerance is not set yet at this point.
     */
-    solver->kin_ftol = block->options->min_tol;
+    solver->kin_ftol = UROUND; /* block->options->min_tol; */
     solver->kin_stol = block->options->min_tol;
     solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
     
@@ -1304,7 +1322,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
             
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
         KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;
@@ -1316,17 +1333,18 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
              from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
              value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
              as a success. Commenting out this code since it causes problems.*/
-        else if (flag == KIN_LINESEARCH_NONCONV) {
+        else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
             realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
-            if(fnorm < solver->kin_stol) {
+            if(fnorm < solver->kin_stol) { /* Kinsol returned nonconv but the residuals are converged */
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->id);*/
+            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
+                jmi_kinsol_linesearch_nonconv_error_message(block);
             }
 
         }
     }
+    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     
     /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
     if((block->n == 1) && block->options->use_Brent_in_1d_flag) {
@@ -1377,17 +1395,18 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         
         jmi_kinsol_solver_print_solve_start(block, &topnode);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
-        } else if (flag == KIN_LINESEARCH_NONCONV) {
+        } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->id);*/
+            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
+                jmi_kinsol_linesearch_nonconv_error_message(block);
             }
         }
+        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
+        
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
             solver->force_new_J_flag = 1;
