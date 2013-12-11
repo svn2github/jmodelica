@@ -133,7 +133,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     }
 
     if(iter >= nbr_allocated_iterations){
-        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
+        jmi_log_node(log, logWarning, "Warning", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
         block->event_iter = 0;
         return jmi_block_solver_status_event_non_converge;
     }
@@ -144,7 +144,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     } else {
         /* Check for infinite loop */
         if(jmi_check_infinite_loop(block->sw_old,switches,block->n_sw,iter) && jmi_check_infinite_loop(block->bool_old,booleans,nbr_bool,iter)){
-            jmi_log_node(log, logWarning, "Warning", "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
+            jmi_log_node(log, logWarning, "Warning", "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
             block->event_iter = 0;
             return jmi_block_solver_status_inf_event_loop;
         }

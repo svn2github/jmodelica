@@ -340,18 +340,20 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 if(ef != 0) { 
                     switch(ef) {
                         case jmi_block_solver_status_err_event_eval:
-                            jmi_log_fmt(log, iter_node, logError, "Error evaluating switches <block:%d, iter:%d> at <t:%E>",
+                            jmi_log_fmt(log, iter_node, logError, "Error evaluating switches in <block:%d, iter:%d> at <t:%E>",
                                 block_solver->id, iter, cur_time);
                             break;
                         case jmi_block_solver_status_err_f_eval:
-                            jmi_log_fmt(log, iter_node, logError, "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
+                            jmi_log_fmt(log, iter_node, logError, "Error updating discrete variables in <block:%d, iter:%d> at <t:%E>",
                                 block_solver->id, iter, cur_time);
                             break;
                         case jmi_block_solver_status_inf_event_loop:
-                            jmi_log_fmt(log, iter_node, logError, "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
+                            jmi_log_fmt(log, iter_node, logError, "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                                block_solver->id, iter, cur_time);
                             break;
                         case jmi_block_solver_status_event_non_converge:
-                            jmi_log_fmt(log, iter_node, logError, "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
+                            jmi_log_fmt(log, iter_node, logError, "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",
+                                block_solver->id, iter, cur_time);
                             break;
                         default:
                             break;
@@ -405,8 +407,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             }
             
             if(!non_reals_changed_flag) {
-                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration at "
-                            "<t:%E>", cur_time);
+                jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                            block_solver->id, iter, cur_time);
 
                 converged = 1;
                 jmi_log_leave(log, iter_node);
@@ -467,10 +469,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                             block_solver->id, iter, cur_time);
                         break;
                     case jmi_block_solver_status_inf_event_loop:
-                        jmi_log_node(log, logError, "Error", "Detected infinite loop in fixed point iteration at <t:%g>", cur_time);
+                        jmi_log_node(log, logError, "Error", "Detected infinite loop in enhanced fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                            block_solver->id, iter, cur_time);
                         break;
                     case jmi_block_solver_status_event_non_converge:
-                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations at <t:%E>", cur_time);
+                        jmi_log_node(log, logError, "Error", "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",
+                            block_solver->id, iter, cur_time);
                         break;
                     default:
                         break;
@@ -494,8 +498,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 /* Check for consistency */
                 if (non_reals_not_changed_flag){
-                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration at "
-                        "<t:%E>", cur_time);
+                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent solution using enhanced fixed point iteration in <block:%d, iter:%d> at <t:%E>",
+                        block_solver->id, iter, cur_time);
                     converged = 1;
                     jmi_log_leave(log, iter_node);
                     break;
@@ -511,8 +515,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         if(converged==0){
-            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration at <t:%g>",
-                        cur_time);
+            jmi_log_node(log, logError, "Error", "Failed to find a consistent solution in event iteration in <block:%d, iter:%d> at <t:%E>",
+                 block_solver->id, iter, cur_time);
             ef = 1; /* Return flag */
         }
         jmi_log_leave(log, top_node);
