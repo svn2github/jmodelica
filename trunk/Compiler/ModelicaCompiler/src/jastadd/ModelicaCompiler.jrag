@@ -132,9 +132,9 @@ public class ModelicaCompiler {
 	protected boolean debugSrcIsHome = false;
 	protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
 	    "Compiler/ModelicaCBackEnd/templates",
-        "Compiler/ModelicaXMLBackEnd/templates",
+        "Compiler/ModelicaFMUXBackEnd/templates",
         "Compiler/OptimicaCBackEnd/templates",
-        "Compiler/OptimicaXMLBackEnd/templates",
+        "Compiler/OptimicaFMUXBackEnd/templates",
 	};
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
