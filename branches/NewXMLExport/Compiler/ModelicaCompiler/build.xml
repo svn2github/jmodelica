@@ -27,7 +27,7 @@
 <project name="ModelicaCompiler" default="build" basedir=".">
 	
 	<property name="modules" 
-		value="ModelicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaCBackEnd,ModelicaCompiler" />
+		value="ModelicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaXMLBackEnd,ModelicaCBackEnd,ModelicaCompiler" />
 	
 	<property name="java_version" value="1.6"/>
 	<property name="java_compiler" value="javac${java_version}"/>
@@ -87,7 +87,7 @@
             <propertycopy name="last" from="jastadd_files_list_${index}" override="true" />
         </sequential>
     </for>
-    <propertyregex property="jastadd_files_temp" input="${last}" regexp=";" replace=" ../" />
+    <propertyregex property="jastadd_files_temp" input="${last}" regexp=";+" replace=" ../" />
 	<property name="jastadd_files" value="../${jastadd_files_temp}" />
 
 
