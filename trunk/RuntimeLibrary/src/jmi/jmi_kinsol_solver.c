@@ -1389,6 +1389,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
             }
         }
         if(flag != KIN_SUCCESS) {
+            /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
+            solver->force_new_J_flag = 1;
+            
             if (flagNonscaled == 0) {
                 jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
                              "re-scaled equations failed in <block: %d>", block->id); 
