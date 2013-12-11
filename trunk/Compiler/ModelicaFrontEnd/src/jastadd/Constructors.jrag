@@ -737,14 +737,28 @@ aspect Constructors {
 	 * \brief Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(new Opt(), type, new Opt(), new FQNameString(name));
+		this(new Opt(), type, new Opt(), new FQNameString(name), 0);
 	}
 	
     /**
      * \brief Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
     public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
-        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name));
+        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name), 0);
+    }
+    
+    /**
+     * \brief Create an FFunctionVariable with everything but order given.
+     */
+    public FFunctionVariable.FFunctionVariable(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+        this(inputOutput, type, bindingExp, name, 0);
+    }
+    
+    /**
+     * \brief Create an FFunctionArray with everything but order given.
+     */
+    public FFunctionArray.FFunctionArray(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+        this(inputOutput, type, bindingExp, name, 0);
     }
     
 	/**
@@ -1224,6 +1238,23 @@ aspect InheritedFactoryMethods {
 
 	public FAttribute         FAttribute.createEmptyNode()         { return new FAttribute(); }
 	public FInternalAttribute FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
+	
+	
+    /**
+     * Create new node of same class as this, with the specified children.
+     */
+    public FFunctionVariable FFunctionVariable.createNode(Opt<FTypePrefixInputOutput> prefix, FType type, Opt<FExp> bindingExp, FQName name, int order) {
+        FFunctionVariable node = createEmptyNode();
+        node.setFTypePrefixInputOutputOpt(prefix);
+        node.setType(type);
+        node.setBindingExpOpt(bindingExp);
+        node.setFQName(name);
+        node.setOrder(order);
+        return node;
+    }
+    
+    public FFunctionVariable FFunctionVariable.createEmptyNode() { return new FFunctionVariable(); }
+    public FFunctionArray    FFunctionArray.createEmptyNode()    { return new FFunctionArray(); }
 
 	/**
 	 * \brief Create new node of same class as this, with the specified 

@@ -2979,11 +2979,56 @@ equation
   der(x1) + der(x2) = 1;
   x1 + F({x2}) = 1;
 
-    annotation(__JModelica_disabled(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmDifferentiation_InitArray",
             description="Test differentiation of function with initial array statement",
             flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.InitArray
+ Real x1;
+ Real x2;
+ Real _der_x1;
+initial equation 
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + IndexReduction.AlgorithmDifferentiation.InitArray.F({x2}) = 1;
+ _der_x1 + IndexReduction.AlgorithmDifferentiation.InitArray._der_F({x2}, {der(x2)}) = 0.0;
+
+public
+ function IndexReduction.AlgorithmDifferentiation.InitArray.F
+  input Real[:] x;
+  output Real y;
+  Real[:] a;
+ algorithm
+  size(a) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   a[i1] := x[i1] .^ 2;
+  end for;
+  y := a[1];
+  return;
+ end IndexReduction.AlgorithmDifferentiation.InitArray.F;
+
+ function IndexReduction.AlgorithmDifferentiation.InitArray._der_F
+  input Real[:] x;
+  input Real[:] _der_x;
+  output Real _der_y;
+  Real y;
+  Real[:] a;
+  Real[:] _der_a;
+ algorithm
+  size(a) := {size(x, 1)};
+  size(_der_a) := {size(x, 1)};
+  for i1 in 1:size(x, 1) loop
+   a[i1] := x[i1] .^ 2;
+   _der_a[i1] := 2 .* x[i1] .* _der_x[i1];
+  end for;
+  y := a[1];
+  _der_y := _der_a[1];
+  return;
+ end IndexReduction.AlgorithmDifferentiation.InitArray._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.InitArray;
 ")})));
 end InitArray;
 

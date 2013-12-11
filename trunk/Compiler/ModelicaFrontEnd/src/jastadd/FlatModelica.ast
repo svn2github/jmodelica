@@ -95,13 +95,8 @@ abstract FAbstractVariable : BaseNode;
 FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           Type:FType
                                           [BindingExp:FExp]
-                                          FQName;
-
-/**
- * A flat derivative variable in a function.
- * Created when a FFunctionVariabe is differentiated.
- */
-FFunctionDerivativeVariable : FFunctionVariable ::= <Order:int>;
+                                          FQName
+                                          <Order:int>;
 
 /**
  * \brief An array variable in a function. 

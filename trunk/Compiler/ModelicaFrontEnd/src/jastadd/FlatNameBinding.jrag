@@ -76,7 +76,7 @@ aspect FlatNameBinding {
 	
 	
 	eq FFunctionDecl.getChild().lookupFV(FQName fqn)          = lookupFV(fqn);
-    eq FFunctionDecl.getChild().lookupDerFV(FQName fqn)       = lookupFV(fqn.derPrefixName(1));
+    eq FFunctionDecl.getChild().lookupDerFV(FQName fqn)       = lookupFV(fqn.createDerPrefixedName(1));
 	eq FFunctionDecl.getChild().lookupOutermostFV(FQName fqn) = lookupOutermostFV(fqn);
 	
 	/**
@@ -89,17 +89,6 @@ aspect FlatNameBinding {
 		return nullUnknown(res);
 	}
 	
-    /**
-     * Generic lookup function. Can find normal variables, records and record members.
-     * Used by derivative lookup.
-     */
-    syn FAbstractVariable FFunctionDecl.lookupFV(String name) {
-        FAbstractVariable res = (tempLookupMap == null) ? null : tempLookupMap.lookup(name);
-        if (res == null)
-            res = variablesMap().lookup(name);
-        return nullUnknown(res);
-    }
-    
 	/**
 	 * Lookup function for finding the outermost record variable. 
 	 * 
@@ -605,7 +594,7 @@ aspect FlatHDerBinding {
 	eq Root.getChild().lookupHDerFV(FQName fqn, int order) = null;
 
 	eq FClass.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupFV(fqn.hDerName(order));
-	eq FFunctionDecl.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupFV(fqn.derPrefixName(order));
+	eq FFunctionDecl.getChild(int index).lookupHDerFV(FQName fqn, int order) = lookupFV(fqn.createDerPrefixedName(order));
 
 }
 

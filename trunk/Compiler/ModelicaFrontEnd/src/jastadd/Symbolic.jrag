@@ -997,12 +997,12 @@ aspect AlgorithmDifferentiation{
         return createNode(getTest().fullCopy(), statements);
     }
     
-//    @Override
-//    public void FInitArrayStmt.diff(List<FStatement> diffed) {
-//        diffed.add(fullCopy());
-//        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
-//            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
-//    }
+    @Override
+    public void FInitArrayStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
+    }
     
     @Override
     public void FReturnStmt.diff(List<FStatement> diffed) {
@@ -1018,7 +1018,8 @@ aspect AlgorithmDifferentiation{
     }
     
     syn FFunctionVariable FFunctionVariable.createDerivative() {
-        FFunctionVariable ffv = new FFunctionDerivativeVariable(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), getFQName().createDerPrefixedName(1), order() + 1);
+        FFunctionVariable ffv = createNode(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), getFQName().createDerPrefixedName(1), order() + 1);
+        ffv.hasInitArrayStmt = hasInitArrayStmt;
         if (hasBindingExp())
             ffv.setBindingExp(getBindingExp().diff("time"));
         return ffv;
@@ -1034,8 +1035,7 @@ aspect AlgorithmDifferentiation{
     syn int FAlgorithm.order()      = 0;
     eq FDerivativeAlgorithm.order() = getOrder();
     
-    syn int FFunctionVariable.order()      = 0;
-    eq FFunctionDerivativeVariable.order() = getOrder();
+    syn int FFunctionVariable.order()      = getOrder();
     
     syn int FAssignStmt.order()      = 0;
     eq FDerivativeAssignStmt.order() = getOrder();
