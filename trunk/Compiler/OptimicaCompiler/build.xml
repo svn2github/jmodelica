@@ -89,7 +89,7 @@
             <propertycopy name="last" from="jastadd_files_list_${index}" override="true" />
         </sequential>
     </for>
-    <propertyregex property="jastadd_files_temp" input="${last}" regexp=";" replace=" ../" />
+    <propertyregex property="jastadd_files_temp" input="${last}" regexp=";+" replace=" ../" />
 	<property name="jastadd_files" value="../${jastadd_files_temp}" />
 
 
