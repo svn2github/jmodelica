@@ -250,9 +250,9 @@ def test_ModelicaModelFunction():
                             "@1 = input[0]\n"
                             "@0 = (@0*@1)\n"
                             "output[0] = @0\n"
-                            "@2 = input[1]\n"
-                            "@0 = (@2+@0)\n"
-                            "output[1] = @0\n")
+                            "@1 = input[1]\n"
+                            "@1 = (@1+@0)\n"
+                            "output[1] = @1\n")
     mf_1 = model.getModelFunctionByName("simpleModelWithFunctions.f")
     mf_2 = model.getModelFunctionByName("simpleModelWithFunctions.f2")
     actual = str(mf_1) + str(mf_2)
@@ -411,9 +411,9 @@ def test_ConstructArrayInOutFunction1():
                 "@0 = input[0]\n"
                 "@0 = (-@0)\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "@1 = (-@1)\n"
-                "output[1] = @1\n")
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelVector1.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelVector1.f\").call([A[1],A[2]]){0}," +                                                             
                 "function(\"AtomicModelVector1.f\").call([A[1],A[2]]){1})-vertcat(temp_1[1],temp_1[2]))," +
@@ -456,15 +456,15 @@ def test_ConstructArrayInOutFunctionCallEquation():
                 "@0 = input[0]\n"
                 "@0 = (-@0)\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "@1 = (-@1)\n"
-                "output[1] = @1\n"
-                "@2 = input[2]\n"
-                "@2 = (2.*@2)\n"
-                "output[2] = @2\n"
-                "@3 = input[3]\n"
-                "@3 = (2.*@3)\n"
-                "output[3] = @3\n")
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n"
+                "@0 = input[2]\n"
+                "@0 = (2.*@0)\n"
+                "output[2] = @0\n"
+                "@0 = input[3]\n"
+                "@0 = (2.*@0)\n"
+                "output[3] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelVector3.f")) == expected
     expected = ("(vertcat(function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2])" +
                 "{0},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2])" +
@@ -505,10 +505,10 @@ def test_ConstructFunctionMatrix():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[2]\n"
                 "output[0] = @0\n"
-                "@1 = input[3]\n"
-                "output[1] = @1\n"
-                "@2 = input[0]\n"
-                "@3 = input[1]\n")
+                "@0 = input[3]\n"
+                "output[1] = @0\n"
+                "@0 = input[0]\n"
+                "@1 = input[1]\n")
     assert str(model.getModelFunctionByName("AtomicModelMatrix.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1," +
                 "0.3]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1" +
@@ -541,21 +541,21 @@ def test_ConstructFunctionMatrixDimsGreaterThanTwo():
                 "@0 = input[0]\n"
                 "@0 = (-@0)\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "@1 = (-@1)\n"
-                "output[1] = @1\n"
-                "@2 = input[2]\n"
-                "@2 = (-@2)\n"
-                "output[2] = @2\n"
-                "@3 = input[3]\n"
-                "@3 = (-@3)\n"
-                "output[3] = @3\n"
-                "@4 = input[4]\n"
-                "@4 = (-@4)\n"
-                "output[4] = @4\n"
-                "@5 = 10\n"
-                "output[5] = @5\n"
-                "@6 = input[5]\n")
+                "@0 = input[1]\n"
+                "@0 = (-@0)\n"
+                "output[1] = @0\n"
+                "@0 = input[2]\n"
+                "@0 = (-@0)\n"
+                "output[2] = @0\n"
+                "@0 = input[3]\n"
+                "@0 = (-@0)\n"
+                "output[3] = @0\n"
+                "@0 = input[4]\n"
+                "@0 = (-@0)\n"
+                "output[4] = @0\n"
+                "@0 = 10\n"
+                "output[5] = @0\n"
+                "@0 = input[5]\n")
     assert str(model.getModelFunctionByName("AtomicModelLargerThanTwoDimensionArray.f")) == expected
     expected = ("vertcat((vertcat("
                 "function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){0}," 
@@ -583,18 +583,18 @@ def test_ConstructNestedRecordFunctions():
                 "  7. 1-by-1 (dense)\n"
                 "@0 = 0\n"
                 "output[0] = @0\n"
-                "@1 = input[0]\n"
-                "output[1] = @1\n"
-                "@2 = 2\n"
-                "output[2] = @2\n"
-                "@3 = 3\n"
-                "output[3] = @3\n"
-                "@4 = 6\n"
-                "output[4] = @4\n"
-                "@5 = 7\n"
-                "output[5] = @5\n"
-                "output[6] = @2\n"
-                "output[7] = @3\n")
+                "@0 = input[0]\n"
+                "output[1] = @0\n"
+                "@0 = 2\n"
+                "output[2] = @0\n"
+                "@1 = 3\n"
+                "output[3] = @1\n"
+                "@2 = 6\n"
+                "output[4] = @2\n"
+                "@2 = 7\n"
+                "output[5] = @2\n"
+                "output[6] = @0\n"
+                "output[7] = @1\n")
     assert str(model.getModelFunctionByName("AtomicModelRecordNestedArray.generateCurves")) == expected
     expected = ("vertcat((vertcat(" +
                 "function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){0}," +
@@ -622,8 +622,8 @@ def test_ConstructRecordInFunctionInFunction():
                 "@1 = input[0]\n"
                 "@0 = (@0+@1)\n"
                 "{@2,@3} = function(\"AtomicModelRecordInOutFunctionCallStatement.f2\").call([@1,@0])\n"
-                "@3 = (@2*@3)\n"
-                "output[0] = @3\n"
+                "@2 = (@2*@3)\n"
+                "output[0] = @2\n"
                 "ModelFunction : function(\"AtomicModelRecordInOutFunctionCallStatement.f2\")\n"
                 " Inputs (2):\n"
                 "  0. 1-by-1 (dense)\n"
@@ -633,10 +633,10 @@ def test_ConstructRecordInFunctionInFunction():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = 10\n"
-                "@2 = input[1]\n"
-                "@2 = (@1*@2)\n" 
-                "output[1] = @2\n")
+                "@0 = 10\n"
+                "@1 = input[1]\n"
+                "@0 = (@0*@1)\n" 
+                "output[1] = @0\n")
     funcStr = str(model.getModelFunctionByName("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunctionByName("AtomicModelRecordInOutFunctionCallStatement.f2"))
     assert funcStr == expected
     assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der_a)"
@@ -656,20 +656,20 @@ def test_ConstructRecordArbitraryDimension():
                 "  7. 1-by-1 (dense)\n"
                 "@0 = 1\n"
                 "output[0] = @0\n"
-                "@1 = 2\n"
-                "output[1] = @1\n"
-                "@2 = 3\n"
-                "output[2] = @2\n"
-                "@3 = 4\n"
-                "output[3] = @3\n"
-                "@4 = 5\n"
-                "output[4] = @4\n"
-                "@5 = 6\n"
-                "output[5] = @5\n"
-                "@6 = input[0]\n"
-                "output[6] = @6\n"
-                "@6 = (2.*@6)\n"
-                "output[7] = @6\n")
+                "@0 = 2\n"
+                "output[1] = @0\n"
+                "@0 = 3\n"
+                "output[2] = @0\n"
+                "@0 = 4\n"
+                "output[3] = @0\n"
+                "@0 = 5\n"
+                "output[4] = @0\n"
+                "@0 = 6\n"
+                "output[5] = @0\n"
+                "@0 = input[0]\n"
+                "output[6] = @0\n"
+                "@0 = (2.*@0)\n"
+                "output[7] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelRecordArbitraryDimension.f")) == expected
     expected = ("vertcat(((-a)-der_a),(vertcat(" + 
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}," +
@@ -685,7 +685,6 @@ def test_ConstructRecordArbitraryDimension():
     
 def test_ConstructArrayFlattening():
     model =  transfer_to_casadi_interface("atomicModelSimpleArrayIndexing", modelFile, compiler_options={"inline_functions":"none"})
-    model.calculateValuesForDependentParameters()
     expected = ("ModelFunction : function(\"atomicModelSimpleArrayIndexing.f\")\n"
                 " Inputs (0):\n"
                 " Outputs (4):\n"
@@ -695,12 +694,12 @@ def test_ConstructArrayFlattening():
                 "  3. 1-by-1 (dense)\n"
                 "@0 = 1\n"
                 "output[0] = @0\n"
-                "@1 = 2\n"
-                "output[1] = @1\n"
-                "@2 = 3\n"
-                "output[2] = @2\n"
-                "@3 = 4\n"
-                "output[3] = @3\n")
+                "@0 = 2\n"
+                "output[1] = @0\n"
+                "@0 = 3\n"
+                "output[2] = @0\n"
+                "@0 = 4\n"
+                "output[3] = @0\n")
     assert str(model.getModelFunctionByName("atomicModelSimpleArrayIndexing.f")) == expected
     
 def test_ConstructRecordNestedSeveralVars():
@@ -720,24 +719,24 @@ def test_ConstructRecordNestedSeveralVars():
                 "  9. 1-by-1 (dense)\n"
                 "@0 = 1\n"
                 "output[0] = @0\n"
-                "@1 = 2\n"
-                "output[1] = @1\n"
-                "@2 = 3\n"
-                "output[2] = @2\n"
-                "@3 = 4\n"
-                "output[3] = @3\n"
-                "@4 = 5\n"
-                "output[4] = @4\n"
-                "@5 = 6\n"
-                "output[5] = @5\n"
-                "@6 = 7\n"
-                "output[6] = @6\n"
-                "@7 = 8\n"
-                "output[7] = @7\n"
-                "@8 = 9\n"
-                "output[8] = @8\n"
-                "@9 = input[0]\n"
-                "output[9] = @9\n")
+                "@0 = 2\n"
+                "output[1] = @0\n"
+                "@0 = 3\n"
+                "output[2] = @0\n"
+                "@0 = 4\n"
+                "output[3] = @0\n"
+                "@0 = 5\n"
+                "output[4] = @0\n"
+                "@0 = 6\n"
+                "output[5] = @0\n"
+                "@0 = 7\n"
+                "output[6] = @0\n"
+                "@0 = 8\n"
+                "output[7] = @0\n"
+                "@0 = 9\n"
+                "output[8] = @0\n"
+                "@0 = input[0]\n"
+                "output[9] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelRecordSeveralVars.f")) == expected
     expected = ("vertcat(((-a)-der_a),(vertcat(" +  
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}," + 
@@ -822,8 +821,8 @@ def test_ConstructVariousRealValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "@1 = input[1]\n"
-                "@1 = (@0+@1)\n"
-                "output[0] = @1\n")
+                "@0 = (@0+@1)\n"
+                "output[0] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
@@ -841,14 +840,14 @@ def test_ConstructVariousRealValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = 2\n"
                 "@1 = input[0]\n"
-                "@2 = (@0<@1)\n"
-                "@3 = 1\n"
-                "@3 = (@2?@3:0)\n"
-                "@2 = (!@2)\n"
-                "@4 = 5\n"
-                "@4 = (@2?@4:0)\n"
-                "@4 = (@3+@4)\n"
-                "output[0] = @4\n"
+                "@0 = (@0<@1)\n"
+                "@2 = 1\n"
+                "@2 = (@0?@2:0)\n"
+                "@0 = (!@0)\n"
+                "@3 = 5\n"
+                "@0 = (@0?@3:0)\n"
+                "@2 = (@2+@0)\n"
+                "output[0] = @2\n"
                 "output[1] = @1\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.monoInPolyOut")) == expected
     
@@ -870,8 +869,8 @@ def test_ConstructVariousRealValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "output[1] = @1\n")
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
@@ -962,9 +961,9 @@ def test_ConstructVariousRealValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = 1\n"
-                "output[1] = @1\n"
-                "@2 = input[1]\n")
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInPolyOutInternal")) == expected
      
      
@@ -998,8 +997,8 @@ def test_ConstructVariousIntegerValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "@1 = input[1]\n"
-                "@1 = (@0+@1)\n"
-                "output[0] = @1\n")
+                "@0 = (@0+@1)\n"
+                "output[0] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
@@ -1017,14 +1016,14 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = 2\n"
                 "@1 = input[0]\n"
-                "@2 = (@0<@1)\n"
-                "@3 = 1\n"
-                "@3 = (@2?@3:0)\n"
-                "@2 = (!@2)\n"
-                "@4 = 5\n"
-                "@4 = (@2?@4:0)\n"
-                "@4 = (@3+@4)\n"
-                "output[0] = @4\n"
+                "@0 = (@0<@1)\n"
+                "@2 = 1\n"
+                "@2 = (@0?@2:0)\n"
+                "@0 = (!@0)\n"
+                "@3 = 5\n"
+                "@0 = (@0?@3:0)\n"
+                "@2 = (@2+@0)\n"
+                "output[0] = @2\n"
                 "output[1] = @1\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInPolyOut")) == expected
     
@@ -1046,8 +1045,8 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "output[1] = @1\n")
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
@@ -1109,10 +1108,10 @@ def test_ConstructVariousIntegerValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = 3\n"
                 "@1 = input[0]\n"
-                "@2 = (@0*@1)\n"
-                "@2 = (@1*@2)\n"
-                "@3 = 1\n"
-                "@2 = (@3+@2)\n"
+                "@0 = (@0*@1)\n"
+                "@0 = (@1*@0)\n"
+                "@2 = 1\n"
+                "@2 = (@2+@0)\n"
                 "@1 = (@1+@2)\n"
                 "output[0] = @1\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")) == expected
@@ -1140,9 +1139,9 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = 1\n"
-                "output[1] = @1\n"
-                "@2 = input[1]\n")
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal")) == expected
      
      
@@ -1175,8 +1174,8 @@ def test_ConstructVariousBooleanValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "@1 = input[1]\n"
-                "@1 = (@0&&@1)\n"
-                "output[0] = @1\n")
+                "@0 = (@0&&@1)\n"
+                "output[0] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
@@ -1196,8 +1195,8 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@1 = input[0]\n"
                 "@0 = (@0||@1)\n"
                 "@2 = (!@1)\n"
-                "@0 = (@2?@0:0)\n"
-                "output[0] = @0\n"
+                "@2 = (@2?@0:0)\n"
+                "output[0] = @2\n"
                 "output[1] = @1\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInPolyOut")) == expected
     
@@ -1219,8 +1218,8 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = input[1]\n"
-                "output[1] = @1\n")
+                "@0 = input[1]\n"
+                "output[1] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
@@ -1283,9 +1282,9 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = input[0]\n"
                 "@0 = (@0&&@0)\n"
                 "@1 = 0\n"
-                "@0 = (@1||@0)\n"
-                "@2 = 0\n"
-                "@0 = (@2||@0)\n"
+                "@1 = (@1||@0)\n"
+                "@0 = 0\n"
+                "@0 = (@0||@1)\n"
                 "output[0] = @0\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")) == expected
 
@@ -1312,9 +1311,9 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "  1. 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n"
-                "@1 = 1\n"
-                "output[1] = @1\n"
-                "@2 = input[1]\n")
+                "@0 = 1\n"
+                "output[1] = @0\n"
+                "@0 = input[1]\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
      
      

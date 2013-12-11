@@ -519,9 +519,12 @@ def test_ModelFunctionGetNameCall():
     function.init()
     modelFunction = ModelFunction(function)
     arg = MX("arg")
-    manualCall = function.call([arg])[0]
-    assert( isEqual( modelFunction.call([arg])[0].getDep(0).getDep(0),arg) )
-    assert( str(manualCall) == str(modelFunction.call([arg])[0]) )
+    argVec = MXVector()
+    argVec.append(arg)
+    manualCall = function.call(argVec)[0]
+    mfCall = modelFunction.call(argVec)
+    assert( isEqual( mfCall[0].getDep(0).getDep(0),arg) )
+    assert( str(manualCall) == str(mfCall[0]) )
 
 def test_ModelFunctionCallAndUse():
     funcVar = MX("node")
@@ -531,8 +534,10 @@ def test_ModelFunctionCallAndUse():
     function.init()
     modelFunction = ModelFunction(function)
     arg = MX("arg")
-    call = modelFunction.call([arg])[0]
-    evaluateCall = MXFunction([arg], [call])
+    argVec = MXVector()
+    argVec.append(arg)
+    call = modelFunction.call(argVec)
+    evaluateCall = MXFunction([arg], [call[0]])
     evaluateCall.init()
     evaluateCall.setInput(0.0)
     evaluateCall.evaluate()        
@@ -588,19 +593,18 @@ def test_ConstraintPrinting():
 
 def test_OptimizationProblemConstructors():
     model = Model()
-    constraintsEmpty = ConstraintVector()
+    constraintsEmpty = numpy.array([], dtype = object)
     optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0), MX(0))
     optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0))
     optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0))
-
-    assert( int(model.this) == int(optBothMayerAndLagrange.getModel().this) )
+    assert( int(model.this) == int(optBothMayerAndLagrange.getModel().this) ) # Looks at pointers
     assert( int(model.this) == int(optOnlyLagrange.getModel().this) )
     assert( int(model.this) == int(optNeitherLagrangreOrMayer.getModel().this) )
 
 def test_OptimizationProblemTime():
     start = MX (0)
     final = MX(1)
-    constraintsEmpty = ConstraintVector()
+    constraintsEmpty = numpy.array([], dtype = object)
     model = Model()
     optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, start, final, MX(0), MX(0))
     optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, start, final, MX(0))
@@ -623,7 +627,7 @@ def test_OptimizationProblemTime():
 def test_OptimizationProblemLagrangeMayer():
     lagrange = MX("lagrange")
     mayer = MX("mayer")
-    constraintsEmpty = ConstraintVector()
+    constraintsEmpty = numpy.array([], dtype = object)
     model = Model()
     optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty,  MX(0),  MX(0), lagrange, mayer)
     optOnlyLagrange = OptimizationProblem(model, constraintsEmpty,  MX(0),  MX(0), lagrange)
@@ -642,22 +646,22 @@ def test_OptimizationProblemLagrangeMayer():
     assert( isEqual(mayer, optNeitherLagrangreOrMayer.getMayerTerm()) )
 
 def test_OptimizationProblemConstraints():
-    constraintsEmpty = ConstraintVector()
-    constraintsLessThan = ConstraintVector()
-    constraintsGreaterThan = ConstraintVector()
+    constraintsEmpty = numpy.array([], dtype = object)
+    constraintsLessThan = numpy.array([], dtype = object)
+    constraintsGreaterThan = numpy.array([], dtype = object)
     lhs = MX("lhs")
     rhs = MX("rhs")
     lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
     greaterThanConstraint = Constraint(lhs, rhs, Constraint.GEQ)
-    constraintsLessThan.push_back(lessThanConstraint)
-    constraintsGreaterThan.push_back(greaterThanConstraint)
-    
+    constraintsLessThan = numpy.append(constraintsLessThan, lessThanConstraint)
+    constraintsGreaterThan = numpy.append(constraintsGreaterThan, greaterThanConstraint)
+
     model = Model()
-    
+
     optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, MX(0), MX(0), MX(0), MX(0))
     optOnlyLagrange = OptimizationProblem(model, constraintsLessThan, MX(0), MX(0), MX(0))
     optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsGreaterThan, MX(0), MX(0))
-    
+
     assert( len(optBothMayerAndLagrange.getPathConstraints()) == 0 )
     assert( isEqual(optOnlyLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
     assert( isEqual(optNeitherLagrangreOrMayer.getPathConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
@@ -666,7 +670,7 @@ def test_OptimizationProblemConstraints():
     assert( isEqual(optBothMayerAndLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
 
 def test_OptimizationProblemPrinting():
-    constraintsEmpty = ConstraintVector()
+    constraintsEmpty = numpy.array([], dtype = object)
     model = Model()
     simpleOptProblem = OptimizationProblem(model, constraintsEmpty, MX(0), MX(1))
     expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
@@ -689,35 +693,35 @@ def test_ModelVariableSorting():
     model = Model()
     var1 = MX("node1")
     var2 = MX("node2")
-    
+
     def checkVariablesEqualToInOrder(varTuple, varVec):
         for i in range(len(varTuple)):
             assert( int(varTuple[i].this) == int(varVec[i].this))
     def addVariableVectorToModel(varVec, model):
         for i in range(len(varVec)):
             model.addVariable(varVec[i])
-    
+
     #Create different kinds of variables
-    outputVariables = MyVariableVector()
-    inputRealVariables = MyVariableVector()
-    inputIntegerVariables = MyVariableVector()
-    inputBooleanVariables = MyVariableVector()
-    algebraicVariables = MyVariableVector()
-    differentiatedVariables = MyVariableVector()
-    derivativeVariables = MyVariableVector()
-    discreteRealVariables = MyVariableVector()
-    discreteIntegerVariables = MyVariableVector()
-    discreteBooleanVariables = MyVariableVector()
-    constantRealVariables = MyVariableVector()
-    constantIntegerVariables = MyVariableVector()
-    constantBooleanVariables = MyVariableVector()
-    indepenentRealParameterVariables = MyVariableVector()
-    depenentRealParameterVariables = MyVariableVector()
-    indepenentIntegerParameterVariables = MyVariableVector()
-    depenentIntegerParameterVariables = MyVariableVector()
-    indepenentBooleanParameterVariables = MyVariableVector()
-    depenentBooleanParameterVariables = MyVariableVector()
-    
+    outputVariables = numpy.array([], dtype = object)
+    inputRealVariables = numpy.array([], dtype = object)
+    inputIntegerVariables = numpy.array([], dtype = object)
+    inputBooleanVariables = numpy.array([], dtype = object)
+    algebraicVariables = numpy.array([], dtype = object)
+    differentiatedVariables = numpy.array([], dtype = object)
+    derivativeVariables = numpy.array([], dtype = object)
+    discreteRealVariables = numpy.array([], dtype = object)
+    discreteIntegerVariables = numpy.array([], dtype = object)
+    discreteBooleanVariables = numpy.array([], dtype = object)
+    constantRealVariables = numpy.array([], dtype = object)
+    constantIntegerVariables = numpy.array([], dtype = object)
+    constantBooleanVariables = numpy.array([], dtype = object)
+    indepenentRealParameterVariables = numpy.array([], dtype = object)
+    depenentRealParameterVariables = numpy.array([], dtype = object)
+    indepenentIntegerParameterVariables = numpy.array([], dtype = object)
+    depenentIntegerParameterVariables = numpy.array([], dtype = object)
+    indepenentBooleanParameterVariables = numpy.array([], dtype = object)
+    depenentBooleanParameterVariables = numpy.array([], dtype = object)
+
     # Real variables
     rIn1 = RealVariable(var1, MyVariable.INPUT, MyVariable.CONTINUOUS)
     rIn2 = RealVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
@@ -727,33 +731,27 @@ def test_ModelVariableSorting():
     rOut2 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
     rOut3 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
     rOut4 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
-    inputRealVariables.push_back(rIn1)
-    inputRealVariables.push_back(rIn2)
-    inputRealVariables.push_back(rIn3)
-    inputRealVariables.push_back(rIn4)
-    outputVariables.push_back(rOut1)
-    outputVariables.push_back(rOut2)
-    outputVariables.push_back(rOut3)
-    outputVariables.push_back(rOut4)
-    
+    inputRealVariables = numpy.append(inputRealVariables, [rIn1, rIn2, rIn3, rIn4])
+    outputVariables = numpy.append(outputVariables, [rOut1, rOut2, rOut3, rOut4])
+
     rAlg = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    algebraicVariables.push_back(rAlg)
-    
+    algebraicVariables = numpy.append(algebraicVariables, [rAlg])
+
     rDiff = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    differentiatedVariables.push_back(rDiff)
+    differentiatedVariables = numpy.append(differentiatedVariables, rDiff)
     rDer = DerivativeVariable(var1, rDiff)
-    derivativeVariables.push_back(rDer)
+    derivativeVariables = numpy.append(derivativeVariables, rDer)
     rDisc = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
-    discreteRealVariables.push_back(rDisc)
+    discreteRealVariables = numpy.append(discreteRealVariables, rDisc)
     rConst = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
-    constantRealVariables.push_back(rConst)
+    constantRealVariables = numpy.append(constantRealVariables, rConst)
     rIndep = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
-    indepenentRealParameterVariables.push_back(rIndep)
+    indepenentRealParameterVariables = numpy.append(indepenentRealParameterVariables, rIndep)
     rDep =  RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
     rDep.setAttribute("bindingExpression", var2)
-    depenentRealParameterVariables.push_back(rDep)
-    
-    
+    depenentRealParameterVariables = numpy.append(depenentRealParameterVariables, rDep)
+
+
     # Integer variables
     iIn1 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
     iIn2 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
@@ -761,24 +759,20 @@ def test_ModelVariableSorting():
     iOut1 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
     iOut2 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
     iOut3 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
-    inputIntegerVariables.push_back(iIn1)
-    inputIntegerVariables.push_back(iIn2)
-    inputIntegerVariables.push_back(iIn3)
-    outputVariables.push_back(iOut1)
-    outputVariables.push_back(iOut2)
-    outputVariables.push_back(iOut3)
-    
+    inputIntegerVariables = numpy.append(inputIntegerVariables, [iIn1, iIn2, iIn3])
+    outputVariables = numpy.append(outputVariables, [iOut1, iOut2, iOut3])
+
     iDisc = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
-    discreteIntegerVariables.push_back(iDisc)
+    discreteIntegerVariables = numpy.append(discreteIntegerVariables, iDisc)
     iConst = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
-    constantIntegerVariables.push_back(iConst)
+    constantIntegerVariables = numpy.append(constantIntegerVariables, iConst)
     iIndep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
-    indepenentIntegerParameterVariables.push_back(iIndep)
+    indepenentIntegerParameterVariables = numpy.append(indepenentIntegerParameterVariables, iIndep)
     iDep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
     iDep.setAttribute("bindingExpression", var2)
-    depenentIntegerParameterVariables.push_back(iDep)
-    
-    
+    depenentIntegerParameterVariables = numpy.append(depenentIntegerParameterVariables, iDep)
+
+
     # Boolean variables
     bIn1 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
     bIn2 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
@@ -786,26 +780,22 @@ def test_ModelVariableSorting():
     bOut1 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
     bOut2 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
     bOut3 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
-    inputBooleanVariables.push_back(bIn1)
-    inputBooleanVariables.push_back(bIn2)
-    inputBooleanVariables.push_back(bIn3)
-    outputVariables.push_back(bOut1)
-    outputVariables.push_back(bOut2)
-    outputVariables.push_back(bOut3)
-    
+    inputBooleanVariables = numpy.append(inputBooleanVariables, [bIn1, bIn2, bIn3])
+    outputVariables = numpy.append(outputVariables, [bOut1, bOut2, bOut3])
+
     bDisc = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
     bConst = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
-    discreteBooleanVariables.push_back(bDisc)
-    constantBooleanVariables.push_back(bConst)
+    discreteBooleanVariables = numpy.append(discreteBooleanVariables, bDisc)
+    constantBooleanVariables = numpy.append(constantBooleanVariables, bConst)
     bIndep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
     bDep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
-    indepenentBooleanParameterVariables.push_back(bIndep)
+    indepenentBooleanParameterVariables = numpy.append(indepenentBooleanParameterVariables, bIndep)
     bDep.setAttribute("bindingExpression", var2)
-    depenentBooleanParameterVariables.push_back(bDep)
-    
-    
-    
-    
+    depenentBooleanParameterVariables = numpy.append(depenentBooleanParameterVariables, bDep)
+
+
+
+
     # Add differentiated variable, but without its corresponding derivative variable
     # => should be sorted as algebraic. Then add derivative variable and check again
     addVariableVectorToModel(differentiatedVariables, model)
@@ -813,7 +803,7 @@ def test_ModelVariableSorting():
     addVariableVectorToModel(derivativeVariables, model)
     checkVariablesEqualToInOrder(model.getVariableByKind(Model.DIFFERENTIATED), differentiatedVariables) 
     checkVariablesEqualToInOrder(model.getVariableByKind(Model.DERIVATIVE), derivativeVariables) 
-    
+
     # Add the rest of the variables and check that they are sorted correctly
     addVariableVectorToModel(outputVariables, model)
     addVariableVectorToModel(inputRealVariables, model)
