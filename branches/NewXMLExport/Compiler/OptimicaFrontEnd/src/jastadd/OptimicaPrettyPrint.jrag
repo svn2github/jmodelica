@@ -1,0 +1,218 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect OptimicaPrettyPrint {
+
+	public void OptClassDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+ 		str.print(indent + getRestriction().toString());
+ 		str.print(" " + getName().getID());
+ 		if (hasClassModification()) {
+ 			str.print(" ");
+ 			p.print(getClassModification(),str,"");
+ 		}
+		str.print("\n");
+		
+ 		// Print all local classes
+ 		int numPubClass = 0;
+// 		str.print(indent + "public\n");
+ 		for (int i=0;i<getNumClassDecl();i++)
+ 			if (((BaseClassDecl)getClassDecl(i)).isPublic()) {
+ 			 	numPubClass++;
+	 			p.print(getClassDecl(i), str, p.indent(indent));
+	 			str.print(";\n\n");
+			}
+			
+		if (getNumClassDecl()-numPubClass>0) {	
+	 		str.print(indent + "protected\n");
+ 			for (int i=0;i<getNumClassDecl();i++)
+ 				if (((BaseClassDecl)getClassDecl(i)).isProtected()) {
+		 			p.print(getClassDecl(i), str, p.indent(indent));
+		 			str.print(";\n\n");
+		 		}
+		}
+			
+		// Print all extends clauses
+ 		for (int i=0;i<getNumSuper();i++) {
+ 			p.print(getSuper(i), str, p.indent(indent));
+ 			str.print(";\n");
+		} 			
+			
+ 		// Print all components
+ 		int numPubComp = 0;
+// 		str.print(indent + "public\n");
+ 		for (int i=0;i<getNumComponentDecl();i++)
+ 			if (getComponentDecl(i).isPublic()) {
+ 			 	numPubComp++;
+	 			p.print(getComponentDecl(i), str, p.indent(indent));
+	 			str.print(";\n");
+			}
+			
+		if (getNumComponentDecl()-numPubComp>0) {	
+	 		str.print(indent + "protected\n");
+ 			for (int i=0;i<getNumComponentDecl();i++)
+ 				if (getComponentDecl(i).isProtected()) {
+		 			p.print(getComponentDecl(i), str, p.indent(indent));
+		 			str.print(";\n");
+			}
+		}	
+		
+		if (getNumEquation()>0) {
+			str.print(indent + "equation\n");
+			for (int i=0;i<getNumEquation();i++) {
+				str.print(indent + "  ");
+				p.print(getEquation(i),str,indent);
+				str.print(";\n");
+			}
+		}
+		
+		if (getNumConstraint()>0) {
+			str.print(indent + "constraint\n");
+			for (int i=0;i<getNumConstraint();i++) {
+				str.print(indent + "  ");
+				p.print(getConstraint(i),str,indent);
+				str.print(";\n");
+			}
+		}
+		
+		str.print(indent + "end " + getName().getID());
+	} 
+	
+	public void RelationConstraint.prettyPrint(Printer p,PrintStream str, String indent) {
+		p.print(getLeft(),str,indent);
+		str.print(op());
+		p.print(getRight(),str,indent);
+	}
+
+	syn String RelationConstraint.op();
+	eq ConstraintEq.op()  = " = ";
+	eq ConstraintLeq.op() = " <= ";
+	eq ConstraintGeq.op() = " >= ";
+	
+	public void FForClauseC.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(indent+"for ");
+		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
+		str.print(" loop\n");
+		getFConstraints().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
+		str.print(indent + "end for");
+	}
+
+	eq OptimizationClass.toString() = "optimization";
+
+	public void TimedVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+		str.print(getName().name());
+		str.print("(");
+		p.print(getArg(), str, indent);
+		str.print(")");
+	}
+
+	protected void InstTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.print(getName().name());
+		str.print("(");
+		p.print(getArg(), str, indent);
+		str.print(")");
+	}
+
+}
+
+aspect FlatOptimicaPrettyPrint {
+	public void FOptClass.prettyPrint(Printer p, PrintStream str, String indent) {
+		// TODO: refactor to decrease code duplication
+		String nextInd = p.indent(indent);
+		str.print(indent+"optimization "+ name());
+		getFAttributeList().prettyPrintFAttributeList(str,p);
+		str.print("\n");
+		
+		for (int i=0;i<getNumFVariable();i++) {
+			log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
+	  		p.print(getFVariable(i), str, p.indent(indent));
+	  		str.print(";\n");  
+		}
+		
+		if (getNumFInitialEquation()>0)
+			str.print(indent + "initial equation \n");
+	    for (int j=0;j<getNumFInitialEquation();j++) {
+			log.debug("FClass.prettyPrint(): Equation nr: " + j);
+	  		p.print(getFInitialEquation(j), str, p.indent(indent));
+			str.print(";\n");
+		}
+
+	    boolean wroteEquation = false;
+    	for (FAbstractEquation e : getFAbstractEquations()) {
+    		if (e instanceof FAlgorithm) {
+    			p.print(e, str, indent);
+    			wroteEquation = false;
+    		} else {
+    			if (!e.isIgnored()) {
+	    			if (!wroteEquation) {
+	    				str.print(indent);
+	    				str.print("equation\n");
+	    				wroteEquation = true;
+	    			}
+	    			p.print(e, str, nextInd);
+		    		str.print(";\n");
+    			}
+    		}
+    	}
+	  	
+		if (getNumFParameterEquation()>0)
+			str.print(indent + "parameter equation\n");
+		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+	  	
+		str.print(indent + "constraint \n");
+	  	for (int j=0;j<getNumFConstraint();j++) {
+			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
+	  		p.print(getFConstraint(j), str, p.indent(indent));
+			str.print(";\n");
+		}
+	    
+    	p.print(getFFunctionDecls(), str, p.indent(indent));
+    	p.print(getFRecordDecls(), str, p.indent(indent));
+
+    	str.print(indent);
+  		str.print("end ");
+  		str.print(name());
+  		str.print(";\n");
+	}
+
+	public void FRelationConstraint.prettyPrint(Printer p,PrintStream str, String indent) {
+		str.print(indent);
+		p.print(getLeft(),str,indent);
+		str.print(op());
+		p.print(getRight(),str,indent);
+	}
+
+	syn String FRelationConstraint.op();
+	eq FConstraintEq.op()  = " = ";
+	eq FConstraintLeq.op() = " <= ";
+	eq FConstraintGeq.op() = " >= ";
+	
+	protected void FTimedVariable.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		p.print(getName(), str, indent);
+		str.print("(");
+		p.print(getArg(), str, indent);
+		str.print(")");
+	}
+
+	protected void FStartTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.append("startTime");
+	}
+	
+	protected void FFinalTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+		str.append("finalTime");
+	}
+	
+}
+
