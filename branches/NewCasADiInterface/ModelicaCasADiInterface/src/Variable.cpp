@@ -109,9 +109,9 @@ void Variable::setAttribute(AttributeKey key, double val) {
 
 
 void Variable::print(ostream& os) const {
-    os << (getCausality() == INPUT ? "Input " : (getCausality() == OUTPUT ? "Output " : "" ));
-    os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "Discrete " : (getVariability() == PARAMETER ? "Parameter " : 
-           (getVariability() == CONSTANT ? "Constant " : ""))));
+    os << (getCausality() == INPUT ? "input " : (getCausality() == OUTPUT ? "output " : "" ));
+    os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "discrete " : (getVariability() == PARAMETER ? "parameter " : 
+           (getVariability() == CONSTANT ? "constant " : ""))));
     if (declaredType != Ref<VariableType>(NULL)) {
         os << declaredType->getName() << " ";
     } else {
