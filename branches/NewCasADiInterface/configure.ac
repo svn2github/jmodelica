@@ -363,7 +363,7 @@ AC_CHECK_HEADERS([stdlib.h])
 AC_HEADER_STDBOOL
 AC_C_CONST
 
-AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.4.0])
+AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.5.0])
 
 AC_CONFIG_FILES([
  Makefile

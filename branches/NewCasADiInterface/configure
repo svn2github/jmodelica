@@ -813,7 +813,7 @@ CC
 CFLAGS
 CPP
 CXXCPP'
-ac_subdirs_all='ThirdParty/Sundials/sundials-2.4.0'
+ac_subdirs_all='ThirdParty/Sundials/sundials-2.5.0'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -19592,7 +19592,7 @@ fi
 
 
 
-subdirs="$subdirs ThirdParty/Sundials/sundials-2.4.0"
+subdirs="$subdirs ThirdParty/Sundials/sundials-2.5.0"
 
 
 ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh RuntimeLibrary/Makefile jm_tests"
