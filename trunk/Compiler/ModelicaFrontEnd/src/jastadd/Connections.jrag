@@ -425,7 +425,9 @@ aspect Connections {
 		}
 		
 		public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
-            addVar(new ConnectionSetEntry(var, true, name));
+		    // If var is present as inner, don't add it as outer
+		    if (getConnectionSet(new ConnectionSetEntry(var, false, name)) == null)
+		        addVar(new ConnectionSetEntry(var, true, name));
 		}
 		
 		/**
@@ -1473,8 +1475,8 @@ aspect OverconstrainedConnections {
 
 			/**
 			 * Set the selected root of this subgraph.
-			 * @param root: The selected root node.
-			 * @param otherRoots: A collection to add any redundant roots to.
+			 * @param root        the selected root node
+			 * @param otherRoots  a collection to add any redundant roots to
 			 * @return true if unbreakable loop found
 			 */
 			public boolean markSelectedRoot(Node root, Collection<Node> otherRoots) {
