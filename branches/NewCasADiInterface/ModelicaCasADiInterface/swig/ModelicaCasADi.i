@@ -49,7 +49,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %include "doc.i"
 
-%rename(MyVariable) ModelicaCasADi::Variable;
 %rename(_transferModelicaModel) transferModelicaModel;
 %rename(_transferOptimizationProblem) transferOptimizationProblem;
 

@@ -24,8 +24,8 @@ def heurestic_MC_variables_equal(MC_var1, MC_var2):
     
 
 def test_VariableAlias():
-    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
     # Default values
     assert not realVar1.isAlias()
     assert realVar1.getAlias() == None
@@ -75,9 +75,9 @@ def test_VariableAlias():
     assert heurestic_MC_variables_equal(model.getModelVariableByName("node2"), realVar2)
 
 def test_NegatedAliasAttributes():
-    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar3 = RealVariable(MX("node3"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar3 = RealVariable(MX("node3"), Variable.INTERNAL, Variable.CONTINUOUS)
     realVar1.setAlias(realVar3)
     realVar2.setAlias(realVar3)
     realVar1.setNegated(True)
@@ -127,9 +127,9 @@ def test_NegatedAliasAttributes():
 
 def test_ModelAliasAndModelGetters():
     model = Model()
-    realVar1 = RealVariable(MX("node1"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar2 = RealVariable(MX("node2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar3 = RealVariable(MX("node3"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar3 = RealVariable(MX("node3"), Variable.INTERNAL, Variable.CONTINUOUS)
     realVar1.setAlias(realVar3)
     realVar2.setAlias(realVar3)
     realVar1.setNegated(True)
@@ -157,10 +157,10 @@ def test_DependentParameters():
     eq3 = a*b
     eq4 = f.call([a])[0]
     
-    r1 = RealVariable(a, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r2 = RealVariable(b, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r3 = RealVariable(c, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r4 = RealVariable(d, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r1 = RealVariable(a, Variable.INTERNAL, Variable.PARAMETER)
+    r2 = RealVariable(b, Variable.INTERNAL, Variable.PARAMETER)
+    r3 = RealVariable(c, Variable.INTERNAL, Variable.PARAMETER)
+    r4 = RealVariable(d, Variable.INTERNAL, Variable.PARAMETER)
     
     r1.setAttribute("bindingExpression", eq1)
     r2.setAttribute("bindingExpression", eq2)
@@ -194,10 +194,10 @@ def test_NumericalEvaluation():
     eq3 = a*b
     eq4 = f.call([a])[0]
     
-    r1 = RealVariable(a, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r2 = RealVariable(b, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r3 = RealVariable(c, MyVariable.INTERNAL, MyVariable.PARAMETER)
-    r4 = RealVariable(d, MyVariable.INTERNAL, MyVariable.PARAMETER)
+    r1 = RealVariable(a, Variable.INTERNAL, Variable.PARAMETER)
+    r2 = RealVariable(b, Variable.INTERNAL, Variable.PARAMETER)
+    r3 = RealVariable(c, Variable.INTERNAL, Variable.PARAMETER)
+    r4 = RealVariable(d, Variable.INTERNAL, Variable.PARAMETER)
     
     r1.setAttribute("bindingExpression", eq1)
     r2.setAttribute("bindingExpression", eq2)
@@ -251,7 +251,7 @@ def test_RealTypePrinting():
 def test_RealVariableAttributes():
     attributeNode1 = MX(1)
     attributeNode2 = MX(2)
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
 
     realVar.setAttribute("myAttribute", attributeNode1)
     assert( isEqual(realVar.getAttribute("myAttribute"), attributeNode1) )
@@ -264,19 +264,19 @@ def test_RealVariableAttributes():
     assert( abs(realVar.getAttribute("start").getValue() - 1) < 0.000001)
 
 def test_RealVariableConstants():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    assert( realVar.getCausality() == MyVariable.INTERNAL )
-    assert( realVar.getVariability() == MyVariable.CONTINUOUS )
-    assert( realVar.getType() == MyVariable.REAL)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
+    assert( realVar.getCausality() == Variable.INTERNAL )
+    assert( realVar.getVariability() == Variable.CONTINUOUS )
+    assert( realVar.getType() == Variable.REAL)
     assert( not realVar.isDerivative() )
     
 def test_RealVariableNode():
     node = MX("var")
-    realVar = RealVariable(node, MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(node, Variable.INTERNAL, Variable.CONTINUOUS)
     assert( isEqual(realVar.getVar(), node) )
     
 def test_RealVariableVariableType():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     assert( realVar.getDeclaredType() == None )
     realType = RealType()
     realVar.setDeclaredType(realType)
@@ -289,7 +289,7 @@ def test_RealVariableVariableType():
     assert( int(userType.this) == int(realVar.getDeclaredType().this) )
     
 def test_RealVariableDerivativeVariable():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     derVar = DerivativeVariable(MX("node"), realVar)
     assert( realVar.getMyDerivativeVariable() == None )
     realVar.setMyDerivativeVariable(derVar)
@@ -299,16 +299,16 @@ def test_RealVariableNonSymbolicError():
     import sys
     errorString = ""
     try:
-        realVar = RealVariable(MX(1), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+        realVar = RealVariable(MX(1), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "A variable must have a symbolic MX");
     
 def test_RealVariableInvalidDerivativeVariable():
     import sys
-    realVar1 = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar2 = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    notARealVariable = IntegerVariable(MX("node"), MyVariable.INPUT, MyVariable.DISCRETE)
+    realVar1 = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
+    notARealVariable = IntegerVariable(MX("node"), Variable.INPUT, Variable.DISCRETE)
     errorString = ""
     try:
         realVar1.setMyDerivativeVariable(notARealVariable)
@@ -327,7 +327,7 @@ def test_RealVariableInvalidDerivativeVariable():
     
 def test_RealVariableInvalidAsStateVariable():
     import sys
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     derVar = DerivativeVariable(MX("node"), None)
     
     errorString = ""
@@ -339,7 +339,7 @@ def test_RealVariableInvalidAsStateVariable():
     assert(errorString == "A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable.");
     
 def test_RealVariablePrinting():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     realVar.setAttribute("myAttribute", MX(2))
     assert( str(realVar) == "Real node(myAttribute = 2);" );
     
@@ -358,9 +358,9 @@ def test_DerivativeVariableAttributes():
 
 def test_DerivativeVariableConstants():
     derVar = DerivativeVariable(MX("node"), None)
-    assert( derVar.getCausality() == MyVariable.INTERNAL )
-    assert( derVar.getVariability() == MyVariable.CONTINUOUS )
-    assert( derVar.getType() == MyVariable.REAL)
+    assert( derVar.getCausality() == Variable.INTERNAL )
+    assert( derVar.getVariability() == Variable.CONTINUOUS )
+    assert( derVar.getType() == Variable.REAL)
     assert( derVar.isDerivative() )
 
 def test_DerivativeVariableNode():
@@ -379,14 +379,14 @@ def test_DerivativeVariableVariableType():
     assert( int(userType.this) == int(derVar.getDeclaredType().this) )
     
 def test_DerivativeVariableDifferentiatedVariable():
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     derVar = DerivativeVariable(MX("node"), realVar)
     #assert( int(derVar.getMyDifferentiatedVariable().this) == int(realVar.this) )
 
 def test_DerivativeVariableInvalidStateVariable():
     import sys
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
+    intVar = IntegerVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     
     errorString = ""
     try:
@@ -409,7 +409,7 @@ def test_DerivativeVariablePrinting():
 def test_IntegerVariableAttributes():
     attributeNode1 = MX(1)
     attributeNode2 = MX(2)
-    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar = IntegerVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
 
     intVar.setAttribute("myAttribute", attributeNode1)
     assert( isEqual(intVar.getAttribute("myAttribute"), attributeNode1) )
@@ -420,18 +420,18 @@ def test_IntegerVariableAttributes():
     assert( intVar.getName() == "node")
     
 def test_IntegerVariableConstants():
-    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    assert( intVar.getCausality() == MyVariable.INTERNAL )
-    assert( intVar.getVariability() == MyVariable.DISCRETE )
-    assert( intVar.getType() == MyVariable.INTEGER)
+    intVar = IntegerVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
+    assert( intVar.getCausality() == Variable.INTERNAL )
+    assert( intVar.getVariability() == Variable.DISCRETE )
+    assert( intVar.getType() == Variable.INTEGER)
 
 def test_IntegerVariableNode():
     node = MX("var")
-    intVar = IntegerVariable(node, MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar = IntegerVariable(node, Variable.INTERNAL, Variable.DISCRETE)
     assert( isEqual(intVar.getVar(), node) )
     
 def test_IntegerVariableVariableType():
-    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar = IntegerVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     assert( intVar.getDeclaredType() == None )
     intType = IntegerType()
     intVar.setDeclaredType(intType)
@@ -441,7 +441,7 @@ def test_IntegerVariableVariableType():
     assert( int(userType.this) == int(intVar.getDeclaredType().this) )
    
 def test_IntegerVariablePrinting():
-    intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    intVar = IntegerVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     intVar.setAttribute("myAttribute", MX(2))
     assert( str(intVar) == "discrete Integer node(myAttribute = 2);" )
     
@@ -449,7 +449,7 @@ def test_IntegerVariableContinuousError():
     import sys
     errorString = ""
     try:
-        intVar = IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+        intVar = IntegerVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "An integer variable can not have continuous variability");
@@ -457,7 +457,7 @@ def test_IntegerVariableContinuousError():
 def test_BooleanVariableAttributes():
     attributeNode1 = MX(1)
     attributeNode2 = MX(2)
-    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar = BooleanVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
 
     boolVar.setAttribute("myAttribute", attributeNode1)
     assert( isEqual(boolVar.getAttribute("myAttribute"), attributeNode1) )
@@ -468,18 +468,18 @@ def test_BooleanVariableAttributes():
     assert( boolVar.getName() == "node")
     
 def test_BooleanVariableConstants():
-    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    assert( boolVar.getCausality() == MyVariable.INTERNAL )
-    assert( boolVar.getVariability() == MyVariable.DISCRETE )
-    assert( boolVar.getType() == MyVariable.BOOLEAN)
+    boolVar = BooleanVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
+    assert( boolVar.getCausality() == Variable.INTERNAL )
+    assert( boolVar.getVariability() == Variable.DISCRETE )
+    assert( boolVar.getType() == Variable.BOOLEAN)
 
 def test_BooleanVariableNode():
     node = MX("var")
-    boolVar = BooleanVariable(node, MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar = BooleanVariable(node, Variable.INTERNAL, Variable.DISCRETE)
     assert( isEqual(boolVar.getVar(), node) )
     
 def test_BooleanVariableVariableType():
-    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar = BooleanVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     assert( boolVar.getDeclaredType() == None )
     boolType = BooleanType()
     boolVar.setDeclaredType(boolType)
@@ -492,13 +492,13 @@ def test_BooleanVariableContinuousError():
     import sys
     errorString = ""
     try:
-        boolVar = BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+        boolVar = BooleanVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "A boolean variable can not have continuous variability");
     
 def test_BooleanVariablePrinting():
-    boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    boolVar = BooleanVariable(MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     boolVar.setAttribute("myAttribute", MX(2))
     assert( str(boolVar) == "discrete Boolean node(myAttribute = 2);" )
     
@@ -723,72 +723,72 @@ def test_ModelVariableSorting():
     depenentBooleanParameterVariables = numpy.array([], dtype = object)
 
     # Real variables
-    rIn1 = RealVariable(var1, MyVariable.INPUT, MyVariable.CONTINUOUS)
-    rIn2 = RealVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
-    rIn3 = RealVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
-    rIn4 = RealVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
-    rOut1 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.CONTINUOUS)
-    rOut2 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
-    rOut3 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
-    rOut4 = RealVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    rIn1 = RealVariable(var1, Variable.INPUT, Variable.CONTINUOUS)
+    rIn2 = RealVariable(var1, Variable.INPUT, Variable.DISCRETE)
+    rIn3 = RealVariable(var1, Variable.INPUT, Variable.PARAMETER)
+    rIn4 = RealVariable(var1, Variable.INPUT, Variable.CONSTANT)
+    rOut1 = RealVariable(var1, Variable.OUTPUT, Variable.CONTINUOUS)
+    rOut2 = RealVariable(var1, Variable.OUTPUT, Variable.DISCRETE)
+    rOut3 = RealVariable(var1, Variable.OUTPUT, Variable.PARAMETER)
+    rOut4 = RealVariable(var1, Variable.OUTPUT, Variable.CONSTANT)
     inputRealVariables = numpy.append(inputRealVariables, [rIn1, rIn2, rIn3, rIn4])
     outputVariables = numpy.append(outputVariables, [rOut1, rOut2, rOut3, rOut4])
 
-    rAlg = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    rAlg = RealVariable(var1,  Variable.INTERNAL, Variable.CONTINUOUS)
     algebraicVariables = numpy.append(algebraicVariables, [rAlg])
 
-    rDiff = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    rDiff = RealVariable(var1,  Variable.INTERNAL, Variable.CONTINUOUS)
     differentiatedVariables = numpy.append(differentiatedVariables, rDiff)
     rDer = DerivativeVariable(var1, rDiff)
     derivativeVariables = numpy.append(derivativeVariables, rDer)
-    rDisc = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
+    rDisc = RealVariable(var1,  Variable.INTERNAL, Variable.DISCRETE)
     discreteRealVariables = numpy.append(discreteRealVariables, rDisc)
-    rConst = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    rConst = RealVariable(var1,  Variable.INTERNAL, Variable.CONSTANT)
     constantRealVariables = numpy.append(constantRealVariables, rConst)
-    rIndep = RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    rIndep = RealVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
     indepenentRealParameterVariables = numpy.append(indepenentRealParameterVariables, rIndep)
-    rDep =  RealVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    rDep =  RealVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
     rDep.setAttribute("bindingExpression", var2)
     depenentRealParameterVariables = numpy.append(depenentRealParameterVariables, rDep)
 
 
     # Integer variables
-    iIn1 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
-    iIn2 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
-    iIn3 = IntegerVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
-    iOut1 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
-    iOut2 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
-    iOut3 = IntegerVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    iIn1 = IntegerVariable(var1, Variable.INPUT, Variable.DISCRETE)
+    iIn2 = IntegerVariable(var1, Variable.INPUT, Variable.PARAMETER)
+    iIn3 = IntegerVariable(var1, Variable.INPUT, Variable.CONSTANT)
+    iOut1 = IntegerVariable(var1, Variable.OUTPUT, Variable.DISCRETE)
+    iOut2 = IntegerVariable(var1, Variable.OUTPUT, Variable.PARAMETER)
+    iOut3 = IntegerVariable(var1, Variable.OUTPUT, Variable.CONSTANT)
     inputIntegerVariables = numpy.append(inputIntegerVariables, [iIn1, iIn2, iIn3])
     outputVariables = numpy.append(outputVariables, [iOut1, iOut2, iOut3])
 
-    iDisc = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
+    iDisc = IntegerVariable(var1,  Variable.INTERNAL, Variable.DISCRETE)
     discreteIntegerVariables = numpy.append(discreteIntegerVariables, iDisc)
-    iConst = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    iConst = IntegerVariable(var1,  Variable.INTERNAL, Variable.CONSTANT)
     constantIntegerVariables = numpy.append(constantIntegerVariables, iConst)
-    iIndep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    iIndep = IntegerVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
     indepenentIntegerParameterVariables = numpy.append(indepenentIntegerParameterVariables, iIndep)
-    iDep = IntegerVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    iDep = IntegerVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
     iDep.setAttribute("bindingExpression", var2)
     depenentIntegerParameterVariables = numpy.append(depenentIntegerParameterVariables, iDep)
 
 
     # Boolean variables
-    bIn1 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.DISCRETE)
-    bIn2 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.PARAMETER)
-    bIn3 = BooleanVariable(var1, MyVariable.INPUT, MyVariable.CONSTANT)
-    bOut1 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.DISCRETE)
-    bOut2 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.PARAMETER)
-    bOut3 = BooleanVariable(var1, MyVariable.OUTPUT, MyVariable.CONSTANT)
+    bIn1 = BooleanVariable(var1, Variable.INPUT, Variable.DISCRETE)
+    bIn2 = BooleanVariable(var1, Variable.INPUT, Variable.PARAMETER)
+    bIn3 = BooleanVariable(var1, Variable.INPUT, Variable.CONSTANT)
+    bOut1 = BooleanVariable(var1, Variable.OUTPUT, Variable.DISCRETE)
+    bOut2 = BooleanVariable(var1, Variable.OUTPUT, Variable.PARAMETER)
+    bOut3 = BooleanVariable(var1, Variable.OUTPUT, Variable.CONSTANT)
     inputBooleanVariables = numpy.append(inputBooleanVariables, [bIn1, bIn2, bIn3])
     outputVariables = numpy.append(outputVariables, [bOut1, bOut2, bOut3])
 
-    bDisc = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.DISCRETE)
-    bConst = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.CONSTANT)
+    bDisc = BooleanVariable(var1,  Variable.INTERNAL, Variable.DISCRETE)
+    bConst = BooleanVariable(var1,  Variable.INTERNAL, Variable.CONSTANT)
     discreteBooleanVariables = numpy.append(discreteBooleanVariables, bDisc)
     constantBooleanVariables = numpy.append(constantBooleanVariables, bConst)
-    bIndep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
-    bDep = BooleanVariable(var1,  MyVariable.INTERNAL, MyVariable.PARAMETER)
+    bIndep = BooleanVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
+    bDep = BooleanVariable(var1,  Variable.INTERNAL, Variable.PARAMETER)
     indepenentBooleanParameterVariables = numpy.append(indepenentBooleanParameterVariables, bIndep)
     bDep.setAttribute("bindingExpression", var2)
     depenentBooleanParameterVariables = numpy.append(depenentBooleanParameterVariables, bDep)
@@ -887,19 +887,19 @@ def test_ModelNonExistingVariableType():
     
 def test_ModelDefaultVariableTypeAssignment():
     model = Model()
-    realVar = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     model.addVariable(realVar)
     expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
     assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
     
 def test_ModelDefaultVariableTypeAssignmentSingletons():
     model = Model()
-    realVar1 = RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    realVar2 = RealVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
-    intVar1 = IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    intVar2 = IntegerVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    boolVar1 = BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE)
-    boolVar2 = BooleanVariable(MX("var2"), MyVariable.INTERNAL, MyVariable.DISCRETE)
+    realVar1 = RealVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(MX("var2"), Variable.INTERNAL, Variable.CONTINUOUS)
+    intVar1 = IntegerVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE)
+    intVar2 = IntegerVariable(MX("var2"), Variable.INTERNAL, Variable.DISCRETE)
+    boolVar1 = BooleanVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE)
+    boolVar2 = BooleanVariable(MX("var2"), Variable.INTERNAL, Variable.DISCRETE)
     model.addVariable(realVar1)
     model.addVariable(realVar2)
     model.addVariable(intVar1)
@@ -913,15 +913,15 @@ def test_ModelDefaultVariableTypeAssignmentSingletons():
 def test_ModelVariableTypeGettersSetters():
     model = Model()
     realVarType = RealType()
-    model.addVariable(RealVariable(MX("var"), MyVariable.INTERNAL, MyVariable.CONTINUOUS, realVarType))
+    model.addVariable(RealVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS, realVarType))
     assert( int(realVarType.this) == int(model.getVariableTypeByName("Real").this) )
     
     boolVarType = BooleanType()
-    model.addVariable(BooleanVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE, boolVarType))
+    model.addVariable(BooleanVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE, boolVarType))
     assert( int(boolVarType.this) == int(model.getVariableTypeByName("Boolean").this) )
     
     intVarType = IntegerType()
-    model.addVariable(IntegerVariable(MX("var"), MyVariable.INTERNAL, MyVariable.DISCRETE, intVarType))
+    model.addVariable(IntegerVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE, intVarType))
     assert( int(intVarType.this) == int(model.getVariableTypeByName("Integer").this) )
       
 def test_ModelTrySettingExistingVariableType():
@@ -943,7 +943,7 @@ def test_ModelInvalidVariabilityRealVariable():
     import sys
     errorString = ""
     model = Model()
-    realVar = RealVariable(MX("var"), MyVariable.INTERNAL, 10)
+    realVar = RealVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(realVar)
     try:
         model.getVariableByKind(Model.REAL_ALGEBRAIC)
@@ -955,7 +955,7 @@ def test_ModelInvalidVariabilityIntegerVariable():
     import sys
     errorString = ""
     model = Model()
-    intVar = IntegerVariable(MX("var"), MyVariable.INTERNAL, 10)
+    intVar = IntegerVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(intVar)
     try:
         model.getVariableByKind(Model.INTEGER_DISCRETE)
@@ -967,7 +967,7 @@ def test_ModelInvalidVariabilityBooleanVariable():
     import sys
     errorString = ""
     model = Model()
-    boolVar = BooleanVariable(MX("var"), MyVariable.INTERNAL, 10)
+    boolVar = BooleanVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(boolVar)
     try:
         model.getVariableByKind(Model.BOOLEAN_DISCRETE)
@@ -1028,7 +1028,7 @@ def test_ModelInvalidVariableKindInGetter():
         
 def test_ModelPrinting():
     model = Model()
-    realVar = RealVariable(MX("node"), MyVariable.INTERNAL, MyVariable.CONTINUOUS)
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     eq1 = Equation(MX("node1"), MX("node2"))
     eq2 = Equation(MX("node3"), MX("node4"))
     model.addVariable(realVar)
