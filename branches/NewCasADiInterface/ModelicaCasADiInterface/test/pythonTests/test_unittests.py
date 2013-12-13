@@ -443,7 +443,7 @@ def test_IntegerVariableVariableType():
 def test_IntegerVariablePrinting():
     intVar = IntegerVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     intVar.setAttribute("myAttribute", MX(2))
-    assert( str(intVar) == "Discrete Integer node(myAttribute = 2);" )
+    assert( str(intVar) == "discrete Integer node(myAttribute = 2);" )
     
 def test_IntegerVariableContinuousError():
     import sys
@@ -500,7 +500,7 @@ def test_BooleanVariableContinuousError():
 def test_BooleanVariablePrinting():
     boolVar = BooleanVariable(MX("node"), MyVariable.INTERNAL, MyVariable.DISCRETE)
     boolVar.setAttribute("myAttribute", MX(2))
-    assert( str(boolVar) == "Discrete Boolean node(myAttribute = 2);" )
+    assert( str(boolVar) == "discrete Boolean node(myAttribute = 2);" )
     
 def test_ModelFunctionGetName():
     funcVar = MX("node")
