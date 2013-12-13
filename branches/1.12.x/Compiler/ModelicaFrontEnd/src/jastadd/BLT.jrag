@@ -1,0 +1,1971 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import org.jmodelica.util.exceptions.BLTException;
+import org.jmodelica.util.ErrorCheckType;
+
+aspect BLT{
+	
+	public class EquationBlockFactory {
+
+		/**
+		 * This method groups the Eq objects in a BLT block so that Eqs that
+		 * originates from the same FAbstractEquation are grouped together.
+		 */
+		public static Collection<Collection<Eq>> groupComponent(Collection<Eq> component) {
+		
+			Eq previous = null;
+			Collection<Eq> group = null;
+			Collection<Collection<Eq>> l = new ArrayList<Collection<Eq>>();
+
+			for (Eq current : component) {
+				if (previous == null || (previous.getEquation() != current.getEquation())) {
+					group = new ArrayList<Eq>();
+					l.add(group);
+				}
+				group.add(current);	
+				previous = current;
+			}	
+			return l;
+		}
+
+		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation eqn, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve) {
+			return createSimpleEquationBlock(eqn, fvs, assignedIndices, solve, false);
+		}
+
+		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation e, Collection<FVariable> fvs, Collection<Integer> assignedIndices, boolean solve, boolean duringTearing) {
+			// Check if equation is solvable for all active variables (only if we want a solved block)
+			Solvability solvability = solve ? Solvability.ANALYTICALLY_SOLVABLE : Solvability.UNSOLVABLE;
+			for (Iterator<FVariable> it = fvs.iterator(); solvability.isSolvable() && it.hasNext(); )
+				solvability = Solvability.least(solvability, e.isSolved(it.next().name(), duringTearing));
+			
+			return e.createSimpleEquationBlock(fvs, assignedIndices, solvability);
+		}
+		
+		/**
+		 * This method takes an equation and a variable and constructs an equation block.
+		 * If <code>solve</code> is true the equation will be solved for the variable. 
+		 */
+		public static SimpleEquationBlock createSimpleEquationBlock(FAbstractEquation equation, FVariable variable, Integer assignedIndex, boolean solve) {
+			return createSimpleEquationBlock(equation, Arrays.asList(variable), Arrays.asList(assignedIndex), solve);
+		}
+
+		/**
+		 * This method takes a list of Eq objects and create equation blocks
+		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
+		 */
+		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> component, boolean solve) {
+			return createSimpleEquationBlock(component, solve, false);
+		}
+		
+		/**
+		 * This method takes an equation <code>eqn</code> and variable
+		 * <code>var</code> and produces an unsolved block of types
+		 * ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
+		 */
+		public static SimpleEquationBlock createSimpleEquationBlock(Eq eqn, Var var) {
+			return createSimpleEquationBlock(eqn.getEquation(), var.getVariable(), eqn.groupNumber(), false);
+		}
+		
+		/**
+		 * This method takes a list of Eq objects and create equation blocks
+		 * of types ScalarEquationBlock, IfEquationBlock or FFunctionCallEquationBlock.
+		 */
+		public static SimpleEquationBlock createSimpleEquationBlock(Collection<Eq> eqns, boolean solve, boolean duringTearing) {
+			Collection<FVariable> fvs = new ArrayList<FVariable>();
+			Collection<Integer> assignedIndices = new ArrayList<Integer>();
+			
+			FAbstractEquation e = eqns.iterator().next().getEquation();
+			for (Eq eqn : eqns) {
+				if (eqn.getEquation() != e) 
+					return null;
+				fvs.add(eqn.getMatching().getVariable());
+				assignedIndices.add(eqn.groupNumber());
+			} 
+
+			return createSimpleEquationBlock(e, fvs, assignedIndices, solve, duringTearing);
+			
+		}
+
+		/**
+		 * This method takes as input a set of Eq objects corresponeing to
+		 * a BLT block. First the, the Eq objects are grouped using
+		 * groupComponent to simplify the analysis. Then, if there is
+		 * only one Eq, a SimpleEquationBlock is created, if possible. Otherwise
+		 * a real or mixed equation block is created.
+		 */
+		public static AbstractEquationBlock createEquationBlock(Collection<Eq> component, boolean useTearing, boolean useHGT, int blockNumber) {
+			
+			SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
+			if (seb != null) {
+				if (seb.equation().hasResidual() && seb.equation().getResidual().hasIterationVariable())
+					seb.equation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getResidual().getIterationVariable().name() + ". Equation: " + seb.equation());
+				if (seb.isSolvable())
+					return seb;
+			}
+			
+			// System of equations
+			Collection<Collection<Eq>> l = groupComponent(component);
+
+			// Check if an equation block is mixed, i.e., contains both continous
+			// and discrete variables, and if it is linear in the unknowns
+			Set<FVariable> activeVariables = new HashSet<FVariable>();
+			for (Eq e : component)
+				activeVariables.add(e.getMatching().getVariable());
+			boolean isMixed = false;
+			boolean isLinear = true;
+			
+			for (Eq e : component) {
+				if (e.getEquation().isDiscrete())
+					isMixed = true;
+				if (!e.getEquation().checkLinearity(activeVariables))
+					isLinear = false;
+			}
+			
+			EquationBlock b = null;
+			if (isMixed && isLinear)
+				return new MixedLinearEquationBlock(createSimpleBlocks(l));
+			else if (isLinear)
+				return new LinearEquationBlock(createSimpleBlocks(l));
+			else if ((useTearing || useHGT) && component.size() > 1)
+				return tear(component, useTearing, useHGT, blockNumber);
+			else if (isMixed)
+				return new MixedEquationBlock(createSimpleBlocks(l));
+			else
+				return new EquationBlock(createSimpleBlocks(l));
+		}
+		
+		public static Collection<SimpleEquationBlock> createSimpleBlocks(Collection<Collection<Eq>> eqs) {
+			Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+			for (Collection<Eq> e : eqs)
+				blocks.add(createSimpleEquationBlock(e, false));
+			return blocks;
+		}
+		
+		public static TornEquationBlock tear(Collection<Eq> block, boolean useTearing, boolean useHGT, int blockNumber) {
+			TornEquationBlock eb = new TornEquationBlock();
+			if (useHGT)
+				tearHandGuided(block, eb, useTearing, blockNumber);
+			else
+				tear(block, eb);
+			return eb;
+		}
+		
+		private static void tearHandGuided(Collection<Eq> block, TornEquationBlock eb, boolean useTearing, int blockNumber) throws BLTException {
+			boolean recalculateMatchings = false;
+			Map<FVariable, Var> varsInBlock = new LinkedHashMap<FVariable, Var>();
+			for (Eq e : block) {
+				varsInBlock.put(e.getMatching().getVariable(), e.getMatching());
+			}
+			Iterator<Eq> it = block.iterator();
+			Collection<Eq> unmatchedHGTEquations = new ArrayList<Eq>();
+			Collection<Var> unmatchedHGTVariables = new ArrayList<Var>();
+			for (Eq eqn : block) {
+				if (eqn.getEquation().hasResidual() && !eqn.getEquation().getResidual().hasIterationVariable())
+					unmatchedHGTEquations.add(eqn);
+			}
+			for (Var var : varsInBlock.values()) {
+				if (var.getVariable().isHGTVarComponent())
+					unmatchedHGTVariables.add(var);
+			}
+			if (unmatchedHGTEquations.size() == unmatchedHGTVariables.size()) {
+				Iterator<Eq> eqnIt = unmatchedHGTEquations.iterator();
+				Iterator<Var> varIt = unmatchedHGTVariables.iterator();
+				while (eqnIt.hasNext() && varIt.hasNext()) {
+					Eq eqn = eqnIt.next();
+					Var var = varIt.next();
+					eqn.getEquation().getResidual().setIterationVariable(new FIdUse(var.getName()));
+					var.getVariable().setHGTAsPair();
+				}
+			} else {
+				StringBuilder sb = new StringBuilder();
+				sb.append("Unable to apply hand-guided tearing selections on block " + blockNumber + ". The number of unmatched hand guided equations and variables are not equal.\n");
+				sb.append("  Unmatched hand guided equations(" + unmatchedHGTEquations.size() + "):\n");
+				for (Eq eqn : unmatchedHGTEquations)
+					sb.append("    " + eqn.getEquation() + "\n");
+				sb.append("\n");
+				sb.append("  Unmatched hand guided variables(" + unmatchedHGTVariables.size() + "):\n");
+				for (Var var : unmatchedHGTVariables)
+					sb.append("    " + var.getName() + "\n");
+				throw new BLTException(sb.toString());
+			}
+			while (it.hasNext()) {
+				Eq e = it.next();
+				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
+					FVariable fIterVar = e.getEquation().getResidual().iterationVariable();
+					Var iterVar = varsInBlock.get(fIterVar);
+					if (iterVar == null) {
+						e.getEquation().getResidual().warning("Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: " + fIterVar.name() + ". Equation: " + e.getEquation());
+						continue;
+					}
+					it.remove();
+					varsInBlock.remove(fIterVar);
+					recalculateMatchings = true;
+					ASTNode.log.info("Hand guided tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), iterVar.getVariable().name());
+					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, iterVar));
+				}
+			}
+			if (recalculateMatchings) {
+				BiPGraph newGraph = new BiPGraph(block, varsInBlock.values());
+				newGraph.maximumMatching(true);
+				Collection<Eq> unmatchedEquations = newGraph.getUnmatchedEquations();
+				Collection<Var> unmatchedVariables = newGraph.getUnmatchedVariables();
+				if (unmatchedEquations.size() > 0 || unmatchedVariables.size() > 0) {
+					ASTNode.log.info("Unmatched equations and variables in block after hand guided, adding them as tearing pairs!");
+					Iterator<Eq> eIt = unmatchedEquations.iterator();
+					Iterator<Var> vIt = unmatchedVariables.iterator();
+					while (eIt.hasNext() && vIt.hasNext()) {
+						Eq e = eIt.next();
+						Var v = vIt.next();
+						ASTNode.log.info("Unmatched tearing pair, equation: %s, tearing with variable: %s", e.getEquation(), v.getVariable().name());
+						newGraph.removeEquation(e);
+						newGraph.removeVariable(v);
+						eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(e, v));
+					}
+					if (eIt.hasNext() || vIt.hasNext()) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("Hand guided tearing selections in block " + blockNumber + " results in a structurally singular block.\n");
+						if (eIt.hasNext()) {
+							sb.append("  The follwowing equation(s) could not be matched to any variable:\n");
+								while (eIt.hasNext())
+									sb.append("    " + eIt.next().getEquation());
+						}
+						if (vIt.hasNext()) {
+							sb.append("  The following varible(s) could not be matched to any equation:\n");
+							while (vIt.hasNext())
+								sb.append("    " + vIt.next().getVariable().name());
+						}
+						throw new BLTException(sb.toString());
+					}
+				}
+				Collection<Collection<Eq>> innerBLT = newGraph.tarjan(false);
+				boolean allInnerAreSolved = true;
+				Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+				for (Collection<Eq> innerBlock : innerBLT) {
+					SimpleEquationBlock seb = EquationBlockFactory.createSimpleEquationBlock(innerBlock, true, true);
+					if (seb != null && seb.isSolvable()) {
+						solvedBlocks.add(seb);
+					} else {
+						allInnerAreSolved = false;
+						break;
+					}
+				}
+				if (allInnerAreSolved) {
+					ASTNode.log.info("Remaining system is solvable.");
+					for (SimpleEquationBlock seb : solvedBlocks)
+						eb.addSolvedBlock(seb);
+					return;
+				} else if (!useTearing) {
+					throw new BLTException("Hand guided tearing selections in block " + blockNumber + " does not result in a torn system. Consider adding additional selections of hand guided equations and variables, or enable automatic tearing.");
+				}
+				block = new ArrayList<Eq>();
+				block.addAll(newGraph.getEquations());
+				ASTNode.log.info("Additional tearing is needed, continuing with automatic tearing.");
+			}
+			tear(block, eb);
+		}
+		
+		private static void tear(Collection<Eq> block, TornEquationBlock eb) {
+			SolvingBiPGraph g = new SolvingBiPGraph(block);
+			
+			// Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
+			Collection<Eq> SUME = g.greedyMatching();
+			Iterator<Eq> itr = SUME.iterator();
+			while (itr.hasNext()) {
+				Eq e = itr.next();
+				if (g.augmentPath(e)) {
+					itr.remove();
+				} else {
+					e.isRes(true);
+				}
+				g.lightReset();
+			}
+
+			// Now we have a Maximum Solvable Matching
+
+			if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
+									//     proceed with recursive tearing of block
+				SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+				if (tearBlock != null && tearBlock.isSolvable()) {
+					eb.addSolvedBlock(tearBlock);
+				} else {
+					tearInner(g, eb);
+				}
+			} else {
+				// Else: Start out by trying to insert residuals that contain
+				// 		 few variables. 
+				java.util.List<Eq> residuals = new ArrayList<Eq>();
+				for (Eq e : SUME) {
+					Eq bestRes = e;
+					for (Var v : e.getSolvableVariables()) {
+						Eq ee = v.getMatching();
+						if (ee.compareTo(bestRes) > 0)
+							bestRes = ee;
+					}
+					if (bestRes != e) {
+						bestRes.isRes(true);
+						g.match(e, bestRes.getMatching());
+						e.isRes(false);
+						residuals.add(bestRes);
+					} else {
+						residuals.add(e);
+					}
+				}
+
+				// Compute inner BLT and see if tearings can be changed 
+				Set<Var> SUMV = new LinkedHashSet<Var>(g.getUnmatchedVariables());
+				Collection<Collection<Eq>> innerBlocks = g.tarjan(false);
+				java.util.List<Var> tearings = new ArrayList<Var>();
+
+				for (Collection<Eq> bInner : innerBlocks) {
+					SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInner, true, true);
+					if (tearBlock != null && tearBlock.isSolvable()) {
+						eb.addSolvedBlock(tearBlock);
+						// If the equation contains a Var in SUMV, that Var cannot be
+						// reinserted and must be used as a iteration variable.
+						for (Eq e : bInner) {
+							for (Var vv : e.getVariables()) {
+								if (SUMV.remove(vv))
+									tearings.add(vv);
+							}
+						}
+					} else {
+						// Build Inner Graph and add info about iteration variables
+						SolvingBiPGraph gInner = new SolvingBiPGraph(bInner);
+						// Build block-graph and look for interchangeable variables in SUMV
+						java.util.List<Eq> eqs = new ArrayList<Eq>();
+						boolean graphHasTear = false;
+						for (Eq e : bInner) {
+							Eq gInnerEq = gInner.getEquation(e.getName());
+							for (Var v : e.getVariables()) {
+								Var gInnerVar = gInner.getVariable(v.getName());
+								if (gInnerVar != null) {
+									if (gInner.canMatch(gInnerEq, gInnerVar) && gInnerVar.isIter() && !eqs.contains(gInnerEq)) {
+										eqs.add(gInnerEq);
+									}
+								} else if (SUMV.contains(v)) {
+									gInnerVar = gInner.addVariable(v.getName(), v.getVariable());
+									gInnerVar.isIter(true);
+									SUMV.remove(v);
+									tearings.add(v);
+									graphHasTear = true;
+									gInner.addInsidence(gInnerEq, gInnerVar);
+									if (gInner.canMatch(gInnerEq, gInnerVar) && !eqs.contains(gInnerEq)) {
+										eqs.add(gInnerEq);
+									}
+								}
+							}
+						}
+						// Go through equations that might get a new matching
+						boolean isChanged = false;
+						for (Eq e : eqs) {
+							Var bestMatch = e.getMatching();
+							for (Var v : e.getSolvableVariables()) {
+								if (v.isIter() && v.compareTo(bestMatch) < 0)
+									bestMatch = v;
+							}
+							if (bestMatch != e.getMatching()) {
+								Var tmp = e.getMatching();
+								tmp.isIter(true);
+								bestMatch.isIter(false);
+								tearings.add(tmp);
+								tearings.remove(bestMatch);
+								gInner.match(e, bestMatch);
+								isChanged = true;
+							}
+						}
+
+						if (graphHasTear) {
+							if (isChanged) {
+								Collection<Collection<Eq>> newBlocks = gInner.tarjan(false);
+								for (Collection<Eq> bInnerInner : newBlocks) {
+									tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, true, true);
+									if (tearBlock != null && tearBlock.isSolvable()) {
+										eb.addSolvedBlock(tearBlock);
+									} else {
+										tearInner(new SolvingBiPGraph(bInnerInner), eb);
+									}
+								}
+							} else {
+								tearInner(new SolvingBiPGraph(bInner), eb);
+							}
+						} else {
+							// Reuse the already constructed graph
+							tearInner(gInner, eb);
+						}
+					}
+				}
+				for (Var v : SUMV) {
+					//SUMV ought to be empty, but there might exist variables that hasn't 
+					// been altered before. 
+					tearings.add(v);
+				}
+				for (int i = 0; i < tearings.size(); i++) {
+					ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+					eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i)));
+				}
+			}
+		}	
+
+		
+		private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
+			Var bestIter = null;
+			for (Eq e : g.getEquations()) {
+				Var v = e.getMatching();
+				if (bestIter == null || v.compareTo(bestIter) > 0)
+					bestIter = v;
+			}
+			Eq res = bestIter.getMatching();
+			bestIter.isIter(true);
+			res.isRes(true);
+			ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().name());
+			eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter));
+			Collection<Collection<Eq>> blt = g.tarjan(false);
+			for (Collection<Eq> block : blt) {
+				SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, true, true);
+				if (tearBlock != null && tearBlock.isSolvable()) {
+					eb.addSolvedBlock(tearBlock);
+				} else {
+					tearInner(new SolvingBiPGraph(block), eb);
+				}
+			}
+		}
+		
+	}
+
+	/**
+	 * Create a simple equation block from a single equation. 
+	 */
+	public SimpleEquationBlock FAbstractEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+		throw new UnsupportedOperationException("Unable to construct equation block from equation type " + getClass().getSimpleName());
+	}
+
+	public SimpleEquationBlock FEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+		FVariable fv = fvs.iterator().next();
+		if (solvability.isAnalyticallySolvable()) { // Solved scalar equation
+			return new SolvedScalarEquationBlock(this, fv);
+		} else if(solvability.isSolvable()) { // Numerically solvable scalar equation
+			return new NumericallySolvedScalarEquationBlock(this, fv);
+		} else { // Unsolved scalar equation
+			return new UnsolvedScalarEquationBlock(this, fv);
+		}
+	}
+
+	public SimpleEquationBlock FAlgorithm.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+		if (numScalarEquations() == 0)
+			return new MetaEquationBlock(this);
+		for (Integer assignedIndex : assignedIndices)
+			if (assignedIndex == null)
+				throw new IllegalArgumentException("FAlgorithm, AssignedIndex must be set for this class type! equation: " + this);
+		if (solvability.isAnalyticallySolvable()) {
+			return new SolvedAlgorithmBlock(this, fvs, assignedIndices);
+		} else {
+			return new UnsolvedAlgorithmBlock(this, fvs, assignedIndices);
+		}
+	}
+
+	public SimpleEquationBlock FFunctionCallEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) {
+		if (numScalarEquations() == 0)
+			return new MetaEquationBlock(this);
+		for (Integer assignedIndex : assignedIndices)
+			if (assignedIndex == null)
+				throw new IllegalArgumentException("FFunctionCallEquation, AssignedIndex must be set for this class type! equation: " + this);
+		if (solvability.isAnalyticallySolvable()) {
+			return new SolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+		} else {
+			return new UnsolvedFunctionCallEquationBlock(this, fvs, assignedIndices);
+		}
+	}
+	
+    public SimpleEquationBlock FIfEquation.createSimpleEquationBlock(Collection<FVariable> fvs, Collection<Integer> assignedIndices, Solvability solvability) { 
+        if (numScalarEquations() == 0)
+            return new MetaEquationBlock(this);
+        for (Integer assignedIndex : assignedIndices)
+            if (assignedIndex == null)
+                throw new IllegalArgumentException("FIfEquation, AssignedIndex must be set for this class type! equation: " + this);
+        if (solvability.isAnalyticallySolvable()) {
+            return new SolvedIfEquationBlock(this, fvs, assignedIndices);
+        } else {
+            return new UnsolvedIfEquationBlock(this, fvs, assignedIndices);
+        }
+    }
+
+	
+	public class BiPGraph{}
+	
+	public BLT BiPGraph.computeBLT(OptionRegistry options) {
+		return computeBLT(options.getBooleanOption("merge_blt_blocks"),
+				options.getBooleanOption("automatic_tearing"),
+				options.getBooleanOption("hand_guided_tearing"));
+	}
+	
+	public BLT BiPGraph.computeBLT(boolean mergeBLT, boolean useTearing, boolean useHGT) {
+		ASTNode.beginStep("computeBLT()");
+		try {
+			Collection<Collection<Eq>> components = tarjan(mergeBLT);
+			BLT blt = new BLT();
+			int blockNumber = 1;
+			for (Collection<Eq> bl : components)
+				blt.add(EquationBlockFactory.createEquationBlock(bl, useTearing, useHGT, blockNumber++));
+			return blt;
+		} finally {
+			ASTNode.endStep("computeBLT()");
+		}
+	}
+	
+	public class BLT extends ArrayList<AbstractEquationBlock> {
+		
+		public ArrayList<Integer> unsolvedBlockSizes() {
+			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+			for (AbstractEquationBlock b : this) {
+				if (!b.isSolvable()) {
+					blockSizes.add(new Integer(b.activeVariables().size()));
+				}		
+			}
+			return blockSizes;
+		}
+
+		public ArrayList<Integer> unsolvedBlockIterationSizes() {
+			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+			for (AbstractEquationBlock b : this) {
+				if (!b.isSolvable()) {
+					blockSizes.add(new Integer(b.iterationVariables().size()));
+				}		
+			}
+			return blockSizes;
+		}
+
+		public void reset() {
+			for (AbstractEquationBlock eb : this) {
+				eb.reset();
+			}	
+		}
+
+		public String toString() {
+			StringBuffer str = new StringBuffer();
+			str.append("-------------------------------\n");
+			for (AbstractEquationBlock eb : this) {
+				str.append(eb.toString());
+				str.append("-------------------------------\n");
+			}
+			return str.toString();
+		}
+		
+		public void writeIterationVariablesToFile(File file) throws FileNotFoundException {
+			PrintStream out = new PrintStream(file);
+			for (AbstractEquationBlock block : this)
+				block.printIterationVariables(out);
+			out.close();
+		}
+		
+		public void writeTearingPairsToFile(File file) throws FileNotFoundException {
+			PrintStream out = new PrintStream(file);
+			int count = 0;
+			for (AbstractEquationBlock block : this)
+				block.printTearingPairs(out, count++);
+			out.close();
+		}
+		
+		public void complianceCheck(ErrorCheckType checkType) {
+			for (AbstractEquationBlock block : this) {
+				if (!block.isSolvable()) {
+					for (FAbstractEquation equ : block.equations()) {
+						if (equ.isWhen()) {
+							for (FExp guard : equ.transformedGuards()) {
+								if (guard.dependsOn(block.activeVariables())) {
+									equ.error("A when-guard is involved in an algebraic loop, "
+											+ "consider breaking it using pre() expressions");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public class StructuredBLT extends BLT {
+		private ArrayList<AbstractEquationBlock> topEquationBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> allBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> odeBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> realOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> integerBooleanOutputBlocks = new ArrayList<AbstractEquationBlock>();
+		private ArrayList<AbstractEquationBlock> otherBlocks = new ArrayList<AbstractEquationBlock>();
+		
+		private FClass fclass;
+	
+		public StructuredBLT(FClass fclass) {
+			this.fclass = fclass;	
+		}
+		
+		public StructuredBLT(FClass fclass, BLT blt) {
+			this(fclass);
+			for (AbstractEquationBlock eb : blt) {
+				this.add(eb);
+				eb.setDAEPredecessors();
+				if (eb.getPredecessors().size() == 0) {
+					topEquationBlocks.add(eb);
+				}
+			}
+
+			reset();
+			// Loop over all derivatives
+			for (FVariable fv : getFClass().derivativeVariables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							odeBlocks.add(ebb);
+						}
+					}
+					odeBlocks.add(eb);
+				}
+			}
+			
+			// Loop over all real outputs
+			for (FVariable fv : getFClass().realOutputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				//States and inputs can be outputs in which case they don't have equation blocks associated with them
+				if (eb!=null && !eb.isVisited()) { 
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							realOutputBlocks.add(ebb);
+						}
+					}
+					realOutputBlocks.add(eb);
+				}	
+			}
+
+			// Loop over integer and boolean outputs
+			for (FVariable fv : getFClass().outputs()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (eb!=null && !eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()){
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							integerBooleanOutputBlocks.add(ebb);
+						}
+					}
+					integerBooleanOutputBlocks.add(eb);
+				}	
+			}
+
+			// Loop over all others
+			for (FVariable fv : getFClass().variables()) {
+				// Get the block where the variable is solved for	
+				AbstractEquationBlock eb = fv.myDAEEquationBlock();
+				if (eb!=null && !eb.isVisited()) {
+					eb.setVisited(true);
+					for (AbstractEquationBlock ebb : eb.getAllPredecessors()) {
+						if (!ebb.isVisited()) {	
+							ebb.setVisited(true);
+							otherBlocks.add(ebb);
+						}
+					}
+					otherBlocks.add(eb);
+				}	
+			}
+			// Add any blocks not visited (generally meta blocks)
+			for (AbstractEquationBlock eb : this) {
+				if (!eb.isVisited()) {
+					eb.setVisited(true);
+					otherBlocks.add(eb);
+				}
+			}
+			
+			allBlocks.addAll(odeBlocks);
+			allBlocks.addAll(realOutputBlocks);
+			allBlocks.addAll(integerBooleanOutputBlocks);
+			allBlocks.addAll(otherBlocks);
+
+		}
+		
+		public FClass getFClass() {
+			return fclass;	
+		}
+		
+
+	    public ArrayList<AbstractEquationBlock> getAllBlocks() {
+			return allBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOdeBlocks() {
+			return odeBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getRealOutputBlocks() {
+			return realOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getIntegerBooleanOutputBlocks() {
+			return integerBooleanOutputBlocks;
+		}
+
+	    public ArrayList<AbstractEquationBlock> getOtherBlocks() {
+			return otherBlocks;
+		}
+
+		public String printGraphPython() {
+			StringBuffer str = new StringBuffer();
+			str.append("##############################\n");
+			int max_depth = 0;
+			HashMap<String,ArrayList<AbstractEquationBlock>> map = new HashMap<String,ArrayList<AbstractEquationBlock>>();
+			for (AbstractEquationBlock eb : allBlocks) {
+				int d = eb.depth();
+				if (d>max_depth) {
+					max_depth = d;
+				}
+				if (map.get("" + d)==null) {
+					map.put("" + d,new ArrayList<AbstractEquationBlock>());
+				}
+				map.get("" + d).add(eb);	
+			}
+			str.append("blocks={\n");
+			int l = 0;
+			
+//			for (String key : map.keySet()) {
+			for (int i=0;i<=max_depth;i++) {
+				String key = "" + i;
+				int k=0;
+				str.append(key + ":[");
+				for (AbstractEquationBlock eb : map.get(key)) {
+					str.append("{'index':" + allBlocks.indexOf(eb) + ",'depth':" + l + ",'pred':" + "[" );
+					int j = 0;
+					for (AbstractEquationBlock peb : eb.getPredecessors()) {
+						str.append(allBlocks.indexOf(peb));	
+						if (j<eb.getPredecessors().size()-1) {
+							str.append(",");
+						}
+						j++;
+					}
+					str.append("]}");
+					if (k<map.get(key).size()-1) {
+						str.append(",\n");
+					}
+					k++;
+				}	
+				str.append("]");
+				if (l<max_depth) {
+					str.append(",\n");
+				}
+				l++;		
+			}	
+
+			str.append("}\n");
+			str.append("##############################");
+			return str.toString();
+		}
+
+		public String toString() {
+			
+			HashSet<FVariable> solvedVars = new HashSet<FVariable>();
+			
+			int n_blocks = 0;
+			/*
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.activeVariables()) {
+					System.out.println("'" + fv.name() + "',");
+				}
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				n_blocks++;
+				for (FVariable fv : eb.inactiveVariables()) {
+					if (!solvedVars.contains(fv)) {
+						System.out.println("ERRROR:");
+						System.out.println("Variable:");
+						System.out.println(fv);
+						System.out.println("needed by block:");
+						System.out.println(eb.toStringVerbose());
+						System.out.println("have not been solved");
+					}							
+				}
+				solvedVars.addAll(eb.activeVariables());
+			}
+			
+			System.out.println("Number of blocks in generated code: " + n_blocks +  
+			" Total number of blocks: " + size());
+			*/
+
+			StringBuffer str = new StringBuffer();
+			str.append("************* Structured BLT*********\n");
+			str.append("***********************************\n");	
+			str.append("************* ODE section *********\n");	
+			str.append("***********************************\n");	
+			// Loop over all derivatives
+			for (AbstractEquationBlock eb : getOdeBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("************ Real outputs *********\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("****Integer and boolean outputs ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+			str.append("***********************************\n");	
+			str.append("**** Other variables ***\n");	
+			str.append("***********************************\n");	
+			for (AbstractEquationBlock eb : getOtherBlocks()) {
+				str.append(eb.toString());
+				str.append("******\n");
+			}
+
+//			str.append(">>\n\n\n");
+//			str.append(printGraphPython());
+
+			return str.toString();
+		}
+	}
+
+	/**
+	 * Abstract class for equation blocks resulting from the BLT transformation
+	 */
+	public abstract class AbstractEquationBlock {
+	
+		private Set<AbstractEquationBlock> allPredecessors = null;
+		private Set<AbstractEquationBlock> predecessors = new LinkedHashSet<AbstractEquationBlock>();
+		private Set<AbstractEquationBlock> successors = new LinkedHashSet<AbstractEquationBlock>();
+		private Set<FVariable> dependsOnVariables = null; 
+		private boolean visited = false;
+		private boolean predecessorsSet = false;
+	
+		public abstract Collection<FAbstractEquation> equations();
+		
+		/*
+		 * The active variables are assigned their values when the block is solved.
+		 */
+		public abstract Collection<FVariable> activeVariables();
+
+		/* 
+		 * These are the variables that are solved for if an iterative
+		 * Newton solver is applied. This set is not necessarily identical
+		 * to the set of active variables, e.g., in the case of torn
+		 * or mixed blocks.
+		 */ 
+		public Collection<FVariable> iterationVariables() {
+			return activeVariables();
+		}
+		
+		public Collection<FVariable> continuousIterationVariables() {
+			Collection<FVariable> l = new ArrayList<FVariable>();
+			for (FVariable fv : iterationVariables())
+				if (fv.isReal())
+					l.add(fv);
+			return l;
+		}
+		
+		public Collection<FVariable> descreteIterationVariables() {
+			Collection<FVariable> l = new ArrayList<FVariable>();
+			for (FVariable fv : iterationVariables())
+				if (!fv.isReal())
+					l.add(fv);
+			return l;
+		}
+		
+		public FTypePrefixVariability variability() {
+			return FContinuous.instance;
+		}
+		
+		public Collection<FVariable> inactiveVariables() {
+			java.util.List<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.algebraicVariables());
+				s.addAll(e.derivativeVariables());	
+			}
+			s.removeAll(activeVariables());
+			return s;	
+		}		
+
+		public Collection<FVariable> independentVariables() {
+			java.util.List<FVariable> s = new ArrayList<FVariable>();
+			for (FAbstractEquation e : equations()) {
+				s.addAll(e.inputs());
+				s.addAll(e.differentiatedRealVariables());	
+				s.addAll(e.discretePreVariables());	
+			}
+			return s;
+		}		
+		
+		public abstract boolean isSolvable();
+		
+		public void setDAEPredecessors() {
+			if (!predecessorsSet) {
+				for (FVariable fv : inactiveVariables()) {
+					if (!predecessors.contains(fv.myDAEEquationBlock())) {
+						predecessors.add(fv.myDAEEquationBlock());
+					}
+					if (!fv.myDAEEquationBlock().getSuccessors().contains(this)) {
+						fv.myDAEEquationBlock().getSuccessors().add(this);
+					}
+					fv.myDAEEquationBlock().setDAEPredecessors();
+				}
+				predecessorsSet = true;
+			}		
+		}
+		
+		public Set<FVariable> dependsOn() {
+			if (this.dependsOnVariables==null) {
+				dependsOnVariables = new LinkedHashSet<FVariable>();
+				dependsOnVariables.addAll(independentVariables());
+				for (AbstractEquationBlock eb : getPredecessors()) {
+					dependsOnVariables.addAll(eb.dependsOn());
+				}
+			}
+			return dependsOnVariables;
+		}
+				
+		public boolean isMixed() {
+			for (FAbstractEquation e : equations()) {
+				if (e.isDiscrete()) {
+					return true;
+				}	
+			}	
+			return false;
+		}
+		
+		public Collection<FAbstractEquation> differentiatedEquations() {
+			java.util.List<FAbstractEquation> diffedEq = new ArrayList<FAbstractEquation>();
+			for (FAbstractEquation e : equations()) {
+				if (e.getMeIntegrated()!=null) {
+					diffedEq.add(e);
+				}
+			}
+			return diffedEq;
+		}
+
+		public Collection<AbstractEquationBlock> getAllPredecessors() {
+			if (allPredecessors == null) {
+				allPredecessors = new LinkedHashSet<AbstractEquationBlock>(); 
+				for (AbstractEquationBlock eb : getPredecessors()) {
+					allPredecessors.addAll(eb.getAllPredecessors());
+					allPredecessors.add(eb);
+				}
+			}
+			return allPredecessors;
+		}	
+		
+		public Set<AbstractEquationBlock> getPredecessors() {
+			return predecessors;
+		}	
+
+		public Set<AbstractEquationBlock> getSuccessors() {
+			return successors;
+		}	
+		
+		public boolean isPredecessorsSet() {
+			return predecessorsSet;
+		}
+	
+		public int depth() {
+			int max_predecessor_depth = -1;
+			for (AbstractEquationBlock eb : getAllPredecessors()) {
+				int d = eb.depth();
+				if (d>max_predecessor_depth) {
+					max_predecessor_depth = d;
+				}
+			}
+			return max_predecessor_depth + 1;
+		}
+	
+		public boolean isVisited() {
+			return visited;
+		}
+		
+		public void setVisited(boolean visited) {
+			this.visited = visited;	
+		}
+		
+		public void reset() {
+			visited  = false;	
+		}
+		
+		public boolean isSimple() {
+			return false;
+		}
+		
+		public final String toString() {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			prettyPrint(new NotNullPrintStream(os));
+			return os.toString();
+		}
+		
+		public abstract void prettyPrint(PrintStream str);
+		
+		public boolean mergeBlock(AbstractEquationBlock block) {
+			return false;
+		}
+		
+		protected void printIterationVariables(PrintStream str) {}
+		
+		protected void printTearingPairs(PrintStream str, int blockNumber) {}
+		
+	}
+
+	/**
+	 * EquationBlock is a general block that may contain one or more
+	 * non-solved equations.
+	 */
+	public class EquationBlock extends AbstractEquationBlock {
+		
+		protected Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+		
+		public EquationBlock(Collection<SimpleEquationBlock> blocks) {
+			for (SimpleEquationBlock block : blocks)
+				addBlock(block);
+		}
+				
+		public void addBlock(SimpleEquationBlock b) {
+			for (SimpleEquationBlock block : blocks)
+				if (block.mergeBlock(b))
+					return;
+			if (!isLinear())
+				b.checkStartValues();
+			blocks.add(b);
+		}
+		
+		protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
+			FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
+			int row = 0;
+			int col = 0;
+			Map<FVariable, Integer> columnMap = new HashMap<FVariable, Integer>();
+			for (FVariable fv : vars)
+				columnMap.put(fv, col++);
+			
+			for (FAbstractEquation fe : eqns) {
+				Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
+				Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
+				Iterator<FVariable> it = new ChainedIterator<FVariable>(RLHS.iterator(), RRHS.iterator());
+				FExp l = ((FEquation)fe).getLeft();
+				FExp r = ((FEquation)fe).getRight();
+				while (it.hasNext()) {
+					FVariable fv = it.next();
+					Integer colObj = columnMap.get(fv);
+					if (colObj == null)
+						continue;
+					col = columnMap.get(fv);
+					
+					FExp dl = l.dynamicFExp(l.diff(fv.name()));
+					boolean lz = dl.equalsRealValue(0);
+					FExp dr = r.dynamicFExp(r.diff(fv.name()));;
+					boolean rz = dr.equalsRealValue(0);;
+					FExp je;
+					if (rz && lz) {
+						je = null;
+					} else if (lz) {
+						je = r.dynamicFExp(new FNegExp(dr));
+					} else if (rz) {
+						je = dl;
+					} else {
+						je = r.dynamicFExp(new FSubExp(dl,dr));
+					}
+					jacobian[row][col] = je;
+				}	
+				row++;
+			}
+			return jacobian;
+		}
+		
+		protected final static FTypePrefixVariability computeVariability(FExp[][] jacobian) {
+			FTypePrefixVariability blockVariability = ASTNode.fConstant();
+			for (FExp[] row : jacobian)
+				for (FExp element : row)
+					if (element != null && !element.variability().lessOrEqual(blockVariability))
+						blockVariability = element.variability();
+			return blockVariability;
+		}
+		
+		/**
+		 * Returns true if the block is linear.
+		 * 
+		 * @return boolean True if linear
+		 */
+		public boolean isLinear() {
+			return false;
+		}
+		
+		@Override
+		public Collection<FVariable> activeVariables() {
+			Collection<FVariable> l = new ArrayList<FVariable>();
+			for (SimpleEquationBlock sb : blocks)
+				l.addAll(sb.activeVariables());
+			return l;
+		}		
+
+		public Collection<SimpleEquationBlock> subBlocks() {
+			return blocks;
+		}
+
+		public Collection<FAbstractEquation> equations() {
+			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+			for (SimpleEquationBlock sb : blocks)
+				l.add(sb.equation());
+			return l;
+		}
+		
+		@Override
+		public boolean isSolvable() {
+			return false;	
+		}
+		
+		public boolean containsDerivative() {
+			for (FVariable fv : activeVariables())
+				if (fv.isDerivativeVariable())
+					return true;
+			return false;
+		}
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintEquation(str);
+		}
+	
+	}
+
+	/**
+	 * LinearEquationBlock is a system of equations that may contain one or more
+	 * non-solved equations, all of wich are linear in the active variables.
+	 */
+	public class LinearEquationBlock extends EquationBlock {
+
+		private FExp[][] jacobian;
+		private FTypePrefixVariability blockVariability;
+
+		public LinearEquationBlock(Collection<SimpleEquationBlock> blocks) {
+			super(blocks);
+			
+			// Compute Jacobian
+			jacobian = computeJacobian(equations(), activeVariables());
+			blockVariability = computeVariability(jacobian);
+		}
+		
+		@Override
+		public boolean isLinear() {
+			return true;
+		}
+		
+		public FTypePrefixVariability variability() {
+			return blockVariability;	
+		}
+	
+		public FExp[][] getJacobian() {
+			return jacobian;	
+		}
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved linear block of " + activeVariables().size() + " variables:");
+			str.println("Coefficient variability: " + variability().toStringLiteral());
+			str.println("Unknown variables:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			for (SimpleEquationBlock seb : blocks)
+				seb.prettyPrintEquation(str);
+			str.println("Jacobian:");
+			for (int col=0;col<equations().size();col++) {
+				str.print("  |");
+				for (int row=0;row<equations().size();row++) {
+					str.print(jacobian[col][row] == null ? "0.0" : jacobian[col][row]);
+					if (row<equations().size()-1) {
+						str.print(", ");	
+					}
+				}
+				str.println("|");
+			}
+		}
+
+
+	}
+
+	/**
+	 * MixedEquationBlock is a general block that may contain 
+	 * non-solved equations and which contains both continous
+	 * and discrete equations.
+	 */
+	public class MixedEquationBlock extends EquationBlock {
+		
+		public MixedEquationBlock(Collection<SimpleEquationBlock> blocks) {
+			super(blocks);
+		}
+		
+		public Collection<FVariable> activeContinuousVariables() {
+			Collection<FVariable> l = new ArrayList<FVariable>();
+			for (FVariable fv : activeVariables())
+				if (fv.isReal())
+					l.add(fv);
+			return l;
+		}
+		
+		public Collection<FVariable> activeDiscreteVariables() {
+			Collection<FVariable> l = new ArrayList<FVariable>();
+			for (FVariable fv : activeVariables())
+				if (!fv.isReal())
+					l.add(fv);
+			return l;
+		}
+		
+		public Collection<FAbstractEquation> continuousEquations() {
+			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				l.add(seb.equation());
+			return l;
+		}
+		
+		public Collection<FAbstractEquation> discreteEquations() {
+			Collection<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				l.add(seb.equation());
+			return l;
+		}
+		
+		public Collection<SimpleEquationBlock> continuousEquationBlocks() {
+			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
+			for (SimpleEquationBlock seb : blocks) {
+				if (seb.equation().isReal())
+					l.add(seb);
+			}
+			return l;
+		}
+		
+		public Collection<SimpleEquationBlock> discreteEquationBlocks() {
+			Collection<SimpleEquationBlock> l = new ArrayList<SimpleEquationBlock>();
+			for (SimpleEquationBlock seb : blocks)
+				if (!seb.equation().isReal())
+					l.add(seb);
+			return l;
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			str.println("Mixed non-solved block of " + activeVariables().size() + " variables:");
+			str.println("Unknown continuous variables:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Unknown discrete variables:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Continuous equations:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks())
+				seb.prettyPrintEquation(str);
+			str.println("Discrete equations:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintEquation(str);
+		}
+	}
+
+	public class MixedLinearEquationBlock extends MixedEquationBlock {
+		
+		private FExp[][] jacobian;
+		private FTypePrefixVariability blockVariability;
+
+		public MixedLinearEquationBlock(Collection<SimpleEquationBlock> blocks) {
+			super(blocks);
+			jacobian = computeJacobian(continuousEquations(), activeContinuousVariables());
+			blockVariability = computeVariability(jacobian);
+		}
+		
+		@Override
+		public boolean isLinear() {
+			return true;
+		}
+		
+		@Override
+		public FTypePrefixVariability variability() {
+			return blockVariability;	
+		}
+	
+		public FExp[][] getJacobian() {
+			return jacobian;	
+		}
+
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved mixed linear block of " + activeVariables().size() + " variables:\n");
+			str.println("Coefficient variability: " + variability().toStringLiteral());
+		
+			Collection<SimpleEquationBlock> continuousEquationBlocks = continuousEquationBlocks();
+			str.println("Unknown continuous variables:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Unknown discrete variables:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintActiveVariables(str);
+			str.println("Continuous equations:");
+			for (SimpleEquationBlock seb : continuousEquationBlocks)
+				seb.prettyPrintEquation(str);
+			str.println("Discrete equations:");
+			for (SimpleEquationBlock seb : discreteEquationBlocks())
+				seb.prettyPrintEquation(str);
+			str.println("Jacobian:");
+			for (int col=0;col<continuousEquationBlocks.size();col++) {
+				str.print("  |");
+				for (int row=0;row<continuousEquationBlocks.size();row++) {
+					str.print(jacobian[col][row] == null ? "0.0" : jacobian[col][row]);
+					if (row<continuousEquationBlocks.size()-1) {
+						str.print(", ");
+					}
+				}
+				str.println("|");
+			}
+		}
+
+		
+		
+	}
+	
+	/**
+	 * SimpleEquationBlock is the base class of ScalarEquationBlock, FunctionCallEquationBlock
+	 * AlgorithmBLock and IfEquationBlock.
+	 */
+	public abstract class SimpleEquationBlock extends AbstractEquationBlock {
+		private FAbstractEquation equation;
+		
+		public SimpleEquationBlock(FAbstractEquation equation) {
+			this.equation = equation;
+		}
+		
+		public FAbstractEquation equation() {
+			return equation;
+		}
+		
+		public Collection<FAbstractEquation> equations() {
+			return Arrays.asList(equation());
+		}
+		
+		public void prettyPrintActiveVariables(PrintStream str) {
+			prettyPrintActiveVariables(str, false);
+		}
+		
+        public Collection<Integer> assignedIndices() {
+            return null;
+        }
+		
+		/**
+		 * This method is call on blocks that are used in iterations. This
+		 * method should check the start values of its variable and verify
+		 * that a start value is set.
+		 */
+		public void checkStartValues() {}
+
+		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+			for (FVariable fv : activeVariables()) {
+				str.print("  " + fv.name());
+				if (printAttributes) {
+					str.print("(");
+					fv.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+					str.print(")");
+				}
+				str.println();
+			}
+		}
+		
+		public void prettyPrintEquation(PrintStream str) {
+			str.print("  " + equation());
+			if (equation().hasNominal())
+				str.print("    (Nominal=" + equation().getNominal().getValue() + ")");
+			str.println();
+		}
+		
+		
+		public void prettyPrintIterationVariables(PrintStream str) {
+			if (!isSolvable())
+				doPrettyPrintIterationVariables(str);
+		}
+		
+		public void doPrettyPrintIterationVariables(PrintStream str) {
+			boolean first = true;
+			for (FVariable var : activeVariables()) {
+				if (first)
+					str.print(" Iteration variables: ");
+				else
+					str.print("                      ");
+				first = false;
+				str.println(var.name());
+			}
+		}
+
+		public boolean isSimple() {
+			return true;
+		}
+		
+	}
+	
+	/**
+	 * An equation that does not affect the values of any variables. 
+	 *
+	 * Examples: asserts, calls to functions without outputs.
+	 */
+	public class MetaEquationBlock extends SimpleEquationBlock {
+
+		public MetaEquationBlock(FAbstractEquation equation) {
+			super(equation);
+		}
+
+		public Collection<FVariable> activeVariables() {
+			return Collections.<FVariable>emptyList();
+		}
+
+		public boolean isSolvable() {
+			return true;
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			str.println("Meta equation block:");
+			str.println("Equation:");
+			prettyPrintEquation(str);
+		}
+		
+	}
+
+	/**
+	 * ScalarEquationBlock represents a scalar equation. Base class for
+	 * SolvedScalarEquationBlock and UnsolvedScalarEquationBlock.
+	 */
+	public abstract class ScalarEquationBlock extends SimpleEquationBlock {
+		protected FVariable fv;
+		
+		public ScalarEquationBlock(FEquation eqn, FVariable fv) {
+			super(eqn);
+			this.fv = fv;
+		}
+		
+		public FEquation equation() {
+			return (FEquation) super.equation();
+		}
+		
+		public Collection<FVariable> activeVariables() {
+			return Arrays.asList(fv);
+		}
+		
+	}
+	
+	/**
+	 * SolvedScalarEquationBlock represents a solved scalar equation. 
+	 */
+	public class SolvedScalarEquationBlock extends ScalarEquationBlock {
+
+		public SolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
+			super(eqn, fv);
+		}
+
+		@Override
+		public boolean isSolvable() {
+			return true;
+		}
+		
+		public FExp solution() {
+			return equation().solution(fv.name());
+		}
+		
+		@Override
+		public void prettyPrint(PrintStream str) {
+			str.println("Solved block of 1 variables:");
+			str.println("Computed variable:");
+			prettyPrintActiveVariables(str);
+			str.println("Solution:");
+			str.println("  " + solution());
+		}
+		
+	}
+
+	/**
+	 * UnsolvedScalarEquationBlock represents a solved scalar equation. 
+	 */
+	public class UnsolvedScalarEquationBlock extends ScalarEquationBlock {
+		
+		public UnsolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
+			super(eqn, fv);
+		}
+		
+		@Override
+		public void checkStartValues() {
+			fv.warnStartAttributeNotSet();
+		}
+		
+		@Override
+		public boolean isSolvable() {
+			return false;
+		}
+		
+		@Override
+		public void prettyPrint(PrintStream str) {
+			str.println("Non-solved block of 1 variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
+		}
+
+	}
+
+	/**
+	 * NumericallySolvedScalarEquationBlock represents a numerically solved scalar equation. 
+	 */
+	public class NumericallySolvedScalarEquationBlock extends ScalarEquationBlock {
+		
+		public NumericallySolvedScalarEquationBlock(FEquation eqn, FVariable fv) {
+			super(eqn, fv);
+		}
+
+		@Override
+		public void checkStartValues() {
+			fv.warnStartAttributeNotSet();
+		}
+		
+		@Override
+		public boolean isSolvable() {
+			return true;
+		}
+
+		@Override
+		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+			super.prettyPrintActiveVariables(str, true);
+		}
+		
+		@Override
+		public void prettyPrintIterationVariables(PrintStream str) {
+			doPrettyPrintIterationVariables(str);
+		}
+		
+		@Override
+		public void prettyPrint(PrintStream str) {
+			str.println("Numerically solved block of 1 variables:");
+			str.println("Computed variable:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
+		}
+		
+	}
+
+	/**
+	 * FunctionCallEquationBlock serves as a base class for SolvedFunctionCallEquationBlock
+	 * and UnsolvedFunctionCallEquationBlock.
+	 */
+	public abstract class FunctionCallEquationBlock extends SimpleEquationBlock {
+		
+		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
+		
+		public FunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVars, Collection<Integer> assignedIndices) {
+			super(eqn);
+			this.activeVars.addAll(activeVars);
+			this.assignedIndices.addAll(assignedIndices);
+		}
+		
+		public FFunctionCallEquation equation() {
+			return (FFunctionCallEquation) super.equation();
+		}
+		
+		public Collection<FVariable> activeVariables() {
+			return new ArrayList<FVariable>(activeVars);
+		}
+		
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
+		
+		public boolean mergeBlock(AbstractEquationBlock block) {
+			if (!(block instanceof FunctionCallEquationBlock))
+				return false;
+			
+			FunctionCallEquationBlock fceb = (FunctionCallEquationBlock) block;
+			
+			if (equation() != fceb.equation())
+				return false;
+			
+			activeVars.addAll(fceb.activeVars);
+			assignedIndices.addAll(fceb.assignedIndices);
+			return true;
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			str.print(isSolvable() ? "Solved" : "Non-solved");
+			str.println(" block of " + activeVariables().size() + " variables:");
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Equations:");
+			prettyPrintEquation(str);
+		}
+	}
+
+
+	/**
+	 * A solved function call equation.
+	 */
+	public class SolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
+		
+		public SolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(eqn, activeVariables, assignedIndices);
+		}
+		
+		@Override
+		public boolean isSolvable() {
+			return true;
+		}
+		
+	}
+
+	/** 
+	 * An unsolved function call equation
+	 */
+	public class UnsolvedFunctionCallEquationBlock extends FunctionCallEquationBlock {
+		
+		public UnsolvedFunctionCallEquationBlock(FFunctionCallEquation eqn, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(eqn, activeVariables, assignedIndices);
+		}
+		
+		@Override
+		public void checkStartValues() {
+			for (FVariable var : activeVars)
+				var.warnStartAttributeNotSet();
+		}
+		
+
+		@Override
+		public boolean isSolvable() {
+			return false;
+		}
+
+	}
+
+	/**
+	 * Base class for blocks representing an algorithm block.
+	 */
+	public abstract class AlgorithmBlock extends SimpleEquationBlock {
+		
+		protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+		protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
+		
+		public AlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(alg);
+			this.activeVars.addAll(activeVariables);
+			this.assignedIndices.addAll(assignedIndices);
+		}
+	
+		public FAlgorithm equation() {
+			return (FAlgorithm) super.equation();
+		}
+		
+		public Collection<FVariable> activeVariables() {
+			return activeVars;
+		}
+		
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
+				
+		public boolean isMixed() {
+			return false;
+		}
+		
+		public Collection<FAbstractEquation> differentiatedEquations() {
+			return new ArrayList<FAbstractEquation>();
+		}
+		
+		public void prettyPrint(PrintStream str) {
+			String prefix = isSolvable() ? "Solved" : "Non-solved";
+			str.format("%s algorithm block of %d variables:\n", prefix, activeVariables().size());
+			str.println("Unknown variables:");
+			prettyPrintActiveVariables(str);
+			str.println("Algorithm:");
+			prettyPrintEquation(str);
+		}
+		
+	}
+
+	/**
+	 * An algorithm block that is solved in its active variables.
+	 */
+	public class SolvedAlgorithmBlock extends AlgorithmBlock {
+		
+		public SolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(alg, activeVariables, assignedIndices);
+		}
+		
+		public boolean isSolvable() {
+			return true;
+		}
+		
+	}
+
+	/** 
+	 * An algorithm block that isn't solved in its active variables.
+	 */
+	public class UnsolvedAlgorithmBlock extends AlgorithmBlock {
+		
+		public UnsolvedAlgorithmBlock(FAlgorithm alg, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+			super(alg, activeVariables, assignedIndices);
+		}
+
+		public boolean isSolvable() {
+			return false;
+		}
+
+	}
+	
+    /**
+     * Base class for blocks representing an algorithm block.
+     */
+    public abstract class IfEquationBlock extends SimpleEquationBlock {
+        
+        protected Collection<FVariable> activeVars = new LinkedHashSet<FVariable>();
+        protected Collection<Integer> assignedIndices = new ArrayList<Integer>();
+        
+        public IfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation);
+            this.activeVars.addAll(activeVariables);
+            this.assignedIndices.addAll(assignedIndices);
+        }
+    
+        public FIfEquation equation() {
+            return (FIfEquation) super.equation();
+        }
+        
+        public Collection<FVariable> activeVariables() {
+            return activeVars;
+        }   
+        
+        public Collection<Integer> assignedIndices() {
+            return assignedIndices;
+        }
+                
+        public boolean isMixed() {
+            return false;
+        }
+        
+        public Collection<FAbstractEquation> differentiatedEquations() {
+            return new ArrayList<FAbstractEquation>();
+        }
+        
+        public void prettyPrint(PrintStream str) {
+            String prefix = isSolvable() ? "Solved" : "Non-solved";
+            str.format("%s if equation block of %d variables:\n", prefix, activeVariables().size());
+            str.println("Unknown variables:");
+            prettyPrintActiveVariables(str);
+            str.println("If Equation:");
+            prettyPrintEquation(str);
+        }
+        
+    }
+
+    /**
+     * An algorithm block that is solved in its active variables.
+     */
+    public class SolvedIfEquationBlock extends IfEquationBlock {
+        
+        public SolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation, activeVariables, assignedIndices);
+        }
+        
+        public boolean isSolvable() {
+            return true;
+        }
+        
+    }
+
+    /** 
+     * An algorithm block that isn't solved in its active variables.
+     */
+    public class UnsolvedIfEquationBlock extends IfEquationBlock {
+        
+        public UnsolvedIfEquationBlock(FIfEquation equation, Collection<FVariable> activeVariables, Collection<Integer> assignedIndices) {
+            super(equation, activeVariables, assignedIndices);
+        }
+
+        public boolean isSolvable() {
+            return false;
+        }
+
+    }
+    
+	/**
+	 * TornEquationBlock represents an equation block resulting from tearing.
+	 */
+	public class TornEquationBlock extends AbstractEquationBlock {
+		private java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+		private java.util.List<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
+		
+		public TornEquationBlock() {
+		}
+		
+		public void addSolvedBlock(SimpleEquationBlock aeb) {
+			if (!solvedBlocks.isEmpty() && solvedBlocks.get(solvedBlocks.size() - 1).mergeBlock(aeb))
+				return;
+			solvedBlocks.add(aeb);
+		}
+		
+		public Collection<SimpleEquationBlock> getSolvedBlocks() {
+			return solvedBlocks;
+		}
+		
+		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
+			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
+				return;
+			aeb.checkStartValues();
+			unsolvedBlocks.add(aeb);
+		}
+		
+		public Collection<SimpleEquationBlock> getUnsolvedBlocks() {
+			return unsolvedBlocks;
+		}
+
+		public Collection<FAbstractEquation> unsolvedEquations() {
+			Collection<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				eqs.addAll(block.equations());
+			}
+			return eqs;
+		}
+
+		public Collection<FAbstractEquation> solvedEquations() {
+			Collection<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
+			for (AbstractEquationBlock block : solvedBlocks) {
+				eqs.addAll(block.equations());
+			}
+			return eqs;
+		}
+
+		public Collection<FAbstractEquation> equations() {
+			// Sort out any duplicated equations that has been introduced from records...
+			// TODO: This should probably be handled in the compute_tearing() method..
+			Collection<FAbstractEquation> s = new ArrayList<FAbstractEquation>();
+			FAbstractEquation prev = null;
+			for (FAbstractEquation e : solvedEquations()) {
+				if (e != prev)
+					s.add(e);
+				prev = e;
+			}
+			for (FAbstractEquation e : unsolvedEquations()) {
+				if (e != prev)
+					s.add(e);
+				prev = e;
+			}
+			return s;
+		}
+
+		public Collection<FVariable> activeVariables() {
+			Collection<FVariable> vars = new ArrayList<FVariable>();
+			for(AbstractEquationBlock block : solvedBlocks){
+				vars.addAll(block.activeVariables());
+			}
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				vars.addAll(block.activeVariables());
+			}
+			return vars;
+		}	
+		
+		public Collection<FVariable> iterationVariables() {
+			Collection<FVariable> vars = new ArrayList<FVariable>();
+			for (AbstractEquationBlock block : unsolvedBlocks) {
+				vars.addAll(block.activeVariables());
+			}
+			return vars;
+		}
+		
+		public boolean isSolvable() {
+			return false;
+		}			
+		
+		public void prettyPrint(PrintStream str) {
+			Collection<FVariable> iterationVars = iterationVariables();
+			Collection<FVariable> solvedVars = activeVariables();
+			solvedVars.removeAll(iterationVars);
+			str.println("Torn block of " + iterationVars.size() + " iteration variables" +
+					" and " + solvedVars.size() + " solved variables.");
+			str.println("Solved variables:");
+			for (SimpleEquationBlock seb : solvedBlocks)
+				seb.prettyPrintActiveVariables(str);
+			str.println("Iteration variables:");
+			for (SimpleEquationBlock seb : unsolvedBlocks)
+				seb.prettyPrintActiveVariables(str, true);
+			str.println("Solved equations:");
+			for (SimpleEquationBlock seb : solvedBlocks) {
+				seb.prettyPrintIterationVariables(str);
+				seb.prettyPrintEquation(str);
+			}
+			str.println("Residual equations:");
+			for (SimpleEquationBlock seb : unsolvedBlocks) {
+				seb.prettyPrintIterationVariables(str);
+				seb.prettyPrintEquation(str);
+			}
+		}
+	
+		protected void printIterationVariables(PrintStream str) {
+			for (AbstractEquationBlock block : unsolvedBlocks)
+				for (FVariable var : block.activeVariables())
+					str.println(var.name());
+		}
+		
+		protected void printTearingPairs(PrintStream str, int blockNumber) {
+			int counter = 0;
+			str.println("In block #" + blockNumber);
+			for (SimpleEquationBlock block : unsolvedBlocks) {
+				boolean equationHasHGT = block.equation().hasResidual();
+				FVariable iterVar = (equationHasHGT) ? block.equation().getResidual().iterationVariable() : null;
+				for (FVariable var : block.activeVariables()) {
+					boolean variableHasHGT = var.isHGTVarComponent() || var == iterVar;
+					str.print(" (");
+					str.print(variableHasHGT ? 'M' : 'A');
+					str.print(") " + (counter++) + " " + var.name() + " (");
+					var.printFAttributes(str, FAttribute.MIN, FAttribute.MAX, FAttribute.START, FAttribute.NOMINAL);
+					str.println(")");
+					str.print("   (");
+					str.print(equationHasHGT ? 'M' : 'A');
+					str.print(") " + block.equation().toString()); 
+					if (block.equation().hasNominal())
+						str.print("    (Nominal=" + block.equation().getNominal().getValue() + ")");
+					str.println();
+				}
+				str.println();
+			}
+			str.println();
+		}
+		
+	}
+
+}
