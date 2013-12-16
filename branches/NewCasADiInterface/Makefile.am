@@ -170,7 +170,7 @@ $(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/comm
 	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
 	touch $(MC_BUILD)/test/pythonTests/runtests.sh
 	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
-	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ JMODELICA_HOME=$(DESTDIR)$(prefix) nosetests" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
+	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ JMODELICA_HOME=$(DESTDIR)$(prefix) nosetests *.py" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
 	
 build-python-packages:
 if WITH_SUNDIALS

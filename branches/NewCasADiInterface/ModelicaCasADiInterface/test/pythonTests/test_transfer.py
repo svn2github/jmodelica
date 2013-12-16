@@ -1316,4 +1316,12 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = input[1]\n")
     assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
      
+def test_TransferVariableType():
+    model = transfer_to_casadi_interface("AtomicModelMisc", modelFile)
+    x1 = model.getVariableByName('x1')
+    assert isinstance(x1, RealVariable)
+    assert isinstance(x1.getMyDerivativeVariable(), DerivativeVariable)
+    assert isinstance(model.getVariableByName('x2'), IntegerVariable)
+    assert isinstance(model.getVariableByName('x3'), BooleanVariable)
+    assert isinstance(model.getVariableByName('x4'), BooleanVariable)
      
