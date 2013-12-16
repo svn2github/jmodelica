@@ -2345,7 +2345,7 @@ fclass IndexReduction.IndexReduction50
  parameter StateSelect c1_ss = StateSelect.default /* StateSelect.default */;
  parameter StateSelect c2_ss = StateSelect.never /* StateSelect.never */;
  parameter Real p = 0 /* 0 */;
- Real c1_phi(stateSelect = c1_ss);
+ Real c1_phi(stateSelect = c2_ss);
  Real c1_w(stateSelect = c1_ss);
  Real c1_a;
  Real c2_w(stateSelect = c2_ss);

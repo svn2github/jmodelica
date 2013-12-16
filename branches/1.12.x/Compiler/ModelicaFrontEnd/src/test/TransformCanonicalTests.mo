@@ -1140,7 +1140,7 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  constant Real y = 0.0;
- parameter Real p(start = 3) = 5 /* 5 */;
+ parameter Real p(start = 3, fixed = f) = 5 /* 5 */;
 end TransformCanonicalTests.AliasTest30;
 ")})));
 end AliasTest30;
@@ -1269,6 +1269,255 @@ public
 end TransformCanonicalTests.AliasFuncTest1;
 ")})));
 end AliasFuncTest1;
+
+
+model AliasPropMinMax1
+	Real x1(min = 1.0, max = 5.0) = time;
+	Real x2(min = 0.0, max = 2.5) = x1;
+    Integer y1(min = 1, max = 5) = integer(time);
+    Integer y2(min = 0, max = 3) = y1;
+	type A = enumeration(a, b, c, d, e);
+	A a1(min = A.b, max = A.e, start = A.b);
+	A a2(min = A.a, max = A.d) = a1;
+equation
+	when time > 1 then
+		a1 = A.c;
+	end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropMinMax1",
+			description="Test propagation of min/max attributes in alias set",
+			flatModel="
+fclass TransformCanonicalTests.AliasPropMinMax1
+ Real x2(min = 1.0,max = 2.5);
+ discrete Integer y1(min = 1,max = 3);
+ discrete TransformCanonicalTests.AliasPropMinMax1.A a1(min = TransformCanonicalTests.AliasPropMinMax1.A.b,max = TransformCanonicalTests.AliasPropMinMax1.A.d,start = TransformCanonicalTests.AliasPropMinMax1.A.b);
+ discrete Boolean temp_2;
+initial equation 
+ pre(y1) = 0;
+ pre(a1) = TransformCanonicalTests.AliasPropMinMax1.A.b;
+ pre(temp_2) = false;
+equation
+ temp_2 = time > 1;
+ a1 = if temp_2 and not pre(temp_2) then TransformCanonicalTests.AliasPropMinMax1.A.c else pre(a1);
+ x2 = time;
+ y1 = if time < pre(y1) or time >= pre(y1) + 1 or initial() then integer(time) else pre(y1);
+
+public
+ type TransformCanonicalTests.AliasPropMinMax1.A = enumeration(a, b, c, d, e);
+
+end TransformCanonicalTests.AliasPropMinMax1;
+")})));
+end AliasPropMinMax1;
+
+
+model AliasPropMinMax2
+    Real x1(min = 2.6, max = 5.0) = time;
+    Real x2(min = 0.0, max = 2.5) = x1;
+    Integer y1(min = 3, max = 5) = integer(time);
+    Integer y2(min = 0, max = 2) = y1;
+    type A = enumeration(a, b, c, d, e);
+    A a1(min = A.d, max = A.e, start = A.b);
+    A a2(min = A.a, max = A.c) = a1;
+equation
+    when time > 1 then
+        a1 = A.c;
+    end when;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="AliasPropMinMax2",
+			description="Test errors on impossible min/max combinations",
+			errorMessage="
+3 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
+")})));
+end AliasPropMinMax2;
+
+
+model AliasPropNominal1
+	type A = Real(nominal = 2);
+	
+	model B
+		Real x(nominal = 3);
+	end B;
+	
+	Real x1 = time;
+	A x2 = x1;
+	
+	Real y1 = time + 1;
+	A y2 = y1;
+	B y3(x = y1);
+    
+    Real z1 = time + 2;
+    A z2 = z1;
+    B z3(x = z1);
+	Real z4(nominal = 4) = z1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropNominal1",
+			description="Test propagation of nominal attribute in alias set",
+			flatModel="
+fclass TransformCanonicalTests.AliasPropNominal1
+ TransformCanonicalTests.AliasPropNominal1.A x2;
+ TransformCanonicalTests.AliasPropNominal1.A y2(nominal = 3);
+ TransformCanonicalTests.AliasPropNominal1.A z2(nominal = 4);
+equation
+ x2 = time;
+ y2 = time + 1;
+ z2 = time + 2;
+
+public
+ type TransformCanonicalTests.AliasPropNominal1.A = Real(nominal = 2);
+end TransformCanonicalTests.AliasPropNominal1;
+")})));
+end AliasPropNominal1;
+
+
+model AliasPropStart1
+    type A = Real(start = 2);
+    
+    model B
+        Real x(start = 3);
+    end B;
+    
+    Real x1 = time;
+    A x2 = x1;
+    
+    Real y1 = time + 1;
+    A y2 = y1;
+    B y3(x = y1);
+    
+    Real z1 = time + 2;
+    A z2 = z1;
+    B z3(x = z1);
+    Real z4(start = 4) = z1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropStart1",
+			description="Test propagation of start attribute in alias set",
+			flatModel="
+fclass TransformCanonicalTests.AliasPropStart1
+ TransformCanonicalTests.AliasPropStart1.A x2;
+ TransformCanonicalTests.AliasPropStart1.A y2(start = 3);
+ TransformCanonicalTests.AliasPropStart1.A z2(start = 4);
+equation
+ x2 = time;
+ y2 = time + 1;
+ z2 = time + 2;
+
+public
+ type TransformCanonicalTests.AliasPropStart1.A = Real(start = 2);
+end TransformCanonicalTests.AliasPropStart1;
+")})));
+end AliasPropStart1;
+
+
+model AliasPropFixed1
+	Real x1(fixed = true);
+	Real x2 = x1;
+	input Real x3(start = 1) = x2;
+equation
+	der(x3) = -x2 * time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropFixed1",
+			description="Test propagation of fixed attribute in alias set",
+			flatModel="
+fclass TransformCanonicalTests.AliasPropFixed1
+ input Real x3(start = 1,fixed = true);
+initial equation 
+ x3 = 1;
+equation
+ der(x3) = (- x3) * time;
+end TransformCanonicalTests.AliasPropFixed1;
+")})));
+end AliasPropFixed1;
+
+
+model AliasPropStateSelect1
+	package A
+        constant StateSelect ss[5] = { StateSelect.always, StateSelect.prefer, StateSelect.default, StateSelect.avoid, StateSelect.never };
+		
+		model B
+            constant StateSelect s1;
+            constant StateSelect s2;
+		    Real x1(stateSelect = s1);
+            Real x2(stateSelect = s2);
+		equation
+			x1 = time;
+			x1 = x2;
+        end B;
+	end A;
+	
+	A.B b[10](s1 = A.ss[{1, 1, 1, 1, 2, 2, 2, 3, 3, 4}], s2 = A.ss[{2, 3, 4, 5, 3, 4, 5, 4, 5, 5}]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropStateSelect1",
+			description="Test propagation of stateSelect attribute in alias set",
+			flatModel="
+fclass TransformCanonicalTests.AliasPropStateSelect1
+ constant StateSelect b[1].s1 = StateSelect.always;
+ constant StateSelect b[1].s2 = StateSelect.prefer;
+ Real b[1].x1(stateSelect = StateSelect.always);
+ constant StateSelect b[2].s1 = StateSelect.always;
+ constant StateSelect b[2].s2 = StateSelect.default;
+ Real b[2].x1(stateSelect = StateSelect.always);
+ constant StateSelect b[3].s1 = StateSelect.always;
+ constant StateSelect b[3].s2 = StateSelect.avoid;
+ Real b[3].x1(stateSelect = StateSelect.always);
+ constant StateSelect b[4].s1 = StateSelect.always;
+ constant StateSelect b[4].s2 = StateSelect.never;
+ Real b[4].x1(stateSelect = StateSelect.always);
+ constant StateSelect b[5].s1 = StateSelect.prefer;
+ constant StateSelect b[5].s2 = StateSelect.default;
+ Real b[5].x1(stateSelect = StateSelect.prefer);
+ constant StateSelect b[6].s1 = StateSelect.prefer;
+ constant StateSelect b[6].s2 = StateSelect.avoid;
+ Real b[6].x1(stateSelect = StateSelect.prefer);
+ constant StateSelect b[7].s1 = StateSelect.prefer;
+ constant StateSelect b[7].s2 = StateSelect.never;
+ Real b[7].x1(stateSelect = StateSelect.never);
+ constant StateSelect b[8].s1 = StateSelect.default;
+ constant StateSelect b[8].s2 = StateSelect.avoid;
+ Real b[8].x1(stateSelect = StateSelect.avoid);
+ constant StateSelect b[9].s1 = StateSelect.default;
+ constant StateSelect b[9].s2 = StateSelect.never;
+ Real b[9].x1(stateSelect = StateSelect.never);
+ constant StateSelect b[10].s1 = StateSelect.avoid;
+ constant StateSelect b[10].s2 = StateSelect.never;
+ Real b[10].x1(stateSelect = StateSelect.never);
+equation
+ b[1].x1 = time;
+ b[2].x1 = time;
+ b[3].x1 = time;
+ b[4].x1 = time;
+ b[5].x1 = time;
+ b[6].x1 = time;
+ b[7].x1 = time;
+ b[8].x1 = time;
+ b[9].x1 = time;
+ b[10].x1 = time;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end TransformCanonicalTests.AliasPropStateSelect1;
+")})));
+end AliasPropStateSelect1;
 
 
 model ParameterBindingExpTest3_Warn

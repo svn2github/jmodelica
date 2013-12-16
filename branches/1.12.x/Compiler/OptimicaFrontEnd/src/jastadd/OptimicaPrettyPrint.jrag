@@ -136,7 +136,7 @@ aspect FlatOptimicaPrettyPrint {
 		str.print("\n");
 		
 		for (int i=0;i<getNumFVariable();i++) {
-			log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
+			//log.debug("FClass.prettyPrint(): FVariable: " + getFVariable(i).name() + " is$Final: " + is$Final);
 	  		p.print(getFVariable(i), str, p.indent(indent));
 	  		str.print(";\n");  
 		}
@@ -144,7 +144,7 @@ aspect FlatOptimicaPrettyPrint {
 		if (getNumFInitialEquation()>0)
 			str.print(indent + "initial equation \n");
 	    for (int j=0;j<getNumFInitialEquation();j++) {
-			log.debug("FClass.prettyPrint(): Equation nr: " + j);
+			//log.debug("FClass.prettyPrint(): Equation nr: " + j);
 	  		p.print(getFInitialEquation(j), str, p.indent(indent));
 			str.print(";\n");
 		}

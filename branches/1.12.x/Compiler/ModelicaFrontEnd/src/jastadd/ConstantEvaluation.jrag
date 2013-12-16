@@ -1048,10 +1048,14 @@ aspect ConstantEvaluation {
      		this.index = index;
      		value = this.type.getFEnumLiteralType(index - 1).getName();
     	}
-    	
-    	public int intValue() {
-    		return index;
-    	}
+        
+        public int intValue() {
+            return index;
+        }
+        
+        public double realValue() {
+            return index;
+        }
     	
     	public String stringValue() {
     		return value;

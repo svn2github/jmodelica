@@ -561,23 +561,34 @@ aspect AliasVariables {
 				AttributePropagator ap = map.get(name);
 				if (ap == null) {
 					ap = createAttributePropagator(name);
-					map.put(name, ap);
+					ap.addToMap(map);
 				}
 				return ap;
 			}
 
 			private AttributePropagator createAttributePropagator(String name) {
 				// TODO: add support for more attributes
-				if (name.equals(FAttribute.START))
-					return new StartAttributePropagator();
+				if (name.equals(FAttribute.START) || name.equals(FAttribute.NOMINAL))
+					return new LevelAttributePropagator(name);
+				else if (name.equals(FAttribute.FIXED))
+				    return new BooleanReduceAttributePropagator(name, false);
+                else if (name.equals(FAttribute.MIN) || name.equals(FAttribute.MAX))
+                    return new MinMaxAttributePropagator(name);
+                else if (name.equals(FAttribute.STATE_SELECT))
+                    return new StateSelectAttributePropagator(name);
 				else
-					return new OtherAttributePropagator(name);
+					return new KeepAttributePropagator(name);
 			}
 
 			private abstract class AttributePropagator {
 
+			    protected String name;
 				protected ArrayList<FAttribute> list = new ArrayList<FAttribute>();
 				protected BitSet neg = new BitSet();
+                
+                public AttributePropagator(String name) {
+                    this.name = name;
+                }
 
 				public void addAttribute(FAttribute attr, boolean neg) {
 					this.neg.set(list.size(), neg);
@@ -589,6 +600,36 @@ aspect AliasVariables {
 					return n > 0 && list.get(n - 1).isInFV(fv);
 				}
 				
+				public void addToMap(Map<String, AttributePropagator> map) {
+                    map.put(name, this);
+				}
+				
+				protected void select(int i, List<FAttribute> l) {
+				    if (i < 0)
+				        return;
+                    FAttribute sel = list.get(i);
+                    
+                    // Don't add attributes from own type
+                    FVariable targetFV = target.getFVariable();
+                    boolean inTarget = sel.isInFV(targetFV);
+                    if (!inTarget && targetFV.findAttribute(name) == sel)
+                        return;
+                    
+                    // If it is taken from elsewhere, we need a copy
+                    if (!inTarget)
+                        sel = sel.fullCopy();
+                    
+                    // Value may need to be negated
+                    if (neg.get(i) != target.isNegated() && sel.hasValue())
+                        negate(sel);
+                    
+                    l.add(sel);
+				}
+				
+				protected void negate(FAttribute sel) {
+				    sel.setValue(sel.getValue().createNegated());
+				}
+				
 				public abstract void propagate(List<FAttribute> l);
 
 			}
@@ -598,13 +639,11 @@ aspect AliasVariables {
 			 * 
 			 * Only adds back the attribute from the target variable, if any.
 			 */
-			private class OtherAttributePropagator extends AttributePropagator {
-
-				private String name;
-
-				public OtherAttributePropagator(String name) {
-					this.name = name;
-				}
+			private class KeepAttributePropagator extends AttributePropagator {
+                
+                public KeepAttributePropagator(String name) {
+                    super(name);
+                }
 
 				public void propagate(List<FAttribute> l) {
 					if (list.size() > 0 && list.get(0).isInFV(target.getFVariable())) 
@@ -614,47 +653,193 @@ aspect AliasVariables {
 			}
 			
 			/**
-			 * Propagates start attribute. Selects the attribute that was set 
-			 * "closest to the user".
+			 * Selects the attribute that was set "closest to the user".
+			 * 
+			 * Used for start and nominal.
 			 * 
 			 * Selects the value with lowest level among attributes set on variables, 
 			 * or if no such are found the first found from a type. 
 			 */
-			private class StartAttributePropagator extends AttributePropagator {
+			private class LevelAttributePropagator extends AttributePropagator {
 				
 				private final static int NO_KIND   = 0;
 				private final static int TYPE_KIND = 1;
 				private final static int FV_KIND   = 2;
+				
+				public LevelAttributePropagator(String name) {
+				    super(name);
+				}
 
 				public void propagate(List<FAttribute> l) {
-					FAttribute sel = null;
 					int selKind = NO_KIND;
 					int selLevel = 0;
-					int selIndex = 0;
-					int curIndex = 0;
+					int selIndex = -1;
+					int i = 0;
 					for (FAttribute attr : list) {
 						int curKind = attr.isInFV() ? FV_KIND : TYPE_KIND;
 						int curLevel = attr.getLevel();
 						if (curKind > selKind || (curKind == FV_KIND && curLevel < selLevel)) {
-							sel = attr;
 							selKind = curKind;
 							selLevel = curLevel;
-							selIndex = curIndex;
+							selIndex = i;
 						}
-						curIndex++;
+						i++;
 					}
-					// Don't add attributes from own type
-					FVariable targetFV = target.getFVariable();
-					if (sel == null || (selKind == TYPE_KIND && targetFV.findAttribute(FAttribute.START) == sel))
-						return;
-					if (!sel.isInFV(targetFV))
-						sel = sel.fullCopy();
-					if (neg.get(selIndex) != target.isNegated() && sel.hasValue())
-						sel.setValue(sel.getValue().createNegated());
-					l.add(sel);
+					select(selIndex, l);
 				}
 				
 			}
+            
+            /**
+             * Combine values from all variables in alias set using boolean operation (and/or).
+             * 
+             * Used for fixed.
+             */
+            private class BooleanReduceAttributePropagator extends AttributePropagator {
+                
+                private boolean isAnd;
+                
+                public BooleanReduceAttributePropagator(String name, boolean isAnd) {
+                    super(name);
+                    this.isAnd = isAnd;
+                }
+
+                public void propagate(List<FAttribute> l) {
+                    boolean res = isAnd;
+                    int i = 0;
+                    int selIndex = -1;
+                    boolean selVal = false;
+                    for (FAttribute attr : list) {
+                        boolean val = false;
+                        boolean set = attr.hasValue();
+                        try {
+                            val = set && attr.getValue().ceval().booleanValue();
+                        } catch (ConstantEvaluationException e) {
+                            set = false;
+                        }
+                        res = isAnd ? (res && val) : (res || val);
+                        if (val == res && (selIndex < 0 || selVal != res)) {
+                            selIndex = i;
+                            selVal = val;
+                        }
+                        i++;
+                    }
+                    select(selIndex, l);
+               }
+                
+                protected void negate(FAttribute sel) {}
+                
+            }
+            
+            /**
+             * Find strictest combination of min/max values.
+             * 
+             * Reports an error if this results in min > max.
+             */
+            private class MinMaxAttributePropagator extends AttributePropagator {
+                
+                private boolean propagated = false;
+                
+                public MinMaxAttributePropagator(String name) {
+                    super(name);
+                }
+                
+                public void addToMap(Map<String, AttributePropagator> map) {
+                    map.put(FAttribute.MIN, this);
+                    map.put(FAttribute.MAX, this);
+                }
+
+                public void propagate(List<FAttribute> l) {
+                    if (propagated)
+                        return;
+                    propagated = true;
+                    
+                    double min = Double.NEGATIVE_INFINITY;
+                    double max = Double.POSITIVE_INFINITY;
+                    int i = 0;
+                    int selMin = -1;
+                    int selMax = -1;
+                    boolean targetNeg = target.isNegated();
+                    for (FAttribute attr : list) {
+                        boolean isMin = attr.name().equals(FAttribute.MIN);
+                        double val = isMin ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                        try {
+                            if (attr.hasValue())
+                                val = attr.getValue().ceval().realValue();
+                        } catch (ConstantEvaluationException e) {}
+                        if (neg.get(i) != targetNeg) {
+                            val = -val;
+                            isMin = !isMin;
+                        }
+                        if (isMin) {
+                            if (val > min) {
+                                min = val;
+                                selMin = i;
+                            }
+                        } else {
+                            if (val < max) {
+                                max = val;
+                                selMax = i;
+                            }
+                        }
+                        i++;
+                    }
+                    int p = l.getNumChild();
+                    select(selMin, l, FAttribute.MIN);
+                    select(selMax, l, FAttribute.MAX);
+                    if (min > max) 
+                        target.getFVariable().error("Variable %s is part of alias set that results in min/max combination with no possible values, min = %s, max = %s", 
+                                target.getFVariable().name(), l.getChild(p).getValue(), l.getChild(p + 1).getValue());
+                }
+                
+                protected void select(int i, List<FAttribute> l, String name) {
+                    this.name = name;
+                    select(i, l);
+                }
+                
+                protected void negate(FAttribute sel) {
+                    super.negate(sel);
+                    String name = sel.name().equals(FAttribute.MIN) ? FAttribute.MAX : FAttribute.MIN;
+                    sel.getName().setFQName(new FQNameString(name));
+                }
+                
+            }
+            
+            /**
+             * Take the value that is furthest from StateSelect.default, prefering positive ones over negative.
+             */
+            private class StateSelectAttributePropagator extends AttributePropagator {
+                
+                public StateSelectAttributePropagator(String name) {
+                    super(name);
+                }
+
+                public void propagate(List<FAttribute> l) {
+                    int i = 0;
+                    int selIndex = -1;
+                    int cur = 0;
+                    for (FAttribute attr : list) {
+                        int val = 0;
+                        try {
+                            if (attr.hasValue())
+                                val = attr.getValue().ceval().intValue();
+                        } catch (ConstantEvaluationException e) {}
+                        if (val > 0) {
+                            // Convert to a ranking value: always > never > prefer > avoid > default
+                            val = (val < 3 ? 11 - 2 * val : 2* val) - 5;
+                            if (val > cur) {
+                                cur = val;
+                                selIndex = i;
+                            }
+                        }
+                        i++;
+                    }
+                    select(selIndex, l);
+               }
+                
+                protected void negate(FAttribute sel) {}
+                
+            }
 			
 		}
 	
