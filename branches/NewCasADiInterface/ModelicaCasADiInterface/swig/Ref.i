@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Create input typemaps for Ref<T> and const vector< Ref<T> >&,
 // and ouput typemaps for Ref<T> and vector< Ref<T> >
-%define %instantiate_Ref(T)
-%_instantiate_Ref(%arg(ModelicaCasADi::Ref< T >), %arg(T))
+%define %instantiate_Ref(N,T)
+%_instantiate_Ref(%arg(ModelicaCasADi::Ref< N::T >), %arg(N::T), %arg(N##__##T))
 %enddef
 
 
@@ -39,7 +39,7 @@ namespace std {
 
 
 // For internal use. RefT should be ModelicaCasADi::Ref< T >
-%define %_instantiate_Ref(RefT, T)
+%define %_instantiate_Ref(RefT, T, SWIGT)
 
 // -------- Typemaps for Ref<T> --------
 
@@ -72,10 +72,30 @@ namespace std {
     $typemap(typecheck, T *)
 }
 
+//%typemap(out, fragment="GetSWIGType"{T}) RefT {
 %typemap(out) RefT {
     T *node = $1.getNode();
     incRefNode(node);
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(node), $descriptor(T *), SWIG_POINTER_OWN);
+//    $result = SWIG_NewPointerObj(SWIG_as_voidptr(node), $descriptor(T *), SWIG_POINTER_OWN);
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(node),
+        node ? (swig_type_info *)node->_get_swig_p_type() : $descriptor(T *),
+        SWIG_POINTER_OWN);
+}
+
+/*
+%fragment("GetSWIGType"{T}, "header") {
+void *T::_get_swig_p_type() {
+    // return (void *)$descriptor(T *); // should work with new enough SWIG
+    return (void *)(SWIGTYPE_p_ ## SWIGT);
+}
+}
+*/
+
+%header {
+void *T::_get_swig_p_type() {
+    // return (void *)$descriptor(T *); // should work with new enough SWIG
+    return (void *)(SWIGTYPE_p_ ## SWIGT);
+}
 }
 
 

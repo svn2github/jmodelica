@@ -46,6 +46,8 @@ class RealVariable : public Variable {
         const Ref<Variable> getMyDerivativeVariable() const;
         /** @return False */
         virtual bool isDerivative() const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         Ref<Variable> myDerivativeVariable;
 };

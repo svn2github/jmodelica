@@ -51,6 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %rename(_transferModelicaModel) transferModelicaModel;
 %rename(_transferOptimizationProblem) transferOptimizationProblem;
+%ignore _get_swig_p_type;
 
 
 %feature("ref")   SharedNode "ModelicaCasADi::incRefNode($this);"
@@ -65,26 +66,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // All %instantiate_Ref invocations must be afer "Ref.i"
 // and before the header for the type T in question.
 
-%instantiate_Ref(ModelicaCasADi::Equation)
-%instantiate_Ref(ModelicaCasADi::Constraint)
-%instantiate_Ref(ModelicaCasADi::ModelFunction)
+%instantiate_Ref(ModelicaCasADi, SharedNode)
 
-%instantiate_Ref(ModelicaCasADi::VariableType)
-%instantiate_Ref(ModelicaCasADi::PrimitiveType)
-%instantiate_Ref(ModelicaCasADi::BooleanType)
-%instantiate_Ref(ModelicaCasADi::IntegerType)
-%instantiate_Ref(ModelicaCasADi::RealType)
-%instantiate_Ref(ModelicaCasADi::UserType)
+%instantiate_Ref(ModelicaCasADi, Equation)
+%instantiate_Ref(ModelicaCasADi, Constraint)
+%instantiate_Ref(ModelicaCasADi, ModelFunction)
 
-%instantiate_Ref(ModelicaCasADi::Variable)
-%instantiate_Ref(ModelicaCasADi::RealVariable)
-%instantiate_Ref(ModelicaCasADi::DerivativeVariable)
-%instantiate_Ref(ModelicaCasADi::BooleanVariable)
-%instantiate_Ref(ModelicaCasADi::IntegerVariable)
+%instantiate_Ref(ModelicaCasADi, VariableType)
+%instantiate_Ref(ModelicaCasADi, PrimitiveType)
+%instantiate_Ref(ModelicaCasADi, BooleanType)
+%instantiate_Ref(ModelicaCasADi, IntegerType)
+%instantiate_Ref(ModelicaCasADi, RealType)
+%instantiate_Ref(ModelicaCasADi, UserType)
 
-%instantiate_Ref(ModelicaCasADi::Model)
-%instantiate_Ref(ModelicaCasADi::OptimizationProblem)
-%instantiate_Ref(ModelicaCasADi::CompilerOptionsWrapper)
+%instantiate_Ref(ModelicaCasADi, Variable)
+%instantiate_Ref(ModelicaCasADi, RealVariable)
+%instantiate_Ref(ModelicaCasADi, DerivativeVariable)
+%instantiate_Ref(ModelicaCasADi, BooleanVariable)
+%instantiate_Ref(ModelicaCasADi, IntegerVariable)
+
+%instantiate_Ref(ModelicaCasADi, Model)
+%instantiate_Ref(ModelicaCasADi, OptimizationProblem)
+%instantiate_Ref(ModelicaCasADi, CompilerOptionsWrapper)
 
 // These must be in dependency order!
 // SWIG doesn't follow #includes in the header files

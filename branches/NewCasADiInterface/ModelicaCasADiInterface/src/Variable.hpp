@@ -155,6 +155,7 @@ class Variable : public SharedNode {
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
         
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     protected:
         Ref<Variable> myModelVariable; /// If this Variable is a alias, this is its corresponding model variable. 
         bool negated;

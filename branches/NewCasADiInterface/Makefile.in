@@ -913,7 +913,7 @@ modelicacasadi_wrapper:
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
-$(DESTDIR)$(prefix)/Python/casadi_interface: 
+$(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
@@ -925,7 +925,7 @@ $(DESTDIR)$(prefix)/Python/casadi_interface:
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/casadi_interface
 
-$(MC_BUILD)/test: 
+$(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/common/atomic* $(MC_INTERFACE)/test/common/modelicaModels.mo
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests

@@ -41,6 +41,8 @@ class Equation: public SharedNode {
         const CasADi::MX getResidual() const; 
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         CasADi::MX lhs;
         CasADi::MX rhs;

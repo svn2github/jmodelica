@@ -34,6 +34,8 @@ class BooleanVariable : public Variable {
                       Ref<VariableType> declaredType = Ref<VariableType>());
         /** @return The Boolean Type enum */
         const Type getType() const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
 inline const Variable::Type BooleanVariable::getType() const { return Variable::BOOLEAN; }
 }; // End namespace

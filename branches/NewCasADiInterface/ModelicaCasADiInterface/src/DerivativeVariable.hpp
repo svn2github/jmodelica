@@ -34,6 +34,8 @@ class DerivativeVariable : public RealVariable {
         const Ref<Variable> getMyDifferentiatedVariable() const;
         /** @return True */
         bool isDerivative() const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         Ref<Variable> myDifferentiatedVariable;
 };

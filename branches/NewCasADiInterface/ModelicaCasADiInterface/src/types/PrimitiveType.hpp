@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi 
 {
 /** Abstract class for the primitive types RealType, BooleanType, IntegerType, StringType */
-class PrimitiveType : public VariableType {};
+class PrimitiveType : public VariableType {
+    public:
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
+};
 }; // End namespace
 #endif
 

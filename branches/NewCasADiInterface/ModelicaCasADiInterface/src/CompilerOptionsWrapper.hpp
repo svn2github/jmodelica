@@ -41,6 +41,8 @@ class CompilerOptionsWrapper: public SharedNode {
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         org::jmodelica::util::OptionRegistry optr;
 };

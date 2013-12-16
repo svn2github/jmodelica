@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8.6)
 project(ModelicaCasADi CXX)
 
 
+add_definitions(-DMODELICACASADI_WITH_SWIG) # todo: might not always want this...
+
+
 function(make_paths_absolute DEST_VAR DIRS)  
   set(ABS_DIRS "")
   foreach(DIR ${DIRS})

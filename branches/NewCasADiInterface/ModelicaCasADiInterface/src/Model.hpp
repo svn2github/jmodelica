@@ -169,6 +169,8 @@ class Model: public SharedNode {
         
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         /// The MX for independent parameters and constants. Filled by calculateValuesForDependentParameters.
         std::vector<CasADi::MX> paramAndConstMXVec;

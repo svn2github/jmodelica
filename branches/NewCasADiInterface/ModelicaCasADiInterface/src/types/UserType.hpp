@@ -53,6 +53,8 @@ class UserType : public VariableType {
         bool hasAttribute(const AttributeKey key) const;
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         void print(std::ostream& os) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         const std::string name;
         Ref<PrimitiveType> baseType;

@@ -26,6 +26,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Printable.hpp"
 
 
+// MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS should be used in the public
+// section of all subclasses of SharedNode, which should also be used with
+// %instantiate_Ref in the swig files.
+#ifdef MODELICACASADI_WITH_SWIG
+#define MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS virtual void *_get_swig_p_type();
+#else
+#define MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
+#endif
+
 namespace ModelicaCasADi
 {
 class SharedNode: public Printable {
@@ -35,6 +44,7 @@ class SharedNode: public Printable {
         SharedNode() { refCount=0; }
         virtual ~SharedNode() { assert(refCount==0); }
         
+        virtual void *_get_swig_p_type();
     private:
         int refCount;
 };

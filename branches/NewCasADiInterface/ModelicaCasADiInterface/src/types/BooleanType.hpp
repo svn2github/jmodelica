@@ -37,6 +37,8 @@ class BooleanType : public PrimitiveType {
          * @return A bool
          */
         bool hasAttribute(const AttributeKey key) const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
 inline const std::string BooleanType::getName() const { return "Boolean"; }
 inline bool BooleanType::hasAttribute(const AttributeKey key) const { return attributes.find(AttributeKeyInternal(key))!=attributes.end(); }

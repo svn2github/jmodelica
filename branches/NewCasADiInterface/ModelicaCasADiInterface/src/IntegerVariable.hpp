@@ -34,6 +34,8 @@ class IntegerVariable : public Variable {
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /** @param The Integer Type enum */
         const Type getType() const;
+
+        MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
 };
 inline const Variable::Type IntegerVariable::getType() const { return Variable::INTEGER; }
 }; // End namespace
