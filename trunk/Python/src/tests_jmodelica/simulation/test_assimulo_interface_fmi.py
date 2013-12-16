@@ -267,11 +267,11 @@ class Test_FMI_ODE:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "CVode"
-        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["rtol"] = 1e-7
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         
     @testattr(stddist = True)
     def test_cc_with_radau(self):
@@ -281,7 +281,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
     
     @testattr(stddist = True)
     def test_cc_with_dopri(self):
@@ -291,17 +291,18 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
         
     @testattr(stddist = True)
     def test_cc_with_lsodar(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "LSODAR"
+        opts["LSODAR_options"]["rtol"] = 1e-6
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
         
     @testattr(stddist = True)
     def test_cc_with_rodas(self):
@@ -312,7 +313,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
     
     @testattr(stddist = True)
     def test_no_state1(self):

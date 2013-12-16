@@ -1337,8 +1337,8 @@ class TestNegativeNominalScaling(object):
     """
 
     def __init__(self):
-        self._fpath = os.path.join(get_files_path(), 'Modelica', "NominalTest.mop")
-        self._cpath = "NominalTests.NominalTest2"
+        self._fpath = os.path.join(get_files_path(), 'Modelica', 'NominalTest.mo')
+        self._cpath = 'NominalTests.NominalTest2'
     
     def setUp(self):
         """
