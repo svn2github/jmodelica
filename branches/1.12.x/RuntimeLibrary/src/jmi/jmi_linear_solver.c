@@ -203,7 +203,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
         
     /* Write solution back to model */
-    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+    // JMI_BLOCK_EVALUATE is used since it is needed for torn linear equation blocks! Might be changed in the future!
+    block->F(block->problem_data,block->x, block->res, JMI_BLOCK_EVALUATE);
 
     return info==0? 0: -1;
 }

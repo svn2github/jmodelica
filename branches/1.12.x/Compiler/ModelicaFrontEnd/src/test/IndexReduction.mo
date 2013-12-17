@@ -2635,12 +2635,17 @@ equation
         WarningTestCase(
             name="IndexReduction57",
             description="Test warnings for state select.",
+            automatic_tearing=false,
             errorMessage="
-2 warnings found:
+3 warnings found:
 
 Warning: in file '...':
 At line 0, column 0:
   Iteration variable \"b_v\" is missing start value!
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"v1\" is missing start value!
 
 Warning: in file '...':
 At line 0, column 0:

@@ -136,12 +136,18 @@ aspect BLT{
 			}
 			
 			EquationBlock b = null;
+			if ((useTearing || useHGT) && component.size() > 1 && !isMixed) {
+			    TornEquationBlock block = tear(component, useTearing, useHGT, blockNumber);
+			    if (!block.getSolvedBlocks().isEmpty()) {
+			        if (isLinear)
+			            block.computeJacobian();
+			        return block;
+			    }
+			}
 			if (isMixed && isLinear)
 				return new MixedLinearEquationBlock(createSimpleBlocks(l));
 			else if (isLinear)
 				return new LinearEquationBlock(createSimpleBlocks(l));
-			else if ((useTearing || useHGT) && component.size() > 1)
-				return tear(component, useTearing, useHGT, blockNumber);
 			else if (isMixed)
 				return new MixedEquationBlock(createSimpleBlocks(l));
 			else
@@ -1041,6 +1047,57 @@ aspect BLT{
 		
 		protected void printTearingPairs(PrintStream str, int blockNumber) {}
 		
+        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
+            FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
+            int row = 0;
+            int col = 0;
+            Map<FVariable, Integer> columnMap = new HashMap<FVariable, Integer>();
+            for (FVariable fv : vars)
+                columnMap.put(fv, col++);
+            
+            for (FAbstractEquation fe : eqns) {
+                Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
+                Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
+                Iterator<FVariable> it = new ChainedIterator<FVariable>(RLHS.iterator(), RRHS.iterator());
+                FExp l = ((FEquation)fe).getLeft();
+                FExp r = ((FEquation)fe).getRight();
+                while (it.hasNext()) {
+                    FVariable fv = it.next();
+                    Integer colObj = columnMap.get(fv);
+                    if (colObj == null)
+                        continue;
+                    col = columnMap.get(fv);
+                    
+                    FExp dl = l.dynamicFExp(l.diff(fv.name()));
+                    boolean lz = dl.equalsRealValue(0);
+                    FExp dr = r.dynamicFExp(r.diff(fv.name()));;
+                    boolean rz = dr.equalsRealValue(0);;
+                    FExp je;
+                    if (rz && lz) {
+                        je = null;
+                    } else if (lz) {
+                        je = r.dynamicFExp(new FNegExp(dr));
+                    } else if (rz) {
+                        je = dl;
+                    } else {
+                        je = r.dynamicFExp(new FSubExp(dl,dr));
+                    }
+                    jacobian[row][col] = je;
+                }   
+                row++;
+            }
+            return jacobian;
+        }
+        
+        protected final static FTypePrefixVariability computeVariability(FExp[][] jacobian) {
+            FTypePrefixVariability blockVariability = ASTNode.fConstant();
+            for (FExp[] row : jacobian)
+                for (FExp element : row)
+                    if (element != null && !element.variability().lessOrEqual(blockVariability))
+                        blockVariability = element.variability();
+            return blockVariability;
+        }
+        
 	}
 
 	/**
@@ -1063,57 +1120,6 @@ aspect BLT{
 			if (!isLinear())
 				b.checkStartValues();
 			blocks.add(b);
-		}
-		
-		protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
-			FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
-			int row = 0;
-			int col = 0;
-			Map<FVariable, Integer> columnMap = new HashMap<FVariable, Integer>();
-			for (FVariable fv : vars)
-				columnMap.put(fv, col++);
-			
-			for (FAbstractEquation fe : eqns) {
-				Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
-				Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
-				Iterator<FVariable> it = new ChainedIterator<FVariable>(RLHS.iterator(), RRHS.iterator());
-				FExp l = ((FEquation)fe).getLeft();
-				FExp r = ((FEquation)fe).getRight();
-				while (it.hasNext()) {
-					FVariable fv = it.next();
-					Integer colObj = columnMap.get(fv);
-					if (colObj == null)
-						continue;
-					col = columnMap.get(fv);
-					
-					FExp dl = l.dynamicFExp(l.diff(fv.name()));
-					boolean lz = dl.equalsRealValue(0);
-					FExp dr = r.dynamicFExp(r.diff(fv.name()));;
-					boolean rz = dr.equalsRealValue(0);;
-					FExp je;
-					if (rz && lz) {
-						je = null;
-					} else if (lz) {
-						je = r.dynamicFExp(new FNegExp(dr));
-					} else if (rz) {
-						je = dl;
-					} else {
-						je = r.dynamicFExp(new FSubExp(dl,dr));
-					}
-					jacobian[row][col] = je;
-				}	
-				row++;
-			}
-			return jacobian;
-		}
-		
-		protected final static FTypePrefixVariability computeVariability(FExp[][] jacobian) {
-			FTypePrefixVariability blockVariability = ASTNode.fConstant();
-			for (FExp[] row : jacobian)
-				for (FExp element : row)
-					if (element != null && !element.variability().lessOrEqual(blockVariability))
-						blockVariability = element.variability();
-			return blockVariability;
 		}
 		
 		/**
@@ -1830,8 +1836,16 @@ aspect BLT{
 		private java.util.List<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
 		private java.util.List<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
 		
+        private FExp[][] jacobian = null;
+		
 		public TornEquationBlock() {
 		}
+		
+        public void computeJacobian() {
+            // Safe since this is only called when block is linear and that means that
+            // all equations are of type FEquation!
+            jacobian = computeJacobian(equations(), activeVariables());
+        }
 		
 		public void addSolvedBlock(SimpleEquationBlock aeb) {
 			if (!solvedBlocks.isEmpty() && solvedBlocks.get(solvedBlocks.size() - 1).mergeBlock(aeb))
@@ -1846,7 +1860,8 @@ aspect BLT{
 		public void addUnsolvedBlock(SimpleEquationBlock aeb) {
 			if (!unsolvedBlocks.isEmpty() && unsolvedBlocks.get(unsolvedBlocks.size() - 1).mergeBlock(aeb))
 				return;
-			aeb.checkStartValues();
+            if (jacobian == null)
+                aeb.checkStartValues();
 			unsolvedBlocks.add(aeb);
 		}
 		
@@ -1909,7 +1924,7 @@ aspect BLT{
 		
 		public boolean isSolvable() {
 			return false;
-		}			
+		}
 		
 		public void prettyPrint(PrintStream str) {
 			Collection<FVariable> iterationVars = iterationVariables();
@@ -1932,6 +1947,19 @@ aspect BLT{
 			for (SimpleEquationBlock seb : unsolvedBlocks) {
 				seb.prettyPrintIterationVariables(str);
 				seb.prettyPrintEquation(str);
+			}
+			if (jacobian != null) {
+	            str.println("Jacobian:");
+	            for (int col=0;col<jacobian.length;col++) {
+	                str.print("  |");
+	                for (int row=0;row<jacobian.length;row++) {
+	                    str.print(jacobian[col][row] == null ? "0.0" : jacobian[col][row]);
+	                    if (row<jacobian.length-1) {
+	                        str.print(", ");    
+	                    }
+	                }
+	                str.println("|");
+	            }
 			}
 		}
 	

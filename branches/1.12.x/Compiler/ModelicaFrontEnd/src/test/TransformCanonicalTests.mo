@@ -5109,6 +5109,7 @@ x1 - x2 = z*w;
 			name="BlockTest4",
 			description="Test of linear systems of equations",
 			equation_sorting=true,
+            automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -5142,6 +5143,7 @@ x1 - x2 = z;
 			name="BlockTest5",
 			description="Test of linear systems of equations",
 			equation_sorting=true,
+            automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -5176,6 +5178,7 @@ x1 - x2 = z*p;
 			name="BlockTest6",
 			description="Test of linear systems of equations",
 			equation_sorting=true,
+            automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
@@ -5245,6 +5248,7 @@ equation
 			description="Test of linear systems of equations. Checks that the time
 			derivative is not included in the jacobian.",
 			equation_sorting=true,
+            automatic_tearing=false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
