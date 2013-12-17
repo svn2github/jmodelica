@@ -24,7 +24,7 @@ def update_jacs_scalings(jacs, jacs_updated, scalings, scalings_updated, node):
         block = node.block
         jacs[block] = node.jacobian
         jacs_updated[block] = True
-    elif type == 'ScalingUpdated':
+    elif type == 'ResidualScalingUpdated':
         block = node.block
         scalings[block] = node.scaling
         scalings_updated[block] = True
@@ -45,7 +45,7 @@ def gather_solves(log):
     for solve in solves:
         block_solves = []
 
-        for bl_node in solve.find(('NewtonSolve', 'JacobianUpdated', 'ScalingUpdated')):
+        for bl_node in solve.find(('NewtonSolve', 'JacobianUpdated', 'ResidualScalingUpdated')):
             if bl_node.type == 'NewtonSolve':
                 block_solve = bl_node
                 block_solves.append(block_solve)
@@ -58,7 +58,7 @@ def gather_solves(log):
                     block_solve['initial_residual_scaling_updated'] = scalings_updated[block_index]
                 scalings_updated[block_index] = False
 
-                for it_node in block_solve.find(('KinsolInfo', 'JacobianUpdated', 'ScalingUpdated')):
+                for it_node in block_solve.find(('KinsolInfo', 'JacobianUpdated', 'ResidualScalingUpdated')):
                     if it_node.type == 'KinsolInfo':
                         if 'iteration_index' in it_node:
                             iteration = it_node
