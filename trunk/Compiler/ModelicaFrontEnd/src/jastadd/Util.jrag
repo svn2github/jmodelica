@@ -2376,7 +2376,13 @@ aspect FlatFunctionUtils {
      eq InstNode.getChild().myLefts()             = new ArrayList<FFunctionCallLeft>();
      eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
      eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
-
+     
+     inh FAbstractFunctionCall FExp.myFunctionCall();
+     eq Root.getChild().myFunctionCall() = null;
+     eq FFunctionCall.getChild().myFunctionCall() = this;
+     eq FFunctionCallEquation.getLeft().myFunctionCall() = getCall();
+     eq FFunctionCallStmt.getLeft().myFunctionCall() = getCall();
+     
      /**
       * Get the name this expression should use for temporary variable.
       * 

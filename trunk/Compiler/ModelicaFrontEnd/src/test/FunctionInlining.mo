@@ -196,22 +196,23 @@ fclass FunctionInlining.BasicInline6
  Real y[1];
  Real y[2];
  Real y[3];
- Real temp_6;
- Real temp_8;
- Real temp_10;
- Real temp_18;
+ Real temp_7;
+ Real temp_9;
+ Real temp_11;
+ Real temp_20;
 equation
- x[1] = temp_18 * (y[1] + temp_6);
- x[2] = temp_18 * (y[2] + temp_8);
- x[3] = temp_18 * (y[3] + temp_10);
+ x[1] = temp_20 * (y[1] + temp_7);
+ x[2] = temp_20 * (y[2] + temp_9);
+ x[3] = temp_20 * (y[3] + temp_11);
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
- temp_6 = y[1] .+ 2;
- temp_8 = y[2] .+ 2;
- temp_10 = y[3] .+ 2;
- temp_18 = y[1] * temp_6 + y[2] * temp_8 + y[3] * temp_10;
+ temp_7 = y[1] .+ 2;
+ temp_9 = y[2] .+ 2;
+ temp_11 = y[3] .+ 2;
+ temp_20 = y[1] * temp_7 + y[2] * temp_9 + y[3] * temp_11;
 end FunctionInlining.BasicInline6;
+			
 ")})));
     end BasicInline6;
     
@@ -305,32 +306,37 @@ fclass FunctionInlining.BasicInline8
  Real y[1];
  Real y[2];
  Real y[3];
- Real temp_40;
- Real temp_59;
- Real temp_60;
- Real temp_61;
- Real temp_63;
- Real temp_88;
- Real temp_111;
- Real temp_136;
- Real temp_159;
+ Real temp_28;
+ Real temp_30;
+ Real temp_32;
+ Real temp_41;
+ Real temp_48;
+ Real temp_49;
+ Real temp_50;
+ Real temp_52;
+ Real temp_54;
+ Real temp_56;
+ Real temp_65;
 equation
- x[1] = (y[1] * temp_40 + y[2] * (y[2] .+ 1) + y[3] * (y[3] .+ 1)) * (y[1] + temp_40) + (temp_59 * temp_63 + temp_60 * (temp_60 .+ 1) + temp_61 * (temp_61 .+ 1)) * (temp_59 + temp_63);
- x[2] = (y[1] * (y[1] .+ 1) + y[2] * temp_88 + y[3] * (y[3] .+ 1)) * (y[2] + temp_88) + (temp_59 * (temp_59 .+ 1) + temp_60 * temp_111 + temp_61 * (temp_61 .+ 1)) * (temp_60 + temp_111);
- x[3] = (y[1] * (y[1] .+ 1) + y[2] * (y[2] .+ 1) + y[3] * temp_136) * (y[3] + temp_136) + (temp_59 * (temp_59 .+ 1) + temp_60 * (temp_60 .+ 1) + temp_61 * temp_159) * (temp_61 + temp_159);
+ x[1] = temp_41 * (y[1] + temp_28) + temp_65 * (temp_48 + temp_52);
+ x[2] = temp_41 * (y[2] + temp_30) + temp_65 * (temp_49 + temp_54);
+ x[3] = temp_41 * (y[3] + temp_32) + temp_65 * (temp_50 + temp_56);
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
- temp_59 = y[1] * 2;
- temp_60 = y[2] * 2;
- temp_61 = y[3] * 2;
- temp_40 = y[1] .+ 1;
- temp_63 = temp_59 .+ 1;
- temp_88 = y[2] .+ 1;
- temp_111 = temp_60 .+ 1;
- temp_136 = y[3] .+ 1;
- temp_159 = temp_61 .+ 1;
+ temp_28 = y[1] .+ 1;
+ temp_30 = y[2] .+ 1;
+ temp_32 = y[3] .+ 1;
+ temp_41 = y[1] * temp_28 + y[2] * temp_30 + y[3] * temp_32;
+ temp_48 = y[1] * 2;
+ temp_49 = y[2] * 2;
+ temp_50 = y[3] * 2;
+ temp_52 = temp_48 .+ 1;
+ temp_54 = temp_49 .+ 1;
+ temp_56 = temp_50 .+ 1;
+ temp_65 = temp_48 * temp_52 + temp_49 * temp_54 + temp_50 * temp_56;
 end FunctionInlining.BasicInline8;
+			
 ")})));
     end BasicInline8;
     
@@ -1835,14 +1841,15 @@ fclass FunctionInlining.ForStatementInline7
  Real v[2];
  Real v[3];
  Real z;
- Real temp_12;
+ Real temp_14;
 equation
  v[1] = 1;
  v[2] = 2;
  v[3] = 3;
- z = temp_12 + temp_12 + 3 * temp_12 + 4 * temp_12;
- temp_12 = v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
+ z = temp_14 + temp_14 + 3 * temp_14 + 4 * temp_14;
+ temp_14 = v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
 end FunctionInlining.ForStatementInline7;
+			
 ")})));
     end ForStatementInline7;
 

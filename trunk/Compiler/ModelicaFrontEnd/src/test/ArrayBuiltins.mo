@@ -1457,22 +1457,29 @@ public
  function ArrayBuiltins.Transpose.Transpose11.f
   input Real[:, :] a;
   output Real[size(a, 2), size(a, 1)] b;
-  Real temp_1;
+  Real[:,:] temp_1;
+  Real temp_2;
  algorithm
+  size(temp_1) := {size(a, 1), size(a, 1)};
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(a, 1) loop
+    temp_2 := 0.0;
+    for i5 in 1:size(a, 2) loop
+     temp_2 := temp_2 + a[i3,i5] * (a[i4,i5] + a[i4,i5]);
+    end for;
+    temp_1[i3,i4] := temp_2;
+   end for;
+  end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 1) loop
-    temp_1 := 0.0;
-    for i3 in 1:size(transpose(a + a[:,:]), 1) loop
-     temp_1 := temp_1 + a[i1,i3] * (a[i2,i3] + a[i2,i3]);
-    end for;
-    b[i1,i2] := temp_1;
+    b[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
   return;
  end ArrayBuiltins.Transpose.Transpose11.f;
 
 end ArrayBuiltins.Transpose.Transpose11;
-
+			
 ")})));
 end Transpose11;
 
@@ -2995,16 +3002,19 @@ public
   input Real[:] v;
   output Real result;
   Real temp_1;
+  Real temp_2;
  algorithm
-  temp_1 := 0.0;
+  temp_2 := 0.0;
   for i1 in 1:size(v, 1) loop
-   temp_1 := temp_1 + v[i1] * v[i1];
+   temp_2 := temp_2 + v[i1] * v[i1];
   end for;
+  temp_1 := temp_2;
   result := sqrt(temp_1);
   return;
  end Modelica.Math.Vectors.length;
 
 end ArrayBuiltins.NonVectorizedSalarization3;
+			
 ")})));
 end NonVectorizedSalarization3;
 
