@@ -10,23 +10,26 @@ equation
  der(y) = -y;
 end NominalTest1;
 
+
 model NominalTest2
-  Real x(min=-3, max=-1,nominal=-2)=-2;
+  output Real x(min=-3, max=-1,nominal=-2)=-2;
 end NominalTest2;
 
-optimization NominalOptTest1(objective=y(finalTime),startTime=0,finalTime=10)
-extends NominalTest1(x(fixed=true),y(fixed=true));
-end NominalOptTest1;
 
-optimization NominalOptTest2(objective=cost(finalTime),startTime=0,finalTime=10)
-  parameter Integer i = 1;
-  parameter Boolean b = true;
-  Real x(start=10000, fixed=true,nominal=10000);
-  input Real u(min=-1000,max=1000, nominal = 5000);
-  Real cost(start=0,fixed=true, nominal=1e6);
+model NominalTest3
+    type T1 = Real(nominal=6);
+    Real x1, x2(nominal=1), x3(nominal=2), x4, x5(nominal=3), x6(nominal=4);
+    T1 x7, x8(nominal=5), x9;
 equation
-  der(x) = -x + u;
-  der(cost) = x^2 + u^2;
-end NominalOptTest2;
+    der(x1) = 1;
+    der(x2) = 2;
+    der(x3) = 3;
+    x4 = 4 * time;
+    x5 = 5 * time;
+    x6 = 6 * time;
+    der(x7) = 7;
+    der(x8) = 8;
+    x9 = 9 * time;
+end NominalTest3;
 
 end NominalTests;

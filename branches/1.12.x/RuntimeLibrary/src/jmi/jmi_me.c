@@ -689,14 +689,14 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
     return 0;
 }
 
-/* TODO: is not implemented. */
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx) {
-    int i;
-    
-    for(i = 0; i < nx; i++) {
-        x_nominal[i] = 1.0;
+    if (nx != jmi->n_real_x) {
+        jmi_log_node(jmi->log, logError, "Error",
+            "Wrong size of array when getting nominal values: size is <t:%d>, should be <t:%d>", nx, jmi->n_real_x);
+    	return 1;
     }
     
+    memcpy(x_nominal, jmi->nominals, nx * sizeof(jmi_real_t));
     return 0;
 }
 

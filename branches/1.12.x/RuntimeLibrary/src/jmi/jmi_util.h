@@ -767,6 +767,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
+        jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
@@ -1071,6 +1072,7 @@ struct jmi_t {
     int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
     int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
+    jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
     int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
     jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */

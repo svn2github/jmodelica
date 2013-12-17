@@ -11473,6 +11473,35 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end NominalTest1;
 
+
+model NominalTest2
+	type T1 = Real(nominal=6);
+	Real x1, x2(nominal=1), x3(nominal=2), x4, x5(nominal=3), x6(nominal=4);
+	T1 x7, x8(nominal=5), x9;
+equation
+    der(x1) = 1;
+    der(x2) = 2;
+    der(x3) = 3;
+    x4 = 4 * time;
+    x5 = 5 * time;
+    x6 = 6 * time;
+    der(x7) = 7;
+    der(x8) = 8;
+    x9 = 9 * time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="NominalTest2",
+			description="Check generation of nominal values for states",
+			variability_propagation=false,
+			template="$C_DAE_nominals$",
+			generatedCode="
+static const int N_nominals = 5;
+static const jmi_real_t DAE_nominals[] = { 1.0, 1.0, 2.0, 6.0, 5.0 };
+")})));
+end NominalTest2;
+
+
 model MathSolve
 	Real a[2,2] = [1,2;3,4];
     Real b[2] = {-2,3};
@@ -12247,14 +12276,15 @@ end when;
 			name="TestRelationalOp1",
 			description="Test correct generation of all four relational operators",
 			variability_propagation=false,
-			template="$C_DAE_initial_relations$
-                                  $C_DAE_relations$",
+			template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+",
 			generatedCode="
 static const int N_initial_relations = 6;
-static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
-
+static const int DAE_initial_relations[] = { JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT };
 static const int N_relations = 4;
-static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+static const int DAE_relations[] = { JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT };
 ")})));
 end TestRelationalOp1;
 
@@ -12283,14 +12313,15 @@ end when;
 			name="TestRelationalOp2",
 			description="Test correct generation of all four relational operators",
 			variability_propagation=false,
-			template="$C_DAE_initial_relations$
-                                  $C_DAE_relations$",
+			template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+",
 			generatedCode="
 static const int N_initial_relations = 0;
-static const int DAE_initial_relations[1]= {-1};
-
+static const int DAE_initial_relations[] = { -1 };
 static const int N_relations = 4;
-static const int DAE_relations[4]= {JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT};
+static const int DAE_relations[] = { JMI_REL_LEQ, JMI_REL_LT, JMI_REL_GEQ, JMI_REL_GT };
 ")})));
 end TestRelationalOp2;
 
@@ -12317,19 +12348,21 @@ end when;
  der(v2) = y;
  der(v3) = y;
  der(v4) = y;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp3",
 			description="Test generation of all four relational operators.",
 			variability_propagation=false,
-			template="$C_DAE_initial_relations$
-                                  $C_DAE_relations$",
+			template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+",
 			generatedCode="
 static const int N_initial_relations = 6;
-static const int DAE_initial_relations[6]= {JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT};
-
+static const int DAE_initial_relations[] = { JMI_REL_GEQ, JMI_REL_LEQ, JMI_REL_GT, JMI_REL_LEQ, JMI_REL_LEQ, JMI_REL_LT };
 static const int N_relations = 0;
-static const int DAE_relations[1]= {-1};
+static const int DAE_relations[] = { -1 };
 ")})));
 end TestRelationalOp3;
 
@@ -12357,21 +12390,22 @@ equation
     q1 = if pre(q1)>=0.5 then pre(q1) else 2*pre(q1);
     q2 = if w>=0.5 then pre(q2) else 2*pre(q2); 
   end when;
+
 	annotation(__JModelica(UnitTesting(tests={
 		CCodeGenTestCase(
 			name="TestRelationalOp4",
 			description="Test correct event generation.",
 			variability_propagation=false,
-			template="$C_DAE_initial_relations$
-                                  $C_DAE_relations$",
+			template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+",
 			generatedCode="
 static const int N_initial_relations = 1;
-static const int DAE_initial_relations[1]= {JMI_REL_GEQ};
-
+static const int DAE_initial_relations[] = { JMI_REL_GEQ };
 static const int N_relations = 3;
-static const int DAE_relations[3]= {JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ};
+static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ, JMI_REL_GEQ };
 ")})));
-
 end TestRelationalOp4;
 
 model TestRelationalOp5
@@ -12390,17 +12424,17 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
-			template="$C_DAE_initial_relations$
-                                  $C_DAE_relations$
-                                  $C_ode_derivatives$",
+			template="
+$C_DAE_initial_relations$
+$C_DAE_relations$
+$C_ode_derivatives$
+",
 			generatedCode="
 static const int N_initial_relations = 0;
-static const int DAE_initial_relations[1]= {-1};
-
+static const int DAE_initial_relations[] = { -1 };
 static const int N_relations = 1;
-static const int DAE_relations[1]= {JMI_REL_GEQ};
-
-      model_ode_guards(jmi);
+static const int DAE_relations[] = { JMI_REL_GEQ };
+    model_ode_guards(jmi);
 /************* ODE section *********/
     _der_x_3 = (COND_EXP_EQ(_sw(0), JMI_TRUE, _x_0, AD_WRAP_LITERAL(0)));
     _der_y_4 = (COND_EXP_EQ(COND_EXP_GE(_y_1, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, (1.0 * (_y_1) * (_y_1)), AD_WRAP_LITERAL(0)));
@@ -12410,7 +12444,6 @@ static const int DAE_relations[1]= {JMI_REL_GEQ};
 /**** Other variables ***/
 /********* Write back reinits *******/
 ")})));
-
 end TestRelationalOp5;
 
 model TestRelationalOp6

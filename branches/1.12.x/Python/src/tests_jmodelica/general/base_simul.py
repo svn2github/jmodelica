@@ -49,12 +49,12 @@ class _BaseSimOptTest:
           format      - either 'jmu' or 'fmu' depending on which format should be tested
         """
         global _model_name
-        path = os.path.join(get_files_path(), 'Modelica', mo_file)
+        cls.mo_path = os.path.join(get_files_path(), 'Modelica', mo_file)
 
         if format=='jmu':
-            _model_name = compile_jmu(class_name, path, compiler_options=options)
+            _model_name = compile_jmu(class_name, cls.mo_path, compiler_options=options)
         elif format=='fmu':
-            _model_name = compile_fmu(class_name, path, compiler_options=options,target=target)
+            _model_name = compile_fmu(class_name, cls.mo_path, compiler_options=options,target=target)
         else:
             raise Exception("Format must be either 'jmu' or 'fmu'.")
 
