@@ -16,6 +16,8 @@
 
 $external_func_includes$
 
+extern void dgemm_(char* TRANSA, char* TRANSB, int* M, int* N, int* K, double* ALPHA, double* A, int* LDA, double* B, int* LDB, double* BETA, double* C, int* LDC);
+
 const char *C_GUID = $C_guid$;
 
 static int model_ode_guards_init(jmi_t* jmi);

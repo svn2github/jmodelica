@@ -5407,6 +5407,7 @@ equation
 			description="Test code generation of samplers",
 			generate_ode=true,
 			equation_sorting=true,
+            automatic_tearing=false,
 			variability_propagation=false,
 			template="
 $C_dae_init_blocks_residual_functions$
@@ -5504,6 +5505,7 @@ equation
 			name="WhenEqu5",
 			description="Test code generation of samplers",
 			generate_ode=true,
+            automatic_tearing=false,
 			equation_sorting=true,
 			variability_propagation=false,
 			template="
@@ -5657,6 +5659,7 @@ equation
 			name="WhenTest7",
 			description="Test code generation unsolved when equations",
 			generate_ode=true,
+            automatic_tearing=false,
 			equation_sorting=true,
 			variability_propagation=false,
 			template="
@@ -6567,6 +6570,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+            automatic_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -6678,6 +6682,7 @@ der(x1) = -x1 + z1;
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+            automatic_tearing=false,
 			template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -6859,6 +6864,7 @@ equation
 			description="Test of code generation of blocks",
 			generate_ode=true,
 			equation_sorting=true,
+			automatic_tearing=false,
 			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
@@ -7013,6 +7019,7 @@ equation
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+			automatic_tearing=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -7091,6 +7098,7 @@ model BlockTest5
 			description="Test of min and max for iteration varaibles.",
 			generate_ode=true,
 			equation_sorting=true,
+            automatic_tearing=false,
 			variability_propagation=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
@@ -7186,6 +7194,7 @@ model BlockTest6
 			generate_ode=true,
 			equation_sorting=true,
 			variability_propagation=false,
+            automatic_tearing=false,
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -7268,6 +7277,7 @@ equation
 			description="Test of min, max and nominal attributes in blocks",
 			generate_ode=true,
 			equation_sorting=true,
+            automatic_tearing=false,
 			variability_propagation=false,
 			template="
 $C_dae_blocks_residual_functions$
@@ -7770,6 +7780,7 @@ equation
             name="BlockTest10",
             description="Test of mixed linear equation block",
             generate_ode=true,
+            automatic_tearing=false,
             equation_sorting=true,
             template="
 $C_dae_blocks_residual_functions$
@@ -11087,7 +11098,7 @@ equation
   u0 = sin(time);
   u1 = R1*i1;
   u2 = R2*i2;
-  u3 = R3*abs(i3); //TODO: Temporary fix until tearing works on linear blocks (#3099)
+  u3 = R3*i3;
   uL = L*der(iL);
   u0 = u1 + u3;
   uL = u1 + u2;
@@ -11106,34 +11117,57 @@ equation
 			template="$C_dae_blocks_residual_functions$",
 			generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-  jmi_real_t** res = &residual;
-  int ef = 0;
-  if (evaluation_mode==JMI_BLOCK_NOMINAL) {
-  } else  if (evaluation_mode==JMI_BLOCK_MIN) {
-  } else if (evaluation_mode==JMI_BLOCK_MAX) {
-  } else if (evaluation_mode==JMI_BLOCK_VALUE_REFERENCE) {
-    x[0] = 12;
-    x[1] = 13;
-  } else if (evaluation_mode==JMI_BLOCK_EQUATION_NOMINAL) {
-    (*res)[0] = 1;
-    (*res)[1] = 1;
-  } else if (evaluation_mode==JMI_BLOCK_INITIALIZE) {
-    x[0] = _i2_6;
-    x[1] = _i3_7;
-  } else if (evaluation_mode==JMI_BLOCK_EVALUATE) {
-    _i2_6 = x[0];
-    _i3_7 = x[1];
-  _i1_5 = _i2_6 + _i3_7;
-  _u1_1 = _R1_9 * _i1_5;
-  _u2_2 = jmi_divide_equation(jmi, (- _u0_0 + _u1_1),(- 1.0),\"(- u0 + u1) / (- 1.0)\");
-  (*res)[0] = _R3_11 * jmi_abs(_i3_7) - (_u2_2);
-  (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
-  } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
-  } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-    _i2_6 = x[0];
-    _i3_7 = x[1];
-  }
-  return ef;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 12;
+        x[1] = 13;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _i2_6;
+        x[1] = _i3_7;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t Q1[6] = {0};
+        jmi_real_t Q2[6] = {0};
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 3;
+        int n2 = 2;
+        Q1[0] = - 1.0;
+        Q1[3] = - 1.0;
+        for (i = 0; i < 6; i += 3) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+            Q1[i + 1] = (Q1[i + 1] - ((- _R1_9)) * Q1[i + 0]) / (1.0);
+            Q1[i + 2] = (Q1[i + 2] - (- 1.0) * Q1[i + 1]) / (- 1.0);
+        }
+        Q2[4] = 1.0;
+        Q2[5] = 1.0;
+        memset(Q3, 0, 4 * sizeof(jmi_real_t));
+        Q3[1] = (- _R2_10);
+        Q3[2] = (- _R3_11);
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        _i2_6 = x[0];
+        _i3_7 = x[1];
+        _i1_5 = _i2_6 + _i3_7;
+        _u1_1 = _R1_9 * _i1_5;
+        _u2_2 = jmi_divide_equation(jmi, (- _u0_0 + _u1_1),(- 1.0),\"(- u0 + u1) / (- 1.0)\");
+        (*res)[0] = _R3_11 * _i3_7 - (_u2_2);
+        (*res)[1] = _R2_10 * _i2_6 - (_u2_2);
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        _i2_6 = x[0];
+        _i3_7 = x[1];
+    }
+    return ef;
 }
 
 ")})));
@@ -11313,6 +11347,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = 2;
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_1;
         x[1] = _x_0;
@@ -11411,7 +11447,7 @@ model NominalTest1
 	parameter Boolean pEnabled = true;
 	parameter Real pValues[2] = {2,3};
 equation
-	x = abs(y); //TODO: Temporary fix until tearing works on linear blocks (#3099)
+	x = y .+ 1;
 	y = x .- 1 annotation(__Modelon(nominal(enabled=pEnabled)=pValues));
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -11436,9 +11472,27 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         (*res)[0] = 2.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_1_2;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t Q1[1] = {0};
+        jmi_real_t Q2[1] = {0};
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        Q1[0] = - 1.0;
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = - 1.0;
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = 1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _y_1_2 = x[0];
-        _x_1_0 = jmi_abs(_y_1_2);
+        _x_1_0 = _y_1_2 + 1;
         (*res)[0] = _x_1_0 - 1 - (_y_1_2);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
@@ -11459,9 +11513,27 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         (*res)[0] = 3.0;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_2_3;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t Q1[1] = {0};
+        jmi_real_t Q2[1] = {0};
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        Q1[0] = - 1.0;
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = - 1.0;
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = 1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         _y_2_3 = x[0];
-        _x_2_1 = jmi_abs(_y_2_3);
+        _x_2_1 = _y_2_3 + 1;
         (*res)[0] = _x_2_1 - 1 - (_y_2_3);
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {

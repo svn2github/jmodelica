@@ -2184,7 +2184,8 @@ aspect CCodeGen {
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
-
+	
+	@Override
 	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
 		String innerIndent = ASTNode.printer_C.indent(indent);
 		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
@@ -2192,19 +2193,17 @@ aspect CCodeGen {
 		int cols = activeVariables().size();
 		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
 		// Output Jacobian
-		int var_counter = 0;
-		for (int i=0;i<rows;i++) {
-			for (int j=0;j<cols;j++) {
-			    if (jacobian[j][i] != null) {
-			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
-			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+		for (int col = 0; col < cols; col++) {
+			for (int row = 0; row < rows; row++) {
+			    if (jacobian[row][col] != null) {
+			        jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent, rows * col + row, jacobian[row][col].prettyPrint_C(""));
 			    }
-			    var_counter++;
 			}
 		}
-						
 	}
 
+	@Override
 	public void MixedLinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
 		String innerIndent = ASTNode.printer_C.indent(indent);
 		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
@@ -2212,19 +2211,81 @@ aspect CCodeGen {
 		int rows = continuousEquations().size();
 		int cols = activeContinuousVariables().size();
 		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
-		int var_counter = 0;
-		for (int i=0;i<rows;i++) {
-			for (int j=0;j<cols;j++) {
-			    if (jacobian[j][i] != null) {
-			        jacobian[j][i].genTempVars_C(ASTNode.printer_C, str, innerIndent);
-			        str.format("%sresidual[%d] = %s;\n", innerIndent, var_counter, jacobian[j][i].prettyPrint_C(""));
+		for (int col = 0; col < cols; col++) {
+			for (int row = 0; row < rows; row++) {
+			    if (jacobian[row][col] != null) {
+			        jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+			        str.format("%sresidual[%d] = %s;\n", innerIndent,  rows * col + row, jacobian[row][col].prettyPrint_C(""));
 			    }
-			    var_counter++;
 			}
 		}
-						
 	}
 	
+    @Override
+    public void TornEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+        if (jacobian == null)
+            return;
+        String outerIndent = indent;
+        indent = ASTNode.printer_C.indent(indent);
+        String innerIndent = ASTNode.printer_C.indent(indent);
+        str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", outerIndent);
+        int n1 = getSolvedBlocks().size();
+        int n2 = getUnsolvedBlocks().size();
+        str.format("%sjmi_real_t Q1[%d] = {0};\n", indent, n1 * n2);
+        str.format("%sjmi_real_t Q2[%d] = {0};\n", indent, n2 * n1);
+        str.format("%sjmi_real_t* Q3 = residual;\n", indent);
+        str.format("%sint i;\n", indent);
+        str.format("%schar trans = 'N';\n", indent);
+        str.format("%sdouble alpha = -1;\n", indent);
+        str.format("%sdouble beta = 1;\n", indent);
+        str.format("%sint n1 = %d;\n", indent, n1);
+        str.format("%sint n2 = %d;\n", indent, n2);
+
+        // Write top-right quadrant, A12, to Q1.
+        for (int col = n1; col < n1 + n2; col++) {
+            for (int row = 0; row < n1; row++) {
+                if (jacobian[row][col] != null) {
+                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                    str.format("%sQ1[%d] = %s;\n", indent, n1 * (col - n1) + row, jacobian[row][col].prettyPrint_C(""));
+                }
+            }
+        }
+        // Compute L^-1 * A12 by doing Q1 = L^-1 * Q1
+        str.format("%sfor (i = 0; i < %d; i += %d) {\n", indent, n1 * n2, n1);
+        for (int row = 0; row < n1; row++) {
+            str.format("%sQ1[i + %d] = (Q1[i + %d]", innerIndent, row, row);
+            for (int col = 0; col < row; col++) {
+                if (jacobian[row][col] != null)
+                    str.format(" - (%s) * Q1[i + %d]", jacobian[row][col].prettyPrint_C(""), col);
+            }
+            str.format(") / (%s);\n", jacobian[row][row].prettyPrint_C(""));
+        }
+        str.format("%s}\n", indent);
+        // Write bottom-left quadrant, A21, to Q2.
+        for (int col = 0; col < n1; col++) {
+            for (int row = n1; row < n1 + n2; row++) {
+                if (jacobian[row][col] != null) {
+                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                    str.format("%sQ2[%d] = %s;\n", indent, n2 * col + (row - n1), jacobian[row][col].prettyPrint_C(""));
+                }
+            }
+        }
+        
+        // Write bottom-right quadrant, A22, to Q3.
+        str.format("%smemset(Q3, 0, %d * sizeof(jmi_real_t));\n", indent, n2 * n2);
+        for (int col = n1; col < n1 + n2; col++) {
+            for (int row = n1; row < n1 + n2; row++) {
+                if (jacobian[row][col] != null) {
+                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                    str.format("%sQ3[%d] = %s;\n", indent, n2 * (col - n1) + (row - n1), jacobian[row][col].prettyPrint_C(""));
+                }
+            }
+        }
+        
+        // Compute block jacobian into Q3
+        str.format("%sdgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);\n", indent);
+    }
+    
 	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, PrintStream str) {
 		if (!genRequiresBlockResidualFunction_C())
 			return;
@@ -2259,6 +2320,9 @@ aspect CCodeGen {
 	}
 	public String MixedLinearEquationBlock.genJMISolverConstant_C() {
 		return "JMI_LINEAR_SOLVER";
+	}
+	public String TornEquationBlock.genJMISolverConstant_C() {
+	    return jacobian != null ? "JMI_LINEAR_SOLVER" : "JMI_KINSOL_SOLVER";
 	}
 
 	
