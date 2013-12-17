@@ -66,10 +66,10 @@ void optimize(ModelicaCasADi::OptimizationProblem &myOptProblem, int numSteps, v
     Model* model = myOptProblem.getModel();
     
     // MX variables
-    vector<MX> x_var  = getMX(model->getVariableByKind(Model::DIFFERENTIATED));
-    vector<MX> dx_var = getMX(model->getVariableByKind(Model::DERIVATIVE));
-    vector<MX> z_var  = getMX(model->getVariableByKind(Model::REAL_ALGEBRAIC));
-    vector<MX> u_var  = getMX(model->getVariableByKind(Model::REAL_INPUT));
+    vector<MX> x_var  = getMX(model->getVariables(Model::DIFFERENTIATED));
+    vector<MX> dx_var = getMX(model->getVariables(Model::DERIVATIVE));
+    vector<MX> z_var  = getMX(model->getVariables(Model::REAL_ALGEBRAIC));
+    vector<MX> u_var  = getMX(model->getVariables(Model::REAL_INPUT));
     vector<MX> vars;
     vars.insert(vars.end(), x_var.begin(), x_var.end() );
     vars.insert(vars.end(), dx_var.begin(), dx_var.end());

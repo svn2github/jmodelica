@@ -101,7 +101,7 @@ class Model: public SharedNode {
          * @param The name of the type
          * @return A reference to a VariableType, a reference to NULL if not present. 
          * */
-        Ref<VariableType> getVariableTypeByName(std::string typeName) const;
+        Ref<VariableType> getVariableType(std::string typeName) const;
 
         /** 
          * Get a vector of pointers to variables of a specific kind, as defined in 
@@ -109,7 +109,7 @@ class Model: public SharedNode {
          * @param A VariableKind enum
          * @return An std::vector of pointers to Variables
          */
-        std::vector< Ref<Variable> > getVariableByKind(VariableKind kind);
+        std::vector< Ref<Variable> > getVariables(VariableKind kind);
         
         /** @return A vector of pointers to Variables. */
         std::vector< Ref<Variable> > getAllVariables();
@@ -117,7 +117,7 @@ class Model: public SharedNode {
         /** @return A vector of pointers to all model variables (i.e. that haven't been aliaseliminated). */
         std::vector< Ref<Variable> > getModelVariables();
         /** @return A vector of pointers to all alias variables in the model. */
-        std::vector< Ref<Variable> > getAliasVariables();
+        std::vector< Ref<Variable> > getAliases();
 
         /**
          * Returns the Variable with a certain name in the Model.
@@ -127,7 +127,7 @@ class Model: public SharedNode {
          * @param String name of a Variable
          * @return A pointer to a Variable
          */
-        Ref<Variable> getVariableByName(std::string name);
+        Ref<Variable> getVariable(std::string name);
         
         /**
          * Returns the Variable with a certain name in the Model.
@@ -137,7 +137,7 @@ class Model: public SharedNode {
          * @param String name of a Variable
          * @return A pointer to a Variable
          */
-        Ref<Variable> getModelVariableByName(std::string name);
+        Ref<Variable> getModelVariable(std::string name);
         
 
         /** Calculates values for dependent parameters */
@@ -165,7 +165,7 @@ class Model: public SharedNode {
          * @param The name of the ModelFunction
          * @return A pointer to a ModelFunction. Returns NULL if not present 
          */
-        Ref<ModelFunction> getModelFunctionByName(std::string name) const; 
+        Ref<ModelFunction> getModelFunction(std::string name) const; 
         
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
@@ -215,13 +215,13 @@ inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
 inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
 inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {}
-inline Ref<VariableType> Model::getVariableTypeByName(std::string typeName) const { 
+inline Ref<VariableType> Model::getVariableType(std::string typeName) const { 
     return typesInModel.find(typeName) != typesInModel.end() ? 
                 typesInModel.find(typeName)->second : 
                 Ref<VariableType>(); 
 }
 inline void Model::setModelFunctionByItsName(Ref<ModelFunction> mf) { modelFunctionMap[mf->getName()] = mf; }
-inline Ref<ModelFunction> Model::getModelFunctionByName(std::string name) const { 
+inline Ref<ModelFunction> Model::getModelFunction(std::string name) const { 
     return modelFunctionMap.find(name) != modelFunctionMap.end() ? 
                 modelFunctionMap.find(name)->second :
                 NULL; 

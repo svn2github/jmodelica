@@ -272,7 +272,7 @@ ModelicaCasADi::Variable::Variability getVariability(const FVar &fVar) {
  * @param A string base type name. 
  */
 static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, std::string baseTypeName) {
-    if( m->getVariableTypeByName(baseTypeName).getNode() == NULL ) {
+    if( m->getVariableType(baseTypeName).getNode() == NULL ) {
 		if (baseTypeName == "Real") {
 			m->addNewVariableType(new ModelicaCasADi::RealType());
 		} else if (baseTypeName == "Integer") {
@@ -281,7 +281,7 @@ static ModelicaCasADi::Ref<ModelicaCasADi::PrimitiveType> getBaseTypeForDerivedT
 			m->addNewVariableType(new ModelicaCasADi::BooleanType());
 		}
     }
-    return (ModelicaCasADi::PrimitiveType*) m->getVariableTypeByName(baseTypeName).getNode();
+    return (ModelicaCasADi::PrimitiveType*) m->getVariableType(baseTypeName).getNode();
 }
 
 template <class List, class DerivedType, class Attribute, class Type>
@@ -340,7 +340,7 @@ template <class FVar>
 ModelicaCasADi::Ref<ModelicaCasADi::UserType> getUserType(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
     ModelicaCasADi::Ref<ModelicaCasADi::UserType> userType;
     if (!std::string(env->toString(fv.getDerivedType().this$)).empty()) {
-        userType = (ModelicaCasADi::UserType*) m->getVariableTypeByName(env->toString(fv.getDerivedType().this$)).getNode();
+        userType = (ModelicaCasADi::UserType*) m->getVariableType(env->toString(fv.getDerivedType().this$)).getNode();
         if(userType.getNode() == NULL) {
             throw std::runtime_error("Variable's derived type not present in Model when Variable transferred");
         }
@@ -407,7 +407,7 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaC
     if (!fv.isAlias()) {
         return;
     }
-    var->setAlias(m->getVariableByName(env->toString(fv.alias().name().this$)));
+    var->setAlias(m->getVariable(env->toString(fv.alias().name().this$)));
     var->setNegated(fv.isNegated());
 }  
 

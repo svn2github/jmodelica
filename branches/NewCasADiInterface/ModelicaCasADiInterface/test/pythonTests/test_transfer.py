@@ -37,14 +37,14 @@ def assertNear(val1, val2, tol):
     
 def test_ModelicaAliasVariables():
     model = transfer_to_casadi_interface("atomicModelAlias", modelFile)
-    assert not model.getVariableByName("x").isNegated()
-    assert model.getVariableByName("z").isNegated()
-    assert str(model.getVariableByName("x")) == "Real x(alias: y);"
-    assert str(model.getModelVariableByName("x")) == "Real y;"
-    assert str(model.getVariableByName("y")) == "Real y;"
-    assert str(model.getModelVariableByName("y")) == "Real y;"
-    assert str(model.getVariableByName("z")) == "Real z(alias: y);"
-    assert str(model.getModelVariableByName("z")) == "Real y;"
+    assert not model.getVariable("x").isNegated()
+    assert model.getVariable("z").isNegated()
+    assert str(model.getVariable("x")) == "Real x(alias: y);"
+    assert str(model.getModelVariable("x")) == "Real y;"
+    assert str(model.getVariable("y")) == "Real y;"
+    assert str(model.getModelVariable("y")) == "Real y;"
+    assert str(model.getVariable("z")) == "Real z(alias: y);"
+    assert str(model.getModelVariable("z")) == "Real y;"
     
 
 def test_ModelicaSimpleEquation():
@@ -60,171 +60,171 @@ def test_ModelicaFunctionCallEquations():
                 
 def test_ModelicaBindingExpression():
     model =  transfer_to_casadi_interface("AtomicModelAttributeBindingExpression", modelFile)
-    dependent =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
-    independent =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
+    dependent =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
+    independent =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
     actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))
     expected = str(MX(2)) + str(MX("p1"))
     assert actual == expected
 
 def test_ModelicaUnit():
     model =  transfer_to_casadi_interface("AtomicModelAttributeUnit", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("unit")) == str(MX("kg")) 
 
 def test_ModelicaQuantity():
     model =  transfer_to_casadi_interface("AtomicModelAttributeQuantity", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("quantity")) == str(MX("kg")) 
 
 def test_ModelicaDisplayUnit():
     model =  transfer_to_casadi_interface("AtomicModelAttributeDisplayUnit", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("displayUnit")) == str(MX("kg")) 
 
 def test_ModelicaMin():
     model =  transfer_to_casadi_interface("AtomicModelAttributeMin", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("min"))) == str(MX(0)) 
 
 def test_ModelicaMax():
     model =  transfer_to_casadi_interface("AtomicModelAttributeMax", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("max")) == str(MX(100))
     
 def test_ModelicaStart():
     model =  transfer_to_casadi_interface("AtomicModelAttributeStart", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("start"))  == str(MX(0.0005))
     
 def test_ModelicaFixed():
     model =  transfer_to_casadi_interface("AtomicModelAttributeFixed", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("fixed")) == str(MX(True))
 
 def test_ModelicaNominal():
     model =  transfer_to_casadi_interface("AtomicModelAttributeNominal", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("nominal")) == str(MX(0.1))
         
 def test_ModelicaComment():
     model =  transfer_to_casadi_interface("AtomicModelComment", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("comment")) == str(MX("I am x1's comment"))
         
 def test_ModelicaRealDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedRealTypeVoltage", modelFile)
-    assert str(model.getVariableTypeByName("Voltage")) == ("Voltage type = Real (quantity = ElectricalPotential, unit = V);")
+    assert str(model.getVariableType("Voltage")) == ("Voltage type = Real (quantity = ElectricalPotential, unit = V);")
    
 def test_ModelicaDerivedTypeDefaultType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedTypeAndDefaultType", modelFile)
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
-    assert int(diffs[0].getDeclaredType().this) == int(model.getVariableTypeByName("Voltage").this)
-    assert int(diffs[1].getDeclaredType().this) == int(model.getVariableTypeByName("Real").this)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
+    assert int(diffs[0].getDeclaredType().this) == int(model.getVariableType("Voltage").this)
+    assert int(diffs[1].getDeclaredType().this) == int(model.getVariableType("Real").this)
     
 def test_ModelicaIntegerDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedIntegerTypeSteps", modelFile)
-    assert str(model.getVariableTypeByName("Steps")) == ("Steps type = Integer (quantity = steps);")
+    assert str(model.getVariableType("Steps")) == ("Steps type = Integer (quantity = steps);")
     
 def test_ModelicaBooleanDeclaredType():
     model =  transfer_to_casadi_interface("AtomicModelDerivedBooleanTypeIsDone", modelFile)
-    assert str(model.getVariableTypeByName("IsDone")) == ("IsDone type = Boolean (quantity = Done);")
+    assert str(model.getVariableType("IsDone")) == ("IsDone type = Boolean (quantity = Done);")
 
 def test_ModelicaRealConstant():
     model =  transfer_to_casadi_interface("atomicModelRealConstant", modelFile)
-    constVars =  model.getVariableByKind(Model.REAL_CONSTANT)
+    constVars =  model.getVariables(Model.REAL_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
 
 def test_ModelicaRealIndependentParameter():
     model =  transfer_to_casadi_interface("atomicModelRealIndependentParameter", modelFile)
-    indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
+    indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
         
 def test_ModelicaRealDependentParameter():
     model =  transfer_to_casadi_interface("atomicModelRealDependentParameter", modelFile)
-    depParam =  model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
-    indepParam =  model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT)
+    depParam =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
+    indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
     assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
     
 def test_ModelicaDerivative():
     model =  transfer_to_casadi_interface("atomicModelRealDerivative", modelFile)
-    assert str(model.getVariableByKind(Model.DERIVATIVE)[0].getVar()) == str(der_x1)
+    assert str(model.getVariables(Model.DERIVATIVE)[0].getVar()) == str(der_x1)
     
 def test_ModelicaDifferentiated():
     model = transfer_to_casadi_interface("atomicModelRealDifferentiated", modelFile)
-    diff = model.getVariableByKind(Model.DIFFERENTIATED)
+    diff = model.getVariables(Model.DIFFERENTIATED)
     assert str(diff[0].getVar()) == str(x1)
         
 def test_ModelicaRealInput():
     model =  transfer_to_casadi_interface("atomicModelRealInput", modelFile)
-    ins =  model.getVariableByKind(Model.REAL_INPUT)
+    ins =  model.getVariables(Model.REAL_INPUT)
     assert str(ins[0].getVar()) == str(x1)
 
 def test_ModelicaAlgebraic():
     model =  transfer_to_casadi_interface("atomicModelRealAlgebraic", modelFile)
-    alg =  model.getVariableByKind(Model.REAL_ALGEBRAIC)
+    alg =  model.getVariables(Model.REAL_ALGEBRAIC)
     assert str(alg[0].getVar()) == str(x1)
     
 def test_ModelicaRealDisrete():
     model =  transfer_to_casadi_interface("atomicModelRealDiscrete", modelFile)
-    realDisc =  model.getVariableByKind(Model.REAL_DISCRETE)
+    realDisc =  model.getVariables(Model.REAL_DISCRETE)
     assert str(realDisc[0].getVar()) == str(x1)
     
 def test_ModelicaIntegerConstant():
     model =  transfer_to_casadi_interface("atomicModelIntegerConstant", modelFile)
-    constVars =  model.getVariableByKind(Model.INTEGER_CONSTANT)
+    constVars =  model.getVariables(Model.INTEGER_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
     
 def test_ModelicaIntegerIndependentParameter():
     model =  transfer_to_casadi_interface("atomicModelIntegerIndependentParameter", modelFile)
-    indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
+    indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
     
 def test_ModelicaIntegerDependentConstants():
     model =  transfer_to_casadi_interface("atomicModelIntegerDependentParameter", modelFile)    
-    depParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_DEPENDENT)
-    indepParam =  model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT)
+    depParam =  model.getVariables(Model.INTEGER_PARAMETER_DEPENDENT)
+    indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
     assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
 
 def test_ModelicaIntegerDiscrete():
     model =  transfer_to_casadi_interface("atomicModelIntegerDiscrete", modelFile)
-    intDisc =  model.getVariableByKind(Model.INTEGER_DISCRETE)
+    intDisc =  model.getVariables(Model.INTEGER_DISCRETE)
     assert str(intDisc[0].getVar()) == str(x1)
     
 def test_ModelicaIntegerInput():
     model =  transfer_to_casadi_interface("atomicModelIntegerInput", modelFile)    
-    intIns =  model.getVariableByKind(Model.INTEGER_INPUT)
+    intIns =  model.getVariables(Model.INTEGER_INPUT)
     assert str(intIns[0].getVar()) == str(x1)
     
 def test_ModelicaBooleanConstant():
     model =  transfer_to_casadi_interface("atomicModelBooleanConstant", modelFile)
-    constVars =  model.getVariableByKind(Model.BOOLEAN_CONSTANT)
+    constVars =  model.getVariables(Model.BOOLEAN_CONSTANT)
     assert str(constVars[0].getVar()) == str(MX("pi"))
     assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
     
 def test_ModelicaBooleanIndependentParameter():
     model =  transfer_to_casadi_interface("atomicModelBooleanIndependentParameter", modelFile)
-    indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
+    indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
     assert str(indepParam[0].getVar()) == str(MX("pi"))
     assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
     
 def test_ModelicaBooleanDependentParameter():
     model =  transfer_to_casadi_interface("atomicModelBooleanDependentParameter", modelFile)    
-    depParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_DEPENDENT)  
-    indepParam =  model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT)
+    depParam =  model.getVariables(Model.BOOLEAN_PARAMETER_DEPENDENT)  
+    indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
     assert str( indepParam[0].getVar().logic_and(MX(True)) ) == str(depParam[0].getAttribute("bindingExpression"))
     
 def test_ModelicaBooleanDiscrete():
     model =  transfer_to_casadi_interface("atomicModelBooleanDiscrete", modelFile)        
-    boolDisc =  model.getVariableByKind(Model.BOOLEAN_DISCRETE)
+    boolDisc =  model.getVariables(Model.BOOLEAN_DISCRETE)
     assert str(boolDisc[0].getVar()) == str(x1)
 
 def test_ModelicaBooleanInput():
     model =  transfer_to_casadi_interface("atomicModelBooleanInput", modelFile)
-    boolIns =  model.getVariableByKind(Model.BOOLEAN_INPUT)
+    boolIns =  model.getVariables(Model.BOOLEAN_INPUT)
     assert str(boolIns[0].getVar()) == str(x1)
         
 def test_ModelicaModelFunction():
@@ -253,15 +253,15 @@ def test_ModelicaModelFunction():
                             "@1 = input[1]\n"
                             "@1 = (@1+@0)\n"
                             "output[1] = @1\n")
-    mf_1 = model.getModelFunctionByName("simpleModelWithFunctions.f")
-    mf_2 = model.getModelFunctionByName("simpleModelWithFunctions.f2")
+    mf_1 = model.getModelFunction("simpleModelWithFunctions.f")
+    mf_2 = model.getModelFunction("simpleModelWithFunctions.f2")
     actual = str(mf_1) + str(mf_2)
     assert expectedPrint == actual
 
 def test_ModelicaDependentParametersCalculated():
     model =  transfer_to_casadi_interface("atomicModelDependentParameter", modelFile)
     model.calculateValuesForDependentParameters()
-    depVars = model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT)
+    depVars = model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
     assert depVars[0].getAttribute("evaluatedBindingExpression").getValue() == 20
     assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
     assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
@@ -274,7 +274,7 @@ def test_ModelicaFunctionCallEquationForParameterBinding():
                 "parameter Real p2[1](bindingExpression = temp_1[1], evaluatedBindingExpression = 2) = temp_1[1]/* 2 */;\n"
                 "parameter Real p2[2](bindingExpression = temp_1[2], evaluatedBindingExpression = 4) = temp_1[2]/* 4 */;\n")
     actual = ""
-    for var in model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT):
+    for var in model.getVariables(Model.REAL_PARAMETER_DEPENDENT):
         actual += str(var) + "\n"
     print expected, "\n", actual
     assert actual == expected
@@ -338,12 +338,12 @@ def test_OptimicaMayerTerm():
 
 def test_OptimicaFree():
     model =  transfer_to_casadi_interface("atomicWithFree", optproblemsFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("free"))) == str(MX(False))
 
 def test_OptimicaInitialGuess():
     model =  transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile).getModel()
-    diffs =  model.getVariableByKind(Model.DIFFERENTIATED)
+    diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
 
@@ -395,8 +395,8 @@ def test_ConstructVariableLaziness():
     model = transfer_to_casadi_interface("AtomicModelVariableLaziness", modelFile)
     x2_eq = model.getDaeResidual()[0].getDep(0)
     x1_eq = model.getDaeResidual()[1].getDep(0)
-    x1_var = model.getVariableByKind(Model.DIFFERENTIATED)[0].getVar()
-    x2_var = model.getVariableByKind(Model.DIFFERENTIATED)[1].getVar()
+    x1_var = model.getVariables(Model.DIFFERENTIATED)[0].getVar()
+    x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
     assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
     
 def test_ConstructArrayInOutFunction1():
@@ -414,7 +414,7 @@ def test_ConstructArrayInOutFunction1():
                 "@0 = input[1]\n"
                 "@0 = (-@0)\n"
                 "output[1] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelVector1.f")) == expected
+    assert str(model.getModelFunction("AtomicModelVector1.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelVector1.f\").call([A[1],A[2]]){0}," +                                                             
                 "function(\"AtomicModelVector1.f\").call([A[1],A[2]]){1})-vertcat(temp_1[1],temp_1[2]))," +
                 "(temp_1[1]-der_A[1]),(temp_1[2]-der_A[2]))")
@@ -434,7 +434,7 @@ def test_ConstructArrayInOutFunction2():
                 "{@2,@3} = function(\"AtomicModelVector2.f2\").call([@0,@1])\n"
                 "output[0] = @2\n"
                 "output[1] = @3\n")
-    assert str(model.getModelFunctionByName("AtomicModelVector2.f")) == expected
+    assert str(model.getModelFunction("AtomicModelVector2.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelVector2.f\").call([A[1],A[2]]){0}," +
                 "function(\"AtomicModelVector2.f\").call([A[1],A[2]]){1})-vertcat(temp_1[1],temp_1[2]))," +
                 "(temp_1[1]-der_A[1]),(temp_1[2]-der_A[2]))")
@@ -465,7 +465,7 @@ def test_ConstructArrayInOutFunctionCallEquation():
                 "@0 = input[3]\n"
                 "@0 = (2.*@0)\n"
                 "output[3] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelVector3.f")) == expected
+    assert str(model.getModelFunction("AtomicModelVector3.f")) == expected
     expected = ("(vertcat(function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2])" +
                 "{0},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2])" +
                 "{1},function(\"AtomicModelVector3.f\").call([A[1],A[2],1,2]){2}," +
@@ -490,7 +490,7 @@ def test_FunctionCallStatementOmittedOuts():
                 "@1 = input[0]\n"
                 "{NULL,NULL,@2} = function(\"atomicModelFunctionCallStatementIgnoredOuts.f\").call([@0,@1])\n"
                 "output[0] = @2\n")
-    assert str(model.getModelFunctionByName("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
+    assert str(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
     
 def test_ConstructFunctionMatrix():
     model = transfer_to_casadi_interface("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none"})
@@ -509,7 +509,7 @@ def test_ConstructFunctionMatrix():
                 "output[1] = @0\n"
                 "@0 = input[0]\n"
                 "@1 = input[1]\n")
-    assert str(model.getModelFunctionByName("AtomicModelMatrix.f")) == expected
+    assert str(model.getModelFunction("AtomicModelMatrix.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1," +
                 "0.3]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1" +
                 ",0.3]){1})-vertcat(temp_1[1,1],temp_1[1,2])),((-temp_1[1,1])-der_A[1,1]),((-temp_1[1,2])-der_A[1,2])," +
@@ -556,7 +556,7 @@ def test_ConstructFunctionMatrixDimsGreaterThanTwo():
                 "@0 = 10\n"
                 "output[5] = @0\n"
                 "@0 = input[5]\n")
-    assert str(model.getModelFunctionByName("AtomicModelLargerThanTwoDimensionArray.f")) == expected
+    assert str(model.getModelFunction("AtomicModelLargerThanTwoDimensionArray.f")) == expected
     expected = ("vertcat((vertcat("
                 "function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){0}," 
                 "function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){1}," 
@@ -595,7 +595,7 @@ def test_ConstructNestedRecordFunctions():
                 "output[5] = @2\n"
                 "output[6] = @0\n"
                 "output[7] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelRecordNestedArray.generateCurves")) == expected
+    assert str(model.getModelFunction("AtomicModelRecordNestedArray.generateCurves")) == expected
     expected = ("vertcat((vertcat(" +
                 "function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){0}," +
                 "function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){1}," +
@@ -637,7 +637,7 @@ def test_ConstructRecordInFunctionInFunction():
                 "@1 = input[1]\n"
                 "@0 = (@0*@1)\n" 
                 "output[1] = @0\n")
-    funcStr = str(model.getModelFunctionByName("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunctionByName("AtomicModelRecordInOutFunctionCallStatement.f2"))
+    funcStr = str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f2"))
     assert funcStr == expected
     assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der_a)"
 
@@ -670,7 +670,7 @@ def test_ConstructRecordArbitraryDimension():
                 "output[6] = @0\n"
                 "@0 = (2.*@0)\n"
                 "output[7] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelRecordArbitraryDimension.f")) == expected
+    assert str(model.getModelFunction("AtomicModelRecordArbitraryDimension.f")) == expected
     expected = ("vertcat(((-a)-der_a),(vertcat(" + 
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}," +
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){1}," +
@@ -700,7 +700,7 @@ def test_ConstructArrayFlattening():
                 "output[2] = @0\n"
                 "@0 = 4\n"
                 "output[3] = @0\n")
-    assert str(model.getModelFunctionByName("atomicModelSimpleArrayIndexing.f")) == expected
+    assert str(model.getModelFunction("atomicModelSimpleArrayIndexing.f")) == expected
     
 def test_ConstructRecordNestedSeveralVars():
     model = transfer_to_casadi_interface("AtomicModelRecordSeveralVars", modelFile, compiler_options={"inline_functions":"none"})
@@ -737,7 +737,7 @@ def test_ConstructRecordNestedSeveralVars():
                 "output[8] = @0\n"
                 "@0 = input[0]\n"
                 "output[9] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelRecordSeveralVars.f")) == expected
+    assert str(model.getModelFunction("AtomicModelRecordSeveralVars.f")) == expected
     expected = ("vertcat(((-a)-der_a),(vertcat(" +  
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}," + 
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){1}," +
@@ -804,7 +804,7 @@ def test_ConstructVariousRealValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.monoInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOut")) == expected 
 
     #function polyInMonoOut
         #input Real x1
@@ -823,7 +823,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@1 = input[1]\n"
                 "@0 = (@0+@1)\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
         #input Real x
@@ -849,7 +849,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@2 = (@2+@0)\n"
                 "output[0] = @2\n"
                 "output[1] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.monoInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInPolyOut")) == expected
     
     #function polyInPolyOut
         #input Real x1
@@ -871,7 +871,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "output[0] = @0\n"
                 "@0 = input[1]\n"
                 "output[1] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
         #input Real x
@@ -886,7 +886,7 @@ def test_ConstructVariousRealValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.monoInMonoOutReturn")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutReturn")) == expected
 
     #function functionCallInFunction
         #input Real x
@@ -900,7 +900,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@0 = input[0]\n"
                 "@1 = function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.functionCallInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallInFunction")) == expected
     
     #function functionCallEquationInFunction
         #input Real x
@@ -915,7 +915,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@0 = input[0]\n"
                 "{@1,NULL} = function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.functionCallEquationInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallEquationInFunction")) == expected
 
     #function monoInMonoOutInternal
         #input Real x
@@ -936,7 +936,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@1 = sin(@1)\n"
                 "@0 = (@0+@1)\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.monoInMonoOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutInternal")) == expected
 
     #function polyInPolyOutInternal
         #input Real x1
@@ -964,7 +964,7 @@ def test_ConstructVariousRealValuedFunctions():
                 "@0 = 1\n"
                 "output[1] = @0\n"
                 "@0 = input[1]\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicRealFunctions.polyInPolyOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOutInternal")) == expected
      
      
 def test_ConstructVariousIntegerValuedFunctions():
@@ -980,7 +980,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOut")) == expected 
 
     #function polyInMonoOut
         #input Integer x1
@@ -999,7 +999,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@1 = input[1]\n"
                 "@0 = (@0+@1)\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
         #input Integer x
@@ -1025,7 +1025,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@2 = (@2+@0)\n"
                 "output[0] = @2\n"
                 "output[1] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInPolyOut")) == expected
     
     #function polyInPolyOut
         #input Integer x1
@@ -1047,7 +1047,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "output[0] = @0\n"
                 "@0 = input[1]\n"
                 "output[1] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
         #input Integer x
@@ -1062,7 +1062,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn")) == expected
 
     #function functionCallInFunction
         #input Integer x
@@ -1076,7 +1076,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@0 = input[0]\n"
                 "@1 = function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.functionCallInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallInFunction")) == expected
     
     #function functionCallEquationInFunction
         #input Integer x
@@ -1091,7 +1091,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@0 = input[0]\n"
                 "{@1,NULL} = function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction")) == expected
 
     #function monoInMonoOutInternal
         #input Integer x
@@ -1114,7 +1114,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@2 = (@2+@0)\n"
                 "@1 = (@1+@2)\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")) == expected
 
     #function polyInPolyOutInternal
         #input Integer x1
@@ -1142,7 +1142,7 @@ def test_ConstructVariousIntegerValuedFunctions():
                 "@0 = 1\n"
                 "output[1] = @0\n"
                 "@0 = input[1]\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal")) == expected
      
      
 def test_ConstructVariousBooleanValuedFunctions():
@@ -1158,7 +1158,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOut")) == expected 
 
     #function polyInMonoOut
         #input Boolean x1
@@ -1176,7 +1176,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@1 = input[1]\n"
                 "@0 = (@0&&@1)\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInMonoOut")) == expected 
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInMonoOut")) == expected 
 
     #function monoInPolyOut
         #input Boolean x
@@ -1198,7 +1198,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@2 = (@2?@0:0)\n"
                 "output[0] = @2\n"
                 "output[1] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInPolyOut")) == expected
     
     #function polyInPolyOut
         #input Boolean x1
@@ -1220,7 +1220,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "output[0] = @0\n"
                 "@0 = input[1]\n"
                 "output[1] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInPolyOut")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOut")) == expected
     
     #function monoInMonoOutReturn
         #input Boolean x
@@ -1235,7 +1235,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 " Output: 1-by-1 (dense)\n"
                 "@0 = input[0]\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn")) == expected
 
     #function functionCallInFunction
         #input Boolean x
@@ -1249,7 +1249,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = input[0]\n"
                 "@1 = function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.functionCallInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallInFunction")) == expected
     
     #function functionCallEquationInFunction
         #input Boolean x
@@ -1264,7 +1264,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = input[0]\n"
                 "{@1,NULL} = function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([@0])\n"
                 "output[0] = @1\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction")) == expected
 
     #function monoInMonoOutInternal
         #input Boolean x
@@ -1286,7 +1286,7 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = 0\n"
                 "@0 = (@0||@1)\n"
                 "output[0] = @0\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")) == expected
 
     #function polyInPolyOutInternal
         #input Boolean x1
@@ -1314,14 +1314,14 @@ def test_ConstructVariousBooleanValuedFunctions():
                 "@0 = 1\n"
                 "output[1] = @0\n"
                 "@0 = input[1]\n")
-    assert str(model.getModelFunctionByName("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
+    assert str(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal")) == expected
      
 def test_TransferVariableType():
     model = transfer_to_casadi_interface("AtomicModelMisc", modelFile)
-    x1 = model.getVariableByName('x1')
+    x1 = model.getVariable('x1')
     assert isinstance(x1, RealVariable)
     assert isinstance(x1.getMyDerivativeVariable(), DerivativeVariable)
-    assert isinstance(model.getVariableByName('x2'), IntegerVariable)
-    assert isinstance(model.getVariableByName('x3'), BooleanVariable)
-    assert isinstance(model.getVariableByName('x4'), BooleanVariable)
+    assert isinstance(model.getVariable('x2'), IntegerVariable)
+    assert isinstance(model.getVariable('x3'), BooleanVariable)
+    assert isinstance(model.getVariable('x4'), BooleanVariable)
      

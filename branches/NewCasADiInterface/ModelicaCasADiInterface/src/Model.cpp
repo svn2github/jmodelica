@@ -162,8 +162,8 @@ Model::VariableKind Model::classifyVariable(Ref<Variable> var) const {
 }
 
 void Model::addNewVariableType(Ref<VariableType> variableType) {
-    if (getVariableTypeByName(variableType->getName()).getNode() != NULL && 
-        getVariableTypeByName(variableType->getName()).getNode() != variableType.getNode() ){
+    if (getVariableType(variableType->getName()).getNode() != NULL && 
+        getVariableType(variableType->getName()).getNode() != variableType.getNode() ){
         throw std::runtime_error("A VariableType with the same name as a type in the Model can not be "
                                  "added if those types are not the same object");
     } else {
@@ -172,27 +172,27 @@ void Model::addNewVariableType(Ref<VariableType> variableType) {
 }
 
 void Model::assignVariableTypeToRealVariable(Ref<Variable> var) {
-    if (getVariableTypeByName("Real").getNode() != NULL) {
-        var->setDeclaredType(getVariableTypeByName("Real"));
+    if (getVariableType("Real").getNode() != NULL) {
+        var->setDeclaredType(getVariableType("Real"));
     } else {
         typesInModel["Real"] = new RealType();
-        var->setDeclaredType(getVariableTypeByName("Real"));
+        var->setDeclaredType(getVariableType("Real"));
     }
 }
 void Model::assignVariableTypeToIntegerVariable(Ref<Variable> var) {
-    if (getVariableTypeByName("Integer").getNode() != NULL) {
-        var->setDeclaredType(getVariableTypeByName("Integer"));
+    if (getVariableType("Integer").getNode() != NULL) {
+        var->setDeclaredType(getVariableType("Integer"));
     } else {
         typesInModel["Integer"] = new IntegerType();
-        var->setDeclaredType(getVariableTypeByName("Integer"));
+        var->setDeclaredType(getVariableType("Integer"));
     }    
 }
 void Model::assignVariableTypeToBooleanVariable(Ref<Variable> var) {
-    if (getVariableTypeByName("Boolean").getNode() != NULL) {
-        var->setDeclaredType(getVariableTypeByName("Boolean"));
+    if (getVariableType("Boolean").getNode() != NULL) {
+        var->setDeclaredType(getVariableType("Boolean"));
     } else {
         typesInModel["Boolean"] = new BooleanType();
-        var->setDeclaredType(getVariableTypeByName("Boolean"));
+        var->setDeclaredType(getVariableType("Boolean"));
     }    
 }
 
@@ -221,7 +221,7 @@ void Model::addVariable(Ref<Variable> var) {
     z.push_back(var);
 }
 
-vector< Ref<Variable> > Model::getVariableByKind(VariableKind kind) {
+vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
 	if (kind < 0 || kind >= NUM_OF_VARIABLE_KIND) {
 		throw std::runtime_error("Invalid VariableKind");
 	}
@@ -235,7 +235,7 @@ vector< Ref<Variable> > Model::getVariableByKind(VariableKind kind) {
     return varVec;
 }
 
-Ref<Variable> Model::getVariableByName(std::string name) {
+Ref<Variable> Model::getVariable(std::string name) {
     Ref<Variable> returnVar = Ref<Variable>(NULL);
     for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
@@ -246,7 +246,7 @@ Ref<Variable> Model::getVariableByName(std::string name) {
     return returnVar;
 }
 
-Ref<Variable> Model::getModelVariableByName(std::string name) {
+Ref<Variable> Model::getModelVariable(std::string name) {
     Ref<Variable> returnVar;
     for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
@@ -270,7 +270,7 @@ vector< Ref<Variable> > Model::getModelVariables() {
     }
     return modelVars;
 }
-vector< Ref<Variable> > Model::getAliasVariables() {
+vector< Ref<Variable> > Model::getAliases() {
     vector< Ref<Variable> > aliasVars;
     for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->isAlias()) {

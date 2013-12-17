@@ -65,14 +65,14 @@ def test_VariableAlias():
     assert realVar2.getAttribute("anotherAttr").isEqual(anotherMX)
     
     # Add the variables to a Model and make sure that the distinction between the 
-    # function getVariableByName and getModelVariableByName works.
+    # function getVariable and getModelVariable works.
     model = Model()
     model.addVariable(realVar1)
     model.addVariable(realVar2)
-    assert heurestic_MC_variables_equal(model.getVariableByName("node1"), realVar1)
-    assert heurestic_MC_variables_equal(model.getVariableByName("node2"), realVar2)
-    assert heurestic_MC_variables_equal(model.getModelVariableByName("node1"), realVar2)
-    assert heurestic_MC_variables_equal(model.getModelVariableByName("node2"), realVar2)
+    assert heurestic_MC_variables_equal(model.getVariable("node1"), realVar1)
+    assert heurestic_MC_variables_equal(model.getVariable("node2"), realVar2)
+    assert heurestic_MC_variables_equal(model.getModelVariable("node1"), realVar2)
+    assert heurestic_MC_variables_equal(model.getModelVariable("node2"), realVar2)
 
 def test_NegatedAliasAttributes():
     realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
@@ -137,7 +137,7 @@ def test_ModelAliasAndModelGetters():
     model.addVariable(realVar2)
     model.addVariable(realVar3)
     modelVars = model.getModelVariables()
-    aliasVars = model.getAliasVariables()
+    aliasVars = model.getAliases()
     assert isEqual(modelVars[0].getVar(), realVar3.getVar())
     assert isEqual(aliasVars[0].getVar(), realVar1.getVar())
     assert isEqual(aliasVars[1].getVar(), realVar2.getVar())
@@ -687,7 +687,7 @@ def test_OptimizationProblemPrinting():
 def test_ModelVariableKindsEmpty():
     model = Model()
     for kind in range(Model.NUM_OF_VARIABLE_KIND):
-        assert( len(model.getVariableByKind(kind)) == 0)
+        assert( len(model.getVariables(kind)) == 0)
 
 def test_ModelVariableSorting():
     model = Model()
@@ -799,10 +799,10 @@ def test_ModelVariableSorting():
     # Add differentiated variable, but without its corresponding derivative variable
     # => should be sorted as algebraic. Then add derivative variable and check again
     addVariableVectorToModel(differentiatedVariables, model)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_ALGEBRAIC), differentiatedVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_ALGEBRAIC), differentiatedVariables)
     addVariableVectorToModel(derivativeVariables, model)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DIFFERENTIATED), differentiatedVariables) 
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DERIVATIVE), derivativeVariables) 
+    checkVariablesEqualToInOrder(model.getVariables(Model.DIFFERENTIATED), differentiatedVariables) 
+    checkVariablesEqualToInOrder(model.getVariables(Model.DERIVATIVE), derivativeVariables) 
 
     # Add the rest of the variables and check that they are sorted correctly
     addVariableVectorToModel(outputVariables, model)
@@ -822,25 +822,25 @@ def test_ModelVariableSorting():
     addVariableVectorToModel(depenentRealParameterVariables, model)
     addVariableVectorToModel(depenentIntegerParameterVariables, model)
     addVariableVectorToModel(depenentBooleanParameterVariables, model)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.OUTPUT), outputVariables) 
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_INPUT), inputRealVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_INPUT), inputIntegerVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_INPUT), inputBooleanVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_ALGEBRAIC), algebraicVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DIFFERENTIATED), differentiatedVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.DERIVATIVE), derivativeVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_DISCRETE), discreteRealVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_DISCRETE), discreteIntegerVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_DISCRETE), discreteBooleanVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_CONSTANT), constantRealVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_CONSTANT), constantIntegerVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_CONSTANT), constantBooleanVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_PARAMETER_INDEPENDENT), indepenentRealParameterVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_PARAMETER_INDEPENDENT), indepenentIntegerParameterVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_PARAMETER_INDEPENDENT), indepenentBooleanParameterVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.REAL_PARAMETER_DEPENDENT), depenentRealParameterVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.INTEGER_PARAMETER_DEPENDENT), depenentIntegerParameterVariables)
-    checkVariablesEqualToInOrder(model.getVariableByKind(Model.BOOLEAN_PARAMETER_DEPENDENT), depenentBooleanParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.OUTPUT), outputVariables) 
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_INPUT), inputRealVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_INPUT), inputIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_INPUT), inputBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_ALGEBRAIC), algebraicVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.DIFFERENTIATED), differentiatedVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.DERIVATIVE), derivativeVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_DISCRETE), discreteRealVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_DISCRETE), discreteIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_DISCRETE), discreteBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_CONSTANT), constantRealVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_CONSTANT), constantIntegerVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_CONSTANT), constantBooleanVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_PARAMETER_INDEPENDENT), indepenentRealParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT), indepenentIntegerParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT), indepenentBooleanParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.REAL_PARAMETER_DEPENDENT), depenentRealParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.INTEGER_PARAMETER_DEPENDENT), depenentIntegerParameterVariables)
+    checkVariablesEqualToInOrder(model.getVariables(Model.BOOLEAN_PARAMETER_DEPENDENT), depenentBooleanParameterVariables)
 
 def test_ModelEqutionFunctionality():
     model = Model()
@@ -876,21 +876,21 @@ def test_ModelWithModelFunction():
     f.setOption("name", functionName)
     f.init()
     modelFunction = ModelFunction(f)
-    assert( model.getModelFunctionByName(functionName) == None )
+    assert( model.getModelFunction(functionName) == None )
     model.setModelFunctionByItsName(modelFunction)
-    assert( int(model.getModelFunctionByName(functionName).this) == int(modelFunction.this) )
-    assert( model.getModelFunctionByName("iDontExist") == None )
+    assert( int(model.getModelFunction(functionName).this) == int(modelFunction.this) )
+    assert( model.getModelFunction("iDontExist") == None )
 
 def test_ModelNonExistingVariableType():
     model = Model()
-    assert( model.getVariableTypeByName("IAmNotATypeInModel") == None )
+    assert( model.getVariableType("IAmNotATypeInModel") == None )
     
 def test_ModelDefaultVariableTypeAssignment():
     model = Model()
     realVar = RealVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS)
     model.addVariable(realVar)
     expectedPrint = ("Real type (displayUnit = , fixed = 0, max = inf, min = -inf, nominal = 1, quantity = , start = 0, unit = );")
-    assert( str(model.getVariableTypeByName("Real")) == expectedPrint )
+    assert( str(model.getVariableType("Real")) == expectedPrint )
     
 def test_ModelDefaultVariableTypeAssignmentSingletons():
     model = Model()
@@ -914,15 +914,15 @@ def test_ModelVariableTypeGettersSetters():
     model = Model()
     realVarType = RealType()
     model.addVariable(RealVariable(MX("var"), Variable.INTERNAL, Variable.CONTINUOUS, realVarType))
-    assert( int(realVarType.this) == int(model.getVariableTypeByName("Real").this) )
+    assert( int(realVarType.this) == int(model.getVariableType("Real").this) )
     
     boolVarType = BooleanType()
     model.addVariable(BooleanVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE, boolVarType))
-    assert( int(boolVarType.this) == int(model.getVariableTypeByName("Boolean").this) )
+    assert( int(boolVarType.this) == int(model.getVariableType("Boolean").this) )
     
     intVarType = IntegerType()
     model.addVariable(IntegerVariable(MX("var"), Variable.INTERNAL, Variable.DISCRETE, intVarType))
-    assert( int(intVarType.this) == int(model.getVariableTypeByName("Integer").this) )
+    assert( int(intVarType.this) == int(model.getVariableType("Integer").this) )
       
 def test_ModelTrySettingExistingVariableType():
     import sys
@@ -946,7 +946,7 @@ def test_ModelInvalidVariabilityRealVariable():
     realVar = RealVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(realVar)
     try:
-        model.getVariableByKind(Model.REAL_ALGEBRAIC)
+        model.getVariables(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable variability when sorting for internal real variable: Real var;");
@@ -958,7 +958,7 @@ def test_ModelInvalidVariabilityIntegerVariable():
     intVar = IntegerVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(intVar)
     try:
-        model.getVariableByKind(Model.INTEGER_DISCRETE)
+        model.getVariables(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable variability when sorting for internal integer variable: Integer var;");
@@ -970,7 +970,7 @@ def test_ModelInvalidVariabilityBooleanVariable():
     boolVar = BooleanVariable(MX("var"), Variable.INTERNAL, 10)
     model.addVariable(boolVar)
     try:
-        model.getVariableByKind(Model.BOOLEAN_DISCRETE)
+        model.getVariables(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable variability when sorting for internal boolean variable: Boolean var;");
@@ -982,7 +982,7 @@ def test_ModelInvalidCausalityRealVariable():
     realVar = RealVariable(MX("var"), 10, 10)
     model.addVariable(realVar)
     try:
-        model.getVariableByKind(Model.REAL_ALGEBRAIC)
+        model.getVariables(Model.REAL_ALGEBRAIC)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable causality when sorting for variable: Real var;")
@@ -994,7 +994,7 @@ def test_ModelInvalidCausalityIntegerVariable():
     intVar = IntegerVariable(MX("var"), 10, 10)
     model.addVariable(intVar)
     try:
-        model.getVariableByKind(Model.INTEGER_DISCRETE)
+        model.getVariables(Model.INTEGER_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable causality when sorting for variable: Integer var;");
@@ -1006,7 +1006,7 @@ def test_ModelInvalidCausalityBooleanVariable():
     boolVar = BooleanVariable(MX("var"), 10, 10)
     model.addVariable(boolVar)
     try:
-        model.getVariableByKind(Model.BOOLEAN_DISCRETE)
+        model.getVariables(Model.BOOLEAN_DISCRETE)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid variable causality when sorting for variable: Boolean var;");
@@ -1016,12 +1016,12 @@ def test_ModelInvalidVariableKindInGetter():
     errorString = ""
     model = Model()
     try:
-        model.getVariableByKind(-1)
+        model.getVariables(-1)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid VariableKind");
     try:
-        model.getVariableByKind(Model.NUM_OF_VARIABLE_KIND)
+        model.getVariables(Model.NUM_OF_VARIABLE_KIND)
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Invalid VariableKind");
