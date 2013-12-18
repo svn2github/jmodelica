@@ -46,7 +46,6 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
     
     fmiComponent component;
     fmiInteger   retval;
-    jmi_t* jmi = 0;
     
     if(!functions->allocateMemory || !functions->freeMemory || !functions->logger) {
          if(functions->logger) {
@@ -60,6 +59,7 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
     if (fmuType == fmiModelExchange) {
         component = (fmiComponent)functions->allocateMemory(1, sizeof(fmi2_me_t));
         if(!component) return NULL;
+
         retval = fmi2_me_instantiate(component, instanceName, fmuType, fmuGUID, 
                                      fmuResourceLocation, functions, visible,
                                      loggingOn);
@@ -68,28 +68,17 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
             return NULL;
         }
 
-#ifndef FMUME20
-        jmi_log_comment(jmi->log, logError, "The model is not compiled as a Co-Simulation FMU.");
-        fmi2_free_instance(component);
-        return NULL;
-#endif
-
     } else if (fmuType == fmiCoSimulation) {
         component = (fmiComponent)functions->allocateMemory(1, sizeof(fmi2_cs_t));
         if(!component) return NULL;
+
         retval = fmi2_cs_instantiate(component, instanceName, fmuType, fmuGUID, 
                                      fmuResourceLocation, functions, visible,
                                      loggingOn);
         if (retval != fmiOK) {
             functions->freeMemory(component);
             return NULL;
-        }
-
-#ifndef FMUCS20
-        jmi_log_comment(jmi->log, logError, "The model is not compiled as a Model Exchange FMU.");
-        fmi2_free_instance(component);
-        return NULL;
-#endif
+		}
     }
     else 
         component = NULL; /* assert ? */
@@ -186,8 +175,12 @@ fmiStatus fmi2_setup_experiment(fmiComponent c,
                                 fmiBoolean   stopTimeDefined, 
                                 fmiReal      stopTime) {
     fmiStatus retval;
+
+	if (c == NULL) {
+		return fmiFatal;
+    }
     
-    jmi_setup_experiment(&((fmi2_me_t*)c)->jmi, toleranceDefined + '0', tolerance);
+    jmi_setup_experiment(&((fmi2_me_t*)c)->jmi, toleranceDefined, tolerance);
     
     retval = fmi2_set_time(c, startTime);
     
@@ -206,8 +199,12 @@ fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
     jmi_ode_method_t ode_method;
     jmi_real_t ode_step_size;
     jmi_real_t ode_rel_tol;
+
+	if (c == NULL) {
+		return fmiFatal;
+    }
     
-    if (!c || ((fmi2_me_t *)c)->fmi_mode != instantiatedMode) {
+    if (((fmi2_me_t *)c)->fmi_mode != instantiatedMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter initialization mode after instantiating the model.");
         return fmiError;
     }
@@ -245,6 +242,10 @@ fmiStatus fmi2_enter_initialization_mode(fmiComponent c) {
 }
 
 fmiStatus fmi2_exit_initialization_mode(fmiComponent c) {
+	if (c == NULL) {
+		return fmiFatal;
+    }
+
     if (((fmi2_me_t *)c)->fmi_mode != initializationMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only exit initialization mode when being in initialization mode.");
         return fmiError;
@@ -269,7 +270,14 @@ fmiStatus fmi2_terminate(fmiComponent c) {
 }
 
 fmiStatus fmi2_reset(fmiComponent c) {
-    return 0;
+	/* Resets the FMU by deleting the jmi struct. */
+    if (c == NULL) {
+		return fmiFatal;
+    }
+
+    jmi_delete(&((fmi2_me_t*)c)->jmi);
+    
+    return fmiOK;
 }
 
 fmiStatus fmi2_get_real(fmiComponent c, const fmiValueReference vr[],
@@ -315,27 +323,22 @@ fmiStatus fmi2_get_integer(fmiComponent c, const fmiValueReference vr[],
 fmiStatus fmi2_get_boolean(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, fmiBoolean value[]) {
     fmiInteger retval;
-    jmi_boolean* casted_values = 0;
+    jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));
     int i;
     
     if (c == NULL) {
 		return fmiFatal;
     }
-    
-    casted_values = (jmi_boolean*)calloc(nvr, sizeof(char));
-    for (i = 0; i < nvr; i++) {
-        casted_values[i] = value[i] + '0';
-    }
 
-    retval = jmi_get_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, casted_values);
+    retval = jmi_get_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
     if (retval != 0) {
         return fmiError;
     }
     
     for (i = 0; i < nvr; i++) {
-        value[i] = casted_values[i] - '0';
+        value[i] = jmi_boolean_values[i];
     }
-    free(casted_values);
+    free(jmi_boolean_values);
 
     return fmiOK;
 }
@@ -404,22 +407,24 @@ fmiStatus fmi2_set_integer(fmiComponent c, const fmiValueReference vr[],
 fmiStatus fmi2_set_boolean(fmiComponent c, const fmiValueReference vr[],
                            size_t nvr, const fmiBoolean value[]) {
     fmiInteger retval;
-    jmi_boolean* casted_values = 0;
     int i;
+
+	jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));;
     
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    casted_values = (jmi_boolean*)calloc(nvr, sizeof(char));
     for (i = 0; i < nvr; i++) {
-        casted_values[i] = value[i] + '0';
+        jmi_boolean_values[i] = value[i];
     }
     
-    retval = jmi_set_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, casted_values);
+    retval = jmi_set_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
     if (retval != 0) {
         return fmiError;
     }
+
+	free(jmi_boolean_values);
     
     return fmiOK;
 }
@@ -489,6 +494,10 @@ fmiStatus fmi2_get_directional_derivative(fmiComponent c,
 }
 
 fmiStatus fmi2_enter_event_mode(fmiComponent c) {
+	if (c == NULL) {
+		return fmiFatal;
+    }
+
     if (((fmi2_me_t *)c)->fmi_mode != continuousTimeMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter event mode from continuous time mode.");
         return fmiError;
@@ -513,11 +522,11 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
         return fmiError;
     }
     
-    fmiEventInfo->newDiscreteStatesNeeded           = !(event_info->iteration_converged - '0');
-    fmiEventInfo->terminateSimulation               = event_info->terminate_simulation - '0';
-    fmiEventInfo->nominalsOfContinuousStatesChanged = event_info->nominals_of_states_changed - '0';
-    fmiEventInfo->valuesOfContinuousStatesChanged   = event_info->state_values_changed - '0';
-    fmiEventInfo->nextEventTimeDefined              = event_info->next_event_time_defined - '0';
+    fmiEventInfo->newDiscreteStatesNeeded           = !event_info->iteration_converged;
+    fmiEventInfo->terminateSimulation               = event_info->terminate_simulation;
+    fmiEventInfo->nominalsOfContinuousStatesChanged = event_info->nominals_of_states_changed;
+    fmiEventInfo->valuesOfContinuousStatesChanged   = event_info->state_values_changed;
+    fmiEventInfo->nextEventTimeDefined              = event_info->next_event_time_defined;
     fmiEventInfo->nextEventTime                     = event_info->next_event_time;
     
     free(event_info);
@@ -526,7 +535,11 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
 }
 
 fmiStatus fmi2_enter_continuous_time_mode(fmiComponent c) {
-    if (((fmi2_me_t *)c)->fmi_mode != continuousTimeMode) {
+	if (c == NULL) {
+		return fmiFatal;
+    }
+
+    if (((fmi2_me_t *)c)->fmi_mode != eventMode) {
         jmi_log_comment(((fmi2_me_t *)c)->jmi.log, logError, "Can only enter continuous time mode from event mode.");
         return fmiError;
     }
@@ -667,7 +680,8 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
     fmi2_me -> fmi_instance_name = tmpname;
     
     fmi2_me -> fmi_functions = functions;
-    fmi2_me -> fmu_type = fmuType;
+    fmi2_me -> fmu_type      = fmuType;
+	fmi2_me -> fmi_mode      = instantiatedMode;
     
     return fmiOK;
 }

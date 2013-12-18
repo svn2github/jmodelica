@@ -39,6 +39,19 @@ FMI_Export fmiComponent fmiInstantiate(fmiString instanceName,
                                        const fmiCallbackFunctions* functions, 
                                        fmiBoolean                  visible,
                                        fmiBoolean                  loggingOn) {
+                                           
+    
+    if (fmuType == fmiCoSimulation) {
+#ifndef FMUCS20
+        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Co-Simulation FMU.");
+        return NULL;
+#endif
+    } else if (fmuType == fmiModelExchange) {
+#ifndef FMUME20
+        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Model Exchange FMU.");
+        return NULL;
+#endif
+    }
     return fmi2_instantiate(instanceName, fmuType, fmuGUID, fmuResourceLocation,
                             functions, visible, loggingOn);
 }
