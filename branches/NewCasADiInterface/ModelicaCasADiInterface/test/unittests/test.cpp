@@ -48,7 +48,7 @@ using namespace ModelicaCasADi;
 
 bool testAllVariableKindsEmpty(Model &model){
     for (int i = 0; i < Model::NUM_OF_VARIABLE_KIND; i++){
-        if (!model.getVariableByKind((Model::VariableKind)i).empty()) {
+        if (!model.getVariables((Model::VariableKind)i).empty()) {
             return false;
         }
     }
@@ -659,10 +659,10 @@ int main(int argc, char **argv) {
         f.setOption("name", functionName);
         f.init();
         ModelFunction modelFunction(f);
-        assert( model.getModelFunctionByName(functionName) == NULL );
+        assert( model.getModelFunction(functionName) == NULL );
         model.setModelFunctionByItsName(&modelFunction);
-        assert( model.getModelFunctionByName(functionName) == &modelFunction );
-        assert( model.getModelFunctionByName("iDontExist") == NULL );
+        assert( model.getModelFunction(functionName) == &modelFunction );
+        assert( model.getModelFunction("iDontExist") == NULL );
     }
     { // Test variables empty in empty model
         Model model;
@@ -733,10 +733,10 @@ int main(int argc, char **argv) {
         // Add differentiated variable, but without its corresponding derivative variable
         // => should be sorted as algebraic. Then add derivative variable and check again
         addVariableVectorToModel(differentiatedVariables, model);
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_ALGEBRAIC), differentiatedVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_ALGEBRAIC), differentiatedVariables) );
         addVariableVectorToModel(derivativeVariables, model);
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::DIFFERENTIATED), differentiatedVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::DERIVATIVE), derivativeVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::DIFFERENTIATED), differentiatedVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::DERIVATIVE), derivativeVariables) );
         
         // Add the rest of the variables and check that they are sorted correctly
         addVariableVectorToModel(outputVariables, model);
@@ -756,25 +756,25 @@ int main(int argc, char **argv) {
         addVariableVectorToModel(depenentRealParameterVariables, model);
         addVariableVectorToModel(depenentIntegerParameterVariables, model);
         addVariableVectorToModel(depenentBooleanParameterVariables, model);
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::OUTPUT), outputVariables) ); 
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_INPUT), inputRealVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::INTEGER_INPUT), inputIntegerVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::BOOLEAN_INPUT), inputBooleanVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_ALGEBRAIC), algebraicVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::DIFFERENTIATED), differentiatedVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::DERIVATIVE), derivativeVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_DISCRETE), discreteRealVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::INTEGER_DISCRETE), discreteIntegerVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::BOOLEAN_DISCRETE), discreteBooleanVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_CONSTANT), constantRealVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::INTEGER_CONSTANT), constantIntegerVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::BOOLEAN_CONSTANT), constantBooleanVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_PARAMETER_INDEPENDENT), indepenentRealParameterVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::INTEGER_PARAMETER_INDEPENDENT), indepenentIntegerParameterVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::BOOLEAN_PARAMETER_INDEPENDENT), indepenentBooleanParameterVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::REAL_PARAMETER_DEPENDENT), depenentRealParameterVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::INTEGER_PARAMETER_DEPENDENT), depenentIntegerParameterVariables) );
-        assert( checkVariablesEqualToInOrder(model.getVariableByKind(Model::BOOLEAN_PARAMETER_DEPENDENT), depenentBooleanParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::OUTPUT), outputVariables) ); 
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_INPUT), inputRealVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::INTEGER_INPUT), inputIntegerVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::BOOLEAN_INPUT), inputBooleanVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_ALGEBRAIC), algebraicVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::DIFFERENTIATED), differentiatedVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::DERIVATIVE), derivativeVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_DISCRETE), discreteRealVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::INTEGER_DISCRETE), discreteIntegerVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::BOOLEAN_DISCRETE), discreteBooleanVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_CONSTANT), constantRealVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::INTEGER_CONSTANT), constantIntegerVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::BOOLEAN_CONSTANT), constantBooleanVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_PARAMETER_INDEPENDENT), indepenentRealParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::INTEGER_PARAMETER_INDEPENDENT), indepenentIntegerParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::BOOLEAN_PARAMETER_INDEPENDENT), indepenentBooleanParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::REAL_PARAMETER_DEPENDENT), depenentRealParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::INTEGER_PARAMETER_DEPENDENT), depenentIntegerParameterVariables) );
+        assert( checkVariablesEqualToInOrder(model.getVariables(Model::BOOLEAN_PARAMETER_DEPENDENT), depenentBooleanParameterVariables) );
     }
     { // Test to add invalid (non-symbolic) variable
         Model model;
@@ -793,13 +793,13 @@ int main(int argc, char **argv) {
     }
     { // Test non-existing VariableType
         Model model;
-        assert( model.getVariableTypeByName("I'mNotATypeInModel") == NULL );
+        assert( model.getVariableType("I'mNotATypeInModel") == NULL );
     }
     { // Test VariableType, default for Real Variables
         Model model;
         model.addVariable(new RealVariable(MX("var"), Variable::INTERNAL, Variable::CONTINUOUS));
         std::stringstream actual;
-        actual << *(model.getVariableTypeByName("Real"));
+        actual << *(model.getVariableType("Real"));
         string expectedPrint = "Type name: Real, attributes:\n\tdisplayUnit = MX()\n\tfixed = MX(Const<0>(scalar))"
                                "\n\tmax = MX(Const<inf>(scalar))\n\tmin = MX(Const<-inf>(scalar))"
                                "\n\tquantity = MX()\n\tstart = MX(Const<0>(scalar))\n\tunit = MX()";
@@ -828,15 +828,15 @@ int main(int argc, char **argv) {
         Model model;
         VariableType* realVarType = new RealType();
         model.addVariable(new RealVariable(MX("var"), Variable::INTERNAL, Variable::CONTINUOUS, realVarType));
-        assert( realVarType == model.getVariableTypeByName("Real") );
+        assert( realVarType == model.getVariableType("Real") );
         
         VariableType* boolVarType = new BooleanType();
         model.addVariable(new BooleanVariable(MX("var"), Variable::INTERNAL, Variable::DISCRETE, boolVarType));
-        assert( boolVarType == model.getVariableTypeByName("Boolean") );
+        assert( boolVarType == model.getVariableType("Boolean") );
         
         VariableType* intVarType = new IntegerType();
         model.addVariable(new IntegerVariable(MX("var"), Variable::INTERNAL, Variable::DISCRETE, intVarType));
-        assert( intVarType == model.getVariableTypeByName("Integer") );
+        assert( intVarType == model.getVariableType("Integer") );
     }
     { // Test Model, set variable with VariableType name equal to existing type, but where the types are not equal
         Model model;
@@ -863,7 +863,7 @@ int main(int argc, char **argv) {
         try 
         {
             model.addVariable(new RealVariable(MX("var"), Variable::INTERNAL, Variable::Variability(10)));
-            model.getVariableByKind(Model::REAL_ALGEBRAIC);
+            model.getVariables(Model::REAL_ALGEBRAIC);
         }
         catch(std::runtime_error& ex)
         { 
@@ -879,7 +879,7 @@ int main(int argc, char **argv) {
         try 
         {
             model.addVariable(new IntegerVariable(MX("var"), Variable::INTERNAL, (Variable::Variability)10));
-            model.getVariableByKind(Model::INTEGER_DISCRETE);
+            model.getVariables(Model::INTEGER_DISCRETE);
         }
         catch(std::runtime_error& ex)
         { 
@@ -895,7 +895,7 @@ int main(int argc, char **argv) {
         try 
         {
             model.addVariable(new BooleanVariable(MX("var"), Variable::INTERNAL, (Variable::Variability)10));
-            model.getVariableByKind(Model::BOOLEAN_DISCRETE);
+            model.getVariables(Model::BOOLEAN_DISCRETE);
         }
         catch(std::runtime_error& ex)
         { 
@@ -911,7 +911,7 @@ int main(int argc, char **argv) {
         try 
         {
             model.addVariable(new RealVariable(MX("var"), (Variable::Causality)10, (Variable::Variability)10));
-            model.getVariableByKind(Model::REAL_ALGEBRAIC);
+            model.getVariables(Model::REAL_ALGEBRAIC);
         }
         catch(std::runtime_error& ex)
         { 

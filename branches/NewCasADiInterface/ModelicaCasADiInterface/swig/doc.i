@@ -94,7 +94,7 @@ Parameters::
 
 ";
 
-%feature("docstring") ModelicaCasADi::Model::getVariableTypeByName "
+%feature("docstring") ModelicaCasADi::Model::getVariableType "
 Get a VariableType with a certain name in the Model.
 
 Parameters::
@@ -109,7 +109,7 @@ Returns::
 ";
 
 
-%feature("docstring") ModelicaCasADi::Model::getVariableByKind "
+%feature("docstring") ModelicaCasADi::Model::getVariables "
 Returns a numpy array with all Variables of a certain kind, as specified in the Model.
 
 Parameters::
@@ -125,7 +125,7 @@ Returns::
 ";
 
 
-%feature("docstring") ModelicaCasADi::Model::getVariableByName "
+%feature("docstring") ModelicaCasADi::Model::getVariable "
 Returns the Variable with the provided name. If there is no 
 variable with that name present in the Model None is returned.
 
@@ -144,7 +144,7 @@ Returns::
         
 ";
 
-%feature("docstring") ModelicaCasADi::Model::getModelVariableByName "
+%feature("docstring") ModelicaCasADi::Model::getModelVariable "
 Returns the Variable with the provided name. If there is no 
 variable with that name present in the Model None is returned.
 
@@ -183,7 +183,7 @@ Returns::
         A numpy array with zero or more Variables. 
 
 ";  
-%feature("docstring") ModelicaCasADi::Model::getAliasVariables "
+%feature("docstring") ModelicaCasADi::Model::getAliases "
 Returns a numpy array with all alias variables present in the Model. 
 
 Returns::
@@ -235,7 +235,7 @@ Returns::
 
 ";
         
-%feature("docstring") ModelicaCasADi::Model::getModelFunctionByName "
+%feature("docstring") ModelicaCasADi::Model::getModelFunction "
 Retrieves a ModelFunction with a certain name. 
 
 Parameters::

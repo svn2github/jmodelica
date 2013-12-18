@@ -34,10 +34,10 @@ void genScript(ModelicaCasADi::OptimizationProblem &myOptProblem, int numSteps, 
     vector<int> nVarCsum;
     
     // Number of vars. 
-    nVar[0] = model->getVariableByKind(Model::DIFFERENTIATED).size();
-    nVar[1] = model->getVariableByKind(Model::DERIVATIVE).size();
-    nVar[2] = model->getVariableByKind(Model::REAL_ALGEBRAIC).size();
-    nVar[3] = model->getVariableByKind(Model::REAL_INPUT).size();
+    nVar[0] = model->getVariables(Model::DIFFERENTIATED).size();
+    nVar[1] = model->getVariables(Model::DERIVATIVE).size();
+    nVar[2] = model->getVariables(Model::REAL_ALGEBRAIC).size();
+    nVar[3] = model->getVariables(Model::REAL_INPUT).size();
     
     nVarCsum.push_back(0);
     std::partial_sum(nVar.begin(), nVar.end()-1, std::back_inserter(nVarCsum));
