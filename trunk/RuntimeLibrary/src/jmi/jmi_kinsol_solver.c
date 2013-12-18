@@ -1465,8 +1465,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         }
     }
 
-    /* Write solution back to model just to make sure. In some cases x was not the last evaluations*/    
-    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+    /* Write solution back to model just to make sure. In some cases x was not the last evaluations*/   
+    block->F(block->problem_data,block->x, block->res, JMI_BLOCK_EVALUATE);
+    /* block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK); */
     
     /* Get debug information */
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
