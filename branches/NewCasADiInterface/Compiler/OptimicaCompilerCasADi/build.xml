@@ -198,6 +198,9 @@
 			<fileset dir="${modelica_casadi_back_end_ast}">
 				<include name="FExpToCasADi.jrag" />
 			</fileset>
+            <fileset dir="${modelica_casadi_back_end_path}/src/jastadd">
+				<include name="CasADiInterface.jrag" />
+			</fileset>
 
 		</jastadd>
 

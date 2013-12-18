@@ -321,7 +321,7 @@ aspect FExpToCasADi {
                     usedCalls.add(callVector.get(index + i));
                 }
             }
-            index += (fleft.hasFExp() ? fleft.getFExp().toMXVector().size() : 1); //TODO: What about omitted arrays?
+            index += (fleft.hasFExp() ? fleft.getFExp().toMXVector().size() : 1);
         }
         return usedCalls;
     }

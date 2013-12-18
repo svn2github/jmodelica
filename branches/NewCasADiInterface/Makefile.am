@@ -148,7 +148,7 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 	
 	
-$(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
+$(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/_modelicacasadi_wrapper.pyd $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py

@@ -676,6 +676,52 @@ Returns::
         
 ";
 
+/********** TimedVariable **********/
+
+%feature("docstring") ModelicaCasADi::TimedVariable::TimedVariable "
+A timed variable keeps a reference to its base variable (e.g. a refernce 
+to X for X(1)), and a time point (e.g. 1). Is used in constraints, and is
+only supported for real variables. 
+
+Parameters::
+
+    MX --
+        A symbolic MX
+        
+    Variable --
+        The base variable for this timed variable, e.g. X if this is timed variable X(1).
+    
+    MX --
+        A MX expression for the time point, e.g. 1 or finalTime/2.
+";
+
+%feature("docstring") ModelicaCasADi::TimedVariable::getType "
+Returns the Type Real
+
+Returns::
+
+    Type --
+        
+";
+
+%feature("docstring") ModelicaCasADi::TimedVariable::getBaseVariable "
+The base variable for this timed variable, e.g. X if this is timed variable X(1).
+
+Returns::
+
+    Variable --
+        
+";
+
+%feature("docstring") ModelicaCasADi::TimedVariable::getTimepoint "
+Returns a MX expression for the time point
+
+Returns::
+
+    MX --
+        
+";
+
 /********** OptimizationProblem  **********/
 %feature("docstring") ModelicaCasADi::OptimizationProblem::OptimizationProblem "
 Create an OptimizationProblem from the constraints, objective function
@@ -688,13 +734,19 @@ Parameters::
         
     numpy.array(Constraint) --
         A numpy array with the path constraints. 
+        
+    numpy.array(Constraint) --
+        A numpy array with the point constraints. 
    
     MX --
         A MX for the start time
         
     MX --
         A MX for the final time
-        
+ 
+    numpy.array(TimedVariable) --
+        A numpy array with the TimedVariable.
+    
     MX --
         A MX for the Lagrange term, default = MX(0)
     
@@ -740,6 +792,26 @@ Returns::
 
     numpy.array(Constraint) --
         A numpy array with the path constraints
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::OptimizationProblem::getPointConstraints "
+Returns the point constraints
+
+Returns::
+
+    numpy.array(Constraint) --
+        A numpy array with the point constraints
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::OptimizationProblem::getTimedVariables "
+Returns the timed variable
+
+Returns::
+
+    numpy.array(TimedVariable) --
+        A numpy array with the timed variables
         
 "; 
 
@@ -790,6 +862,16 @@ Parameters::
 
     numpy.array(Constraint) --
         The path constraints
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::OptimizationProblem::setPointConstraint "
+Sets the point constraints
+
+Parameters::
+
+    numpy.array(Constraint) --
+        The point constraints
         
 "; 
 

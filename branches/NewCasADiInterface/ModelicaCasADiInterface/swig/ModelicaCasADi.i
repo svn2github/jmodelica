@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "types/UserType.hpp"
 
 #include "Variable.hpp"
+#include "TimedVariable.hpp"
 #include "RealVariable.hpp"
 #include "DerivativeVariable.hpp"
 #include "BooleanVariable.hpp"
@@ -80,6 +81,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %instantiate_Ref(ModelicaCasADi, UserType)
 
 %instantiate_Ref(ModelicaCasADi, Variable)
+%instantiate_Ref(ModelicaCasADi, TimedVariable)
 %instantiate_Ref(ModelicaCasADi, RealVariable)
 %instantiate_Ref(ModelicaCasADi, DerivativeVariable)
 %instantiate_Ref(ModelicaCasADi, BooleanVariable)
@@ -107,6 +109,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "types/UserType.hpp"
 
 %include "Variable.hpp"
+%include "TimedVariable.hpp"
 %include "RealVariable.hpp"
 %include "DerivativeVariable.hpp"
 %include "BooleanVariable.hpp"
@@ -150,8 +153,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %extend ModelicaCasADi::UserType {
   std::string __repr__() { return $self->repr(); }
 }
-
 %extend ModelicaCasADi::Variable {
+  std::string __repr__() { return $self->repr(); }
+}
+%extend ModelicaCasADi::TimedVariable {
   std::string __repr__() { return $self->repr(); }
 }
 %extend ModelicaCasADi::RealVariable {

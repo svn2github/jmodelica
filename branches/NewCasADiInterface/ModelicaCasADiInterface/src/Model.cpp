@@ -72,7 +72,7 @@ Model::VariableKind Model::classifyInternalRealVariable(Ref<Variable> var) const
         case(Variable::CONSTANT): return REAL_CONSTANT; break;
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal real variable: " << (*var.getNode());
+            errorMessage << "Invalid variable variability when sorting for internal real variable: " << var;
             throw std::runtime_error(errorMessage.str());
             break;
     } 
@@ -91,7 +91,7 @@ Model::VariableKind Model::classifyInternalIntegerVariable(Ref<Variable> var) co
         case(Variable::CONSTANT): return INTEGER_CONSTANT; break;  
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal integer variable: " << (*var.getNode());
+            errorMessage << "Invalid variable variability when sorting for internal integer variable: " << var;
             throw std::runtime_error(errorMessage.str());
             break;
     }
@@ -110,7 +110,7 @@ Model::VariableKind Model::classifyInternalBooleanVariable(Ref<Variable> var) co
         case(Variable::CONSTANT): return BOOLEAN_CONSTANT; break;  
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable variability when sorting for internal boolean variable: " << (*var.getNode());
+            errorMessage << "Invalid variable variability when sorting for internal boolean variable: " << var;
             throw std::runtime_error(errorMessage.str());
             break;
     }
@@ -130,7 +130,7 @@ Model::VariableKind Model::classifyInputVariable(Ref<Variable> var) const {
         case(Variable::STRING):  return STRING_INPUT;  break;
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable type when sorting for input variable: " << (*var.getNode());
+            errorMessage << "Invalid variable type when sorting for input variable: " << var;
             throw std::runtime_error(errorMessage.str());
             break;
     } 
@@ -143,7 +143,7 @@ Model::VariableKind Model::classifyInternalVariable(Ref<Variable> var) const {
         case(Variable::STRING):  return classifyInternalStringVariable(var);  break; 
         default: 
             std::stringstream errorMessage;
-            errorMessage << "Invalid variable type when sorting for internal variable: " << (*var.getNode());
+            errorMessage << "Invalid variable type when sorting for internal variable: " << var;
             throw std::runtime_error(errorMessage.str());
             break;         
     } 
@@ -157,7 +157,7 @@ Model::VariableKind Model::classifyVariable(Ref<Variable> var) const {
         case Variable::INTERNAL: return classifyInternalVariable(var); break;
     }
     std::stringstream errorMessage;
-    errorMessage << "Invalid variable causality when sorting for variable: " << (*var.getNode());
+    errorMessage << "Invalid variable causality when sorting for variable: " << var;
     throw std::runtime_error(errorMessage.str());
 }
 
@@ -375,7 +375,7 @@ string generatePrintStringForVector(const vector<T> &makeStringOf) {
     std::stringstream result;
     typename vector<T>::const_iterator it;
     for ( it = makeStringOf.begin(); it < makeStringOf.end(); ++it) {
-         result << *(*it).getNode() << "\n";
+         result << *it << "\n";
     }
     return result.str();
 }
@@ -391,11 +391,11 @@ void Model::print(std::ostream& os) const {
     os << generatePrintStringForVector(z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
     for (Model::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
-            os << *(it->second.getNode()) << endl;
+            os << it->second << endl;
     }
     os << "\n------------------------------- Functions -------------------------------\n" << endl;
     for (Model::functionMap::const_iterator it = modelFunctionMap.begin(); it != modelFunctionMap.end(); ++it){
-            os << *(it->second.getNode()) << endl;
+            os << it->second << endl;
     }
     os << "\n------------------------------- Equations -------------------------------\n" << endl;
     if (!initialEquations.empty()) {

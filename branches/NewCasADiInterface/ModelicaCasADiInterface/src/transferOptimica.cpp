@@ -38,12 +38,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FVariable.h"
 #include "org/jmodelica/optimica/compiler/FRealVariable.h"
 #include "org/jmodelica/optimica/compiler/FDerivativeVariable.h"
+#include "org/jmodelica/optimica/compiler/FTimedVariable.h"
+#include "org/jmodelica/optimica/compiler/FIdUse.h"
 #include "org/jmodelica/optimica/compiler/FExp.h"
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
 
 // The ModelicaCasADi program
 #include "Model.hpp"
 #include "Constraint.hpp"
+#include "TimedVariable.hpp"
 
 // For transforming output from JCC-wrapped classes to CasADi objects. 
 // Must be included after FExp.h
@@ -61,22 +64,63 @@ using ModelicaCasADi::Constraint;
 using ModelicaCasADi::OptimizationProblem;
 using ModelicaCasADi::CompilerOptionsWrapper;
 using ModelicaCasADi::Ref;
+using ModelicaCasADi::Variable;
+using ModelicaCasADi::TimedVariable;
 
 
-
-vector< Ref<Constraint> >* transferConstraints(oc::FOptClass &fc){
-    java::util::ArrayList pcsList;
-    vector< Ref<Constraint> >* pcs = new vector< Ref<Constraint> >();
+vector< Ref<Constraint> >* transferPointConstraints(oc::FOptClass &fc){
+    java::util::ArrayList pointConstraintsJM;
+    vector< Ref<Constraint> >* pointConstraints = new vector< Ref<Constraint> >();
     Constraint::Type type;
     for(int i = 0; i < 3; ++i){
-        pcsList = (i==0 ? fc.pathLeqConstraints() : (i==1 ? fc.pathGeqConstraints() : fc.pathEqConstraints()));
+        pointConstraintsJM = (i==0 ? fc.pointLeqConstraints() : (i==1 ? fc.pointGeqConstraints() : fc.pointEqConstraints()));
         type = (i==0? Constraint::LEQ: (i==1? Constraint::GEQ : Constraint::EQ));
-        for(int j = 0; j < pcsList.size(); ++j){
-            oc::FRelationConstraint fr = oc::FRelationConstraint(pcsList.get(j).this$);
-            pcs->push_back(new Constraint(toMX(fr.getLeft()), toMX(fr.getRight()),type));
+        for(int j = 0; j < pointConstraintsJM.size(); ++j){
+            oc::FRelationConstraint fr = oc::FRelationConstraint(pointConstraintsJM.get(j).this$);
+            pointConstraints->push_back(new Constraint(toMX(fr.getLeft()), toMX(fr.getRight()),type));
         }
     }
-    return pcs;
+    return pointConstraints;
+}
+
+
+vector< Ref<Constraint> >* transferPathConstraints(oc::FOptClass &fc){
+    java::util::ArrayList pathConstraintsJM;
+    vector< Ref<Constraint> >* pathConstraints = new vector< Ref<Constraint> >();
+    Constraint::Type type;
+    for(int i = 0; i < 3; ++i){
+        pathConstraintsJM = (i==0 ? fc.pathLeqConstraints() : (i==1 ? fc.pathGeqConstraints() : fc.pathEqConstraints()));
+        type = (i==0? Constraint::LEQ: (i==1? Constraint::GEQ : Constraint::EQ));
+        for(int j = 0; j < pathConstraintsJM.size(); ++j){
+            oc::FRelationConstraint fr = oc::FRelationConstraint(pathConstraintsJM.get(j).this$);
+            pathConstraints->push_back(new Constraint(toMX(fr.getLeft()), toMX(fr.getRight()),type));
+        }
+    }
+    return pathConstraints;
+}
+
+vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass &fc) {
+    java::util::ArrayList timedVarList = fc.timedRealVariables();
+    vector< Ref< TimedVariable > > timedModelVariables;
+    vector< Ref<Variable> > allVars = m->getAllVariables();
+    vector< MX > timedMXVars;
+    vector< MX > timedMXTimePoints;
+    vector< MX > timedMXFVars;
+    oc::FTimedVariable timedVar;
+    for (int i = 0; i < timedVarList.size(); ++i) {
+        timedVar = oc::FTimedVariable(timedVarList.get(i).this$);
+        timedMXVars.push_back(toMX(timedVar));
+        timedMXTimePoints.push_back(toMX(timedVar.getArg()));
+        timedMXFVars.push_back(toMX(timedVar.getName().myFV().asMXVariable()));
+    }
+    for (int i = 0; i < allVars.size(); ++i) {
+        for (int j = 0; j < timedMXFVars.size(); ++j) {
+            if (timedMXFVars[j].isEqual(allVars[i]->getVar())) {
+                timedModelVariables.push_back(new TimedVariable(timedMXVars[j], allVars[i], timedMXTimePoints[j]));
+            }
+        }
+    }
+    return timedModelVariables;
 }
 
 Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
@@ -113,6 +157,8 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         
         // Variables template
         transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (m, fclass.allVariables());
+        // Transfer timed variables. Depends on that other variables are transferred. 
+        vector< Ref<TimedVariable> > timedVars = transferTimedVariables(m, fclass);
         
         // Equations
         transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(m, fclass.equations());
@@ -127,8 +173,9 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         MX lagrangeTerm = fclass.objectiveIntegrandExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveIntegrandExp());
         MX mayerTerm = fclass.objectiveExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveExp());
         
-        return new OptimizationProblem(m, *(transferConstraints(fclass)),  MX(fclass.startTimeAttribute()), 
-                                       MX(fclass.finalTimeAttribute()), lagrangeTerm, mayerTerm);                   
+        return new OptimizationProblem(m, *(transferPathConstraints(fclass)), *(transferPointConstraints(fclass)),
+                                         MX(fclass.startTimeAttribute()), MX(fclass.finalTimeAttribute()), 
+                                         timedVars, lagrangeTerm, mayerTerm);                   
     }
         catch (JavaError e) {
         std::cout << "Java error occurred: " << std::endl;

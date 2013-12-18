@@ -22,8 +22,10 @@ from casadi_interface import *
 # Common variables used in the tests
 x1 = MX("x1")
 x2 = MX("x2")
+x3 = MX("x3")
 der_x1 = MX("der_x1")
 der_x2 = MX("der_x2") 
+der_x3 = MX("der_x3") 
 modelFile = "../common/atomicModelicaModels.mo"
     
 def assertNear(val1, val2, tol):
@@ -300,21 +302,78 @@ def computeStringRepresentationForContainer(myContainer):
         stringRepr += str(myContainer[index])
     return stringRepr
     
-
-def test_OptimicaLessThanConstraint():
-    optProblem =  transfer_to_casadi_interface("atomicOptimizationLEQ", optproblemsFile);
+    
+def test_OptimicaLessThanPathConstraint():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationLEQ", optproblemsFile)
     expected = str(x1) + " <= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
-def test_OptimicaGreaterThanConstraint():
+def test_OptimicaGreaterThanPathConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQ", optproblemsFile)
     expected = str(x1) + " >= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
     
-def test_OptimicaSevaralConstraints():
+def test_OptimicaSevaralPathConstraints():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQandLEQ", optproblemsFile)
     expected = str(x2) + " <= " + str(MX(1.0)) +  str(x1) + " >= " + str(MX(1.0)) 
-    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)    
+
+def test_OptimicaEqualityPointConstraint():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " = " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+def test_OptimicaLessThanPointConstraint():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationLEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " <= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+
+def test_OptimicaGreaterThanPointConstraint():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQpoint", optproblemsFile)
+    expected = str(MX("x1(finalTime)")) + " >= " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+def test_OptimicaSevaralPointConstraints():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
+    expected = str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) + str(MX("x2(finalTime + 1)")) + " = " + str(MX(1.0))
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
+    
+def test_OptimicaMixedConstraints():
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationMixedConstraints", optproblemsFile)
+    expectedPath = str(MX("x3(startTime + 1)")) + " <= " + str(x1)
+    expectedPoint =  str(MX("x2(startTime + 1)")) + " <= " + str(MX(1.0)) +  str(MX("x1(startTime + 1)")) + " >= " + str(MX(1.0)) 
+    assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expectedPath)
+    assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expectedPoint)
+    
+def test_OptimicaTimedVariables():
+    def heurestic_MC_variables_equal(MC_var1, MC_var2):
+        return MC_var1.getVar().isEqual(MC_var2.getVar()) and str(MC_var1) == str(MC_var2)
+
+    optProblem =  transfer_to_casadi_interface("atomicOptimizationTimedVariables", optproblemsFile)
+    # test there are 3 timed
+    timedVars = optProblem.getTimedVariables()
+    assert len(timedVars) == 3
+
+    # test they contain model vars
+    x1 = optProblem.getModel().getVariable("x1")
+    x2 = optProblem.getModel().getVariable("x2")
+    x3 = optProblem.getModel().getVariable("x3")
+
+    assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
+    assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
+    assert heurestic_MC_variables_equal(x3, timedVars[2].getBaseVariable())
+        
+        
+    # Test their time expression has start/final parameter MX in them
+    startTime = optProblem.getModel().getVariable("startTime")
+    finalTime = optProblem.getModel().getVariable("finalTime")
+    tp1 = timedVars[0].getTimepoint()
+    tp2 = timedVars[1].getTimepoint()
+    tp3 = timedVars[2].getTimepoint()
+
+    assert tp1.getDep(1).isEqual(startTime.getVar())
+    assert tp2.getDep(1).isEqual(startTime.getVar())
+    assert tp3.getDep(0).isEqual(finalTime.getVar())
 
 def test_OptimicaStartTime():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationStart5", optproblemsFile)
@@ -347,7 +406,7 @@ def test_OptimicaInitialGuess():
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
 
-def test_OptimicaSimpleEquation():
+def test_OptimicaInvalidCompiler():
     import sys
     errorString = ""
     try:

@@ -26,7 +26,7 @@ void Constraint::print(std::ostream& os) const {
     switch(ct) {
         case Constraint::EQ:  {
             lhs.print(os);
-            os << " == ";
+            os << " = ";
             rhs.print(os);
             break;
         }

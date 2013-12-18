@@ -86,6 +86,7 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FVariable
   org.jmodelica.optimica.compiler.FRealVariable
   org.jmodelica.optimica.compiler.FDerivativeVariable
+  org.jmodelica.optimica.compiler.FTimedVariable
   org.jmodelica.optimica.compiler.FFunctionCall
   org.jmodelica.optimica.compiler.FVectorFunctionCall
   org.jmodelica.optimica.compiler.FFunctionDecl

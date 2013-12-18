@@ -21,33 +21,49 @@ namespace ModelicaCasADi{
 
 OptimizationProblem::OptimizationProblem(Ref<Model> model, 
                                         const std::vector< Ref<Constraint> > &pathConstraints,
+                                        const std::vector< Ref<Constraint> > &pointConstraints,
                                         MX startTime, MX finalTime,
+                                        const std::vector< Ref<TimedVariable> > &timedVariables,
                                         MX lagrangeTerm  /*= MX(0)*/,
                                         MX mayerTerm  /*= MX(0)*/) : model(model)  {
     this->pathConstraints = pathConstraints;
+    this->pointConstraints = pointConstraints;
     this->startTime = startTime;
     this->finalTime = finalTime;
+    this->timedVariables = timedVariables;
     this->lagrangeTerm = lagrangeTerm;
     this->mayerTerm = mayerTerm;
 } 
 void OptimizationProblem::print(ostream& os) const { 
     using namespace std;
     os << "Model contained in OptimizationProblem:\n" << endl;
-    os << *(model.getNode());
-    os << "-- Optimization information  --\n" << endl;
+    os << model;
+    os << "----------------------- Optimization information ------------------------\n\n";
     os << "Start time = ";
     startTime.print(os);
-    os << endl;
     os << "\nFinal time = ";
     finalTime.print(os);
-    os << endl;
+    os << "\n\n";
     for (vector< Ref<Constraint> >::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
         if (it == pathConstraints.begin()) {
-            os << "-- Constraints --" << endl;
+            os << "-- Path constraints --" << endl;
         }
-        os << *(*it).getNode() << endl;
+        os << *it << endl;
     }
-    os << "-- Lagrange term --\n";
+    for (vector< Ref<Constraint> >::const_iterator it = pointConstraints.begin(); it != pointConstraints.end(); ++it) {
+        if (it == pointConstraints.begin()) {
+            os << "-- Point constraints --" << endl;
+        }
+        os << *it << endl;
+    }
+    for (vector< Ref<TimedVariable> >::const_iterator it = timedVariables.begin(); it != timedVariables.end(); ++it) {
+        if (it == timedVariables.begin()) {
+            os << "\n-- Timed variables --\n";
+        }
+        os << *it << endl;
+    }
+    
+    os << "\n-- Lagrange term --\n";
     lagrangeTerm.print(os);
     os << endl;
     os << "-- Mayer term --\n";

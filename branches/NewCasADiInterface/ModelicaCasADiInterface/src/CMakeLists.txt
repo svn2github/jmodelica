@@ -39,6 +39,7 @@ set(MC_CPP
   CompilerOptionsWrapper.cpp
   Constraint.cpp
   DerivativeVariable.cpp
+  TimedVariable.cpp
   Equation.cpp
   IntegerVariable.cpp
   Model.cpp
@@ -63,6 +64,7 @@ set(MC_HPP
   CompilerOptionsWrapper.hpp
   Constraint.hpp
   DerivativeVariable.hpp
+  TimedVariable.hpp
   Equation.hpp
   IntegerVariable.hpp
   ModelFunction.hpp
