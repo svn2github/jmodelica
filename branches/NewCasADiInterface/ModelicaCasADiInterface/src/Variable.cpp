@@ -93,6 +93,15 @@ void Variable::setAttributeForAlias(AttributeKey key, AttributeValue val) {
 }
 
 void Variable::setAttribute(AttributeKey key, AttributeValue val) { 
+    if (key == "bindingExpression" && hasAttributeSet("bindingExpression")) {
+        MX bindingExpression = *getAttribute(key);
+        if (bindingExpression.isConstant() && (!val.isConstant())) {
+            throw std::runtime_error("It is not allowed to make independent parameters dependent");
+        } else if (!bindingExpression.isConstant()) {
+            throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
+        }
+    } 
+    
     if (isAlias()) {
         setAttributeForAlias(key, val);
     } else {
@@ -100,11 +109,7 @@ void Variable::setAttribute(AttributeKey key, AttributeValue val) {
     }
 }
 void Variable::setAttribute(AttributeKey key, double val) { 
-    if (isAlias()) {
-        setAttributeForAlias(key, val);
-    } else {
-        attributes[AttributeKeyInternal(key)]=MX(val); 
-    }
+    setAttribute(key, MX(val));
 }
 
 

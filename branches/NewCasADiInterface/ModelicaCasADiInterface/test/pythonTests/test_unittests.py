@@ -150,35 +150,77 @@ def test_DependentParameters():
     funcVar = MX("funcVar")
     f = MXFunction([funcVar], [funcVar*2])
     f.init()
-    
-    
+
+
     eq1 = MX(10)
     eq2 = a + MX(2)
     eq3 = a*b
     eq4 = f.call([a])[0]
-    
+
     r1 = RealVariable(a, Variable.INTERNAL, Variable.PARAMETER)
     r2 = RealVariable(b, Variable.INTERNAL, Variable.PARAMETER)
     r3 = RealVariable(c, Variable.INTERNAL, Variable.PARAMETER)
     r4 = RealVariable(d, Variable.INTERNAL, Variable.PARAMETER)
-    
+
     r1.setAttribute("bindingExpression", eq1)
     r2.setAttribute("bindingExpression", eq2)
     r3.setAttribute("bindingExpression", eq3)
     r4.setAttribute("bindingExpression", eq4)
-    
+
     model = Model()
-    
+
     model.addVariable(r1)
     model.addVariable(r2)
     model.addVariable(r3)
     model.addVariable(r4)
-    
+
     model.calculateValuesForDependentParameters()
-    
+
     assert r2.getAttribute("evaluatedBindingExpression").getValue() == 12
     assert r3.getAttribute("evaluatedBindingExpression").getValue() == 120
     assert r4.getAttribute("evaluatedBindingExpression").getValue() == 20
+    
+    
+def test_DisallowedChangedBindingExpression():
+    a = MX("a")
+    b = MX("b")
+
+    eq1 = MX(10)
+    eq2 = a + MX(2)
+
+    r1 = RealVariable(a, Variable.INTERNAL, Variable.PARAMETER)
+    r2 = RealVariable(b, Variable.INTERNAL, Variable.PARAMETER)
+
+    r1.setAttribute("bindingExpression", eq1)
+    r2.setAttribute("bindingExpression", eq2)
+
+    errorString = ""
+
+    # Test independent parameter
+    # Try to set a new constant bindingExpression, allowed
+    r1.setAttribute("bindingExpression", 5)
+    assert r1.getAttribute("bindingExpression").getValue() == 5
+    # Try to set a non constant bindingExpression
+    try:
+        r1.setAttribute("bindingExpression", MX("var"))
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "It is not allowed to make independent parameters dependent");
+
+    # Test dependent parameter, no changes to bindingExpression allowed
+    # Try to set a constant bindingExpression
+    try:
+        r2.setAttribute("bindingExpression", 5)
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "It is not allowed to change binding expression of dependent parameters");
+    # Try to set a non constant bindingExpression
+    try:
+        r2.setAttribute("bindingExpression", MX("var"))
+    except:
+        errorString = sys.exc_info()[1].message 
+    assert(errorString == "It is not allowed to change binding expression of dependent parameters");
+    
 
 def test_NumericalEvaluation():
     a = MX("a")
