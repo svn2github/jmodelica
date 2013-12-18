@@ -56,21 +56,22 @@ using ModelicaCasADi::CompilerOptionsWrapper;
 using ModelicaCasADi::Ref;
 
 Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
-    // initalizeClass is needed on classes where static variables are acessed. 
-    // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
-    jl::System::initializeClass(false); 
-    mc::ModelicaCompiler::initializeClass(false); 
-    
-    Ref<Model> m = new Model();
-    mc::ModelicaCompiler compiler(options->getOptionRegistry());
-    
-    java::lang::String fileVecJava[modelFiles.size()];
-    for (int i = 0; i < modelFiles.size(); ++i) {
-        fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
-    }
-    compiler.setLogger(StringFromUTF(log_level.c_str()));
-
     try {
+        // initalizeClass is needed on classes where static variables are acessed. 
+        // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
+        jl::System::initializeClass(false); 
+        mc::ModelicaCompiler::initializeClass(false); 
+        
+        Ref<Model> m = new Model();
+        mc::ModelicaCompiler compiler(options->getOptionRegistry());
+        
+        java::lang::String fileVecJava[modelFiles.size()];
+        for (int i = 0; i < modelFiles.size(); ++i) {
+            fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
+        }
+        compiler.setLogger(StringFromUTF(log_level.c_str()));
+
+
         mc::FClass fclass = compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
@@ -97,10 +98,8 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
         // Done
         return m;                   
     }
-        catch (JavaError e) {
-        cout << "Java error occurred: " << endl;
-        describeJavaException();
-        clearJavaException();
+    catch (JavaError e) {
+        rethrowJavaException(e);
     }
     return NULL;
     

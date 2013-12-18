@@ -124,22 +124,23 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
 }
 
 Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
-    // initalizeClass is needed on classes where static variables are acessed. 
-    // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
-    jl::System::initializeClass(false);
-    oc::OptimicaCompiler::initializeClass(false);
-    
-    // Create a model and optimica compiler
-    Ref<Model> m = new Model();
-    oc::OptimicaCompiler compiler(options->getOptionRegistry());
-    
-    java::lang::String fileVecJava[modelFiles.size()];
-    for (int i = 0; i < modelFiles.size(); ++i) {
-        fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
-    }
-    compiler.setLogger(StringFromUTF(log_level.c_str()));
-    
     try {
+        // initalizeClass is needed on classes where static variables are acessed. 
+        // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
+        jl::System::initializeClass(false);
+        oc::OptimicaCompiler::initializeClass(false);
+        
+        // Create a model and optimica compiler
+        Ref<Model> m = new Model();
+        oc::OptimicaCompiler compiler(options->getOptionRegistry());
+        
+        java::lang::String fileVecJava[modelFiles.size()];
+        for (int i = 0; i < modelFiles.size(); ++i) {
+            fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
+        }
+        compiler.setLogger(StringFromUTF(log_level.c_str()));
+    
+
         oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
             StringFromUTF(modelName.c_str())).this$);
@@ -177,10 +178,8 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
                                          MX(fclass.startTimeAttribute()), MX(fclass.finalTimeAttribute()), 
                                          timedVars, lagrangeTerm, mayerTerm);                   
     }
-        catch (JavaError e) {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+    catch (JavaError e) {
+        rethrowJavaException(e);
     }
     return NULL;
 }

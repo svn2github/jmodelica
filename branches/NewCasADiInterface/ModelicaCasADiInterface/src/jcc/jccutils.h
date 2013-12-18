@@ -9,9 +9,8 @@
 #include "java/lang/Class.h"
 
 #include "initjcc.h"
+#include "jccexception.h"
 
-
-typedef int JavaError; // Hopefully JCC will use a better type some day
 
 inline void describeJavaException() { vm_env->ExceptionDescribe(); }
 inline void clearJavaException()    { vm_env->ExceptionClear(); }

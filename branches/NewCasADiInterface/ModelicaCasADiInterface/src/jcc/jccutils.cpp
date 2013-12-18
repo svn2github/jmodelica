@@ -1,9 +1,20 @@
+#include <iostream>
 #include <jni.h>
 
 #include "initjcc.h"
 #include "jccutils.h"
 
 using namespace java::lang;
+
+void describeAndClearJavaException(JavaError e) {
+    std::cout << "Java error occurred: " << std::endl;
+    describeJavaException(); clearJavaException();
+}
+
+void rethrowJavaException(JavaError e) {
+    describeAndClearJavaException(e);
+    throw "a java error occurred; details were printed";
+}
 
 jstring fromUTF(const char *bytes) {
     return vm_env->NewStringUTF(bytes);

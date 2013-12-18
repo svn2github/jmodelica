@@ -27,15 +27,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %{
 #include <exception>
+#include "jccexception.h"
 %}
 
 %exception {
     try {
         $action
-    } catch (const std::exception& e) { \
-    SWIG_exception(SWIG_RuntimeError, e.what()); \
-    } catch (const char* e) { \
-        SWIG_exception(SWIG_RuntimeError, e); \
+    } catch (const std::exception& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    } catch (const char* e) {
+        SWIG_exception(SWIG_RuntimeError, e);
+    } catch (JavaError e) {
+        describeAndClearJavaException(e);
+        SWIG_exception(SWIG_RuntimeError, "a java error occurred; details were printed");
     }
 }
 

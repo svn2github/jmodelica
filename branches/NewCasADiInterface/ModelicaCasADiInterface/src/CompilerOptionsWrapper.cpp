@@ -28,9 +28,7 @@ void CompilerOptionsWrapper::setStringOption(std::string opt, std::string val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 void CompilerOptionsWrapper::setBooleanOption(std::string opt, bool val) {
@@ -40,9 +38,7 @@ void CompilerOptionsWrapper::setBooleanOption(std::string opt, bool val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 void CompilerOptionsWrapper::setIntegerOption(std::string opt, int val) {
@@ -52,9 +48,7 @@ void CompilerOptionsWrapper::setIntegerOption(std::string opt, int val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 void CompilerOptionsWrapper::setRealOption(std::string opt, double val) {
@@ -64,9 +58,7 @@ void CompilerOptionsWrapper::setRealOption(std::string opt, double val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 
@@ -77,9 +69,7 @@ void CompilerOptionsWrapper::addStringOption(std::string opt, std::string val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }    
 }
 void CompilerOptionsWrapper::addBooleanOption(std::string opt, bool val) {
@@ -89,9 +79,7 @@ void CompilerOptionsWrapper::addBooleanOption(std::string opt, bool val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 void CompilerOptionsWrapper::addIntegerOption(std::string opt, int val) {
@@ -101,9 +89,7 @@ void CompilerOptionsWrapper::addIntegerOption(std::string opt, int val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 void CompilerOptionsWrapper::addRealOption(std::string opt, double val) {
@@ -113,9 +99,7 @@ void CompilerOptionsWrapper::addRealOption(std::string opt, double val) {
     }
     catch (JavaError e) 
     {
-        std::cout << "Java error occurred: " << std::endl;
-        describeJavaException();
-        clearJavaException();
+        rethrowJavaException(e);
     }
 }
 
