@@ -1056,7 +1056,7 @@ aspect Scalarization {
     syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray() && canAcceptArray();
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
-    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause() && !canAcceptArray();
+    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FMatrix.extractTemp()       = size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
@@ -1189,6 +1189,7 @@ aspect Scalarization {
      */
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         boolean notFunc = !inFunction();
+        getArgs().createArrayTemporaries(clauses, vars, indexMap);
         FExp temp = createTemporaryExp(indexMap, notFunc);
         if (temp != null) {
             createFunctionCallClause(clauses, indexMap, temp);
@@ -1245,6 +1246,7 @@ aspect Scalarization {
      * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
      */
     public void FFunctionCall.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        getArgs().createArrayTemporaries(clauses, vars, indexMap);
         createFunctionCallClause(clauses, indexMap, tempUseExp());
     }
     
@@ -1975,6 +1977,7 @@ aspect Scalarization {
 	 */
 	public void FFunctionCallEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
+	    createArrayTemporaries(eqns, vars, indexMap);
 	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
 	        for (FExp e : getCall().getArray().iterable()) {
 	            FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(indexMap);

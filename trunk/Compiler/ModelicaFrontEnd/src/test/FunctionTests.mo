@@ -4784,9 +4784,14 @@ public
   input Real[:] o_in;
   output Real[size(in1, 1)] o;
   Real[:] temp_1;
+  Real[:] temp_2;
  algorithm
   size(temp_1) := {size(in1, 1)};
-  (temp_1) := FunctionTests.ArrayExpInFunc24.f(in1, in2, o_in[in2]);
+  size(temp_2) := {size(in2, 1)};
+  for i1 in 1:size(in2, 1) loop
+   temp_2[i1] := o_in[in2[i1]];
+  end for;
+  (temp_1) := FunctionTests.ArrayExpInFunc24.f(in1, in2, temp_2);
   for i1 in 1:size(in1, 1) loop
    o[in1[i1]] := temp_1[i1];
   end for;
@@ -5868,9 +5873,11 @@ public
  function FunctionTests.ArrayOutputScalarization17.f1
   output Real o;
   Real[2] y;
+  Real[2] temp_1;
  algorithm
   o := 2;
-  (y) := FunctionTests.ArrayOutputScalarization17.f2(FunctionTests.ArrayOutputScalarization17.f2({1, 2}));
+  (temp_1) := FunctionTests.ArrayOutputScalarization17.f2({1, 2});
+  (y) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
   return;
  end FunctionTests.ArrayOutputScalarization17.f1;
 
@@ -7832,6 +7839,87 @@ public
 end FunctionTests.UnknownArray32;
 ")})));
 end UnknownArray32;
+
+model UnknownArray33
+	
+  record R
+    Real[2] x;
+  end R;
+	
+    function f
+        input Real[2] a;
+        output Real b;
+        output R c;
+    algorithm
+        b := a[1];
+		c := R(f2(f2(a)));
+    end f;
+	
+	function f2
+		input Real[:] a;
+		output Real[size(a,1)] b = a;
+		algorithm
+	end f2;
+    
+    Real x;
+	R y;
+equation
+	(x,y) = f(f2(f2({time,time*2})));
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="UnknownArray33",
+			description="Check extraction of function calls in function call equations",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray33
+ Real x;
+ Real y.x[1];
+ Real y.x[2];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
+equation
+ ({temp_1[1], temp_1[2]}) = FunctionTests.UnknownArray33.f2({time, time * 2});
+ ({temp_2[1], temp_2[2]}) = FunctionTests.UnknownArray33.f2({temp_1[1], temp_1[2]});
+ (x, FunctionTests.UnknownArray33.R({y.x[1], y.x[2]})) = FunctionTests.UnknownArray33.f({temp_2[1], temp_2[2]});
+
+public
+ function FunctionTests.UnknownArray33.f
+  input Real[2] a;
+  output Real b;
+  output FunctionTests.UnknownArray33.R c;
+  Real[2] temp_1;
+  Real[2] temp_2;
+ algorithm
+  b := a[1];
+  (temp_1) := FunctionTests.UnknownArray33.f2(a);
+  (temp_2) := FunctionTests.UnknownArray33.f2(temp_1);
+  c.x[1] := temp_2[1];
+  c.x[2] := temp_2[2];
+  return;
+ end FunctionTests.UnknownArray33.f;
+
+ function FunctionTests.UnknownArray33.f2
+  input Real[:] a;
+  output Real[size(a, 1)] b;
+ algorithm
+  for i1 in 1:size(a, 1) loop
+   b[i1] := a[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray33.f2;
+
+ record FunctionTests.UnknownArray33.R
+  Real x[2];
+ end FunctionTests.UnknownArray33.R;
+
+end FunctionTests.UnknownArray33;
+			
+")})));
+end UnknownArray33;
 
 // TODO: need more complex cases
 model IncompleteFunc1
