@@ -1128,7 +1128,7 @@ Semantic error at line 821, column 7:
   Can not infer array size of the variable x
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 823, column 2:
-  The right and left expression types of equation are not compatible
+  The array sizes of right and left hand side of equation are not compatible
 ")})));
 end UnknownSize6;
 
@@ -6148,6 +6148,100 @@ fclass ArrayTests.Other.ArraySize3
 end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;
+
+
+model ArraySizeInIf1
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = false;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if a then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySizeInIf1",
+			description="Test that array size errors lock if branches if possible",
+			flatModel="
+fclass ArrayTests.Other.ArraySizeInIf1
+ parameter Boolean a = false /* false */;
+ parameter Integer b = 5 /* 5 */;
+ parameter Integer c = 2 /* 2 */;
+ parameter Integer d = 1 /* 1 */;
+ constant Real e[1] = 1;
+ constant Real e[2] = 2;
+ constant Real f[1] = 1;
+end ArrayTests.Other.ArraySizeInIf1;
+")})));
+end ArraySizeInIf1;
+
+
+model ArraySizeInIf2
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = false;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if time > 2 then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Other_ArraySizeInIf2",
+			description="Test that array size errors don't lock if branches if not possible",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Semantic error at line 6225, column 5:
+  All branches in if equation with non-parameter tests must have the same number of equations
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Semantic error at line 6226, column 9:
+  The array sizes of right and left hand side of equation are not compatible
+")})));
+end ArraySizeInIf2;
 
 end Other;
 
