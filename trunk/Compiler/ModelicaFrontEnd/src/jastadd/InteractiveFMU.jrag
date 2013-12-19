@@ -46,14 +46,14 @@ aspect InteractiveFMU{
 			for (AbstractEquationBlock aeb : daeBLT) {
 				if (aeb.isSolvable())
 					continue;
-				for (FAbstractEquation fae : aeb.equations())
+				for (FAbstractEquation fae : aeb.allEquations())
 					if (!localIterations.contains(fae))
 						allSolved = false;
 			}
 			for (AbstractEquationBlock aeb : daeInitBLT) {
 				if (aeb.isSolvable())
 					continue;
-				for (FAbstractEquation fae : aeb.equations())
+				for (FAbstractEquation fae : aeb.allEquations())
 					if (!localIterations.contains(fae))
 						allSolved = false;
 			}
@@ -70,7 +70,7 @@ aspect InteractiveFMU{
 	public abstract void AbstractEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations);
 	
 	public void EquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
-		for (SimpleEquationBlock subBlock : blocks)
+		for (SimpleEquationBlock subBlock : unsolvedBlocks)
 			subBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	
@@ -162,9 +162,9 @@ aspect InteractiveFMU{
 	}
 	
 	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
-		for (SimpleEquationBlock solvedBlock : solvedBlocks)
+		for (SimpleEquationBlock solvedBlock : solvedBlocks())
 			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
-		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks)
+		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks())
 			unsolvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	

@@ -376,7 +376,7 @@ aspect IndexReduction {
             if (!eb.differentiatedEquations().isEmpty()) {
                 add = true;
             } else {
-                for (FVariable var : eb.activeVariables()) {
+                for (FVariable var : eb.allVariables()) {
                     if (var.isDerivativeVariable()) {
                         add = true;
                         break;
@@ -389,11 +389,11 @@ aspect IndexReduction {
                 
                 // Step 1: Initialize, add all equations in blocks
                 // having differentiated equations
-                g.addAll(eb.equations());
+                g.addAll(eb.allEquations());
                 
                 // Step 2: Extract all active variables, i.e., highest order 
                 // derivatives for each variable
-                for (FVariable fv : eb.activeVariables())
+                for (FVariable fv : eb.allVariables())
                     z.add(fv);
             }
         }

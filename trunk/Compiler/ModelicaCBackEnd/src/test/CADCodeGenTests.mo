@@ -3001,6 +3001,7 @@ equation
 			fmi_version="2.0alpha",
 			generate_ode=true,
 			equation_sorting=true,
+			automatic_tearing=false,
 			template="
 $CAD_dae_blocks_residual_functions$
 ",
