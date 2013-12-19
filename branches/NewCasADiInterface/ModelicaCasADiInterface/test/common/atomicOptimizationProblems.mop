@@ -95,7 +95,7 @@ constraint
     x3(startTime + 1) <= x1;
 end atomicOptimizationMixedConstraints;
 
-optimization atomicOptimizationTimedVariables (objectiveIntegrand=x1) 
+optimization atomicOptimizationTimedVariables (objective=x1(finalTime)) 
     Real x1(start=0);
     Real x2(start=0);
     Real x3(start=0);
@@ -191,4 +191,3 @@ equation
 constraint
     x1 >=  1.00;
 end atomicWithInitialGuess;
-

@@ -352,7 +352,7 @@ def test_OptimicaTimedVariables():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationTimedVariables", optproblemsFile)
     # test there are 3 timed
     timedVars = optProblem.getTimedVariables()
-    assert len(timedVars) == 3
+    assert len(timedVars) == 4
 
     # test they contain model vars
     x1 = optProblem.getModel().getVariable("x1")
@@ -360,20 +360,37 @@ def test_OptimicaTimedVariables():
     x3 = optProblem.getModel().getVariable("x3")
 
     assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
-    assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
-    assert heurestic_MC_variables_equal(x3, timedVars[2].getBaseVariable())
+    assert heurestic_MC_variables_equal(x1, timedVars[1].getBaseVariable())
+    assert heurestic_MC_variables_equal(x2, timedVars[2].getBaseVariable())
+    assert heurestic_MC_variables_equal(x3, timedVars[3].getBaseVariable())
         
         
-    # Test their time expression has start/final parameter MX in them
+    # Test their time expression has start/final parameter MX in them and
+    # that timed variables are lazy.
     startTime = optProblem.getModel().getVariable("startTime")
     finalTime = optProblem.getModel().getVariable("finalTime")
+    path_constraints = optProblem.getPathConstraints()
+    point_constraints = optProblem.getPointConstraints()
+
     tp1 = timedVars[0].getTimepoint()
     tp2 = timedVars[1].getTimepoint()
     tp3 = timedVars[2].getTimepoint()
+    tp4 = timedVars[3].getTimepoint()
+
+    tv1 = timedVars[0].getVar()
+    tv2 = timedVars[1].getVar()
+    tv3 = timedVars[2].getVar()
+    tv4 = timedVars[3].getVar()
 
     assert tp1.getDep(1).isEqual(startTime.getVar())
-    assert tp2.getDep(1).isEqual(startTime.getVar())
-    assert tp3.getDep(0).isEqual(finalTime.getVar())
+    assert tp2.isEqual(finalTime.getVar())
+    assert tp3.getDep(1).isEqual(startTime.getVar())
+    assert tp4.getDep(0).isEqual(finalTime.getVar())
+
+    assert tv1.isEqual(point_constraints[0].getLhs())
+    assert tv2.isEqual(optProblem.getMayerTerm())
+    assert tv3.isEqual(path_constraints[0].getLhs())
+    assert tv4.isEqual(path_constraints[1].getLhs())
 
 def test_OptimicaStartTime():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationStart5", optproblemsFile)

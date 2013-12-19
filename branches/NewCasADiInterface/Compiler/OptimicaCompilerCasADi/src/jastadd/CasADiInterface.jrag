@@ -18,5 +18,5 @@ import casadi.MX;
 
 // This aspect defines CasADiInterface functionality unique to the OptimicaCompiler. Shared functionality is located in FExpToCasADi under ModelicaCompilerCasADi. 
 aspect CasADiInterface {
-    eq FTimedVariable.toMX() = new MX(getName().toString() + "(" + getArg().toString() + ")");
+    syn lazy MX FTimedVariable.toMX() = new MX(getName().toString() + "(" + getArg().toString() + ")");
 }
