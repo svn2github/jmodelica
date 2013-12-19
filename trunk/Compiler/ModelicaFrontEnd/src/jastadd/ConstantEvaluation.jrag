@@ -2928,10 +2928,8 @@ aspect ConstantEvaluation {
    */
   syn CValue FType.sign(CValue v) = 
 	  CValue.UNKNOWN;
-  eq FRealType.sign(CValue v) = 
-	  new CValueReal(StrictMath.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) StrictMath.signum(v.intValue()));
+	  new CValueInteger((int) StrictMath.signum(v.realValue()));
   
   /**
    * \brief Ceil expression for constant values.
