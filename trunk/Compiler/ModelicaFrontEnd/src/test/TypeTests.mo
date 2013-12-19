@@ -1232,12 +1232,12 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="PreTest1",
-			description="Testing that continuous variables can be accessed in pre expressions only inside when clauses.",
+			description="Testing that continuous variables can't be accessed in pre expressions in normal equations",
 			errorMessage="
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1256, column 13:
-  Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses
+  Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses and initial equations
 ")})));
 end PreTest1;
 
@@ -1302,6 +1302,30 @@ end TypeTests.PreTest3;
 end PreTest3;
 
 
+model PreTest4
+    Real x(start = 1);
+initial equation
+    pre(x) = 0;
+equation
+    der(x) = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PreInInitial1",
+            description="Test that pre() of continuous variable can be used in initial equations",
+            flatModel="
+fclass TypeTests.PreTest4
+ Real x(start = 1);
+initial equation 
+ pre(x) = 0;
+ x = 1;
+equation
+ der(x) = time;
+end TypeTests.PreTest4;
+")})));
+end PreTest4;
+
+
 model EdgeTest1
   Real x (start=3);
   Boolean x2;
@@ -1349,7 +1373,7 @@ equation
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 1147, column 7:
-  Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses
+  Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses and initial equations
 ")})));
 end ChangeTest1;
 

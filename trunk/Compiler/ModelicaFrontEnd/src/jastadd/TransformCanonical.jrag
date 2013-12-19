@@ -1436,22 +1436,40 @@ aspect TransformCanonical {
     public class FClass {
         /**
          * Add pre variables to the list of FVariables, one for each
-         * discrete variable.
+         * discrete variable and one for each continuous variable that is 
+         * used in a pre() expression in an initial equation.
          */
         public class addFPreVariables extends Transformation {
             public void perform() {
                 ArrayList<FVariable> l = new ArrayList<FVariable>();
-                for (FVariable fv : discreteVariables()) {
+                for (FVariable fv : discreteVariables()) 
                     l.add(fv.createPreVariable());
-                }
-                for (FVariable fv : l) {
+                for (FVariable fv : continuousVariablesUsedInPreInInitial())
+                    l.add(fv.createPreVariable());
+                for (FVariable fv : l) 
                     addFVariable(fv);
-                }
-//              flush();
                 root().flushAllRecursive();
             }
         }
     }
+    
+    syn lazy Collection<FVariable> FClass.continuousVariablesUsedInPreInInitial() {
+        Set<FVariable> res = new LinkedHashSet<FVariable>();
+        getFInitialEquations().gatherContinuousVariablesUsedInPre(res);
+        return new ArrayList<FVariable>(res);
+    }
+    
+    public void ASTNode.gatherContinuousVariablesUsedInPre(Set<FVariable> res) {
+        for (ASTNode n : this) 
+            n.gatherContinuousVariablesUsedInPre(res);
+    }
+    
+    public void FPreExp.gatherContinuousVariablesUsedInPre(Set<FVariable> res) {
+        FAbstractVariable fv = getFIdUse().myFV();
+        if (fv.isContinuous())
+            res.add((FVariable) fv);
+    }
+    
 	
 	/**
 	 * Create a pre variable for this variable.

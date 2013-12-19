@@ -1051,7 +1051,7 @@ aspect FlatVariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen()) 
+        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }
@@ -1070,11 +1070,11 @@ aspect FlatVariabilityCheck {
     }
     
     public void InstPreExp.discreteArgError() {
-        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses and initial equations");
     }
     
     public void FChangeExp.discreteArgError() {
-        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses and initial equations");
     }
     
     public void FReinit.discreteArgError() {
