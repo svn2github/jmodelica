@@ -17,6 +17,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 /********** ModelicaCasADi::Model **********/
+%feature("docstring") ModelicaCasADi::Model "
+Model represent a compiled Modelica model in CasADi interface, 
+and it mostly keeps lists with variables and equations. Model 
+provides many methods for getting/setting various properties on the model,
+and it also provides high-level functionality such as calculating
+the values of dependent parameters, or categorising variables. ";
+
+
 %feature("docstring") ModelicaCasADi::Model::Model "
 Creates a Model, instantiated without any arguments. 
 ";
@@ -251,6 +259,11 @@ Returns::
 ";      
 
 /********** ModelicaCasADi::Equation **********/
+%feature("docstring") ModelicaCasADi::Equation "
+Equation represents an equation in Modelica, and it
+keeps MX expressions for the right and left-hand-side.";
+
+
 %feature("docstring") ModelicaCasADi::Equation::Equation "
 Creates an Equation, with a MX expressions for the left and right hand side.
 
@@ -294,6 +307,16 @@ Returns::
 "; 
 
 /********** ModelicaCasADi::Variable  **********/
+%feature("docstring") ModelicaCasADi::Variable "
+ Abstract class for Variables, using symolic MX. A variable holds data 
+ so that it can represent a Modelica or Optimica variable. This data
+ consists of attributes and enum variables that tells the variable's
+ primitive data type and its causality and variability. 
+ 
+ A variable can also hold a VariableType that contains information about 
+ its default attributes or the attributes of its user defined type. ";
+
+
 %feature("docstring") ModelicaCasADi::Variable::Variable "
 Creates an empty Variable. Note that Variable should not be used directly,
 instead subclasses such as RealVariable should be used. 
@@ -477,6 +500,13 @@ Parameters::
 
 
 /********** ModelFunction **********/
+%feature("docstring") ModelicaCasADi::ModelFunction "
+ModelFunction is a wrapper around a Modelica function. CasADi
+provides the class MXFunction which is used to represent Modelica function,
+and calls using these functions are present in the MX the equations keeps. 
+ModelFunction provides a way to call the MXFunction using a MXVector 
+as arguments to the function.";
+
 %feature("docstring") ModelicaCasADi::ModelFunction::ModelFunction "
 Create a ModelFunction, which is basically a wrapper around an MXFunction 
 that may be called and printed. 
@@ -514,6 +544,10 @@ Returns::
 ";
 
 /********** RealVariable **********/ 
+%feature("docstring") ModelicaCasADi::RealVariable "
+Represent a real Modelica variable. Can keep a reference to
+a DerivativeVariable.";
+
 %feature("docstring") ModelicaCasADi::RealVariable::RealVariable "
 Create a RealVariable.
 
@@ -575,6 +609,9 @@ Returns::
 ";
 
 /********** DerivativeVariable **********/
+%feature("docstring") ModelicaCasADi::DerivativeVariable "
+Represent a derivate variable, e.g. a variable that represents
+der(variable). Keeps a reference to its corresponding non-derivate variable.";
 
 %feature("docstring") ModelicaCasADi::DerivativeVariable::DerivativeVariable "
 Create a derivative variable. A derivative variable takes its 
@@ -615,6 +652,11 @@ Returns::
 ";
 
 /********** IntegerVariable **********/
+%feature("docstring") ModelicaCasADi::IntegerVariable "
+
+An integer Modelica variable.
+
+";
 
 %feature("docstring") ModelicaCasADi::IntegerVariable::IntegerVariable "
 Create an Integer Variable. An integer Variable may not have 
@@ -646,6 +688,10 @@ Returns::
 ";
 
 /********** BooleanVariable **********/
+%feature("docstring") ModelicaCasADi::BooleanVariable "
+
+A boolean Modelica variable.
+";
 
 %feature("docstring") ModelicaCasADi::BooleanVariable::BooleanVariable "
 Create a Boolean variable. Boolean variables may not have
@@ -677,6 +723,10 @@ Returns::
 ";
 
 /********** TimedVariable **********/
+%feature("docstring") ModelicaCasADi::TimedVariable "
+Represents a variable at a given time, as supported in Optimica constraints. 
+A timed variable keeps a reference to its base variable
+ (e.g. a refernce to X for X(1)), and a time point (e.g. 1). ";
 
 %feature("docstring") ModelicaCasADi::TimedVariable::TimedVariable "
 A timed variable keeps a reference to its base variable (e.g. a refernce 
@@ -723,6 +773,12 @@ Returns::
 ";
 
 /********** OptimizationProblem  **********/
+%feature("docstring") ModelicaCasADi::OptimizationProblem "
+OptimizationProblem reperesent an Optimica optimization problem. 
+OptimizationProblem keeps a reference to a Model and provides some
+additional information such as constraints, timed variables, Lagrange
+and Mayer terms. ";
+
 %feature("docstring") ModelicaCasADi::OptimizationProblem::OptimizationProblem "
 Create an OptimizationProblem from the constraints, objective function
 and start/final times.
@@ -896,6 +952,11 @@ Parameters::
 "; 
 
 /********** Constraint  **********/
+%feature("docstring") ModelicaCasADi::Constraint "
+Constraint represents an optimica constraint. Constraint
+keeps MX for its left and right-hand-side, as well as a constraint
+type (i.e. equal, less than or equal, greater than or equal). ";
+
 %feature("docstring") ModelicaCasADi::Constraint::Constraint "
 Create a constraint from MX for the left and right hand side, 
 and a relation type (i.e. less than, greateer than and equal).

@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi
 {
 /** 
- * A timed variable keeps a reference to its base variable (e.g. a refernce to X * for X(1)), and a time point (e.g. 1). 
+ * A timed variable keeps a reference to its base variable (e.g. a refernce to X
+ * for X(1)), and a time point (e.g. 1). 
  */
 class TimedVariable : public Variable {
     public:
