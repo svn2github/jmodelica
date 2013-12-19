@@ -1008,12 +1008,18 @@ public class ModelicaCompiler {
 		    if (f.isDirectory()) 
 		        name_tmp = LibNode.isStructuredLib(f) ? new File(f, LibNode.PACKAGE_FILE).getPath() : null;
             SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
-            if (!options.getBooleanOption("ignore_within") && sr_tmp != null && sr_tmp.isFileInLibrary()) {
-                String lib = sr_tmp.findOutermostLibraryDir();
-                String type = f.isDirectory() ? "Directory" : "File";
-                log.warning("%s '%s' is part of library at '%s', using library instead.", type, f.getPath(), lib);
-                name = lib;
-                f = new File(name);
+            if (!options.getBooleanOption("ignore_within")) {
+                String lib = null;
+                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
+                    lib = sr_tmp.findOutermostLibraryDir();
+                else if (f.getName().equals(LibNode.PACKAGE_FILE))
+                    lib = f.getParent();
+                if (lib != null) {
+                    String type = f.isDirectory() ? "Directory" : "File";
+                    log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
+                    name = lib;
+                    f = new File(name);
+                }
             }
 			if (f.isDirectory()) {
 				if (!sr.getProgram().getLibraryList().addLibrary(name)) 
