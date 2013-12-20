@@ -3131,6 +3131,7 @@ aspect ArrayHelpers {
 			} catch (ConstantEvaluationException uoe) {
 				FExp e2 = new FAddExp(createFExp(d), e.createSizeFExp());
 				exps[d] = e.dynamicFExp(e2);
+				size[d] = UNKNOWN;
 			}
 		}
 		

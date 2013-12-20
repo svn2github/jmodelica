@@ -4510,8 +4510,8 @@ public
   temp_3 := 0;
   temp_1[temp_2 + 1,temp_3 + 1] := 3;
   temp_3 := temp_3 + 1;
-  for i8 in 1:size(x1, 1) loop
-   temp_5[1,i8] := x1[i8];
+  for i6 in 1:size(x1, 1) loop
+   temp_5[1,i6] := x1[i6];
   end for;
   for i3 in 1:1 loop
    for i4 in 1:size(x1, 1) loop
@@ -4586,7 +4586,7 @@ public
   temp_2 := 0;
   temp_3 := 0;
   for i3 in 1:size(x1, 1) loop
-   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3,i4];
+   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3];
   end for;
   temp_3 := temp_3 + 1;
   for i3 in 1:size(x2, 1) loop
@@ -4603,7 +4603,7 @@ public
   end for;
   temp_3 := temp_3 + size(x2, 2);
   for i3 in 1:size(x1, 1) loop
-   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3,i4];
+   temp_1[temp_2 + i3,temp_3 + 1] := x1[i3];
   end for;
   temp_2 := temp_2 + size(x1, 1);
   temp_3 := 0;

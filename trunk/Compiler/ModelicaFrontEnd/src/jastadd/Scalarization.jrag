@@ -1295,66 +1295,74 @@ aspect Scalarization {
     /**
      * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
      */
-	public void FMatrix.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-		FIdUseExp rowOffset = tempExp(calcTempVarName());
-		FIdUseExp colOffset = tempExp(calcTempVarName());
-		
-		if (vars != null) {
-		    vars.add(new FFunctionVariable(fIntegerScalarType(), rowOffset.name()));
-		    vars.add(new FFunctionVariable(fIntegerScalarType(), colOffset.name()));
-		}
-		
-		FExp rowOffsetInc = null;
-		FExp colOffsetInc = null;
-		FExp rowOffsetSub = null;
-		FExp colOffsetSub = null;
-		
-		names.addLayer(ndims());
-        names.fillLayer(this);
-		clauses.add(new FAssignStmt(rowOffset, new FIntegerLitExp(0)));
-		
-		for (int i = 0; i < getNumFExp(); i++) {
-			FMatrixRow row = (FMatrixRow) getFExp(i);
-			clauses.add(new FAssignStmt(colOffset.fullCopy(), new FIntegerLitExp(0)));
-			
-			for (int j = 0; j < row.getNumFExp(); j++) {
-				FExp exp = row.getFExp(j);
-				FArraySubscripts fas = names.createFArraySubscripts();
-				
-				if (exp.ndims() == 0) {
-					rowOffsetInc = new FIntegerLitExp(1);
-					colOffsetInc = new FIntegerLitExp(1);
-					rowOffsetSub = new FIntegerLitExp(1);
-					colOffsetSub = new FIntegerLitExp(1);
-				} else if (exp.ndims() == 1) {
-					rowOffsetInc = exp.size().createFExp(0);
-					colOffsetInc = new FIntegerLitExp(1);
-					rowOffsetSub = new FIdUseExp(names.get(0));
-					colOffsetSub = new FIntegerLitExp(1);
-				} else {
-					rowOffsetInc = exp.size().createFExp(0);
-					colOffsetInc = exp.size().createFExp(1);
-					rowOffsetSub = new FIdUseExp(names.get(0));
-					colOffsetSub = new FIdUseExp(names.get(1));
-				}
-				
-				exp.createArrayTemporaries(clauses, vars, indexMap, names);
-				exp.addArrayUsesToIndexMap(indexMap, names);
-				
-				
-				fas.setFSubscript(new FExpSubscript(new FAddExp(rowOffset.fullCopy(), rowOffsetSub)), 0);
-				fas.setFSubscript(new FExpSubscript(new FAddExp(colOffset.fullCopy(), colOffsetSub)), 1);
-				FIdUseExp left = tempExp(fas);
-				names.createForLoops(clauses, exp).add(new FAssignStmt(left, exp.scalarize(indexMap)));
-				
-				if (j < row.getNumFExp() - 1)
-					clauses.add(new FAssignStmt(colOffset.fullCopy(), new FAddExp(colOffset.fullCopy(), colOffsetInc)));
-			}
-			if (i < getNumFExp() - 1)
-			    clauses.add(new FAssignStmt(rowOffset.fullCopy(), new FAddExp(rowOffset.fullCopy(), rowOffsetInc)));
-		}
-		names.removeLayer();
-	}
+    public void FMatrix.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        FIdUseExp rowOffset = tempExp(calcTempVarName());
+        FIdUseExp colOffset = tempExp(calcTempVarName());
+        
+        if (vars != null) {
+            vars.add(new FFunctionVariable(fIntegerScalarType(), rowOffset.name()));
+            vars.add(new FFunctionVariable(fIntegerScalarType(), colOffset.name()));
+        }
+        
+        FExp rowOffsetInc = null;
+        FExp colOffsetInc = null;
+        FExp rowOffsetSub = null;
+        FExp colOffsetSub = null;
+        
+        ForNames orig = names.copySurface();
+        clauses.add(new FAssignStmt(rowOffset, new FIntegerLitExp(0)));
+        
+        for (int i = 0; i < getNumFExp(); i++) {
+            FMatrixRow row = (FMatrixRow) getFExp(i);
+            clauses.add(new FAssignStmt(colOffset.fullCopy(), new FIntegerLitExp(0)));
+            
+            for (int j = 0; j < row.getNumFExp(); j++) {
+                FExp exp = row.getFExp(j);
+                names = orig.copySurface();
+                names.addLayer(exp.ndims());
+                names.fillLayer(exp);
+                if (exp.ndims() == 0) {
+                    rowOffsetInc = new FIntegerLitExp(1);
+                    colOffsetInc = new FIntegerLitExp(1);
+                    rowOffsetSub = new FIntegerLitExp(1);
+                    colOffsetSub = new FIntegerLitExp(1);
+                } else if (exp.ndims() == 1) {
+                    rowOffsetInc = exp.size().createFExp(0);
+                    colOffsetInc = new FIntegerLitExp(1);
+                    rowOffsetSub = new FIdUseExp(names.get(0));
+                    colOffsetSub = new FIntegerLitExp(1);
+                } else {
+                    rowOffsetInc = exp.size().createFExp(0);
+                    colOffsetInc = exp.size().createFExp(1);
+                    rowOffsetSub = new FIdUseExp(names.get(0));
+                    colOffsetSub = new FIdUseExp(names.get(1));
+                }
+                
+                exp.createArrayTemporaries(clauses, vars, indexMap, names);
+                exp.addArrayUsesToIndexMap(indexMap, names);
+                
+                FExp e1 = new FAddExp(rowOffset.fullCopy(), rowOffsetSub);
+                FExp e2 = new FAddExp(colOffset.fullCopy(), colOffsetSub);
+                FArraySubscripts fas;
+                if (ndims() > 2) {
+                    fas = names.createFArraySubscripts();
+                    fas.setFSubscript(new FExpSubscript(e1), 0);
+                    fas.setFSubscript(new FExpSubscript(e2), 1);
+                } else {
+                    fas = new FArraySubscripts();
+                    fas.addFSubscript(e1);
+                    fas.addFSubscript(e2);
+                }
+                FIdUseExp left = tempExp(fas);
+                names.createForLoops(clauses, exp).add(new FAssignStmt(left, exp.scalarize(indexMap)));
+                
+                if (j < row.getNumFExp() - 1)
+                    clauses.add(new FAssignStmt(colOffset.fullCopy(), new FAddExp(colOffset.fullCopy(), colOffsetInc)));
+            }
+            if (i < getNumFExp() - 1)
+                clauses.add(new FAssignStmt(rowOffset.fullCopy(), new FAddExp(rowOffset.fullCopy(), rowOffsetInc)));
+        }
+    }
 	
     /**
      * @see FExp#unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names)
