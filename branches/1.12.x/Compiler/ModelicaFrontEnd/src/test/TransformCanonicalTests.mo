@@ -6158,6 +6158,45 @@ end TransformCanonicalTests.FixedFalseParam1;
 ")})));
 end FixedFalseParam1;
 
+model FixedFalseParam2
+	parameter Real a1(fixed = false);
+	parameter Real a2(fixed = false);
+	parameter Real b = 2;
+	parameter Real c = 3;
+	Real d = time * 42;
+initial equation
+	c = b * a1 - a2 * d;
+	a1 = a2 * 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="FixedFalseParam2",
+			description="Test differentiation of parameters with fixed = false",
+			methodName="printDAEInitBLT",
+			methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  d
+Solution:
+  time * 42
+-------------------------------
+Torn block of 1 iteration variables and 1 solved variables.
+Solved variables:
+  a2
+Iteration variables:
+  a1()
+Solved equations:
+  a1 = a2 * 3.14
+Residual equations:
+ Iteration variables: a1
+  c = b * a1 - a2 * d
+Jacobian:
+  |(- 3.14), 1.0|
+  |d, - b|
+-------------------------------
+")})));
+end FixedFalseParam2;
 
 model AssertEval1
 	Real x = time;
