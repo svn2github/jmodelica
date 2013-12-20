@@ -6243,8 +6243,56 @@ Semantic error at line 6226, column 9:
 ")})));
 end ArraySizeInIf2;
 
+
+model ArraySizeInIf3
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = true;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if a then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySizeInIf3",
+			description="",
+			flatModel="
+fclass ArrayTests.Other.ArraySizeInIf3
+ parameter Boolean a = true /* true */;
+ parameter Integer b = 5 /* 5 */;
+ parameter Integer c = 5 /* 5 */;
+ parameter Integer d = 0 /* 0 */;
+ constant Real e[1] = 1;
+ constant Real e[2] = 2;
+ constant Real e[3] = 3;
+ constant Real e[4] = 4;
+ constant Real e[5] = 5;
+end ArrayTests.Other.ArraySizeInIf3;
+")})));
+end ArraySizeInIf3;
+
 end Other;
 
-
-  annotation(uses(Modelica(version="3.0.1")));
 end ArrayTests;
