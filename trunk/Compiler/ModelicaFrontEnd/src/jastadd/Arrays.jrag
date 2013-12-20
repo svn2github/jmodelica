@@ -792,6 +792,8 @@ aspect Arrays {
  	}
 	
 	eq FArray.size() {
+	    if (getFExp(0) == null)
+	        return new Size(0);
 		if (isIterArray())
 			return getFExp(0).size();
 		return getFExp(0).size().expand(getNumFExp());
