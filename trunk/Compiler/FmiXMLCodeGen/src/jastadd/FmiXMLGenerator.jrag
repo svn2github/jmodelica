@@ -963,7 +963,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
 			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
-			generateAttribute("canSerializeFMUState",                false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
 			generateAttribute("providesDirectionalDerivative",       true,                    genPrinter);
         }
 	}
@@ -989,7 +989,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
-			generateAttribute("canSerializeFMUState",                   false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
 			generateAttribute("providesDirectionalDerivative",          true,                    genPrinter);
         }
 	}
@@ -1028,7 +1028,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		private String def;
 
 		public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
-			super("unit", "unit", myGenerator, fclass);
+			super("unit", "Unit", myGenerator, fclass);
 		}
 
 		public String[] children() { return new String[] {"displayUnit"}; }
@@ -1188,7 +1188,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
 
 			public String[] children() {
-				return new String[] {"real", "integer", "boolean", "string", "enumeration"};
+				return new String[] {"real", "integer", "boolean", "string", "variableEnumeration"};
 			}
 			
 			public void generateAttributes(PrintStream genPrinter) {
@@ -1390,7 +1390,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		public class XMLTag_enumeration extends XMLTag {
 
 			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
-				super("enumeration", "Enumeration", myGenerator, fclass);
+				super("variableEnumeration", "Enumeration", myGenerator, fclass);
 			}
 			
 			public void generate(PrintStream genPrinter) {

@@ -79,9 +79,11 @@ fmiComponent fmi2_instantiate(fmiString instanceName,
             functions->freeMemory(component);
             return NULL;
 		}
-    }
-    else 
-        component = NULL; /* assert ? */
+    } else {
+		/* We have to use the raw logger callback here; the logger in the jmi_t struct is not yet initialized. */
+        functions->logger(0, instanceName, fmiError, "ERROR", "Valid choises for fmuType are fmiModelExchange and fmiCoSimulation");
+        component = NULL;
+	}
     
     return component;
 }
@@ -185,8 +187,8 @@ fmiStatus fmi2_setup_experiment(fmiComponent c,
     retval = fmi2_set_time(c, startTime);
     
     if (((fmi2_me_t*)c)->fmu_type == fmiCoSimulation) {
-        /*jmi_init_ode_problem(((fmi2_me_t*)c)->ode_problem, startTime, fmi2_cs_rhs_fcn,
-                             fmi2_cs_root_fcn, fmi2_cs_completed_integrator_step);*/
+        jmi_init_ode_problem(((fmi2_cs_t*)c)->ode_problem, startTime, fmi2_cs_rhs_fcn,
+                             fmi2_cs_root_fcn, fmi2_cs_completed_integrator_step);
     }
     
     return retval;
@@ -252,8 +254,9 @@ fmiStatus fmi2_exit_initialization_mode(fmiComponent c) {
     }
     if (((fmi2_me_t *)c)->fmu_type == fmiModelExchange) {
         ((fmi2_me_t *)c)->fmi_mode = eventMode;
-    } else {
-        /* TODO: what happens in the CS case? */
+    } else if (((fmi2_me_t *)c)->fmu_type == fmiCoSimulation) {
+        ((fmi2_me_t *)c)->fmi_mode = slaveInitialized;
+		((fmi2_cs_t *)c)->event_info.newDiscreteStatesNeeded = fmiTrue; /* To start event iteration after initialization. */
     }
     return fmiOK;
 }
@@ -517,7 +520,7 @@ fmiStatus fmi2_new_discrete_state(fmiComponent  c, fmiEventInfo* fmiEventInfo) {
     
     event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
     
-    retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, FALSE, event_info);
+    retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, TRUE, event_info);
     if (retval != 0) {
         return fmiError;
     }
@@ -648,25 +651,26 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
                               const fmiCallbackFunctions* functions, 
                               fmiBoolean                  visible,
                               fmiBoolean                  loggingOn) {
-    fmi2_me_t* fmi2_me;
     fmiInteger retval;
     char* tmpname;
     size_t inst_name_len;
-    jmi_callbacks_t* cb;
-    fmi2_me = (fmi2_me_t*)c;
+    
+    fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
+	jmi_callbacks_t* cb = &fmi2_me->jmi.jmi_callbacks;
 
-/*****************************/
-    cb = &fmi2_me->jmi.jmi_callbacks;
+	inst_name_len = strlen(instanceName)+1;
+    tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
+    strncpy(tmpname, instanceName, inst_name_len);
 
-    cb->emit_log = fmi2_me_emit_log;
-    cb->is_log_category_emitted = fmi2_me_is_log_category_emitted;
+    cb->emit_log                    = fmi2_me_emit_log;
+    cb->is_log_category_emitted     = fmi2_me_is_log_category_emitted;
     cb->log_options.logging_on_flag = loggingOn;
-    cb->log_options.log_level = logWarning;
-    cb->allocate_memory = functions->allocateMemory;
-    cb->free_memory = functions->freeMemory;
-    cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */
-    cb->instance_name = instanceName;    /** < \brief Name of this model instance. */
-    cb->model_data = fmi2_me;
+    cb->log_options.log_level       = logWarning;
+    cb->allocate_memory             = functions->allocateMemory;
+    cb->free_memory                 = functions->freeMemory;
+    cb->model_name                  = jmi_get_model_identifier();    /**< \brief Name of the model (corresponds to a fixed compiled unit name) */
+    cb->instance_name               = tmpname;                       /**< \brief Name of this model instance. */
+    cb->model_data                  = fmi2_me;
     
     retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID);
           
@@ -674,14 +678,10 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
         return fmiError;
     }
     
-    inst_name_len = strlen(instanceName)+1;
-    tmpname = (char*)(fmi2_me_t *)functions->allocateMemory(inst_name_len, sizeof(char));
-    strncpy(tmpname, instanceName, inst_name_len);
     fmi2_me -> fmi_instance_name = tmpname;
-    
-    fmi2_me -> fmi_functions = functions;
-    fmi2_me -> fmu_type      = fmuType;
-	fmi2_me -> fmi_mode      = instantiatedMode;
+    fmi2_me -> fmi_functions     = functions;
+    fmi2_me -> fmu_type          = fmuType;
+	fmi2_me -> fmi_mode          = instantiatedMode;
     
     return fmiOK;
 }
