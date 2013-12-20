@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include <jni.h>
 
 #include "initjcc.h"
@@ -13,7 +14,7 @@ void describeAndClearJavaException(JavaError e) {
 
 void rethrowJavaException(JavaError e) {
     describeAndClearJavaException(e);
-    throw "a java error occurred; details were printed";
+    throw std::runtime_error("a java error occurred; details were printed");
 }
 
 jstring fromUTF(const char *bytes) {

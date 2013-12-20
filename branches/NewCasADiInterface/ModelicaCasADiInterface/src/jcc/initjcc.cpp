@@ -1,6 +1,7 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 #ifdef linux
 #include <dlfcn.h>
 #endif
@@ -20,8 +21,7 @@ JNIEnv *vm_env;
 static const char *getenv_checked(const char *name) {
     const char *value = getenv(name);
     if (value == NULL) {
-	cerr << "Environment variable " << name << " not set" << endl;
-	exit(1);
+        throw std::runtime_error(string("Environment variable ") + name + " not set");
     }
     return value;    
 }
@@ -36,7 +36,7 @@ jint initJVM(const char *classpath, const char *libpath)
 
     HINSTANCE hVM = LoadLibrary(jvmpath.data());
     if (hVM == NULL) {
-	cerr << "Failed to load " << jvmpath; exit(1);
+        throw std::runtime_error(string("Failed to load ") + jvmpath);
     }
 
     typedef jint (CALLBACK *fpCJV)(JavaVM**, void**, JavaVMInitArgs*);
@@ -57,9 +57,7 @@ jint initJVM(const char *classpath, const char *libpath)
         handle = dlopen(jvmpath2.data(), RTLD_LAZY);
 
         if (handle == NULL) {
-            cerr << "Failed to load " << jvmpath << endl;
-            cerr << "or " << jvmpath2 << endl;
-            exit(1);
+            throw std::runtime_error(string("Failed to load ") + jvmpath + " or " + jvmpath2);
         }
     }
 
@@ -70,10 +68,10 @@ jint initJVM(const char *classpath, const char *libpath)
 #endif
 
     if (CreateJavaVM == NULL) {
-	cerr << "Failed to locate entry point JNI_CreateJavaVM"; exit(1);    
+        throw std::runtime_error("Failed to locate entry point JNI_CreateJavaVM");
     }
     if (GetDefaultJavaVMInitArgs == NULL) {
-	cerr << "Failed to locate entry point JNI_GetDefaultJavaVMInitArgs"; exit(1);    
+        throw std::runtime_error("Failed to locate entry point JNI_GetDefaultJavaVMInitArgs");
     }
 
 
@@ -99,7 +97,7 @@ jint initJVM(const char *classpath, const char *libpath)
     delete options;
 
     if (res < 0) {
-	cerr << "Failed to create Java VM" << endl; exit(1);
+        throw std::runtime_error("Failed to create Java VM");
     }
 
     env = new JCCEnv(jvm, vm_env);
