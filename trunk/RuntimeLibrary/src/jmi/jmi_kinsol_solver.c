@@ -818,7 +818,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     
     int N = block->n;
     char trans = 'N';
-    int ret, i;
+    int ret = 0, i;
     
     solver->updated_jacobian_flag = 0; /* The Jacobian is no longer current */
     
@@ -1210,6 +1210,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     if(solver->num_bounds > 0) {
         free(solver->bound_vindex);
         free(solver->bound_kind);
+        free(solver->bound_limiting);
         free(solver->bounds);
         free(solver->active_bounds);
     }
