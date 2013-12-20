@@ -252,7 +252,7 @@ Solution:
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  b
+  b()
 Equations:
   23 = sin(iter_0 * b)
 -------------------------------

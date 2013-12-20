@@ -1009,7 +1009,7 @@ aspect CADCodeGen {
 		
 		int i = 0;//TODO: This should be done in genVarDecls_CAD().
 		Set<ASTNode> visited = new HashSet<ASTNode>();
-		for (FAbstractEquation e : equations()){
+		for (FAbstractEquation e : allEquations()){
 			e.genTempForFunc_CAD(i, indent, str, visited);
 			i += e.numScalarEquations();
 		}
@@ -1128,7 +1128,7 @@ aspect CADCodeGen {
      * @see FAbstractEquation#genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Set<FVariable>).
      */
     public void SimpleEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str){
-        equation().genBlock_CAD(indent, str, null, activeVariables(), assignedIndices());
+        equation().genBlock_CAD(indent, str, null, allVariables(), assignedIndices());
     }
 
 	/**
@@ -1166,7 +1166,7 @@ aspect CADCodeGen {
      */
     @Override
     public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        for (AbstractEquationBlock aeb : solvedBlocks)
+        for (AbstractEquationBlock aeb : solvedBlocks())
             aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
     }
     
@@ -1175,7 +1175,7 @@ aspect CADCodeGen {
      */
     public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         if (genBlockEnabled())
-            equation().genBlock_CAD(indent, str, visited, activeVariables(), assignedIndices());
+            equation().genBlock_CAD(indent, str, visited, allVariables(), assignedIndices());
     }
 	
 	/**
@@ -1224,7 +1224,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void TornEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		for (SimpleEquationBlock block : getUnsolvedBlocks())
+		for (SimpleEquationBlock block : blockResidualBlocks_C())
 			block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
 	}
 	
@@ -1521,9 +1521,9 @@ aspect CADCodeGen {
 	protected void TornEquationBlock.genVarDecls_CAD(PrintStream str, String indent, Set<ASTNode> visited) {
 		if (visited == null)
 			visited = new HashSet<ASTNode>();
-		for (AbstractEquationBlock aeb : getSolvedBlocks())
+		for (AbstractEquationBlock aeb : solvedBlocks())
 			aeb.genVarDecls_CAD(str, indent, visited);
-		for (AbstractEquationBlock aeb : getUnsolvedBlocks())
+		for (AbstractEquationBlock aeb : unsolvedBlocks())
 			aeb.genVarDecls_CAD(str, indent, visited);
 	}
 	
@@ -1544,7 +1544,7 @@ aspect CADCodeGen {
 		}
 		for (AbstractEquationBlock eb : getAllBlocks()){
 			if(eb.isSolvable()){
-				for (FAbstractEquation e : eb.equations()){
+				for (FAbstractEquation e : eb.allEquations()){
 					e.genTempForFunc_CAD(i, indent, str, null);
 					i += e.numScalarEquations();
 				}
@@ -1566,7 +1566,7 @@ aspect CADCodeGen {
 			eb.genVarDecls_CAD(str, indent, null);
 		}
 		for (AbstractEquationBlock eb : getAllBlocks()){
-			for (FAbstractEquation e : eb.equations()){
+			for (FAbstractEquation e : eb.allEquations()){
 				e.genTempForFunc_CAD(i, indent, str,null);
 				i += e.numScalarEquations();
 			}

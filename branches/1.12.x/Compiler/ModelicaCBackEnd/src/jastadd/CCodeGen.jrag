@@ -2023,42 +2023,38 @@ aspect CCodeGen {
 	}
 	
 	@Override
+    protected void EquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        if (visited == null)
+            visited = new HashSet<ASTNode>();
+        if (jacobian != null)
+            for (FExp[] col : jacobian)
+                for (FExp exp : col)
+                    if (exp != null)
+                        exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        for (SimpleEquationBlock seb : unsolvedBlocks())
+            seb.genVarDecls_C(str, indent, visited);
+        for (SimpleEquationBlock seb : nonRealBlocks())
+            seb.genVarDecls_C(str, indent, visited);
+    }
+    
+    @Override
     protected void TornEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
         if (visited == null)
             visited = new HashSet<ASTNode>();
-        for (AbstractEquationBlock aeb : getSolvedBlocks())
-            aeb.genVarDecls_C(str, indent, visited);
-        for (AbstractEquationBlock aeb : getUnsolvedBlocks())
-            aeb.genVarDecls_C(str, indent, visited);
-    }
-    
-    @Override
-    protected void LinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-        for (FExp[] col : jacobian)
-            for (FExp exp : col)
-                if (exp != null)
-                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
+        for (SimpleEquationBlock seb : solvedBlocks())
+            seb.genVarDecls_C(str, indent, visited);
         super.genVarDecls_C(str, indent, visited);
     }
-    
-    @Override
-    protected void MixedLinearEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
-        for (FExp[] col : jacobian)
-            for (FExp exp : col)
-                if (exp != null)
-                    exp.genVarDecls_C(ASTNode.printer_C, str, indent);
-        super.genVarDecls_C(str, indent, visited);
-    }
-    
+
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
 		Set<ASTNode> res = new LinkedHashSet<ASTNode>();
 		res.addAll(blockResidualEquations_C());
 		return res;
 	}
     
-    public Set<ASTNode> MixedEquationBlock.blockResidualNodes_C() {
+    public Set<ASTNode> EquationBlock.blockResidualNodes_C() {
         Set<ASTNode> res = super.blockResidualNodes_C();
-        res.addAll(discreteEquations());
+        res.addAll(nonRealEquations());
         return res;
     }
     
@@ -2067,8 +2063,8 @@ aspect CCodeGen {
     }
 	
 	public Set<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-	    Set<ASTNode> res = new LinkedHashSet<ASTNode>(activeVariables());
-		res.addAll(equations());
+	    Set<ASTNode> res = super.blockResidualNodes_C();
+	    res.addAll(solvedEquations());
 		return res;
 	}
 	
@@ -2076,38 +2072,25 @@ aspect CCodeGen {
 		return iterationVariables();
 	}
 	
-	public Collection<FVariable> MixedEquationBlock.blockResidualVariables_C() {
-		return activeContinuousVariables();
-	}
-	
 	public Collection<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
-		return equations();
+		return allEquations();
 	}
 	
-	public Collection<FAbstractEquation> MixedEquationBlock.blockResidualEquations_C() {
-		return continuousEquations();
-	}
-	
-	public Collection<FAbstractEquation> TornEquationBlock.blockResidualEquations_C() {
-		return unsolvedEquations();
+	public Collection<FAbstractEquation> EquationBlock.blockResidualEquations_C() {
+		return realEquations();
 	}
 	
 	public Collection<SimpleEquationBlock> EquationBlock.blockResidualBlocks_C() {
-		return subBlocks();
-	}
-	
-	@Override
-	public Collection<SimpleEquationBlock> MixedEquationBlock.blockResidualBlocks_C() {
-		return continuousEquationBlocks();
+		return unsolvedBlocks;
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
 	}
 	
-	public void MixedEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+	public void EquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
 		// Loop over all active variables and write the values in x to the z vector
 		// Write the residual expressions
-		for (FAbstractEquation ae : discreteEquations()) {
+		for (FAbstractEquation ae : nonRealEquations()) {
 			FEquation e = (FEquation)ae;
 			str.print(indent);
 			e.getLeft().prettyPrint_C(str,"");
@@ -2124,13 +2107,6 @@ aspect CCodeGen {
 	public void EquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
 			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
 		for (SimpleEquationBlock block : blockResidualBlocks_C())
-			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
-	}
-	
-	@Override
-	public void TornEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
-			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (SimpleEquationBlock block : getUnsolvedBlocks())
 			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
 	}
 	
@@ -2152,7 +2128,7 @@ aspect CCodeGen {
 	
     public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         if (genBlockEnabled())
-            equation().genBlock_C(indent, str, visited, activeVariables(), assignedIndices());
+            equation().genBlock_C(indent, str, visited, allVariables(), assignedIndices());
     }
     
     public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
@@ -2171,7 +2147,7 @@ aspect CCodeGen {
 	}
 	
 	public void TornEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
-		for (SimpleEquationBlock block : getUnsolvedBlocks())
+		for (SimpleEquationBlock block : unsolvedBlocks())
 			block.genBlockResidualFunctionEqnNominals_C(enumerator, indent, str);
 	}
 	
@@ -2185,52 +2161,38 @@ aspect CCodeGen {
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
 	
-	@Override
-	public void LinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		String innerIndent = ASTNode.printer_C.indent(indent);
-		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
-		int rows = equations().size();
-		int cols = activeVariables().size();
-		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
-		// Output Jacobian
-		for (int col = 0; col < cols; col++) {
-			for (int row = 0; row < rows; row++) {
-			    if (jacobian[row][col] != null) {
-			        jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
-			        str.format("%sresidual[%d] = %s;\n", innerIndent, rows * col + row, jacobian[row][col].prettyPrint_C(""));
-			    }
-			}
-		}
-	}
+    @Override
+    public void EquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+        if (jacobian == null)
+            return;
+        String innerIndent = ASTNode.printer_C.indent(indent);
+        str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
+        FExp[][] jacobian = jacobian();
+        int rows = realEquations().size();
+        int cols = realVariables().size();
+        str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
+        // Output Jacobian
+        for (int col = 0; col < cols; col++) {
+            for (int row = 0; row < rows; row++) {
+                if (jacobian[row][col] != null) {
+                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+                    str.format("%sresidual[%d] = %s;\n", innerIndent, rows * col + row, jacobian[row][col].prettyPrint_C(""));
+                }
+            }
+        }
+    }
 
-	@Override
-	public void MixedLinearEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-		String innerIndent = ASTNode.printer_C.indent(indent);
-		str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
-		// Output Jacobian
-		int rows = continuousEquations().size();
-		int cols = activeContinuousVariables().size();
-		str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
-		for (int col = 0; col < cols; col++) {
-			for (int row = 0; row < rows; row++) {
-			    if (jacobian[row][col] != null) {
-			        jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
-			        str.format("%sresidual[%d] = %s;\n", innerIndent,  rows * col + row, jacobian[row][col].prettyPrint_C(""));
-			    }
-			}
-		}
-	}
-	
     @Override
     public void TornEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
-        if (jacobian == null)
+        if (!isLinear())
             return;
         String outerIndent = indent;
         indent = ASTNode.printer_C.indent(indent);
         String innerIndent = ASTNode.printer_C.indent(indent);
         str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", outerIndent);
-        int n1 = getSolvedBlocks().size();
-        int n2 = getUnsolvedBlocks().size();
+        FExp[][] jacobian = jacobian();
+        int n1 = solvedBlocks().size();
+        int n2 = unsolvedBlocks().size();
         str.format("%sjmi_real_t Q1[%d] = {0};\n", indent, n1 * n2);
         str.format("%sjmi_real_t Q2[%d] = {0};\n", indent, n2 * n1);
         str.format("%sjmi_real_t* Q3 = residual;\n", indent);
@@ -2240,7 +2202,7 @@ aspect CCodeGen {
         str.format("%sdouble beta = 1;\n", indent);
         str.format("%sint n1 = %d;\n", indent, n1);
         str.format("%sint n2 = %d;\n", indent, n2);
-
+        
         // Write top-right quadrant, A12, to Q1.
         for (int col = n1; col < n1 + n2; col++) {
             for (int row = 0; row < n1; row++) {
@@ -2299,8 +2261,8 @@ aspect CCodeGen {
 			str.print("dae_" + (inInit ? "init_" : "") + "block_dir_der_" + residualBlockNumber_C() + ", ");
 		else
 			str.print("NULL, ");
-		str.print(continuousIterationVariables().size() + ", ");
-		str.print(descreteIterationVariables().size() + ", ");
+		str.print(iterationVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
+		str.print(nonRealVariables().size() + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
 		str.print(genJMISolverConstant_C() + ", ");
 		str.print(residualBlockNumber_C() + ");\n");
@@ -2315,14 +2277,8 @@ aspect CCodeGen {
 	public String AbstractEquationBlock.genJMISolverConstant_C() {
 		return "JMI_KINSOL_SOLVER";
 	}
-	public String LinearEquationBlock.genJMISolverConstant_C() {
-		return "JMI_LINEAR_SOLVER";
-	}
-	public String MixedLinearEquationBlock.genJMISolverConstant_C() {
-		return "JMI_LINEAR_SOLVER";
-	}
-	public String TornEquationBlock.genJMISolverConstant_C() {
-	    return jacobian != null ? "JMI_LINEAR_SOLVER" : "JMI_KINSOL_SOLVER";
+	public String EquationBlock.genJMISolverConstant_C() {
+	    return isLinear() ? "JMI_LINEAR_SOLVER" : "JMI_KINSOL_SOLVER";
 	}
 
 	
@@ -2336,7 +2292,7 @@ aspect CCodeGen {
 	
     public void SimpleEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
         if (genBlockEnabled())
-            equation().genBlock_C(indent, str, new HashSet<FAbstractEquation>(), activeVariables(), assignedIndices());
+            equation().genBlock_C(indent, str, new HashSet<FAbstractEquation>(), allVariables(), assignedIndices());
     }
     
     public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {

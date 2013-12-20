@@ -51,14 +51,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   i1
   u1
   u2
 Iteration variables:
-  i2()
-  i3()
+  i2
+  i3
 Solved equations:
   i1 = i2 + i3
   u1 = R1 * i1
@@ -96,6 +97,96 @@ Solution:
 ")})));
   end Test1;
 
+model Test2
+ parameter Real m = 1;
+ parameter Real f0 = 1;
+ parameter Real f1 = 1;
+ Real v;
+ Real a;
+ Real f;
+ Real u;
+ Real sa;
+ Boolean startFor(start=false);
+ Boolean startBack(start=false);
+ Integer mode(start=2);
+ Real dummy;
+equation 
+ der(dummy) = 1;
+ u = 2*sin(time);
+ m*der(v) = u - f;
+ der(v) = a;
+ startFor = pre(mode)==2 and sa > 1;
+ startBack = pre(mode) == 2 and sa < -1;
+ a = if pre(mode) == 1 or startFor then sa-1 else 
+     if pre(mode) == 3 or startBack then 
+     sa + 1 else 0;
+ f = if pre(mode) == 1 or startFor then 
+     f0 + f1*v else 
+     if pre(mode) == 3 or startBack then 
+     -f0 + f1*v else f0*sa;
+ mode=if (pre(mode) == 1 or startFor)
+      and v>0 then 1 else 
+      if (pre(mode) == 3 or startBack)
+          and v<0 then 3 else 2;
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="Test2",
+            description="Test tearing of mixed linear equation block",
+            equation_sorting=true,
+            automatic_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  der(dummy)
+Solution:
+  1
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  u
+Solution:
+  2 * sin(time)
+-------------------------------
+Torn mixed linear block of 3 iteration variables and 3 solved variables:
+Coefficient variability: Discrete
+Solved variables:
+  a
+  der(v)
+  f
+Iteration variables:
+  sa
+Unknown discrete variables:
+  startBack
+  startFor
+Solved equations:
+  a = if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
+  der(v) = a
+  f = if pre(mode) == 1 or startFor then f0 + f1 * v elseif pre(mode) == 3 or startBack then - f0 + f1 * v else f0 * sa
+Residual equations:
+ Iteration variables: sa
+  m * der(v) = u - f
+Discrete equations:
+  startBack = pre(mode) == 2 and sa < -1
+  startFor = pre(mode) == 2 and sa > 1
+Jacobian:
+  |1.0, 0.0, 0.0, - (if pre(mode) == 1 or startFor then 1.0 elseif pre(mode) == 3 or startBack then 1.0 else 0.0)|
+  |- 1.0, 1.0, 0.0, 0.0|
+  |0.0, 0.0, 1.0, - (if pre(mode) == 1 or startFor then 0.0 elseif pre(mode) == 3 or startBack then 0.0 else f0)|
+  |0.0, m, 1.0, 0.0|
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  mode
+Solution:
+  if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
+-------------------------------
+")})));
+end Test2;
+
 model WarningTest1
 	Real u0,u1,u2,u3,uL;
 	Real i0,i1,i2,i3,iL;
@@ -106,7 +197,7 @@ model WarningTest1
 equation
 	u0 = sin(time);
 	u1 = R1*i1;
-	u2 = R2*i2;
+	u2 = R2*abs(i2);
 	u3 = R3*i3;
 	uL = L*der(iL);
 	u0 = u1 + u3;
@@ -118,7 +209,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={ 
 		WarningTestCase(
 			name="WarningTest1",
-			description="",
+			description="Test missing start value warning",
 			equation_sorting=true,
 			automatic_tearing=true,
 			errorMessage="
@@ -142,7 +233,7 @@ model WarningTest2
 equation
 	u0 = sin(time);
 	u1 = R1*i1;
-	u2 = R2*i2;
+	u2 = R2*abs(i2);
 	u3 = R3*i3;
 	uL = L*der(iL);
 	u0 = u1 + u3;
@@ -154,7 +245,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={ 
 		WarningTestCase(
 			name="WarningTest2",
-			description="",
+			description="Test missing start value warning",
 			equation_sorting=true,
 			automatic_tearing=true,
 			errorMessage="
@@ -189,7 +280,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			name="WarningTest3",
-			description="",
+			description="Test for alias eliminated hand guided tearing variable warning",
 			equation_sorting=true,
 			automatic_tearing=true,
 			hand_guided_tearing=true,
@@ -198,16 +289,46 @@ Warning: in file '...':
 At line 0, column 0:
   Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
   Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
-
-Warning: in file '...':
-At line 0, column 0:
-  Iteration variable \"i3\" is missing start value!
-
-Warning: in file '...':
-At line 0, column 0:
-  Iteration variable \"u2\" is missing start value!
 ")})));
 end WarningTest3;
+
+model WarningTest4
+    Real u0,u1,uL;
+    Real u2 annotation(__Modelon(IterationVariable));
+    Real u3 annotation(__Modelon(IterationVariable));
+    Real i0,i1,i2(start=1),i3,iL;
+    parameter Real R1 = 1;
+    parameter Real R2 = 1;
+    parameter Real R3 = 1;
+    parameter Real L = 1;
+equation
+    u0 = sin(time);
+    u1 = R1*i1;
+    u2 = R2*i2;
+    u3 = R3*i3;
+    uL = L*der(iL);
+    u0 = u1 + u3 annotation(__Modelon(ResidualEquation));
+    uL = u1 + u2;
+    u2 = u3;
+    i0 = i1 + iL;
+    i1 = i2 + i3;
+
+    annotation(__JModelica(UnitTesting(tests={ 
+        WarningTestCase(
+            name="WarningTest4",
+            description="Test so that no warning is given for linear torn blocks when no start value is set",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            errorMessage="
+1 warnings found:
+
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/TearingTests.mo':
+At line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+    Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
+")})));
+end WarningTest4;
 
 model RecordTearingTest1
   record R
@@ -296,7 +417,7 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn block of 1 iteration variables and 1 solved variables:
 Solved variables:
   r.x
 Iteration variables:
@@ -335,7 +456,7 @@ equation
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
-Torn block of 2 iteration variables and 1 solved variables.
+Torn block of 2 iteration variables and 1 solved variables:
 Solved variables:
   y
 Iteration variables:
@@ -378,13 +499,14 @@ equation
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn block of 1 iteration variables and 2 solved variables:
 Solved variables:
   x
   y
 Iteration variables:
   v()
 Solved equations:
+  (x, y) = TearingTests.RecordTearingTest4.F(v, v)
   (x, y) = TearingTests.RecordTearingTest4.F(v, v)
 Residual equations:
  Iteration variables: v
@@ -424,7 +546,7 @@ equation
 			description="Test of record tearing",
 			methodResult="
 -------------------------------
-Torn block of 3 iteration variables and 3 solved variables.
+Torn block of 3 iteration variables and 3 solved variables:
 Solved variables:
   c
   d
@@ -435,15 +557,17 @@ Iteration variables:
   b()
 Solved equations:
   (c, d) = TearingTests.RecordTearingTest5.F(a, b)
+  (c, d) = TearingTests.RecordTearingTest5.F(a, b)
   (e, f) = TearingTests.RecordTearingTest5.F(c, d)
 Residual equations:
  Iteration variables: f
   (e, f) = TearingTests.RecordTearingTest5.F(c, d)
  Iteration variables: a
-                      b
+  (a, b) = TearingTests.RecordTearingTest5.F(e, f)
+ Iteration variables: b
   (a, b) = TearingTests.RecordTearingTest5.F(e, f)
 -------------------------------
-      ")})));
+")})));
 end RecordTearingTest5;
 
 model AlgorithmTearingTest1
@@ -464,7 +588,7 @@ equation
 			description="Test of algorithm tearing",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn block of 1 iteration variables and 2 solved variables:
 Solved variables:
   y
   x
@@ -505,7 +629,7 @@ equation
 			description="Test of algorithm tearing",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn block of 1 iteration variables and 2 solved variables:
 Solved variables:
   y
   x
@@ -558,14 +682,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -638,14 +763,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 3 iteration variables and 2 solved variables.
+Torn linear block of 3 iteration variables and 2 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
 Iteration variables:
-  i2()
-  i1()
-  i3()
+  i2
+  i1
+  i3
 Solved equations:
   u2 = R2 * i2
   u1 = R1 * i1
@@ -719,14 +845,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 3 iteration variables and 2 solved variables.
+Torn linear block of 3 iteration variables and 2 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
 Iteration variables:
-  i2()
-  i3()
-  i1()
+  i2
+  i3
+  i1
 Solved equations:
   u2 = R3 * i3
   u1 = R1 * i1
@@ -801,14 +928,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -883,14 +1011,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i4()
-  i2()
+  i4
+  i2
 Solved equations:
   u2 = R3 * i4
   u0 = u1 + u2
@@ -964,14 +1093,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -1044,14 +1174,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   i1
   u1
   u2
 Iteration variables:
-  i2()
-  i3()
+  i2
+  i3
 Solved equations:
   i1 = i2 + i3
   u1 = R1 * i1
@@ -1126,14 +1257,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -1207,14 +1339,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   i1
   u1
   u2
 Iteration variables:
-  i2()
-  i3()
+  i2
+  i3
 Solved equations:
   i1 = i2 + i3
   u1 = R1 * i1
@@ -1332,14 +1465,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i2()
-  i3()
+  i2
+  i3
 Solved equations:
   u2 = R2 * i2
   u0 = u1 + u2
@@ -1414,14 +1548,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -1497,14 +1632,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i2()
-  i3()
+  i2
+  i3
 Solved equations:
   u2 = R2 * i2
   u0 = u1 + u2
@@ -1580,14 +1716,15 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Torn block of 2 iteration variables and 3 solved variables.
+Torn linear block of 2 iteration variables and 3 solved variables:
+Coefficient variability: Parameter
 Solved variables:
   u2
   u1
   i1
 Iteration variables:
-  i3()
-  i2()
+  i3
+  i2
 Solved equations:
   u2 = R3 * i3
   u0 = u1 + u2
@@ -1649,12 +1786,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c[1]
   a[1]
 Iteration variables:
-  b[1]()
+  b[1]
 Solved equations:
   c[1] = b[1] - 3
   a[1] = c[1] + 1
@@ -1666,12 +1804,13 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c[2]
   a[2]
 Iteration variables:
-  b[2]()
+  b[2]
 Solved equations:
   c[2] = b[2] - 3
   a[2] = c[2] + 1
@@ -1683,12 +1822,13 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c[3]
   a[3]
 Iteration variables:
-  b[3]()
+  b[3]
 Solved equations:
   c[3] = b[3] - 3
   a[3] = c[3] + 1
@@ -1700,12 +1840,13 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c[4]
   a[4]
 Iteration variables:
-  b[4]()
+  b[4]
 Solved equations:
   c[4] = b[4] - 3
   a[4] = c[4] + 1
@@ -1717,12 +1858,13 @@ Jacobian:
   |- 1.0, 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c[5]
   a[5]
 Iteration variables:
-  b[5]()
+  b[5]
 Solved equations:
   c[5] = b[5] - 3
   a[5] = c[5] + 1
@@ -1761,12 +1903,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
 Iteration variables:
-  c[1]()
+  c[1]
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
@@ -1778,12 +1921,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[2]
   b[2]
 Iteration variables:
-  c[2]()
+  c[2]
 Solved equations:
   a[2] = c[2] + 1
   a[2] = b[2] + 2
@@ -1795,12 +1939,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[3]
   b[3]
 Iteration variables:
-  c[3]()
+  c[3]
 Solved equations:
   a[3] = c[3] + 1
   a[3] = b[3] + 2
@@ -1812,12 +1957,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[4]
   b[4]
 Iteration variables:
-  c[4]()
+  c[4]
 Solved equations:
   a[4] = c[4] + 1
   a[4] = b[4] + 2
@@ -1829,12 +1975,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[5]
   b[5]
 Iteration variables:
-  c[5]()
+  c[5]
 Solved equations:
   a[5] = c[5] + 1
   a[5] = b[5] + 2
@@ -1874,7 +2021,8 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 5 iteration variables and 10 solved variables.
+Torn linear block of 5 iteration variables and 10 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
@@ -1887,11 +2035,11 @@ Solved variables:
   a[5]
   b[5]
 Iteration variables:
-  c[5]()
-  c[4]()
-  c[3]()
-  c[2]()
-  c[1]()
+  c[5]
+  c[4]
+  c[3]
+  c[2]
+  c[1]
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
@@ -1968,13 +2116,14 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.y
   b.y
   a.x
 Iteration variables:
-  b.x()
+  b.x
 Solved equations:
   a.y = b.x - 3
   b.x = b.y + 2
@@ -2029,13 +2178,14 @@ model HandGuidedTearing19
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c.a.y
   c.b.y
   c.a.x
 Iteration variables:
-  c.b.x()
+  c.b.x
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
@@ -2090,13 +2240,14 @@ model HandGuidedTearing20
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c.a.y
   c.b.y
   c.a.x
 Iteration variables:
-  c.b.x()
+  c.b.x
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
@@ -2154,13 +2305,14 @@ model HandGuidedTearing21
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c.a.y
   c.b.y
   c.a.x
 Iteration variables:
-  c.b.x()
+  c.b.x
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
@@ -2218,13 +2370,14 @@ model HandGuidedTearing22
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c.a.y
   c.b.y
   c.a.x
 Iteration variables:
-  c.b.x()
+  c.b.x
 Solved equations:
   c.a.y = c.b.x - 3
   c.b.x = c.b.y + 2
@@ -2282,13 +2435,14 @@ model HandGuidedTearing23
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 3 solved variables.
+Torn linear block of 1 iteration variables and 3 solved variables:
+Coefficient variability: Constant
 Solved variables:
   c.b.x
   c.a.y
   c.a.x
 Iteration variables:
-  c.b.y()
+  c.b.y
 Solved equations:
   c.b.x = c.b.y + 2
   c.a.y = c.b.x - 3
@@ -2327,12 +2481,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
 Iteration variables:
-  c[1]()
+  c[1]
 Solved equations:
   a[1] = c[1] .+ 1
   a[1] = b[1] .+ 2
@@ -2344,12 +2499,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[2]
   b[2]
 Iteration variables:
-  c[2]()
+  c[2]
 Solved equations:
   a[2] = c[2] .+ 1
   a[2] = b[2] .+ 2
@@ -2361,12 +2517,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[3]
   b[3]
 Iteration variables:
-  c[3]()
+  c[3]
 Solved equations:
   a[3] = c[3] .+ 1
   a[3] = b[3] .+ 2
@@ -2378,12 +2535,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[4]
   b[4]
 Iteration variables:
-  c[4]()
+  c[4]
 Solved equations:
   a[4] = c[4] .+ 1
   a[4] = b[4] .+ 2
@@ -2395,12 +2553,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[5]
   b[5]
 Iteration variables:
-  c[5]()
+  c[5]
 Solved equations:
   a[5] = c[5] .+ 1
   a[5] = b[5] .+ 2
@@ -2438,12 +2597,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
 Iteration variables:
-  c[1]()
+  c[1]
 Solved equations:
   a[1] = c[1] .+ 1
   a[1] = b[1] .+ 2
@@ -2455,12 +2615,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[2]
   b[2]
 Iteration variables:
-  c[2]()
+  c[2]
 Solved equations:
   a[2] = c[2] .+ 1
   a[2] = b[2] .+ 2
@@ -2472,12 +2633,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[3]
   b[3]
 Iteration variables:
-  c[3]()
+  c[3]
 Solved equations:
   a[3] = c[3] .+ 1
   a[3] = b[3] .+ 2
@@ -2489,12 +2651,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[4]
   b[4]
 Iteration variables:
-  c[4]()
+  c[4]
 Solved equations:
   a[4] = c[4] .+ 1
   a[4] = b[4] .+ 2
@@ -2506,12 +2669,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[5]
   b[5]
 Iteration variables:
-  c[5]()
+  c[5]
 Solved equations:
   a[5] = c[5] .+ 1
   a[5] = b[5] .+ 2
@@ -2551,12 +2715,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
 Iteration variables:
-  c[1]()
+  c[1]
 Solved equations:
   a[1] = c[1] .+ 1
   a[1] = b[1] .+ 2
@@ -2568,12 +2733,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[2]
   c[2]
 Iteration variables:
-  b[2]()
+  b[2]
 Solved equations:
   a[2] = b[2] .+ 2
   a[2] = c[2] .+ 1
@@ -2585,12 +2751,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[3]
   c[3]
 Iteration variables:
-  b[3]()
+  b[3]
 Solved equations:
   a[3] = b[3] .+ 2
   a[3] = c[3] .+ 1
@@ -2602,12 +2769,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   b[4]
   c[4]
 Iteration variables:
-  a[4]()
+  a[4]
 Solved equations:
   a[4] = b[4] .+ 2
   a[4] = c[4] .+ 1
@@ -2619,12 +2787,13 @@ Jacobian:
   |0.0, - 1.0, 1.0|
   |- 1.0, 1.0, 0.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   b[5]
   c[5]
 Iteration variables:
-  a[5]()
+  a[5]
 Solved equations:
   a[5] = b[5] .+ 2
   a[5] = c[5] .+ 1
@@ -2669,12 +2838,13 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[1]
   b[1]
 Iteration variables:
-  c[1]()
+  c[1]
 Solved equations:
   a[1] = c[1] + 1
   a[1] = b[1] + 2
@@ -2686,12 +2856,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[2]
   c[2]
 Iteration variables:
-  b[2]()
+  b[2]
 Solved equations:
   a[2] = b[2] + 2
   a[2] = c[2] + 1
@@ -2703,12 +2874,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a[3]
   c[3]
 Iteration variables:
-  b[3]()
+  b[3]
 Solved equations:
   a[3] = b[3] + 2
   a[3] = c[3] + 1
@@ -2720,12 +2892,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   b[4]
   c[4]
 Iteration variables:
-  a[4]()
+  a[4]
 Solved equations:
   a[4] = b[4] + 2
   a[4] = c[4] + 1
@@ -2737,12 +2910,13 @@ Jacobian:
   |0.0, - 1.0, 1.0|
   |- 1.0, 1.0, 0.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   b[5]
   c[5]
 Iteration variables:
-  a[5]()
+  a[5]
 Solved equations:
   a[5] = b[5] + 2
   a[5] = c[5] + 1
@@ -2788,12 +2962,13 @@ model HandGuidedTearing28
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.a[1]
   a.b[1]
 Iteration variables:
-  a.c[1]()
+  a.c[1]
 Solved equations:
   a.a[1] = a.c[1] + 1
   a.a[1] = a.b[1] + 2
@@ -2805,12 +2980,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.a[2]
   a.b[2]
 Iteration variables:
-  a.c[2]()
+  a.c[2]
 Solved equations:
   a.a[2] = a.c[2] + 1
   a.a[2] = a.b[2] + 2
@@ -2822,12 +2998,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.a[3]
   a.b[3]
 Iteration variables:
-  a.c[3]()
+  a.c[3]
 Solved equations:
   a.a[3] = a.c[3] + 1
   a.a[3] = a.b[3] + 2
@@ -2839,12 +3016,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.a[4]
   a.b[4]
 Iteration variables:
-  a.c[4]()
+  a.c[4]
 Solved equations:
   a.a[4] = a.c[4] + 1
   a.a[4] = a.b[4] + 2
@@ -2856,12 +3034,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.a[5]
   a.b[5]
 Iteration variables:
-  a.c[5]()
+  a.c[5]
 Solved equations:
   a.a[5] = a.c[5] + 1
   a.a[5] = a.b[5] + 2
@@ -2916,12 +3095,13 @@ model HandGuidedTearing29
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.b.x[1]
   a.b.z[1]
 Iteration variables:
-  a.b.y[1]()
+  a.b.y[1]
 Solved equations:
   a.b.x[1] = a.b.y[1] .+ 2
   a.b.x[1] = a.b.z[1] .+ 1
@@ -2933,12 +3113,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.b.x[2]
   a.b.y[2]
 Iteration variables:
-  a.b.z[2]()
+  a.b.z[2]
 Solved equations:
   a.b.x[2] = a.b.z[2] .+ 1
   a.b.x[2] = a.b.y[2] .+ 2
@@ -2950,12 +3131,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.b.x[3]
   a.b.z[3]
 Iteration variables:
-  a.b.y[3]()
+  a.b.y[3]
 Solved equations:
   a.b.x[3] = a.b.y[3] .+ 2
   a.b.x[3] = a.b.z[3] .+ 1
@@ -2967,12 +3149,13 @@ Jacobian:
   |1.0, - 1.0, 0.0|
   |0.0, 1.0, - 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.b.y[4]
   a.b.z[4]
 Iteration variables:
-  a.b.x[4]()
+  a.b.x[4]
 Solved equations:
   a.b.x[4] = a.b.y[4] .+ 2
   a.b.x[4] = a.b.z[4] .+ 1
@@ -2984,12 +3167,13 @@ Jacobian:
   |0.0, - 1.0, 1.0|
   |- 1.0, 1.0, 0.0|
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn linear block of 1 iteration variables and 2 solved variables:
+Coefficient variability: Constant
 Solved variables:
   a.b.y[5]
   a.b.z[5]
 Iteration variables:
-  a.b.x[5]()
+  a.b.x[5]
 Solved equations:
   a.b.x[5] = a.b.y[5] .+ 2
   a.b.x[5] = a.b.z[5] .+ 1
@@ -3026,11 +3210,12 @@ annotation(
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y
 Iteration variables:
-  x()
+  x
 Solved equations:
   y = x - 1
 Residual equations:
@@ -3060,11 +3245,12 @@ annotation(
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   z[1]
 Iteration variables:
-  y[1](start=2)
+  y[1]
 Solved equations:
   z[1] = - y[1] .- 1
 Residual equations:
@@ -3074,11 +3260,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   z[2]
 Iteration variables:
-  y[2](start=2)
+  y[2]
 Solved equations:
   z[2] = - y[2] .- 1
 Residual equations:
@@ -3109,11 +3296,12 @@ annotation(
             methodName="printDAEBLT",
             methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[1]
 Iteration variables:
-  x[1]()
+  x[1]
 Solved equations:
   x[1] .+ y[1] = 4
 Residual equations:
@@ -3123,11 +3311,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[2]
 Iteration variables:
-  x[2]()
+  x[2]
 Solved equations:
   x[2] .+ y[2] = 4
 Residual equations:
@@ -3137,11 +3326,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[3]
 Iteration variables:
-  x[3]()
+  x[3]
 Solved equations:
   x[3] .+ y[3] = 4
 Residual equations:
@@ -3151,11 +3341,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[4]
 Iteration variables:
-  x[4]()
+  x[4]
 Solved equations:
   x[4] .+ y[4] = 4
 Residual equations:
@@ -3186,11 +3377,12 @@ annotation(
             methodName="printDAEBLT",
             methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[1]
 Iteration variables:
-  x[1]()
+  x[1]
 Solved equations:
   x[1] .+ y[1] = 4
 Residual equations:
@@ -3200,11 +3392,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[2]
 Iteration variables:
-  x[2]()
+  x[2]
 Solved equations:
   x[2] .+ y[2] = 4
 Residual equations:
@@ -3214,11 +3407,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[3]
 Iteration variables:
-  x[3]()
+  x[3]
 Solved equations:
   x[3] .+ y[3] = 4
 Residual equations:
@@ -3228,11 +3422,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[4]
 Iteration variables:
-  x[4]()
+  x[4]
 Solved equations:
   x[4] .+ y[4] = 4
 Residual equations:
@@ -3263,11 +3458,12 @@ annotation(
             methodName="printDAEBLT",
             methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   y[1]
 Iteration variables:
-  x[1]()
+  x[1]
 Solved equations:
   x[1] .+ y[1] = 4
 Residual equations:
@@ -3277,11 +3473,12 @@ Jacobian:
   |1.0, 1.0|
   |- 1.0, 1.0|
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
 Solved variables:
   x[2]
 Iteration variables:
-  y[2]()
+  y[2]
 Solved equations:
   x[2] .+ y[2] = 4
 Residual equations:
@@ -3817,7 +4014,7 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
-Torn block of 1 iteration variables and 2 solved variables.
+Torn block of 1 iteration variables and 2 solved variables:
 Solved variables:
   b()
   a
@@ -3849,7 +4046,7 @@ initial equation
             methodName="printDAEInitBLT",
             methodResult="
 -------------------------------
-Torn block of 2 iteration variables and 1 solved variables.
+Torn block of 2 iteration variables and 1 solved variables:
 Solved variables:
   c
 Iteration variables:

@@ -763,7 +763,7 @@ public class DiagnosticsGenerator {
 	public void BLT.diagnostics_generateBLTTable(PrintStream out, boolean isInit) {
 		Deque<FVariable> orderList = new ArrayDeque<FVariable>();
 		for (AbstractEquationBlock aeb : this) {
-			orderList.addAll(aeb.activeVariables());
+			orderList.addAll(aeb.allVariables());
 		}
 		FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
 		
@@ -808,8 +808,8 @@ public class DiagnosticsGenerator {
 		tm.enterBlock();
 		int xStart = tm.getYPos();
 		int yStart = tm.getYPos();
-		int xEnd = xStart + activeVariables().size() - 1;
-		int yEnd = yStart + activeVariables().size() - 1;
+		int xEnd = xStart + allVariables().size() - 1;
+		int yEnd = yStart + allVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(xStart, yStart, xEnd, yEnd, "1px solid black", diagnostics_generateBLTTable_color()));
 		diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
 		tm.popStyleRule();
@@ -817,7 +817,7 @@ public class DiagnosticsGenerator {
 	}
 	
 	public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
-		for (FAbstractEquation equation : equations()) {
+		for (FAbstractEquation equation : allEquations()) {
 			if (varFilter == EMPTY_VAR_FILTER)
 				size = equation.numScalarEquations();
 			String equationStr = ASTNode.escapeHTML(equation);
@@ -872,14 +872,14 @@ public class DiagnosticsGenerator {
 	
 	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		int startL = tm.getYPos();
-		int endL = startL + activeVariables().size() - iterationVariables().size() - 1;
+		int endL = startL + allVariables().size() - iterationVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
 		int startJ = endL + 1;
-		int endJ = startL + activeVariables().size() - 1;
+		int endJ = startL + allVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startJ, startJ, endJ, endJ, "1px solid black", "#F0C0C0"));
 		java.util.List<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
-		blocks.addAll(getSolvedBlocks());
-		blocks.addAll(getUnsolvedBlocks());
+		blocks.addAll(solvedBlocks());
+		blocks.addAll(unsolvedBlocks());
 		for (SimpleEquationBlock seb : blocks) {
 			seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
 		}

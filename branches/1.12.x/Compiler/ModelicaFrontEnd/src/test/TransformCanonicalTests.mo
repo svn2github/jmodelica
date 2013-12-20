@@ -4823,13 +4823,13 @@ Solution:
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  y
+  y()
 Equations:
   2 / y = x + 3
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
-  z
+  z()
 Equations:
   x / z = x - y
 -------------------------------
@@ -4947,15 +4947,15 @@ Solution:
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  r.x
-  r.y
+  r.x()
+  r.y()
 Equations:
   (TransformCanonicalTests.BlockTest1.R(r.x, r.y)) = TransformCanonicalTests.BlockTest1.f1(x + r.x)
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  y1
-  y2
+  y1()
+  y2()
 Equations:
   (y1, y2) = TransformCanonicalTests.BlockTest1.f2(x + y1)
 -------------------------------
@@ -5015,8 +5015,8 @@ equation
 			equation_sorting=true,
 			inline_functions="none",
 			automatic_tearing=false,
-			description="
-Test of correct creation of blocks containing functions returning records", methodResult="
+			description="Test of correct creation of blocks containing functions returning records",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5026,27 +5026,27 @@ Solution:
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  r.x
-  r.y
+  r.x()
+  r.y()
 Equations:
   (TransformCanonicalTests.BlockTest2.R(r.x, r.y)) = TransformCanonicalTests.BlockTest2.f1(x + r.x)
 -------------------------------
 Non-solved block of 3 variables:
 Unknown variables:
-  r2.r.x
-  r2.x
-  r2.r.y
+  r2.r.x()
+  r2.x()
+  r2.r.y()
 Equations:
   (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
 -------------------------------
 Non-solved block of 2 variables:
 Unknown variables:
-  y1
-  y2
+  y1()
+  y2()
 Equations:
   (y1, y2) = TransformCanonicalTests.BlockTest2.f2(x + y1)
 -------------------------------
-      ")})));
+")})));
 end BlockTest2;
 
 model BlockTest3
@@ -5074,8 +5074,8 @@ equation
 			equation_sorting=true,
 			inline_functions="none",
 			automatic_tearing=false,
-			description="
-Test of correct creation of blocks containing functions returning records", methodResult="
+			description="Test of correct creation of blocks containing functions returning records",
+			methodResult="
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -5085,15 +5085,15 @@ Solution:
 -------------------------------
 Non-solved block of 4 variables:
 Unknown variables:
-  r2.y
-  r2.x
-  r1.x
-  r1.y
+  r2.y()
+  r2.x()
+  r1.x()
+  r1.y()
 Equations:
   (TransformCanonicalTests.BlockTest3.R(r2.x, r2.y)) = TransformCanonicalTests.BlockTest3.F(x + r1.x)
   (TransformCanonicalTests.BlockTest3.R(r1.x, r1.y)) = TransformCanonicalTests.BlockTest3.F(x + r2.x)
 -------------------------------
-      ")})));
+")})));
 end BlockTest3;
 
 model BlockTest4
@@ -5213,11 +5213,11 @@ equation
 			name="BlockTest7",
 			description="Test of linear systems of equations with if expression",
 			equation_sorting=true,
+            automatic_tearing = false,
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
 Non-solved mixed linear block of 3 variables:
-
 Coefficient variability: Discrete
 Unknown continuous variables:
   b
@@ -6181,11 +6181,12 @@ Computed variable:
 Solution:
   time * 42
 -------------------------------
-Torn block of 1 iteration variables and 1 solved variables.
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Continuous
 Solved variables:
   a2
 Iteration variables:
-  a1()
+  a1
 Solved equations:
   a1 = a2 * 3.14
 Residual equations:

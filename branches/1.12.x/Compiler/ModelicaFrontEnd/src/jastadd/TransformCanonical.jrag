@@ -446,7 +446,7 @@ aspect TransformCanonical {
 				return;
 			}
 			for (AbstractEquationBlock eb : daeBLT) {
-				for (FVariable fv : eb.activeVariables()) {
+				for (FVariable fv : eb.allVariables()) {
 					daeFVariableEquationBlockMap.put(fv,eb);
 				}
 			}
@@ -454,6 +454,7 @@ aspect TransformCanonical {
 				if (e.numScalarEquations() == 0)
 					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE));
 			daeStructuredBLT = new StructuredBLT(this, daeBLT);
+			daeStructuredBLT.checkStartValues();
 			log.info(daeStructuredBLT);
 			
 			log.info(daeBLT);
@@ -553,10 +554,11 @@ aspect TransformCanonical {
 				return;
 			}
 			for (AbstractEquationBlock eb : daeInitBLT) {
-				for (FVariable fv : eb.activeVariables()) {
+				for (FVariable fv : eb.allVariables()) {
 					daeInitFVariableEquationBlockMap.put(fv,eb);
 				}
 			}	
+			daeInitBLT.checkStartValues();
 			log.info(daeInitBLT);
 		}
 	}	
