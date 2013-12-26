@@ -2835,9 +2835,6 @@ class TestLocalDAECollocator2:
         Test setting parameters post-compilation.
         """
         op = self.cstr_dependent_parameter_op
-        N.testing.assert_raises(RuntimeError,
-                op.model.getVariableByName('cstr.F').setAttribute,
-                "bindingExpression", 500)
         
         # Reference values
         cost_ref_low = 1.2391821615924346e3
@@ -2846,16 +2843,21 @@ class TestLocalDAECollocator2:
         u_norm_ref_default = 3.0556730059139556e2
         
         # Test lower EdivR
-        op.model.getVariableByName('cstr.EdivR').setAttribute(
+        op.model.getVariable('cstr.EdivR').setAttribute(
                 "bindingExpression", 8200)
         res_low = op.optimize(self.algorithm)
         assert_results(res_low, cost_ref_low, u_norm_ref_low)
         
         # Test default EdviR
-        op.model.getVariableByName('cstr.EdivR').setAttribute(
+        op.model.getVariable('cstr.EdivR').setAttribute(
                 "bindingExpression", 8750)
         res_default = op.optimize(self.algorithm)
         assert_results(res_default, cost_ref_default, u_norm_ref_default)
+
+        # Test dependent parameter setting
+        N.testing.assert_raises(RuntimeError,
+                op.model.getVariable('cstr.F').setAttribute,
+                "bindingExpression", 500)
     
     @testattr(new_casadi = True)
     def test_blocking_factors(self):
