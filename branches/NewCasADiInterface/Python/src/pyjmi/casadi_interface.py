@@ -24,13 +24,15 @@ import numpy as N
 
 try:
     import casadi
+    from modelicacasadi_wrapper import OptimizationProblem as CI_OP
 except:
     pass
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
 from pyjmi.common.xmlparser import XMLException
-from pyfmi.common.core import unzip_unit, get_platform_suffix, get_files_in_archive, rename_to_tmp, load_DLL
+from pyfmi.common.core import (unzip_unit, get_platform_suffix,
+                               get_files_in_archive, rename_to_tmp, load_DLL)
 
 def convert_casadi_der_name(name):
     n = name.split('der_')[1]
@@ -70,7 +72,7 @@ def unzip_fmux(archive, path='.'):
     
     return fmux_files
 
-class OptimizationProblem(ModelBase):
+class OptimizationProblem(ModelBase, CI_OP):
 
     """
     Python wrapper for the CasADi interface class OptimizationProblem.
@@ -83,8 +85,8 @@ class OptimizationProblem(ModelBase):
             optimization_problem --
                 OptimizationProblem from the CasADi interface
         """
-        self.op = optimization_problem
-        self.model = self.op.getModel()
+        CI_OP.__init__(self, optimization_problem)
+        self.model = self.getModel()
         
     def _default_options(self, algorithm):
         """ 

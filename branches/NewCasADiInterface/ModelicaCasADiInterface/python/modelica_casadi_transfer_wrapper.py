@@ -17,6 +17,7 @@ import sys
 import platform
 from casadi import *
 from modelicacasadi_wrapper import *
+from pyjmi.casadi_interface import OptimizationProblem as pyjmi_op
 JVM_SET_UP=False
 
 
@@ -97,9 +98,14 @@ def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto',
         JVM_SET_UP=True
         
     if _which_compiler(file_vec, compiler) == "MODELICA":
-        return _transfer_modelica(class_name, _generate_StringVector(file_vec), _get_options(compiler_options), compiler_log_level)
+        return _transfer_modelica(class_name, _generate_StringVector(file_vec),
+                                  _get_options(compiler_options),
+                                  compiler_log_level)
     else:
-        return _transfer_optimica(class_name, _generate_StringVector(file_vec), _get_options(compiler_options), compiler_log_level)
+        op = _transfer_optimica(class_name, _generate_StringVector(file_vec),
+                                _get_options(compiler_options),
+                                compiler_log_level)
+        return pyjmi_op(op)
 
 
 def _generate_StringVector(file_vec):

@@ -3156,9 +3156,6 @@ class LocalDAECollocator2(CasadiCollocator):
         self.__dict__.update(options)
         
         # Store model and op objects
-        # Remove unneeded_op if unneeded! FIX!!!
-        self.unneeded_op = op
-        op = op.op
         self.op = op
         model = op.getModel()
         self.model = model
