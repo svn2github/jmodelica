@@ -32,7 +32,7 @@ from pyfmi import FMUModel,load_fmu
 try:
     from casadi_interface import transfer_to_casadi_interface
     from pyjmi.optimization.casadi_collocation import *
-    from pyjmi.casadi_interface import CasadiModel, OptimizationProblem
+    from pyjmi.casadi_interface import CasadiModel
     import casadi
 except (NameError, ImportError):
     pass
@@ -1626,52 +1626,36 @@ class TestLocalDAECollocator2:
         """Compile the test models."""
         vdp_file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange"
-        model_vdp_bounds_lagrange = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_bounds_lagrange_op = \
-                OptimizationProblem(model_vdp_bounds_lagrange)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Lagrange_Renamed_Input"
-        model_vdp_bounds_lagrange_renamed = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_bounds_lagrange_renamed_op = \
-                OptimizationProblem(model_vdp_bounds_lagrange_renamed)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Bounds_Mayer"
-        model_vdp_bounds_mayer = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_bounds_mayer_op = \
-                OptimizationProblem(model_vdp_bounds_mayer)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Constraints_Mayer"
-        model_vdp_constraints_mayer = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_constraints_mayer_op = \
-                OptimizationProblem(model_vdp_constraints_mayer)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Initial_Equations"
-        model_vdp_initial_equations = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_initial_equations_op = \
-                OptimizationProblem(model_vdp_initial_equations)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
-        model_vdp_scaled_min_time = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_scaled_min_time_op = \
-                OptimizationProblem(model_vdp_scaled_min_time)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
-        model_vdp_unscaled_min_time = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_unscaled_min_time_op = \
-                OptimizationProblem(model_vdp_unscaled_min_time)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
 
         class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
-        model_vdp_min_time_nonzero_start = \
-                transfer_to_casadi_interface(class_path, vdp_file_path)
         self.vdp_min_time_nonzero_start_op = \
-                OptimizationProblem(model_vdp_min_time_nonzero_start)
+                transfer_to_casadi_interface(class_path, vdp_file_path)
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
@@ -1680,40 +1664,28 @@ class TestLocalDAECollocator2:
         self.cstr_model = load_fmu(fmu_cstr)
         
         class_path = "CSTR.CSTR_Opt_Bounds_Lagrange"
-        model_cstr_lagrange = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_lagrange_op = \
-                OptimizationProblem(model_cstr_lagrange)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Bounds_Mayer"
-        model_cstr_mayer = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_mayer_op = \
-                OptimizationProblem(model_cstr_mayer)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Dependent_Parameter"
-        model_cstr_dependent_parameter = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_dependent_parameter_op = \
-                OptimizationProblem(model_cstr_dependent_parameter)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Extends"
-        model_cstr_extends = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_extends_op = \
-                OptimizationProblem(model_cstr_extends)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Scaled_Min_Time"
-        model_cstr_scaled_min_time = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_scaled_min_time_op = \
-                OptimizationProblem(model_cstr_scaled_min_time)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
-        model_cstr_unscaled_min_time = \
-                transfer_to_casadi_interface(class_path, cstr_file_path)
         self.cstr_unscaled_min_time_op = \
-                OptimizationProblem(model_cstr_unscaled_min_time)
+                transfer_to_casadi_interface(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
                                     'ParameterEstimation_1.mop')
@@ -1723,10 +1695,8 @@ class TestLocalDAECollocator2:
         self.second_order_model = load_fmu(fmu_second_order)
         
         class_path = "ParEst.ParEstCasADi"
-        model_second_order_par_est = \
-                transfer_to_casadi_interface(class_path, pe_file_path)
         self.second_order_par_est_op = \
-                OptimizationProblem(model_second_order_par_est)
+                transfer_to_casadi_interface(class_path, pe_file_path)
         
         qt_file_path = os.path.join(get_files_path(), 'Modelica',
                                     'QuadTankPack.mop')
@@ -1736,16 +1706,12 @@ class TestLocalDAECollocator2:
         self.qt_model = load_fmu(fmu_qt_sim)
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi"
-        model_qt_par_est = \
-                transfer_to_casadi_interface(class_path, qt_file_path)
         self.qt_par_est_op = \
-                OptimizationProblem(model_qt_par_est)
+                transfer_to_casadi_interface(class_path, qt_file_path)
         
         class_path = "QuadTankPack.QuadTank_ParEstCasADi_Degenerate"
-        model_qt_par_est_degenerate = \
-                transfer_to_casadi_interface(class_path, qt_file_path)
         self.qt_par_est_degenerate_op = \
-                OptimizationProblem(model_qt_par_est_degenerate)
+                transfer_to_casadi_interface(class_path, qt_file_path)
         
         self.algorithm = "LocalDAECollocationAlg2"
     

@@ -2267,12 +2267,10 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         elif self.discr != "LG" and self.discr != "LGR":
             raise ValueError("Unknown discretization scheme %s." % self.discr)
 
-        # Check validity of rename_vars
+        # Check named_vars
         if self.named_vars:
-            if self.graph != "SX":
-                raise NotImplementedError('named_vars is only compatible ' + \
-                                          'with graph == "SX".')
-            print("Warning: Variable names are currently activated.")
+            print("Warning: Named NLP variables is currently enabled. This " +
+                  "may have significant performance impacts.")
         
         # Check validity of quadrature_constraint
         if (self.discr == "LG" and self.eliminate_der_var and
@@ -2435,11 +2433,11 @@ class LocalDAECollocationAlg2Options(OptionBase):
             Type: str
             Default: "LGR"
         
-        graph --
-            CasADi graph type. Possible values are "SX" and "MX".
+        expand_to_SX --
+            Whether to expand the CasADi MX graphs to SX graphs.
             
-            Type: str
-            Default: "SX"
+            Type: bool
+            Default: False
 
         named_vars --
             Whether to name the NLP variables according to their corresponding
@@ -2639,7 +2637,7 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'discr': "LGR",
-                'graph': 'SX',
+                'expand_to_SX': False,
                 'named_vars': False,
                 'init_traj': None,
                 'variable_scaling': True,
