@@ -726,17 +726,33 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
 }
 
 /* Estimate condition number utilizing dgecon from LAPACK*/
-static realtype jmi_calculate_condition_number(jmi_block_solver_t * block, realtype* A) {
+static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     char norm = 'I';
     int N = block->n;
-    double Jnorm = 1.0, Jcond = 1.0;
+    double J_norm = 1.0;
+    double J_recip_cond = 1.0;
     int info;
-    
-    dgecon_(&norm, &N, A, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);
+
+    /* Copy Jacobian to factorization matrix */
+    DenseCopy(solver->J, solver->J_LU);
+    /* Perform LU factorization to be used with dgecon */
+    dgetrf_(&N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
+    if (info != 0 ) {
+    	/* If matrix i singular, return something very large to be evaluated*/
+    	return 1e100;
+    }
+
+    /* Compute infinity norm of J to be used with dgecon */
+    J_norm = dlange_(&norm, &N, &N, solver->J->data, &N, solver->lapack_work);
+
+    /* Compute reciprocal condition number */
+    dgecon_(&norm, &N, solver->J_LU->data, &N, &J_norm, &J_recip_cond, solver->lapack_work, solver->lapack_iwork,&info);
+    /* To be evaluated - why is this needed? Error handling due to J being used instead of J_LU?
     if(Jcond < 0) Jcond = -Jcond;
     if(Jcond == 0.0) Jcond = 1e-30;
-    return 1.0/Jcond;
+    */
+    return 1.0/J_recip_cond;
 }
 
 /* Callback from KINSOL called to calculate Jacobian */
@@ -1040,7 +1056,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     }
     
     if (solver->using_max_min_scaling_flag) {
-        realtype cond = jmi_calculate_condition_number(block, solver->J->data);
+        realtype cond = jmi_calculate_jacobian_condition_number(block);
 
         jmi_log_node(block->log, logInfo, "Regularization",
             "Calculated condition number in <block: %d>. Regularizing if <cond: %E> is greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
