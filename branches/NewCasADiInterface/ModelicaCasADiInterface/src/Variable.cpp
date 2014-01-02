@@ -40,6 +40,40 @@ Variable::Variable(MX var, Variable::Causality causality,
 
 
 
+void Variable::setQuantity(std::string quantity) { setAttribute("quantity", MX(quantity)); }
+void Variable::setQuantity(CasADi::MX quantity) { setAttribute("quantity", quantity); }
+CasADi::MX* Variable::getQuantity() { return getAttribute("quantity"); }
+
+void Variable::setNominal(double nominal) { setAttribute("nominal", MX(nominal)); }
+void Variable::setNominal(CasADi::MX nominal) { setAttribute("nominal", nominal); }
+CasADi::MX* Variable::getNominal() { return getAttribute("nominal"); }
+
+void Variable::setUnit(std::string unit) { setAttribute("unit", MX(unit)); }
+void Variable::setUnit(CasADi::MX unit) { setAttribute("unit", unit); }
+CasADi::MX* Variable::getUnit() { return getAttribute("unit"); }
+
+void Variable::setDisplayUnit(std::string displayUnit) { setAttribute("displayUnit", MX(displayUnit)); }
+void Variable::setDisplayUnit(CasADi::MX displayUnit) { setAttribute("displayUnit", displayUnit); }
+CasADi::MX* Variable::getDisplayUnit() { return getAttribute("displayUnit"); }
+
+void Variable::setMin(double min) { setAttribute("min", MX(min)); }
+void Variable::setMin(CasADi::MX min) { setAttribute("min", min); }
+CasADi::MX* Variable::getMin() { return getAttribute("min"); }
+
+void Variable::setMax(double max) { setAttribute("max", MX(max)); }
+void Variable::setMax(CasADi::MX max) { setAttribute("max", max); }
+CasADi::MX* Variable::getMax() { return getAttribute("max"); }
+
+void Variable::setStart(double start) { setAttribute("start", MX(start)); }
+void Variable::setStart(CasADi::MX start) { setAttribute("start", start); }
+CasADi::MX* Variable::getStart() { return getAttribute("start"); }
+
+void Variable::setFixed(bool fixed) { setAttribute("fixed", MX(fixed)); }
+void Variable::setFixed(CasADi::MX fixed) { setAttribute("fixed", fixed); }
+CasADi::MX* Variable::getFixed() { return getAttribute("fixed"); }
+
+
+
 
 Variable::AttributeValue* Variable::getAttribute(AttributeKey key) { 
     if (isAlias()) {

@@ -290,6 +290,59 @@ def test_RealTypePrinting():
     assert( not realType.hasAttribute("not") )
     assert( realType.getName() == "Real" )
     
+def test_VariableDedicatedGettersAndSetters():
+    realVar = RealVariable(MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
+
+    quantity = MX("q")
+    realVar.setQuantity("q")
+    assert str(realVar.getQuantity()) == str(quantity)
+    realVar.setQuantity(quantity)
+    assert quantity.isEqual(realVar.getQuantity())
+
+    nominal = MX(1)
+    realVar.setNominal(1)
+    assert str(realVar.getNominal()) == str(nominal)
+    realVar.setNominal(nominal)
+    assert nominal.isEqual(realVar.getNominal())
+
+    unit = MX("u")
+    realVar.setUnit("u")
+    assert str(realVar.getUnit()) == str(unit)
+    realVar.setUnit(unit)
+    assert unit.isEqual(realVar.getUnit())
+
+    displayUnit = MX("du")
+    realVar.setDisplayUnit("du")
+    assert str(realVar.getDisplayUnit()) == str(displayUnit)
+    realVar.setDisplayUnit(displayUnit)
+    assert displayUnit.isEqual(realVar.getDisplayUnit())
+
+    min = MX(-1)
+    realVar.setMin(-1)
+    assert str(realVar.getMin()) == str(min)
+    realVar.setMin(min)
+    assert min.isEqual(realVar.getMin())
+
+    Max = MX(1)
+    realVar.setMax(1)
+    assert str(realVar.getMax()) == str(Max)
+    realVar.setMax(Max)
+    assert Max.isEqual(realVar.getMax())
+
+    Start = MX(1)
+    realVar.setStart(1)
+    assert str(realVar.getStart()) == str(Start)
+    realVar.setStart(Start)
+    assert Start.isEqual(realVar.getStart())
+
+    fixed = MX(False)
+    realVar.setFixed(False)
+    assert str(realVar.getFixed()) == str(fixed)
+    realVar.setFixed(fixed)
+    assert fixed.isEqual(realVar.getFixed())
+
+    
+    
 def test_RealVariableAttributes():
     attributeNode1 = MX(1)
     attributeNode2 = MX(2)

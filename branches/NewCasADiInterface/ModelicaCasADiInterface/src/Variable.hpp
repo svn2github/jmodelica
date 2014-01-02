@@ -87,6 +87,41 @@ class Variable : public SharedNode {
         Ref<Variable> getAlias() const;
         
         
+        /* Getters and setters for standard Modelica attributes */
+        void setQuantity(std::string quantity);
+        void setQuantity(CasADi::MX quantity);
+        CasADi::MX* getQuantity();
+        
+        void setNominal(double nominal);
+        void setNominal(CasADi::MX nominal);
+        CasADi::MX* getNominal();
+        
+        void setUnit(std::string unit);
+        void setUnit(CasADi::MX unit);
+        CasADi::MX* getUnit();
+        
+        void setDisplayUnit(std::string displayUnit);
+        void setDisplayUnit(CasADi::MX displayUnit);
+        CasADi::MX* getDisplayUnit();
+        
+        void setMin(double min);
+        void setMin(CasADi::MX min);
+        CasADi::MX* getMin();
+        
+        void setMax(double max);
+        void setMax(CasADi::MX max);
+        CasADi::MX* getMax();
+        
+        void setStart(double start);
+        void setStart(CasADi::MX start);
+        CasADi::MX* getStart();
+        
+        void setFixed(bool fixed);
+        void setFixed(CasADi::MX fixed);
+        CasADi::MX* getFixed();
+        
+        
+        
         /**
          * @return The string name of this Variable 
          */
