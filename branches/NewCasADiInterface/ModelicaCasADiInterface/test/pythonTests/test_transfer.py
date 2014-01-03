@@ -23,9 +23,7 @@ from casadi_interface import *
 x1 = MX("x1")
 x2 = MX("x2")
 x3 = MX("x3")
-der_x1 = MX("der_x1")
-der_x2 = MX("der_x2") 
-der_x3 = MX("der_x3") 
+der_x1 = MX("der(x1)")
 modelFile = "../common/atomicModelicaModels.mo"
     
 def assertNear(val1, val2, tol):
@@ -57,7 +55,7 @@ def test_ModelicaSimpleInitialEquation():
 
 def test_ModelicaFunctionCallEquations():
     assert( repr(transfer_to_casadi_interface("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual()) == 
-                ("MX(vertcat((x1-der_x1),(vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
+                ("MX(vertcat((x1-der(x1)),(vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
                 ".call([x1]){0},function(\"AtomicModelFunctionCallEquation.f\").call([x1]){1})-vertcat(x2,x3))))") )  
                 
 def test_ModelicaBindingExpression():
@@ -441,30 +439,30 @@ def test_OptimicaInvalidCompiler():
 
 def test_ConstructElementaryExpression():
     dae = transfer_to_casadi_interface("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
-    expected = "MX(vertcat(((2+x1)-der_x1),((x2-x1)-der_x2),((x3*x2)-der_x3),((x4/x3)-der_x4)))"
+    expected = "MX(vertcat(((2+x1)-der(x1)),((x2-x1)-der(x2)),((x3*x2)-der(x3)),((x4/x3)-der(x4))))"
     assert repr(dae) == expected 
     
 def test_ConstructElementaryFunctions():
     dae = transfer_to_casadi_interface("AtomicModelElementaryFunctions", modelFile).getDaeResidual()
-    expected = ("MX(vertcat((pow(x1,5)-der_x1),(fabs(x2)-der_x2),(fmin(x3,x2)-der_x3)," +
-                "(fmax(x4,x3)-der_x4),(sqrt(x5)-der_x5),(sin(x6)-der_x6),(cos(x7)-der_x7),(tan(x8)-der_x8)," +
-                "(asin(x9)-der_x9),(acos(x10)-der_x10),(atan(x11)-der_x11),(atan2(x12,x11)-der_x12)," +
-                "(sinh(x13)-der_x13),(cosh(x14)-der_x14),(tanh(x15)-der_x15),(exp(x16)-der_x16),(log(x17)-der_x17)," +
-                "((0.434294*log(x18))-der_x18),((-x18)-der_x19)))" ) # CasADi converts log10 to log with constant.
+    expected = ("MX(vertcat((pow(x1,5)-der(x1)),(fabs(x2)-der(x2)),(fmin(x3,x2)-der(x3))," +
+                "(fmax(x4,x3)-der(x4)),(sqrt(x5)-der(x5)),(sin(x6)-der(x6)),(cos(x7)-der(x7)),(tan(x8)-der(x8))," +
+                "(asin(x9)-der(x9)),(acos(x10)-der(x10)),(atan(x11)-der(x11)),(atan2(x12,x11)-der(x12))," +
+                "(sinh(x13)-der(x13)),(cosh(x14)-der(x14)),(tanh(x15)-der(x15)),(exp(x16)-der(x16)),(log(x17)-der(x17))," +
+                "((0.434294*log(x18))-der(x18)),((-x18)-der(x19))))" ) # CasADi converts log10 to log with constant.
     assert repr(dae) == expected
     
 def test_ConstructBooleanExpressions():
     dae = transfer_to_casadi_interface("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
-    expected = ("MX(vertcat((((x2?1:0)+((!x2)?2:0))-der_x1)," + 
+    expected = ("MX(vertcat((((x2?1:0)+((!x2)?2:0))-der(x1))," + 
                 "((0<x1)-x2),((0<=x1)-x3),((x1<0)-x4)" +
                 ",((x1<=0)-x5),((x5==x4)-x6),((x6!=x5)-x7),((x6&&x5)-x8),((x6||x5)-x9)))" )
     assert repr(dae) == expected
      
 def test_ConstructMisc():
     model = transfer_to_casadi_interface("AtomicModelMisc", modelFile)
-    expected = ("MX(vertcat((1.11-der_x1),(((x3?3:0)+((!x3)?4:0))-x2)," +
+    expected = ("MX(vertcat((1.11-der(x1)),(((x3?3:0)+((!x3)?4:0))-x2)," +
                 "((1||(1<x2))-x3),((0||x3)-x4)))" + 
-                "MX(vertcat((-x1),(-pre_x2),(-pre_x3),(-pre_x4)))")
+                "MX(vertcat((-x1),(-pre(x2)),(-pre(x3)),(-pre(x4))))")
     assert (repr(model.getDaeResidual()) + repr(model.getInitialResidual()))  == expected
      
 def test_ConstructVariableLaziness():
@@ -493,7 +491,7 @@ def test_ConstructArrayInOutFunction1():
     assert str(model.getModelFunction("AtomicModelVector1.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelVector1.f\").call([A[1],A[2]]){0}," +                                                             
                 "function(\"AtomicModelVector1.f\").call([A[1],A[2]]){1})-vertcat(temp_1[1],temp_1[2]))," +
-                "(temp_1[1]-der_A[1]),(temp_1[2]-der_A[2]))")
+                "(temp_1[1]-der(A[1])),(temp_1[2]-der(A[2])))")
     assert str(model.getDaeResidual()) == expected
  
 def test_ConstructArrayInOutFunction2():
@@ -513,7 +511,7 @@ def test_ConstructArrayInOutFunction2():
     assert str(model.getModelFunction("AtomicModelVector2.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelVector2.f\").call([A[1],A[2]]){0}," +
                 "function(\"AtomicModelVector2.f\").call([A[1],A[2]]){1})-vertcat(temp_1[1],temp_1[2]))," +
-                "(temp_1[1]-der_A[1]),(temp_1[2]-der_A[2]))")
+                "(temp_1[1]-der(A[1])),(temp_1[2]-der(A[2])))")
     assert str(model.getDaeResidual()) == expected
     
 def test_ConstructArrayInOutFunctionCallEquation():
@@ -550,7 +548,7 @@ def test_ConstructArrayInOutFunctionCallEquation():
     
 def test_FunctionCallEquationOmittedOuts():
     model = transfer_to_casadi_interface("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
-    expected = ("vertcat(((x1+x2)-der_x2),"
+    expected = ("vertcat(((x1+x2)-der(x2)),"
                 "(vertcat("
                 "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){0},"
                 "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){2})"
@@ -589,13 +587,13 @@ def test_ConstructFunctionMatrix():
     assert str(model.getModelFunction("AtomicModelMatrix.f")) == expected
     expected = ("vertcat((vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1," +
                 "0.3]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],0.1" +
-                ",0.3]){1})-vertcat(temp_1[1,1],temp_1[1,2])),((-temp_1[1,1])-der_A[1,1]),((-temp_1[1,2])-der_A[1,2])," +
+                ",0.3]){1})-vertcat(temp_1[1,1],temp_1[1,2])),((-temp_1[1,1])-der(A[1,1])),((-temp_1[1,2])-der(A[1,2]))," +
                 "(vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0}," +
                 "function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1}," +
                 "function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2}," +
                 "function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})-" +
-                "vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])),((-temp_2[1,1])-der_dx[1,1])," +
-                "((-temp_2[1,2])-der_dx[1,2]),((-temp_2[2,1])-der_dx[2,1]),((-temp_2[2,2])-der_dx[2,2]))")
+                "vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])),((-temp_2[1,1])-der(dx[1,1]))," +
+                "((-temp_2[1,2])-der(dx[1,2])),((-temp_2[2,1])-der(dx[2,1])),((-temp_2[2,2])-der(dx[2,2])))")
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructFunctionMatrixDimsGreaterThanTwo():
@@ -642,7 +640,7 @@ def test_ConstructFunctionMatrixDimsGreaterThanTwo():
                 "function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){4}," 
                 "function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1],A[1,1,2],A[1,1,3],A[1,2,1],A[1,2,2],A[1,2,3]]){5})" 
                 "-vertcat(temp_1[1,1,1],temp_1[1,1,2],temp_1[1,1,3],temp_1[1,2,1],temp_1[1,2,2],temp_1[1,2,3]))," +
-                "(temp_1[1,1,1]-der_A[1,1,1]),(temp_1[1,1,2]-der_A[1,1,2]),(temp_1[1,1,3]-der_A[1,1,3]),(temp_1[1,2,1]-der_A[1,2,1]),(temp_1[1,2,2]-der_A[1,2,2]),(temp_1[1,2,3]-der_A[1,2,3]))")
+                "(temp_1[1,1,1]-der(A[1,1,1])),(temp_1[1,1,2]-der(A[1,1,2])),(temp_1[1,1,3]-der(A[1,1,3])),(temp_1[1,2,1]-der(A[1,2,1])),(temp_1[1,2,2]-der(A[1,2,2])),(temp_1[1,2,3]-der(A[1,2,3])))")
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructNestedRecordFunctions():
@@ -687,7 +685,7 @@ def test_ConstructNestedRecordFunctions():
                 "compCurve.curves[1].path[2].point[1],compCurve.curves[1].path[2].point[2]," +
                 "compCurve.curves[2].path[1].point[1],compCurve.curves[2].path[1].point[2]," +
                 "compCurve.curves[2].path[2].point[1],compCurve.curves[2].path[2].point[2]))," +
-                "(compCurve.curves[1].path[1].point[2]-der_a))")
+                "(compCurve.curves[1].path[1].point[2]-der(a)))")
     assert str(model.getDaeResidual()) == expected
         
 def test_ConstructRecordInFunctionInFunction():
@@ -716,7 +714,7 @@ def test_ConstructRecordInFunctionInFunction():
                 "output[1] = @0\n")
     funcStr = str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f2"))
     assert funcStr == expected
-    assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der_a)"
+    assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der(a))"
 
 def test_ConstructRecordArbitraryDimension():
     model = transfer_to_casadi_interface("AtomicModelRecordArbitraryDimension", modelFile, compiler_options={"inline_functions":"none"})
@@ -748,7 +746,7 @@ def test_ConstructRecordArbitraryDimension():
                 "@0 = (2.*@0)\n"
                 "output[7] = @0\n")
     assert str(model.getModelFunction("AtomicModelRecordArbitraryDimension.f")) == expected
-    expected = ("vertcat(((-a)-der_a),(vertcat(" + 
+    expected = ("vertcat(((-a)-der(a)),(vertcat(" + 
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}," +
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){1}," +
                 "function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){2}," + 
@@ -815,7 +813,7 @@ def test_ConstructRecordNestedSeveralVars():
                 "@0 = input[0]\n"
                 "output[9] = @0\n")
     assert str(model.getModelFunction("AtomicModelRecordSeveralVars.f")) == expected
-    expected = ("vertcat(((-a)-der_a),(vertcat(" +  
+    expected = ("vertcat(((-a)-der(a)),(vertcat(" +  
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}," + 
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){1}," +
                 "function(\"AtomicModelRecordSeveralVars.f\").call([a]){2}," +
@@ -831,14 +829,14 @@ def test_ConstructRecordNestedSeveralVars():
 
 def test_ConstructFunctionsInRhs():
     model = transfer_to_casadi_interface("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
-    expected = ("vertcat((sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})-der_x1),"
-                "(function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1,x2]){0}-der_x2),"
+    expected = ("vertcat((sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})-der(x1)),"
+                "(function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1,x2]){0}-der(x2)),"
                 "(vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0},function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})-vertcat(x3,x4)),"
                 "(vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1,x2]){0},function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1,x2]){1})-vertcat(x5,x6)),"
-                "(function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}-der_x7),"
-                "(function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}-der_x8),"
-                "(function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}-der_x9),"
-                "(function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}-der_x10),"
+                "(function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}-der(x7)),"
+                "(function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}-der(x8)),"
+                "(function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}-der(x9)),"
+                "(function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}-der(x10)),"
                 "(vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9,x10]){0},function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9,x10]){1})-vertcat(x11,x12)))")
     assert str(model.getDaeResidual()) == expected 
     

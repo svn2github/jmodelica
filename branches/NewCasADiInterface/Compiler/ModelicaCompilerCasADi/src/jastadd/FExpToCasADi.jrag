@@ -472,11 +472,11 @@ aspect FExpToCasADi {
     
     eq FEnumVariable.asMXVariable() = new MX("enum_" + getFQName().toString());
     eq FVariable.asMXVariable() = new MX(getFQName().toString());
-    eq FDerivativeVariable.asMXVariable() = new MX("der_" + getFQName().toString());
-    eq FPreBooleanVariable.asMXVariable() = new MX("pre_" + getFQName().toString());
-    eq FPreIntegerVariable.asMXVariable() = new MX("pre_" + getFQName().toString());
-    eq FPreRealVariable.asMXVariable() = new MX("pre_" + getFQName().toString());
-    eq FFunctionVariable.asMXVariable() = new MX("funcVar_" + getFQName().toString());
+    eq FDerivativeVariable.asMXVariable() = new MX("der(" + getFQName().toString() + ")");
+    eq FPreBooleanVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FPreIntegerVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FPreRealVariable.asMXVariable() = new MX("pre(" + getFQName().toString() + ")");
+    eq FFunctionVariable.asMXVariable() = new MX(getFQName().toString());
     
     eq FFunctionArray.asMXVector() {
         MXVector MXVec = new MXVector();
