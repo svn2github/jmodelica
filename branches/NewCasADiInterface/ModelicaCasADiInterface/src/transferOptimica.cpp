@@ -113,11 +113,16 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
         timedMXTimePoints.push_back(toMX(timedVar.getArg()));
         timedMXFVars.push_back(toMX(timedVar.getName().myFV().asMXVariable()));
     }
-    for (int i = 0; i < allVars.size(); ++i) {
-        for (int j = 0; j < timedMXFVars.size(); ++j) {
-            if (timedMXFVars[j].isEqual(allVars[i]->getVar())) {
-                timedModelVariables.push_back(new TimedVariable(timedMXVars[j], allVars[i], timedMXTimePoints[j]));
+    for (int i = 0; i < timedMXFVars.size(); ++i) {
+        bool foundCorrespondingVar = false;
+        for  (int j = 0; j < allVars.size(); ++j) {
+            if (timedMXFVars[i].isEqual(allVars[j]->getVar()) && !foundCorrespondingVar) {
+                timedModelVariables.push_back(new TimedVariable(timedMXVars[i], allVars[j], timedMXTimePoints[i]));
+                foundCorrespondingVar = true;
             }
+        }
+        if (!foundCorrespondingVar) {
+            throw std::runtime_error("Could not find base variable for timed variable");
         }
     }
     return timedModelVariables;

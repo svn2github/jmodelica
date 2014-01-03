@@ -360,9 +360,9 @@ def test_OptimicaTimedVariables():
     x3 = optProblem.getModel().getVariable("x3")
 
     assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
-    assert heurestic_MC_variables_equal(x1, timedVars[1].getBaseVariable())
-    assert heurestic_MC_variables_equal(x2, timedVars[2].getBaseVariable())
-    assert heurestic_MC_variables_equal(x3, timedVars[3].getBaseVariable())
+    assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
+    assert heurestic_MC_variables_equal(x3, timedVars[2].getBaseVariable())
+    assert heurestic_MC_variables_equal(x1, timedVars[3].getBaseVariable())
         
         
     # Test their time expression has start/final parameter MX in them and
@@ -383,14 +383,14 @@ def test_OptimicaTimedVariables():
     tv4 = timedVars[3].getVar()
 
     assert tp1.getDep(1).isEqual(startTime.getVar())
-    assert tp2.isEqual(finalTime.getVar())
-    assert tp3.getDep(1).isEqual(startTime.getVar())
-    assert tp4.getDep(0).isEqual(finalTime.getVar())
+    assert tp2.getDep(1).isEqual(startTime.getVar())
+    assert tp3.getDep(0).isEqual(finalTime.getVar())
+    assert tp4.isEqual(finalTime.getVar())
 
     assert tv1.isEqual(point_constraints[0].getLhs())
-    assert tv2.isEqual(optProblem.getMayerTerm())
-    assert tv3.isEqual(path_constraints[0].getLhs())
-    assert tv4.isEqual(path_constraints[1].getLhs())
+    assert tv2.isEqual(path_constraints[0].getLhs())
+    assert tv3.isEqual(path_constraints[1].getLhs())
+    assert tv4.isEqual(optProblem.getMayerTerm())
 
 def test_OptimicaStartTime():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationStart5", optproblemsFile)
@@ -555,8 +555,9 @@ def test_FunctionCallEquationOmittedOuts():
                 "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){0},"
                 "function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1,x3]){2})"
                 "-vertcat(x1,x2)))")
-    assert str(model.getDaeResidual()) == expected
-    
+    assert str(model.getDaeResidual()) == expected  
+
+     
 def test_FunctionCallStatementOmittedOuts():
     model = transfer_to_casadi_interface("atomicModelFunctionCallStatementIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"

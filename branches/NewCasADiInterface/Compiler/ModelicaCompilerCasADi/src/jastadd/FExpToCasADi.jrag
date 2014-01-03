@@ -37,9 +37,9 @@ aspect FExpToCasADi {
     /******** MXFunction ********/
     
     /**
-     * Creates an MXFunction for this FFunctionDecl. The MXFunction requires a single expression
+     * Creates A MXFunction for this FFunctionDecl. The MXFunction requires a single expression
      * for all output variables, and only functions for which this is possible are supported. 
-     * @return An MXFunction 
+     * @return A MXFunction 
      */
     syn lazy MXFunction FFunctionDecl.toMXFunction() {  
         MXVector finalExpressions = generateFinalExpressionVector();
@@ -52,7 +52,7 @@ aspect FExpToCasADi {
     /**
      * Puts the MX for all function variables in a single vector. Arrays
      * and records are flattened. 
-     * @return An MXVector
+     * @return A MXVector
      */
     MXVector FFunctionDecl.getMXVectorForFuncVars(){
         MXVector MXVec = new MXVector();
@@ -68,7 +68,7 @@ aspect FExpToCasADi {
     /**
      * Calculates an inlined expression for all variables in this FFunctionDecl.
      * Handles the statements sequentially, and returns a vector with the expressions. 
-     * @return An MXVector
+     * @return A MXVector
      */
     MXVector FFunctionDecl.generateFinalExpressionVector() {
         MXVector allVars = getMXVectorForFuncVars();
@@ -84,8 +84,8 @@ aspect FExpToCasADi {
     
     /**
      * Collects the MX for the function variables that occur as inputs in 
-     * an MXVector
-     * @return An MXVector
+     * A MXVector
+     * @return A MXVector
      */
     MXVector FFunctionDecl.generateInputVector() {
         MXVector allVars = getMXVectorForFuncVars();
@@ -106,8 +106,8 @@ aspect FExpToCasADi {
      * corresponds to variables that occur as output for this function. 
      * Assumes that the variables in the supplied vector is ordered in the
      * same way as the variables in this function's variable list. 
-     * @param An MXVector mixedCausality
-     * @return An MXVector
+     * @param A MXVector mixedCausality
+     * @return A MXVector
      */
     MXVector FFunctionDecl.pickMXCorrespondingToOutputs(MXVector mixedCausality) {
         MXVector allVars = getMXVectorForFuncVars();
@@ -128,9 +128,9 @@ aspect FExpToCasADi {
     
     /**
      * Update the supplied expressions to reflect this statement.
-     * @param An MXVector with expressions
-     * @param An MXVector with MX for the function variables
-     * @return An MXVector
+     * @param A MXVector with expressions
+     * @param A MXVector with MX for the function variables
+     * @return A MXVector
      */
     MXVector FStatement.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
         return expressions;
@@ -138,9 +138,9 @@ aspect FExpToCasADi {
     
     /**
      * Update the supplied expressions to reflect this statement.
-     * @param An MXVector with expressions
-     * @param An MXVector with MX for the function variables
-     * @return An MXVector
+     * @param A MXVector with expressions
+     * @param A MXVector with MX for the function variables
+     * @return A MXVector
      */
     MXVector FFunctionCallStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {   
         if (getCall().isIgnored()) {
@@ -164,9 +164,9 @@ aspect FExpToCasADi {
     
     /**
      * Update the supplied expressions to reflect this statement.
-     * @param An MXVector with expressions
-     * @param An MXVector with MX for the function variables
-     * @return An MXVector
+     * @param A MXVector with expressions
+     * @param A MXVector with MX for the function variables
+     * @return A MXVector
      */
     MXVector FAssignStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
         MXVector lhsVec = new MXVector();
@@ -180,8 +180,8 @@ aspect FExpToCasADi {
     }
     
     /**
-     * @param An MX that is searched for
-     * @param An MXVector that is searched in
+     * @param A MX that is searched for
+     * @param A MXVector that is searched in
      * @return An index >= 0 if successful
      */
     int FStatement.findIndexOfMXInMXVector(MX node, MXVector vec){
@@ -199,9 +199,9 @@ aspect FExpToCasADi {
     syn MX FAbstractEquation.toMXForLhs() = new MX();
     /** @return An empty MX */
     syn MX FAbstractEquation.toMXForRhs() = new MX();
-    /** @return An MX the left hand side expression */
+    /** @return A MX the left hand side expression */
     eq FEquation.toMXForLhs() = getLeft().toMX();
-    /** @return An MX the eight hand side expression */
+    /** @return A MX the eight hand side expression */
     eq FEquation.toMXForRhs()  = getRight().toMX();
     /** @return A possibly stacked MX for the variables that are to be set by the function call */
     eq FFunctionCallEquation.toMXForLhs() {
@@ -234,8 +234,8 @@ aspect FExpToCasADi {
      */
       
     /**
-     * Returns this expression as an MXVector. 
-     * @return An MXVector
+     * Returns this expression as A MXVector. 
+     * @return A MXVector
      */ 
     syn MXVector FExp.toMXVector()  {
         MXVector MXVec = new MXVector();
@@ -243,12 +243,14 @@ aspect FExpToCasADi {
         return MXVec;
     }
     /**
-     * Returns this expression as an MX. Note that this might
+     * Returns this expression as A MX. Note that this might
      * not make sense for some expressions, e.g. function calls with
      * several outputs and FIdUseExp for FFunctionArray.
-     * @return An MX
+     * @return A MX
      */
-    syn MX FExp.toMX() = new MX(0.0);
+    syn MX FExp.toMX() {
+        throw new UnsupportedOperationException("Cannot convert expression to MX: " + toString());
+    }
     
     // Arithmetic expressions
     eq FAddExp.toMX() = getLeft().toMX().__add__(getRight().toMX());
@@ -292,11 +294,11 @@ aspect FExpToCasADi {
     // Other expressions
     syn lazy MX FClass.timeMX() = new MX("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
-    /** @return An MX with the first output, and perhaps only output, for this function call */
+    /** @return A MX with the first output, and perhaps only output, for this function call */
     eq FFunctionCall.toMX() { 
         return toMXVector().get(0);  
     }
-    /** @return An MXVector with the outputs from this function call */
+    /** @return A MXVector with the outputs from this function call */
     eq FFunctionCall.toMXVector() {
         MXFunction f = myFFunctionDecl().toMXFunction();
         MXVector argVec = new MXVector();
@@ -309,22 +311,30 @@ aspect FExpToCasADi {
         // To handle the case where some outputs are not used. 
         return  myLefts().size() > 0 ? retrieveUsedOutputsFromMXFunctionCall(f.call(argVec)) : f.call(argVec);
     }
-    
-    /** @return An MXVector with the used MX outputs for this function call */
+        
+    /** @return A MXVector with the used MX outputs for this function call */
     MXVector FFunctionCall.retrieveUsedOutputsFromMXFunctionCall(MXVector callVector) {
         MXVector usedCalls = new MXVector();
         ArrayList<FFunctionCallLeft> lefts = myLefts();
         int index = 0;
-        for (FFunctionCallLeft fleft : myLefts()) {
-            if (fleft.hasFExp()) {
-                for (int i = 0; i < fleft.getFExp().toMXVector().size(); ++i) {
-                    usedCalls.add(callVector.get(index + i));
+        ArrayList<FFunctionCallLeft> myLefts = myLefts();
+        ArrayList<FFunctionVariable> myOutVars = myFFunctionDecl().myOutputs();
+        for (int i = 0; i < myLefts.size(); ++i) {
+            if (myLefts.get(i).hasFExp()) {
+                for (int j = 0; j < myLefts.get(i).getFExp().toMXVector().size(); ++j) {
+                    usedCalls.add(callVector.get(index + j));
+                }
+            } else {
+                if (myOutVars.get(i).size().numElements() > 1) {
+                    throw new UnsupportedOperationException("Unused array or record outs are not supported");
                 }
             }
-            index += (fleft.hasFExp() ? fleft.getFExp().toMXVector().size() : 1);
+            index += (myLefts.get(i).hasFExp() ? myLefts.get(i).getFExp().toMXVector().size() : 1);
         }
         return usedCalls;
     }
+    
+    
     
     /**
      * Connects the use of a variable in an expression with
@@ -332,7 +342,7 @@ aspect FExpToCasADi {
      * Note that sometimes FIdUseExp points to a whole
      * matrices or record, and these should be transformed to vectors
      * of MX instead. 
-     * @return An MX
+     * @return A MX
      */
     eq FIdUseExp.toMX() {
         if (myFV().inRecord()) {
@@ -351,7 +361,7 @@ aspect FExpToCasADi {
      * Note that this function can handle the case when the FIdUseExp
      * points to whole matrices or records, e.g. as outputs of 
      * function calls inside functions. 
-     * @return An MX
+     * @return A MX
      */
     eq FIdUseExp.toMXVector() {
         if (inFunction() && (size().numElements() > 1 || type().isRecord())) {
@@ -365,7 +375,7 @@ aspect FExpToCasADi {
     
     /**
      * Connects the FIdUse to its symbolic and lazy MX variable
-     * @return An MX
+     * @return A MX
      */
     syn MX FIdUse.toMX() {
         if (myFV().inRecord()) {
@@ -387,13 +397,17 @@ aspect FExpToCasADi {
         List<FSubscript> subs = getFSubscripts();
         int nbrOfSizeDimsZeroBased = subs.getNumChild() - 1;
         
-        flattenedIndex += subs.getChild(nbrOfSizeDimsZeroBased).value() - 1;
-        int base = 1;
-        for (int i = nbrOfSizeDimsZeroBased; i > 0 ; --i) {
-            base*=size.get(i);
-            flattenedIndex +=  base*(subs.getChild(i - 1).value() - 1);
+        try {
+            flattenedIndex += subs.getChild(nbrOfSizeDimsZeroBased).value() - 1;
+            int base = 1;
+            for (int i = nbrOfSizeDimsZeroBased; i > 0 ; --i) {
+                base*=size.get(i);
+                flattenedIndex +=  base*(subs.getChild(i - 1).value() - 1);
+            }
+            return flattenedIndex;
+        } catch (ConstantEvaluationException exp) {
+            throw new UnsupportedOperationException("Indexing into arrays with expressions that can't be preevaluated is not supported in CasADiInterface");
         }
-        return flattenedIndex;
     }
     
     eq FNegExp.toMX() = getFExp().toMX().__neg__();
@@ -438,7 +452,7 @@ aspect FExpToCasADi {
       * For retrieving the MXVector representation of this variable.
       * Some variables, e.g. FFunctionArray can only be represented
       * as MXVector
-      * @return An MXVector
+      * @return A MXVector
       */
     syn lazy MXVector FAbstractVariable.asMXVector() {
         MXVector MXVec = new MXVector();
@@ -451,7 +465,9 @@ aspect FExpToCasADi {
      * Note that some variables can not be represented as a single MX, e.g.
      * FFunctionArray. These may need to be represented as MXVector.
      */
-    syn lazy MX FAbstractVariable.asMXVariable() = new MX(0.0);
+    syn lazy MX FAbstractVariable.asMXVariable() {
+        throw new UnsupportedOperationException("Cannot convert variable to MX: " + toString());
+    }
     
     
     eq FEnumVariable.asMXVariable() = new MX("enum_" + getFQName().toString());
@@ -478,7 +494,7 @@ aspect FExpToCasADi {
      * a hashmap in the FFunctionDecl, put there via AST traversation. Furthermore
      * the key for the variables in the hashmap is the same as the FQName
      * of the FIdUse's that later refer to them. 
-     * @return An MXVector.
+     * @return A MXVector.
      */ 
     eq FFunctionVariable.asMXVector() {
         MXVector MXVec = new MXVector();
@@ -544,7 +560,7 @@ aspect FExpToCasADi {
     
     /**
      * Returns the binding expression for this variable if there is one, otherwhise null.
-     * @return An MX
+     * @return A MX
      */
     syn MX FVariable.findMXBindingExpressionIfPresent() {
         return hasBindingExp() ? getBindingExp().toMX() :  (hasParameterEquation() ? parameterEquationToMXBindingExpression() : null);
@@ -553,7 +569,7 @@ aspect FExpToCasADi {
     /**
      * Creates a binding expression for the parameter equation of this variable.
      * Note that this handles cases where the parameter equation is a function call equation.
-     * @return An MX
+     * @return A MX
      */
     syn MX FVariable.parameterEquationToMXBindingExpression() {
         if (hasParameterEquation() && parameterEquation().hasFunctionCallEquationsWithLefts()) {
@@ -586,7 +602,7 @@ aspect FExpToCasADi {
      * Does a recursive AST traversation up to the first encountered FFunctionDecl. The FFunctionDecl has an hash map that contains 
      * MX symbolic variables for records, and the MX for the passed in key (which should be equal to the FQName of the variable) is returned. 
      * @param A String 
-     * @return An MX
+     * @return A MX
      */
     syn MX ASTNode.getMXVariableFromRecordHashMap(String key) {
         if (getParent() != null) {
@@ -599,7 +615,7 @@ aspect FExpToCasADi {
     /**
      * Retrieves the MX for the record variable with this key (which should be equal to the FQName of the variable).
      * @param A String 
-     * @return an MX
+     * @return A MX
      */
     eq FFunctionDecl.getMXVariableFromRecordHashMap(String key) = hashMapWithMXForRecordVariables.get(key); 
     
@@ -608,7 +624,7 @@ aspect FExpToCasADi {
      * has a hash map where the key,value-pair passed in is set. The key should be the FQName of a 
      * variable  in a record and value its symbolic MX. 
      * @param A String 
-     * @param An MX
+     * @param A MX
      */
     public void ASTNode.setMXVariableInFunctionDeclRecordVariableMap(String key, MX val) {
         if (getParent() != null) {
@@ -620,7 +636,7 @@ aspect FExpToCasADi {
      * Sets the passed in key,value-pair in the map, where the key should be the FQName 
      * of a variable in a record, and value its symbolic MX. 
      * @param A String
-     * @param An MX
+     * @param A MX
      */
     public void FFunctionDecl.setMXVariableInFunctionDeclRecordVariableMap(String key, MX val) {
         hashMapWithMXForRecordVariables.put(key, val);
