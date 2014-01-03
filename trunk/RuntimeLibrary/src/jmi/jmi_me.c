@@ -738,6 +738,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+    if (nR > 0) {
+        jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, nR);
+    }
 
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
@@ -858,7 +861,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-
+        
+        /* Save the z values to the z_last vector */
+        jmi_save_last_successful_values(jmi);
+        
         jmi_log_leave(jmi->log, final_node);
     }
 
@@ -867,7 +873,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     jmi->jmi_callbacks.free_memory(event_indicators);
     jmi->jmi_callbacks.free_memory(sw_temp);
-
+    
+    if (nR > 0) {
+        jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
+    }
     jmi_log_leave(jmi->log, top_node);
 
     return 0;
