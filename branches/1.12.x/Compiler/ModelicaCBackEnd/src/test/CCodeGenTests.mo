@@ -567,6 +567,50 @@ $C_ode_initialization$
 ")})));
 end CCodeGenTest17;
 
+model CCodeGenTest18
+    parameter Boolean[3] table = {false, true, false};
+    Boolean x;
+    Integer index = integer(time);
+algorithm
+    if index < 4 then
+        x := table[index];
+    else
+        x := true;
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenTest18",
+            description="Test generation of temporary variables",
+            template="
+$C_ode_derivatives$
+",
+			generatedCode="
+    JMI_ARRAY_STATIC(tmp_1, 3, 1)
+    model_ode_guards(jmi);
+/************* ODE section *********/
+/************ Real outputs *********/
+/****Integer and boolean outputs ***/
+/**** Other variables ***/
+    _index_4 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_index_4);
+    JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _table_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _table_2_1;
+    jmi_array_ref_1(tmp_1, 3) = _table_3_2;
+    _x_3 = pre_x_3;
+    if (COND_EXP_LT(_index_4, 4, JMI_TRUE, JMI_FALSE)) {
+        JMI_ARRAY_STATIC_INIT_1(tmp_1, 3)
+        jmi_array_ref_1(tmp_1, 1) = _table_1_0;
+        jmi_array_ref_1(tmp_1, 2) = _table_2_1;
+        jmi_array_ref_1(tmp_1, 3) = _table_3_2;
+        _x_3 = func_temp_1_exp(_index_4, tmp_1);
+    } else {
+        _x_3 = JMI_TRUE;
+    }
+/********* Write back reinits *******/
+
+")})));
+end CCodeGenTest18;
 
 model CLogExp1
  Boolean x = true;
