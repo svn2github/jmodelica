@@ -20,6 +20,7 @@ import java.util.Collections;
 
 import org.jmodelica.util.exceptions.BLTException;
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.ChainedIterable;
 
 aspect BLT{
 	
@@ -1088,11 +1089,9 @@ aspect BLT{
             for (FAbstractEquation fe : eqns) {
                 Set<FVariable> RLHS = fe.referencedFVariablesInLHS();
                 Set<FVariable> RRHS = fe.referencedFVariablesInRHS();
-                Iterator<FVariable> it = new ChainedIterator<FVariable>(RLHS.iterator(), RRHS.iterator());
                 FExp l = ((FEquation)fe).getLeft();
                 FExp r = ((FEquation)fe).getRight();
-                while (it.hasNext()) {
-                    FVariable fv = it.next();
+                for (FVariable fv : new ChainedIterable<FVariable>(RLHS, RRHS)) {
                     Integer colObj = columnMap.get(fv);
                     if (colObj == null)
                         continue;
