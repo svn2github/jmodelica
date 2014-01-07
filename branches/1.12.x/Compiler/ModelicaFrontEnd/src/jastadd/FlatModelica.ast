@@ -1046,6 +1046,11 @@ FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 FIdUseExp : FAbstractArrayExp ::= FIdUse;
 
 /**
+ * \brief Identifier of temporary variable, used during scalarization
+ */
+FIdTempExp : FIdUseExp;
+
+/**
  * \brief The built-in function der in the instance tree.
  */
 InstDerExp : FUnaryExp; 

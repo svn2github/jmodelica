@@ -5127,12 +5127,13 @@ model ArrayIterTestUnknown1
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTestUnknown1",
 			description="Array constructor with iterators: vectors of length 1",
+			variability_propagation=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1
- parameter Real x[1];
- parameter Real x[2];
- parameter Real x[3];
-parameter equation
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
  ({x[1], x[2], x[3]}) = ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f(6);
 
 public
@@ -5142,8 +5143,10 @@ public
   Real[:] temp_1;
  algorithm
   size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
+  for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
+   temp_1[i2] := i2 ^ 2;
+  end for;
   for i1 in 1:max(integer(a / 2 - 1) + 1, 0) loop
-   temp_1[i1] := i1 ^ 2;
    x[i1] := temp_1[i1];
   end for;
   return;

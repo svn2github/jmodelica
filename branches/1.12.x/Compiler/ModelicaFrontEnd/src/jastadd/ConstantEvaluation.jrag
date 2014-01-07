@@ -1382,6 +1382,10 @@ aspect ConstantEvaluation {
   eq FSumExp.reduceStartValue()     = type().zeroCValue();
   eq FProductExp.reduceStartValue() = new CValueInteger(1);
   
+  syn CValue FReductionExp.scalarReduceStartValue();
+  eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
+  eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
+  
   syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
   eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
   eq FProductExp.reduceOperation(CValue leftValue, CValue rightValue) = type().mul(leftValue, rightValue);
