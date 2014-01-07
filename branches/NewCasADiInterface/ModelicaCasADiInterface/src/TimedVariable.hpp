@@ -31,18 +31,18 @@ class TimedVariable : public Variable {
          * as RealVariable instead.
          * @param A symbolic MX.
          * @param Ref<Variable> baseVariable, a reference to its base varible.
-         * @param MX Timepoint, this variable's timepoint
+         * @param MX Timepoint, this variable's time point
          */
-        TimedVariable(CasADi::MX var, Ref<Variable> baseVariable, CasADi::MX timepoint);
+        TimedVariable(CasADi::MX var, Ref<Variable> baseVariable, CasADi::MX timePoint);
         
         /**
-         * The timepoint for this TimedVariable
+         * The time point for this TimedVariable
          * @return MX, a MX expression for the time point
          */
-        const CasADi::MX getTimepoint();
+        const CasADi::MX getTimePoint();
         
         /**
-         * The base variable for this variable, e.g. a refernce to model variable for X 
+         * The base variable for this variable, e.g. a reference to model variable for X 
          * if this variable is for X(1)
          * @ Ref<Variable> baseVariable, a reference to its base varible.
          */
@@ -56,10 +56,10 @@ class TimedVariable : public Variable {
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         Ref<Variable> baseVariable;
-        CasADi::MX timepoint;
+        CasADi::MX timePoint;
 };
 inline const Variable::Type TimedVariable::getType() const { return Variable::REAL; }
 inline const Ref<Variable> TimedVariable::getBaseVariable() { return this->baseVariable; }
-inline const CasADi::MX TimedVariable::getTimepoint() { return this->timepoint; }
+inline const CasADi::MX TimedVariable::getTimePoint() { return this->timePoint; }
 }; // End namespace
 #endif

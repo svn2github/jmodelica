@@ -370,10 +370,10 @@ def test_OptimicaTimedVariables():
     path_constraints = optProblem.getPathConstraints()
     point_constraints = optProblem.getPointConstraints()
 
-    tp1 = timedVars[0].getTimepoint()
-    tp2 = timedVars[1].getTimepoint()
-    tp3 = timedVars[2].getTimepoint()
-    tp4 = timedVars[3].getTimepoint()
+    tp1 = timedVars[0].getTimePoint()
+    tp2 = timedVars[1].getTimePoint()
+    tp3 = timedVars[2].getTimePoint()
+    tp4 = timedVars[3].getTimePoint()
 
     tv1 = timedVars[0].getVar()
     tv2 = timedVars[1].getVar()

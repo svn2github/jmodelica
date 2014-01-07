@@ -604,7 +604,7 @@ def test_TimedVariable():
     timedVar = TimedVariable(node, realVar, timePoint)
     assert heurestic_MC_variables_equal(realVar, timedVar.getBaseVariable())
     assert node.isEqual(timedVar.getVar())
-    assert timePoint.isEqual(timedVar.getTimepoint())
+    assert timePoint.isEqual(timedVar.getTimePoint())
     
 
 def test_TimedVariableInvalidBaseVarType():
