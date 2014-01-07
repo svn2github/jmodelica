@@ -728,7 +728,7 @@ aspect Flattening {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
                 InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
-				return (isEach || decl == InstAssignable.this) ? 
+				return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
 						exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
 			}
 		};
