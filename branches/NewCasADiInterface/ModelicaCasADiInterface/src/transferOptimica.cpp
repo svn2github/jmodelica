@@ -150,6 +150,10 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
             StringFromUTF(modelName.c_str())).this$);
        
+        if (fclass.numEnums() != 0) {
+            throw std::runtime_error("Enum variables are not supported in CasADiInterface");
+        }
+       
        if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
         }
