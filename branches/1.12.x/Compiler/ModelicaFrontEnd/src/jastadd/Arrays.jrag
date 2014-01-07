@@ -187,7 +187,7 @@ aspect Arrays {
 		if (getNumFExp()==0)  //Empty array
 			return 1;
 		// We assume that the FArray is set up correctly and that
-		// all brances are equal.
+		// all branches are equal.
 		return getFExp(0).ndims() + 1;
 	}
 	eq FAbstractCat.ndims() {
@@ -1825,7 +1825,10 @@ aspect Arrays {
 	 * @param level  the level this FArray is at in a structure of nestled FArrays.
 	 */
 	public void FArray.fillArray(Array arr, Index i, int level) {
-		getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
+	    if (isIterArray())
+	        super.fillArray(arr, i, level);
+	    else
+	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
 	eq FFunctionCall.getArray() {
