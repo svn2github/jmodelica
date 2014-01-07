@@ -1029,7 +1029,7 @@ aspect CADCodeGen {
 		str.println("if (evaluation_mode == JMI_BLOCK_INITIALIZE) {");
 		int var_counter = 0;
 		// Loop over all unsolved variables and write their value to x	
-		for (FVariable fv : blockResidualVariables_C()) {
+		for (FVariable fv : iterationVariables()) {
 			str.print(innerIndent);
 			str.println("x["+var_counter+"] = " + fv.name_C() + ";");
 			var_counter++;
@@ -1045,7 +1045,7 @@ aspect CADCodeGen {
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		// Iteration is over the unsolved variables. 
-		for (FVariable fv : blockResidualVariables_C()) {
+		for (FVariable fv : iterationVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];");
 			str.print(innerIndent);
@@ -1067,7 +1067,7 @@ aspect CADCodeGen {
 		// Code that stores the evaluated dz
 		// dz entries for the solved variables are updated below as well
 		var_counter = 0;
-		for (FVariable fv : blockResidualVariables_C()) {
+		for (FVariable fv : iterationVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];");
 			var_counter++;
@@ -1091,7 +1091,7 @@ aspect CADCodeGen {
 		
 		// Reset all variables. global dz is updated elsewhere and dz_active should
 		// always be reset so as not to cause incorrect seeds
-		for (FVariable fv : blockResidualVariables_C()) {
+		for (FVariable fv : iterationVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;");
 		}
@@ -1157,7 +1157,7 @@ aspect CADCodeGen {
      * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
      */
     public void EquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        for (SimpleEquationBlock block : blockResidualBlocks_C())
+        for (SimpleEquationBlock block : unsolvedBlocks())
             block.genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
     }
     
@@ -1215,7 +1215,7 @@ aspect CADCodeGen {
      * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
      */
     public void EquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-        for (SimpleEquationBlock block : blockResidualBlocks_C())
+        for (SimpleEquationBlock block : unsolvedBlocks())
             block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
     }
 	
@@ -1224,7 +1224,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void TornEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		for (SimpleEquationBlock block : blockResidualBlocks_C())
+		for (SimpleEquationBlock block : unsolvedBlocks())
 			block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
 	}
 	

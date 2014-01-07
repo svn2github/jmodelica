@@ -1906,7 +1906,7 @@ aspect CCodeGen {
 		
 		Map<FAbstractVariable,String> solverArrayMap = new HashMap<FAbstractVariable,String>();
 		int i = 0;
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			solverArrayMap.put(fv, "x[" + (i++) + "]");
 		
 		String indent = ASTNode.printer_C.indent(outerIndent);
@@ -1919,22 +1919,22 @@ aspect CCodeGen {
 
 		// Nominal values
 		str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.NOMINAL, solverArrayMap);
 		
 		// Min values
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MIN, solverArrayMap);
 		
 		// Max values
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MAX, solverArrayMap);
 		
 		// Variable value references
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualValuref_C(nextIndent, str, solverArrayMap);
 		
 		// Equation nominal values
@@ -1943,7 +1943,7 @@ aspect CCodeGen {
 		
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
 		// Loop over all active variables and write their value to x	
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualInit_C(nextIndent, str, solverArrayMap);
 		
 		// Generate code for Jacobian
@@ -1951,7 +1951,7 @@ aspect CCodeGen {
 		
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
 		// Loop over all active variables and write the values in x to the z vector
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualEvalInit_C(nextIndent, str, solverArrayMap);
 		Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
 		genBlockResidualFunctionBeforeEqns_C(nextIndent, str, inInitial, visitedList);
@@ -1962,7 +1962,7 @@ aspect CCodeGen {
 		// Write back
 		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
 		// Loop over all active variables and write their value to x	
-		for (FVariable fv : blockResidualVariables_C()) 
+		for (FVariable fv : iterationVariables()) 
 			fv.genBlockResidualWriteback_C(nextIndent, str, solverArrayMap);
 
 		str.print(indent + "}\n");
@@ -2048,7 +2048,7 @@ aspect CCodeGen {
 
 	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
 		Set<ASTNode> res = new LinkedHashSet<ASTNode>();
-		res.addAll(blockResidualEquations_C());
+		res.addAll(realEquations());
 		return res;
 	}
     
@@ -2066,22 +2066,6 @@ aspect CCodeGen {
 	    Set<ASTNode> res = super.blockResidualNodes_C();
 	    res.addAll(solvedEquations());
 		return res;
-	}
-	
-	public Collection<FVariable> AbstractEquationBlock.blockResidualVariables_C() {
-		return iterationVariables();
-	}
-	
-	public Collection<FAbstractEquation> AbstractEquationBlock.blockResidualEquations_C() {
-		return allEquations();
-	}
-	
-	public Collection<FAbstractEquation> EquationBlock.blockResidualEquations_C() {
-		return realEquations();
-	}
-	
-	public Collection<SimpleEquationBlock> EquationBlock.blockResidualBlocks_C() {
-		return unsolvedBlocks;
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
@@ -2106,7 +2090,7 @@ aspect CCodeGen {
 	@Override
 	public void EquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
 			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (SimpleEquationBlock block : blockResidualBlocks_C())
+		for (SimpleEquationBlock block : unsolvedBlocks())
 			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
 	}
 	
@@ -2141,7 +2125,7 @@ aspect CCodeGen {
 	}
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
-		for (FAbstractEquation e : blockResidualEquations_C()) {
+		for (FAbstractEquation e : realEquations()) {
 			e.genNominal_C(enumerator, indent, str, null);
 		}
 	}
