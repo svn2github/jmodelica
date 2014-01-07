@@ -324,12 +324,8 @@ aspect FExpToCasADi {
                 for (int j = 0; j < myLefts.get(i).getFExp().toMXVector().size(); ++j) {
                     usedCalls.add(callVector.get(index + j));
                 }
-            } else {
-                if (myOutVars.get(i).size().numElements() > 1) {
-                    throw new UnsupportedOperationException("Unused array or record outs are not supported");
-                }
-            }
-            index += (myLefts.get(i).hasFExp() ? myLefts.get(i).getFExp().toMXVector().size() : 1);
+            } 
+            index += myOutVars.get(i).asMXVector().size();
         }
         return usedCalls;
     }

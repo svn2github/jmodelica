@@ -1054,6 +1054,48 @@ model atomicModelFunctionCallStatementIgnoredOuts
         x1 = f2(x1);
 end atomicModelFunctionCallStatementIgnoredOuts;
 
+model atomicModelFunctionCallStatementIgnoredArrayRecordOuts
+
+    record Complex 
+        Real[2] point;
+    end Complex;
+    
+    function f
+        input Real in1;
+        input Real in2;
+        output Complex out1;
+        output Real out2;
+        output Real[2] out3;
+        output Real[2] out4;
+        output Real out5;
+        
+    algorithm
+        out1 := Complex({in1+1, in2});
+        out2 := in2+1;
+        out3 := {in1, in2};
+        out4 := {in1, in2+ 2};
+        out5 := in2 - 2;
+    end f;
+    
+    function f2
+        input Real in1;
+        output Complex out1;
+        output Real out2;
+        output Real[2] out3;
+        output Real out4;
+    algorithm
+        (out1, out2 , , out3, out4) := f(10, in1);
+    end f2;
+        
+    Real x1 (start=1);
+    Real x2 (start=2);
+    
+    equation
+        (, x1, , x2) = f2(x1);
+end atomicModelFunctionCallStatementIgnoredArrayRecordOuts;
+
+
+
 model atomicModelAlias
     Real x;
     Real y;

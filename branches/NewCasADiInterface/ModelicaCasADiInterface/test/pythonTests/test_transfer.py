@@ -567,6 +567,30 @@ def test_FunctionCallStatementOmittedOuts():
                 "output[0] = @2\n")
     assert str(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2")) == expected
     
+def test_OmittedArrayRecordOuts():
+    model = transfer_to_casadi_interface("atomicModelFunctionCallStatementIgnoredArrayRecordOuts", modelFile, compiler_options={"inline_functions":"none"})
+    expectedFunctionPrint = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\")\n"
+                            " Input: 1-by-1 (dense)\n"
+                            " Outputs (6):\n"
+                            "  0. 1-by-1 (dense)\n"
+                            "  1. 1-by-1 (dense)\n"
+                            "  2. 1-by-1 (dense)\n"
+                            "  3. 1-by-1 (dense)\n"
+                            "  4. 1-by-1 (dense)\n"
+                            "  5. 1-by-1 (dense)\n"
+                            "@0 = 10\n"
+                            "@1 = input[0]\n"
+                            "{@2,@3,@4,NULL,NULL,@5,@6,@7} = function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f\").call([@0,@1])\n"
+                            "output[0] = @2\n"
+                            "output[1] = @3\n"
+                            "output[2] = @4\n"
+                            "output[3] = @5\n"
+                            "output[4] = @6\n"
+                            "output[5] = @7\n")
+    expectedResidualPrint = "(vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2},function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5})-vertcat(x1,x2))"
+    assert str(model.getModelFunction("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2")) == expectedFunctionPrint
+    assert str(model.getDaeResidual()) == expectedResidualPrint
+    
 def test_ConstructFunctionMatrix():
     model = transfer_to_casadi_interface("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
