@@ -5114,6 +5114,34 @@ Semantic error at line 1960, column 16:
 ")})));
 end ArrayIterTest5;
 
+
+model ArrayIterTest6
+    Real x[3,2] = { { 2 * i for i in 1:2 }, { i * i for i in 2:3 }, { 1, 2 } } * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest6",
+            description="Iteration expressions as members of array constructor",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest6
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+equation
+ x[1,1] = 2 * time;
+ x[1,2] = 4 * time;
+ x[2,1] = 4 * time;
+ x[2,2] = 9 * time;
+ x[3,1] = time;
+ x[3,2] = 2 * time;
+end ArrayTests.Constructors.Iterators.ArrayIterTest6;
+")})));
+end ArrayIterTest6;
+
+
 model ArrayIterTestUnknown1
     function f
 		input Integer a;
