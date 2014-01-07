@@ -279,7 +279,7 @@ aspect Flattening {
 			n = all.size();
 			// We need a copy of all since it can be modified during iteration
 			for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
-				if (!added.contains(cons)) {
+				if (!added.contains(cons) && cons.hasBindingFExp()) {
 					cons.flattenInFunction(ffd, fc, true, this);
 					cons.myBindingInstExp().flattenUsedFuncsAndEnums(fc);
 					all.remove(cons);

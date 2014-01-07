@@ -579,8 +579,6 @@ end R;
 	output R[size(recsIn,1)] recsOut;
   algorithm
     c := cat(2,x,x); // Concat unknown size.
-	known := x; // Assign unknown to known size.
-	x := known; // Assign known to unknown size.
 	recsOut := recsIn;
 	recsOut[1] := R(x[1,:]);
 	
@@ -607,12 +605,6 @@ end R;
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 684, column 10:
   Unknown size arg in operator cat() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 686, column 2:
-  Assigning an expression of unknown size to an operand of known size is not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 687, column 2:
-  Assigning an expression of known size to an operand of unknown size is not supported
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 647, column 2:
   Record arrays of unknown sizes are not supported

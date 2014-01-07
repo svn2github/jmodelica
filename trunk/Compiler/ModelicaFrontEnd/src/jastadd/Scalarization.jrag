@@ -201,12 +201,12 @@ aspect Scalarization {
 			ae.scalarize(toList, vars, indexMap);
 	}
 	
-	public static void FAlgorithm.scalarizeStmtList(
-			List<FStatement> fromList, List<FStatement> toList, 
-			List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
-		for (FStatement stmt : fromList) 
-			stmt.scalarize(vars, toList, indexMap);
-	}
+    public static void FStatement.scalarizeStmtList(
+            List<FStatement> fromList, List<FStatement> toList, 
+            List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
+        for (FStatement stmt : fromList)
+            stmt.scalarizeStmt(vars, toList, indexMap);
+    }
 	
 	/**
 	 * \brief Replace all expressions in array subscripts with literals.
@@ -1094,7 +1094,7 @@ aspect Scalarization {
     
     inh boolean FExp.inUnknownSize();
     eq Root.getChild().inUnknownSize()        = false;
-    eq FAssignStmt.getChild().inUnknownSize() = getRight().size().isUnknown();
+    eq FAssignStmt.getChild().inUnknownSize() = getLeft().size().isUnknown() || getRight().size().isUnknown();
     eq FExp.getChild().inUnknownSize()        = false;
     eq FIdUseExp.getChild().inUnknownSize()   = size().isUnknown();
     eq FMulExp.getChild().inUnknownSize()     = getLeft().size().isUnknown() || getRight().size().isUnknown();
@@ -1570,13 +1570,86 @@ aspect Scalarization {
 	public void FStatement.scalarizeStmt(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
 		int n1 = stmts.getNumChild();
+        addSizeAsserts(stmts);
 		scalarize(vars, stmts, indexMap);
 		if (shouldBeSorted) {
 			int n2 = stmts.getNumChild();
 			for (int i = n1; i < n2; i++) 
 				stmts.getChild(i).shouldBeSorted = true;
+			if (hasExtraSortingDependencies())
+			    stmts.getChild(n2-1).extraSortingDependencies().addAll(extraSortingDependencies());
 		}
 	}
+	
+    /**
+     * Creates assert statements to check sizes in assignments between known
+     * and unknown sizes. 
+     */
+    public void FStatement.addSizeAsserts(List clauses) {
+        if (!inFunction())
+            return;
+        
+        FStatement stmt;
+        Set<String> vis = new HashSet<String>();
+        for (FAssert a : sizeAssertsColl()) {
+            String s = a.prettyPrint("");
+            if (!vis.contains(s)) {
+                vis.add(s);
+                stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), a);
+                stmt.shouldBeSorted = this.shouldBeSorted;
+                if (stmt.shouldBeSorted)
+                    extraSortingDependencies().add(stmt);
+                clauses.add(stmt);
+            }
+        }
+    }
+    coll ArrayList<FAssert> FStatement.sizeAssertsColl() [new ArrayList<FAssert>()] 
+            with addAll root FFunctionDecl;
+    FAssignStmt contributes sizeAsserts()
+        to FStatement.sizeAssertsColl() for this;
+    FFunctionCall contributes sizeAsserts() 
+        to FStatement.sizeAssertsColl() for myFStatement();
+    FFunctionCallLeft contributes sizeAsserts() when hasFExp()
+        to FStatement.sizeAssertsColl() for getFExp().myFStatement();
+                
+    syn ArrayList<FAssert> FAssignStmt.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        getLeft().size().sizeAsserts(a, getRight().size(), getLeft());
+        getRight().size().sizeAsserts(a, getLeft().size(), getLeft());
+        return a;
+    }
+    syn ArrayList<FAssert> FFunctionCallLeft.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        if (hasFExp()) {
+            Size fs = getFExp().myFunctionCall().typeOfOutput(getParent().getIndexOfChild(this)).size();
+            fs.sizeAsserts(a, getFExp().size(), getFExp());
+            getFExp().size().sizeAsserts(a, fs, getFExp());
+        }
+        return a;
+    }
+    syn ArrayList<FAssert> FFunctionCall.sizeAsserts() {
+        ArrayList<FAssert> a = new ArrayList<FAssert>();
+        for (int i = 0; i < getNumArg(); i++) {
+            myFFunctionDecl().getFFunctionVariable(i).size().sizeAsserts(a, getArg(i).size(), getArg(i));
+        }
+        return a;
+    }
+    /**
+     * Adds an assert statement to <code>asserts</code> for all dimensions where
+     * size is known in this size but unknown in <code>other</code>.
+     */
+    public void Size.sizeAsserts(Collection<FAssert> asserts, Size other, FExp context) {
+        Size l = evaluated();
+        other = other.evaluated();
+        for (int i = 0; i < l.size.length; i++) {
+            if (l.size[i] != UNKNOWN && other.size[i] == UNKNOWN) {
+                FAssert a = new FAssert(
+                        new FEqExp(other.createFExp(i), l.createFExp(i)),
+                        new FStringLitExp("Mismatching sizes in " + context.containingFFunctionDecl().name()), new Opt<FExp>());
+                asserts.add(a);
+            }
+        }
+    }
 	
 	/**
 	 * \brief Scalarize the statement and put all resulting statements in the
@@ -1601,8 +1674,9 @@ aspect Scalarization {
             return; // Special case, Function call stmt
         }
         
-        left.type().scalarizeAssignment(vars, stmts, indexMap, left, right);
-	}
+        FType t = left.size().isUnknown() ? left.type() : right.type();
+        t.scalarizeAssignment(vars, stmts, indexMap, left, right);
+    }
 	
 	public void FFunctionCallStmt.scalarize(List<? extends FAbstractVariable> vars, List<FStatement> stmts, 
 			Map<String,FExp> indexMap) {
@@ -1637,8 +1711,7 @@ aspect Scalarization {
 	public void FIfStmt.scalarizeElse(List<? extends FAbstractVariable> vars, FIfWhenStmt stmt, 
 			Map<String,FExp> indexMap) {
 		FIfStmt ifstmt = (FIfStmt) stmt;
-		for (FStatement es : getElseStmts())
-			es.scalarize(vars, ifstmt.getElseStmtList(), indexMap);
+		FStatement.scalarizeStmtList(getElseStmts(), ifstmt.getElseStmtList(), vars, indexMap);
 	}
 	
 	/**
@@ -1647,8 +1720,7 @@ aspect Scalarization {
 	public FIfWhenClause FIfWhenClause.scalarize(List<? extends FAbstractVariable> vars, Map<String,FExp> indexMap) {
 		FExp test = getTest().scalarize(indexMap);
 		List<FStatement> stmts = new List<FStatement>();
-		for (FStatement stmt : getFStatements())
-			stmt.scalarize(vars, stmts, indexMap);
+		FStatement.scalarizeStmtList(getFStatements(), stmts, vars, indexMap);
 		return createNode(test, stmts);
 	}
 	
@@ -1659,8 +1731,7 @@ aspect Scalarization {
 			getIndex().createArrayTemporaries(stmts, vars, indexMap);
 			FForStmt stmt = new FForStmt();
 			stmt.setIndex(getIndex().scalarize(indexMap));
-			for (FStatement fs : getForStmts())
-				fs.scalarize(vars, stmt.getForStmtList(), indexMap);
+			FStatement.scalarizeStmtList(getForStmts(), stmt.getForStmtList(), vars, indexMap);
 			stmts.add(stmt);
 		} else {
 			ArrayList<FForIndex> indexList = new ArrayList();
@@ -1670,7 +1741,7 @@ aspect Scalarization {
 			myIndexMap.putAll(indexMap);
 			for (Index i : indices) {
 				indices.fillIndexMap(myIndexMap, i, indexList);
-				FAlgorithm.scalarizeStmtList(getForStmts(), stmts, vars, myIndexMap);
+				FStatement.scalarizeStmtList(getForStmts(), stmts, vars, myIndexMap);
 				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
 				getForStmts().flushTempVarNames();
 			}
@@ -1685,8 +1756,7 @@ aspect Scalarization {
 		getTest().createArrayTemporaries(stmts, vars, indexMap);
 		FWhileStmt stmt = new FWhileStmt();
 		stmt.setTest(getTest().scalarize(indexMap));
-		for (FStatement ws : getWhileStmts())
-			ws.scalarize(vars, stmt.getWhileStmtList(), indexMap);
+		FStatement.scalarizeStmtList(getWhileStmts(), stmt.getWhileStmtList(), vars, indexMap);
 		getTest().createArrayTemporaries(stmt.getWhileStmtList(), null, indexMap);
 		stmts.add(stmt);
 	}
@@ -1712,8 +1782,7 @@ aspect Scalarization {
 		
 		for (FFunctionVariable var : getFFunctionVariables())
 			var.scalarize(vars, stmts, emptyIndexMap);
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			stmt.scalarizeStmt(vars, stmts, emptyIndexMap);
+        FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, vars, emptyIndexMap);
 		
 		return fd;
 	}
@@ -1814,7 +1883,7 @@ aspect Scalarization {
 	public void FAlgorithm.scalarize(List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {		
 		List<FStatement> stmts = new List<FStatement>();
-		scalarizeStmtList(getFStatements(),stmts,vars,indexMap);
+		FStatement.scalarizeStmtList(getFStatements(),stmts,vars,indexMap);
 		eqns.add(new FAlgorithm(stmts));	
 	}
 	

@@ -17,6 +17,8 @@
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
+from pyfmi.fmi import FMUException
+import nose
 
 class TestFunction1(SimulationTest):
     """
@@ -109,3 +111,26 @@ class TestZeroDimArray(SimulationTest):
         Test that results match the expected ones.
         """
         self.assert_end_value('y', 1.0)
+
+class TestAssertSize(SimulationTest):
+    """
+    Test of function where size needs to be asserted
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('FunctionTests.mo', 
+            'FunctionTests.TestAssertSize', options={'inline_functions':'none', 'variability_propagation':False})
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
+        
+    @testattr(stddist = True)
+    def test_result(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.model.set_log_level(3)
+        with nose.tools.assert_raises(FMUException):
+            self.run()

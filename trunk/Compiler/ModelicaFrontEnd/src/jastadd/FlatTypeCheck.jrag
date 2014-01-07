@@ -734,7 +734,7 @@ aspect FlatTypeCheck {
 			  } else if (size().isUnknown() && !inFunction()) {
 				  error(functionCallDecription() + ": could not evaluate array size of output " + 
 						  myOutput().name());
-			  } else if (!use.type().typeCompatible(type())) {
+			  } else if (!use.type().typeCompatible(type(), true)) {
 			      if (use.type().scalarType().typeCompatible(type().scalarType())) {
 			          if (!lockBranch(checkType))
 	                      error(functionCallDecription() + ": array sizes of component " + use.name() + 
