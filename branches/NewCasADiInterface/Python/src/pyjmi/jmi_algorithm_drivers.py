@@ -2437,7 +2437,7 @@ class LocalDAECollocationAlg2Options(OptionBase):
             Whether to expand the CasADi MX graphs to SX graphs.
             
             Type: bool
-            Default: False
+            Default: True
 
         named_vars --
             Whether to name the NLP variables according to their corresponding
@@ -2637,7 +2637,7 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'h_bounds': (0.7, 1.3),
                 'n_cp': 3,
                 'discr': "LGR",
-                'expand_to_SX': False,
+                'expand_to_SX': True,
                 'named_vars': False,
                 'init_traj': None,
                 'variable_scaling': True,

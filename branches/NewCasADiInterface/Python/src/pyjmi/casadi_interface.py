@@ -87,6 +87,7 @@ class OptimizationProblem(ModelBase, CI_OP):
         """
         CI_OP.__init__(self, optimization_problem)
         self.model = self.getModel()
+        self.model.get_identifier = lambda : "unknown_name"
         
     def _default_options(self, algorithm):
         """ 
@@ -117,7 +118,54 @@ class OptimizationProblem(ModelBase, CI_OP):
         
             Options class for the algorithm specified with default values.
         """
-        return self._default_options(algorithm)    
+        return self._default_options(algorithm)
+
+    def get_attr(self, var, attr):
+        """
+        Helper method for getting values of variable attributes.
+
+        Parameters::
+
+            var --
+                Variable object to get attribute value from.
+
+                Type: Variable
+
+            attr --
+                Attribute whose value is sought.
+
+                If var is a parameter and attr == "_value", the value of the
+                parameter is returned.
+
+                Type: str
+
+        Returns::
+
+            Value of attribute attr of Variable var.
+        """
+        if attr == "_value":
+            val = var.getAttribute('evaluatedBindingExpression')
+            if val is None:
+                val = var.getAttribute('bindingExpression')
+                if val is None:
+                    if var.getVariability() != var.PARAMETER:
+                        raise ValueError("%s is not a parameter." %
+                                         var.getName())
+                    else:
+                        raise RuntimeError("BUG: Unable to evaluate " +
+                                           "value of %s." % var.getName())
+            return val.getValue()
+        else:
+            val_expr = var.getAttribute(attr)
+            if val_expr is None:
+                if attr == "free":
+                    return False
+                elif attr == "initialGuess":
+                    return 0.
+                else:
+                    raise ValueError("Variable %s does not have attribute %s."
+                                     % (var.getName(), attr))
+            return self.model.evaluateExpression(val_expr)
     
     def optimize(self, algorithm='LocalDAECollocationAlg2', options={}):
         """
@@ -159,6 +207,9 @@ class OptimizationProblem(ModelBase, CI_OP):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
+        if algorithm != "LocalDAECollocationAlg2":
+            raise ValueError("LocalDAECollocationAlg2 is the only supported " +
+                             "algorithm.")
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
 
