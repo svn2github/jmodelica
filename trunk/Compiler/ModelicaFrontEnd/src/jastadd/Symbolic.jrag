@@ -763,6 +763,10 @@ aspect Derivatives {
 		return new FRealLitExp(0);
 	}
 	
+    public FExp FDivFuncExp.diff(String name) {
+        return new FRealLitExp(0);
+    }
+    
 	public FExp FExp.diffUseOrDerExp(String name, String myName) {
 		int val;
 		if (name.equals(TIME) && !variability().parameterOrLess()) {
