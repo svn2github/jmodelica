@@ -228,7 +228,7 @@ def test_ModelicaBooleanInput():
     assert str(boolIns[0].getVar()) == str(x1)
         
 def test_ModelicaModelFunction():
-    model =  transfer_to_casadi_interface("simpleModelWithFunctions", "../common/modelicaModels.mo")
+    model =  transfer_to_casadi_interface("simpleModelWithFunctions", modelFile)
     expectedPrint = ("ModelFunction : function(\"simpleModelWithFunctions.f\")\n Inputs (2):\n"
                             "  0. 1-by-1 (dense)\n"
                             "  1. 1-by-1 (dense)\n"

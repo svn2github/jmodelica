@@ -162,12 +162,11 @@ $(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/casadi_interface
 
-$(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/common/atomic* $(MC_INTERFACE)/test/common/modelicaModels.mo
+$(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/common/atomic*
 	mkdir -p $(MC_BUILD)/test/pythonTests
 	mkdir -p $(MC_BUILD)/test/common
 	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
 	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
-	cp $(MC_INTERFACE)/test/common/modelicaModels.mo $(MC_BUILD)/test/common
 	cd $(CASADI_BUILD_DIR)/python/ ; \
 	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
 	touch $(MC_BUILD)/test/pythonTests/runtests.sh
