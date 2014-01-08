@@ -65,22 +65,22 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
         jl::System::initializeClass(false); 
         mc::ModelicaCompiler::initializeClass(false); 
         
-        Ref<Model> m = new Model();
+        // Create Modelica compiler and compile to flat class
         mc::ModelicaCompiler compiler(options->getOptionRegistry());
-        
         java::lang::String fileVecJava[modelFiles.size()];
         for (int i = 0; i < modelFiles.size(); ++i) {
             fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
         }
         compiler.setLogger(StringFromUTF(log_level.c_str()));
-
-
         mc::FClass fclass = compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
         if (fclass.numEnums() != 0) {
             throw std::runtime_error("Enum variables are not supported in CasADiInterface");
         }
+        
+        // Create a model with the model identfier.
+        Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));
         
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable

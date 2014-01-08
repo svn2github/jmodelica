@@ -1424,3 +1424,8 @@ def test_TransferVariableType():
     assert isinstance(model.getVariable('x3'), BooleanVariable)
     assert isinstance(model.getVariable('x4'), BooleanVariable)
      
+def test_ModelIdentifier():
+    model = transfer_to_casadi_interface("identifierTest.identfierTestModel", modelFile)
+    assert model.getIdentifier() == "identifierTest_identfierTestModel"
+    optProblem = transfer_to_casadi_interface("identifierTest.identfierTestModel", optproblemsFile)
+    assert optProblem.getModel().getIdentifier() == "identifierTest_identfierTestModel"

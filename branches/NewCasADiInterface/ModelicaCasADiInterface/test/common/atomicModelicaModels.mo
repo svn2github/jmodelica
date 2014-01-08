@@ -1113,3 +1113,11 @@ equation
     der(x) = time;
     der(y) = time + 2;
 end atomicModelTime;
+
+package identifierTest
+
+    model identfierTestModel 
+        Real a = 1;
+    end identfierTestModel;
+
+end identifierTest;

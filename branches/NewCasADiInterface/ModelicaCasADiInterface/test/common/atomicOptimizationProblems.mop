@@ -191,3 +191,15 @@ equation
 constraint
     x1 >=  1.00;
 end atomicWithInitialGuess;
+
+package identifierTest
+
+    optimization identfierTestModel(objectiveIntegrand=x1, finalTime=10) 
+        Real x1(start=0, initialGuess = 5, fixed = true);
+    equation
+        der(x1)  = sin(x1) + 0.5;
+    constraint
+        x1 >=  1.00;
+    end identfierTestModel;
+
+end identifierTest;

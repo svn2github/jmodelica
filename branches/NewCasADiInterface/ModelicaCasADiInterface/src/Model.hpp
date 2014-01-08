@@ -72,8 +72,8 @@ class Model: public SharedNode {
             NUM_OF_VARIABLE_KIND  // This must be defined last & no other
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
-        /** A Model is instantiated without any arguments */
-        Model();
+        /** @param string identifier, typically <packagename>_<classname>, default empty string */
+        Model(std::string identifier = "");
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
         /** @return A MX, this Model's time variable */
@@ -167,11 +167,16 @@ class Model: public SharedNode {
          */
         Ref<ModelFunction> getModelFunction(std::string name) const; 
         
+        /** @return string Model identifier, typically <packagename>_<classname> */
+        std::string getIdentifier();
+        
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
+        /// Identifier, typically <packagename>_<classname>
+        std::string identifier;
         /// The MX for independent parameters and constants. Filled by calculateValuesForDependentParameters.
         std::vector<CasADi::MX> paramAndConstMXVec;
         /// The values for independent parameters and constants. Filled by calculateValuesForDependentParameters. 
@@ -211,10 +216,13 @@ class Model: public SharedNode {
         void handleVariableTypeForAddedVariable(Ref<Variable> var);
         void assignVariableTypeToVariable(Ref<Variable> var);
 };
+inline std::string Model::getIdentifier() { return identifier; }
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
 inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
-inline Model::Model() : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {}
+inline Model::Model(std::string identifier /* = "" */) : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {
+        this->identifier = identifier;
+}
 inline Ref<VariableType> Model::getVariableType(std::string typeName) const { 
     return typesInModel.find(typeName) != typesInModel.end() ? 
                 typesInModel.find(typeName)->second : 

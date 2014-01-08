@@ -24,9 +24,15 @@ provides many methods for getting/setting various properties on the model,
 and it also provides high-level functionality such as calculating
 the values of dependent parameters, or categorising variables. ";
 
-
 %feature("docstring") ModelicaCasADi::Model::Model "
-Creates a Model, instantiated without any arguments. 
+Creates a Model with the specified identifier. 
+If no identifier is supplied default identifier 
+is an empty string. 
+
+Parameters::
+
+    String --
+        Identfier, typically <packagename>_<classname>
 ";
 
 %feature("docstring") ModelicaCasADi::Model::addVariable "
@@ -68,6 +74,15 @@ Parameters::
 
     Equation --
         An Equation
+";
+
+%feature("docstring") ModelicaCasADi::Model::getIdentifier "
+Returns Model identifier, typically <packagename>_<classname>
+
+Returns::
+
+    String --
+        Model identifier
 ";
 
 %feature("docstring") ModelicaCasADi::Model::addDaeEquation "

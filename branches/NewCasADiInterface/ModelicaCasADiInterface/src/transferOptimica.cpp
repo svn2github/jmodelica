@@ -139,8 +139,7 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         jl::System::initializeClass(false);
         oc::OptimicaCompiler::initializeClass(false);
         
-        // Create a model and optimica compiler
-        Ref<Model> m = new Model();
+        // Create Optimica compiler and compile to flat class
         oc::OptimicaCompiler compiler(options->getOptionRegistry());
         
         java::lang::String fileVecJava[modelFiles.size()];
@@ -148,17 +147,17 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
             fileVecJava[i] = StringFromUTF(modelFiles[i].c_str());
         }
         compiler.setLogger(StringFromUTF(log_level.c_str()));
-    
-
         oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
             StringFromUTF(modelName.c_str())).this$);
-       
         if (fclass.numEnums() != 0) {
             throw std::runtime_error("Enum variables are not supported in CasADiInterface");
         }
+        
+        // Create a model with the model identfier.
+        Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));
        
-       if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
+        if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
         }
         
