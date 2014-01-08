@@ -1629,8 +1629,8 @@ aspect Scalarization {
     }
     syn ArrayList<FAssert> FFunctionCall.sizeAsserts() {
         ArrayList<FAssert> a = new ArrayList<FAssert>();
-        for (int i = 0; i < getNumArg(); i++) {
-            myFFunctionDecl().getFFunctionVariable(i).size().sizeAsserts(a, getArg(i).size(), getArg(i));
+        for (FExp arg : getArgs()) {
+            arg.myCorrespondingInput().size().sizeAsserts(a, arg.size(), arg);
         }
         return a;
     }
