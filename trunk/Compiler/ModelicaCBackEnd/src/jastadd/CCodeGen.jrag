@@ -1881,7 +1881,7 @@ aspect CCodeGen {
 	public void AbstractEquationBlock.genEnumerateResidualBlocks_C(Enumerator enumerator) {
 		if (residualBlockNumber_C != -1 || !genRequiresBlockResidualFunction_C())
 			return;
-		for (AbstractEquationBlock subBlock : genBlockResidualFunctionSubBlocks_C())
+		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genEnumerateResidualBlocks_C(enumerator);
 		residualBlockNumber_C = enumerator.next();
 	}
@@ -1898,78 +1898,165 @@ aspect CCodeGen {
 			block.genEnumerateResidualBlocks_C(enumerator);
 	}
 	
-	public void AbstractEquationBlock.genBlockResidualFunction_C(boolean inInitial, String outerIndent, PrintStream str) {
-		if (!genRequiresBlockResidualFunction_C())
-			return;
-		for (AbstractEquationBlock subBlock : genBlockResidualFunctionSubBlocks_C())
-			subBlock.genBlockResidualFunction_C(inInitial, outerIndent, str);
-		
-		Map<FAbstractVariable,String> solverArrayMap = new HashMap<FAbstractVariable,String>();
-		int i = 0;
-		for (FVariable fv : iterationVariables()) 
-			solverArrayMap.put(fv, "x[" + (i++) + "]");
-		
-		String indent = ASTNode.printer_C.indent(outerIndent);
-		String nextIndent = ASTNode.printer_C.indent(indent);
-		str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
-				outerIndent, (inInitial? "init_": ""), residualBlockNumber_C());
-		str.print(indent + "jmi_real_t** res = &residual;\n");
-		str.print(indent + "int ef = 0;\n");
-		genVarDecls_C(str, indent, null);
+    public void AbstractEquationBlock.genBlockResidualFunction_C(boolean inInitial, String outerIndent, PrintStream str) {
+        if (!genRequiresBlockResidualFunction_C())
+            return;
+        for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
+            subBlock.genBlockResidualFunction_C(inInitial, outerIndent, str);
+        
+        Map<FAbstractVariable,String> solverArrayMap = new HashMap<FAbstractVariable,String>();
+        int i = 0;
+        for (FVariable fv : iterationVariables()) 
+            solverArrayMap.put(fv, "x[" + (i++) + "]");
+        
+        String indent = ASTNode.printer_C.indent(outerIndent);
+        String nextIndent = ASTNode.printer_C.indent(indent);
+        str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
+                outerIndent, (inInitial? "init_": ""), residualBlockNumber_C());
+        str.print(indent + "jmi_real_t** res = &residual;\n");
+        str.print(indent + "int ef = 0;\n");
+        genVarDecls_C(str, indent, null);
+        
+        // Nominal values
+        str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.NOMINAL, solverArrayMap);
+        
+        // Min values
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MIN, solverArrayMap);
+        
+        // Max values
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MAX, solverArrayMap);
+        
+        // Variable value references
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualValuref_C(nextIndent, str, solverArrayMap);
+        
+        // Equation nominal values
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
+        genBlockResidualFunctionEqnNominals_C(new Enumerator(), nextIndent, str);
+        
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
+        // Loop over all active variables and write their value to x	
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualInit_C(nextIndent, str, solverArrayMap);
+        
+        // Generate code for Jacobian
+        genBlockResidualFunction_jacobian_C(indent, str);
+        
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
+        // Loop over all active variables and write the values in x to the z vector
+        for (FVariable fv : iterationVariables()) 
+            fv.genBlockResidualEvalInit_C(nextIndent, str, solverArrayMap);
+        Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
+        genBlockResidualFunction_solvedEqns_C(nextIndent, str, inInitial, visitedList);
+        // Write the residual expressions
+        genBlockResidualFunction_residualEqns_C(new Enumerator(), nextIndent, str, visitedList, solverArrayMap);
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
+        genBlockResidualFunction_nonReals_C(nextIndent, str, visitedList);
+        // Write back
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
+        // Loop over all active variables and write their value to x
+        for (FVariable fv : iterationVariables())
+            fv.genBlockResidualWriteback_C(nextIndent, str, solverArrayMap);
+        str.print(indent + "}\n");
+        str.print(indent + "return ef;\n");
+        str.print(outerIndent + "}\n\n");
+    }
 
-		// Nominal values
-		str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.NOMINAL, solverArrayMap);
-		
-		// Min values
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MIN, solverArrayMap);
-		
-		// Max values
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MAX, solverArrayMap);
-		
-		// Variable value references
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualValuref_C(nextIndent, str, solverArrayMap);
-		
-		// Equation nominal values
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
-		genBlockResidualFunctionEqnNominals_C(new Enumerator(), nextIndent, str);
-		
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
-		// Loop over all active variables and write their value to x	
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualInit_C(nextIndent, str, solverArrayMap);
-		
-		// Generate code for Jacobian
-		genBlockResidualFunctionJacobian_C(indent, str);
-		
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
-		// Loop over all active variables and write the values in x to the z vector
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualEvalInit_C(nextIndent, str, solverArrayMap);
-		Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
-		genBlockResidualFunctionBeforeEqns_C(nextIndent, str, inInitial, visitedList);
-		// Write the residual expressions
-		genBlockResidualFunctionEqns_C(new Enumerator(), nextIndent, str, visitedList, solverArrayMap);
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
-		genBlockResidualFunctionAfterEqns_C(nextIndent, str, visitedList);
-		// Write back
-		str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
-		// Loop over all active variables and write their value to x	
-		for (FVariable fv : iterationVariables()) 
-			fv.genBlockResidualWriteback_C(nextIndent, str, solverArrayMap);
+    /*
+     * Various dispatch methods used in genBlockResidualFunction_C():
+     */
 
-		str.print(indent + "}\n");
-		str.print(indent + "return ef;\n");
-		str.print(outerIndent + "}\n\n");
-	}
-	
+    /**
+     * Only needed for numerically solved equation blocks. Ensures that the
+     * residual function is generated for such blocks.
+     */
+    protected Collection<SimpleEquationBlock> AbstractEquationBlock.genBlockResidualFunction_subBlocks_C() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    protected Collection<SimpleEquationBlock> TornEquationBlock.genBlockResidualFunction_subBlocks_C() {
+        return solvedBlocks;
+    }
+    
+    /**
+     * Generates solved equation for all non-real equations in this block.
+     */
+    public void AbstractEquationBlock.genBlockResidualFunction_nonReals_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {}
+
+    @Override
+    public void EquationBlock.genBlockResidualFunction_nonReals_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
+        for (FAbstractEquation ae : nonRealEquations()) {
+            FEquation e = (FEquation)ae;
+            str.print(indent);
+            e.getLeft().prettyPrint_C(str,"");
+            str.print(" = ");
+            e.getRight().prettyPrint_C(str,"");
+            str.print(";\n");
+        }
+    }
+
+    /**
+     * Generates residual equation for all unsolved equations in this block.
+     */
+    public void AbstractEquationBlock.genBlockResidualFunction_residualEqns_C(Enumerator enumerator, String indent,
+            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {}
+
+    @Override
+    public void EquationBlock.genBlockResidualFunction_residualEqns_C(Enumerator enumerator, String indent,
+            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+        for (SimpleEquationBlock block : unsolvedBlocks())
+            block.genBlockResidualFunction_residualEqn_C(enumerator, indent, str, visited, solverArrayMap);
+    }
+    
+    public void NumericallySolvedScalarEquationBlock.genBlockResidualFunction_residualEqns_C(Enumerator enumerator, String indent,
+            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+        genBlockResidualFunction_residualEqn_C(enumerator, indent, str, visited, solverArrayMap);
+    }
+
+    /**
+     * Generates residual equation for this simple block.
+     */
+    public void SimpleEquationBlock.genBlockResidualFunction_residualEqn_C(Enumerator enumerator, String indent,
+            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
+        equation().genResidual_C(enumerator, indent, str, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
+    }
+
+    /**
+     * Generates solution equation for all solved equations in this block.
+     * Currently only generates code for torn blocks since it is the only
+     * non-simple block that have solved equations.
+     */
+    public void AbstractEquationBlock.genBlockResidualFunction_solvedEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {}
+
+    @Override
+    public void TornEquationBlock.genBlockResidualFunction_solvedEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        // Loop over all solved blocks and write the expressions  
+        for (SimpleEquationBlock aeb : solvedBlocks)
+            aeb.genBlockResidualFunction_solvedEqn_C(indent, str, inInitial, visited);
+    }
+
+    /**
+     * Generates solved equation for this simple block
+     */
+    public void SimpleEquationBlock.genBlockResidualFunction_solvedEqn_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        if (genBlockEnabled())
+            equation().genBlock_C(indent, str, visited, allVariables(), assignedIndices());
+    }
+
+    @Override
+    public void NumericallySolvedScalarEquationBlock.genBlockResidualFunction_solvedEqn_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+    }
+    
 	public void FVariable.genBlockResidualAttribute_C(String indent, PrintStream str, String attr, Map<FAbstractVariable,String> solverArrayMap) {
 		if (attributeSet(attr)) 
 			str.format("%s%s = %s;\n", indent, solverArrayMap.get(this), attributeExp(attr).ceval());
@@ -2006,14 +2093,6 @@ aspect CCodeGen {
 	
 	public void FVariable.genBlockResidualWriteback_C(String indent, PrintStream str, Map<FAbstractVariable,String> solverArrayMap) {
 		str.format("%s%s = %s;\n", indent, name_C(), solverArrayMap.get(this));
-	}
-	
-	protected Collection<SimpleEquationBlock> AbstractEquationBlock.genBlockResidualFunctionSubBlocks_C() {
-		return Collections.emptyList();
-	}
-	
-	protected Collection<SimpleEquationBlock> TornEquationBlock.genBlockResidualFunctionSubBlocks_C() {
-		return solvedBlocks;
 	}
 	
 	protected void AbstractEquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
@@ -2061,68 +2140,13 @@ aspect CCodeGen {
     public Set<ASTNode> SolvedScalarEquationBlock.blockResidualNodes_C() {
         return Collections.<ASTNode>singleton(solution());
     }
-	
-	public Set<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-	    Set<ASTNode> res = super.blockResidualNodes_C();
-	    res.addAll(solvedEquations());
-		return res;
-	}
-	
-	public void AbstractEquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-	}
-	
-	public void EquationBlock.genBlockResidualFunctionAfterEqns_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-		// Loop over all active variables and write the values in x to the z vector
-		// Write the residual expressions
-		for (FAbstractEquation ae : nonRealEquations()) {
-			FEquation e = (FEquation)ae;
-			str.print(indent);
-			e.getLeft().prettyPrint_C(str,"");
-			str.print(" = ");
-			e.getRight().prettyPrint_C(str,"");
-			str.print(";\n");
-		}
-	}
-	
-	public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-			PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap);
-	
-	@Override
-	public void EquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, PrintStream str, 
-			Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-		for (SimpleEquationBlock block : unsolvedBlocks())
-			block.genBlockResidualFunctionEqns_C(enumerator, indent, str, visited, solverArrayMap);
-	}
-	
-    @Override
-    public void SimpleEquationBlock.genBlockResidualFunctionEqns_C(Enumerator enumerator, String indent, 
-            PrintStream str, Set<FAbstractEquation> visited, Map<FAbstractVariable,String> solverArrayMap) {
-        equation().genResidual_C(enumerator, indent, str, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
+
+    public Set<ASTNode> TornEquationBlock.blockResidualNodes_C() {
+        Set<ASTNode> res = super.blockResidualNodes_C();
+        res.addAll(solvedEquations());
+        return res;
     }
-	
-	
-	public void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {
-	}
-	
-	public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		// Loop over all solved blocks and write the expressions  
-		for (AbstractEquationBlock aeb : solvedBlocks)
-			aeb.genBlockResidualFunctionBeforeSubEqns_C(indent, str, inInitial, visited);
-	}
-	
-    public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        if (genBlockEnabled())
-            equation().genBlock_C(indent, str, visited, allVariables(), assignedIndices());
-    }
-    
-    public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        genBlockResidualFunctionBeforeEqns_C(indent, str, inInitial, visited);
-    }
-    
-	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
-	}
+
 	
 	public void AbstractEquationBlock.genBlockResidualFunctionEqnNominals_C(Enumerator enumerator, String indent, PrintStream str) {
 		for (FAbstractEquation e : realEquations()) {
@@ -2143,10 +2167,10 @@ aspect CCodeGen {
 		equation().genNominal_C(enumerator, indent, str, new HashSet<FVariable>(activeVars));
 	}
 	
-	public void AbstractEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {}
+    public void AbstractEquationBlock.genBlockResidualFunction_jacobian_C(String indent, PrintStream str) {}
 	
     @Override
-    public void EquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+    public void EquationBlock.genBlockResidualFunction_jacobian_C(String indent, PrintStream str) {
         if (jacobian == null)
             return;
         String innerIndent = ASTNode.printer_C.indent(indent);
@@ -2167,7 +2191,7 @@ aspect CCodeGen {
     }
 
     @Override
-    public void TornEquationBlock.genBlockResidualFunctionJacobian_C(String indent, PrintStream str) {
+    public void TornEquationBlock.genBlockResidualFunction_jacobian_C(String indent, PrintStream str) {
         if (!isLinear())
             return;
         String outerIndent = indent;
@@ -2235,7 +2259,7 @@ aspect CCodeGen {
 	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, PrintStream str) {
 		if (!genRequiresBlockResidualFunction_C())
 			return;
-		for (AbstractEquationBlock subBlock : genBlockResidualFunctionSubBlocks_C())
+		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genBlockAddCall_C(dirDer, inInit, indent, str);
 		
 		str.print(indent);
