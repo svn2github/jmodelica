@@ -2607,6 +2607,48 @@ end ArrayBuiltins.Linspace6;
 ")})));
 end Linspace6;
 
+model Linspace7
+ function f
+  input Integer x1;
+  input Integer x2;
+  input Integer n;
+  output Real[n] a = linspace(x1,x2,n);
+ algorithm
+ end f;
+
+ Real x[3] = f(1,4,3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Linspace7",
+			description="Linspace operator: basic test",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Linspace7
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = ArrayBuiltins.Linspace7.f(1, 4, 3);
+
+public
+ function ArrayBuiltins.Linspace7.f
+  input Integer x1;
+  input Integer x2;
+  input Integer n;
+  output Real[n] a;
+ algorithm
+  for i1 in 1:n loop
+   a[i1] := x1 + (i1 - 1) * ((x2 - x1) / (n - 1));
+  end for;
+  return;
+ end ArrayBuiltins.Linspace7.f;
+
+end ArrayBuiltins.Linspace7;
+			
+")})));
+end Linspace7;
 
 
 model NdimsExp1

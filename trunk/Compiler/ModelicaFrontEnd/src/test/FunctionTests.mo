@@ -7941,7 +7941,7 @@ model UnknownArray34
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray34",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -7996,7 +7996,7 @@ model UnknownArray35
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray35",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -8067,7 +8067,7 @@ model UnknownArray36
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray36",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -8144,7 +8144,7 @@ model UnknownArray37
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray37",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="

@@ -1089,6 +1089,7 @@ aspect Scalarization {
     }
     eq FExp.scalarizesToLoop()      = false;
     eq FRangeExp.scalarizesToLoop() = true;
+    eq FLinspace.scalarizesToLoop() = true;
     eq FIdUseExp.scalarizesToLoop() = isArray() && (!hasFArraySubscripts() || getFArraySubscripts().scalarizesToLoop());
     eq FIdTempExp.scalarizesToLoop() = true;
     
@@ -1516,6 +1517,14 @@ aspect Scalarization {
      * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
      */
     public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+        indexNames = names.copySurface();
+        super.addArrayUsesToIndexMap(indexMap, names);
+    }
+    
+    /**
+     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
+     */
+    public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexNames = names.copySurface();
         super.addArrayUsesToIndexMap(indexMap, names);
     }
@@ -2644,6 +2653,14 @@ aspect Scalarization {
 		}
 		return res;
 	}
+	
+    public FExp FLinspace.scalarizeExp(Map<String,FExp> indexMap) {
+        FExp index = new FSubExp(new FIdUseExp(indexNames.get(0)), new FIntegerLitExp(1));
+        FExp len  = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
+        FExp step = new FDivExp(len, new FSubExp(getN().fullCopy(), new FIntegerLitExp(1)));
+        FExp res = new FAddExp(getStartExp().fullCopy(), new FMulExp(index, step));
+        return res;
+    }
 
 	
 	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
