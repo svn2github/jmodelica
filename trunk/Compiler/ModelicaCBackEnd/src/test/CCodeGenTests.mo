@@ -7967,6 +7967,8 @@ $C_ode_derivatives$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -7983,8 +7985,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _x_0 = x[0];
         _y_1 = x[1];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
             tmp_2 = _x_0;
             _x_0 = _y_1;
             _x_0 = _x_0 * 2;
@@ -8003,6 +8003,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8019,8 +8021,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         _x_0 = x[0];
         _y_1 = x[1];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
             tmp_2 = _x_0;
             _x_0 = _y_1;
             _x_0 = _x_0 * 2;
@@ -8144,6 +8144,9 @@ $C_ode_derivatives$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8164,9 +8167,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _y_1 = x[1];
         _z_2 = x[2];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
-            jmi_ad_var_t tmp_3;
             tmp_2 = _y_1;
             tmp_3 = _z_2;
             _y_1 = _x_0 * 2 + 2;
@@ -8190,6 +8190,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8210,9 +8213,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         _y_1 = x[1];
         _z_2 = x[2];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
-            jmi_ad_var_t tmp_3;
             tmp_2 = _y_1;
             tmp_3 = _z_2;
             _y_1 = _x_0 * 2 + 2;
@@ -8257,6 +8257,9 @@ $C_ode_derivatives$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+	jmi_ad_var_t tmp_1;
+	jmi_ad_var_t tmp_2;
+	jmi_ad_var_t tmp_3;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8268,9 +8271,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _x_0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _x_0 = x[0];
-        jmi_ad_var_t tmp_1;
-        jmi_ad_var_t tmp_2;
-        jmi_ad_var_t tmp_3;
         tmp_2 = _y_1;
         tmp_3 = _z_2;
         _y_1 = _x_0 * 2 + 2;
@@ -8295,6 +8295,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8306,9 +8309,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[0] = _x_0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _x_0 = x[0];
-        jmi_ad_var_t tmp_1;
-        jmi_ad_var_t tmp_2;
-        jmi_ad_var_t tmp_3;
         tmp_2 = _y_1;
         tmp_3 = _z_2;
         _y_1 = _x_0 * 2 + 2;
@@ -8422,6 +8422,8 @@ $C_ode_derivatives$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8438,8 +8440,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _x_0 = x[0];
         _y_1 = x[1];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
             tmp_2 = _x_0;
             _x_0 = _y_1;
             tmp_1 = _x_0;
@@ -8456,6 +8456,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8472,8 +8474,6 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _a_3 = x[0];
         _z_2 = x[1];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_3;
-            jmi_ad_var_t tmp_4;
             tmp_4 = _a_3;
             _a_3 = _z_2 * _x_0;
             tmp_3 = _a_3;
@@ -8531,6 +8531,10 @@ $C_ode_derivatives$
 static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8555,8 +8559,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         _x_0 = x[2];
         _y_1 = x[3];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
             tmp_2 = _a_3;
             _a_3 = _z_2 + _x_0;
             tmp_1 = _a_3;
@@ -8564,8 +8566,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             tmp_2 = tmp_1;
             (*res)[0] = tmp_2 - (_a_3);
             (*res)[1] = _time + _a_3 - (_z_2);
-            jmi_ad_var_t tmp_3;
-            jmi_ad_var_t tmp_4;
             tmp_4 = _x_0;
             _x_0 = _y_1 + _z_2;
             tmp_3 = _x_0;
@@ -8583,6 +8583,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8599,8 +8601,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _a_3 = x[0];
         _z_2 = x[1];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_1;
-            jmi_ad_var_t tmp_2;
             tmp_2 = _a_3;
             _a_3 = _z_2 + _x_0;
             tmp_1 = _a_3;
@@ -8917,6 +8917,12 @@ $C_ode_derivatives$
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    jmi_ad_var_t tmp_3;
+    jmi_ad_var_t tmp_4;
+    jmi_ad_var_t tmp_5;
+    jmi_ad_var_t tmp_6;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8927,9 +8933,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[0] = _x_0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _x_0 = x[0];
-        jmi_ad_var_t tmp_1;
-        jmi_ad_var_t tmp_2;
-        jmi_ad_var_t tmp_3;
         tmp_2 = _y_1;
         tmp_3 = _z1_2;
         _y_1 = _x_0;
@@ -8941,9 +8944,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         _z1_2 = tmp_3;
         tmp_3 = tmp_1;
         _z1_2 = (tmp_3);
-        jmi_ad_var_t tmp_4;
-        jmi_ad_var_t tmp_5;
-        jmi_ad_var_t tmp_6;
         tmp_5 = _y_1;
         tmp_6 = _z2_3;
         _y_1 = _z1_2;
@@ -8967,6 +8967,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     jmi_real_t** res = &residual;
     int ef = 0;
+    jmi_ad_var_t tmp_7;
+    jmi_ad_var_t tmp_8;
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
@@ -8979,8 +8981,6 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         _z3_4 = x[0];
         if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-            jmi_ad_var_t tmp_7;
-            jmi_ad_var_t tmp_8;
             tmp_8 = _y_1;
             _y_1 = _z3_4;
             tmp_7 = _y_1;
