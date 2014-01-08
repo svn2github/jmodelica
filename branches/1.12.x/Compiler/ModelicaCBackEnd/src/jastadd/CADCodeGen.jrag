@@ -337,16 +337,7 @@ aspect CADCodeGen {
 		throw new UnsupportedOperationException("FExp.genADStatement_CAD() have to be overrided if type have continuous variablity, type=" + getClass().getSimpleName());
 	}
 	
-	/**
-	 * (non-Javadoc)
-	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
-	 */
-	@Override
-	public void FLitExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
-		str.print("AD_WRAP_LITERAL(0)");
-	}
 	syn boolean FLitExp.inlineVar_CAD() = true;
-	syn boolean FLitExp.inlineDer_CAD() = false;
 	
 	/**
 	 * (non-Javadoc)
@@ -671,15 +662,6 @@ aspect CADCodeGen {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" : -");
 		getFExp().genDer_CAD(p, str, indent);
-	}
-	
-	/**
-	 * (non-Javadoc)
-	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
-	 */
-	@Override
-	public void FSignExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
-		str.print("AD_WRAP_LITERAL(0)");
 	}
 	
 	/**

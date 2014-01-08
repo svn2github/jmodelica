@@ -610,6 +610,142 @@ if (_sw(0)) {
 ")})));
 end smoothTest1;
 
+model signTest1
+    Real x;
+equation
+    der(x) = sign(x); 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="signTest1",
+            description="Tests cad generation for the sign operator",
+            generate_dae_jacobian=true,
+            inline_functions="none",
+            template="
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+    (*res)[0] = jmi_sign(_x_0) - (_der_x_1);
+    (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+
+")})));
+end signTest1;
+
+model signTest2
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := sign(x);
+    end F;
+    Real x;
+equation
+    der(x) = F(x); 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="signTest2",
+            description="Tests cad generation for the sign() operator in functions",
+            generate_dae_jacobian=true,
+            inline_functions="none",
+            template="
+$CAD_functions$
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+void func_CADCodeGenTests_signTest2_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    y_var_v = jmi_sign(x_var_v);
+    y_der_v = AD_WRAP_LITERAL(0);
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    func_CADCodeGenTests_signTest2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &v_0, &d_0);
+    (*res)[0] = v_0 - (_der_x_1);
+    (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+
+")})));
+end signTest2;
+
+model divFuncTest1
+    Real x;
+equation
+    der(x) = div(x, 3.14); 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="divFuncTest1",
+            description="Tests cad generation for the div() operator",
+            generate_dae_jacobian=true,
+            template="
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t v_5;
+    (*res)[0] = _temp_1_1 - (_der_x_2);
+    (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")), pre_temp_1_1) - (_temp_1_1);
+
+")})));
+end divFuncTest1;
+
+model divFuncTest2
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := div(x, 3.14);
+    end F;
+    Real x;
+equation
+    der(x) = F(x); 
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="divFuncTest2",
+            description="Tests cad generation for the div() operator in functions",
+            generate_dae_jacobian=true,
+            inline_functions="none",
+            template="
+$CAD_functions$
+$C_DAE_equation_directional_derivative$
+",
+            generatedCode="
+void func_CADCodeGenTests_divFuncTest2_F_der_AD(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t y_var_v;
+    jmi_ad_var_t y_der_v;
+    y_var_v = ((long)jmi_divide_function(\"CADCodeGenTests.divFuncTest2.F\", x_var_v,3.14,\"div(x, 3.14)\"));
+    y_der_v = AD_WRAP_LITERAL(0);
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    func_CADCodeGenTests_divFuncTest2_F_der_AD(_x_0, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &v_0, &d_0);
+    (*res)[0] = v_0 - (_der_x_1);
+    (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+
+")})));
+end divFuncTest2;
+
 model notTest1
 	Real x;
 equation
