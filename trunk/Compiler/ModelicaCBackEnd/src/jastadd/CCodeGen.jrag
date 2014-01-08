@@ -1949,21 +1949,18 @@ aspect CCodeGen {
         // Generate code for Jacobian
         genBlockResidualFunction_jacobian_C(indent, str);
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
         // Loop over all active variables and write the values in x to the z vector
         for (FVariable fv : iterationVariables()) 
             fv.genBlockResidualEvalInit_C(nextIndent, str, solverArrayMap);
         Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
         genBlockResidualFunction_solvedEqns_C(nextIndent, str, inInitial, visitedList);
+        str.print(nextIndent + "if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
         // Write the residual expressions
-        genBlockResidualFunction_residualEqns_C(new Enumerator(), nextIndent, str, visitedList, solverArrayMap);
+        genBlockResidualFunction_residualEqns_C(new Enumerator(), ASTNode.printer_C.indent(nextIndent), str, visitedList, solverArrayMap);
+        str.print(nextIndent + "}\n");
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
         genBlockResidualFunction_nonReals_C(nextIndent, str, visitedList);
-        // Write back
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
-        // Loop over all active variables and write their value to x
-        for (FVariable fv : iterationVariables())
-            fv.genBlockResidualWriteback_C(nextIndent, str, solverArrayMap);
         str.print(indent + "}\n");
         str.print(indent + "return ef;\n");
         str.print(outerIndent + "}\n\n");
