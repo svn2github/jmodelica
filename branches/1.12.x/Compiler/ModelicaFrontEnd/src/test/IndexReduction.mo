@@ -2322,6 +2322,35 @@ end IndexReduction.IndexReduction49_DotPow;
 ")})));
 end IndexReduction49_DotPow;
 
+model DivFunc
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + div(x2, 3.14) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DivFunc",
+            description="Test differentiation of div() operator. This model probably makes no sence in the real world!",
+            flatModel="
+fclass IndexReduction.DivFunc
+ Real x1;
+ Real x2;
+ discrete Real temp_1;
+ Real _der_x1;
+initial equation 
+ pre(temp_1) = 0.0;
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + temp_1 = 1;
+ temp_1 = if div(x2, 3.14) < pre(temp_1) or div(x2, 3.14) >= pre(temp_1) + 1 or initial() then div(x2, 3.14) else pre(temp_1);
+ _der_x1 = 0.0;
+end IndexReduction.DivFunc;
+")})));
+end DivFunc;
+
 model IndexReduction50
 	parameter StateSelect c1_ss = StateSelect.default; 
 	parameter StateSelect c2_ss = StateSelect.never; 
@@ -3387,8 +3416,6 @@ public
 end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
 ")})));
   end PlanarPendulum;
-
-
 
 end AlgorithmDifferentiation;
 
