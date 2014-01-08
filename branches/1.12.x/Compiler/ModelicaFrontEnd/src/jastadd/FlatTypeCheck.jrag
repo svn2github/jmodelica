@@ -728,7 +728,7 @@ aspect FlatTypeCheck {
 			  else if (size().isUnknown() && !inFunction())
 				  error(functionCallDecription() + ": could not evaluate array size of output " + 
 						  myOutput().name());
-			  else if (!use.type().typeCompatible(type())) 
+			  else if (!use.type().typeCompatible(type(), true)) 
 				  error(functionCallDecription() + ": types of component " + use.name() + 
 						  " and output " + myOutput().name() + " are not compatible");
 		  }

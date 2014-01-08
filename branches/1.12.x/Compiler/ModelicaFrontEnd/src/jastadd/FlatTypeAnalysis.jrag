@@ -362,8 +362,9 @@ aspect FlatTypeAnalysis {
 		FRecordType res = getRecord().recordType().fullCopy();
 		if (!(getRecord() instanceof FIdUseInstAccess)) {
 			int n = getNumArg();
-			for (int i = 0; i < n; i++) 
-				res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
+			for (int i = 0; i < n; i++)
+			    if (getArg(i).size().isUnknown())
+			        res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
 		}
 		return res;
 	}

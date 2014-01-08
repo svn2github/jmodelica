@@ -4239,6 +4239,7 @@ public
   output Real[size(is2, 1), 2] y;
   Integer[2] temp_1;
  algorithm
+  assert(size(is2, 1) == 2, \"Mismatching sizes in FunctionTests.ArrayExpInFunc16.f\");
   temp_1[1] := is1[1];
   temp_1[2] := is1[2];
   for i1 in 1:2 loop
@@ -4539,7 +4540,7 @@ function f
 	input Real[:] x1;
 	input Real[:,:] x2;
 	input Real[:,:] x3;
-	output Real[size(x1,1)+size(x2,1)+1,size(x2,2)+1] y;
+	output Real[size(x1,1)*2+size(x3,1),size(x2,2)+1] y;
 algorithm
 	y := [x1, x2; x2, x1; x3];
 end f;
@@ -4577,7 +4578,7 @@ public
   input Real[:] x1;
   input Real[:, :] x2;
   input Real[:, :] x3;
-  output Real[size(x1, 1) + size(x2, 1) + 1, size(x2, 2) + 1] y;
+  output Real[size(x1, 1) * 2 + size(x3, 1), size(x2, 2) + 1] y;
   Real[:,:] temp_1;
   Integer temp_2;
   Integer temp_3;
@@ -6005,6 +6006,7 @@ public
   output Real x1;
   Real[2] b1;
  algorithm
+  assert(size(a1, 1) == 2, \"Mismatching sizes in FunctionTests.ArrayOutputScalarization19.f1\");
   (b1) := FunctionTests.ArrayOutputScalarization19.f2(a1);
   x1 := b1[1] + b1[2];
   return;
@@ -7920,6 +7922,284 @@ end FunctionTests.UnknownArray33;
 			
 ")})));
 end UnknownArray33;
+
+model UnknownArray34
+    function f
+		input Integer n;
+        output Real b;
+    protected
+        Real[3] c;
+        Real[n] d;
+    algorithm
+        d := {1,2,3};
+        c := d;
+        b := 1;
+    end f;
+
+    Real x = f(3);
+	
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray34",
+			description="Check extraction of function calls in function call equations",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray34
+ Real x;
+equation
+ x = FunctionTests.UnknownArray34.f(3);
+
+public
+ function FunctionTests.UnknownArray34.f
+  input Integer n;
+  output Real b;
+  Real[3] c;
+  Real[:] d;
+  Integer[3] temp_1;
+ algorithm
+  size(d) := {n};
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
+  temp_1[1] := 1;
+  temp_1[2] := 2;
+  temp_1[3] := 3;
+  for i1 in 1:3 loop
+   d[i1] := temp_1[i1];
+  end for;
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray34.f\");
+  for i1 in 1:n loop
+   c[i1] := d[i1];
+  end for;
+  b := 1;
+  return;
+ end FunctionTests.UnknownArray34.f;
+
+end FunctionTests.UnknownArray34;
+			
+")})));
+end UnknownArray34;
+
+model UnknownArray35
+    function f
+		input Integer n;
+		input Real[:] d;
+        output Real b;
+    protected
+		Real[n,3] e;
+    algorithm
+		e := {d,d,d};
+        b := 1;
+    end f;
+
+    Real x = f(3, {1,2,3});
+	
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray35",
+			description="Check extraction of function calls in function call equations",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray35
+ Real x;
+equation
+ x = FunctionTests.UnknownArray35.f(3, {1, 2, 3});
+
+public
+ function FunctionTests.UnknownArray35.f
+  input Integer n;
+  input Real[:] d;
+  output Real b;
+  Real[:,:] e;
+  Real[:,:] temp_1;
+ algorithm
+  size(e) := {n, 3};
+  size(temp_1) := {3, size(d, 1)};
+  assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
+  for i4 in 1:size(d, 1) loop
+   temp_1[1,i4] := d[i4];
+  end for;
+  for i4 in 1:size(d, 1) loop
+   temp_1[2,i4] := d[i4];
+  end for;
+  for i4 in 1:size(d, 1) loop
+   temp_1[3,i4] := d[i4];
+  end for;
+  for i1 in 1:3 loop
+   for i2 in 1:size(d, 1) loop
+    e[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  b := 1;
+  return;
+ end FunctionTests.UnknownArray35.f;
+
+end FunctionTests.UnknownArray35;
+			
+")})));
+end UnknownArray35;
+
+model UnknownArray36
+    function f2
+		input Real[:] xin;
+		input Real[2] yin;
+		output Real[size(xin,1)] xout = yin;
+		output Real[2] yout = xin;
+		algorithm
+	end f2;
+	
+    function f1
+		input Integer n;
+        output Real b;
+    protected
+        Real[2] c;
+        Real[n] d;
+    algorithm
+        d[1:2] := {1,2};
+        c := d;
+		(c,d) := f2(c,d);
+        b := 1;
+    end f1;
+
+    Real x = f1(2);
+	
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray36",
+			description="Check extraction of function calls in function call equations",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray36
+ Real x;
+equation
+ x = FunctionTests.UnknownArray36.f1(2);
+
+public
+ function FunctionTests.UnknownArray36.f1
+  input Integer n;
+  output Real b;
+  Real[2] c;
+  Real[:] d;
+ algorithm
+  size(d) := {n};
+  d[1] := 1;
+  d[2] := 2;
+  assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
+  for i1 in 1:n loop
+   c[i1] := d[i1];
+  end for;
+  assert(n == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f1\");
+  (c, d) := FunctionTests.UnknownArray36.f2(c, d);
+  b := 1;
+  return;
+ end FunctionTests.UnknownArray36.f1;
+
+ function FunctionTests.UnknownArray36.f2
+  input Real[:] xin;
+  input Real[2] yin;
+  output Real[size(xin, 1)] xout;
+  output Real[2] yout;
+ algorithm
+  assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f2\");
+  for i1 in 1:2 loop
+   xout[i1] := yin[i1];
+  end for;
+  assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray36.f2\");
+  for i1 in 1:size(xin, 1) loop
+   yout[i1] := xin[i1];
+  end for;
+  return;
+ end FunctionTests.UnknownArray36.f2;
+
+end FunctionTests.UnknownArray36;
+			
+")})));
+end UnknownArray36;
+
+model UnknownArray37
+    function f2
+		input Real[:,:] xin;
+		input Real[2,:] yin;
+		output Real[size(xin,1),size(xin,2)] xout = yin;
+		output Real[2,2] yout = xin;
+		algorithm
+	end f2;
+	
+    function f1
+		input Integer n;
+		input Real[:,:] d;
+        output Real b;
+    protected
+        Real[2,n] c;
+    algorithm
+        c := d;
+		(c,d) := f2(c,d);
+        b := 1;
+    end f1;
+
+    Real x = f1(2, {{1,2},{3,4}});
+	
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray37",
+			description="Check extraction of function calls in function call equations",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray37
+ Real x;
+equation
+ x = FunctionTests.UnknownArray37.f1(2, {{1, 2}, {3, 4}});
+
+public
+ function FunctionTests.UnknownArray37.f1
+  input Integer n;
+  input Real[:, :] d;
+  output Real b;
+  Real[:,:] c;
+ algorithm
+  size(c) := {2, n};
+  assert(size(d, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f1\");
+  for i1 in 1:size(d, 1) loop
+   for i2 in 1:size(d, 2) loop
+    c[i1,i2] := d[i1,i2];
+   end for;
+  end for;
+  assert(size(d, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f1\");
+  assert(size(d, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f1\");
+  (c, d) := FunctionTests.UnknownArray37.f2(c, d);
+  b := 1;
+  return;
+ end FunctionTests.UnknownArray37.f1;
+
+ function FunctionTests.UnknownArray37.f2
+  input Real[:, :] xin;
+  input Real[2, :] yin;
+  output Real[size(xin, 1), size(xin, 2)] xout;
+  output Real[2, 2] yout;
+ algorithm
+  assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
+  for i1 in 1:2 loop
+   for i2 in 1:size(yin, 2) loop
+    xout[i1,i2] := yin[i1,i2];
+   end for;
+  end for;
+  assert(size(xin, 1) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
+  assert(size(xin, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownArray37.f2\");
+  for i1 in 1:size(xin, 1) loop
+   for i2 in 1:size(xin, 2) loop
+    yout[i1,i2] := xin[i1,i2];
+   end for;
+  end for;
+  return;
+ end FunctionTests.UnknownArray37.f2;
+
+end FunctionTests.UnknownArray37;
+			
+")})));
+end UnknownArray37;
 
 // TODO: need more complex cases
 model IncompleteFunc1

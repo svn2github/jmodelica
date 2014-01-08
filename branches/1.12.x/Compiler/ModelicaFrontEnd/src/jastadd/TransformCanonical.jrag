@@ -699,6 +699,9 @@ aspect TransformCanonical {
 			extraSortingDependencies = new LinkedHashSet<FStatement>();
 		return extraSortingDependencies;
 	}
+    private boolean FStatement.hasExtraSortingDependencies() {
+        return extraSortingDependencies != null;
+    }
 	
 	
 	syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();

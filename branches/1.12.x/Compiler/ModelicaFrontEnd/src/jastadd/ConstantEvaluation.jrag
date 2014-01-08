@@ -1180,8 +1180,11 @@ aspect ConstantEvaluation {
   syn CValue FExp.ceval() {
 	  if (isCircular()) 
 		  return CValue.UNKNOWN;
-	  if (isArray())
+	  if (isArray()) {
+          if (size().evaluated().isUnknown())
+	          return CValue.UNKNOWN;
 		  return cevalArray(Index.NULL);
+	  }
 	  return cevalCalc();
   }
   
@@ -1347,6 +1350,8 @@ aspect ConstantEvaluation {
   }
   
   eq FUnknownSizeExp.cevalCalc() {
+      if (getVariable() == null)
+          return CValue.UNKNOWN;
 	  CValue val = getVariable().evaluationValue();
 	  return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
   }
