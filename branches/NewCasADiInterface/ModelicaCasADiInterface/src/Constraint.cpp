@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Constraint.hpp>
+#include "Constraint.hpp"
 using std::ostream; using CasADi::MX;
 namespace ModelicaCasADi{
 Constraint::Constraint(MX lhs, MX rhs,

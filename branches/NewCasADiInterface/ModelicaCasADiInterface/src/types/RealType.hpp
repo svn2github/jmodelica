@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_REAL_TYPE
 #define _MODELICACASADI_REAL_TYPE
+#include <string>
+#include <map>
 
 #include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 

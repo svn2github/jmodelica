@@ -16,8 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_MODEL_FUNCTION
 #define _MODELICACASADI_MODEL_FUNCTION
-#include <map>
 
+#include <iostream> 
+#include <vector>
 #include "symbolic/casadi.hpp"
 #include "SharedNode.hpp"
 namespace ModelicaCasADi 

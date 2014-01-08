@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //ModelicaCasADi
 #include "SharedNode.hpp"
-#include "Ref.hpp"
 
 namespace ModelicaCasADi 
 {

@@ -16,8 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_EQUATION
 #define _MODELICACASADI_EQUATION
-#include <iostream>
 
+#include <iostream>
 #include "symbolic/casadi.hpp"
 #include "SharedNode.hpp"
 namespace ModelicaCasADi 

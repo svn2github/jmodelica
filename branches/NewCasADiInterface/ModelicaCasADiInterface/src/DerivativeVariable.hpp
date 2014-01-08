@@ -16,7 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_DER_VAR
 #define _MODELICACASADI_DER_VAR
+
+#include "symbolic/casadi.hpp"
+#include "types/VariableType.hpp"
+#include "Ref.hpp"
 #include "RealVariable.hpp"
+
 namespace ModelicaCasADi
 {
 class DerivativeVariable : public RealVariable {

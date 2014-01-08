@@ -17,11 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // System includes
 #include <iostream>
 
-// Other transfer functionality, including shared with transferModelica. 
 #include "jccutils.h"
 #include "transferOptimica.hpp"
 
+// CasADi
+#include "symbolic/casadi.hpp"
+
 // Wrapped classes from the Optimica compiler
+#include "java/lang/System.h"
+#include "java/util/ArrayList.h"
 #include "org/jmodelica/optimica/compiler/AliasManager.h"
 #include "org/jmodelica/optimica/compiler/OptimicaCompiler.h"
 #include "org/jmodelica/optimica/compiler/FStringComment.h"

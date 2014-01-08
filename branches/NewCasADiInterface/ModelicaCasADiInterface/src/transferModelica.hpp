@@ -17,7 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TRANSFER_MODELICA
 #define TRANSFER_MODELICA
 
-// Much of the transfer functionality lies here, shared with transferOptimica
+#include <vector>
+#include <string>
+
+// Most of the transfer functionality lies here, shared with transferOptimica
 // and implemented with templates.
 #include "sharedTransferFunctionality.hpp"
 

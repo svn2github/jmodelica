@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_CONSTRAINT
 #define _MODELICACASADI_CONSTRAINT
 #include <iostream>
-
 #include "symbolic/casadi.hpp"
 #include "SharedNode.hpp"
 namespace ModelicaCasADi{

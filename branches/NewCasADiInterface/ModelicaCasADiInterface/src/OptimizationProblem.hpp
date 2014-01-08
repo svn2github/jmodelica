@@ -17,12 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MODELICACASADI_OPTIMIZATIONPROBLEM
 #define _MODELICACASADI_OPTIMIZATIONPROBLEM
 #include <iostream>
+#include <vector>
+
+#include "symbolic/casadi.hpp"
 
 #include "Model.hpp"
 #include "Constraint.hpp"
-#include "vector"
 #include "SharedNode.hpp"
 #include "TimedVariable.hpp"
+#include "Ref.hpp"
 namespace ModelicaCasADi 
 {
 class OptimizationProblem : public SharedNode {

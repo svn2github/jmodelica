@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <DerivativeVariable.hpp>
+#include "DerivativeVariable.hpp"
 namespace ModelicaCasADi {
 using CasADi::MX;
 DerivativeVariable::DerivativeVariable(MX var, Ref<Variable> diffVar, 

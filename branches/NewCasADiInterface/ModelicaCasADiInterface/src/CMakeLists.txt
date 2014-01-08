@@ -59,7 +59,6 @@ set(MC_CPP
 )
 # MC_HPP is used by the parent script for SWIG dependencies as well
 set(MC_HPP
-  AttributeExpression.hpp
   BooleanVariable.hpp
   CompilerOptionsWrapper.hpp
   Constraint.hpp

@@ -21,14 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "jni.h"
 
 // JCC wrappers
-#include "java/lang/System.h"
-#include "java/util/ArrayList.h"
 #include "casadi/MX.h"
 #include "casadi/MXFunction.h"
 #include "casadi/MXVector.h"
-
-// CasADi
-#include "symbolic/casadi.hpp"
 
 // The ModelicaCasADi program
 #include "Model.hpp"
@@ -55,9 +50,6 @@ void setUpJVM();
  * Destroys the JVM. 
  */ 
 void tearDownJVM();
-
-
-
 
 
 
@@ -119,8 +111,6 @@ static void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> 
         m->addInitialEquation(*it);
     }
 }
-
-
 
 
 

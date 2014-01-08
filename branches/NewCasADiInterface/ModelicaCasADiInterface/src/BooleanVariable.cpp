@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <BooleanVariable.hpp>
+#include "BooleanVariable.hpp"
 namespace ModelicaCasADi 
 {
 BooleanVariable::BooleanVariable(CasADi::MX var, Variable::Causality causality,

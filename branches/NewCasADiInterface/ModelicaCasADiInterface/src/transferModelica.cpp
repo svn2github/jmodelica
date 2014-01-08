@@ -17,11 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // System includes
 #include <iostream>
 
-// Other transfer functionality, including shared with transferModelica. 
 #include "jccutils.h"
 #include "transferModelica.hpp"
 
+// CasADi
+#include "symbolic/casadi.hpp"
+
 // Wrapped classes from the Modelica compiler
+#include "java/lang/System.h"
+#include "java/util/ArrayList.h"
 #include "org/jmodelica/modelica/compiler/AliasManager.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 #include "org/jmodelica/modelica/compiler/FDerivedType.h"
@@ -50,7 +54,6 @@ namespace jl = java::lang;
 using org::jmodelica::util::OptionRegistry;
 using std::cout;  using std::endl; using std::string;
 using std::vector;
-using CasADi::MX;
 using ModelicaCasADi::Model;
 using ModelicaCasADi::CompilerOptionsWrapper;
 using ModelicaCasADi::Ref;

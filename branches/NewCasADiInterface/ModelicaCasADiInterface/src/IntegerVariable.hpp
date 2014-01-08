@@ -16,7 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_INTEGER_VAR
 #define _MODELICACASADI_INTEGER_VAR
+
+#include "symbolic/casadi.hpp"
+#include "types/VariableType.hpp"
+#include "Ref.hpp"
 #include "Variable.hpp"
+
 namespace ModelicaCasADi
 {
 class IntegerVariable : public Variable {

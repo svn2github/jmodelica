@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _MODELICACASADI_BOOLEAN_TYPE
 #define _MODELICACASADI_BOOLEAN_TYPE
+#include <string>
+#include <map>
 
 #include "types/PrimitiveType.hpp"
 namespace ModelicaCasADi 

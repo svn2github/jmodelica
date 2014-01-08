@@ -14,11 +14,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <types/RealType.hpp>
-#include <types/IntegerType.hpp>
-#include <types/BooleanType.hpp>
-#include <DerivativeVariable.hpp>
-#include <Model.hpp>
+#include "types/RealType.hpp"
+#include "types/IntegerType.hpp"
+#include "types/BooleanType.hpp"
+#include "DerivativeVariable.hpp"
+#include "Model.hpp"
 
 using CasADi::MX; using CasADi::MXFunction; 
 using std::vector; using std::ostream;

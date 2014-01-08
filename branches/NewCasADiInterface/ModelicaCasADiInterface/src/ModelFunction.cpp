@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <ModelFunction.hpp>
+#include "ModelFunction.hpp"
 using std::ostream; using std::vector; using std::string;
 using CasADi::MX;  using CasADi::MXFunction;
 
