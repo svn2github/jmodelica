@@ -76,36 +76,44 @@ abstract public class TestAnnotationizerHelper {
 		}
 	}
 
-	/**
-	 * This is the main method for regenerating an existing annotation.
-	 * 
-	 * @param filePath     the path to the Modelica file containing the test model
-	 * @param modelName    the name of the test model
-	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
-	 */
-	public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
-		try {
-			SourceRoot root = parse(filePath, modelName, new OptionRegistry());
-			ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
-			if (cd.isUnknown()) {
-				System.err.println("Class " + modelName + " not found");
-				System.exit(1);
-			}
-			AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests");
-			a = a.iterator().hasNext() ? a.iterator().next() : AnnotationNode.NO_ANNOTATION;
-			if (!a.exists()) {
-				System.err.println("No test annotation found in class " + modelName);
-				System.exit(1);
-			}
-			Class cl = getTestCase(a.name());
-			Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
-			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
-			ta.createAnnotation(write);
-		} catch (Exception e) {
-			handleException(e);
-		}
-	}
-    
+    /**
+     * This is the main method for regenerating an existing annotation.
+     * 
+     * @param filePath     the path to the Modelica file containing the test model
+     * @param modelName    the name of the test model
+     * @param write        if <code>true</code>, write the annotation directly in the Modelica file
+     */
+    public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
+        try {
+            SourceRoot root = parse(filePath, modelName, new OptionRegistry());
+            ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
+            if (cd.isUnknown()) {
+                System.err.println("Class " + modelName + " not found");
+                System.exit(1);
+            }
+            AnnotationNode tests = cd.annotation("__JModelica/UnitTesting/tests");
+            AnnotationNode test = AnnotationNode.NO_ANNOTATION;
+            for (AnnotationNode n : tests) {
+                if (test.exists()) {
+                    System.err.println("Multiple test annotations found in class " + modelName + ".");
+                    System.err.println("TestAnnotationizer is currently unable to regenerate models with multiple tests!");
+                    System.exit(1);
+                }
+                test = n;
+            }
+            if (!test.exists()) {
+                System.err.println("No test annotation found in class " + modelName);
+                System.exit(1);
+            }
+            Class cl = getTestCase(test.name());
+            Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
+            TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
+            ta.createAnnotation(write);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
     /**
      * Set type of error checking to be performed.
      * 
