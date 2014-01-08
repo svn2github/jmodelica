@@ -998,7 +998,7 @@ aspect CADCodeGen {
 	public void AbstractEquationBlock.genBlockResidualFunction_CAD(boolean inInitial, String outerIndent, PrintStream str) {
 		if (!genRequiresBlockResidualFunction_C())
 			return;
-		for (AbstractEquationBlock subBlock : genBlockResidualFunctionSubBlocks_C())
+		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
 			subBlock.genBlockResidualFunction_CAD(inInitial, outerIndent, str);
 		
 		str.format("%sstatic int dae_%sblock_dir_der_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n",
