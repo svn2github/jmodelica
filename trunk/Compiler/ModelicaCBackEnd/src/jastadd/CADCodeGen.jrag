@@ -675,11 +675,6 @@ aspect CADCodeGen {
 		str.print(")");
 	}
 	
-	syn boolean FNegExp.inlineVar_CAD() = true;
-	syn boolean FNegExp.inlineDer_CAD() = true;
-	eq FNegExp.getChild().inlineVar_CAD() = true;
-	eq FNegExp.getChild().inlineDer_CAD() = true;
-
 	/**
 	 * (non-Javadoc)
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
