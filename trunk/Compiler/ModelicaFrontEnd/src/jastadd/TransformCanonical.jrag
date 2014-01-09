@@ -5064,9 +5064,9 @@ aspect SemiLinear {
 	eq FSemiLinearExp.isSemiLinear() = true;
 	
 	syn FExp FSemiLinearExp.asIfExp() {
-		FIfExp exp = new FIfExp(new FGeqExp(getX(), new FRealLitExp(0)),
-			new FMulExp(getX(),getPosSlope()),
-			new FMulExp(getX(),getNegSlope()));
+		FIfExp exp = new FIfExp(new FGeqExp(getX().fullCopy(), new FRealLitExp(0)),
+			new FMulExp(getX().fullCopy(), getPosSlope().fullCopy()),
+			new FMulExp(getX().fullCopy(), getNegSlope().fullCopy()));
 		return exp;
 	}
 	
