@@ -757,6 +757,21 @@ aspect CCodeGen {
 			node.genVarDecls_C(p, str, indent);
 	}
 	
+    public void FAlgorithm.genVarDecls_C(Printer p, PrintStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        if (!inFunction()) {
+            boolean first = true;
+            String switchTemp = this.tempName_C();
+            for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+                if (first) {
+                    first = false;
+                    use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
+                }
+              use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
+            }
+        }
+    }
+	
 	public void FFunctionVariable.genVarDecls_C(Printer p, PrintStream str, String indent) {
 		if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
@@ -2098,6 +2113,16 @@ aspect CCodeGen {
 				n.genVarDecls_C(ASTNode.printer_C, str, indent);
 	}
 	
+    protected void SolvedAlgorithmBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
+        if (visited == null || visited.add(equation())) {
+            if (activeVars.size() != equation().uniqueFIdUseExpsInLHS().size()) {
+                equation().genVarDecls_C(ASTNode.printer_C, str, indent);
+            } else {
+                equation().getFStatements().genVarDecls_C(ASTNode.printer_C, str, indent);
+            }
+        }
+    }
+	
 	@Override
     protected void EquationBlock.genVarDecls_C(PrintStream str, String indent, Set<ASTNode> visited) {
         if (visited == null)
@@ -2470,14 +2495,6 @@ aspect CCodeGen {
     public void FAlgorithm.prettyPrintNoSideEffect_C(PrintStream str, String indent) {
         String switchTemp = this.tempName_C();
         Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
-        boolean first = true;
-        for (FIdUseExp use : lhs) {
-            if (first) {
-                first = false;
-                use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
-            }
-            use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
-        }
         for (FIdUseExp use : lhs)
             FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
         prettyPrint_C(str, indent);
