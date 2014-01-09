@@ -670,10 +670,16 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void FNegExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
-		str.print("-");
+		str.print("- (");
 		getFExp().genDer_CAD(p, str, indent);
+		str.print(")");
 	}
 	
+	syn boolean FNegExp.inlineVar_CAD() = true;
+	syn boolean FNegExp.inlineDer_CAD() = true;
+	eq FNegExp.getChild().inlineVar_CAD() = true;
+	eq FNegExp.getChild().inlineDer_CAD() = true;
+
 	/**
 	 * (non-Javadoc)
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
