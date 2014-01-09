@@ -1136,7 +1136,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest24",
-			description="",
+			description="Check that self-connections are allowed with a warning",
 			flatModel="
 fclass ConnectTests.ConnectTest24
  Real a = 1;
@@ -1154,7 +1154,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			name="ConnectTest25",
-			description="",
+			description="Check that self-connections are allowed with a warning",
 			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
@@ -1162,6 +1162,48 @@ At line 1152, column 5:
   Ignored connection from connector to itself
 ")})));
 end ConnectTest25;
+
+
+model ConnectTest26
+    connector A
+        B b[2];
+    end A;
+    
+    connector B
+        Real x;
+        flow Real y;
+    end B;
+    
+    A a1, a2;
+equation
+    connect(a1, a2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest26",
+			description="Test array of composite connectors in connector",
+			flatModel="
+fclass ConnectTests.ConnectTest26
+ Real a1.b[1].x;
+ Real a1.b[1].y;
+ Real a1.b[2].x;
+ Real a1.b[2].y;
+ Real a2.b[1].x;
+ Real a2.b[1].y;
+ Real a2.b[2].x;
+ Real a2.b[2].y;
+equation
+ a1.b[1].x = a2.b[1].x;
+ - a1.b[1].y - a2.b[1].y = 0;
+ a1.b[2].x = a2.b[2].x;
+ - a1.b[2].y - a2.b[2].y = 0;
+ a1.b[1].y = 0;
+ a1.b[2].y = 0;
+ a2.b[1].y = 0;
+ a2.b[2].y = 0;
+end ConnectTests.ConnectTest26;
+")})));
+end ConnectTest26;
 
 
 model ConnectOuterTest1
