@@ -3447,6 +3447,7 @@ class LocalDAECollocator2(CasadiCollocator):
             coll_eq = [sum([x_i[i][k] * der_vals_k[i, k] for
                             k in range(self.n_cp)]) - h_i * dx_i_k[i] for
                        i in range(self.n_var["x"])]
+            coll_eq = casadi.vertcat(coll_eq)
         else:
             dx_i_k = [casadi.msym("dx_i_k", self.n_var["x"])]
             x_i = [casadi.msym("x_i", self.n_var["x"], self.n_cp + 1)]
@@ -3454,7 +3455,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                      self.n_cp + 1)
             h_i = casadi.msym("h_i")
             coll_der = [casadi.sumCols(x_i[0] * der_vals_k) / h_i]
-            coll_eq = [casadi.sumCols(x_i[0] * der_vals_k) - h_i*dx_i_k[0]]
+            coll_eq = casadi.sumCols(x_i[0] * der_vals_k) - h_i*dx_i_k[0]
         collocation['coll_der'] = coll_der
         collocation['coll_eq'] = coll_eq
         collocation['dx_i_k'] = dx_i_k
@@ -3531,7 +3532,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     index = new_index
                     if self.named_vars:
                         new_vars = N.array([casadi.msym(var.getName() +
-                                            '           _%d_%d' % (i, k)) for
+                                                        '_%d_%d' % (i, k)) for
                                             var in mvar_vectors[var_type]])
                         var_map[i][k][var_type] = new_vars
                         xx += list(new_vars)
@@ -3735,13 +3736,22 @@ class LocalDAECollocator2(CasadiCollocator):
                 NLP variable vector.
                 Type: MX or SXMatrix
         """
-        z = casadi.vertcat([self.time_points[i][k],
-                            self.var_map[i][k]['x'],
-                            self.var_map[i][k]['unelim_u'],
-                            self.var_map[i][k]['w'],
-                            self.var_map['p_opt'],
-                            self.var_map[i][k]['elim_u']])
-        return [z, self.var_map[i][k]['dx']]
+        if self.named_vars:
+            z = reduce(list.__add__, map(list, [[self.time_points[i][k]],
+                                                self.var_map[i][k]['x'],
+                                                self.var_map[i][k]['unelim_u'],
+                                                self.var_map[i][k]['w'],
+                                                self.var_map['p_opt'],
+                                                self.var_map[i][k]['elim_u']]))
+            return z + list(self.var_map[i][k]['dx'])
+        else:
+            z = casadi.vertcat([self.time_points[i][k],
+                                self.var_map[i][k]['x'],
+                                self.var_map[i][k]['unelim_u'],
+                                self.var_map[i][k]['w'],
+                                self.var_map['p_opt'],
+                                self.var_map[i][k]['elim_u']])
+            return [z, self.var_map[i][k]['dx']]
     
     def _get_z_elim_der(self, i, k):
         """
@@ -4317,7 +4327,7 @@ class LocalDAECollocator2(CasadiCollocator):
                 dae_fcn_t0.init()
             else:
                 coll_eq_fcn = casadi.MXFunction(
-                        x_i + [der_vals_k, h_i] + dx_i_k, coll_eq)
+                        x_i + [der_vals_k, h_i] + dx_i_k, [coll_eq])
                 coll_eq_fcn.setOption("name", "coll_eq_fcn")
                 coll_eq_fcn.init()
                 dae_fcn = casadi.MXFunction(sym_input + sym_input_dx,
@@ -4414,7 +4424,8 @@ class LocalDAECollocator2(CasadiCollocator):
                 scaled_var.append(invariant_dx_i_k_d * invariant_dx_i_k +
                                   invariant_dx_i_k_e)
                 scaled_var.append(dx_i_k_sf * variant_dx_i_k)
-                coll_eq = casadi.substitute(coll_eq, unscaled_var, scaled_var)
+                [coll_eq] = casadi.substitute([coll_eq], unscaled_var,
+                                              scaled_var)
             
             # Scale variables in expressions
             sym_sf = casadi.ssym("d_i_k", variant_var.numel())
@@ -4536,15 +4547,15 @@ class LocalDAECollocator2(CasadiCollocator):
             G_i.setOption("name", "G_i_fcn")
             G_i_fcn.init()
 
-        # Continue here with named_vars!
-        dh()
-
         # Create list of state matrices
         x_list = [[]]
         self.x_list = x_list
         for i in xrange(1, self.n_e + 1):
             x_i = [var_map[i][k]['x'] for k in xrange(self.n_cp + 1)]
-            x_i = casadi.horzcat(x_i)
+            if self.named_vars:
+                x_i = map(casadi.vertcat, N.array(x_i).T)
+            else:
+                x_i = [casadi.horzcat(x_i)]
             x_list.append(x_i)
         
         # Index collocation equation scale factors
@@ -4611,26 +4622,32 @@ class LocalDAECollocator2(CasadiCollocator):
             # Evaluate u_1_0 based on polynomial u_1
             u_1_0 = 0
             for k in xrange(1, self.n_cp + 1):
-                u_1_0 += (var_map[1][k]['unelim_u'] *
-                          self.pol.eval_basis(k, 0, False))
+                u_1_0 += (self.pol.eval_basis(k, 0, False) *
+                          var_map[1][k]['unelim_u'])
                 
             # Add residual for u_1_0 as constraint
-            c_e.append(var_map[1][0]['unelim_u'] - u_1_0)
-        
+            u_1_0_constr = var_map[1][0]['unelim_u'] - u_1_0
+            if self.named_vars:
+                u_1_0_constr = casadi.vertcat(u_1_0_constr)
+            c_e.append(u_1_0_constr)
+
         # Collocation and DAE constraints
         for i in xrange(1, self.n_e + 1):
             for k in xrange(1, self.n_cp + 1):
                 # Create function inputs
                 if self.eliminate_der_var: # FIX!!!
                     z = self._get_z_elim_der(i, k)
-                    fcn_input = z + [x_list[i], der_vals[k],
-                                     self.horizon * self.h[i]]
+                    fcn_input = z + x_list[i] + [der_vals[k],
+                                                 self.horizon * self.h[i]]
                 else:
                     z = self._get_z(i, k)
                     fcn_input = z
-                    coll_input = [x_list[i], der_vals[k],
-                                  self.horizon * self.h[i],
-                                  var_map[i][k]['dx']]
+                    coll_input = x_list[i] + [der_vals[k],
+                                              self.horizon * self.h[i]]
+                    if self.named_vars:
+                        coll_input += list(var_map[i][k]['dx'])
+                    else:
+                        coll_input += [var_map[i][k]['dx']]
                 if self.variable_scaling and self.nominal_traj is not None:
                     # FIX!!!
                     fcn_input += [variant_sf[i][k]]
@@ -4661,7 +4678,10 @@ class LocalDAECollocator2(CasadiCollocator):
                                self.horizon * self.h[i] * x_i_np1)
                     
                     # Add residual for x_i_np1 as constraint
-                    c_e.append(var_map[i][self.n_cp + 1]['x'] - x_i_np1)
+                    quad_constr = var_map[i][self.n_cp + 1]['x'] - x_i_np1
+                    if self.named_vars:
+                        quad_constr = casadi.vertcat(quad_constr)
+                    c_e.append(quad_constr)
             else:
                 for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on polynomial x_i
@@ -4671,7 +4691,10 @@ class LocalDAECollocator2(CasadiCollocator):
                             k, 1, True)
                     
                     # Add residual for x_i_np1 as constraint
-                    c_e.append(var_map[i][self.n_cp + 1]['x'] - x_i_np1)
+                    quad_constr = var_map[i][self.n_cp + 1]['x'] - x_i_np1
+                    if self.named_vars:
+                        quad_constr = casadi.vertcat(quad_constr)
+                    c_e.append(quad_constr)
         
         # Constraints for terminal values
         if self.is_gauss: # FIX!!!
@@ -4683,8 +4706,11 @@ class LocalDAECollocator2(CasadiCollocator):
                                   self.pol.eval_basis(k, 1, False))
                 
                 # Add residual for xx_ne_np1 as constraint
-                c_e.append(var_map[self.n_e][self.n_cp + 1][var_type] -
-                           xx_ne_np1)
+                term_constr = (var_map[self.n_e][self.n_cp + 1][var_type] -
+                               xx_ne_np1)
+                if self.named_vars:
+                    term_constr = casadi.vertcat(term_constr)
+                c_e.append(term_constr)
             if not self.eliminate_der_var:
                 # Evaluate dx_{n_e, n_cp + 1} based on polynomial x_{n_e}
                 dx_ne_np1 = 0
@@ -4694,13 +4720,19 @@ class LocalDAECollocator2(CasadiCollocator):
                                   x_ne_k * self.pol.eval_basis_der(k, 1))
                 
                 # Add residual for dx_ne_np1 as constraint
-                c_e.append(var_map[self.n_e][self.n_cp + 1]['dx'] - dx_ne_np1)
+                term_constr_dx = (var_map[self.n_e][self.n_cp + 1]['dx'] -
+                                  dx_ne_np1)
+                if self.named_vars:
+                    term_constr_dx = casadi.vertcat(term_constr_dx)
+                c_e.append(term_constr_dx)
         
         # Continuity constraints for x_{i, 0}
         if not self.eliminate_cont_var:
             for i in xrange(1, self.n_e):
                 cont_constr = (var_map[i][self.n_cp + self.is_gauss]['x'] - 
                                var_map[i + 1][0]['x'])
+                if self.named_vars:
+                    cont_constr = casadi.vertcat(cont_constr)
                 c_e.append(cont_constr)
         
         # Element length constraints
@@ -4771,7 +4803,10 @@ class LocalDAECollocator2(CasadiCollocator):
                                         constr_var = d * constr_var + e
                             
                             # Add constraint
-                            c_e.append(constr_var - constr_val)
+                            input_constr = constr_var - constr_val
+                            if self.named_vars:
+                                input_constr = casadi.vertcat(input_constr)
+                            c_e.append(input_constr)
         
         # Store constraints and time as data attributes
         self.c_e = c_e
@@ -5145,12 +5180,15 @@ class LocalDAECollocator2(CasadiCollocator):
         # Concatenate constraints
         constraints = casadi.vertcat([self.c_e, self.c_i])
         
-        # Define NLP function
-        nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
-                                casadi.nlpOut(f=self.cost, g=constraints))
-        
-        # Create solver object        
-        self.solver = casadi.IpoptSolver(nlp)
+        # Create solver object
+        if self.named_vars:
+            cost_fcn = casadi.MXFunction(self.xx, [self.cost])
+            constraint_fcn = casadi.MXFunction(self.xx, [constraints])
+            self.solver = casadi.IpoptSolver(cost_fcn, constraint_fcn)
+        else:
+            nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx),
+                                    casadi.nlpOut(f=self.cost, g=constraints))
+            self.solver = casadi.IpoptSolver(nlp)
 
         # Expand to SX
         self.solver.setOption("expand", self.expand_to_SX)
