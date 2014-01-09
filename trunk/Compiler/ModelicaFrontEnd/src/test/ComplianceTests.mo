@@ -628,7 +628,6 @@ model Error2
   algorithm
 	y := symmetric(x);
 	b := identity(n);
-	c := linspace(1,5,n);
 	a := min(c);
 	a := max(c);
 	b := b^2;
@@ -644,16 +643,13 @@ model Error2
 			name="UnknownArraySizes_Error2",
 			description="Test that compliance errors are given.",
 			errorMessage="
-10 errors found:
+9 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 736, column 7:
   Unknown sizes in operator symmetric() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 737, column 7:
   Unknown size arg in operator identity() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 738, column 7:
-  Unknown size arg in operator linspace() is not supported in functions
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
 Compliance error at line 739, column 7:
   Unknown sizes in operator min() is not supported in functions
