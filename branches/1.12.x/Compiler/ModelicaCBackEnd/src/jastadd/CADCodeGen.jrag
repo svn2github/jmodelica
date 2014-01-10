@@ -32,18 +32,23 @@ import java.util.HashSet;
 
 
 aspect CADCodeGen {
-	
-	public class CADPrettyPrinter extends Printer {
-		
-		public CADPrettyPrinter() {
-			super("    ");
-		}
-		
- 		public void print(ASTNode node, PrintStream str, String indent) {
- 			node.prettyPrint_CAD(this, str, indent); 
- 		}
-  		
-  		public String op(FBinExp e) { return e.op_C(); }
+
+    public class CADPrettyPrinter extends CodePrinter {
+
+        @Override
+        public void print(ASTNode node, PrintStream str, String indent) {
+            node.prettyPrint_CAD(this, str, indent); 
+        }
+
+        @Override
+        public void printVarDecls(ASTNode node, PrintStream str, String indent) {
+            node.genVarDecls_CAD(this, str, indent);
+        }
+
+        @Override
+        public void printPreSteps(ASTNode node, PrintStream str, String indent) {
+            node.genTempVars_CAD(this, str, indent);
+        }
 	}
 	
 	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
@@ -60,7 +65,7 @@ aspect CADCodeGen {
 	}
 
 	// Default implementation is to use the standard C printer
-	public void ASTNode.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void ASTNode.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
  		prettyPrint_C(p, str, indent);
 	}
 		
@@ -89,7 +94,7 @@ aspect CADCodeGen {
 	syn String FExp.getSeedName() = "(*dz)";
 	
 	@Override
-	public void FIdUse.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FIdUse.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print(varName_CAD());
 	}
 	
@@ -100,11 +105,11 @@ aspect CADCodeGen {
 	/**
 	 *Print CAD code for value for record use in statement in function. 
 	 */
-	public String FQName.genRecordUse_var_CAD(Printer p, FAbstractVariable fv, String type) {
+	public String FQName.genRecordUse_var_CAD(CodePrinter p, FAbstractVariable fv, String type) {
 		throw new UnsupportedOperationException();
 	}	
 	
-	public String FQNameFull.genRecordUse_var_CAD(Printer p, FAbstractVariable fv, String type) {
+	public String FQNameFull.genRecordUse_var_CAD(CodePrinter p, FAbstractVariable fv, String type) {
 		FQNamePart part = getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
 		String res = fv.genUse_var_CAD(p, fas, C_ARRAY_RECORD);
@@ -122,11 +127,11 @@ aspect CADCodeGen {
 	/**
 	 *Print CAD code for for derivative record use in statement in function. 
 	 */
-	public String FQName.genRecordUse_der_CAD(Printer p, FAbstractVariable fv, String type) {
+	public String FQName.genRecordUse_der_CAD(CodePrinter p, FAbstractVariable fv, String type) {
 		throw new UnsupportedOperationException();
 	}	
 	
-	public String FQNameFull.genRecordUse_der_CAD(Printer p, FAbstractVariable fv, String type) {
+	public String FQNameFull.genRecordUse_der_CAD(CodePrinter p, FAbstractVariable fv, String type) {
 		FQNamePart part = getFQNamePart(0);
 		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
 		String res = fv.genUse_der_CAD(p, fas, C_ARRAY_RECORD);
@@ -141,7 +146,7 @@ aspect CADCodeGen {
 		return res;
 	}
 	
-	syn String FIdUse.toString_var_CAD(Printer p) {
+	syn String FIdUse.toString_var_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
 			return getFQName().genRecordUse_var_CAD(p, myRecordFV(), type);
@@ -150,7 +155,7 @@ aspect CADCodeGen {
 		}
 	}
 	
-	syn String FIdUse.toString_der_CAD(Printer p) {
+	syn String FIdUse.toString_der_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
 			return getFQName().genRecordUse_der_CAD(p, myRecordFV(), type);
@@ -159,33 +164,33 @@ aspect CADCodeGen {
 		}
 	}
 	
-	public String FAbstractVariable.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FAbstractVariable.genUse_var_CAD(CodePrinter p, FArraySubscripts fas, String type) {
 		if (shouldBeDifferentiated())
 			return varName_CAD();
 		else
 			return name_C();
 	}
 	
-	public String FAbstractVariable.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FAbstractVariable.genUse_der_CAD(CodePrinter p, FArraySubscripts fas, String type) {
 		return derName_CAD();
 		
 	}
 	
-	public String FFunctionArray.genUse_var_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FFunctionArray.genUse_var_CAD(CodePrinter p, FArraySubscripts fas, String type) {
 		if (fas == null)
 			return varName_CAD();
 		else
 			return fas.genFunctionArrayUse_var_CAD(p, varName_CAD(), type);
 	}
 	
-	public String FFunctionArray.genUse_der_CAD(Printer p, FArraySubscripts fas, String type) {
+	public String FFunctionArray.genUse_der_CAD(CodePrinter p, FArraySubscripts fas, String type) {
 		if (fas == null)
 			return derName_CAD();
 		else
 			return fas.genFunctionArrayUse_der_CAD(p, derName_CAD(), type);
 	}
 	
-	public String FArraySubscripts.genFunctionArrayUse_var_CAD(Printer p, String name, String type) {
+	public String FArraySubscripts.genFunctionArrayUse_var_CAD(CodePrinter p, String name, String type) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();	
 		PrintStream str = new PrintStream(os);
 		str.print("jmi_array_");
@@ -200,19 +205,19 @@ aspect CADCodeGen {
 		return os.toString();
 	}
 	
-	public void FSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public void FExpSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FExpSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().prettyPrint_C(p,str,indent);
 	}
 	
-	public void FIntegerSubscript.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FIntegerSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print(getValue());
 	}
 	
-	public String FArraySubscripts.genFunctionArrayUse_der_CAD(Printer p, String name, String type) {
+	public String FArraySubscripts.genFunctionArrayUse_der_CAD(CodePrinter p, String name, String type) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();	
 		PrintStream str = new PrintStream(os);
 		str.print("jmi_array_");
@@ -231,7 +236,7 @@ aspect CADCodeGen {
 	 * CAD code for FExp resides bellow
 	 *-----------------------------------------------------------------------*/
 	
-	public void FExp.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		genVar_CAD(p, str, indent);
 	}
 	
@@ -244,7 +249,7 @@ aspect CADCodeGen {
 	eq FIfExp.autoGenChildVarDecls_CAD()        = true;
 
 	@Override
-	public void FExp.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (isArray() && !size().isUnknown()) {
 			getArray().genTempVars_CAD(p, str, indent);
 		} else {
@@ -280,7 +285,7 @@ aspect CADCodeGen {
 	/**
 	 * Generates var expression or prints reference to evaluated expression
 	 */
-	public void FExp.genVar_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genVar_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (inlineVar_CAD())
 			genVarExp_CAD(p, str, indent);
 		else
@@ -290,7 +295,7 @@ aspect CADCodeGen {
 	/**
 	 * Generates der expression or prints reference to evaluated expression
 	 */
-	public void FExp.genDer_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genDer_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!shouldBeDifferentiated())
 			str.print("AD_WRAP_LITERAL(0)");
 		else if (inlineDer_CAD())
@@ -302,7 +307,7 @@ aspect CADCodeGen {
 	/**
 	 * Generates ad statment for this FExp
 	 */
-	public void FExp.genADStatement_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!hasADStatement_CAD())
 			return;
 		if (!inlineVar_CAD()) {
@@ -324,7 +329,7 @@ aspect CADCodeGen {
 	/**
 	 * Genereates the var expression that calculates the value of this node
 	 */
-	public void FExp.genVarExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genVarExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		prettyPrint_C(p, str, indent);
 	}
 	
@@ -333,7 +338,7 @@ aspect CADCodeGen {
 	 * The default implementation will throw an error and all subclasses that are 
 	 * continouos must implement this method.
 	 */
-	public void FExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		throw new UnsupportedOperationException("FExp.genADStatement_CAD() have to be overrided if type have continuous variablity, type=" + getClass().getSimpleName());
 	}
 	
@@ -344,7 +349,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FIdUseExp.genVarExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FIdUseExp.genVarExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print(varName_CAD());
 	}
 	
@@ -353,7 +358,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FIdUseExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FIdUseExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print(derName_CAD());
 	}
 	syn boolean FIdUseExp.inlineVar_CAD() = true;
@@ -364,7 +369,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FMinMaxExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FMinMaxExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getX().genVar_CAD(p, str, indent);
 		str.format(" %s ", compareSign_CAD());
 		getY().genVar_CAD(p, str, indent);
@@ -383,7 +388,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FSinExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FSinExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * cos(");
 		getFExp().genVar_CAD(p, str, indent);
@@ -395,7 +400,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FCosExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FCosExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * -sin(");
 		getFExp().genVar_CAD(p, str, indent);
@@ -407,7 +412,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FTanExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FTanExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / (cos(");
 		getFExp().genVar_CAD(p, str, indent);
@@ -421,7 +426,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FAsinExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FAsinExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / sqrt(1 - ");
 		getFExp().genVar_CAD(p, str, indent);
@@ -435,7 +440,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FAcosExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FAcosExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print("- ");
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / sqrt(1 - ");
@@ -450,7 +455,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FAtanExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FAtanExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / (1 + ");
 		getFExp().genVar_CAD(p, str, indent);
@@ -464,7 +469,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FAtan2Exp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FAtan2Exp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print("(");
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * ");
@@ -489,7 +494,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FSinhExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FSinhExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * cosh(");
 		getFExp().genVar_CAD(p, str, indent);
@@ -501,7 +506,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FCoshExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FCoshExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * sinh(");
 		getFExp().genVar_CAD(p, str, indent);
@@ -513,7 +518,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FTanhExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FTanhExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * (1 - ");
 		genVar_CAD(p, str, indent);
@@ -528,7 +533,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FLogExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FLogExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / ");
 		getFExp().genVar_CAD(p, str, indent);
@@ -539,7 +544,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FLog10Exp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FLog10Exp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * log10(exp(1)) / ");
 		getFExp().genVar_CAD(p, str, indent);
@@ -550,7 +555,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FExpExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FExpExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" * ");
 		genVar_CAD(p, str, indent);
@@ -562,7 +567,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FDotPowExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FDotPowExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getLeft().genVar_CAD(p, str, indent);
 		str.print(" == 0 ? 0 : (");
 		genVar_CAD(p, str, indent);
@@ -585,7 +590,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FSqrtExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FSqrtExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(" / (2 * ");
 		genVar_CAD(p, str, indent);
@@ -598,7 +603,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FDotDivExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FDotDivExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print("(");
 		getLeft().genDer_CAD(p, str, indent);
 		str.print(" * ");
@@ -619,7 +624,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FDotMulExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FDotMulExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getLeft().genDer_CAD(p, str, indent);
 		str.print(" * ");
 		getRight().genVar_CAD(p, str, indent);
@@ -634,7 +639,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FDotAddExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FDotAddExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getLeft().genDer_CAD(p, str, indent);
 		str.print(" + ");
 		getRight().genDer_CAD(p, str, indent);
@@ -645,7 +650,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FDotSubExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FDotSubExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getLeft().genDer_CAD(p, str, indent);
 		str.print(" - ");
 		getRight().genDer_CAD(p, str, indent);
@@ -656,7 +661,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FAbsExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FAbsExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genVar_CAD(p, str, indent);
 		str.print(" >= 0 ? ");
 		getFExp().genDer_CAD(p, str, indent);
@@ -669,7 +674,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FNegExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FNegExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print("- (");
 		getFExp().genDer_CAD(p, str, indent);
 		str.print(")");
@@ -680,7 +685,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FNoEventExp.genDerExp_CAD(Printer p, PrintStream str, String indent){
+	public void FNoEventExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent){
 		getFExp().genDer_CAD(p, str, indent);
 	}
 	eq FNoEventExp.getChild().inlineVar_CAD() = true;
@@ -691,7 +696,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FTimeExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FTimeExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.format("%s[jmi->offs_t]", getSeedName());
 	}
 	syn boolean FTimeExp.inlineVar_CAD() = true;
@@ -702,7 +707,7 @@ aspect CADCodeGen {
 	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
 	 */
 	@Override
-	public void FSmoothExp.genDerExp_CAD(Printer p, PrintStream str, String indent) {
+	public void FSmoothExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
 		getFExp().genDer_CAD(p, str, indent);
 	}
 	eq FSmoothExp.getChild().inlineVar_CAD() = true;
@@ -713,7 +718,7 @@ aspect CADCodeGen {
 	 * write if expressions as a single statment.
 	 */
 	@Override
-	public void FIfExp.genADStatement_CAD(Printer p, PrintStream str, String indent) {
+	public void FIfExp.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
 		String innerIndent = p.indent(indent);
 		getIfExp().genTempVars_CAD(p, str, indent);
 		
@@ -774,7 +779,7 @@ aspect CADCodeGen {
 	 * <outs> = f(<ins>). The function is not an expression. The input arguments are then generated from the 
 	 * FFunctionCallLeft belonging to this function. For unused outputs NULL argument is used.  
 	 */
-	public void FFunctionCall.genADStatement_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCall.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (FExp arg : getArgs())
 			arg.genTempInputs_CAD(p, str, indent);
 		boolean exp = functionCallIsExp();
@@ -1619,14 +1624,14 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void ASTNode.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void ASTNode.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (ASTNode node : this){
 			node.genTempVars_CAD(p, str, indent);
 		}
 	}
 	
-    public void FIfWhenElseEquation.genTempVars_CAD(Printer p, PrintStream str, String indent) {}
-    public void FIfWhenEquation.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+    public void FIfWhenElseEquation.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {}
+    public void FIfWhenEquation.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
         super.genTempVars_CAD(p, str, indent);
         if (hasElse())
             getElse().genTempVars_CAD(p, str, indent);
@@ -1642,13 +1647,13 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FFunctionCall.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCall.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		getArgs().genTempVars_CAD(p, str, indent);
 		genADStatement_CAD(p, str, indent);
 	}
 	
 	@Override
-	public void FAssert.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void FAssert.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		super.genTempVars_CAD(p, str, indent);
 		prettyPrint_C(p, str, indent);
 	}
@@ -1656,7 +1661,7 @@ aspect CADCodeGen {
 	eq FAssert.getChild().inlineVar_CAD() = true;
 	
 	@Override
-	public void FStringAddExp.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void FStringAddExp.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 	    super.genTempVars_CAD(p, str, indent);
 	    genTempVars_C(p, str, indent);
 	}
@@ -1671,7 +1676,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FFunctionCallLeft.genTempVars_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallLeft.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (hasFExp())
 			getFExp().genTempOutputs_CAD(p, str, indent);
 	}
@@ -1683,7 +1688,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FExp.genTempOutputs_CAD(Printer p, PrintStream str, String indent) {}
+	public void FExp.genTempOutputs_CAD(CodePrinter p, PrintStream str, String indent) {}
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
@@ -1693,7 +1698,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FArray.genTempOutputs_CAD(Printer p, PrintStream str, String indent) {
+	public void FArray.genTempOutputs_CAD(CodePrinter p, PrintStream str, String indent) {
 		type().printInit_C(p, str, indent, tempName_var_CAD(), this);
 		type().printInit_C(p, str, indent, tempName_der_CAD(), this);
 	}
@@ -1710,7 +1715,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void ASTNode.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void ASTNode.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (ASTNode node : this)
 			node.genVarDecls_CAD(p, str, indent);
 	}
@@ -1725,7 +1730,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FFunctionCallLeft.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallLeft.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (hasFExp())
 			getFExp().genTempOutputDecls_CAD(p, str, indent);
 	}
@@ -1739,7 +1744,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FIdUseExp.genVarDecls_CAD(Printer p, PrintStream str, String indent) {}
+	public void FIdUseExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {}
 	
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
@@ -1750,7 +1755,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FLitExp.genVarDecls_CAD(Printer p, PrintStream str, String indent) {}
+	public void FLitExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {}
 	
 	/**
 	 * Declares a regular and a derivate variable for this expression. jmi_ad_var_t
@@ -1761,7 +1766,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FExp.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (hasADStatement_CAD()) {
 			if (!inlineVar_CAD()) {
 				str.print(indent);
@@ -1789,7 +1794,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FArray.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FArray.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		getArray().genVarDecls_CAD(p, str, indent);
 	}
 	
@@ -1803,7 +1808,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FFunctionCall.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCall.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (functionCallIsExp()) {
 			str.print(indent);
 			str.print("jmi_ad_var_t ");
@@ -1819,7 +1824,7 @@ aspect CADCodeGen {
 	}
 	
     @Override
-    public void FStringAddExp.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+    public void FStringAddExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
         super.genVarDecls_CAD(p, str, indent);
         genVarDecls_C(p, str, indent);
     }
@@ -1833,13 +1838,13 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FFunctionVariable.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionVariable.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!shouldBeDifferentiated()) {
 			genVarDecls_C(p, str, indent);
 		} else if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
-			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true);
-			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true);
+			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true, false);
 		}
 	}
 	
@@ -1847,7 +1852,7 @@ aspect CADCodeGen {
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
 	@Override
-	public void FForIndex.genVarDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FForIndex.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		super.genVarDecls_CAD(p, str, indent);
 		String name = getFVariable().name_C();
 		str.format("%sjmi_ad_var_t %s;\n", indent, name);
@@ -1868,10 +1873,10 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream 
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FExp.genTempOutputDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
 			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 		}
 	}
 	
@@ -1884,9 +1889,9 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 */
 	@Override
-	public void FArray.genTempOutputDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FArray.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-		type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+		type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 	}
 	
 	
@@ -1897,13 +1902,13 @@ aspect CADCodeGen {
 	 * in function calls. 
 	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
 	 * @param PrintStream str, the c-code is written to this stream 
-	 * @param String indent, used to get a consistently formated c-code
+	 * CodePrinterdent, used to get a consistently formated c-code
 	 */
-	public void FExp.genTempInputDecls_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genTempInputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		genVarDecls_CAD(p, str, indent);
 		if (isComposite() && !keepAsArray()) {
 			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 		}
 	}
 	
@@ -1951,7 +1956,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream 
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FExp.genTempInputs_CAD(Printer p, PrintStream str, String indent) {
+	public void FExp.genTempInputs_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
 			String name = tempName_var_CAD();
 			type().printInit_C(p, str, indent, name, this);
@@ -1965,7 +1970,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genTempInputAssigns_var_CAD(Printer p, PrintStream str, String indent, String name, FExp exp) {
+	public void FType.genTempInputAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
 			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
@@ -1983,7 +1988,7 @@ aspect CADCodeGen {
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
 	public void FType.genTempInputAssigns_der_CAD(
-			Printer p, PrintStream str, String indent, String name, FExp exp) {
+			CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
 			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
@@ -2000,7 +2005,7 @@ aspect CADCodeGen {
 	/**
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
-	public void FType.genTempInputCellAssigns_var_CAD(Printer p, PrintStream str, String indent, String name, FExp exp) {
+	public void FType.genTempInputCellAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		str.print(indent + name + " = ");
 		p.print(exp, str, indent);
 		str.print(";\n");
@@ -2019,7 +2024,7 @@ aspect CADCodeGen {
 	 * @param String name
 	 */
 	@Override
-	public void FRecordType.genTempInputCellAssigns_var_CAD(Printer p, PrintStream str, String indent, String name, FExp exp) {
+	public void FRecordType.genTempInputCellAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -2031,7 +2036,7 @@ aspect CADCodeGen {
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
 	public void FType.genTempInputCellAssigns_der_CAD(
-			Printer p, PrintStream str, String indent, String name, FExp exp) {
+			CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		str.print(indent + name + " = ");
 		exp.genDer_CAD(p, str, indent);
 		str.print(";\n");
@@ -2041,7 +2046,7 @@ aspect CADCodeGen {
 	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
 	 */
 	@Override
-	public void FRecordType.genTempInputCellAssigns_der_CAD(Printer p, PrintStream str, String indent, String name, FExp exp) {
+	public void FRecordType.genTempInputCellAssigns_der_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -2333,7 +2338,7 @@ aspect CADCodeGen {
 	 * CAD code for Statements resides bellow
 	 *-----------------------------------------------------------------------*/
 	//Methods to handle If clauses starts here
-	public void FIfWhenStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FIfWhenStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (FIfWhenClause clause : getFIfWhenClauses())
 			clause.getTest().genTempVars_CAD(p, str, indent);
 		str.print(indent);
@@ -2344,7 +2349,7 @@ aspect CADCodeGen {
 	}
 	
 	//Methods to handle while loops starts here
-	public void FWhileStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FWhileStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		getTest().genTempVars_CAD(p, str, indent);
 		str.print(indent);
 		str.print("while (");
@@ -2357,7 +2362,7 @@ aspect CADCodeGen {
 	}
 	
 	//Methods to handle for-loops in functions starts here
-	public void FForStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FForStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		getIndex().genTempVars_CAD(p, str, indent);
 		getIndex().printForArrayInit_C(p, str, indent);
 		str.print(indent);
@@ -2375,19 +2380,19 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
-	public void FReturnStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FReturnStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		returnDefinition().printReturnWrite_CAD(str, indent);
 		// TODO: Check if there are any dynamic declarations first
 		str.print(indent + "JMI_DYNAMIC_FREE()\n");
 		str.print(indent + "return;\n");
 	}
 	
-	public void FFunctionCallStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!getCall().isIgnored())
 			genTempVars_CAD(p, str, indent);
 	}
 	
-	public void FFunctionCallEquation.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallEquation.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!getCall().isIgnored())
 			genTempVars_CAD(p, str, indent);
 	}
@@ -2397,7 +2402,7 @@ aspect CADCodeGen {
 	 * @param String indent, used to get a consistently formated c-code
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
-	public void FAssignStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FAssignStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		genTempVars_CAD(p, str, indent);
 		str.print(indent);
 		p.print(getLeft(), str, indent);
@@ -2414,11 +2419,10 @@ aspect CADCodeGen {
 		}
 	}
 	
-	public void FInitArrayStmt.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
-		FIdUseExp fexp = getFIdUseExp();
-		FType type = fexp.type();
+	public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		// I know that myFV is an ffunctionvariable
-		FFunctionVariable fv = (FFunctionVariable) fexp.myFV();
+        FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
+		FType type = fv.type();
 		fv.setDummyExp();
 		FExp bindingExp = fv.getBindingExp();
 		type.printInit_C(p, str, indent, fv.varName_CAD(), bindingExp);
@@ -2450,7 +2454,7 @@ aspect CADCodeGen {
 	 * type real they are omitted in the printed call.  
 	 * @param PrintStream str, the c-code is written to this stream 
 	 */
-	public void FFunctionDecl.genFuncAnnotation_CAD(Printer p, PrintStream str, String indent){
+	public void FFunctionDecl.genFuncAnnotation_CAD(CodePrinter p, PrintStream str, String indent){
 		for (FFunctionVariable ffv : myOutputs())
 			ffv.genVarDecls_CAD(p, str, indent);
 		str.print(indent);
@@ -2491,7 +2495,7 @@ aspect CADCodeGen {
 	 * Function for generating a dummy function that only calls the normal function and also
 	 * set output derivatives to zero. 
 	 */
-	public void FFunctionDecl.genZeroDerivativeFunction_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionDecl.genZeroDerivativeFunction_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (FFunctionVariable ffv : myOutputs())
 			ffv.genVarDecls_CAD(p, str, indent);
 		str.print(indent);
@@ -2507,7 +2511,7 @@ aspect CADCodeGen {
 	/**
 	 * Generates a function call to the non AD function.
 	 */
-	public void FFunctionDecl.genNonADFunctionCall_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionDecl.genNonADFunctionCall_CAD(CodePrinter p, PrintStream str, String indent) {
 		str.print(indent);
 		str.print(funcNameUnderscore("def") + "(");
 		String sep = "";
@@ -2542,7 +2546,7 @@ aspect CADCodeGen {
 	 * @param PrintStream str, the c-code is written to this stream 
 	 * @param String indent, used to get a consistently formated c-code
 	 */
-	public void FFunctionDecl.prettyPrint_CAD(Printer p, PrintStream str, String outerIndent) {
+	public void FFunctionDecl.prettyPrint_CAD(CodePrinter p, PrintStream str, String outerIndent) {
 		if (!shouldPrintFuncDecl_CAD())
 			return;
 		String indent = p.indent(outerIndent);
@@ -2567,33 +2571,33 @@ aspect CADCodeGen {
 		str.print(outerIndent + "}\n\n");
 	}
 	
-	public void FFunctionDecl.genReturnStmt_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionDecl.genReturnStmt_CAD(CodePrinter p, PrintStream str, String indent) {
 		returnDefinition().printReturnWrite_CAD(str, indent);
 		str.print(indent + "JMI_DYNAMIC_FREE()\n");
 		str.print(indent + "return;\n");
 	}
 	
-	public void FFunctionArray.prettyPrint_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!isOutput()) {
-			printDeclOrInit_C(p, str, indent, varName_CAD(), false);
-			printDeclOrInit_C(p, str, indent, derName_CAD(), false);
+			printDeclOrInit_C(p, str, indent, varName_CAD(), false, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD(), false, false);
 		}
 	}
 	
-	public void FFunctionVariable.printNullOutputReplacement_CAD(Printer p, PrintStream str, String indent) {
+	public void FFunctionVariable.printNullOutputReplacement_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (isComposite()) {
 			String name_var_CAD = varName_CAD();
 			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
 			String next = p.indent(indent);
 			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_var_r, false);
+			printDeclOrInit_C(p, str, next, name_var_r, false, true);
 			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
 			str.print(indent + "}\n");
 			
 			String name_der_CAD = derName_CAD();
 			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_der_r, false);
+			printDeclOrInit_C(p, str, next, name_der_r, false, false);
 			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
 			str.print(indent + "}\n");
 		}
@@ -2655,7 +2659,7 @@ aspect CADCodeGen {
 	 * @param String suffix, typically der_AD for AD functions
 	 * @param boolean returnArgs, specifies whether return arguments should be printed or not
 	 */
-	private void FFunctionDecl.prettyPrintHead_CAD(Printer p, PrintStream str, String indent, 
+	private void FFunctionDecl.prettyPrintHead_CAD(CodePrinter p, PrintStream str, String indent, 
 			String type, String suffix, boolean returnArgs) {
 		str.print(indent);
 		str.print(type);

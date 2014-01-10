@@ -1448,14 +1448,13 @@ aspect FlatPrettyPrint {
 	eq FDotPowExp.getLeft().shouldhaveParenthesis() = true;
 	eq FNegExp.getFExp().shouldhaveParenthesis()    = true;
 	
+	/**
+	 * Returns true if this exp should add parenthesis given a certain precedence.
+	 */
+	syn boolean FExp.addParenthesis(int parentPrecedence) = precedence() < parentPrecedence || precedence() == parentPrecedence && shouldhaveParenthesis();
+	
 	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		int myPrecedence = precedence();
-		int parentPrecedence = parentPrecedence();
-		boolean addParenthesis = false;
-		if (myPrecedence < parentPrecedence())
-			addParenthesis = true;
-		else if (myPrecedence == parentPrecedence && shouldhaveParenthesis())
-			addParenthesis = true;
+		boolean addParenthesis = addParenthesis(parentPrecedence());
 		if (addParenthesis)
 			str.print('(');
 		prettyPrintExp(p, str, indent);
