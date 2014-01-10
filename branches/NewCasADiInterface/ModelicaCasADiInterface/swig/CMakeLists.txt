@@ -19,8 +19,12 @@ set(CASADI_INTERFACE_DEPS doc.i ModelicaCasADi.i Ref.i)
 find_package(SWIG REQUIRED)
 include(UseSWIG)
 
-find_package(PythonLibs)
+find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_PATH})
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../ThirdParty/CasADi/CasADi/cmake_modules)
+find_package(NUMPY REQUIRED)
+include_directories("${NUMPY_PATH}/..") # ${NUMPY_PATH} points to include/numpy/, we want just include/
 
 set(CMAKE_SWIG_FLAGS "")
 
