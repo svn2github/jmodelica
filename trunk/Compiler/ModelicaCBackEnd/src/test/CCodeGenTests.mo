@@ -1619,7 +1619,7 @@ void func_CCodeGenTests_CFunctionTest12_f_def(jmi_array_t* x_a, jmi_array_t* y_a
 void func_CCodeGenTests_CFunctionTest12_f_def(jmi_array_t* x_a, jmi_array_t* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARRAY_STATIC(y_an, 2, 1)
-	    if (y_a == NULL) {
+    if (y_a == NULL) {
         JMI_ARRAY_STATIC_INIT_1(y_an, 2)
         y_a = y_an;
     }
@@ -3259,6 +3259,67 @@ void func_CCodeGenTests_CUnknownArray5_f_def(jmi_array_t* i1_a, jmi_array_t* i2_
 ")})));
 end CUnknownArray5;
 
+model CUnknownArray6
+function f
+    input Integer[:] i1;
+    input Integer[size(i1,1)] i2;
+    input Real[:,:] x;
+    output Real[size(i1,1) * 2 - 2,size(i1,1)] y;
+algorithm
+    y := transpose([x[i1,i2]]);
+end f;
+
+Real[2,2] ae = f({1,2},{2,1},{{3,4},{5,6},{7,8}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray6",
+            description="Multiple unknown size outputs with low precedence exp",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray6_f_def(jmi_array_t* i1_a, jmi_array_t* i2_a, jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARRAY_DYNAMIC(y_an, 2)
+    JMI_ARRAY_DYNAMIC(temp_1_a, 2)
+    jmi_ad_var_t temp_2_v;
+    jmi_ad_var_t temp_3_v;
+    jmi_ad_var_t i5_0i;
+    jmi_ad_var_t i5_0ie;
+    jmi_ad_var_t i6_1i;
+    jmi_ad_var_t i6_1ie;
+    jmi_ad_var_t i3_2i;
+    jmi_ad_var_t i3_2ie;
+    jmi_ad_var_t i4_3i;
+    jmi_ad_var_t i4_3ie;
+    if (y_a == NULL) {
+        JMI_ARRAY_DYNAMIC_INIT_2(y_an, (jmi_array_size(i1_a, 0) * 2 - 2) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0) * 2 - 2, jmi_array_size(i1_a, 0))
+        y_a = y_an;
+    }
+    JMI_ARRAY_DYNAMIC_INIT_2(temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
+    temp_2_v = 0;
+    temp_3_v = 0;
+    i5_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i5_0i = 1; i5_0i < i5_0ie; i5_0i += 1) {
+        i6_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i6_1i = 1; i6_1i < i6_1ie; i6_1i += 1) {
+            jmi_array_ref_2(temp_1_a, temp_2_v + i5_0i, temp_3_v + i6_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i5_0i), jmi_array_val_1(i2_a, i6_1i));
+        }
+    }
+    i3_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    for (i3_2i = 1; i3_2i < i3_2ie; i3_2i += 1) {
+        i4_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        for (i4_3i = 1; i4_3i < i4_3ie; i4_3i += 1) {
+            jmi_array_ref_2(y_a, i3_2i, i4_3i) = jmi_array_val_2(temp_1_a, i4_3i, i3_2i);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end CUnknownArray6;
 
 model CRecordDecl1
  record A

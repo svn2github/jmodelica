@@ -1843,8 +1843,8 @@ aspect CADCodeGen {
 			genVarDecls_C(p, str, indent);
 		} else if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
-			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true);
-			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true);
+			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true, false);
 		}
 	}
 	
@@ -1876,7 +1876,7 @@ aspect CADCodeGen {
 	public void FExp.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
 			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 		}
 	}
 	
@@ -1891,7 +1891,7 @@ aspect CADCodeGen {
 	@Override
 	public void FArray.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
 		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-		type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+		type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 	}
 	
 	
@@ -1908,7 +1908,7 @@ aspect CADCodeGen {
 		genVarDecls_CAD(p, str, indent);
 		if (isComposite() && !keepAsArray()) {
 			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
-			type().printDecl_C(p, str, indent, tempName_der_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
 		}
 	}
 	
@@ -2420,10 +2420,9 @@ aspect CADCodeGen {
 	}
 	
 	public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
-		FIdUseExp fexp = getFIdUseExp();
-		FType type = fexp.type();
 		// I know that myFV is an ffunctionvariable
-		FFunctionVariable fv = (FFunctionVariable) fexp.myFV();
+        FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
+		FType type = fv.type();
 		fv.setDummyExp();
 		FExp bindingExp = fv.getBindingExp();
 		type.printInit_C(p, str, indent, fv.varName_CAD(), bindingExp);
@@ -2580,8 +2579,8 @@ aspect CADCodeGen {
 	
 	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
 		if (!isOutput()) {
-			printDeclOrInit_C(p, str, indent, varName_CAD(), false);
-			printDeclOrInit_C(p, str, indent, derName_CAD(), false);
+			printDeclOrInit_C(p, str, indent, varName_CAD(), false, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD(), false, false);
 		}
 	}
 	
@@ -2591,14 +2590,14 @@ aspect CADCodeGen {
 			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
 			String next = p.indent(indent);
 			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_var_r, false);
+			printDeclOrInit_C(p, str, next, name_var_r, false, true);
 			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
 			str.print(indent + "}\n");
 			
 			String name_der_CAD = derName_CAD();
 			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
 			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_der_r, false);
+			printDeclOrInit_C(p, str, next, name_der_r, false, false);
 			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
 			str.print(indent + "}\n");
 		}

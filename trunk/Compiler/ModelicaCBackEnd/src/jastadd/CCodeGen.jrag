@@ -583,34 +583,27 @@ aspect CCodeGen {
 			setBindingExpOpt(new Opt());
 	}
 	
-	public void FFunctionVariable.printDeclOrInit_C(
-	        CodePrinter p, PrintStream str, String indent, String name, boolean decl) {
-		// This is a rather ugly hack, but we temporarily need an FExp that is in the tree
-		if (!hasBindingExp()) {
-			setDummyExp();
-//			if (dummyFExp == null) 
-//				dummyFExp = new FNoExp();
-//			setBindingExp(dummyFExp);
-		}
-		if (decl)
-			type().printDecl_C(p, str, indent, name, getBindingExp());
-		else
-			if (!hasInitArrayStmt)
-				type().printInit_C(p, str, indent, name, getBindingExp());
-		
-		resetDummyExp();
-//		if (dummyFExp != null)
-//			setBindingExpOpt(new Opt());
-	}	
+    public void FFunctionVariable.printDeclOrInit_C(
+            CodePrinter p, PrintStream str, String indent, String name, boolean decl, boolean genSubDecls) {
+        // This is a rather ugly hack, but we temporarily need an FExp that is in the tree
+        if (!hasBindingExp()) {
+            setDummyExp();
+        }
+        if (decl)
+            type().printDecl_C(p, str, indent, name, getBindingExp(), genSubDecls);
+        else if (!hasInitArrayStmt)
+            type().printInit_C(p, str, indent, name, getBindingExp());
+        resetDummyExp();
+    }
 	
 	public void FFunctionVariable.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
 		if (!isOutput() || !isRecord())
-			printDeclOrInit_C(p, str, indent, name_C(), false);
+			printDeclOrInit_C(p, str, indent, name_C(), false, true);
 	}
 	
 	public void FFunctionArray.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
 		if (!isOutput()) 
-			printDeclOrInit_C(p, str, indent, name_C(), false);
+			printDeclOrInit_C(p, str, indent, name_C(), false, true);
 	}
 	
 	public void FFunctionVariable.printNullOutputReplacement_C(CodePrinter p, PrintStream str, String indent) {
@@ -619,7 +612,7 @@ aspect CCodeGen {
 			String name_r = name_C + C_SUFFIX_NULL;
 			String next = p.indent(indent);
 			str.print(indent + "if (" + name_C + " == NULL) {\n");
-			printDeclOrInit_C(p, str, next, name_r, false);
+			printDeclOrInit_C(p, str, next, name_r, false, true);
 			str.print(next + name_C + " = " + name_r + ";\n");
 			str.print(indent + "}\n");
 		}
@@ -638,16 +631,22 @@ aspect CCodeGen {
 	syn String FType.arrayInitExtraArgs_C() = "";
 	eq FRecordType.arrayInitExtraArgs_C()   = name_C() + ", ";
 	
-	public void FType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
-		printDecl_C(p, str, indent, name, src, false);
+    public final void FType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
+        printDecl_C(p, str, indent, name, src, false, true);
+    }
+    
+	public final void FType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src, boolean genSubDecls) {
+		printDecl_C(p, str, indent, name, src, false, genSubDecls);
 	}
 	
-	public void FType.printExternDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
-		printDecl_C(p, str, indent, name, src, true);
+	public final void FType.printExternDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
+		printDecl_C(p, str, indent, name, src, true, true);
 	}
 	
-	public void FType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src, boolean isExternal) {
+	public void FType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src, boolean isExternal, boolean genSubDecls) {
 		if (isArray()) {
+		    if (genSubDecls)
+		        size().genVarDecls_C(p, str, indent, src);
 			boolean unknown = size().isUnknown();
 			String macroType_C = isExternal ? arrayExternMacroType_C() : arrayMacroType_C();
 			str.format("%s%s_%s(%s%s, ", indent, macroType_C, 
@@ -677,6 +676,7 @@ aspect CCodeGen {
 	
 	public void FType.printInit_C(CodePrinter p, PrintStream str, String indent, String name, FExp src, String macroType_C) {
 		if (isArray()) {
+		    size().genTempVars_C(p, str, indent, src);
 			boolean unknown = size().isUnknown();
 			str.format("%s%s_%s_INIT_%d(%s%s, ", indent, macroType_C, 
 					(unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
@@ -689,9 +689,10 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FRecordType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
+	@Override
+	public void FRecordType.printDecl_C(CodePrinter p, PrintStream str, String indent, String name, FExp src, boolean isExternal, boolean genSubDecls) {
 		if (isArray()) {
-			super.printDecl_C(p, str, indent, name, src);
+			super.printDecl_C(p, str, indent, name, src, isExternal, genSubDecls);
 			String pre = "jmi_array_rec_" + ndims() + "(" + name + ", ";
 			for (Index i : indices()) // TODO: this doesn't work for the dynamic case
 				printChildDecls_C(p, str, indent, pre + i.toUnclosedString() + ")", src);
@@ -701,6 +702,7 @@ aspect CCodeGen {
 		}
 	}
 	
+	@Override
 	public void FRecordType.printInit_C(CodePrinter p, PrintStream str, String indent, String name, FExp src) {
 		if (isArray()) {
 			super.printInit_C(p, str, indent, name, src);
@@ -746,14 +748,36 @@ aspect CCodeGen {
 		str.print(numElements());
 	}
 
-	@Override
-	public void MutableSize.printNumElements_C(CodePrinter p, PrintStream str, String indent, FExp src) {
-		if (isUnknown()) {
-			FExp numElem = src.dynamicFExp(createNumElementsFExp());
-			numElem.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
-		} else {
-			super.printNumElements_C(p, str, indent, src);
-		}
+    @Override
+    public void MutableSize.printNumElements_C(CodePrinter p, PrintStream str, String indent, FExp src) {
+        evaluate();
+        int known = 1;
+        boolean printed = false;
+        boolean calced = false;
+        for (int i = 0; i < size.length; i++) {
+            // TODO: this will fail if hasValue(i) == false
+            if (size[i] == UNKNOWN) {
+                FExp exp = src.dynamicFExp(exps[i]);
+                if (printed)
+                    str.print(" * ");
+                boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
+                if (addParenthesis)
+                    str.print("(");
+                p.print(exp, str, indent);
+                if (addParenthesis)
+                    str.print(")");
+                printed = true;
+            } else {
+                calced = true;
+                known *= size[i];
+            }
+        }
+        
+        if (calced) {
+            if (printed)
+                str.print(" * ");
+            str.print(known);
+        }
 	}
 	
     public void Size.printDimensions_C(CodePrinter p, PrintStream str, String indent, FExp src) {
@@ -778,10 +802,45 @@ aspect CCodeGen {
 		}
 	}
 	
+    public void Size.genVarDecls_C(CodePrinter p, PrintStream str, String indent, FExp src) {}
+
+    @Override
+    public void MutableSize.genVarDecls_C(CodePrinter p, PrintStream str, String indent, FExp src) {
+        if (isUnknown()) {
+            for (int i = 0; i < size.length; i++) {
+                if (exps[i] != null) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printVarDecls(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                }
+            }
+        } else {
+            super.genVarDecls_C(p, str, indent, src);
+        }
+    }
+
+	
+    public void Size.genTempVars_C(CodePrinter p, PrintStream str, String indent, FExp src) {}
+
+    @Override
+    public void MutableSize.genTempVars_C(CodePrinter p, PrintStream str, String indent, FExp src) {
+        if (isUnknown()) {
+            for (int i = 0; i < size.length; i++) {
+                if (exps[i] != null) {
+                    FExp exp = src.dynamicFExp(exps[i]);
+                    p.printPreSteps(exp, str, indent); // TODO: This is a hack to get CAD gen to work!
+                }
+            }
+        } else {
+            super.genTempVars_C(p, str, indent, src);
+        }
+    }
+	
 	public void ASTNode.genVarDecls_C(CodePrinter p, PrintStream str, String indent) {
 		for (ASTNode node : this)
 			node.genVarDecls_C(p, str, indent);
 	}
+	
+	
 	
     public void FAlgorithm.genVarDecls_C(CodePrinter p, PrintStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
@@ -801,7 +860,7 @@ aspect CCodeGen {
 	public void FFunctionVariable.genVarDecls_C(CodePrinter p, PrintStream str, String indent) {
 		if (!isInput()) {
 			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
-			printDeclOrInit_C(p, str, indent, name_C() + suffix, true);
+			printDeclOrInit_C(p, str, indent, name_C() + suffix, true, true);
 		}
 	}
 	

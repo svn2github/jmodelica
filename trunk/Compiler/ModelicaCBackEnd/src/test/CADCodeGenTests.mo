@@ -2290,28 +2290,31 @@ void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t y_var_v;
     jmi_ad_var_t y_der_v;
+    jmi_ad_var_t v_0;
     JMI_ARRAY_DYNAMIC(t_var_a, 1)
     JMI_ARRAY_DYNAMIC(t_der_a, 1)
     jmi_ad_var_t temp_1_var_v;
     jmi_ad_var_t temp_1_der_v;
-    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
-    jmi_ad_var_t v_1;
+    jmi_ad_var_t v_2;
     jmi_ad_var_t i1_1i;
     jmi_ad_var_t i1_1ie;
-    JMI_ARRAY_DYNAMIC_INIT_1(t_var_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
-    JMI_ARRAY_DYNAMIC_INIT_1(t_der_a, jmi_array_size(x_var_a, 0), jmi_array_size(x_var_a, 0))
     v_0 = jmi_array_size(x_var_a, 0);
-    i1_0ie = v_0 + 1 / 2.0;
+    JMI_ARRAY_DYNAMIC_INIT_1(t_var_a, v_0, jmi_array_size(x_var_a, 0))
+    v_0 = jmi_array_size(x_var_a, 0);
+    JMI_ARRAY_DYNAMIC_INIT_1(t_der_a, v_0, jmi_array_size(x_var_a, 0))
+    v_1 = jmi_array_size(x_var_a, 0);
+    i1_0ie = v_1 + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(t_var_a, i1_0i) = jmi_array_val_1(x_var_a, i1_0i) * 23;
         jmi_array_ref_1(t_der_a, i1_0i) = jmi_array_val_1(x_der_a, i1_0i) * 23 + jmi_array_val_1(x_var_a, i1_0i) * AD_WRAP_LITERAL(0);
     }
     temp_1_var_v = 0.0;
     temp_1_der_v = AD_WRAP_LITERAL(0);
-    v_1 = jmi_array_size(x_var_a, 0);
-    i1_1ie = v_1 + 1 / 2.0;
+    v_2 = jmi_array_size(x_var_a, 0);
+    i1_1ie = v_2 + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         temp_1_var_v = temp_1_var_v + jmi_array_val_1(t_var_a, i1_1i);
         temp_1_der_v = temp_1_der_v + jmi_array_val_1(t_der_a, i1_1i);
@@ -2326,6 +2329,64 @@ void func_CADCodeGenTests_FunctionUnknownArraySizeTest1_F_der_AD(jmi_array_t* x_
 
 ")})));
 end FunctionUnknownArraySizeTest1;
+
+model FunctionUnknownArraySizeTest2
+    function F1
+        input Real x[2];
+        input Integer num;
+        output Real y[2 + num * num];
+    algorithm
+        for i in 1:size(y,1) loop
+            y[i] := x[1] + x[2];
+        end for;
+    end F1;
+    
+    Real z[2]={time,1};
+    constant Integer num = 2;
+    Real w[2 + num * num] = F1(z, num);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="FunctionUnknownArraySizeTest2",
+            description="",
+            generate_ode_jacobian=true,
+            inline_functions="none",
+            template="
+$CAD_functions$",
+            generatedCode="
+void func_CADCodeGenTests_FunctionUnknownArraySizeTest2_F1_der_AD(jmi_array_t* x_var_a, jmi_ad_var_t num_v, jmi_array_t* x_der_a, jmi_array_t* y_var_a, jmi_array_t* y_der_a) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    JMI_ARRAY_DYNAMIC(y_var_an, 1)
+    JMI_ARRAY_DYNAMIC(y_der_an, 1)
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    if (y_var_a == NULL) {
+        v_1 = num_v * num_v;
+        v_0 = 2 + v_1;
+        JMI_ARRAY_DYNAMIC_INIT_1(y_var_an, (v_0), 2 + v_1)
+        y_var_a = y_var_an;
+    }
+    if (y_der_a == NULL) {
+        v_1 = num_v * num_v;
+        v_0 = 2 + v_1;
+        JMI_ARRAY_DYNAMIC_INIT_1(y_der_an, (v_0), 2 + v_1)
+        y_der_a = y_der_an;
+    }
+    v_2 = jmi_array_size(y_var_a, 0);
+    i_0ie = v_2 + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        jmi_array_ref_1(y_var_a, i_0i) = jmi_array_val_1(x_var_a, 1) + jmi_array_val_1(x_var_a, 2);
+        jmi_array_ref_1(y_der_a, i_0i) = jmi_array_val_1(x_der_a, 1) + jmi_array_val_1(x_der_a, 2);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end FunctionUnknownArraySizeTest2;
 
 model CADDerAnno1
 		function f
