@@ -1068,10 +1068,6 @@ aspect Scalarization {
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
     eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
     
-    syn boolean FExpSubscript.extractTemp() = 
-            !getFExp().extractTemp() && getFExp().isArray() 
-            && !getFExp().scalarizesToLoop() && getFExp().inUnknownSize();
-    
     /**
      * Stores fornames to be uses by <code>scalarize()</code>
      */
@@ -1079,25 +1075,15 @@ aspect Scalarization {
     public String FColonSubscript.indexName = null;
     
     /**
-     * Will this FExp scalarize well by adding subscripts?
+     * Will this expression be scalarized as an unknown size?
      */
-    syn boolean ASTNode.scalarizesToLoop() {
-        boolean res = true;
-        for (ASTNode n : this)
-            res = res && n.scalarizesToLoop();
-        return res;
-    }
-    eq FExp.scalarizesToLoop()      = false;
-    eq FRangeExp.scalarizesToLoop() = true;
-    eq FIdUseExp.scalarizesToLoop() = isArray() && (!hasFArraySubscripts() || getFArraySubscripts().scalarizesToLoop());
-    eq FIdTempExp.scalarizesToLoop() = true;
-    
     inh boolean FExp.inUnknownSize();
-    eq Root.getChild().inUnknownSize()        = false;
-    eq FAssignStmt.getChild().inUnknownSize() = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FExp.getChild().inUnknownSize()        = false;
-    eq FIdUseExp.getChild().inUnknownSize()   = size().isUnknown();
-    eq FMulExp.getChild().inUnknownSize()     = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq Root.getChild().inUnknownSize()          = false;
+    eq FStatement.getChild().inUnknownSize()    = false;
+    eq FEquation.getChild().inUnknownSize()     = false;
+    eq FFunctionCall.getChild().inUnknownSize() = false;
+    eq FAssignStmt.getChild().inUnknownSize()   = getLeft().size().isUnknown() || getRight().size().isUnknown();
+    eq FExp.getChild().inUnknownSize()          = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
     
     
     /**
@@ -1125,21 +1111,6 @@ aspect Scalarization {
             } else {
                 knownArrayTemporaries(clauses, vars, indexMap);
             }
-        } else {
-            super.createArrayTemporaries(clauses, vars, indexMap, names);
-        }
-    }
-    
-    /**
-     * TODO: refactor into inherited, like function calls
-     */
-    public void FExpSubscript.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        if (extractTemp()){
-            if (vars != null)
-                vars.add(new FFunctionArray((FType) getFExp().type().unboundCopy(), getFExp().tempVarName()));
-            FIdUseExp t = getFExp().tempExp();
-            getFExp().type().scalarizeAssignment(vars, clauses, indexMap, t, getFExp());
-            getFExp().useTempVar = true;
         } else {
             super.createArrayTemporaries(clauses, vars, indexMap, names);
         }
@@ -1516,6 +1487,14 @@ aspect Scalarization {
      * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
      */
     public void FRangeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
+        indexNames = names.copySurface();
+        super.addArrayUsesToIndexMap(indexMap, names);
+    }
+    
+    /**
+     * @see FExp#addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names)
+     */
+    public void FLinspace.addArrayUsesToIndexMap(Map<String,FExp> indexMap, ForNames names) {
         indexNames = names.copySurface();
         super.addArrayUsesToIndexMap(indexMap, names);
     }
@@ -2473,7 +2452,7 @@ aspect Scalarization {
                        new FIdUseExp(tempVarName());
 		else if (type().isRecord() && wantsRecordCon())
 			res = buildRecordConstructor(indexMap);
- 		else if (buildScalarArray() && indexNames == null) 
+ 		else if (buildScalarArray() && !inUnknownSize()) 
  			res = getArray().buildScalarized(indexMap, this);
 		else
 			res = scalarizeExp(indexMap);
@@ -2644,6 +2623,14 @@ aspect Scalarization {
 		}
 		return res;
 	}
+	
+    public FExp FLinspace.scalarizeExp(Map<String,FExp> indexMap) {
+        FExp index = new FSubExp(new FIdUseExp(indexNames.get(0)), new FIntegerLitExp(1));
+        FExp len  = new FSubExp(getStopExp().fullCopy(), getStartExp().fullCopy());
+        FExp step = new FDivExp(len, new FSubExp(getN().fullCopy(), new FIntegerLitExp(1)));
+        FExp res = new FAddExp(getStartExp().fullCopy(), new FMulExp(index, step));
+        return res;
+    }
 
 	
 	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {

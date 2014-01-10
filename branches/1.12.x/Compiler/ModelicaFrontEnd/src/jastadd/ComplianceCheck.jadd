@@ -245,12 +245,6 @@ aspect ComplianceCheck {
 			if (e.size().isUnknown())
 				compliance("Unknown sizes in record constructors is not supported");
 	}
-	public void FLinspace.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && getN().ceval().isUnknown()) {
-			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-		}
-	}
 	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);

@@ -4240,11 +4240,11 @@ public
   Integer[2] temp_1;
  algorithm
   assert(size(is2, 1) == 2, \"Mismatching sizes in FunctionTests.ArrayExpInFunc16.f\");
-  temp_1[1] := is1[1];
-  temp_1[2] := is1[2];
+  temp_1[1] := 1;
+  temp_1[2] := 2;
   for i1 in 1:2 loop
    for i2 in 1:size(is2, 1) loop
-    y[i1,i2] := x[temp_1[i1],is2[i2]];
+    y[i1,i2] := x[is1[temp_1[i1]],is2[i2]];
    end for;
   end for;
   return;
@@ -7941,7 +7941,7 @@ model UnknownArray34
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray34",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -7996,7 +7996,7 @@ model UnknownArray35
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray35",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -8067,7 +8067,7 @@ model UnknownArray36
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray36",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -8144,7 +8144,7 @@ model UnknownArray37
 	annotation(__JModelica(UnitTesting(tests={
 				TransformCanonicalTestCase(
 			name="UnknownArray37",
-			description="Check extraction of function calls in function call equations",
+			description="Known to unknown size assignment",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
@@ -8200,6 +8200,107 @@ end FunctionTests.UnknownArray37;
 			
 ")})));
 end UnknownArray37;
+
+model UnknownArray38
+    function f
+		input Integer n;
+		input Real[:] d;
+        output Real b;
+    protected
+		Real[n,3] e;
+		Real[1,1] c;
+    algorithm
+		e := {d,d,d};
+		c := [f(n,3 * e * 3 * {{1,2},{3,4},{5,6}})];
+        b := 1;
+    end f;
+
+    Real x = f(3, {1,2,3});
+	
+	annotation(__JModelica(UnitTesting(tests={
+				TransformCanonicalTestCase(
+			name="UnknownArray38",
+			description="Checks a more complex combination of known/unknown sizes",
+			variability_propagation=false,
+			inline_functions="none",
+			flatModel="
+fclass FunctionTests.UnknownArray38
+ Real x;
+equation
+ x = FunctionTests.UnknownArray38.f(3, {1, 2, 3});
+
+public
+ function FunctionTests.UnknownArray38.f
+  input Integer n;
+  input Real[:] d;
+  output Real b;
+  Real[:,:] e;
+  Real[1, 1] c;
+  Real[:,:] temp_1;
+  Real[:,:] temp_2;
+  Integer temp_3;
+  Integer temp_4;
+  Real[:] temp_5;
+  Real[:,:] temp_6;
+  Real temp_7;
+  Integer[3, 2] temp_8;
+ algorithm
+  size(e) := {n, 3};
+  size(temp_1) := {3, size(d, 1)};
+  size(temp_2) := {n, 1};
+  size(temp_5) := {n};
+  size(temp_6) := {n, 2};
+  assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  for i4 in 1:size(d, 1) loop
+   temp_1[1,i4] := d[i4];
+  end for;
+  for i4 in 1:size(d, 1) loop
+   temp_1[2,i4] := d[i4];
+  end for;
+  for i4 in 1:size(d, 1) loop
+   temp_1[3,i4] := d[i4];
+  end for;
+  for i1 in 1:3 loop
+   for i2 in 1:size(d, 1) loop
+    e[i1,i2] := temp_1[i1,i2];
+   end for;
+  end for;
+  assert(n == 1, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
+  temp_3 := 0;
+  temp_4 := 0;
+  temp_8[1,1] := 1;
+  temp_8[1,2] := 2;
+  temp_8[2,1] := 3;
+  temp_8[2,2] := 4;
+  temp_8[3,1] := 5;
+  temp_8[3,2] := 6;
+  for i1 in 1:n loop
+   for i2 in 1:2 loop
+    temp_7 := 0.0;
+    for i3 in 1:3 loop
+     temp_7 := temp_7 + 3 * e[i1,i3] * 3 * temp_8[i3,i2];
+    end for;
+    temp_6[i1,i2] := temp_7;
+   end for;
+  end for;
+  (temp_5) := FunctionTests.UnknownArray38.f(n, temp_6);
+  for i3 in 1:n loop
+   temp_2[temp_3 + i3,temp_4 + 1] := temp_5[i3];
+  end for;
+  for i1 in 1:n loop
+   for i2 in 1:1 loop
+    c[i1,i2] := temp_2[i1,i2];
+   end for;
+  end for;
+  b := 1;
+  return;
+ end FunctionTests.UnknownArray38.f;
+
+end FunctionTests.UnknownArray38;
+			
+")})));
+end UnknownArray38;
 
 // TODO: need more complex cases
 model IncompleteFunc1
