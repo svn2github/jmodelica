@@ -93,6 +93,11 @@ set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 set(MODELPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/common")
 
+# replace any backslashes in the paths with forward slashes to avoid upsetting the C++ compiler
+string(REGEX REPLACE "\\\\" "/" CLASSPATH "${CLASSPATH}")
+string(REGEX REPLACE "\\\\" "/" CASADI_HOME "${CASADI_HOME}")
+string(REGEX REPLACE "\\\\" "/" LIBPATH "${LIBPATH}")
+
 message(STATUS "CLASSPATH=${CLASSPATH}")
 message(STATUS "CASADI_HOME=${CASADI_HOME}")
 message(STATUS "LIBPATH=${LIBPATH}")
