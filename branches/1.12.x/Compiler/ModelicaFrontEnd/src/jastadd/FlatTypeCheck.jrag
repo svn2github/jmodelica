@@ -305,8 +305,8 @@ aspect FlatTypeCheck {
   
   protected void InstComponentArrayAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord() && !inCardinality())
+      if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+          if (icd.isOrExtendsPrimitive() || icd.isRecord())
 			  top.error("Could not calculate type of " + top.name());
 		  else
 			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
@@ -797,7 +797,7 @@ aspect FlatTypeCheck {
   
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
-  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a reference to a connector";
+  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -933,7 +933,7 @@ aspect FlatTypeCheck {
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
+  eq FCardinality.getChild().argumentTypeValid(FType type)          = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
           getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());

@@ -2342,6 +2342,104 @@ At line 1815, column 9:
 ")})));
 end Cardinality3;
 
+//TODO: Wrong, #3374
+model Cardinality4
+	connector A = Real;
+
+    A x[2];
+    A y;
+equation
+    connect(x[1], x[2]);
+    connect(x[2], y);
+    if cardinality(x[1]) == 2 then
+        x[1] = time;
+    elseif cardinality(y) == 2 then
+        y = time;
+    else
+        x[2] = time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cardinality4",
+            description="cardinality(): array test",
+            flatModel="
+fclass ConnectTests.Cardinality4
+ Real x[2];
+ Real y;
+equation
+ if 3 == 2 then
+  x[1] = time;
+ elseif 1 == 2 then
+  y = time;
+ else
+  x[2] = time;
+ end if;
+ x[1] = x[2];
+ x[2] = y;
+end ConnectTests.Cardinality4;
+			
+")})));
+end Cardinality4;
+
+model Cardinality5
+	connector A = Real;
+
+    A x[2];
+    A y;
+equation
+    connect(x[1], y);
+    connect(y, x[2]);
+    if cardinality(x) == 2 then
+        x[1] = time;
+    elseif cardinality(y) == 2 then
+        y = time;
+    else
+        x[2] = time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Cardinality5",
+			description="cardinality(): non scalar",
+			errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 2350, column 20:
+  The argument of cardinality() must be a scalar reference to a connector
+			
+")})));
+end Cardinality5;
+
+//TODO: Wrong, #3374
+model Cardinality6
+	connector A = Real;
+
+    A x[3];
+equation
+    connect(x[1:2], x[2:3]);
+    for i in 1:3 loop
+		assert(cardinality(x[i]) == 1, "Message");
+	end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cardinality6",
+            description="cardinality(): array test",
+            flatModel="
+fclass ConnectTests.Cardinality6
+ Real x[3];
+equation
+ for i in 1:3 loop
+  assert(4 == 1, \"Message\");
+ end for;
+ x[1] = x[2];
+ x[2] = x[3];
+end ConnectTests.Cardinality6;
+			
+")})));
+end Cardinality6;
+
 
 model ConditionalNoErrTest1
     connector C = Real;
