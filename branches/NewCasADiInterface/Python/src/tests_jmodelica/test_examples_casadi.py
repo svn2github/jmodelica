@@ -26,11 +26,6 @@ def test_ccpp():
     """Run the Combined Cycle Power Plant example."""
     ccpp.run_demo(False)
 
-@testattr(casadi_new = True)
-def test_ccpp_new():
-    """Run the Combined Cycle Power Plant example."""
-    ccpp_new.run_demo(False)
-
 @testattr(casadi = True)
 def test_cstr_casadi():
     """Run the CSTR CasADi example."""
@@ -60,3 +55,13 @@ def test_vdp_casadi():
 def test_vdp_casadi_ps():
     """Run the VDP CasADi example using CasadiPseudoSpectral."""
     vdp_casadi_ps.run_demo(False)
+
+@testattr(casadi_new = True)
+def test_ccpp_new():
+    """Run the new Combined Cycle Power Plant example."""
+    ccpp_new.run_demo(False)
+
+@testattr(casadi_new = True)
+def test_vdp_casadi_new():
+    """Run the new VDP CasADi example."""
+    vdp_casadi_new.run_demo(False)
