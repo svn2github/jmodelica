@@ -32,7 +32,7 @@ from pyfmi import FMUModel,load_fmu
 try:
     from casadi_interface import transfer_to_casadi_interface
     from pyjmi.optimization.casadi_collocation import *
-    from pyjmi.casadi_interface import CasadiModel
+    from pyjmi import CasadiModel
     import casadi
 except (NameError, ImportError):
     pass

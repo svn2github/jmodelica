@@ -83,11 +83,10 @@ class OptimizationProblem(ModelBase, CI_OP):
         Parameters::
 
             optimization_problem --
-                OptimizationProblem from the CasADi interface
+                OptimizationProblem from CasADiInterface
         """
         CI_OP.__init__(self, optimization_problem)
         self.model = self.getModel()
-        self.model.get_identifier = lambda : "unknown_name"
         
     def _default_options(self, algorithm):
         """ 
@@ -155,6 +154,17 @@ class OptimizationProblem(ModelBase, CI_OP):
                         raise RuntimeError("BUG: Unable to evaluate " +
                                            "value of %s." % var.getName())
             return val.getValue()
+        elif attr == "comment":
+            var_desc = var.getAttribute("comment")
+            if var_desc is None:
+                return ""
+            else:
+                return var_desc.getName()
+        elif attr == "nominal":
+            if var.isDerivative():
+                var = var.getMyDifferentiatedVariable()
+            val_expr = var.getAttribute(attr)
+            return self.model.evaluateExpression(val_expr)
         else:
             val_expr = var.getAttribute(attr)
             if val_expr is None:

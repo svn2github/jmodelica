@@ -3276,17 +3276,22 @@ class LocalDAECollocator2(CasadiCollocator):
         n_var['unelim_u'] = len(unelim_input_indices)
         n_var['elim_u'] = len(elim_input_indices)
         
-        # Identify free parameters
-        indep_pars = \
-                list(model.getVariables(model.REAL_PARAMETER_INDEPENDENT))
-        dep_pars = \
-                list(model.getVariables(model.REAL_PARAMETER_DEPENDENT))
-        mvar_vectors['p_opt'] =  N.array([par for par in indep_pars + dep_pars
-                                          if op.get_attr(par, "free")])
-        mvar_vectors['p_indep'] = N.array([par for par in indep_pars
-                                           if not op.get_attr(par, "free")])
-        mvar_vectors['p_dep'] = N.array([par for par in dep_pars
-                                         if not op.get_attr(par, "free")])
+        # Sort parameters
+        par_kinds = [model.BOOLEAN_CONSTANT,
+                     model.BOOLEAN_PARAMETER_DEPENDENT,
+                     model.BOOLEAN_PARAMETER_INDEPENDENT,
+                     model.INTEGER_CONSTANT,
+                     model.INTEGER_PARAMETER_DEPENDENT,
+                     model.INTEGER_PARAMETER_INDEPENDENT,
+                     model.REAL_CONSTANT,
+                     model.REAL_PARAMETER_INDEPENDENT,
+                     model.REAL_PARAMETER_DEPENDENT]
+        pars = reduce(list.__add__, [list(model.getVariables(par_kind)) for
+                                     par_kind in par_kinds])
+        mvar_vectors['p_fixed'] = [par for par in pars
+                                   if not op.get_attr(par, "free")]
+        mvar_vectors['p_opt'] = [par for par in pars
+                                 if op.get_attr(par, "free")]
         n_var['p_opt'] = len(mvar_vectors['p_opt'])
         
         # Create named symbolic variable structure
@@ -3370,14 +3375,9 @@ class LocalDAECollocator2(CasadiCollocator):
         Substitute non-free parameters in expressions for their values.
         """
         # Get parameter values
-        indep_pars = [p.getVar() for p in self.mvar_vectors["p_indep"]]
-        dep_pars = [p.getVar() for p in self.mvar_vectors["p_dep"]]
-        indep_vals = \
-                [p.getAttribute("bindingExpression").getValue() for
-                 p in self.mvar_vectors["p_indep"]]
-        dep_vals = \
-                [p.getAttribute("evaluatedBindingExpression").getValue() for
-                 p in self.mvar_vectors["p_dep"]]
+        par_vars = [par.getVar() for par in self.mvar_vectors['p_fixed']]
+        par_vals = [self.op.get_attr(par, "_value")
+                    for par in self.mvar_vectors['p_fixed']]
 
         # Update optimization expressions
         op_expressions = [self.initial, self.dae, self.path, self.point,
@@ -3387,8 +3387,7 @@ class LocalDAECollocator2(CasadiCollocator):
          self.path,
          self.point,
          self.mterm,
-         self.lterm] = casadi.substitute(
-                op_expressions, indep_pars + dep_pars, indep_vals + dep_vals)
+         self.lterm] = casadi.substitute(op_expressions, par_vars, par_vals)
     
     def _scale_variables(self):
         """
@@ -3442,10 +3441,10 @@ class LocalDAECollocator2(CasadiCollocator):
                                      self.n_cp + 1)
             h_i = casadi.msym("h_i")
             coll_der = [sum([x_i[i][k] * der_vals_k[i, k] for
-                             k in range(self.n_cp)]) / h_i for
+                             k in range(self.n_cp + 1)]) / h_i for
                         i in range(self.n_var["x"])]
             coll_eq = [sum([x_i[i][k] * der_vals_k[i, k] for
-                            k in range(self.n_cp)]) - h_i * dx_i_k[i] for
+                            k in range(self.n_cp + 1)]) - h_i * dx_i_k[i] for
                        i in range(self.n_var["x"])]
             coll_eq = casadi.vertcat(coll_eq)
         else:
@@ -3470,6 +3469,8 @@ class LocalDAECollocator2(CasadiCollocator):
         """
         # Set model info
         nlp_n_var = copy.copy(self.n_var)
+        del nlp_n_var['u']
+        del nlp_n_var['elim_u']
         if self.blocking_factors is not None:
             n_u = nlp_n_var['unelim_u']
             del nlp_n_var['unelim_u']
@@ -3874,7 +3875,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                             "combined with free element " +
                                             "lengths.")
         constraint_points = sorted(set(
-                [self.model.evaluateExpression(timed_var.getTimepoint()) for
+                [self.model.evaluateExpression(timed_var.getTimePoint()) for
                  timed_var in self.op.getTimedVariables()]))
         nlp_timed_variables = casadi.MX()
         if self.hs == "free":
@@ -3914,7 +3915,7 @@ class LocalDAECollocator2(CasadiCollocator):
             timed_variables_sfs = []
             for tv in self.op.getTimedVariables():
                 timed_variables.append(tv.getVar())
-                tp = self.model.evaluateExpression(tv.getTimepoint())
+                tp = self.model.evaluateExpression(tv.getTimePoint())
                 (i, k) = collocation_constraint_points[tp]
                 name = tv.getBaseVariable().getName()
                 (index, vt) = name_map[name]
@@ -5584,16 +5585,111 @@ class LocalDAECollocator2(CasadiCollocator):
         (t,dx_opt,x_opt,u_opt,w_opt,p_opt) = self.get_result()
         data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
 
-        # Continue here!
-        dh()
-        
         if (format=='txt'):
+            model = self.model
+            op = self.op
+            name_map = self.name_map
+            mvar_vectors = self.mvar_vectors
+            variable_list = reduce(list.__add__,
+                                   [list(mvar_vectors[vt]) for
+                                    vt in ['p_opt', 'p_fixed',
+                                           'dx', 'x', 'u', 'w']])
 
-            if file_name=='':
-                file_name=self.model.get_identifier() + '_result.txt'
+            # Map variable to aliases
+            alias_map = {}
+            for var in variable_list:
+                alias_map[var.getName()] = []
+            for alias_var in model.getAliases():
+                alias = alias_var.getAlias()
+                alias_map[alias.getName()].append(alias_var)
+
+            # Set up sections
+            num_vars = len(model.getAllVariables()) + 1
+            name_section = []
+            description_section = []
+            data_info_section = []
+            data_info_section.append('int dataInfo(%d,%d)\n' % (num_vars, 4))
+            data_info_section.append('0 1 0 -1 # time\n')
+
+            # Collect meta information
+            n_variant = 1
+            n_invariant = 1
+            max_name_length = len('Time')
+            max_desc_length = len('Time in [s]')
+            for var in variable_list:
+                # Name
+                name = var.getName()
+                name_section.append('%s\n' % name)
+                if len(name) > max_name_length:
+                    max_name_length = len(name)
+
+                # Description
+                description = op.get_attr(var, "comment")
+                description_section.append('%s\n' % description)
+                if len(description) > max_desc_length:
+                    max_desc_length = len(description)
+
+                # Data info
+                variability = var.getVariability()
+                if variability in [var.PARAMETER, var.CONSTANT]:
+                    n_invariant += 1
+                    data_info_section.append('1 %d 0 -1 # %s\n' %
+                                             (n_invariant, name))
+                else:
+                    n_variant += 1
+                    data_info_section.append('2 %d 0 -1 # %s\n' %
+                                             (n_variant, name))
+
+                # Handle alias variables
+                for alias_var in alias_map[var.getName()]:
+                    # Name
+                    name = alias_var.getName()
+                    name_section.append('%s\n' % name)
+                    if len(name) > max_name_length:
+                        max_name_length = len(name)
+
+                    # Description
+                    description = op.get_attr(alias_var, "comment")
+                    description_section.append('%s\n' % description)
+                    if len(description) > max_desc_length:
+                        max_desc_length = len(description)
+
+                    # Data info
+                    if alias_var.isNegated():
+                        neg = -1
+                    else:
+                        neg = 1
+                    if variability in [alias_var.PARAMETER, alias_var.CONSTANT]:
+                        data_info_section.append('1 %d 0 -1 # %s\n' %
+                                                 (neg*n_invariant, name))
+                    else:
+                        data_info_section.append('2 %d 0 -1 # %s\n' %
+                                                 (neg*n_variant, name))
+
+            # Define section headers
+            name_section.append('\n')
+            name_section = ['char name(%d,%d)\n' % (num_vars, max_name_length),
+                            'time\n'] + name_section
+            description_section.append('\n')
+            description_section = ['char description(%d,%d)\n' %
+                                   (num_vars, max_desc_length),
+                                   'Time in [s]\n'] + description_section
+            data_info_section.append('\n')
+
+            # Collect parameter data (data_1)
+            data_1 = []
+            for par in mvar_vectors['p_opt']:
+                name = par.getName()
+                (ind, _) = name_map[name]
+                data_1.append(" %.14E" % p_opt[ind])
+
+            for par in mvar_vectors['p_fixed']:
+                data_1.append(" %.14E" % op.get_attr(par, "_value"))
 
             # Open file
-            f = codecs.open(file_name,'w','utf-8')
+            if file_name == '':
+                file_name = self.model.getIdentifier() + '_result.txt'
+            f = codecs.open(file_name, 'w', 'utf-8')
 
             # Write header
             f.write('#1\n')
@@ -5601,228 +5697,66 @@ class LocalDAECollocator2(CasadiCollocator):
             f.write('Atrajectory\n')
             f.write('1.1\n')
             f.write('\n')
-            
-            md = self.model.get_model_description()
-            
-            # NOTE: it is essential that the lists 'names', 'aliases', 'descriptions' 
-            # and 'variabilities' are sorted in the same order and that this order 
-            # is: value reference order AND within the same value reference the 
-            # non-alias variable must be before its corresponding aliases. Otherwise 
-            # the header-writing algorithm further down will fail.
-            # Therefore the following code is needed...
-            
-            # all lists that we need for later
-            vrefs_alias = []
-            vrefs = []
-            names_alias = []
-            names = []
-            names_noalias = []
-            aliases_alias = []
-            aliases = []
-            descriptions_alias = []
-            descriptions = []
-            variabilities_alias = []
-            variabilities = []
-            variabilities_noalias = []
-            
-            # go through all variables and split in non-alias/only-alias lists
-            for var in md.get_model_variables():
-                if var.get_alias() == xmlparser.NO_ALIAS:
-                    vrefs.append(var.get_value_reference())
-                    names.append(var.get_name())
-                    aliases.append(var.get_alias())
-                    descriptions.append(var.get_description())
-                    variabilities.append(var.get_variability())
-                else:
-                    vrefs_alias.append(var.get_value_reference())
-                    names_alias.append(var.get_name())
-                    aliases_alias.append(var.get_alias())
-                    descriptions_alias.append(var.get_description())
-                    variabilities_alias.append(var.get_variability())
-            
-            # extend non-alias lists with only-alias-lists
-            vrefs.extend(vrefs_alias)
-            names.extend(names_alias)
-            aliases.extend(aliases_alias)
-            descriptions.extend(descriptions_alias)
-            variabilities.extend(variabilities_alias)
-            
-            # start values (used in parameter writing)
-            start = md.get_variable_start_attributes()
-            start_values = dict([(start[i][0],start[i][1]) for i in range(len(start))])
-            
-            # if some parameters were optimized, store that value
-            vr_map = self.model.get_vr_map()
-            for var in self.ocp.pf:
-                try:
-                    vr = var.getValueReference()
-                    start_values[vr] = p_opt[vr_map[vr][0]]
-                except KeyError:
-                    pass
-            # add and calculate the dependent parameters
-            for (_, vr, val) in self.model.get_pd_val():
-                try:
-                    start_values[vr] = val
-                except KeyError:
-                    pass
-            
-            # zip to list of tuples and sort - non alias variables are now
-            # guaranteed to be first in list and all variables are in value reference 
-            # order
-            names = sorted(zip(
-                tuple(vrefs), 
-                tuple(names)), 
-                key=operator.itemgetter(0))
-            aliases = sorted(zip(
-                tuple(vrefs), 
-                tuple(aliases)), 
-                key=operator.itemgetter(0))
-            descriptions = sorted(zip(
-                tuple(vrefs), 
-                tuple(descriptions)), 
-                key=operator.itemgetter(0))
-            variabilities = sorted(zip(
-                tuple(vrefs), 
-                tuple(variabilities)), 
-                key=operator.itemgetter(0))
-            
-            num_vars = len(names)
-            
-            # Find the maximum name and description length
-            max_name_length = len('Time')
-            max_desc_length = len('Time in [s]')
-            
-            for i in range(len(names)):
-                name = names[i][1]
-                desc = descriptions[i][1]
-                
-                if (len(name)>max_name_length):
-                    max_name_length = len(name)
-                    
-                if (len(desc)>max_desc_length):
-                    max_desc_length = len(desc)
-            
-            f.write('char name(%d,%d)\n' % (num_vars + 1, max_name_length))
-            f.write('time\n')
-            
-            # write names
-            for name in names:
-                f.write(name[1] +'\n')
-            
-            f.write('\n')
-            
-            f.write('char description(%d,%d)\n' % (num_vars + 1, max_desc_length))
-            f.write('Time in [s]\n')
 
-            # write descriptions
-            for desc in descriptions:
-                f.write(desc[1]+'\n')
-                
-            f.write('\n')
+            # Write names
+            for name in name_section:
+                f.write(name)
 
-            # Write data meta information
-            f.write('int dataInfo(%d,%d)\n' % (num_vars + 1, 4))
-            f.write('0 1 0 -1 # time\n')
+            # Write descriptions
+            for description in description_section:
+                f.write(description)
 
-            cnt_1 = 1
-            cnt_2 = 1
-            
-            n_parameters = 0
-            params = []
-            
-            for i, name in enumerate(names):
-                if variabilities[i][1] == xmlparser.PARAMETER or \
-                    variabilities[i][1] == xmlparser.CONSTANT:
-                    if aliases[i][1] == 0: # no alias
-                        cnt_1 = cnt_1 + 1
-                        n_parameters += 1
-                        params += [name]
-                        f.write('1 %d 0 -1 # ' % cnt_1 + name[1]+'\n')
-                    else: # alias
-                        if aliases[i][1] == 1:
-                            neg = 1
-                        else:
-                            neg = -1 # negated alias
-                        var = self._get_xml_variable_by_name(name[1])
-                        if var.get_alias():
-                            # Check whether the alias has the same variability
-                            var_ali = md.get_aliases_for_variable(name[1])[0]
-                            for aliass in var_ali:
-                                aliass_var = \
-                                    self._get_xml_variable_by_name(aliass)
-                                if not aliass_var.get_alias():
-                                    variab = aliass_var.get_variability()
-                                    if (variab != xmlparser.PARAMETER and
-                                        variab != xmlparser.CONSTANT):
-                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
-                                                name[1] +'\n')
-                                    else:
-                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
-                                                name[1] +'\n')
-                        else:
-                            f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
-                                    name[1] +'\n')
-                else:
-                    if aliases[i][1] == 0: # noalias
-                        cnt_2 = cnt_2 + 1
-                        f.write('2 %d 0 -1 # ' % cnt_2 + name[1] +'\n')
-                    else: # alias
-                        if aliases[i][1] == 1:
-                            neg = 1
-                        else:
-                            neg = -1 # negated alias
-                        var = self._get_xml_variable_by_name(name[1])
-                        if var.get_alias():
-                            # Check whether the alias has the same variability
-                            var_ali = md.get_aliases_for_variable(name[1])[0]
-                            for aliass in var_ali:
-                                aliass_var = \
-                                    self._get_xml_variable_by_name(aliass)
-                                if not aliass_var.get_alias():
-                                    variab = aliass_var.get_variability()
-                                    if (variab == xmlparser.PARAMETER or
-                                        variab == xmlparser.CONSTANT):
-                                        f.write('1 %d 0 -1 # ' % (neg*cnt_1) +
-                                                name[1] +'\n')
-                                    else:
-                                        f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
-                                                name[1] +'\n')
-                        else:
-                            f.write('2 %d 0 -1 # ' % (neg*cnt_2) +
-                                    name[1] +'\n')
-            f.write('\n')
-            
-            # Write data
-            # Write data set 1
+            # Write dataInfo
+            for data_info in data_info_section:
+                f.write(data_info)
+
+            # Write data_1
+            n_parameters = (len(mvar_vectors['p_opt']) +
+                            len(mvar_vectors['p_fixed']))
             f.write('float data_1(%d,%d)\n' % (2, n_parameters + 1))
+            par_val_str = ''
+            for par_val in data_1:
+                par_val_str += par_val
+            par_val_str += '\n'
             f.write("%.14E" % data[0,0])
-            str_text = ''
-            for i in params:
-                str_text += " %.14E" % (start_values[i[0]])#(0.0)#(z[ref])
-            
-            f.write(str_text)
-            f.write('\n')
+            f.write(par_val_str)
             f.write("%.14E" % data[-1,0])
-            f.write(str_text)
+            f.write(par_val_str)
+            f.write('\n')
 
-            f.write('\n\n')
-            
-            # Write data set 2
-            n_vars = len(data[0,:])
-            n_points = len(data[:,0])
+            # Write data_2
+            n_vars = len(data[0, :])
+            n_points = len(data[:, 0])
             f.write('float data_2(%d,%d)\n' % (n_points, n_vars))
             for i in range(n_points):
                 str_text = ''
                 for ref in range(n_vars):
-                    str_text = str_text + (" %.14E" % data[i,ref])
-                f.write(str_text+'\n')
+                    str_text = str_text + (" %.14E" % data[i, ref])
+                f.write(str_text + '\n')
 
+            # Close file
             f.write('\n')
-
             f.close()
-
         else:
-            raise Error('Export on binary Dymola result files not yet supported.')
+            raise NotImplementedError('Export on binary Dymola result files ' +
+                                      'not yet supported.')
+
+    def _debug_eval_expr(self, expr):
+        """
+        Helper method for symbolically evaluting expressions.
+        """
+        if self.named_vars:
+            try:
+                debug_xx = self._debug_xx
+            except AttributeError:
+                debug_xx = [casadi.ssym(var.getName()) for var in self.xx]
+                self._debug_xx = debug_xx
+            f = casadi.MXFunction(self.xx, [expr])
+            f.init()
+            return f.eval(debug_xx)[0]
+        else:
+            raise ValueError(
+                    "_debug_eval_expr only works with named variables.")
 
 class PseudoSpectral(CasadiCollocator):
     

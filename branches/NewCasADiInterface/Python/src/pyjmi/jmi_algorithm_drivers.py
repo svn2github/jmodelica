@@ -2177,16 +2177,14 @@ class LocalDAECollocationAlg2(AlgorithmBase):
     IPOPT for solving the arising non-linear programming problem.
     """
     
-    def __init__(self, model, options):
+    def __init__(self, op, options):
         """
         Create a LocalDAECollocationAlg2 algorithm.
         
         Parameters::
               
-            model -- 
-                Model object
-                
-                Type: pyjmi.casadi_interface.CasadiModel
+            op -- 
+                OptimizationProblem from CasADiInterface
 
             options -- 
                 The options that should be used by the algorithm. For 
@@ -2205,7 +2203,60 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                 - A LocalDAECollocationAlg2Options object.
         """
         self._t0 = time.clock()
+        self.op = op
+        model = op.model
         self.model = model
+
+        # Check that model does not contain any unsupported variables
+        var_kinds = [(model.BOOLEAN_DISCRETE, "Boolean discrete"),
+                     (model.BOOLEAN_INPUT, "Boolean input"),
+                     (model.INTEGER_DISCRETE, "integer discrete"),
+                     (model.INTEGER_INPUT, "integer input"),
+                     (model.REAL_DISCRETE, "real discrete"),
+                     (model.STRING_DISCRETE, "string discrete"),
+                     (model.STRING_INPUT, "string input")]
+        error_str = ''
+        for (kind, name) in var_kinds:
+            variables = model.getVariables(kind)
+            if len(variables) == 1:
+                var_name = variables[0].getName()
+                error_str += ("The following variable is %s, which " % name +
+                              "is not supported: %s.\n\n" % var_name)
+            elif len(variables) > 1:
+                error_str += ("The following variables are %s, " % name +
+                              "which is not supported: ")
+                for var in variables[:-1]:
+                    error_str += var.getName() + ", "
+                error_str += variables[-1].getName() + ".\n\n"
+
+        # Check for unsupported free parameters
+        var_kinds = [(model.BOOLEAN_PARAMETER_DEPENDENT,
+                      "Boolean parameter dependent"),
+                     (model.BOOLEAN_PARAMETER_INDEPENDENT,
+                      "Boolean parameter independent"),
+                     (model.INTEGER_PARAMETER_DEPENDENT,
+                      "integer parameter dependent"),
+                     (model.INTEGER_PARAMETER_INDEPENDENT,
+                      "integer parameter independent"),
+                     (model.STRING_PARAMETER_DEPENDENT,
+                      "string parameter dependent"),
+                     (model.STRING_PARAMETER_INDEPENDENT,
+                      "string parameter independent")]
+        for (kind, name) in var_kinds:
+            variables = [var for var in model.getVariables(kind)
+                         if op.get_attr(var, "free")]
+            if len(variables) == 1:
+                var_name = variables[0].getName()
+                error_str += ("The following parameter is %s and free, "%name +
+                              "which is not supported: %s.\n\n" % var_name)
+            elif len(variables) > 1:
+                error_str += ("The following parameters are %s and " % name +
+                              "free, which is not supported: ")
+                for var in variables[:-1]:
+                    error_str += var.getName() + ", "
+                error_str += variables[-1].getName() + ".\n\n"
+        if len(error_str) > 0:
+            raise Exception(error_str)
         
         # handle options argument
         if isinstance(options, dict):
@@ -2224,7 +2275,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator2(model, self.options)
+        self.nlp = LocalDAECollocator2(self.op, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -2321,16 +2372,17 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         """ 
         Solve the optimization problem using ipopt solver. 
         """
-        times = {}
-        times['sol'] = self.nlp.ipopt_solve()
-        self._write_result()
-        
-        # Calculate times
-        times['tot'] = time.clock() - self._t0
-        times['init'] = times['tot'] - times['sol']
-        
-        # Store times as data attribute
-        self.times = times
+        if not self.named_vars:
+            times = {}
+            times['sol'] = self.nlp.ipopt_solve()
+            self._write_result()
+            
+            # Calculate times
+            times['tot'] = time.clock() - self._t0
+            times['init'] = times['tot'] - times['sol']
+            
+            # Store times as data attribute
+            self.times = times
         
     def _write_result(self):
         """
@@ -2340,7 +2392,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
         # Set result file name
         if not self.result_file_name:
-            self.result_file_name = self.model.get_identifier()+'_result.txt'
+            self.result_file_name = self.model.getIdentifier()+'_result.txt'
         
     def get_result(self):
         """ 
@@ -2350,6 +2402,8 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
             The LocalDAECollocationAlg2Result object.
         """
+        if self.named_vars:
+            return self.nlp
         resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
         
@@ -2363,7 +2417,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
         # Create and return result object
         return LocalDAECollocationAlg2Result(self.model, resultfile, self.nlp,
-                                            res, self.options, self.times,
+                                             res, self.options, self.times,
                                              h_opt)
     
     @classmethod
