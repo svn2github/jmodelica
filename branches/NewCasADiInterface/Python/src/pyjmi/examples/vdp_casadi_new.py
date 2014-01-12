@@ -37,7 +37,6 @@ def run_demo(with_plots=True):
     # Set algorithm options
     opts = op.optimize_options()
     opts['n_e'] = 30
-    opts['IPOPT_options']['linear_solver'] = "mumps"
     
     # Optimize
     res = op.optimize(options=opts)
