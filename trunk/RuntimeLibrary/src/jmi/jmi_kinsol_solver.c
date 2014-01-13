@@ -808,7 +808,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
                              "<JacobianConditionEstimate:%E> large values may lead to convergence problems.", cond);
         }
         */
-        solver->J_is_singular_flag = 0;        
+        solver->J_is_singular_flag = 0;
     }
     
     if(solver->force_new_J_flag ) {
@@ -926,6 +926,15 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
 			ret = 0;
         }
+
+		/* Evaluate discrete variables after a regularization. */
+		if (block->evaluate_discrete_variables) {
+			if(block->callbacks->log_options.log_level >= 6) {
+				jmi_log_node(block->log, logInfo, "Info", "Evaluating switches after regularization.");
+			}
+
+			block->evaluate_discrete_variables(block->problem_data);
+		}
     }
     else {
         /* Normal linear system solve (with LU) to get Newton step */
