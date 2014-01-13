@@ -67,7 +67,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     jmi_linear_solver_t* solver = block->solver;
     iwork = solver->iwork;
     
-    /* If needed, reevaluate and factorize Jacobian */
+    /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
 
         /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->id);*/
@@ -98,14 +98,17 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             else
                 solver->equed = 'N';
         }
+	}
 
-		/* Log the  */
-		if((block->callbacks->log_options.log_level >= 5)) {
-			destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
-                                      "Linear solver invoked for <block:%d>", block->id);
-			jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
-		}
+	/* Log the jacobian.*/
+	if((block->callbacks->log_options.log_level >= 5)) {
+		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
+                                     "Linear solver invoked for <block:%d>", block->id);
+		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+	}
 
+	/*  If jacobian is reevaluated then factorize Jacobian. */
+    if (solver->cached_jacobian != 1) {
         /* Call 
         *  DGETRF computes an LU factorization of a general M-by-N matrix A
         *  using partial pivoting with row interchanges.
