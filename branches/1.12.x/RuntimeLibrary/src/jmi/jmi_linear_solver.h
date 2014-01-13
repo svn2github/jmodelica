@@ -59,6 +59,7 @@ struct jmi_linear_solver_t {
     int cached_jacobian;          /**< \brief This flag indicates weather the Jacobian needs to be refactorized */
     int singular_jacobian;   /**< \brief Indicates if the Jacobian is singular or not */
     int iwork;
+    double* zero_vector;
     jmi_real_t* rwork;
 };
 

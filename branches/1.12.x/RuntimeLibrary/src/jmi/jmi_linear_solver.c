@@ -28,6 +28,7 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     int j = 0; */
     int n_x = block->n;
     int info = 0;
+    int i;
     
     if (!solver) return -1;
     
@@ -42,6 +43,11 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->singular_jacobian = 0;
     solver->iwork = 5*n_x;
     solver->rwork = (double*)calloc(solver->iwork,sizeof(double));
+    solver->zero_vector = (double*)calloc(n_x,sizeof(double));
+
+    for (i=0; i<n_x; i++) {
+        solver->zero_vector[i] = 0.0;
+    }
 
     *solver_ptr = solver;
     return info==0? 0: -1;
@@ -120,7 +126,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     /* Compute right hand side at initial x*/ 
-    info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE);
+    /* info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE); */
+    info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
     if(info) {
         if(block->init) {
             jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->id);
@@ -193,12 +200,14 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {
         for (i=0;i<n_x;i++) {
-             block->x[i] = block->initial[i] + block->res[i] * solver->cScale[i];
+             /* block->x[i] = block->initial[i] + block->res[i] * solver->cScale[i]; */
+             block->x[i] = block->res[i] * solver->cScale[i];
         }
     }
     else {
         for (i=0;i<n_x;i++) {
-            block->x[i] = block->initial[i] + block->res[i] ;
+            /* block->x[i] = block->initial[i] + block->res[i] ; */
+            block->x[i] = block->res[i];
         }
     }
     
@@ -217,6 +226,7 @@ void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     free(solver->rScale);
     free(solver->cScale);
     free(solver->rwork);
+    free(solver->zero_vector);
     free(solver);
     block->solver = 0;
 }
