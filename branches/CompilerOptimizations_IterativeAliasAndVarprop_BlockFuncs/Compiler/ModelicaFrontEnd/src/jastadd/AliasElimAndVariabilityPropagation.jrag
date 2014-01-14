@@ -1,0 +1,52 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+aspect AliasElimAndVariabilityPropagation {
+	
+    public class FClass {
+        /**
+         * Runs alias elimination and variability propagation iteratively if option is set.
+         */
+        public class aliasElimAndVariabilityPropagationIfSet extends Transformation {
+            public aliasElimAndVariabilityPropagationIfSet() {
+                super("alias_variability_elim");
+            }
+            
+            public void perform() {
+                aliasElimAndVariabilityPropagation();
+            }
+        }
+    }
+    
+    public void FClass.aliasElimAndVariabilityPropagation() {
+        boolean more = true;
+        int eqBefore;
+        
+        while(more) {
+            forceRewrites();
+            root().flushAllRecursiveClearFinal();
+            
+            eqBefore = getNumFAbstractEquation();
+            
+            aliasElimination.apply();
+            variabilityPropagation.apply();
+            
+            more = eqBefore > getNumFAbstractEquation();
+        }
+    }
+    
+}
