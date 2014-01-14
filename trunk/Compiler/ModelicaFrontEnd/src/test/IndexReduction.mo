@@ -3419,5 +3419,71 @@ end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
 
 end AlgorithmDifferentiation;
 
+  model AlgorithmVariability1
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+    Integer i;
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+algorithm
+    if y < 3.12 then
+        i := 1;
+    else
+        i := -1;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmVariability1",
+            description="Test so that variability calculations are done propperly for algorithms",
+            flatModel="
+fclass IndexReduction.AlgorithmVariability1
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ discrete Integer i;
+ Real _der_y;
+ Real _der_vx;
+ Real _der_vy;
+ Real _der_x;
+ Real _der_der_y;
+initial equation 
+ x = 0.0;
+ _der_x = 0.0;
+ pre(i) = 0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ _der_vx = lambda * x;
+ _der_vy = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+algorithm
+ if y < 3.12 then
+  i := 1;
+ else
+  i := - 1;
+ end if;
+equation
+ 2 * x * der(x) + 2 * y * _der_y = 0.0;
+ der(_der_x) = _der_vx;
+ _der_der_y = _der_vy;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ _der_x = der(x);
+end IndexReduction.AlgorithmVariability1;
+")})));
+  end AlgorithmVariability1;
 
 end IndexReduction;

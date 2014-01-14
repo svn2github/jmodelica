@@ -124,14 +124,15 @@ aspect FlatVariability {
 	}
 	
 	eq FAlgorithm.variability() {
-		FTypePrefixVariability var = fConstant();
+		FTypePrefixVariability rhsVar = fConstant();
+		FTypePrefixVariability lhsVar = fConstant();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			var = var.combine(fv.variability());
+			lhsVar = lhsVar.combine(fv.variability());
 		}
 		for (FVariable fv : referencedFVariablesInRHS()) {
-			var = var.combine(fv.variability());
+			rhsVar = rhsVar.combine(fv.variability());
 		}
-		return var;
+		return lhsVar.combineDown(rhsVar);
 	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
