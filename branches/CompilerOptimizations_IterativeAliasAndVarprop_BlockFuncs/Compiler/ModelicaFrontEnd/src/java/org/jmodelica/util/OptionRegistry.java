@@ -171,6 +171,32 @@ public class OptionRegistry {
  			 true,
  			 "If this option is set to true (default), then variabilities are " +
               "propagated through the model."),
+        ALIAS_VPROP
+   			("alias_variability_elim", 
+   			 compiler, 
+   			 false,
+   			 "If this option is set to true, then alias elimination and variability propagation " +
+              "is performed iteratively through the model."),
+        COUNT_POT
+       		("count_pot_alias", 
+       		 compiler, 
+       		 true,
+       		 "If this option is set to true, then it counts the potential alias equations in the model"),
+        FIND_FUN
+           	("find_fun_in_block", 
+           	compiler, 
+           	false,
+           	""),
+        FIND_IDENT
+            ("find_ident_fun", 
+            compiler, 
+            false,
+            ""),
+        REM_SAME
+            ("remove_same_var", 
+            compiler, 
+            false,
+            ""),
 		HALT_WARN
 			("halt_on_warning", 
 			 compiler, 

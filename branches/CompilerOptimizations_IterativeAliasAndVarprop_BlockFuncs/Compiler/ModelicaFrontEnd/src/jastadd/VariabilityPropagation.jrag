@@ -81,6 +81,7 @@ aspect VariabilityPropagation {
                 root().flushAllRecursiveClearFinal(); // Enable expression rewrites
             }
         }
+        public variabilityPropagationIfSet variabilityPropagation = new variabilityPropagationIfSet();
     }
 	
 	/**
@@ -297,7 +298,7 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
 			FTypePrefixVariability variability,
 			FExp bindingExp) {
-		
+		log.error("FAbstractVariable.variabilityPropagation(): " + this);
 		throw new UnsupportedOperationException();
 	}
 	

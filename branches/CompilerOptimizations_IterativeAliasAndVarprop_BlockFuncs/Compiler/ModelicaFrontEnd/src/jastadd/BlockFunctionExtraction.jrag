@@ -1,0 +1,123 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+aspect BlockFunctionExtraction {
+	
+    public class FClass {
+
+        // Runs block function removal if option is set.
+        
+        public class blockFunctionExtractionIfSet extends Transformation {
+            public blockFunctionExtractionIfSet() {
+                super("block_func_extract");
+            }
+            
+            public void perform() {
+                blockFunctionExtraction();
+            }
+        }
+    }
+    
+    public void FClass.blockFunctionExtraction() {
+
+        ArrayList<FFunctionCall> functions = new ArrayList<FFunctionCall>();
+        HashMap<String,FVariable> newVars = new HashMap<String,FVariable>();
+
+        for(AbstractEquationBlock block: getDAEInitBLT())
+            if(!block.isSimple())
+                for(FAbstractEquation equation: block.allEquations())
+                    equation.findBlockFunctionExtraction(block, functions);
+        
+        for(FFunctionCall fc: functions){
+            FVariable funcReplacement = null;
+            if((funcReplacement = newVars.get(fc.toString())) == null){
+                funcReplacement = null;//fc.type().createTempFVariable(new FQName(fc.calcTempVarName()), fc.variability());
+                // Add variable to list of FVariables?
+                newVars.put(fc.toString(), funcReplacement);
+                // Add equation funcReplacement = func()
+            }
+            fc.getParent().replaceFuncWithVar(fc.toString(), funcReplacement);
+        }
+        //createUseExp-FVariable
+        //replaceMe-ASTNode
+        //createTempFVariable-FType
+        //calcTempVarName-FExp
+        
+    }
+    
+    // Find non-dependant function
+    
+    public void FAbstractEquation.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+
+    }
+     
+    public void FEquation.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {  
+        getLeft().findBlockFunctionExtraction(block, functions); 
+        getRight().findBlockFunctionExtraction(block, functions);
+    }
+       
+    public void FExp.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+
+    }
+   
+    public void FBinExp.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        getLeft().findBlockFunctionExtraction(block, functions);
+        getRight().findBlockFunctionExtraction(block, functions);
+    }
+    
+    public void FUnaryExp.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        getFExp().findBlockFunctionExtraction(block, functions);
+    }
+
+    public void FMathematicalFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        getFExp().findBlockFunctionExtraction(block, functions);
+    }
+    
+    public void FFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
+        boolean dep = false;
+        for (FExp exp: getArgs()){
+            if (exp.dependsOnBlock(block)) {
+                dep = true;
+                break;
+            }
+        }
+        if(!dep) {
+            //log.error("Found function call: " + this);
+            functions.add(this);
+        }
+        for (FExp exp: getArgs()){
+            exp.findBlockFunctionExtraction(block, functions);
+        }
+    }
+    
+    // Replace function call with new variable
+    
+    public void ASTNode.replaceFuncWithVar(String func, FVariable funcReplacement){
+    
+    }
+    
+    public void BinExp.replaceFuncWithVar(String func, FVariable funcReplacement){
+        if(getRight().toString().equals(func)){
+            log.error("Right!");
+        }else if(getLeft().toString().equals(func)){
+            log.error("Left!");
+        }else{
+            log.error("Something is wrong in "+ getNodeName() +".replaceFuncWithVar");
+        }
+    }
+    
+}

@@ -133,7 +133,7 @@ aspect LightProfiling {
 			String fmt = buf.toString();
 			
 			for (String[] line : lines) 
-				ASTNode.log.debug(String.format(fmt, (Object[]) line));
+				ASTNode.log.error(String.format(fmt, (Object[]) line));
 		}
 		
 		public String[][] rawLog() {
