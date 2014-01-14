@@ -45,13 +45,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 %}
 
+%rename(_transferModelicaModel) transferModelicaModel;
+%rename(_transferOptimizationProblem) transferOptimizationProblem;
+%rename(print_) print;
+// __repr__ and __str__ are overloaded to be used from Python instead
+%ignore operator<<;
+// Things that shouldn't be used from Python:
+%ignore _get_swig_p_type;
+%ignore ModelicaCasADi::Ref; 
+%ignore ModelicaCasADi::incRefNode;
+%ignore ModelicaCasADi::decRefNode;
+
+
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
 
 %include "doc.i"
-
-%rename(_transferModelicaModel) transferModelicaModel;
-%rename(_transferOptimizationProblem) transferOptimizationProblem;
-%ignore _get_swig_p_type;
 
 
 %feature("ref")   SharedNode "ModelicaCasADi::incRefNode($this);"

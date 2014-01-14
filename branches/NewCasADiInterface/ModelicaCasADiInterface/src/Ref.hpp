@@ -34,12 +34,16 @@ template <class T> class Ref {
         template <class S> Ref(S *node) { this->node = node; incRef(); }
         template <class S> Ref(const Ref<S> &ref) { this->node = ref.node; incRef(); }
         ~Ref() { decRef(); }
-        
+
+// SWIG complains that it can't wrap these, and we don't need to. Haven't been able to find
+// an %ignore invocation that will ignore them; perhaps the templates are confusing SWIG?
+#ifndef SWIG
         Ref<T>& operator=(T* node) { setNode(node); return *this; }
         Ref<T>& operator=(const Ref<T>& ref) { setNode(ref.node); return *this; }
         template <class S> Ref<T>& operator=(S* node) { setNode(node); return *this; }
         template <class S> Ref<T>& operator=(const Ref<S>& ref) { setNode(ref.node); return *this; }
-        
+#endif
+
         const T *operator->() const { assert(node != NULL); return node; }
         T *operator->() { assert(node != NULL); return node; }
         
