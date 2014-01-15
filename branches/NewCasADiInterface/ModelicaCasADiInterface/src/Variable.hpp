@@ -83,8 +83,8 @@ class Variable : public SharedNode {
         void setNegated(bool negated);
         /** @param Sets an alias for this variable, making this an alias variable */
         void setAlias(Ref<Variable> var);
-        /** @return This variable's alias, or NULL */
-        Ref<Variable> getAlias() const;
+        /** @return This variable's model variable if it is an alias, or None otherwise */
+        Ref<Variable> getModelVariable() const;
         
         
         /* Getters and setters for standard Modelica attributes */
@@ -213,7 +213,7 @@ inline void Variable::setNegated(bool negated) {
     this->negated = negated; 
 }
 inline void Variable::setAlias(Ref<Variable> modelVariable) { this->myModelVariable = modelVariable; }
-inline Ref<Variable> Variable::getAlias() const { return myModelVariable; }
+inline Ref<Variable> Variable::getModelVariable() const { return myModelVariable; }
 inline std::string Variable::getName() const { return var.getName(); }
 inline const Variable::Type Variable::getType() const { throw std::runtime_error("Variable does not have a type"); }
 inline void Variable::setDeclaredType(Ref<VariableType> declaredType) { this->declaredType = declaredType; }

@@ -28,7 +28,7 @@ def test_VariableAlias():
     realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
     # Default values
     assert not realVar1.isAlias()
-    assert realVar1.getAlias() == None
+    assert realVar1.getModelVariable() == None
     assert not realVar1.isNegated()
     
     # Try to set negated attribute, even though it is not an alias variable yet. 
@@ -46,7 +46,7 @@ def test_VariableAlias():
     # Check updated attributes, results of getters etc. 
     assert realVar1.isAlias()
     assert not realVar2.isAlias()
-    assert heurestic_MC_variables_equal(realVar1.getAlias(), realVar2)
+    assert heurestic_MC_variables_equal(realVar1.getModelVariable(), realVar2)
     assert not realVar1.isNegated()
     # Set negated, and check
     realVar1.setNegated(True)

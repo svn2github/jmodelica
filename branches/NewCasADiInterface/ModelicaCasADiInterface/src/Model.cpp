@@ -251,7 +251,7 @@ Ref<Variable> Model::getModelVariable(std::string name) {
     for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
             if( (*it)->isAlias()) {
-                returnVar = (*it)->getAlias();
+                returnVar = (*it)->getModelVariable();
             } else {
                 returnVar = *it;
             }
