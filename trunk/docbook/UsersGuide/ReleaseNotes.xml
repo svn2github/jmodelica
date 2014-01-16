@@ -95,7 +95,23 @@
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <para>The following simulation improvements have been made: </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved the simulation run-time with support for the
+          improvements made in the compiler</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved the robustness when solving linear and nonlinear
+          blocks.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>JModelica.org now simulates the example models from the MultiBody
+      package in MSL with the exception of the few models that require dynamic
+      state selection.</para>
     </section>
 
     <section>
@@ -1905,12 +1921,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
