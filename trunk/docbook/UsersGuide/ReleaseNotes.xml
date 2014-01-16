@@ -46,13 +46,52 @@
     <section>
       <title>Compilers</title>
 
-      <para/>
+      <para>The following compliance improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved support for algorithms, including when
+          statements.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for if equations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of attributes in alias sets.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for expandable connectors and for
+          overconstrained connection systems.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for automatic differentiation of
+          functions.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for String operations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Many bug fixes.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Added check mode, where a class is checked for errors to see if it
+      can be used in a simulation class.</para>
+
+      <para>Class annotations are now only allowed as the last element of the
+      class, as per the Modelica 3.2 specification.</para>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <para></para>
     </section>
 
     <section>
@@ -172,7 +211,8 @@
         </listitem>
 
         <listitem>
-          <para>Inlining of simple functions is now activate by default</para>
+          <para>Inlining of simple functions is now activated by
+          default</para>
         </listitem>
 
         <listitem>
@@ -372,8 +412,8 @@
         (<literal>JMResultBase</literal>) has two new functions,
         <literal>initial</literal> and <literal>final</literal>, which will
         always return initial and final value of the simulation/optimization
-        as scalar values. See both <xref linkend="ch_simulation"/> and <xref
-        linkend="ch_optimization"/> for plotting code examples.</para>
+        as scalar values. See both <xref linkend="ch_simulation" /> and <xref
+        linkend="ch_optimization" /> for plotting code examples.</para>
       </section>
 
       <section>
@@ -398,7 +438,7 @@ print r.warnings</programlisting>
         <para>FMUs and JMUs created with JModelica.org now produce logs in a
         structured XML format, which can be either parsed using tools in the
         Python module <literal>pyjmi.log</literal> or using general purpose
-        XML tools. See <xref linkend="sec_models_debug_nonlinear"/> for code
+        XML tools. See <xref linkend="sec_models_debug_nonlinear" /> for code
         examples.</para>
       </section>
     </section>
@@ -1861,12 +1901,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute
