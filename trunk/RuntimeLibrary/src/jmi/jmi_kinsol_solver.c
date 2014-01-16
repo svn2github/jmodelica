@@ -1324,16 +1324,17 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     if(block->init) {
         jmi_kinsol_init(block);
     }
-    
-    /* Read initial values for iteration variables from variable vector.
-     * This is needed if the user has changed initial guesses in between calls to
-     * Kinsol.
-     */
-    flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
-    if(flag) {        
-        jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
-                     "when reading initial guess.", flag, block->id);
-        return flag;
+    else {
+        /* Read initial values for iteration variables from variable vector.
+        * This is needed if the user has changed initial guesses in between calls to
+        * Kinsol.
+        */
+        flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
+        if(flag) {        
+            jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
+                         "when reading initial guess.", flag, block->id);
+            return flag;
+        }
     }
 
     /* update the scaling only once per time step */
