@@ -394,7 +394,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
         {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
-            jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "residuals");
+            jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
             for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
             jmi_log_leave(log, node);
         }
@@ -779,7 +779,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(info != 0 ) {
         solver->J_is_singular_flag = 1;
-        jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected when factorizing in linear solver. "
+        jmi_log_node(block->log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
                      "Will try to regularize the equations in <block: %d>", block->id);
         if(N > 1) {
             jmi_kinsol_reg_matrix(block);
@@ -792,7 +792,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
                              "<JacobianConditionEstimate:%E> large values may lead to convergence problems.", cond);
         }
         */
-        solver->J_is_singular_flag = 0;        
+        solver->J_is_singular_flag = 0;
     }
     
     if(solver->force_new_J_flag ) {
@@ -910,6 +910,15 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
 			ret = 0;
         }
+
+		/* Evaluate discrete variables after a regularization. */
+		if (block->evaluate_discrete_variables) {
+			if(block->callbacks->log_options.log_level >= 6) {
+				jmi_log_node(block->log, logInfo, "Info", "Evaluating switches after regularization.");
+			}
+
+			block->evaluate_discrete_variables(block->problem_data);
+		}
     }
     else {
         /* Normal linear system solve (with LU) to get Newton step */
@@ -917,14 +926,14 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         i = 1;
         
         if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J_LU->data, N, N);
-            jmi_log_reals(block->log, node, logInfo, "b", xd, N);
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J->data, N, N);
+            jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
         dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
         
         if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_reals(block->log, node, logInfo, "x", xd, N);
+            jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
             jmi_log_leave(block->log, node);
         }
     }
@@ -1030,7 +1039,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         }
 
         if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ScalingUpdated", "<block:%d>", block->id);
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%d>", block->id);
             jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
             realtype* res = scale_ptr;
             for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
@@ -1042,8 +1051,8 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     if (solver->using_max_min_scaling_flag) {
         realtype cond = jmi_calculate_condition_number(block, solver->J->data);
 
-        jmi_log_node(block->log, logInfo, "ConditionNumber",
-            "Calculated condition number in <block: %d>. Regularizing if <cond: %E> greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
+        jmi_log_node(block->log, logInfo, "Regularization",
+            "Calculated condition number in <block: %d>. Regularizing if <cond: %E> is greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
         if (cond > solver->kin_reg_tol) {
             if(N > 1) {
                 int info;
@@ -1231,7 +1240,7 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_solver_t * block,
         jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
         jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->x, block->n);        
+        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->initial, block->n);        
     }
 }
 

@@ -734,10 +734,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     max_iterations = 30; /* Maximum number of event iterations */
 
+	top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
+                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+
     retval = jmi_ode_derivatives(jmi);
 
-    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
-                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+
     if (nR > 0) {
         jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, nR);
     }

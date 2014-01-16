@@ -61,12 +61,13 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     double* singular_values;
     int info;
     int i;
+	jmi_log_node_t destnode;
 
     char trans;
     jmi_linear_solver_t* solver = block->solver;
     iwork = solver->iwork;
     
-    /* If needed, reevaluate and factorize Jacobian */
+    /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
 
         /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->id);*/
@@ -96,8 +97,18 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             }
             else
                 solver->equed = 'N';
-        }        
+        }
+	}
 
+	/* Log the jacobian.*/
+	if((block->callbacks->log_options.log_level >= 5)) {
+		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
+                                     "Linear solver invoked for <block:%d>", block->id);
+		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+	}
+
+	/*  If jacobian is reevaluated then factorize Jacobian. */
+    if (solver->cached_jacobian != 1) {
         /* Call 
         *  DGETRF computes an LU factorization of a general M-by-N matrix A
         *  using partial pivoting with row interchanges.
@@ -129,6 +140,9 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE); */
     info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
     if(info) {
+		/* Close the LinearSolve log node and generate the Error/Warning node and return. */
+		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
+
         if(block->init) {
             jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->id);
         }
@@ -146,13 +160,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     if((block->callbacks->log_options.log_level >= 5)) {
-        jmi_log_node_t destnode;
-        destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
-                                      "Linear solver invoked for <block:%d>", block->id);
-
         jmi_log_reals(block->log, destnode, logInfo, "initial_guess", block->initial, block->n);
-        jmi_log_reals(block->log, destnode, logInfo, "b", block->res, block->n);
-        jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+        jmi_log_reals(block->log, destnode, logInfo, "b", block->res, block->n);     
         jmi_log_leave(block->log, destnode);
     }
  

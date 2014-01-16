@@ -97,6 +97,21 @@ int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
     return 0;
 }
 
+int jmi_block_evaluate_discrete_variables(void* b) {
+    int ret;
+    jmi_block_residual_t* block = (jmi_block_residual_t*)b;
+    jmi_t* jmi = block->jmi;
+    jmi_real_t* switches = jmi_get_sw(jmi);
+
+    ret = jmi_evaluate_switches(jmi, switches, block->mode_sw);
+    if (ret) {
+        jmi_log_node(jmi->log, logError, "Error", "Error evaluating switches after regularization <block:%d, iter:%d> at <t:%E>",
+        block->index, block->event_iter, jmi_get_t(jmi)[0]);
+    }
+    
+    return ret;
+}
+
 jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_reals_changed_flag) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
     jmi_t* jmi = block->jmi;
@@ -144,7 +159,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     } else {
         /* Check for infinite loop */
         if(jmi_check_infinite_loop(block->sw_old,switches,block->n_sw,iter) && jmi_check_infinite_loop(block->bool_old,booleans,nbr_bool,iter)){
-            jmi_log_node(log, logWarning, "Warning", "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
+            jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",block->index, iter, cur_time);
             block->event_iter = 0;
             return jmi_block_solver_status_inf_event_loop;
         }
@@ -209,6 +224,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
         jmi_block_check_discrete_variables_change,
         jmi_block_update_discrete_variables,
         jmi_block_log_discrete_variables,
+        jmi_block_evaluate_discrete_variables,
         n,
         b->options,
         b);
@@ -326,7 +342,7 @@ int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t del
         /* evaluate the residual to get negative side */
         flag |= b->F(b->jmi,x,fn,JMI_BLOCK_EVALUATE);
 
-        x[i] = x[i] - delta;
+        x[i] = x[i] + delta;
 
         for (j=0;j<n;j++) {
             b->jac[i*n + j] = (fp[j] - fn[j])/2./delta;

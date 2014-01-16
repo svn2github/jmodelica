@@ -145,6 +145,15 @@ typedef int (*jmi_block_solver_check_discrete_variables_change_func_t)(void* pro
  */
 typedef jmi_block_solver_status_t (*jmi_block_solver_update_discrete_variables_func_t)(void* problem_data, int* non_reals_changed_flag);
 
+/**
+ * \brief Function signature for evaluating discrete variables due to regularization.
+ * Values from the last residuals evaluation are used.
+ *
+ * @param problem_data (Input) Problem data pointer passed in the jmi_block_solver_new.
+ * @return 0 on successful execution or error code.
+ */
+typedef int (*jmi_block_solver_evaluate_discrete_variables)(void* problem_data);
+
 /* TODO: log_discrete_variables is not really needed. Kept just to make sure there are not changes during refactoring */
 typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_log_node_t node);
 
@@ -162,6 +171,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                            jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                            jmi_block_solver_log_discrete_variables log_discrete_variables, /* can be NULL, only needed during restructuring for regression testing */
+                           jmi_block_solver_evaluate_discrete_variables evaluate_discrete_variables, /* can be NULL, only needed after a regularization. */
                            int n,                            
                            jmi_block_solver_options_t* options,
                            void* problem_data);
@@ -186,11 +196,11 @@ typedef void (*jmi_block_solver_delete_func_t)(jmi_block_solver_t* block_solver)
 
 /**< \brief Equation block solver options. */
 struct jmi_block_solver_options_t {
-    double res_tol;                 /**< \brief Tolerance for the equation block solver */
-    double min_tol;                 /**< \brief Minimal allowed value for the tolerance */
-    double step_limit_factor;       /** < \brief Step limiting factor */
-    double regularization_tolerance; /** < \brief Tolerance for deciding when regularization should be performed */
-    int max_iter;                     /**< \brief Maximum number of iterations for the equation block solver before failure */
+    double res_tol;                         /**< \brief Tolerance for the equation block solver */
+    double min_tol;                         /**< \brief Minimal allowed value for the tolerance */
+    double step_limit_factor;               /**< \brief Step limiting factor */
+    double regularization_tolerance;        /**< \brief Tolerance for deciding when regularization should be performed */
+    int max_iter;                           /**< \brief Maximum number of iterations for the equation block solver before failure */
 
     int enforce_bounds_flag;                /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     int use_jacobian_equilibration_flag;    /**< \brief If jacobian equlibration should be used in equation block solvers */
