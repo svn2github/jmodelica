@@ -330,18 +330,28 @@ aspect VariabilityPropagation {
 		}
 		
 		// Pre var
-		if (wasDiscrete) {
+		if (wasDiscrete && !myPreVariable().isUnknown()) {
 			FAbstractVariable pre = myPreVariable();
 			pre.taggedForRemoval = true;
 			pre.variabilityPropagation(worklist, variability, bindingExp);
 		}
 		
 		// Derivative
-		if (isDifferentiatedVariable()) {
+		if (isDifferentiatedVariable() && !myDerivativeVariable().isUnknown()) {
 			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
 			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
 		}
+		
+        // Alias variables
+        if (!isAlias()) {
+            if (aliasSet() != null) {
+                for (AliasManager.AliasVariable av : aliasSet()) {
+                    if (av.getFVariable() != this)
+                        av.getFVariable().variabilityPropagation(worklist, variability, bindingExp);
+                }
+            }
+        }
 	}
 }
 
