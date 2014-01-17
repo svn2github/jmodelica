@@ -46,13 +46,76 @@
     <section>
       <title>Compilers</title>
 
-      <para/>
+      <para>The following compliance improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved support for algorithms, including when
+          statements.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for if equations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of discrete constructs.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of attributes in alias sets.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved index reduction algorithm.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for expandable connectors and for
+          overconstrained connection systems.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for automatic differentiation of functions with
+          smoothOrder annotation.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for String operations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Many bug fixes.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Added check mode, where a class is checked for errors to see if it
+      can be used in a simulation class.</para>
+
+      <para>Class annotations are now only allowed as the last element of the
+      class, as per the Modelica 3.2 specification.</para>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <para>The following simulation improvements have been made: </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved the simulation run-time with support for the
+          improvements made in the compiler</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved the robustness when solving linear and nonlinear
+          blocks.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>JModelica.org now simulates the example models from the MultiBody
+      package in MSL with the exception of the few models that require dynamic
+      state selection.</para>
     </section>
 
     <section>
@@ -172,7 +235,8 @@
         </listitem>
 
         <listitem>
-          <para>Inlining of simple functions is now activate by default</para>
+          <para>Inlining of simple functions is now activated by
+          default</para>
         </listitem>
 
         <listitem>
@@ -1861,12 +1925,41 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
-            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
-            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
-            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
-            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
-            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
+            <m:math display="block">
+              <m:mrow>
+                <m:munderover>
+                  <m:mo>∫</m:mo>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>0</m:mi>
+                  </m:msub>
+
+                  <m:msub>
+                    <m:mi>t</m:mi>
+
+                    <m:mi>f</m:mi>
+                  </m:msub>
+                </m:munderover>
+
+                <m:mrow>
+                  <m:mrow>
+                    <m:mi>L</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>.</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
+
+                  <m:mtext>dt</m:mtext>
+                </m:mrow>
+              </m:mrow>
+            </m:math>
           </informalequation>
 
           <para>the Optimica class attribute

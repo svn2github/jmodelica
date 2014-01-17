@@ -6722,7 +6722,7 @@ equation
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
 Semantic error at line 3773, column 2:
-  Calling function f(): types of component y and output c are not compatible
+  Calling function f(): array sizes of component y and output c are not compatible
 ")})));
 end UnknownArray7;
 

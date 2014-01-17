@@ -648,7 +648,7 @@ fmiStatus fmi2_me_instantiate(fmiComponent c,
     cb->emit_log = fmi2_me_emit_log;
     cb->is_log_category_emitted = fmi2_me_is_log_category_emitted;
     cb->log_options.logging_on_flag = loggingOn;
-    cb->log_options.log_level = logWarning;
+    cb->log_options.log_level = 5; /* must be high to let the messages during initialization go through */
     cb->allocate_memory = functions->allocateMemory;
     cb->free_memory = functions->freeMemory;
     cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */

@@ -342,7 +342,8 @@ aspect ErrorCheck {
   // TODO: find way to move side-effects out from inh attr
   inh boolean FExp.lockBranch(ErrorCheckType checkType);
   inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
-  inh boolean FIfEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
   eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);

@@ -25,62 +25,43 @@
 
       <itemizedlist>
         <listitem>
-          <para>Integer, Boolean and enumeration variables for optimizations
-          (parameters and constants are supported, as are discrete variables
-          in simulations)</para>
+          <para>Discrete variables are only supported in FMUs.</para>
         </listitem>
 
         <listitem>
           <para>The support for String variables and parameters is
-          limited</para>
+          limited.</para>
         </listitem>
 
         <listitem>
-          <para>Arrays indexed with enumerations or Booleans</para>
+          <para>Arrays indexed with enumerations or Booleans are not
+          supported.</para>
         </listitem>
 
         <listitem>
           <para>Functions with array inputs with sizes declared as ':' are
-          only partially supported (there are some operations on such
-          functions that aren't supported).</para>
+          only partially supported (there are some operations on such arrays
+          that are not supported).</para>
         </listitem>
 
         <listitem>
-          <para>Partial support for external functions; record arguments and
-          return values are not supported.</para>
+          <para>Partial support for external functions; records are not
+          supported as arguments or return values.</para>
         </listitem>
 
         <listitem>
           <para>The following built-in functions are not
           supported:<informaltable border="1" frame="void" width="25%">
               <tr>
-                <td>cardinality()</td>
-
-                <td>Connections.branch()</td>
-              </tr>
-
-              <tr>
                 <td>delay(...)</td>
-
-                <td>Connections.root(()</td>
               </tr>
 
               <tr>
-                <td>reinit(x, expr)</td>
-
-                <td>Connections.potentialRoot()</td>
-              </tr>
-
-              <tr>
-                <td>symmetric()</td>
-
-                <td>Connections.isRoot()</td>
+                <td>spatialDistribution(..)</td>
               </tr>
 
               <tr>
                 <td>terminal()</td>
-
-                <td>Connections.rooted()</td>
               </tr>
             </informaltable></para>
         </listitem>
@@ -91,15 +72,15 @@
               <tr>
                 <td>ceil(x)</td>
 
-                <td>initial()</td>
+                <td>integer(x)</td>
 
-                <td>rem(x,y)</td>
+                <td>reinit(x, expr)</td>
               </tr>
 
               <tr>
                 <td>div(x,y)</td>
 
-                <td>integer(x)</td>
+                <td>mod(x,y)</td>
 
                 <td>sample(start,interval)</td>
               </tr>
@@ -107,7 +88,7 @@
               <tr>
                 <td>edge(b)</td>
 
-                <td>mod(x,y)</td>
+                <td>pre(y)</td>
 
                 <td>semiLinear(...)</td>
               </tr>
@@ -115,16 +96,20 @@
               <tr>
                 <td>floor(x)</td>
 
-                <td>pre(y)</td>
+                <td>rem(x,y)</td>
 
                 <td>sign(v)</td>
+              </tr>
+
+              <tr>
+                <td>initial()</td>
               </tr>
             </informaltable></para>
         </listitem>
 
         <listitem>
-          <para>Overloaded operators (Modelica Language Specification, chapter
-          14)</para>
+          <para>Overloaded operators and the Complex type are not supported
+          (Modelica Language Specification, chapter 14).</para>
         </listitem>
 
         <listitem>
@@ -140,7 +125,7 @@
 
       <itemizedlist>
         <listitem>
-          <para>Annotations for transcription information</para>
+          <para>Annotations for transcription information.</para>
         </listitem>
       </itemizedlist>
     </listitem>
@@ -156,12 +141,12 @@
         </listitem>
 
         <listitem>
-          <para>Second order derivatives (Hessians) are not provided</para>
+          <para>Second order derivatives (Hessians) are not provided.</para>
         </listitem>
 
         <listitem>
           <para>The interface for interacting with JMUs does not comply with
-          FMI specification</para>
+          FMI specification.</para>
         </listitem>
       </itemizedlist>
     </listitem>
@@ -178,7 +163,7 @@
 
         <listitem>
           <para>Functions for setting and getting string variables do not
-          work</para>
+          work.</para>
         </listitem>
       </itemizedlist>
     </listitem>

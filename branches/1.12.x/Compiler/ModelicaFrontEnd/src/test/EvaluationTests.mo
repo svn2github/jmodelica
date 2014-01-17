@@ -1083,4 +1083,37 @@ end EvaluationTests.EvalColonSizeCell;
 ")})));
 end EvalColonSizeCell;
 
+
+model SignEval1
+	constant Integer a1 = sign(-1.0);
+    constant Integer a2 = a1;
+    constant Integer b1 = sign(-0.5);
+    constant Integer b2 = b1;
+    constant Integer c1 = sign(0.0);
+    constant Integer c2 = c1;
+    constant Integer d1 = sign(0.5);
+    constant Integer d2 = d1;
+    constant Integer e1 = sign(1.0);
+    constant Integer e2 = e1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="SignEval1",
+			description="Test constant evaluation of sign()",
+			flatModel="
+fclass EvaluationTests.SignEval1
+ constant Integer a1 = sign(- 1.0);
+ constant Integer a2 = -1;
+ constant Integer b1 = sign(- 0.5);
+ constant Integer b2 = -1;
+ constant Integer c1 = sign(0.0);
+ constant Integer c2 = 0;
+ constant Integer d1 = sign(0.5);
+ constant Integer d2 = 1;
+ constant Integer e1 = sign(1.0);
+ constant Integer e2 = 1;
+end EvaluationTests.SignEval1;
+")})));
+end SignEval1;
+
 end EvaluationTests;

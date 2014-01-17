@@ -557,6 +557,9 @@ aspect FlatAPI {
 		for (FVariable fv : discreteVariables()) {
 			l.add((FVariable) lookupFV(fv.getFQName().preName()));
 		}
+        for (FVariable fv : continuousVariablesUsedInPreInInitial()) {
+            l.add((FVariable) lookupFV(fv.getFQName().preName()));
+        }
 		return l;
 	}
 	

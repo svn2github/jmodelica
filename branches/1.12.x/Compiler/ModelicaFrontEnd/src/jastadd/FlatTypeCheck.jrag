@@ -220,10 +220,16 @@ aspect FlatTypeCheck {
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
 	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
-	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-		  if (!getLeft().type().equivalentTo(getRight().type())) {
-			  error("The right and left expression types of equation are" +
-		  			" not compatible");		  
+      FType left = getLeft().type();
+      FType right = getRight().type();
+	  if (!left.isUnknown() && !right.isUnknown()) {
+		  if (!left.equivalentTo(right)) {
+		      if (left.scalarType().equivalentTo(right.scalarType())) {
+		          if (!lockBranch(checkType))
+		              error("The array sizes of right and left hand side of equation are not compatible");        
+		      } else {
+	              error("The right and left expression types of equation are not compatible");        
+		      }
 		  }
 	  }
   }
@@ -1051,7 +1057,7 @@ aspect FlatVariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen()) 
+        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }
@@ -1070,11 +1076,11 @@ aspect FlatVariabilityCheck {
     }
     
     public void InstPreExp.discreteArgError() {
-        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses and initial equations");
     }
     
     public void FChangeExp.discreteArgError() {
-        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses and initial equations");
     }
     
     public void FReinit.discreteArgError() {
