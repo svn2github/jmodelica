@@ -59,6 +59,10 @@
         </listitem>
 
         <listitem>
+          <para>Improved handling of discrete constructs.</para>
+        </listitem>
+
+        <listitem>
           <para>Improved handling of attributes in alias sets.</para>
         </listitem>
 
