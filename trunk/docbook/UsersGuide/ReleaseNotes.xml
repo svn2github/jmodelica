@@ -18,27 +18,28 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Modelica.Mechanics.MultiBody</para>
+            <para>Greatly improved support for
+            Modelica.Mechanics.MultiBody</para>
           </listitem>
 
           <listitem>
-            <para>expandable connectors</para>
+            <para>Support for expandable connectors</para>
           </listitem>
 
           <listitem>
-            <para>when statements</para>
+            <para>Support for when statements</para>
           </listitem>
 
           <listitem>
-            <para>event generating functions</para>
+            <para>Support for event generating built-in functions</para>
           </listitem>
 
           <listitem>
-            <para>over-constrained connection graphs</para>
+            <para>Support for overconstrained connection graphs</para>
           </listitem>
 
           <listitem>
-            <para>reinit() operator</para>
+            <para>Support for reinit() operator</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -99,7 +100,7 @@
     <section>
       <title>Simulation</title>
 
-      <para>The following simulation improvements have been made: </para>
+      <para>The following simulation improvements have been made:</para>
 
       <itemizedlist>
         <listitem>
@@ -135,6 +136,8 @@
 
       <para>Jonathan Kämpe</para>
 
+      <para>Björn Lennernäs</para>
+
       <para>Fredrik Magnusson</para>
 
       <para>Jesper Mattsson</para>
@@ -151,8 +154,6 @@
         <title>Previous contributors</title>
 
         <para>Sofia Gedda</para>
-
-        <para>Björn Lennernäs</para>
 
         <para>Petter Lindgren</para>
 
@@ -1925,41 +1926,12 @@ yres = res['y']
           to encode Lagrange cost functions of the type</para>
 
           <informalequation>
-            <m:math display="block">
-              <m:mrow>
-                <m:munderover>
-                  <m:mo>∫</m:mo>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>0</m:mi>
-                  </m:msub>
-
-                  <m:msub>
-                    <m:mi>t</m:mi>
-
-                    <m:mi>f</m:mi>
-                  </m:msub>
-                </m:munderover>
-
-                <m:mrow>
-                  <m:mrow>
-                    <m:mi>L</m:mi>
-
-                    <m:mo>⁡</m:mo>
-
-                    <m:mfenced>
-                      <m:mi>.</m:mi>
-                    </m:mfenced>
-                  </m:mrow>
-
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
-
-                  <m:mtext>dt</m:mtext>
-                </m:mrow>
-              </m:mrow>
-            </m:math>
+            <m:math display="block"><m:mrow> <m:munderover> <m:mo>∫</m:mo>
+            <m:msub> <m:mi>t</m:mi> <m:mi>0</m:mi> </m:msub> <m:msub>
+            <m:mi>t</m:mi> <m:mi>f</m:mi> </m:msub> </m:munderover> <m:mrow>
+            <m:mrow> <m:mi>L</m:mi> <m:mo>⁡</m:mo> <m:mfenced> <m:mi>.</m:mi>
+            </m:mfenced> </m:mrow> <m:mspace depth="0.5ex" height="0.5ex"
+            width="1ex"/> <m:mtext>dt</m:mtext> </m:mrow> </m:mrow></m:math>
           </informalequation>
 
           <para>the Optimica class attribute
