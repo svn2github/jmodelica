@@ -2729,8 +2729,8 @@ public
   output Real _der_y;
   Real y;
  algorithm
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.Simple._der_F;
 
@@ -2800,17 +2800,17 @@ public
   Real y;
   Real c;
  algorithm
-  c := 0;
   _der_c := 0.0;
+  c := 0;
   for i in 1:10 loop
    if i > x then
     break;
    end if;
-   c := c + 0.5;
    _der_c := _der_c;
+   c := c + 0.5;
   end for;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.For._der_F;
 
@@ -2895,10 +2895,10 @@ public
   Real b;
   Real _der_b;
  algorithm
-  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2(x1, x2, _der_x1, _der_x2);
-  y := a + b;
+  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   _der_y := _der_a + _der_b;
+  y := a + b;
   return;
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1;
 
@@ -2912,10 +2912,10 @@ public
   Real a;
   Real b;
  algorithm
-  a := x1;
   _der_a := _der_x1;
-  b := sin(x2);
+  a := x1;
   _der_b := cos(x2) * _der_x2;
+  b := sin(x2);
   return;
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2;
 
@@ -2983,14 +2983,14 @@ public
   Real b;
  algorithm
   if 10 > x then
+   _der_b := 0.0;
    b := 1;
-   _der_b := 0.0;
   else
-   b := 2;
    _der_b := 0.0;
+   b := 2;
   end if;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.If._der_F;
 
@@ -3054,11 +3054,11 @@ public
   size(a) := {size(x, 1)};
   size(_der_a) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
-   a[i1] := x[i1] .^ 2;
    _der_a[i1] := 2 .* x[i1] .* _der_x[i1];
+   a[i1] := x[i1] .^ 2;
   end for;
-  y := a[1];
   _der_y := _der_a[1];
+  y := a[1];
   return;
  end IndexReduction.AlgorithmDifferentiation.InitArray._der_F;
 
@@ -3122,14 +3122,14 @@ public
   Real y;
   Real c;
  algorithm
-  c := 0;
   _der_c := 0.0;
+  c := 0;
   while c < x loop
-   c := c + 0.5;
    _der_c := _der_c;
+   c := c + 0.5;
   end while;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.While._der_F;
 
@@ -3226,10 +3226,10 @@ public
   Real b;
   Real _der_b;
  algorithm
-  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, 0, _der_x1, _der_x2);
-  y := a + b;
+  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   _der_y := _der_a + _der_b;
+  y := a + b;
   return;
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F1;
 
@@ -3245,13 +3245,13 @@ public
   Real b;
  algorithm
   if c < 10 then
-   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
    (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, c + 1, _der_x1, _der_x2);
+   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
   else
-   a := x1;
    _der_a := _der_x1;
-   b := sin(x2);
+   a := x1;
    _der_b := cos(x2) * _der_x2;
+   b := sin(x2);
   end if;
   return;
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F2;
@@ -3316,8 +3316,8 @@ public
   c := 0;
   c := if x > 23 then 2 else - 2;
   c := c + 23;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F;
 
@@ -3394,8 +3394,8 @@ public
   output Real _der_y;
   Real y;
  algorithm
-  y := x ^ 2;
   _der_y := 2 * x * _der_x;
+  y := x ^ 2;
   return;
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square;
 
@@ -3407,15 +3407,159 @@ public
   Real _der_y;
   Real y;
  algorithm
-  y := x ^ 2;
-  _der_y := 2 * x * _der_x;
   _der_der_y := 2 * x * _der_der_x + 2 * _der_x * _der_x;
+  _der_y := 2 * x * _der_x;
+  y := x ^ 2;
   return;
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square;
 
 end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
 ")})));
   end PlanarPendulum;
+
+model SelfReference_AssignStmt
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := x * x;
+        y := y * x;
+        annotation(smoothOrder=1);
+    end F;
+    Real a = F(time * 2);
+    Real b = der(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_SelfReference_AssignStmt",
+            description="Test differentiation of statements with lsh variable in rhs",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt
+ Real a;
+ Real b;
+ Real _der_a;
+equation
+ a = IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F(time * 2);
+ b = _der_a;
+ _der_a = IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F(time * 2, 2);
+
+public
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  y := y * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := x * _der_x + _der_x * x;
+  y := x * x;
+  _der_y := y * _der_x + _der_y * x;
+  y := y * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt;
+")})));
+end SelfReference_AssignStmt;
+
+model SelfReference_FunctionCall
+    function F1
+        input Real x;
+        output Real y;
+    algorithm
+        (,y) := F2(x);
+        (,y) := F2(y);
+        annotation(smoothOrder=1);
+    end F1;
+    function F2
+        input Real x;
+        output Real y;
+        output Real z;
+    algorithm
+        y := 42;
+        z := x * x;
+        z := z * x;
+        annotation(smoothOrder=1);
+    end F2;
+    Real a = F1(time * 2);
+    Real b = der(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_SelfReference_FunctionCall",
+            description="Test differentiation of statements with lsh variable in rhs",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall
+ Real a;
+ Real b;
+ Real _der_a;
+equation
+ a = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1(time * 2);
+ b = _der_a;
+ _der_a = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1(time * 2, 2);
+
+public
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1
+  input Real x;
+  output Real y;
+ algorithm
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2
+  input Real x;
+  output Real y;
+  output Real z;
+ algorithm
+  y := 42;
+  z := x * x;
+  z := z * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  (, _der_y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2(x, _der_x);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
+  (, _der_y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2(y, _der_y);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  output Real _der_z;
+  Real y;
+  Real z;
+ algorithm
+  _der_y := 0.0;
+  y := 42;
+  _der_z := x * _der_x + _der_x * x;
+  z := x * x;
+  _der_z := z * _der_x + _der_z * x;
+  z := z * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2;
+
+end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall;
+")})));
+end SelfReference_FunctionCall;
 
 end AlgorithmDifferentiation;
 

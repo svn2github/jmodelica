@@ -943,9 +943,9 @@ aspect AlgorithmDifferentiation{
     
     @Override
     public void FAssignStmt.diff(List<FStatement> diffed) {
-        diffed.add(fullCopy());
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
             diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFIdUseExp(), getRight().diff("time"), order() + 1));
+        diffed.add(fullCopy());
     }
    
     @Override
@@ -963,7 +963,6 @@ aspect AlgorithmDifferentiation{
     
     @Override
     public void FFunctionCallStmt.diff(List<FStatement> diffed) {
-        diffed.add(fullCopy());
         if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
             List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
             for (FFunctionCallLeft l : getLefts()) {
@@ -973,6 +972,7 @@ aspect AlgorithmDifferentiation{
             FExp diffedCall = getCall().diff("time");
             diffed.add(new FDerivativeFunctionCallStmt(lefts, (FAbstractFunctionCall) diffedCall, order() + 1));
         }
+        diffed.add(fullCopy());
     }
     
     syn FIfWhenStmt FIfWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses);
