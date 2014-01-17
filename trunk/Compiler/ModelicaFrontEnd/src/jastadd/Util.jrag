@@ -1205,9 +1205,10 @@ aspect FlatNames {
     syn String FAttribute.name()    = getName().name();
     
     syn String FAbstractFunctionCall.name();
-    eq InstFunctionCall.name()     = getNameNoTransform().name();
-    eq FFunctionCall.name()        = getNameNoTransform().name();
-    eq FBuiltInFunctionCall.name() = builtInName();
+    eq InstFunctionCall.name()      = getNameNoTransform().name();
+    eq FFunctionCall.name()         = getNameNoTransform().name();
+    eq InstRecordConstructor.name() = getRecordNoTransform().name();
+    eq FBuiltInFunctionCall.name()  = builtInName();
     
     syn String FAbstractVariable.name() = null;
     eq FVariable.name()         = getFQNameNoTransform().name();

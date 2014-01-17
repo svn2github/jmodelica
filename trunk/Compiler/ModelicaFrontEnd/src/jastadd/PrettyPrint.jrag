@@ -1664,6 +1664,13 @@ aspect FlatPrettyPrint {
 		str.print(")");
 	}
 
+    protected void InstRecordConstructor.prettyPrintExp(Printer p, PrintStream str, String indent) {
+        str.print(getRecord().name());
+        str.print("(");
+        getArgs().prettyPrintWithSep(p, str, "", ", ");
+        str.print(")");
+    }
+
 	public void InstDefaultArgument.prettyPrint(Printer p, PrintStream str, String indent) {
 		p.print(getFExp(), str, indent);
 	}

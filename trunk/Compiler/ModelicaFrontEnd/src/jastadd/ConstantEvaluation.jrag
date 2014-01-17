@@ -1302,6 +1302,14 @@ aspect ConstantEvaluation {
 	  return res;
   }
   
+  eq InstRecordConstructor.cevalCalc() {
+      CValueRecord res = new CValueRecord((FRecordType) type());
+      int i = 0;
+      for (InstFunctionArgument arg : getArgs())
+          res.setMember(i++, arg.getFExp().ceval());
+      return res;
+  }
+  
   // TODO: expand to handle boolean end enum index
   eq FEndExp.cevalCalc() {
 	  int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;

@@ -141,10 +141,14 @@ aspect Flattening {
 		super.flattenUsedFuncsAndEnums(fc);
 	}
 	
-	public void FRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
+	public void InstRecordConstructor.flattenUsedFuncsAndEnums(FClass fc) {
 		getRecord().flattenMyRecord(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
+    
+    public void InstDefaultArgument.flattenUsedFuncsAndEnums(FClass fc) {
+        getFExp().flattenUsedFuncsAndEnums(fc);
+    }
 	
 	public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
 		super.flattenUsedFuncsAndEnums(fc);
@@ -163,10 +167,8 @@ aspect Flattening {
 			myInstClassDecl().flattenEnum(fc);
 	}
 	
-	public void FIdUse.flattenMyRecord(FClass fc) {}
-	
-	public void FIdUseInstAccess.flattenMyRecord(FClass fc) {
-		getInstAccess().myInstClassDecl().flattenRecord(fc);
+	public void InstAccess.flattenMyRecord(FClass fc) {
+		myInstClassDecl().flattenRecord(fc);
 	}
 	
 	// Flatten function if not already done
@@ -2044,19 +2046,15 @@ aspect FlatExpressions {
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
 	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
 	
-	public FRecordConstructor FRecordConstructor.flatten(FQName prefix) {
+	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();
-		for (FExp e : getArgs()) 
-			args.add(e.flatten(prefix));
+		for (InstFunctionArgument a : getArgs()) 
+			args.add(a.getFExp().flatten(prefix));
 		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
 	}
 	
-	public FIdUse FIdUse.flattenRecordName() {
-		return flatten(new FQNameEmpty());
-	}
-	
-	public FIdUse FIdUseInstAccess.flattenRecordName() {
-		return new FIdUse(getInstAccess().myInstClassDecl().qualifiedName());
+	public FIdUse InstAccess.flattenRecordName() {
+		return new FIdUse(myInstClassDecl().qualifiedName());
 	}
 	
 	public FFunctionCall FFunctionCall.flatten(FQName prefix) {

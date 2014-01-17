@@ -464,14 +464,14 @@ aspect Environments {
 	public void FExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {}
 	
-	public void FRecordConstructor.populateInstRecordModificationList(
+	public void InstRecordConstructor.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {
-		InstClassDecl icd = ((FIdUseInstAccess) getRecord()).getInstAccess().myInstClassDecl();
+		InstClassDecl icd = getRecord().myInstClassDecl();
 		ArrayList<InstComponentDecl> inputs = icd.myModifiableComponents();
 		Modification mod = org.getModification();
 		for (int i = 0; i < inputs.size(); i++) {
 			String name = inputs.get(i).name();
-			list.add(new InstRecordModification(mod, name, getArg(i)));
+			list.add(new InstRecordModification(mod, name, getArg(i).getFExp()));
 		}
 	}
 	

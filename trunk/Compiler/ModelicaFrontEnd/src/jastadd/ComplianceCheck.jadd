@@ -240,9 +240,9 @@ aspect ComplianceCheck {
 		}
 	}
 	
-	public void FRecordConstructor.complianceCheck(ErrorCheckType checkType) {
-		for (FExp e : getArgs())
-			if (e.size().isUnknown())
+	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {
+		for (InstFunctionArgument a : getArgs())
+			if (a.getFExp().size().isUnknown())
 				compliance("Unknown sizes in record constructors is not supported");
 	}
 	

@@ -304,7 +304,7 @@ aspect FlatVariability {
     }
 
     /**
-     * Convert all continous variables that are this expression refers to into discrete variables.
+     * Convert all continous variables that this expression refers to into discrete variables.
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     

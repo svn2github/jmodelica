@@ -1089,8 +1089,9 @@ aspect InstanceErrorCheck {
 	}
 	
 	syn String FAbstractFunctionCall.functionCallDecription() = "Calling function " + name() + "()";
-	eq FRecordConstructor.functionCallDecription() = "Record constructor for " + name();
-	eq InstFunctionCall.functionCallDecription()   = getName().myInstClassDecl().isRecord() ? 
+	eq FRecordConstructor.functionCallDecription()    = "Record constructor for " + name();
+    eq InstRecordConstructor.functionCallDecription() = "Record constructor for " + name();
+	eq InstFunctionCall.functionCallDecription()      = getName().myInstClassDecl().isRecord() ? 
 			"Record constructor for " + name() : super.functionCallDecription();
 	  
 	public boolean InstFunctionArgument.generateUnbindableError(String desc, boolean genForPos) {

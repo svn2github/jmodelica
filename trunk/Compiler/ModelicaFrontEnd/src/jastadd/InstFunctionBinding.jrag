@@ -201,9 +201,8 @@ aspect InstFunctionBinding {
 	 * This implementation adds the argument to the original arguments 
 	 * and the expression from the argument as a child.
 	 */
-	public void FRecordConstructor.addArgument(InstFunctionArgument arg) {
-		addArg(arg.getFExpNoTransform().fullCopy());
-		addToOriginalArgs(arg);
+	public void InstRecordConstructor.addArgument(InstFunctionArgument arg) {
+		addArg(arg);
 	}
 	
 	public class InstFunctionCall {
@@ -531,8 +530,7 @@ aspect InstFunctionBinding {
 		    	n = builtInTranslator.create(name, temp);
 		    if (n == null) {
 				if (target.isRecord() && argsOK) {
-					FIdUse rec = new FIdUseInstAccess(getName());
-					n = new FRecordConstructor(rec, new List());
+					n = new InstRecordConstructor(getName(), new List());
 				} else {
 					InstAccess accessName = getName();
 					if (externalObject)
