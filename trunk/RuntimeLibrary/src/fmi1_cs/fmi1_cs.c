@@ -584,7 +584,25 @@ fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time){
 
 int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step_event){
     int retval;
+
+    /* Set the continuous states */
+    retval = fmi1_me_set_continuous_states(ode_problem->fmix_me, (fmiReal*)ode_problem->states, ode_problem->n_real_x);
+    if (retval != fmiOK) {
+        return fmiError;
+    }
     
+    /* Set the time */
+    retval = fmi1_me_set_time(ode_problem->fmix_me, ode_problem->time);
+    if (retval != fmiOK) {
+        return fmiError;
+    }
+    
+    /* Set the inputs */
+    retval = fmi1_cs_set_input(ode_problem, ode_problem->time);
+    if (retval != fmiOK) {
+        return fmiError;
+    }
+
     retval = fmi1_me_completed_integrator_step(ode_problem->fmix_me, step_event);
     if (retval != fmiOK) {
         return -1;

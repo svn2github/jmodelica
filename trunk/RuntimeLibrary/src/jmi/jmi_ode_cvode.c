@@ -132,7 +132,9 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             return JMI_ODE_ERROR;
         }
         
-        /* After each step call completed integrator step */
+        /* After each step update the ode_problem struct and call completed integrator step. */
+        problem->states = NV_DATA_S(integrator->y_work);
+        problem->time = tret;
         retval = problem->complete_step_func(problem, &step_event);
         if (retval != 0) {
             jmi_log_node(problem->log, logError, "Error", "Failed to complete an integrator step. "
