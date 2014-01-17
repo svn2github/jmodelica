@@ -166,7 +166,7 @@ aspect OptimicaTransformCanonical {
 	
 	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap, true);
+		createArrayTemporaries(eqns, vars, indexMap);
 		//log.debug("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
@@ -190,7 +190,7 @@ aspect OptimicaTransformCanonical {
 	
 	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap, true);
+		createArrayTemporaries(eqns, vars, indexMap);
 		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
 		myIndexMap.putAll(indexMap);
 		Indices indices = indices();

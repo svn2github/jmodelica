@@ -599,7 +599,8 @@ aspect FormattedPrint {
 			}
 		}
 
-		for (Annotation annotation : getAnnotations()) {
+		if (hasAnnotation()) {
+		    Annotation annotation = getAnnotation();
 			if (!annotation.hasBeenFormatted()) {
 				annotation.preFormatting = new DefaultFormattingItem(indentation.toString());
 			}
@@ -986,13 +987,6 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
-	void EquationAnnotation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
-		printStream.print(getAnnotation().preFormatting);
-		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(";");
-		printStream.print(getAnnotation().postFormatting);
-	}
-
 	void Statement.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
@@ -1231,12 +1225,6 @@ aspect FormattedPrint {
 
 		if (hasExternalClause()) {
 			getExternalClause().doPrettyPrintFormatted(printer, printStream);
-			if (getExternalClause().originalAnnotation2 != null) {
-				printStream.print(getExternalClause().originalAnnotation2.preFormatting);
-				getExternalClause().originalAnnotation2.prettyPrintFormattedHelper(printer, printStream);
-				printStream.print(";");
-				printStream.print(getExternalClause().originalAnnotation2.postFormatting);
-			}
 		}
 		
 		getEndDecl().doPrettyPrintFormatted(printer, printStream);
@@ -1285,8 +1273,8 @@ aspect FormattedPrint {
 		printStream.print(')');
 		if (hasStringComment())
 			getStringComment().doPrettyPrintFormatted(printer, printStream);
-		if (getNumAnnotation() == 1)
-			getAnnotation(0).doPrettyPrintFormatted(printer, printStream);
+		if (hasAnnotation())
+			getAnnotation().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(';');
 	}
 	
@@ -1647,13 +1635,6 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
-	void ElementAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
-		printStream.print(getAnnotation().preFormatting);
-		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(";");
-		printStream.print(getAnnotation().postFormatting);
-	}
-
 	eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
 	
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
@@ -1964,8 +1945,8 @@ aspect FormattedPrint {
 			getExternalLanguage().doPrettyPrintFormatted(printer, printStream);
 		if (hasExternalFunctionCall())
 			getExternalFunctionCall().doPrettyPrintFormatted(printer, printStream);
-		if (hasAnnotation1())
-			getAnnotation1().doPrettyPrintFormatted(printer, printStream);
+		if (hasAnnotation())
+			getAnnotation().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(';');
 	}
 	

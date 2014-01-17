@@ -132,9 +132,9 @@ public class ModelicaCompiler {
 	protected boolean debugSrcIsHome = false;
 	protected static final String[] DEBUG_TEMPLATE_IN_SRC = new String[] {
 	    "Compiler/ModelicaCBackEnd/templates",
-        "Compiler/ModelicaXMLBackEnd/templates",
+        "Compiler/ModelicaFMUXBackEnd/templates",
         "Compiler/OptimicaCBackEnd/templates",
-        "Compiler/OptimicaXMLBackEnd/templates",
+        "Compiler/OptimicaFMUXBackEnd/templates",
 	};
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
@@ -998,24 +998,39 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
-//      noteUsedMemory();
 		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
 		sr.options.copyAllOptions(this.options);
 		for (String name : names) {
-			if (new File(name).isDirectory()) {
-				if (!sr.getProgram().getLibraryList().addLibrary(name))
-					log.error(String.format("The directory '%s' is not a Modelica library.", name));
+		    File f = new File(name);
+		    String name_tmp = name;
+		    if (f.isDirectory()) 
+		        name_tmp = LibNode.isStructuredLib(f) ? new File(f, LibNode.PACKAGE_FILE).getPath() : null;
+            SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
+            if (!options.getBooleanOption("ignore_within")) {
+                String lib = null;
+                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
+                    lib = sr_tmp.findOutermostLibraryDir();
+                else if (f.getName().equals(LibNode.PACKAGE_FILE))
+                    lib = f.getParent();
+                if (lib != null) {
+                    String type = f.isDirectory() ? "Directory" : "File";
+                    log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
+                    name = lib;
+                    f = new File(name);
+                }
+            }
+			if (f.isDirectory()) {
+				if (!sr.getProgram().getLibraryList().addLibrary(name)) 
+					log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
 			} else {
-				SourceRoot sr_tmp = parseModel(name);
-				for(StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
+				for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
 					sr.getProgram().addUnstructuredEntity(sd);
 			}
 		}
 		
 		hookFilesParsed(sr);
-//      noteUsedMemory();
 		ASTNode.endStep("parseModel()");
 		
 		return sr;
@@ -1238,15 +1253,6 @@ public class ModelicaCompiler {
 	}
 	
 	/**
-	 * \brief Create a new XMLGenerator object.
-	 * 
-	 * Override for subclasses needing another subclass of XMLGenerator.
-	 */
-	protected XMLGenerator createXMLGenerator(FClass fc) {
-		return new XMLGenerator(new PrettyPrinter(), '$', fc);
-	}
-	
-	/**
 	 * \brief Create a new CGenerator object.
 	 * 
 	 * Override for subclasses needing another subclass of CGenerator.
@@ -1269,6 +1275,14 @@ public class ModelicaCompiler {
 		if (tmpl != null) {
 		    if (debugSrcIsHome) 
 		        tmpl = debugFindTemplateInSrcDir(tmpl);
+			hookCheckAbort();
+			hookCodeGeneratorCreated(gen);
+			String output = new File(dir, name).getPath();
+			gen.generate(tmpl, output);
+			log.debug("Generated file '" + output + "'.");
+			
+			//XML template == null is valid
+		} else if (gen instanceof GenericXMLGenerator) {
 			hookCheckAbort();
 			hookCodeGeneratorCreated(gen);
 			String output = new File(dir, name).getPath();
@@ -1308,7 +1322,7 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		generateFile(fc, target.getXMLTemplates(fc), createXMLGenerator(fc), 
+		generateFile(fc, target.getXMLTemplates(fc), target.getXMLGenerator(fc),
 					outDir, "modelDescription.xml");
 		generateFile(fc, target.getCTemplates(fc), createCGenerator(fc), 
 					sourceDir, name + ".c");
@@ -1635,38 +1649,41 @@ public class ModelicaCompiler {
     * The target is an enum that represents all different targets, the templates are in a separate class.
     */
     public enum TargetObject {
-        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu"),
-        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu"),
-        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu"),
-        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu"),
-        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu"), 
-        JMU       (Templates.JMU,       "jmu",       "jmu"),
-        FMUX      (Templates.FMUX,       null,       "fmux"),
-        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu"), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        CHECK     (Templates.NULL,      null,        null, ErrorCheckType.CHECK),
-        NOCODEGEN (Templates.NULL,      null,        null, ErrorCheckType.COMPILE, false);
+        
+        FMUME10   (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUME20   (Templates.FMUME20,   "fmume20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
+        FMUCS20   (Templates.FMUCS20,   "fmucs20",   "fmu",  XMLGeneratorHolder.FMI2),
+        FMUMECS20 (Templates.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
+        JMU       (Templates.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
+        FMUX      (Templates.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
+        FMUME20a  (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        FMUCS20a  (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
+        CHECK     (Templates.NULL,      null,        null,   XMLGeneratorHolder.FMI1, ErrorCheckType.CHECK),
+        NOCODEGEN (Templates.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false);
 
         private final Templates templates;
         private final String makeFileFlag;
         private final String suffix;
+        private final XMLGeneratorHolder xmlGenerator;
         private final ErrorCheckType checkType;
         private final boolean codeGen;
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType, boolean codeGen) {
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType, boolean codeGen) {
             this.templates = templates;
             this.makeFileFlag = makeFileFlag;
             this.suffix = suffix;
             this.checkType = checkType;
             this.codeGen = codeGen;
+            this.xmlGenerator = xmlGenerator;
         }
 
-        private TargetObject(Templates templates, String makeFileFlag, String suffix, ErrorCheckType checkType) {
-            this(templates, makeFileFlag, suffix, checkType, true);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator, ErrorCheckType checkType) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, checkType, true);
         }
         
-        private TargetObject(Templates templates, String makeFileFlag, String suffix) {
-            this(templates, makeFileFlag, suffix, ErrorCheckType.COMPILE);
+        private TargetObject(Templates templates, String makeFileFlag, String suffix, XMLGeneratorHolder xmlGenerator) {
+            this(templates, makeFileFlag, suffix, xmlGenerator, ErrorCheckType.COMPILE);
         }
 
         
@@ -1739,6 +1756,15 @@ public class ModelicaCompiler {
             return templates.getXMLTemplates(fc);
         }
         
+    	/**
+    	 * \brief Create a new XMLGenerator object.
+    	 * 
+    	 * Override for subclasses needing another subclass of XMLGenerator.
+    	 */
+    	public GenericXMLGenerator getXMLGenerator(FClass fc) {
+    		return xmlGenerator.getXMLGenerator(fc);
+    	}
+        
         /**
          * get the flag should be used in the Makefile.
          * 
@@ -1799,6 +1825,14 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_cs_xml", true);
                     options.setBooleanOption("generate_xml_equations", false);
                     break;
+                case FMUMECS20:
+                	options.setBooleanOption("generate_ode", true);
+                    options.setBooleanOption("generate_dae", false);
+                    options.setBooleanOption("equation_sorting", true);
+                    options.setBooleanOption("generate_fmi_me_xml", true);
+                    options.setBooleanOption("generate_fmi_cs_xml", true);
+                    options.setBooleanOption("generate_xml_equations", false);
+                    break;
                 case JMU:
                     options.setBooleanOption("generate_ode", false);
                     options.setBooleanOption("generate_dae", true);
@@ -1821,18 +1855,15 @@ public class ModelicaCompiler {
             }
             
             switch (this) {
+                case FMUME20a:
+                case FMUCS20a:
+                    options.setStringOption("fmi_version", "2.0alpha"); //TODO: Temporary option.
+                    break;
                 case FMUME10:
                 case FMUCS10:
-                    options.setStringOption("fmi_version", "1.0");
                 case FMUME20:
                 case FMUCS20:
                 case FMUMECS20:
-                    options.setStringOption("fmi_version", "2.0");
-                    break;
-                case FMUME20a:
-                case FMUCS20a:
-                    options.setStringOption("fmi_version", "2.0alpha");
-                    break;
                 case JMU:
                 case FMUX:
                     break;
@@ -1843,7 +1874,43 @@ public class ModelicaCompiler {
 
 }
 
+
 aspect CompilationHelpers {
+
+
+syn boolean SourceRoot.isFileInLibrary() = findOutermostLibraryDir() != null;
+
+syn lazy String SourceRoot.findOutermostLibraryDir() {
+    if (getProgram().getNumUnstructuredEntity() != 1) 
+        return null;
+    else
+        return getProgram().getUnstructuredEntity(0).findOutermostLibraryDir();
+}
+
+syn String StoredDefinition.findOutermostLibraryDir() {
+    if (!hasWithin() || !getWithin().hasPackageName())
+        return null;
+    File me = new File(fileName());
+    if (me.getName().equals(LibNode.PACKAGE_FILE))
+        me = me.getParentFile();
+    File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
+    return (lib != null) ? lib.getPath() : null;
+}
+
+syn File Access.findOutermostLibraryDirForWithin(File f) = null;
+eq Dot.findOutermostLibraryDirForWithin(File f) {
+    for (int i = getNumAccess() - 1; i >= 0 && f != null; i--)
+        f = getAccess(i).findOutermostLibraryDirForWithin(f);
+    return f;
+}
+eq NamedAccess.findOutermostLibraryDirForWithin(File f) {
+    f = f.getParentFile();
+    if (f.getName().equals(getID()) && LibNode.isStructuredLib(f))
+        return f;
+    else 
+        return null;
+}
+
 
 /**
  * Class for all templates.
@@ -1854,11 +1921,11 @@ aspect CompilationHelpers {
 public class Templates {
     
     public static final Templates NULL      = new Templates();
-    public static final Templates FMUME10   = new Templates("fmi_model_description.tpl",       "fmi1_me_modelica_template.c");
-    public static final Templates FMUME20   = new Templates("fmi_model_description.tpl",       "fmi2_master_modelica_template.c");
-    public static final Templates FMUCS10   = new Templates("fmi1_cs_model_description.tpl",   "fmi1_cs_modelica_template.c");
-    public static final Templates FMUCS20   = new Templates("fmi1_cs_model_description.tpl",   "fmi2_master_modelica_template.c");
-    public static final Templates FMUMECS20 = new Templates("fmi1_cs_model_description.tpl",   "fmi2_master_modelica_template.c");
+    public static final Templates FMUME10   = new Templates(null,                              "fmi1_me_modelica_template.c");
+    public static final Templates FMUME20   = new Templates(null,                              "fmi2_master_modelica_template.c");
+    public static final Templates FMUCS10   = new Templates(null,                              "fmi1_cs_modelica_template.c");
+    public static final Templates FMUCS20   = new Templates(null,                              "fmi2_master_modelica_template.c");
+    public static final Templates FMUMECS20 = new Templates(null,                              "fmi2_master_modelica_template.c");
     public static final Templates JMU       = new Templates("jmodelica_model_description.tpl", "jmi_modelica_template.c");
     public static final Templates FMUX      = new Templates("jmodelica_model_description.tpl");
     
@@ -1897,6 +1964,33 @@ private String Templates.getCTemplateName(FClass fc) {
 
 public String Templates.getXMLTemplateName(FClass fc) {
     return template(XML);
+}
+
+public class XMLGeneratorHolder {
+
+    public static final XMLGeneratorHolder NULL  = new XMLGeneratorHolder();
+    public static final XMLGeneratorHolder FMI1  = new XMLGeneratorHolder(Fmi1XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder FMI2  = new XMLGeneratorHolder(Fmi2XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder JMI   = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder FMIX  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+
+    private final GenericXMLGenerator.Creator xmlGen;
+
+    private XMLGeneratorHolder(GenericXMLGenerator.Creator xmlGen) {
+        this.xmlGen = xmlGen;
+    }
+    
+    private XMLGeneratorHolder() {
+        this.xmlGen = null;
+    }
+}
+    
+public GenericXMLGenerator XMLGeneratorHolder.getXMLGenerator(FClass fc) {
+    if (xmlGen == null) {
+    	return null;
+    }
+	
+	return (GenericXMLGenerator) xmlGen.create(new PrettyPrinter(), '$', fc);
 }
 
 /**

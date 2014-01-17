@@ -47,79 +47,55 @@ aspect Library {
 	
 		//log.debug("LibNode.getStoredDefinition: "+ getName() + " enter");
 	    
-	    
-		if (getStructured()) {
-			String dirName = getFileName();
-			File baseDir = new File(dirName);
-			File packageFile = new File(baseDir, PACKAGE_FILE);
-			try {
-				
-				if (packageFile.isFile()) {
-				    log.info("Reading file: " + packageFile);
-				    ParserHandler ph = new ParserHandler();
-				    SourceRoot sr = ph.parseFile(packageFile.getPath());
-				    StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
-				    FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
-		   			entity.setFileName(packageFile.getPath());
-		   			LibClassDecl lcd = new LibClassDecl(fcd);
-		   				   				   			
-		   			LibraryList ll = new LibraryList();
-		   			ll.add(dirName, true);
-					lcd.setLibNodeList(ll.createLibNodeList());
-					
-					File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
-					if (orderFile.isFile()) {
-						BufferedReader in = new BufferedReader(ParserHandler.fileReader(orderFile));
-						java.util.List<String> order = new ArrayList<String>();
-						String line;
-						while ((line = in.readLine()) != null)
-							order.add(line);
-						lcd.setOrder(order);
-					}
-					
-					entity.setElement(lcd, 0);
-					//log.debug("LibNode.getStoredDefinition: "+ getName() + " exit1");
-	   				return entity;
-	   			}
-			} catch (ParserException e) {
-				e.getProblem().setFileName(packageFile.getPath());
-				log.error(e.getProblem().toString());
-				return createErrorStoredDefinition();
-			} catch (Exception e) {
-				String msg = "Error when parsing file: '" + packageFile + "':\n" + 
-						"   " + e.getClass().getName() + "\n";
-				if (e.getMessage() != null)
-					msg = msg + "   " + e.getMessage();
-				log.error(msg);
-				log.debug(e);
-				return createErrorStoredDefinition();
-			} 		
-			
-		} else {
-			try {
-				log.info("Reading file: " + getFileName() + "...");
-				ParserHandler ph = new ParserHandler();
-				SourceRoot sr = ph.parseFile(getFileName());
-				for (StoredDefinition sd : sr.getProgram().getUnstructuredEntitys()) {
-					sd.setFileName(getFileName());
-				}
-				//log.debug("LibNode.getStoredDefinition: "+ getName() + " exit2");
-				return sr.getProgram().getUnstructuredEntity(0);
-			} catch (ParserException e) {
-				e.getProblem().setFileName(getFileName());
-				log.error(e.getProblem().toString()+"\n");
-				return createErrorStoredDefinition();
-			} catch (Exception e) {
-				String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
-						"   " + e.getClass().getName() + "\n";
-				if (e.getMessage() != null)
-					msg = msg + "   " + e.getMessage();
-				log.error(msg);
-				log.debug(e);
-				return createErrorStoredDefinition();
-			} 
-		}
-		return null;
+        String fileName = getFileName();
+        String dirName = null;
+        File baseDir = null;
+        boolean isStructured = getStructured();
+        if (isStructured) {
+            dirName = getFileName();
+            baseDir = new File(dirName);
+            fileName = new File(baseDir, PACKAGE_FILE).getPath();
+        }
+        try {
+            log.info("Reading file: " + fileName);
+            ParserHandler ph = new ParserHandler();
+            SourceRoot sr = ph.parseFile(fileName);
+            StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
+            entity.setFileName(fileName);
+            if (isStructured) {
+                FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
+                LibClassDecl lcd = new LibClassDecl(fcd);
+
+                LibraryList ll = new LibraryList();
+                ll.add(dirName, true);
+                lcd.setLibNodeList(ll.createLibNodeList());
+                
+                File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
+                if (orderFile.isFile()) {
+                    BufferedReader in = new BufferedReader(ParserHandler.fileReader(orderFile));
+                    java.util.List<String> order = new ArrayList<String>();
+                    String line;
+                    while ((line = in.readLine()) != null)
+                        order.add(line);
+                    lcd.setOrder(order);
+                }
+                
+                entity.setElement(lcd, 0);
+            }
+            return entity;
+        } catch (ParserException e) {
+            e.getProblem().setFileName(getFileName());
+            problem(e.getProblem());
+            return createErrorStoredDefinition();
+        } catch (Exception e) {
+            String msg = "Error when parsing file: '" + getFileName() + "':\n" + 
+                    "   " + e.getClass().getName() + "\n";
+            if (e.getMessage() != null)
+                msg = msg + "   " + e.getMessage();
+            error(msg);
+            log.debug(e);
+            return createErrorStoredDefinition();
+        } 
 	}
 	
 	/**
@@ -186,7 +162,7 @@ aspect Library {
 		setImportList(fcd.getImportList());
 		setClassDeclList(fcd.getClassDeclList());
 		setComponentDeclList(fcd.getComponentDeclList());
-		setAnnotationList(fcd.getAnnotationList());
+		setAnnotationOpt(fcd.getAnnotationOpt());
 		setExternalClauseOpt(fcd.getExternalClauseOpt());
 		setEndDecl(fcd.getEndDecl());
 		setLocation(fcd);

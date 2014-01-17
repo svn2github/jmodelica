@@ -6,9 +6,9 @@ public class FilteredIterator<T> implements Iterator<T> {
 	
 	private T next;
 	private Iterator<T> parent;
-	private Criteria<T> criteria;
+	private Criteria<? super T> criteria;
 	
-	public FilteredIterator(Iterator<T> parent, Criteria<T> criteria) {
+	public FilteredIterator(Iterator<T> parent, Criteria<? super T> criteria) {
 		this.parent = parent;
 		this.criteria = criteria;
 		next();

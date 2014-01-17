@@ -21,7 +21,7 @@
 #include "jmi_init_opt.h"
 
 /* Forward declarations */
-static void print_problem_stats(jmi_init_opt_t *jmi_init_opt);
+/*static void print_problem_stats(jmi_init_opt_t *jmi_init_opt);*/
 
 /* Copy free parameters */
 static void copy_p(jmi_init_opt_t *jmi_init_opt) {
@@ -749,6 +749,8 @@ int jmi_init_opt_get_result(jmi_init_opt_t *jmi_init_opt, jmi_real_t *p_opt,
 
 */
 
+/* Un-used function */
+/*
 static void print_problem_stats(jmi_init_opt_t *jmi_init_opt) {
 
     printf("Creating NLP for the DAE initialization problem:\n");
@@ -759,3 +761,4 @@ static void print_problem_stats(jmi_init_opt_t *jmi_init_opt) {
     printf("Number of non-zeros in equality constraint Jacobian:       %d\n",jmi_init_opt->dh_n_nz);
 
 }
+*/

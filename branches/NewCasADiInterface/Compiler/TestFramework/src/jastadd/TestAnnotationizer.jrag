@@ -59,50 +59,77 @@ abstract public class TestAnnotationizerHelper {
 	 * @param modelName    the name of the test model
 	 * @param description  the text to put in the "description" field of the test annotation
 	 * @param data         any extra data to send to the delegate object
-	 * @param opts         comma-separated list of compiler options to override defaults for
+     * @param opts         comma-separated list of compiler options to override defaults for
+     * @param checkType    check type to use when checking
 	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
 	 */
 	public static void doAnnotation(String filePath, String testType, String modelName, 
-			String description, String[] opts, String data, boolean write) throws Exception {
+			String description, String[] opts, String data, String checkType, boolean write) throws Exception {
 		try {
 			Class cl = getTestCase(testType);
 			Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String[].class, String.class);
 			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
-			ta.createAnnotation(write);
-		} catch (InvocationTargetException e) {
-			handleException(e);
-		}
-	}
-
-	/**
-	 * This is the main method for regenerating an existing annotation.
-	 * 
-	 * @param filePath     the path to the Modelica file containing the test model
-	 * @param modelName    the name of the test model
-	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
-	 */
-	public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
-		try {
-			SourceRoot root = parse(filePath, modelName, new OptionRegistry());
-			ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
-			if (cd.isUnknown()) {
-				System.err.println("Class " + modelName + " not found");
-				System.exit(1);
-			}
-			AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests");
-			a = a.iterator().hasNext() ? a.iterator().next() : AnnotationNode.NO_ANNOTATION;
-			if (!a.exists()) {
-				System.err.println("No test annotation found in class " + modelName);
-				System.exit(1);
-			}
-			Class cl = getTestCase(a.name());
-			Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
-			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
+			ta.setCheckType(checkType);
 			ta.createAnnotation(write);
 		} catch (Exception e) {
 			handleException(e);
 		}
 	}
+
+    /**
+     * This is the main method for regenerating an existing annotation.
+     * 
+     * @param filePath     the path to the Modelica file containing the test model
+     * @param modelName    the name of the test model
+     * @param write        if <code>true</code>, write the annotation directly in the Modelica file
+     */
+    public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
+        try {
+            SourceRoot root = parse(filePath, modelName, new OptionRegistry());
+            ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
+            if (cd.isUnknown()) {
+                System.err.println("Class " + modelName + " not found");
+                System.exit(1);
+            }
+            AnnotationNode tests = cd.annotation("__JModelica/UnitTesting/tests");
+            AnnotationNode test = AnnotationNode.NO_ANNOTATION;
+            for (AnnotationNode n : tests) {
+                if (test.exists()) {
+                    System.err.println("Multiple test annotations found in class " + modelName + ".");
+                    System.err.println("TestAnnotationizer is currently unable to regenerate models with multiple tests!");
+                    System.exit(1);
+                }
+                test = n;
+            }
+            if (!test.exists()) {
+                System.err.println("No test annotation found in class " + modelName);
+                System.exit(1);
+            }
+            Class cl = getTestCase(test.name());
+            Constructor constructor = cl.getConstructor(ClassDecl.class, String.class, String.class);
+            TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(cd, filePath, modelName);
+            ta.createAnnotation(write);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
+
+    /**
+     * Set type of error checking to be performed.
+     * 
+     * Available for all test types, but only logical to change for error/warning/compliance tests.
+     */
+    public void setCheckType(String val) {
+        if (val != null)
+            checkType = ErrorCheckType.valueOf(ErrorCheckType.class, val.toUpperCase());
+    }
+    
+    /**
+     * Get type of error checking being performed.
+     */
+    public ErrorCheckType getCheckType() {
+        return (checkType == null) ? ErrorCheckType.COMPILE : checkType;
+    }
 	
 	/**
 	 * Get the test case generator class for the specified test case name (or prefix thereof).
@@ -155,7 +182,8 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("    -d=<data>    set extra data to send to the specific generator, \\n is interpreted");
 		System.out.println("    -p=<opts>    comma-separated list of compiler options to override defaults for, ");
 		System.out.println("                 example: -p=eliminate_alias_variables=false,default_msl_version=\"2.2\"");
-		System.out.println("    -h           print this help");
+        System.out.println("    -k=<type>    set the check type to use when error checking");
+        System.out.println("    -h           print this help");
 		System.out.println("  User will be prompted for type and/or class if not set with options.");
 		System.out.println("  Available test types:");
 		for (Class cl : TestAnnotationizerHelper.class.getClasses()) 
@@ -188,6 +216,7 @@ abstract public class TestAnnotationizerHelper {
 	protected String data;
 	protected SourceRoot root;
 	protected String[] opts;
+	protected ErrorCheckType checkType = null;
 	
 	/**
 	 * \brief Standard constructor for test case creators.
@@ -208,7 +237,6 @@ abstract public class TestAnnotationizerHelper {
 		this.description = prepare(description);
 		this.opts = opts;
 		this.data = data;
-		process();
 	}
 	
 	/**
@@ -226,13 +254,13 @@ abstract public class TestAnnotationizerHelper {
 		this.className = className;
 		AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
 		this.description = annotationString(a.forPath("description"), false);
-		this.data = annotationString(a.forPath(dataName()), false);
+        this.data = annotationString(a.forPath(dataName()), false);
+        setCheckType(annotationString(a.forPath("checkType"), false));
 		ArrayList<String> optStrings = new ArrayList<String>();
 		for (AnnotationNode a2 : a) 
 			if (a2.name().indexOf('_') >= 0) 
 				optStrings.add(a2.name() + '=' + annotationString(a2, true));
 		opts = optStrings.toArray(new String[optStrings.size()]);
-		process();
 	}
 	
 	protected static String annotationString(AnnotationNode a, boolean option) {
@@ -294,6 +322,7 @@ abstract public class TestAnnotationizerHelper {
 	 * @param write  if <code>true</code>, write the annotation directly in the Modelica file
 	 */
 	protected void createAnnotation(boolean write) throws Exception {
+        process();
 		if (write)
 			writeAnnotation();
 		else
@@ -452,6 +481,8 @@ abstract public class TestAnnotationizerHelper {
 		out.println("\t\t\tdescription=\"" + description + "\",");
 		for (String opt : opts) 
 			out.println("\t\t\t" + opt + ",");
+		if (checkType != null)
+		    out.println("\t\t\tcheckType=" + checkType.toString().toLowerCase() + ",");
 		printSpecific(out, "\t\t\t");
 		out.println(")})));");
 	}
@@ -480,7 +511,7 @@ abstract public class TestAnnotationizerHelper {
 		InstProgramRoot ipr = root.getProgram().getInstProgramRoot();
 		Collection<Problem> problems = null;
 		try {
-			ipr.checkErrorsInInstClass(className, ErrorCheckType.COMPILE);
+			ipr.checkErrorsInInstClass(className, getCheckType());
 			problems = root.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();
@@ -505,7 +536,7 @@ abstract public class TestAnnotationizerHelper {
 		fc.transformCanonical();
 		Collection<Problem> problems = null;
 		try {
-			fc.errorCheck(ErrorCheckType.COMPILE);
+			fc.errorCheck(getCheckType());
 			problems = root.collectWarnings();
 		} catch (CompilerException e) {
 			problems = e.getProblems();

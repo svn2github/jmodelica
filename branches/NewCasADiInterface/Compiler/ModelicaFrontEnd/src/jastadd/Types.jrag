@@ -28,36 +28,42 @@ aspect Types {
    syn String InstComponentDecl.className() = myInstClass().name();
 
    // The double dispatch pattern applied to subtype testing.
-   syn boolean InstNode.subType(InstNode t) = false;
+   syn boolean InstNode.subType(InstNode t)              = subType(t, true);
+   syn boolean InstNode.subType(InstNode t, boolean top) = false;
 
-   syn boolean InstNode.superTypeCompositeType(InstComposite subType)          = false;
-   syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType)     = false;
-   syn boolean InstNode.superTypeRecordType(InstRecord subType)                = false;
-   syn boolean InstNode.superTypeClassType(InstRoot subType)                   = false;
-   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType) = false;
+   syn boolean InstNode.superTypeCompositeType(InstComposite subType, boolean top)          = false;
+   syn boolean InstNode.superTypeArrayType(InstArrayComponentDecl subType, boolean top)     = false;
+   syn boolean InstNode.superTypeRecordType(InstRecord subType, boolean top)                = false;
+   syn boolean InstNode.superTypeClassType(InstRoot subType, boolean top)                   = false;
+   syn boolean InstNode.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) = false;
    
-   eq InstComposite.subType(InstNode t)          = t.superTypeCompositeType(this);
-   eq InstArrayComponentDecl.subType(InstNode t) = t.superTypeArrayType(this);
-   eq InstRecord.subType(InstNode t)             = t.superTypeRecordType(this);
-   eq InstPrimitive.subType(InstNode t)          = t.superTypePrimitiveComponentType(this);
+   eq InstComposite.subType(InstNode t, boolean top)          = t.superTypeCompositeType(this, top);
+   eq InstArrayComponentDecl.subType(InstNode t, boolean top) = t.superTypeArrayType(this, top);
+   eq InstRecord.subType(InstNode t, boolean top)             = t.superTypeRecordType(this, top);
+   eq InstPrimitive.subType(InstNode t, boolean top)          = t.superTypePrimitiveComponentType(this, top);
 
-   eq InstComposite.superTypeCompositeType(InstComposite subType)               = compareCompositeTypes(this, subType);
-   eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType) = compareCompositeTypes(this, subType);
-   eq InstRecord.superTypeRecordType(InstRecord subType)                        = compareCompositeTypes(this, subType);
-   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType)          = true;
-   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType)    = true;
-   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType) {
+   eq InstComposite.superTypeCompositeType(InstComposite subType, boolean top)               = compareCompositeTypes(this, subType, top);
+   eq InstArrayComponentDecl.superTypeArrayType(InstArrayComponentDecl subType, boolean top) = compareCompositeTypes(this, subType, top);
+   eq InstRecord.superTypeRecordType(InstRecord subType, boolean top)                        = compareCompositeTypes(this, subType, top);
+   eq UnknownInstComponentDecl.superTypeRecordType(InstRecord subType, boolean top)          = true;
+   eq UnknownInstComponentDecl.superTypeCompositeType(InstComposite subType, boolean top)    = true;
+   eq InstPrimitive.superTypePrimitiveComponentType(InstPrimitive subType, boolean top) {
        if (subType == this) 
            return true;
-       return subType.className().equals(className()) && subType.ndims() == ndims();
+       return subType.className().equals(className()) && 
+               (subType.ndims() == ndims() || top && subType.ndims() == 0);
    }
    
-   public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType) {
+   public static boolean InstComponentDecl.compareCompositeTypes(InstComponentDecl superType, InstComponentDecl subType, boolean top) {
        if (subType == superType || subType.myInstClass().isUnknown()) 
            return true;
        
-       if (superType.isArray() != subType.isArray())
-           return false;
+       if (superType.isArray() != subType.isArray()) {
+           if (top && superType.isArray()) 
+               return compareCompositeTypes(superType.getInstComponentDecl(0), subType, true);
+           else
+               return false;
+       }
        
        if (superType.isArray()) {
            List<InstComponentDecl> superComponents = superType.getInstComponentDecls();
@@ -230,6 +236,9 @@ aspect DerivativeFunctions {
 	eq FVariable.shouldBeDifferentiated()                  = variability().continuousVariability();
 	syn boolean FIdUse.shouldBeDifferentiated()            = myFV().shouldBeDifferentiated();
 	syn boolean FExp.shouldBeDifferentiated()              = type().shouldBeDifferentiated() && (inFunction() && !isConstantExp() || isContinuousExp());
+	eq FDivFuncExp.shouldBeDifferentiated()                = false;
+	eq FSignExp.shouldBeDifferentiated()                   = false;
+	eq FLitExp.shouldBeDifferentiated()                    = false;
 	syn boolean FStatement.shouldBeDifferentiated()        = type().shouldBeDifferentiated();
 	syn boolean FAbstractEquation.shouldBeDifferentiated() = variability().continuousVariability();
 	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;

@@ -34,7 +34,8 @@
     <para>This example focuses on how to use JModelica.org's simulation
     functionality in the most basic way. The model which is to be simulated is
     the Van der Pol problem described in the code below. The model is also
-    available from the examples in JModelica.org in the file VDP.mo.</para>
+    available from the examples in JModelica.org in the file
+    <filename>VDP.mop</filename>.</para>
 
     <programlisting language="modelica" xml:id="sim_list_vdp">model VDP
     // State start values
@@ -51,7 +52,7 @@
   equation
     der(x1) = (1 - x2^2) * x1 - x2 + u;
     der(x2) = x1;
-  end VDP;
+end VDP;
 </programlisting>
 
     <para>Create a new file in your working directory called

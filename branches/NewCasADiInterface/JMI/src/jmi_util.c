@@ -775,7 +775,7 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
 
 int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode) {
     jmi_int_t nF,nR;
-    jmi_int_t nF0,nF1,nFp,nR0,retval;
+    jmi_int_t nF0,nF1,nFp,nR0;
     jmi_int_t i,size_switches;
     jmi_real_t *event_indicators;
     jmi_real_t eps = jmi->events_epsilon;
@@ -787,12 +787,14 @@ int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode) {
         size_switches = nR;
         /* Allocate memory */
         event_indicators = (jmi_real_t*) calloc(size_switches, sizeof(jmi_real_t));
-        retval = jmi_dae_R(jmi,event_indicators);
+        /* TODO: Check return value of jmi_dae_R */
+        jmi_dae_R(jmi,event_indicators);
     } else { /* INITIALIZE */
         size_switches = nR0;
         /* Allocate memory */
         event_indicators = (jmi_real_t*) calloc(size_switches, sizeof(jmi_real_t));
-        retval = jmi_init_R0(jmi, event_indicators);
+        /* TODO: Check return value of jmi_dae_R0 */
+        jmi_init_R0(jmi, event_indicators);
     }
 
     if (mode==1) {

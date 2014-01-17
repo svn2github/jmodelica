@@ -360,8 +360,6 @@ fmiStatus fmi1_me_initialize(fmiComponent c, fmiBoolean toleranceControlled, fmi
     jmi_real_t nextTimeEvent;       /* Next time event instant */
     fmiInteger iter, max_iterations;
     
-    jmi_real_t* switchesR;   /* Switches */
-    jmi_real_t* switchesR0;  /* Initial Switches */
     jmi_real_t* switches;
     jmi_real_t* sw_temp = 0;
     jmi_real_t* b_mode;
@@ -653,7 +651,6 @@ fmiStatus fmi1_me_get_derivatives(fmiComponent c, fmiReal derivatives[] , size_t
 
 fmiStatus fmi1_me_get_event_indicators(fmiComponent c, fmiReal eventIndicators[], size_t ni) {
     jmi_t* jmi;
-    fmiValueReference i;
     fmiInteger retval;
     
     if (c == NULL) {
@@ -703,10 +700,10 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     int n_outputs;
     int* output_vrefs;
 
-    clock_t c0, c1, d0, d1;
+    clock_t /*c0, c1,*/ d0, d1;
     jmi_real_t setElementTime;
 
-    c0 = clock();
+    /*c0 = clock();*/
 
     setElementTime = 0;
 
@@ -845,9 +842,11 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     }
 
     fmi -> fmi_functions.freeMemory(jac);
-
+    
+    /*
     c1 = clock();
-    /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));
+    */
     /*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
     return fmiOK;
 }
@@ -972,11 +971,13 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int index;
     int output_off = 0;
     
+    /*
     int passed = 0;
     int failed = 0;
     
     fmiReal rel_tol;
     fmiReal abs_tol;
+    */
     
     int offs;
     jmi_real_t** dv;
@@ -995,9 +996,9 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int n_outputs_real;
     int* output_vrefs_real;
     jmi_t* jmi = ((fmi_t *)c)->jmi;
-    clock_t c0, c1;
+    /* clock_t c0, c1; */
 
-    c0 = clock();
+    /* c0 = clock(); */
     n_outputs = jmi->n_outputs;
     n_outputs_real = n_outputs;
     
@@ -1058,9 +1059,11 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
                 (*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
             }
         }
+        
+        /*
         c1 = clock();
-
-        /*printf("Jac A eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+        printf("Jac A eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));
+        */
 
     } else {
 
@@ -1169,9 +1172,10 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     free(jac2);
     */
     
+    /*
     c1 = clock();
-
-    /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
+    printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));
+    */
     return fmiOK;
 }
 
@@ -1375,7 +1379,6 @@ jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {
 fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitialization,
                               fmiBoolean intermediateResults, fmiEventInfo* eventInfo) {
 
-    fmiInteger nGuards;
     fmiInteger nF;
     fmiInteger nR;
     fmiInteger retval;
@@ -1390,7 +1393,6 @@ fmiStatus fmi1_me_event_iteration(fmiComponent c, fmiBoolean duringInitializatio
     jmi_log_node_t top_node;
 
     /* Allocate memory */
-    nGuards = jmi->n_guards;
     jmi_dae_get_sizes(jmi, &nF, &nR);
     event_indicators = fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
     sw_temp = fmi->fmi_functions.allocateMemory(nR, sizeof(jmi_real_t));
@@ -1609,7 +1611,6 @@ fmiStatus fmi1_me_terminate(fmiComponent c) {
 
 fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
     fmiInteger nniters;
-    fmiReal avg_nniters;
     fmi_t* fmi = ((fmi_t*)c);
     jmi_t* jmi = fmi->jmi;
     jmi_block_residual_t* block;

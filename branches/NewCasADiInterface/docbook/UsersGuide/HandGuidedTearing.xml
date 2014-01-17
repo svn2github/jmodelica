@@ -24,8 +24,8 @@
         <term><literal>equation_sorting</literal></term>
 
         <listitem>
-          <para>If this option is true (default is false), equations are
-          sorted using the BLT algorithm.</para>
+          <para>If this option is true (default is true), equations are sorted
+          using the BLT algorithm.</para>
         </listitem>
       </varlistentry>
 
@@ -33,7 +33,7 @@
         <term><literal>automatic_tearing</literal></term>
 
         <listitem>
-          <para>If this option is set to true (default is false), automatic
+          <para>If this option is set to true (default is true), automatic
           tearing of equation systems is performed. This option requires that
           <literal>equation_sorting</literal> equals true.</para>
         </listitem>

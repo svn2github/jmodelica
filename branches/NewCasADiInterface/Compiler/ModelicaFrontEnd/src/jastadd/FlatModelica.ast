@@ -95,7 +95,8 @@ abstract FAbstractVariable : BaseNode;
 FFunctionVariable : FAbstractVariable ::= [FTypePrefixInputOutput]
                                           Type:FType
                                           [BindingExp:FExp]
-                                          FQName;
+                                          FQName
+                                          <Order:int>;
 
 /**
  * \brief An array variable in a function. 
@@ -124,8 +125,7 @@ abstract FVariable : FAbstractVariable ::= FVisibilityType
                                            <DerivedType>
                                            [BindingExp:FExp]
                                            [FStringComment]
-                                           FQName
-                                           <HGTType:FClass.HGTVariableType>;
+                                           FQName;
 
 /**
  * Represents a set of attributes that can be used by several variables.
@@ -314,6 +314,11 @@ FRecordComponentType : BaseNode ::= <Name> FType;
  * an AST node. FPrimitiveType serves as base class for these AST nodes.
  */
 abstract FPrimitiveType : FType;
+
+/**
+ * Type representing no value at all, equivalent to the void type in C-like languages.
+ */
+FNoType : FType;
 
 /**
  * \brief Base class for the numeric types Real and Integer.
@@ -633,6 +638,11 @@ FElseEquation : FIfWhenElseEquation;
  */
 FAlgorithm : FAbstractEquation ::= FStatement*;
 
+/**
+ * A flattened derivative algorithm clause.
+ * Created when a FAlgorithm is differentiated.
+ */
+FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 
 /**
  * \brief Base class for statements in flattened algorithms.
@@ -650,6 +660,12 @@ InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
 FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
 
 /**
+ * A flattened derivative assignment statement.
+ * Created when a FAssignStmt is differentiated.
+ */
+FDerivativeAssignStmt : FAssignStmt ::= <Order:int>;
+
+/**
  * \brief A flattened function call statement.
  * 
  * This covers function calls with no used return value or when using 
@@ -658,6 +674,12 @@ FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
  * (FAbstractFunctionCall inherits FExp, since it can be used in expressions).
  */
 FFunctionCallStmt : FStatement ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
+
+/**
+ * A flattened derivative function call statement.
+ * Created when a FFunctionCallStmt is differentiated.
+ */
+FDerivativeFunctionCallStmt : FFunctionCallStmt ::= <Order:int>;
 
 /**
  * \brief Flattened break statement.
@@ -673,6 +695,11 @@ FReturnStmt : FStatement;
  * Class for array initalization statements.
  */
 FInitArrayStmt : FStatement ::= FIdUseExp;
+
+/**
+ * Class for derivated array initalization statements.
+ */
+FDerivatedInitArrayStmt : FInitArrayStmt ::= <Order:int>;
 
 /**
  * \brief Base class for flattened if and when statements.
@@ -1019,6 +1046,11 @@ FIdUse : BaseNode ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 FIdUseExp : FAbstractArrayExp ::= FIdUse;
 
 /**
+ * \brief Identifier of temporary variable, used during scalarization
+ */
+FIdTempExp : FIdUseExp;
+
+/**
  * \brief The built-in function der in the instance tree.
  */
 InstDerExp : FUnaryExp; 
@@ -1264,6 +1296,11 @@ FEdgeExp : FUnaryBuiltIn;
  * Change built-in function.
  */
 FChangeExp : FUnaryBuiltIn;
+
+/**
+ * Reinit built-in function.
+ */
+FReinit : FBuiltInFunctionCall ::= Var:FExp FExp;
 
 /**
  * Sample built-in function.

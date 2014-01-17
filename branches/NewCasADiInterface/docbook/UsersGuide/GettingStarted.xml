@@ -58,18 +58,18 @@
       <para>If you are on Windows, there are three different Python shells are
       available under the JModelica.org start menu.<itemizedlist>
           <listitem>
-            <para><emphasis role="bold">Python</emphasis> - Normal command
-            shell started with Python.</para>
+            <para><emphasis role="bold">Python</emphasis> Normal command shell
+            started with Python.</para>
           </listitem>
 
           <listitem>
-            <para><emphasis role="bold">IPython</emphasis> - Interactive shell
+            <para><emphasis role="bold">IPython</emphasis> Interactive shell
             for Python with, for example, code highlighting and tab
             completion.</para>
           </listitem>
 
           <listitem>
-            <para><emphasis role="bold">pylab</emphasis> - IPython shell which
+            <para><emphasis role="bold">pylab</emphasis> IPython shell which
             also loads the numeric computation environment <link
             xlink:href="http://www.scipy.org/PyLab">PyLab</link>.</para>
           </listitem>
@@ -117,7 +117,7 @@ RLC.run_demo()</programlisting></para>
   <section>
     <title>Check your installation</title>
 
-    <para>The JModelica.org Python packages require some third party Python
+    <para>The JModelica.org Python packages require some third-party Python
     packages in order to run. Use the function
     <literal>&lt;package&gt;.check_packages()</literal>, where
     <literal>&lt;package&gt;</literal> is either
@@ -136,7 +136,7 @@ Platform...................... win32
 
 Python version:............... 2.7.3
 
-pymodelica/pyjmi version:..... 1.9
+pymodelica/pyjmi version:..... 1.12
 
 
 Dependencies:
@@ -144,7 +144,7 @@ Dependencies:
 Package                        Version
 -------                        -------
 assimulo...................... --
-casadi........................ 1.6.0
+casadi........................ 1.7.0
 Cython........................ 0.18
 jpype......................... --
 lxml.......................... 3.1.0
@@ -202,7 +202,7 @@ setuptools.................... 0.6
           to, open a Python shell and type:</para>
 
           <programlisting language="python">import os
-os.environ['USERPROFILE']   // windows
+os.environ['USERPROFILE']   // Windows
 os.environ['HOME']          // Linux</programlisting>
         </listitem>
 
@@ -243,8 +243,8 @@ pyjmi.environ['IPOPT_HOME']</programlisting>
 
     <para>Please use the <link
     xlink:href="http://www.jmodelica.org/forum">JModelica.org forum</link> for
-    any questions related to JModelica.org. You can search in old threads to
-    see if someone has asked your question before or start a new thread if you
-    are a member.</para>
+    any questions related to JModelica.org or the Modelica language. You can
+    search in old threads to see if someone has asked your question before or
+    start a new thread if you are a registered user.</para>
   </section>
 </chapter>

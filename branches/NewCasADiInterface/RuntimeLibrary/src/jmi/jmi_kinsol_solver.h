@@ -26,7 +26,7 @@
 #ifndef _JMI_KINSOL_SOLVER_H
 #define _JMI_KINSOL_SOLVER_H
 
-#include "jmi_util.h"
+#include "jmi_block_solver.h"
 
 /*
  *  TODO: Error codes...
@@ -40,15 +40,17 @@
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
-int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_residual_t* block);
+/**< \brief Kinsol solver constructor function */
+int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_solver_t* block_solver);
 
-int jmi_kinsol_solver_solve(jmi_block_residual_t* block);
+/**< \brief Kinsol solver main solve function */
+int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 
-int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
+/**< \brief Kinsol solver destructor */
+void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
-int jmi_kinsol_solver_evaluate_jacobian_factorization(jmi_block_residual_t* block, jmi_real_t* factorization);
-
-void jmi_kinsol_solver_delete(jmi_block_residual_t* block);
+/**< \brief Convert Kinsol return flag to readable name */
+const char *jmi_kinsol_flag_to_name(int flag);
 
 struct jmi_kinsol_solver_t {
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
@@ -59,12 +61,15 @@ struct jmi_kinsol_solver_t {
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
     realtype kin_stol;             /**< \brief Tolerance for Step-size */
+    realtype kin_reg_tol;
     
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
     int J_is_singular_flag;         /**< \brief A flag indicating that J is singular. Regularized JTJ is setup */
     int use_steepest_descent_flag;  /**< \brief A flag indicating that steepest descent and not Newton direction should be used */
     int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
+    int using_max_min_scaling_flag; /**< \brief A flag indicating if either the maximum scaling is used of the minimum */
+    int updated_jacobian_flag;      /**< \brief A flag indicating if an updated Jacobian is used to solve the system */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
 
@@ -95,7 +100,8 @@ extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
 extern void dgecon_(char *norm, int *n, double *a, int *lda, double *anorm, double *rcond, 
              double *work, int *iwork, int *info);
-
+extern double dlange_(char *norm, int *m, int *n, double *a, int *lda,
+             double *work);
 extern int dgeequ_(int *m, int *n, double *a, int *
     lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, int *info);

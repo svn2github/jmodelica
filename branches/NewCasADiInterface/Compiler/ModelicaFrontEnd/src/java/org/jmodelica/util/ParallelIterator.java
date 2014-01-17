@@ -8,14 +8,14 @@ import java.util.Iterator;
 public class ParallelIterator<T> implements Iterator<T[]> {
 	
 	private T[] elems;
-	private Iterator<T>[] iters;
+	private Iterator<? extends T>[] iters;
 	private boolean max;
 	
-	public ParallelIterator(T[] res, Iterator<T>... iterators) {
+	public ParallelIterator(T[] res, Iterator<? extends T>... iterators) {
 		this(res, false, iterators);
 	}
 	
-	public ParallelIterator(T[] res, boolean max, Iterator<T>... iterators) {
+	public ParallelIterator(T[] res, boolean max, Iterator<? extends T>... iterators) {
 		iters = iterators;
 		elems = res;
 		this.max = max;
@@ -26,7 +26,7 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 	}
 	
 	public boolean hasNext() {
-		for (Iterator<T> it : iters)
+		for (Iterator<? extends T> it : iters)
 			if (it.hasNext() == max)
 				return max;
 		return !max;
@@ -39,7 +39,7 @@ public class ParallelIterator<T> implements Iterator<T[]> {
 	}
 
 	public void remove() {
-		for (Iterator<T> it : iters)
+		for (Iterator<? extends T> it : iters)
 			it.remove();
 	}
 	

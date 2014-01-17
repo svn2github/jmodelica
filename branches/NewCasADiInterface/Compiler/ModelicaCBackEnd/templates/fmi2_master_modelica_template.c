@@ -29,6 +29,8 @@
 #include "fmiFunctionTypes.h"
 #include "fmiTypesPlatform.h"
 
+#define FMI_FUNCTION_PREFIX $C_model_id$
+
 $INCLUDE: fmi_code_gen_template.c$
 /*
 void _emit(log_t *log, char* message) { }

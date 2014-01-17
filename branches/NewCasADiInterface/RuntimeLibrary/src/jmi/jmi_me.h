@@ -68,6 +68,8 @@ jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* T
     
 jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
 
+jmi_value_reference is_negated(jmi_value_reference valueref);
+
 int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID);
 
 void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
@@ -103,6 +105,8 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx);
 
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results, jmi_event_info_t* event_info);
+
+int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event);
 
 /**
  * Update run-time options specified by the user.

@@ -97,7 +97,6 @@ package CSTRLib
    end Two_CSTRs_stat_init;
 
  end Components;
-  annotation (uses(Modelica(version="3.0.1")));
 
   package Examples
     model SimulationExperiment
@@ -113,8 +112,6 @@ package CSTRLib
         height=-0.5,
         offset=1)
         annotation (Placement(transformation(extent={{-50,-24},{-30,-4}})));
-      annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{
-                -100,-100},{100,100}}), graphics));
       Components.Two_CSTRs_stat_init two_CSTRs_stat_init(
         CA2_0=1,
         T1_0(displayUnit="K"),
@@ -146,8 +143,6 @@ package CSTRLib
         annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
       Modelica.Blocks.Interfaces.RealInput u2
         annotation (Placement(transformation(extent={{-120,-40},{-80,0}})));
-      annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{
-                -100,-100},{100,100}}), graphics));
     equation
       connect(u1, two_CSTRs_Series.u1) annotation (Line(
           points={{-100,40},{-50,40},{-50,16},{2,16}},

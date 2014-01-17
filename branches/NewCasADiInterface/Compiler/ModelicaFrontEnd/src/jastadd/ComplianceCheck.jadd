@@ -44,6 +44,19 @@ aspect ComplianceCheck {
 			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
 	}
 	
+	public void FEventGenExp.complianceCheck(ErrorCheckType checkType) {
+		super.complianceCheck(checkType);
+		complianceOnlyFMU("The " + name() + "() function-like operator is");
+		if (!inFunction() && generatesEvent() && inWhile())
+			compliance("Event generating expressions are not supported in while statements: " + prettyPrint(""));
+	}
+	
+    inh boolean FRelExp.inWhile();
+    inh boolean FEventGenExp.inWhile();
+    eq FWhileStmt.getChild().inWhile() = true;
+    eq Root.getChild().inWhile() = false;
+    eq FAlgorithm.getChild().inWhile() = false;
+	
 	public void InstAccess.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
@@ -54,9 +67,6 @@ aspect ComplianceCheck {
 
 	public void FWhenEquation.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("When equations are");
-		if (hasElse()) {
-			compliance("Else clauses in when equations are currently not supported");
-		}
 	}
 	
 	public void ASTNode.complianceOnlyFMU(String message) {
@@ -73,22 +83,11 @@ aspect ComplianceCheck {
 	}
     
     
-//    public void InstExpandableConnectorDecl.complianceCheck(ErrorCheckType checkType) {
-//        if (inExpandableConnector())
-//            compliance("Nested expandable connectors are not supported");
-//    }
-    
     public void FConnectClause.complianceCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1().getInstAccess();
         InstAccess right = getConnector2().getInstAccess();
         if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
             compliance("Adding variables to non-declared nested expandable connectors is not supported");
-//        if (left.isExpandableConnectorPart() && right.myInstComponentDecl().isExpandableConnector() || 
-//                left.isNestledExpandableConnectorPart())
-//            compliance("Nested expandable connectors are not supported");
-//        else if (right.isExpandableConnectorPart() && left.myInstComponentDecl().isExpandableConnector() || 
-//                right.isNestledExpandableConnectorPart())
-//            compliance("Nested expandable connectors are not supported");
     }
     
     syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
@@ -136,15 +135,6 @@ aspect ComplianceCheck {
 	
 	public void FSignExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The sign() function-like operator is");
-	}
-	
-	public void FEventGenExp.complianceCheck(ErrorCheckType checkType) {
-		complianceOnlyFMU("The " + name() + "() function-like operator is");
-	}
-	
-	public void FArray.complianceCheck(ErrorCheckType checkType) {
-		if (size().isUnknown())
-			compliance("Unknown size array expressions are not supported");
 	}
 	
 	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
@@ -245,12 +235,6 @@ aspect ComplianceCheck {
 		super.complianceCheck(checkType);
 		boolean left  = getLeft().size().isUnknown();
 		boolean right = getRight().size().isUnknown();
-		if (left && !right) {
-			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
-		}
-		if (!left && right) {
-			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
-		}
 		if ((left || right) && getLeft().type().isRecord()) {
 			compliance("Record arrays of unknown sizes are not supported");
 		}
@@ -260,12 +244,6 @@ aspect ComplianceCheck {
 		for (FExp e : getArgs())
 			if (e.size().isUnknown())
 				compliance("Unknown sizes in record constructors is not supported");
-	}
-	public void FLinspace.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && getN().ceval().isUnknown()) {
-			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-		}
 	}
 	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
@@ -290,31 +268,35 @@ aspect ComplianceCheck {
 	public void FTerminalExp.complianceCheck(ErrorCheckType checkType) {
 		warning("The terminal() function-like operator is not supported, and is currently evaluated to false");
 	}
-	
-	public void FTerminate.complianceCheck(ErrorCheckType checkType) {
-		complianceOnlyFMU("The terminate() function-like operator is");
-	}
+    
+    public void FTerminate.complianceCheck(ErrorCheckType checkType) {
+        complianceOnlyFMU("The terminate() function-like operator is");
+    }
+    
+    public void FReinit.complianceCheck(ErrorCheckType checkType) {
+        complianceOnlyFMU("The reinit() function-like operator is");
+    }
 	
 	public void FStringExp.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (hasMinimumLength()) {
-			getMinimumLength().markAsStructuralParameter();
+			getMinimumLength().markAsStructuralParameter(checkType);
 			if (!getMinimumLength().variability().parameterOrLess())
 				getMinimumLength().compliance("minimumLength with higher than parameter variability is not supported");
 		}
 		if (hasLeftJustified()) {
-			getLeftJustified().markAsStructuralParameter();
+			getLeftJustified().markAsStructuralParameter(checkType);
 			if (!getLeftJustified().variability().parameterOrLess())
 				getLeftJustified().compliance("leftJustified with higher than parameter variability is not supported");
 		}
 		if (hasSignificantDigits()) {
-			getSignificantDigits().markAsStructuralParameter();
+			getSignificantDigits().markAsStructuralParameter(checkType);
 			if (!getSignificantDigits().variability().parameterOrLess())
 				getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
 		}
 		if (hasFormat()) {
 			getFormat().compliance("format argument is not supported");
-//			getFormat().markAsStructuralParameter();
+//			getFormat().markAsStructuralParameter(checkType);
 //			if (!getSignificantDigits().variability().parameterOrLess())
 //				getFormat().compliance("format with higher than parameter variability is not supported");
 		}
@@ -328,7 +310,7 @@ aspect ComplianceCheck {
 			} else if (variability().lessOrEqual(fParameter())) {
 				warning("String parameters are only partially supported");
 				if (isParameter())
-					markAsStructuralParameter();
+					markAsStructuralParameter(checkType);
 			} else {
 				compliance("String variables are not supported");
 			}

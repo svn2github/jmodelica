@@ -190,35 +190,6 @@ AM_CONDITIONAL([WITH_SUPERLU],[test "x$with_superlu" != xno])
 AC_SUBST(SUPERLU_HOME)
 SUPERLU_HOME=$superlu
 
-AC_ARG_WITH([tables],
-  [AS_HELP_STRING([--with-tables],
-    [Tables installation directory @<:@default=check@:>@])],
-  [tables=$withval],
-  [with_tables=no])
-
-AS_IF([test "x$with_tables" = xno],
-      [tables="ThirdParty/Tables/"])
-
-AS_IF([test "x$with_tables" = xno],
-      [with_tables=automatic])
-
-AS_IF([test "x$with_tables" = xno],
-     [AC_MSG_RESULT([Tables installation not specified.])],
-     [AC_MSG_RESULT([Tables installation specified.])])
-
-AM_CONDITIONAL([WITH_TABLES],[test "x$with_tables" != xno])
-
-AC_SUBST(TABLES_HOME)
-AC_SUBST(WITH_TABLES)
-
-AS_IF([test "x$with_tables" = xautomatic],
-      [TABLES_HOME=`cd $srcdir; pwd`/$tables],
-      [TABLES_HOME=$tables])
-
-AS_IF([test "x$with_tables" != xno],
-      [WITH_TABLES="true"],
-      [WITH_TABLES="false"]) 
-
 AC_ARG_WITH([eclipse],
    [AS_HELP_STRING([--with-eclipse],
      [Eclipse installation directory @<:@default=no@:>@])],

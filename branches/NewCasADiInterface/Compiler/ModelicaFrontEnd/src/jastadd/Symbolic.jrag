@@ -22,13 +22,6 @@ aspect EquationSolve {
 	
 	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
 
-	eq FWhenEquation.isSolved(String name, boolean duringTearing) {
-		if (getNumFAbstractEquation()>1)
-			return Solvability.UNSOLVABLE;
-		else
-			return getFAbstractEquation(0).isSolved(name);
-	}
-
 	eq FEquation.isSolved(String name, boolean duringTearing) {
 		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
 		if (solvable)
@@ -81,6 +74,29 @@ aspect EquationSolve {
 			return Solvability.UNSOLVABLE;
 	}
 
+    eq FIfWhenElseEquation.isSolved(String name, boolean duringTearing) {
+        Set<FVariable> leftVars = referencedFVariablesInLHS();
+        
+        boolean inLeft = false;
+        for (FVariable fv : leftVars) {
+            if (fv.name().equals(name))
+                inLeft = true;
+        }
+        
+        Set<FVariable> argVars = referencedFVariablesInRHS();
+
+        boolean inArgs = false;
+        for (FVariable fv : argVars) {
+            if (fv.name().equals(name))
+                inArgs = true;
+        }
+
+        if (inLeft && !inArgs)
+            return Solvability.ANALYTICALLY_SOLVABLE;
+        else
+            return Solvability.UNSOLVABLE;
+    }
+    
 	syn nta FExp FEquation.solution(String name) {
 		return solution(name, false);
 	}
@@ -424,7 +440,7 @@ aspect Derivatives {
     public class FunctionDifferentiationException extends ExpressionDifferentiationException {
     	
     	private static final String MSG = 
-    		"Cannot differentiate call to function without derivative annotation%s%s%s";
+    		"Cannot differentiate call to function without derivative or smooth order annotation%s%s%s";
     
     	public FExp fexp;
     	
@@ -747,11 +763,13 @@ aspect Derivatives {
 		return new FRealLitExp(0);
 	}
 	
+    public FExp FDivFuncExp.diff(String name) {
+        return new FRealLitExp(0);
+    }
+    
 	public FExp FExp.diffUseOrDerExp(String name, String myName) {
 		int val;
-		if (variability().parameterOrLess()) {
-			val = 0;		
-		} else if (name.equals(TIME)) {
+		if (name.equals(TIME) && !variability().parameterOrLess()) {
 			return createDerExp(1);
 		} else if (name.equals(myName)) {
 			val = 1;
@@ -772,36 +790,18 @@ aspect Derivatives {
 	syn int FDummyDerivativeVariable.order() = 1;
 	eq FHDummyDerivativeVariable.order()     = getOrder();
 	
-	protected FExp FExp.createDerExp(int order) {
-		return diff(TIME, order);
-	}
+	syn FExp FExp.createDerExp(int order) = diff(TIME, order);
+	eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order);
+	eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
+	eq FDerExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+	eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 	
-	protected FExp FIdUseExp.createDerExp(int order) {
-		return getFIdUse().createDerExp(order);
-	}
+	syn FExp FIdUse.createDerExp(int order) = (order == 1) ? new FDerExp(fullCopy()) : new FHDerExp(fullCopy(), order);
 	
-	protected FExp FInstAccessExp.createDerExp(int order) {
-		return getInstAccess().createDerExp(order);
-	}
+	syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
 	
-	protected FExp FDerExp.createDerExp(int order) {
-		return getFIdUse().createDerExp(order() + order);
-	}
-	
-	protected FExp InstDerExp.createDerExp(int order) {
-		return getFExp().createDerExp(order() + order);
-	}
-	
-	public FExp FIdUse.createDerExp(int order) {
-		return (order == 1) ? new FDerExp(fullCopy()) : new FHDerExp(fullCopy(), order);
-	}
-	
-	public FExp FIdUseInstAccess.createDerExp(int order) {
-		return getInstAccess().createDerExp(order);
-	}
-	
-	public FExp InstAccess.createDerExp(int order) {
-		FExp use = new FInstAccessExp((InstAccess) fullCopy());
+	syn InstDerExp InstAccess.createDerExp(int order) {
+		FExp use = new FInstAccessExp(fullCopy());
 		return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
 	}
 	
@@ -837,18 +837,18 @@ aspect Derivatives {
 				for (FExp e : getArgs()) {
 					if (!e.isIndependent(s)) {
 						isIndependent = false;
-						break;			
+						break;
 					}
-				}				
+				}
 				if (isIndependent) {
-					return new FRealLitExp(0);	
+					return new FRealLitExp(0);
 				}
 			}
 		}
-		FFunctionDecl fd = myFFunctionDecl();
-		if (!fd.hasFDerivativeFunction()) 
-			throw new FunctionDifferentiationException(this);
 		FFunctionDecl myDecl = myFFunctionDecl();
+		FFunctionDecl myDiffDecl = myDecl.diff(inFunction());
+		if (myDiffDecl == null)
+		    throw new FunctionDifferentiationException(this);
 		List args = new List();
 		for (FExp e : getArgs()) {
 			args.add(e.fullCopy());
@@ -856,22 +856,197 @@ aspect Derivatives {
 		int i = 0;
 		for (FExp e : getArgs()) {
 			FFunctionVariable fv = myDecl.getFFunctionVariable(i);
-			if (fv.shouldBeDifferentiated()) 
+			if (fv.shouldBeDifferentiated())
 				args.add(e.diff(name));
 			i++;
 		}
-		FFunctionCall der_f = new FFunctionCall(fd.getFDerivativeFunction().getName().fullCopy(), args, getSizes());		
+		FFunctionCall der_f = new FFunctionCall(myDiffDecl.getFQName().createFIdUse(), args, getSizes());
 		return dynamicFExp(der_f);
 	}
 
 	public FExp FArray.diff(String name) {
 		FArray diff_farray = new FArray();
 		for (FExp e : getFExps()) {
-			diff_farray.addFExp(e.diff(name));	
+			diff_farray.addFExp(e.diff(name));
 		}
 		return dynamicFExp(diff_farray);
 	}
 	
+}
+
+aspect AlgorithmDifferentiation{
+    public class FFunctionDecl {
+        private static final int SMOOTH_ORDER_ANNOTATION_DEFAULT = -1;
+        private int smoothOrderAnnotation = SMOOTH_ORDER_ANNOTATION_DEFAULT;
+        
+        public void readSmoothOrderAnnotation(AnnotationNode a) {
+            AnnotationNode smoothOrder = a.forPath("smoothOrder");
+            if (smoothOrder.isIntegerValue())
+                smoothOrderAnnotation = smoothOrder.integer();
+        }
+        
+    }
+    
+    syn FFunctionDecl FFunctionDecl.diff(boolean inFunction) {
+        int order = order() + 1;
+        if (smoothOrderAnnotation == 0 && !inFunction)
+            return null;
+        if (hasFDerivativeFunction()) 
+            return getFDerivativeFunction().myFFunctionDecl();
+        if (smoothOrderAnnotation == SMOOTH_ORDER_ANNOTATION_DEFAULT && !inFunction)
+            return null;
+        FQName name = getFQName().createDerPrefixedName(1);
+        Collection<FFunctionVariable> inputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> derivatedInputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> outputs = new ArrayList<FFunctionVariable>();
+        Collection<FFunctionVariable> others = new ArrayList<FFunctionVariable>();
+        for (FFunctionVariable ffv : getFFunctionVariables()) {
+            FFunctionVariable ffvCopy = ffv.fullCopy();
+            if (ffv.isInput()) {
+                inputs.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    derivatedInputs.add(ffv.createDerivative());
+            } else if (ffv.isOutput()) {
+                ffvCopy.setFTypePrefixInputOutputOpt(new Opt<FTypePrefixInputOutput>());
+                others.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    outputs.add(ffv.createDerivative());
+            } else {
+                others.add(ffvCopy);
+                if (ffv.order() == order() && ffv.shouldBeDifferentiated())
+                    others.add(ffv.createDerivative());
+            }
+        }
+        List<FFunctionVariable> variables = new List<FFunctionVariable>();
+        variables.addAll(inputs);
+        variables.addAll(derivatedInputs);
+        variables.addAll(outputs);
+        variables.addAll(others);
+        FFunctionDecl function = new FFunctionDecl(name, variables, new FAlgorithm(), new Opt<FDerivativeFunction>());
+        function.smoothOrderAnnotation = Math.max(smoothOrderAnnotation - 1, 0);
+        myFClass().addFFunctionDecl(function);
+        setFDerivativeFunction(new FDerivativeFunction(name.createFIdUse(), order, new List<FIdUse>(), new List<FIdUse>()));
+        function.setFAlgorithm(getFAlgorithm().diff());
+        return function;
+    }
+    
+    syn FAlgorithm FAlgorithm.diff() {
+        List<FStatement> diffed = new List<FStatement>();
+        for (FStatement statement : getFStatements())
+            statement.diff(diffed);
+        return new FDerivativeAlgorithm(diffed, order() + 1);
+    }
+    
+    public void FStatement.diff(List<FStatement> diffed) {
+        throw new UnsupportedOperationException("Can not differentiate statment: " + this);
+    }
+    
+    @Override
+    public void FAssignStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+            diffed.add(new FDerivativeAssignStmt(getLeft().createDerExp(1).asFIdUseExp(), getRight().diff("time"), order() + 1));
+    }
+   
+    @Override
+    public void FBreakStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+    }
+    
+    @Override
+    public void FForStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getForStmts())
+            statement.diff(statements);
+        diffed.add(new FForStmt(getIndex().fullCopy(), statements));
+    }
+    
+    @Override
+    public void FFunctionCallStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated()) {
+            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+            for (FFunctionCallLeft l : getLefts()) {
+                Opt<FExp> lopt = l.hasFExp() ? new Opt<FExp>(l.getFExp().diff("time")) : new Opt<FExp>();
+                lefts.add(new FFunctionCallLeft(lopt));
+            }
+            FExp diffedCall = getCall().diff("time");
+            diffed.add(new FDerivativeFunctionCallStmt(lefts, (FAbstractFunctionCall) diffedCall, order() + 1));
+        }
+    }
+    
+    syn FIfWhenStmt FIfWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses);
+    eq FIfStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) {
+        List<FStatement> elseStatements = new List<FStatement>();
+        for (FStatement statement : getElseStmts())
+            statement.diff(elseStatements);
+        return new FIfStmt(differentiatedClauses, elseStatements);
+    }
+    eq FWhenStmt.createDifferentiated(List<FIfWhenClause> differentiatedClauses) = new FWhenStmt(differentiatedClauses);
+    
+    @Override
+    public void FIfWhenStmt.diff(List<FStatement> diffed) {
+        List<FIfWhenClause> clauses = new List<FIfWhenClause>();
+        for (FIfWhenClause clause : getFIfWhenClauses())
+            clauses.add(clause.diff());
+        diffed.add(createDifferentiated(clauses));
+    }
+    
+    public FIfWhenClause FIfWhenClause.diff() {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getFStatements())
+            statement.diff(statements);
+        return createNode(getTest().fullCopy(), statements);
+    }
+    
+    @Override
+    public void FInitArrayStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+        if (order() == myFAlgorithm().order() && shouldBeDifferentiated())
+            diffed.add(new FDerivatedInitArrayStmt(getFIdUseExp().createDerExp(1).asFIdUseExp(), order() + 1));
+    }
+    
+    @Override
+    public void FReturnStmt.diff(List<FStatement> diffed) {
+        diffed.add(fullCopy());
+    }
+    
+    @Override
+    public void FWhileStmt.diff(List<FStatement> diffed) {
+        List<FStatement> statements = new List<FStatement>();
+        for (FStatement statement : getWhileStmts())
+            statement.diff(statements);
+        diffed.add(new FWhileStmt(getTest().fullCopy(), statements));
+    }
+    
+    syn FFunctionVariable FFunctionVariable.createDerivative() {
+        FFunctionVariable ffv = createNode(getFTypePrefixInputOutputOpt().fullCopy(), getType().fullCopy(), new Opt<FExp>(), getFQName().createDerPrefixedName(1), order() + 1);
+        ffv.hasInitArrayStmt = hasInitArrayStmt;
+        if (hasBindingExp())
+            ffv.setBindingExp(getBindingExp().diff("time"));
+        return ffv;
+    }
+    
+    rewrite FDerExp {
+        when (myFV().isFFunctionVariable()) to FIdUseExp 
+        new FIdUseExp(getFIdUse().getFQName().createDerPrefixedName(order()));
+    }
+    
+    
+    syn int FFunctionDecl.order()   = getFAlgorithm().order();
+    syn int FAlgorithm.order()      = 0;
+    eq FDerivativeAlgorithm.order() = getOrder();
+    
+    syn int FFunctionVariable.order()      = getOrder();
+    
+    syn int FAssignStmt.order()      = 0;
+    eq FDerivativeAssignStmt.order() = getOrder();
+    
+    syn int FFunctionCallStmt.order()      = 0;
+    eq FDerivativeFunctionCallStmt.order() = getOrder();
+    
+    syn int FInitArrayStmt.order()     = 0;
+    eq FDerivatedInitArrayStmt.order() = getOrder();
 }
 
  aspect ExpressionSimplification {

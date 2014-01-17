@@ -792,7 +792,6 @@ package NonLinear
         Icon(coordinateSystem(preserveAspectRatio=true, extent={{-200,-100},{200,
               100}}), graphics));
   end CLPANL;
-  annotation (uses(Modelica(version="3.2")));
 
   model MultiSystems
     parameter Integer n = 5;

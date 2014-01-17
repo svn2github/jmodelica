@@ -20,6 +20,7 @@ abstract InstNode : BaseNode ::= /InstComponentDecl*/
                                  /InstImport*/ 
                                  /RedeclaredInstClassDecl:InstClassDecl*/
                                  /FAbstractEquation*/ 
+                                 /ElementInstModification:InstModification*/ 
                                  /FQName/;
 
 DynamicOpt : Opt;
@@ -150,6 +151,9 @@ InstForIndex : CommonForIndex ::= InstPrimitive;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
+
+// An expression array subscript that defers name lookup to another subscript
+FDeferExpSubscript : FExpSubscript ::= <Defer:FExpSubscript>;
 
 // These nodes are used to create instance copies of modification trees intended for
 // error checking.	

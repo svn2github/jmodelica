@@ -1173,7 +1173,10 @@ aspect FlatNames {
 		String name = prefixActualPartName();
 		if (!name.isEmpty())
 			name += ".";
-		name += createDerPrefixString(order) + lastActualPartName();
+		String last = lastActualPartName();
+		if (last.startsWith("_"))
+		    last = last.substring(1);
+		name += createDerPrefixString(order) + last;
 		if (hasFArraySubscripts())
 			name += getFArraySubscripts();
 		return name;
@@ -1300,6 +1303,7 @@ aspect FlatNames {
     eq FPreIntegerVariable.variableIndex()    = myNonPreVariable().variableIndex();
     eq FPreRealVariable.variableIndex()       = myNonPreVariable().variableIndex();
     eq FPreStringVariable.variableIndex()     = myNonPreVariable().variableIndex();
+    eq FPreEnumVariable.variableIndex()       = myNonPreVariable().variableIndex();
     
     inh int FAbstractVariable.findVariableIndex();
     eq FClass.getFVariable(int i).findVariableIndex()     = i;
@@ -1956,6 +1960,7 @@ aspect FlatNames {
     eq FEnumLiteralType.name() 		= getName();
     eq FRecordType.name()      		= getName();
     eq FUnknownType.name()     		= "(unknown type)";
+    eq FNoType.name()               = "(no return value)";
     eq FExternalObjectType.name()	= "ExternalObject";
     
     
@@ -2371,7 +2376,13 @@ aspect FlatFunctionUtils {
      eq InstNode.getChild().myLefts()             = new ArrayList<FFunctionCallLeft>();
      eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
      eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
-
+     
+     inh FAbstractFunctionCall FExp.myFunctionCall();
+     eq Root.getChild().myFunctionCall() = null;
+     eq FFunctionCall.getChild().myFunctionCall() = this;
+     eq FFunctionCallEquation.getLeft().myFunctionCall() = getCall();
+     eq FFunctionCallStmt.getLeft().myFunctionCall() = getCall();
+     
      /**
       * Get the name this expression should use for temporary variable.
       * 
@@ -2680,8 +2691,13 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is disabled by a conditional clause
      */
-    syn boolean InstComponentDecl.isDisabled() = 
-    	hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+    syn boolean InstComponentDecl.isDisabled() {
+        try {
+            return hasConditionalAttribute() && !getConditionalAttribute().ceval().booleanValue();
+        } catch (ConstantEvaluationException e) {
+            return false;
+        }
+    }
     
     syn boolean FIdUseInstAccess.isDisabled() = getInstAccess().isDisabled();
     syn boolean InstAccess.isDisabled() = false;
@@ -2783,24 +2799,26 @@ aspect FlatExpressions {
     eq FlatRoot.getChild().inIfCondition()          = false;
 
     inh boolean FAbstractEquation.inWhen();
-    inh boolean FExp.inWhen();
-    eq FWhenEquation.getFAbstractEquation().inWhen() = true;
-    eq InstNode.getChild().inWhen()                  = false;
-    eq FClass.getChild().inWhen()                    = false;
+    eq FClass.getChild().inWhen()                          = false;
+    eq InstNode.getChild().inWhen()                        = false;
+    eq FIfWhenElseEquation.getFAbstractEquation().inWhen() = isWhen() || inWhen();
     
     inh boolean FStatement.inWhen();
-    eq FWhenClause.getFStatement().inWhen()          = true;
-
-    inh boolean FRelExp.inWhile();
-    eq FWhileStmt.getChild().inWhile() = true;
-    eq Root.getChild().inWhile() = false;
-    eq FAlgorithm.getChild().inWhile() = false;
+    inh boolean FIfClause.inWhen();
+    eq FIfClause.getFStatement().inWhen()   = myFStatement().isWhen() || inWhen();
+    eq FIfStmt.getElseStmt().inWhen()       = isWhen() || inWhen();
+    eq FWhenClause.getFStatement().inWhen() = true;
+    
+    inh boolean FExp.inWhen();
+    eq FIfExp.getThenExp().inWhen() = isWhen() || inWhen();
+    eq FIfExp.getElseExp().inWhen() = isWhen() || inWhen();
     
     inh boolean FAbstractEquation.isInitial();
-    eq FClass.getChild().isInitial()                   = false;
-    eq FClass.getFInitialEquation().isInitial()        = true;
-    eq InstNode.getChild().isInitial()                 = false;
-    eq FWhenEquation.getInitialEquation().isInitial()  = true;
+    inh boolean FIfExp.isInitial();
+    eq FClass.getChild().isInitial()                      = false;
+    eq FClass.getFInitialEquation().isInitial()           = true;
+    eq InstNode.getChild().isInitial()                    = false;
+    eq FAbstractEquation.getInitialEquation().isInitial() = true;
     
     /**
      * \brief Is this expression of a type that is valid for most uses?
@@ -3001,10 +3019,12 @@ aspect GeneralHelpers {
 	
 	abstract public FExp FExp.fullCopy();
 	abstract public FQName FQName.fullCopy();
+    abstract public Access Access.fullCopy();
 	abstract public InstAccess InstAccess.fullCopy();
 	abstract public InstNamedAccess InstNamedAccess.fullCopy();
 	abstract public InstScalarAccess InstScalarAccess.fullCopy();
 	abstract public InstArrayAccess InstArrayAccess.fullCopy();
+    abstract public VisibilityType VisibilityType.fullCopy();
 	abstract public FAbstractFunctionCall FAbstractFunctionCall.fullCopy();
 	abstract public FStatement FStatement.fullCopy();
 	abstract public FEquationType FEquationType.fullCopy();
@@ -3013,6 +3033,7 @@ aspect GeneralHelpers {
 	abstract public FTypePrefixInputOutput FTypePrefixInputOutput.fullCopy();
 	abstract public FTypePrefixVariability FTypePrefixVariability.fullCopy();
 	abstract public FSubscript FSubscript.fullCopy();
+    abstract public CommonForIndex CommonForIndex.fullCopy();
 	
 	abstract public FExp FExp.copy();
 	abstract public InstAccess InstAccess.copy();

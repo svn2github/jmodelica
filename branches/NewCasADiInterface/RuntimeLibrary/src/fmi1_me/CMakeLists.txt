@@ -13,6 +13,9 @@ set(FMI_MESources
 )
 #Build fmi_me library
 add_library(fmi1_me STATIC ${FMI_MESources})
+if(NOT MSVC)
+    set_target_properties(fmi1_me PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror")
+endif()
 
 #Install the libraries
 install(TARGETS fmi1_me DESTINATION "${JMODELICA_INSTALL_DIR}/lib/RuntimeLibrary")

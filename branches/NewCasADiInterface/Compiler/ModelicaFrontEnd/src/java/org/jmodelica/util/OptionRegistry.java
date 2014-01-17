@@ -94,7 +94,7 @@ public class OptionRegistry {
 			("automatic_tearing", 
 			 compiler, 
 			 true, 
-			 "If this option is set to true (default is false), automatic tearing of equation systems is performed."),
+			 "If this option is set to true (default is true), automatic tearing of equation systems is performed."),
 		HAND_GUIDED_TEARING 
 			("hand_guided_tearing", 
 			 compiler, 
@@ -326,7 +326,18 @@ public class OptionRegistry {
 	        ("log_transformation_steps",
 	         compiler,
 	         false,
-	         "Write flat tree after each transformation step to files"),
+	         "Write flat tree after each transformation step to separate files."),
+	    CHECK_INACTIVE
+	        ("check_inactive_contitionals",
+	         compiler,
+	         false,
+	         "Check for errors in inactive conditional components when compiling. When checking a class, " +
+	         "this is always done. Default is false."),
+	    IGNORE_WITHIN
+	        ("ignore_within",
+	         compiler,
+	         false,
+	         "Ignore within clauses, both when reading input files and when error-checking. Default is false."),
 		
 		// Runtime options
         /*
@@ -345,12 +356,6 @@ public class OptionRegistry {
             runtime,
             false,
             "Enforce min-max bounds on variables in the equation blocks."),
-        NLE_SOLVER_LOG_LEVEL
-            ("nle_solver_log_level",
-              runtime, 
-              0,
-              "Log level for non-linear equation solver: 0 - no progress messages, 1,2,3 - different levels of verbosity.",
-              0,3),
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
              runtime,
@@ -418,6 +423,18 @@ public class OptionRegistry {
             100,
             "Maximum number of iterations for the equation block solver before failure",
             2,500),
+        NLE_SOLVER_STEP_LIMIT_FACTOR
+            ("nle_solver_step_limit_factor",
+            runtime,
+            10,
+            "Factor limiting the step-size taken by the nonlinear solver",
+            0,1e10),
+        NLE_SOLVER_REGULARIZATION_TOLERANCE
+            ("nle_solver_regularization_tolerance",
+            runtime,
+            -1,
+            "Tolerance for deciding when regularization should kick in (i.e. when condition number > reg tol)",
+            -1,1e20),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               runtime,

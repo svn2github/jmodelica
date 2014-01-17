@@ -26,13 +26,12 @@
 #ifndef _JMI_SIMPLE_NEWTON_H
 #define _JMI_SIMPLE_NEWTON_H
 
-#include "jmi.h"
-#include "jmi_block_residual.h"
+#include "jmi_block_solver.h"
 
-int jmi_simple_newton_solve(jmi_block_residual_t *block);
+int jmi_simple_newton_solve(jmi_block_solver_t *block);
 
-void jmi_simple_newton_delete(jmi_block_residual_t *block);
+void jmi_simple_newton_delete(jmi_block_solver_t *block);
 
-int jmi_simple_newton_jac(jmi_block_residual_t *block);
+int jmi_simple_newton_jac(jmi_block_solver_t *block);
 
 #endif

@@ -117,8 +117,9 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                   Import:ImportClause* 
                                   ClassDecl* 
                                   ComponentDecl*
-                                  Annotation* 
+                                  ElementModification:Modification* 
                                   [ExternalClause] 
+                                  [Annotation] 
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
@@ -190,8 +191,7 @@ Composition : SourceBaseNode ::= Clause* [ExternalClause];
 
 ExternalClause : SourceBaseNode ::= [ExternalLanguage] 
                               [ExternalFunctionCall] 
-                              [Annotation1:Annotation] 
-                              [Annotation2:Annotation];
+                              [Annotation];
                    
 ExternalFunctionCall : SourceBaseNode ::= [ReturnVar:Access] FunctionName:IdDecl Arg:Exp*;
 
@@ -207,7 +207,6 @@ InitialEquationClause : EquationClause;
 Algorithm             : Clause ::= [Initial] Statement*;
 
 abstract Element : Clause;
-ElementAnnotation       : Element ::= Annotation;
 PN_ExtendsClause        : Element ::= Super:Access [ClassModification] [Annotation];
 ExtendsClause           : Element ::= VisibilityType Super:Access [ClassModification] [Annotation];
 InlineExtendsClause     : ExtendsClause;
@@ -307,7 +306,6 @@ abstract AbstractEquationModifier : SourceBaseNode;
 abstract AbstractEquation         : SourceBaseNode ::= [AbstractEquationModifier] Comment;
 Initial              : AbstractEquationModifier;
 Equation             : AbstractEquation ::= Left:Exp Right:Exp;
-EquationAnnotation   : AbstractEquation ::= Annotation;
 ConnectClause        : AbstractEquation ::= Comment Connector1:Access Connector2:Access;
 abstract IfWhenElseEquation       : AbstractEquation ::= AbstractEquation*;
 abstract IfWhenEquation           : IfWhenElseEquation ::= Test:Exp [Else:IfWhenElseEquation];

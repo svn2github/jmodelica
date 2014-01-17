@@ -166,7 +166,9 @@ aspect FlatTypeAnalysis {
 	eq FEquation.type() = getRight().type().numericPromotion(getLeft().type());
 	
 	syn lazy FType FStatement.type() = fUnknownType();
-	eq FAssignStmt.type() = getRight().type().numericPromotion(getLeft().type());
+	eq FAssignStmt.type()            = getRight().type().numericPromotion(getLeft().type());
+	eq FFunctionCallStmt.type()      = getCall().type();
+	eq FInitArrayStmt.type()         = getFIdUseExp().type();
 	
 	// TODO: Role of attribute is unclear - used to find blocks that contain equations 
 	//       over *any* reals. Probably needs refactoring.
@@ -218,6 +220,17 @@ aspect FlatTypeAnalysis {
 		}	
 		return true;
 	}
+	
+	eq FIfWhenElseEquation.isReal() {
+		for (FAbstractEquation equation : getFAbstractEquations())
+			if (!equation.isReal())
+				return false;
+		return true;
+	}
+	eq FIfEquation.isReal() {
+		return super.isReal() && (!hasElse() || getElse().isReal());
+	}
+	// TODO: isInteger(), etc. for if equation
 	
 	eq FAlgorithm.isReal() = FStatement.statementsAssignsOnlyReals(getFStatements());
 	// TODO: isInteger(), etc. for algorithm
@@ -349,8 +362,9 @@ aspect FlatTypeAnalysis {
 		FRecordType res = getRecord().recordType().fullCopy();
 		if (!(getRecord() instanceof FIdUseInstAccess)) {
 			int n = getNumArg();
-			for (int i = 0; i < n; i++) 
-				res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
+			for (int i = 0; i < n; i++)
+			    if (getArg(i).size().isUnknown())
+			        res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
 		}
 		return res;
 	}
@@ -477,14 +491,14 @@ aspect FlatTypeAnalysis {
 	
 	eq FSmoothExp.type() = getFExp().type();
 	
-	// TODO: Maybe there should be a special type for "no return value"
-	eq FConnectionsOp.type() = null;
+	eq FConnectionsOp.type() = fNoType();
 	eq FConnBoolOp.type()    = fBooleanScalarType();
 	
 	eq FCardinality.type() = fIntegerScalarType();
 
-	eq FTerminate.type() = null;
-	eq FAssert.type() = null;
+    eq FTerminate.type() = fNoType();
+    eq FReinit.type() = fNoType();
+	eq FAssert.type() = fNoType();
 	eq FGetInstanceName.type() = fStringScalarType();
 
 	/**
@@ -637,10 +651,13 @@ aspect InstBindingType {
 	 */
 	syn FType InstAssignable.bindingType() {
 		InstNode decl = myInstValueMod().myInstNode();
-		if (myBindingExpHasEach() || decl == this) 
+		if (myBindingExpHasEach() || decl == this) {
 			return type();
-		else
+		} else {
+		    if (!decl.isClassDecl())
+		        decl = commonAncestor(decl);
 			return expandBindingType(type(), decl);
+		}
 	}
 		
 	/**
@@ -662,30 +679,32 @@ aspect InstBindingType {
 		InstNode decl = icm.myInstNode();
 		if (decl == this)
 			return res.sizedType(size());
-		if (icm.getEach()) 
-			return res;
-		else if (!enclosedBy(decl))
-			return res.sizedType(res.size().expand(decl.size()));
-		else
-			return expandBindingType(res.arrayType(size()), decl);
+        if (icm.getEach()) {
+            return res;
+        } else {
+            if (decl.isClassDecl()) {
+                return res.sizedType(res.size().expand(decl.size()));
+            } else {
+                decl = commonAncestor(decl);
+                if (decl != null)
+                    return expandBindingType(res.sizedType(size()), decl);
+                else
+                    return res.sizedType(res.size().expand(size()));
+            }
+        }
 	}
 	
 	/**
 	 * \brief Add array dimensions for surrounding InstArrayComponentDecls to 
 	 *        type for binding expression.
 	 */
-	inh FType InstAssignable.expandBindingType(FType type, InstNode node);
-	inh FType InstArrayComponentDecl.expandBindingType(FType type, InstNode node);
-	inh FType InstComposite.expandBindingType(FType type, InstNode node);
-	
+	inh FType InstNode.expandBindingType(FType type, InstNode node);
 	eq InstClassDecl.getChild().expandBindingType(FType type, InstNode node) = type;
 	eq InstRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
-	eq FlatRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
+	eq Root.getChild().expandBindingType(FType type, InstNode node)          = type;
 	eq InstArrayComponentDecl.getChild().expandBindingType(FType type, InstNode node) = 
 		expandBindingType(type.enclosingArrayType(myDimensionLength()), node);
-	eq InstComposite.getChild().expandBindingType(FType type, InstNode node) = 
-		(node == this) ? type : expandBindingType(type, node);
-	eq InstRecord.getChild().expandBindingType(FType type, InstNode node) = 
+	eq InstNode.getChild().expandBindingType(FType type, InstNode node) = 
 		(node == this) ? type : expandBindingType(type, node);
 	
 	inh boolean InstAssignable.inArrayComponent();
@@ -956,6 +975,7 @@ aspect BuiltInFlatTypes {
 	public static final FStringType  FStringType.SCALAR  				= new FStringType(Size.SCALAR);
 	public static final FUnknownType FUnknownType.SCALAR 				= new FUnknownType(Size.SCALAR);
 	public static final FExternalObjectType FExternalObjectType.SCALAR 	= new FExternalObjectType(Size.SCALAR);
+    public static final FNoType      FNoType.SCALAR                     = new FNoType(Size.SCALAR);
 
 	syn boolean FType.isReal()    				= false;
 	eq FRealType.isReal()						= true;
@@ -981,22 +1001,24 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isPrimitive() = false;
 	eq FPrimitiveType.isPrimitive() = true;
 	
-	syn boolean FType.isRealScalar()      = isReal() && isScalar();
-	syn boolean FType.isRealArray()       = isReal() && isArray();
-	syn boolean FType.isIntegerScalar()   = isInteger() && isScalar();
-	syn boolean FType.isIntegerArray()    = isInteger() && isArray();
-	syn boolean FType.isBooleanScalar()   = isBoolean() && isScalar();
-	syn boolean FType.isBooleanArray()    = isBoolean() && isArray();
-	syn boolean FType.isStringScalar()    = isString() && isScalar();
-	syn boolean FType.isStringArray()     = isString() && isArray();
-	syn boolean FType.isRecordScalar()    = isRecord() && isScalar();
-	syn boolean FType.isRecordArray()     = isRecord() && isArray();
-	syn boolean FType.isEnumScalar()      = isEnum() && isScalar();
-	syn boolean FType.isEnumArray()       = isEnum() && isArray();
-	syn boolean FType.isNumericScalar()   = isNumeric() && isScalar();
-	syn boolean FType.isNumericArray()    = isNumeric() && isArray();
-	syn boolean FType.isPrimitiveScalar() = isPrimitive() && isScalar();
-	syn boolean FType.isPrimitiveArray()  = isPrimitive() && isArray();
+	syn boolean FType.isRealScalar()      		= isReal() && isScalar();
+	syn boolean FType.isRealArray()       		= isReal() && isArray();
+	syn boolean FType.isIntegerScalar()   		= isInteger() && isScalar();
+	syn boolean FType.isIntegerArray()    		= isInteger() && isArray();
+	syn boolean FType.isBooleanScalar()   		= isBoolean() && isScalar();
+	syn boolean FType.isBooleanArray()    		= isBoolean() && isArray();
+	syn boolean FType.isStringScalar()    		= isString() && isScalar();
+	syn boolean FType.isStringArray()     		= isString() && isArray();
+	syn boolean FType.isRecordScalar()    		= isRecord() && isScalar();
+	syn boolean FType.isRecordArray()     		= isRecord() && isArray();
+	syn boolean FType.isEnumScalar()      		= isEnum() && isScalar();
+	syn boolean FType.isEnumArray()       		= isEnum() && isArray();
+	syn boolean FType.isNumericScalar()   		= isNumeric() && isScalar();
+	syn boolean FType.isNumericArray()    		= isNumeric() && isArray();
+	syn boolean FType.isPrimitiveScalar() 		= isPrimitive() && isScalar();
+	syn boolean FType.isPrimitiveArray() 		= isPrimitive() && isArray();
+	syn boolean FType.isExternalObjectScalar()	= isExternalObject() && isScalar();
+	syn boolean FType.isExternalObjectArray()	= isExternalObject() && isArray();
 	
 	syn boolean FType.containsReal() = isReal();
 	eq FRecordType.containsReal() {
@@ -1082,7 +1104,8 @@ aspect BuiltInFlatTypes {
   		copy.setSize(Size.SCALAR);
   		return copy;
 	}
-	eq FUnknownType.scalarType() 		= FUnknownType.SCALAR;
+    eq FUnknownType.scalarType()        = this;
+    eq FNoType.scalarType()             = this;
 	eq FRealType.scalarType()    		= FRealType.SCALAR;
 	eq FIntegerType.scalarType() 		= FIntegerType.SCALAR;
 	eq FBooleanType.scalarType()		= FBooleanType.SCALAR;
@@ -1092,7 +1115,8 @@ aspect BuiltInFlatTypes {
 	syn boolean FType.isUnknown() = false;
  	eq FUnknownType.isUnknown() = true;
  	
-	syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+    syn FType ASTNode.fUnknownType() = FUnknownType.SCALAR;
+    syn FType ASTNode.fNoType()      = FNoType.SCALAR;
 	
 	syn FPrimitiveType ASTNode.fRealScalarType()    		= FRealType.SCALAR;
 	syn FPrimitiveType ASTNode.fIntegerScalarType() 		= FIntegerType.SCALAR;
@@ -1122,7 +1146,8 @@ aspect BuiltInFlatTypes {
   		copy.setSize(size);
   		return copy;
  	}
- 	eq FUnknownType.arrayType(Size size)  		= this;
+    eq FUnknownType.arrayType(Size size)        = this;
+    eq FNoType.arrayType(Size size)             = this;
 	eq FRealType.arrayType(Size size)     		= fRealArrayType(size);
  	eq FIntegerType.arrayType(Size size)  		= fIntegerArrayType(size);
  	eq FStringType.arrayType(Size size)   		= fStringArrayType(size);
@@ -1132,7 +1157,7 @@ aspect BuiltInFlatTypes {
  	/**
  	 * \brief Create a literal with the zero value for this type, if applicable.
  	 */
- 	public FExp FType.zeroLiteral()        { return null; }
+ 	public FExp FType.zeroLiteral()        { throw new UnsupportedOperationException("Unable to create zero literal from type " + this); }
  	public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
  	public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
  	public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }

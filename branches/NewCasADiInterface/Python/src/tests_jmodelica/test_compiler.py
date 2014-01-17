@@ -264,7 +264,7 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_setget_integer_option(self):
         """ Test integer option setter and getter. """
-        option = 'nle_solver_log_level'
+        option = 'log_level'
         default_value = Test_Compiler.mc.get_integer_option(option)
         new_value = 1
         # change value of option

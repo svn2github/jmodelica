@@ -75,6 +75,9 @@ void jmi_log_delete(jmi_log_t *log);
 /** \brief Enter a new log node with given category and type. */
 jmi_log_node_t jmi_log_enter(jmi_log_t *log, jmi_log_category_t c, const char *type);
 
+/** \brief Get current log node. */
+jmi_log_node_t jmi_log_get_current_node(jmi_log_t *log);
+
 /** \brief Enter a new log node with given category and type, then call jmi_log_fmt with the remaining parameters. */
 jmi_log_node_t jmi_log_enter_fmt(jmi_log_t *log, jmi_log_category_t c, const char *type, const char* fmt, ...);
 
@@ -170,5 +173,7 @@ void jmi_log_int_(   jmi_log_t *log, int x);
 
 /** \brief Log a value reference of type `t` (one of `ribs`), without ending the line. */
 void jmi_log_vref_(  jmi_log_t *log, char t, int vref);
+
+char* jmi_log_get_build_date();
 
 #endif

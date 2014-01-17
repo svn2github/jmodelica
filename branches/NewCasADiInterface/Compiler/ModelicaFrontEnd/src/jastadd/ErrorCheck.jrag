@@ -58,6 +58,15 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @see ASTNode#warning(String)
 	   */
 	  public void warning(String s, ASTNode n);
+      
+      /**
+       * Called when a problem is generated though other means than the other methods in this interface, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p);
 	  
 	  /**
 	   * Connect error handler to a Root.
@@ -112,13 +121,26 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void warning(String s, ASTNode n) {
 		  problem(s, n, root.warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
 	  }
-	  
-	  protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
-		  Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
-		  if (!list.contains(p))
-			  list.add(p);
-	  }
-	  
+
+      /**
+       * Called when a problem is generated though other means than the other methods in this class, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p) {
+          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? root.warnings : root.errors;
+          if (!list.contains(p))
+              list.add(p);
+      }
+
+      protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
+          Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
+          if (!list.contains(p))
+              list.add(p);
+      }
+
 	  public IErrorHandler connectTo(Root root) {
 		  IErrorHandler eh = new DefaultErrorHandler(root);
 		  root.setErrorHandler(eh);
@@ -169,6 +191,17 @@ import org.jmodelica.util.ErrorCheckType;
 	  public void warning(String s, ASTNode n) {
 		  delegate.warning(s, n);
 	  }
+
+      /**
+       * Called when a problem is generated though other means than the other methods in this class, 
+       * typically during parsing of library files.
+       * 
+       * @param p   the problem
+       * @see ASTNode#problem(Problem)
+       */
+      public void problem(Problem p) {
+          delegate.problem(p);
+      }
 	  
 	  public IErrorHandler connectTo(Root root) {
 		  delegate = delegate.connectTo(root);
@@ -286,6 +319,14 @@ aspect ErrorCheck {
   public void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
   }
+
+  /**
+   * Register a problem. Delegates to an {@link IErrorHandler}.
+   * @param p   the problem.
+   */
+  public void ASTNode.problem(Problem p) {
+      root().getErrorHandler().problem(p);
+  }
   
   /**
    * Lock the closest surrounding if-equation or if-expression that have only 
@@ -295,54 +336,59 @@ aspect ErrorCheck {
    * Any parameters used in the test will be marked as structural.
    * 
    * NB: This has side-effects, dispite being an inherited attribute.
+   * 
+   * @param checkType  the type of error checks to use when marking structural parameters
    */
   // TODO: find way to move side-effects out from inh attr
-  inh boolean FExp.lockBranch();
-  inh boolean FExpSubscript.lockBranch();
-  inh boolean FIfEquation.lockBranch();
-  eq FIfExp.getThenExp().lockBranch()                     = lockMyBranch(true);
-  eq FIfExp.getElseExp().lockBranch()                     = lockMyBranch(false);
-  eq FIfEquation.getFAbstractEquation().lockBranch()      = lockMyBranch(true);
-  eq FIfEquation.getElse().lockBranch()                   = lockMyBranch(false);
-  eq FConnectClause.getConnector1().lockBranch()          = getConnector2().isDisabled();
-  eq FConnectClause.getConnector2().lockBranch()          = getConnector1().isDisabled();
-  eq InstComponentDecl.getInstModification().lockBranch() = isDisabled();
-  eq InstNode.getChild().lockBranch()                     = false;
-  eq FClass.getChild().lockBranch()                       = false;
+  inh boolean FExp.lockBranch(ErrorCheckType checkType);
+  inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
+  inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
+  eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
+  eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
+  eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
+  eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
+  eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled();
+  eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled();
+  eq InstComponentDecl.getInstModification().lockBranch(ErrorCheckType checkType) = isDisabled();
+  eq InstNode.getChild().lockBranch(ErrorCheckType checkType)                     = false;
+  eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
    * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch()}.
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
    * 
    * Any parameters used in the test will be marked as structural.
    * 
-   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
-  public boolean FIfExp.lockMyBranch(boolean then) {
+  public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
 	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
-		  getIfExp().markAsStructuralParameter();
+		  getIfExp().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
-		  return lockBranch();
+		  return lockBranch(checkType);
 	  }
   }
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
    * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
-   * delegates to {@link #lockBranch()}.
+   * delegates to {@link #lockBranch(ErrorCheckType)}.
    * 
    * Any parameters used in the test will be marked as structural.
    * 
-   * @param this  if true, we are trying to remove the then-branch, otherwise the else-branch
+   * @param checkType  the type of error checks to use when marking structural parameters
+   * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
-  public boolean FIfEquation.lockMyBranch(boolean then) {
+  public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
 	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
-		  getTest().markAsStructuralParameter();
+		  getTest().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
-		  return lockBranch();
+		  return lockBranch(checkType);
 	  }
   }
 
@@ -455,6 +501,14 @@ aspect InstanceErrorCheck {
     eq InstClassDecl.getChild().inInstComponent()     = false;
     eq InstRoot.getChild().inInstComponent()          = false;
     eq FlatRoot.getChild().inInstComponent()          = false;
+    
+    
+    public void FExp.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
+            super.collectErrors(checkType);
+        }
+    }
 
   	public void InstBaseClassDecl.collectErrors(ErrorCheckType checkType) {
     	if (!errorChecked) {
@@ -520,7 +574,7 @@ aspect InstanceErrorCheck {
 	    if (!errorChecked) {
 	    	errorChecked = true;
 	    	boolean checkInner = isOuter() && 
-	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner);
+	    	        !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
 	    	if (isRecursed()) {
 	    		error("Recursive class structure");
 	    	} else if (checkInner) {
@@ -531,8 +585,6 @@ aspect InstanceErrorCheck {
 	    	} else if (inOuter()) {
 	    		surroundingOuterComponentDecl().collectErrors(checkType);
 	    	} else {
-  		  		errorChecked = false;
-	    		super.collectErrors(checkType);
   		  		collectErrorsInClassName(checkType);
   		  		if (hasFArraySubscripts())
   		  		    getFArraySubscripts().collectErrors(checkType);
@@ -540,11 +592,19 @@ aspect InstanceErrorCheck {
 	    			getConditionalAttribute().collectErrors(checkType);
 	    		if (isActive() && hasInstModification())
 	    			getInstModification().collectErrors(checkType);
-	    		if (hasInstConstraining())
-	    			getInstConstraining().collectErrors(checkType);
+	    		
+	    		if (shouldCheckInto(checkType)) {
+  		  		    errorChecked = false;
+    	    		super.collectErrors(checkType);
+    	    		if (hasInstConstraining())
+    	    			getInstConstraining().collectErrors(checkType);
+	    		}
 	    	}
 		}
 	}
+	
+	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
+	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
 	
 	// TODO: move to better place (InstanceTree.jrag?)
 	syn boolean InstComponentDecl.isActive() {
@@ -564,13 +624,14 @@ aspect InstanceErrorCheck {
 		//       need that for other things as well, but is there problems with it?
 	}	
 	
-	public void FExp.checkConstantExpression(String varKind, String varName) {
+	public void FExp.checkConstantExpression(ErrorCheckType checkType, String varKind, String varName) {
 		String exp = "'" + prettyPrint("") + "'";
 		boolean failed = false;
 		try {
 			if (isCircular()) {
-				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
-						varKind, varName, exp);
+			    if (!checkType.allowConstantNoValue())
+    				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
+    						varKind, varName, exp);
 			} else {
 				CValue val = ceval();
 				if (val.isUnknown()) {
@@ -587,7 +648,7 @@ aspect InstanceErrorCheck {
 		} catch (ConstantEvaluationException e) {
 			failed = true;
 		}
-		if (failed)
+		if (failed && !checkType.allowConstantNoValue())
 			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
 	}
 	
@@ -604,7 +665,7 @@ aspect InstanceErrorCheck {
 	    		// TODO: Check structural parameters as well
 				// Check if the binding expression of constants can be evaluated
 				if (isConstant()) 
-					bexp.checkConstantExpression("constant", qualifiedName());
+					bexp.checkConstantExpression(checkType, "constant", qualifiedName());
 				else if (isParameter() && bexp.isCircular())
 					bexp.error("Circularity in binding expression of parameter: %s = %s", 
 							qualifiedName(), bexp);
@@ -620,7 +681,7 @@ aspect InstanceErrorCheck {
     		// Mark parameters with Evaluate=true as structural
     		if (isParameter() && annotation().forPath("Evaluate").bool())
     		    if (canEvaluateAsStructural())
-    		        markAsStructuralParameter();
+    		        markAsStructuralParameter(checkType);
     		    else
     		        warning("Evaluate annotation is ignored when fixed equals false");
 			
@@ -629,7 +690,7 @@ aspect InstanceErrorCheck {
 			getLocalFArraySubscriptsOpt().collectErrors(checkType);
 			
 			// Check attributes for primitive variables
-			checkAttributes();
+			checkAttributes(checkType);
 		}
 	}
 	
@@ -649,9 +710,9 @@ aspect InstanceErrorCheck {
     }
     eq FInstAccessExp.canEvaluateAsStructural() = getInstAccess().myInstComponentDecl().canEvaluateAsStructural();
 	
-	public void InstAssignable.checkAttributes() {}
+	public void InstAssignable.checkAttributes(ErrorCheckType checkType) {}
 	
-	public void InstPrimitive.checkAttributes() {
+	public void InstPrimitive.checkAttributes(ErrorCheckType checkType) {
 		// Check if the expressions of the attributes can be evaluated
 		// Note that this check has to be done locally in the
 		// context of an InstAssignable node in order to avoid
@@ -664,11 +725,11 @@ aspect InstanceErrorCheck {
 				if (icm.hasInstModification() && icm.getInstModification().hasInstValueMod()) {
 					FExp val_mod = icm.getInstModification().instValueMod();
 					if (val_mod.variability().lessOrEqual(fConstant())) 
-						val_mod.checkConstantExpression("attribute", icm.getName().name());
+						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
 					else if (!val_mod.variability().lessOrEqual(fParameter())) 
 						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
 								icm.getName().name(), val_mod);
-					if (val_mod.isCircular())
+					if (val_mod.isCircular() && !checkType.allowConstantNoValue())
 						error("Could not evaluate binding expression for attribute '%s' due to circularity: %s", 
 								icm.getName().name(), val_mod);
 				}
@@ -734,15 +795,63 @@ aspect InstanceErrorCheck {
     	  errorChecked = true;
 		  getOriginalInstClass().collectErrors(checkType);
 		}
-		
 	}
 
 	public void InstBuiltIn.collectErrors(ErrorCheckType checkType) {}
 
 	public void InstComponentRedeclare.collectErrors(ErrorCheckType checkType) {
-		super.collectErrors(checkType);
-		getInstComponentDecl().collectErrors(checkType);
+		if (!errorChecked) {
+		    super.collectErrors(checkType);
+		    errorChecked = true;
+		    // TODO: The InstComponentDecl doesn't really have enough information to check this, 
+		    //       as it doesn't know about the original declaration or constraining type.
+		    //       Fixing that might need redesign of this part of the instance tree
+		    getInstComponentDecl().checkRedeclares(checkType);
+		}
 	}
+	
+	public void InstNode.checkRedeclares(ErrorCheckType checkType) {
+	    if (!errorChecked) {
+	        for (InstNode n : getInstComponentDecls()) 
+	            n.checkRedeclares(checkType);
+	        for (InstNode n : getInstExtendss()) 
+	            n.checkRedeclares(checkType);
+	      }
+	}
+
+    public void InstReplacingRecord.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingComposite.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingPrimitive.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingExpandableConnectorDecl.checkRedeclares(ErrorCheckType checkType) {
+        super.checkRedeclares(checkType);
+        if (shouldCheckInto(checkType))
+            typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstComponentDecl.checkRedeclares(ErrorCheckType checkType) {
+        if (isActive() && hasInstModification())
+            getInstModification().collectErrors(checkType);
+        if (shouldCheckInto(checkType)) {
+            if (hasInstConstraining())
+                getInstConstraining().collectErrors(checkType);
+            super.checkRedeclares(checkType);
+        }
+    }
 
 	public void InstClassRedeclare.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);
@@ -895,6 +1004,7 @@ aspect InstanceErrorCheck {
             for (Index j : ivals.indices()) {
                 var.setEvaluationValue(ivals.getCell(j));
                 if (last) {
+                    child.resetCollectErrors();
                     child.collectErrors(checkType);
                     child.flushAllRecursive();
                 } else {
@@ -924,10 +1034,12 @@ aspect InstanceErrorCheck {
 	    			error("The class " + name + " is not a function");
 	    	} else if (!func.isRecord() && !func.isCompleteFunction()) {
 	    		// TODO: add check if function is partial?
-	    		error("Calling function " + getName().name() + 
-	    				"(): can only call functions that have one algorithm section or external function specification");
+	    	    if (!checkType.allowIncompleteReplaceableFunc() || !canBeReplacedForMe(func))
+	    	        error("Calling function " + getName().name() + 
+	    	                "(): can only call functions that have one algorithm section or external function specification");
 	    	} else {
 	    		// Function exists, check everything
+	            errorChecked = false; // super also uses errorChecked
 	    		super.collectErrors(checkType);
 	    		
 	    		// We need to check the function definition as well.
@@ -941,7 +1053,31 @@ aspect InstanceErrorCheck {
 	    	}
 	    }
 	}
+    
+    /**
+     * Can <code>node</code> be replaced as seen from here?
+     */
+    inh boolean ASTNode.canBeReplacedForMe(InstNode node);
+    eq InstNode.getChild().canBeReplacedForMe(InstNode node) = node.canBeReplacedFor(this);
+    eq Root.getChild().canBeReplacedForMe(InstNode node)     = false;
 	
+	/**
+	 * Is this node or any node before the closest common ancestor with <code>source</code> replaceable?
+	 */
+	syn boolean InstNode.canBeReplacedFor(InstNode source) = canBeReplacedIn(commonAncestor(source));
+	
+    /**
+     * Is this class or any class before <code>ancestor</code> replaceable?
+     */
+	syn boolean InstNode.canBeReplacedIn(InstNode ancestor) = isReplaceable() || canBeReplacedInHelper(ancestor);
+
+    /**
+     * Helper method for {@link #canBeReplacedIn(InstNode)} - use it instead.
+     */
+    inh boolean InstNode.canBeReplacedInHelper(InstNode ancestor);
+    eq InstNode.getChild().canBeReplacedInHelper(InstNode ancestor) = (ancestor != this) && canBeReplacedIn(ancestor);
+    eq Root.getChild().canBeReplacedInHelper(InstNode ancestor)     = false;
+
 	public void FInfArgsFunctionCall.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);
 		if (unbindableArgs != null) {
@@ -1131,5 +1267,110 @@ aspect AssertEval {
         }
         return remove;
     }
+    
+}
+
+aspect ScalarizationErrorCheck {
+    
+    /**
+     * Check errors that can only be detected after scalarization.
+     */
+    public void FClass.scalarizationErrorCheck() {
+        checkMultipleReinit();
+        breakOnErrors();
+    }
+    
+    /**
+     * Check for variables with multiple reinits.
+     */
+    public void FClass.checkMultipleReinit() {
+        Map<FAbstractVariable, Set<FReinit>> reinitMap = collectReinits();
+        for (FAbstractVariable fv : reinitMap.keySet()) {
+            if (!fv.isUnknown()) {
+                Set<FWhenEquation> whens = new HashSet<FWhenEquation>();
+                Set<FReinit> reinits = reinitMap.get(fv);
+                for (FReinit r : reinits) {
+                    FWhenEquation w = r.myWhen();
+                    if (!whens.contains(w))
+                        whens.add(w);
+                }
+                if (whens.size() > 1) {
+                    StringBuilder buf = new StringBuilder();
+                    buf.append("The variable ");
+                    buf.append(fv.name());
+                    buf.append(" is assigned in reinit() clauses in more than one when clause:\n");
+                    for (FReinit r : reinits) {
+                        buf.append("    ");
+                        buf.append(r);
+                        buf.append(";\n");
+                    }
+                    fv.error(buf.toString());
+                }
+            }
+        }
+    }
+    
+    /**
+     * Find all reinits and map them to the assigned variable.
+     */
+    syn boolean FVariable.isReinit() = myFClass().collectReinits().keySet().contains(this);
+    
+    syn lazy Map<FAbstractVariable,Set<FReinit>> FClass.collectReinits() {
+        Map<FAbstractVariable,Set<FReinit>> reinitMap = new HashMap<FAbstractVariable,Set<FReinit>>();
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.collectReinits(reinitMap);
+        return reinitMap;
+    }
+    
+    public void FAbstractEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
+    
+    public void FIfWhenEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+    	if (isWhen()) {
+	        super.collectReinits(map);
+	        if (hasElse())
+	            getElse().collectReinits(map);
+    	}
+    }
+    
+    public void FIfWhenElseEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        for (FAbstractEquation e : getFAbstractEquations())
+            e.collectReinits(map);
+    }
+    
+    public void FFunctionCallEquation.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        getCall().collectReinits(map);
+    }
+    
+    public void FExp.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {}
+    
+    public void FReinit.collectReinits(Map<FAbstractVariable,Set<FReinit>> map) {
+        Set<FReinit> set = map.get(myFV());
+        if (set == null) {
+            set = new LinkedHashSet<FReinit>();
+            map.put(myFV(), set);
+        }
+        set.add(this);
+    }
+    
+    /**
+     * Get the when-equation that this reinit() belongs to.
+     * 
+     * Gets the top when in a when-elsewhen-else.
+     * Not valid after when-equations have been converted to if-equations.
+     */
+    inh FWhenEquation FReinit.myWhen();
+    eq FWhenEquation.getChild().myWhen() = findTopWhen(this);
+    eq FClass.getChild().myWhen()        = null;
+    eq InstNode.getChild().myWhen()      = null;
+    
+    /**
+     * Find the top when-equation in a when-elsewhen-else equation.
+     * 
+     * @param last  will be returned if parent is not a when equation
+     */
+    inh FWhenEquation FWhenEquation.findTopWhen(FWhenEquation last);
+    eq FWhenEquation.getChild().findTopWhen(FWhenEquation last) = findTopWhen(this);
+    eq FClass.getChild().findTopWhen(FWhenEquation last)        = last;
+    eq InstNode.getChild().findTopWhen(FWhenEquation last)      = last;
     
 }

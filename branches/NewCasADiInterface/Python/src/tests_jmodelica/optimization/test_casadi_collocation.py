@@ -94,6 +94,9 @@ class TestLocalDAECollocator:
 
         class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
         compile_fmux(class_path, vdp_file_path)
+
+        class_path = "VDP_pack.VDP_Opt_DAE"
+        compile_fmux(class_path, vdp_file_path)
         
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
@@ -172,6 +175,11 @@ class TestLocalDAECollocator:
                 'VDP_pack_VDP_Opt_Min_Time_Nonzero_Start.fmux'
         self.model_vdp_min_time_nonzero_start = CasadiModel(
                 fmux_vdp_min_time_nonzero_start, verbose=False)
+
+        fmux_vdp_dae = 'VDP_pack_VDP_Opt_DAE.fmux'
+        self.model_vdp_dae = CasadiModel(fmux_vdp_dae, verbose=False)
+        self.model_vdp_dae_blt = CasadiModel(fmux_vdp_dae, verbose=False,
+                                             ode=True)
         
         fmu_cstr = 'CSTR_CSTR.fmu'
         self.model_cstr = load_fmu(fmu_cstr)
@@ -218,6 +226,40 @@ class TestLocalDAECollocator:
                 fmux_qt_par_est_degenerate, verbose=False)
         
         self.algorithm = "LocalDAECollocationAlg"
+
+    @testattr(casadi = True)
+    def test_vdp(self):
+        """Simple VDP test."""
+        model = self.model_vdp_bounds_lagrange
+        
+        # References values
+        cost_ref = 3.1761958052678922
+        u_norm_ref = 0.28723832161142143
+        
+        # Optimize
+        opts = model.optimize_options(self.algorithm)
+        res = model.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+
+    @testattr(casadi = True)
+    def test_vdp_blt(self):
+        """
+        Test CasADi's ODE conversion via BLT on a simple VDP DAE.
+        """
+        model_dae = self.model_vdp_dae
+        model_ode = self.model_vdp_dae_blt
+        
+        # References values
+        cost_ref = 3.1761958052678922
+        u_norm_ref = 0.28723832161142143
+        
+        # Optimize DAE formulation
+        res_dae = model_dae.optimize(self.algorithm)
+        assert_results(res_dae, cost_ref, u_norm_ref)
+
+        # Optimize ODE formulation
+        res_ode = model_ode.optimize(self.algorithm)
+        assert_results(res_ode, cost_ref, u_norm_ref)
     
     @testattr(casadi = True)
     def test_init_traj_sim(self):
@@ -247,7 +289,7 @@ class TestLocalDAECollocator:
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [435.4425832, 333.42862629],rtol=1e-5)
+                [435.4425832, 333.42862629],rtol=1e-3)
     
     @testattr(casadi = True)
     def test_init_traj_opt(self):
@@ -1564,7 +1606,7 @@ class TestLocalDAECollocator:
         opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
         res = model.simulate(start_time=0., final_time=150., input=opt_input, options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
-                                  [284.62140206, 345.22510435], rtol=5e-4)
+                                  [284.62140206, 346.31140807], rtol=5e-3)
 
     @testattr(casadi = True)
     def test_matrix_evaluations(self):

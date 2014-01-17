@@ -93,23 +93,20 @@ def run_demo(with_plots=True):
         declaration.
         """
         
-        # Get a list of local classes using the method ClassDecl.classes()
-        # which returns a Java ArrayList object containing ClassDecl objects.
-        local_classes = class_decl.classes()
+        # Get an iterator over of local classes using the method ClassDecl.classes()
+        # which returns a Java Iterable object over ClassDecl objects.
+        local_classes = class_decl.classes().iterator()
         
-        # Get the number of local classes.
-        num_classes = local_classes.size()
-        
+        num_classes = 0
         # Loop over all local classes
-        for i in range(local_classes.size()):
-            # Call count_classes recursively for all local classes
-            num_classes = num_classes + \
-                          count_classes(local_classes.get(i),depth + 1)
+        while local_classes.hasNext():
+            # Call count_classes recursively for all local classes 
+            # (including the contained class itself)
+            num_classes += 1 + count_classes(local_classes.next(), depth + 1)
 
         # If the class declaration corresponds to a package, print
         # the number of hierarchically contained classes
-        if class_decl.getRestriction().getNodeName() == 'MPackage' \
-               and depth <= 1:
+        if class_decl.isPackage() and depth <= 1:
             print("The package %s has %d hierachically contained classes" \
                   %(class_decl.qualifiedName(),num_classes))
             

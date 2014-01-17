@@ -44,11 +44,16 @@ aspect ContentCheck {
 			}
 		}
 	}
-	
-	public void FTerminate.contentCheck(ErrorCheckType checkType) {
-		if (inFunction()) 
-			error("The terminate() statement is not allowed in functions");
-	}
+    
+    public void FTerminate.contentCheck(ErrorCheckType checkType) {
+        if (inFunction()) 
+            error("The terminate() statement is not allowed in functions");
+    }
+    
+    public void FReinit.contentCheck(ErrorCheckType checkType) {
+        if (!inWhen() || inAlgorithm()) 
+            error("The reinit() operator is only allowed in when equations");
+    }
 	
 	public void InstExternal.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction())
@@ -116,7 +121,7 @@ aspect ContentCheck {
 	
 	public void InstComponentDecl.contentCheck(ErrorCheckType checkType) {
 		if (!inFunction() && hasFArraySubscripts()) // Array sizes outside functions should be structural parameters
-			getFArraySubscripts().markAsStructuralParameter();
+			getFArraySubscripts().markAsStructuralParameter(checkType);
 	}
 	
     public void InstAssignable.contentCheck(ErrorCheckType checkType) {
@@ -235,11 +240,13 @@ aspect ContentCheck {
 				error("All branches in when equation must assign the same variables");
 		}
 	}
-	
-	public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
-		if (getName().hasFArraySubscripts())
-			error("Modifiers of specific array elements are not allowed");
-	}
+    
+    public void InstNamedModification.contentCheck(ErrorCheckType checkType) {
+        if (getName().hasFArraySubscripts())
+            error("Modifiers of specific array elements are not allowed");
+    }
+    
+    public void InstComponentRedeclare.contentCheck(ErrorCheckType checkType) {}
 	
 	public static final String FIfEquation.UNBALANCED_ERROR = 
 		"All branches in if equation with non-parameter tests must have the same number of equations";
@@ -253,17 +260,10 @@ aspect ContentCheck {
 			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
 			boolean functionCallEqu = hasFunctionCallEquations(); 
 			if (hasOnlyParamTests()) {
-				setEliminateOnParamTest();
+				setEliminateOnParamTest(checkType);
 			} else {
 				if (!balanced) {
 					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-				} else if (functionCallEqu) {
-					if (hasFunctionCallEquationsWithLefts())
-						compliance("If equations that has non-parameter tests and contains " + 
-								"function calls using multiple outputs are not supported");
-					else
-						warning("Function calls without outputs in if equations that has " + 
-								"non-parameter tests are not supported, and are currently ignored");
 				}
 			}
 		}
@@ -372,58 +372,58 @@ aspect StructuralParams {
 	
 	private boolean InstAssignable.isStructuralParam = false;
 	
-	public void FExp.markAsStructuralParameter() {
+	public void FExp.markAsStructuralParameter(ErrorCheckType checkType) {
 		if (inFunction())
 			return;
-		if (!canCeval())
+		if (!checkType.allowConstantNoValue() && !canCeval())
 			compliance("Could not evaluate expression used as structural parameter: " + this);
-		markUsesAsStructuralParameter();
+		markUsesAsStructuralParameter(checkType);
 	}
 	
-	public void FArraySubscripts.markAsStructuralParameter() {
+	public void FArraySubscripts.markAsStructuralParameter(ErrorCheckType checkType) {
 		for (FSubscript s : getFSubscripts())
-			s.markAsStructuralParameter();
+			s.markAsStructuralParameter(checkType);
 	}
 	
-	public void FSubscript.markAsStructuralParameter() {}
-	public void FExpSubscript.markAsStructuralParameter() {
-		getFExp().markAsStructuralParameter();
+	public void FSubscript.markAsStructuralParameter(ErrorCheckType checkType) {}
+	public void FExpSubscript.markAsStructuralParameter(ErrorCheckType checkType) {
+		getFExp().markAsStructuralParameter(checkType);
 	}  
 
 	
-	public void ASTNode.markUsesAsStructuralParameter() {
+	public void ASTNode.markUsesAsStructuralParameter(ErrorCheckType checkType) {
 		for (ASTNode n : this)
-			n.markUsesAsStructuralParameter();
+			n.markUsesAsStructuralParameter(checkType);
 	}
     
-    public void FSizeExp.markUsesAsStructuralParameter() {
-        getDimOpt().markUsesAsStructuralParameter();
+    public void FSizeExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {
+        getDimOpt().markUsesAsStructuralParameter(checkType);
     }
     
-    public void FNdimsExp.markUsesAsStructuralParameter() {}
+    public void FNdimsExp.markUsesAsStructuralParameter(ErrorCheckType checkType) {}
 	
-	public void InstAccess.markUsesAsStructuralParameter() {
-		myInstComponentDecl().markAsStructuralParameter();
-		markUsesInSubscriptsAsStructuralParameter();
+	public void InstAccess.markUsesAsStructuralParameter(ErrorCheckType checkType) {
+		myInstComponentDecl().markAsStructuralParameter(checkType);
+		markUsesInSubscriptsAsStructuralParameter(checkType);
 	}
 	
-	public void InstAccess.markUsesInSubscriptsAsStructuralParameter() {}
+	public void InstAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {}
 	
-	public void InstDot.markUsesInSubscriptsAsStructuralParameter() {
+	public void InstDot.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
 		for (InstAccess ia : getInstAccesss())
-			ia.markUsesInSubscriptsAsStructuralParameter();
+			ia.markUsesInSubscriptsAsStructuralParameter(checkType);
 	}
 	
-	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter() {
-		getFArraySubscripts().markUsesAsStructuralParameter();
+	public void InstArrayAccess.markUsesInSubscriptsAsStructuralParameter(ErrorCheckType checkType) {
+		getFArraySubscripts().markUsesAsStructuralParameter(checkType);
 	}
 	
 	
-	public void InstComponentDecl.markAsStructuralParameter() {
+	public void InstComponentDecl.markAsStructuralParameter(ErrorCheckType checkType) {
 		// TODO: should probably do something constructive here?
 	}
 	
-	public void InstAssignable.markAsStructuralParameter() {
+	public void InstAssignable.markAsStructuralParameter(ErrorCheckType checkType) {
 		if (isStructuralParam || !isParameter() || inFunction() || isForIndex())
 			return;
 		if (indices().numElements() > 0 && !fixedAttributeCValue().reduceBooleanOr()) {
@@ -435,12 +435,10 @@ aspect StructuralParams {
 		variability_computed = false;
 		if (hasBindingFExp()) {
 			FExp e = getBindingFExp();
-			if (!e.canCeval())
+			if (!checkType.allowConstantNoValue() && !e.canCeval())
 				compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
-			e.markUsesAsStructuralParameter();
+			e.markUsesAsStructuralParameter(checkType);
 		}
 	}
-
-	// TODO: Propagate structural parameter information during flattening
 	
 }

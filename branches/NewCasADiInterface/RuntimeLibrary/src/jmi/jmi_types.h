@@ -30,6 +30,9 @@ typedef double jmi_real_t; /*< Typedef for the real number
 typedef int jmi_int_t; /*< Typedef for the integer number
                < representation used in the Runtime
                < Library. */
+typedef void* jmi_extobj_t; /*< Typedef for the external object
+               < representation used in the Runtime
+               < Library. */
 
 /* Temporary remains of CppAD*/            
 typedef jmi_real_t jmi_ad_var_t; 

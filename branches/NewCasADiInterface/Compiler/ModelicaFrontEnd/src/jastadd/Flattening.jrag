@@ -114,6 +114,11 @@ aspect Flattening {
 		getInstExtendsList().flattenUsedFuncsAndEnums(fc);
 		super.flattenUsedFuncsAndEnums(fc);
     }
+    
+    public void InstComponentDecl.flattenUsedFuncsAndEnums(FClass fc) {
+        if (useInFlattening())
+            super.flattenUsedFuncsAndEnums(fc);
+    }
 
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
     	actualInstClass().flattenUsedFuncsAndEnums(fc);
@@ -201,6 +206,7 @@ aspect Flattening {
 				ffd.setFDerivativeFunction(der);
 			// TODO: should we look in extends as well?
 			ffd.readInlineAnnotation(annotation());
+			ffd.readSmoothOrderAnnotation(annotation());
 			
 			fc.addFFunctionDecl(ffd);
 			ffd.ensureFQNamesFull();
@@ -273,7 +279,7 @@ aspect Flattening {
 			n = all.size();
 			// We need a copy of all since it can be modified during iteration
 			for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
-				if (!added.contains(cons)) {
+				if (!added.contains(cons) && cons.hasBindingFExp()) {
 					cons.flattenInFunction(ffd, fc, true, this);
 					cons.myBindingInstExp().flattenUsedFuncsAndEnums(fc);
 					all.remove(cons);
@@ -721,10 +727,21 @@ aspect Flattening {
 			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
-				return (isEach || decl == InstAssignable.this || !enclosedBy(decl)) ? 
-						exp : exp.dynamicFExp(splitBindingFExp(exp, decl));
+                InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
+				return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
+						exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
 			}
 		};
+        AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
+        if (iterationNode.exists() && root().options.getBooleanOption("hand_guided_tearing")) {
+            AnnotationNode enabledNode = iterationNode.forPath("enabled");
+            if (!enabledNode.exists() || enabledNode.exp() == null) {
+                attr.add(new FInternalAttribute(FAttribute.HGT, new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_COMPONENT, isArray()));
+            } else {
+                attr.add(new FInternalAttribute(FAttribute.HGT, containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).flatten(getFQNamePrefix()), 
+                        FInternalAttribute.HGTVarLevel_COMPONENT, enabledNode.isEachSet()));
+            }
+        }
 		addAttributes(attr, totalMergedEnvironment(), mut, false);
 	}
 	
@@ -811,14 +828,6 @@ aspect Flattening {
 				
 		fv.setFQName(name);
 		
-		AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
-		if (root().options.getBooleanOption("hand_guided_tearing") && iterationNode.exists()) {
-			AnnotationNode enabledNode = iterationNode.forPath("enabled");
-			if (!enabledNode.exists() || containingInstNode().dynamicFExp(enabledNode.exp().instantiate()).ceval().booleanValue()) {
-				fv.setHGTType(FClass.HGTVariableType.COMPONENT);
-			}
-		}
-		
 		return fv;
 	}
 	
@@ -842,8 +851,12 @@ aspect Flattening {
 			FExp fe = im.getFExp();
 			boolean hasEach = im.hasEach() || 
 				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
-			if (!hasEach && im.myInstNode() != this)
-				fe = splitBindingFExp(fe, im.myInstNode());
+            InstNode decl = im.myInstNode();
+			if (!hasEach && decl != this) {
+			    if (!decl.isClassDecl())
+			        decl = commonAncestor(decl);
+				fe = splitBindingFExp(fe, decl);
+			}
 			return fe.unboundCopy();
 		}
 		return null;
@@ -866,18 +879,13 @@ aspect Flattening {
 	 * @param fe    the expression to split
 	 * @param node  the node where the binding expression was declared 
 	 */
-	inh FExp InstAssignable.splitBindingFExp(FExp fe, InstNode node);
-	inh FExp InstArrayComponentDecl.splitBindingFExp(FExp fe, InstNode node);
-	inh FExp InstComposite.splitBindingFExp(FExp fe, InstNode node);
-	
+	inh FExp InstNode.splitBindingFExp(FExp fe, InstNode node);
 	eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
 	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
-	eq FlatRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
+	eq Root.getChild().splitBindingFExp(FExp fe, InstNode node)          = fe;
 	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
-	eq InstComposite.getChild().splitBindingFExp(FExp fe, InstNode node) =
-		(node == this) ? fe : splitBindingFExp(fe, node);
-	eq InstRecord.getChild().splitBindingFExp(FExp fe, InstNode node) =
+	eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node) =
 		(node == this) ? fe : splitBindingFExp(fe, node);
 	
 	/**
@@ -898,7 +906,7 @@ aspect Flattening {
 	 * Will not create new nodes unless necessary.
 	 */
 	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
-	eq FArray.splitArrayExp(int index)         = isIterArray() ? super.splitArrayExp(index) : getFExp(index - 1);
+	eq FArray.splitArrayExp(int index)         = isIterArray() ? getFExp(0).splitArrayExp(index) : getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
 	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
@@ -920,6 +928,18 @@ aspect Flattening {
 		FSubscriptedExp exp = (FSubscriptedExp) unboundCopy();
 		exp.getFArraySubscripts().specifyNext(index);
 		return exp;
+	}
+	eq FIterExp.splitArrayExp(int index) {
+	    Map<String,FExp> repl = new HashMap<String,FExp>();
+	    repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
+	    FExp res = getFExp().fullCopy().replaceIndices(repl);
+	    if (getNumForIndex() > 1) {
+	        List<CommonForIndex> indices = new List<CommonForIndex>();
+	        for (int i = 1, n = getNumForIndex(); i < n; i++)
+	            indices.add(getForIndex(i).fullCopy());
+	        res = new FArray(new List(new FIterExp(res, indices)));
+	    }
+	    return res;
 	}
 	// TODO: consider if expressions
 	
@@ -1117,7 +1137,7 @@ aspect Flattening {
 				boolean isEach = getComponentModification().hasEach();
 				boolean isFinal = getComponentModification().hasFinal();
 				if (getInstModification().hasInstValueMod()) {
-					InstValueModification ivm = getInstModification().getInstValueMod();
+					InstValueModification ivm = im.getInstValueMod();
 					a.setValue(aer.retrieve(ivm, isEach).flatten(prefix));
 				}
 				if (isEach)
@@ -1504,7 +1524,8 @@ aspect FlatExpressions {
                 if (!size().isEmpty()) {
                     // Check if we have non-constant array subscripts
                     if (ia.hasUnknownIndices()) {
-                        if (!ia.inFunction()) {
+                        // If this is a package constant, then the variable will not be available in the flattened model 
+                        if (!ia.inFunction() && variability().constantVariability()) {
                             // Inline entire array wrapped in an FSubscriptedExp, and resolve index later
                             FExp exp = getBindingFExp().getArray().buildLiteral(isReal());
                             FArraySubscripts fas = ia.getFArraySubscripts().flatten(prefix);
@@ -1923,6 +1944,12 @@ aspect FlatExpressions {
 	public FSampleExp    FSampleExp.flatten(FQName prefix)    { return new FSampleExp(getOffset().flatten(prefix), getInterval().flatten(prefix)); }
 	public FSmoothExp    FSmoothExp.flatten(FQName prefix)    { return new FSmoothExp(getOrder().flatten(prefix), getFExp().flatten(prefix)); }
 	
+    public FReinit FReinit.flatten(FQName prefix) {
+        FReinit res = new FReinit(getVar().flatten(prefix), getFExp().flatten(prefix));
+        res.setInstanceTreeSource(this);
+        return res;
+    }
+	
 	
 	public FAssert FAssert.flatten(FQName prefix) {
 		Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
@@ -1965,11 +1992,17 @@ aspect FlatExpressions {
 		return createNode(getX().flatten(prefix), hasY() ? getY().flatten(prefix) : null); 
 	}
 	
-	public FSizeExp FSizeExp.flatten(FQName prefix) {
+	public FExp FSizeExp.flatten(FQName prefix) {
 		FExp exp = getFExp();
-		exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
-		Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
-		return new FSizeExp(exp, dim);
+		if (exp.size().isUnknown()) {
+	        exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
+	        Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
+	        return new FSizeExp(exp, dim);
+		} else {
+		    Size s = exp.size();
+		    FExp se = hasDim() ? s.createFExp(dimension()) : s.createFExp();
+		    return dynamicFExp(se).flatten(prefix);
+		}
 	}
 	
 	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {
@@ -2278,8 +2311,7 @@ aspect InstantiatedExpressions {
 	public static List Statement.instantiateStatementList(List<Statement> l) {
 		List l2 = new List();
 		for (Statement s : l) 
-			if (!(s instanceof AlgorithmAnnotation))
-				l2.add(s.instantiate());
+			l2.add(s.instantiate());
 		return l2;
 	}
 	

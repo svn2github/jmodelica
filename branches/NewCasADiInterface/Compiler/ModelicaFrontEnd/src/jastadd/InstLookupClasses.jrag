@@ -422,7 +422,7 @@ aspect InstLookupClasses {
 		
 		for (InstClassDecl icd : instClassDecls()) 
 			if (icd.matches(name)) 
-				return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
+				return findInnerClassIfAny(icd);
 		
 		for (InstExtends ie : instExtends()) {
 			InstClassDecl icd = ie.memberInstClass(name);
@@ -477,7 +477,7 @@ aspect InstLookupClasses {
 			
 			for (InstClassDecl icd : instClassDecls()) 
 				if (icd.matches(name)) 
-					return icd.inOrIsOuter() ? icd.myInnerInstClassDecl() : icd;
+					return findInnerClassIfAny(icd);
 
 			for (InstExtends ie : instExtends()) {
 				InstClassDecl icd = ie.memberInstClass(name);
@@ -487,6 +487,20 @@ aspect InstLookupClasses {
 			
 			return null;
 		}
+	}
+	
+	/**
+	 * If icd is in an outer component, try to find corresponding class in inner decl.
+	 * 
+	 * If inner decl isn't found, return icd to avoid extra error messages.
+	 */
+	public InstClassDecl InstNode.findInnerClassIfAny(InstClassDecl icd) {
+	    if (icd.inOrIsOuter()) {
+	        InstClassDecl inner = icd.myInnerInstClassDecl();
+	        if (inner != null) 
+	            icd = inner;
+	    }
+	    return icd;
 	}
 	
 	eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 

@@ -108,9 +108,21 @@ aspect IndexReduction {
             log.info(aliasManager.printAliasSets());
 
             log.info("States:");
+            Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
+            for (FVariable fv : variables())
+                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+                    stateSelectAlwaysVars.add(fv);
             for (FVariable fv : differentiatedRealVariables()) {
+                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
+                    fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
+                stateSelectAlwaysVars.remove(fv);
                 log.info(new PrettyPrintDelegate(fv, "  "));
             }
+            for (FVariable fv : stateSelectAlwaysVars) 
+                if (fv.isSetInReinit())
+                    fv.error(fv.name() + " is assigned in reinit(), but could not be selected as state");
+                else
+                    fv.warning(fv.name() + " has stateSelect=always, but could not be selected as state");
             
             // Calculate new graph
             g = new BiPGraph();
@@ -149,7 +161,10 @@ aspect IndexReduction {
      */
     public FQName FQName.createDerPrefixedName(int order) {
         FQName pref = copyPrefix();
-        String name = createDerPrefixString(order) + lastActualPartName();
+        String name = lastActualPartName();
+        if (name.startsWith("_"))
+            name = name.substring(1);
+        name = createDerPrefixString(order) + name;
         FQName der;
         if (hasFArraySubscripts())
             der = pref.copyAndAppend(name, getFArraySubscripts().fullCopy());
@@ -361,7 +376,7 @@ aspect IndexReduction {
             if (!eb.differentiatedEquations().isEmpty()) {
                 add = true;
             } else {
-                for (FVariable var : eb.activeVariables()) {
+                for (FVariable var : eb.allVariables()) {
                     if (var.isDerivativeVariable()) {
                         add = true;
                         break;
@@ -374,23 +389,12 @@ aspect IndexReduction {
                 
                 // Step 1: Initialize, add all equations in blocks
                 // having differentiated equations
-                g.addAll(eb.equations());
+                g.addAll(eb.allEquations());
                 
                 // Step 2: Extract all active variables, i.e., highest order 
                 // derivatives for each variable
-                for (FVariable fv : eb.activeVariables()) {
-                    if (fv.isDerivativeVariable()) {
-                        // If the stateSelect attribute equals StateSelect.always,
-                        // then don't add the variable so that it cannot be
-                        // selected as dummy derivative.
-                        FRealVariable frv = (FRealVariable)fv.getMeIntegrated();
-                        if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-                            z.add(fv);
-                        }
-                    } else {
-                        z.add(fv);
-                    }
-                }
+                for (FVariable fv : eb.allVariables())
+                    z.add(fv);
             }
         }
         
@@ -477,18 +481,8 @@ aspect IndexReduction {
             
             // Get the "integrated" variables 
             z = new ArrayList<FVariable>();
-            for (FVariable fv : zHat) {
-                FVariable z_test = fv.getMeIntegrated();
-                if (z_test.isDerivativeVariable()) {
-                    // Take into account user defined state selection
-                    FRealVariable frv = (FRealVariable)z_test.getMeIntegrated();
-                    if (frv!=null && frv.stateSelectAttribute()!=FRealVariable.StateSelect.ALWAYS) {
-                        z.add(z_test);
-                    }
-                } else {
-                    z.add(z_test);
-                }
-            }
+            for (FVariable fv : zHat)
+                z.add(fv.getMeIntegrated());
             
             // Check if there are remaining differentiated equations
             remainingDifferentiatedEquations = false;
@@ -541,7 +535,8 @@ aspect IndexReduction {
         return weight;
     }
     
-    syn StateSelect FRealVariable.stateSelectAttribute() = StateSelect.values()[stateSelectAttributeInt() - 1];
+    syn FRealVariable.StateSelect FVariable.stateSelectAttribute() = FRealVariable.StateSelect.DEFAULT;
+    eq FRealVariable.stateSelectAttribute() = isTemporary() ? FRealVariable.StateSelect.AVOID : StateSelect.values()[stateSelectAttributeInt() - 1];
     
     public class FRealVariable {
         public enum StateSelect {
@@ -569,8 +564,22 @@ aspect IndexReduction {
     eq FRealVariable.stateSelectionWeight() {
         FRealVariable frv = (FRealVariable) getMeIntegrated();
         StateSelect ss = (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
-        return ss.weight();
+        long weight = ss.weight();
+        // Slightly increase weight for variables used in reinit(), since they give errors if they do not become states
+        if (isSetInReinit())
+            weight++;
+        return weight;
     }
+    
+    /**
+     * Check if this variable is marked as being set by a reinit().
+     */
+    syn boolean FAbstractVariable.isSetInReinit() = false;
+    eq FRealVariable.isSetInReinit() {
+        FAttribute a = findAttribute(FAttribute.STATE_SELECT);
+        return a != null && a.isInternal();
+    }
+    
     
     public class IndexReductionResult {
 
@@ -664,7 +673,8 @@ aspect MunkersProblem {
         
         private int nextStep = COVER_MATCHED_COLUMNS;
 
-        /** Implementation of the Munkres (Hungarian) algorithm: based on the description at:
+        /** 
+         * Implementation of the Munkres (Hungarian) algorithm: based on the description at:
          * http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
          */
         public MunkresProblem(long[][] cost) {
@@ -678,18 +688,18 @@ aspect MunkersProblem {
             starred = new boolean[n][m];
             primed = new boolean[n][m]; 
             
-            for (int i=0;i<n;i++) {
-                for (int j=0;j<m;j++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
                     this.cost[i][j] = cost[i][j];
                     originalCost[i][j] = cost[i][j];
                     starred[i][j] = false;
                     primed[i][j] = false;
                 }
             }
-            for (int i=0;i<n;i++) { 
+            for (int i = 0; i < n; i++) { 
                 rowCover[i] = false;
             }
-            for (int j=0;j<m;j++) { 
+            for (int j = 0; j < m; j++) { 
                 columnCover[j] = false;
             }       
             //System.out.println(this);
@@ -723,7 +733,7 @@ aspect MunkersProblem {
                         break;
                     case AUGMENT_PATH:
                         //System.out.println("Step: AUGMENT_PATH");
-                        augmentPath(rp,cp);
+                        augmentPath(rp, cp);
                         //System.out.println(this);
                         break;
                     case ADD_SUB_MIN_VALUE:
@@ -737,10 +747,10 @@ aspect MunkersProblem {
                 }
             }
             
-            int[][] result = new int[n][2];
+            int[][] result = new int[k][2];
             int ind = 0;
-            for (int i=0;i<n;i++) {
-                for (int j=0;j<m;j++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
                     if (starred[i][j]) {
                         result[ind][0] = i;
                         result[ind][1] = j;

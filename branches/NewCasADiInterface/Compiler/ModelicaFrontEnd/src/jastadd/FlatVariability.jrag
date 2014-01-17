@@ -93,7 +93,21 @@ aspect FlatVariability {
 	protected static final int Continuous.VARIABILITY_LEVEL = 30;
 	
 	syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
-	eq FEquation.variability() = getLeft().variability().combine(getRight().variability());
+	eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
+	eq FIfWhenElseEquation.variability() {
+		FTypePrefixVariability var = fConstant();
+		for (FAbstractEquation equation : getFAbstractEquations())
+			var = var.combine(equation.variability());
+		return var;
+	}
+	eq FIfEquation.variability() {
+		if (isWhen())
+			return fDiscrete();
+		FTypePrefixVariability var = super.variability();
+		if (hasElse())
+			var = var.combine(getElse().variability());
+		return var;
+	}
 	eq FFunctionCallEquation.variability() {
 		FTypePrefixVariability var = fConstant();
 		// Check all output arguments
@@ -108,16 +122,17 @@ aspect FlatVariability {
 		}
 		return var;
 	}
-	eq FWhenEquation.variability() = fDiscrete();
+	
 	eq FAlgorithm.variability() {
-		FTypePrefixVariability var = fConstant();
+		FTypePrefixVariability rhsVar = fConstant();
+		FTypePrefixVariability lhsVar = fConstant();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			var = var.combine(fv.variability());
+			lhsVar = lhsVar.combine(fv.variability());
 		}
 		for (FVariable fv : referencedFVariablesInRHS()) {
-			var = var.combine(fv.variability());
+			rhsVar = rhsVar.combine(fv.variability());
 		}
-		return var;
+		return lhsVar.combineDown(rhsVar);
 	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
@@ -134,11 +149,6 @@ aspect FlatVariability {
 	eq FFunctionCallEquation.isParameter() = variability().parameterVariability();
 	eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
 	eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
-	
-	eq FWhenEquation.isConstant() = variability().constantVariability();
-	eq FWhenEquation.isParameter() = variability().parameterVariability();
-	eq FWhenEquation.isDiscrete() = variability().discreteVariability();
-	eq FWhenEquation.isContinuous() = variability().continuousVariability();
 	
 	eq FAlgorithm.isConstant() = variability().constantVariability();
 	eq FAlgorithm.isParameter() = variability().parameterVariability();
@@ -384,7 +394,10 @@ aspect FlatVariability {
 	eq FIdUseExp.assignedFV()               = myFV();
 	
 	
-	syn FTypePrefixVariability FVariable.variability() = getFTypePrefixVariability();
+	syn FTypePrefixVariability FAbstractVariable.variability() {
+	    throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
+	}
+	eq FVariable.variability() = getFTypePrefixVariability();
 		
 		
 	syn boolean FExp.isConstantExp()   = variability().constantVariability();
@@ -395,12 +408,7 @@ aspect FlatVariability {
 	syn boolean FSubscript.isConstant() = true;
 	eq FExpSubscript.isConstant() = getFExp().isConstantExp();
 	
-	inh boolean FExp.inDiscreteLocation();
-	eq FFunctionDecl.getChild().inDiscreteLocation()             = true;
-	eq FWhenEquation.getFAbstractEquation().inDiscreteLocation() = true;
-	eq FWhenClause.getFStatement().inDiscreteLocation()          = true;
-	eq FClass.getChild().inDiscreteLocation()                    = false;
-	eq InstNode.getChild().inDiscreteLocation()                  = false;
+	syn boolean FExp.inDiscreteLocation() = inWhen() || inFunction();
 	
 	syn FTypePrefixVariability FExp.variability() = expVariability();
 	syn lazy FTypePrefixVariability FAbstractExp.variability() = 
@@ -464,6 +472,7 @@ aspect FlatVariability {
 	eq FConnBoolOp.expVariability()    = fConstant();
 
 	eq FTerminate.expVariability() = null;
+    eq FReinit.expVariability() = null;
 	eq FAssert.expVariability() = null;
 
 	eq FIdUseExp.expVariability() = getFIdUse().variability();
@@ -507,6 +516,7 @@ aspect FlatVariability {
 	eq FSampleExp.expVariability() = fDiscrete();
 	
 	eq FSimulationStateBuiltIn.expVariability() = fParameter();
+	eq FInitialExp.expVariability()             = fDiscrete();
 	
 	eq FFunctionCall.expVariability() = inputVariability().combineDown(type().funcOutputVariability());
 	syn FTypePrefixVariability FFunctionCall.inputVariability() = super.expVariability();

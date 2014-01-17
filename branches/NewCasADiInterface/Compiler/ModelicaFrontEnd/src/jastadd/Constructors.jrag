@@ -202,6 +202,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Constructs a derivative algorithm block that is not initial.
+	 */
+	public FDerivativeAlgorithm.FDerivativeAlgorithm(List<FStatement> stmts, int order) {
+	    this(new FNormalEquation(), new Opt<FQName>(), new Opt<FResidual>(), new Opt<FNominal>(), stmts, order);
+	}
+	
+	/**
 	 * \brief Constructs a boolean literal expression from a boolean.
 	 */
 	public static FBooleanLitExp FBooleanLitExp.create(boolean val) {
@@ -544,7 +551,7 @@ aspect Constructors {
 	 */
 	public FRealVariable.FRealVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -552,7 +559,7 @@ aspect Constructors {
 	 */
 	public FDerivativeVariable.FDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -560,7 +567,7 @@ aspect Constructors {
 	 */
 	public FDummyDerivativeVariable.FDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -568,7 +575,7 @@ aspect Constructors {
 	 */
 	public FHDerivativeVariable.FHDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
 	}
 	
 	/**
@@ -576,7 +583,7 @@ aspect Constructors {
 	 */
 	public FHDummyDerivativeVariable.FHDummyDerivativeVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, int order) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, order);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, order);
 	}
 	
 	/**
@@ -585,7 +592,7 @@ aspect Constructors {
 	public FPreRealVariable.FPreRealVariable(FRealVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
@@ -593,7 +600,7 @@ aspect Constructors {
 	 */
 	public FIntegerVariable.FIntegerVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -602,7 +609,7 @@ aspect Constructors {
 	public FPreIntegerVariable.FPreIntegerVariable(FIntegerVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
@@ -610,7 +617,7 @@ aspect Constructors {
 	 */
 	public FEnumVariable.FEnumVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName enumName) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, enumName);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, enumName);
 	}
 	
 	/**
@@ -619,7 +626,7 @@ aspect Constructors {
 	public FPreEnumVariable.FPreEnumVariable(FEnumVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType(), fv.getEnum().fullCopy());
+				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getEnum().fullCopy());
 	}
 	
 	/**
@@ -627,7 +634,7 @@ aspect Constructors {
 	 */
 	public FBooleanVariable.FBooleanVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -636,7 +643,7 @@ aspect Constructors {
 	public FPreBooleanVariable.FPreBooleanVariable(FBooleanVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
@@ -644,7 +651,7 @@ aspect Constructors {
 	 */
 	public FStringVariable.FStringVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name);
 	}
 	
 	/**
@@ -653,7 +660,7 @@ aspect Constructors {
 	public FPreStringVariable.FPreStringVariable(FStringVariable fv) {
 		this(fv.getFVisibilityType().fullCopy(), fv.getFTypePrefixVariability().fullCopy(),
 				new Opt(), (List) fv.getFAttributeList().fullCopy(), fv.getDerivedType(), 
-				new Opt(), new Opt(), fv.getFQName().fullCopy(), fv.getHGTType());
+				new Opt(), new Opt(), fv.getFQName().fullCopy());
 	}
 	
 	/**
@@ -661,7 +668,7 @@ aspect Constructors {
 	 */
 	public FRecordVariable.FRecordVariable(FVisibilityType fvt, 
 			FTypePrefixVariability variability, FQName name, FQName record) {
-		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, FClass.HGTVariableType.NONE, record);
+		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
 
 	
@@ -675,11 +682,27 @@ aspect Constructors {
 	}
 	
 	/**
+	 * \brief Create an FInternalAttribute with only the children that are 
+	 *        valid for them.
+	 */
+	public FInternalAttribute.FInternalAttribute(String name, FExp exp, int level, boolean eachKey) {
+	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(exp), 
+	            true, level, eachKey ? new Opt<FEach>(new FEach()) : new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
+	}
+	
+	/**
 	 * Create an attribute with only the required children.
 	 */
 	public FAttribute.FAttribute(FIdUse typeName, FIdDecl name, boolean isSet, int level) {
 		this(typeName, name, new Opt(), isSet, level, new Opt(), new Opt(), new List());
 	}
+    
+    /**
+     * Create an attribute with only the required children.
+     */
+    public FAttribute.FAttribute(String typeName, String name, boolean isSet, int level) {
+        this(new FIdUse(typeName), new FIdDecl(name), isSet, level);
+    }
 	
 	/**
 	 * Create an attribute with only the required children and a value.
@@ -691,6 +714,15 @@ aspect Constructors {
 				(value == null ? new Opt() : new Opt(value)), 
 				isSet, level, new Opt(), new Opt(), new List());
 	}
+    
+    /**
+     * Create an attribute with only the required children and a value.
+     * 
+     * The value may be <code>null</code>, then no value is set.
+     */
+    public FAttribute.FAttribute(String typeName, String name, FExp value, boolean isSet, int level) {
+        this(new FIdUse(typeName), new FIdDecl(name), value, isSet, level);
+    }
 	
 	/**
 	 * \brief Create an FFunctionArray with the given name and type. 
@@ -705,14 +737,28 @@ aspect Constructors {
 	 * \brief Create an FFunctionVariable with the given name and type. 
 	 */
 	public FFunctionVariable.FFunctionVariable(FType type, String name) {
-		this(new Opt(), type, new Opt(), new FQNameString(name));
+		this(new Opt(), type, new Opt(), new FQNameString(name), 0);
 	}
 	
     /**
      * \brief Create an FFunctionVariable with the given name, type and input/output prefix. 
      */
     public FFunctionVariable.FFunctionVariable(FType type, String name, FTypePrefixInputOutput inputOutput) {
-        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name));
+        this(new Opt<FTypePrefixInputOutput>(inputOutput), type, new Opt<FExp>(), new FQNameString(name), 0);
+    }
+    
+    /**
+     * \brief Create an FFunctionVariable with everything but order given.
+     */
+    public FFunctionVariable.FFunctionVariable(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+        this(inputOutput, type, bindingExp, name, 0);
+    }
+    
+    /**
+     * \brief Create an FFunctionArray with everything but order given.
+     */
+    public FFunctionArray.FFunctionArray(Opt<FTypePrefixInputOutput> inputOutput, FType type, Opt<FExp> bindingExp, FQName name) {
+        this(inputOutput, type, bindingExp, name, 0);
     }
     
 	/**
@@ -873,7 +919,8 @@ aspect InheritedFactoryMethods {
 	public FNoEventExp     FNoEventExp.createEmptyNode()     { return new FNoEventExp();     }
 	public FSmoothExp      FSmoothExp.createEmptyNode()      { return new FSmoothExp();      }
 	public FEdgeExp        FEdgeExp.createEmptyNode()        { return new FEdgeExp();        }
-	public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FChangeExp      FChangeExp.createEmptyNode()      { return new FChangeExp();      }
+    public FReinit         FReinit.createEmptyNode()         { return new FReinit();         }
 	public FSampleExp      FSampleExp.createEmptyNode()      { return new FSampleExp();      }
 	public FInitialExp     FInitialExp.createEmptyNode()     { return new FInitialExp();     }
 	public FTerminalExp    FTerminalExp.createEmptyNode()    { return new FTerminalExp();    }
@@ -1191,6 +1238,23 @@ aspect InheritedFactoryMethods {
 
 	public FAttribute         FAttribute.createEmptyNode()         { return new FAttribute(); }
 	public FInternalAttribute FInternalAttribute.createEmptyNode() { return new FInternalAttribute(); }
+	
+	
+    /**
+     * Create new node of same class as this, with the specified children.
+     */
+    public FFunctionVariable FFunctionVariable.createNode(Opt<FTypePrefixInputOutput> prefix, FType type, Opt<FExp> bindingExp, FQName name, int order) {
+        FFunctionVariable node = createEmptyNode();
+        node.setFTypePrefixInputOutputOpt(prefix);
+        node.setType(type);
+        node.setBindingExpOpt(bindingExp);
+        node.setFQName(name);
+        node.setOrder(order);
+        return node;
+    }
+    
+    public FFunctionVariable FFunctionVariable.createEmptyNode() { return new FFunctionVariable(); }
+    public FFunctionArray    FFunctionArray.createEmptyNode()    { return new FFunctionArray(); }
 
 	/**
 	 * \brief Create new node of same class as this, with the specified 

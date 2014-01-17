@@ -1048,10 +1048,14 @@ aspect ConstantEvaluation {
      		this.index = index;
      		value = this.type.getFEnumLiteralType(index - 1).getName();
     	}
-    	
-    	public int intValue() {
-    		return index;
-    	}
+        
+        public int intValue() {
+            return index;
+        }
+        
+        public double realValue() {
+            return index;
+        }
     	
     	public String stringValue() {
     		return value;
@@ -1176,8 +1180,11 @@ aspect ConstantEvaluation {
   syn CValue FExp.ceval() {
 	  if (isCircular()) 
 		  return CValue.UNKNOWN;
-	  if (isArray())
+	  if (isArray()) {
+          if (size().evaluated().isUnknown())
+	          return CValue.UNKNOWN;
 		  return cevalArray(Index.NULL);
+	  }
 	  return cevalCalc();
   }
   
@@ -1321,7 +1328,10 @@ aspect ConstantEvaluation {
   eq FConnRooted.cevalFromGraph() = connectionGraph.ops(getA()).rooted;
 
   eq FTerminate.cevalCalc() {
-	  throw new ConstantEvaluationException();
+      throw new ConstantEvaluationException();
+  }
+  eq FReinit.cevalCalc() {
+      throw new ConstantEvaluationException();
   }
   eq FAssert.cevalCalc() {
 	  throw new ConstantEvaluationException();
@@ -1340,6 +1350,8 @@ aspect ConstantEvaluation {
   }
   
   eq FUnknownSizeExp.cevalCalc() {
+      if (getVariable() == null)
+          return CValue.UNKNOWN;
 	  CValue val = getVariable().evaluationValue();
 	  return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
   }
@@ -1374,6 +1386,10 @@ aspect ConstantEvaluation {
   syn CValue FReductionExp.reduceStartValue();
   eq FSumExp.reduceStartValue()     = type().zeroCValue();
   eq FProductExp.reduceStartValue() = new CValueInteger(1);
+  
+  syn CValue FReductionExp.scalarReduceStartValue();
+  eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
+  eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
   
   syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
   eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
@@ -1663,9 +1679,12 @@ aspect ConstantEvaluation {
 	 * consequence, identifiers in expressions refers to InstAssignable nodes,
 	 * and accordingly, it it necessary to compute the constant value 
 	 * corresponding to an InstAssignable node. If the assignable is a
-	 * constant or a parametes, and if it has a binding expression, then
+	 * constant or a parameter, and if it has a binding expression, then
 	 * a corresponding CValue object is returned, otherwise, CValueUnknown
-	 * is returned.
+	 * is returned. If the variable has <code>evaluationValue</code> set, 
+	 * then that value is always returned.
+	 * 
+	 * Outside of functions, the calculated value is cached.
 	 * 
 	 * @return The constant value.
 	 */
@@ -1674,13 +1693,16 @@ aspect ConstantEvaluation {
 		if (evaluationValue != null) {
 			val = evaluationValue;
 		} else if ((isConstant() || isParameter()) && !isForIndex()) {
+		    boolean func = inFunction();
 	    	if (hasBindingFExp()) {
 		    	FExp bexp = getBindingFExp();
 	    		if (!bexp.type().isUnknown())
-	    			val = bexp.ceval(i);
+	    			val = bexp.ceval(func ? i : Index.NULL);
 	    	} else {
 	    		val = startAttributeCValue();
 	    	}
+	    	if (!func)
+	    	    evaluationValue = val;
 		}
 		return val;
 	}
@@ -1713,6 +1735,7 @@ aspect ConstantEvaluation {
 	}
 	
 	syn CValue InstAssignable.startAttributeCValueDefault() = CValue.UNKNOWN;
+	eq InstEnum.startAttributeCValueDefault()               = new CValueEnum(type(), 1);
 	eq InstPrimitive.startAttributeCValueDefault() {
 		CValue res = CValue.UNKNOWN;
 		if (isReal())
@@ -2910,10 +2933,8 @@ aspect ConstantEvaluation {
    */
   syn CValue FType.sign(CValue v) = 
 	  CValue.UNKNOWN;
-  eq FRealType.sign(CValue v) = 
-	  new CValueReal(StrictMath.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) StrictMath.signum(v.intValue()));
+	  new CValueInteger((int) StrictMath.signum(v.realValue()));
   
   /**
    * \brief Ceil expression for constant values.

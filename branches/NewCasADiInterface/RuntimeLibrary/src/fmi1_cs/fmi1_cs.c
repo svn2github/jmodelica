@@ -190,7 +190,7 @@ void fmi1_cs_free_slave_instance(fmiComponent c) {
 void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...){
     void *tmp;
     fmi1_cs_t* fmi1_cs;
-    int verification, length;
+    int verification;
     va_list args;
     char buffer[50000];
     
@@ -198,7 +198,7 @@ void log_forwarding_me(fmiComponent c, fmiString instanceName, fmiStatus status,
 
     va_start(args, message);
     /* vsnprintf(buffer, sizeof buffer, message, args); */ /* Cannot be used due to C89 */
-    length = vsprintf (buffer,message, args);
+    vsprintf (buffer,message, args);
     va_end(args);
   
     
@@ -226,8 +226,6 @@ fmiComponent fmi1_cs_instantiate_slave(fmiString instanceName, fmiString GUID, f
     char* tmp_name_encoded;
     size_t inst_name_len;
     size_t guid_len;
-    char buffer[400];
-    fmiInteger i;
     
     component = (fmi1_cs_t *)functions.allocateMemory(1, sizeof(fmi1_cs_t));
     
@@ -349,6 +347,7 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmiStatus retval;
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
+    fmi1_me_t* fmi1_me;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -367,12 +366,12 @@ fmiStatus fmi1_cs_reset_slave(fmiComponent c) {
     fmi1_me_free_model_instance(ode_problem->fmix_me);
     ode_problem->fmix_me = NULL;
     
-    ode_problem->fmix_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
+    ode_problem->fmix_me = fmi1_me = fmi1_me_instantiate_model(fmi1_cs->encoded_instance_name,
                                                      fmi1_cs->GUID, fmi1_cs->me_callback_functions,
                                                      fmi1_cs->logging_on);
     
     if (ode_problem->fmix_me == NULL){ return fmiError; }
-    
+    ode_problem->log = fmi1_me->jmi.log;
     return fmiOK;
 }
 

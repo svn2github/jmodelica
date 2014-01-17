@@ -66,7 +66,6 @@ int jmi_ode_euler_solve(jmi_ode_solver_t* solver, double tend, int initialize){
     while ( tcur < tend ) {
         size_t k;
         int zero_crossning_event = 0;
-        int time_event = 0;
 
         /* Get derivatives */
         /* if(n_real_x > 0) { */

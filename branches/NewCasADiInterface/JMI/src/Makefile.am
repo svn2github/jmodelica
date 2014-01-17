@@ -78,7 +78,7 @@ libjmi_la_SOURCES = jmi.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/external/Assimulo/src/lib -std=c89 -pedantic
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/external/Assimulo/src/lib -std=c89 -pedantic -Werror
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -90,7 +90,7 @@ libjmi_algorithm_la_SOURCES = jmi_init_opt.h \
                               jmi_opt_coll.c \
                               jmi_opt_coll_radau.c
 
-libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -119,10 +119,10 @@ libfmi_cs_la_SOURCES = fmi1_cs.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
 
-libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
 libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 
 MSLCSOURCES=$(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources
@@ -140,7 +140,6 @@ libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
 # static inclusion of the runtime libraries when creating model so:s.
 libModelicaExternalC_la_LDFLAGS = -no-undefined -static-libtool-libs
 
-if WITH_TABLES
 libModelicaStandardTables_la_SOURCES = $(MSLCSOURCES)/ModelicaStandardTables.c $(MSLCSOURCES)/ModelicaMatIO.c
 libModelicaStandardTables_la_SOURCES += $(MSLCSOURCES)/zlib/adler32.c $(MSLCSOURCES)/zlib/compress.c $(MSLCSOURCES)/zlib/crc32.c $(MSLCSOURCES)/zlib/deflate.c $(MSLCSOURCES)/zlib/gzclose.c $(MSLCSOURCES)/zlib/gzlib.c $(MSLCSOURCES)/zlib/gzread.c $(MSLCSOURCES)/zlib/gzwrite.c $(MSLCSOURCES)/zlib/infback.c $(MSLCSOURCES)/zlib/inffast.c $(MSLCSOURCES)/zlib/inflate.c $(MSLCSOURCES)/zlib/inftrees.c $(MSLCSOURCES)/zlib/trees.c $(MSLCSOURCES)/zlib/uncompr.c $(MSLCSOURCES)/zlib/zutil.c
 
@@ -150,7 +149,6 @@ libModelicaStandardTables_la_CFLAGS = -DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB -Wall
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
 libModelicaStandardTables_la_LDFLAGS = -no-undefined -static-libtool-libs
-endif
 
 libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_opt_coll_ipopt.cpp \
@@ -158,7 +156,7 @@ libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_init_opt_ipopt.cpp \
                            jmi_init_opt_TNLP.cpp
 
-libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic
+libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
 libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force

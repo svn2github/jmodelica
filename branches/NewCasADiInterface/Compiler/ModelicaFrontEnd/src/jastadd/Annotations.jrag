@@ -50,10 +50,10 @@ aspect AnnotationAPI {
 	eq ParseAnnotation.annotation() = getClassModification().annotationNode();
 	eq Modification.annotation()    = annotationNode();
 	
-	eq ExternalClause.annotation() = getAnnotation1Opt().annotation();
+	eq ExternalClause.annotation() = getAnnotationOpt().annotation();
 	eq InstExternal.annotation()   = getExternalClause().annotation();
 	
-	eq FullClassDecl.annotation()            = getAnnotations().annotation();
+	eq FullClassDecl.annotation()            = getAnnotationOpt().annotation();
 	eq InstClassDecl.annotation()            = getClassDecl().annotation();
 	eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
 	eq ExtendsClauseShortClass.annotation()  = getComment().annotation();
@@ -285,6 +285,22 @@ aspect AnnotationAPI {
 		 */
 		public Exp exp() {
 			return null;
+		}
+		
+		/**
+		 * Returns true if the each keyword is set
+		 * @return true if each is set
+		 */
+		public boolean isEachSet() {
+		    return false;
+		}
+		
+		/**
+		 * Returns true if the final keyword is set
+		 * @return true if final is set
+		 */
+		public boolean isFinalSet() {
+		    return false;
 		}
 		
 		/**
@@ -640,7 +656,7 @@ aspect AnnotationAPI {
 			@Override
 			protected void createRealNode() {
 				ClassModification cm = new ClassModification();
-				fullClassDecl.addAnnotation(new ParseAnnotation(cm));
+				fullClassDecl.setAnnotation(new ParseAnnotation(cm));
 				realNode = new ClassModAnnotationNode(cm);
 			}
 		}
@@ -912,6 +928,17 @@ aspect AnnotationAPI {
 			else
 				return createSetableNullPath(this, path, i);
 		}
+		
+		@Override
+		public boolean isEachSet() {
+		    return mod.hasEach();
+		}
+		
+		@Override
+		public boolean isFinalSet() {
+		    return mod.hasFinal();
+		}
+		
 	}
 	
 	/**
@@ -972,7 +999,7 @@ aspect AnnotationAPI {
 		protected AnnotationNode forPath(String[] path, int i) {
 			return mod.getClassModification().annotationNode().forPath(path, i);
 		}
-
+		
 	}
 	
 	/**

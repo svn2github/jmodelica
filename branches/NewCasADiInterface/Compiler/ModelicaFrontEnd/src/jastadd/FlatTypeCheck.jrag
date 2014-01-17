@@ -48,6 +48,14 @@ aspect FlatTypeCheck {
         typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
     }
 
+    public void InstReplacingPrimitive.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
+    public void InstReplacingExpandableConnectorDecl.typeCheck(ErrorCheckType checkType) {
+        typeCheckReplacingComponent(getOriginalInstComponent(), checkType);
+    }
+
     public void InstComponentDecl.typeCheckReplacingComponent(InstComponentDecl declaredType, ErrorCheckType checkType) {
         super.typeCheck(checkType);
         
@@ -91,9 +99,10 @@ aspect FlatTypeCheck {
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
     	FExp bexp = myBindingInstExp();
 		boolean func = inFunction();
-    	if (!size().isComplete() && !func && !inRecordDecl()) 
+        Size componentSize = size();
+        if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
     		error("Can not infer array size of the variable " + name());
-    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
+    	if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
     		if (myBindingExpHasEach() && !inArrayComponent()) {
     			bexp.error("The 'each' keyword cannot be applied to members of non-array components");
      		} else {
@@ -130,13 +139,25 @@ aspect FlatTypeCheck {
 			AnnotationNode iterationNode = annotation().vendorNode().forPath("IterationVariable");
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
-				FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-				enabledExp.collectErrors(checkType);
-				try {
-					enabledExp.ceval().booleanValue();
-				} catch (ConstantEvaluationException e) {
-					enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-				}
+			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
+			    enabledExp.collectErrors(checkType);
+			    if (!enabledExp.type().isBoolean()) {
+			        enabledExp.error("The type of the HGT enabled expression is not boolean");
+			    } else if (!enabledNode.isEachSet() && !type().dimensionCompatible(enabledExp.type())) { 
+			        if (enabledExp.ndims() == 0) {
+			            enabledExp.warning("Assuming 'each' for enabled expression");
+			        } else {
+			            enabledExp.error("Array size mismatch for the enabled attribute" +
+			                    ", size of component declaration is " + size() + 
+			                    " and size of expression is " + enabledExp.size());
+			        }
+			    } else if (enabledNode.isEachSet()) { 
+			        if (ndims() == 0) {
+			            error("The 'each' keyword cannot be applied to attributes of scalar components");
+			        } else if (enabledExp.ndims() > 0) {
+			            error("The enabled attribute is declared 'each' and the expression is not scalar");
+			        }
+			    }
 			}
 		}
 		
@@ -164,35 +185,51 @@ aspect FlatTypeCheck {
 			FExp val_mod = getInstModification().instValueMod();
 			if (!type().isUnknown() && !val_mod.type().isUnknown()) {
 				FType attr_type = owner.attributeType(this);
+				boolean checkSize = !owner.isInRedeclareMod();
 				if (!type().typeCompatible(val_mod.type().scalarType())) {
 					error("The type of the binding expression of the attribute " + name() +
 					  " does not match the declared type of the variable");
-				} else if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
-					if (val_mod.ndims() == 0) {
-						warning("Assuming 'each' for the attribute " + name());
-					} else {
-						error("Array size mismatch for the attribute " + name() +
-								", size of declaration is " + attr_type.size() + 
-								" and size of " + name() + " expression is " + val_mod.size());
-					}
-				} else if (getEach()) { 
-					if (owner.ndims() == 0) {
-						error("The 'each' keyword cannot be applied to attributes of scalar components");
-					} else if (val_mod.ndims() > 0) {
-						error("The attribute " + name() + 
-								" is declared 'each' and the binding expression is not scalar");
-					}
+				} else if (checkSize) {
+				    if (!getEach() && !attr_type.dimensionCompatible(val_mod.type())) { 
+    					if (val_mod.ndims() == 0) {
+    						warning("Assuming 'each' for the attribute " + name());
+    					} else {
+    						error("Array size mismatch for the attribute " + name() +
+    								", size of declaration is " + attr_type.size() + 
+    								" and size of " + name() + " expression is " + val_mod.size());
+    					}
+    				} else if (getEach()) { 
+    					if (owner.ndims() == 0) {
+    						error("The 'each' keyword cannot be applied to attributes of scalar components");
+    					} else if (val_mod.ndims() > 0) {
+    						error("The attribute " + name() + 
+    								" is declared 'each' and the binding expression is not scalar");
+    					}
+    				}
 				}
 			}
     	}
     }
     
+    inh boolean InstNode.isInRedeclareMod();
+    eq InstElementRedeclare.getChild().isInRedeclareMod() = true;
+    eq InstClassDecl.getChild().isInRedeclareMod()        = false;
+    eq InstRoot.getChild().isInRedeclareMod()             = false;
+    eq Root.getChild().isInRedeclareMod()                 = false;
+    
+    
   public void FEquation.typeCheck(ErrorCheckType checkType) {
 	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
-	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-		  if (!getLeft().type().equivalentTo(getRight().type())) {
-			  error("The right and left expression types of equation are" +
-		  			" not compatible");		  
+      FType left = getLeft().type();
+      FType right = getRight().type();
+	  if (!left.isUnknown() && !right.isUnknown()) {
+		  if (!left.equivalentTo(right)) {
+		      if (left.scalarType().equivalentTo(right.scalarType())) {
+		          if (!lockBranch(checkType))
+		              error("The array sizes of right and left hand side of equation are not compatible");        
+		      } else {
+	              error("The right and left expression types of equation are not compatible");        
+		      }
 		  }
 	  }
   }
@@ -274,8 +311,8 @@ aspect FlatTypeCheck {
   
   protected void InstComponentArrayAccess.typeError(InstAccess top) {
 	  InstComponentDecl icd = myInstComponentDecl();
-	  if (!icd.isUnknown()) {
-		  if (icd.isOrExtendsPrimitive() || icd.isRecord() && !inCardinality())
+      if (!icd.isUnknown() && !icd.myInstClass().isUnknown() && !inCardinality()) {
+          if (icd.isOrExtendsPrimitive() || icd.isRecord())
 			  top.error("Could not calculate type of " + top.name());
 		  else
 			  top.error("Accesses to composite components other than records are not allowed: " + top.name());
@@ -369,6 +406,11 @@ aspect FlatTypeCheck {
   }
   eq FIdUseExp.asFIdUse() = getFIdUse();
   
+  syn FIdUseExp FExp.asFIdUseExp() {
+      throw new UnsupportedOperationException("asFIdUseExp() is not supported for class type " + getClass().getSimpleName());
+  }
+  eq FIdUseExp.asFIdUseExp() = this;
+  
 	syn boolean FExp.isInstAccess()  = false;
 	eq FInstAccessExp.isInstAccess() = true;
 	syn InstAccess FExp.asInstAccess() {
@@ -393,7 +435,7 @@ aspect FlatTypeCheck {
 				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
   }
   
-  public void FExpSubscript.typeCheckAsSize() {
+  public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
@@ -404,7 +446,7 @@ aspect FlatTypeCheck {
 	  } else if (!inFunction()) { 
 		  if (!getFExp().variability().lessOrEqual(fParameter())) {
 			  error("Array size must be constant or parameter: " + getFExp());
-		  } else {
+		  } else if (!checkType.allowIncompleteSizes()) {
 			  try {
 				  getFExp().ceval().intValue();
 			  } catch (ConstantEvaluationException e) {
@@ -414,7 +456,7 @@ aspect FlatTypeCheck {
 	  }
   }
   
-  public void FExpSubscript.typeCheckAsIndex() {
+  public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
 	  if (ndims() > 1) { 
 		  error("Array index must be scalar or vector expression: " + getFExp());
 	  } else if (!type().isInteger()) { // TODO: Expand to support Boolean and enums
@@ -433,7 +475,7 @@ aspect FlatTypeCheck {
 	              for (FExp e : getFExp().getArray().iterable()) {
 	                  int i = e.ceval().intValue();
 	                  if (i < 1 || i > max) {
-	                      if (!lockBranch())
+	                      if (!lockBranch(checkType))
 	                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
 	                      reportedOutOfBound = true;
 	                      return;
@@ -452,9 +494,9 @@ aspect FlatTypeCheck {
   
   public void FExpSubscript.typeCheck(ErrorCheckType checkType) {
 	  if (isInstComponentSize()) 
-		  typeCheckAsSize();
+		  typeCheckAsSize(checkType);
 	  else 
-		  typeCheckAsIndex();
+		  typeCheckAsIndex(checkType);
   }
   
   inh boolean FSubscript.inUnknownAccess();
@@ -615,10 +657,17 @@ aspect FlatTypeCheck {
   public void FAssert.typeCheck(ErrorCheckType checkType) {
 	  if (hasLevel()) {
 		  if (getLevel().isParameterExp())
-			  getLevel().markAsStructuralParameter();
+			  getLevel().markAsStructuralParameter(checkType);
 		  else if (!getLevel().isConstantExp())
 			  error("Level of assert() must be constant or parameter");
 	  }
+  }
+  
+  public void FReinit.typeCheck(ErrorCheckType checkType) {
+      if (!getVar().isAccess() || !getVar().type().isReal())
+          error("First argument to reinit() must be an access to a Real variable");
+      else if (!getVar().type().typeCompatible(getFExp().type()))
+          error("Arguments to reinit() must be of compatible types");
   }
   
   public void FEdgeExp.typeCheck(ErrorCheckType checkType) {
@@ -680,14 +729,21 @@ aspect FlatTypeCheck {
 	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
 		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
 			  FIdUse use = getFExp().asFIdUse();
-			  if (use.isForIndex())
+			  if (use.isForIndex()) {
 				  error("Can not assign a value to a for loop index");
-			  else if (size().isUnknown() && !inFunction())
+			  } else if (size().isUnknown() && !inFunction()) {
 				  error(functionCallDecription() + ": could not evaluate array size of output " + 
 						  myOutput().name());
-			  else if (!use.type().typeCompatible(type())) 
-				  error(functionCallDecription() + ": types of component " + use.name() + 
-						  " and output " + myOutput().name() + " are not compatible");
+			  } else if (!use.type().typeCompatible(type(), true)) {
+			      if (use.type().scalarType().typeCompatible(type().scalarType())) {
+			          if (!lockBranch(checkType))
+	                      error(functionCallDecription() + ": array sizes of component " + use.name() + 
+	                              " and output " + myOutput().name() + " are not compatible");
+			      } else {
+    				  error(functionCallDecription() + ": types of component " + use.name() + 
+    						  " and output " + myOutput().name() + " are not compatible");
+			      }
+			  }
 		  }
 	  }
   }
@@ -754,7 +810,7 @@ aspect FlatTypeCheck {
   
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
-  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a reference to a connector";
+  eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";
   
   protected String InstFunctionArgument.argumentDesc() { return null; }
   
@@ -862,6 +918,7 @@ aspect FlatTypeCheck {
   eq InstPreExp.getOriginalArg().argumentDefinedTypeValid()                = false;
   eq FEdgeExp.getOriginalArg().argumentDefinedTypeValid()                  = false;
   eq FChangeExp.getOriginalArg().argumentDefinedTypeValid()                = false;
+  eq FReinit.getOriginalArg().argumentDefinedTypeValid()                   = false;
 
   /**
    * \brief Check if the type supplied is valid for this argument.
@@ -889,10 +946,11 @@ aspect FlatTypeCheck {
 	  hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
   eq FSmoothExp.getChild().argumentTypeValid(FType type)            = type.onlyContainsReal();
   eq FDimensionConvert.getChild().argumentTypeValid(FType type)     = argumentSizeValid(type.size());
-  eq FCardinality.getChild().argumentTypeValid(FType type)          = getFExp().isComponentReference(ALLOWED_COMPONENTS);
+  eq FCardinality.getChild().argumentTypeValid(FType type)          = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
           getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
   eq FStringExp.getChild().argumentTypeValid(FType type)            = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+  eq FReinit.getChild().argumentTypeValid(FType type)               = true;  // Type checked in Reinit.typeCheck()
   
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
@@ -969,10 +1027,15 @@ aspect FlatTypeCheck {
 aspect FlatVariabilityCheck {
     
     private FExp FPreExp.instanceTreeSource = null;
+    private FExp FReinit.instanceTreeSource = null;
     
     public void FExp.setInstanceTreeSource(FExp source) {}
     
     public void FPreExp.setInstanceTreeSource(FExp source) {
+        instanceTreeSource = source;
+    }
+    
+    public void FReinit.setInstanceTreeSource(FExp source) {
         instanceTreeSource = source;
     }
     
@@ -990,7 +1053,7 @@ aspect FlatVariabilityCheck {
     
     /**
      * Check operations that are allowed on discrete expressions or variables, 
-     * but not on continuous ones.
+     * but not on continuous ones or vice-versa.
      * 
      * Also breaks connections back to instance tree that was added during flattening 
      * to be able to report these errors in the correct place.
@@ -1001,21 +1064,34 @@ aspect FlatVariabilityCheck {
     }
     
     public void FPreExp.checkDiscreteOperations() {
-        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen()) 
+        if (instanceTreeSource != null && getFIdUse().myFV().isContinuous() && !inWhen() && !inInitialEquationSection()) 
             instanceTreeSource.discreteArgError();
         instanceTreeSource = null;
     }
     
+    public void FReinit.checkDiscreteOperations() {
+        if (instanceTreeSource != null && !myFV().isContinuous()) 
+            instanceTreeSource.discreteArgError();
+        instanceTreeSource = null;
+    }
+    
+    /**
+     * Generate error for operator that got wrong variability of argument
+     */
     public void FExp.discreteArgError() {
         throw new UnsupportedOperationException();
     }
     
     public void InstPreExp.discreteArgError() {
-        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses and initial equations");
     }
     
     public void FChangeExp.discreteArgError() {
-        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses");
+        error("Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses and initial equations");
+    }
+    
+    public void FReinit.discreteArgError() {
+        error("Built-in operator reinit() must have a continuous variable access as its first argument");
     }
     
 }

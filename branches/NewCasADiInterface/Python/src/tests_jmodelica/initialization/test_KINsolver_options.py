@@ -44,7 +44,7 @@ class TestInitOptions:
         self.log_file_name = os.path.join(curr_dir, 'Data', 'test_KINsolver_options_log.txt')
         self.model = load_fmu('BouncingBounds.fmu', log_file_name=self.log_file_name)
         self.model.set_debug_logging(True)
-        self.model.set_fmil_log_level(5)
+        self.model.set_log_level(5)
         self.model.set('_log_level', 5)
         
     @testattr(stddist = True)

@@ -85,7 +85,6 @@ package DISTLib
 
 
 
-  annotation (uses(Modelica(version="2.2.1")));
   package Examples 
     model Simulation 
       Modelica.Blocks.Sources.Step step(

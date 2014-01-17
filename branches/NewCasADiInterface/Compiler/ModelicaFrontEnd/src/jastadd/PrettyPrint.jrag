@@ -979,8 +979,9 @@ aspect FlatPrettyPrint {
 		
 		p.print(getFStringCommentOpt(),str,indent);
 		
-		if (getHGTType() == FClass.HGTVariableType.COMPONENT || getHGTType() == FClass.HGTVariableType.PAIR)
-			str.print(" annotation(__Modelon(IterationVariable))");
+		CValue hgt = HGTVarCValue();
+		if (hgt != null)
+			str.format(" annotation(__Modelon(IterationVariable(enabled=%s)))", hgt);
 
 		if (isIndependentParameter() && hasBindingExp()) {
 			str.print(" /* ");
@@ -1006,35 +1007,24 @@ aspect FlatPrettyPrint {
 			}
 		}
 	}
+	
+	syn boolean FAttribute.shouldPrettyPrint() = !name().equals(HGT);
 
 	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
-	
-	    boolean attrSet = false;
-	    	boolean firstAttr = true;
-	    	
-	    	for (int i=0;i<getNumChild();i++) {
-	    		if (((FAttribute)getChild(i)).getAttributeSet()) {
-					attrSet=true;
-					break;
-	 		   	}
-	    	}
-	    
-	    	if (attrSet){
-	    		str.print("(");
-	    		for (int i=0;i<getNumChild();i++) {
-	    
-	    			if (((FAttribute)getChild(i)).getAttributeSet()) {
-	
-						if (!firstAttr)	
-							str.print(",");
-						p.print(((FAttribute)getChild(i)),str,"");
-						
-						firstAttr = false;
-	 		   		}
-	    		}
-	    		str.print(")");
-	   		}
-	
+	    boolean firstAttr = true;
+	    for (ASTNode astNode : this) {
+	        FAttribute attr = (FAttribute)astNode;
+	        if (attr.getAttributeSet() && attr.shouldPrettyPrint()) {
+	            if (!firstAttr)	
+	                str.print(",");
+	            else
+	                str.print("(");
+	            firstAttr = false;
+	            p.print(attr, str, "");
+	        }
+	    }
+	    if (!firstAttr)
+	        str.print(")");
 	}
 	
     public void FAttribute.prettyPrint(Printer p, PrintStream str, String indent) {
@@ -1458,14 +1448,13 @@ aspect FlatPrettyPrint {
 	eq FDotPowExp.getLeft().shouldhaveParenthesis() = true;
 	eq FNegExp.getFExp().shouldhaveParenthesis()    = true;
 	
+	/**
+	 * Returns true if this exp should add parenthesis given a certain precedence.
+	 */
+	syn boolean FExp.addParenthesis(int parentPrecedence) = precedence() < parentPrecedence || precedence() == parentPrecedence && shouldhaveParenthesis();
+	
 	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		int myPrecedence = precedence();
-		int parentPrecedence = parentPrecedence();
-		boolean addParenthesis = false;
-		if (myPrecedence < parentPrecedence())
-			addParenthesis = true;
-		else if (myPrecedence == parentPrecedence && shouldhaveParenthesis())
-			addParenthesis = true;
+		boolean addParenthesis = addParenthesis(parentPrecedence());
 		if (addParenthesis)
 			str.print('(');
 		prettyPrintExp(p, str, indent);
@@ -1780,6 +1769,7 @@ aspect FlatPrettyPrint {
 	eq FInitialExp.builtInName()         = "initial";
 	eq FTerminalExp.builtInName()        = "terminal";
 	eq FTerminate.builtInName()          = "terminate";
+    eq FReinit.builtInName()             = "reinit";
 	eq FAssert.builtInName()             = "assert";
 	eq FIdentity.builtInName()           = "identity";
 	eq FDiagonal.builtInName()           = "diagonal";

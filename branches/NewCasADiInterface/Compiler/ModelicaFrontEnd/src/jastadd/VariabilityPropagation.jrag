@@ -59,9 +59,7 @@ aspect VariabilityPropagation {
 		return myFV().canPropagate();
 	}
 	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() 
-			&& getHGTType() != FClass.HGTVariableType.COMPONENT 
-			&& getHGTType() != FClass.HGTVariableType.PAIR;
+	eq FVariable.canPropagate() = !isOutput() && !isHGTVar();
 	eq FDerivativeVariable.canPropagate() = false;
 	
 	// Hook for checks that are needed in optimica
@@ -332,18 +330,28 @@ aspect VariabilityPropagation {
 		}
 		
 		// Pre var
-		if (wasDiscrete) {
+		if (wasDiscrete && !myPreVariable().isUnknown()) {
 			FAbstractVariable pre = myPreVariable();
 			pre.taggedForRemoval = true;
 			pre.variabilityPropagation(worklist, variability, bindingExp);
 		}
 		
 		// Derivative
-		if (isDifferentiatedVariable()) {
+		if (isDifferentiatedVariable() && !myDerivativeVariable().isUnknown()) {
 			FDerivativeVariable fDerivativeVariable = myDerivativeVariable();
 			fDerivativeVariable.taggedForRemoval = true;
 			fDerivativeVariable.variabilityPropagation(worklist, FTypePrefixVariability.fConstant(), new FIntegerLitExp(0));
 		}
+		
+        // Alias variables
+        if (!isAlias()) {
+            if (aliasSet() != null) {
+                for (AliasManager.AliasVariable av : aliasSet()) {
+                    if (av.getFVariable() != this)
+                        av.getFVariable().variabilityPropagation(worklist, variability, bindingExp);
+                }
+            }
+        }
 	}
 }
 
@@ -374,10 +382,16 @@ aspect ConstantFolding {
 		getRight().enableConstantFolding();
 	}
 	
-	public void FWhenEquation.enableConstantFolding() {
+	public void FIfWhenElseEquation.enableConstantFolding() {
 		for (FAbstractEquation equation : getFAbstractEquations()) {
 			equation.enableConstantFolding();
 		}
+	}
+	
+	public void FIfWhenEquation.enableConstantFolding() {
+	    super.enableConstantFolding();
+	    if (hasElse())
+	        getElse().enableConstantFolding();
 	}
 	
 	public void FExp.enableConstantFolding() {	
@@ -410,6 +424,13 @@ aspect ConstantFolding {
 		}
 		super.enableConstantFolding();
 	}
+	public void FPreExp.enableConstantFolding() {
+		if (variability().parameterOrLess()) {
+			constantFoldingEnabled = true;
+			is$Final = false;
+			return;
+		}
+	}
 
 	rewrite FAbstractExp {
 		when (constantFoldingEnabled && isConstantExp()) to FExp {
@@ -435,6 +456,12 @@ aspect ConstantFolding {
 			}
 			constantFoldingEnabled = false;
 			return this;
+		}
+	}
+	
+	rewrite FPreExp {
+		when (constantFoldingEnabled) to FExp {
+			return new FIdUseExp(getFIdUse().fullCopy());
 		}
 	}
 	

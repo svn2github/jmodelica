@@ -5,9 +5,18 @@ project (SimulationRuntime)
 #Inputs through flags
 add_definitions(-DTOP_SRC)
 add_definitions(-DSUNDIALS_HOME)
+if(NOT TOP_SRC)
+    set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../)
+    message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
+endif()
 
 # Get the JModelica install directory
-set(JMODELICA_INSTALL_DIR ${CMAKE_INSTALL_DIR})
+if(CMAKE_INSTALL_DIR)
+    set(JMODELICA_INSTALL_DIR ${CMAKE_INSTALL_DIR})
+else()
+    set(JMODELICA_INSTALL_DIR ${TOP_SRC}/../install)
+    message(STATUS "Install dir not defined, using ${JMODELICA_INSTALL_DIR}")
+endif()    
 message(STATUS JMODELICA_INSTALL_DIR=${JMODELICA_INSTALL_DIR})
 
 #Make the directory for header files to be installed in.

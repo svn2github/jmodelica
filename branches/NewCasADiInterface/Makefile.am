@@ -286,6 +286,13 @@ endif
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
 
+if WITH_MINGW
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/lib/win32/libpthreadGC2-2-9-1.a $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
+	cp $(abs_top_srcdir)/ThirdParty/pthreads/include/*.h $(DESTDIR)$(prefix)/ThirdParty/pthreads/include
+endif
+
 	mkdir -p $(DESTDIR)$(prefix)/Options
 	cp $(abs_builddir)/Options/options.xml $(DESTDIR)$(prefix)/Options/options.xml
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty
@@ -314,7 +321,7 @@ endif
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_me_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/fmi2_functions_cs_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp  $(abs_top_srcdir)/Compiler/OptimicaCBackEnd/templates/jmi_optimica_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
-	cp  $(abs_top_srcdir)/Compiler/ModelicaXMLBackEnd/templates/*.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
+	cp  $(abs_top_srcdir)/Compiler/ModelicaFMUXBackEnd/templates/*.tpl $(DESTDIR)$(prefix)/CodeGenTemplates
 	mkdir -p $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML

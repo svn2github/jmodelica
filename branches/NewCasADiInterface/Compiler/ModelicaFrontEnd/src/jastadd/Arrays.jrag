@@ -187,7 +187,7 @@ aspect Arrays {
 		if (getNumFExp()==0)  //Empty array
 			return 1;
 		// We assume that the FArray is set up correctly and that
-		// all brances are equal.
+		// all branches are equal.
 		return getFExp(0).ndims() + 1;
 	}
 	eq FAbstractCat.ndims() {
@@ -792,6 +792,8 @@ aspect Arrays {
  	}
 	
 	eq FArray.size() {
+	    if (getFExp(0) == null)
+	        return new Size(0);
 		if (isIterArray())
 			return getFExp(0).size();
 		return getFExp(0).size().expand(getNumFExp());
@@ -1793,6 +1795,18 @@ aspect Arrays {
 		return arr;
 	}
 	
+	eq FReinit.getArray() {
+        if (!getVar().isArray())
+            return super.getArray();
+        
+        Array arr = new Array(getVar().indices());
+        Array inner1 = getVar().getArray();
+        Array inner2 = getFExp().getArray();
+        for (Index i : arr.indices())
+            arr.set(i, new FReinit(inner1.get(i), inner2.get(i)));
+        return arr;
+	}
+	
 	/**
 	 * \brief Add a copy of this expression to arr at position i. 
 	 */
@@ -1811,7 +1825,10 @@ aspect Arrays {
 	 * @param level  the level this FArray is at in a structure of nestled FArrays.
 	 */
 	public void FArray.fillArray(Array arr, Index i, int level) {
-		getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
+	    if (isIterArray())
+	        super.fillArray(arr, i, level);
+	    else
+	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
 	eq FFunctionCall.getArray() {
@@ -2570,6 +2587,11 @@ aspect ArrayHelpers {
 		    return this;
 		}
 		
+        /**
+         * Replace FUnknownSizeExps with equivalent FSizeExps
+         */
+        public void replaceUnknowns(FFunctionVariable parent) {}
+		
 		/**
 		 * \brief Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
@@ -3078,6 +3100,18 @@ aspect ArrayHelpers {
 				evaluate(i);
 		}
 		
+        /**
+         * Replace FUnknownSizeExps with equivalent FSizeExps
+         */
+        public void replaceUnknowns(FFunctionVariable parent) {
+            for (int i = 0; i < exps.length; i++) {
+                if (exps[i] != null) {
+                    exps[i] = exps[i].createSizeFExp();
+                    exps[i].parent = parent;
+                }
+            }
+        }
+		
 		/**
 		 * \brief Adds <code>s</code> to length <code>d</code>.
 		 */
@@ -3102,6 +3136,7 @@ aspect ArrayHelpers {
 			} catch (ConstantEvaluationException uoe) {
 				FExp e2 = new FAddExp(createFExp(d), e.createSizeFExp());
 				exps[d] = e.dynamicFExp(e2);
+				size[d] = UNKNOWN;
 			}
 		}
 		

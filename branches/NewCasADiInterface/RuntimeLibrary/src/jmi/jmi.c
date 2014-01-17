@@ -42,6 +42,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
+        jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
@@ -163,6 +164,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->z = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
     *(jmi_->z) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
+    jmi_->z_last    = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
+    *(jmi_->z_last) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
     /*jmi_->pre_z = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t ));*/
     
     jmi_->dz = (jmi_real_t**)calloc(1, sizeof(jmi_real_t *));
@@ -186,6 +189,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         jmi_->variable_scaling_factors[i] = 1.0;
         (*(jmi_->z))[i] = 0;
     }
+    jmi_save_last_successful_values(jmi_);
 
     for (i=0;i<jmi_->n_v;i++) {
         int j;
@@ -202,6 +206,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->initial_relations = (jmi_int_t*)calloc(n_initial_relations,sizeof(jmi_int_t));
     jmi_->relations = (jmi_int_t*)calloc(n_relations,sizeof(jmi_int_t));
 
+    /* TODO: if we define the incoming vectors as jmi_int_t*, then we can use memcpy instead */
     for (i=0;i<n_initial_relations;i++) {
         jmi_->initial_relations[i] = initial_relations[i];
     }
@@ -209,6 +214,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     for (i=0;i<n_relations;i++) {
         jmi_->relations[i] = relations[i];
     }
+
+    jmi_->nominals = (jmi_real_t*) calloc(n_real_x, sizeof(jmi_real_t));
+    memcpy(jmi_->nominals, nominals, n_real_x * sizeof(jmi_real_t));
 
     jmi_->dae_block_residuals = (jmi_block_residual_t**)calloc(n_dae_blocks,
             sizeof(jmi_block_residual_t*));
@@ -228,6 +236,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->terminate = 0;
 
+    jmi_->reinit_triggered = 0;
+
     jmi_->is_initialized = 0;
 
     return 0;
@@ -236,7 +246,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
 int jmi_delete(jmi_t* jmi){
     int i;
-    if(jmi->dae != NULL) {
+    if (jmi->dae != NULL) {
         jmi_func_delete(jmi->dae->F);
         jmi_func_delete(jmi->dae->R);
         jmi_delete_simple_color_info(&jmi->color_info_A);
@@ -261,12 +271,15 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->output_vrefs);
     free(*(jmi->z));
     free(jmi->z);
+    free(*(jmi->z_last));
+    free(jmi->z_last);
 /*  free(jmi->pre_z);*/
     free(*(jmi->dz));
     free(jmi->dz);
     free(jmi->initial_relations);
     free(jmi->relations);
-    for(i=0; i<JMI_ACTIVE_VAR_BUFS_NUM; i++) {
+    free(jmi->nominals);
+    for (i = 0; i < JMI_ACTIVE_VAR_BUFS_NUM; i++) {
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
@@ -505,10 +518,7 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
     jmi_real_t t = jmi_get_t(jmi)[0];
-    /* This is a workaround for an issue with gcc 4.5.1: http://trac.jmodelica.org/ticket/1349 */
-        /* The original code is: if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) */
-    jmi_real_t tmp = ((t-offset)<=-1e-6)? JMI_TRUE: JMI_FALSE;
-    if (!jmi->atEvent || tmp) {
+    if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
       /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
         return JMI_FALSE;
     }

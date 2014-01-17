@@ -49,7 +49,6 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
 
     /* Create jmi struct -> No need  since jmi_init allocates it
      jmi_t* jmi = (jmi_t *)functions.allocateMemory(1, sizeof(jmi_t)); */
-    jmi_t* jmi = 0;
     fmiInteger retval;
 
     if(!functions.allocateMemory || !functions.freeMemory || !functions.logger) {
@@ -74,7 +73,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     cb->emit_log = fmi1_me_emit_log;
     cb->is_log_category_emitted = fmi1_me_is_log_category_emitted;
     cb->log_options.logging_on_flag = loggingOn;
-    cb->log_options.log_level = logWarning;
+    cb->log_options.log_level = 5;
     cb->allocate_memory = functions.allocateMemory;
     cb->free_memory = functions.freeMemory;
     cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */
@@ -125,33 +124,60 @@ fmiStatus fmi1_me_set_debug_logging(fmiComponent c, fmiBoolean loggingOn) {
 fmiStatus fmi1_me_set_time(fmiComponent c, fmiReal time) {
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
+    jmi_real_t* time_old = (jmi_get_t(jmi));
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    *(jmi_get_t(jmi)) = time;
-    jmi->recomputeVariables = 1;
+    if (*time_old != time) {
+        *time_old = time;
+        jmi->recomputeVariables = 1;
+    }
+    /* *(jmi_get_t(jmi)) = time; 
+    jmi->recomputeVariables = 1; */
     return fmiOK;
 }
 
 fmiStatus fmi1_me_set_continuous_states(fmiComponent c, const fmiReal x[], size_t nx) {
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
+    jmi_real_t* x_cur = jmi_get_real_x(jmi);
+    fmiInteger i;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
-    jmi->recomputeVariables = 1;
+    for (i = 0; i < nx; i++){
+        if (x_cur[i] != x[i]){
+            x_cur[i] = x[i];
+            jmi->recomputeVariables = 1;
+        }
+    }
+    /* memcpy (jmi_get_real_x(jmi), x, nx*sizeof(fmiReal));
+    jmi->recomputeVariables = 1; */
     return fmiOK;
 }
 
 fmiStatus fmi1_me_completed_integrator_step(fmiComponent c, fmiBoolean* callEventUpdate) {
+    fmi1_me_t* self = (fmi1_me_t*)c;
+    jmi_t* jmi = &self->jmi;
+    fmiInteger retval;
+    fmiReal triggered_event;
     if (c == NULL) {
 		return fmiFatal;
     }
     
-    *callEventUpdate = fmiFalse;
+    retval = jmi_completed_integrator_step(jmi, &triggered_event);
+    if (retval != 0) {
+        return fmiError;
+    }
+    
+    if (triggered_event == 1.0){
+        *callEventUpdate = fmiTrue;
+    }else{
+        *callEventUpdate = fmiFalse;
+    }
+    
     return fmiOK;
 }
 
@@ -335,10 +361,10 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
     int n_outputs;
     int* output_vrefs;
 
-    clock_t c0, c1, d0, d1;
+    clock_t /*c0, c1,*/ d0, d1;
     jmi_real_t setElementTime;
 
-    c0 = clock();
+    /* c0 = clock(); */
 
     setElementTime = 0;
 
@@ -478,7 +504,7 @@ fmiStatus fmi1_me_get_partial_derivatives(fmiComponent c, fmiStatus (*setMatrixE
 
     fmi1_me -> fmi_functions.freeMemory(jac);
 
-    c1 = clock();
+    /* c1 = clock(); */
     /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     /*printf(" - setMatrixElementTime: %f\n", setElementTime);*/
     return fmiOK;
@@ -607,8 +633,10 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int index;
     int output_off = 0;
     
+    /*
     int passed = 0;
     int failed = 0;
+    */
     
 /**    fmiReal rel_tol;
     fmiReal abs_tol; */
@@ -631,9 +659,9 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     int* output_vrefs_real;
     fmi1_me_t* self = (fmi1_me_t*)c;
     jmi_t* jmi = &self->jmi;
-    clock_t c0, c1;
+    /* clock_t c0, c1; */
 
-    c0 = clock();
+    /* c0 = clock(); */
     n_outputs = jmi->n_outputs;
     n_outputs_real = n_outputs;
     
@@ -690,7 +718,7 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
                 (*dv)[jmi->color_info_A->group_cols[jmi->color_info_A->group_start_index[i] + j] + jmi->n_real_dx] = 0.;
             }
         }
-        c1 = clock();
+        /* c1 = clock(); */
 
         /*printf("Jac A eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
 
@@ -801,8 +829,10 @@ fmiStatus fmi1_me_get_jacobian(fmiComponent c, int independents, int dependents,
     free(jac2);
     */
     
+    /*
     c1 = clock();
-
+    */
+    
     /*printf("Jac eval call: %f\n", ((fmiReal) ((long)(c1-c0))/(CLOCKS_PER_SEC)));*/
     return fmiOK;
 }
@@ -906,6 +936,7 @@ fmiStatus fmi1_me_event_update(fmiComponent c, fmiBoolean intermediateResults, f
     
     retval = jmi_event_iteration(&((fmi1_me_t *)c)->jmi, intermediateResults, event_info);
     if (retval != 0) {
+        free(event_info);
         return fmiError;
     }
     

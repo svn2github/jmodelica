@@ -592,14 +592,10 @@ typedef struct jmi_options_t {
     jmi_log_options_t* log_options;                  /**< \bried  Logger options */
 
     double nle_solver_default_tol;          /**< \brief Default tolerance for the equation block solver */
-    double nle_solver_min_tol;              /**< \brief Minimum tolerance for the equation block solver */
     double nle_solver_tol_factor;           /**< \brief Tolerance safety factor for the non-linear equation block solver. */
 
     double events_default_tol;              /**< \brief Default tolerance for the event iterations. */        
     double events_tol_factor;               /**< \brief Tolerance safety factor for the event iterations. */
-
-    int block_jacobian_check;               /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
-    double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
 
     int cs_solver;                          /**< \brief Option for changing the internal CS solver */
     double cs_rel_tol;                      /** < \brief Default tolerance for the adaptive solvers in the CS case. */
@@ -771,6 +767,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
+        jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
@@ -1064,6 +1061,7 @@ struct jmi_t {
     int offs_pre_guards_init;            /**< \brief  Offset of the first pre guard in the DAE initialization system \f$F_0\f$ */
 
     jmi_real_t** z;                      /**< \brief  This vector contains the actual values. */
+    jmi_real_t** z_last;                 /**< \brief  This vector contains the values from the last successful integration step. */
     jmi_real_t** dz;                     /**< \brief  This vector is used to store calculated directional derivatives */
     int dz_active_index;                 /**< \brief The element in dz_active_variables to be used (0..JMI_ACTIVE_VAR_BUFS_NUM). Needed for local iterations */
     int block_level;                     /**< \brief Block level for nested equation blocks. Currently 0 or 1. */
@@ -1074,6 +1072,7 @@ struct jmi_t {
     int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
     int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
+    jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
     int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
     jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
@@ -1104,7 +1103,9 @@ struct jmi_t {
 
 
     jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
-    int terminate;                       /**< \brief Flag to trigger termination of the simulation. */
+    jmi_int_t terminate;                 /**< \brief Flag to trigger termination of the simulation. */
+
+    jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
 };
 
 /**

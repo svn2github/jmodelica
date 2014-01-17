@@ -83,6 +83,9 @@ IPOPT_HOME =
 # SUNDIALS home
 SUNDIALS_HOME = 
 
+# STATIC PTHREADS home
+STATIC_PTHREADS_HOME = $(JMODELICA_HOME)/ThirdParty/pthreads
+
 # Additional library directories
 EXT_LIB_DIRS =
 
@@ -130,7 +133,7 @@ CXXFLAGS = -g -DJMI_AD=${JMI_AD}
 # C Compiler options
 CFLAGS = -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES}
 
-SHARED_LDFLAGS = -shared -pthread
+SHARED_LDFLAGS = -shared
 
 # Directories with header files
 JMI_INC_DIR = ${JMODELICA_HOME}/include
@@ -147,9 +150,9 @@ RUNTIMELIBRARY_LIB_DIR = ${JMODELICA_HOME}/lib/RuntimeLibrary
 LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
 
 # Libraries necessary to link with jmi
-LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -lstdc++
-LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -lstdc++
-LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -lstdc++
+LIBS_FMUME10 = -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
+LIBS_FMU20 = -lfmi2 -ljmi -lModelicaExternalC -L$(JMI_LIB_DIR) -l:liblapack.a -l:libblas.a -l:libgfortran.a  -L$(SUNDIALS_HOME)/lib -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a -L$(STATIC_PTHREADS_HOME)/lib -lpthreadGC2-2-9-1 -lstdc++
 LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) -lstdc++ -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial 
 
 #LIBS_IPOPT = -L$(JMI_LIB_DIR) -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad -lfmi -L$(IPOPT_HOME)/lib -lipopt -lm -lgfortran -lpthread -lmingw32 -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -L$(SUNDIALS_HOME)/lib -lsundials_kinsol -lsundials_nvecserial

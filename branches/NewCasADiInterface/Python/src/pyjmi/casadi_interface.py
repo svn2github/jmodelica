@@ -244,9 +244,19 @@ class CasadiModel(ModelBase):
             Whether to enable verbose output from the XML parsing.
             Type: bool
             Default: True
+
+        ode --
+            Whether to attempt to transform the DAE into an ODE using CasADi's
+            BLT algorithm.
+
+            Enabling this is very experimental, and assumes that the objective
+            and constraints do not depend on the algebraic variables, and
+            furthermore that there are no bounds on the algebraic variables.
+            Type: bool
+            Default: False
     """
     
-    def __init__(self, name, path='.', verbose=True):
+    def __init__(self, name, path='.', verbose=True, ode=False):
         
         # Create temp binary
         self._fmuxnames = unzip_fmux(archive=name, path=path)
@@ -256,6 +266,7 @@ class CasadiModel(ModelBase):
         self.xmldoc = xmlparser.ModelDescription(self._tempxml)
         
         # Load CasADi interface
+        self._casadi_blt = ode
         self._load_xml_to_casadi(self._tempxml, verbose)
         
         self._ode_conversion = False
@@ -962,6 +973,10 @@ class CasadiModel(ModelBase):
          self.mterm,
          self.lterm] = casadi.substitute(ocp_expressions, [parameters],
                                          [parameter_values])
+
+        # Transform ODE RHS into residual
+        if self._casadi_blt:
+            self.ode = N.array(casadi.der(self.ocp.x)) - self.ode
     
     def _load_xml_to_casadi(self, xml, verbose):
         # Create a symbolic OCP
@@ -971,6 +986,11 @@ class CasadiModel(ModelBase):
         options["sort_equations"] = False
         options["eliminate_dependent"] = False
         self.ocp.parseFMI(xml, options)
+        if self._casadi_blt:
+            self.ocp.makeExplicit()
+            self.ocp.eliminateAlgebraic()
+            if len(self.ocp.z) > 0 or self.ocp.ode.empty():
+                raise RuntimeError("Unable to reformulate as ODE.")
         casadi.updateDependent(self.ocp)
         
         # Store list of non-free parameters
@@ -986,21 +1006,21 @@ class CasadiModel(ModelBase):
                                       "supported.")
         
         # Identify variables
-        names = {'x': self.xmldoc.get_x_variable_names,
-                 'u': self.xmldoc.get_u_variable_names,
-                 'w': self.xmldoc.get_w_variable_names,
-                 'p_opt': self.xmldoc.get_p_opt_variable_names}
         variables = {}
         variables['x'] = self.ocp.x
         variables['u'] = self.ocp.u
         variables['w'] = self.ocp.z
         variables['p_opt'] = self.ocp.pf
+        names = {}
+        for vt in variables:
+            names[vt] = [(var.getValueReference(), var.getName()) for
+                         var in variables[vt]]
         
         # Make sure the variables appear in value reference order
         var_vectors = {}
         for var_type in names:
             var_dict = dict((repr(v), v) for v in variables[var_type])
-            name_dict = dict((x[0], x[1]) for x in names[var_type](False))
+            name_dict = dict((x[0], x[1]) for x in names[var_type])
             if var_type == 'p_opt':
                 free_times = 0
                 if self.xmldoc.get_opt_finaltime_free():

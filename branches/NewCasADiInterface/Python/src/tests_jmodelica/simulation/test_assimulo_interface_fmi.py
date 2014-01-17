@@ -71,6 +71,9 @@ class Test_Events:
         compile_fmu("EventIter.EventInfiniteIteration1", file_name)
         compile_fmu("EventIter.EventInfiniteIteration2", file_name)
         compile_fmu("EventIter.EventInfiniteIteration3", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration1", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration2", file_name)
+        compile_fmu("EventIter.SingularSystem1", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -86,6 +89,41 @@ class Test_Events:
     def test_event_infinite_iteration_3(self):
         model = load_fmu("EventIter_EventInfiniteIteration3.fmu")
         nose.tools.assert_raises(FMUException, model.simulate)
+        
+    @testattr(stddist = True)
+    def test_singular_system_event_1(self):
+        model = load_fmu("EventIter_SingularSystem1.fmu")
+        
+        #Check that we can initialize without error!
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("mode"), 0.0)
+        nose.tools.assert_almost_equal(model.get("sa"), 0.0)
+        
+    @testattr(stddist = True)
+    def test_enhanced_event_iteration_1(self):
+        model = load_fmu("EventIter_EnhancedEventIteration1.fmu")
+        res = model.simulate()
+        
+        nose.tools.assert_almost_equal(res["x[1]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[2]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[3]"][-1], 0)
+        nose.tools.assert_almost_equal(res["x[4]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[5]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[6]"][-1], -0.406)
+        nose.tools.assert_almost_equal(res["x[7]"][-1], 0.94)
+        
+    @testattr(stddist = True)
+    def test_enhanced_event_iteration_2(self):
+        model = load_fmu("EventIter_EnhancedEventIteration2.fmu")
+        res = model.simulate(final_time=2.0)
+        
+        nose.tools.assert_almost_equal(res["y"][0], 1.0)
+        nose.tools.assert_almost_equal(res["w"][0], 0.0)
+        nose.tools.assert_almost_equal(res["x"][-1], 2.0)
+        nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
+        nose.tools.assert_almost_equal(res["z"][-1], 0.0)
+        nose.tools.assert_almost_equal(res["w"][-1], 1.0)
 
 class Test_Relations:
     @classmethod
@@ -229,11 +267,11 @@ class Test_FMI_ODE:
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "CVode"
-        opts["CVode_options"]["rtol"] = 1e-6
+        opts["CVode_options"]["rtol"] = 1e-7
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-4
         
     @testattr(stddist = True)
     def test_cc_with_radau(self):
@@ -243,7 +281,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
     
     @testattr(stddist = True)
     def test_cc_with_dopri(self):
@@ -253,17 +291,18 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
         
     @testattr(stddist = True)
     def test_cc_with_lsodar(self):
         model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
         opts = model.simulate_options()
         opts["solver"] = "LSODAR"
+        opts["LSODAR_options"]["rtol"] = 1e-6
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-3
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
         
     @testattr(stddist = True)
     def test_cc_with_rodas(self):
@@ -274,7 +313,7 @@ class Test_FMI_ODE:
         
         res = model.simulate(final_time=1.5,options=opts)
         
-        assert (N.abs(res.final("J1.w") - 3.245091100366517)) < 1e-4
+        assert (N.abs(res.final("J1.w") - 3.2450903041811698)) < 1e-3
     
     @testattr(stddist = True)
     def test_no_state1(self):
@@ -833,7 +872,7 @@ class Test_ODE_JACOBIANS5:
         cname='BlockOdeJacTest'
         fname = os.path.join(get_files_path(), 'Modelica', 'BlockOdeJacTest.mo')
         
-        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True,'generate_runtime_option_parameters':False, 'automatic_tearing':False}, version="2.0alpha")
+        _fn_block = compile_fmu(cname, fname, compiler_options={'generate_ode_jacobian':True, 'automatic_tearing':False}, version="2.0alpha")
         
     def setUp(self):
         pass
@@ -844,5 +883,5 @@ class Test_ODE_JACOBIANS5:
         m_block = FMUModel2('BlockOdeJacTest.fmu')
         m_block.initialize()
         
-        A,B,C,D,n_err = m_block.check_jacobians()       
+        A,B,C,D,n_err = m_block.check_jacobians()
         nose.tools.assert_equals(n_err, 0)

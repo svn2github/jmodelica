@@ -297,6 +297,28 @@ class TestChange(SimulationTest):
         """
         self.assert_all_trajectories(['x','y'])
 
+class TestReinit(SimulationTest):
+    """
+    Basic test of reinit().
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('BouncingBall.mo', 'BouncingBall')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=10.0, time_step=0.02)
+        self.run()
+        self.load_expected_data('BouncingBall_result.txt')
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        """
+        Test that results match the expected ones.
+        """
+        self.assert_all_trajectories(['h','v'])
+
 class TestStringExpConstant(SimulationTest):
     """
     Basic test of Modelica string operator.

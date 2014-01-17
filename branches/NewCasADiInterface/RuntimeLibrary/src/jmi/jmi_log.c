@@ -28,6 +28,19 @@
 /*#define INLINE inline */ /* not supported in c89 */
 #define INLINE 
 
+const char* jmi_callback_log_category_to_string(jmi_log_category_t c) {
+    switch(c){
+    case logError:
+        return "ERROR";
+    case logWarning:
+        return "WARNING";
+    case logInfo:
+        return "INFO";
+    default:
+        return "FATAL";
+    }   
+}
+
 category_t severest(category_t c1, category_t c2) {
     /* Smaller is more severe. */
     return c1 <= c2 ? c1 : c2;
@@ -313,7 +326,7 @@ static INLINE BOOL can_pop(log_t *log)   { return log->topindex > 0; } /* always
   * Also calls indent_line().
   */
 static void set_category(log_t *log, category_t c) {
-    frame_t *top = topof(log);
+    frame_t *top;
 
     if (!log->initialized) {
         /* Hook to do some more initialization once everthing is set up.
@@ -322,7 +335,7 @@ static void set_category(log_t *log, category_t c) {
         log->initialized = TRUE;
         initialize(log);
     }
-
+    top = topof(log);
     if (log->c != c) emit(log);
     log->c = c;
     top->severest_category = severest(top->severest_category, c);
@@ -399,6 +412,10 @@ static void create_log_file_if_needed(log_t *log) {
     }
 }
 
+char* jmi_log_get_build_date() {
+    return __DATE__ " " __TIME__;
+}
+
 /** Additional log_t initialization */
 static void initialize(log_t *log) {
     create_log_file_if_needed(log);
@@ -427,7 +444,6 @@ static void delete_log(log_t *log) {
 static BOOL _leave_frame_(log_t *log) {
     frame_t *top = topof(log);
     frame_t *newtop;
-    jmi_callbacks_t* cb = log->jmi_callbacks;
 
     log->next_name = NULL;
     log->leafdim = -1;
@@ -490,7 +506,6 @@ static void close_leaf(log_t *log) {
 /** \brief Enter a frame for a node. */
 static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
                      const char *name, const char *name_end) {
-    jmi_callbacks_t* cb = log->jmi_callbacks;
     close_leaf(log);
     log->next_name = NULL;
 
@@ -512,6 +527,13 @@ static node_t enter_(log_t *log, category_t c, const char *type, int leafdim,
     push_frame(log, c, type, leafdim);
     return node_from_top(log);
 }
+
+jmi_log_node_t jmi_log_get_current_node(jmi_log_t *log) {
+    jmi_log_node_t node;
+    node.inner_id = topof(log)->id;
+    return node;
+}
+
 
 static BOOL ok_label_parent(jmi_log_t *log, jmi_log_node_t node) {
     if (topof(log)->id != node.inner_id) {
@@ -616,10 +638,14 @@ static node_t enter_value_(log_t *log, node_t node, category_t c,
     return enter_(log, c, "value", 0, name, name_end);
 }
 /* could be exported */
+/* Un-used function */
+/*
 static node_t jmi_log_enter_value_(log_t *log, node_t node, category_t c, 
                                    const char *name) {
     return enter_value_(log, node, c, name, NULL);
 }
+*/
+
 node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c, 
                              const char *name) {
     if (!ok_label_parent(log, node)) { name = NULL; }

@@ -78,7 +78,7 @@ model AlgoTest5
     Integer target;
     Real r_pos;
     Integer d_pos;
-    Integer i_pos;
+    Integer i_pos(start=-1);
 	Real[10] intervals = linspace(-1,1,10);
   algorithm
     assert(r_pos >= min(intervals) or r_pos < max(intervals), "Outside of intervals");

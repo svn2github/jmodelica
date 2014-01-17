@@ -18,6 +18,7 @@
 Module for testing Simulation.
 """
 import numpy as N
+import nose
 
 from tests_jmodelica.general.base_simul import *
 from tests_jmodelica import testattr
@@ -27,7 +28,7 @@ class TestNominal(SimulationTest):
     @classmethod
     def setUpClass(cls):
         SimulationTest.setup_class_base(
-                'NominalTest.mop', 'NominalTests.NominalTest1',
+                'NominalTest.mo', 'NominalTests.NominalTest1',
                     options={"enable_variable_scaling":True})
 
     @testattr(stddist = True)
@@ -40,6 +41,18 @@ class TestNominal(SimulationTest):
     @testattr(stddist = True)
     def test_trajectories(self):
         self.assert_all_trajectories(['x', 'y', 'z', 'der(x)', 'der(y)'])
+    
+    @testattr(stddist = True)
+    def test_get_nominal(self):
+        from pymodelica import compile_fmu
+        from pyfmi import load_fmu
+        fmu = load_fmu(compile_fmu('NominalTests.NominalTest3', TestNominal.mo_path))
+        n = fmu._get_nominal_continuous_states()
+        nose.tools.assert_almost_equal(n[0], 1.0)
+        nose.tools.assert_almost_equal(n[1], 1.0)
+        nose.tools.assert_almost_equal(n[2], 2.0)
+        nose.tools.assert_almost_equal(n[3], 6.0)
+        nose.tools.assert_almost_equal(n[4], 5.0)
         
 class TestRLCSquareCS(SimulationTest):
     @classmethod
@@ -735,4 +748,54 @@ class TestQR2(SimulationTest):
     def test_trajectories(self):
         self.assert_all_trajectories(['Q[1,1]','p[1]'],rel_tol=1e-4, abs_tol=1e-4)
 
+class TestWhenInLoop1(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest1')
 
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', -1)
+        self.assert_end_value('y', -0.4)
+
+class TestWhenInLoop2(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest2')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', -0.75)
+        self.assert_end_value('y', -0.25)
+    
+class TestWhenInLoop4(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            'WhenTests.mo',
+            'WhenTests.WhenTest4')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1,time_step=0.02,rel_tol=1e-6)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_trajectories(self):
+        self.assert_end_value('x', 1)
+        self.assert_end_value('y', 3)
+        self.assert_end_value('z', 2)

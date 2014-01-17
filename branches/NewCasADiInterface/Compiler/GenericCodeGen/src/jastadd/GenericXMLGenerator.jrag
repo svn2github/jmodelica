@@ -28,6 +28,10 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     private String indentStep;
     private int indentation;
     
+    public interface Creator {
+        public GenericXMLGenerator create(Printer expPrinter, char escapeCharacter, FClass fclass);
+    }
+    
     /**
      * Returns the string denoting the beginning of the copyright blurb.
      */
@@ -90,10 +94,37 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param includeDir      directory to look for included files in. If null, includes are not supported
      */
     public void generate(Reader templateReader, PrintStream genPrinter, File includeDir) {
-        if (templateReader == null) 
+        if (templateReader == null) {
+        	generateXMLDeclaration(genPrinter);
             rootTag().generate(genPrinter);
-        else 
+        	
+        } else {
             super.generate(templateReader, genPrinter, includeDir);
+        }
+    }
+    
+    /**
+     * Generates the XML Declaration.
+     */
+    protected void generateXMLDeclaration(PrintStream printer) {	
+		printer.print("<?xml");		
+		printer.format(" %s=\"%s\"", "version", getXMLVersion());
+		printer.format(" %s=\"%s\"", "encoding", getXMLEncoding());
+		printer.print("?>\n");
+    }
+    
+    /**
+     * Get the version for the XML Declaration, defalut implementation returns "1.0".
+     */
+    protected String getXMLVersion() {
+    	return "1.0";
+    }
+    
+    /**
+     * Get the encoding for the XML Declaration, defalut implementation returns "UTF-8".
+     */
+    protected String getXMLEncoding() {
+    	return "UTF-8";
     }
     
     /**
@@ -173,7 +204,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param value    the value of the attribute
      * @param printer  the print stream to use
      */
-    protected void generateAttribute(String name, String value, PrintStream printer) {
+    protected void generateAttribute(String name, Object value, PrintStream printer) {
         printer.format(" %s=\"%s\"", name, value);
     }
     
@@ -207,7 +238,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         /**
          * The name to use for the xml tag or attribute.
          */
-        protected final String xml;
+        protected String xml;
         
         /**
          * Construct a tag.
@@ -267,7 +298,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * 
          * Subclasses that represent an XML attribute should override and return non-null.
          */
-        public String value() {
+        public Object value() {
             return null;
         }
         
@@ -340,15 +371,14 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
          * @param printer A PrintStream object for output of the generated code.
          */
         public void generate(PrintStream printer) {
-            String val = value();
+        	Object val = value();
             if (val != null)
                 generateAttribute(xml, val, printer);
-            else if (childTags().length == 0)
+            else if (childTags().length != 0)
                 generateNode(xml, printer);
             else
                 generateClosed(xml, printer);
         }
         
     }
-
 }

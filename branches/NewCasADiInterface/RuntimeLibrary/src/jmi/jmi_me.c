@@ -19,8 +19,9 @@
 
 #include "jmi_me.h"
 
-#define indexmask 0x0FFFFFFF
-#define typemask 0xF0000000
+#define indexmask  0x07FFFFFF
+#define negatemask 0x08000000
+#define typemask   0xF0000000
 
 jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) {
     /* Translate a ValueReference into variable index in z-vector. */
@@ -34,6 +35,13 @@ jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
     jmi_value_reference type = valueref & typemask;
     
     return type;
+}
+
+jmi_value_reference is_negated(jmi_value_reference valueref) {
+    /* Checks for a valueReference if it is negated. */
+    jmi_value_reference negated = valueref & negatemask;
+    
+    return negated;
 }
 
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
@@ -108,6 +116,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
+    jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -273,6 +282,7 @@ int jmi_initialize(jmi_t* jmi) {
     jmi->atInitial = JMI_FALSE;
 
     jmi_copy_pre_values(jmi);
+    jmi_save_last_successful_values(jmi);
 
     jmi->is_initialized = 1;
  
@@ -636,6 +646,8 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
         if(retval != 0) {
             jmi_log_node(jmi->log, logError, "Error",
                 "Evaluating the derivatives failed at <t:%g>", jmi_get_t(jmi)[0]);
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_last_successful_values(jmi);
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -645,14 +657,25 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     return 0;
 }
 
+int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
+    int retval = 0;
+    
+    /* Save the z values to the z_last vector */
+    jmi_save_last_successful_values(jmi);
+    
+    *triggered_event = JMI_FALSE;
+    return retval;
+}
+
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
-    jmi_value_reference i;
     int retval;
 
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "Error",
+                "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>", jmi_get_t(jmi)[0]);
+            jmi_reset_last_successful_values(jmi);
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -666,21 +689,20 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
     return 0;
 }
 
-//TODO: is not implemented.
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx) {
-    int i;
-    
-    for(i = 0; i < nx; i++) {
-        x_nominal[i] = 1.0;
+    if (nx != jmi->n_real_x) {
+        jmi_log_node(jmi->log, logError, "Error",
+            "Wrong size of array when getting nominal values: size is <t:%d>, should be <t:%d>", nx, jmi->n_real_x);
+    	return 1;
     }
     
+    memcpy(x_nominal, jmi->nominals, nx * sizeof(jmi_real_t));
     return 0;
 }
 
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
-    jmi_int_t nGuards;
     jmi_int_t nF;
     jmi_int_t nR;
     jmi_int_t retval;
@@ -691,9 +713,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_real_t* switches;
     jmi_real_t* sw_temp;
     jmi_log_node_t top_node;
+    jmi_log_node_t iter_node;
 
     /* Allocate memory */
-    nGuards = jmi->n_guards;
     jmi_dae_get_sizes(jmi, &nF, &nR);
     event_indicators = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
     sw_temp = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
@@ -703,19 +725,24 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
     event_info->next_event_time = 0.0;                   /* A reset. */
     event_info->state_value_references_changed = FALSE;  /* No support for dynamic state selection */
-    event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation */
-    event_info->iteration_converged = FALSE;             /* The iteration have not converged */
+    event_info->terminate_simulation = FALSE;            /* Don't terminate the simulation unless flagged to. */
+    event_info->iteration_converged = FALSE;             /* The iteration has not converged */
     event_info->nominals_of_states_changed = FALSE;      /* Not used, get_nominals is not implemented. */
-    event_info->state_values_changed = FALSE;            /* Not used, the reinit operator is not supported. */
+    event_info->state_values_changed = FALSE;            /* State variables have not been changed by reinit. */
     
     jmi->terminate = 0; /* Reset terminate flag. */
 
     max_iterations = 30; /* Maximum number of event iterations */
 
+	top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
+                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+
     retval = jmi_ode_derivatives(jmi);
 
-    top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
-                                 "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
+
+    if (nR > 0) {
+        jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, nR);
+    }
 
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
@@ -732,7 +759,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     /* Iterate */
     iter = 0;
     while (event_info->iteration_converged == FALSE) {
-        jmi_log_node_t iter_node;
+        jmi->reinit_triggered = 0; /* Reset reinit flag. */
 
         iter += 1;
         
@@ -751,30 +778,26 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
 
-        /* Compare new values with values
-         * with the pre values. If there is an element that differs, set
-         * eventInfo->iterationConverged to false
-         */
+        /* Compare new values with the pre values. If there is an element that differs, set
+         * event_info->iteration_converged to false. */
         event_info->iteration_converged = TRUE; /* Assume the iteration converged */
-
-        /* Start with continuous variables - they could change due to
-         * the reinit operator. */
-
-        /*
-        for (i = jmi->offs_real_dx; i < jmi->offs_t; i++) {
-            if (jmi->z[i - jmi->offs_real_dx + jmi->offs_pre_real_dx] != jmi->z[i]) {
-                event_info->iteration_converged = FALSE;
-                event_info->state_values_changed = TRUE;
-            }
-        }
-         */
 
         for (i = jmi->offs_real_d; i < jmi->offs_pre_real_dx; i++) {
             if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
                 event_info->iteration_converged = FALSE;
             }
         }
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_reals(jmi->log, iter_node, logInfo, "z_values", &z[jmi->offs_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
+            jmi_log_reals(jmi->log, iter_node, logInfo, "pre(z)_values", &z[jmi->offs_pre_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
+        }
         
+        /* Check if a reinit triggered - this would mean that state variables changed. */
+        if (jmi->reinit_triggered) {
+            event_info->iteration_converged = FALSE;
+            event_info->state_values_changed = TRUE;
+        }
+
         /* Evaluate the switches */
         memcpy(sw_temp, switches, nR*sizeof(jmi_real_t));
         retval = jmi_evaluate_switches(jmi, sw_temp, 1);
@@ -785,7 +808,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* Copy new values to pre values */
         jmi_copy_pre_values(jmi);
-
+        
         if (intermediate_results) {
             break;
         }
@@ -828,7 +851,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
-        /* Evaluate the guards with the event flat set to false in order to
+        /* Evaluate the guards with the event flag set to false in order to
          * reset guards depending on samplers before copying pre values.
          * If this is not done, then the corresponding pre values for these guards
          * will be true, and no event will be triggered at the next sample.
@@ -840,7 +863,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-
+        
+        /* Save the z values to the z_last vector */
+        jmi_save_last_successful_values(jmi);
+        
         jmi_log_leave(jmi->log, final_node);
     }
 
@@ -849,7 +875,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     jmi->jmi_callbacks.free_memory(event_indicators);
     jmi->jmi_callbacks.free_memory(sw_temp);
-
+    
+    if (nR > 0) {
+        jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
+    }
     jmi_log_leave(jmi->log, top_node);
 
     return 0;
@@ -881,8 +910,6 @@ static int get_option_index(char* option) {
 void jmi_update_runtime_options(jmi_t* jmi) {
     jmi_real_t* z = jmi_get_z(jmi);
     int index;
-    int index1;
-    int index2;
     jmi_options_t* op = &jmi->options;
     jmi_block_solver_options_t* bsop = &op->block_solver_options;
     index = get_option_index("_log_level");
@@ -894,32 +921,23 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->block_solver_options.enforce_bounds_flag = (int)z[index]; 
     
     index = get_option_index("_use_jacobian_equilibration");
-    index1 = get_option_index("_use_jacobian_scaling");
-    if(index || index1 ){
-        int fl, fl1;
-        fl = fl1 = bsop->use_jacobian_equilibration_flag;
-        if(index) fl = (int)z[index]; 
-        if(index1) fl1 = (int)z[index1];
-        
-        bsop->use_jacobian_equilibration_flag = fl || fl1; 
+    if(index ){
+        bsop->use_jacobian_equilibration_flag = (int)z[index]; 
     }
     
     index = get_option_index("_residual_equation_scaling");
-    index1 = get_option_index("_use_automatic_scaling");
-    index2 = get_option_index("_use_manual_equation_scaling");
-    if(index || index1 || index2) {
-        /* to support deprecation: non-default setting given precendence*/
-        if(index2 && (int)z[index2]) {
-            bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
-        }
-        else if(index1 && !(int)z[index1]){
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_residual_scaling_none:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_none;
-        }
-        else if(index && ((int)z[index] != jmi_residual_scaling_auto)) {
-            bsop->residual_equation_scaling_mode = (int)z[index];
-        }
-        else
+            break;
+        case jmi_residual_scaling_manual:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_manual;
+            break;
+        default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+        }
     }
     index = get_option_index("_nle_solver_max_iter");
     if(index)
@@ -929,9 +947,18 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         bsop->experimental_mode  = (int)z[index];
     
     index = get_option_index("_iteration_variable_scaling");
-    if(index)
-        bsop->iteration_variable_scaling_mode = (int)z[index];
-    
+    if(index) {
+        switch((int)z[index]) {
+        case jmi_iter_var_scaling_none:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_none;
+            break;
+        case jmi_iter_var_scaling_heuristics:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_heuristics;
+            break;
+        default:
+            bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+        }
+    }
     index = get_option_index("_rescale_each_step");
     if(index)
         bsop->rescale_each_step_flag = (int)z[index]; 
@@ -947,9 +974,15 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_check_jac_cond");
     if(index)
         bsop->check_jac_cond_flag = (int)z[index]; 
+    index = get_option_index("_nle_solver_step_limit_factor");
+    if(index)
+        bsop->step_limit_factor = z[index];
     index = get_option_index("_nle_solver_min_tol");
     if(index)
-        op->nle_solver_min_tol = z[index]; 
+        bsop->min_tol = z[index];
+    index = get_option_index("_nle_solver_regularization_tolerance");
+    if(index)
+        bsop->regularization_tolerance = z[index];
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 
@@ -961,10 +994,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->events_tol_factor = z[index];
     index = get_option_index("_block_jacobian_check");
     if(index)
-        op->block_jacobian_check = z[index]; 
+         bsop->block_jacobian_check = z[index]; 
     index = get_option_index("_block_jacobian_check_tol");
     if(index)
-        op->block_jacobian_check_tol = z[index];
+         bsop->block_jacobian_check_tol = z[index];
     index = get_option_index("_cs_solver");
     if(index)
         op->cs_solver = z[index];
@@ -978,6 +1011,7 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     if(index)
         op->log_options->copy_log_to_file_flag = (int)z[index]; 
     
+    bsop->res_tol = jmi->newton_tolerance;
 /*    op->block_solver_experimental_mode = 
             jmi_block_solver_experimental_steepest_descent_first|
             jmi_block_solver_experimental_converge_switches_first;

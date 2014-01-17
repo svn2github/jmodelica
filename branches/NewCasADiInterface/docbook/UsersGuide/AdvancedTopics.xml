@@ -144,8 +144,11 @@ org = jpype.JPackage('org')
       <para>Also, we need to create an instance of a Modelica compiler in
       order to compile models:</para>
 
-      <programlisting language="python"># Create a compiler
+      <programlisting language="python"># Create a compiler and compiler target object
 mc = ModelicaCompiler()
+
+# Build trees as if for an FMU for ME v 1.0
+target = mc.create_target_object("me", "1.0")
 </programlisting>
 
       <para>In order to avoid parsing the same file multiple times (we will
@@ -198,35 +201,31 @@ except NameError, e:
       analysis by traversing the tree. Say that we are interested in counting
       the number of classes (packages, models, blocks, functions etc.) in the
       Modelica standard library. As the basis for traversing the AST, we may
-      use the method <literal>ClassDecl.classes()</literal> that returns a
-      list of local classes contained in a class. Based on this method, a
-      Python function for traversing the class hierarchy of the source AST can
-      be defined:</para>
+      use the method <literal>ClassDecl.classes()</literal> that returns an
+      iterator over local classes contained in a class. Based on this method,
+      a Python function for traversing the class hierarchy of the source AST
+      can be defined:</para>
 
       <programlisting language="python">def count_classes(class_decl,depth):
     """ Count the number of classes hierarchically contained
     in a class declaration."""
-
-    # Get a list of local classes using the method ClassDecl.classes()
-    # which returns a Java ArrayList object containing ClassDecl objects.
-    local_classes = class_decl.classes()
-    
-    # Get the number of local classes.
-    num_classes = local_classes.size()
-
+    # Get an iterator over of local classes using the method ClassDecl.classes()
+    # which returns a Java Iterable object over ClassDecl objects.
+    local_classes = class_decl.classes().iterator()
+       
+    num_classes = 0
     # Loop over all local classes
-    for i in range(local_classes.size()):
-        # Call count_classes recursively for all local classes
-        num_classes = num_classes + \
-                      count_classes(local_classes.get(i),depth + 1)
+    while local_classes.hasNext():
+        # Call count_classes recursively for all local classes 
+        # (including the contained class itself)
+        num_classes += 1 + count_classes(local_classes.next(), depth + 1)
 
     # If the class declaration corresponds to a package, print
     # the number of hierarchically contained classes
-    if class_decl.getRestriction().getNodeName() == 'MPackage' \
-           and depth &lt;= 1:
+    if class_decl.isPackage() and depth &lt;= 1:
         print("The package %s has %d hierachically contained classes" \
               %(class_decl.qualifiedName(),num_classes))
-
+            
     # Return the number of hierachically contained classes
     return num_classes
 </programlisting>
@@ -290,7 +289,7 @@ try:
 except:
     # Retrieve the node in the instance tree corresponding to the class
     # Modelica.Electrical.Analog.Examples.CauerLowPassAnalog
-    filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog")
+    filter_instance = mc.instantiate_model(source_root,"CauerLowPassAnalog", target)
 </programlisting>
 
       <para>Next we define a Python function for traversing the instance AST
@@ -450,7 +449,7 @@ try:
     filter_flat_model.name()
 except:
     # Flatten the model instance filter_instance
-    filter_flat_model = mc.flatten_model(filter_instance)
+    filter_flat_model = mc.flatten_model(filter_instance, target)
 </programlisting>
 
       <para>During flattening, the instance tree is traversed and all
