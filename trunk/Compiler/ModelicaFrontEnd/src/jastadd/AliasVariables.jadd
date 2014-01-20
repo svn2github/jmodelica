@@ -195,7 +195,17 @@ aspect AliasVariables {
 				return null;
 			return alias.getSet();
 		}
-
+		
+		/**
+		 * \brief Remove a variable and its alias set from the alias manager.
+		 */
+        public void unAlias(FVariable fv) {
+            AliasSet as = fv.aliasSet();
+            for (AliasVariable av : as)
+                variableMap.remove(av.fv);
+            aliasSets.remove(as);
+        }
+        
 		/**
 		 * \brief Add a pair of alias variables to the alias manager.
 		 */
