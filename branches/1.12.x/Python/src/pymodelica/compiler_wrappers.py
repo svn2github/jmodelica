@@ -76,8 +76,6 @@ class ModelicaCompiler(object):
                 self.set_integer_option(key,value)
             elif isinstance(value, float):
                 self.set_real_option(key,value)
-            elif isinstance(value, list):
-                self.set_string_option(key, list_to_string(value))
             else:
                 raise JMIException("Unknown compiler option type for key: %s. \
                 Should be of the following types: boolean, string, integer, \

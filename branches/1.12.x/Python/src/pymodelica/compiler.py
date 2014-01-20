@@ -32,7 +32,7 @@ from compiler_exceptions import IllegalCompilerArgumentError
 
 import pymodelica as pym
 from pymodelica.common import xmlparser
-from pymodelica.common.core import get_unit_name
+from pymodelica.common.core import get_unit_name, list_to_string
 
 
 def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0',
@@ -315,6 +315,10 @@ def _compile_unit(class_name, file_name, compiler, target, version,
     """
     Helper function for compile_fmu, compile_jmu and compile_fmux.
     """
+    for key, value in compiler_options.iteritems():
+        if isinstance(value, list):
+            compiler_options[key] = list_to_string(value)
+    
     if isinstance(file_name, basestring):
         file_name = [file_name]
         
