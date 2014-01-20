@@ -75,9 +75,9 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
         mc::FClass fclass = compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()),
             StringFromUTF(modelName.c_str()));
-        if (fclass.numEnums() != 0) {
-            throw std::runtime_error("Enum variables are not supported in CasADiInterface");
-        }
+//         if (fclass.numEnums() != 0) {
+//             throw std::runtime_error("Enum variables are not supported in CasADiInterface");
+//         }
         
         // Create a model with the model identfier.
         Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));

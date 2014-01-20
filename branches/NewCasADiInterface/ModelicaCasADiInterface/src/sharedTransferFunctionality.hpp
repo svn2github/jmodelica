@@ -17,6 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SHARED_TRANSFER_FUNCTIONALITY
 #define SHARED_TRANSFER_FUNCTIONALITY
 
+
+#include "iostream"
+
 //JNI
 #include "jni.h"
 
@@ -41,6 +44,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 #include "IntegerVariable.hpp"
 #include "Ref.hpp"
+
+#include "initjcc.h" // for env
+#include "JCCEnv.h"
+
 
 /**
  * Sets up a JVM with a class path to find the JModelica.org compiler
@@ -415,7 +422,14 @@ void transferFVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar fv) {
 template <class ArrayList, class FVar, class JMDerivativeVariable, class JMRealVariable, class List, class Attribute, class Comment>
 static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, ArrayList vars){
     for (int i = 0; i < vars.size(); i++) {
-        transferFVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, FVar(vars.get(i).this$));
+        FVar var = FVar(vars.get(i).this$);
+        if (var.type().isEnum()) {
+            char *name = env->toString(var.this$);
+            std::cerr << "Warning: Ignored enumeration typed variable:\n" << name << std::endl;
+            delete[] name;
+        } else {
+            transferFVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, var);
+        }
     }
 }
 
