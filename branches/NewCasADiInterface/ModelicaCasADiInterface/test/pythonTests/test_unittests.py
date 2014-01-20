@@ -28,7 +28,7 @@ def test_VariableAlias():
     realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
     # Default values
     assert not realVar1.isAlias()
-    assert realVar1.getModelVariable() == None
+    assert realVar1.getModelVariable() == realVar1
     assert not realVar1.isNegated()
     
     # Try to set negated attribute, even though it is not an alias variable yet. 

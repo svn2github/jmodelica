@@ -394,7 +394,7 @@ Params::
         
 "; 
 %feature("docstring") ModelicaCasADi::Variable::getModelVariable "
-If this Variable is an alias, return it's Model variable; otherwise return None. 
+If this Variable is an alias, return it's Model variable; otherwise return itself.
 
 Params::
 
