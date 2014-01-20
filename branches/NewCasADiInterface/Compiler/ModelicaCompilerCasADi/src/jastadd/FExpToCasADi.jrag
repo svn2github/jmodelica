@@ -146,6 +146,11 @@ aspect FExpToCasADi {
         if (getCall().isIgnored()) {
             return expressions;
         }
+        if (getNumLeft() == 0) {
+            // Ignore things that we don't support right now, such as asserts
+            System.err.println("Warning: Ignored statement:\n" + this);
+            return expressions;
+        }
         MXVector lhsVec = new MXVector();
         for (FFunctionCallLeft fleft : getLefts()) {
             if (fleft.hasFExp()) {
