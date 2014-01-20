@@ -1870,16 +1870,16 @@ fclass IndexReduction.IndexReduction39_MinExp
  Real x1;
  Real x2;
  Real x3;
- Real _der_x1;
  Real _der_x2;
+ Real _der_x3;
 initial equation 
- x3 = 0.0;
+ x1 = 0.0;
 equation
- _der_x1 + _der_x2 + der(x3) = 1;
+ der(x1) + _der_x2 + _der_x3 = 1;
  min(x1, x2) = 0;
  min(x1, x3) = 0;
- min(_der_x1, _der_x2) = 0.0;
- min(_der_x1, der(x3)) = 0.0;
+ noEvent(if x1 < x2 then der(x1) else _der_x2) = 0.0;
+ noEvent(if x1 < x3 then der(x1) else _der_x3) = 0.0;
 end IndexReduction.IndexReduction39_MinExp;
 ")})));
 end IndexReduction39_MinExp;
@@ -1900,16 +1900,16 @@ fclass IndexReduction.IndexReduction40_MaxExp
  Real x1;
  Real x2;
  Real x3;
- Real _der_x1;
  Real _der_x2;
+ Real _der_x3;
 initial equation 
- x3 = 0.0;
+ x1 = 0.0;
 equation
- _der_x1 + _der_x2 + der(x3) = 1;
+ der(x1) + _der_x2 + _der_x3 = 1;
  max(x1, x2) = 0;
  max(x1, x3) = 0;
- max(_der_x1, _der_x2) = 0.0;
- max(_der_x1, der(x3)) = 0.0;
+ noEvent(if x1 > x2 then der(x1) else _der_x2) = 0.0;
+ noEvent(if x1 > x3 then der(x1) else _der_x3) = 0.0;
 end IndexReduction.IndexReduction40_MaxExp;
 ")})));
 end IndexReduction40_MaxExp;

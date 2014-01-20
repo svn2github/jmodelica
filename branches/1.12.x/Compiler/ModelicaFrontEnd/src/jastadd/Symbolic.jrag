@@ -722,9 +722,7 @@ aspect Derivatives {
 	}
 	
 	public FExp FMinMaxExp.diff(String name) {
-		return dynamicFExp(createNode(
-				dynamicFExp((getX().diff(name))), 
-				dynamicFExp((getY().diff(name)))));
+		return dynamicFExp(new FNoEventExp(new FIfExp(createCompareNode(getX().fullCopy(), getY().fullCopy()), getX().diff(name), getY().diff(name))));
 	}
 	
 	public FExp FIdUseExp.diff(String name) {

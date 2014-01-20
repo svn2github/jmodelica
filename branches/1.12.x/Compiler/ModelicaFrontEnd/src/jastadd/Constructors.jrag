@@ -1280,4 +1280,8 @@ aspect InheritedFactoryMethods {
 	syn FDotDivExp FArtmBinExp.newFDivExp(FExp l, FExp r) = isDotOp() ? new FDotDivExp(l, r) : new FDivExp(l, r);
 	syn FDotPowExp FArtmBinExp.newFPowExp(FExp l, FExp r) = isDotOp() ? new FDotPowExp(l, r) : new FPowExp(l, r);
 	
+	syn FRelExp FMinMaxExp.createCompareNode(FExp x, FExp y);
+	eq FMinExp.createCompareNode(FExp x, FExp y) = new FLtExp(x, y);
+	eq FMaxExp.createCompareNode(FExp x, FExp y) = new FGtExp(x, y);
+	
 }
