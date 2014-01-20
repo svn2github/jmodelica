@@ -1,0 +1,2764 @@
+/*
+Copyright (C) 2009 Modelon AB
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.io.PrintStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+/*
+ * This aspect is used to generate AD code used when generating jacobians
+ * for ODE and DAE systems and for blocks that require iteration. The functionality
+ * in this class is called from CADGenerator that derives what is called from
+ * the compiler options set by the user. 
+ *
+ * When adding new AD code remember to check that the variables are declared
+ * at the start of functions etc. in order to retain c89 compliance. 
+ *  
+ */
+
+
+aspect CADCodeGen {
+
+    public class CADPrettyPrinter extends CodePrinter {
+
+        @Override
+        public void print(ASTNode node, PrintStream str, String indent) {
+            node.prettyPrint_CAD(this, str, indent); 
+        }
+
+        @Override
+        public void printVarDecls(ASTNode node, PrintStream str, String indent) {
+            node.genVarDecls_CAD(this, str, indent);
+        }
+
+        @Override
+        public void printPreSteps(ASTNode node, PrintStream str, String indent) {
+            node.genTempVars_CAD(this, str, indent);
+        }
+	}
+	
+	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
+	
+	public String ASTNode.prettyPrint_CAD(String indent) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		PrintStream str = new PrintStream(os);
+		prettyPrint_CAD(str,indent);
+		return os.toString();
+	}
+
+	public void ASTNode.prettyPrint_CAD(PrintStream str, String indent) {
+ 		prettyPrint_CAD(printer_CAD, str, indent);
+	}
+
+	// Default implementation is to use the standard C printer
+	public void ASTNode.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+ 		prettyPrint_C(p, str, indent);
+	}
+		
+	private int FClass.adIndex = 0;
+	
+	//Assign a unique AD-index for each node that is printed
+	public int FClass.nextADIndex() {
+		return adIndex++;
+	}
+	
+	syn lazy int FExp.adIndex() = myFClass().nextADIndex();
+	
+	syn String FExp.varName_CAD() = "v_" + adIndex();
+	eq FIdUseExp.varName_CAD() = inFunction() ? getFIdUse().varName_CAD() : prettyPrint_C("");
+	
+	syn String FExp.derName_CAD() = "d_" + adIndex();
+	eq FIdUseExp.derName_CAD() {
+		if (inFunction())
+			return getFIdUse().derName_CAD();
+		else if (!shouldBeDifferentiated())
+			return "AD_WRAP_LITERAL(0)";
+		else
+			return String.format("%s[jmi_get_index_from_value_ref(%d)-jmi->offs_real_dx]", getSeedName(), myFV().valueReference());
+	}
+	
+	syn String FExp.getSeedName() = "(*dz)";
+	
+	@Override
+	public void FIdUse.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print(varName_CAD());
+	}
+	
+	syn String FIdUse.varName_CAD() = toString_var_CAD(printer_CAD);
+	
+	syn String FIdUse.derName_CAD() = toString_der_CAD(printer_CAD);
+	
+	/**
+	 *Print CAD code for value for record use in statement in function. 
+	 */
+	public String FQName.genRecordUse_var_CAD(CodePrinter p, FAbstractVariable fv, String type) {
+		throw new UnsupportedOperationException();
+	}	
+	
+	public String FQNameFull.genRecordUse_var_CAD(CodePrinter p, FAbstractVariable fv, String type) {
+		FQNamePart part = getFQNamePart(0);
+		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
+		String res = fv.genUse_var_CAD(p, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
+			part = getFQNamePart(i);
+			res = res + "->" + part.getName();
+			if (part.hasFArraySubscripts()) {
+				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
+				res = part.getFArraySubscripts().genFunctionArrayUse_C(p, res, curType);
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 *Print CAD code for for derivative record use in statement in function. 
+	 */
+	public String FQName.genRecordUse_der_CAD(CodePrinter p, FAbstractVariable fv, String type) {
+		throw new UnsupportedOperationException();
+	}	
+	
+	public String FQNameFull.genRecordUse_der_CAD(CodePrinter p, FAbstractVariable fv, String type) {
+		FQNamePart part = getFQNamePart(0);
+		FArraySubscripts fas = part.hasFArraySubscripts() ? part.getFArraySubscripts() : null;
+		String res = fv.genUse_der_CAD(p, fas, C_ARRAY_RECORD);
+		for (int i = 1, n = getNumFQNamePart(); i < n; i++) {
+			part = getFQNamePart(i);
+			res = res + "->" + part.getName();
+			if (part.hasFArraySubscripts()) {
+				String curType = (n - i > 1 ? C_ARRAY_RECORD : type);
+				res = part.getFArraySubscripts().genFunctionArrayUse_C(p, res, curType);
+			}
+		}
+		return res;
+	}
+	
+	syn String FIdUse.toString_var_CAD(CodePrinter p) {
+		String type = myFV().funcArrayType(isAssignUse());
+		if (myFV().inRecord() && inFunction()) {
+			return getFQName().genRecordUse_var_CAD(p, myRecordFV(), type);
+		} else {
+			return myFV().genUse_var_CAD(p, getFQName().getFArraySubscripts(), type);
+		}
+	}
+	
+	syn String FIdUse.toString_der_CAD(CodePrinter p) {
+		String type = myFV().funcArrayType(isAssignUse());
+		if (myFV().inRecord() && inFunction()) {
+			return getFQName().genRecordUse_der_CAD(p, myRecordFV(), type);
+		} else {
+			return myFV().genUse_der_CAD(p, getFQName().getFArraySubscripts(), type);
+		}
+	}
+	
+	public String FAbstractVariable.genUse_var_CAD(CodePrinter p, FArraySubscripts fas, String type) {
+		if (shouldBeDifferentiated())
+			return varName_CAD();
+		else
+			return name_C();
+	}
+	
+	public String FAbstractVariable.genUse_der_CAD(CodePrinter p, FArraySubscripts fas, String type) {
+		return derName_CAD();
+		
+	}
+	
+	public String FFunctionArray.genUse_var_CAD(CodePrinter p, FArraySubscripts fas, String type) {
+		if (fas == null)
+			return varName_CAD();
+		else
+			return fas.genFunctionArrayUse_var_CAD(p, varName_CAD(), type);
+	}
+	
+	public String FFunctionArray.genUse_der_CAD(CodePrinter p, FArraySubscripts fas, String type) {
+		if (fas == null)
+			return derName_CAD();
+		else
+			return fas.genFunctionArrayUse_der_CAD(p, derName_CAD(), type);
+	}
+	
+	public String FArraySubscripts.genFunctionArrayUse_var_CAD(CodePrinter p, String name, String type) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		str.print("jmi_array_");
+		str.print(type);
+		str.print("_");
+		str.print(getNumFSubscript());
+		str.print("(");
+		str.print(name);
+		str.print(", ");
+		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+		str.print(")");
+		return os.toString();
+	}
+	
+	public void FSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void FExpSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().prettyPrint_C(p,str,indent);
+	}
+	
+	public void FIntegerSubscript.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print(getValue());
+	}
+	
+	public String FArraySubscripts.genFunctionArrayUse_der_CAD(CodePrinter p, String name, String type) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();	
+		PrintStream str = new PrintStream(os);
+		str.print("jmi_array_");
+		str.print(type);
+		str.print("_");
+		str.print(getNumFSubscript());
+		str.print("(");
+		str.print(name);
+		str.print(", ");
+		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+		str.print(")");
+		return os.toString();
+	}
+	
+	/*-------------------------------------------------------------------------
+	 * CAD code for FExp resides bellow
+	 *-----------------------------------------------------------------------*/
+	
+	public void FExp.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		genVar_CAD(p, str, indent);
+	}
+	
+	syn boolean FExp.autoGenChildADStatements_CAD() = true;
+	eq FIfExp.autoGenChildADStatements_CAD()        = false;
+	eq FRelExp.autoGenChildADStatements_CAD()       = !generatesEvent();
+	eq FFunctionCall.autoGenChildADStatements_CAD() = false;
+	
+	syn boolean FExp.autoGenChildVarDecls_CAD() = autoGenChildADStatements_CAD();
+	eq FIfExp.autoGenChildVarDecls_CAD()        = true;
+
+	@Override
+	public void FExp.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (isArray() && !size().isUnknown()) {
+			getArray().genTempVars_CAD(p, str, indent);
+		} else {
+			if (autoGenChildADStatements_CAD())
+				super.genTempVars_CAD(p, str, indent);
+			genADStatement_CAD(p , str, indent);
+		}
+	}
+	
+	/**
+	 * Determines if the expression type genereates ad statments
+	 */
+	syn boolean FExp.hasADStatement_CAD()      = type() != null;
+	eq FIdUseExp.hasADStatement_CAD()          = false;
+	eq FLitExp.hasADStatement_CAD()            = false;
+	eq FRangeExp.hasADStatement_CAD()          = false;
+	eq FRecordConstructor.hasADStatement_CAD() = false;
+	
+	/**
+	 * The var expression for this type will be inlined if true
+	 */
+	inh boolean FExp.inlineVar_CAD();
+	eq BaseNode.getChild().inlineVar_CAD() = true;
+	eq FExp.getChild().inlineVar_CAD()     = false;
+	
+	/**
+	 * The der expression for this type will be inlined if true
+	 */
+	inh boolean FExp.inlineDer_CAD();
+	eq BaseNode.getChild().inlineDer_CAD() = true;
+	eq FExp.getChild().inlineDer_CAD()     = false;
+	
+	/**
+	 * Generates var expression or prints reference to evaluated expression
+	 */
+	public void FExp.genVar_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (inlineVar_CAD())
+			genVarExp_CAD(p, str, indent);
+		else
+			str.print(varName_CAD());
+	}
+	
+	/**
+	 * Generates der expression or prints reference to evaluated expression
+	 */
+	public void FExp.genDer_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!shouldBeDifferentiated())
+			str.print("AD_WRAP_LITERAL(0)");
+		else if (inlineDer_CAD())
+			genDerExp_CAD(p, str, indent);
+		else
+			str.print(derName_CAD());
+	}
+	
+	/**
+	 * Generates ad statment for this FExp
+	 */
+	public void FExp.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!hasADStatement_CAD())
+			return;
+		if (!inlineVar_CAD()) {
+			str.print(indent);
+			str.print(varName_CAD());
+			str.print(" = ");
+			genVarExp_CAD(p, str, indent);
+			str.print(";\n");
+		}
+		if (shouldBeDifferentiated() && !inlineDer_CAD()) {
+			str.print(indent);
+			str.print(derName_CAD());
+			str.print(" = ");
+			genDerExp_CAD(p, str, indent);
+			str.print(";\n");
+		}
+	}
+	
+	/**
+	 * Genereates the var expression that calculates the value of this node
+	 */
+	public void FExp.genVarExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		prettyPrint_C(p, str, indent);
+	}
+	
+	/**
+	 * Genereates the der expression that calculates the derivative value of this node
+	 * The default implementation will throw an error and all subclasses that are 
+	 * continouos must implement this method.
+	 */
+	public void FExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		throw new UnsupportedOperationException("FExp.genADStatement_CAD() have to be overrided if type have continuous variablity, type=" + getClass().getSimpleName());
+	}
+	
+	syn boolean FLitExp.inlineVar_CAD() = true;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FIdUseExp.genVarExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print(varName_CAD());
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FIdUseExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print(derName_CAD());
+	}
+	syn boolean FIdUseExp.inlineVar_CAD() = true;
+	syn boolean FIdUseExp.inlineDer_CAD() = true;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FMinMaxExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getX().genVar_CAD(p, str, indent);
+		str.format(" %s ", compareSign_CAD());
+		getY().genVar_CAD(p, str, indent);
+		str.print(" ? ");
+		getX().genDer_CAD(p, str, indent);
+		str.print(" : ");
+		getY().genDer_CAD(p, str, indent);
+	}
+	
+	syn String FMinMaxExp.compareSign_CAD();
+	eq FMinExp.compareSign_CAD() = "<";
+	eq FMaxExp.compareSign_CAD() = ">";
+
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FSinExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * cos(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FCosExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * -sin(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FTanExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / (cos(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(") * cos(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print("))");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FAsinExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / sqrt(1 - ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FAcosExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print("- ");
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / sqrt(1 - ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FAtanExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / (1 + ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FAtan2Exp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print("(");
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * ");
+		getY().genVar_CAD(p, str, indent);
+		str.print(" - ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getY().genDer_CAD(p, str, indent);
+		str.print(") / (");
+		getY().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getY().genVar_CAD(p, str, indent);
+		str.print(" + ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FSinhExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * cosh(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FCoshExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * sinh(");
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FTanhExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * (1 - ");
+		genVar_CAD(p, str, indent);
+		str.print(" * ");
+		genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	syn boolean FTanhExp.inlineVar_CAD() = false;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FLogExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / ");
+		getFExp().genVar_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FLog10Exp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * log10(exp(1)) / ");
+		getFExp().genVar_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FExpExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" * ");
+		genVar_CAD(p, str, indent);
+	}
+	syn boolean FExpExp.inlineVar_CAD() = false;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FDotPowExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getLeft().genVar_CAD(p, str, indent);
+		str.print(" == 0 ? 0 : (");
+		genVar_CAD(p, str, indent);
+		str.print(" * (");
+		getRight().genDer_CAD(p, str, indent);
+		str.print(" * log(jmi_abs(");
+		getLeft().genVar_CAD(p, str, indent);
+		str.print(")) + ");
+		getRight().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getLeft().genDer_CAD(p, str, indent);
+		str.print(" / ");
+		getLeft().genVar_CAD(p, str, indent);
+		str.print("))");
+	}
+	syn boolean FDotPowExp.inlineVar_CAD() = false;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FSqrtExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" / (2 * ");
+		genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	syn boolean FSqrtExp.inlineVar_CAD() = false;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FDotDivExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print("(");
+		getLeft().genDer_CAD(p, str, indent);
+		str.print(" * ");
+		getRight().genVar_CAD(p, str, indent);
+		str.print(" - ");
+		getLeft().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getRight().genDer_CAD(p, str, indent);
+		str.print(") / (");
+		getRight().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getRight().genVar_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FDotMulExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getLeft().genDer_CAD(p, str, indent);
+		str.print(" * ");
+		getRight().genVar_CAD(p, str, indent);
+		str.print(" + ");
+		getLeft().genVar_CAD(p, str, indent);
+		str.print(" * ");
+		getRight().genDer_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FDotAddExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getLeft().genDer_CAD(p, str, indent);
+		str.print(" + ");
+		getRight().genDer_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FDotSubExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getLeft().genDer_CAD(p, str, indent);
+		str.print(" - ");
+		getRight().genDer_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FAbsExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genVar_CAD(p, str, indent);
+		str.print(" >= 0 ? ");
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(" : -");
+		getFExp().genDer_CAD(p, str, indent);
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FNegExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print("- (");
+		getFExp().genDer_CAD(p, str, indent);
+		str.print(")");
+	}
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FNoEventExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent){
+		getFExp().genDer_CAD(p, str, indent);
+	}
+	eq FNoEventExp.getChild().inlineVar_CAD() = true;
+	eq FNoEventExp.getChild().inlineDer_CAD() = true;
+	 
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FTimeExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.format("%s[jmi->offs_t]", getSeedName());
+	}
+	syn boolean FTimeExp.inlineVar_CAD() = true;
+	syn boolean FTimeExp.inlineDer_CAD() = true;
+	
+	/**
+	 * (non-Javadoc)
+	 * @see FExp#genDerExp_CAD(Printer, java.io.PrintStream, java.lang.String)
+	 */
+	@Override
+	public void FSmoothExp.genDerExp_CAD(CodePrinter p, PrintStream str, String indent) {
+		getFExp().genDer_CAD(p, str, indent);
+	}
+	eq FSmoothExp.getChild().inlineVar_CAD() = true;
+	eq FSmoothExp.getChild().inlineDer_CAD() = true;
+	
+	/**
+	 * If expressions need special handling during CAD since it is not possible to
+	 * write if expressions as a single statment.
+	 */
+	@Override
+	public void FIfExp.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
+		String innerIndent = p.indent(indent);
+		getIfExp().genTempVars_CAD(p, str, indent);
+		
+		str.print(indent);
+		str.print("if (");
+		getIfExp().genVar_CAD(p, str, indent);
+		str.print(") {\n");
+		
+		getThenExp().genTempVars_CAD(p, str, innerIndent);
+		
+		str.print(innerIndent);
+		genVar_CAD(p, str, indent);
+		str.print(" = ");
+		getThenExp().genVar_CAD(p, str, indent);
+		str.print(";\n");
+		
+		if (shouldBeDifferentiated()) {
+			str.print(innerIndent);
+			genDer_CAD(p, str, indent);
+			str.print(" = ");
+			getThenExp().genDer_CAD(p, str, indent);
+			str.print(";\n");
+		}
+		str.print(indent);
+		str.print("} else {\n");
+		
+		getElseExp().genTempVars_CAD(p, str, innerIndent);
+		
+		str.print(innerIndent);
+		genVar_CAD(p, str, indent);
+		str.print(" = ");
+		getElseExp().genVar_CAD(p, str, indent);
+		str.print(";\n");
+		
+		if (shouldBeDifferentiated()) {
+			str.print(innerIndent);
+			genDer_CAD(p, str, indent);
+			str.print(" = ");
+			getElseExp().genDer_CAD(p, str, indent);
+			str.print(";\n");
+		}
+		
+		str.print(indent);
+		str.print("}\n");
+	}
+	syn boolean FIfExp.inlineVar_CAD() = false;
+	syn boolean FIfExp.inlineDer_CAD() = false;
+	eq FIfExp.getIfExp().inlineVar_CAD() = true;
+	
+	/**
+	 *  General method used to print function calls.
+	 * Assumes that a function is called as: f(<inputs>,<outputs>) where inputs and outputs are ordered as
+	 * variables first and then derivatives (only if the variable is of type real, if not inputs will be ommitted
+	 * and outputs will be called with NULL argument). 
+	 * Scenarios:
+	 * x = f(y) The function is an expression. If the function has more then one output then then unused outputs
+	 * will be filled with NULL arguments,
+	 * <outs> = f(<ins>). The function is not an expression. The input arguments are then generated from the 
+	 * FFunctionCallLeft belonging to this function. For unused outputs NULL argument is used.  
+	 */
+	public void FFunctionCall.genADStatement_CAD(CodePrinter p, PrintStream str, String indent) {
+		for (FExp arg : getArgs())
+			arg.genTempInputs_CAD(p, str, indent);
+		boolean exp = functionCallIsExp();
+		
+		str.print(indent);
+		str.print(funcNameUnderscore("der_AD"));
+		str.print("(");
+		String sep = "";
+		for (FExp arg : getArgs()) {
+			str.print(sep);
+			arg.genArgument_var_CAD(str);
+			sep = ", ";
+		}
+		for (FExp arg : getArgs()) {
+			if (arg.myCorrespondingInput().shouldBeDifferentiated()) {
+				str.print(sep);
+				arg.genArgument_der_CAD(str);
+				sep = ", ";
+			}
+		}
+		ArrayList<FFunctionVariable> outputs = myOutputs();
+		if (!exp){
+			// The function is not an expression, generate arguments from my FFunctionCallLeft
+			int lefts = myLefts().size();
+			for (int i = 0; i < outputs.size(); i++) {
+				str.print(sep);
+				if (i < lefts) {
+					if (outputs.get(i).shouldBeDifferentiated())
+						myLefts().get(i).genArgument_var_CAD(str);
+					else
+						myLefts().get(i).genArgument_C(str);
+				} else {
+					str.print("NULL");
+				}
+				sep = ", ";
+			}
+			for (int i = 0; i < outputs.size(); i++) {
+				if (!outputs.get(i).shouldBeDifferentiated())
+					continue;
+				str.print(sep);
+				if (i < lefts)
+					myLefts().get(i).genArgument_der_CAD(str);
+				else
+					str.print("NULL");
+				sep = ", ";
+			}
+		} else {
+			boolean first = true;
+			for (FFunctionVariable output : outputs) {
+				str.print(sep);
+				sep = ", ";
+				if (first) {
+					str.print("&");
+					genVar_CAD(p, str, indent);
+				} else {
+					str.print("NULL");
+				}
+				first = false;
+			}
+			first = true;
+			for (FFunctionVariable output : outputs) {
+				if (!output.shouldBeDifferentiated())
+					continue;
+				str.print(sep);
+				sep = ", ";
+				if (first && shouldBeDifferentiated()) {
+					str.print("&");
+					genDer_CAD(p, str, indent);
+				} else {
+					str.print("NULL");
+				}
+				first = false;
+			}
+		}
+		str.print(");\n");
+	}
+	syn boolean FFunctionCall.inlineVar_CAD() = false;
+	syn boolean FFunctionCall.inlineDer_CAD() = false;
+	
+	/*-------------------------------------------------------------------------
+	 * CAD code for Equations and blocks resides bellow
+	 *-----------------------------------------------------------------------*/
+	
+	/**
+	 * Generates AD-code for a single equation. Empty implementation for FAbtractEquation,
+	 * other types implement their specific functionality.
+	 * Note that methods called assumes that variables are already declared. 
+	 * TODO: Some of the code in these functions are duplicated from the corresponding C codegen!
+	 * 
+	 * @param Enumerator An enumerator that is used to number the residual equations
+	 * @param String Indentation
+	 * @param PrintStream Output stream
+	 * @param Set<FAbstractEquation> A list that contains all visisted equations.
+	 *    Used by FFunctionCallEquation so that only one function call is generated.
+	 * @param Set<FVariable> A set that specfies the active variables. Used by
+	 *    FFunctionCallEquation so that it may be split into different subblocks.
+	 *    All residual equation for all variales should be genereated if null is specified.
+	 */
+	public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {}
+		
+	/**
+	 * Generates AD-code for a single equation. 
+	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
+	 */
+	@Override
+	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+		boolean firstVisit = visited == null ? true : visited.add(this);
+		if(!shouldBeDifferentiated()){
+			genResidual_C(enumerator, indent, str, null, null);
+			return;
+		}
+		genTempVars_CAD(printer_CAD, str, indent);
+		int index = enumerator.next();
+		
+		str.print(indent);
+		str.print("(*res)[");
+		str.print(index);
+		str.print("] = ");
+		getRight().genVar_CAD(printer_CAD, str, indent);
+		str.print(" - (");
+		getLeft().genVar_CAD(printer_CAD, str, indent);
+		str.print(");\n");
+		
+		str.print(indent);
+		str.print("(*dF)[");
+		str.print(index);
+		str.print("] = ");
+		getRight().genDer_CAD(printer_CAD, str, indent);
+		str.print(" - (");
+		getLeft().genDer_CAD(printer_CAD, str, indent);
+		str.print(");\n");
+	}
+	
+	/**
+	 * Generates AD-code for a FunctionCallEquation, i.e. an equation of the sort <outs> = f(<ins>). 
+	 * FFunctionCallLeft is looped over and their base index is set to i. This is needed since the call 
+	 * has several outputs which need to be aware of which index in the residual and dF vector that they should fill.
+	 * The call is then made and the variables are set. Then a write back function, which prints the residual code is called.
+	 * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
+	 */
+	@Override
+	public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+		boolean firstVisit = visited == null ? true : visited.add(this);
+		if (!getCall().isIgnored()) {
+			if (firstVisit) {
+				genTempVars_CAD(printer_CAD, str, indent);
+			}
+			Enumerator indexCounter = new Enumerator();
+			for (FFunctionCallLeft l : getLefts())
+				l.genWriteBack_CAD(str, indent, enumerator, forIndices, indexCounter);
+		}
+	}
+	
+	
+	/**
+     * Generates AD-code for an if-equation.
+     * For argument descriptions @see FAbstractEquation#genResidual_CAD(Enumerator enumerator, java.lang.String indent, java.io.PrintStream str, java.util.Set<FAbstractEquation> visited, java.util.Set<FVariable> forVariables).
+     */
+    public void FIfWhenElseEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+        genIfStart_C(printer_CAD, str, indent);
+        if (forIndices == null)
+            forIndices = Collections.emptySet();
+        Iterator<Integer> fiIt = forIndices.iterator();
+        int i = 0;
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            ArrayList<Integer> fis = new ArrayList<Integer>();
+            while (n >= i && n < i + equation.numScalarEquations()) {
+                fis.add(n - i);
+                n = fiIt.hasNext() ? fiIt.next() : -1;
+            }
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genResidual_CAD(enumerator, indent + "  ", str, visited, fis);
+            }
+            i += equation.numScalarEquations();
+        }
+    }
+    
+    public void FIfWhenEquation.genResidual_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+        if (!isElse()) {
+            boolean firstVisit = visited == null ? true : visited.add(this);
+            if (firstVisit)
+                genTempVars_CAD(printer_CAD, str, indent);
+        }
+        Enumerator enumCopy = enumerator.copy();
+        super.genResidual_CAD(enumerator, indent, str, visited, forIndices);
+        if (hasElse())
+            getElse().genResidual_CAD(enumCopy, indent, str, visited, forIndices);
+        genIfEnd_C(printer_CAD, str, indent);
+    }
+	
+	
+	//Methods to handle blocks starts here
+	/**
+	 * Code for generating residual equation blocks. The default implementation
+	 * produces block and use dispatch methods to genereate block dependent code.
+	 * Block types should overide this function and provide an empty implementation
+	 * if no block is necessary.
+	 * TODO: Some of the code in these functions are duplicated from the corresponding C codegen!
+	 * 
+	 * @param boolean Specfies wether the block is initial or not
+	 * @param String The outer indent. The indent should be indented
+	 *    once more for the statments inside the block.
+	 * @param PrintStream Output stream
+	 */
+	public void AbstractEquationBlock.genBlockResidualFunction_CAD(boolean inInitial, String outerIndent, PrintStream str) {
+		if (!genRequiresBlockResidualFunction_C())
+			return;
+		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
+			subBlock.genBlockResidualFunction_CAD(inInitial, outerIndent, str);
+		
+		str.format("%sstatic int dae_%sblock_dir_der_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {\n",
+				outerIndent, (inInitial ? "init_" : ""), residualBlockNumber_C());
+		
+		String indent = ASTNode.printer_CAD.indent(outerIndent);
+		String innerIndent = ASTNode.printer_CAD.indent(indent);
+		
+		int i = 0;//TODO: This should be done in genVarDecls_CAD().
+		Set<ASTNode> visited = new HashSet<ASTNode>();
+		for (FAbstractEquation e : allEquations()){
+			e.genTempForFunc_CAD(i, indent, str, visited);
+			i += e.numScalarEquations();
+		}
+		
+		genVarDecls_CAD(str, indent, null);
+		
+		str.print(indent);
+		str.println("jmi_real_t** res = &residual;");
+		str.print(indent);
+		str.println("int ef = 0;");
+		str.print(indent);
+		str.println("jmi_real_t** dF = &dRes;");
+		str.print(indent);
+		str.println("jmi_real_t** dz;");
+		
+		str.print(indent);
+		str.println("if (evaluation_mode == JMI_BLOCK_INITIALIZE) {");
+		int var_counter = 0;
+		// Loop over all unsolved variables and write their value to x	
+		for (FVariable fv : iterationVariables()) {
+			str.print(innerIndent);
+			str.println("x["+var_counter+"] = " + fv.name_C() + ";");
+			var_counter++;
+		}
+		str.print(innerIndent);
+		str.println("return 0;");
+		
+		// If we should evaluate the block Jacobian, then use dz_active_variables as seed
+		str.print(indent);
+		str.println("} else if (evaluation_mode == JMI_BLOCK_EVALUATE) {");
+		str.print(innerIndent);
+		str.println("dz = jmi->dz_active_variables;");
+		// Loop over all active variables and write the values in x to the z vector
+		var_counter = 0;
+		// Iteration is over the unsolved variables. 
+		for (FVariable fv : iterationVariables()) {
+			str.print(innerIndent);
+			str.println("(*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];");
+			str.print(innerIndent);
+			str.println(fv.name_C() + " = x["+var_counter+"];");
+			var_counter++;
+		}
+		
+		// If we should evaluate the right hand side use global dz as seed
+		str.print(indent);
+		str.println("} else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {");
+		str.print(innerIndent);
+		str.println("dz = jmi->dz;");
+		
+		// If we should write back directional derivatives then global use dz as seed
+		str.print(indent);
+		str.println("} else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {");
+		str.print(innerIndent);
+		str.println("dz = jmi->dz;");
+		// Code that stores the evaluated dz
+		// dz entries for the solved variables are updated below as well
+		var_counter = 0;
+		for (FVariable fv : iterationVariables()) {
+			str.print(innerIndent);
+			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];");
+			var_counter++;
+		}
+		str.print(indent);
+		str.println("} else {");
+		str.print(innerIndent);
+		str.println("return -1;");
+		str.print(indent);
+		str.println("}");
+		
+		Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
+		// Generate dz_i seeds from solved equations and variables
+		genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visitedList);
+		
+		str.print(indent);
+		str.println("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {");
+		
+		// AD-code for residual equations
+		genBlockResidualFunctionEqns_CAD(new Enumerator(), innerIndent, str, visitedList);
+		
+		// Reset all variables. global dz is updated elsewhere and dz_active should
+		// always be reset so as not to cause incorrect seeds
+		for (FVariable fv : iterationVariables()) {
+			str.print(innerIndent);
+			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;");
+		}
+		
+		str.print(indent);
+		str.println("}");
+		str.print(indent);
+		str.println("return ef;");
+		str.print(outerIndent);
+		str.println("}");
+		str.println();
+	}
+	
+	/**
+	 * Used to generate AD code for blocks, called mainly from model_ode_derivatives or model_ode_initialize_dir_der.
+	 * The default implementation prints code for calls to blocks that require iteration, e.g. EquationBlock,TornEquationBlock. 
+	 * Other blocks suchs as solvedFunctionCallEquationBlock:s override this method by generally printing standard AD-code. 
+	 * Overridden methods assume that variables are already declared.
+	 * 
+	 * @param int i, determines the index the called block
+	 * @param boolean init, determines whether init blocks are called, which they are in model_ode_initialize_dir_der
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void AbstractEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str){
+		if (inInitial) {
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_init_block_residuals[" + i +"]);\n");
+		} else {
+			str.print(indent + "jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[" + i +"]);\n");
+		}
+	}
+	
+    /**
+     * @see FAbstractEquation#genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Set<FVariable>).
+     */
+    public void SimpleEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str){
+        equation().genBlock_CAD(indent, str, null, allVariables(), assignedIndices());
+    }
+
+	/**
+	 * Generates AD code by calling prettyPrint_CAD for the corresponding equation.
+	 * Note that called methods assumes that variables are already declared.
+	 * 
+	 * For argument descriptions @see FAbstractEquation#genBlock_CAD(int, boolean, String, PrintStream).
+	 */
+	@Override
+	public void MetaEquationBlock.genBlock_CAD(int i, boolean inInitial, String indent, PrintStream str) {
+		equation().genTempVars_CAD(ASTNode.printer_CAD, str, indent);
+	}
+	
+	
+	
+	/**
+	 * Used to generate seeds w.r.t. the unsolved variables in a TornEquationBlock. 
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param boolean Indicates wether a initial block is generated
+	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
+	 */
+	public abstract void AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited);
+	
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    public void EquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        for (SimpleEquationBlock block : unsolvedBlocks())
+            block.genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
+    }
+    
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    @Override
+    public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        for (AbstractEquationBlock aeb : solvedBlocks())
+            aeb.genBlockResidualFunctionBeforeSubEqns_CAD(indent, str, inInitial, visited);
+    }
+    
+    /**
+     * @see AbstractEquationBlock#genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+     */
+    public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        if (genBlockEnabled())
+            equation().genBlock_CAD(indent, str, visited, allVariables(), assignedIndices());
+    }
+	
+	/**
+	 * Sub method for generating seeds w.r.t the unsolved variables.
+	 * Necesarry for numerically solved scalar equations.
+	 * Default implementation dispatches to regular before method.
+	 * 
+	 * @param String indentation that should be used
+	 * @param PrintStream output stream
+	 * @param boolean Indicates wether a initial block is generated
+	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
+	 */
+	public void AbstractEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		genBlockResidualFunctionBeforeEqns_CAD(indent, str, inInitial, visited);
+	}
+	
+	/**
+	 * @see AbstractEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(String, PrintStream, boolean, Set<FAbstractEquation>).
+	 */
+	@Override
+	public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+		str.format("%sef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+	}
+	
+	/**
+	 * Code for generating residual function for unsolved equation blocks
+	 * 
+	 * @param Enumerator Enumerator that specifies numers for the residual equations
+	 * @param String indentation that should be used
+	 * @param PrintStream output stream
+	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
+	 */
+	public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited);
+	
+    /**
+     * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
+     */
+    public void EquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
+        for (SimpleEquationBlock block : unsolvedBlocks())
+            block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
+    }
+	
+	/**
+	 * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
+	 */
+	@Override
+	public void TornEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
+		for (SimpleEquationBlock block : unsolvedBlocks())
+			block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
+	}
+	
+    /**
+     * @see AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator, String, PrintStream, Set<FAbstractEquation>).
+     */
+    public void SimpleEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited) {
+        equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices());
+    }
+    
+    /**
+     * Generates AD code for this equation and a variable in it. Typically called from within 
+     * a solved block when printing AD code. Empty standard implementation and other blocks override. 
+     * 
+	 * @param String indentation that should be used
+	 * @param PrintStream output stream
+	 * @param Set<FAbstractEquation> visited, a set that contains all visited equations. Might be null!
+	 * @param Collection<FAbstractEquation> forVariables, variables to generate assignments for.
+	 * @param Collection<Integer> forIndices, indices to generate assignments for.
+	 */
+	public void FAbstractEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+	        Collection<FVariable> forVariables, Collection<Integer> forIndices) {}
+	
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    @Override
+    public void FEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        FVariable v = forVariables.iterator().next();
+        FExp solution = solution(v.name());
+        if(v.shouldBeDifferentiated()){
+            solution.genTempVars_CAD(printer_CAD, str, indent);
+            str.print(indent + v.name_C() + " = ");
+            solution.genVar_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+            str.print(indent + "(*dz)[jmi_get_index_from_value_ref(" + v.valueReference() + ")-jmi->offs_real_dx] = ");
+            solution.genDer_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+        } else {
+            solution.genTempVars_CAD(printer_CAD, str, indent);
+            str.format("%s%s = ", indent, v.name_C());
+            solution.genVar_CAD(printer_CAD, str, indent);
+            str.print(";\n");
+        }
+    }
+	
+	/**
+	 * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+	 */
+	@Override
+	public void FFunctionCallEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+	        Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+		boolean firstVisit = visited == null ? true : visited.add(this);
+		if (!getCall().isIgnored()) {
+			if (firstVisit)
+				genTempVars_CAD(printer_CAD, str, indent);
+			int i = 0;
+			for (FFunctionCallLeft l : getLefts()) {
+				l.setEquationIndex(i++);
+				l.genWriteBackAssignment_CAD(str, indent, new HashSet<FVariable>(forVariables));
+			}
+		}
+	}
+	
+    private int FFunctionCallLeft.equationIndex = -1;
+    public void FFunctionCallLeft.setBaseIndex(int i) {
+        equationIndex = i + myIndex();
+    }
+    public void FFunctionCallLeft.setEquationIndex(int i) {
+        equationIndex = i;
+    }
+    
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    public void FIfWhenElseEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        genIfStart_C(printer_CAD, str, indent);
+        Iterator<FVariable> fvIt = forVariables.iterator();
+        Iterator<Integer> fiIt = forIndices.iterator();
+        int i = 0;
+        int n = fiIt.hasNext() ? fiIt.next() : -1;
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            ArrayList<Integer> fis   = new ArrayList<Integer>();
+            ArrayList<FVariable> fvs = new ArrayList<FVariable>();
+            while (n >= i && n < i + equation.numScalarEquations()) {
+                    fis.add(n - i);
+                    fvs.add(fvIt.next());
+                    n = fiIt.hasNext() ? fiIt.next() : -1;
+            }
+            if (forIndices.size() == 0 || fis.size() > 0) {
+                equation.genBlock_CAD(indent + "  ", str, visited, fvs, fis);
+            }
+            i += equation.numScalarEquations();
+        }
+    }
+    
+    /**
+     * @see FAbstractEquation.genBlock_CAD(String, PrintStream, Set<FAbstractEquation>, Collection<FVariable>, Collection<Integer>).
+     */
+    public void FIfWhenEquation.genBlock_CAD(String indent, PrintStream str, Set<FAbstractEquation> visited,
+            Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        if (!isElse()) {
+            boolean firstVisit = visited == null ? true : visited.add(this);
+            if (firstVisit)
+                genTempVars_CAD(printer_CAD, str, indent);
+        }
+        super.genBlock_CAD(indent, str, visited, forVariables, forIndices);
+        if (hasElse())
+            getElse().genBlock_CAD(indent, str, visited, forVariables, forIndices);
+        genIfEnd_C(printer_CAD, str, indent);
+    }
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FFunctionCallLeft.genWriteBackAssignment_CAD(PrintStream str, String indent, Collection<FVariable> forVariables){
+		if (hasFExp()) {
+			getFExp().type().genWriteBackAssignment_var_CAD(str, indent, varName_CAD(), getFExp(), forVariables);
+			getFExp().type().genWriteBackAssignment_der_CAD(str, indent, derName_CAD(), getFExp(), forVariables);
+		}
+	}
+
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBackAssignment_var_CAD(str, indent, cellName, arr.get(i), forVariables);
+			}
+		} else {
+			genCellWriteBackAssignment_var_CAD(str, indent, name, exp, forVariables);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBackAssignment_der_CAD(str, indent, cellName, arr.get(i), forVariables);
+			}
+		} else {
+			genCellWriteBackAssignment_der_CAD(str, indent, name, exp, forVariables);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		exp.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
+	}
+		
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FIdUseExp.genWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()))
+			return; // This variable is not in the set of variables to generate code for.
+		str.print(indent);
+		str.print(varName_CAD());
+		str.print(" = ");
+		str.print(name + ";\n");
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		exp.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
+	}
+		
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
+		throw new UnsupportedOperationException();
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FIdUseExp.genWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, Collection<FVariable> forVariables) {
+		if (forVariables != null && !forVariables.contains(myFV()) || !shouldBeDifferentiated())
+			return; // This variable is not in the set of variables to generate code for.
+		str.print(indent);
+		str.print(derName_CAD());
+		str.print(" = ");
+		str.print(name + ";\n");
+	}
+
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FRecordType.genCellWriteBackAssignment_var_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genCellWriteBackAssignment_var_CAD(str, indent, compName, compExp, forVariables);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FRecordType.genCellWriteBackAssignment_der_CAD(PrintStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genCellWriteBackAssignment_der_CAD(str, indent, compName, compExp, forVariables);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Used to generate temporary variables for use in a function call with several outputs. 
+	 * Checks so that the temporary variables are declared only once by checking against a 
+	 * set of already declared variables before declaration.
+	 * @param int i, sets base index for its FFunctionCallLeft to i.  
+	 * @param String indent,  used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param HashSet<String> hs, contains a set with the already declared variables, only variables not in this set a
+	 */
+	@Override
+	public void FFunctionCallEquation.genTempForFunc_CAD(int i, String indent, PrintStream str, Set<ASTNode> visited) {
+		if (!getCall().isIgnored()) {
+			for (FFunctionCallLeft l : getLefts()) {
+				if(visited == null || visited.add(l)){
+					l.setBaseIndex(i);
+					l.genTempVar_var_CAD(indent, str);
+					l.genTempVar_der_CAD(indent,str);
+				}
+				
+			}
+		}
+		super.genTempForFunc_CAD(i, indent, str, visited);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Iterates over the ASTNode:s and generates temporary variable declarations for FFunctionCallEquations. 
+	 * Checks so that the variables are declared only once. 
+	 * @param int i, see FFunctionCallEquation.genTempForFunc_CAD
+	 * @param String indent,  used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param HashSet<String> hs, contains a set with the already declared variables, only variables not in this set a
+	 */
+	public void ASTNode.genTempForFunc_CAD(int i, String indent, PrintStream str, Set<ASTNode> visited) {
+		for(ASTNode n: this){
+			n.genTempForFunc_CAD(i,indent,str,visited);
+		}
+	}
+
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates variable declarations for all active variables. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent,  used to get a consistently formated c-code
+	 * @param HashSet<String> hs, contains a set with the already declared variables, only variables not in this set a
+	 */
+	protected void AbstractEquationBlock.genVarDecls_CAD(PrintStream str, String indent, Set<ASTNode> visited) {
+		for (ASTNode n : blockResidualNodes_C())
+			if (visited == null || visited.add(n))
+				n.genVarDecls_CAD(ASTNode.printer_CAD, str, indent);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	@Override
+	protected void TornEquationBlock.genVarDecls_CAD(PrintStream str, String indent, Set<ASTNode> visited) {
+		if (visited == null)
+			visited = new HashSet<ASTNode>();
+		for (AbstractEquationBlock aeb : solvedBlocks())
+			aeb.genVarDecls_CAD(str, indent, visited);
+		for (AbstractEquationBlock aeb : unsolvedBlocks())
+			aeb.genVarDecls_CAD(str, indent, visited);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates variable declarations and temporary variables for 
+	 * all solvable blocks in this BLT. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent,  used to get a consistently formated c-code
+	 */
+	public void BLT.genSolvedVarDecls_CAD(PrintStream str, String indent) {
+		int i = 0;
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				eb.genVarDecls_CAD(str, indent, null);
+			}
+		}
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			if(eb.isSolvable()){
+				for (FAbstractEquation e : eb.allEquations()){
+					e.genTempForFunc_CAD(i, indent, str, null);
+					i += e.numScalarEquations();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates variable declarations and temporary variables for 
+	 * all blocks in this BLT. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent,  used to get a consistently formated c-code
+	 */
+	public void BLT.genVarDecls_CAD(PrintStream str, String indent) {
+		int i = 0;
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			eb.genVarDecls_CAD(str, indent, null);
+		}
+		for (AbstractEquationBlock eb : getAllBlocks()){
+			for (FAbstractEquation e : eb.allEquations()){
+				e.genTempForFunc_CAD(i, indent, str,null);
+				i += e.numScalarEquations();
+			}
+		}
+	}
+	
+	/**
+	 * Generates AD code for this block. If a block needs iteration then
+	 * increase a counter, the counter is used to determine the index of the
+	 * the iteration-block that needs to be called. 
+	 * Note that called methods assumes that variables are already declared.
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void BLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
+		int block_counter = 0;
+		for (AbstractEquationBlock block : this) {
+			block.genBlock_CAD(block_counter, false, ASTNode.printer_CAD.indent(""), str);
+			if (!block.isSolvable()) {
+				block_counter++;
+			}
+		}
+	}
+	/**
+	 * The central method used when generating ODE Jacobians. Calls methods to 
+	 * generate AD code for different block types:
+	 * ODEBlocks, Real output blocks, integer and boolean output blocks and other blocks.
+	 * Blocks that need iteration are called from here. 
+	 * Note that called methods assumes that variables are already declared.
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void StructuredBLT.genOdeDerivativeBlocks_CAD(PrintStream str) {
+		int block_counter = 0;
+		String indent = ASTNode.printer_CAD.indent("");
+		str.format("%s/*********** ODE section ***********/\n", indent);
+		// Loop over all derivatives
+		for (AbstractEquationBlock eb : getOdeBlocks()) {
+			eb.genBlock_CAD(block_counter, false, indent, str);
+			block_counter += eb.isSolvable() ? 0: 1;
+		}
+		str.format("%s/*********** Real outputs **********/\n", indent);
+		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
+			eb.genBlock_CAD(block_counter, false, indent, str);
+			block_counter += eb.isSolvable() ? 0: 1;
+		}
+		str.format("%s/*** Integer and boolean outputs ***/\n", indent);
+		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
+			eb.genBlock_CAD(block_counter, false, indent, str);
+			block_counter += eb.isSolvable() ? 0: 1;
+		}
+		str.format("%s/********* Other variables *********/\n", indent);
+		for (AbstractEquationBlock eb : getOtherBlocks()) {
+			eb.genBlock_CAD(block_counter, false, indent, str);
+			block_counter += eb.isSolvable() ? 0: 1;
+		}
+	}
+	
+	//Methods to handle function calls starts here
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Iterates over the ASTNode:s and generates temporary AD variables 
+	 * in arrays etc. which are currently not supported in AD. 
+	 * @param Printer p,
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void ASTNode.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+		for (ASTNode node : this){
+			node.genTempVars_CAD(p, str, indent);
+		}
+	}
+	
+    public void FIfWhenElseEquation.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {}
+    public void FIfWhenEquation.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+        super.genTempVars_CAD(p, str, indent);
+        if (hasElse())
+            getElse().genTempVars_CAD(p, str, indent);
+    }
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Used to generate expressions in the argument of a function call. Also used to
+	 * generate temporary records and arrays used as inputs. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FFunctionCall.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+		getArgs().genTempVars_CAD(p, str, indent);
+		genADStatement_CAD(p, str, indent);
+	}
+	
+	@Override
+	public void FAssert.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+		super.genTempVars_CAD(p, str, indent);
+		prettyPrint_C(p, str, indent);
+	}
+	
+	eq FAssert.getChild().inlineVar_CAD() = true;
+	
+	@Override
+	public void FStringAddExp.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+	    super.genTempVars_CAD(p, str, indent);
+	    genTempVars_C(p, str, indent);
+	}
+	
+	eq FStringAddExp.getChild().inlineVar_CAD() = true;
+
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FFunctionCallLeft.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (hasFExp())
+			getFExp().genTempOutputs_CAD(p, str, indent);
+	}
+
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FExp.genTempOutputs_CAD(CodePrinter p, PrintStream str, String indent) {}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FArray.genTempOutputs_CAD(CodePrinter p, PrintStream str, String indent) {
+		type().printInit_C(p, str, indent, tempName_var_CAD(), this);
+		type().printInit_C(p, str, indent, tempName_der_CAD(), this);
+	}
+	
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Iterates over the ASTNode:s and generates variable declarations. 
+	 * Can be called at e.g. the start of functions for c89-compliance. 
+	 * Note that the methods used to print the regular AD code typically
+	 * assumes that variables are already declared.  
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void ASTNode.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		for (ASTNode node : this)
+			node.genVarDecls_CAD(p, str, indent);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates variable declarations for the left hand side in a function call. 
+	 * TODO: Declare in genTempForFunc instead.
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FFunctionCallLeft.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (hasFExp())
+			getFExp().genTempOutputDecls_CAD(p, str, indent);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * No variables should be declared for this expression. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FIdUseExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * No variables should be declared for this expression. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FLitExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {}
+	
+	/**
+	 * Declares a regular and a derivate variable for this expression. jmi_ad_var_t
+	 * is a type that describes floating point numbers. Calls the overridden
+	 * method in order to continue iteration over that  ASTNode:s
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (hasADStatement_CAD()) {
+			if (!inlineVar_CAD()) {
+				str.print(indent);
+				str.print("jmi_ad_var_t ");
+				str.println(varName_CAD() + ";");
+			}
+			if (shouldBeDifferentiated() && !inlineDer_CAD()) {
+				str.print(indent);
+				str.print("jmi_ad_var_t ");
+				str.println(derName_CAD() + ";");
+			}
+		}
+		if (autoGenChildVarDecls_CAD())
+			super.genVarDecls_CAD(p, str, indent);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Declares a regular and a derivate variable for this expression. jmi_ad_var_t
+	 * is a type that describes floating point numbers. Calls the overridden
+	 * method in order to continue iteration over that  ASTNode:s
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FArray.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		getArray().genVarDecls_CAD(p, str, indent);
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates temporary input variables for arrays and records.
+	 * TODO: Declare in genTempForFunc instead.
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FFunctionCall.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (functionCallIsExp()) {
+			str.print(indent);
+			str.print("jmi_ad_var_t ");
+			str.println(varName_CAD() + ";");
+			if (shouldBeDifferentiated()) {
+				str.print(indent);
+				str.print("jmi_ad_var_t ");
+				str.println(derName_CAD() + ";");
+			}
+		}
+		for (FExp arg : getArgs())
+			arg.genTempInputDecls_CAD(p, str, indent);
+	}
+	
+    @Override
+    public void FStringAddExp.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+        super.genVarDecls_CAD(p, str, indent);
+        genVarDecls_C(p, str, indent);
+    }
+    
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Currently unsopported functionality. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FFunctionVariable.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!shouldBeDifferentiated()) {
+			genVarDecls_C(p, str, indent);
+		} else if (!isInput()) {
+			String suffix = (isOutput() && isComposite()) ? C_SUFFIX_NULL : "";
+			printDeclOrInit_C(p, str, indent, varName_CAD() + suffix, true, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD() + suffix, true, false);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	@Override
+	public void FForIndex.genVarDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		super.genVarDecls_CAD(p, str, indent);
+		String name = getFVariable().name_C();
+		str.format("%sjmi_ad_var_t %s;\n", indent, name);
+		if (needsForArray()) {
+			str.format("%sint %si;\n", indent, name);
+			str.format("%sjmi_ad_var_t %sa[%d];\n", indent, name, getFExp().size().numElements());
+		} else {
+			str.format("%sjmi_ad_var_t %se;\n", indent, name);
+		}
+	}
+
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates temporary output declarations. Other types suchs as arrays may override
+	 * this empty implementation. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FExp.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()) {
+			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates temporary output declarations.  
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	@Override
+	public void FArray.genTempOutputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
+		type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+	}
+	
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Generates temporary variables for records and arrays typically used
+	 * in function calls. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * CodePrinterdent, used to get a consistently formated c-code
+	 */
+	public void FExp.genTempInputDecls_CAD(CodePrinter p, PrintStream str, String indent) {
+		genVarDecls_CAD(p, str, indent);
+		if (isComposite() && !keepAsArray()) {
+			type().printDecl_C(p, str, indent, tempName_var_CAD(), this);
+			type().printDecl_C(p, str, indent, tempName_der_CAD(), this, false);
+		}
+	}
+	
+	/**
+	 * Used to assign a unique temporary variable for this expression.	
+	 */
+	syn lazy String FExp.tempName_var_CAD() {
+		return "tmp_var_" + myFClass().nextTempNbr_var_CAD();
+	}
+	
+	/**
+	 * Used to assign a unique temporary derivative variable for this expression.
+	 */
+	syn lazy String FExp.tempName_der_CAD() {
+		return "tmp_der_" + myFClass().nextTempNbr_der_CAD();
+	}
+	
+	private int FClass.tmpNbr_var = 0;
+	
+	/**
+	 * Is called when assigning unique temporary variables. Increment index by one for each expression. 
+	 */
+	public int FClass.nextTempNbr_var_CAD() {
+		return tmpNbr_var++;
+	}
+	
+	private int FClass.tmpNbr_der = 0;
+	
+	/**
+	 * Is called when assigning unique temporary derivative variables. Increment index by one for each expression. 
+	 */
+	public int FClass.nextTempNbr_der_CAD() {
+		return tmpNbr_der++;
+	}
+	
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Functions containing expressions/records/array as arguments need
+	 * to handle the arguments before. For expressions this usually means AD-code
+	 * and for records/array temporary records/arrays are constructed and filled
+	 * and passed on as input.  
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FExp.genTempInputs_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (isComposite() && !keepAsArray()) {
+			String name = tempName_var_CAD();
+			type().printInit_C(p, str, indent, name, this);
+			type().genTempInputAssigns_var_CAD(p, str, indent, name, this);
+			name = tempName_der_CAD();
+			type().printInit_C(p, str, indent, name, this);
+			type().genTempInputAssigns_der_CAD(p, str, indent, name, this);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genTempInputAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genTempInputCellAssigns_var_CAD(p, str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genTempInputCellAssigns_var_CAD(p, str, indent, name, exp);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genTempInputAssigns_der_CAD(
+			CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genTempInputCellAssigns_der_CAD(p, str, indent, cellName, arr.get(i));
+			}
+		} else {
+			genTempInputCellAssigns_der_CAD(p, str, indent, name, exp);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genTempInputCellAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		str.print(indent + name + " = ");
+		p.print(exp, str, indent);
+		str.print(";\n");
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 * 
+	 * Functions containing expressions/records/array as arguments need
+	 * to handle the arguments before. For expressions this usually means AD-code
+	 * and for records/array temporary records/arrays are constructed and filled
+	 * and passed on as input.  
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name
+	 */
+	@Override
+	public void FRecordType.genTempInputCellAssigns_var_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genTempInputAssigns_var_CAD(p, str, indent, compName, compExp);
+		}
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	public void FType.genTempInputCellAssigns_der_CAD(
+			CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		str.print(indent + name + " = ");
+		exp.genDer_CAD(p, str, indent);
+		str.print(";\n");
+	}
+	
+	/**
+	 * TODO: This method is a duplicate from c-codegen. Should be refactored!
+	 */
+	@Override
+	public void FRecordType.genTempInputCellAssigns_der_CAD(CodePrinter p, PrintStream str, String indent, String name, FExp exp) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genTempInputAssigns_der_CAD(p, str, indent, compName, compExp);
+		}
+	}
+	
+	syn String FFunctionCallLeft.varName_CAD() {
+		// TODO: use getFExp().tempName_C() instead of first case as well?
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
+			return getFExp().tempName_var_CAD();
+		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
+			return ((FIdUseExp) getFExp()).getFIdUse().varName_CAD();
+		} else {
+			return getFExp().tempName_var_CAD();
+		}
+	}
+	
+	// TODO: Declare in genVarDecls_C instead
+	public void FFunctionCallLeft.genTempVar_var_CAD(String indent, PrintStream str) {
+		if (hasFExp() && !getFExp().isComposite()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(varName_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	syn String FFunctionCallLeft.derName_CAD() {
+		// TODO: use getFExp().tempName_C() instead of first case as well?
+		if (equationIndex >= 0 && !getFExp().isComposite()) {
+			return getFExp().tempName_der_CAD();
+		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
+			return ((FIdUseExp) getFExp()).getFIdUse().derName_CAD();
+		} else {
+			return getFExp().tempName_der_CAD();
+		}
+	}
+	
+	// TODO: Declare in genVarDecls_C instead
+	public void FFunctionCallLeft.genTempVar_der_CAD(String indent, PrintStream str) {
+		if (hasFExp() && !getFExp().isComposite()) {
+			str.print(indent);
+			str.print(type_C());
+			str.print(" ");
+			str.print(derName_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	/**
+	 * Used when function calls are printed. It is used to  generate outputs for the function call and the  
+	 * arguments are written as references to be filled (if they are not arrays or records). 
+	 * If it does not contain any expression print NULL (for the case: (x,,y) = f(<ins>). 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FFunctionCallLeft.genArgument_var_CAD(PrintStream str) {
+		if (hasFExp()) {
+			if (!getFExp().isComposite())
+				str.print("&");
+			str.print(varName_CAD());
+		} else {
+			str.print("NULL");
+		}
+	}
+	
+	/**
+	 * Used when function calls are printed. It is used to generate derivative outputs for the function call and the  
+	 * arguments are written as references to be filled (if they are not arrays or records). 
+	 * If it does not contain any expression print NULL (for the case: (x,,y) = f(<ins>). 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FFunctionCallLeft.genArgument_der_CAD(PrintStream str) {
+		if (hasFExp()) {
+			if (!getFExp().isComposite())
+				str.print("&");
+			str.print(derName_CAD());
+		} else {
+			str.print("NULL");
+		}
+	}
+	
+	/**
+	 * Used when function calls are printed. It is used to generate input
+	 * variables for the function call. 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FExp.genArgument_var_CAD(PrintStream str) {
+		if (isComposite() && !keepAsArray())
+			str.print(tempName_var_CAD());
+		else
+			genVar_CAD(printer_CAD, str, "");
+	}
+	
+	/**
+	 * Used when function calls are printed. It is used to generate input
+	 * derivative variables for the function call. 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FExp.genArgument_der_CAD(PrintStream str) {
+		if (isComposite() && !keepAsArray()){
+			str.print(tempName_der_CAD());
+		} else{
+			genDer_CAD(printer_CAD, str, "");
+		}
+	}
+	
+	/**
+	 * Used when generating the residual for a FFunctionCallEquation. The equationindex
+	 * determines which entry in the residual, res[], and directional derivative, dF[], that
+	 * the expressions contained in this FFunctionCallLeft fills. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FFunctionCallLeft.genWriteBack_CAD(PrintStream str, String indent, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		if (hasFExp()) {
+			if (getFExp().type().shouldBeDifferentiated()) {
+			    Enumerator enumeratorCopy = enumerator.copy();
+			    Enumerator indexCounterCopy = indexCounter.copy();
+				getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
+				getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumeratorCopy, forIndices, indexCounterCopy);
+			} else {
+				getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, new LinkedHashSet<Integer>(forIndices), indexCounter);
+			}
+		}
+	}
+
+	/**
+	 * Used to generate residuals for the expression in the argument. It is assumed that  this type
+	 * corresponds to the arguments type. If this is an array then the expressions are extracted and
+	 * a residual is generated for each expression, otherwise the residual is generated for the expression
+	 * directly. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FType.genWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBack_var_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
+			}
+		} else {
+			genCellWriteBack_var_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
+		}
+	}
+	
+	/**
+	 * Used to generate derivative residual for the expression in the argument. It is assumed that this type
+	 * corresponds to the arguments type. If this is an array then the expressions are extracted and
+	 * a derivative residual is generated for each expression, otherwise the derivative residual is generated 
+	 * for the expression directly. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FType.genWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		if (isArray()) {
+			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
+			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+			Array arr = exp.getArray();
+			for (Index i : arr.indices()) {
+				String cellName = pre + i.toUnclosedString() + ")";
+				genCellWriteBack_der_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
+			}
+		} else {
+			genCellWriteBack_der_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
+		}
+	}
+	
+	/**
+	 * Calls a function that generates the residual for the expression in the argument.
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		exp.genWriteBack_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
+	}
+	
+	/**
+	 * Used when generating residuals when variables in records are used. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FRecordType.genCellWriteBack_var_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genCellWriteBack_var_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
+		}
+	}
+	
+	
+	/**
+	 * Used when generating derivative residuals when variables in records are used. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FRecordType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		for (FRecordComponentType comp : getComponents()) {
+			String compName = name + "->" + comp.getName();
+			FExp compExp = exp.extractRecordComponentExp(comp.getName());
+			comp.getFType().genCellWriteBack_der_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
+		}
+	}
+	
+	/**
+	 * Calls a function that generates the derivative residual for the expression in the argument.
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param FExp, corresponds to the new value for the  variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FType.genCellWriteBack_der_CAD(PrintStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		exp.genWriteBack_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
+	}
+	
+	
+	/**
+	 * Fills the residual vector at place index with the difference between
+	 * this variable and the variable that name corresponds to. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		throw new UnsupportedOperationException();
+	}
+	public void FIdUseExp.genWriteBack_var_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		int index = indexCounter.next();
+		if (forIndices.size() == 0 || forIndices.contains(index)) {
+			// This variable is in the set of variables to generate code for.
+			str.print(indent);
+			str.print("(*res)[");
+			str.print(enumerator.next());
+			str.print("] = ");
+			str.print(name);
+			str.print(" - (");
+			str.print(varName_CAD());
+			str.print(");\n");
+		}
+	}
+	
+	/**
+	 * Fills the direction derivative residual vector at place index with the difference between
+	 * this derivative variable and the variable that name corresponds to. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String name, corresponds to the name of the variable that the residual is generated for. 
+	 * @param int index, determines which index in the reisdual 
+	 */
+	public void FExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		throw new UnsupportedOperationException();
+	}
+	public void FIdUseExp.genWriteBack_der_CAD(PrintStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+		int index = indexCounter.next();
+		if ((forIndices.size() == 0 || forIndices.contains(index)) && shouldBeDifferentiated()) {
+			str.print(indent);
+			str.print("(*dF)[");
+			str.print(enumerator.next());
+			str.print("] = ");
+			str.print(name);
+			str.print(" - (");
+			str.print(derName_CAD());
+			str.print(");\n");
+		}
+	}
+	
+	/*-------------------------------------------------------------------------
+	 * CAD code for Statements resides bellow
+	 *-----------------------------------------------------------------------*/
+	//Methods to handle If clauses starts here
+	public void FIfWhenStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		for (FIfWhenClause clause : getFIfWhenClauses())
+			clause.getTest().genTempVars_CAD(p, str, indent);
+		str.print(indent);
+		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "} else ");
+		prettyPrintElse_C(p, str, indent);
+		str.print(indent);
+		str.print("}\n");
+	}
+	
+	//Methods to handle while loops starts here
+	public void FWhileStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		getTest().genTempVars_CAD(p, str, indent);
+		str.print(indent);
+		str.print("while (");
+		p.print(getTest(), str, indent);
+		str.print(") {\n");
+		p.print(getWhileStmts(), str, p.indent(indent));
+		getTest().genTempVars_CAD(p, str, p.indent(indent));
+		str.print(indent);
+		str.print("}\n");
+	}
+	
+	//Methods to handle for-loops in functions starts here
+	public void FForStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		getIndex().genTempVars_CAD(p, str, indent);
+		getIndex().printForArrayInit_C(p, str, indent);
+		str.print(indent);
+		str.print("for (");
+		p.print(getIndex(), str, indent);
+		str.print(") {\n");
+		getIndex().printForArrayNext_C(p, str, p.indent(indent));
+		p.print(getForStmts(), str, p.indent(indent));
+		str.print(indent);
+		str.print("}\n");
+	}
+	
+	/* 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FReturnStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		returnDefinition().printReturnWrite_CAD(str, indent);
+		// TODO: Check if there are any dynamic declarations first
+		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+		str.print(indent + "return;\n");
+	}
+	
+	public void FFunctionCallStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!getCall().isIgnored())
+			genTempVars_CAD(p, str, indent);
+	}
+	
+	public void FFunctionCallEquation.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!getCall().isIgnored())
+			genTempVars_CAD(p, str, indent);
+	}
+
+	/* Prints AD code for this assignement statement
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FAssignStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		genTempVars_CAD(p, str, indent);
+		str.print(indent);
+		p.print(getLeft(), str, indent);
+		str.print(" = ");
+		p.print(getRight(), str, indent);
+		str.print(";\n");
+
+		if (shouldBeDifferentiated()) {
+			str.print(indent);
+			str.print(getLeft().getFIdUse().toString_der_CAD(p));
+			str.print(" = ");
+			getRight().genDer_CAD(p, str, indent);
+			str.print(";\n");
+		}
+	}
+	
+	public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		// I know that myFV is an ffunctionvariable
+        FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
+		FType type = fv.type();
+		fv.setDummyExp();
+		FExp bindingExp = fv.getBindingExp();
+		type.printInit_C(p, str, indent, fv.varName_CAD(), bindingExp);
+		type.printInit_C(p, str, indent, fv.derName_CAD(), bindingExp);
+		fv.resetDummyExp();
+	}
+
+	
+	/*-------------------------------------------------------------------------
+	 * END CAD code for statements
+	 *-----------------------------------------------------------------------*/
+	
+	/* Used to declare function headers. 
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FFunctionDecl.genHeader_CAD(PrintStream str, String indent) {
+		if (!shouldPrintFuncDecl_CAD())
+			return;
+		prettyPrintHead_CAD(printer_CAD, str, indent, "void", "der_AD", true);
+		str.print(";\n");
+	}
+	
+	/* Functions in Modelica may have derivative annotations associated with them. 
+	 * When printing the body of a function a check is made to see if it has a derivative
+	 * annotation, if so this function is called that assigns the variables of the function
+	 * by calling its non-AD counterpart and its derivatives by calling its derivative annotation. 
+	 * Only variables of type real can be filled by the derivative function, if they are not of 
+	 * type real they are omitted in the printed call.  
+	 * @param PrintStream str, the c-code is written to this stream 
+	 */
+	public void FFunctionDecl.genFuncAnnotation_CAD(CodePrinter p, PrintStream str, String indent){
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.genVarDecls_CAD(p, str, indent);
+		str.print(indent);
+		str.print("/*Using specified derivative annotation instead of AD*/\n");
+		
+		genNonADFunctionCall_CAD(p, str, indent);
+		
+		// Print the call to the specified derivative function
+		str.print(indent);
+		str.print(getFDerivativeFunction().funcNameUnderscore("def") + "(");
+		String sep = "";
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(sep);
+			sep = ", ";
+			if(ffv.shouldBeDifferentiated())
+				str.print(ffv.varName_CAD());
+			else
+				str.print(ffv.name_C());
+		}
+		for (FFunctionVariable ffv : myInputs()){
+			if(ffv.shouldBeDifferentiated()){
+				str.print(sep);
+				sep = ", ";
+				str.print(ffv.derName_CAD());
+			}
+		}
+		for (FFunctionVariable ffv : myOutputs()){
+			if(ffv.shouldBeDifferentiated()) {
+				str.print(sep);
+				sep = ", ";
+				str.print("&" + ffv.derName_CAD());
+			}
+		}
+		str.print(");\n");
+	}
+	
+	/**
+	 * Function for generating a dummy function that only calls the normal function and also
+	 * set output derivatives to zero. 
+	 */
+	public void FFunctionDecl.genZeroDerivativeFunction_CAD(CodePrinter p, PrintStream str, String indent) {
+		for (FFunctionVariable ffv : myOutputs())
+			ffv.genVarDecls_CAD(p, str, indent);
+		str.print(indent);
+		str.print("/*Zero derivative function*/\n");
+		
+		genNonADFunctionCall_CAD(p, str, indent);
+		
+		for (FFunctionVariable ffv : myOutputs())
+			if(ffv.shouldBeDifferentiated())
+				str.format("%s%s = 0;\n", indent, ffv.derName_CAD());
+	}
+	
+	/**
+	 * Generates a function call to the non AD function.
+	 */
+	public void FFunctionDecl.genNonADFunctionCall_CAD(CodePrinter p, PrintStream str, String indent) {
+		str.print(indent);
+		str.print(funcNameUnderscore("def") + "(");
+		String sep = "";
+		for (FFunctionVariable ffv : myInputs()){
+			str.print(sep);
+			sep = ", ";
+			if(ffv.shouldBeDifferentiated())
+				str.print(ffv.varName_CAD());
+			else
+				str.print(ffv.name_C());
+		}
+		for (FFunctionVariable ffv : myOutputs()){
+			str.print(sep);
+			sep = ", ";
+			if(ffv.shouldBeDifferentiated())
+				str.print("&" + ffv.varName_CAD());
+			else
+				str.print("&" + ffv.name_C());
+		}
+		str.print(");\n");
+	}
+	
+	syn boolean FFunctionDecl.shouldPrintFuncDecl_CAD() = requiresDerivative() && functionIsUsedAsDerivative();
+	
+	/* Prints a function, the header and body. A check is made whether the function
+	 * has a derivative annotation, if so the body of the function is printed in a 
+	 * special way. 
+	 * Since the function may have NULL inputs a check is made at the end of the function,
+	 * if some of the inputs that are to be filled by the function are NULL they are 
+	 * not updated. 
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FFunctionDecl.prettyPrint_CAD(CodePrinter p, PrintStream str, String outerIndent) {
+		if (!shouldPrintFuncDecl_CAD())
+			return;
+		String indent = p.indent(outerIndent);
+		// Print definition
+		prettyPrintHead_CAD(p, str, outerIndent, "void", "der_AD", true);
+		str.print(" {\n");
+		str.print(indent + "JMI_DYNAMIC_INIT()\n");
+		if (hasFDerivativeFunction()){
+			genFuncAnnotation_CAD(p, str, indent);
+			genReturnStmt_CAD(p, str, indent);
+		} else if (derivativEqualsZero()){
+			genZeroDerivativeFunction_CAD(p, str, indent);
+			genReturnStmt_CAD(p, str, indent);
+		} else {
+			genVarDecls_CAD(p, str, indent);
+			for (FFunctionVariable ffv : myNonInputs())
+				p.print(ffv, str, indent);
+			for (FFunctionVariable ffv : myOutputs())
+				ffv.printNullOutputReplacement_CAD(p, str, indent);
+			p.print(getFAlgorithm(), str, indent);
+		}
+		str.print(outerIndent + "}\n\n");
+	}
+	
+	public void FFunctionDecl.genReturnStmt_CAD(CodePrinter p, PrintStream str, String indent) {
+		returnDefinition().printReturnWrite_CAD(str, indent);
+		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+		str.print(indent + "return;\n");
+	}
+	
+	public void FFunctionArray.prettyPrint_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (!isOutput()) {
+			printDeclOrInit_C(p, str, indent, varName_CAD(), false, true);
+			printDeclOrInit_C(p, str, indent, derName_CAD(), false, false);
+		}
+	}
+	
+	public void FFunctionVariable.printNullOutputReplacement_CAD(CodePrinter p, PrintStream str, String indent) {
+		if (isComposite()) {
+			String name_var_CAD = varName_CAD();
+			String name_var_r = name_var_CAD + C_SUFFIX_NULL;
+			String next = p.indent(indent);
+			str.print(indent + "if (" + name_var_CAD + " == NULL) {\n");
+			printDeclOrInit_C(p, str, next, name_var_r, false, true);
+			str.print(next + name_var_CAD + " = " + name_var_r + ";\n");
+			str.print(indent + "}\n");
+			
+			String name_der_CAD = derName_CAD();
+			String name_der_r = name_der_CAD + C_SUFFIX_NULL;
+			str.print(indent + "if (" + name_der_CAD + " == NULL) {\n");
+			printDeclOrInit_C(p, str, next, name_der_r, false, false);
+			str.print(next + name_der_CAD + " = " + name_der_r + ";\n");
+			str.print(indent + "}\n");
+		}
+	}
+	
+	
+	/* Loops through its FFunctionVariables, calls a function on each that prints
+	 * code for checking if the corresponding function variables input was set as NULL. 
+	 * Is used to handle NULL arguments in functions. 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FunctionReturnDefinition.printReturnWrite_CAD(PrintStream str, String indent) {
+		for (FFunctionVariable v : outputs)
+			if (v.shouldBeDifferentiated())
+				v.printReturnWrite_CAD(str, indent);
+			else
+				v.printReturnWrite_C(str, indent);
+	}
+	
+	/* Prints code that checks whether the variables corresponding return varible was set as
+	 * NULL, if not the return variable is set to this variables value. Is used to handle NULL
+	 * inputs in functions. 
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 */
+	public void FFunctionVariable.printReturnWrite_CAD(PrintStream str, String indent) {
+		if (!isRecord()) {
+			str.print(indent);
+			str.print("if (");
+			str.print(varReturnName_CAD());
+			str.print(" != NULL) *");
+			str.print(varReturnName_CAD());
+			str.print(" = ");
+			str.print(varName_CAD());
+			str.print(";\n");
+			str.print(indent);
+			str.print("if (");
+			str.print(derReturnName_CAD());
+			str.print(" != NULL) *");
+			str.print(derReturnName_CAD());
+			str.print(" = ");
+			str.print(derName_CAD());
+			str.print(";\n");
+		}
+	}
+	
+	public void FFunctionArray.printReturnWrite_CAD(PrintStream str, String indent) {}
+	
+	//end returns from functions
+	
+	//Function declarations and headers
+	/* Generates the header for this function declaration in this way:
+	 * type functionname_suffix(inputs, (returnArgs? outputs:""))  
+	 * @param Printer p, use CADPrettyPrinter for p.print to call prettyPrint_CAD
+	 * @param PrintStream str, the c-code is written to this stream 
+	 * @param String indent, used to get a consistently formated c-code
+	 * @param String type, the functions return type
+	 * @param String suffix, typically der_AD for AD functions
+	 * @param boolean returnArgs, specifies whether return arguments should be printed or not
+	 */
+	private void FFunctionDecl.prettyPrintHead_CAD(CodePrinter p, PrintStream str, String indent, 
+			String type, String suffix, boolean returnArgs) {
+		str.print(indent);
+		str.print(type);
+		str.print(" ");
+		str.print(funcNameUnderscore(suffix));
+		str.print("(");
+		String sep = "";
+		for (FFunctionVariable v : myInputs()) {
+			str.print(sep);
+			if (v.shouldBeDifferentiated())
+				v.printArgument_var_CAD(str);
+			else
+				v.printArgument_C(str);
+			sep = ", ";
+		}
+		for (FFunctionVariable v : myInputs()) {
+			if(v.shouldBeDifferentiated()){
+				str.print(sep);
+				v.printArgument_der_CAD(str);
+			}
+		}
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				str.print(sep);
+				if (v.shouldBeDifferentiated())
+					v.printReturnArgument_var_CAD(str);
+				else
+					v.printReturnArgument_C(str);
+				sep = ", ";
+			}
+		}
+		if (returnArgs) {
+			for (FFunctionVariable v : myOutputs()) {
+				if(v.shouldBeDifferentiated()){
+					str.print(sep);
+					v.printReturnArgument_der_CAD(str);
+					sep = ", ";
+				}
+			}
+		}
+		str.print(")");
+	}
+	
+	/* Prints the argument's C type and name for this variable, used when generating function headers. 
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void FFunctionVariable.printArgument_var_CAD(PrintStream str) {
+		str.print(type_C());
+		str.print(" "  + varName_CAD());
+	}
+	
+	/* Prints the derivative argument's C type and name for this variable, used when generating function headers.
+	 * It is assumed that this function is called for real arguments only, since discrete lack derivatives. Thus
+	 * no explicit check is made for the non-real scenario.  
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void FFunctionVariable.printArgument_der_CAD(PrintStream str) {
+		str.print(type_C());
+		str.print(" ");
+		str.print(derName_CAD());
+	}
+	
+	/* Prints variables return argument, used when generating function headers.
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void FFunctionVariable.printReturnArgument_var_CAD(PrintStream str) {
+		str.print(typeReturn_C());
+		str.print(" ");
+		str.print(varReturnName_CAD());
+	}
+
+	/* Prints derivative variables return argument, used when generating function headers.
+	 * When calling a function with derivative outputs for non real variables this return
+	 * argument should be set to NULL, in that case no derivative will be set for this variable
+	 * (see printReturnWrite_CAD) 
+	 * @param PrintStream str, the c-code is written to this stream
+	 */
+	public void FFunctionVariable.printReturnArgument_der_CAD(PrintStream str) {
+		str.print(typeReturn_C());
+		str.print(" ");
+		str.print(derReturnName_CAD());
+	}
+	
+	syn lazy String FAbstractVariable.varName_CAD() = name_C();
+	syn lazy String FAbstractVariable.derName_CAD() = "0";
+	
+	eq FFunctionVariable.varName_CAD() = nameUnderscore() + "_var_" + C_SUFFIX_VARIABLE;
+	eq FFunctionArray.varName_CAD()    = nameUnderscore() + "_var_" + C_SUFFIX_ARRAY;
+	eq FFunctionVariable.derName_CAD() = nameUnderscore() + "_der_" + C_SUFFIX_VARIABLE;
+	eq FFunctionArray.derName_CAD()    = nameUnderscore() + "_der_" + C_SUFFIX_ARRAY;
+	
+	syn String FFunctionVariable.varReturnName_CAD() = 
+		isRecord() ? varName_CAD() : (getFQName().nameUnderscore() + "_var_" + C_SUFFIX_RETURN);
+	syn String FFunctionArray.varReturnName_CAD()    = varName_CAD();
+	
+	syn String FFunctionVariable.derReturnName_CAD() = 
+		isRecord() ? derName_CAD() : (getFQName().nameUnderscore() + "_der_" + C_SUFFIX_RETURN);
+	syn String FFunctionArray.derReturnName_CAD()    = derName_CAD();
+	
+	//end functions
+	
+}
