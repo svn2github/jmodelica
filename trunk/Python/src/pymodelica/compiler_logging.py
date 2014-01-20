@@ -159,8 +159,12 @@ class KeepLastStream():
                 message.append(os.linesep + '...')
         message = ''.join(message)
         
-        return "Unexpected output from the compiler, got '%s' in:%s%s" \
-            % (lines[localLine][column], os.linesep, message)
+        if localLine + 1 >= len(lines) and column >= len(lines[localLine]):
+            return "Unexpected end of output from the compiler:%s%s" \
+                % (os.linesep, message)
+        else:
+            return "Unexpected output from the compiler, got '%s' in:%s%s" \
+                % (lines[localLine][column], os.linesep, message)
     
     def discardRemaining(self):
         """
