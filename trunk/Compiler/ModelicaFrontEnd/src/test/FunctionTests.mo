@@ -11405,6 +11405,127 @@ end FunctionTests.FunctionLike.Special.SemiLinear3;
 ")})));
 end SemiLinear3;
 
+model SemiLinear4
+  Real x,y;
+  Real sa,sb;
+  Real[5] s;
+equation
+  sa = time;
+  y = semiLinear(x,s[2],s[3]);
+  sb = time;
+  y = semiLinear(x,s[5],sb);
+  x  = time;
+  y = semiLinear(x,s[3],s[4]);
+  y = semiLinear(x,s[1],s[2]);
+  y = semiLinear(x,sa,s[1]);
+  y = semiLinear(x,s[4],s[5]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_Special_SemiLinear4",
+			description="Test of the semiLinear() operator. Zero flow transformation.",
+			flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear4
+ Real x;
+ Real y;
+ Real sa;
+ Real sb;
+ Real s[1];
+ Real s[2];
+ Real s[3];
+ Real s[4];
+ Real s[5];
+equation
+ sa = time;
+ sb = time;
+ x = time;
+ s[1] = if x >= 0 then sa else sb;
+ s[2] = s[1];
+ s[3] = s[2];
+ s[4] = s[3];
+ s[5] = s[4];
+ y = if x >= 0.0 then x * sa else x * sb;
+end FunctionTests.FunctionLike.Special.SemiLinear4;
+			
+")})));
+end SemiLinear4;
+
+model SemiLinear5
+  Real x,y;
+  Real sa,sb;
+  Real[5] s;
+equation
+  semiLinear(x,s[3],s[4]) = -y;
+  y = semiLinear(-x,sb,s[5]);
+  y = semiLinear(--x,s[2],s[3]);
+  sa = time;
+  sb = time;
+  x  = time;
+  semiLinear(x,sa,s[1]) = --y;
+  -y = semiLinear(--x,s[4],s[5]);
+  -y = semiLinear(-x,s[2],s[1]);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="FunctionLike_Special_SemiLinear5",
+			description="Test of the semiLinear() operator. Zero flow transformation.",
+			flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear5
+ Real x;
+ Real y;
+ Real sa;
+ Real sb;
+ Real s[1];
+ Real s[2];
+ Real s[3];
+ Real s[4];
+ Real s[5];
+equation
+ sa = time;
+ sb = time;
+ x = time;
+ s[1] = if x >= 0 then sa else s[3];
+ s[2] = s[1];
+ y = if x >= 0.0 then x * sa else x * s[3];
+ s[5] = if - x >= 0 then sb else s[3];
+ s[4] = s[5];
+ y = if - x >= 0.0 then (- x) * sb else (- x) * s[3];
+end FunctionTests.FunctionLike.Special.SemiLinear5;
+			
+")})));
+end SemiLinear5;
+
+model SemiLinear6
+  Real x,y;
+  Real sa,sb,sc;
+  Real[2] s;
+equation
+  sa = time;
+  sb = time;
+  x  = time;
+  y = semiLinear(x,sa,s[1]);
+  y = semiLinear(x,s[1],s[2]);
+  y = semiLinear(x,s[2],sb);
+  y = semiLinear(x,s[2],sc);
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="SemiLinear6",
+			description="Test of the semiLinear() operator. Zero flow transformation error",
+			variability_propagation=false,
+			errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
+y = semiLinear(x, sa, s[1])
+y = semiLinear(x, s[1], s[2])
+y = semiLinear(x, s[2], sb)
+y = semiLinear(x, s[2], sc)
+			
+")})));
+end SemiLinear6;
+
 end Special;
 
 
