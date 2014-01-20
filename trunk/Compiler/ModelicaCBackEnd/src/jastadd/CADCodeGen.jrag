@@ -1247,7 +1247,7 @@ aspect CADCodeGen {
         FVariable v = forVariables.iterator().next();
         FExp solution = solution(v.name());
         if(v.shouldBeDifferentiated()){
-            solution.genTempVars_CAD(printer_CAD, str, indent);
+            printer_CAD.printPreSteps(solution, str, indent);
             str.print(indent + v.name_C() + " = ");
             solution.genVar_CAD(printer_CAD, str, indent);
             str.print(";\n");
@@ -1255,7 +1255,7 @@ aspect CADCodeGen {
             solution.genDer_CAD(printer_CAD, str, indent);
             str.print(";\n");
         } else {
-            solution.genTempVars_CAD(printer_CAD, str, indent);
+            printer_CAD.printPreSteps(solution, str, indent);
             str.format("%s%s = ", indent, v.name_C());
             solution.genVar_CAD(printer_CAD, str, indent);
             str.print(";\n");
@@ -1271,7 +1271,7 @@ aspect CADCodeGen {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if (!getCall().isIgnored()) {
 			if (firstVisit)
-				genTempVars_CAD(printer_CAD, str, indent);
+				printer_CAD.printPreSteps(this, str, indent);
 			int i = 0;
 			for (FFunctionCallLeft l : getLefts()) {
 				l.setEquationIndex(i++);
@@ -1321,7 +1321,7 @@ aspect CADCodeGen {
         if (!isElse()) {
             boolean firstVisit = visited == null ? true : visited.add(this);
             if (firstVisit)
-                genTempVars_CAD(printer_CAD, str, indent);
+                printer_CAD.printPreSteps(this, str, indent);
         }
         super.genBlock_CAD(indent, str, visited, forVariables, forIndices);
         if (hasElse())
@@ -1626,7 +1626,7 @@ aspect CADCodeGen {
 	 */
 	public void ASTNode.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
 		for (ASTNode node : this){
-			node.genTempVars_CAD(p, str, indent);
+			p.printPreSteps(node, str, indent);
 		}
 	}
 	
@@ -1634,7 +1634,7 @@ aspect CADCodeGen {
     public void FIfWhenEquation.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
         super.genTempVars_CAD(p, str, indent);
         if (hasElse())
-            getElse().genTempVars_CAD(p, str, indent);
+            p.printPreSteps(getElse(), str, indent);
     }
 	
 	/**
@@ -1648,7 +1648,7 @@ aspect CADCodeGen {
 	 */
 	@Override
 	public void FFunctionCall.genTempVars_CAD(CodePrinter p, PrintStream str, String indent) {
-		getArgs().genTempVars_CAD(p, str, indent);
+		p.printPreSteps(getArgs(), str, indent);
 		genADStatement_CAD(p, str, indent);
 	}
 	

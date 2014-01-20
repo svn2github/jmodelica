@@ -970,7 +970,7 @@ aspect CCodeGen {
 	
 	public void FFunctionCallStmt.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
 		if (!getCall().isIgnored()) {
-			genTempVars_C(p, str, indent);
+			p.printPreSteps(this, str, indent);
 			p.print(getCall(), str, indent);
 			for (FFunctionCallLeft l : getLefts()) {
 				l.genWriteBackAssignment_C(str, indent, null);
@@ -980,7 +980,7 @@ aspect CCodeGen {
 	
 	public void FFunctionCallEquation.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
 		if (!getCall().isIgnored()) {
-			genTempVars_C(p, str, indent);
+			p.printPreSteps(this, str, indent);
 			p.print(getCall(), str, indent);
 		}
 	}
@@ -1003,7 +1003,7 @@ aspect CCodeGen {
     }
 
 	public void FAssignStmt.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
-		genTempVars_C(p, str, indent);
+		p.printPreSteps(this, str, indent);
 		str.print(indent);
 		p.print(getLeft(), str, indent);
 		str.print(" = ");
@@ -1024,7 +1024,7 @@ aspect CCodeGen {
 	
 	public void FIfWhenStmt.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
 		for (FIfWhenClause clause : getFIfWhenClauses())
-			clause.getTest().genTempVars_C(p, str, indent);
+			p.printPreSteps(clause.getTest(), str, indent);
 		str.print(indent);
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "} else ");
 		prettyPrintElse_C(p, str, indent);
@@ -1050,7 +1050,7 @@ aspect CCodeGen {
 	}
 	
 	public void FWhileStmt.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
-		getTest().genTempVars_C(p, str, indent);
+		p.printPreSteps(getTest(), str, indent);
 		str.print(indent);
 		str.print("while (");
 		p.print(getTest(), str, "");
@@ -1061,7 +1061,7 @@ aspect CCodeGen {
 	}
 	
 	public void FForStmt.prettyPrint_C(CodePrinter p, PrintStream str, String indent) {
-		getIndex().genTempVars_C(p, str, indent);
+		p.printPreSteps(getIndex(), str, indent);
 		getIndex().printForArrayInit_C(p, str, indent);
 		str.print(indent);
 		str.print("for (");
@@ -1870,18 +1870,18 @@ aspect CCodeGen {
 	
 	public void ASTNode.genTempVars_C(CodePrinter p, PrintStream str, String indent) {
 		for (ASTNode node : this)
-			node.genTempVars_C(p, str, indent);
+			p.printPreSteps(node, str, indent);
 	}
 	
 	public void FExp.genTempVars_C(CodePrinter p, PrintStream str, String indent) {
 		if (isArray() && !size().isUnknown())
-			getArray().genTempVars_C(p, str, indent);
+			p.printPreSteps(getArray(), str, indent);
 		else
 			super.genTempVars_C(p, str, indent);
 	}
 	
 	public void FFunctionCall.genTempVars_C(CodePrinter p, PrintStream str, String indent) {
-		getArgs().genTempVars_C(p, str, indent);
+		p.printPreSteps(getArgs(), str, indent);
 		for (FExp arg : getArgs()) 
 			arg.genTempInput_C(p, str, indent);
 	}
@@ -2290,7 +2290,7 @@ aspect CCodeGen {
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
                 if (jacobian[row][col] != null) {
-                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, innerIndent);
+                    ASTNode.printer_C.printPreSteps(jacobian[row][col], str, innerIndent);
                     str.format("%sresidual[%d] = %s;\n", innerIndent, rows * col + row, jacobian[row][col].prettyPrint_C(""));
                 }
             }
@@ -2322,7 +2322,7 @@ aspect CCodeGen {
         for (int col = n1; col < n1 + n2; col++) {
             for (int row = 0; row < n1; row++) {
                 if (jacobian[row][col] != null) {
-                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                    ASTNode.printer_C.printPreSteps(jacobian[row][col], str, indent);
                     str.format("%sQ1[%d] = %s;\n", indent, n1 * (col - n1) + row, jacobian[row][col].prettyPrint_C(""));
                 }
             }
@@ -2342,7 +2342,7 @@ aspect CCodeGen {
         for (int col = 0; col < n1; col++) {
             for (int row = n1; row < n1 + n2; row++) {
                 if (jacobian[row][col] != null) {
-                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                	ASTNode.printer_C.printPreSteps(jacobian[row][col], str, indent);
                     str.format("%sQ2[%d] = %s;\n", indent, n2 * col + (row - n1), jacobian[row][col].prettyPrint_C(""));
                 }
             }
@@ -2353,7 +2353,7 @@ aspect CCodeGen {
         for (int col = n1; col < n1 + n2; col++) {
             for (int row = n1; row < n1 + n2; row++) {
                 if (jacobian[row][col] != null) {
-                    jacobian[row][col].genTempVars_C(ASTNode.printer_C, str, indent);
+                	ASTNode.printer_C.printPreSteps(jacobian[row][col], str, indent);
                     str.format("%sQ3[%d] = %s;\n", indent, n2 * (col - n1) + (row - n1), jacobian[row][col].prettyPrint_C(""));
                 }
             }
@@ -2411,8 +2411,8 @@ aspect CCodeGen {
     }
     
     public void MetaEquationBlock.genBlock_C(boolean inInitial, String indent, PrintStream str) {
-        equation().genTempVars_C(ASTNode.printer_C, str, indent);
-        equation().prettyPrint_C(ASTNode.printer_C, str, indent);
+        ASTNode.printer_C.printPreSteps(equation(), str, indent);
+        ASTNode.printer_C.print(equation(), str, indent);
     }
     
      public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
@@ -2435,9 +2435,9 @@ aspect CCodeGen {
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         FVariable fv = forVariables.iterator().next();
         FExp sol = solution(fv.name());
-        sol.genTempVars_C(printer_C, str, indent);
+        printer_C.printPreSteps(sol, str, indent);
         str.format("%s%s = ", indent, fv.name_C());
-        sol.prettyPrint_C(str, indent);
+        printer_C.print(sol, str, indent);
         str.print(";\n");
     }
     
@@ -2446,8 +2446,8 @@ aspect CCodeGen {
         boolean firstVisit = visited == null ? true : visited.add(this);
         if (!getCall().isIgnored()) {
             if (firstVisit) {
-                genTempVars_C(printer_C, str, indent);
-                getCall().prettyPrint_C(str, indent);
+                printer_C.printPreSteps(this, str, indent);
+                printer_C.print(getCall(), str, indent);
             }
             for (FFunctionCallLeft l : getLefts()) {
                 l.genWriteBackAssignment_C(str, indent, forVariables);
@@ -2460,9 +2460,9 @@ aspect CCodeGen {
         boolean firstVisit = visited == null ? true : visited.add(this);
         boolean sideEffect = forVariables.size() == uniqueFIdUseExpsInLHS().size();
         if (firstVisit) {
-            genTempVars_C(printer_C, str, indent);
+            printer_C.printPreSteps(this, str, indent);
             if (sideEffect)
-                prettyPrint_C(str, indent);
+                printer_C.print(this, str, indent);
             else
                 prettyPrintNoSideEffect_C(str, indent);
         }
@@ -2514,11 +2514,11 @@ aspect CCodeGen {
     
     public void FEquation.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         boolean firstVisit = visited == null || visited.add(this);
-        genTempVars_C(printer_C, str, indent);
+        printer_C.printPreSteps(this, str, indent);
         str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-        getRight().prettyPrint_C(str,"");
+        printer_C.print(getRight(), str, "");
         str.print(" - (");
-        getLeft().prettyPrint_C(str,"");
+        printer_C.print(getLeft(), str, "");
         str.print(");\n");
     }
     
@@ -2526,8 +2526,8 @@ aspect CCodeGen {
         boolean firstVisit = visited == null || visited.add(this);
         if (!getCall().isIgnored()) {
             if (firstVisit) {
-                genTempVars_C(printer_C, str, indent);
-                getCall().prettyPrint_C(str, indent);
+                printer_C.printPreSteps(this, str, indent);
+                printer_C.print(getCall(), str, indent);
             }
             Enumerator indexCounter = new Enumerator();
             for (FFunctionCallLeft l : getLefts())
@@ -2564,7 +2564,7 @@ aspect CCodeGen {
     public void FAlgorithm.genResidual_C(Enumerator enumerator, String indent, PrintStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         if (!visited.contains(this)) {
             visited.add(this);
-            genTempVars_C(printer_C, str, indent);
+            printer_C.printPreSteps(this, str, indent);
             prettyPrintNoSideEffect_C(str, indent);
         }
         Enumerator indexCounter = new Enumerator();
@@ -2700,7 +2700,7 @@ aspect CCodeGen {
     public void FAbstractEquation.genAssignment_C(String indent, PrintStream str) {}
     
 	public void FEquation.genAssignment_C(String indent, PrintStream str) {
-		genTempVars_C(printer_C, str, indent);
+		printer_C.printPreSteps(this, str, indent);
 		FIdUseExp left = (FIdUseExp)getLeft();
 		String oldindent = indent; // needed if left is EO
         if (left.myFV().isExternalObject()) {
@@ -2708,9 +2708,9 @@ aspect CCodeGen {
             indent = printer_C.indent(indent);
         }
         str.print(indent);
-		left.getFIdUse().prettyPrint_C(str,"");
+		printer_C.print(left.getFIdUse(), str, "");
 		str.print(" = (");
-		getRight().prettyPrint_C(str,"");
+		printer_C.print(getRight(), str, "");
 		str.print(")");
 		if (left.myFV().isReal() && root().options.getBooleanOption("enable_variable_scaling") && !inFunction()) {
 			str.print("/sf(");
@@ -2839,7 +2839,7 @@ aspect CCodeGen {
 		if (forVariables != null && !forVariables.contains(myFV()))
 			return; // This variable is not in the set of variables to generate code for.
 		str.print(indent);
-		getFIdUse().prettyPrint_C(str,"");
+		printer_C.print(getFIdUse(), str, "");
 		str.print(" = (");
 		str.print(name);
 		str.print(")");
@@ -2878,19 +2878,19 @@ aspect CCodeGen {
 			if (startAttributeSet()) {
 				if (root().options.getBooleanOption("enable_variable_scaling")) {
 					str.print("(");
-					startAttributeExp().prettyPrint_C(str,"");					
+					printer_C.print(startAttributeExp(), str, "");
 					str.print(")");
 					str.print("/sf(");
 					str.print(valueReference());
 					str.print(")");
 				} else {
-					startAttributeExp().prettyPrint_C(str,"");					
+					printer_C.print(startAttributeExp(), str, "");
 				}
 			} else {
 				str.print("0.0");
 			}
 			str.print(" - ");
-			str.print(name_C());	
+			str.print(name_C());
 			str.print(";\n");
 		}
 	}
@@ -2933,7 +2933,7 @@ aspect CCodeGen {
 	}
 	
 	public void FVariable.genStartValue_C(String indent, PrintStream str) {
-		genTempVars_C(printer_C, str, indent);
+		printer_C.printPreSteps(this, str, indent);
 		str.print(indent + name_C() + " = ");
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
@@ -2956,8 +2956,8 @@ aspect CCodeGen {
 	
 	public void FExternalObjectVariable.genStartValue_C(String indent, PrintStream str) {
 		str.print(indent + "if (!jmi->indep_extobjs_initialized) { \n");
-		genVarDecls_C(printer_C, str, printer_C.indent(indent));
-		genTempVars_C(printer_C, str, printer_C.indent(indent));
+		printer_C.printVarDecls(this, str, printer_C.indent(indent));
+		printer_C.printPreSteps(this, str, printer_C.indent(indent));
 		super.genStartValue_C(printer_C.indent(indent), str);
 		str.print(indent + "}\n");
 	}
