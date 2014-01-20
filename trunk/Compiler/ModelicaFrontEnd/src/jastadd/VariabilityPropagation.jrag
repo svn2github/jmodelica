@@ -107,13 +107,22 @@ aspect VariabilityPropagation {
 		}
 
 		// Clean variables
-		ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
-		for (FVariable fVariable: getFVariables()) {
-			if (!fVariable.taggedForRemoval) {
-				newVariables.add(fVariable);
-			}
-		}
-		setFVariableList(new List<FVariable>(newVariables));
+        ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
+        ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
+        for (FVariable fVariable: getFVariables()) {
+            if (!fVariable.taggedForRemoval) {
+                newVariables.add(fVariable);
+            }
+        }
+        for (FVariable fVariable: getAliasVariables()) {
+            if (fVariable.aliasSet() != null) {
+                newAliases.add(fVariable);
+            } else if (!fVariable.isTemporary()) {
+                newVariables.add(fVariable);
+            }
+        }
+        setFVariableList(new List<FVariable>(newVariables));
+        setAliasVariableList(new List<FVariable>(newAliases));
 
 		// Clean equations
 		ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
@@ -357,10 +366,8 @@ aspect VariabilityPropagation {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.constantVariability())
                         setBindingExp(bindingExp);
-                    if (variability.parameterVariability() && !fv.isTemporary()) {
-                        myFClass().addFVariable(fv);
+                    if (variability.parameterVariability() && !fv.isTemporary())
                         parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp()));
-                    }
                 }
             }
             if (variability.parameterVariability())
