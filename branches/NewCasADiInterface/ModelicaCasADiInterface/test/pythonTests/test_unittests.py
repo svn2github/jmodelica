@@ -13,15 +13,15 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from casadi_interface import *
-
-""" 
-As there is no function to check equality of variables this
-function provides a substitute. Check that the MX of the kept variables
-are equal and that the print of the variables are equal
-"""
-def heurestic_MC_variables_equal(MC_var1, MC_var2):
-    return MC_var1.getVar().isEqual(MC_var2.getVar()) and str(MC_var1) == str(MC_var2)
     
+def test_SharedNode_eq():
+    realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
+    # Since == and != are implemented separately, we test both
+    assert realVar1 == realVar1
+    assert not (realVar1 != realVar1)
+    # Test that we can compare a SharedNode to a regular Python object
+    assert realVar1 != 1
+    assert not (realVar1 == 1)
 
 def test_VariableAlias():
     realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
@@ -46,7 +46,7 @@ def test_VariableAlias():
     # Check updated attributes, results of getters etc. 
     assert realVar1.isAlias()
     assert not realVar2.isAlias()
-    assert heurestic_MC_variables_equal(realVar1.getModelVariable(), realVar2)
+    assert realVar1.getModelVariable() == realVar2
     assert not realVar1.isNegated()
     # Set negated, and check
     realVar1.setNegated(True)
@@ -69,10 +69,10 @@ def test_VariableAlias():
     model = Model()
     model.addVariable(realVar1)
     model.addVariable(realVar2)
-    assert heurestic_MC_variables_equal(model.getVariable("node1"), realVar1)
-    assert heurestic_MC_variables_equal(model.getVariable("node2"), realVar2)
-    assert heurestic_MC_variables_equal(model.getModelVariable("node1"), realVar2)
-    assert heurestic_MC_variables_equal(model.getModelVariable("node2"), realVar2)
+    assert model.getVariable("node1") == realVar1
+    assert model.getVariable("node2") == realVar2
+    assert model.getModelVariable("node1") == realVar2
+    assert model.getModelVariable("node2") == realVar2
 
 def test_NegatedAliasAttributes():
     realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
@@ -602,7 +602,7 @@ def test_TimedVariable():
     timePoint = MX("ATimePointExpression")
     node = MX("node")
     timedVar = TimedVariable(node, realVar, timePoint)
-    assert heurestic_MC_variables_equal(realVar, timedVar.getBaseVariable())
+    assert realVar == timedVar.getBaseVariable()
     assert node.isEqual(timedVar.getVar())
     assert timePoint.isEqual(timedVar.getTimePoint())
     

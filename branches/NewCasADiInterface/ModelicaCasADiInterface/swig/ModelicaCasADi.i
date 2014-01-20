@@ -131,6 +131,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "transferModelica.hpp"
 %include "transferOptimica.hpp"
 
+%extend ModelicaCasADi::SharedNode {
+    // consider: Could we take the argument as a const SharedNode * instead,
+    // to avoid some reference counting overhead?
+    bool __eq__(Ref<SharedNode> ref) {
+        return $self == ref.node;
+    }
+    bool __ne__(Ref<SharedNode> ref) {
+        return $self != ref.node;
+    }
+    bool __eq__(SWIG_Object obj) {
+        return false; // Should only happen if obj is not a proxy for a SharedNode
+    }   
+    bool __ne__(SWIG_Object obj) {
+        return true; // Should only happen if obj is not a proxy for a SharedNode
+    }   
+}
+
 %extend ModelicaCasADi::Equation {
   std::string __repr__() { return $self->repr(); }
 }
