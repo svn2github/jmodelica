@@ -34,18 +34,28 @@ aspect AliasElimAndVariabilityPropagation {
     
     public void FClass.aliasElimAndVariabilityPropagation() {
         boolean more = true;
-        int eqBefore;
+        int eqBefore, eqAfter;
         
-        while(more) {
+        while (more) {
             forceRewrites();
             root().flushAllRecursiveClearFinal();
             
             eqBefore = getNumFAbstractEquation();
             
             aliasElimination.apply();
-            variabilityPropagation.apply();
             
-            more = eqBefore > getNumFAbstractEquation();
+            eqAfter = getNumFAbstractEquation();
+
+            more = eqBefore > eqAfter;
+            
+            if (more) {
+                forceRewrites();
+                root().flushAllRecursiveClearFinal();
+
+                variabilityPropagation.apply();
+
+                more = eqAfter > getNumFAbstractEquation();
+            }
         }
     }
     
