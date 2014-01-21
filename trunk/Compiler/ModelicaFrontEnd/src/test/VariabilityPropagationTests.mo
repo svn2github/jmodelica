@@ -38,8 +38,10 @@ fclass VariabilityPropagationTests.VariabilityInference
  constant Real x1 = 1;
  constant Boolean x2 = true;
  parameter Real p1 = 4 /* 4 */;
+ parameter Real r1;
  parameter Real r2;
 parameter equation
+ r1 = p1;
  r2 = p1 + 1.0;
 end VariabilityPropagationTests.VariabilityInference;
 ")})));

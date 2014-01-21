@@ -39,13 +39,18 @@ aspect FlatVariability {
 	eq Continuous.continuousVariability() = true;
 	
 	
+    syn int FTypePrefixVariability.compareTo(FTypePrefixVariability other)
+        = variabilityLevel() - other.variabilityLevel();
+    syn boolean FTypePrefixVariability.equals(FTypePrefixVariability other)
+        = compareTo(other) == 0;
+	
 	/**
 	 * \brief Test if variability is at most the same as <code>other</code>.
 	 * 
 	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
 	 */
-	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
-		variabilityLevel() <= other.variabilityLevel();
+    syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
+            compareTo(other) <= 0;
 	
 	syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
 	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());

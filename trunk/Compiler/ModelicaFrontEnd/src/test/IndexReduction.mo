@@ -173,13 +173,14 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
+ parameter Real sine.amplitude \"Amplitude of sine wave\";
  Modelica.SIunits.Torque damper.flange_b.tau \"Cut torque in the flange\";
  parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
  parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
- parameter Real sine.amplitude \"Amplitude of sine wave\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
+ parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
@@ -188,6 +189,11 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Real inertia1._der_w;
  Real inertia2._der_phi;
  Real inertia2._der_w;
+ parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
+ parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
+ parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
+ parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
+ parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  Real idealGear._der_phi_a;
  Real idealGear._der_phi_b;
  Real inertia1._der_der_phi;
@@ -207,12 +213,18 @@ parameter equation
  damper.d = damping;
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
+ damper.flange_b.phi = fixed.phi0;
+ fixed.flange.phi = damper.flange_b.phi;
+ idealGear.support.phi = damper.flange_b.phi;
+ torque.support.phi = damper.flange_b.phi;
+ torque.phi_support = damper.flange_b.phi;
+ idealGear.phi_support = damper.flange_b.phi;
 equation
  inertia1.w = inertia1._der_phi;
  inertia1.a = inertia1._der_w;
  inertia1.J * inertia1.a = - torque.flange.tau + (- idealGear.flange_a.tau);
- idealGear.phi_a = inertia1.phi - fixed.phi0;
- idealGear.phi_b = inertia2.phi - fixed.phi0;
+ idealGear.phi_a = inertia1.phi - damper.flange_b.phi;
+ idealGear.phi_b = inertia2.phi - damper.flange_b.phi;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
@@ -225,7 +237,7 @@ equation
  inertia3.J * inertia3.a = - spring.flange_b.tau;
  damper.flange_b.tau = damper.d * damper.w_rel;
  damper.lossPower = damper.flange_b.tau * damper.w_rel;
- damper.phi_rel = fixed.phi0 - inertia2.phi;
+ damper.phi_rel = damper.flange_b.phi - inertia2.phi;
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
  - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));

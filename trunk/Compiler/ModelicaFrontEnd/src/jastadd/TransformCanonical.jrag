@@ -1638,9 +1638,7 @@ aspect TransformCanonical {
 	}
 	
 	syn boolean FTypePrefixVariability.aliasCompatible(FTypePrefixVariability that) {
-		boolean l = this.discreteVariability();
-		boolean r = that.discreteVariability();
-		return (l && r) || (!l && !r);
+        return this.equals(that);
 	}
 	
 	/**

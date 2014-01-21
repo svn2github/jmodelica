@@ -900,9 +900,10 @@ $C_set_start_values$
          generatedCode="
     _y_1 = ((_x_0*sf(0)))/sf(1);
     _z_2 = (func_CCodeGenTests_CCodeGenParameters1_f_exp(AD_WRAP_LITERAL(1)))/sf(2);
-
+ 
     _x_0 = (1)/sf(0);
     model_init_eval_parameters(jmi);
+    _dummy_3 = (0.0)/sf(3);
 ")})));
 end CCodeGenParameters1;
 
