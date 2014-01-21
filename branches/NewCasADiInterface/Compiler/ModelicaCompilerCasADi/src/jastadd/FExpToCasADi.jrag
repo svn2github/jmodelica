@@ -146,8 +146,7 @@ aspect FExpToCasADi {
         if (getCall().isIgnored()) {
             return expressions;
         }
-        if (getNumLeft() == 0) {
-            // Ignore things that we don't support right now, such as asserts
+        if (isIgnoredForCasADi()) {
             System.err.println("Warning: Ignored statement:\n" + this);
             return expressions;
         }
@@ -642,4 +641,15 @@ aspect FExpToCasADi {
     public void FFunctionDecl.setMXVariableInFunctionDeclRecordVariableMap(String key, MX val) {
         hashMapWithMXForRecordVariables.put(key, val);
     }
+
+    public boolean FAbstractEquation.isIgnoredForCasADi() { return false; }
+    public boolean FFunctionCallEquation.isIgnoredForCasADi() {
+        // Ignore things that we don't support right now, such as asserts
+        return getNumLeft() == 0;
+    }   
+    public boolean FStatement.isIgnoredForCasADi() { return false; }
+    public boolean FFunctionCallStmt.isIgnoredForCasADi() {
+        // Ignore things that we don't support right now, such as asserts
+        return getNumLeft() == 0;
+    }   
 }

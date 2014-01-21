@@ -88,7 +88,15 @@ template <class ArrayList, class AbstractEquation>
 static std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > createModelEquationVectorFromEquationArrayList(ArrayList equationList) {
     std::vector< ModelicaCasADi::Ref<ModelicaCasADi::Equation> > allEquations;
     for (int i = 0; i < equationList.size(); ++i) {
-        allEquations.push_back(transferFAbstractEquation<AbstractEquation>(AbstractEquation(equationList.get(i).this$)));
+        AbstractEquation eq = AbstractEquation(equationList.get(i).this$);
+        if (eq.isIgnoredForCasADi()) {
+            char *str = env->toString(eq.this$);
+            std::cerr << "Warning: Ignored equation:\n" << str << std::endl;
+            delete[] str;
+            
+        } else {
+            allEquations.push_back(transferFAbstractEquation<AbstractEquation>(eq));
+        }
     }
     return allEquations;
 }
@@ -424,9 +432,9 @@ static void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, Arr
     for (int i = 0; i < vars.size(); i++) {
         FVar var = FVar(vars.get(i).this$);
         if (var.type().isEnum()) {
-            char *name = env->toString(var.this$);
-            std::cerr << "Warning: Ignored enumeration typed variable:\n" << name << std::endl;
-            delete[] name;
+            char *str = env->toString(var.this$);
+            std::cerr << "Warning: Ignored enumeration typed variable:\n" << str << std::endl;
+            delete[] str;
         } else {
             transferFVariable<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, var);
         }
