@@ -11775,6 +11775,26 @@ static const jmi_real_t DAE_nominals[] = { 1.0, 1.0, 2.0, 6.0, 5.0 };
 end NominalTest2;
 
 
+model NominalTest3
+    Real x1, x2(nominal=-1), x3(nominal=-2);
+equation
+    der(x1) = 1;
+    der(x2) = 2;
+    der(x3) = 3;
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="NominalTest3",
+			description="Check that negative nominals are positive in generated C code",
+			variability_propagation=false,
+			template="$C_DAE_nominals$",
+			generatedCode="
+static const int N_nominals = 3;
+static const jmi_real_t DAE_nominals[] = { 1.0, 1.0, 2.0 };
+")})));
+end NominalTest3;
+
+
 model MathSolve
 	Real a[2,2] = [1,2;3,4];
     Real b[2] = {-2,3};

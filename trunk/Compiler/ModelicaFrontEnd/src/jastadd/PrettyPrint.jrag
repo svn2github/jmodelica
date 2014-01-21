@@ -24,15 +24,29 @@ aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
     public class Printer {
+        
+        private static final Map<String,Map<String,String>> INDENT_MAPS = new HashMap<String,Map<String,String>>();
+        private final Map<String,String> INDENTS;
 		
 		protected String step;
 		
 		public Printer(String step) {
 			this.step = step;
+			Map<String,String> indents = INDENT_MAPS.get(step);
+			if (indents == null) {
+			    indents = new HashMap<String,String>();
+			    INDENT_MAPS.put(step, indents);
+			}
+			INDENTS = indents;
 		}
 		
 		public String indent(String old) {
-			return old + step;
+		    String res = INDENTS.get(old);
+		    if (res == null) {
+		        res = old + step;
+		        INDENTS.put(old, res);
+		    }
+			return res;
 		}
 
 		public void print(ASTNode node, PrintStream str, String indent) { 

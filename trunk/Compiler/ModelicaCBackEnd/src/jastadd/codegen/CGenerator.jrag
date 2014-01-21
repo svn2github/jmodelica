@@ -154,7 +154,7 @@ public class CGenerator extends GenericGenerator {
         }
         
         protected void generateFor(FRealVariable e, PrintStream genPrinter) {
-            genPrinter.print(e.nominalAttribute());
+            genPrinter.print(StrictMath.abs(e.nominalAttribute()));
         }
     
     }
