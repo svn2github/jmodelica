@@ -114,7 +114,6 @@ aspect TransformCanonical {
 	    root().flushAllRecursive();
 	    (new countPotAliasIfSet()).apply();
 	    (new findFunInBlockIfSet()).apply();
-	    (new removeSameVarIfSet()).apply();
 	    (new findIdentFunIfSet()).apply();
 		for (FRecordDecl rec : getFRecordDecls())
 			rec.clearBindingEquations();
@@ -443,9 +442,13 @@ aspect TransformCanonical {
 		} 
 			
 		// Perform BLT
+		(new blockFunctionExtractionIfSet()).apply();
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
 				daeBLT = g.computeBLT(root().options);
+				if (bFEFlag && blockFunctionExtraction(daeBLT)) {
+				    daeBLT = g.computeBLT(root().options);
+				}
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
@@ -554,6 +557,9 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			try {
 				daeInitBLT = g.computeBLT(root().options);
+				if (bFEFlag && blockFunctionExtraction(daeInitBLT)) {
+                    daeInitBLT = g.computeBLT(root().options);
+                }
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;

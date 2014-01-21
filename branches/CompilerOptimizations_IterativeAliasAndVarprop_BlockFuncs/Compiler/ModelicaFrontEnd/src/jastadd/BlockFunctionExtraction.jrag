@@ -18,8 +18,10 @@
 aspect BlockFunctionExtraction {
 	
     public class FClass {
-
-        // Runs block function removal if option is set.
+            
+        private boolean bFEFlag = false;
+        
+        // Runs block function extraction if option is set.
         
         public class blockFunctionExtractionIfSet extends Transformation {
             public blockFunctionExtractionIfSet() {
@@ -27,36 +29,45 @@ aspect BlockFunctionExtraction {
             }
             
             public void perform() {
-                blockFunctionExtraction();
+                blockFunctionExtractionSetFlag();
             }
         }
     }
     
-    public void FClass.blockFunctionExtraction() {
+    public void FClass.blockFunctionExtractionSetFlag() {
+    
+        bFEFlag = true;
+    }
+    
+    public boolean FClass.blockFunctionExtraction(BLT blt) {  
 
         ArrayList<FFunctionCall> functions = new ArrayList<FFunctionCall>();
-        HashMap<String,FVariable> newVars = new HashMap<String,FVariable>();
-
-        for(AbstractEquationBlock block: getDAEInitBLT())
-            if(!block.isSimple())
-                for(FAbstractEquation equation: block.allEquations())
+        HashMap<String,FVariable> newVars = new HashMap<String, FVariable>();
+        
+        // Find functions to extract from current block
+        for (AbstractEquationBlock block: blt)
+            if (!block.isSimple())
+                for (FAbstractEquation equation: block.allEquations())
                     equation.findBlockFunctionExtraction(block, functions);
+                    
+        // If no functions are found do not proceed
+        if (functions.isEmpty())
+            return false;
         
-        for(FFunctionCall fc: functions){
-            FVariable funcReplacement = null;
-            if((funcReplacement = newVars.get(fc.toString())) == null){
-                funcReplacement = null;//fc.type().createTempFVariable(new FQName(fc.calcTempVarName()), fc.variability());
-                // Add variable to list of FVariables?
-                newVars.put(fc.toString(), funcReplacement);
-                // Add equation funcReplacement = func()
+        // If functions are found replace them with new variables and add equations: new_var = func()
+        log.error("Found " + functions.size() + " function calls to remove");
+        for (FFunctionCall fCall: functions) {
+            FVariable funcRepVariable = null;
+            if ((funcRepVariable = newVars.get(fCall.toString())) == null) {
+                log.error("New function call!");
+                funcRepVariable = fCall.type().createTempFVariable(new FQNameFull(fCall.calcTempVarName()), fCall.variability());
+                addFVariable(funcRepVariable);
+                newVars.put(fCall.toString(), funcRepVariable);
+                addFEquation(new FEquation(funcRepVariable.createUseExp(), fCall.copy()));
             }
-            fc.getParent().replaceFuncWithVar(fc.toString(), funcReplacement);
+            fCall.replaceMe(funcRepVariable.createUseExp());
         }
-        //createUseExp-FVariable
-        //replaceMe-ASTNode
-        //createTempFVariable-FType
-        //calcTempVarName-FExp
-        
+        return true;        
     }
     
     // Find non-dependant function
@@ -90,33 +101,16 @@ aspect BlockFunctionExtraction {
     public void FFunctionCall.findBlockFunctionExtraction(AbstractEquationBlock block, ArrayList<FFunctionCall> functions) {
         boolean dep = false;
         for (FExp exp: getArgs()){
+            exp.findBlockFunctionExtraction(block, functions);
+        }
+        for (FExp exp: getArgs()){
             if (exp.dependsOnBlock(block)) {
                 dep = true;
                 break;
             }
         }
         if(!dep) {
-            //log.error("Found function call: " + this);
             functions.add(this);
-        }
-        for (FExp exp: getArgs()){
-            exp.findBlockFunctionExtraction(block, functions);
-        }
-    }
-    
-    // Replace function call with new variable
-    
-    public void ASTNode.replaceFuncWithVar(String func, FVariable funcReplacement){
-    
-    }
-    
-    public void BinExp.replaceFuncWithVar(String func, FVariable funcReplacement){
-        if(getRight().toString().equals(func)){
-            log.error("Right!");
-        }else if(getLeft().toString().equals(func)){
-            log.error("Left!");
-        }else{
-            log.error("Something is wrong in "+ getNodeName() +".replaceFuncWithVar");
         }
     }
     

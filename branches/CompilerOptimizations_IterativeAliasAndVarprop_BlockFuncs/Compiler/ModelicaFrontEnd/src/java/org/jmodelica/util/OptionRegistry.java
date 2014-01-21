@@ -180,23 +180,23 @@ public class OptionRegistry {
         COUNT_POT
        		("count_pot_alias", 
        		 compiler, 
-       		 true,
+       		 false,
        		 "If this option is set to true, then it counts the potential alias equations in the model"),
         FIND_FUN
            	("find_fun_in_block", 
-           	compiler, 
-           	false,
-           	""),
+           	 compiler, 
+           	 false,
+           	 ""),
+        EXTRACT_FUN
+            ("block_func_extract", 
+             compiler, 
+             false,
+             ""),
         FIND_IDENT
             ("find_ident_fun", 
-            compiler, 
-            false,
-            ""),
-        REM_SAME
-            ("remove_same_var", 
-            compiler, 
-            false,
-            ""),
+             compiler, 
+             false,
+             ""),
 		HALT_WARN
 			("halt_on_warning", 
 			 compiler, 
