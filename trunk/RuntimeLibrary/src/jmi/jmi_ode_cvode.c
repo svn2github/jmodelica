@@ -95,6 +95,7 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             y = problem->states;
         }
         */
+		memcpy (NV_DATA_S(integrator->y_work), problem->states, problem->n_real_x*sizeof(jmi_real_t));
         time = problem->time;
         flag = CVodeReInit(integrator->cvode_mem, time, integrator->y_work);
         if (flag<0){
