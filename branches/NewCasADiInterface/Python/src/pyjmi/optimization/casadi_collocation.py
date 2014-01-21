@@ -5600,7 +5600,7 @@ class LocalDAECollocator2(CasadiCollocator):
             for var in variable_list:
                 alias_map[var.getName()] = []
             for alias_var in model.getAliases():
-                alias = alias_var.getAlias()
+                alias = alias_var.getModelVariable()
                 alias_map[alias.getName()].append(alias_var)
 
             # Set up sections
