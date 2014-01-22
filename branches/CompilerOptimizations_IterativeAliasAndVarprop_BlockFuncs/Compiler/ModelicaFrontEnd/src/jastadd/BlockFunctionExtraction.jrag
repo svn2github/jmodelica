@@ -18,8 +18,6 @@
 aspect BlockFunctionExtraction {
 	
     public class FClass {
-            
-        private boolean bFEFlag = false;
         
         // Runs block function extraction if option is set.
         
@@ -28,19 +26,12 @@ aspect BlockFunctionExtraction {
                 super("block_func_extract");
             }
             
-            public void perform() {
-                blockFunctionExtractionSetFlag();
-            }
+            public void perform() {}
         }
     }
     
-    public void FClass.blockFunctionExtractionSetFlag() {
-    
-        bFEFlag = true;
-    }
-    
     public boolean FClass.blockFunctionExtraction(BLT blt) {  
-
+        
         ArrayList<FFunctionCall> functions = new ArrayList<FFunctionCall>();
         HashMap<String,FVariable> newVars = new HashMap<String, FVariable>();
         
@@ -55,11 +46,9 @@ aspect BlockFunctionExtraction {
             return false;
         
         // If functions are found replace them with new variables and add equations: new_var = func()
-        log.error("Found " + functions.size() + " function calls to remove");
         for (FFunctionCall fCall: functions) {
             FVariable funcRepVariable = null;
             if ((funcRepVariable = newVars.get(fCall.toString())) == null) {
-                log.error("New function call!");
                 funcRepVariable = fCall.type().createTempFVariable(new FQNameFull(fCall.calcTempVarName()), fCall.variability());
                 addFVariable(funcRepVariable);
                 newVars.put(fCall.toString(), funcRepVariable);

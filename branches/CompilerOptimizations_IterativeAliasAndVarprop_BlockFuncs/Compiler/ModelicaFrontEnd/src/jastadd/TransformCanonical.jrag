@@ -442,11 +442,10 @@ aspect TransformCanonical {
 		} 
 			
 		// Perform BLT
-		(new blockFunctionExtractionIfSet()).apply();
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
 				daeBLT = g.computeBLT(root().options);
-				if (bFEFlag && blockFunctionExtraction(daeBLT)) {
+				if (root().options.getBooleanOption("block_func_extract") && blockFunctionExtraction(daeBLT)) {
 				    daeBLT = g.computeBLT(root().options);
 				}
 			} catch (BLTException e) {
@@ -557,7 +556,7 @@ aspect TransformCanonical {
 			g.tarjanReset();
 			try {
 				daeInitBLT = g.computeBLT(root().options);
-				if (bFEFlag && blockFunctionExtraction(daeInitBLT)) {
+				if (root().options.getBooleanOption("block_func_extract") && blockFunctionExtraction(daeInitBLT)) {
                     daeInitBLT = g.computeBLT(root().options);
                 }
 			} catch (BLTException e) {
