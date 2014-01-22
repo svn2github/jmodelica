@@ -34,6 +34,8 @@ casadi:
 	make -f Makefile
 
 install_casadi: casadi
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
+	cp $(abs_builddir)/casadi_build/lib/*.dll $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cd $(abs_builddir)/casadi_build/python/; \
 	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
