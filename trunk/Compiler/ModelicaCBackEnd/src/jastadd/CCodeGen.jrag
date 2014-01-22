@@ -2037,6 +2037,12 @@ aspect CCodeGen {
         for (FVariable fv : iterationVariables()) 
             fv.genBlockResidualValuref_C(nextIndent, str, solverArrayMap);
         
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {\n");
+        // Loop over all non-real variables and write their position in the z-vector
+        Enumerator nonRealEnumerator = new Enumerator();
+        for (FVariable fv : nonRealVariables())
+            str.format("%sres[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
+        
         // Equation nominal values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
         genBlockResidualFunctionEqnNominals_C(new Enumerator(), nextIndent, str);
