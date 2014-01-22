@@ -1146,11 +1146,14 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  parameter Real x(start = 3,fixed = f);
- constant Real y = -0.0;
+ Real y;
  parameter Real p = 5 /* 5 */;
 parameter equation
  x = p;
+equation
+ 0.0 = - y;
 end TransformCanonicalTests.AliasTest30;
+			
 ")})));
 end AliasTest30;
 
@@ -1830,7 +1833,7 @@ equation
  2.0 + v3 + v4 + v6 = 1;
  2.0 + v3 + v4 = 1;
  2.0 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 + 0.0 = 1;
+ v5 + v6 + v8 + v7 = 1;
  v5 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
@@ -2429,10 +2432,12 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
  parameter Real x(start = 1);
- constant Real y = 0.0;
+ Real y;
  parameter Real p = 2 /* 2 */;
 parameter equation
  x = p;
+equation
+ y = 0.0;
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 end ParameterDerivativeTest;
@@ -3544,12 +3549,17 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu6
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ Real x[1];
+ Real x[2];
+ Real x[3];
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
+equation
+ x[1] = if false then 1 elseif true then 4 else 7;
+ x[2] = if false then 2 elseif true then 5 else 8;
+ x[3] = if false then 3 elseif true then 6 else 9;
 end TransformCanonicalTests.IfEqu6;
+			
 ")})));
 end IfEqu6;
 
@@ -3572,12 +3582,17 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu7
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ Real x[1];
+ Real x[2];
+ Real x[3];
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
+equation
+ x[1] = if false then 1 elseif true then 4 else 7;
+ x[2] = if false then 2 elseif true then 5 else 8;
+ x[3] = if false then 3 elseif true then 6 else 9;
 end TransformCanonicalTests.IfEqu7;
+			
 ")})));
 end IfEqu7;
 
@@ -3631,10 +3646,14 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu9
- constant Real x[1] = 3;
- constant Real x[2] = 4;
+ Real x[1];
+ Real x[2];
  constant Boolean y = true;
+equation
+ x[1] = if true then 3 else 7;
+ x[2] = if true then 4 else 8;
 end TransformCanonicalTests.IfEqu9;
+			
 ")})));
 end IfEqu9;
 
@@ -3659,10 +3678,14 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu10
- constant Real x[1] = 3;
- constant Real x[2] = 4;
+ Real x[1];
+ Real x[2];
  constant Boolean y = true;
+equation
+ x[1] = if true then 3 else 5;
+ x[2] = if true then 4 else 6;
 end TransformCanonicalTests.IfEqu10;
+			
 ")})));
 end IfEqu10;
 
@@ -4050,9 +4073,9 @@ fclass TransformCanonicalTests.IfEqu22
  Real temp_1[1];
  Real temp_1[2];
 equation
- x[1] = temp_1[1];
- x[2] = temp_1[2];
- if b then
+ x[1] = if true then temp_1[1] else 0;
+ x[2] = if true then temp_1[2] else 0;
+ if true then
   ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
  else
   temp_1[1] = 0.0;
@@ -5133,11 +5156,11 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z + 0.8414709848078965
-  x1 - x2 = z * 1.0
-  x2 = 1.0 * z + 1 + 1.0
+  x1 - x2 = z
+  x2 = z + 1 + 1.0
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, (- 1.0), - 1.0|
+  |1.0, - 1.0, - 1.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
@@ -5350,23 +5373,24 @@ Solution:
 -------------------------------
 Solved block of 2 variables:
 Unknown variables:
-  temp_2
-  temp_3
+  temp_4
+  temp_5
 Equations:
-  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  ({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[1]
 Solution:
-  temp_2 / (- 1.0)
+  temp_4 / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[2]
 Solution:
-  temp_3 / (- 1.0)
+  temp_5 / (- 1.0)
 -------------------------------
+			
 ")})));
 end BlockTest10;
 

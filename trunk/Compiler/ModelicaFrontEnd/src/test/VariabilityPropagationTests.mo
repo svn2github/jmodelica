@@ -388,7 +388,7 @@ initial equation
  iL = 0.0;
 equation
  u0 = sin(time);
- u1 = R1 * 1.0;
+ u1 = R1;
  u2 = R2 * i2;
  u2 = R3 * i3;
  uL = L * der(iL);
@@ -419,10 +419,10 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
- constant Real x2 = 0.0;
+ Real x2;
  Real x3;
  Real x4;
- constant Real x5 = 0.0;
+ Real x5;
  parameter Real x6;
  parameter Real p1 = 4 /* 4 */;
 initial equation 
@@ -430,8 +430,10 @@ initial equation
 parameter equation
  x6 = p1 + 1;
 equation
+ x2 = 0.0;
  x3 = der(x4);
  der(x4) = 3;
+ x5 = 0.0;
 end VariabilityPropagationTests.Der1;
 ")})));
 end Der1;
@@ -514,13 +516,15 @@ equation
 fclass VariabilityPropagationTests.IfEq2
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
- constant Real x1 = 2;
- parameter Real x2;
+ Real x1;
+ Real x2;
  constant Real x3 = 3;
  constant Real x4 = 3;
-parameter equation
- x2 = p1 + 2;
+equation
+ x1 = if false then 1 elseif true then 2 else 3;
+ x2 = if false then p1 + 1 elseif true then p1 + 2 else 4;
 end VariabilityPropagationTests.IfEq2;
+			
 ")})));
 end IfEq2;
 

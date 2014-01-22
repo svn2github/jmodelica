@@ -92,11 +92,12 @@ aspect TransformCanonical {
 		    new propagateResidualPairs(),
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
+		    new addFPreVariables(),
+		    aliasElimination,
+		    new variabilityPropagationIfSet(),
 		    aliasElimination,
 		    addFDerivativeVariables,
-		    new addFPreVariables(),
 		    new enableIfEquationRewrite(),
-		    new variabilityPropagationIfSet(),
 		    new evaluateAsserts(),
 		    new enableSemiLinearRewrite(),
 		    new genInitialEquations(),
@@ -1933,6 +1934,7 @@ aspect TransformCanonical {
 		nonDefiningUses().size() <= 1 && 
 		definingUses().size() <= 1 && 
 		!usedAsFunctionCallLeft() && 
+        !isPreVariable() && myPreVariable().isUnknown() && 
 		(definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents());
 	
 	/**
@@ -5215,10 +5217,15 @@ aspect SemiLinear {
     eq FNegExp.isNegated()        = !getFExp().isNegated();
     
     
-    syn String FEquation.zeroFlowGetKey()   = 
-            (zeroFlowNegated() ? "-" : "")
-            + zeroFlowGetLeft().prettyPrint("") 
-            + zeroFlowGetX().prettyPrint("$"); 
+    syn String FEquation.zeroFlowGetKey() {
+        StringBuilder sb = new StringBuilder();
+        if (zeroFlowNegated())
+            sb.append("-");
+        sb.append(zeroFlowGetLeft().prettyPrint(""));
+        sb.append("$");
+        sb.append(zeroFlowGetX().prettyPrint(""));
+        return sb.toString();
+    }
     
 	
 	syn boolean FExp.isSemiLinear() = false;
