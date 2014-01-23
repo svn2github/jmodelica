@@ -1088,6 +1088,8 @@ struct jmi_t {
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
+	
+	int nbr_event_iter;                  /**< Counter for the nummber of global event iterations performed. */ 
 
     jmi_simple_color_info_t* color_info_A;  /**< \brief CPR coloring info for the ODE Jacobian A */
     jmi_simple_color_info_t* color_info_B;  /**< \brief CPR coloring info for the ODE Jacobian B */

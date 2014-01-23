@@ -240,6 +240,8 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->is_initialized = 0;
 
+	jmi_->nbr_event_iter = 0;
+
     return 0;
 
 }
