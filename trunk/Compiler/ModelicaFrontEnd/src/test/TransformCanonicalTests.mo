@@ -1146,12 +1146,10 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  parameter Real x(start = 3,fixed = f);
- Real y;
+ constant Real y = -0.0;
  parameter Real p = 5 /* 5 */;
 parameter equation
  x = p;
-equation
- 0.0 = - y;
 end TransformCanonicalTests.AliasTest30;
 			
 ")})));
@@ -2432,13 +2430,12 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
  parameter Real x(start = 1);
- Real y;
+ constant Real y = 0.0;
  parameter Real p = 2 /* 2 */;
 parameter equation
  x = p;
-equation
- y = 0.0;
 end TransformCanonicalTests.ParameterDerivativeTest;
+			
 ")})));
 end ParameterDerivativeTest;
 
@@ -3549,15 +3546,11 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu6
- Real x[1];
- Real x[2];
- Real x[3];
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
-equation
- x[1] = if false then 1 elseif true then 4 else 7;
- x[2] = if false then 2 elseif true then 5 else 8;
- x[3] = if false then 3 elseif true then 6 else 9;
 end TransformCanonicalTests.IfEqu6;
 			
 ")})));
@@ -3582,15 +3575,11 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu7
- Real x[1];
- Real x[2];
- Real x[3];
+ constant Real x[1] = 4;
+ constant Real x[2] = 5;
+ constant Real x[3] = 6;
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
-equation
- x[1] = if false then 1 elseif true then 4 else 7;
- x[2] = if false then 2 elseif true then 5 else 8;
- x[3] = if false then 3 elseif true then 6 else 9;
 end TransformCanonicalTests.IfEqu7;
 			
 ")})));
@@ -3646,12 +3635,9 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu9
- Real x[1];
- Real x[2];
+ constant Real x[1] = 3;
+ constant Real x[2] = 4;
  constant Boolean y = true;
-equation
- x[1] = if true then 3 else 7;
- x[2] = if true then 4 else 8;
 end TransformCanonicalTests.IfEqu9;
 			
 ")})));
@@ -3678,12 +3664,9 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu10
- Real x[1];
- Real x[2];
+ constant Real x[1] = 3;
+ constant Real x[2] = 4;
  constant Boolean y = true;
-equation
- x[1] = if true then 3 else 5;
- x[2] = if true then 4 else 6;
 end TransformCanonicalTests.IfEqu10;
 			
 ")})));
@@ -4070,16 +4053,12 @@ fclass TransformCanonicalTests.IfEqu22
  parameter Integer nX = 2 /* 2 */;
  Real x[1];
  Real x[2];
- Real temp_1[1];
- Real temp_1[2];
 equation
- x[1] = if true then temp_1[1] else 0;
- x[2] = if true then temp_1[2] else 0;
  if true then
-  ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
+  ({x[1], x[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
  else
-  temp_1[1] = 0.0;
-  temp_1[2] = 0.0;
+  x[1] = 0.0;
+  x[2] = 0.0;
  end if;
 
 public
@@ -4093,6 +4072,7 @@ public
  end TransformCanonicalTests.IfEqu22.f;
 
 end TransformCanonicalTests.IfEqu22;
+	  
 ")})));
 end IfEqu22;
 

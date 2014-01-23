@@ -695,7 +695,7 @@ $C_DAE_equation_directional_derivative$
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
     jmi_ad_var_t v_5;
-    (*res)[0] = _temp_1_1 - (_der_x_3);
+    (*res)[0] = _temp_1_1 - (_der_x_2);
     (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")), pre_temp_1_1) - (_temp_1_1);
 
@@ -1002,7 +1002,7 @@ equation
     }
     (*res)[0] = v_0 - (_u_1);
     (*dF)[0] = d_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
-    (*res)[1] = _u_1 - (_der_x_4);
+    (*res)[1] = _u_1 - (_der_x_3);
     (*dF)[1] = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[2] = JMI_FALSE - (_b_2);
 ")})));
