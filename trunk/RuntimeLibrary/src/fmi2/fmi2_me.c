@@ -379,6 +379,8 @@ fmiStatus fmi2_set_real(fmiComponent c, const fmiValueReference vr[],
     for (i = 0; i < nvr; i++) {
         if (is_negated(vr[i])) {
             negated_value[i] = -value[i];
+        } else {
+            negated_value[i] = value[i];
         }
     }
     
