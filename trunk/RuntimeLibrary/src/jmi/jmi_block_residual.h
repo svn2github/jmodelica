@@ -152,6 +152,7 @@ struct jmi_block_residual_t {
     */
     
     int init;              /**< \brief A flag for initialization */
+    int at_event;          /**< \brief A flag indicating if we are at an event */
     
     long int nb_calls;                    /**< \brief Nb of times the block has been solved */
     long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */

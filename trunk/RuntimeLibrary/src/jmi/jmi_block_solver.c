@@ -118,6 +118,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     }
     
     block_solver->init = 1;
+    block_solver->at_event = 1;
 
     block_solver->F = F;
     block_solver->dF =dF;
@@ -215,6 +216,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
     c0 = clock();
     block_solver->cur_time = cur_time;
+    block_solver->at_event = handle_discrete_changes;
 
     if(block_solver->init) {
         int i;
