@@ -2190,7 +2190,17 @@ fclass ArrayBuiltins.Cat.ArrayShortCat2
  constant Real x[3,1] = 7;
  constant Real x[3,2] = 8;
  constant Real x[3,3] = 9;
+ constant Real a = 1;
+ constant Real b[1,1] = 2;
+ constant Real b[1,2] = 3;
+ constant Real c[1] = 4;
+ constant Real c[2] = 7;
+ constant Real d[1,1] = 5;
+ constant Real d[1,2] = 6;
+ constant Real d[2,1] = 8;
+ constant Real d[2,2] = 9;
 end ArrayBuiltins.Cat.ArrayShortCat2;
+			
 ")})));
 end ArrayShortCat2;
 

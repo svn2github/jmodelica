@@ -4262,6 +4262,7 @@ fclass RedeclareTests.RedeclareElement23
  constant Real b[2].z = 2;
  constant Real b[2].y = 1;
  constant Real x = 1;
+ constant Real b[1].y = 1;
 end RedeclareTests.RedeclareElement23;
 ")})));
 end RedeclareElement23;

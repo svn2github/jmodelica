@@ -81,6 +81,8 @@ equation
 fclass VariabilityPropagationTests.ConstantFolding1
  constant Real x3 = 1;
  constant Real x4 = 2.0;
+ constant Real x1 = 1;
+ constant Real x2 = 2.0;
 end VariabilityPropagationTests.ConstantFolding1;
 ")})));
 end ConstantFolding1;
@@ -485,6 +487,7 @@ equation
 fclass VariabilityPropagationTests.IfEq1
  constant Real p1 = 4;
  constant Real x1 = 3;
+ constant Real x2 = 3;
 end VariabilityPropagationTests.IfEq1;
 ")})));
 end IfEq1;
@@ -952,6 +955,7 @@ fclass VariabilityPropagationTests.AliasVariabilities1
  constant Real c1 = 1;
  constant Real c2 = 2;
  parameter Real b;
+ constant Real d = 3.0;
 parameter equation
  a = p1 + p2;
  b = a;
@@ -964,12 +968,12 @@ end VariabilityPropagationTests.AliasVariabilities1;
 			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
-		<ScalarVariable name=\"a\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"a\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"b\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"b\" valueReference=\"7\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
@@ -989,17 +993,17 @@ end VariabilityPropagationTests.AliasVariabilities1;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"d\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" />
+		<ScalarVariable name=\"d\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"p1\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"p1\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"p2\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"p2\" valueReference=\"5\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentParameter</VariableCategory>

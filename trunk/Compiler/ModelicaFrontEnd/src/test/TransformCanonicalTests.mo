@@ -222,6 +222,7 @@ fclass TransformCanonicalTests.TransformCanonicalTest7
  parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
  constant Real y = 2;
+ constant Real x[2] = 2;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
@@ -452,8 +453,8 @@ Input variables:
   end LinearityTest1;
 
   model AliasTest1
-    Real x1 = 1;
-    Real x2 = 1;
+    Real x1 = time;
+    Real x2 = time;
     Real x3,x4,x5,x6;
   equation
     x1 = -x3;
@@ -476,7 +477,7 @@ Alias sets:
   end AliasTest1;
 
   model AliasTest2
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -497,7 +498,7 @@ Alias sets:
   end AliasTest2;
 
   model AliasTest3
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -518,7 +519,7 @@ Alias sets:
   end AliasTest3;
 
   model AliasTest4
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -539,7 +540,7 @@ Alias sets:
   end AliasTest4;
 
   model AliasTest5
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -560,7 +561,7 @@ Alias sets:
   end AliasTest5;
 
   model AliasTest6
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -581,7 +582,7 @@ Alias sets:
   end AliasTest6;
 
   model AliasTest7
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     x1 = x2;
@@ -602,7 +603,7 @@ Alias sets:
   end AliasTest7;
 
   model AliasTest8
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -623,7 +624,7 @@ Alias sets:
   end AliasTest8;
 
   model AliasTest9
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3,x4;
   equation
     -x1 = x2;
@@ -644,7 +645,7 @@ Alias sets:
   end AliasTest9;
 
   model AliasTest10
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = x2;
@@ -664,7 +665,7 @@ Alias sets:
   end AliasTest10;
 
   model AliasTest11
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = x2;
@@ -684,7 +685,7 @@ Alias sets:
   end AliasTest11;
 
   model AliasTest12
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = -x2;
@@ -704,7 +705,7 @@ Alias sets:
   end AliasTest12;
 
   model AliasTest13
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     x1 = -x2;
@@ -724,7 +725,7 @@ Alias sets:
   end AliasTest13;
 
   model AliasTest14
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     -x1 = x2;
@@ -744,7 +745,7 @@ Alias sets:
   end AliasTest14;
 
   model AliasTest15
-    Real x1 = 1;
+    Real x1 = time;
     Real x2,x3;
   equation
     -x1 = x2;
@@ -863,6 +864,8 @@ Semantic error at line 0, column 0:
 			flatModel="
 fclass TransformCanonicalTests.AliasTest20
  constant Real x1 = 1;
+ constant Real x2 = - 1;
+ constant Real x3 = 1;
 end TransformCanonicalTests.AliasTest20;
 ")})));
   end AliasTest20;
@@ -871,7 +874,7 @@ end TransformCanonicalTests.AliasTest20;
     Real x1,x2,x3;
   equation
     0 = x1 + x2;
-    x1 = 1;   
+    x1 = time;   
     x3 = x2^2;
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -901,6 +904,7 @@ Alias sets:
 fclass TransformCanonicalTests.AliasTest22
  constant Real x1 = 1;
  constant Real x3 = 1.0;
+ constant Real x2 = - 1;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -1012,7 +1016,7 @@ equation
  x1 = x3;
  x2 = x4;
  x3 = x5;
- x3 =1;
+ x3 = 1;
 
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -1022,6 +1026,10 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest27
  constant Real x1 = 1;
+ constant Real x2 = 1;
+ constant Real x3 = 1;
+ constant Real x4 = 1;
+ constant Real x5 = 1;
 end TransformCanonicalTests.AliasTest27;
 ")})));
 end AliasTest27;
@@ -1164,7 +1172,7 @@ equation
  x1 = -x2;
  x3 = -x4;
  x2 = -x4;
- x3 =1;
+ x3 = time;
 
 
 	annotation(__JModelica(UnitTesting(tests={

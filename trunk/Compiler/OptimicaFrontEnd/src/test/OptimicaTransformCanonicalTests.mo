@@ -326,6 +326,7 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(final
  constant Real y = 1;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
+ constant Real x[1] = 1;
 constraint 
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;

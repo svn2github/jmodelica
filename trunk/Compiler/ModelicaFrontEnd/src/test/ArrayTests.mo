@@ -513,6 +513,8 @@ equation
 fclass ArrayTests.General.ArrayTest21
  constant Real x[1] = 0;
  constant Real x[2] = 0;
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
 end ArrayTests.General.ArrayTest21;
 ")})));
 end ArrayTest21;
@@ -532,7 +534,10 @@ equation
 fclass ArrayTests.General.ArrayTest22
  constant Real x[1] = 1;
  constant Real x[2] = 1;
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
 end ArrayTests.General.ArrayTest22;
+			
 ")})));
 end ArrayTest22;
 
@@ -553,7 +558,12 @@ fclass ArrayTests.General.ArrayTest23
  constant Real x[1,2] = 1;
  constant Real x[2,1] = 1;
  constant Real x[2,2] = 1;
+ constant Real y[1,1] = 1;
+ constant Real y[1,2] = 1;
+ constant Real y[2,1] = 1;
+ constant Real y[2,2] = 1;
 end ArrayTests.General.ArrayTest23;
+			
 ")})));
 end ArrayTest23;
 
@@ -4884,6 +4894,12 @@ fclass ArrayTests.Constructors.LongForm.LongArrayForm4
  constant Real x3[3,1] = 7;
  constant Real x3[3,2] = 8;
  constant Real x3[3,3] = 9;
+ constant Real x1[1] = 1;
+ constant Real x1[2] = 2;
+ constant Real x1[3] = 3;
+ constant Real x2[1] = 4;
+ constant Real x2[2] = 5;
+ constant Real x2[3] = 6;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -4942,6 +4958,10 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
  constant Real xx[1,2] = 2;
  constant Real xx[2,1] = 3;
  constant Real xx[2,2] = 4;
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -5255,6 +5275,9 @@ fclass ArrayTests.For.ForEquation2
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
+ constant Real a.y[1] = 3;
+ constant Real a.y[2] = 2;
+ constant Real a.y[3] = 1;
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -5593,6 +5616,14 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real z[2,1,2] = 0;
  constant Real z[2,2,1] = 0;
  constant Real z[2,2,2] = 1;
+ constant Real m[1].x[1,1] = 1;
+ constant Real m[1].x[1,2] = 0;
+ constant Real m[1].x[2,1] = 0;
+ constant Real m[1].x[2,2] = 1;
+ constant Real m[2].x[1,1] = 1;
+ constant Real m[2].x[1,2] = 0;
+ constant Real m[2].x[2,1] = 0;
+ constant Real m[2].x[2,2] = 1;
 initial equation 
  y[1,1,1] = 0.0;
  y[1,1,2] = 0.0;

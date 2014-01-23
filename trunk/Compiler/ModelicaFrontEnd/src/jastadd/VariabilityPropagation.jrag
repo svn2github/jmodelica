@@ -109,13 +109,14 @@ aspect VariabilityPropagation {
 		// Clean variables
         ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
         ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
+        AliasManager am = getAliasManager();
         for (FVariable fVariable: getFVariables()) {
             if (!fVariable.taggedForRemoval) {
                 newVariables.add(fVariable);
             }
         }
         for (FVariable fVariable: getAliasVariables()) {
-            if (fVariable.aliasSet() != null) {
+            if (am.getAliasSet(fVariable) != null) {
                 newAliases.add(fVariable);
             } else if (!fVariable.isTemporary()) {
                 newVariables.add(fVariable);
@@ -327,7 +328,7 @@ aspect VariabilityPropagation {
 		// Declaration
 		setFTypePrefixVariability(variability);
 		if (variability.constantVariability()) {
-			setBindingExp(bindingExp);
+			setBindingExp(bindingExp.fullCopy());
 		}
 		
 		// Uses
@@ -365,15 +366,21 @@ aspect VariabilityPropagation {
                 if (fv != this) {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.constantVariability())
-                        setBindingExp(bindingExp);
+                        fv.setBindingExp(bindingExp.negated(av.isNegated()));
                     if (variability.parameterVariability() && !fv.isTemporary())
-                        parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp()));
+                        parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(av.isNegated())));
                 }
             }
-            if (variability.parameterVariability())
-                myFClass().getAliasManager().unAlias(this);
+            myFClass().getAliasManager().unAlias(this);
         }
 	}
+	
+    syn FExp FExp.negated(boolean neg) {
+        if (neg)
+            return new FNegExp(unboundCopy());
+        else
+            return unboundCopy();
+    }
 }
 
 aspect ConstantFolding {

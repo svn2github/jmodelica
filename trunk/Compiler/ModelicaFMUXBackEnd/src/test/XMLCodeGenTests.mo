@@ -691,18 +691,18 @@ end XMLCodeGenTest2;
 			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
-		<ScalarVariable name=\"a.b.c.y[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" />
+		<ScalarVariable name=\"a.b.c.y[1]\" valueReference=\"6\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"a.b.c.y[2]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" />
+		<ScalarVariable name=\"a.b.c.y[2]\" valueReference=\"7\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"a.b.x[1,1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" />
+		<ScalarVariable name=\"a.b.x[1,1]\" valueReference=\"4\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
@@ -711,8 +711,8 @@ end XMLCodeGenTest2;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"a.b.x[2,1]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"alias\" >
-			<Real relativeQuantity=\"false\" />
+		<ScalarVariable name=\"a.b.x[2,1]\" valueReference=\"5\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
