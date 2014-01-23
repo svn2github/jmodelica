@@ -217,14 +217,6 @@ end RedeclareTestOx5;
  
 model RedeclareTestOx6_Err 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
- 
-  
-/*
-  This test case test tests lookup in a redeclared component and is currently
-  not supported.   
- 
-*/
- 
   model A
     Real x=1;
   end A;
@@ -252,14 +244,9 @@ model RedeclareTestOx6_Err
    E e(d(redeclare B a)); // This redeclaration should be ok since B is a subtype of A!
  
 end RedeclareTestOx6_Err;
+
  
- model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
-/*
-  Should give an error message like
-   
- 
-*/
- 
+model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
   model A
     Real x=1;
   end A;
@@ -284,7 +271,6 @@ end RedeclareTestOx6_Err;
    end E;
  
    E e(d(redeclare C a)); 
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -301,8 +287,6 @@ end RedeclareTestOx65_Err;
  
 model RedeclareTestOx7_Err 
     "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
-  // This is based on replaceable types and is not tested here.
- 
   model A
     Real x=1;
   end A;
@@ -330,6 +314,16 @@ model RedeclareTestOx7_Err
  
    E e(d(redeclare model AA=B)); // This redeclaration should be ok since B is a subtype of A!
  
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="RedeclareTestOx7_Err",
+			description="Using var not available in final type without explicit constrainedby",
+			errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 283, column 19:
+  Cannot find class or component declaration for z
+")})));
 end RedeclareTestOx7_Err;
  
 model RedeclareTestOx8 "Constraining clause example"
@@ -370,20 +364,6 @@ end RedeclareTests.RedeclareTestOx8;
 end RedeclareTestOx8;
  
 model RedeclareTestOx9_Err "Constraining clause example, errouneous"
- 
- 
- 
- /*
-  Should give an error message like
-  Error in redeclaration in component:
-   D d(redeclare A c); in class RedeclareTestOx9_Err
-   component 'A c' is not a subtype of constraining type B.
-   Redeclared declaration located in class D.
-   replaceable C c constrainedby B;
-   Instance name of redeclared original declaration: d.c   
-   TODO: the check is correct, but the error message is not correct.
-*/
- 
   model A
     Real x=1;
   end A;
@@ -418,11 +398,8 @@ Semantic error at line 399, column 8:
 ")})));
 end RedeclareTestOx9_Err;
 
+
 model RedeclareTestOx95_Err "Constraining clause example, errouneous"
- 
- 
- 
- 
   model A
     Real x=1;
   end A;
@@ -459,9 +436,6 @@ end RedeclareTestOx95_Err;
 
 
 model RedeclareTestOx10 "Constraining clause example."
- 
- 
- 
   model A
     Real x=1;
   end A;
@@ -505,14 +479,6 @@ end RedeclareTestOx10;
 
 
 model RedeclareTestOx11_Err "Constraining clause example."
-//  Should give an error message like
-//  Error in redeclaration in component:
-//   D d(redeclare A c); in class RedeclareTestOx9_Err
-//   component 'A c' is not a subtype of constraining type B.
-//   Redeclared declaration located in class D.
-//   replaceable C c constrainedby B;
-//   Instance name of redeclared original declaration: d.c   
- 
   model A
     Real x=1;
   end A;
@@ -539,14 +505,13 @@ model RedeclareTestOx11_Err "Constraining clause example."
    
    // This is another error
    E e(redeclare D d(redeclare A c));
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="RedeclareTestOx11_Err",
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
-3 errors found:
+2 errors found:
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 537, column 38:
@@ -554,14 +519,11 @@ Semantic error at line 537, column 38:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
 Semantic error at line 541, column 8:
   In the declaration 'redeclare D d(redeclare A c)', the replacing class is not a subtype of the constraining class from the declaration 'replaceable D d constrainedby D (redeclare replaceable B c constrainedby A)'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 541, column 22:
-  In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx11_Err;
 
 
- model RedeclareTestOx115_Err "Constraining clause example."
+model RedeclareTestOx115_Err "Constraining clause example."
 /*
   Should give an error message like
   Error: in file 'src/test/modelica/RedeclareTests.mo':
@@ -591,10 +553,8 @@ Semantic error at line 431, column 32:
    model E
      replaceable D d(redeclare replaceable C c constrainedby C) constrainedby D(redeclare replaceable B c constrainedby C);
    end E;
-  
- 
+
    E e;
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -608,15 +568,13 @@ Semantic error at line 601, column 69:
 ")})));
 end RedeclareTestOx115_Err;
 
- model RedeclareTestOx116_Err "Constraining clause example."
+
+model RedeclareTestOx116_Err "Constraining clause example."
 /*
   Should give an error message like
   Error: in file 'src\test\modelica\RedeclareTests.mo':
 Semantic error at line 470, column 58:
   'A' is not a subtype of 'B'
-  
- 
- 
  */
  
   model A
@@ -642,10 +600,8 @@ Semantic error at line 470, column 58:
      // This is an error because the constraining clause of C c constrainedby A is not a subtype of B c
      replaceable D d constrainedby D(redeclare replaceable C c constrainedby A);
    end E;
-  
  
    E e;
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -678,7 +634,6 @@ model RedeclareTestOx12 "Constraining clause example."
    end D;
  
    D d(redeclare A c);
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -736,9 +691,6 @@ end RedeclareTestOx13;
 
 
 model RedeclareTest_Constr_14_Err "Constraining clause example."
- 
- 
-  
   model A
     Real x=1;
   end A;
@@ -778,8 +730,8 @@ Semantic error at line 752, column 10:
 ")})));
 end RedeclareTest_Constr_14_Err;
 
+
 model RedeclareTest_Constr_15_Err "Constraining clause example."
- 
   model A
     Real x=1;
   end A;
@@ -805,7 +757,6 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
    end E;
  
    E e(d(redeclare replaceable C c));
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -819,8 +770,8 @@ Semantic error at line 790, column 10:
 ")})));
 end RedeclareTest_Constr_15_Err;
 
+
 model RedeclareTest_Constr_16_Err "Constraining clause example."
- 
   model A
     Real x=1;
   end A;
@@ -846,7 +797,6 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
    end E;
  
    E e(d(redeclare replaceable A c));
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -860,8 +810,8 @@ Semantic error at line 837, column 10:
 ")})));
 end RedeclareTest_Constr_16_Err;
 
+
 model RedeclareTest_Constr_17_Err "Constraining clause example."
- 
   model A
     Real x=1;
   end A;
@@ -887,7 +837,6 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
    end E;
  
    E e(redeclare replaceable D d(redeclare replaceable B c) constrainedby D(redeclare replaceable C c constrainedby C));
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -900,6 +849,7 @@ Semantic error at line 884, column 34:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
+
 
 model RedeclareTest_Constr_18_Err "Constraining clause example."
   model A
@@ -928,7 +878,6 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
    end E;
  
    E e;
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
@@ -945,10 +894,8 @@ Semantic error at line 940, column 38:
 ")})));
 end RedeclareTest_Constr_18_Err;
 
+
 model RedeclareTest_Classes_1 "Redeclaration of classes example."
- 
- 
- 
   model A
     Real x=1;
   end A;
@@ -965,19 +912,15 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
   end C;
  
    model D
-   
      replaceable model myA = A;
      myA a(x=4);
    end D;
  
    model E
-   
-   
       D d(redeclare replaceable model myA = C);
    end E;
  
    E e;
- 
 
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
@@ -1428,50 +1371,8 @@ end RedeclareTests.RedeclareTest6;
 ")})));
 end RedeclareTest6;
 
-model RedeclareTest65_Err
-  model C2
-    Real x=2;
-  end C2;
-  
-  model C22
-    Real x=3;
-    Real y=4;
-  end C22;
-  
-  model C222
-    Real x=5;
-    Real y=6;
-    Real z=7;
-  end C222;
-  
-  model A
-    replaceable C2 c2(x=55); 
-  end A;
-  
-  model B
-    A a(redeclare replaceable C22 c2(w=8));
-  end B;
-  
-  B b(a(redeclare C222 c2(z=9,y=4,x=6)));
-
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RedeclareTest65_Err",
-			description="Basic redeclare error.",
-			errorMessage="
-1 errors found:
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 404, column 7:
-  Cannot find component declaration for w
-
-")})));
-end RedeclareTest65_Err;
-
-
 
 model RedeclareTest7
-
   model A
   	model B
     	Real x=3;
@@ -1561,7 +1462,7 @@ model RedeclareTest9
   end A;
   
   model B
-    // Notice that the modifier 'x=8' is  merged since
+    // Note that the modifier 'x=8' is  merged since
     // it appears in a constraining clause  
     A a(redeclare replaceable C22 c2 constrainedby C22(x=8));
     A aa;
@@ -1609,7 +1510,7 @@ model RedeclareTest95_Err
   end A;
   
   model B
-    // Notice that the modifier 'x=8' is  merged since
+    // Note that the modifier 'w=8' is  merged since
     // it appears in a constraining clause  
     A a(redeclare replaceable C22 c2 constrainedby C22(w=8));
     A aa;
@@ -1631,54 +1532,8 @@ Semantic error at line 1609, column 7:
 ")})));
 end RedeclareTest95_Err;
 
-model RedeclareTest96_Err
-  
-  
-  model C2
-    Real x=2;
-  end C2;
-  
-  model C22
-    Real x=3;
-    Real y=4;
-  end C22;
-  
-  model C222
-    Real x=5;
-    Real y=6;
-    Real z=7;
-  end C222;
-  
-  model A
-    replaceable C2 c2;
-  end A;
-  
-  model B
-    // Notice that the modifier 'x=8' is  merged since
-    // it appears in a constraining clause  
-    extends A(redeclare replaceable C22 c2(w=8));
-    A aa;
-  end B;
-  
-  A a(redeclare C22 c2);
-  B b(redeclare C222 c2(z=9,y=4));
-
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RedeclareTest96_Err",
-			description="Basic redeclares.",
-			errorMessage="
-1 errors found:
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 1659, column 7:
-  Cannot find component declaration for w
-
-")})));
-end RedeclareTest96_Err;
 
 model RedeclareTest97_Err
-  
-  
   model C2
     Real x=2;
   end C2;
@@ -1699,7 +1554,7 @@ model RedeclareTest97_Err
   end A;
   
   model B
-    // Notice that the modifier 'x=8' is  merged since
+    // Note that the modifier 'w=8' is  merged since
     // it appears in a constraining clause  
     extends A(redeclare replaceable C22 c2 constrainedby C22(w=8));
     A aa;
@@ -3306,7 +3161,6 @@ end RedeclareTests.RedeclareTest38;
 end RedeclareTest38;
 
 
-// TODO: add another test where call to f() is in binding expression of x
 model RedeclareTest39
     function f1
         input Real x;
@@ -3358,6 +3212,35 @@ public
 end RedeclareTests.RedeclareTest39;
 ")})));
 end RedeclareTest39;
+
+
+model RedeclareTest40
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+    algorithm
+        y := x + 1;
+    end f2;
+    
+    model A
+        replaceable function f = f1;
+        Real x = f(time);
+    end A;
+    
+    model B
+        replaceable A a constrainedby A(redeclare function f = f2);
+    end B;
+    
+    model C
+        B b(redeclare A a);
+    end C;
+    
+    C c;
+end RedeclareTest40;
 
 
 model RedeclareElement1

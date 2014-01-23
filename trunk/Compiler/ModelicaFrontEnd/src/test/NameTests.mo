@@ -412,7 +412,11 @@ end NameTest12_Err;
 			name="NameTest13_Err",
 			description="Test that names are looked up correct.",
 			errorMessage="
-2 errors found:
+3 errors found:
+
+Error: in file '/src/test/NameTests.mo':
+Semantic error at line 399, column 31:
+  Cannot find component declaration for z
 
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 37:
@@ -462,9 +466,13 @@ end NameTest13_Err;
 2 errors found:
  
 Error: in file 'src/test/modelica/NameTests.mo':
+Semantic error at line 459, column 18:
+  Cannot find component declaration for z
+ 
+Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 18:
   Cannot find component declaration for z
-
+  
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 461, column 20:
   Cannot find class or component declaration for pp
