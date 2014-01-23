@@ -363,19 +363,12 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 /* Logging callback used by KINSOL to report progress att higher log levels */
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
     int i;
-    long int nniters;
     jmi_block_solver_t *block = eh_data;
     jmi_kinsol_solver_t* solver = block->solver;
     struct KINMemRec* kin_mem = solver->kin_mem;
     realtype* residual_scaling_factors = N_VGetArrayPointer(solver->kin_f_scale);
     jmi_log_t *log = block->log;
-    
-    jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
-    jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
-    jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
-    
-    /* Get the number of iterations */
-    KINGetNumNonlinSolvIters(kin_mem, &nniters);
+
     
     /* Only output an iteration under certain conditions:
          *  1. nle_solver_log > 2
@@ -385,21 +378,32 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
          *  This approach gives one printout per iteration
          */
 
-    if ((block->callbacks->log_options.log_level >= 5) &&
-            (((strcmp("KINSolInit",function)==0) ||
-              (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0)))
+    if ((block->callbacks->log_options.log_level >= 5))
     {
-        jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
-        jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
-        jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
-        {
-            realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
-            jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
-            for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
-            jmi_log_leave(log, node);
+        jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
+        jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
+        jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
+        
+        if ((((strcmp("KINSolInit",function)==0) ||
+              (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
+            long int nniters;
+            /* Get the number of iterations */
+            KINGetNumNonlinSolvIters(kin_mem, &nniters);
+    
+            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
+            jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
+            {
+                realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+                jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
+                for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
+                jmi_log_leave(log, node);
+            }
         }
+        
+        jmi_log_leave(log, topnode);
     }
-    jmi_log_leave(log, topnode);
+    
 }
 
 /* Print out meaningfull message based on KINSOL return flag */
@@ -1257,7 +1261,7 @@ void jmi_kinsol_solver_print_solve_start(jmi_block_solver_t * block,
         jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
         jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
-        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->initial, block->n);        
+        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->x, block->n);        
     }
 }
 
