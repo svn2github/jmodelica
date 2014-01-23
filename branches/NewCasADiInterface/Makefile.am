@@ -60,19 +60,7 @@ MC_OPTIMICA_JARS=$(MC_JARS)/optimica
 
 CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
 
-IFCASADI_DIR_INCLUDE_WINDOWS=-I"$(JAVA_HOME)\include" -I"$(JAVA_HOME)\include\win32" -I"$(CASADI_HOME)" 
-IFCASADI_WINDOWS=$(MC_COMPILERS_DIR)/lib/ifcasadi.dll 
-LIBCASADI_WINDOWS=$(CASADI_BUILD_DIR)/lib/libcasadi.dll 
-LIBIFCASADI_COMPILER_FLAGS_WINDOWS=-fPIC -shared -D_REENTRANT -Wl,--add-stdcall-alias 
 
-CASADI_CMAKE_FLAGS_LINUX =  $(CASADI_HOME) -DENABLE_SHARED=ON -DENABLE_STATIC=OFF 
-IFCASADI_DIR_INCLUDE_LINUX=-I$(JAVA_HOME)/include/ -I"$(CASADI_HOME)" 
-IFCASADI_LINUX=$(MC_COMPILERS_DIR)/lib/libifcasadi.so
-LIBCASADI_LINUX=$(CASADI_BUILD_DIR)/lib/libcasadi.so 
-LIBIFCASADI_COMPILER_FLAGS_LINUX=-fPIC -shared -D_REENTRANT
-
-	
-	    
 # The CMake for ModelicaCasADi needs these variables.
 export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
@@ -81,60 +69,45 @@ export CASADI_BUILD_DIR
  
 casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/casadi_interface $(MC_BUILD)/test
 
-$(MC_JARS):  $(MC_SRC)/src/cpp-generated/ $(MC_MODELICA_JARS) $(OC_SRC)/src/cpp-generated/ $(MC_OPTIMICA_JARS) ifcasadi
+ifcasadi:
+	mkdir -p $(MC_BUILD)/ifcasadi; \
+	cd $(MC_BUILD)/ifcasadi; \
+	case $(build) in \
+	*-cygwin*) \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	*-mingw*) \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	*) \
+	cmake $(MC_SRC)/src/swig ;; \
+	esac 
+	cd $(MC_BUILD)/ifcasadi;  make
+
+$(MC_JARS): $(MC_MODELICA_JARS) $(MC_OPTIMICA_JARS)
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(MC_JARS)
 
-$(MC_MODELICA_JARS): 
+mc_modelica: ifcasadi
 	cd $(MC_SRC); ant -f build.xml 
+
+mc_optimica: ifcasadi
+	cd $(OC_SRC); ant -f build.xml 
+
+$(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
+$(MC_SRC)/bin/util.jar:             mc_modelica
+
+$(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
+$(OC_SRC)/bin/util.jar:             mc_optimica
+
+$(MC_MODELICA_JARS): $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_SRC)/bin/util.jar
 	rm -rf $(MC_MODELICA_JARS)
 	mkdir -p $(MC_MODELICA_JARS)
 	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_MODELICA_JARS)
 	cp $(MC_SRC)/bin/util.jar $(MC_MODELICA_JARS)
-	
-$(MC_SRC)/src/cpp-generated/: 
-	rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
-	mkdir -p $(MC_SRC)/src/cpp-generated
-	mkdir -p $(MC_SRC)/src/java-generated/casadi
-	swig -outdir $(MC_SRC)/src/java-generated/casadi \
-             -o $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
-	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
 
-$(MC_OPTIMICA_JARS): $(OC_SRC)/src/cpp-generated/ 
-	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; ant -f build.xml 
-	cd $(OC_SRC); ant -f build.xml 
+$(MC_OPTIMICA_JARS): $(OC_SRC)/bin/OptimicaCompiler.jar $(OC_SRC)/bin/util.jar
 	rm -rf $(MC_OPTIMICA_JARS)
 	mkdir -p $(MC_OPTIMICA_JARS)
 	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_OPTIMICA_JARS)
 	cp $(OC_SRC)/bin/util.jar $(MC_OPTIMICA_JARS)
-	     
-$(OC_SRC)/src/cpp-generated/: 
-	rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
-	mkdir -p $(OC_SRC)/src/cpp-generated
-	mkdir -p $(OC_SRC)/src/java-generated/casadi
-	swig -outdir $(OC_SRC)/src/java-generated/casadi \
-             -o $(OC_SRC)/src/cpp-generated/java_casadi_wrap.cxx \
-	     -java -package casadi -c++ -I$(CASADI_HOME) $(MC_SRC)/src/swig/java_casadi.i
-
-	     
-ifcasadi: $(MC_SRC)/src/cpp-generated/
-	mkdir -p $(MC_COMPILERS_DIR)/lib
-	case $(build) in \
-	*-cygwin*) \
-	g++ -o $(MC_COMPILERS_DIR)/lib/ifcasadi.dll $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
-	$(LIBCASADI_WINDOWS)   \
-	$(LIBIFCASADI_COMPILER_FLAGS_WINDOWS)  \
-	$(IFCASADI_DIR_INCLUDE_WINDOWS) ;; \
-	*-mingw*) \
-	g++ -o $(MC_COMPILERS_DIR)/lib/ifcasadi.dll $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
-	$(LIBCASADI_WINDOWS)   \
-	$(LIBIFCASADI_COMPILER_FLAGS_WINDOWS)  \
-	$(IFCASADI_DIR_INCLUDE_WINDOWS) ;; \
-	*) \
-	g++ -o $(MC_COMPILERS_DIR)/lib/libifcasadi.so $(MC_SRC)/src/cpp-generated/java_casadi_wrap.cxx   \
-	$(LIBCASADI_LINUX)   \
-	$(LIBIFCASADI_COMPILER_FLAGS_LINUX)  \
-	$(IFCASADI_DIR_INCLUDE_LINUX) ;; \
-	esac
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
@@ -150,9 +123,9 @@ modelicacasadi_wrapper:
 	cmake $(MC_INTERFACE) ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
-	
-	
-$(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
+
+
+ $(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
@@ -374,8 +347,14 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
-	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-	rm -rf $(DESTDIR)$(prefix)/Python/casadi_interface
+#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
+#	rm -rf $(DESTDIR)$(prefix)/Python/casadi_interface
+if HAVE_ANT
+	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
+	cd $(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi; \
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
+endif
 	
 
 clean-python-packages:
@@ -400,10 +379,6 @@ if HAVE_ANT
 	$(ANT_OPTS) $(ANT) clean
 	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
 	$(ANT_OPTS) $(ANT) clean
-	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
-	cd $(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi; \
-	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
 endif
 
 docs:

@@ -34,7 +34,7 @@
 
 	<property name="modelica_front_end_path" value="../ModelicaFrontEnd" />
 	<property name="optimica_front_end_path" value="../OptimicaFrontEnd" />
-	<property name="modelica_casadi_back_end_path" value="." />  <!-- todo: change when integrating -->
+	<property name="modelica_casadi_back_end_path" value="../ModelicaCompilerCasADi" />
 
 	<property name="ast_package" value="org.jmodelica.optimica.compiler" />
 
@@ -130,6 +130,8 @@
 			<include name="**/*.java" />
 			<exclude name="**/*junit*/**" />
 			<exclude name="**/*.aj" />
+            <!-- Exclude DebugCompiler.java since it depends on org.jmodelica.modelica -->
+			<exclude name="**/DebugCompiler.java" />
 		</javac>
 	</target>
     

@@ -84,10 +84,10 @@ find_library(CASADI_DLL
 # generate modelicacasadi_paths.h
 if(WIN32)
   set(CLASSPATH ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
-  set(LIBPATH ${MC_BUILD}/casadi/lib;${JMODELICA}/lib)
+  set(LIBPATH ${MC_BUILD}/casadi/lib;${MC_BUILD}/ifcasadi)
 else(WIN32)
   join(CLASSPATH ":" "${JARS}")
-  set(LIBPATH ${MC_BUILD}/casadi/lib:${JMODELICA}/lib)
+  set(LIBPATH ${MC_BUILD}/casadi/lib:${MC_BUILD}/ifcasadi)
 endif(WIN32)
 set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
