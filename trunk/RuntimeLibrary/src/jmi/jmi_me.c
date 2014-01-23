@@ -126,12 +126,8 @@ int jmi_initialize(jmi_t* jmi) {
     int nR0, nR;             /* Number of R-equations */
     int initComplete = 0;    /* If the initialization are complete */
     int iter, max_iterations;
+    jmi_log_node_t top_node;
 
-/*  
-    //For setting the final switches (if any)  
-    jmi_real_t* switchesR;   // Switches
-    jmi_real_t* switchesR0;  // Initial Switches
-*/
     jmi_real_t* switches;    /* Switches */
     jmi_real_t* sw_temp = 0;
     jmi_real_t* b_mode;
@@ -139,6 +135,11 @@ int jmi_initialize(jmi_t* jmi) {
     if (jmi->is_initialized == 1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");
         return -1;
+    }
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 4){
+        top_node =jmi_log_enter_fmt(jmi->log, logInfo, "Initialization", 
+                                "Starting initialization.");
     }
     
     /* Evaluate parameters */
@@ -283,33 +284,12 @@ int jmi_initialize(jmi_t* jmi) {
 
     jmi_copy_pre_values(jmi);
     jmi_save_last_successful_values(jmi);
-
+    
     jmi->is_initialized = 1;
- 
-/*
-    //Set the final switches (if any)
-    if (nR > 0){
-        jmi_real_t* a_mode =  jmi -> jmi_callbacks -> allocate_memory(nR, sizeof(jmi_real_t));
-        retval = jmi_dae_R(jmi,a_mode); //Get the event indicators after the initialisation
-        
-        if(retval != 0) { //Error check
-            jmi_log_comment(jmi->log, logError, "Initialization failed.");
-            return fmiError;
-        }
-        
-        switches = jmi_get_sw(jmi); //Get the switches
-        
-        for (i=0; i < nR; i=++){ //Set the final switches
-            if (a_mode[i] > 0.0){
-                switches[i] = 1.0;
-            }else{
-                switches[i] = 0.0;
-            }
-            printf("Switches (after) %d, %f\n",i,switches[i]);
-        }
-        jmi -> jmi_callbacks -> free_memory(a_mode); //Free memory
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 4){
+        jmi_log_leave(jmi->log, top_node);
     }
-*/
     
     return 0;
 }
@@ -640,10 +620,27 @@ int jmi_get_directional_derivative(jmi_t* jmi,
 
 int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     int retval;
+    jmi_log_node_t node;
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDerivatives", 
+                                "Call to get derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            int nF, nR;
+            jmi_dae_get_sizes(jmi, &nF, &nR);
+            jmi_log_reals(jmi->log, node, logInfo, "switches", jmi_get_sw(jmi), nR);
+            jmi_log_reals(jmi->log, node, logInfo, "booleans", jmi_get_boolean_d(jmi), jmi->n_boolean_d);
+            jmi_log_reals(jmi->log, node, logInfo, "integers", jmi_get_integer_d(jmi), jmi->n_integer_d);
+        }
+    }
+    
     
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
+            if (jmi->jmi_callbacks.log_options.log_level >= 5){
+                jmi_log_leave(jmi->log, node);
+            }
             jmi_log_node(jmi->log, logError, "Error",
                 "Evaluating the derivatives failed at <t:%g>", jmi_get_t(jmi)[0]);
             /* If it failed, reset to the previous succesful values */
@@ -654,25 +651,51 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
     }
     memcpy (derivatives, jmi_get_real_dx(jmi), nx*sizeof(jmi_real_t));
     
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_leave(jmi->log, node);
+    }
+    
     return 0;
 }
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     int retval = 0;
+    jmi_log_node_t node;
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        node = jmi_log_enter_fmt(jmi->log, logInfo, "CompletedIntegratorStep", 
+                                "Completed integrator step was called at <t:%g> indicating a successful step.", jmi_get_t(jmi)[0]);
+    }
     
     /* Save the z values to the z_last vector */
     jmi_save_last_successful_values(jmi);
+    /* Block completed step */
+    /* jmi_block_completed_integrator_step(jmi); */
     
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_leave(jmi->log, node);
+    }
+
     *triggered_event = JMI_FALSE;
     return retval;
 }
 
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
     int retval;
+    jmi_log_node_t node;
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetEventIndicators", 
+                                "Call to get event indicators at <t:%g>.", jmi_get_t(jmi)[0]);
+    }
+    
 
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
+            if (jmi->jmi_callbacks.log_options.log_level >= 5){
+                jmi_log_leave(jmi->log, node);
+            }
             jmi_log_node(jmi->log, logError, "Error",
                 "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>", jmi_get_t(jmi)[0]);
             jmi_reset_last_successful_values(jmi);
@@ -684,8 +707,16 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
     
     if(retval != 0) {
         jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_leave(jmi->log, node);
+        }
         return -1;
     }
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_leave(jmi->log, node);
+    }
+    
     return 0;
 }
 
@@ -866,6 +897,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
+        /* Block completed step */
+        /* jmi_block_completed_integrator_step(jmi); */
         
         jmi_log_leave(jmi->log, final_node);
     }
