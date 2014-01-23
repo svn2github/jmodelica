@@ -390,7 +390,7 @@ initial equation
  iL = 0.0;
 equation
  u0 = sin(time);
- u1 = R1;
+ u1 = R1 * 1.0;
  u2 = R2 * i2;
  u2 = R3 * i3;
  uL = L * der(iL);
@@ -435,7 +435,6 @@ equation
  x3 = der(x4);
  der(x4) = 3;
 end VariabilityPropagationTests.Der1;
-			
 ")})));
 end Der1;
 
@@ -525,7 +524,6 @@ fclass VariabilityPropagationTests.IfEq2
 parameter equation
  x2 = p1 + 2;
 end VariabilityPropagationTests.IfEq2;
-			
 ")})));
 end IfEq2;
 

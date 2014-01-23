@@ -1159,7 +1159,6 @@ fclass TransformCanonicalTests.AliasTest30
 parameter equation
  x = p;
 end TransformCanonicalTests.AliasTest30;
-			
 ")})));
 end AliasTest30;
 
@@ -1839,7 +1838,7 @@ equation
  2.0 + v3 + v4 + v6 = 1;
  2.0 + v3 + v4 = 1;
  2.0 + v3 + v4 = 1;
- v5 + v6 + v8 + v7 = 1;
+ v5 + v6 + v8 + v7 + 0.0 = 1;
  v5 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
@@ -2443,7 +2442,6 @@ fclass TransformCanonicalTests.ParameterDerivativeTest
 parameter equation
  x = p;
 end TransformCanonicalTests.ParameterDerivativeTest;
-			
 ")})));
 end ParameterDerivativeTest;
 
@@ -3560,7 +3558,6 @@ fclass TransformCanonicalTests.IfEqu6
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu6;
-			
 ")})));
 end IfEqu6;
 
@@ -3589,7 +3586,6 @@ fclass TransformCanonicalTests.IfEqu7
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu7;
-			
 ")})));
 end IfEqu7;
 
@@ -3647,7 +3643,6 @@ fclass TransformCanonicalTests.IfEqu9
  constant Real x[2] = 4;
  constant Boolean y = true;
 end TransformCanonicalTests.IfEqu9;
-			
 ")})));
 end IfEqu9;
 
@@ -3676,7 +3671,6 @@ fclass TransformCanonicalTests.IfEqu10
  constant Real x[2] = 4;
  constant Boolean y = true;
 end TransformCanonicalTests.IfEqu10;
-			
 ")})));
 end IfEqu10;
 
@@ -4061,12 +4055,16 @@ fclass TransformCanonicalTests.IfEqu22
  parameter Integer nX = 2 /* 2 */;
  Real x[1];
  Real x[2];
+ Real temp_1[1];
+ Real temp_1[2];
 equation
- if true then
-  ({x[1], x[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
+ x[1] = temp_1[1];
+ x[2] = temp_1[2];
+ if b then
+  ({temp_1[1], temp_1[2]}) = TransformCanonicalTests.IfEqu22.f({1, 2});
  else
-  x[1] = 0.0;
-  x[2] = 0.0;
+  temp_1[1] = 0.0;
+  temp_1[2] = 0.0;
  end if;
 
 public
@@ -4080,7 +4078,6 @@ public
  end TransformCanonicalTests.IfEqu22.f;
 
 end TransformCanonicalTests.IfEqu22;
-	  
 ")})));
 end IfEqu22;
 
@@ -5144,11 +5141,11 @@ Unknown variables:
   x2
 Equations:
   x1 + x2 = z + 0.8414709848078965
-  x1 - x2 = z
-  x2 = z + 1 + 1.0
+  x1 - x2 = z * 1.0
+  x2 = 1.0 * z + 1 + 1.0
 Jacobian:
   |1.0, - 1.0, 1.0|
-  |1.0, - 1.0, - 1.0|
+  |1.0, (- 1.0), - 1.0|
   |0.0, - 1.0, 1.0|
 -------------------------------
 ")})));
@@ -5361,24 +5358,23 @@ Solution:
 -------------------------------
 Solved block of 2 variables:
 Unknown variables:
-  temp_4
-  temp_5
+  temp_2
+  temp_3
 Equations:
-  ({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  ({temp_2, temp_3}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[1]
 Solution:
-  temp_4 / (- 1.0)
+  temp_2 / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   z[2]
 Solution:
-  temp_5 / (- 1.0)
+  temp_3 / (- 1.0)
 -------------------------------
-			
 ")})));
 end BlockTest10;
 

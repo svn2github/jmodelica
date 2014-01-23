@@ -1179,22 +1179,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real _der_x1[1];
  Real _der_x1[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_2;
+ Real temp_3;
+ Real _der_temp_2;
+ Real _der_temp_3;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  _der_x1[1] + der(x2[1]) = 2;
  _der_x1[2] + der(x2[2]) = 3;
- ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- ({_der_temp_4, _der_temp_5}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - _der_x1[1] = _der_temp_4;
- - _der_x1[2] = _der_temp_5;
+ ({temp_2, temp_3}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1[1] = temp_2;
+ - x1[2] = temp_3;
+ ({_der_temp_2, _der_temp_3}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - _der_x1[1] = _der_temp_2;
+ - _der_x1[2] = _der_temp_3;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f_der
@@ -1203,7 +1203,7 @@ public
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output Real[2] der_y;
- algorithm
+algorithm
   der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -1213,7 +1213,7 @@ public
   input Real[2] x;
   input Real[2, 2] A;
   output Real[2] y;
- algorithm
+algorithm
   y[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -1274,22 +1274,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real x1._der_a[2];
  Real x2._der_a[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_2;
+ Real temp_3;
+ Real _der_temp_2;
+ Real _der_temp_3;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  x1.der(a[1]) + x2.der(a[1]) = 2;
  x1._der_a[2] + x2._der_a[2] = 3;
- (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1.a[1] = temp_4;
- - x1.a[2] = temp_5;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
- - x1.der(a[1]) = _der_temp_4;
- - x1._der_a[2] = _der_temp_5;
+ (IndexReduction.IndexReduction28_Record.R({temp_2, temp_3})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1.a[1] = temp_2;
+ - x1.a[2] = temp_3;
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_2, _der_temp_3})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1.der(a[1]) = _der_temp_2;
+ - x1._der_a[2] = _der_temp_3;
 
 public
  function IndexReduction.IndexReduction28_Record.f_der
@@ -1298,7 +1298,7 @@ public
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
- algorithm
+algorithm
   der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -1308,7 +1308,7 @@ public
   input Real[2] x;
   input Real[2, 2] A;
   output IndexReduction.IndexReduction28_Record.R y;
- algorithm
+algorithm
   y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -1944,9 +1944,9 @@ fclass IndexReduction.IndexReduction41_Homotopy
 initial equation 
  x2 = 0.0;
 equation
- der(x2) = 1;
+ 0.0 + der(x2) = 1;
 end IndexReduction.IndexReduction41_Homotopy;
-			
+
 ")})));
 end IndexReduction41_Homotopy;
 
@@ -2421,7 +2421,7 @@ model IndexReduction51
     Real x(start = 2);
     Real y;
 equation
-    y = 0*time;
+    y = 0 * time;
     c1_phi = x - y;
     c1_phi = c2_phi;
     c1_w = der(c1_phi);
@@ -2434,7 +2434,6 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction51",
             description="Test of complicated index reduction, alias elimination, expression simplification and variability propagation issue",
-			eliminate_alias_variables=true,
             flatModel="
 fclass IndexReduction.IndexReduction51
  parameter StateSelect c1_ss = StateSelect.default /* StateSelect.default */;
@@ -2447,7 +2446,7 @@ fclass IndexReduction.IndexReduction51
  Real x(start = 2);
  constant Real y = 0;
  Real _der_c2_w;
- Real _der_der_x;
+ Real _der_der_c1_phi;
 initial equation 
  x = 2;
  c1_w = 0.0;
@@ -2457,8 +2456,8 @@ equation
  c2_w = der(x);
  c2_a = _der_c2_w;
  c2_a * p = 0;
- der(c1_w) = _der_der_x;
- _der_c2_w = _der_der_x;
+ der(c1_w) = _der_der_c1_phi;
+ _der_c2_w = _der_der_c1_phi;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
