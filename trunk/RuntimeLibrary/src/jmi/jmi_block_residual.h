@@ -169,12 +169,13 @@ struct jmi_block_residual_t {
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
  * @param solver Solver to be used for the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -184,12 +185,13 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param dF A jmi_block_dir_der_func_t function
  * @param n Integer size of the block of real variables
  * @param n_nr Integer size of the block of non-real variables
+ * @param n_as Integer size of the number of active switches
  * @param jacobian_variability Variability of the Jacobian coefficients
  * @param solver Solver to be used for the block
  * @param index Integer ID nbr of the block
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_nr, int n_as, int jacobian_variability, jmi_block_solver_kind_t solver, int index);
 
 
 /**

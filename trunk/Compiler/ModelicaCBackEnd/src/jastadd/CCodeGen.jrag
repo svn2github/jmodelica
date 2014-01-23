@@ -2043,6 +2043,14 @@ aspect CCodeGen {
         for (FVariable fv : nonRealVariables())
             str.format("%sres[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
         
+        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {\n");
+        // Loop over all non-real variables and write their position in the z-vector
+        Enumerator relExpEnumerator = new Enumerator();
+        for (FRelExp relExp : activeSwitches_C())
+            relExp.genBlockResidualFunction_printSwitchIndex_C(nextIndent, str, relExpEnumerator);
+        for (FRelExp relExp : activeInitialSwitches_C())
+            relExp.genBlockResidualFunction_printSwitchIndex_C(nextIndent, str, relExpEnumerator);
+        
         // Equation nominal values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
         genBlockResidualFunctionEqnNominals_C(new Enumerator(), nextIndent, str);
@@ -2089,6 +2097,15 @@ aspect CCodeGen {
         return solvedBlocks;
     }
     
+    /**
+     * Prints the position for the switch in the z-vector
+     */
+    public void FRelExp.genBlockResidualFunction_printSwitchIndex_C(String nextIndent, PrintStream str, Enumerator enumerator) {
+        if (inEquationSection())
+            str.format("%sres[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), relExpInEquationsIndex());
+        else
+            str.format("%sres[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
+    }
     /**
      * Generates solved equation for all non-real equations in this block.
      */
@@ -2384,6 +2401,7 @@ aspect CCodeGen {
 			str.print("NULL, ");
 		str.print(iterationVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
 		str.print(nonRealVariables().size() + ", ");
+		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
 		str.print(genJMISolverConstant_C() + ", ");
 		str.print(residualBlockNumber_C() + ");\n");
@@ -2402,6 +2420,45 @@ aspect CCodeGen {
 	    return isLinear() ? "JMI_LINEAR_SOLVER" : "JMI_KINSOL_SOLVER";
 	}
 
+	
+    private Collection<FRelExp> AbstractEquationBlock.activeSwitches_C = null;
+    
+    /**
+     * Returns all active switches in the block. A switch is considered active
+     * in a block if is located in the block and depends on active variables
+     * in the block.
+     */
+    public Collection<FRelExp> AbstractEquationBlock.activeSwitches_C() {
+        if (activeSwitches_C == null) {
+            activeSwitches_C = new ArrayList<FRelExp>();
+            collectActiveSwitches_C(activeSwitches_C, false);
+        }
+        return activeSwitches_C;
+    }
+    
+    private Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C = null;
+    
+    /**
+     * Returns all active initial switches in the block. A switch is considered
+     * active in a block if is located in the block and depends on active
+     * aariables in the block.
+     */
+    public Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C() {
+        if (activeInitialSwitches_C == null) {
+            activeInitialSwitches_C = new ArrayList<FRelExp>();
+            collectActiveSwitches_C(activeInitialSwitches_C, true);
+        }
+        return activeInitialSwitches_C;
+    }
+    
+    private void AbstractEquationBlock.collectActiveSwitches_C(Collection<FRelExp> res, boolean initial) {
+        Collection<FVariable> allVariables = allVariables();
+        for (FAbstractEquation equation : allEquations())
+            for (FRelExp relExp : initial ? equation.relExpInInitialEquation() : equation.relExpInEquation())
+                if (relExp.dependsOn(allVariables))
+                    res.add(relExp);
+    }
+    
 	
     /**
      * \brief Generate code for blocks of equations 

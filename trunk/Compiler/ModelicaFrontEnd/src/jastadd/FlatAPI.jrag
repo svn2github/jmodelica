@@ -999,14 +999,20 @@ aspect FlatAPI {
 		return n_eq;
 	}
 
-	syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
+    syn int FClass.numInitialEventIndicators() = numRelExpInInitialEquations();
     syn int FClass.numRelExpInInitialEquations() = 
-    	relExpInInitialEquations().size();
-	coll ArrayList<FRelExp> FClass.relExpInInitialEquations() 
-	    [new ArrayList<FRelExp>()] with add root FlatRoot;
-	FRelExp contributes
- 		this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
-	    to FClass.relExpInInitialEquations() for myFClass();	
+        relExpInInitialEquations().size();
+    coll ArrayList<FRelExp> FClass.relExpInInitialEquations()
+        [new ArrayList<FRelExp>()] with add root FlatRoot;
+    FRelExp contributes
+        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent()
+    to FClass.relExpInInitialEquations() for myFClass();
+
+    coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
+        [new ArrayList<FRelExp>()] with add root FAbstractEquation;
+    FRelExp contributes
+        this when inInitialEquationSection() && originalFRelExp==null && generatesEvent() 
+    to FAbstractEquation.relExpInInitialEquation() for myFEquation();
 
 	public int FRelExp.relExpInInitialEquationsIndex() {
 		return myFClass().relExpInInitialEquations().

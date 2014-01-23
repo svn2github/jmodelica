@@ -41,6 +41,7 @@
 #define JMI_BLOCK_EQUATION_NOMINAL         256
 #define JMI_BLOCK_VALUE_REFERENCE          512
 #define JMI_BLOCK_NON_REAL_VALUE_REFERENCE 1024
+#define JMI_BLOCK_ACTIVE_SWITCH_INDEX      2048
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
