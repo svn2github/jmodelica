@@ -1397,4 +1397,9 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
 
+/**
+ * \brief Calls each blocks completed integration step function.
+ */
+int jmi_block_completed_integrator_step(jmi_t *jmi);
+
 #endif
