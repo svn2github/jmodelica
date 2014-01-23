@@ -83,66 +83,64 @@ fmiStatus fmi2_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     for (i = 0; i < ode_problem -> n_real_u; i++) {
         if (inputs[i].active == fmiTrue) {
             inputs[i].tn = ode_problem->time;
-            retval = fmi2_get_real(ode_problem ->fmix_me, &(inputs[i].vr), 1, &(inputs[i].input));
-            if (retval != fmiOK) {
+            flag = fmi2_get_real(ode_problem ->fmix_me, &(inputs[i].vr), 1, &(inputs[i].input));
+            if (flag != fmiOK) {
                 jmi_log_comment(ode_problem->log, logError, "Failed to get the initial inputs.");
                 return fmiError;
             }
         }
     }
     
-   
-    retval = JMI_ODE_EVENT;
-    while (retval == JMI_ODE_EVENT && ode_problem->time < time_final){
+    while (retval == JMI_ODE_EVENT && ode_problem->time < time_final) {
         
         /*printf("time = %f", ode_problem->time);
         fflush(stdout);*/
 
-		while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
-			flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));
-			if (flag != fmiOK){
-				jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
-				return fmiError;
-			}
-
-			if (fmi2_cs->event_info.valuesOfContinuousStatesChanged) {
-				flag = fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
-				if (flag != fmiOK) {
-					return fmiError;
-				}
-			}
-			initialize = TRUE;
-		}
-
-		if (fmi2_cs->event_info.nominalsOfContinuousStatesChanged) {
-			flag = fmi2_get_nominals_of_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
-			if (flag != fmiOK) {
-				jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
-				return fmiError;
-			}
-		}
-
-		/* Check if there are upcoming time events. */
-		if (fmi2_cs->event_info.nextEventTimeDefined){
-			if(fmi2_cs->event_info.nextEventTime < time_final){
-				time_event = fmi2_cs->event_info.nextEventTime;
-			} else{
-				time_event = time_final;
-			}
-		}else{
-			time_event = time_final;
-		}
-		
-
-		retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
-        if (retval==JMI_ODE_OK && time_event == time_final) {
-            break;
-        } else if (retval<JMI_ODE_OK){
+        while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
+            flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));
+            
+            if (flag != fmiOK) {
+            jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
+                return fmiError;
+            }
+			
+            initialize = TRUE;
+        }
+        
+        if (initialize) {
+            flag = fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
+            if (flag != fmiOK) {
+                return fmiError;
+            }
+        }
+        
+        if (fmi2_cs->event_info.nominalsOfContinuousStatesChanged) {
+            flag = fmi2_get_nominals_of_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
+            if (flag != fmiOK) {
+                jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
+                return fmiError;
+            }
+        }
+        
+        /* Check if there are upcoming time events. */
+        if (fmi2_cs->event_info.nextEventTimeDefined) {
+            if(fmi2_cs->event_info.nextEventTime < time_final) {
+                time_event = fmi2_cs->event_info.nextEventTime;
+            } else{
+                time_event = time_final;
+            }
+        } else {
+            time_event = time_final;
+        }
+        
+        retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
+        
+        if (retval<JMI_ODE_OK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
             return fmiError;
-        }  else {
-			fmi2_cs->event_info.newDiscreteStatesNeeded = fmiTrue; /* Finnished with an event -> new discrete states needed. */
-		}
+        } else if (retval == JMI_ODE_EVENT) {
+            fmi2_cs->event_info.newDiscreteStatesNeeded = fmiTrue; /* Finnished with an event -> new discrete states needed. */
+        }
     }
     
     /* De-activate inputs as they are no longer valid */
