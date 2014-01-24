@@ -1019,7 +1019,7 @@ aspect CADCodeGen {
 		str.println("if (evaluation_mode == JMI_BLOCK_INITIALIZE) {");
 		int var_counter = 0;
 		// Loop over all unsolved variables and write their value to x	
-		for (FVariable fv : iterationVariables()) {
+		for (FVariable fv : unsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("x["+var_counter+"] = " + fv.name_C() + ";");
 			var_counter++;
@@ -1035,7 +1035,7 @@ aspect CADCodeGen {
 		// Loop over all active variables and write the values in x to the z vector
 		var_counter = 0;
 		// Iteration is over the unsolved variables. 
-		for (FVariable fv : iterationVariables()) {
+		for (FVariable fv : unsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[ jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = dx[" + var_counter + "];");
 			str.print(innerIndent);
@@ -1057,7 +1057,7 @@ aspect CADCodeGen {
 		// Code that stores the evaluated dz
 		// dz entries for the solved variables are updated below as well
 		var_counter = 0;
-		for (FVariable fv : iterationVariables()) {
+		for (FVariable fv : unsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = -(*dF)[" + var_counter + "];");
 			var_counter++;
@@ -1081,7 +1081,7 @@ aspect CADCodeGen {
 		
 		// Reset all variables. global dz is updated elsewhere and dz_active should
 		// always be reset so as not to cause incorrect seeds
-		for (FVariable fv : iterationVariables()) {
+		for (FVariable fv : unsolvedVariables()) {
 			str.print(innerIndent);
 			str.println("(*dz)[jmi_get_index_from_value_ref(" + fv.valueReference() + ")-jmi->offs_real_dx] = 0;");
 		}

@@ -151,7 +151,7 @@ Computed variable:
 Solution:
   2 * sin(time)
 -------------------------------
-Torn mixed linear block of 3 iteration variables and 3 solved variables:
+Torn mixed linear block of 1 iteration variables and 5 solved variables:
 Coefficient variability: Discrete
 Solved variables:
   a
@@ -159,7 +159,7 @@ Solved variables:
   f
 Iteration variables:
   sa
-Unknown discrete variables:
+Solved discrete variables:
   startBack
   startFor
 Solved equations:

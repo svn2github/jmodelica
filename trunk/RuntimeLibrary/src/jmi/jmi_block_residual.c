@@ -140,7 +140,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         return jmi_block_solver_status_err_event_eval;
     }
     
-    ef = block->F(jmi,NULL,NULL,JMI_BLOCK_EVALUATE_NON_REALS);
+    ef = block->F(jmi, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
     if (ef) {
         jmi_log_node(log, logError, "Error", "Error updating discrete variables <block:%d, iter:%d> at <t:%E>",
              block->index, iter, cur_time);

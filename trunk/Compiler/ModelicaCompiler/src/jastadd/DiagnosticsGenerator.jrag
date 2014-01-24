@@ -261,7 +261,7 @@ public class DiagnosticsGenerator {
 				Set<FVariable> vars = new HashSet<FVariable>();
 				for (AbstractEquationBlock eb : fc.getDAEStructuredBLT())
 					if (eb instanceof TornEquationBlock)
-						vars.addAll(eb.iterationVariables());
+						vars.addAll(eb.unsolvedVariables());
 				for (AliasManager.AliasSet as : fc.getAliasManager().getAliasSets())
 					if (vars.contains(as.getIterationVariable().getFVariable()))
 						out.println(as.toStringWithStart());
@@ -872,7 +872,7 @@ public class DiagnosticsGenerator {
 	
 	public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, PrintStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
 		int startL = tm.getYPos();
-		int endL = startL + allVariables().size() - iterationVariables().size() - 1;
+		int endL = startL + allVariables().size() - unsolvedVariables().size() - 1;
 		tm.addStyleRule(new DiagnosticsGenerator.StyleRule(startL, startL, endL, endL, "1px solid black", "#F0E4E4"));
 		int startJ = endL + 1;
 		int endJ = startL + allVariables().size() - 1;

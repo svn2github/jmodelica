@@ -805,6 +805,10 @@ public class SolvingBiPGraph extends BiPGraph {
 	@Override
 	public void addInsidence(Eq e, Var v) {
 		super.addInsidence(e, v);
+		if (e.getEquation().isReal() != v.getVariable().isReal())
+		    return;
+		e.sameTypeOccurrence();
+		v.sameTypeOccurrence();
 		Solvability solvability = isSolved(e, v);
 		switch (solvability) {
 		case ANALYTICALLY_SOLVABLE:
@@ -830,6 +834,7 @@ public class Eq implements Comparable<Eq> {
 	private java.util.List<Var> solvableVariables = new ArrayList<Var>();
 	private int analyticallySolvableOccurrences = 0;
 	private int numericallySolvableOccurrences = 0;
+	private int sameTypeOccurrences = 0;
 	private Var matching = null;
 	private boolean visited = false;
 	private int layer = 1000000;
@@ -963,6 +968,15 @@ public class Eq implements Comparable<Eq> {
 		return getName();
 	}
 
+	public void sameTypeOccurrence(){
+	    sameTypeOccurrences++;
+    }
+    
+    public int getNbrSameTypeOccurrences(){
+        return sameTypeOccurrences;
+    }
+    
+
 	public void addAnalyticallySolvableVariable(Var v) {
 		solvableVariables.add(v);
 		analyticallySolvableOccurrences++;
@@ -975,6 +989,10 @@ public class Eq implements Comparable<Eq> {
 	
 	public java.util.List<Var> getSolvableVariables() {
 		return solvableVariables;
+	}
+	
+	public boolean isReal() {
+	    return getEquation().isReal();
 	}
 	
 	public void isRes(boolean bol){
@@ -1025,10 +1043,13 @@ public class Eq implements Comparable<Eq> {
 	 */
 	@Override
 	public int compareTo(Eq other) {
-		int diff = (markedAsResidualEquation() ? 1 : 0) - (other.markedAsResidualEquation() ? 1 : 0);
+	    int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
+	    if (diff != 0)
+	        return diff;
+		diff = (markedAsResidualEquation() ? 1 : 0) - (other.markedAsResidualEquation() ? 1 : 0);
 		if (diff != 0)
 			return diff;
-		diff = getVariables().size() - other.getVariables().size();
+		diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
 		if (diff != 0)
 			return diff;
 		diff = numericallySolvableOccurrences - other.numericallySolvableOccurrences;
@@ -1069,6 +1090,7 @@ public class Var implements Comparable<Var> {
 	private Var meDifferentiated = null; // A reference to this variable differentiated once
 	private Var meIntegrated = null;
 	private int occurrences = 0;
+	private int sameTypeOccurrences = 0;
 	private int analyticallySolvableOccurrences = 0;
 	private int numericallySolvableOccurrences = 0;
 	private boolean isIter=false;
@@ -1143,6 +1165,10 @@ public class Var implements Comparable<Var> {
 		occurrences++;
 	}
 	
+    public void sameTypeOccurrence(){
+        sameTypeOccurrences++;
+    }
+
 	public void analyticallySolvableOccurrence(){
 		analyticallySolvableOccurrences++;
 	}
@@ -1155,6 +1181,10 @@ public class Var implements Comparable<Var> {
 		return occurrences;
 	}
 	
+	public int getNbrSameTypeOccurrences(){
+	    return sameTypeOccurrences;
+	}
+	
 	public int getNbrAnalyticallySolvableOccurrences(){
 		return analyticallySolvableOccurrences;
 	}
@@ -1165,6 +1195,10 @@ public class Var implements Comparable<Var> {
 	
 	public String toString() {
 		return v.displayName();
+	}
+	
+	public boolean isReal() {
+	    return getVariable().isReal();
 	}
 	
 	public void isIter(boolean bol){
@@ -1190,13 +1224,16 @@ public class Var implements Comparable<Var> {
 	 */
 	@Override
 	public int compareTo(Var other) {
-		int diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
+        int diff = (isReal() ? 1 : 0) - (other.isReal() ? 1 : 0);
+        if (diff != 0)
+            return diff;
+		diff = (other.getVariable().isTemporary() ? 1 : 0) - (getVariable().isTemporary() ? 1 : 0);
 		if (diff != 0)
 			return diff;
 		diff = (markedAsIterationVariable() ? 1 : 0) - (other.markedAsIterationVariable() ? 1 : 0);
 		if (diff != 0)
 			return diff;
-		diff = getNbrOccurrences() - other.getNbrOccurrences();
+		diff = getNbrSameTypeOccurrences() - other.getNbrSameTypeOccurrences();
 		if (diff != 0)
 			return diff;
 		diff = getNbrNumericallySolvableOccurrences() - other.getNbrNumericallySolvableOccurrences();

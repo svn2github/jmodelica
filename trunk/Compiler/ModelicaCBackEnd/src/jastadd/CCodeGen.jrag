@@ -2006,7 +2006,7 @@ aspect CCodeGen {
         
         Map<FAbstractVariable,String> solverArrayMap = new HashMap<FAbstractVariable,String>();
         int i = 0;
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             solverArrayMap.put(fv, "x[" + (i++) + "]");
         
         String indent = ASTNode.printer_C.indent(outerIndent);
@@ -2019,22 +2019,22 @@ aspect CCodeGen {
         
         // Nominal values
         str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.NOMINAL, solverArrayMap);
         
         // Min values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MIN, solverArrayMap);
         
         // Max values
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             fv.genBlockResidualAttribute_C(nextIndent, str, FAttribute.MAX, solverArrayMap);
         
         // Variable value references
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             fv.genBlockResidualValuref_C(nextIndent, str, solverArrayMap);
         
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_VALUE_REFERENCE) {\n");
@@ -2057,24 +2057,24 @@ aspect CCodeGen {
         
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
         // Loop over all active variables and write their value to x	
-        for (FVariable fv : iterationVariables()) 
+        for (FVariable fv : unsolvedVariables()) 
             fv.genBlockResidualInit_C(nextIndent, str, solverArrayMap);
         
         // Generate code for Jacobian
         genBlockResidualFunction_jacobian_C(indent, str);
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE || evaluation_mode == JMI_BLOCK_WRITE_BACK) {\n");
+        str.print(indent + "} else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
         // Loop over all active variables and write the values in x to the z vector
-        for (FVariable fv : iterationVariables()) 
-            fv.genBlockResidualEvalInit_C(nextIndent, str, solverArrayMap);
+        str.print(nextIndent + "if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {\n"); // TODO: remove guard when correct x is given to JMI_BLOCK_EVALUATE_NON_REALS
+        for (FVariable fv : unsolvedVariables()) 
+            fv.genBlockResidualEvalInit_C(ASTNode.printer_C.indent(nextIndent), str, solverArrayMap);
+        str.print(nextIndent + "}\n");
         Set<FAbstractEquation> visitedList = new HashSet<FAbstractEquation>();
         genBlockResidualFunction_solvedEqns_C(nextIndent, str, inInitial, visitedList);
-        str.print(nextIndent + "if (evaluation_mode == JMI_BLOCK_EVALUATE) {\n");
+        str.print(nextIndent + "if (evaluation_mode & JMI_BLOCK_EVALUATE) {\n");
         // Write the residual expressions
         genBlockResidualFunction_residualEqns_C(new Enumerator(), ASTNode.printer_C.indent(nextIndent), str, visitedList, solverArrayMap);
         str.print(nextIndent + "}\n");
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EVALUATE_NON_REALS) {\n");
-        genBlockResidualFunction_nonReals_C(nextIndent, str, visitedList);
         str.print(indent + "}\n");
         str.print(indent + "return ef;\n");
         str.print(outerIndent + "}\n\n");
@@ -2093,8 +2093,8 @@ aspect CCodeGen {
     }
 
     @Override
-    protected Collection<SimpleEquationBlock> TornEquationBlock.genBlockResidualFunction_subBlocks_C() {
-        return solvedBlocks;
+    protected Collection<SimpleEquationBlock> EquationBlock.genBlockResidualFunction_subBlocks_C() {
+        return solvedBlocks();
     }
     
     /**
@@ -2105,22 +2105,6 @@ aspect CCodeGen {
             str.format("%sres[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), relExpInEquationsIndex());
         else
             str.format("%sres[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
-    }
-    /**
-     * Generates solved equation for all non-real equations in this block.
-     */
-    public void AbstractEquationBlock.genBlockResidualFunction_nonReals_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {}
-
-    @Override
-    public void EquationBlock.genBlockResidualFunction_nonReals_C(String indent, PrintStream str, Set<FAbstractEquation> visited) {
-        for (FAbstractEquation ae : nonRealEquations()) {
-            FEquation e = (FEquation)ae;
-            str.print(indent);
-            e.getLeft().prettyPrint_C(str,"");
-            str.print(" = ");
-            e.getRight().prettyPrint_C(str,"");
-            str.print(";\n");
-        }
     }
 
     /**
@@ -2157,9 +2141,9 @@ aspect CCodeGen {
     public void AbstractEquationBlock.genBlockResidualFunction_solvedEqns_C(String indent, PrintStream str,boolean inInitial,  Set<FAbstractEquation> visited) {}
 
     @Override
-    public void TornEquationBlock.genBlockResidualFunction_solvedEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+    public void EquationBlock.genBlockResidualFunction_solvedEqns_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
         // Loop over all solved blocks and write the expressions  
-        for (SimpleEquationBlock aeb : solvedBlocks)
+        for (SimpleEquationBlock aeb : solvedBlocks())
             aeb.genBlockResidualFunction_solvedEqn_C(indent, str, inInitial, visited);
     }
 
@@ -2167,8 +2151,15 @@ aspect CCodeGen {
      * Generates solved equation for this simple block
      */
     public void SimpleEquationBlock.genBlockResidualFunction_solvedEqn_C(String indent, PrintStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        if (genBlockEnabled())
-            equation().genBlock_C(indent, str, visited, allVariables(), assignedIndices());
+        if (genBlockEnabled()) {
+            if (!isReal()) {
+                str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
+                equation().genBlock_C(ASTNode.printer_C.indent(indent), str, visited, allVariables(), assignedIndices());
+                str.format("%s}\n", indent);
+            } else {
+                equation().genBlock_C(indent, str, visited, allVariables(), assignedIndices());
+            }
+        }
     }
 
     @Override
@@ -2329,7 +2320,7 @@ aspect CCodeGen {
         String innerIndent = ASTNode.printer_C.indent(indent);
         str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", outerIndent);
         FExp[][] jacobian = jacobian();
-        int n1 = solvedBlocks().size();
+        int n1 = solvedRealBlocks().size();
         int n2 = unsolvedBlocks().size();
         str.format("%sjmi_real_t Q1[%d] = {0};\n", indent, n1 * n2);
         str.format("%sjmi_real_t Q2[%d] = {0};\n", indent, n2 * n1);
@@ -2399,7 +2390,7 @@ aspect CCodeGen {
 			str.print("dae_" + (inInit ? "init_" : "") + "block_dir_der_" + residualBlockNumber_C() + ", ");
 		else
 			str.print("NULL, ");
-		str.print(iterationVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
+		str.print(unsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
 		str.print(nonRealVariables().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");

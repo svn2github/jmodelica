@@ -5242,7 +5242,7 @@ Coefficient variability: Discrete
 Unknown continuous variables:
   b
   a
-Unknown discrete variables:
+Solved discrete variables:
   d
 Continuous equations:
   a = b * (if d then 1 else 2)
