@@ -434,6 +434,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
+        jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
     }
 
     jmi->block_level = 0; /* to recover from errors */
