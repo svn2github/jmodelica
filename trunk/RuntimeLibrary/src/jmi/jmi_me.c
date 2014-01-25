@@ -667,8 +667,8 @@ int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
             
                 return -1;
             }
-        jmi->recomputeVariables = 0;
         }
+        jmi->recomputeVariables = 0;
     }
     memcpy (derivatives, jmi_get_real_dx(jmi), nx*sizeof(jmi_real_t));
     
@@ -742,8 +742,8 @@ int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni
             
                 return -1;
             }
-        jmi->recomputeVariables = 0;
         }
+        jmi->recomputeVariables = 0;
     }
     retval = jmi_dae_R_perturbed(jmi,eventIndicators);
     
