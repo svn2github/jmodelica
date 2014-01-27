@@ -1,4 +1,3 @@
-CASADI_BUILD_DIR=$(abs_builddir)/../../casadi_build
 CASADI_SRC_DIR=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi/
 
 # This is to ensure that the install target of the Sundials
@@ -17,13 +16,13 @@ $(CASADI_BUILD_DIR):
 	cd $(CASADI_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles"  -DENABLE_SHARED=ON -DENABLE_STATIC=OFF  $(CASADI_SRC_DIR) ;; \
 	*-mingw*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles" $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -G "MSYS Makefiles"  -DENABLE_SHARED=ON -DENABLE_STATIC=OFF  $(CASADI_SRC_DIR) ;; \
 	*-apple*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -DENABLE_SHARED=ON -DENABLE_STATIC=OFF $(CASADI_SRC_DIR) ;; \
 	*) \
-	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake $(CASADI_SRC_DIR) ;; \
+	PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig cmake -DENABLE_SHARED=ON -DENABLE_STATIC=OFF $(CASADI_SRC_DIR) ;; \
 	esac
 
 

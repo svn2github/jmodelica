@@ -1849,6 +1849,9 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_cs_xml", false);
                     options.setBooleanOption("generate_xml_equations", true);
                     break;
+                case NOCODEGEN:
+                    options.setBooleanOption("generate_runtime_option_parameters", false);
+                    break;
             }
             
             switch (this) {

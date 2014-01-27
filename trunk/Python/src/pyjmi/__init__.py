@@ -69,7 +69,7 @@ except:
 #Import the model class allowing for users to type: from pyjmi import JMUModel
 from jmi import JMUModel
 #Import the model class allowing for users to type: from pyjmi import CasadiModel
-from casadi_interface import CasadiModel
+from casadi_interface import CasadiModel, OptimizationProblem
 
 def get_files_path():
     """Get the absolute path to the example files directory."""
