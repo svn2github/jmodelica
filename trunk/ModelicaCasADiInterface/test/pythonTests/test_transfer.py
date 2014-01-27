@@ -460,7 +460,7 @@ def test_ConstructBooleanExpressions():
      
 def test_ConstructMisc():
     model = transfer_to_casadi_interface("AtomicModelMisc", modelFile)
-    expected = ("MX(vertcat((1.11-der(x1)),(((x3?3:0)+((!x3)?4:0))-x2)," +
+    expected = ("MX(vertcat((1.11-der(x1)),((((1<x1)?3:0)+((!(1<x1))?4:0))-x2)," +
                 "((1||(1<x2))-x3),((0||x3)-x4)))" + 
                 "MX(vertcat((-x1),(-pre(x2)),(-pre(x3)),(-pre(x4))))")
     assert (repr(model.getDaeResidual()) + repr(model.getInitialResidual()))  == expected
@@ -866,28 +866,28 @@ def test_ConstructFunctionsInRhs():
     
     model = transfer_to_casadi_interface("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat(("
-                "function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([x1]){0}-x1),"
-                "(function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([x1,x2]){0}-x2),"
-                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([x2]){0},function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([x2]){1})-vertcat(x3,x4)),"
-                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([x1,x2]){0},function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([x1,x2]){1})-vertcat(x5,x6)),"
-                "(function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\").call([x7]){0}-x7),"
-                "(function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\").call([x8]){0}-x8),"
-                "(function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\").call([x9]){0}-x9),"
-                "(function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\").call([x10]){0}-x10),"
-                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([x9,x10]){0},function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([x9,x10]){1})-vertcat(x11,x12)))")
+                "function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([u1]){0}-x1),"
+                "(function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([u1,u2]){0}-x2),"
+                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){0},function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){1})-vertcat(x3,x4)),"
+                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1,u2]){0},function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1,u2]){1})-vertcat(x5,x6)),"
+                "(function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\").call([u1]){0}-x7),"
+                "(function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\").call([u2]){0}-x8),"
+                "(function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\").call([u1]){0}-x9),"
+                "(function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\").call([u2]){0}-x10),"
+                "(vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1,u2]){0},function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1,u2]){1})-vertcat(x11,x12)))")
     assert str(model.getDaeResidual()) == expected 
       
     model = transfer_to_casadi_interface("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat(("
-                "function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([x1]){0}-x1),"
-                "(function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([x1,x2]){0}-x2),"
-                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([x2]){0},function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([x2]){1})-vertcat(x3,x4)),"
-                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([x1,x2]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([x1,x2]){1})-vertcat(x5,x6)),"
-                "(function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([x7]){0}-x7),"
-                "(function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([x8]){0}-x8),"
-                "(function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([x9]){0}-x9),"
-                "(function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([x10]){0}-x10),"
-                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([x9,x10]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([x9,x10]){1})-vertcat(x11,x12)))")
+                "function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([u1]){0}-x1),"
+                "(function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([u1,u2]){0}-x2),"
+                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){0},function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){1})-vertcat(x3,x4)),"
+                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1,u2]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1,u2]){1})-vertcat(x5,x6)),"
+                "(function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([u1]){0}-x7),"
+                "(function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([u2]){0}-x8),"
+                "(function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([u1]){0}-x9),"
+                "(function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([u2]){0}-x10),"
+                "(vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1,u2]){0},function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1,u2]){1})-vertcat(x11,x12)))")
     assert str(model.getDaeResidual()) == expected 
      
 def test_ConstructVariousRealValuedFunctions():

@@ -99,7 +99,7 @@ model AtomicModelMisc
     Boolean x4;
 equation
     der(x1) = 1.11;
-    x2 =if(x3) then 3 else 4;
+    x2 = if (x1 > 1) then 3 else 4;
     x3 = true or (x2 > 1);
     x4 = false or x3;
 end AtomicModelMisc;
@@ -309,6 +309,8 @@ model AtomicModelAtomicIntegerFunctions
         (y,internal) := monoInPolyOut(x);
     end functionCallEquationInFunction;
 
+    input Integer u1;
+    input Integer u2;
     Integer x1 (start = 2);
     Integer x2;
     Integer x3;
@@ -322,15 +324,15 @@ model AtomicModelAtomicIntegerFunctions
     Integer x11;
     Integer x12;
 equation
-    x1 = monoInMonoOut(x1);
-    x2 = polyInMonoOut(x1,x2);
-    (x3,x4) = monoInPolyOut(x2);
-    (x5,x6) = polyInPolyOut(x1,x2);
-    x7 = monoInMonoOutReturn(x7);
-    x8 = functionCallInFunction(x8);
-    x9 = functionCallEquationInFunction(x9);
-    x10 = monoInMonoOutInternal(x10);
-    (x11,x12) = polyInPolyOutInternal(x9,x10);
+    x1 = monoInMonoOut(u1);
+    x2 = polyInMonoOut(u1,u2);
+    (x3,x4) = monoInPolyOut(u2);
+    (x5,x6) = polyInPolyOut(u1,u2);
+    x7 = monoInMonoOutReturn(u1);
+    x8 = functionCallInFunction(u2);
+    x9 = functionCallEquationInFunction(u1);
+    x10 = monoInMonoOutInternal(u2);
+    (x11,x12) = polyInPolyOutInternal(u1,u2);
 end AtomicModelAtomicIntegerFunctions;
 
 model AtomicModelAtomicBooleanFunctions
@@ -418,6 +420,8 @@ model AtomicModelAtomicBooleanFunctions
         (y,internal) := monoInPolyOut(x);
     end functionCallEquationInFunction;
 
+    input Boolean u1;
+    input Boolean u2;
     Boolean x1 (start = false);
     Boolean x2;
     Boolean x3;
@@ -431,15 +435,15 @@ model AtomicModelAtomicBooleanFunctions
     Boolean x11;
     Boolean x12;
 equation
-    x1 = monoInMonoOut(x1);
-    x2 = polyInMonoOut(x1,x2);
-    (x3,x4) = monoInPolyOut(x2);
-    (x5,x6) = polyInPolyOut(x1,x2);
-    x7 = monoInMonoOutReturn(x7);
-    x8 = functionCallInFunction(x8);
-    x9 = functionCallEquationInFunction(x9);
-    x10 = monoInMonoOutInternal(x10);
-    (x11,x12) = polyInPolyOutInternal(x9,x10);
+    x1 = monoInMonoOut(u1);
+    x2 = polyInMonoOut(u1,u2);
+    (x3,x4) = monoInPolyOut(u2);
+    (x5,x6) = polyInPolyOut(u1,u2);
+    x7 = monoInMonoOutReturn(u1);
+    x8 = functionCallInFunction(u2);
+    x9 = functionCallEquationInFunction(u1);
+    x10 = monoInMonoOutInternal(u2);
+    (x11,x12) = polyInPolyOutInternal(u1,u2);
 end AtomicModelAtomicBooleanFunctions;
 
 
