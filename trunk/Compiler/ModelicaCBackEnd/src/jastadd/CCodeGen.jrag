@@ -2102,9 +2102,9 @@ aspect CCodeGen {
      */
     public void FRelExp.genBlockResidualFunction_printSwitchIndex_C(String nextIndent, PrintStream str, Enumerator enumerator) {
         if (inEquationSection())
-            str.format("%sres[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), relExpInEquationsIndex());
+            str.format("%sx[%d] = jmi->offs_sw + %d;\n", nextIndent, enumerator.next(), relExpInEquationsIndex());
         else
-            str.format("%sres[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
+            str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
     }
 
     /**
