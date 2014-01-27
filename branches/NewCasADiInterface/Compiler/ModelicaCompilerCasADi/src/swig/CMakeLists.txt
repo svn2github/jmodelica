@@ -53,7 +53,12 @@ swig_add_module(${MODULE_NAME} java java_casadi.i)
 swig_link_libraries(${MODULE_NAME} ${CASADI_DLL})
 
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
-  PROPERTIES LINK_FLAGS "${LINKFLAGS}")
+  PROPERTIES PREFIX "")
+  
+if(WIN32)
+  set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
+    PROPERTIES LINK_FLAGS "${LINKFLAGS}")
+endif(WIN32)
 
 
 # Expose the SWIG module under a nicely named build target
