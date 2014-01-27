@@ -456,7 +456,7 @@ aspect TransformCanonical {
 				if (e.numScalarEquations() == 0)
 					daeBLT.add(e.createSimpleEquationBlock(Collections.<FVariable>emptyList(), null, Solvability.ANALYTICALLY_SOLVABLE));
 			daeStructuredBLT = new StructuredBLT(this, daeBLT);
-			daeStructuredBLT.checkStartValues();
+			daeStructuredBLT.errorCheck();
 			log.info(daeStructuredBLT);
 			
 			log.info(daeBLT);
@@ -560,7 +560,7 @@ aspect TransformCanonical {
 					daeInitFVariableEquationBlockMap.put(fv,eb);
 				}
 			}	
-			daeInitBLT.checkStartValues();
+			daeInitBLT.errorCheck();
 			log.info(daeInitBLT);
 		}
 	}	

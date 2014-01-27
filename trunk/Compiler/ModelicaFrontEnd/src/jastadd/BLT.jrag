@@ -144,13 +144,8 @@ aspect BLT{
                     block = tornBlock;
             }
             if (block == null) {
-                Collection<SimpleEquationBlock> nonRealBlocks = new ArrayList<SimpleEquationBlock>();
-                for (Collection<Eq> eqs : groupComponent(nonRealEquations)) {
-                    SimpleEquationBlock nonRealBlock = createSimpleEquationBlock(eqs, true, false);
-                    if (nonRealBlock == null)
-                        throw new BLTException("Unsolved non-real equation:\n" + eqs.iterator().next().toString()); // TODO: Improve
-                    nonRealBlocks.add(nonRealBlock);
-                }
+                BiPGraph g = new BiPGraph(nonRealEquations);
+                Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks();
                 block = new EquationBlock(nonRealBlocks, createSimpleBlocks(groupComponent(realEquations)));
             }
             
@@ -537,6 +532,31 @@ aspect BLT{
 		}
 	}
 	
+    public Collection<SimpleEquationBlock> BiPGraph.computeNonRealBlocks() {
+        Collection<Collection<Eq>> components = tarjan(false);
+        Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
+        for (Collection<Eq> component : components) {
+            SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, true);
+            if (block == null) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("Non-real equations contains an algebraic loop:");
+                for (Eq e : component) {
+                    sb.append("\n");
+                    sb.append(e.getEquation());
+                }
+                throw new BLTException(sb.toString());
+            } else if (!block.isSolvable()) {
+                Eq e = component.iterator().next();
+                StringBuffer sb = new StringBuffer();
+                sb.append("Unable to solve variable '" + e.getMatching().getName() + "' from equation:\n");
+                sb.append(e.getEquation());
+                throw new BLTException(sb.toString());
+        }
+            blocks.add(block);
+        }
+        return blocks;
+    }
+    
 	public class BLT extends ArrayList<AbstractEquationBlock> {
 		
 		public ArrayList<Integer> unsolvedBlockSizes() {
@@ -607,9 +627,9 @@ aspect BLT{
 			}
 		}
 		
-		public void checkStartValues() {
+		public void errorCheck() {
 		    for (AbstractEquationBlock block : this)
-		        block.checkStartValues();
+		        block.errorCheck();
 		}
 
 	}
@@ -1079,7 +1099,7 @@ aspect BLT{
 		 * method should check the start values of its variable and verify
 		 * that a start value is set.
 		 */
-		public abstract void checkStartValues();
+		public abstract void errorCheck();
 		
 		protected void printIterationVariables(PrintStream str) {}
 		
@@ -1398,14 +1418,16 @@ aspect BLT{
         }
 
         @Override
-        public void checkStartValues() {
+        public void errorCheck() {
+            for (SimpleEquationBlock seb : unsolvedBlocks)
+                if (!seb.isReal())
+                    seb.equation().error("Non-real equation used as residual:\n" + seb.equation());
             if (isLinear())
                 return;
             for (SimpleEquationBlock seb : solvedBlocks()) // Local iterations.
-                seb.checkStartValues();
-                
+                seb.errorCheck();
             for (SimpleEquationBlock seb : unsolvedBlocks)
-                seb.checkStartValues();
+                seb.errorCheck();
         }
 
         @Override
@@ -1496,68 +1518,6 @@ aspect BLT{
     public class TornEquationBlock extends EquationBlock {
 
         public TornEquationBlock() {}
-
-//        /**
-//         * Adds a solved block to this torn block.
-//         * 
-//         * @param block Block to add to the list of solved blocks
-//         */
-//        public void addSolvedBlock(SimpleEquationBlock seb) {
-//            solvedBlocks.add(seb);
-//        }
-//
-//        /**
-//         * Returns all solved blocks in this block.
-//         * 
-//         * @return Collection<FAbstractEquation> all solved blocks
-//         */
-//        public Collection<SimpleEquationBlock> solvedBlocks() {
-//            return solvedBlocks;
-//        }
-//
-//        /**
-//         * Adds an unsolved block to this torn block.
-//         * 
-//         * @param block Block to add to the list of unsolved blocks
-//         */
-//        public void addUnsolvedBlock(SimpleEquationBlock block) {
-//            super.addUnsolvedBlock(block);
-//        }
-
-//        @Override
-//        public Collection<FVariable> realVariables() {
-//            return collectVariables(solvedBlocks, unsolvedBlocks());
-//        }
-
-//        @Override
-//        public Collection<FAbstractEquation> realEquations() {
-//            return collectEquations(solvedBlocks, unsolvedBlocks());
-//        }
-
-//        /**
-//         * Returns all variables in this block that are solved.
-//         * 
-//         * @return Collection<FAbstractEquation> all solved variables
-//         */
-//        public Collection<FVariable> solvedVariables() {
-//            return collectVariables(solvedBlocks());
-//        }
-
-//        /**
-//         * Returns all equations in this block that are solved.
-//         * 
-//         * @return Collection<FAbstractEquation> all solved equations
-//         */
-//        public Collection<FAbstractEquation> solvedEquations() {
-//            return collectEquations(solvedBlocks());
-//        }
-
-//        @Override
-//        public void checkStartValues() {
-//            super.checkStartValues();
-//            for (SimpleEquationBlock seb : unsolvedBlocks())
-//                seb.checkStartValues();
-//        }
 
         protected void prettyPrint_typeStr(PrintStream str) {
             str.print("Torn");
@@ -1715,7 +1675,7 @@ aspect BLT{
         }
 
         @Override
-		public void checkStartValues() {}
+		public void errorCheck() {}
 
 		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
 			for (FVariable fv : allVariables()) {
@@ -1854,7 +1814,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			fv.warnStartAttributeNotSet();
 		}
 
@@ -1884,7 +1844,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			fv.warnStartAttributeNotSet();
 		}
 
@@ -1991,7 +1951,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void checkStartValues() {
+		public void errorCheck() {
 			for (FVariable var : activeVars)
 				var.warnStartAttributeNotSet();
 		}

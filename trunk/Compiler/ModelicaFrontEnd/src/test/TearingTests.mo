@@ -330,6 +330,30 @@ At line 0, column 0:
 ")})));
 end WarningTest4;
 
+model BLTError1
+    Integer i, j;
+    Real r,s;
+equation
+    i = j + integer(time) + integer(s);
+    i * j = 0;
+    r = i * time;
+    s = r * 3.14;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError1",
+            description="Test error message given by BLT when non-real equation contains a loop",
+            errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TearingTests.mo':
+Semantic error at line 0, column 0:
+  Non-real equation used as residual:
+i * j = 0
+")})));
+end BLTError1;
+
+
 model RecordTearingTest1
   record R
     Real x;

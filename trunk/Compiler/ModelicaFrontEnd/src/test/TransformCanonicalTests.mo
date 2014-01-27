@@ -6557,5 +6557,46 @@ Semantic error at line 0, column 0:
 ")})));
 end IllegalWhen3_Err;
 
+model BLTError1
+    Real x;
+    Integer i;
+equation
+    x = if i > 10 then time else - time;
+    42 * (i + 1) = integer(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError1",
+            description="Test error message given by BLT when non-real equations are unsolved",
+            errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Unable to solve variable 'i' from equation:
+42 * (i + 1) = temp_1
+")})));
+end BLTError1;
+
+model BLTError2
+    Integer i, j;
+equation
+    i = j + integer(time);
+    i * j = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError2",
+            description="Test error message given by BLT when non-real equation contains a loop",
+            errorMessage="
+1 errors found:
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Semantic error at line 0, column 0:
+  Non-real equations contains an algebraic loop:
+i = j + temp_1
+i * j = 0
+")})));
+end BLTError2;
 
 end TransformCanonicalTests;
