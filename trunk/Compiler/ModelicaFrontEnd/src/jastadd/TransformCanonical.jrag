@@ -202,7 +202,7 @@ aspect TransformCanonical {
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
             log.debug("Writing flat tree after step " + stepName + " to " + fileName);
             try {
-                PrintStream out = new PrintStream(file);
+                CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
                 out.close();
             } catch (FileNotFoundException e) {

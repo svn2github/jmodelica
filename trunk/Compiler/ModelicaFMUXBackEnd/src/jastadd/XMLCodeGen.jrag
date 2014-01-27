@@ -30,23 +30,23 @@ aspect XMLCodeGen {
 			super("\t");
 		}
 		
- 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 		public void print(ASTNode node, CodeStream str, String indent) { 
  			node.prettyPrint_XML(this, str, indent); 
  		}
 	}
 	
 	public String ASTNode.prettyPrint_XML(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream str = new PrintStream(os);
+		CodeStream str = new CodeStream(os);
 		prettyPrint_XML(str, indent);
 		return os.toString();
 	}
 
-	public void ASTNode.prettyPrint_XML(PrintStream str, String indent) {
+	public void ASTNode.prettyPrint_XML(CodeStream str, String indent) {
  		prettyPrint_XML(new XMLPrettyPrinter(), str, indent);
 	}
 	
-	public void ASTNode.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void ASTNode.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
 
@@ -58,19 +58,19 @@ aspect XMLCodeGen {
 	private static final String ASTNode.XML_TAG_CLOSE_FORMAT   = "%s</%s:%s>\n";
 	private static final String ASTNode.XML_TAG_SINGLE_FORMAT  = "%s<%s:%s/>\n";
 	
-	public void ASTNode.tag_XML(PrintStream str, String format, String indent) {
+	public void ASTNode.tag_XML(CodeStream str, String format, String indent) {
 		str.format(format, indent, xmlNamespace(), xmlTag());
 	}
 	
-	public void ASTNode.tag_XML(PrintStream str, String format, String indent, String tag) {
+	public void ASTNode.tag_XML(CodeStream str, String format, String indent, String tag) {
 		str.format(format, indent, xmlNamespace(), tag);
 	}
 	
-	public void ASTNode.tag_XML(PrintStream str, String format, String indent, Map<String, String> attr) {
+	public void ASTNode.tag_XML(CodeStream str, String format, String indent, Map<String, String> attr) {
 		str.format(format, indent, xmlNamespace(), addAttrs_XML(xmlTag(), attr));
 	}
 	
-	public void ASTNode.tag_XML(PrintStream str, String format, String indent, String tag, Map<String, String> attr) {
+	public void ASTNode.tag_XML(CodeStream str, String format, String indent, String tag, Map<String, String> attr) {
 		str.format(format, indent, xmlNamespace(), addAttrs_XML(tag, attr));
 	}
 	
@@ -85,65 +85,65 @@ aspect XMLCodeGen {
 		return buf.toString();
 	}
 	
-	public void ASTNode.open_XML(PrintStream str, String indent) {
+	public void ASTNode.open_XML(CodeStream str, String indent) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT_NL, indent);
 	}
 	
-	public void ASTNode.open_XML(PrintStream str, String indent, String tag) {
+	public void ASTNode.open_XML(CodeStream str, String indent, String tag) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT_NL, indent, tag);
 	}
 	
-	public void ASTNode.open_XML(PrintStream str, String indent, Map<String, String> attr) {
+	public void ASTNode.open_XML(CodeStream str, String indent, Map<String, String> attr) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT_NL, indent, attr);
 	}
 	
-	public void ASTNode.open_XML(PrintStream str, String indent, String tag, Map<String, String> attr) {
+	public void ASTNode.open_XML(CodeStream str, String indent, String tag, Map<String, String> attr) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT_NL, indent, tag, attr);
 	}
 	
-	public void ASTNode.openLine_XML(PrintStream str, String indent) {
+	public void ASTNode.openLine_XML(CodeStream str, String indent) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT, indent);
 	}
 	
-	public void ASTNode.openLine_XML(PrintStream str, String indent, Map<String, String> attr) {
+	public void ASTNode.openLine_XML(CodeStream str, String indent, Map<String, String> attr) {
 		tag_XML(str, XML_TAG_OPEN_FORMAT, indent, attr);
 	}
 	
-	public void ASTNode.close_XML(PrintStream str) {
+	public void ASTNode.close_XML(CodeStream str) {
 		close_XML(str, "");
 	}
 	
-	public void ASTNode.close_XML(PrintStream str, String indent) {
+	public void ASTNode.close_XML(CodeStream str, String indent) {
 		tag_XML(str, XML_TAG_CLOSE_FORMAT, indent);
 	}
 	
-	public void ASTNode.close_XML(PrintStream str, String indent, String tag) {
+	public void ASTNode.close_XML(CodeStream str, String indent, String tag) {
 		tag_XML(str, XML_TAG_CLOSE_FORMAT, indent, tag);
 	}
 	
-	public void ASTNode.single_XML(PrintStream str, String indent) {
+	public void ASTNode.single_XML(CodeStream str, String indent) {
 		tag_XML(str, XML_TAG_SINGLE_FORMAT, indent);
 	}
 	
-	public void ASTNode.single_XML(PrintStream str, String indent, String tag) {
+	public void ASTNode.single_XML(CodeStream str, String indent, String tag) {
 		tag_XML(str, XML_TAG_SINGLE_FORMAT, indent, tag);
 	}
 	
-	public void ASTNode.single_XML(PrintStream str, String indent,  Map<String, String> attr) {
+	public void ASTNode.single_XML(CodeStream str, String indent,  Map<String, String> attr) {
 		tag_XML(str, XML_TAG_SINGLE_FORMAT, indent, attr);
 	}
 	
-	public void ASTNode.single_XML(PrintStream str, String indent, String tag, Map<String, String> attr) {
+	public void ASTNode.single_XML(CodeStream str, String indent, String tag, Map<String, String> attr) {
 		tag_XML(str, XML_TAG_SINGLE_FORMAT, indent, tag, attr);
 	}
 	
-	public void ASTNode.enclose_XML(Printer p, PrintStream str, String indent, String tag, ASTNode node) {
+	public void ASTNode.enclose_XML(Printer p, CodeStream str, String indent, String tag, ASTNode node) {
 		open_XML(str, indent, tag);
 		p.print(node, str, indent);
 		close_XML(str, indent, tag);
 	}
 	
-	public void ASTNode.enclose_XML(Printer p, PrintStream str, String indent, String tag, ASTNode node, Map<String, String> attr) {
+	public void ASTNode.enclose_XML(Printer p, CodeStream str, String indent, String tag, ASTNode node, Map<String, String> attr) {
 		open_XML(str, indent, tag, attr);
 		p.print(node, str, indent);
 		close_XML(str, indent, tag);
@@ -166,7 +166,7 @@ aspect XMLCodeGen {
 	
 	//------------------------ Expressions -------------------------
 	
-	public void FLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FLitExp.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace ="exp";
 		String tag = this.xmlTag();
 		
@@ -179,7 +179,7 @@ aspect XMLCodeGen {
 		
 	}
 	
-	public void FExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		open_XML(str, indent);
 		for (FExp child : childFExps())
@@ -188,36 +188,36 @@ aspect XMLCodeGen {
 	}
 	
 	
-	public void FIdUseExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {	
+	public void FIdUseExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {	
 		p.print(getFIdUse(), str, p.indent(indent));
 	}
 	
-	public void FDerExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {	
+	public void FDerExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {	
 		open_XML(str, indent);
 		p.print(getFIdUse(), str, p.indent(indent));
 		close_XML(str, indent);
 	}
 	
 	
-	public void FIdUse.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FIdUse.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		open_XML(str, indent);
 		p.print(getFQName(), str, p.indent(indent));
 		close_XML(str, indent);
 	}
 
-	public void FEnumLitExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FEnumLitExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		open_XML(str, indent);
 		p.print(new FQNameFull(getEnum(), getValue()), str, p.indent(indent));
 		close_XML(str, indent);
 	}
 	
-	public void FTimeExp.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FTimeExp.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		openLine_XML(str, indent);
 		prettyPrint(str, "");
 		close_XML(str);
 	}
     
-	public void FFunctionCall.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FFunctionCall.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		open_XML(str, indent);
 		enclose_XML(p, str, indent2, "Name", getName().getFQName());
@@ -229,7 +229,7 @@ aspect XMLCodeGen {
 	
 	private static final FSubExp FEquation.EXP_TEMPLATE = new FSubExp();
 	
-	public void FEquation.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FEquation.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		String indent3 = p.indent(indent2);
 		open_XML(str, indent);
@@ -240,7 +240,7 @@ aspect XMLCodeGen {
 		close_XML(str, indent);
 	}
 		
-	public void FFunctionCallEquation.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallEquation.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		if (!getCall().isIgnoredXML()) {
 			String indent2 = p.indent(indent);
 			open_XML(str, indent);
@@ -256,7 +256,7 @@ aspect XMLCodeGen {
 	
 	//-------------------- Functions ---------------------------
 	
-    public void FFunctionDecl.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FFunctionDecl.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		open_XML(str, indent);
 		enclose_XML(p, str, indent2, "Name", getFQName());
@@ -267,7 +267,7 @@ aspect XMLCodeGen {
 		close_XML(str, indent);
     }
     
-    public void FFunctionVariable.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FFunctionVariable.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		String indent3 = p.indent(indent2);
 		open_XML(str, indent, attr_XML("type", getType().scalarType().toString()));
@@ -288,7 +288,7 @@ aspect XMLCodeGen {
 		close_XML(str, indent);
     }
 	
-	public void FFunctionCallLeft.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallLeft.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		open_XML(str, indent);
 		if (hasFExp())
 			p.print(getFExp(), str, p.indent(indent));
@@ -299,17 +299,17 @@ aspect XMLCodeGen {
 
 	
     //-------------------- Algorithms ---------------------------
-    public void FAlgorithm.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FAlgorithm.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		open_XML(str, indent);
 		p.print(getFStatements(), str, p.indent(indent));
 		close_XML(str, indent);
     }
     
-    public void FStatement.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FStatement.prettyPrint_XML(Printer p, CodeStream str, String indent) {
     	single_XML(str, indent);
     }
     
-    public void FAssignStmt.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+    public void FAssignStmt.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String indent2 = p.indent(indent);
 		open_XML(str, indent);
 		p.print(getLeft(), str, indent2);
@@ -317,7 +317,7 @@ aspect XMLCodeGen {
 		close_XML(str, indent);
     }
     
-    public void FIfStmt.prettyPrint_XML(Printer p, PrintStream str, String indent){
+    public void FIfStmt.prettyPrint_XML(Printer p, CodeStream str, String indent){
         String namespace="fun";
         String tag = this.xmlTag();
         String elseIfTag = "ElseIf";
@@ -350,7 +350,7 @@ aspect XMLCodeGen {
         str.println(indent + "</" + namespace + ":" + tag + ">");        
     }
     
-    public void FIfWhenClause.prettyPrint_XML(Printer p, PrintStream str, String indent){
+    public void FIfWhenClause.prettyPrint_XML(Printer p, CodeStream str, String indent){
         String namespace="fun";
         String testTag = "Condition";
         String stmtTag = "Statements";
@@ -365,7 +365,7 @@ aspect XMLCodeGen {
         str.println(indent + "</" + namespace + ":" + stmtTag + ">");  
     }
     
-    public void FForStmt.prettyPrint_XML(Printer p, PrintStream str, String indent){
+    public void FForStmt.prettyPrint_XML(Printer p, CodeStream str, String indent){
         String namespace="fun";
         String tag = this.xmlTag();
         String stmtTag = "Statements";
@@ -383,7 +383,7 @@ aspect XMLCodeGen {
      
     }
     
-    public void FForIndex.prettyPrint_XML(Printer p, PrintStream str, String indent){
+    public void FForIndex.prettyPrint_XML(Printer p, CodeStream str, String indent){
         String namespace="fun";
         String tag = "Index";      
         String varTag = "IterationVariable";
@@ -405,7 +405,7 @@ aspect XMLCodeGen {
      
     }
       
-    public void FWhileStmt.prettyPrint_XML(Printer p, PrintStream str, String indent){
+    public void FWhileStmt.prettyPrint_XML(Printer p, CodeStream str, String indent){
         String namespace="fun";
         String tag = this.xmlTag();
         String testTag = "Condition";
@@ -425,7 +425,7 @@ aspect XMLCodeGen {
         str.println(indent + "</" + namespace + ":" + tag + ">"); 
     }
     
-	public void FFunctionCallStmt.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallStmt.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			FFunctionCall call = (FFunctionCall)this.getCall();
 			String tag = this.xmlTag();
@@ -454,22 +454,22 @@ aspect XMLCodeGen {
 	
 	//-------------------- Qualified Names ---------------------------
 	
-	public void FQName.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FQName.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public void FQNameString.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FQNameString.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		// TODO: Should probably be changed in schema, a simple string should be enough here
 		for (String part : getName().split("\\."))
 			str.println("<exp:QualifiedNamePart name=\"" + part + "\"/>");
 	}
 	
-	public void FQNameFull.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FQNameFull.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		for (FQNamePart np : getFQNameParts())
 			np.prettyPrint_XML(str,p.indent(indent));
 	}
 	
-	public void FQNamePart.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FQNamePart.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		String nameAttr = " name=\"" + this.getName() + "\"";
@@ -484,7 +484,7 @@ aspect XMLCodeGen {
 
 	}
 	
-	public void FArraySubscripts.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FArraySubscripts.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
@@ -498,18 +498,18 @@ aspect XMLCodeGen {
 		
 	}
     
-	public void FSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FSubscript.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		return;
 	}
 	
-	public void FColonSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FColonSubscript.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
 		str.println(indent + "<" + namespace + ":" + tag + "/>");
 	}
 	
-	public void FExpSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FExpSubscript.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		
@@ -519,7 +519,7 @@ aspect XMLCodeGen {
 			
 	}
 
-	public void FIntegerSubscript.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FIntegerSubscript.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace = "exp";
 		String tag = this.xmlTag();
 		

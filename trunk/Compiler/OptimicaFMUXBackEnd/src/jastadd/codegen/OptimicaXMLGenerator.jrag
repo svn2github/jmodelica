@@ -52,7 +52,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 	
 	@Override
-	protected void addRealAttributes(PrintStream genPrinter, FRealVariable realvariable) {
+	protected void addRealAttributes(CodeStream genPrinter, FRealVariable realvariable) {
 		super.addRealAttributes(genPrinter, realvariable);
 		Boolean generateFMI = realvariable.root().options.getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
@@ -69,7 +69,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 	
 	@Override
-	protected void addIntegerAttributes(PrintStream genPrinter, FIntegerVariable integervariable) {
+	protected void addIntegerAttributes(CodeStream genPrinter, FIntegerVariable integervariable) {
 		super.addIntegerAttributes(genPrinter, integervariable);
 		Boolean generateFMI = integervariable.root().options.getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
@@ -86,7 +86,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 	
 	@Override
-	protected void addBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
+	protected void addBooleanAttributes(CodeStream genPrinter, FBooleanVariable booleanvariable) {
 		super.addBooleanAttributes(genPrinter, booleanvariable);
 		Boolean generateFMI = booleanvariable.root().options.getBooleanOption("generate_fmi_me_xml");
 		if(!generateFMI) {
@@ -103,7 +103,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 	
 	@Override
-	protected void addLinearInfo(PrintStream genPrinter, FVariable variable) {
+	protected void addLinearInfo(CodeStream genPrinter, FVariable variable) {
 		super.addLinearInfo(genPrinter, variable);
 		boolean[] linearTimedVariables = variable.isLinearTimedVariables();
 		Boolean generateFMI = variable.root().options.getBooleanOption("generate_fmi_me_xml");
@@ -133,7 +133,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
 		@Override
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			
 			String indent="\t\t";
@@ -184,7 +184,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	
 	
 	//XML code generation for the objective function
-	private void objectiveFunction_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+	private void objectiveFunction_XML(CodeStream genPrinter, FOptClass optClass, String indent){
 		if(optClass.objectiveExp()!=null){
 			FExp objFunct = (FExp)optClass.objectiveExp();
 			objFunct.prettyPrint_XML(genPrinter,indent);
@@ -195,7 +195,7 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 
 	//XML code generation for the integrand objective function
-	private void integrandObjectiveFunction_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+	private void integrandObjectiveFunction_XML(CodeStream genPrinter, FOptClass optClass, String indent){
 		if(optClass.objectiveIntegrandExp()!=null){
 			FExp integrandObjFunct = (FExp)optClass.objectiveIntegrandExp();
 			integrandObjFunct.prettyPrint_XML(genPrinter,indent);
@@ -206,21 +206,21 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 	}
 	
 	//XML code generation for interval start time
-	private void intervalStartTime_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+	private void intervalStartTime_XML(CodeStream genPrinter, FOptClass optClass, String indent){
 		genPrinter.println(indent + "<opt:Value>" + optClass.startTimeAttribute() + "</opt:Value>");
 		genPrinter.println(indent + "<opt:Free>" + optClass.startTimeFreeAttribute() + "</opt:Free>");
 		genPrinter.println(indent + "<opt:InitialGuess>" + optClass.startTimeInitialGuessAttribute() + "</opt:InitialGuess>");
 	}
 	
 	//XML code generation for interval final time
-	private void intervalFinalTime_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+	private void intervalFinalTime_XML(CodeStream genPrinter, FOptClass optClass, String indent){
 		genPrinter.println(indent + "<opt:Value>" + optClass.finalTimeAttribute() + "</opt:Value>");
 		genPrinter.println(indent + "<opt:Free>" + optClass.finalTimeFreeAttribute() + "</opt:Free>");
 		genPrinter.println(indent + "<opt:InitialGuess>" + optClass.finalTimeInitialGuessAttribute() + "</opt:InitialGuess>");
 	}
 	
 	//XML code generatorio for the time points
-	private void timePoints_XML(PrintStream genPrinter, FOptClass optClass, String indent){
+	private void timePoints_XML(CodeStream genPrinter, FOptClass optClass, String indent){
 		
 		double[] points = optClass.timePoints();
 		

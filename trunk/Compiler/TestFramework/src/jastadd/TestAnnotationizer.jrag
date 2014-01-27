@@ -625,7 +625,7 @@ abstract public class TestAnnotationizerHelper {
 			FClass fc = compile();
 			AbstractGenerator generator = createGenerator(fc);
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			generator.generate(new StringReader(template), new NotNullPrintStream(os));
+			generator.generate(new StringReader(template), new NotNullCodeStream(os));
 			code = prepare(os.toString());
 		}
 		

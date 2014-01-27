@@ -38,7 +38,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_free_dependent_real_parameters", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numFreeDependentRealParameters());
 		}	
 	}
@@ -52,7 +52,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_j", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.objectiveExp()!=null? "1": "0");
 		}	
 	}
@@ -66,7 +66,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_l", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.objectiveIntegrandExp()!=null? "1": "0");
 		}	
 	}
@@ -80,7 +80,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_ceq", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numPathEqConstraints());
 		}	
 	}
@@ -94,7 +94,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_cineq", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numPathLeqConstraints() + " + " + 
 					foptclass.numPathGeqConstraints());
 		}	
@@ -109,7 +109,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_heq", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numPointEqConstraints());
 		}	
 	}
@@ -123,7 +123,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_hineq", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numPointLeqConstraints() + " + " + 
 					foptclass.numPointGeqConstraints());
 		}	
@@ -138,7 +138,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("n_tp", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(foptclass.numTimePoints());
 		}	
 	}
@@ -152,7 +152,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_point_variable_aliases", myGenerator, foptclass);
 		}
 	
-		private void generateVar(PrintStream genPrinter, FVariable fv, String offset, int index) {
+		private void generateVar(CodeStream genPrinter, FVariable fv, String offset, int index) {
 			genPrinter.print("#define ");
 			genPrinter.print(fv.name_C());
 			genPrinter.print("_p_(j) ((*(jmi->z))[jmi->offs_");
@@ -162,13 +162,13 @@ public class OptimicaCGenerator extends CADGenerator {
 			genPrinter.print("])\n");
 		}
 
-		private void generateVarList(PrintStream genPrinter, Iterable<? extends FVariable> list, String offset) {
+		private void generateVarList(CodeStream genPrinter, Iterable<? extends FVariable> list, String offset) {
 			int index = 0;
 			for (FVariable fv : list)
 				generateVar(genPrinter, fv, offset, index++);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			generateVarList(genPrinter, foptclass.derivativeVariables(),             "real_dx_p");
 			generateVarList(genPrinter, foptclass.differentiatedRealVariables(),     "real_x_p");
 			generateVarList(genPrinter, foptclass.realInputs(),                      "real_u_p");
@@ -185,7 +185,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_dependent_free_parameter_residuals", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) 
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			Enumerator enumerator = new Enumerator();
@@ -204,7 +204,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_cost_function", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			FExp obj = foptclass.objectiveExp();
 			if (obj != null) {
 				obj.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
@@ -224,7 +224,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_lagrange_integrand", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			FExp obj = foptclass.objectiveIntegrandExp();
 			if (obj != null) {
 				obj.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
@@ -245,7 +245,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_path_equality_constraints", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			for (FConstraint c : foptclass.pathEqConstraints()) 
 				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
@@ -265,7 +265,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_path_inequality_constraints", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			for (FConstraint c : foptclass.pathLeqConstraints()) 
 				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FConstraint c : foptclass.pathGeqConstraints()) 
@@ -291,7 +291,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_point_equality_constraints", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			for (FConstraint c : foptclass.pointEqConstraints()) 
 				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			int i=0;
@@ -311,7 +311,7 @@ public class OptimicaCGenerator extends CADGenerator {
 			super("C_Opt_point_inequality_constraints", myGenerator, foptclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			for (FConstraint c : foptclass.pointLeqConstraints()) 
 				c.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			for (FConstraint c : foptclass.pointGeqConstraints()) 

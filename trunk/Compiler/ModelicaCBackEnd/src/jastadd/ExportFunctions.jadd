@@ -67,7 +67,7 @@ aspect ExportFunctions {
 
 	public static final String ASTNode.C_SUFFIX_EXPORT = "export";
 
-	public void FFunctionDecl.exportWrapper_C(PrintStream str, String indent) {
+	public void FFunctionDecl.exportWrapper_C(CodeStream str, String indent) {
 		// TODO: handle multiple outputs/array output
 
 		// Function header
@@ -100,7 +100,7 @@ aspect ExportFunctions {
 		str.format("%s}\n\n", indent);
 	}
 
-	public void FFunctionDecl.exportWrapperArgumentDecl_C(PrintStream str) {
+	public void FFunctionDecl.exportWrapperArgumentDecl_C(CodeStream str) {
 		// TODO: handle multiple outputs/array output
 		String sep = "";
 		for (FFunctionVariable var : myInputs()) {
@@ -110,7 +110,7 @@ aspect ExportFunctions {
 		}
 	}
 
-	public void FFunctionDecl.exportWrapperArgumentTypeDecl_C(PrintStream str) {
+	public void FFunctionDecl.exportWrapperArgumentTypeDecl_C(CodeStream str) {
 		// TODO: handle multiple outputs/array output
 		String sep = "";
 		for (FFunctionVariable var : myInputs()) {
@@ -120,7 +120,7 @@ aspect ExportFunctions {
 		}
 	}
 
-	public void FFunctionDecl.exportWrapperArgumentCall_C(PrintStream str) {
+	public void FFunctionDecl.exportWrapperArgumentCall_C(CodeStream str) {
 		// TODO: handle multiple outputs/array output
 		String sep = "";
 		for (FFunctionVariable var : myInputs()) {
@@ -130,45 +130,45 @@ aspect ExportFunctions {
 		}
 	}
 	
-	public void FFunctionVariable.exportWrapperDecl_C(PrintStream str) {
+	public void FFunctionVariable.exportWrapperDecl_C(CodeStream str) {
 		str.format("%s %s", exportWrapperType_C(), name_C());
 	}
 	
-	public void FFunctionVariable.exportWrapperTypeDecl_C(PrintStream str) {
+	public void FFunctionVariable.exportWrapperTypeDecl_C(CodeStream str) {
 		str.print(exportWrapperType_C());
 	}
 	
-	public void FFunctionVariable.exportWrapperCall_C(PrintStream str) {
+	public void FFunctionVariable.exportWrapperCall_C(CodeStream str) {
 		str.print(name_C());
 	}
 	
-	public void FFunctionArray.exportWrapperDecl_C(PrintStream str) {
+	public void FFunctionArray.exportWrapperDecl_C(CodeStream str) {
 		String name = name_C();
 		str.format("%s* %sp", exportWrapperType_C(), name);
 		for (int i = 0; i < ndims(); i++) 
 			str.format(", int %s%d", name, i);
 	}
 	
-	public void FFunctionArray.exportWrapperTypeDecl_C(PrintStream str) {
+	public void FFunctionArray.exportWrapperTypeDecl_C(CodeStream str) {
 		str.format("%s*", exportWrapperType_C());
 		for (int i = 0; i < ndims(); i++) 
 			str.print(", int");
 	}
 	
-	public void FFunctionArray.exportWrapperCall_C(PrintStream str) {
+	public void FFunctionArray.exportWrapperCall_C(CodeStream str) {
 		String name = name_C();
 		str.format("%sp", name);
 		for (int i = 0; i < ndims(); i++) 
 			str.format(", %s%d", name, i);
 	}
 	
-	public void FFunctionVariable.exportWrapperDeclareTemp_C(PrintStream str, String ind) {
+	public void FFunctionVariable.exportWrapperDeclareTemp_C(CodeStream str, String ind) {
 	}
 	
-	public void FFunctionVariable.exportWrapperInitTemp_C(PrintStream str, String ind) {
+	public void FFunctionVariable.exportWrapperInitTemp_C(CodeStream str, String ind) {
 	}
 	
-	public void FFunctionArray.exportWrapperDeclareTemp_C(PrintStream str, String ind) {
+	public void FFunctionArray.exportWrapperDeclareTemp_C(CodeStream str, String ind) {
 		// NB: makes assumptions about definitions in jmi_array_none.h
 		String name = name_C();
 		str.format("%sint %s_size[%d];\n", ind, name, ndims());
@@ -176,7 +176,7 @@ aspect ExportFunctions {
 		str.format("%sjmi_array_t* %s = &%s_obj;\n", ind, name, name);
 	}
 	
-	public void FFunctionArray.exportWrapperInitTemp_C(PrintStream str, String ind) {
+	public void FFunctionArray.exportWrapperInitTemp_C(CodeStream str, String ind) {
 		// NB: makes assumptions about definitions in jmi_array_none.h
 		String name = name_C();
 		str.format("%s%s_obj.var = %sp;\n", ind, name, name);

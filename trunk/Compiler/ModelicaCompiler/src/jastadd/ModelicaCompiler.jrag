@@ -1177,7 +1177,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("prettyPrintRawFlat()");
 		if (fc.root().options.getBooleanOption("generate_mof_files")) {
 			log.debug("Creating raw .mof file...");
-			PrintStream out = new PrintStream(flatFile);
+			CodeStream out = new CodeStream(flatFile);
 			fc.prettyPrint_MC(out, "");
 			out.close();
 			log.debug("... raw .mof file created.");
@@ -1202,7 +1202,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("prettyPrintFlat()");
 		if (fc.root().options.getBooleanOption("generate_mof_files")) {
 			log.debug("Creating transformed .mof file...");
-			PrintStream out = new PrintStream(new File(sourceDir, instName + "_transformed.mof"));
+			CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
 			fc.prettyPrint_MC(out, "");
 			out.close();
 			log.debug("... transformed .mof file created.");

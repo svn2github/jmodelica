@@ -596,14 +596,14 @@ aspect BLT{
 		}
 		
 		public void writeIterationVariablesToFile(File file) throws FileNotFoundException {
-			PrintStream out = new PrintStream(file);
+			CodeStream out = new CodeStream(file);
 			for (AbstractEquationBlock block : this)
 				block.printIterationVariables(out);
 			out.close();
 		}
 		
 		public void writeTearingPairsToFile(File file) throws FileNotFoundException {
-			PrintStream out = new PrintStream(file);
+			CodeStream out = new CodeStream(file);
 			int count = 0;
 			for (AbstractEquationBlock block : this)
 				block.printTearingPairs(out, count++);
@@ -1088,11 +1088,11 @@ aspect BLT{
 		
 		public final String toString() {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			prettyPrint(new NotNullPrintStream(os));
+			prettyPrint(new NotNullCodeStream(os));
 			return os.toString();
 		}
 		
-		public abstract void prettyPrint(PrintStream str);
+		public abstract void prettyPrint(CodeStream str);
 		
 		/**
 		 * This method is call on blocks that are used in iterations. This
@@ -1101,9 +1101,9 @@ aspect BLT{
 		 */
 		public abstract void errorCheck();
 		
-		protected void printIterationVariables(PrintStream str) {}
+		protected void printIterationVariables(CodeStream str) {}
 		
-		protected void printTearingPairs(PrintStream str, int blockNumber) {}
+		protected void printTearingPairs(CodeStream str, int blockNumber) {}
 		
         protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars) {
             FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
@@ -1431,7 +1431,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             prettyPrint_typeStr(str);
             prettyPrint_mixedStr(str);
             prettyPrint_linearStr(str);
@@ -1472,42 +1472,42 @@ aspect BLT{
             }
         }
 
-        protected void prettyPrint_beforeVariablesStr(PrintStream str) {}
+        protected void prettyPrint_beforeVariablesStr(CodeStream str) {}
 
-        protected void prettyPrint_beforeEquationsStr(PrintStream str) {}
+        protected void prettyPrint_beforeEquationsStr(CodeStream str) {}
 
-        protected void prettyPrint_typeStr(PrintStream str) {
+        protected void prettyPrint_typeStr(CodeStream str) {
             str.print("Non-solved");
         }
 
-        protected void prettyPrint_mixedStr(PrintStream str) {
+        protected void prettyPrint_mixedStr(CodeStream str) {
             if (isMixed())
                 str.print(" mixed");
         }
 
-        protected void prettyPrint_linearStr(PrintStream str) {
+        protected void prettyPrint_linearStr(CodeStream str) {
             if (isLinear())
                 str.print(" linear");
         }
 
-        protected void prettyPrint_numVarStr(PrintStream str) {
+        protected void prettyPrint_numVarStr(CodeStream str) {
             str.print(allVariables().size() + " variables");
         }
 
-        protected void prettyPrint_unsolvedVariablesStr(PrintStream str) {
+        protected void prettyPrint_unsolvedVariablesStr(CodeStream str) {
             if (isMixed())
                 str.println("Unknown continuous variables:");
             else
                 str.println("Unknown variables:");
         }
 
-        protected void prettyPrint_unsolvedEquationsStr(PrintStream str) {
+        protected void prettyPrint_unsolvedEquationsStr(CodeStream str) {
             if (isMixed())
                 str.println("Continuous equations:");
             else
                 str.println("Equations:");
         }
-        protected void prettyPrint_unsolvedVar(PrintStream str, SimpleEquationBlock block) {
+        protected void prettyPrint_unsolvedVar(CodeStream str, SimpleEquationBlock block) {
             block.prettyPrintEquation(str);
         }
     }
@@ -1519,19 +1519,19 @@ aspect BLT{
 
         public TornEquationBlock() {}
 
-        protected void prettyPrint_typeStr(PrintStream str) {
+        protected void prettyPrint_typeStr(CodeStream str) {
             str.print("Torn");
         }
 
         @Override
-        protected void prettyPrint_beforeVariablesStr(PrintStream str) {
+        protected void prettyPrint_beforeVariablesStr(CodeStream str) {
             str.println("Solved variables:");
             for (SimpleEquationBlock seb : solvedRealBlocks())
                 seb.prettyPrintActiveVariables(str);
         }
 
         @Override
-        protected void prettyPrint_beforeEquationsStr(PrintStream str) {
+        protected void prettyPrint_beforeEquationsStr(CodeStream str) {
             str.println("Solved equations:");
             for (SimpleEquationBlock seb : solvedRealBlocks()) {
                 seb.prettyPrintIterationVariables(str);
@@ -1540,34 +1540,34 @@ aspect BLT{
         }
 
         @Override
-        protected void prettyPrint_numVarStr(PrintStream str) {
+        protected void prettyPrint_numVarStr(CodeStream str) {
             str.print(unsolvedVariables().size() + " iteration variables and " + solvedVariables().size() + " solved variables");
         }
 
         @Override
-        protected void prettyPrint_unsolvedVariablesStr(PrintStream str) {
+        protected void prettyPrint_unsolvedVariablesStr(CodeStream str) {
             str.println("Iteration variables:");
         }
 
         @Override
-        protected void prettyPrint_unsolvedEquationsStr(PrintStream str) {
+        protected void prettyPrint_unsolvedEquationsStr(CodeStream str) {
             str.println("Residual equations:");
         }
 
         @Override
-        protected void prettyPrint_unsolvedVar(PrintStream str, SimpleEquationBlock block) {
+        protected void prettyPrint_unsolvedVar(CodeStream str, SimpleEquationBlock block) {
             block.prettyPrintIterationVariables(str);
             block.prettyPrintEquation(str);
         }
 
         @Override
-        protected void printIterationVariables(PrintStream str) {
+        protected void printIterationVariables(CodeStream str) {
             for (FVariable var : unsolvedVariables())
                 str.println(var.name());
         }
 
         @Override
-        protected void printTearingPairs(PrintStream str, int blockNumber) {
+        protected void printTearingPairs(CodeStream str, int blockNumber) {
             int counter = 0;
             str.println("In block #" + blockNumber);
             for (SimpleEquationBlock block : unsolvedBlocks()) {
@@ -1666,7 +1666,7 @@ aspect BLT{
                 return allVariables();
         }
 
-        public void prettyPrintActiveVariables(PrintStream str) {
+        public void prettyPrintActiveVariables(CodeStream str) {
             prettyPrintActiveVariables(str, false);
         }
 
@@ -1677,7 +1677,7 @@ aspect BLT{
         @Override
 		public void errorCheck() {}
 
-		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
 			for (FVariable fv : allVariables()) {
 				str.print("  " + fv.name());
 				if (printAttributes) {
@@ -1689,7 +1689,7 @@ aspect BLT{
 			}
 		}
 		
-		public void prettyPrintEquation(PrintStream str) {
+		public void prettyPrintEquation(CodeStream str) {
 			str.print("  " + equation());
 			if (equation().hasNominal())
 				str.print("    (Nominal=" + equation().getNominal().getValue() + ")");
@@ -1697,12 +1697,12 @@ aspect BLT{
 		}
 		
 		
-		public void prettyPrintIterationVariables(PrintStream str) {
+		public void prettyPrintIterationVariables(CodeStream str) {
 			if (!isSolvable())
 				doPrettyPrintIterationVariables(str);
 		}
 		
-		public void doPrettyPrintIterationVariables(PrintStream str) {
+		public void doPrettyPrintIterationVariables(CodeStream str) {
 			boolean first = true;
 			for (FVariable var : allVariables()) {
 				if (first)
@@ -1743,7 +1743,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Meta equation block:");
 			str.println("Equation:");
 			prettyPrintEquation(str);
@@ -1794,7 +1794,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Solved block of 1 variables:");
 			str.println("Computed variable:");
 			prettyPrintActiveVariables(str);
@@ -1824,7 +1824,7 @@ aspect BLT{
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Non-solved block of 1 variables:");
 			str.println("Unknown variables:");
 			prettyPrintActiveVariables(str);
@@ -1863,17 +1863,17 @@ aspect BLT{
             return allVariables();
         }
 		@Override
-		public void prettyPrintActiveVariables(PrintStream str, boolean printAttributes) {
+		public void prettyPrintActiveVariables(CodeStream str, boolean printAttributes) {
 			super.prettyPrintActiveVariables(str, true);
 		}
 
 		@Override
-		public void prettyPrintIterationVariables(PrintStream str) {
+		public void prettyPrintIterationVariables(CodeStream str) {
 			doPrettyPrintIterationVariables(str);
 		}
 
 		@Override
-		public void prettyPrint(PrintStream str) {
+		public void prettyPrint(CodeStream str) {
 			str.println("Numerically solved block of 1 variables:");
 			str.println("Computed variable:");
 			prettyPrintActiveVariables(str);
@@ -1914,7 +1914,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             str.print(isSolvable() ? "Solved" : "Non-solved");
             str.println(" block of " + allVariables().size() + " variables:");
             str.println("Unknown variables:");
@@ -1998,7 +1998,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
             str.format("%s algorithm block of %d variables:\n", prefix, allVariables().size());
             str.println("Unknown variables:");
@@ -2076,7 +2076,7 @@ aspect BLT{
         }
 
         @Override
-        public void prettyPrint(PrintStream str) {
+        public void prettyPrint(CodeStream str) {
             String prefix = isSolvable() ? "Solved" : "Non-solved";
             str.format("%s if equation block of %d variables:\n", prefix, allVariables().size());
             str.println("Unknown variables:");

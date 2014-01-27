@@ -1317,7 +1317,7 @@ aspect FlatAPI {
 			
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
 			new StreamGobbler(in).start();
-			prettyPrint(new PrintStream(new DigestOutputStream(out, md5)), "");
+			prettyPrint(new CodeStream(new DigestOutputStream(out, md5)), "");
 			out.close();
 			
 			return new BigInteger(1,md5.digest()).toString(16);

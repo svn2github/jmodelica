@@ -29,7 +29,7 @@ aspect FormattedPrint {
 		 */
 		@Override
 		@SuppressWarnings({"unchecked"})
-		public void print(ASTNode node, PrintStream printStream, String ident) {
+		public void print(ASTNode node, CodeStream printStream, String ident) {
 			node.doPrettyPrintFormatted(this, printStream);
 		}
 
@@ -951,7 +951,7 @@ aspect FormattedPrint {
 	 */
 	public String ASTNode.prettyPrintFormatted() {
 		OutputStream outputStream = new ByteArrayOutputStream();
-		PrintStream printStream = new PrintStream(outputStream);
+		CodeStream printStream = new CodeStream(outputStream);
 		prettyPrintFormatted(formattedPrettyPrinter, printStream);
 
 		return outputStream.toString();
@@ -963,51 +963,51 @@ aspect FormattedPrint {
 	 * @param printStream the stream, to which the AST node should be printed.
 	 */
 	
-	public void ASTNode.prettyPrintFormatted(Printer printer, PrintStream printStream) {
+	public void ASTNode.prettyPrintFormatted(Printer printer, CodeStream printStream) {
 		propagateFormatting();
 		doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ASTNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void ASTNode.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
 		for (ASTNode childNode: this) {
 			childNode.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
 
-	void SourceBaseNode.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void SourceBaseNode.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(postFormatting);
 	}
 
-	void AbstractEquation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
-		printStream.print(preFormatting);
-		prettyPrintFormattedHelper(printer, printStream);
-		printStream.print(";");
-		printStream.print(postFormatting);
-	}
-
-	void Statement.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void AbstractEquation.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
 		printStream.print(preFormatting);
 		prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(postFormatting);
 	}
 
-	void AlgorithmAnnotation.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void Statement.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
+		printStream.print(preFormatting);
+		prettyPrintFormattedHelper(printer, printStream);
+		printStream.print(";");
+		printStream.print(postFormatting);
+	}
+
+	void AlgorithmAnnotation.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
 		printStream.print(getAnnotation().preFormatting);
 		getAnnotation().prettyPrintFormattedHelper(printer, printStream);
 		printStream.print(";");
 		printStream.print(getAnnotation().postFormatting);
 	}
 	
-	void SourceBaseNode.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void SourceBaseNode.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		for (ASTNode childNode: this) {
 			childNode.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
 
-	void StoredDefinition.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void StoredDefinition.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasWithin()) {
 			getWithin().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1016,7 +1016,7 @@ aspect FormattedPrint {
 		}
 	}
 
-	void Within.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Within.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("within");
 		printStream.print(insideFormatting);
 		if (hasPackageName()) {
@@ -1025,43 +1025,43 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 
-	void Encapsulated.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Encapsulated.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("encapsulated");
 	}
 
-	void Partial.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Partial.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("partial");
 	}
 
-	void Redeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Redeclare.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("redeclare");
 	}
 
-	void Final.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Final.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("final");
 	}
 
-	void Inner.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Inner.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("inner");
 	}
 
-	void Outer.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Outer.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("outer");
 	}
 
-	void Replaceable.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Replaceable.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("replaceable");
 	}
 
-	void Restriction.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Restriction.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(this);
 	}
 
-	void IdDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IdDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(getID());
 	}
 
-	void ExtendsClauseShortClass.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ExtendsClauseShortClass.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasTypePrefixInputOutput())
 			getTypePrefixInputOutput().doPrettyPrintFormatted(printer, printStream);
 		getSuper().doPrettyPrintFormatted(printer, printStream);
@@ -1075,22 +1075,22 @@ aspect FormattedPrint {
 		getComment().prettyPrintFormattedHelper(printer, printStream);
 	}
 
-	void Access.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Access.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(name());
 	}
 
-	void ArrayAccess.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ArrayAccess.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(name());
 		if (hasArraySubscripts()) {
 			getArraySubscripts().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
 
-	void Dot.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Dot.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getAccesss().prettyPrintWithSep(printer, printStream, null, ".");
 	}
 
-	void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ArraySubscripts.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (getNumSubscript() == 0) {
 			return;
 		}
@@ -1105,13 +1105,13 @@ aspect FormattedPrint {
 		printStream.print("]");
 	}
 
-	void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ArrayConstructor.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("{");
 		getFunctionArguments().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("}");
 	}
 
-	void Matrix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Matrix.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("[");
 		for (int i = 0; i < getNumRow(); i++) {
 			getRow(i).doPrettyPrintFormatted(printer, printStream);
@@ -1123,7 +1123,7 @@ aspect FormattedPrint {
 		printStream.print("]");
 	}
 
-	void MatrixRow.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void MatrixRow.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		for (int i = 0; i < getNumExp(); i++) {
 			getExp(i).doPrettyPrintFormatted(printer, printStream);
 
@@ -1133,7 +1133,7 @@ aspect FormattedPrint {
 		}
 	}    
 
-	void ClassModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ClassModification.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("(");
 		if (getNumArgument() > 0) {
 			getArgument(0).doPrettyPrintFormatted(printer, printStream);
@@ -1145,11 +1145,11 @@ aspect FormattedPrint {
 		printStream.print(")");
 	}
 
-	void Each.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Each.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("each");
 	}
 
-	void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ConstrainingClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("constrainedby");
 		getAccess().doPrettyPrintFormatted(printer, printStream);
 		if (hasClassModification()) {
@@ -1157,16 +1157,16 @@ aspect FormattedPrint {
 		}
 	}
 
-	void ShortClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ShortClassDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		prettyPrintFormattedHelper(printer, printStream, new Opt<Each>(), getFinalOpt());
 		printStream.print(';');
 	}
 	
-	void FullClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void FullClassDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		prettyPrintFormattedHelper(printer, printStream, new Opt<Each>(), getFinalOpt());
 	}
 	
-	void BaseClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, Opt<Each> each_, Opt<Final> final_) {
+	void BaseClassDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream, Opt<Each> each_, Opt<Final> final_) {
 		if (hasRedeclare()) {
 			getRedeclare().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1195,9 +1195,9 @@ aspect FormattedPrint {
 		prettyPrintFormattedDecl(printer, printStream);
 	}
 	
-	void BaseClassDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {}
+	void BaseClassDecl.prettyPrintFormattedDecl(Printer printer, CodeStream printStream) {}
 
-	void ShortClassDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
+	void ShortClassDecl.prettyPrintFormattedDecl(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getExtendsClauseShortClass().doPrettyPrintFormatted(printer, printStream);
@@ -1208,7 +1208,7 @@ aspect FormattedPrint {
 			getConstrainingClauseComment().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	void FullClassDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
+	void FullClassDecl.prettyPrintFormattedDecl(Printer printer, CodeStream printStream) {
 		if (prettyPrintFormatedShouldHaveExtends())
 			printStream.print("extends");
 		getName().doPrettyPrintFormatted(printer, printStream);
@@ -1233,7 +1233,7 @@ aspect FormattedPrint {
 	syn boolean FullClassDecl.prettyPrintFormatedShouldHaveExtends() = false;
 	eq ExtendClassDecl.prettyPrintFormatedShouldHaveExtends() = true;
 
-	void EnumClassDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void EnumClassDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasEncapsulated()) {
 			getEncapsulated().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1334,7 +1334,7 @@ aspect FormattedPrint {
 		addEquation(equation);
 	}
 
-	void ExtendsClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ExtendsClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("extends");
 		getSuper().doPrettyPrintFormatted(printer, printStream);
 		if (hasClassModification()) {
@@ -1345,14 +1345,14 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 
-	void ImportClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ImportClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("import");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(";");
 	}
 
-	void ImportClauseUnqualified.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ImportClauseUnqualified.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("import");
 		getPackageName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(".*");
@@ -1360,7 +1360,7 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 
-	void ImportClauseRename.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ImportClauseRename.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("import");
 		getIdDecl().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
@@ -1369,19 +1369,19 @@ aspect FormattedPrint {
 		printStream.print(";");
 	}
 
-	void CompleteModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void CompleteModification.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getClassModification().doPrettyPrintFormatted(printer, printStream);
 		if (hasValueModification()) {
 			getValueModification().doPrettyPrintFormatted(printer, printStream);
 		}
 	}
 
-	void ValueModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ValueModification.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("=");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ElementModification.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ElementModification.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasEach()) {
 			getEach().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1397,15 +1397,15 @@ aspect FormattedPrint {
 		}
 	}
 
-	void ClassRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ClassRedeclare.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getBaseClassDecl().prettyPrintFormattedHelper(printer, printStream, getEachOpt(), getFinalOpt());
 	}
 
-	void ComponentRedeclare.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ComponentRedeclare.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getComponentDecl().prettyPrintFormattedHelper(printer, printStream, getEachOpt(), getFinalOpt());
 	}
 
-	void EquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void EquationClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("equation");
 
 		for (AbstractEquation abstractEquation : getAbstractEquations()) {
@@ -1413,13 +1413,13 @@ aspect FormattedPrint {
 		}
 	}
 	
-	void InitialEquationClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void InitialEquationClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("initial");
 		printStream.print(insideFormatting);
 		super.prettyPrintFormattedHelper(printer, printStream);
 	}
 
-	void Algorithm.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Algorithm.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasInitial()) {
 			printStream.print("initial");
 			printStream.print(insideFormatting);
@@ -1431,17 +1431,17 @@ aspect FormattedPrint {
 		}
 	}
 
-	void BreakStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void BreakStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("break");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ReturnStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ReturnStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("return");
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void WhileStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void WhileStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("while");
 		getTest().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("loop");
@@ -1452,7 +1452,7 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ForStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ForStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("for");
 		for (int i = 0; i < getNumForIndex(); i++) {
 			getForIndex(i).doPrettyPrintFormatted(printer, printStream);
@@ -1466,13 +1466,13 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 	
-	void ForStmtList.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ForStmtList.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		for (Statement stmt : getStmts()) {
 			stmt.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
 
-	void WhenStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void WhenStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("when");
 		for (int i = 0; i < getNumIfWhenClause(); i++) {
 			getIfWhenClause(i).doPrettyPrintFormatted(printer, printStream);
@@ -1484,7 +1484,7 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void IfStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IfStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("if");
 		for (int i = 0; i < getNumIfWhenClause(); i++) {
 			getIfWhenClause(i).doPrettyPrintFormatted(printer, printStream);
@@ -1499,7 +1499,7 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 	
-	void ElseClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ElseClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("else");
 		for (Statement stmt : getStmts()) {
 			stmt.doPrettyPrintFormatted(printer, printStream);
@@ -1507,7 +1507,7 @@ aspect FormattedPrint {
 	}
 
 	
-	void IfWhenClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IfWhenClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getTest().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");
 		for (Statement statement : getStatements()) {
@@ -1515,14 +1515,14 @@ aspect FormattedPrint {
 		}
 	}
 
-	void AssignStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void AssignStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(":=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void FunctionCallStmt.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void FunctionCallStmt.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (getNumLeft() > 0) {
 			printStream.print('(');
 			boolean first = true;
@@ -1540,14 +1540,14 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void Equation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Equation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getRight().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ConnectClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ConnectClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("connect");
 		printStream.print("(");
 		getConnector1().doPrettyPrintFormatted(printer, printStream);
@@ -1557,7 +1557,7 @@ aspect FormattedPrint {
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void FunctionCallEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void FunctionCallEquation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (getNumLeft() > 0) {
 			printStream.print("(");
 			for (int i = 0 ; i < getNumLeft(); i++) {
@@ -1573,7 +1573,7 @@ aspect FormattedPrint {
 		getCall().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void ForClauseE.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ForClauseE.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("for");
 		for (int i = 0; i < getNumForIndex(); i++) {
 			getForIndex(i).doPrettyPrintFormatted(printer, printStream);
@@ -1588,7 +1588,7 @@ aspect FormattedPrint {
 		printStream.print("end" + insideFormatting + "for");
 	}
 
-	void ForIndex.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ForIndex.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getForIndexDecl().getName().doPrettyPrintFormatted(printer, printStream);
 		if (hasExp()) {
 			printStream.print("in");
@@ -1596,16 +1596,16 @@ aspect FormattedPrint {
 		}
 	}
 
-	abstract void IfWhenElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen);
+	abstract void IfWhenElseEquation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream, boolean elseIfWhen);
 	syn String IfWhenEquation.keyword();
 	eq IfEquation.keyword() = "if";
 	eq WhenEquation.keyword() = "when";
 
-	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		prettyPrintFormattedHelper(printer, printStream, false);
 	}
 
-	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIfWhen) {
+	void IfWhenEquation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream, boolean elseIfWhen) {
 		if (elseIfWhen) {
 			printStream.print(preFormatting);
 			printStream.print("else");
@@ -1626,7 +1626,7 @@ aspect FormattedPrint {
 		}
 	}
 
-	void ElseEquation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, boolean elseIf) {
+	void ElseEquation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream, boolean elseIf) {
 		printStream.print(preFormatting);
 		printStream.print("else");
 		for (AbstractEquation abstractEquation : getAbstractEquations()) {
@@ -1637,7 +1637,7 @@ aspect FormattedPrint {
 
 	eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
 	
-	void FunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void FunctionCall.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("(");
 		if (hasFunctionArguments()) {
@@ -1646,12 +1646,12 @@ aspect FormattedPrint {
 		printStream.print(")");
 	}
 
-	void PartialFunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void PartialFunctionCall.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("function");
 		super.prettyPrintFormattedHelper(printer, printStream);
 	}
 
-	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void FunctionArguments.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		Iterator<ASTNode> it = new ChainedIterator<ASTNode>(getExps().iterator(), getNamedArguments().iterator());
 		while (it.hasNext()) {
 			ASTNode node = it.next();
@@ -1661,61 +1661,61 @@ aspect FormattedPrint {
 		}
 	}
 
-	void NamedArgument.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void NamedArgument.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("=");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	public void ColonSubscript.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	public void ColonSubscript.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(':');
 	}
 
-	void RealLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void RealLitExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(getUNSIGNED_NUMBER());
 	}
 
-	void IntegerLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IntegerLitExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(getUNSIGNED_INTEGER());
 	}
 
-	public void TimeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	public void TimeExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("time");
 	}
 
-	public void EndExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	public void EndExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("end");
 	}
 
-	void StringLitExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void StringLitExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("\"" + getSTRING() + "\"");
 	}
 
-	void BooleanLitExpTrue.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void BooleanLitExpTrue.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("true");
 	}
 
-	void BooleanLitExpFalse.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void BooleanLitExpFalse.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("false");
 	}
 
-	void NegExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void NegExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("-");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void NotExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void NotExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("not");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void DerExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void DerExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("der(");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(")");
 	}
 
-	void RangeExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void RangeExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		for (int i = 0; i < getNumExp(); i++) {
 			getExp(i).doPrettyPrintFormatted(printer, printStream);
 			if (i + 1 < getNumExp()) {
@@ -1724,7 +1724,7 @@ aspect FormattedPrint {
 		}
 	}
 
-	void IfExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IfExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("if");
 		getIfExp().doPrettyPrintFormatted(printer, printStream);
 		printStream.print("then");
@@ -1736,7 +1736,7 @@ aspect FormattedPrint {
 		printStream.print(getElseExp().postFormatting);
 	}
 
-	void IterExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void IterExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getExp().doPrettyPrintFormatted(printer, printStream);
 		boolean first = true;
 		printStream.print("for");
@@ -1747,7 +1747,7 @@ aspect FormattedPrint {
 			index.doPrettyPrintFormatted(printer, printStream);
 		}
 	}
-	void BinExp.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void BinExp.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getLeft().doPrettyPrintFormatted(printer, printStream);
 		printStream.print(operatorFormatted());
 		getRight().doPrettyPrintFormatted(printer, printStream);
@@ -1773,12 +1773,12 @@ aspect FormattedPrint {
 	eq DotDivExp.operatorFormatted() = "./";
 	eq DotPowExp.operatorFormatted() = ".^";
 
-	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		prettyPrintFormattedHelper(printer, printStream, new Opt<Each>(), getFinalOpt());
 		printStream.print(";");
 	}
 
-	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream, Opt<Each> each_, Opt<Final> final_) {
+	void ComponentDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream, Opt<Each> each_, Opt<Final> final_) {
 		if (hasRedeclare()) {
 			getRedeclare().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1825,12 +1825,12 @@ aspect FormattedPrint {
 		}
 	}
 
-	void SiblingComponentDecl.doPrettyPrintFormatted(Printer printer, PrintStream printStream) {
+	void SiblingComponentDecl.doPrettyPrintFormatted(Printer printer, CodeStream printStream) {
 		if (getSiblings().get(0) == this)
 			super.doPrettyPrintFormatted(printer, printStream);
 	}
 	
-	void ComponentDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
+	void ComponentDecl.prettyPrintFormattedDecl(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream); 
 		if (hasVarArraySubscripts()) {// TODO: Try to keep type array subscripts in typeArraySubscripts()
 			ArraySubscripts as = new ArraySubscripts();
@@ -1853,7 +1853,7 @@ aspect FormattedPrint {
 		
 	}
 	
-	void SiblingComponentDecl.prettyPrintFormattedDecl(Printer printer, PrintStream printStream) {
+	void SiblingComponentDecl.prettyPrintFormattedDecl(Printer printer, CodeStream printStream) {
 		boolean first = true;
 		for (SiblingComponentDecl sibling : getSiblings()) {
 			if (!first)
@@ -1863,7 +1863,7 @@ aspect FormattedPrint {
 		}
 	}
 	
-	void SiblingComponentDecl.prettyPrintFormattedSiblingDecl(Printer printer, PrintStream printStream, boolean first) {
+	void SiblingComponentDecl.prettyPrintFormattedSiblingDecl(Printer printer, CodeStream printStream, boolean first) {
 		if (!first)
 			printStream.print(preFormatting);
 		super.prettyPrintFormattedDecl(printer, printStream);
@@ -1871,7 +1871,7 @@ aspect FormattedPrint {
 			printStream.print(postFormatting);
 	}
 	
-	void EnumLiteralDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void EnumLiteralDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
 		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
@@ -1886,16 +1886,16 @@ aspect FormattedPrint {
 	eq Input.formattedToString()		= "input";
 	eq Output.formattedToString()		= "output";
 
-	void TypePrefix.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void TypePrefix.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print(formattedToString());
 	}
 
-	void ConditionalAttribute.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ConditionalAttribute.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("if");
 		getExp().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void Comment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void Comment.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasStringComment()) {
 			getStringComment().doPrettyPrintFormatted(printer, printStream);
 		}
@@ -1904,18 +1904,18 @@ aspect FormattedPrint {
 		}
 	}
 
-	void StringComment.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void StringComment.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("\"");
 		printStream.print(getComment());
 		printStream.print("\"");
 	}
 
-	void ParseAnnotation.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ParseAnnotation.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("annotation");
 		getClassModification().doPrettyPrintFormatted(printer, printStream);
 	}
 
-	void EndDecl.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void EndDecl.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("end" + insideFormatting + getEndID() + ";");
 	}
 
@@ -1939,7 +1939,7 @@ aspect FormattedPrint {
 	eq FDotDivExp.operatorFormatted() = "./";
 	eq FDotPowExp.operatorFormatted() = ".^";
 
-	void ExternalClause.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ExternalClause.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print("external");
 		if (hasExternalLanguage())
 			getExternalLanguage().doPrettyPrintFormatted(printer, printStream);
@@ -1950,7 +1950,7 @@ aspect FormattedPrint {
 		printStream.print(';');
 	}
 	
-	void ExternalFunctionCall.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ExternalFunctionCall.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		if (hasReturnVar()) {
 			getReturnVar().doPrettyPrintFormatted(printer, printStream);
 			printStream.print('=');
@@ -1967,7 +1967,7 @@ aspect FormattedPrint {
 		printStream.print(')');
 	}
 	
-	void ExternalLanguage.prettyPrintFormattedHelper(Printer printer, PrintStream printStream) {
+	void ExternalLanguage.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		printStream.print('"');
 		printStream.print(getLanguage());
 		printStream.print('"');
