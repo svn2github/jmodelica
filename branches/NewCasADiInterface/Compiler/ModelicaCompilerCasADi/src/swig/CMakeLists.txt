@@ -27,9 +27,10 @@ endif(WIN32)
 
 
 set(CPPFLAGS -fPIC -shared -D_REENTRANT)
-set(LINKFLAGS -shared)
 if(WIN32)
-  list(APPEND LINKFLAGS --add-stdcall-alias)
+  set(LINKFLAGS "-shared -Wl,--add-stdcall-alias")
+else(WIN32)
+  set(LINKFLAGS -shared)
 endif(WIN32)
 
 
