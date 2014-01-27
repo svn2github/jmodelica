@@ -11484,14 +11484,13 @@ equation
  sa = time;
  sb = time;
  x = time;
- s[1] = if x >= 0 then sa else s[3];
- s[2] = s[1];
- y = if x >= 0.0 then x * sa else x * s[3];
  s[5] = if - x >= 0 then sb else s[3];
  s[4] = s[5];
  y = if - x >= 0.0 then (- x) * sb else (- x) * s[3];
+ s[1] = if x >= 0 then sa else s[3];
+ s[2] = s[1];
+ y = if x >= 0.0 then x * sa else x * s[3];
 end FunctionTests.FunctionLike.Special.SemiLinear5;
-			
 ")})));
 end SemiLinear5;
 

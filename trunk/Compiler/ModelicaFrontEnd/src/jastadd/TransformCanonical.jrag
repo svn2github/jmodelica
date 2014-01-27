@@ -66,7 +66,7 @@ aspect TransformCanonical {
 	 *         equations are replaced by scalar declarations and equations
 	 *    <li> Alias variables are eliminated from the model.
 	 *    <li> Derivative variables are generated and inserted in the
-	 *         list of FVariables by calling addFDerivativeVariables().
+	 *         list of FVariables by calling setFDerivativeVariables().
 	 *    <li> Generate initial equations based on start attribute.
 	 *    <li> Sort dependent parameters.
 	 *  </ul>
@@ -92,14 +92,16 @@ aspect TransformCanonical {
 		    new propagateResidualPairs(),
 		    new genInitArrayStatements(),
 		    new functionInliningIfSet(),
-		    aliasElimination,
-		    addFDerivativeVariables,
-		    new addFPreVariables(),
-		    new enableIfEquationRewrite(),
-		    new variabilityPropagationIfSet(),
+            setFDerivativeVariables,
+            new addFPreVariables(),
+            new enableIfEquationRewrite(),
+            aliasElimination,
+            new variabilityPropagationIfSet(),
+            aliasElimination,
 		    new evaluateAsserts(),
 		    new enableSemiLinearRewrite(),
 		    new genInitialEquations(),
+            setFDerivativeVariables,
 		    new propagateNonFixedParameters(),
 		    new sortDependentParameters(),
 		    new addRuntimeOptionParameters()
@@ -1384,27 +1386,28 @@ aspect TransformCanonical {
 
     public class FClass {
         /**
-         * Add derivative variables to the list of FVariables, one for each
-         * differentiate variable.
+         * Remake all FDerivativeVariables.
          */
-        public class addFDerivativeVariables extends Transformation {
+        public class setFDerivativeVariables extends Transformation {
             public void perform() {
-                ArrayList<FDerivativeVariable> l = new ArrayList<FDerivativeVariable>();
+                ArrayList<FVariable> l = new ArrayList<FVariable>();
+                for (FVariable fv : getFVariables())
+                    if (!fv.isDerivativeVariable())
+                        l.add(fv);
                 for (FVariable fv : differentiatedRealVariables())
                     l.add(fv.createFDerivativeVariable());
-                for (FVariable fv : l)
-                    addFVariable(fv);
+                setFVariableList(new List<FVariable>(l));
                 root().flushAllRecursive();
             }
         }
-        public addFDerivativeVariables addFDerivativeVariables = new addFDerivativeVariables();
+        public setFDerivativeVariables setFDerivativeVariables = new setFDerivativeVariables();
     }
-
-	public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {
-		for (FVariable fv : fvs)
-			addFVariable(fv);
-		root().flushAllRecursive();
-	}
+    
+    public void FClass.addFDerivativeVariables(Collection<FVariable> fvs) {
+        for (FVariable fv : fvs)
+            addFVariable(fv);
+        root().flushAllRecursive();
+    }
 
 	public FDerivativeVariable FVariable.createFDerivativeVariable() {
 	    throw new UnsupportedOperationException("Trying to create a derivative variable from the non real variable " + name() + "! Java class type: '" + getClass().getSimpleName() + "'");
@@ -1544,7 +1547,6 @@ aspect TransformCanonical {
             }
         }
     }
-	
 
     public class FClass {
         /**
@@ -1664,7 +1666,7 @@ aspect TransformCanonical {
 	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
 	
 	syn boolean FAbstractVariable.canBeAlias() = false;
-	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable() && !isOutput();
+	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable() && !isPreVariable() && !isDerivativeVariable() && !isOutput();
 	
 	syn int FExp.aliasSign() = 1;
 	eq FNegExp.aliasSign()   = -getFExp().aliasSign();
@@ -1729,12 +1731,7 @@ aspect TransformCanonical {
 				aliasVars.add(fv);
 		}
 		for (FVariable fv : getFVariables()) {
-			if (fv.isAlias()) {
-				aliasVars.add(fv);
-			} else { 
-				nonAliasVars.add(fv);
-				fv.propagateAttributesFromAlias();
-			}
+			fv.aliasSort(aliasVars, nonAliasVars);
 		}
 		
 		// Remove alias equations.
@@ -1751,6 +1748,44 @@ aspect TransformCanonical {
 		
 		flush();
 	}
+	
+    /**
+     * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
+     * <code>nonAliasVars</code>, if it is not.
+     */
+    public void FVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+        if (isAlias()) {
+            aliasVars.add(this);
+        } else if (aliasSortKeep()) { 
+            nonAliasVars.add(this);
+            this.propagateAttributesFromAlias();
+        }
+    }
+    
+    /**
+     * A derivative variable of an alias is removed, if there is no suitable 
+     * alias derivative variable one is created. 
+     */
+    public void FDerivativeVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+        FVariable itg = getMeIntegrated();
+        if (itg.isAlias()) {
+            FVariable alias = itg.alias();
+            if (alias.getMeDifferentiated() == null) {
+                FVariable fdv = alias.createFDerivativeVariable();
+                alias.setMeDifferentiated(fdv);
+                fdv.setMeIntegrated(alias);
+                nonAliasVars.add(fdv);
+            }
+        } else {
+            super.aliasSort(aliasVars, nonAliasVars);
+        }
+    }
+    
+    /**
+     * If this is a pre variable of an alias it should be left out/removed.
+     */
+    syn boolean FVariable.aliasSortKeep() = !isPreVariable() || !myNonPreVariable().isAlias();
+    
 	
 	public void FClass.checkForEliminatedHGTVars() {
 		for (FVariable var : getAliasVariables()) {
@@ -1933,6 +1968,7 @@ aspect TransformCanonical {
 		nonDefiningUses().size() <= 1 && 
 		definingUses().size() <= 1 && 
 		!usedAsFunctionCallLeft() && 
+        !isPreVariable() && myPreVariable().isUnknown() && 
 		(definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents());
 	
 	/**
@@ -5215,10 +5251,15 @@ aspect SemiLinear {
     eq FNegExp.isNegated()        = !getFExp().isNegated();
     
     
-    syn String FEquation.zeroFlowGetKey()   = 
-            (zeroFlowNegated() ? "-" : "")
-            + zeroFlowGetLeft().prettyPrint("") 
-            + zeroFlowGetX().prettyPrint("$"); 
+    syn String FEquation.zeroFlowGetKey() {
+        StringBuilder sb = new StringBuilder();
+        if (zeroFlowNegated())
+            sb.append("-");
+        sb.append(zeroFlowGetLeft().prettyPrint(""));
+        sb.append("$");
+        sb.append(zeroFlowGetX().prettyPrint(""));
+        return sb.toString();
+    }
     
 	
 	syn boolean FExp.isSemiLinear() = false;

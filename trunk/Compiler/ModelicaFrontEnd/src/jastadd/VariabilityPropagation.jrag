@@ -77,7 +77,7 @@ aspect VariabilityPropagation {
             public void perform() {
                 variabilityPropagation();
                 enableConstantFolding();
-//              forceRewrites();
+                forceRewrites();
                 root().flushAllRecursiveClearFinal(); // Enable expression rewrites
             }
         }
@@ -330,6 +330,11 @@ aspect VariabilityPropagation {
 		if (variability.constantVariability()) {
 			setBindingExp(bindingExp.fullCopy());
 		}
+        if (variability.parameterVariability()) {
+            if (fixedAttributeSet()) {
+                setFixedAttribute(true);
+            }
+        }
 		
 		// Uses
 		for (FIdUseExp use : uses()) {
@@ -395,8 +400,9 @@ aspect ConstantFolding {
 		}
 	}
 	
-	public void FAbstractEquation.enableConstantFolding() {	
-
+	public void ASTNode.enableConstantFolding() {
+	    for (ASTNode n : this)
+	        n.enableConstantFolding();
 	}
 	
 	public void FFunctionCallEquation.enableConstantFolding() {
@@ -405,28 +411,9 @@ aspect ConstantFolding {
 		}
 	}
 	
-	public void FEquation.enableConstantFolding() {	
-		getLeft().enableConstantFolding();
-		getRight().enableConstantFolding();
-	}
-	
-	public void FIfWhenElseEquation.enableConstantFolding() {
-		for (FAbstractEquation equation : getFAbstractEquations()) {
-			equation.enableConstantFolding();
-		}
-	}
-	
-	public void FIfWhenEquation.enableConstantFolding() {
-	    super.enableConstantFolding();
-	    if (hasElse())
-	        getElse().enableConstantFolding();
-	}
-	
-	public void FExp.enableConstantFolding() {	
-		for (FExp childExp: childFExps()) {
-			childExp.enableConstantFolding();
-		}
-	}
+    public void FAlgorithm.enableConstantFolding() {
+       
+    }
 	
 	public void FIfExp.enableConstantFolding() {
 		super.enableConstantFolding();

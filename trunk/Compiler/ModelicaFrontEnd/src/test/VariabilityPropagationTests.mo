@@ -390,7 +390,7 @@ initial equation
  iL = 0.0;
 equation
  u0 = sin(time);
- u1 = R1 * 1.0;
+ u1 = R1;
  u2 = R2 * i2;
  u2 = R3 * i3;
  uL = L * der(iL);
@@ -435,8 +435,35 @@ equation
  x3 = der(x4);
  der(x4) = 3;
 end VariabilityPropagationTests.Der1;
+			
 ")})));
 end Der1;
+
+model Der2
+	Real x,y;
+	Real z;
+equation
+	z = time;
+	y = x * der(z) + 1;
+	x = 0;
+    annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Der2",
+			description="Test removal of der var",
+			flatModel="
+fclass VariabilityPropagationTests.Der2
+ constant Real x = 0;
+ Real y;
+ Real z;
+equation
+ z = time;
+ y = 1;
+end VariabilityPropagationTests.Der2;
+			
+")})));
+end Der2;
+
+
 
 model WhenEq1
 	Real x1,x2;
@@ -524,6 +551,7 @@ fclass VariabilityPropagationTests.IfEq2
 parameter equation
  x2 = p1 + 2;
 end VariabilityPropagationTests.IfEq2;
+			
 ")})));
 end IfEq2;
 
@@ -928,6 +956,31 @@ parameter equation
 end VariabilityPropagationTests.InitialEquation1;
 ")})));
 end InitialEquation1;
+
+model InitialEquation2
+    Real x(fixed=false,start=3.14);
+	Real y;
+	parameter Real p1 = 1;
+equation
+	x = y + 1;
+	y = p1 + 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEquation2",
+			description="Check fixed=true",
+			flatModel="
+fclass VariabilityPropagationTests.InitialEquation2
+ parameter Real y;
+ parameter Real x(fixed = true,start = 3.14);
+ parameter Real p1 = 1 /* 1 */;
+parameter equation
+ y = p1 + 1;
+ x = y + 1;
+end VariabilityPropagationTests.InitialEquation2;
+			
+")})));
+end InitialEquation2;
 
 model AliasVariabilities1
 	Real a,b,c,d;
