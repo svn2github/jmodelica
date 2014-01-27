@@ -5393,20 +5393,19 @@ $C_ode_guards$
   jmi_real_t nSamp;
   nextTimeEvent = JMI_INF;
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+  if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),_h_6))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(_h_6));
-    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),_h_6))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(_h_6));
-    nextTimeEventTmp = (nSamp + 1.0)*_h_6 + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), _h_6))) {
+    nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (_h_6));
+    nextTimeEventTmp = (nSamp + 1.0) * (_h_6) + (AD_WRAP_LITERAL(0));
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), _h_6))) {
+    nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (_h_6));
+    nextTimeEventTmp = (nSamp + 1.0) * (_h_6) + (AD_WRAP_LITERAL(0));
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
   }
   *nextTime = nextTimeEvent;
-
 ")})));
 end WhenTest2; 
 
@@ -5442,27 +5441,27 @@ $C_ode_time_events$
   jmi_real_t nSamp;
   nextTimeEvent = JMI_INF;
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+  if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
+    nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")) + (AD_WRAP_LITERAL(0));
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")))) {
+    nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"1 / 3\")) + (AD_WRAP_LITERAL(0));
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
   }
   nextTimeEventTmp = JMI_INF;
-  if (SURELY_LT_ZERO(_t - AD_WRAP_LITERAL(0))) {
+  if (SURELY_LT_ZERO(_t - (AD_WRAP_LITERAL(0)))) {
     nextTimeEventTmp = AD_WRAP_LITERAL(0);
-  }  else if (ALMOST_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
-    nSamp = jmi_dround((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\") + AD_WRAP_LITERAL(0);
-  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - AD_WRAP_LITERAL(0),jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
-    nSamp = floor((_t-AD_WRAP_LITERAL(0))/(jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
-    nextTimeEventTmp = (nSamp + 1.0)*jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\") + AD_WRAP_LITERAL(0);
+  }  else if (ALMOST_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
+    nSamp = jmi_dround((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")) + (AD_WRAP_LITERAL(0));
+  }  else if (SURELY_GT_ZERO(jmi_dremainder(_t - (AD_WRAP_LITERAL(0)), jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")))) {
+    nSamp = floor((_t - (AD_WRAP_LITERAL(0))) / (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")));
+    nextTimeEventTmp = (nSamp + 1.0) * (jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"2 / 3\")) + (AD_WRAP_LITERAL(0));
   }
    if (nextTimeEventTmp<nextTimeEvent) {
     nextTimeEvent = nextTimeEventTmp;
@@ -5493,7 +5492,6 @@ $C_ode_time_events$
     pre_temp_1_3 = JMI_FALSE;
     pre_temp_2_4 = JMI_FALSE;
 
-  
 ")})));
 end WhenTest3; 
 

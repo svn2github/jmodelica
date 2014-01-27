@@ -637,31 +637,31 @@ public class CGenerator extends GenericGenerator {
 			for (FSampleExp s : fclass.samplers()) {
 				genPrinter.print("  nextTimeEventTmp = JMI_INF;\n");
 				// Case 1: time is before offset 
-				genPrinter.print("  if (SURELY_LT_ZERO(_t - ");
+				genPrinter.print("  if (SURELY_LT_ZERO(_t - (");
 				s.getOffset().prettyPrint_C(genPrinter,"");
-				genPrinter.print(")) {\n");
+				genPrinter.print("))) {\n");
 				genPrinter.print("    nextTimeEventTmp = ");
 				s.getOffset().prettyPrint_C(genPrinter,"");
 				genPrinter.print(";\n");
 				//genPrinter.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
 			    genPrinter.print("  } ");	
 			    // Case 2: we are at a sample			    					
-				genPrinter.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - ");
+				genPrinter.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - (");
 				s.getOffset().prettyPrint_C(genPrinter,"");
-				genPrinter.print(",");
+				genPrinter.print("), ");
 				s.getInterval().prettyPrint_C(genPrinter,"");
 				genPrinter.print("))) {\n");
 				// nSamp should be almost an integer - round to get it exact
-				genPrinter.print("    nSamp = jmi_dround((_t-");
+				genPrinter.print("    nSamp = jmi_dround((_t - (");
 			    s.getOffset().prettyPrint_C(genPrinter,"");
-			    genPrinter.print(")/(");
+			    genPrinter.print(")) / (");
 			    s.getInterval().prettyPrint_C(genPrinter,"");
 				genPrinter.print("));\n");
-				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
 				s.getInterval().prettyPrint_C(genPrinter,"");
-				genPrinter.print(" + ");
+				genPrinter.print(") + (");
 			    s.getOffset().prettyPrint_C(genPrinter,"");
-			    genPrinter.print(";\n");
+			    genPrinter.print(");\n");
 /*----*//*
 					genPrinter.print("printf(\"Hopp: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
 					genPrinter.print("(_t-");
@@ -674,23 +674,23 @@ public class CGenerator extends GenericGenerator {
 			    genPrinter.print("  } ");
 
 				// Case 3: Neither of the above: in between samples
-				genPrinter.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - ");
+				genPrinter.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - (");
 				s.getOffset().prettyPrint_C(genPrinter,"");
-				genPrinter.print(",");
+				genPrinter.print("), ");
 				s.getInterval().prettyPrint_C(genPrinter,"");
 				genPrinter.print("))) {\n");
 				// User the floor function to get the number of previous
 				// samples
-				genPrinter.print("    nSamp = floor((_t-");
+				genPrinter.print("    nSamp = floor((_t - (");
 			    s.getOffset().prettyPrint_C(genPrinter,"");
-			    genPrinter.print(")/(");
+			    genPrinter.print(")) / (");
 			    s.getInterval().prettyPrint_C(genPrinter,"");
 				genPrinter.print("));\n");
-				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0)*");
+				genPrinter.print("    nextTimeEventTmp = (nSamp + 1.0) * (");
 				s.getInterval().prettyPrint_C(genPrinter,"");
-				genPrinter.print(" + ");
+				genPrinter.print(") + (");
 			    s.getOffset().prettyPrint_C(genPrinter,"");
-			    genPrinter.print(";\n");
+			    genPrinter.print(");\n");
 /*----*//*
 					genPrinter.print("printf(\"Hopp2: %12.12f %12.12f %12.12f %12.12f\\n\",_t,nextTimeEventTmp,nSamp,");
 					genPrinter.print("(_t-");
