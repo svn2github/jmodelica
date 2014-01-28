@@ -24,9 +24,17 @@ import numpy as N
 
 try:
     import casadi
-    from modelicacasadi_wrapper import OptimizationProblem as CI_OP
-except:
+except ImportError:
     pass
+try:
+    from modelicacasadi_wrapper import OptimizationProblem as CI_OP
+except ImportError:
+    pass
+try:
+    from modelicacasadi_transfer import transfer_to_casadi_interface
+except ImportError:
+    pass
+
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser

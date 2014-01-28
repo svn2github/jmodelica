@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 # Import the needed JModelica.org Python methods
 from pymodelica import compile_fmu
-from casadi_interface import transfer_to_casadi_interface
+from pyjmi.casadi_interface import transfer_to_casadi_interface
 from pyfmi import load_fmu
 from pyjmi import OptimizationProblem, get_files_path
 

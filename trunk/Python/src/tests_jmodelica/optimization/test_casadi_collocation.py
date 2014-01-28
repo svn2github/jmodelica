@@ -30,7 +30,7 @@ from pyjmi.common.xmlparser import XMLException
 from pymodelica.compiler import compile_fmux, compile_fmu
 from pyfmi import FMUModel,load_fmu
 try:
-    from casadi_interface import transfer_to_casadi_interface
+    from pyjmi.casadi_interface import transfer_to_casadi_interface
     from pyjmi.optimization.casadi_collocation import *
     from pyjmi import CasadiModel
     import casadi

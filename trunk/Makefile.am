@@ -68,7 +68,7 @@ export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
  
-casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/casadi_interface $(MC_BUILD)/test
+casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer $(MC_BUILD)/test
 
 ifcasadi:
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -126,17 +126,17 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
 
- $(DESTDIR)$(prefix)/Python/casadi_interface: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
-	mkdir -p $(DESTDIR)$(prefix)/Python/casadi_interface
-	rm -f $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
-	touch $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
-	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/casadi_interface/__init__.py
-	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/casadi_interface
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 
 $(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/common/atomic*
 	mkdir -p $(MC_BUILD)/test/pythonTests
@@ -349,7 +349,7 @@ clean-local: clean-frontends clean-python-packages clean-casadi-interface
 clean-casadi-interface: 
 	rm -rf $(MC_BUILD)
 #	rm -rf $(DESTDIR)$(prefix)/Python/casadi
-#	rm -rf $(DESTDIR)$(prefix)/Python/casadi_interface
+#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 if HAVE_ANT
 	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
 	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi

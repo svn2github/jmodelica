@@ -23,7 +23,7 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import CasADiInterface
-from casadi_interface import transfer_to_casadi_interface
+from pyjmi.casadi_interface import transfer_to_casadi_interface
 from pyjmi import get_files_path
 
 def run_demo(with_plots=True):

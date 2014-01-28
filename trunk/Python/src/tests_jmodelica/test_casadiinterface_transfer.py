@@ -14,7 +14,7 @@
 
 import os
 from tests_jmodelica import testattr, get_files_path
-from casadi_interface import *
+from modelicacasadi_transfer import *
 
 
 ## In this file there are tests for transferModelica, transferOptimica and tests for

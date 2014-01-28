@@ -13,7 +13,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from tests_jmodelica import testattr
-from casadi_interface import *
+from modelicacasadi_transfer import *
 
 @testattr(casadi = True)    
 def test_SharedNode_eq():
