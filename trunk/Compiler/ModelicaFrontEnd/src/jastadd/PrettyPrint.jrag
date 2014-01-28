@@ -264,6 +264,7 @@ aspect PrettyPrint {
 	
 	
     public void ShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);
 	    if (hasEncapsulated())
 	    	str.print("encapsulated ");
 	    if (hasPartial())
@@ -280,7 +281,7 @@ aspect PrettyPrint {
 	    	str.print("replaceable ");
 	    
 	    
-	    str.print(indent + getRestriction().toString());
+	    str.print(getRestriction().toString());
  		str.print(" " + getName().getID());
 	    str.print(" = ");
 	    str.print(getExtendsClauseShortClass().getSuper().name());
@@ -294,6 +295,7 @@ aspect PrettyPrint {
 	}
 	
 	public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);
 	    if (hasEncapsulated())
 	    	str.print("encapsulated ");
 	    if (hasPartial())
@@ -310,7 +312,7 @@ aspect PrettyPrint {
 	    	str.print("replaceable ");
 	    
  		
- 		str.print(indent + getRestriction().toString());
+ 		str.print(getRestriction().toString());
  		str.print(" " + getName().getID() + "\n");
 
 		
