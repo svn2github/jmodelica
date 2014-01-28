@@ -542,23 +542,26 @@ aspect PrettyPrint {
 		str.print(" " + getName().getID()); 
 	    if (hasVarArraySubscripts())
 			p.print(getVarArraySubscripts(),str,indent);
-		 p.print(getModificationOpt(),str,indent);
+		p.print(getModificationOpt(),str,indent);
+		 
+		if (hasConditionalAttribute()) 
+		    p.print(getConditionalAttribute(), str, indent);
 				 
-		if (hasConstrainingClause()) {
-		  p.print(getConstrainingClause(),str,indent);
-		
-		}		 
-
-				    
+		if (hasConstrainingClause()) 
+		    p.print(getConstrainingClause(), str, indent);
 	}
 
-	public void ConstrainingClause.prettyPrint(Printer p, CodeStream str, String indent) {
-       str.print(" constrainedby " + getAccess().name());
-       if (hasClassModification()) {
-    	   str.print(' ');
-	       p.print(getClassModification(),str,indent);
-       }
+    public void ConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" if ");
+        p.print(getExp(), str, indent);
+    }
 
+	public void ConstrainingClause.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" constrainedby " + getAccess().name());
+        if (hasClassModification()) {
+    	    str.print(' ');
+	        p.print(getClassModification(), str, indent);
+        }
 	}
 
 	public void ArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
