@@ -38,6 +38,10 @@ aspect CCodeGen {
 
         public abstract void printPreSteps(ASTNode node, CodeStream str, String indent);
 
+        public boolean insideBlock() {
+            return false;
+        }
+
         @Override
         public String op(FBinExp e) { return e.op_C(); }
 
@@ -62,7 +66,20 @@ aspect CCodeGen {
 
     }
 	
+    /**
+     * Just like CPrettyPrinter but it is used inside of blocks
+     */
+    public class CBlockPrettyPrinter extends CPrettyPrinter {
+
+        @Override
+        public boolean insideBlock() {
+            return true; 
+        }
+
+    }
+    
     static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
+    static CPrettyPrinter ASTNode.blockPrinter_C = new CBlockPrettyPrinter();
 	
 	public String ASTNode.prettyPrint_C(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -1548,6 +1565,7 @@ aspect CCodeGen {
 	syn boolean FRelExp.relIsInverted_C() = false;
 	eq FNeqExp.relIsInverted_C() = true;
 	
+    @Override
 	public void FRelExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (cevalType().isString()) {
 			str.print("strcmp(");
@@ -1564,19 +1582,46 @@ aspect CCodeGen {
 			p.print(getRight(), str, indent);
 			str.print(relIsInverted_C() ? ", JMI_FALSE, JMI_TRUE)" : ", JMI_TRUE, JMI_FALSE)");
 		} else {
-			if (inEquationSection()) {
-				str.print("_sw");
-				str.print("(" + relExpInEquationsIndex() + ")");
-			} else {
-				str.print("_sw_init");
-				str.print("(" + relExpInInitialEquationsIndex() + ")");
-			}
+		    printSwitchMacro_C(p, str, indent);
 		}
 	}
 	
-	syn String FRelExp.op_C() = op();
-	eq FNeqExp.op_C() = " != ";
-	
+    private void FRelExp.printSwitchMacro_C(CodePrinter p, CodeStream str, String indent) {
+        if (inEquationSection()) {
+            str.format("_sw(%d)", relExpInEquationsIndex());
+        } else {
+            str.format("_sw_init(%d)", relExpInInitialEquationsIndex());
+        }
+    }
+
+    syn String FRelExp.op_C() = op();
+    eq FNeqExp.op_C() = " != ";
+
+    @Override
+    public void FRelExp.genTempVars_C(CodePrinter p, CodeStream str, String outerIndent) {
+        super.genTempVars_C(p, str, outerIndent);
+        if (root().options.getBooleanOption("generate_dae"))
+            return;
+        if (generatesEvent()) {
+            if (p.insideBlock())
+                str.formatln("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {", outerIndent);
+            else
+                str.formatln("%sif (jmi->atInitial || jmi->atEvent) {", outerIndent);
+            String indent = p.indent(outerIndent);
+            str.print(indent);
+            printSwitchMacro_C(p, str, indent);
+            str.print(" = jmi_turn_switch(");
+            printIndicator_C(p, str, indent);
+            str.print(", ");
+            printSwitchMacro_C(p, str, indent);
+            str.format(", jmi->events_epsilon, ");
+            genRelExpKind(str);
+            str.formatln(");");
+            str.formatln("%s}", outerIndent);
+        }
+    }
+
+
 	public void FLogBinExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print(macro_C());
 		str.print("(");
@@ -2956,16 +3001,20 @@ aspect CCodeGen {
 
 	public void FRelExp.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		if (hasIndicator()) {
-		    p.print(getIndicator(), str, indent);
-		} else {
-		    p.print(getLeft(), str, indent);
-			str.print(" - (");
-			p.print(getRight(), str, indent);
-			str.print(")");
-		}
+		printIndicator_C(p, str, indent);
 		str.print(";\n");
-	}	
+	}
+	
+    private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
+        if (hasIndicator()) {
+            p.print(getIndicator(), str, indent);
+        } else {
+            p.print(getLeft(), str, indent);
+            str.print(" - (");
+            p.print(getRight(), str, indent);
+            str.print(")");
+        }
+    }
 
 	public void FRealVariable.genStartAttributeResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
 		p.printPreSteps(this, str, indent);
