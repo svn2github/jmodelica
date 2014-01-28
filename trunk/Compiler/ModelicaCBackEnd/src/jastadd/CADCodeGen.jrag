@@ -888,7 +888,7 @@ aspect CADCodeGen {
 	public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
 		boolean firstVisit = visited == null ? true : visited.add(this);
 		if(!shouldBeDifferentiated()){
-			genResidual_C(enumerator, indent, str, null, null);
+			genResidual_C(printer_C, str, indent, enumerator, null, null);
 			return;
 		}
 		genTempVars_CAD(printer_CAD, str, indent);

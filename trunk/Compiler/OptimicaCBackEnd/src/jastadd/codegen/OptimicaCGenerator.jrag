@@ -190,7 +190,7 @@ public class OptimicaCGenerator extends CADGenerator {
 				e.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
 			Enumerator enumerator = new Enumerator();
 			for (FAbstractEquation e : foptclass.freeDependentParameterEquations()) {
-				e.genResidual_C(enumerator, INDENT, genPrinter, null, null);
+				e.genResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator, null, null);
 			}
 		}
 	}
