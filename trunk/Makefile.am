@@ -37,8 +37,9 @@ install_casadi: casadi
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
 	cp $(abs_builddir)/casadi_build/lib/*.* $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
 	mkdir -p $(DESTDIR)$(prefix)/Python/
-	cd $(abs_builddir)/casadi_build/python/; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
+	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
+	## temp fix
+	cp $(abs_builddir)/casadi_build/swig/casadi.py $(DESTDIR)$(prefix)/Python/casadi
 
 ## Install for CasADiInterface, Variables and targets. 
 ## MC_interface installs the system with Python. 
