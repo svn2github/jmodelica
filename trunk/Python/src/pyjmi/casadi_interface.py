@@ -22,19 +22,17 @@ Module containing the CasADi interface Python wrappers.
 import os.path
 import numpy as N
 
-try:
-    import casadi
-except ImportError:
-    pass
-try:
-    from modelicacasadi_wrapper import OptimizationProblem as CI_OP
-except ImportError:
-    pass
-try:
-    from modelicacasadi_transfer import transfer_to_casadi_interface
-except ImportError:
-    pass
+import casadi
 
+try:
+	import modelicacasadi_wrapper
+	modelicacasadi_present = True
+except ImportError:
+	modelicacasadi_present = False
+	
+if modelicacasadi_present:
+    from modelicacasadi_wrapper import OptimizationProblem as CI_OP
+    from modelicacasadi_transfer import transfer_to_casadi_interface
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
@@ -79,6 +77,12 @@ def unzip_fmux(archive, path='.'):
         raise IOError('ModelDescription.xml not found in FMUX archive: '+str(archive))
     
     return fmux_files
+
+if not modelicacasadi_present:
+	# Dummy class so that OptimizationProblem won't give an error.
+	# todo: exclude OptimizationProblem instead?
+	class CI_OP:
+		pass
 
 class OptimizationProblem(ModelBase, CI_OP):
 
