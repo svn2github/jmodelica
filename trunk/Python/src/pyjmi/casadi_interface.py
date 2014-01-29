@@ -25,14 +25,20 @@ import numpy as N
 import casadi
 
 try:
-	import modelicacasadi_wrapper
-	modelicacasadi_present = True
+    import modelicacasadi_wrapper
+    modelicacasadi_present = True
 except ImportError:
-	modelicacasadi_present = False
-	
+    modelicacasadi_present = False
+    
 if modelicacasadi_present:
     from modelicacasadi_wrapper import OptimizationProblem as CI_OP
-    from modelicacasadi_transfer import transfer_to_casadi_interface
+    from modelicacasadi_transfer import transfer_to_casadi_interface as _transfer_to_casadi_interface
+
+    def transfer_to_casadi_interface(*args, **kwargs):
+        model = _transfer_to_casadi_interface(*args, **kwargs)
+        if isinstance(model, CI_OP):
+            return OptimizationProblem(model)
+        return model
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
@@ -79,10 +85,10 @@ def unzip_fmux(archive, path='.'):
     return fmux_files
 
 if not modelicacasadi_present:
-	# Dummy class so that OptimizationProblem won't give an error.
-	# todo: exclude OptimizationProblem instead?
-	class CI_OP:
-		pass
+    # Dummy class so that OptimizationProblem won't give an error.
+    # todo: exclude OptimizationProblem instead?
+    class CI_OP:
+        pass
 
 class OptimizationProblem(ModelBase, CI_OP):
 
