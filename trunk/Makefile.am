@@ -68,7 +68,7 @@ export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
  
-casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer $(MC_BUILD)/test
+casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
 
 ifcasadi:
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -126,28 +126,24 @@ modelicacasadi_wrapper:
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 
 
- $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py  $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py: install_modelicacasadi_transfer
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py: install_modelicacasadi_transfer
+ 
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
+ 
+ install_modelicacasadi_wrapper: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
 	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+ 
+ install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-
-$(MC_BUILD)/test: $(MC_INTERFACE)/test/pythonTests/*py $(MC_INTERFACE)/test/common/atomic*
-	mkdir -p $(MC_BUILD)/test/pythonTests
-	mkdir -p $(MC_BUILD)/test/common
-	cp $(MC_INTERFACE)/test/pythonTests/*py $(MC_BUILD)/test/pythonTests
-	cp $(MC_INTERFACE)/test/common/atomic* $(MC_BUILD)/test/common
-	cd $(CASADI_BUILD_DIR)/python/ ; \
-	rm -f $(MC_BUILD)/test/pythonTests/runtests.sh
-	touch $(MC_BUILD)/test/pythonTests/runtests.sh
-	chmod u+x $(MC_BUILD)/test/pythonTests/runtests.sh
-	echo "PYTHONPATH=:$(DESTDIR)$(prefix)/Python/ JMODELICA_HOME=$(DESTDIR)$(prefix) nosetests *.py" >> $(MC_BUILD)/test/pythonTests/runtests.sh 
 	
 build-python-packages:
 if WITH_SUNDIALS
@@ -392,4 +388,4 @@ docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
 
 
-.PHONY: modelicacasadi_wrapper ifcasadi
+.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
