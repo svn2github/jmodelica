@@ -420,7 +420,7 @@ FQNamePartArray : FQNamePart ::= FArraySubscripts;
  * each and final. 
  */
 FAttribute : BaseNode ::= Type:FIdUse
-                          Name:FIdDecl 			   
+                          Name:FIdDecl
                           [Value:FExp]
                           <AttributeSet:boolean>
                           <Level:int>
@@ -499,7 +499,8 @@ abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
                                           [Name:FQName]
                                           [Residual:FResidual]
-                                          [Nominal:FNominal];
+                                          [Nominal:FNominal]
+                                          FAttribute*;
 
 /**
  * Unsupported equation.

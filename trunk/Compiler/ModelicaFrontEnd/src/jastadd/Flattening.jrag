@@ -729,7 +729,7 @@ aspect Flattening {
 			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
-                InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
+				InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
 				return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
 						exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
 			}
@@ -1259,11 +1259,16 @@ aspect UniqueVariables {
 
 aspect FlatExpressions {
 
-	public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
-		FAbstractEquation eqn = flattenEqn(prefix, fc);
-		if (eqn != null)
-			getType().addEquationTo(fc, eqn);
-	}
+    public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
+        FAbstractEquation eqn = flattenEqn(prefix, fc);
+        if (eqn != null) {
+            List<FAttribute> flatAttrs = new List<FAttribute>();
+            for (FAttribute attr : getFAttributes())
+                flatAttrs.add(attr.flatten(prefix));
+            eqn.setFAttributeList(flatAttrs);
+            getType().addEquationTo(fc, eqn);
+        }
+    }
 	
 	public FEquationType FEquationType.flatten(FQName prefix) {
 		return (FEquationType) fullCopy();
@@ -1456,6 +1461,24 @@ aspect FlatExpressions {
 	
 	public FAssignStmt FAssignStmt.flatten(FQName prefix)             { return null; }
 
+    public FAttribute FAttribute.flatten(FQName prefix) {
+        FAttribute flat = createEmptyNode();
+        flat.setType(getType().fullCopy());
+        flat.setName(getName().fullCopy());
+        if (hasValue())
+            flat.setValue(getValue().flatten(prefix));
+        flat.setLevel(getLevel());
+        if (hasFEach())
+            flat.setFEach(getFEach().fullCopy());
+        if (hasFFinal())
+            flat.setFFinal(getFFinal().fullCopy());
+        List<FAttribute> flatAttrs = new List<FAttribute>();
+        for (FAttribute attr : getFAttributes())
+            flatAttrs.add(attr.flatten(prefix));
+        flat.setFAttributeList(flatAttrs);
+        return flat;
+    }
+	
 	public FArraySubscripts FArraySubscripts.flatten(FQName prefix) {
 		List l = new List();
 		for (int i=0;i<getNumFSubscript();i++)
@@ -2150,10 +2173,10 @@ aspect InstantiatedExpressions {
 		return copyLocationTo(new FUnsupportedEquation(equationType()));
 	}
 
-	public FAbstractEquation Equation.instantiate() {
-		return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
-				buildNominalOpt(), getLeft().instantiate(), getRight().instantiate()));
-	}
+    public FAbstractEquation Equation.instantiate() {
+        return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
+                buildNominalOpt(), new List<FAttribute>(), getLeft().instantiate(), getRight().instantiate()));
+    }
 	
 	private Opt<FQName> Equation.buildNameOpt() {
 		AnnotationNode nameNode = annotation().vendorNode().forPath("name");
