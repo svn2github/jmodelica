@@ -1578,10 +1578,6 @@ public class ModelicaCompiler {
                 //If no target was set, assume jmu.
 				compileJMU(cl, name, compileTo);
 			}
-        } catch (IllegalCompilerArgumentException icae) {
-            log.error(icae.getMessage());
-            closeLogger();
-            System.exit(1);
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 				getDiagnosticsGenerator().writeProblems(ce.getProblems());

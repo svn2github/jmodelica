@@ -340,7 +340,7 @@ Help on function compile_fmu in module pymodelica.compiler:
 
 compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
             compiler_options={}, compile_to='.', compiler_log_level='warning', 
-            separate_process=False, jvm_args='')
+            separate_process=True, jvm_args='')
     Compile a Modelica model to an FMU.
 
     A model class name must be passed, all other arguments have default values.
@@ -421,7 +421,7 @@ compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0
             to locate the Java installation to use.
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
 
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a

@@ -37,7 +37,7 @@ from pymodelica.common.core import get_unit_name, list_to_string
 
 def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0',
                 compiler_options={}, compile_to='.', compiler_log_level='warning',
-                separate_process=False, jvm_args=''):
+                separate_process=True, jvm_args=''):
     """ 
     Compile a Modelica model to an FMU.
     
@@ -119,7 +119,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 
@@ -141,7 +141,7 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
                 separate_process, jvm_args)       
 
 def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={}, 
-                 compile_to='.', compiler_log_level='warning', separate_process=False,
+                 compile_to='.', compiler_log_level='warning', separate_process=True,
                  jvm_args=''):
     """ 
     Compile a Modelica model to an FMUX.
@@ -204,7 +204,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 
@@ -222,7 +222,7 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
                 separate_process, jvm_args)
 
 def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={}, 
-                compile_to='.', compiler_log_level='warning', separate_process = False,
+                compile_to='.', compiler_log_level='warning', separate_process=True,
                 jvm_args=''):
     """ 
     Compile a Modelica or Optimica model to a JMU.
@@ -291,7 +291,7 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
             to locate the Java installation to use. 
             For example (on Windows) this could be:
                 SEPARATE_PROCESS_JVM = C:\Program Files\Java\jdk1.6.0_37
-            Default: False
+            Default: True
             
         jvm_args --
             String of arguments to be passed to the JVM when compiling in a 

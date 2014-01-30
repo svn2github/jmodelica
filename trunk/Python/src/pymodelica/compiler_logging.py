@@ -299,6 +299,9 @@ class CompilerLogHandler:
         
         if exception.kind == 'xml.sax.SAXParseException':
             raise IOError(exception.message)
+
+        if exception.kind == 'org.jmodelica.util.exceptions.IllegalCompilerArgumentException':
+            raise IllegalCompilerArgumentError(exception.message)
         
         raise JError("%s\n%s" % (exception.message, exception.stacktrace))
 
