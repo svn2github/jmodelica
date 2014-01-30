@@ -3777,13 +3777,22 @@ class LocalDAECollocator2(CasadiCollocator):
                 
                 Type: MX or SXMatrix
         """
-        z = casadi.vertcat([self.time_points[i][k],
-                            self.var_map[i][k]['x'],
-                            self.var_map[i][k]['unelim_u'],
-                            self.var_map[i][k]['w'],
-                            self.var_map['p_opt'],
-                            self.var_map[i][k]['elim_u']])
-        return [z]
+        if self.named_vars:
+            z = reduce(list.__add__, map(list, [[self.time_points[i][k]],
+                                                self.var_map[i][k]['x'],
+                                                self.var_map[i][k]['unelim_u'],
+                                                self.var_map[i][k]['w'],
+                                                self.var_map['p_opt'],
+                                                self.var_map[i][k]['elim_u']]))
+            return z
+        else:
+            z = casadi.vertcat([self.time_points[i][k],
+                                self.var_map[i][k]['x'],
+                                self.var_map[i][k]['unelim_u'],
+                                self.var_map[i][k]['w'],
+                                self.var_map['p_opt'],
+                                self.var_map[i][k]['elim_u']])
+            return [z]
     
     def _eliminate_der_var(self):
         """
@@ -3870,6 +3879,8 @@ class LocalDAECollocator2(CasadiCollocator):
             assert(N.allclose(time[-1], self.tf))
         
         # Map constraint points to collocation points
+        if self._normalize_min_time:
+            raise NotImplementedError("Free time horizons not yet supported.")
         if self.op.getTimedVariables().size > 0 and self.hs == "free":
             raise CasadiCollocatorException("Point constraints can not be " +
                                             "combined with free element " +
@@ -3877,8 +3888,8 @@ class LocalDAECollocator2(CasadiCollocator):
         constraint_points = sorted(set(
                 [self.model.evaluateExpression(timed_var.getTimePoint()) for
                  timed_var in self.op.getTimedVariables()]))
-        nlp_timed_variables = casadi.MX()
-        if self.hs == "free":
+        nlp_timed_variables = []
+        if self.hs == "free": # FIX!!!
             timed_variables = casadi.SXMatrix()
         else:
             collocation_constraint_points = {}
@@ -4286,13 +4297,6 @@ class LocalDAECollocator2(CasadiCollocator):
             raise NotImplementedError("nominal_traj not yet supported.")
         if self.discr == "LG" is not None:
             raise NotImplementedError("Gauss not yet supported.")
-        if self._normalize_min_time:
-            raise NotImplementedError("Free time horizons not yet supported.")
-        try:
-            if self.mterm.getValue() != 0:
-                raise NotImplementedError("Mayer terms are not yet supported.")
-        except RuntimeError:
-            raise NotImplementedError("Mayer terms are not yet supported.")
         if self.result_mode != "collocation_points":
             raise NotImplementedError("result_mode not yet supported.")
         if self.measurement_data is not None:
@@ -4489,64 +4493,60 @@ class LocalDAECollocator2(CasadiCollocator):
         dae_fcn.init()
         
         # Manipulate and sort path constraints
-        if self._all_features: # FIX!!!
-            g_e = []
-            g_i = []
-            path = self.path
-            lb = self.ocp.path_min.toArray().reshape(-1)
-            ub = self.ocp.path_max.toArray().reshape(-1)
-            for i in xrange(path.numel()):
-                if lb[i] == ub[i]:
-                    g_e.append(path[i] - ub[i])
-                else:
-                    if lb[i] != -N.inf:
-                        g_i.append(-path[i] + lb[i])
-                    if ub[i] != N.inf:
-                        g_i.append(path[i] - ub[i])
+        g_e = []
+        g_i = []
+        for (res, cnstr) in itertools.izip(self.path, op.getPathConstraints()):
+            if cnstr.getType() == cnstr.EQ:
+                g_e.append(res)
+            elif cnstr.getType() == cnstr.LEQ:
+                g_i.append(-res)
+            elif cnstr.getType() == cnstr.GEQ:
+                g_i.append(res)
         
         # Create path constraint functions
-        if self._all_features: # FIX!!!
-            path_constraint_input = []
-            if self.eliminate_der_var:
-                path_constraint_input += [sym_input_elim_der, x_i, der_vals_k, h_i]
-            else:
-                path_constraint_input.append(sym_input)
-            path_constraint_input.append(timed_variables)
-            if self.variable_scaling and self.nominal_traj is not None:
-                path_constraint_input.append(sym_sf)
-            g_e_fcn = casadi.SXFunction(path_constraint_input,
-                                        [casadi.vertcat(g_e)])
-            g_i_fcn = casadi.SXFunction(path_constraint_input,
-                                        [casadi.vertcat(g_i)])
-            g_e_fcn.setOption("name", "g_e_fcn")
-            g_e_fcn.init()
-            g_i_fcn.setOption("name", "g_i_fcn")
-            g_i_fcn.init()
+        path_constraint_input = []
+        if self.eliminate_der_var: # FIX!!!
+            path_constraint_input += [sym_input_elim_der, x_i, der_vals_k, h_i]
+        else:
+            path_constraint_input += sym_input + sym_input_dx
+        path_constraint_input += timed_variables
+        if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+            path_constraint_input.append(sym_sf)
+        g_e_fcn = casadi.MXFunction(path_constraint_input,
+                                    [casadi.vertcat(g_e)])
+        g_i_fcn = casadi.MXFunction(path_constraint_input,
+                                    [casadi.vertcat(g_i)])
+        g_e_fcn.setOption("name", "g_e_fcn")
+        g_e_fcn.init()
+        g_i_fcn.setOption("name", "g_i_fcn")
+        g_i_fcn.init()
+
+        # Manipulate and sort point constraints
+        G_e = []
+        G_i = []
+        for (res, cnstr) in itertools.izip(self.point,
+                                           op.getPointConstraints()):
+            if cnstr.getType() == cnstr.EQ:
+                G_e.append(res)
+            elif cnstr.getType() == cnstr.LEQ:
+                G_i.append(res)
+            elif cnstr.getType() == cnstr.GEQ:
+                G_i.append(-res)
         
         # Create point constraint functions
-        if self._all_features: # FIX!!!
-            G_e = []
-            G_i = []
-            lb = self.ocp.point_min.toArray().reshape(-1)
-            ub = self.ocp.point_max.toArray().reshape(-1)
-            for i in xrange(self.point.numel()):
-                if lb[i] == ub[i]:
-                    G_e.append(self.point[i] - ub[i])
-                else:
-                    if lb[i] != -N.inf:
-                        G_i.append(-self.point[i] + lb[i])
-                    if ub[i] != N.inf:
-                        G_i.append(self.point[i] - ub[i])
-            G_e_fcn = casadi.SXFunction(
-                    [casadi.vertcat([self.model.p, timed_variables])],
-                    [casadi.vertcat(G_e)])
-            G_i_fcn = casadi.SXFunction([casadi.vertcat(
-                    [self.model.p, timed_variables])],
-                    [casadi.vertcat(G_i)])
-            G_e_fcn.setOption("name", "G_e_fcn")
-            G_e_fcn.init()
-            G_i.setOption("name", "G_i_fcn")
-            G_i_fcn.init()
+        # Note that sym_input is needed as input since the point constraints
+        # may depend on free parameters
+        point_constraint_input = sym_input + timed_variables
+        if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+            point_constraint_input.append(sym_sf)
+        G_e_fcn = casadi.MXFunction(point_constraint_input,
+                                    [casadi.vertcat(G_e)])
+        G_i_fcn = casadi.MXFunction(point_constraint_input,
+                                    [casadi.vertcat(G_i)])
+        G_e_fcn.setOption("name", "G_e_fcn")
+        G_e_fcn.init()
+        G_i_fcn.setOption("name", "G_i_fcn")
+        G_i_fcn.init()
 
         # Create list of state matrices
         x_list = [[]]
@@ -4642,15 +4642,14 @@ class LocalDAECollocator2(CasadiCollocator):
                                                  self.horizon * self.h[i]]
                 else:
                     z = self._get_z(i, k)
-                    fcn_input = z
+                    fcn_input = list(z)
                     coll_input = x_list[i] + [der_vals[k],
                                               self.horizon * self.h[i]]
                     if self.named_vars:
                         coll_input += list(var_map[i][k]['dx'])
                     else:
                         coll_input += [var_map[i][k]['dx']]
-                if self.variable_scaling and self.nominal_traj is not None:
-                    # FIX!!!
+                if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
                     fcn_input += [variant_sf[i][k]]
                     if self.eliminate_der_var:
                         fcn_input += [coll_sf[i]['x']]
@@ -4742,35 +4741,31 @@ class LocalDAECollocator2(CasadiCollocator):
             c_e.append(h_constr)
         
         # Path constraints
-        # FIX!!!
-        if self._all_features:
-            for i in xrange(1, self.n_e + 1):
-                for k in self.time_points[i].keys():
-                    fcn_input = []
-                    if self.eliminate_der_var:
-                        z = self._get_z_elim_der(i, k)
-                        fcn_input += [z, x_list[i], der_vals[k],
-                                      self.horizon * self.h[i]]
-                    else:
-                        z = self._get_z(i, k)
-                        fcn_input.append(z)
-                    fcn_input.append(nlp_timed_variables)
-                    if self.variable_scaling and self.nominal_traj is not None:
-                        fcn_input.append(variant_sf[i][k])
-                    [g_e_constr] = g_e.call(fcn_input)
-                    [g_i_constr] = g_i.call(fcn_input)
-                    c_e.append(g_e_constr)
-                    c_i.append(g_i_constr)
+        for i in xrange(1, self.n_e + 1):
+            for k in self.time_points[i].keys():
+                fcn_input = []
+                if self.eliminate_der_var: # FIX!!!
+                    z = self._get_z_elim_der(i, k)
+                    fcn_input += [z, x_list[i], der_vals[k],
+                                  self.horizon * self.h[i]]
+                else:
+                    z = self._get_z(i, k)
+                    fcn_input = list(z)
+                fcn_input += nlp_timed_variables
+                if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                    fcn_input.append(variant_sf[i][k])
+                [g_e_constr] = g_e_fcn.call(fcn_input)
+                [g_i_constr] = g_i_fcn.call(fcn_input)
+                c_e.append(g_e_constr)
+                c_i.append(g_i_constr)
         
         # Point constraints
-        # FIX!!!
-        if self._all_features:
-            [G_e_constr] = G_e.call([casadi.vertcat(
-                    [var_map['p_opt'], nlp_timed_variables])])
-            [G_i_constr] = G_i.call([casadi.vertcat(
-                    [var_map['p_opt'], nlp_timed_variables])])
-            c_e.append(G_e_constr)
-            c_i.append(G_i_constr)
+        z = self._get_z_elim_der(1, 0) # Needed to get free parameters
+        fcn_input = z + nlp_timed_variables
+        [G_e_constr] = G_e_fcn.call(fcn_input)
+        [G_i_constr] = G_i_fcn.call(fcn_input)
+        c_e.append(G_e_constr)
+        c_i.append(G_i_constr)
         
         # Equality constraints for constrained inputs
         # FIX!!!
@@ -4809,13 +4804,15 @@ class LocalDAECollocator2(CasadiCollocator):
                                 input_constr = casadi.vertcat(input_constr)
                             c_e.append(input_constr)
         
-        # Store constraints and time as data attributes
+        # Store constraints, time and timed variables as data attributes
         self.c_e = c_e
         if c_i.isNull():
             self.c_i = casadi.MX(0, 1)
         else:
             self.c_i = c_i
         self.time = N.array(time)
+        self._timed_variables = timed_variables
+        self._nlp_timed_variables = nlp_timed_variables
         
     def _create_cost(self):
         """
@@ -4837,7 +4834,6 @@ class LocalDAECollocator2(CasadiCollocator):
         self.cost_lagrange = 0
         
         # Mayer term
-        # FIX!!!
         if not self.mterm.isConstant() or self.mterm.getValue() != 0.:
             # Get terminal values
             if self.discr == "LGR":
@@ -4847,35 +4843,21 @@ class LocalDAECollocator2(CasadiCollocator):
             else:
                 raise ValueError("Unknown discretization scheme %s." %
                                  self.discr)
-            
+
             # Create function for evaluation of Mayer term
-            tf = self.ocp.variable('finalTime').getStart()
-            mterm_inputs = casadi.SXMatrix(self.model.t)
-            mterm_inputs.append(casadi.SXMatrix(
-                    [x.atTime(tf, True) for
-                     x in self._var_vectors['x']]))
-            mterm_inputs.append(casadi.SXMatrix(
-                    [u.atTime(tf, True) for
-                     u in self._var_vectors['unelim_u']]))
-            mterm_inputs.append(casadi.SXMatrix(
-                    [w.atTime(tf, True) for
-                     w in self._var_vectors['w']]))
-            mterm_inputs.append(self.model.p)
-            mterm_inputs.append(casadi.SXMatrix(
-                    [u.atTime(tf, True) for
-                     u in self._var_vectors['elim_u']]))
-            mterm_fcn = casadi.MXFunction([mterm_inputs], [self.mterm])
+            mterm_input = self.mvar_struct_cat + self._timed_variables
+            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                mterm_input.append(sym_sf)
+            mterm_fcn = casadi.MXFunction(mterm_input, [self.mterm])
             mterm_fcn.setOption("name", "mterm_fcn")
             mterm_fcn.init()
-            
-            # Use appropriate function evaluation based on graph
-            if self.graph == "MX":
-                [self.cost_mayer] = mterm_fcn.call([z])
-            elif self.graph == "SX":
-                [self.cost_mayer] = mterm_fcn.eval([z])
-            else:
-                raise ValueError("Unknown CasADi graph %s." %
-                                 self.graph)
+
+            # Evaluate Mayer term
+            z = self._get_z_elim_der(1, 0) # Needed to get free parameters
+            mterm_fcn_input = z + self._nlp_timed_variables
+            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                mterm_input.append(sym_sf)
+            [self.cost_mayer] = mterm_fcn.call(mterm_fcn_input)
         
         # Lagrange term
         if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
@@ -4884,10 +4866,10 @@ class LocalDAECollocator2(CasadiCollocator):
                 fcn_input = self.mvar_struct_cat + [x_i, der_vals_k, h_i]
             else:
                 fcn_input = self.mvar_struct_cat + self.mvar_struct_dx
-            # FIX!!!
-            if self.variable_scaling and self.nominal_traj is not None:
+            fcn_input += self._timed_variables
+            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
                 fcn_input.append(self._sym_sf)
-            
+
             lterm_fcn = casadi.MXFunction(fcn_input, [self.lterm])
             lterm_fcn.setOption("name", "lterm_fcn")
             lterm_fcn.init()
@@ -4911,14 +4893,14 @@ class LocalDAECollocator2(CasadiCollocator):
                 for k in xrange(1, self.n_cp + 1):
                     if self.eliminate_der_var: # FIX!!!
                         z = self._get_z_elim_der(i, k)
-                        fcn_input = z + [self.x_list[i], self.der_vals[k],
+                        lterm_fcn_input = z + [self.x_list[i], self.der_vals[k],
                                          self.horizon * self.h[i]]
                     else:
-                        fcn_input = self._get_z(i, k)
-                    # FIX!!!
-                    if self.variable_scaling and self.nominal_traj is not None:
-                        fcn_input += variant_sf[i][k]
-                    [lterm_val] = lterm_fcn.call(fcn_input)
+                        lterm_fcn_input = self._get_z(i, k)
+                    lterm_fcn_input += self._nlp_timed_variables
+                    if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
+                        lterm_fcn_input += variant_sf[i][k]
+                    [lterm_val] = lterm_fcn.call(lterm_fcn_input)
                     # This can be improved! See #3355
                     self.cost_lagrange += ((tf - t0) * self.h[i] *
                                            lterm_val * self.pol.w[k])

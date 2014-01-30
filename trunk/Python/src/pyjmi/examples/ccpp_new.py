@@ -24,9 +24,8 @@ import matplotlib.pyplot as plt
 
 # Import the needed JModelica.org Python methods
 from pymodelica import compile_fmu
-from pyjmi.casadi_interface import transfer_to_casadi_interface
 from pyfmi import load_fmu
-from pyjmi import OptimizationProblem, get_files_path
+from pyjmi import transfer_to_casadi_interface, get_files_path
 
 def run_demo(with_plots=True):
     """
@@ -46,7 +45,7 @@ def run_demo(with_plots=True):
     3.  Verifying the result from the second step by simulating the system
         once more usng the optimized input trajectory.
     
-    The model was developed by Francesco Casella and was published in
+    The model was developed by Francesco Casella and is published in
     @InProceedings{CFA2011,
       author = "Casella, Francesco and Donida, Filippo and {\AA}kesson, Johan",
       title = "Object-Oriented Modeling and Optimal Control: A Case Study in
@@ -101,11 +100,8 @@ def run_demo(with_plots=True):
     
     ### 2. Solve the optimal control problem
     # Compile model
-    ci_op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
-                                         file_paths)
-    
-    # Load optimization problem
-    op = OptimizationProblem(ci_op)
+    op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
+                                      file_paths)
     
     # Set options
     opt_opts = op.optimize_options()

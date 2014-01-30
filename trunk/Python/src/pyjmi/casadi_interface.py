@@ -189,7 +189,7 @@ class OptimizationProblem(ModelBase, CI_OP):
                 if attr == "free":
                     return False
                 elif attr == "initialGuess":
-                    return 0.
+                    return self.get_attr(var, "start")
                 else:
                     raise ValueError("Variable %s does not have attribute %s."
                                      % (var.getName(), attr))

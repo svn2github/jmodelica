@@ -75,7 +75,8 @@ try:
 except ImportError:
     casadi_present = False
 if casadi_present:
-    from casadi_interface import CasadiModel, OptimizationProblem
+    from casadi_interface import (CasadiModel, OptimizationProblem,
+                                  transfer_to_casadi_interface)
 
 def get_files_path():
     """Get the absolute path to the example files directory."""
