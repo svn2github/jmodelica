@@ -86,7 +86,6 @@ set(MC_HPP
   jcc/mxfunctionwrap.hpp
   jcc/JCCEnv.h # todo: Pull these straight from JCC!
   jcc/JObject.h
-  ${MC_PATHS_H}
 )
 # Make the paths absolute since they are exported to the parent script
 make_paths_absolute(MC_HPP "${MC_HPP}")

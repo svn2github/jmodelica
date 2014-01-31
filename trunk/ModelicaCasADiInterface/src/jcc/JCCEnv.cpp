@@ -17,6 +17,8 @@
 #include <string.h>
 #include <iostream>
 #include <jni.h>
+#include <stdexcept>
+#include <string>
 
 #include "JCCEnv.h"
 
@@ -263,8 +265,7 @@ jclass JCCEnv::findClass(const char *className) const
         if (vm_env) {
             cls = vm_env->FindClass(className);
 	    if (cls == NULL) {
-		std::cerr << "Could not find class " << className << std::endl;
- 		exit(1);		
+            throw std::runtime_error(std::string("Could not find class ") + className);
 	    }
 	}
 #ifdef PYTHON

@@ -13,6 +13,7 @@
 #endif
 
 
+jint initJVM();
 jint initJVM(const char *classpath, const char *libpath=NULL);
 void destroyJVM();
 

@@ -81,32 +81,12 @@ find_library(CASADI_DLL
   NO_DEFAULT_PATH
 )
 
-# generate modelicacasadi_paths.h
+# todo: Check if we still need this. Why are there include dirs in the classpath?
 if(WIN32)
   set(CLASSPATH ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
-  set(LIBPATH ${MC_BUILD}/casadi/lib;${MC_BUILD}/ifcasadi)
 else(WIN32)
   join(CLASSPATH ":" "${JARS}")
-  set(LIBPATH ${MC_BUILD}/casadi/lib:${MC_BUILD}/ifcasadi)
 endif(WIN32)
-set(MC_PATHS_H "${CMAKE_CURRENT_BINARY_DIR}/modelicacasadi_paths.h")
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-set(MODELPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/common")
-
-# replace any backslashes in the paths with forward slashes to avoid upsetting the C++ compiler
-string(REGEX REPLACE "\\\\" "/" CLASSPATH "${CLASSPATH}")
-string(REGEX REPLACE "\\\\" "/" CASADI_HOME "${CASADI_HOME}")
-string(REGEX REPLACE "\\\\" "/" LIBPATH "${LIBPATH}")
-
-message(STATUS "CLASSPATH=${CLASSPATH}")
-message(STATUS "CASADI_HOME=${CASADI_HOME}")
-message(STATUS "LIBPATH=${LIBPATH}")
-
-# uses MODELPATH, LIBPATH, and CLASSPATH (inherited from parent)
-configure_file (
-  src/modelicacasadi_paths.h.in
-  ${MC_PATHS_H}
-)
 
 # Set up includes etc. used by both src/ and swig/
 # Add library path for libs

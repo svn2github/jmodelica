@@ -26,6 +26,23 @@ static const char *getenv_checked(const char *name) {
     return value;    
 }
 
+jint initJVM()
+{
+    string jmhome = string(getenv_checked("JMODELICA_HOME"));    
+    string mclib = jmhome + "/lib/casadi_interface";
+    
+    string mcjar = mclib + "/ModelicaCompiler.jar";
+    string ocjar = mclib + "/OptimicaCompiler.jar";
+    string utiljar = mclib + "/util.jar";
+    string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver.jar";
+    string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar + CLASSPATH_SEP + beaverjar;
+
+    string libpath = jmhome + "/lib/casadi_interface" + CLASSPATH_SEP
+                   + jmhome + "/ThirdParty/CasADi/lib";
+    
+    return initJVM(classpath.data(), libpath.data());
+}
+
 jint initJVM(const char *classpath, const char *libpath)
 {
     // ----------------------------- Load jvm.dll -----------------------------

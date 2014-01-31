@@ -19,11 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "sharedTransferFunctionality.hpp"
 
-#include "modelicacasadi_paths.h"
-
 void setUpJVM() {
     std::cout << "Creating JVM" << std::endl;
-    jint version = initJVM(MODELICACASADI_CLASSPATH, MODELICACASADI_LIBPATH);
+    jint version = initJVM();
     std::cout << "Created JVM, JNI version " << (version>>16) << "." << (version&0xffff) << '\n' << std::endl;
 }
 

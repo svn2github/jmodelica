@@ -55,9 +55,7 @@ OC_SRC=$(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi
 MC_BUILD=$(abs_builddir)/ModelicaCasADiInterfaceBuild
 # Jars from the modified modelica and optimica compilers are put into the JModelica folder
 MC_COMPILERS_DIR=$(MC_BUILD)/JModelica.org
-MC_JARS=$(MC_COMPILERS_DIR)/jars
-MC_MODELICA_JARS=$(MC_JARS)/modelica
-MC_OPTIMICA_JARS=$(MC_JARS)/optimica
+MC_LIB=$(DESTDIR)$(prefix)/lib/casadi_interface
 
 CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
 
@@ -68,7 +66,7 @@ export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
  
-casadi_interface: casadi install_casadi $(MC_JARS) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
 
 ifcasadi:
 	mkdir -p $(MC_BUILD)/ifcasadi; \
@@ -83,8 +81,20 @@ ifcasadi:
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
 
-$(MC_JARS): $(MC_MODELICA_JARS) $(MC_OPTIMICA_JARS)
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(MC_JARS)
+$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi
+	rm -rf $(MC_LIB)
+	mkdir -p $(MC_LIB)
+	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_LIB)
+	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_LIB)
+	cp $(MC_SRC)/bin/util.jar $(MC_LIB)
+	case $(build) in \
+	*-cygwin*) \
+	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
+	*-mingw*) \
+	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
+	*) \
+	cp $(MC_BUILD)/ifcasadi/libifcasadi.so $(MC_LIB) ;; \
+	esac 
 
 mc_modelica: ifcasadi
 	cd $(MC_SRC); ant -f build.xml 
@@ -97,18 +107,6 @@ $(MC_SRC)/bin/util.jar:             mc_modelica
 
 $(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
 $(OC_SRC)/bin/util.jar:             mc_optimica
-
-$(MC_MODELICA_JARS): $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_SRC)/bin/util.jar
-	rm -rf $(MC_MODELICA_JARS)
-	mkdir -p $(MC_MODELICA_JARS)
-	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_MODELICA_JARS)
-	cp $(MC_SRC)/bin/util.jar $(MC_MODELICA_JARS)
-
-$(MC_OPTIMICA_JARS): $(OC_SRC)/bin/OptimicaCompiler.jar $(OC_SRC)/bin/util.jar
-	rm -rf $(MC_OPTIMICA_JARS)
-	mkdir -p $(MC_OPTIMICA_JARS)
-	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_OPTIMICA_JARS)
-	cp $(OC_SRC)/bin/util.jar $(MC_OPTIMICA_JARS)
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
