@@ -56,16 +56,21 @@ link_directories(${CASADI_BUILD_DIR}/lib)
 link_directories(${IPOPT_HOME}/lib) 
 
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
-set(JMODELICA "${ABS_MC_BUILD}/JModelica.org")
 
-foreach(Target Modelica Optimica)
-  string(TOLOWER ${Target} target)
-  set(COMPILER_${target} "${JMODELICA}")
-  set(COMPILER_${target}_JAR_DIR "${JMODELICA}/jars/${target}")
-  set(JARS_${target} "${COMPILER_${target}_JAR_DIR}/${Target}Compiler.jar" "${COMPILER_${target}_JAR_DIR}/util.jar")
-endforeach(Target)
+set(COMPILERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Compiler")
+set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty")
 
-set(JARS "${JMODELICA}/jars/beaver.jar" ${JARS_modelica} ${JARS_optimica})
+set(MC_JAR "${COMPILERS_DIR}/ModelicaCompilerCasADi/bin/ModelicaCompiler.jar")
+set(OC_JAR "${COMPILERS_DIR}/OptimicaCompilerCasADi/bin/OptimicaCompiler.jar")
+set(UTIL_JAR "${COMPILERS_DIR}/ModelicaCompilerCasADi/bin/util.jar")
+set(BEAVER_JAR "${THIRDPARTY_DIR}/Beaver/beaver-0.9.6.1/lib/beaver.jar")
+set(JARS ${MC_JAR} ${OC_JAR} ${UTIL_JAR} ${BEAVER_JAR})
+
+message(STATUS "COMPILERS_DIR=${COMPILERS_DIR}")
+message(STATUS "THIRDPARTY_DIR=${THIRDPARTY_DIR}")
+message(STATUS "BEAVER_JAR=${BEAVER_JAR}")
+
+
 set(JARS_AND_JNI ${JARS} "${JAVA_HOME}/include" "${JAVA_HOME}/include/win32")
 
 set(CLASSPATH ${JARS_AND_JNI})
