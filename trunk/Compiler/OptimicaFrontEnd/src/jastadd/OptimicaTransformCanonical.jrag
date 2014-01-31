@@ -22,6 +22,9 @@ aspect OptimicaTransformCanonical {
 		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
 				fv.setFTypePrefixVariability(new FContinuous());
+                for (FIdUseExp use : fv.uses())
+                    if (use.inObjective())
+                        use.replaceMe(new FTimedVariable(use.getFIdUse().fullCopy(), new FStartTimeExp()));
 			}
 		}
 

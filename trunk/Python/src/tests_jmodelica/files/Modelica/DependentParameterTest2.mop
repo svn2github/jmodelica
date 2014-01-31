@@ -1,5 +1,5 @@
 optimization DependentParameterTest2(objectiveIntegrand = (x-2)^2 + u^2 + p1^2 + (p2-3)^2 + (p1-3)^2,
-                         objective=x(finalTime)^2*10 + p2(finalTime)^2)
+                         objective=x(finalTime)^2*10 + p2^2)
  parameter Real p1(free=true) = 1;
  parameter Real p2 = p1;
  parameter Real p3 = 1;  

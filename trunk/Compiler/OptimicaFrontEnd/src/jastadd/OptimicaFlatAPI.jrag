@@ -810,6 +810,12 @@ aspect OptimicaFlatAPI {
     inh boolean InstComponentModification.inOptimization();
     eq FOptClass.getChild().inOptimization() = true;
     eq Root.getChild().inOptimization()      = false; 
+    
+    inh boolean FIdUseExp.inObjective();
+    eq FAttribute.getValue().inObjective() = isObjective();
+    eq Root.getChild().inObjective()       = false;
+    
+    syn boolean FAttribute.isObjective() = getName().name().equals("objective");
 	
 	syn boolean Restriction.isOptimizationClass() = false;
 	eq OptimizationClass.isOptimizationClass() = true;
