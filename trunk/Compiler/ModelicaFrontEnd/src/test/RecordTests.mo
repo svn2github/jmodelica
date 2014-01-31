@@ -524,8 +524,8 @@ public
  end RecordTests.RecordType6.A;
 
  record RecordTests.RecordType6.B
-  Real a;
   Real b;
+  Real a;
  end RecordTests.RecordType6.B;
 
 end RecordTests.RecordType6;
@@ -1173,7 +1173,7 @@ model RecordConstructor3
 			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor3
- RecordTests.RecordConstructor3.A x = RecordTests.RecordConstructor3.A(1, 2, \"foo\");
+ RecordTests.RecordConstructor3.A x = RecordTests.RecordConstructor3.A(1, 2);
 
 public
  record RecordTests.RecordConstructor3.A
@@ -1275,19 +1275,147 @@ model RecordConstructor7
 			variability_propagation=false,
 			flatModel="
 fclass RecordTests.RecordConstructor7
- constant Real b.y = 2;
  constant Real b.x = 1;
+ constant Real b.y = 2;
 
 public
  record RecordTests.RecordConstructor7.B
-  Real y;
   Real x;
+  Real y;
  end RecordTests.RecordConstructor7.B;
 
 end RecordTests.RecordConstructor7;
 ")})));
 end RecordConstructor7;
 
+
+model RecordConstructor8
+    record A
+        Real x;
+        Real y = x + 2;
+    end A;
+    
+    A a = A(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordConstructor8",
+			description="Using default value in record constructor that depends on another member",
+			flatModel="
+fclass RecordTests.RecordConstructor8
+ RecordTests.RecordConstructor8.A a = RecordTests.RecordConstructor8.A(time, time + 2);
+
+public
+ record RecordTests.RecordConstructor8.A
+  Real x;
+  Real y = x + 2;
+ end RecordTests.RecordConstructor8.A;
+
+end RecordTests.RecordConstructor8;
+")})));
+end RecordConstructor8;
+
+
+model RecordConstructor9
+    record A
+        Integer x;
+        Integer y = x + 2;
+    end A;
+    
+    parameter A a = A(1);
+    parameter Integer b = a.y;
+    Real z[b] = (1:b) * time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordConstructor9",
+			description="Constant eval of default value in record constructor that depends on another member",
+			flatModel="
+fclass RecordTests.RecordConstructor9
+ parameter RecordTests.RecordConstructor9.A a = RecordTests.RecordConstructor9.A(1, 1 + 2) /* RecordTests.RecordConstructor9.A(1, 3) */;
+ parameter Integer b = 3 /* 3 */;
+ Real z[3] = (1:3) * time;
+
+public
+ record RecordTests.RecordConstructor9.A
+  discrete Integer x;
+  discrete Integer y = x + 2;
+ end RecordTests.RecordConstructor9.A;
+
+end RecordTests.RecordConstructor9;
+")})));
+end RecordConstructor9;
+
+
+model RecordConstructor10
+    record A
+        Real a;
+        Real b;
+    end A;
+
+    model B
+        parameter Real d = 2;
+    
+        record C = A(b = d);
+        
+        model E
+            C f = C(1);
+        end E;
+        
+        E e;
+    end B;
+
+    B b;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordConstructor10",
+			description="Using default value in record constructor that is set in short class decl",
+			flatModel="
+fclass RecordTests.RecordConstructor10
+ parameter Real b.d = 2 /* 2 */;
+ RecordTests.RecordConstructor10.b.C b.e.f(b = b.d) = RecordTests.RecordConstructor10.b.C(1, b.d);
+
+public
+ record RecordTests.RecordConstructor10.b.C
+  Real a;
+  Real b = b.d;
+ end RecordTests.RecordConstructor10.b.C;
+
+end RecordTests.RecordConstructor10;
+")})));
+end RecordConstructor10;
+
+
+model RecordConstructor11
+    record A
+        Real x;
+    end A;
+    
+    record B
+        extends A;
+        Real y = x + 2;
+    end B;
+    
+    B b = B(time);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="RecordConstructor11",
+			description="Using default value in record constructor that depends on an inherited member",
+			flatModel="
+fclass RecordTests.RecordConstructor11
+ RecordTests.RecordConstructor11.B b = RecordTests.RecordConstructor11.B(time, time + 2);
+
+public
+ record RecordTests.RecordConstructor11.B
+  Real x;
+  Real y = x + 2;
+ end RecordTests.RecordConstructor11.B;
+
+end RecordTests.RecordConstructor11;
+")})));
+end RecordConstructor11;
 
 
 model RecordScalarize1

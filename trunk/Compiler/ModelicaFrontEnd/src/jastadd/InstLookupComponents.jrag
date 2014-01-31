@@ -17,11 +17,11 @@
 
 aspect InstLookupComponents {
 
-	inh InstComponentDecl InstAccess.lookupInstComponent(String name);	
-	inh InstComponentDecl InstResidual.lookupInstComponent(String name);	
-	inh lazy InstComponentDecl InstNode.lookupInstComponent(String name);	
-	inh lazy InstComponentDecl InstModification.lookupInstComponent(String name);	
-	eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name); 
+	inh InstComponentDecl InstAccess.lookupInstComponent(String name);
+	inh InstComponentDecl InstResidual.lookupInstComponent(String name);
+	inh lazy InstComponentDecl InstNode.lookupInstComponent(String name);
+	inh lazy InstComponentDecl InstModification.lookupInstComponent(String name);
+	eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name);
 	eq InstRoot.getChild().lookupInstComponent(String name) = null;
 	
 	eq InstComponentDecl.getInstModification().lookupInstComponent(String name)      = lookupInstComponent(name);
@@ -30,7 +30,7 @@ aspect InstLookupComponents {
 	eq InstComponentDecl.getFArraySubscripts().lookupInstComponent(String name)      = lookupInstComponent(name);
 	eq InstComponentDecl.getLocalFArraySubscripts().lookupInstComponent(String name) = lookupInstComponent(name);
 
-	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponent(name);
+	eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponentForBindingExp(name);
 	
 	eq InstReplacingRecord.getOriginalInstComponent().lookupInstComponent(String name)    = lookupInstComponent(name);
 	eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
@@ -40,26 +40,41 @@ aspect InstLookupComponents {
 	eq InstSimpleShortClassDecl.getChild().lookupInstComponent(String name)               = lookupInstComponent(name);
     eq InstExternalObject.getDestructorCall().lookupInstComponent(String name)            = lookupInstComponent(name);
 	
-	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)            = 
+	eq InstDot.getInstAccess(int i).lookupInstComponent(String name)             = 
 			(i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
 	eq InstScalarAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
-	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)   = getTopInstAccess().lookupInstComponent(name);
-	eq InstArrayAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
-	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)        = null;
-	eq InstResidual.getIterationVariable().lookupInstComponent(String name)    = lookupInstComponent(name);
+	eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)    = getTopInstAccess().lookupInstComponent(name);
+	eq InstArrayAccess.getExpandedSubscripts().lookupInstComponent(String name)  = getTopInstAccess().lookupInstComponent(name);
+	eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)         = null;
+	eq InstResidual.getIterationVariable().lookupInstComponent(String name)      = lookupInstComponent(name);
+	
+	eq InstDefaultRecordModification.getChild().lookupInstComponent(String name) = lookupInstComponentForBindingExp(name);
 	
 	syn InstComponentDecl InstAccess.qualifiedLookupInstComponent(String name) = null;
 	eq InstClassAccess.qualifiedLookupInstComponent(String name)               = myInstClassDecl().memberInstComponentConstrained(name);
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name)           = 
 		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
-	eq InstComponentArrayAccess.qualifiedLookupInstComponent(String name)           = 
+	eq InstComponentArrayAccess.qualifiedLookupInstComponent(String name)      = 
 			lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
-	inh InstComponentDecl InstAccess.localLookupInstComponent(String name);	
+	inh InstComponentDecl InstAccess.localLookupInstComponent(String name);
 	eq InstRoot.getChild().localLookupInstComponent(String name)          = null;
 	eq FlatRoot.getChild().localLookupInstComponent(String name)          = null;
 	eq InstClassDecl.getChild().localLookupInstComponent(String name)     = memberInstComponent(name);
 	eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
+	
+//	inh InstComponentDecl InstDefaultRecordModification.lookupInstComponentForDefaultArg(String name);
+//    eq InstRoot.getChild().lookupInstComponentForDefaultArg(String name)          = null;
+//    eq FlatRoot.getChild().lookupInstComponentForDefaultArg(String name)          = null;
+//    eq InstClassDecl.getChild().lookupInstComponentForDefaultArg(String name)     = genericLookupInstComponent(name);
+//    eq InstComponentDecl.getChild().lookupInstComponentForDefaultArg(String name) = genericLookupInstComponent(name);
+    
+    syn InstComponentDecl InstValueModification.lookupInstComponentForBindingExp(String name) = lookupInstComponent(name);
+    eq InstDefaultRecordModification.lookupInstComponentForBindingExp(String name)            = 
+        (getSource() != null) ? getSource().lookupInstComponent(name) : lookupInstComponentInSurrounding(name);
+    
+    inh InstComponentDecl InstDefaultRecordModification.lookupInstComponentInSurrounding(String name);
+    eq InstNode.getChild().lookupInstComponentInSurrounding(String name) = genericLookupInstComponent(name);
 
 	/**
 	 * Get a specific child access, triggering transformations on that child, but *not* on the entire list.

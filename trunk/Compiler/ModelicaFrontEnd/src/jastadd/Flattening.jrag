@@ -373,15 +373,21 @@ aspect Flattening {
 		if (fc.lookupFRec(qualifiedName()) == null) {
 			FRecordDecl frd = new FRecordDecl();
 	   		frd.setFQName(new FQNameString(qualifiedName()));
-	   		Set<String> names = new HashSet<String>();
 	   		
-	   		for (InstComponentDecl icd : allInstComponentDecls())
-				icd.flattenInRecord(frd, fc, names);
+	   		Set<String> names = new HashSet<String>();
+	   		actualInstClass().flattenComponentsInRecord(frd, fc, names);
 			
 			fc.addFRecordDecl(frd);
 			
 			flattenUsedFuncsAndEnums(fc);
 		}
+	}
+	
+	public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
+        for (InstExtends ie : getInstExtendss())
+            ie.flattenComponentsInRecord(frd, fc, names);
+        for (InstComponentDecl icd : getInstComponentDecls())
+            icd.flattenInRecord(frd, fc, names);
 	}
 	
 	public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
@@ -1518,8 +1524,9 @@ aspect FlatExpressions {
 
 	public FExp FInstAccessExp.flatten(FQName prefix) {
         InstComponentDecl var = getInstAccess().myInstComponentDecl();
-        if (inDefaultArgument()) {
-            int i = var.containingEntity().myInputs().indexOf(var);
+        if (inDefaultArgument()) { // TODO: Handle default arguments of constructor args
+            InstClassDecl parent = (InstClassDecl) var.containingEntity();
+            int i = parent.myCallInputs().indexOf(var);
             int d = findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
         } else {
@@ -1595,21 +1602,25 @@ aspect FlatExpressions {
 	
 
 	/**
-	 * Check if this access is in the binding expression of an input to a function, 
-	 * and refers to an input in the same function.
+	 * Check if this access is in the binding expression of an input to a function 
+	 * or component in a record class, and refers to an input in the same function 
+	 * or component in the same record class.
 	 */
 	syn boolean FInstAccessExp.inDefaultArgument() {
 		InstComponentDecl target = getInstAccess().myInstComponentDecl();
 		InstComponentDecl holder = findComponentWithThisBindingExp();
-		return inFunction() && holder != null && holder.isInput() && target.isInput() &&
-				target.containingEntity() == holder.containingEntity();
+		return holder != null && target.containingEntity() == holder.containingEntity() && 
+		       ((inFunction() && holder.isInput() && target.isInput()) || 
+		        (inRecordDecl() && holder.isModifiable() && target.isModifiable()));
 	}
 	
 	/**
 	 * Find the component that has this expression as a part of its binding expression, if any.
 	 */
-	inh InstComponentDecl FInstAccessExp.findComponentWithThisBindingExp();
-	eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+	inh InstComponentDecl FExp.findComponentWithThisBindingExp();
+    eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
+//    eq InstAssignable.getBindingFExp().findComponentWithThisBindingExp()      = this;
+    eq InstClassModification.getChild().findComponentWithThisBindingExp()     = null;
 	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
 	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;
 	
@@ -1617,11 +1628,12 @@ aspect FlatExpressions {
 	 * Find the depth of nestled function calls in this expression.
 	 */
 	inh int FExp.findDepthOfNestledFunctionCalls();
-	eq InstModification.getChild().findDepthOfNestledFunctionCalls() = 0;
-	eq InstNode.getChild().findDepthOfNestledFunctionCalls()         = 0;
-	eq FClass.getChild().findDepthOfNestledFunctionCalls()           = 0;
-	eq FFunctionCall.getChild().findDepthOfNestledFunctionCalls()    = 1 + findDepthOfNestledFunctionCalls();
-	eq InstFunctionCall.getChild().findDepthOfNestledFunctionCalls() = 1 + findDepthOfNestledFunctionCalls();
+	eq InstModification.getChild().findDepthOfNestledFunctionCalls()   = 0;
+	eq InstNode.getChild().findDepthOfNestledFunctionCalls()           = 0;
+	eq FClass.getChild().findDepthOfNestledFunctionCalls()             = 0;
+	eq FFunctionCall.getChild().findDepthOfNestledFunctionCalls()      = 1 + findDepthOfNestledFunctionCalls();
+	eq InstFunctionCall.getChild().findDepthOfNestledFunctionCalls()   = 1 + findDepthOfNestledFunctionCalls();
+    eq FRecordConstructor.getChild().findDepthOfNestledFunctionCalls() = 1 + findDepthOfNestledFunctionCalls();
 	
 	/**
 	 * Get the referenced argument.
@@ -1633,14 +1645,17 @@ aspect FlatExpressions {
 	 */
 	inh FExp FArgumentExp.findArgOfNestledFunctionCall(int index, int depth);
 	inh FExp FFunctionCall.findArgOfNestledFunctionCall(int index, int depth);
-	eq FFunctionCall.getChild().findArgOfNestledFunctionCall(int index, int depth) = 
+    inh FExp FRecordConstructor.findArgOfNestledFunctionCall(int index, int depth);
+	eq FFunctionCall.getChild().findArgOfNestledFunctionCall(int index, int depth)      = 
 		(depth == 0) ? getArg(index) : findArgOfNestledFunctionCall(index, depth - 1);
-	eq InstNode.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
-	eq FlatRoot.getChild().findArgOfNestledFunctionCall(int index, int depth)      = null;
+	eq FRecordConstructor.getChild().findArgOfNestledFunctionCall(int index, int depth) = 
+	    (depth == 0) ? getArg(index) : findArgOfNestledFunctionCall(index, depth - 1);
+	eq InstNode.getChild().findArgOfNestledFunctionCall(int index, int depth)           = null;
+	eq FlatRoot.getChild().findArgOfNestledFunctionCall(int index, int depth)           = null;
 	
 	// TODO: Handle FArgumentExp all the way to C code generation or generate a temporary variable instead
 	rewrite FArgumentExp { 
-		to FExp copiedFExp().fullCopy();
+		when (myFClass() != null) to FExp copiedFExp().fullCopy();
 	} 
 
 	private Map<InstComponentDecl,String> InstClassDecl.tempVarNames;
@@ -2072,7 +2087,7 @@ aspect FlatExpressions {
 	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();
 		for (InstFunctionArgument a : getArgs()) 
-			args.add(a.getFExp().flatten(prefix));
+			args.add(a.flatten(prefix));
 		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
 	}
 	

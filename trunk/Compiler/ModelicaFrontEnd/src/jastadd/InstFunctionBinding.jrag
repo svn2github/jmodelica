@@ -472,7 +472,7 @@ aspect InstFunctionBinding {
 					target = icd;
 		    	externalObject = true;
 		    }
-    		ArrayList<InstComponentDecl> inputs = myInputs(target);
+    		ArrayList<InstComponentDecl> inputs = target.myCallInputs();
 		    
 		    /* If we can't resolve the name as a function or record, don't try to bind arguments, 
 		     * just leave it for the error check. */

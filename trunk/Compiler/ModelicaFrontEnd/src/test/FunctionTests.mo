@@ -959,33 +959,29 @@ model FunctionBinding16
     Real x = f();
     Real y = f(x);
     Real z = f(x,y);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionBinding16",
+			description="",
+			flatModel="
+fclass FunctionTests.FunctionBinding16
+ Real x = FunctionTests.FunctionBinding16.f(1, 1);
+ Real y = FunctionTests.FunctionBinding16.f(x, x);
+ Real z = FunctionTests.FunctionBinding16.f(x, y);
+
+public
+ function FunctionTests.FunctionBinding16.f
+  input Real a := 1;
+  input Real b := a;
+  output Real c := a + b;
+ algorithm
+  return;
+ end FunctionTests.FunctionBinding16.f;
+
+end FunctionTests.FunctionBinding16;
+")})));
 end FunctionBinding16;
-
-
-model FunctionBinding17
-    function f1
-        output Real a1;
-    algorithm
-        a1 := f2;
-    end f1;
-    
-    function f2
-        output Real a2 = 1;
-    algorithm
-    end f2;
-    
-    Real x = f1();
-end FunctionBinding17;
-
-
-model FunctionBinding18
-    function f
-        output Real a = 1;
-    algorithm
-    end f;
-   
-    Real x = f;
-end FunctionBinding18;
 
 
 model FunctionBinding19
@@ -1010,7 +1006,7 @@ model FunctionBinding19
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="FunctionBinding19",
-			description="",
+			description="Check that identical inherited inputs/outputs of functions are merged",
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.FunctionBinding19
@@ -1114,6 +1110,59 @@ public
 end FunctionTests.FunctionBinding21;
 ")})));
 end FunctionBinding21;
+
+
+model FunctionBinding22
+    function f1
+        input Real a;
+        input Real b = f2(a + 2);
+        output Real c;
+    algorithm
+        c := a + b;
+    end f1;
+		
+    function f2
+        input Real a;
+        output Real b;
+    algorithm
+        b := a + 3;
+    end f2;
+
+    model E
+        Real g = f1(time + 1);
+    end E;
+
+    E e;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="FunctionBinding22",
+			description="Test default argument using function call where arguments use another argument of the outer function",
+			flatModel="
+fclass FunctionTests.FunctionBinding22
+ Real e.g = FunctionTests.FunctionBinding22.f1(time + 1, FunctionTests.FunctionBinding22.f2(time + 1 + 2));
+
+public
+ function FunctionTests.FunctionBinding22.f2
+  input Real a;
+  output Real b;
+ algorithm
+  b := a + 3;
+  return;
+ end FunctionTests.FunctionBinding22.f2;
+
+ function FunctionTests.FunctionBinding22.f1
+  input Real a;
+  input Real b := FunctionTests.FunctionBinding22.f2(a + 2);
+  output Real c;
+ algorithm
+  c := a + b;
+  return;
+ end FunctionTests.FunctionBinding22.f1;
+
+end FunctionTests.FunctionBinding22;
+")})));
+end FunctionBinding22;
 
 
 

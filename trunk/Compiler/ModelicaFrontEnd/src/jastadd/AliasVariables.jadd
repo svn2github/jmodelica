@@ -577,7 +577,6 @@ aspect AliasVariables {
 			}
 
 			private AttributePropagator createAttributePropagator(String name) {
-				// TODO: add support for more attributes
 				if (name.equals(FAttribute.START) || name.equals(FAttribute.NOMINAL))
 					return new LevelAttributePropagator(name);
 				else if (name.equals(FAttribute.FIXED))
