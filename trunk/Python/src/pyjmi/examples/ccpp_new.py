@@ -107,7 +107,7 @@ def run_demo(with_plots=True):
     opt_opts = op.optimize_options()
     opt_opts['n_e'] = 50 # Number of elements
     opt_opts['init_traj'] = init_res.result_data # Simulation result
-    opt_opts['nominal_traj'] = init_res.result_data
+#    opt_opts['nominal_traj'] = init_res.result_data
     
     # Solve the optimal control problem
     opt_res = op.optimize(options=opt_opts)
