@@ -712,9 +712,9 @@ model RecordBinding6
 			description="Modification on record member with non-parameter expression",
 			flatModel="
 fclass RecordTests.RecordBinding6
- Real x.a;
+ Real y;
 equation
- x.a = time;
+ y = time;
 
 public
  record RecordTests.RecordBinding6.A
@@ -771,19 +771,19 @@ model RecordBinding8
 			inline_functions="trivial",
 			flatModel="
 fclass RecordTests.RecordBinding8
+ Real x[1];
+ Real x[2];
  Real y1[1].b;
  Real y1[2].b;
- Real y2[1].a;
  Real y2[1].b;
- Real y2[2].a;
  Real y2[2].b;
 equation
- y2[1].a = time;
- y2[2].a = time * 2;
+ x[1] = time;
+ x[2] = time * 2;
  y1[1].b = time;
  y1[2].b = time;
- y2[1].b = y2[1].a * y2[1].a;
- y2[2].b = y2[2].a * y2[2].a;
+ y2[1].b = x[1] * x[1];
+ y2[2].b = x[2] * x[2];
 
 public
  record RecordTests.RecordBinding8.A

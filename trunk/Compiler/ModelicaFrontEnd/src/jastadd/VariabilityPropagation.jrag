@@ -366,14 +366,16 @@ aspect VariabilityPropagation {
 		
         // Alias variables
         if (aliasSet() != null) {
+            AliasManager.AliasVariable thisAlias = aliasSet().getIterationVariable();
             for (AliasManager.AliasVariable av : aliasSet()) {
                 FVariable fv = av.getFVariable();
+                boolean neg = av.isNegated() ^ thisAlias.isNegated();
                 if (fv != this) {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.constantVariability())
-                        fv.setBindingExp(bindingExp.negated(av.isNegated()));
+                        fv.setBindingExp(bindingExp.negated(neg));
                     if (variability.parameterVariability() && !fv.isTemporary())
-                        parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(av.isNegated())));
+                        parameterEquations.add(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
                 }
             }
             myFClass().getAliasManager().unAlias(this);

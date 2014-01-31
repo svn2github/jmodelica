@@ -109,9 +109,16 @@ aspect IndexReduction {
 
             log.info("States:");
             Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
-            for (FVariable fv : variables())
-                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+            for (FVariable fv : variables()) {
+                if (fv.aliasSet() != null) {
+                    for (AliasManager.AliasVariable av : fv.aliasSet()) {
+                        if (av.getFVariable().stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+                            stateSelectAlwaysVars.add(av.getFVariable());
+                    }
+                } else if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS) {
                     stateSelectAlwaysVars.add(fv);
+                }
+            }
             for (FVariable fv : differentiatedRealVariables()) {
                 if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
                     fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");

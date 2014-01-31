@@ -256,7 +256,7 @@ At line 0, column 0:
 ")})));
 end WarningTest2;
 
-model WarningTest3
+model ErrorTest1
 	Real u0,u1,uL;
 	Real u2 annotation(__Modelon(IterationVariable));
 	Real u3 annotation(__Modelon(IterationVariable));
@@ -278,21 +278,23 @@ equation
 	i1 = i2 + i3;
 	
 	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="WarningTest3",
-			description="Test for alias eliminated hand guided tearing variable warning",
+		ErrorTestCase(
+			name="ErrorTest1",
+			description="Test for alias eliminated hand guided tearing variable error",
 			equation_sorting=true,
 			automatic_tearing=true,
 			hand_guided_tearing=true,
 			errorMessage="
-Warning: in file '...':
-At line 0, column 0:
-  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
-  Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
-")})));
-end WarningTest3;
+1 errors found:
 
-model WarningTest4
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
+    Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
+")})));
+end ErrorTest1;
+
+model ErrorTest2
     Real u0,u1,uL;
     Real u2 annotation(__Modelon(IterationVariable));
     Real u3 annotation(__Modelon(IterationVariable));
@@ -314,8 +316,8 @@ equation
     i1 = i2 + i3;
 
     annotation(__JModelica(UnitTesting(tests={ 
-        WarningTestCase(
-            name="WarningTest4",
+        ErrorTestCase(
+            name="ErrorTest2",
             description="Test so that no warning is given for linear torn blocks when no start value is set",
             equation_sorting=true,
             automatic_tearing=true,
@@ -323,12 +325,12 @@ equation
             errorMessage="
 1 warnings found:
 
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/TearingTests.mo':
-At line 0, column 0:
+Error: in file '...':
+Semantic error at line 0, column 0:
   Hand guided tearing variable 'u3' has been alias eliminated. Selected model variable is:
     Real u2 annotation(__Modelon(IterationVariable(enabled=true)))
 ")})));
-end WarningTest4;
+end ErrorTest2;
 
 model BLTError1
     Integer i, j;
@@ -3970,11 +3972,12 @@ Semantic error at line 0, column 0:
 end HandGuidedTearingError13;
 
 model HandGuidedTearingWarning1
-	Real x(start=1), y(start=2), z;
+	Real x(start=1), y(start=2), z, w;
 equation
-	x = -y;
-	y = z + 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
-	z = x - 1 annotation(__Modelon(ResidualEquation(iterationVariable=x)));
+	x = y + 1;
+	y = x + 1 annotation(__Modelon(ResidualEquation(iterationVariable=y)));
+	w = z + 1;
+	z = w - 1 annotation(__Modelon(ResidualEquation(iterationVariable=x)));
 	annotation(
 	__JModelica(UnitTesting(tests={
 		WarningTestCase(
@@ -3984,16 +3987,11 @@ equation
 			name="HandGuidedTearingWarning1",
 			description="Test hand guided tearing warnings",
 			errorMessage="
-2 warnings found:
+1 warnings found:
 
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
+Warning: in file '...':
 At line 0, column 0:
-  Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: x. Equation: - x = z + 1
-
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-At line 0, column 0:
-  Hand guided tearing variable 'y' has been alias eliminated. Selected model variable is:
-    Real x(start = 1) annotation(__Modelon(IterationVariable(enabled=true)))
+  Can not use hand guided tearing pair, equation and variable resides in different blocks. Variable: x. Equation: z = w - 1
 ")})));
 end HandGuidedTearingWarning1;
 

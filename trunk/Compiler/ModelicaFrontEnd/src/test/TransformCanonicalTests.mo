@@ -1465,7 +1465,7 @@ end TransformCanonicalTests.AliasPropFixed1;
 end AliasPropFixed1;
 
 
-model AliasPropStateSelect1
+model AliasStateSelect1
 	package A
         constant StateSelect ss[5] = { StateSelect.always, StateSelect.prefer, StateSelect.default, StateSelect.avoid, StateSelect.never };
 		
@@ -1484,10 +1484,10 @@ model AliasPropStateSelect1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="AliasPropStateSelect1",
+			name="AliasStateSelect1",
 			description="Test propagation of stateSelect attribute in alias set",
 			flatModel="
-fclass TransformCanonicalTests.AliasPropStateSelect1
+fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
  constant StateSelect b[1].s2 = StateSelect.prefer;
  Real b[1].x1(stateSelect = StateSelect.always);
@@ -1508,16 +1508,16 @@ fclass TransformCanonicalTests.AliasPropStateSelect1
  Real b[6].x1(stateSelect = StateSelect.prefer);
  constant StateSelect b[7].s1 = StateSelect.prefer;
  constant StateSelect b[7].s2 = StateSelect.never;
- Real b[7].x1(stateSelect = StateSelect.never);
+ Real b[7].x1(stateSelect = StateSelect.prefer);
  constant StateSelect b[8].s1 = StateSelect.default;
  constant StateSelect b[8].s2 = StateSelect.avoid;
- Real b[8].x1(stateSelect = StateSelect.avoid);
+ Real b[8].x1(stateSelect = StateSelect.default);
  constant StateSelect b[9].s1 = StateSelect.default;
  constant StateSelect b[9].s2 = StateSelect.never;
- Real b[9].x1(stateSelect = StateSelect.never);
+ Real b[9].x1(stateSelect = StateSelect.default);
  constant StateSelect b[10].s1 = StateSelect.avoid;
  constant StateSelect b[10].s2 = StateSelect.never;
- Real b[10].x1(stateSelect = StateSelect.never);
+ Real b[10].x1(stateSelect = StateSelect.avoid);
 equation
  b[1].x1 = time;
  b[2].x1 = time;
@@ -1533,9 +1533,33 @@ equation
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end TransformCanonicalTests.AliasPropStateSelect1;
+end TransformCanonicalTests.AliasStateSelect1;
 ")})));
-end AliasPropStateSelect1;
+end AliasStateSelect1;
+
+model AliasStateSelect2
+    Real a_s(stateSelect = StateSelect.always, start=1);
+    Real a_s2(stateSelect = StateSelect.always);
+    Real a_v,a_a;
+equation
+    a_s = a_s2;
+    a_v = der(a_s);
+    a_a = der(a_v);
+    a_v = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="AliasStateSelect2",
+            description="Test warnings for state select.",
+            automatic_tearing=false,
+            errorMessage="
+3 warnings found:
+
+Warning: in file '...':
+At line 0, column 0:
+  a_s2 has stateSelect=always, but could not be selected as state
+")})));
+end AliasStateSelect2;
 
 
 model ParameterBindingExpTest3_Warn
