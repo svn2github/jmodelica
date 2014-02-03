@@ -143,9 +143,9 @@ LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 LIB_IPOPT    = `PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig pkg-config --libs ipopt`
 # For different targets
-LIBS_FMUME10 = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi1_me $(LIB_JMIC) $(LIB_COMMON)
-LIBS_FMUCS10 = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi1_cs -lfmi1_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
-LIBS_FMU20   = -L$(RUNTIMELIBRARY_LIB_DIR) -lfmi2 $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMUME10 = -lfmi1_me $(LIB_JMIC) $(LIB_COMMON)
+LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
+LIBS_FMU20   = -lfmi2 $(LIB_JMIC) $(LIB_COMMON) -l:libsundials_cvode.a
 LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT) $(LIB_SUNDIALS)
 
 # Include paths for compilation
