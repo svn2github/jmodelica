@@ -900,6 +900,90 @@ end RecordTests.RecordBinding11;
 end RecordBinding11;
 
 
+model RecordBinding12
+	record A
+		B b(c = 2 * d);
+		Real d;
+	end A;
+	
+	record B
+		Real c;
+	end B;
+	
+	parameter A a(d = 1);
+	Real x = a.b.c * time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding12",
+			description="Modifications on nested records using members of outer record",
+			flatModel="
+fclass RecordTests.RecordBinding12
+ parameter Real a.b.c;
+ parameter Real a.d = 1 /* 1 */;
+ Real x;
+parameter equation
+ a.b.c = 2 * a.d;
+equation
+ x = a.b.c * time;
+
+public
+ record RecordTests.RecordBinding12.B
+  Real c;
+ end RecordTests.RecordBinding12.B;
+
+ record RecordTests.RecordBinding12.A
+  RecordTests.RecordBinding12.B b(c);
+  Real d;
+ end RecordTests.RecordBinding12.A;
+
+end RecordTests.RecordBinding12;
+")})));
+end RecordBinding12;
+
+
+model RecordBinding13
+    record A
+        B b = B(2 * d);
+        Real d;
+    end A;
+    
+    record B
+        Real c;
+    end B;
+    
+    parameter A a(d = 1);
+    Real x = a.b.c * time;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="RecordBinding13",
+			description="Binding expressions on nested records using members of outer record",
+			flatModel="
+fclass RecordTests.RecordBinding13
+ parameter Real a.b.c;
+ parameter Real a.d = 1 /* 1 */;
+ Real x;
+parameter equation
+ a.b.c = 2 * a.d;
+equation
+ x = a.b.c * time;
+
+public
+ record RecordTests.RecordBinding13.B
+  Real c;
+ end RecordTests.RecordBinding13.B;
+
+ record RecordTests.RecordBinding13.A
+  RecordTests.RecordBinding13.B b;
+  Real d;
+ end RecordTests.RecordBinding13.A;
+
+end RecordTests.RecordBinding13;
+")})));
+end RecordBinding13;
+
+
 model RecordArray1
  record A
   Real a[2];

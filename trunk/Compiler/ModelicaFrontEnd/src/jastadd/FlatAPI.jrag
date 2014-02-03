@@ -1612,7 +1612,8 @@ aspect FlatTypes {
 		return -1;
 	}
 	
-	inh FRecordDecl FAbstractVariable.containingRecordDecl();
+    inh FRecordDecl FExp.containingRecordDecl();
+    inh FRecordDecl FAbstractVariable.containingRecordDecl();
 	eq FRecordDecl.getChild().containingRecordDecl() = this;
 	eq Root.getChild().containingRecordDecl()        = null;
 

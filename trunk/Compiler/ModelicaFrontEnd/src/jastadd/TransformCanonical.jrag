@@ -880,47 +880,52 @@ aspect TransformCanonical {
 	}
 	
 	public void FVariable.genBindingEquations(FClass fc, FQName prefix) {
-		genBindingEquations(fc, prefix, null, false);
+		genBindingEquations(fc, prefix, null, prefix, false);
 	}
 	
-	public void FVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+	public void FVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, 
+	        FQName attrPrefix, boolean param) {
 		FExp bexp = selectBindingFExp(attr);
 		boolean isAttr = attr != null && attr.hasValue();
 		param = param || isParameter();
 		if (bexp != null && !(param && bexp.isIndependentParameterExp())) {
+            FQName bexpPrefix = isAttr ? attrPrefix : prefix;
 			if (!inRecord())
 				setBindingExpOpt(new Opt());
-			genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+			genBindingEquationsFromExp(fc, prefix, attr, bexp, bexpPrefix, param);
 			if (isAttr)
 				attr.setValueOpt(new Opt());
 		}
 	}
 	
-	public void FRecordVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, boolean param) {
+	public void FRecordVariable.genBindingEquations(FClass fc, FQName prefix, FAttribute attr, 
+	        FQName attrPrefix, boolean param) {
 		/* TODO: Perhaps this is the wrong approach? Could we instead convert binding expressions 
 		 *       for records into attributes on the variable, and sort it out into binding expressions 
 		 *       during scalarization?
 		 */
 		FExp bexp = selectBindingFExp(attr);
 		if (bexp != null) {
-			super.genBindingEquations(fc, prefix, attr, param);
+			super.genBindingEquations(fc, prefix, attr, attrPrefix, param);
 		} else {
 			List<FAttribute> attrs = selectFAttributeList(attr);
+			if (attrs == getFAttributes())
+			    attrPrefix = prefix;
 			FQName name = createNameForBindingEquation(prefix, attr);
 			for (FVariable comp : myFRecordDecl().getFVariables()) {
 				if (!comp.isConstant()) {
 					FAttribute cAttr = findMatching(attrs, comp.name());
-					comp.genBindingEquations(fc, name, cAttr, param || isParameter());
+					comp.genBindingEquations(fc, name, cAttr, attrPrefix, param || isParameter());
 				}
 			}
 		}
 	}
 	
 	protected void FVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
-			FAttribute attr, FExp bexp, boolean param) {
+			FAttribute attr, FExp bexp, FQName bexpPrefix, boolean param) {
 		FQName name = createNameForBindingEquation(prefix, attr);
 		param = param || isParameter();
-		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(prefix, this));
+		FEquation feq = new FEquation(new FIdUseExp(name), bexp.reflattenBindingExp(bexpPrefix));
 		if (param)
 			fc.addFParameterEquation(feq);
 		else
@@ -928,7 +933,7 @@ aspect TransformCanonical {
 	}
 	
 	protected void FRecordVariable.genBindingEquationsFromExp(FClass fc, FQName prefix, 
-			FAttribute attr, FExp bexp, boolean param) {
+			FAttribute attr, FExp bexp, FQName bexpPrefix, boolean param) {
 		/* If we get here, then we won't be able to leave expressions for independent parameters 
 		 * as binding expressions on the FVariable - we'll have to clean that up later. Since it 
 		 * has to be done after records are broken into separate variables, we'll do it during 
@@ -941,17 +946,17 @@ aspect TransformCanonical {
 				if (!comp.isConstant()) {
 					FAttribute cAttr = findMatching(attrs, comp.name());
 					FExp cExp = bexp.dynamicFExp(bexp.extractRecordFExp(comp.name()));
-					comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, param || isParameter());
+					comp.genBindingEquationsFromExp(fc, name, cAttr, cExp, bexpPrefix, param || isParameter());
 				}
 			}
 		} else {
-			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, param);
+			super.genBindingEquationsFromExp(fc, prefix, attr, bexp, bexpPrefix, param);
 		}
 	}
 	
-	public FExp FExp.reflattenBindingExp(FQName prefix, FVariable var) {
+	public FExp FExp.reflattenBindingExp(FQName prefix) {
 		FExp res = dynamicFExp(fullCopy());
-		FRecordDecl decl = var.containingRecordDecl();
+		FRecordDecl decl = containingRecordDecl();
 		if (decl != null)
 			res.prefixInternalUses(prefix, decl);
 		return res;
@@ -1047,35 +1052,6 @@ aspect TransformCanonical {
 	
 	public FExp FNoEventExp.extractRecordFExp(String suffix) {
 		return createNode(getFExp().extractRecordFExp(suffix));
-	}
-	
-	/**
-	 * \brief Generate equations from an attribute of a record variable.
-	 */
-	public void FAttribute.genBindingEquations(FClass fc, FRecordDecl rec, FQName prefix, boolean depPar) {
-		FVariable comp = (FVariable) rec.lookupHierarchical(getName().getFQName(), 0);
-		if (!comp.isUnknown() && !comp.isConstant()) {
-			FQName fqn = prefix.copyAndAppend(getName().getFQName());
-			
-			if (hasValue()) {
-				boolean indPar = !depPar && comp.isParameter() && getValue().isIndependentParameterExp();
-				// TODO: handle 'each'
-				if (!indPar) {
-					FEquation feq = new FEquation(new FIdUseExp(fqn), getValue());
-					if (depPar || comp.isParameter())
-						fc.addFParameterEquation(feq);
-					else
-						fc.addFEquation(feq);
-					setValueOpt(new Opt());
-				}
-			}
-			
-			if (comp.isRecord()) {
-				FRecordDecl next = comp.myFRecordDecl();
-				for (FAttribute a : getFAttributes())
-					a.genBindingEquations(fc, next, fqn, depPar);
-			}
-		}
 	}
 
     public class FClass {
