@@ -1712,7 +1712,7 @@ aspect FlatNames {
     		return new FQNameEmpty();
     	int fp = -1;
     	String name = getName();
-    	for (int i = 0; i < first && fp >= 0; i++)
+    	for (int i = 0; i < first && (i == 0 || fp >= 0); i++)
     		fp = name.indexOf('.', fp + 1);
     	if (fp < 0 && first > 0)
     		throw new ArrayIndexOutOfBoundsException(first);
@@ -1720,7 +1720,7 @@ aspect FlatNames {
     	for (int i = first; i < last && lp >= 0; i++)
     		lp = name.indexOf('.', lp + 1);
     	if (lp < 0 && last > 0)
-    		throw new ArrayIndexOutOfBoundsException(first);
+    		throw new ArrayIndexOutOfBoundsException(last);
     	lp = name.indexOf('.', lp + 1);
     	return new FQNameString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
     }
