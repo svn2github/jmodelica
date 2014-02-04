@@ -129,6 +129,7 @@ def test_NegatedAliasAttributes():
     assert isEqual(realVar3.getAttribute("start"), -attr3)
     assert isEqual(realVar3.getAttribute("nominal"), -attr4)
 
+    
 @testattr(casadi = True)    
 def test_ModelAliasAndModelGetters():
     model = Model()

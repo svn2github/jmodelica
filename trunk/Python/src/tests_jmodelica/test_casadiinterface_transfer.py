@@ -221,6 +221,7 @@ def test_ModelicaIntegerDependentConstants():
     indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
     assert str(2*(indepParam[0].getVar())) == str(depParam[0].getAttribute("bindingExpression"))
 
+@testattr(casadi = True)    
 def test_ModelicaIntegerDiscrete():
     model =  transfer_to_casadi_interface("atomicModelIntegerDiscrete", modelFile)
     intDisc =  model.getVariables(Model.INTEGER_DISCRETE)
@@ -259,6 +260,7 @@ def test_ModelicaBooleanDiscrete():
     boolDisc =  model.getVariables(Model.BOOLEAN_DISCRETE)
     assert str(boolDisc[0].getVar()) == str(x1)
 
+@testattr(casadi = True)
 def test_ModelicaBooleanInput():
     model =  transfer_to_casadi_interface("atomicModelBooleanInput", modelFile)
     boolIns =  model.getVariables(Model.BOOLEAN_INPUT)
@@ -296,6 +298,7 @@ def test_ModelicaModelFunction():
     actual = str(mf_1) + str(mf_2)
     assert expectedPrint == actual
 
+@testattr(casadi = True)
 def test_ModelicaDependentParametersCalculated():
     model =  transfer_to_casadi_interface("atomicModelDependentParameter", modelFile)
     model.calculateValuesForDependentParameters()
@@ -304,6 +307,7 @@ def test_ModelicaDependentParametersCalculated():
     assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
     assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
 
+@testattr(casadi = True)
 def test_ModelicaFunctionCallEquationForParameterBinding():
     model =  transfer_to_casadi_interface("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
     model.calculateValuesForDependentParameters()
@@ -346,6 +350,7 @@ def test_OptimicaLessThanPathConstraint():
     expected = str(x1) + " <= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)
 
+@testattr(casadi = True)
 def test_OptimicaGreaterThanPathConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQ", optproblemsFile)
     expected = str(x1) + " >= " + str(MX(1.0))
@@ -357,6 +362,7 @@ def test_OptimicaSevaralPathConstraints():
     expected = str(x2) + " <= " + str(MX(1.0)) +  str(x1) + " >= " + str(MX(1.0)) 
     assert( computeStringRepresentationForContainer(optProblem.getPathConstraints()) == expected)    
 
+@testattr(casadi = True)
 def test_OptimicaEqualityPointConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationEQpoint", optproblemsFile)
     expected = str(MX("x1(finalTime)")) + " = " + str(MX(1.0))
@@ -368,6 +374,7 @@ def test_OptimicaLessThanPointConstraint():
     expected = str(MX("x1(finalTime)")) + " <= " + str(MX(1.0))
     assert( computeStringRepresentationForContainer(optProblem.getPointConstraints()) == expected)
 
+@testattr(casadi = True)
 def test_OptimicaGreaterThanPointConstraint():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationGEQpoint", optproblemsFile)
     expected = str(MX("x1(finalTime)")) + " >= " + str(MX(1.0))
@@ -435,6 +442,7 @@ def test_OptimicaTimedVariables():
     assert tv3.isEqual(path_constraints[1].getLhs())
     assert tv4.isEqual(optProblem.getMayerTerm())
 
+@testattr(casadi = True)
 def test_OptimicaStartTime():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationStart5", optproblemsFile)
     assert( optProblem.getStartTime().getValue() == 5)
@@ -444,29 +452,33 @@ def test_OptimicaFinalTime():
     optProblem =  transfer_to_casadi_interface("atomicOptimizationFinal10", optproblemsFile)
     assert( optProblem.getFinalTime().getValue() == 10)
 
+@testattr(casadi = True)
 def test_OptimicaLagrangeTerm():
     optProblem =  transfer_to_casadi_interface("atomicLagrangeX1", optproblemsFile)
     assert str(optProblem.getLagrangeTerm()) == str(x1) 
     optProblem =  transfer_to_casadi_interface("atomicLagrangeNull", optproblemsFile)
     assert str(optProblem.getLagrangeTerm()) == str(MX(0))  
 
+@testattr(casadi = True)
 def test_OptimicaMayerTerm():
     optProblem =  transfer_to_casadi_interface("atomicMayerFinalTime", optproblemsFile)
     assert str(optProblem.getMayerTerm()) == str(MX("finalTime")) 
     optProblem =  transfer_to_casadi_interface("atomicMayerNull", optproblemsFile)
     assert str(optProblem.getMayerTerm()) == str(MX(0))
 
+@testattr(casadi = True)
 def test_OptimicaFree():
     model =  transfer_to_casadi_interface("atomicWithFree", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("free"))) == str(MX(False))
 
+@testattr(casadi = True)
 def test_OptimicaInitialGuess():
     model =  transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
-
+@testattr(casadi = True)
 def test_OptimicaInvalidCompiler():
     import sys
     errorString = ""
@@ -482,7 +494,7 @@ def test_OptimicaInvalidCompiler():
 #                                            #
 ##############################################
 
-
+@testattr(casadi = True)
 def test_ConstructElementaryExpression():
     dae = transfer_to_casadi_interface("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
     expected = "MX(vertcat(((2+x1)-der(x1)),((x2-x1)-der(x2)),((x3*x2)-der(x3)),((x4/x3)-der(x4))))"
@@ -545,6 +557,7 @@ def test_ConstructArrayInOutFunction1():
                 "(temp_1[1]-der(A[1])),(temp_1[2]-der(A[2])))")
     assert str(model.getDaeResidual()) == expected
  
+@testattr(casadi = True)
 def test_ConstructArrayInOutFunction2():
     model = transfer_to_casadi_interface("AtomicModelVector2", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelVector2.f\")\n"
@@ -799,6 +812,7 @@ def test_ConstructRecordInFunctionInFunction():
     assert funcStr == expected
     assert str(model.getDaeResidual()) == "((-function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0})-der(a))"
 
+@testattr(casadi = True)
 def test_ConstructRecordArbitraryDimension():
     model = transfer_to_casadi_interface("AtomicModelRecordArbitraryDimension", modelFile, compiler_options={"inline_functions":"none"})
     expected = ("ModelFunction : function(\"AtomicModelRecordArbitraryDimension.f\")\n"
@@ -912,6 +926,7 @@ def test_ConstructRecordNestedSeveralVars():
                 "-vertcat(r.r1.A,r.r1.B,r.rArr[1].A,r.rArr[1].B,r.rArr[2].A,r.rArr[2].B,r.matrix[1,1],r.matrix[1,2],r.matrix[2,1],r.matrix[2,2])))")
     assert str(model.getDaeResidual()) == expected
 
+@testattr(casadi = True)
 def test_ConstructFunctionsInRhs():
     model = transfer_to_casadi_interface("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"},compiler_log_level="e")
     expected = ("vertcat((sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})-der(x1)),"
