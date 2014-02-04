@@ -28,33 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Ref.hpp"
 namespace ModelicaCasADi 
 {
-class OptimizationProblem : public SharedNode {
+class OptimizationProblem : public Model {
     public:
         /**
          * Create an OptimizationProblem from the constraints and objective
          * passed in as arguments.
-         * @param A pointer to a Model
-         * @param An std::vector with references to (path) Constraint
-         * @param An std::vector with references to (point) Constraint
-         * @param An MX for start time
-         * @param An MX final time
-         * @parma An std::vector with references to TimedVariable
-         * @param An MX for Lagrange term, default MX(0)
-         * @param An MX for Mayer term, default MX(0)
+         * @param A string identifier, default is empty string. 
          */ 
-        OptimizationProblem(Ref<Model> model, 
-                           const std::vector< Ref<Constraint> > &pathConstraints,
-                           const std::vector< Ref<Constraint> > &pointConstraints,
-                           CasADi::MX startTime, CasADi::MX finalTime,
-                           const std::vector< Ref<TimedVariable> > &timedVariables, 
-                           CasADi::MX lagrangeTerm = CasADi::MX(0),
-                           CasADi::MX mayerTerm = CasADi::MX(0)) ;
-        /**
-         * Returns a pointer to the Model that acts as a constraint for this
-         * optimization problem
-         * @return A pointer to a Model.
-         */ 
-        Ref<Model> getModel() const;
+        OptimizationProblem(std::string identifier = "");
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */
@@ -86,23 +67,24 @@ class OptimizationProblem : public SharedNode {
          * Set path constraints
          * @param A vector with constraints
          */ 
-        void setPathConstraint(const std::vector< Ref<Constraint> > &pathConstraints);
+        void setPathConstraints(const std::vector< Ref<Constraint> > &pathConstraints);
         /**
          * Set point constraints
          * @param A vector with constraints
          */ 
-        void setPointConstraint(const std::vector< Ref<Constraint> > &pointConstraints);
+        void setPointConstraints(const std::vector< Ref<Constraint> > &pointConstraints);
         /** @param An MX */
         void setLagrangeTerm(CasADi::MX lagrangeTerm);
         /** @param An MX */
         void setMayerTerm(CasADi::MX mayerTerm);
+        /** @param A std::vector of TimedVariable */
+        void setTimedVariables(const std::vector< Ref<TimedVariable> > &timedVariables);
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        Ref<Model> model; /// Aggregation
         CasADi::MX startTime; /// Start time can be an expression
         CasADi::MX finalTime; /// Final time can be an expression
         CasADi::MX lagrangeTerm;
@@ -111,7 +93,6 @@ class OptimizationProblem : public SharedNode {
         std::vector< Ref<Constraint> >  pathConstraints;
         std::vector< Ref<Constraint> >  pointConstraints;
 };
-inline Ref<Model> OptimizationProblem::getModel() const { return model; } 
 inline CasADi::MX OptimizationProblem::getStartTime() const { return startTime; }
 inline CasADi::MX OptimizationProblem::getFinalTime() const { return finalTime; }
 inline CasADi::MX OptimizationProblem::getLagrangeTerm() const { return lagrangeTerm; }
@@ -122,9 +103,10 @@ inline std::vector< Ref<TimedVariable> >  OptimizationProblem::getTimedVariables
 
 inline void OptimizationProblem::setStartTime(CasADi::MX startTime) { this->startTime = startTime; }
 inline void OptimizationProblem::setFinalTime(CasADi::MX finalTime) { this->finalTime = finalTime; }
-inline void OptimizationProblem::setPathConstraint(const std::vector< Ref<Constraint> > &pathConstraints) { this->pathConstraints = pathConstraints; }
-inline void OptimizationProblem::setPointConstraint(const std::vector< Ref<Constraint> > &pointConstraints) { this->pointConstraints = pointConstraints; }
+inline void OptimizationProblem::setPathConstraints(const std::vector< Ref<Constraint> > &pathConstraints) { this->pathConstraints = pathConstraints; }
+inline void OptimizationProblem::setPointConstraints(const std::vector< Ref<Constraint> > &pointConstraints) { this->pointConstraints = pointConstraints; }
 inline void OptimizationProblem::setLagrangeTerm(CasADi::MX lagrangeTerm) { this->lagrangeTerm = lagrangeTerm; } 
 inline void OptimizationProblem::setMayerTerm(CasADi::MX mayerTerm) { this->mayerTerm = mayerTerm; } 
+inline void OptimizationProblem::setTimedVariables(const std::vector< Ref<TimedVariable> > &timedVariables) { this->timedVariables = timedVariables; }
 }; // End namespace
 #endif

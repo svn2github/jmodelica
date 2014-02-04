@@ -753,72 +753,39 @@ def test_ConstraintPrinting():
     actual = str(equalityConstraint) + str(lessThanConstraint) + str(greaterThanConstraint)
     assert( actual == "lhs = rhslhs <= rhslhs >= rhs" )
 
-@testattr(casadi = True)    
-def test_OptimizationProblemConstructors():
-    model = Model()
-    constraintsEmpty = numpy.array([], dtype = object)
-    timedVarsEmpty = numpy.array([], dtype = object)
-    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), timedVarsEmpty, MX(0), MX(0))
-    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty,  MX(0), MX(0), timedVarsEmpty, MX(0))
-    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), timedVarsEmpty)
-    assert( int(model.this) == int(optBothMayerAndLagrange.getModel().this) ) # Looks at pointers
-    assert( int(model.this) == int(optOnlyLagrange.getModel().this) )
-    assert( int(model.this) == int(optNeitherLagrangreOrMayer.getModel().this) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemTime():
     start = MX (0)
     final = MX(1)
-    constraintsEmpty = numpy.array([], dtype = object)
-    timedVarsEmpty = numpy.array([], dtype = object)
-    model = Model()
-    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, start, final, timedVarsEmpty, MX(0), MX(0))
-    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, start, final, timedVarsEmpty, MX(0))
-    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, start, final, timedVarsEmpty)
-
-    assert( isEqual(start, optBothMayerAndLagrange.getStartTime()) )
-    assert( isEqual(final, optBothMayerAndLagrange.getFinalTime()) )
-    assert( isEqual(start, optOnlyLagrange.getStartTime()) )
-    assert( isEqual(final, optOnlyLagrange.getFinalTime()) )
-    assert( isEqual(start, optNeitherLagrangreOrMayer.getStartTime()) )
-    assert( isEqual(final, optNeitherLagrangreOrMayer.getFinalTime()) )
-    # Set and check
-    start = MX(2)
-    final = MX(4)
-    optBothMayerAndLagrange.setStartTime(start)
-    optBothMayerAndLagrange.setFinalTime(final)
-    assert( isEqual(start, optBothMayerAndLagrange.getStartTime()) )
-    assert( isEqual(final, optBothMayerAndLagrange.getFinalTime()) )
+    opt = OptimizationProblem()
+    
+    assert( opt.getStartTime().isNull() )
+    assert( opt.getFinalTime().isNull() )
+    opt.setStartTime(start)
+    opt.setFinalTime(final)
+    assert( isEqual(start, opt.getStartTime()) )
+    assert( isEqual(final, opt.getFinalTime()) )
     
 @testattr(casadi = True)    
 def test_OptimizationProblemLagrangeMayer():
     lagrange = MX("lagrange")
     mayer = MX("mayer")
-    constraintsEmpty = numpy.array([], dtype = object)
-    timedVarsEmpty = numpy.array([], dtype = object)
-    model = Model()
-    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0),  MX(0), timedVarsEmpty, lagrange, mayer)
-    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0),  MX(0), timedVarsEmpty, lagrange)
-    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0),  MX(0), timedVarsEmpty)
+    opt = OptimizationProblem()
 
-    assert( isEqual(lagrange, optBothMayerAndLagrange.getLagrangeTerm()) )
-    assert( isEqual(mayer, optBothMayerAndLagrange.getMayerTerm()) )
-    assert( isEqual(lagrange, optOnlyLagrange.getLagrangeTerm()) )
-    assert( optOnlyLagrange.getMayerTerm().getValue() == 0 )
-    assert( optNeitherLagrangreOrMayer.getLagrangeTerm().getValue() == 0 )
-    assert( optNeitherLagrangreOrMayer.getMayerTerm().getValue() == 0 )
-    # Set and check
-    optNeitherLagrangreOrMayer.setMayerTerm(mayer)
-    optNeitherLagrangreOrMayer.setLagrangeTerm(lagrange)
-    assert( isEqual(lagrange, optNeitherLagrangreOrMayer.getLagrangeTerm()) )
-    assert( isEqual(mayer, optNeitherLagrangreOrMayer.getMayerTerm()) )
+    assert( opt.getLagrangeTerm().isNull() )
+    assert( opt.getMayerTerm().isNull() )
+    
+    opt.setMayerTerm(mayer)
+    opt.setLagrangeTerm(lagrange)
+    
+    assert( isEqual(lagrange, opt.getLagrangeTerm()) )
+    assert( isEqual(mayer, opt.getMayerTerm()) )
 
 @testattr(casadi = True)    
 def test_OptimizationProblemPathConstraints():
-    constraintsEmpty = numpy.array([], dtype = object)
     constraintsLessThan = numpy.array([], dtype = object)
     constraintsGreaterThan = numpy.array([], dtype = object)
-    timedVarsEmpty = numpy.array([], dtype = object)
     lhs = MX("lhs")
     rhs = MX("rhs")
     lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
@@ -826,25 +793,20 @@ def test_OptimizationProblemPathConstraints():
     constraintsLessThan = numpy.append(constraintsLessThan, lessThanConstraint)
     constraintsGreaterThan = numpy.append(constraintsGreaterThan, greaterThanConstraint)
 
-    model = Model()
-
-    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), timedVarsEmpty, MX(0), MX(0))
-    optOnlyLagrange = OptimizationProblem(model, constraintsLessThan, constraintsEmpty, MX(0), MX(0), timedVarsEmpty, MX(0))
-    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsGreaterThan, constraintsEmpty, MX(0), MX(0), timedVarsEmpty)
-
-    assert( len(optBothMayerAndLagrange.getPathConstraints()) == 0 )
-    assert( isEqual(optOnlyLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
-    assert( isEqual(optNeitherLagrangreOrMayer.getPathConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
-    # Set and check
-    optBothMayerAndLagrange.setPathConstraint(constraintsLessThan)
-    assert( isEqual(optBothMayerAndLagrange.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    opt = OptimizationProblem()
+    
+    assert( len(opt.getPathConstraints()) == 0 )
+    opt.setPathConstraints(constraintsLessThan)
+    assert( isEqual(opt.getPathConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    
+    opt.setPathConstraints(constraintsGreaterThan)
+    assert( isEqual(opt.getPathConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
+    assert( len(opt.getPathConstraints()) == 1)
     
 @testattr(casadi = True)    
 def test_OptimizationProblemPointConstraints():
-    constraintsEmpty = numpy.array([], dtype = object)
     constraintsLessThan = numpy.array([], dtype = object)
     constraintsGreaterThan = numpy.array([], dtype = object)
-    timedVarsEmpty = numpy.array([], dtype = object)
     lhs = MX("lhs")
     rhs = MX("rhs")
     lessThanConstraint = Constraint(lhs, rhs, Constraint.LEQ)
@@ -852,22 +814,18 @@ def test_OptimizationProblemPointConstraints():
     constraintsLessThan = numpy.append(constraintsLessThan, lessThanConstraint)
     constraintsGreaterThan = numpy.append(constraintsGreaterThan, greaterThanConstraint)
 
-    model = Model()
-
-    optBothMayerAndLagrange = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), timedVarsEmpty, MX(0), MX(0))
-    optOnlyLagrange = OptimizationProblem(model, constraintsEmpty, constraintsLessThan, MX(0), MX(0), timedVarsEmpty, MX(0))
-    optNeitherLagrangreOrMayer = OptimizationProblem(model, constraintsEmpty, constraintsGreaterThan, MX(0), MX(0), timedVarsEmpty)
-
-    assert( len(optBothMayerAndLagrange.getPointConstraints()) == 0 )
-    assert( isEqual(optOnlyLagrange.getPointConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
-    assert( isEqual(optNeitherLagrangreOrMayer.getPointConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
-    # Set and check
-    optBothMayerAndLagrange.setPointConstraint(constraintsLessThan)
-    assert( isEqual(optBothMayerAndLagrange.getPointConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    opt = OptimizationProblem()
+    
+    assert( len(opt.getPointConstraints()) == 0 )
+    opt.setPointConstraints(constraintsLessThan)
+    assert( isEqual(opt.getPointConstraints()[0].getResidual(), lessThanConstraint.getResidual()) )
+    
+    opt.setPointConstraints(constraintsGreaterThan)
+    assert( isEqual(opt.getPointConstraints()[0].getResidual(), greaterThanConstraint.getResidual()) )
+    assert( len(opt.getPointConstraints()) == 1)
     
 @testattr(casadi = True)    
 def test_OptimizationProblemTimedVariables():
-    constraintsEmpty = numpy.array([], dtype = object)
 
     realVar1 = RealVariable(MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
     realVar2 = RealVariable(MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
@@ -876,9 +834,10 @@ def test_OptimizationProblemTimedVariables():
     t2 = TimedVariable(MX("node2AtSomeTime"), realVar2, MX("someOtherTime"))
     timedVars = numpy.array([t1, t2])
 
-    model = Model()
 
-    optTimedVars = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), timedVars)
+    optTimedVars = OptimizationProblem()
+    assert( len(optTimedVars.getTimedVariables()) == 0)
+    optTimedVars.setTimedVariables(timedVars)
     timedVarsFromModel = optTimedVars.getTimedVariables();
 
     assert( len(timedVarsFromModel) == 2 )
@@ -886,24 +845,18 @@ def test_OptimizationProblemTimedVariables():
     assert( isEqual(t2.getVar(), timedVarsFromModel[1].getVar()) )
     assert( isEqual(realVar1.getVar(), timedVarsFromModel[0].getBaseVariable().getVar()) )
     assert( isEqual(realVar1.getVar(), timedVarsFromModel[0].getBaseVariable().getVar()) )
-
-    optTimedVars = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(0), numpy.array([], dtype = object))
-    assert( len(optTimedVars.getTimedVariables()) == 0 )
     
 @testattr(casadi = True)    
 def test_OptimizationProblemPrinting():
-    constraintsEmpty = numpy.array([], dtype = object)
-    model = Model()
-    timedVarsEmpty = numpy.array([], dtype = object)
-    simpleOptProblem = OptimizationProblem(model, constraintsEmpty, constraintsEmpty, MX(0), MX(1), timedVarsEmpty)
+    simpleOptProblem = OptimizationProblem()
     expectedPrint = ("Model contained in OptimizationProblem:\n\n" +
                      "------------------------------- Variables -------------------------------\n\n\n" +
                      "---------------------------- Variable types  ----------------------------\n\n\n" +
                      "------------------------------- Functions -------------------------------\n\n\n" +
                      "------------------------------- Equations -------------------------------\n\n\n" +
                      "----------------------- Optimization information ------------------------\n\n" +
-                     "Start time = 0\nFinal time = 1\n\n\n" +
-                     "-- Lagrange term --\n0\n-- Mayer term --\n0")
+                     "Start time = not set\nFinal time = not set\n\n\n" +
+                     "-- Lagrange term --\nnot set\n-- Mayer term --\nnot set")
     print simpleOptProblem
     assert( str(simpleOptProblem) == expectedPrint )
 

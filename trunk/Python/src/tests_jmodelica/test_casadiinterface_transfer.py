@@ -398,9 +398,9 @@ def test_OptimicaTimedVariables():
     assert len(timedVars) == 4
 
     # test they contain model vars
-    x1 = optProblem.getModel().getVariable("x1")
-    x2 = optProblem.getModel().getVariable("x2")
-    x3 = optProblem.getModel().getVariable("x3")
+    x1 = optProblem.getVariable("x1")
+    x2 = optProblem.getVariable("x2")
+    x3 = optProblem.getVariable("x3")
 
     assert heurestic_MC_variables_equal(x1, timedVars[0].getBaseVariable())
     assert heurestic_MC_variables_equal(x2, timedVars[1].getBaseVariable())
@@ -410,8 +410,8 @@ def test_OptimicaTimedVariables():
         
     # Test their time expression has start/final parameter MX in them and
     # that timed variables are lazy.
-    startTime = optProblem.getModel().getVariable("startTime")
-    finalTime = optProblem.getModel().getVariable("finalTime")
+    startTime = optProblem.getVariable("startTime")
+    finalTime = optProblem.getVariable("finalTime")
     path_constraints = optProblem.getPathConstraints()
     point_constraints = optProblem.getPointConstraints()
 
@@ -457,12 +457,12 @@ def test_OptimicaMayerTerm():
     assert str(optProblem.getMayerTerm()) == str(MX(0))
 
 def test_OptimicaFree():
-    model =  transfer_to_casadi_interface("atomicWithFree", optproblemsFile).getModel()
+    model =  transfer_to_casadi_interface("atomicWithFree", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str((diffs[0].getAttribute("free"))) == str(MX(False))
 
 def test_OptimicaInitialGuess():
-    model =  transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile).getModel()
+    model =  transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile)
     diffs =  model.getVariables(Model.DIFFERENTIATED)
     assert str(diffs[0].getAttribute("initialGuess")) == str(MX(5))
 
@@ -1494,4 +1494,4 @@ def test_ModelIdentifier():
     model = transfer_to_casadi_interface("identifierTest.identfierTestModel", modelFile)
     assert model.getIdentifier() == "identifierTest_identfierTestModel"
     optProblem = transfer_to_casadi_interface("identifierTest.identfierTestModel", optproblemsFile)
-    assert optProblem.getModel().getIdentifier() == "identifierTest_identfierTestModel"
+    assert optProblem.getIdentifier() == "identifierTest_identfierTestModel"

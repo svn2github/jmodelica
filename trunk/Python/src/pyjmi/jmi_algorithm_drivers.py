@@ -2204,7 +2204,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         """
         self._t0 = time.clock()
         self.op = op
-        model = op.model
+        model = op
         self.model = model
 
         # Check that model does not contain any unsupported variables

@@ -19,30 +19,34 @@ using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
 
-OptimizationProblem::OptimizationProblem(Ref<Model> model, 
-                                        const std::vector< Ref<Constraint> > &pathConstraints,
-                                        const std::vector< Ref<Constraint> > &pointConstraints,
-                                        MX startTime, MX finalTime,
-                                        const std::vector< Ref<TimedVariable> > &timedVariables,
-                                        MX lagrangeTerm  /*= MX(0)*/,
-                                        MX mayerTerm  /*= MX(0)*/) : model(model)  {
-    this->pathConstraints = pathConstraints;
-    this->pointConstraints = pointConstraints;
-    this->startTime = startTime;
-    this->finalTime = finalTime;
-    this->timedVariables = timedVariables;
-    this->lagrangeTerm = lagrangeTerm;
-    this->mayerTerm = mayerTerm;
+OptimizationProblem::OptimizationProblem(std::string identifier /* = "" */) : Model(identifier) {
+    this->pathConstraints = std::vector< Ref<Constraint> >();
+    this->pointConstraints = std::vector< Ref<Constraint> >();
+    this->startTime = MX();
+    this->finalTime = MX();
+    this->timedVariables = std::vector< Ref<TimedVariable> >();
+    this->lagrangeTerm = MX();
+    this->mayerTerm = MX();
 } 
 void OptimizationProblem::print(ostream& os) const { 
     using namespace std;
     os << "Model contained in OptimizationProblem:\n" << endl;
-    os << model;
+    Model::print(os);
     os << "----------------------- Optimization information ------------------------\n\n";
     os << "Start time = ";
-    startTime.print(os);
+    if (startTime.isNull()) {
+        os << "not set";
+    } else {
+        startTime.print(os);
+    }
+    
     os << "\nFinal time = ";
-    finalTime.print(os);
+    if (finalTime.isNull()) {
+        os << "not set";
+    } else {
+        finalTime.print(os);
+    }
+    
     os << "\n\n";
     for (vector< Ref<Constraint> >::const_iterator it = pathConstraints.begin(); it != pathConstraints.end(); ++it) {
         if (it == pathConstraints.begin()) {
@@ -64,10 +68,18 @@ void OptimizationProblem::print(ostream& os) const {
     }
     
     os << "\n-- Lagrange term --\n";
-    lagrangeTerm.print(os);
-    os << endl;
-    os << "-- Mayer term --\n";
-    mayerTerm.print(os);
+    if (lagrangeTerm.isNull()) {
+        os << "not set";
+    } else {
+        lagrangeTerm.print(os);
+    }
+    
+    os << "\n-- Mayer term --\n";
+    if (mayerTerm.isNull()) {
+        os << "not set";
+    } else {
+        mayerTerm.print(os);
+    }
 }
 
 }; // End namespace

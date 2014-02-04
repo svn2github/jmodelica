@@ -150,12 +150,9 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
             StringFromUTF(modelName.c_str())).this$);
-//         if (fclass.numEnums() != 0) {
-//             throw std::runtime_error("Enum variables are not supported in CasADiInterface");
-//         }
-        
+            
         // Create a model with the model identfier.
-        Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));
+        Ref<OptimizationProblem> optProblem = new OptimizationProblem(env->toString(fclass.nameUnderscore().this$));
        
         if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
@@ -163,22 +160,22 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable
-        transferTime<oc::FClass>(m, fclass);
+        transferTime<oc::FClass>(optProblem, fclass);
         
         // Transfer user defined types (also generates base types for the user types). 
-        transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(m, fclass);
+        transferUserDefinedTypes<oc::FClass, oc::List, oc::FDerivedType, oc::FAttribute, oc::FType>(optProblem, fclass);
         
         // Variables template
-        transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (m, fclass.allVariables());
+        transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (optProblem, fclass.allVariables());
         // Transfer timed variables. Depends on that other variables are transferred. 
-        vector< Ref<TimedVariable> > timedVars = transferTimedVariables(m, fclass);
+        vector< Ref<TimedVariable> > timedVars = transferTimedVariables(optProblem, fclass);
         
         // Equations
-        transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(m, fclass.equations());
-        transferInitialEquations<java::util::ArrayList, oc::FAbstractEquation>(m, fclass.initialEquations());
+        transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
+        transferInitialEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.initialEquations());
         
         // Functions
-        transferFunctions<oc::FOptClass, oc::List, oc::FFunctionDecl>(m, fclass);
+        transferFunctions<oc::FOptClass, oc::List, oc::FFunctionDecl>(optProblem, fclass);
         
         /***** OptimizationProblem *****/
         
@@ -186,9 +183,15 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         MX lagrangeTerm = fclass.objectiveIntegrandExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveIntegrandExp());
         MX mayerTerm = fclass.objectiveExp().this$ == NULL ? MX(0) : toMX(fclass.objectiveExp());
         
-        return new OptimizationProblem(m, *(transferPathConstraints(fclass)), *(transferPointConstraints(fclass)),
-                                         MX(fclass.startTimeAttribute()), MX(fclass.finalTimeAttribute()), 
-                                         timedVars, lagrangeTerm, mayerTerm);                   
+        optProblem->setPathConstraints(*(transferPathConstraints(fclass)));
+        optProblem->setPointConstraints(*(transferPointConstraints(fclass)));
+        optProblem->setStartTime(MX(fclass.startTimeAttribute()));
+        optProblem->setFinalTime(MX(fclass.finalTimeAttribute()));
+        optProblem->setTimedVariables(timedVars);
+        optProblem->setLagrangeTerm(lagrangeTerm);
+        optProblem->setMayerTerm(mayerTerm);
+        
+        return optProblem;
     }
     catch (JavaError e) {
         rethrowJavaException(e);

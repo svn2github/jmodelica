@@ -790,7 +790,7 @@ Returns::
 /********** OptimizationProblem  **********/
 %feature("docstring") ModelicaCasADi::OptimizationProblem "
 OptimizationProblem reperesent an Optimica optimization problem. 
-OptimizationProblem keeps a reference to a Model and provides some
+OptimizationProblem is a subclass Model and provides some
 additional information such as constraints, timed variables, Lagrange
 and Mayer terms. ";
 
@@ -800,39 +800,8 @@ and start/final times.
 
 Parameters::
 
-    Model --
-        A Model.
-        
-    numpy.array(Constraint) --
-        A numpy array with the path constraints. 
-        
-    numpy.array(Constraint) --
-        A numpy array with the point constraints. 
-   
-    MX --
-        A MX for the start time
-        
-    MX --
-        A MX for the final time
- 
-    numpy.array(TimedVariable) --
-        A numpy array with the TimedVariable.
-    
-    MX --
-        A MX for the Lagrange term, default = MX(0)
-    
-    MX --
-        A MX for the Mayer term, default = MX(0)
-        
-"; 
-
-%feature("docstring") ModelicaCasADi::OptimizationProblem::getModel "
-Returns the Model kept in this OptimizationProblem
-
-Returns::
-
-    Model --
-        A Model, representing a constraint in the optimization problem. 
+    identifier --
+        An optional model identfier, default is empty string.
         
 "; 
 
@@ -943,6 +912,16 @@ Parameters::
 
     numpy.array(Constraint) --
         The point constraints
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::OptimizationProblem::setTimedVariables "
+Sets the timed variables
+
+Parameters::
+
+    numpy.array(TimedVariable) --
+        The timed variables
         
 "; 
 

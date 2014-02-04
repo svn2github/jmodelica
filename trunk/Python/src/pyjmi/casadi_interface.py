@@ -104,7 +104,7 @@ class OptimizationProblem(ModelBase, CI_OP):
                 OptimizationProblem from CasADiInterface
         """
         CI_OP.__init__(self, optimization_problem)
-        self.model = self.getModel()
+        self.model = self
         
     def _default_options(self, algorithm):
         """ 
