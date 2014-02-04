@@ -45,7 +45,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                            jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                            jmi_block_solver_log_discrete_variables log_discrete_variables,
-                           jmi_block_solver_evaluate_discrete_variables evaluate_discrete_variables,
                            int n,
                            jmi_block_solver_options_t* options,
                            void* problem_data){
@@ -125,7 +124,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->check_discrete_variables_change = check_discrete_variables_change;
     block_solver->update_discrete_variables = update_discrete_variables;
     block_solver->log_discrete_variables = log_discrete_variables;
-    block_solver->evaluate_discrete_variables = evaluate_discrete_variables;
 
     block_solver->nb_calls = 0;                    /**< \brief Nb of times the block has been solved */
     block_solver->nb_iters = 0;                     /**< \breif Total nb if iterations of non-linear solver */
@@ -307,15 +305,12 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     }
     
     if (handle_discrete_changes) {
-        int iter;
+        int iter, non_reals_changed_flag;
         jmi_log_node_t top_node = jmi_log_enter_fmt(log, logInfo, "BlockEventIterations",
                                       "Starting block (local) event iteration at <t:%E> in <block:%d>",
                                       cur_time, block_solver->id);
        
         jmi_log_reals(log, top_node, logInfo, "ivs", block_solver->x, block_solver->n);
-
-        if(block_solver->log_discrete_variables)
-            block_solver->log_discrete_variables(block_solver->problem_data,top_node);
 
         converged = 0;
         ef = 0;
@@ -376,10 +371,15 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             }
         }
         
+        /* Save the initial values of the discrete variables for the iteration */
+        block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
+
+        if(block_solver->log_discrete_variables)
+            block_solver->log_discrete_variables(block_solver->problem_data,top_node);
+
         iter = 0;
         while (1){
             jmi_log_node_t iter_node;
-            int non_reals_changed_flag;
 
             iter += 1;
 
@@ -389,7 +389,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             ef = block_solver->solve(block_solver); 
             if(block_solver->init) {
             /* 
-                This needs to be done after "solve" so that block 
+                This needs to be done after "solve" so that block
                 can finalize initialization at the first step.
             */
                 block_solver->init = 0;
@@ -433,11 +433,15 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             x = (jmi_real_t*)calloc(block_solver->n, sizeof(jmi_real_t));            
             memcpy(x,block_solver->x,block_solver->n*sizeof(jmi_real_t));
 
+            /* Save the initial values of the discrete variables for the iteration */
+            block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
+
             /* Solve block */
             ef = block_solver->solve(block_solver);
             memcpy(x_new,block_solver->x,block_solver->n*sizeof(jmi_real_t));
-            
-            /* ef = block_solver->update_discrete_variables(block_Wsolver->problem_data, &non_reals_changed_flag); */
+
+            /* Write back the current iteration variables, needed for checking discrete variables. */
+            block_solver->F(block_solver->problem_data, x, NULL, JMI_BLOCK_WRITE_BACK);
 
             iter = 0;
             while (1 && ef==0){
@@ -492,6 +496,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
                 memcpy(x_new, block_solver->x, block_solver->n*sizeof(jmi_real_t));
 
+                /* Write back the current iteration variables, needed for checking discrete variables. */
+                block_solver->F(block_solver->problem_data, x, NULL, JMI_BLOCK_WRITE_BACK);
+
+                /* Log iteration variables and discrete variables. */
                 jmi_log_reals(log, iter_node, logInfo, "ivs (old)", x, block_solver->n);
                 jmi_log_reals(log, iter_node, logInfo, "ivs (new)", x_new, block_solver->n);
                 block_solver->log_discrete_variables(block_solver->problem_data, iter_node);

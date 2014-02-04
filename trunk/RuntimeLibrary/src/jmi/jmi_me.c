@@ -71,6 +71,9 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID) {
         jmi_delete(jmi_);
     	return -1;
     }
+
+    /* Write start values to the pre vector*/
+    jmi_copy_pre_values(jmi);
     
     /* Print some info about Jacobians, if available. */
     if (jmi_->color_info_A != NULL) {
@@ -121,16 +124,7 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
 
 int jmi_initialize(jmi_t* jmi) {
     int retval;
-    int i;                   /* Iteration variable */
-    int nF0, nF1, nFp, nF;   /* Number of F-equations */
-    int nR0, nR;             /* Number of R-equations */
-    int initComplete = 0;    /* If the initialization are complete */
-    int iter, max_iterations;
     jmi_log_node_t top_node;
-
-    jmi_real_t* switches;    /* Switches */
-    jmi_real_t* sw_temp = 0;
-    jmi_real_t* b_mode;
     
     if (jmi->is_initialized == 1) {
         jmi_log_comment(jmi->log, logError, "FMU is already initialized: only one initialization is allowed");
@@ -144,145 +138,28 @@ int jmi_initialize(jmi_t* jmi) {
     
     /* Evaluate parameters */
     jmi_init_eval_parameters(jmi);
-
-    /* Get Sizes */
-    retval = jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the initial sizes.");
-        return -1;
-    }
-
-    retval = jmi_dae_get_sizes(jmi,&nF,&nR);
-    if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Initialization failed when trying to retrieve the actual sizes.");
-        return -1;
-    }
     
     /* We are at the initial event TODO: is this really necessary? */
     jmi->atEvent   = JMI_TRUE;
     jmi->atInitial = JMI_TRUE;
-
-    /* Write values to the pre vector*/
-    jmi_copy_pre_values(jmi);
-
-    /* Set the switches */
-    b_mode =  jmi -> jmi_callbacks.allocate_memory(nR0, sizeof(jmi_real_t));
-    sw_temp =  jmi -> jmi_callbacks.allocate_memory(nR0, sizeof(jmi_real_t));
-    retval = jmi_init_R0(jmi, b_mode);
-    switches = jmi_get_sw(jmi);
-    for (i=0; i < nR0; i=i+1){
-        if (i < nR){
-            if (jmi->relations[i] == JMI_REL_GEQ){
-                if (b_mode[i] >= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_GT){
-                if (b_mode[i] > 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_LEQ){
-                if (b_mode[i] <= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->relations[i] == JMI_REL_LT){
-                if (b_mode[i] < 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-        }else{
-            if (jmi->initial_relations[i-nR] == JMI_REL_GEQ){
-                if (b_mode[i] >= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_GT){
-                if (b_mode[i] > 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_LEQ){
-                if (b_mode[i] <= 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-            if (jmi->initial_relations[i-nR] == JMI_REL_LT){
-                if (b_mode[i] < 0.0){
-                    switches[i] = 1.0;
-                }else{
-                    switches[i] = 0.0;
-                }
-            }
-        }
-    }
-
-    jmi -> jmi_callbacks.free_memory(b_mode);
-    /* Call the initialization function */
+    jmi->tmp_events_epsilon = jmi->events_epsilon;
+    jmi->events_epsilon = 0.0;
+    
+    /* Solve initial equations */
     retval = jmi_ode_initialize(jmi);
 
     if(retval != 0) { /* Error check */
         jmi_log_comment(jmi->log, logError, "Initialization failed.");
-        jmi -> jmi_callbacks.free_memory(sw_temp);
         return -1;
     }
     
-    max_iterations = 30;
-    iter = 0;
-    while (initComplete == 0 && nR0 > 0){                            /* Loop during event iteration */
-        iter += 1;
-        
-        if (iter > 1){
-            retval = jmi_evaluate_switches(jmi,switches,0);
-        }
-        
-        retval = jmi_ode_initialize(jmi);
-
-        if(retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Initialization failed.");
-            jmi -> jmi_callbacks.free_memory(sw_temp);
-            return -1;
-        }
-        
-        /* Evaluate the switches */
-        memcpy(sw_temp,switches,nR0*sizeof(jmi_real_t));
-        retval = jmi_evaluate_switches(jmi,sw_temp,0);
-        
-        if (jmi_compare_switches(switches,sw_temp,nR0)){
-            initComplete = 1;
-        }
-        
-        /* No convergence under the allowed number of iterations. */
-        if(iter >= max_iterations){
-            jmi_log_node(jmi->log, logError, "Error", "Failed to converge during global fixed point iteration "
-                         "due to too many iterations at <t:%g> (initialization).", jmi_get_t(jmi)[0]);
-            jmi -> jmi_callbacks.free_memory(sw_temp);
-            return -1;
-        }
-    }
-    
-    jmi -> jmi_callbacks.free_memory(sw_temp);
+    /* Copy values to pre after the initial equations are solved. */
+    jmi_copy_pre_values(jmi);
 
     /* Reset atEvent flag */
     jmi->atEvent = JMI_FALSE;
     jmi->atInitial = JMI_FALSE;
 
-    jmi_copy_pre_values(jmi);
     jmi_save_last_successful_values(jmi);
     
     jmi->is_initialized = 1;
@@ -776,23 +653,18 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
-    jmi_int_t nF;
-    jmi_int_t nR;
+    jmi_int_t nF, nR;
     jmi_int_t retval;
     jmi_int_t i, max_iterations;
     jmi_real_t next_event_time;
     jmi_real_t* z = jmi_get_z(jmi);
-    jmi_real_t* event_indicators;
-    jmi_real_t* cur_switches;
-    jmi_real_t* pre_switches;
+    jmi_real_t* switches;
     jmi_log_node_t top_node;
     jmi_log_node_t iter_node;
 
-    /* Allocate memory */
+    /* Used for logging */
     jmi_dae_get_sizes(jmi, &nF, &nR);
-    event_indicators = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
-    pre_switches = jmi->jmi_callbacks.allocate_memory(nR, sizeof(jmi_real_t));
-    cur_switches = jmi_get_sw(jmi); /* Get the switches */
+    switches = jmi_get_sw(jmi);
 
     /* Reset eventInfo */
     event_info->next_event_time_defined = FALSE;         /* The next event time is not set. */
@@ -812,30 +684,21 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         top_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalEventIterations", 
                                  "Starting global event iteration at <t:%E>", jmi_get_t(jmi)[0]);
         
-        retval = jmi_ode_derivatives(jmi);
-        
         if (nR > 0) {
-            jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", cur_switches, nR);
+            jmi_log_reals(jmi->log, top_node, logInfo, "pre-switches", switches, nR);
         }
-        
+
+        /* Initial evaluation of model so that we enter the event iteration with correct values. */
+        retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-        
-        /* Copy all pre values */
-        jmi_copy_pre_values(jmi);
-        
+
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
-        
-        /* Evaluate and turn the switches */
-        retval = jmi_evaluate_switches(jmi,cur_switches,1);
     }
-
-    /* Copy current switches to pre switches */
-    memcpy(pre_switches, cur_switches, nR*sizeof(jmi_real_t));
 
     /* Iterate */
     while (event_info->iteration_converged == FALSE) {
@@ -846,6 +709,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         iter_node = jmi_log_enter_fmt(jmi->log, logInfo, "GlobalIteration", 
                                       "Global iteration <iter:%d>, at <t:%E>", jmi->nbr_event_iter, jmi_get_t(jmi)[0]);
         
+        /* Copy current values to pre values */
+        jmi_copy_pre_values(jmi);
+
         /* Evaluate the ODE */
         retval = jmi_ode_derivatives(jmi);
         
@@ -854,9 +720,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
-        
-        /* Evaluate the switches */
-        retval = jmi_evaluate_switches(jmi, cur_switches, 1);
         
         /* Compare current values with the pre values. If there is an element that differs, set
          * event_info->iteration_converged to false. */
@@ -867,6 +730,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 event_info->iteration_converged = FALSE;
             }
         }
+
         if (jmi->jmi_callbacks.log_options.log_level >= 5) {
             jmi_log_reals(jmi->log, iter_node, logInfo, "z_values", &z[jmi->offs_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
             jmi_log_reals(jmi->log, iter_node, logInfo, "pre(z)_values", &z[jmi->offs_pre_real_d], jmi->offs_pre_real_dx-jmi->offs_real_d);
@@ -877,16 +741,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             event_info->iteration_converged = FALSE;
             event_info->state_values_changed = TRUE;
         }
-        
-        if (jmi_compare_switches(cur_switches, pre_switches, nR) == 0) {
-            event_info->iteration_converged = FALSE;
-        }
-        
-        /* Copy current values to pre values */
-        jmi_copy_pre_values(jmi);
-        
-        /* Copy current switches to pre switches */
-        memcpy(pre_switches, cur_switches, nR*sizeof(jmi_real_t));
         
         /* No convergence under the allowed number of iterations. */
         if (jmi->nbr_event_iter >= max_iterations) {
@@ -909,6 +763,11 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* Reset the number of event iterations */
         jmi->nbr_event_iter = 0;
+
+        /* If the event epsilon is 0 due to initialization of the system, reset it */
+        if (jmi->events_epsilon == 0.0) {
+            jmi->events_epsilon = jmi->tmp_events_epsilon;
+        }
 
         /* Compute the next time event */
         retval = jmi_ode_next_time_event(jmi,&next_event_time);
@@ -956,12 +815,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
 	/* If everything went well, check if termination of simulation was requested. */
 	event_info->terminate_simulation = jmi->terminate ? TRUE : FALSE;
-
-    jmi->jmi_callbacks.free_memory(event_indicators);
-    jmi->jmi_callbacks.free_memory(pre_switches);
     
     if (nR > 0) {
-        jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", cur_switches, nR);
+        jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, nR);
     }
     jmi_log_leave(jmi->log, top_node);
 

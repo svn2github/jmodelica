@@ -147,15 +147,6 @@ typedef int (*jmi_block_solver_check_discrete_variables_change_func_t)(void* pro
  */
 typedef jmi_block_solver_status_t (*jmi_block_solver_update_discrete_variables_func_t)(void* problem_data, int* non_reals_changed_flag);
 
-/**
- * \brief Function signature for evaluating discrete variables due to regularization.
- * Values from the last residuals evaluation are used.
- *
- * @param problem_data (Input) Problem data pointer passed in the jmi_block_solver_new.
- * @return 0 on successful execution or error code.
- */
-typedef int (*jmi_block_solver_evaluate_discrete_variables)(void* problem_data);
-
 /* TODO: log_discrete_variables is not really needed. Kept just to make sure there are not changes during refactoring */
 typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_log_node_t node);
 
@@ -173,7 +164,6 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                            jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                            jmi_block_solver_log_discrete_variables log_discrete_variables, /* can be NULL, only needed during restructuring for regression testing */
-                           jmi_block_solver_evaluate_discrete_variables evaluate_discrete_variables, /* can be NULL, only needed after a regularization. */
                            int n,                            
                            jmi_block_solver_options_t* options,
                            void* problem_data);

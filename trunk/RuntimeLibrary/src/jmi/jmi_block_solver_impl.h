@@ -70,7 +70,6 @@ struct jmi_block_solver_t {
     jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change;
     jmi_block_solver_update_discrete_variables_func_t update_discrete_variables;
     jmi_block_solver_log_discrete_variables log_discrete_variables;
-    jmi_block_solver_evaluate_discrete_variables evaluate_discrete_variables;
 
     long int nb_calls;                    /**< \brief Nb of times the block has been solved */
     long int nb_iters;                     /**< \breif Total nb if iterations of non-linear solver */

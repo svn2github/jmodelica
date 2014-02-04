@@ -1100,6 +1100,7 @@ struct jmi_t {
 
     jmi_options_t options;               /**< \brief Runtime options */
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
+    jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
 
@@ -1354,20 +1355,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
  * \brief Call a jmi_generic_func_t, and handle exceptions and setting the current jmi_t pointer.
  */
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func);
-
-/**
- * \brief Evaluates the switches.
- * 
- * Evaluates the switches. Depending on the mode, it either evaluates
- * all the switches at initial time (mode=0) or otherwise (mode=1).
- * 
- * @param jmi The jmi_t struct
- * @param switches The switches (Input, Output)
- * @param eps The epsilon used in determining if a switch or not
- * @param mode Determine if we are evaluating initial switches or not.
- * @return Error code.
- */
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode);
 
 /**
  * \brief Compares two sets of switches.
