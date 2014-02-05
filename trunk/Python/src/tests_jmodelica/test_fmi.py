@@ -953,7 +953,7 @@ class Test_Logger:
         self.m = load_fmu('LoggerTest.fmu')
         self.m.set_debug_logging(True)
         self.m.set('_log_level',6)
-        self.m.set_fmil_log_level(5)
+        self.m.set_log_level(5)
 
     @testattr(stddist = True)
     def test_log_file(self):
@@ -977,7 +977,7 @@ class Test_Logger:
 
         d = gather_solves(parse_jmi_log('LoggerTest_log.txt'))
 
-        assert len(d)==8, "Unexpected number of solver invocations"
+        assert len(d)==7, "Unexpected number of solver invocations"
         assert len(d[0]['block_solves'])==4, "Unexpected number of block solves in first iteration"
 
     @testattr(stddist = True)
