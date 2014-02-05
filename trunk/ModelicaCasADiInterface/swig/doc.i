@@ -789,19 +789,22 @@ Returns::
 
 /********** OptimizationProblem  **********/
 %feature("docstring") ModelicaCasADi::OptimizationProblem "
-OptimizationProblem reperesent an Optimica optimization problem. 
+OptimizationProblem represents an Optimica optimization problem. 
 OptimizationProblem is a subclass Model and provides some
 additional information such as constraints, timed variables, Lagrange
 and Mayer terms. ";
 
 %feature("docstring") ModelicaCasADi::OptimizationProblem::OptimizationProblem "
-Create an OptimizationProblem from the constraints, objective function
-and start/final times.
+Create an OptimizationProblem, takes two optional arguments. 
 
 Parameters::
 
-    identifier --
+    string --
         An optional model identfier, default is empty string.
+        
+    bool --
+         An option flag telling whether minumum time normalisation
+         has been performed (by the compiler). Default is true.
         
 "; 
 
@@ -822,6 +825,15 @@ Returns::
 
     MX --
         The final time
+        
+"; 
+
+%feature("docstring") ModelicaCasADi::OptimizationProblem::getNormalizedTimeFlag "
+Returns a flag telling whether minumum time normalisation has been performed.
+
+Returns::
+
+    bool --
         
 "; 
 

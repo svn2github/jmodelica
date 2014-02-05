@@ -487,7 +487,16 @@ def test_OptimicaInvalidCompiler():
     except:
         errorString = sys.exc_info()[1].message 
     assert errorString == "An OptimizationProblem can not be created from a Modelica model";
-   
+
+@testattr(casadi = True)
+def test_OptimicaNormalizedTimeFlag():
+    optProblem = transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile)
+    assert optProblem.getNormalizedTimeFlag()
+    optProblem = transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile, compiler_options={"normalize_minimum_time_problems":True})
+    assert optProblem.getNormalizedTimeFlag()
+    optProblem = transfer_to_casadi_interface("atomicWithInitialGuess", optproblemsFile, compiler_options={"normalize_minimum_time_problems":False})
+    assert not optProblem.getNormalizedTimeFlag()
+    
 ##############################################
 #                                            # 
 #         CONSTRUCTS TRANSFER TESTS          #

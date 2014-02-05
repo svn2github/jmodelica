@@ -19,7 +19,9 @@ using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
 
-OptimizationProblem::OptimizationProblem(std::string identifier /* = "" */) : Model(identifier) {
+OptimizationProblem::OptimizationProblem(std::string identifier /* = "" */, 
+                                         bool normalizedTime /* = true */ ) :
+                                         Model(identifier) {
     this->pathConstraints = std::vector< Ref<Constraint> >();
     this->pointConstraints = std::vector< Ref<Constraint> >();
     this->startTime = MX();
@@ -27,6 +29,7 @@ OptimizationProblem::OptimizationProblem(std::string identifier /* = "" */) : Mo
     this->timedVariables = std::vector< Ref<TimedVariable> >();
     this->lagrangeTerm = MX();
     this->mayerTerm = MX();
+    this->normalizedTime = normalizedTime;
 } 
 void OptimizationProblem::print(ostream& os) const { 
     using namespace std;

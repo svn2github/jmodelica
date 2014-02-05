@@ -95,6 +95,8 @@ set(CLASSES_optimica
   org.jmodelica.optimica.compiler.FFunctionCallStmt
   org.jmodelica.optimica.compiler.FFunctionVariable
   org.jmodelica.optimica.compiler.FAlgorithm 
+  org.jmodelica.optimica.compiler.BaseNode
+  org.jmodelica.optimica.compiler.Root
 )
 
 

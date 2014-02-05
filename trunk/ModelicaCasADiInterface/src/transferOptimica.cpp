@@ -46,6 +46,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "org/jmodelica/optimica/compiler/FIdUse.h"
 #include "org/jmodelica/optimica/compiler/FExp.h"
 #include "org/jmodelica/optimica/compiler/FFunctionDecl.h"
+#include "org/jmodelica/optimica/compiler/Root.h"
+#include "org/jmodelica/optimica/compiler/BaseNode.h"
+#include "org/jmodelica/util/OptionRegistry.h"
 
 // The ModelicaCasADi program
 #include "Model.hpp"
@@ -150,13 +153,20 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         oc::FOptClass fclass = oc::FOptClass(compiler.compileModelNoCodeGen(
             new_JArray<java::lang::String>(fileVecJava, modelFiles.size()), 
             StringFromUTF(modelName.c_str())).this$);
+
+        std::string identfier = env->toString(fclass.nameUnderscore().this$);
+        std::string option = "normalize_minimum_time_problems";
+        bool normalizedTime = fclass.root()._get_options().getBooleanOption(StringFromUTF(option.c_str()));
             
-        // Create a model with the model identfier.
-        Ref<OptimizationProblem> optProblem = new OptimizationProblem(env->toString(fclass.nameUnderscore().this$));
+        // Create a model with the model identfier and normalizedTime flag. 
+        Ref<OptimizationProblem> optProblem = new OptimizationProblem(identfier, normalizedTime);
        
         if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
         }
+        
+        
+        
         
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable

@@ -33,13 +33,17 @@ class OptimizationProblem : public Model {
         /**
          * Create an OptimizationProblem from the constraints and objective
          * passed in as arguments.
-         * @param A string identifier, default is empty string. 
+         * @param An optional string identifier, default is empty string. 
+         * @param An option flag telling whether minumum time normalisation
+         * has been performed (by the compiler). Default is true.
          */ 
-        OptimizationProblem(std::string identifier = "");
+        OptimizationProblem(std::string identifier = "", bool normalizedTime = true);
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */
         CasADi::MX getFinalTime() const;
+        /** @return A flag telling whether minumum time normalisation has been performed */
+        bool getNormalizedTimeFlag() const;
         /**
          * Returns a vector with the path constraints
          * @return A std::vector of Constraint
@@ -89,12 +93,14 @@ class OptimizationProblem : public Model {
         CasADi::MX finalTime; /// Final time can be an expression
         CasADi::MX lagrangeTerm;
         CasADi::MX mayerTerm;
+        bool normalizedTime;
         std::vector< Ref<TimedVariable> > timedVariables;
         std::vector< Ref<Constraint> >  pathConstraints;
         std::vector< Ref<Constraint> >  pointConstraints;
 };
 inline CasADi::MX OptimizationProblem::getStartTime() const { return startTime; }
 inline CasADi::MX OptimizationProblem::getFinalTime() const { return finalTime; }
+inline bool OptimizationProblem::getNormalizedTimeFlag() const { return normalizedTime; }
 inline CasADi::MX OptimizationProblem::getLagrangeTerm() const { return lagrangeTerm; }
 inline CasADi::MX OptimizationProblem::getMayerTerm() const { return mayerTerm; }
 inline std::vector< Ref<Constraint> >  OptimizationProblem::getPathConstraints() const { return pathConstraints; }
