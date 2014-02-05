@@ -3930,7 +3930,7 @@ class LocalDAECollocator2(CasadiCollocator):
                 (i, k) = collocation_constraint_points[tp]
                 name = tv.getBaseVariable().getName()
                 (index, vt) = name_map[name]
-                if self.nominal_traj is None:
+                if self.variable_scaling and self.nominal_traj is None:
                     timed_variables_sfs.append(self._sf[vt][index])
                 if vt == "elim_u":
                     raise CasadiCollocatorException(
@@ -4308,8 +4308,6 @@ class LocalDAECollocator2(CasadiCollocator):
                     "free_element_lengths_data not yet supported.")
         if self.blocking_factors is not None:
             raise NotImplementedError("Blocking factors not yet supported.")
-        if not self.expand_to_SX:
-            raise NotImplementedError("Unexpanded graph is not yet supported.")
 
         # Create collocation and DAE functions
         sym_input = self.mvar_struct_cat
@@ -5722,6 +5720,33 @@ class LocalDAECollocator2(CasadiCollocator):
         else:
             raise NotImplementedError('Export on binary Dymola result files ' +
                                       'not yet supported.')
+
+    def get_opt_input(self):
+        """
+        Get the optimized input variables as a function of time.
+        
+        The purpose of this method is to conveniently provide the optimized
+        input variables to a simulator.
+        
+        Returns::
+        
+            input_names --
+                Tuple consisting of the names of the input variables.
+            
+            input_interpolator --
+                Collocation polynomials for input variables as a function of
+                time.
+        """
+        if self.hs == "free":
+            self._hi = map(lambda h: self.horizon * h, self.h_opt)
+        else:
+            self._hi = map(lambda h: self.horizon * h, self.h)
+        self._xi = self._u_opt[1:].reshape(self.n_e, self.n_var['u'],
+                                           self.n_cp)
+        self._xi = N.transpose(self._xi, [0, 2, 1])
+        self._ti = N.cumsum([self.t0] + self._hi[1:])
+        input_names = tuple([u.getName() for u in self.mvar_vectors['u']])
+        return (input_names, self._input_interpolator)
 
     def _debug_eval_expr(self, expr):
         """
