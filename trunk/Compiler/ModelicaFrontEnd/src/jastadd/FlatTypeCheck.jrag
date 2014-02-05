@@ -140,24 +140,7 @@ aspect FlatTypeCheck {
 			AnnotationNode enabledNode = iterationNode.forPath("enabled");
 			if (enabledNode.exists()) {
 			    FExp enabledExp = containingInstNode().dynamicFExp(enabledNode.exp().instantiate());
-			    enabledExp.collectErrors(checkType);
-			    if (!enabledExp.type().isBoolean()) {
-			        enabledExp.error("The type of the HGT enabled expression is not boolean");
-			    } else if (!enabledNode.isEachSet() && !type().dimensionCompatible(enabledExp.type())) { 
-			        if (enabledExp.ndims() == 0) {
-			            enabledExp.warning("Assuming 'each' for enabled expression");
-			        } else {
-			            enabledExp.error("Array size mismatch for the enabled attribute" +
-			                    ", size of component declaration is " + size() + 
-			                    " and size of expression is " + enabledExp.size());
-			        }
-			    } else if (enabledNode.isEachSet()) { 
-			        if (ndims() == 0) {
-			            error("The 'each' keyword cannot be applied to attributes of scalar components");
-			        } else if (enabledExp.ndims() > 0) {
-			            error("The enabled attribute is declared 'each' and the expression is not scalar");
-			        }
-			    }
+			    typeCheckHGTEnabled(checkType, enabledExp, type(), enabledNode.isEachSet());
 			}
 		}
 		
@@ -220,6 +203,7 @@ aspect FlatTypeCheck {
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
 	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
+      typeCheckHGTResidual(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();
 	  if (!left.isUnknown() && !right.isUnknown()) {
@@ -982,27 +966,6 @@ aspect FlatTypeCheck {
 			  return false;
 	  return true;
   }
-	
-	public void InstResidual.typeCheck(ErrorCheckType checkType) {
-		if (hasEnabled()) {
-			FExp enabledExp = getEnabled();
-			try {
-				enabledExp.ceval().booleanValue();
-			} catch (ConstantEvaluationException e) {
-				enabledExp.error("Cannot evaluate boolean enabled expression: " + enabledExp);
-			}
-		}
-		if (hasIterationVariable() && !getIterationVariable().isUnknown()) {
-			FIdUse var = getIterationVariable();
-			FTypePrefixVariability variability = var.variability();
-			if (!variability.continuousVariability())
-				var.error("Iteration variable should have continuous variability, %s has %svariability", var, variability);
-			Size size = size();
-			Size varSize = var.size();
-			if (!size.equals(varSize))
-				var.error("Size of iteration variable %s is not the same size as the surrounding equation, size of variable %s, size of equation %s", var, varSize, size);
-		}
-	}
 	
 	public void InstNominal.typeCheck(ErrorCheckType checkType) {
 		if (hasEnabled()) {

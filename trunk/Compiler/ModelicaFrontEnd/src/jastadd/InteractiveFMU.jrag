@@ -24,7 +24,7 @@ aspect InteractiveFMU{
 			
 			// Remove HGT stuff
 			for (FAbstractEquation equation : equations())
-				equation.setResidualOpt(new Opt<FResidual>());
+				equation.unsetHGT();
 			for (FVariable variable : variables())
 				variable.unsetHGT();
 			

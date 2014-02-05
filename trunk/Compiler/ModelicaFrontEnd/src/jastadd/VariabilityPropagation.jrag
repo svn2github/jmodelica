@@ -29,9 +29,9 @@ aspect VariabilityPropagation {
 	eq FIfWhenElseEquation.getChild().canPropagate() = false;
 	
 	syn boolean FEquation.canPropagate() =
-			super.canPropagate() && variables().size() == 1 && !hasResidual();
+			super.canPropagate() && variables().size() == 1 && !isHGTResidual();
 	syn boolean FFunctionCallEquation.canPropagate() =
-			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !hasResidual();
+			super.canPropagate() && variables().size() > 0 && variables().size() == numScalarEquations() && !isHGTResidual();
 	
 	/**
 	 * Checks if left hand side variable(s) is eligible for var. prop.

@@ -589,8 +589,8 @@ public class BiPGraph {
 				if (e.markedAsResidualEquation() || e.getMatching().markedAsIterationVariable()) {
 					keepTogether.add(e);
 				}
-				if (e.getEquation().hasResidual() && e.getEquation().getResidual().hasIterationVariable()) {
-					FVariable fVar = e.getEquation().getResidual().iterationVariable();
+				if (e.getEquation().getHGTIterationVariable() != null) {
+					FVariable fVar = e.getEquation().getHGTIterationVariable();
 					Var var = getVariable(fVar.name());
 					if (var != null) {
 						keepTogether.add(var.getMatching());
@@ -1026,10 +1026,6 @@ public class Eq implements Comparable<Eq> {
 			}
 		}
 		return null;
-	}
-	
-	public boolean markedAsResidualEquation() {
-		return getEquation().hasResidual();
 	}
 	
 	public FTypePrefixVariability variability() {

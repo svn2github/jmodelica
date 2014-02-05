@@ -1794,7 +1794,7 @@ aspect Scalarization {
     public List<FAttribute> FAbstractEquation.scalarizeAttributeList(Index i, Map<String,FExp> indexMap) {
         List<FAttribute> scalarized = new List<FAttribute>();
         for (FAttribute a : getFAttributes()) 
-            scalarized.add(a.scalarize(null, indexMap));
+            scalarized.add(a.scalarize(i, indexMap));
         return scalarized;
     }
 	
@@ -1815,7 +1815,7 @@ aspect Scalarization {
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
 			
-		    List<FAttribute> attrs = scalarizeAttributeList(null, indexMap);
+		    List<FAttribute> attrs = scalarizeAttributeList(Index.NULL, indexMap);
 			FQName name = null;
 			if (hasName()) {
 				name = getName();
@@ -1826,13 +1826,10 @@ aspect Scalarization {
 				}
 				name = name.scalarize(indexMap);
 			}
-			FResidual residual = null;
 			FNominal nominal = null;
-			if (hasResidual())
-				residual = getResidual().scalarize(indexMap, null);
 			if (hasNominal())
-				nominal = getNominal().scalarize(indexMap, null);
-			createScalarFEquations(eqns, indexMap, attrs, name, residual, nominal, getLeft(), getRight());
+				nominal = getNominal().scalarize(indexMap, Index.NULL);
+			createScalarFEquations(eqns, indexMap, attrs, name, nominal, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1844,13 +1841,10 @@ aspect Scalarization {
 				FQName name = null;
 				if (hasName())
 					name = getName().specify(i, true);
-				FResidual residual = null;
 				FNominal nominal = null;
-				if (hasResidual())
-					residual = getResidual().scalarize(indexMap, i);
 				if (hasNominal())
 					nominal = getNominal().scalarize(indexMap, i);
-				createScalarFEquations(eqns, indexMap, attrs, name, residual, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
+				createScalarFEquations(eqns, indexMap, attrs, name, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
 			}
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
@@ -1879,23 +1873,11 @@ aspect Scalarization {
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
-			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs, FQName name, FResidual residual, FNominal nominal, FExp left, FExp right) {
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs, FQName name, FNominal nominal, FExp left, FExp right) {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(attrs, name, residual, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
-	}
-	
-	public FResidual FResidual.scalarize(Map<String,FExp> indexMap, Index i) {
-		FResidual scalarized = new FResidual();
-		scalarized.setLevel(getLevel());
-		if (hasIterationVariable()) {
-			FIdUse iterationVariable = getIterationVariable();
-			if (i != null)
-				iterationVariable = iterationVariable.specify(i, false);
-			scalarized.setIterationVariable(iterationVariable.scalarize(indexMap));
-		}
-		return scalarized;
+			eqns.add(new FEquation(attrs, name, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
 	public FNominal FNominal.scalarize(Map<String,FExp> indexMap, Index i) {

@@ -1163,21 +1163,6 @@ aspect Flattening {
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
 	
 	
-	syn FResidual FResidual.flatten(FQName prefix) {
-		throw new UnsupportedOperationException();
-	}
-	eq InstResidual.flatten(FQName prefix) {  
-		if (hasEnabled()) {
-			if (!getEnabled().ceval().booleanValue())
-				return null;
-		}
-		FResidual flattened = new FResidual();
-		flattened.setLevel(getLevel());
-		if (hasIterationVariable())
-			flattened.setIterationVariable(getIterationVariable().flatten(prefix));
-		return flattened;
-	}
-	
 	syn FNominal FNominal.flatten(FQName prefix) {
 		throw new UnsupportedOperationException();
 	}
@@ -1267,13 +1252,8 @@ aspect FlatExpressions {
 
     public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
         FAbstractEquation eqn = flattenEqn(prefix, fc);
-        if (eqn != null) {
-            List<FAttribute> flatAttrs = new List<FAttribute>();
-            for (FAttribute attr : getFAttributes())
-                flatAttrs.add(attr.flatten(prefix));
-            eqn.setFAttributeList(flatAttrs);
+        if (eqn != null)
             getType().addEquationTo(fc, eqn);
-        }
     }
 	
 	public FEquationType FEquationType.flatten(FQName prefix) {
@@ -1293,19 +1273,23 @@ aspect FlatExpressions {
 	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
 		return (FAbstractEquation) fullCopy();
 	}
+	
+    public void FAbstractEquation.flattenAttrs(FAbstractEquation eqn, FQName prefix) {
+        List<FAttribute> flatAttrs = new List<FAttribute>();
+        for (FAttribute attr : getFAttributes())
+            flatAttrs.add(attr.flatten(prefix));
+        eqn.setFAttributeList(flatAttrs);
+    }
+
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
 		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		flattenAttrs(flattened, prefix);
 		if (hasName()) {
 			if (ndims() > 0)
 				flattened.setName(prefix.copyAndAppend(getName(), getLeft().size().createExpandedFArraySubscripts()));
 			else
 				flattened.setName(prefix.copyAndAppend(getName()));
-		}
-		if (hasResidual()) {
-			FResidual flatten = getResidual().flatten(prefix);
-			if (flatten != null)
-				flattened.setResidual(flatten);
 		}
 		if (hasNominal()) {
 			FNominal flatten = getNominal().flatten(prefix);
@@ -1370,7 +1354,9 @@ aspect FlatExpressions {
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
-		return new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) call);
+		FFunctionCallEquation flattened =  new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) call);
+		flattenAttrs(flattened, prefix);
+		return flattened;
 	}
 	
 	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
@@ -2189,8 +2175,10 @@ aspect InstantiatedExpressions {
 	}
 
     public FAbstractEquation Equation.instantiate() {
-        return copyLocationTo(new FEquation(equationType(), buildNameOpt(), buildResidualOpt(), 
+        FEquation eqn = copyLocationTo(new FEquation(equationType(), buildNameOpt(),
                 buildNominalOpt(), new List<FAttribute>(), getLeft().instantiate(), getRight().instantiate()));
+        contributeHGT(eqn);
+        return eqn;
     }
 	
 	private Opt<FQName> Equation.buildNameOpt() {
@@ -2205,30 +2193,6 @@ aspect InstantiatedExpressions {
 		else
 			return new Opt<FQName>(new FQNameString(nameExp.asAccess().asID()));
 		return new Opt<FQName>();
-	}
-	
-	/**
-	 * Builds a FResidual instance for "this" equation.  
-	 */
-	private Opt<FResidual> Equation.buildResidualOpt() {
-		if (!root().options.getBooleanOption("hand_guided_tearing"))
-			return new Opt<FResidual>();
-		AnnotationNode residualNode = annotation().vendorNode().forPath("ResidualEquation");
-		if (!residualNode.exists())
-			return new Opt<FResidual>();
-		InstResidual residual = new InstResidual();
-		residual.setLevel(Integer.MAX_VALUE);
-		Exp enabledExp = residualNode.forPath("enabled").exp();
-		if (enabledExp != null)
-			residual.setEnabled(enabledExp.instantiate());
-		Exp iterationVariableExp = residualNode.forPath("iterationVariable").exp();
-		if (iterationVariableExp != null) {
-			if (!iterationVariableExp.isAccess())
-				iterationVariableExp.error("Expression \"%s\" is not a legal iteration variable reference", iterationVariableExp);
-			else
-				residual.setIterationVariable(new FIdUseInstAccess(iterationVariableExp.asAccess().instantiate()));
-		}
-		return new Opt<FResidual>(residual);
 	}
 	
 	/**

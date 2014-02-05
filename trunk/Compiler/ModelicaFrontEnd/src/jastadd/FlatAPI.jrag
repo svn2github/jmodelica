@@ -1285,6 +1285,11 @@ aspect FlatAPI {
 	syn boolean FAbstractVariable.isDerivativeVariable() = false;
 	eq FDerivativeVariable.isDerivativeVariable() = true;
 
+    syn FVariable FAbstractVariable.asFVariable() {
+        throw new UnsupportedOperationException("asFVariable() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FVariable.asFVariable() = this;
+
 	syn FDerivativeVariable FAbstractVariable.asDerivativeVariable() {
 		throw new UnsupportedOperationException("isDerivativeVariable() is not supported for class type " + getClass().getSimpleName());
 	}
@@ -1384,6 +1389,9 @@ aspect ReferencedVariables {
 		set.add(this);
 		super.findFIdUseExpsInTree(set);
 	}
+	
+    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+    }
 	
 	syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = Collections.emptySet();
 	eq FEquation.FIdUseExpsInRHS()                         = getRight().findFIdUseExpsInTree();
@@ -1538,14 +1546,6 @@ aspect FlatEnumerations {
 	syn int FEnumSpecification.numEnumLiterals() = 0;
 	eq FEnumLiteralList.numEnumLiterals() = getNumFEnumLiteral();
 	
-	syn FVariable FResidual.iterationVariable() {
-		FVariable variable = (FVariable) getIterationVariable().myFV();
-		if (variable.isAlias())
-			return variable.alias();
-		else
-			return variable;
-	}
-	
 }
 
 aspect FlatCausality {
@@ -1657,8 +1657,9 @@ aspect Attributes {
 			res = myFDerivedType().findAttribute(name);
 		return res;
 	}
-	syn FAttribute FAttribute.findAttribute(String name)   = findMatching(getFAttributes(), name);
-	syn FAttribute FDerivedType.findAttribute(String name) = findMatching(getFAttributes(), name);
+	syn FAttribute FAttribute.findAttribute(String name)        = findMatching(getFAttributes(), name);
+	syn FAttribute FDerivedType.findAttribute(String name)      = findMatching(getFAttributes(), name);
+	syn FAttribute FAbstractEquation.findAttribute(String name) = findMatching(getFAttributes(), name);
 	syn boolean FVariable.attributeSet(FAttribute a)   = (a != null) && a.getAttributeSet();
 	syn FExp    FVariable.attributeExp(FAttribute a)   = (a != null && a.hasValue()) ? a.getValue() : null;
 	syn boolean FVariable.attributeSet(String name)    = attributeSet(findAttribute(name));
@@ -2027,8 +2028,10 @@ aspect FVariableUses {
 	syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
 
 	inh boolean FIdUseExp.inAlgebraicAccessLocation();
-	eq BaseNode.getChild().inAlgebraicAccessLocation()   = true;
-	eq FResidual.getIterationVariable().inAlgebraicAccessLocation() = false;
+	eq FlatRoot.getChild().inAlgebraicAccessLocation()   = false;
+	eq SourceRoot.getChild().inAlgebraicAccessLocation()   = false;
+	eq FAbstractEquation.getFAttribute().inAlgebraicAccessLocation() = false;
+	eq FAbstractEquation.getChild().inAlgebraicAccessLocation() = true;
 	
 	syn LinkedHashSet<FVariable> FAbstractEquation.algebraicVariables() = 
 	    retrieveAlgebraicVariables();

@@ -3315,7 +3315,7 @@ annotation(
     __JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="HandGuidedTearing32",
-            description="Test of hand guided tearing and alias elimination.",
+            description="Test of hand guided tearing with each on enabled attribute for interation variable.",
             equation_sorting=true,
             automatic_tearing=true,
             hand_guided_tearing=true,
@@ -3396,7 +3396,7 @@ annotation(
     __JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="HandGuidedTearing33",
-            description="Test of hand guided tearing and alias elimination.",
+            description="Test of hand guided tearing with vectorized enabled attribute for interation variable.",
             equation_sorting=true,
             automatic_tearing=true,
             hand_guided_tearing=true,
@@ -3477,7 +3477,7 @@ annotation(
     __JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="HandGuidedTearing34",
-            description="Test of hand guided tearing and alias elimination.",
+            description="Test of hand guided tearing with vectorized enabled attribute for interation variable.",
             equation_sorting=true,
             automatic_tearing=true,
             hand_guided_tearing=true,
@@ -3541,6 +3541,219 @@ end TearingTests.HandGuidedTearing35;
 ")})));
 end HandGuidedTearing35;
 
+model HandGuidedTearing36
+    constant Integer n = 4;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, each enabled = true)));
+    x .+ y = fill(4, n);
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing36",
+            description="Test of hand guided tearing with each on enabled attribute for interation variable.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = y[1] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[2]
+Iteration variables:
+  x[2]
+Solved equations:
+  x[2] .+ y[2] = 4
+Residual equations:
+ Iteration variables: x[2]
+  x[2] = y[2] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[3]
+Iteration variables:
+  x[3]
+Solved equations:
+  x[3] .+ y[3] = 4
+Residual equations:
+ Iteration variables: x[3]
+  x[3] = y[3] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[4]
+Iteration variables:
+  x[4]
+Solved equations:
+  x[4] .+ y[4] = 4
+Residual equations:
+ Iteration variables: x[4]
+  x[4] = y[4] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+")})));
+end HandGuidedTearing36;
+
+model HandGuidedTearing37
+    constant Integer n = 4;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = fill(true, n))));
+    x .+ y = fill(4, n);
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing37",
+            description="Test of hand guided tearing with vectorized enabled attribute for interation variable.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = y[1] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[2]
+Iteration variables:
+  x[2]
+Solved equations:
+  x[2] .+ y[2] = 4
+Residual equations:
+ Iteration variables: x[2]
+  x[2] = y[2] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[3]
+Iteration variables:
+  x[3]
+Solved equations:
+  x[3] .+ y[3] = 4
+Residual equations:
+ Iteration variables: x[3]
+  x[3] = y[3] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[4]
+Iteration variables:
+  x[4]
+Solved equations:
+  x[4] .+ y[4] = 4
+Residual equations:
+ Iteration variables: x[4]
+  x[4] = y[4] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+")})));
+end HandGuidedTearing37;
+
+model HandGuidedTearing38
+    constant Integer n = 2;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = if n == 2 then {true,false} else fill(true, n))));
+    x .+ y = fill(4, n) annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = if n == 2 then {false,true} else fill(false, n))));
+annotation(
+    __JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HandGuidedTearing38",
+            description="Test of hand guided tearing with vectorized enabled attribute for residual equation.",
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            methodName="printDAEBLT",
+            methodResult="
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[1]
+Iteration variables:
+  x[1]
+Solved equations:
+  x[1] .+ y[1] = 4
+Residual equations:
+ Iteration variables: x[1]
+  x[1] = y[1] .+ 3
+Jacobian:
+  |1.0, 1.0|
+  |- 1.0, 1.0|
+-------------------------------
+Torn linear block of 1 iteration variables and 1 solved variables:
+Coefficient variability: Constant
+Solved variables:
+  y[2]
+Iteration variables:
+  x[2]
+Solved equations:
+  x[2] = y[2] .+ 3
+Residual equations:
+ Iteration variables: x[2]
+  x[2] .+ y[2] = 4
+Jacobian:
+  |- 1.0, 1.0|
+  |1.0, 1.0|
+-------------------------------
+")})));
+end HandGuidedTearing38;
+
 model HandGuidedTearingError1
 	Real x;
 	Real y;
@@ -3565,11 +3778,11 @@ equation
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8432, column 56:
-  The type of the HGT enabled expression is not boolean
+  The type of the enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8436, column 56:
-  Cannot evaluate boolean enabled expression: 1
+  The type of the enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8439, column 59:
@@ -3605,15 +3818,15 @@ Semantic error at line 8464, column 56:
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8464, column 56:
-  The type of the HGT enabled expression is not boolean
-
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-Semantic error at line 8468, column 56:
-  Cannot evaluate boolean enabled expression: unknownParameter2
+  The type of the enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8468, column 56:
   Cannot find class or component declaration for unknownParameter2
+
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
+Semantic error at line 8468, column 56:
+  The type of the enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8471, column 59:
@@ -3971,6 +4184,104 @@ Semantic error at line 0, column 0:
 
 end HandGuidedTearingError13;
 
+model HandGuidedTearingError14
+    constant Integer n = 4;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = {false,true})));
+    x .* y = fill(4, n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="HandGuidedTearingError14",
+            description="Test of hand guided tearing error when enable flag have incorrect dimensions",
+            equation_sorting=true,
+            hand_guided_tearing=true,
+            automatic_tearing=false,
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Array size mismatch for the enabled attribute, size of component declaration is [4] and size of expression is [2]
+")})));
+
+end HandGuidedTearingError14;
+
+model HandGuidedTearingError15
+    Real x;
+    Real y;
+equation
+    x = y + 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = {false,true})));
+    x * y = 4;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="HandGuidedTearingError15",
+            description="Test of hand guided tearing error when enable flag have incorrect dimensions",
+            equation_sorting=true,
+            hand_guided_tearing=true,
+            automatic_tearing=false,
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Array size mismatch for the enabled attribute, size of component declaration is scalar and size of expression is [2]
+")})));
+
+end HandGuidedTearingError15;
+
+model HandGuidedTearingError16
+    Real x;
+    Real y;
+equation
+    x = y + 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, each enabled = true)));
+    x * y = 4;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="HandGuidedTearingError16",
+            description="Test of hand guided tearing error when enable flag have keyword each",
+            equation_sorting=true,
+            hand_guided_tearing=true,
+            automatic_tearing=false,
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The 'each' keyword cannot be applied to attributes of scalar components
+")})));
+
+end HandGuidedTearingError16;
+
+model HandGuidedTearingError17
+    constant Integer n = 4;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, each enabled = fill(true,n))));
+    x .* y = fill(4, n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="HandGuidedTearingError17",
+            description="Test of hand guided tearing error when enable flag have each keyword incorrectly",
+            equation_sorting=true,
+            hand_guided_tearing=true,
+            automatic_tearing=false,
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The enabled attribute is declared 'each' and the expression is not scalar
+")})));
+
+end HandGuidedTearingError17;
+
 model HandGuidedTearingWarning1
 	Real x(start=1), y(start=2), z, w;
 equation
@@ -4019,6 +4330,31 @@ At line 0, column 0:
   Assuming 'each' for enabled expression
 ")})));
 end HandGuidedTearingWarning2;
+
+model HandGuidedTearingWarning3
+    constant Integer n = 4;
+    Real x[n];
+    Real y[n];
+equation
+    x = y .+ 3 annotation(__Modelon(ResidualEquation(iterationVariable = x, enabled = true)));
+    x .* y = fill(4, n);
+
+    annotation(
+    __JModelica(UnitTesting(tests={
+        WarningTestCase(
+            equation_sorting=true,
+            automatic_tearing=true,
+            hand_guided_tearing=true,
+            name="HandGuidedTearingWarning3",
+            description="Test hand guided tearing warnings",
+            errorMessage="
+1 warnings found:
+
+Warning: in file '...':
+At line 0, column 0:
+  Assuming 'each' for enabled expression
+")})));
+end HandGuidedTearingWarning3;
 
 model TearingLocalLoopTest1
 	Real a, b, c;

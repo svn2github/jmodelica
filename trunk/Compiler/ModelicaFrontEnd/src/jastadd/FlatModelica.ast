@@ -498,7 +498,6 @@ abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
                                           [Name:FQName]
-                                          [Residual:FResidual]
                                           [Nominal:FNominal]
                                           FAttribute*;
 
@@ -519,12 +518,6 @@ FEquation : FAbstractEquation ::= Left:FExp Right:FExp;
  * Example: (x, y, z) = func(a, b);
  */
 FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbstractFunctionCall;
-
-/**
- * A class for storing hand guided tearing on component level.
- */
-FResidual : BaseNode ::= [IterationVariable:FIdUse] <Level:int>;
-InstResidual : FResidual ::= [Enabled:FExp];
 
 /**
  * A class for storing hand guided tearing on system level.

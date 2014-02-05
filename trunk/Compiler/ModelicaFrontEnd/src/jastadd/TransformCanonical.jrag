@@ -1578,7 +1578,7 @@ aspect TransformCanonical {
 	 */
 	public AliasPair FEquation.aliasVariables() {
 		AliasPair res = null;
-		if (!hasResidual()) // This equation should not be alias-removed if it is marked as residual!
+		if (!isHGTResidual()) // This equation should not be alias-removed if it is marked as residual!
 			res = aliasVariables(getLeft(), getRight(), 1);
 		aliasClassified = true;
 		classifiedAsAlias = res != null;
@@ -1786,6 +1786,12 @@ aspect TransformCanonical {
 		rewriteAlias = true;
 		is$Final = false;
 	}
+	
+    public void FInternalAttribute.enableAliasRewrite() {
+        // We do not want to rewrite attributes that are of reference type
+        if (!getType().name().equals("*"))
+            super.enableAliasRewrite();
+    }
 	
 	public void FFunctionDecl.enableAliasRewrite() {
 	}
@@ -4830,80 +4836,6 @@ aspect RuntimeOptions {
 	syn boolean FVisibilityType.isRuntimeOptionVisibility()     = false;
 	eq FRuntimeOptionVisibilityType.isRuntimeOptionVisibility() = true;
 	
-}
-
-aspect ResidualPairPropagation{
-	
-    public static final int FInternalAttribute.HGTVarLevel_COMPONENT = 1;
-    public static final int FInternalAttribute.HGTVarLevel_PAIR = 2;
-    
-    public static final String FAttribute.HGT         = "hgt()";
-    
-    syn CValue FVariable.HGTVarCValue() {
-        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
-        return attr == null ? null : attr.getValue().ceval();
-    }
-    
-    syn boolean FVariable.isHGTVar() {
-        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
-        return attr != null && attr.getValue().ceval().booleanValue();
-    }
-    
-    syn boolean FVariable.isHGTVarPair() {
-        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
-        return attr != null && attr.getLevel() == FInternalAttribute.HGTVarLevel_PAIR &&
-                attr.getValue().ceval().booleanValue();
-    }
-    
-    syn boolean FVariable.isHGTVarComponent() {
-        FAttribute attr = findMatching(getFAttributes(), FAttribute.HGT);
-        return attr != null && attr.getLevel() == FInternalAttribute.HGTVarLevel_COMPONENT &&
-                attr.getValue().ceval().booleanValue();
-    }
-    
-    public void FAbstractVariable.setHGTAsPair() {
-        throw new UnsupportedOperationException();
-    }
-    public void FVariable.setHGTAsPair() {
-        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpTrue(), FInternalAttribute.HGTVarLevel_PAIR);
-    }
-    
-    public void FVariable.unsetHGT() {
-        setAttribute(FAttribute.HGT, "Boolean", new FBooleanLitExpFalse());
-    }
-    
-    public class FClass {
-        public class propagateResidualPairs extends Transformation {
-            public void perform() {
-                for (FAbstractEquation eqn : getFAbstractEquations()) {
-                    if (eqn.hasResidual() && eqn.getResidual().hasIterationVariable())
-                        eqn.getResidual().getIterationVariable().myFV().setHGTAsPair();
-                }
-                
-                for (FResidualPair pair : getFResidualPairs()) {
-                    pair.propagate();
-                }
-            }
-        }
-    }
-	
-	protected void FResidualPair.propagate() {
-		FAbstractEquation fae = getResidualEquation().myFEquation();
-		if (fae == null) {
-			error("Internal HGT Error, unable to find fae");
-			return;
-		}
-		FAbstractVariable fv = getIterationVariable().myFV();
-		int otherLevel = fae.hasResidual() ? fae.getResidual().getLevel() : Integer.MAX_VALUE;
-		if (otherLevel == getLevel()) {
-			error("Internal HGT Error, same level, decalred twise?");
-			return;
-		}
-		if (otherLevel > getLevel()) {
-			fae.setResidual(new FResidual(new Opt<FIdUse>(getIterationVariable().fullCopy()), getLevel()));
-			getIterationVariable().myFV().setHGTAsPair();
-		}
-	}
 }
 
 

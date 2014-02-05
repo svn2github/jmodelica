@@ -555,9 +555,7 @@ aspect Arrays {
 		return left.equals(right) ? left : Size.SCALAR;
 	}
 	
-	inh Size InstResidual.size();
 	inh Size InstNominal.size();
-	eq FAbstractEquation.getResidual().size() = size();
 	eq FAbstractEquation.getNominal().size() = size();
 	
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
