@@ -998,6 +998,7 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
+		ASTNode.getStepInfo().reset();
 		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
