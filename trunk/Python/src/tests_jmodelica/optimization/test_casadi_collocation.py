@@ -414,7 +414,7 @@ class TestLocalDAECollocator:
         col = res.solver
         xx_init = col.get_xx_init()
         N.testing.assert_equal(sum(xx_init == 1.),
-                               (n_e * n_cp + 1) * 3 + 2 * n_e)
+                               (n_e * n_cp + 1) * 4 + 2 * n_e)
         
         # Test with eliminated continuity variables
         opts['eliminate_cont_var'] = True
@@ -1630,7 +1630,7 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
         J_opt = res.get_J("opt")
         J_opt_cond = N.linalg.cond(J_opt)
-        N.testing.assert_allclose(J_opt_cond, 2.47e6, rtol=1e-2)
+        N.testing.assert_allclose(J_opt_cond, 3.37e6, rtol=1e-2)
 
         # Compute Hessian norms
         H_init = res.get_H("init")
@@ -1646,7 +1646,7 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
         KKT_opt = res.get_KKT("opt")
         KKT_opt_cond = N.linalg.cond(KKT_opt)
-        N.testing.assert_allclose(KKT_opt_cond, 9.34e9, rtol=1e-2)
+        N.testing.assert_allclose(KKT_opt_cond, 1.17e10, rtol=1e-2)
 
         # Obtain symbolic matrices and matrix functions
         res.get_J("sym")

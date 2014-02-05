@@ -1642,7 +1642,9 @@ aspect TransformCanonical {
 	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
 	
 	syn boolean FAbstractVariable.canBeAlias() = false;
-	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable() && !isPreVariable() && !isDerivativeVariable() && !isOutput();
+	eq FVariable.canBeAlias() = !lookupDerFV(getFQName()).isDummyDerivativeVariable() 
+	        && !isPreVariable() && !isDerivativeVariable() 
+	        && !isInput() && !isOutput();
 	
 	syn int FExp.aliasSign() = 1;
 	eq FNegExp.aliasSign()   = -getFExp().aliasSign();

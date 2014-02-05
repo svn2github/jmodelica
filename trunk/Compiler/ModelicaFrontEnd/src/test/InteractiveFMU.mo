@@ -36,15 +36,27 @@ package InteractiveFMU
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
+  x
+Solution:
+  (- iter_1) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  y
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
   res_1
 Solution:
-  iter_1 + (- iter_0) + (- time)
+  x + (- y) + (- time)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  iter_0 + (- iter_1) + 2
+  y + (- x) + 2
 -------------------------------
 ")})));
 	end ScalarEquation1;
@@ -68,15 +80,21 @@ Solution:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
+  y
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
   x
 Solution:
-  abs(iter_0) + time
+  abs(y) + time
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  iter_0 + (- x) + 2
+  y + (- x) + 2
 -------------------------------
 ")})));
 	end ScalarEquation2;
@@ -117,18 +135,30 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  (- iter_1) / (- 1.0)
+-------------------------------
 Solved block of 2 variables:
 Unknown variables:
   temp_2
   temp_3
 Equations:
-  (InteractiveFMU.FunctionCallEquation1.R(temp_2, temp_3)) = InteractiveFMU.FunctionCallEquation1.F(iter_1, y)
+  (InteractiveFMU.FunctionCallEquation1.R(temp_2, temp_3)) = InteractiveFMU.FunctionCallEquation1.F(x, y)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  r.x
+Solution:
+  (- iter_0) / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  temp_2 + (- iter_0)
+  temp_2 + (- r.x)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -175,12 +205,18 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  x
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
 Solved block of 2 variables:
 Unknown variables:
   r.x
   temp_2
 Equations:
-  (InteractiveFMU.FunctionCallEquation2.R(r.x, temp_2)) = InteractiveFMU.FunctionCallEquation2.F(iter_0, y)
+  (InteractiveFMU.FunctionCallEquation2.R(r.x, temp_2)) = InteractiveFMU.FunctionCallEquation2.F(x, y)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -212,21 +248,27 @@ Solution:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
+  c
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
   b
 Solution:
-  (- 23) / (- iter_0)
+  (- 23) / (- c)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   a
 Solution:
-  (- iter_0 + b) / (- 1.0)
+  (- c + b) / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  20 + (- iter_0 * a)
+  20 + (- c * a)
 -------------------------------
 ")})));
 	end LocalIteration1;
@@ -250,24 +292,31 @@ Solution:
 			methodName="printDAEBLT",
 			methodResult="
 -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  c
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
   b()
 Equations:
-  23 = sin(iter_0 * b)
+  23 = sin(c * b)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   a
 Solution:
-  (- iter_0 + b) / (- 1.0)
+  (- c + b) / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  20 + (- iter_0 * a)
+  20 + (- c * a)
 -------------------------------
+			
 ")})));
 	end LocalIteration2;
 	
@@ -290,15 +339,21 @@ Solution:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
+  y
+Solution:
+  (- iter_0) / (- 1.0)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
   x
 Solution:
-  abs(iter_0) + time
+  abs(y) + time
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
-  iter_0 + (- x) + 2
+  y + (- x) + 2
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -315,8 +370,7 @@ Solution:
             methodName="aliasDiagnostics",
             methodResult="
 Alias sets:
-{iter_0, y}
-1 variables can be eliminated
+0 variables can be eliminated
 ")})));
 end EquationName1;
 	

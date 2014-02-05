@@ -945,10 +945,12 @@ end TransformCanonicalTests.AliasTest23;
 			flatModel="
 fclass TransformCanonicalTests.AliasTest24
  Real x1;
+ Real x2;
  input Real u;
 initial equation 
  x1 = 0.0;
 equation 
+ x2 = u;
  der(x1) = u;
 
 end TransformCanonicalTests.AliasTest24;
@@ -1444,8 +1446,8 @@ end AliasPropStart1;
 
 model AliasPropFixed1
 	Real x1(fixed = true);
-	Real x2 = x1;
-	input Real x3(start = 1) = x2;
+	Real x2(start = 1) = x1;
+	Real x3(stateSelect=StateSelect.prefer) = x2;
 equation
 	der(x3) = -x2 * time;
 
@@ -1455,11 +1457,15 @@ equation
 			description="Test propagation of fixed attribute in alias set",
 			flatModel="
 fclass TransformCanonicalTests.AliasPropFixed1
- input Real x3(start = 1,fixed = true);
+ Real x3(stateSelect = StateSelect.prefer,start = 1,fixed = true);
 initial equation 
  x3 = 1;
 equation
  der(x3) = (- x3) * time;
+ 
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+ 
 end TransformCanonicalTests.AliasPropFixed1;
 ")})));
 end AliasPropFixed1;
@@ -2295,7 +2301,9 @@ fclass TransformCanonicalTests.InitialEqTest14
  Real m.t(start = 0);
  discrete Real m.x1(start = 1,fixed = true);
  discrete Boolean m.b1(start = false,fixed = true);
+ discrete Boolean m.ub1;
  discrete Integer m.i1(start = 4,fixed = true);
+ discrete Integer m.ui1;
  discrete Real m.x2(start = 2);
  discrete Boolean temp_1;
 initial equation 
@@ -2304,6 +2312,8 @@ initial equation
  m.pre(i1) = 4;
  m.pre(x2) = 2;
  m.t = 0;
+ m.pre(ub1) = false;
+ m.pre(ui1) = 0;
  pre(temp_1) = false;
 equation
  m.der(t) = 1;
@@ -2312,8 +2322,9 @@ equation
  m.i1 = if temp_1 and not pre(temp_1) then 3 else m.pre(i1);
  m.x1 = if temp_1 and not pre(temp_1) then m.pre(x1) + 1 else m.pre(x1);
  m.x2 = if temp_1 and not pre(temp_1) then m.pre(x2) + 1 else m.pre(x2);
+ m.ub1 = ub1;
+ m.ui1 = ui1;
 end TransformCanonicalTests.InitialEqTest14;
-			
 ")})));
   end InitialEqTest14;
 
