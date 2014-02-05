@@ -712,7 +712,7 @@ aspect InstanceErrorCheck {
 	}
     syn boolean FExp.canEvaluateAsStructural() {
         for (FExp n : childFExps())
-            if (n.canEvaluateAsStructural())
+            if (!n.canEvaluateAsStructural())
                 return false;
         return true;
     }

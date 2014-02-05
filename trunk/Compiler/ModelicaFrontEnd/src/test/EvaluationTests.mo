@@ -1116,4 +1116,25 @@ end EvaluationTests.SignEval1;
 ")})));
 end SignEval1;
 
+model ParameterEvalAnnotation1
+	parameter Real[3] p1 = {1,2,3} annotation (Evaluate=true);
+	Real[3] r;
+equation
+	r = {1,2,3} .* p1;
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation1",
+			description="Test constant evaluation of sign()",
+			flatModel="
+fclass EvaluationTests.ParameterEvalAnnotation1
+ parameter Real p1[1] = 1 /* 1 */;
+ parameter Real p1[2] = 2 /* 2 */;
+ parameter Real p1[3] = 3 /* 3 */;
+ constant Real r[1] = 1.0;
+ constant Real r[2] = 4.0;
+ constant Real r[3] = 9.0;
+end EvaluationTests.ParameterEvalAnnotation1;
+")})));
+end ParameterEvalAnnotation1;
+
 end EvaluationTests;
