@@ -5094,43 +5094,60 @@ class LocalDAECollocator2(CasadiCollocator):
             tf = self._denorm_tf_init
 
         # Set bounds and initial guesses
-        for i in xrange(1, self.n_e + 1):
-            for k in self.time_points[i].keys():
-                time = time_points[i][k]
-                if self._normalize_min_time: # FIX!!!
-                    time = t0 + (tf - t0) * time
-                for vt in ['dx', 'x', 'w', 'unelim_u']:
-                    var_min = N.empty(len(mvar_vectors[vt]))
-                    var_max = N.empty(len(mvar_vectors[vt]))
-                    var_init = N.empty(len(mvar_vectors[vt]))
-                    for var in mvar_vectors[vt]:
-                        name = var.getName()
-                        (var_index, _) = name_map[name]
-                        d = 1.
+        for vt in ['dx', 'x', 'w', 'unelim_u']:
+            var_min = N.empty(len(mvar_vectors[vt]))
+            var_max = N.empty(len(mvar_vectors[vt]))
+            var_init = N.empty(len(mvar_vectors[vt]))
+            for var in mvar_vectors[vt]:
+                name = var.getName()
+                v_min = op.get_attr(var, "min")
+                v_max = op.get_attr(var, "max")
+                if self.init_traj is None:
+                    v_init = op.get_attr(var, "initialGuess")
+                (var_idx, _) = name_map[name]
+                if self.variable_scaling:
+                    if self.nominal_traj is None:
+                        d = sfs[vt][var_idx]
                         e = 0.
-                        if self.variable_scaling:
-                            if self.nominal_traj is None:
-                                d = sfs[vt][var_index]
-                            else: # FIX!!!
-                                sf_index = name_idx_sf_map[name]
-                                if is_variant[name]:
+                    else: # FIX!!!
+                        sf_index = name_idx_sf_map[name]
+                        if is_variant[name]:
+                            e = 0.
+                            for i in xrange(1, self.n_e + 1):
+                                for k in self.time_points[i].keys():
                                     d = variant_sf[i][k][sf_index]
-                                else:
-                                    d = invariant_d[sf_index]
-                                    e = invariant_e[sf_index]
-                        v_min = op.get_attr(var, "min")
-                        v_max = op.get_attr(var, "max")
-                        var_min[var_index] = (v_min - e) / d
-                        var_max[var_index] = (v_max - e) / d
-                        if self.init_traj is None:
-                            var_initial = op.get_attr(var, "initialGuess")
+                                    if self.init_traj is not None:
+                                        time = time_points[i][k]
+                                        if self._normalize_min_time: # FIX!!!
+                                            time = t0 + (tf - t0) * time
+                                        v_init = traj[vt][var_idx].eval(time)
+                                    xx_lb[var_indices[i][k][vt][var_idx]] = \
+                                            (v_min - e) / d
+                                    xx_ub[var_indices[i][k][vt][var_idx]] = \
+                                            (v_max - e) / d
+                                    xx_init[var_indices[i][k][vt][var_idx]] = \
+                                            (v_init - e) / d
                         else:
-                            var_initial = traj[vt][var_index].eval(time)
-                        var_init[var_index] = (var_initial - e) / d
-                    
-                    xx_lb[var_indices[i][k][vt]] = var_min
-                    xx_ub[var_indices[i][k][vt]] = var_max
-                    xx_init[var_indices[i][k][vt]] = var_init
+                            d = invariant_d[sf_index]
+                            e = invariant_e[sf_index]
+                else:
+                    d = 1.
+                    e = 0.
+                if ((not self.variable_scaling) or (self.nominal_traj is None)
+                    or (not is_variant[name])):
+                    for i in xrange(1, self.n_e + 1):
+                        for k in self.time_points[i].keys():
+                            if self.init_traj is not None:
+                                time = time_points[i][k]
+                                if self._normalize_min_time: # FIX!!!
+                                    time = t0 + (tf - t0) * time
+                                v_init = traj[vt][var_idx].eval(time)
+                            xx_lb[var_indices[i][k][vt][var_idx]] = \
+                                            (v_min - e) / d
+                            xx_ub[var_indices[i][k][vt][var_idx]] = \
+                                    (v_max - e) / d
+                            xx_init[var_indices[i][k][vt][var_idx]] = \
+                                    (v_init - e) / d
 
         # Set bounds and initial guesses for continuity variables
         if not self.eliminate_cont_var:
