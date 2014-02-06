@@ -93,7 +93,6 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         version --
             The FMI version. Valid options are '1.0' and '2.0'.
             Default: '1.0'
-            Note: Must currently be set to '1.0'.
             
         compiler_options --
             Options for the compiler.

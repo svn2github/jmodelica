@@ -343,7 +343,6 @@ class ModelicaCompiler(object):
                 
             version --
                 The FMI version. Valid options are '1.0' and '2.0'.
-                Note: Must currently be set to '1.0'.
                 
             compile_to --
                 Specify location of the compiled FMU. Directory will be created 
