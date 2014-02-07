@@ -152,6 +152,14 @@ public class ModelicaCompiler {
 	protected String[] targetPlatforms = null;
 	protected Collection<Problem> warnings = new ArrayList<Problem>();
 	
+	public static OptionRegistry createOptions() {
+	    return new OptionRegistry() {};
+	}
+    
+    public static OptionRegistry createOptions(String file) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
+        return new OptionRegistry(file) {};
+    }
+	
 	public ModelicaCompiler(OptionRegistry options) {
 		this.options = options;
 	}
@@ -676,7 +684,7 @@ public class ModelicaCompiler {
 	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling
 		// First save these options in temp options registry to reset when compiling has finished
-		OptionRegistry tempOptions = new OptionRegistry(options);    
+		OptionRegistry tempOptions = options.copy();    
 		
 		//Set options for the target.
 		target.setDefaultOptions(options);
@@ -1099,7 +1107,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("instantiateModel()");
 		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		ipr.options = new OptionRegistry(sr.options);
+		ipr.options = sr.options.copy();
 		
 		if (sr.options.getBooleanOption("compliance_as_warning"))
 			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
@@ -1428,11 +1436,11 @@ public class ModelicaCompiler {
 		}
 
 		try {
-			options = new OptionRegistry(optionsfile);
+			options = createOptions(optionsfile);
 		} catch(Exception e) {
 			log.warning("The options XML file could not be loaded, using defaults.");
 			log.debug(e);
-			options = new OptionRegistry();
+			options = createOptions();
 		}
 		
 		String opts = programarguments.get("opt");

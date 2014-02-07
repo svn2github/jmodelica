@@ -33,7 +33,7 @@ aspect FlatTree {
 		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
 		flatRoot.setFileName(file);
 		FClass fc = flatRoot.getFClass(); // make FClass final
-		flatRoot.options = new OptionRegistry(icl.root().options);
+		flatRoot.options = icl.root().options.copy();
 		// TODO: We should change how the checkErrors() method works, 
 		//       since it relies on the behaviour of DefaultErrorHandler
 		icl.root().getErrorHandler().connectTo(flatRoot);

@@ -85,7 +85,7 @@ abstract public class TestAnnotationizerHelper {
      */
     public static void doRegenerate(String filePath, String modelName, boolean write) throws Exception {
         try {
-            SourceRoot root = parse(filePath, modelName, new OptionRegistry());
+            SourceRoot root = parse(filePath, modelName, ModelicaCompiler.createOptions());
             ClassDecl cd = root.getProgram().simpleLookupClassDotted(modelName);
             if (cd.isUnknown()) {
                 System.err.println("Class " + modelName + " not found");
@@ -333,7 +333,7 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Creates the options registry to use.
 	 */
 	protected OptionRegistry createOptionRegistry(String[] opts) throws Exception {
-		OptionRegistry or = new OptionRegistry();
+		OptionRegistry or = ModelicaCompiler.createOptions();
 		or.setBooleanOption("generate_runtime_option_parameters", false);
 		for (String opt : opts) {
 			String parts[] = opt.split("=");

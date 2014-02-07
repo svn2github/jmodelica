@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,8 +44,44 @@ import org.xml.sax.SAXException;
  * can be created and retrieved based on type: String, Integer etc.
  * OptionRegistry also provides methods for handling paths
  * to Modelica libraries.
+ * 
+ * This class should only be instantiated through ModelicaCompiler.createOptions(). 
+ * This is to ensure that hooks for adding options work properly, by putting 
+ * all contributors in ModelicaCompiler and ensuring that it is loaded before 
+ * any OptionRegistry instances are created.
  */
-public class OptionRegistry {
+abstract public class OptionRegistry {
+    
+    /**
+     * Extend this class and add an instance to the contributor list with 
+     * {@link OptionRegistry#addContributor(OptionContributor)} to contribute 
+     * to set of options. The preferred way to do this is adding a static 
+     * field in ModelicaCompiler that gets its value from a call to addContributor().
+     */
+    abstract public static class OptionContributor {
+        /**
+         * Add additional options to the registry.
+         */
+        public void addOptions(OptionRegistry opt) {}
+        
+        /**
+         * Change options that are in the registry.
+         */
+        public void modifyOptions(OptionRegistry opt) {}
+    }
+    
+    private static java.util.List<OptionContributor> CONTRIBUTORS = new ArrayList<OptionContributor>();
+    
+    /**
+     * Adds a new options contributor.
+     * 
+     * @param oc  the contributor
+     * @return    the contributor, for convenience
+     */
+    public static OptionContributor addContributor(OptionContributor oc) {
+        CONTRIBUTORS.add(oc);
+        return oc;
+    }
 	
 	public interface Inlining {
 		public static final String NONE    = "none";
@@ -517,18 +554,34 @@ public class OptionRegistry {
 			return key;
 		}
 	}
+	
+	/**
+	 * Contributor for base options.
+	 */
+	private static final OptionContributor BASE_CONTRIBUTOR = addContributor(new OptionContributor() {
+        public void addOptions(OptionRegistry opt) {
+            for (Default o : Default.values())
+                opt.defaultOption(o);
+        }
+    });
 
 	private HashMap<String,Option> optionsMap;
 	
 	public OptionRegistry() {
 		optionsMap = new HashMap<String,Option>();
-		for (Default o : Default.values())
-			defaultOption(o);
+		for (OptionContributor oc : CONTRIBUTORS)
+			oc.addOptions(this);
+        for (OptionContributor oc : CONTRIBUTORS)
+            oc.modifyOptions(this);
 	}
 
-	public OptionRegistry(OptionRegistry registry) {
-		this();
-		copyAllOptions(registry);
+	/**
+	 * Create a copy of this OptionRegistry.
+	 */
+	public OptionRegistry copy() {
+	    OptionRegistry res = new OptionRegistry() {};
+		res.copyAllOptions(this);
+		return res;
 	}
 	
 	public OptionRegistry(String filepath) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
@@ -639,23 +692,6 @@ public class OptionRegistry {
 		}
 	}
 	
-	/**
-	 * \brief Main method. Exports default options to XML.
-	 * 
-	 * If given an argument, XML is saved in file with that path.
-	 */
-	public static void main(String[] args) {
-		try {
-			OptionRegistry or = new OptionRegistry();
-			if (args.length < 1) 
-				or.exportXML(System.out);
-			else 
-				or.exportXML(args[0]);
-		} catch (FileNotFoundException e) {
-			System.err.println("Could not open file for writing: " + e.getMessage());
-		}
-	}
-	
 	protected void defaultOption(Default o) {
 		if (o.val instanceof Integer) {
 			if (o.lim != null)
@@ -744,6 +780,14 @@ public class OptionRegistry {
 		else
 			opt.setValue(value);
 	}
+    
+    public void expandIntegerOptionMax(String key, int val) {
+        findIntegerOption(key, false).expandMax(val);
+    }
+    
+    public void expandIntegerOptionMin(String key, int val) {
+        findIntegerOption(key, false).expandMin(val);
+    }
 
 	public int getIntegerOption(String key) {
 		return findIntegerOption(key, false).getValue();
@@ -791,6 +835,10 @@ public class OptionRegistry {
 		else
 			opt.setValue(value);
 	}
+    
+    public void addStringOptionAllowed(String key, String val) {
+        findStringOption(key, false).addAllowed(val);
+    }
 
 	public String getStringOption(String key) {
 		return findStringOption(key, false).getValue();
@@ -846,6 +894,14 @@ public class OptionRegistry {
 		else
 			opt.setValue(value);
 	}
+    
+    public void expandRealOptionMax(String key, double val) {
+        findRealOption(key, false).expandMax(val);
+    }
+    
+    public void expandRealOptionMin(String key, double val) {
+        findRealOption(key, false).expandMin(val);
+    }
 
 	public double getRealOption(String key) {
 		return findRealOption(key, false).getValue();
@@ -1011,9 +1067,10 @@ public class OptionRegistry {
 
 
 	abstract static class Option {
-		protected String key;
-		protected String description;
-		protected OptionType type;
+	    private String key;
+		private String description;
+		private boolean descriptionChanged = false;
+		private OptionType type;
 			
 		public Option(String key, String description, OptionType type) {
 			this.key = key;
@@ -1050,6 +1107,13 @@ public class OptionRegistry {
 		public String getDescription() {
 			return description;
 		}
+		
+		public void changeDescription(String desc) {
+		    if (descriptionChanged)
+		        throw new UnsupportedOperationException("Description of " + key + " has already been changed.");
+		    descriptionChanged = true;
+		    description = desc;
+		}
 	
 		public String toString() {
 			return "\'"+key+"\': " + description; 
@@ -1064,8 +1128,8 @@ public class OptionRegistry {
 	
 	static class IntegerOption extends Option {
 		protected int value;
-		protected int min;
-		protected int max;
+		private int min;
+		private int max;
 		
 		public IntegerOption(String key, OptionType type, String description, int value) {
 			this(key, type, description, value, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -1087,6 +1151,16 @@ public class OptionRegistry {
 		public int getValue() {
 			return value;
 		}
+        
+		public void expandMin(int val) {
+		    if (val < min)
+		        min = val;
+		}
+        
+        public void expandMax(int val) {
+            if (val > max)
+                max = val;
+        }
 
 		@Override
 		public String getType() {
@@ -1101,7 +1175,7 @@ public class OptionRegistry {
 
 	static class StringOption extends Option {
 		protected String value;
-		protected String[] vals;
+		protected Map<String,String> vals;
 		
 		public StringOption(String key, OptionType type, String description, String value) {
 			this(key, type, description, value, null);
@@ -1110,21 +1184,39 @@ public class OptionRegistry {
 		public StringOption(String key, OptionType type, String description, String value, String[] vals) {
 			super(key, description, type);
 			this.value = value;
-			this.vals = vals;
+			if (vals == null) {
+			    this.vals = null;
+			} else {
+	            this.vals = new HashMap<String,String>(8);
+	            for (String v : vals)
+	                this.vals.put(v, v);
+			}
 		}
 
 		public void setValue(String value) {
 			if (vals != null) {
-				for (String v : vals) {
-					if (v.equals(value)) {
-						this.value = v;
-						return;
-					}
+			    String v = vals.get(value);
+			    if (v != null) {
+					this.value = v;
+					return;
 				}
-				invalidValue(value, "allowed values: " + Arrays.toString(vals));
+			    StringBuilder buf = new StringBuilder("allowed values: ");
+			    Object[] arr = vals.keySet().toArray();
+			    Arrays.sort(arr);
+			    buf.append(Arrays.toString(arr).substring(1));
+				invalidValue(value, buf.substring(0, buf.length() - 1));
 			} else {
 				this.value = value;
 			}
+		}
+		
+		public String addAllowed(String value) {
+		    if (vals.containsKey(value)) {
+		        return vals.get(value);
+		    } else {
+		        vals.put(value, value);
+		        return value;
+		    }
 		}
 		
 		public String getValue() {
@@ -1167,6 +1259,16 @@ public class OptionRegistry {
 		public double getValue() {
 			return value;
 		}
+        
+        public void expandMin(double val) {
+            if (val < min)
+                min = val;
+        }
+        
+        public void expandMax(double val) {
+            if (val > max)
+                max = val;
+        }
 
 		@Override
 		public String getType() {
