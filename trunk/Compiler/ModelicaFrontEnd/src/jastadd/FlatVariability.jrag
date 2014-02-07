@@ -22,6 +22,8 @@ aspect FlatVariability {
 	
 	syn boolean FTypePrefixVariability.constantVariability() = false;
 	eq FConstant.constantVariability() = true;	
+    syn boolean FTypePrefixVariability.structParameterVariability() = false;
+    eq FStructParameter.structParameterVariability() = true;
 	syn boolean FTypePrefixVariability.parameterVariability() = false;
 	eq FParameter.parameterVariability() = true;	
 	syn boolean FTypePrefixVariability.discreteVariability() = false;
@@ -197,8 +199,23 @@ aspect FlatVariability {
 	
 	syn FTypePrefixVariability InstComponentDecl.combinedVariability() = 
 		definedVariability().flatten().combineDown(defaultVariability());
-	eq InstAssignable.combinedVariability() = 
-		isStructuralParam ? fStructParameter() : super.combinedVariability();
+
+    // This is used before errorcheck so we have to guard from circular parameter binding exps
+    private boolean InstAssignable.circularVariability = false;
+    eq InstAssignable.combinedVariability() {
+        FTypePrefixVariability v = super.combinedVariability();
+        if (v.parameterVariability()) {
+            if (circularVariability)
+                return v;
+            circularVariability = true;
+            if (isStructuralParam || (annotation().forPath("Evaluate").bool() && canEvaluateAsStructural()))
+                v = fStructParameter();
+            else if (hasBindingFExp() && getBindingFExp().variability().structParameterVariability())
+                v = fStructParameter();
+            circularVariability = false;
+        }
+        return v;
+    }
 	
 	syn lazy FTypePrefixVariability InstComponentDecl.variability() = combinedVariability();
 	eq InstEnumLiteral.variability() = fConstant();

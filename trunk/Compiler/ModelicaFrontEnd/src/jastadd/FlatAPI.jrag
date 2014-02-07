@@ -1953,6 +1953,11 @@ aspect FVariableUses {
 	eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
 	eq FIdUseExp.getFIdUse().isAssignedTo()       = isAssignedTo();
 	eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
+	
+	inh boolean FExp.inBindingExp();
+	eq Root.getChild().inBindingExp() = false;
+	eq InstAssignable.getBindingFExp().inBindingExp() = true;
+	eq FVariable.getBindingExp().inBindingExp() = true;
 
 	/**
 	 * \brief Collection attribute returning all dependent parameters which

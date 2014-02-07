@@ -1833,10 +1833,31 @@ aspect Arrays {
 	        getFExp(i.get(level) - 1).fillArray(arr, i, level + 1);
 	}
 	
+	eq InstFunctionCall.getArray() {
+	      if (variability().structuralOrLess() && inBindingExp()) {
+	          Array arr = new Array(indices());
+	          CValueArray carr = (CValueArray) cevalArray(Index.NULL);
+	          for (Index i : arr.indices()) {
+	              arr.set(i, carr.getCell(i).buildLiteral());
+	          }
+	          return arr;
+	      }
+	      return super.getArray();
+	}
+	
 	eq FFunctionCall.getArray() {
 		FClass fc = myFClass();
 		if (!isArray() || fc == null)
 			return super.getArray();
+		
+		if (variability().structuralOrLess() && inBindingExp()) {
+            Array arr = new Array(indices());
+            CValueArray carr = (CValueArray) cevalArray(Index.NULL);
+            for (Index i : arr.indices()) {
+                arr.set(i, carr.getCell(i).buildLiteral());
+            }
+            return arr;
+        }
 		
 		FArraySubscripts fas = collectIterExpSubscripts();
 		Array arr = new Array(indices());
