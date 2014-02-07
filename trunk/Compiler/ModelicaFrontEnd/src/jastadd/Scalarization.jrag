@@ -1056,7 +1056,7 @@ aspect Scalarization {
     syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray() && canAcceptArray();
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
-    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause() && !(variability().structuralOrLess() && inBindingExp());
+    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FMatrix.extractTemp()       = size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
