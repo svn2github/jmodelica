@@ -2442,7 +2442,7 @@ aspect CCodeGen {
         for (int col = n1; col < n1 + n2; col++) {
             for (int row = n1; row < n1 + n2; row++) {
                 if (jacobian[row][col] != null) {
-                	ASTNode.printer_C.printPreSteps(jacobian[row][col], str, indent);
+                	p.printPreSteps(jacobian[row][col], str, indent);
                     str.format("%sQ3[%d] = ", indent, n2 * (col - n1) + (row - n1));
                     p.print(jacobian[row][col], str, indent);
                     str.format(";\n");
