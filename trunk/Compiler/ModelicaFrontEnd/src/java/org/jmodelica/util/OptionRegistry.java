@@ -692,6 +692,23 @@ abstract public class OptionRegistry {
 		}
 	}
 	
+	/**
+	 * \brief Main method. Exports default options to XML.
+	 * 
+	 * If given an argument, XML is saved in file with that path.
+	 */
+	public static void main(String[] args) {
+		try {
+			OptionRegistry or = new OptionRegistry() {};
+			if (args.length < 1) 
+				or.exportXML(System.out);
+			else 
+				or.exportXML(args[0]);
+		} catch (FileNotFoundException e) {
+			System.err.println("Could not open file for writing: " + e.getMessage());
+		}
+	}
+	
 	protected void defaultOption(Default o) {
 		if (o.val instanceof Integer) {
 			if (o.lim != null)
@@ -760,6 +777,12 @@ abstract public class OptionRegistry {
 	protected void createIntegerOption(String key, OptionType type, String description, int defaultValue, int min, int max) {
 		optionsMap.put(key, new IntegerOption(key, type, description, defaultValue, min, max));			
 	}
+    
+    public void addIntegerOption(String key, int value, String description, int min, int max) {
+        if (findIntegerOption(key, true) != null)
+            throw new IllegalArgumentException("The option " + key + " already exists.");
+        createIntegerOption(key, compiler, description, value, min, max);
+    }
 	
 	public void addIntegerOption(String key, int value, String description) {
 		setIntegerOption(key, value, description, true);
@@ -819,6 +842,12 @@ abstract public class OptionRegistry {
 	public void addStringOption(String key, String value, String description) {
 		setStringOption(key, value, description, true);
 	}
+    
+    public void addStringOption(String key, String value, String description, String[] allowed) {
+        if (findStringOption(key, true) != null)
+            throw new IllegalArgumentException("The option " + key + " already exists.");
+        createStringOption(key, compiler, description, value, allowed);
+    }
 	
 	public void addStringOption(String key, String value) {
 		setStringOption(key, value, "", true);
@@ -878,6 +907,12 @@ abstract public class OptionRegistry {
 	public void addRealOption(String key, double value, String description) {
 		setRealOption(key, value, description, true);
 	}
+    
+    public void addRealOption(String key, double value, String description, double min, double max) {
+        if (findRealOption(key, true) != null)
+            throw new IllegalArgumentException("The option " + key + " already exists.");
+        createRealOption(key, compiler, description, value, min, max);
+    }
 	
 	public void addRealOption(String key, double value) {
 		setRealOption(key, value, "", true);
@@ -1211,6 +1246,8 @@ abstract public class OptionRegistry {
 		}
 		
 		public String addAllowed(String value) {
+		    if (vals == null)
+		        throw new IllegalArgumentException("This option allows any value");
 		    if (vals.containsKey(value)) {
 		        return vals.get(value);
 		    } else {
