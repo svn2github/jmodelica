@@ -1010,7 +1010,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
-		sr.options.copyAllOptions(this.options);
+		sr.options = options.copy();
 		for (String name : names) {
 		    File f = new File(name);
 		    String name_tmp = name;
