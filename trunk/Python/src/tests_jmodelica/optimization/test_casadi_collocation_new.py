@@ -98,6 +98,12 @@ class TestLocalDAECollocator2:
         self.vdp_min_time_nonzero_start_op = \
                 transfer_to_casadi_interface(class_path, vdp_file_path)
         
+        class_path = "VDP_pack.VDP_Opt_Function"
+        self.vdp_function_op = \
+                transfer_to_casadi_interface(
+                        class_path, vdp_file_path,
+                        compiler_options={"inline_functions": "none"})
+        
         cstr_file_path = os.path.join(get_files_path(), 'Modelica', 'CSTR.mop')
         class_path = "CSTR.CSTR"
         fmu_cstr = compile_fmu(class_path, cstr_file_path,
@@ -1587,3 +1593,16 @@ class TestLocalDAECollocator2:
         res.get_KKT("sym")
         res.get_KKT("fcn")
 
+    @testattr(casadi = True)
+    def test_vdp_function(self):
+        """
+        Test a VDP model containing a function
+        """
+        op = self.vdp_function_op
+
+        # Reference values
+        cost_ref = 3.17619580332244e0
+        u_norm_ref = 2.8723837585e-1
+        
+        res = op.optimize()
+        assert_results(res, cost_ref, u_norm_ref)

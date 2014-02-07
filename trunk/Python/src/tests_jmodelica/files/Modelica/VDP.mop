@@ -268,4 +268,32 @@ package VDP_pack
     w = 2*x1;
   end VDP_Opt_DAE;
   
+  optimization VDP_Opt_Function(
+        objectiveIntegrand=x1^2 + x2^2 + u^2,
+        startTime=0, finalTime=20)
+    
+    Real x1(start=0, fixed=true) "First state";
+    Real x2(start=1, fixed=true) "Second state";
+    Real der_x1;
+    Real der_x2;
+    
+    input Real u(max=0.75) "Control signal";
+    
+    function RHS
+      input Real x1;
+      input Real x2;
+      input Real u;
+      output Real der_x1;
+      output Real der_x2;
+    algorithm
+      der_x1 := (1 - x2^2) * x1 - x2 + u;
+      der_x2 := x1;
+    end RHS;
+  
+  equation
+    (der_x1, der_x2) = RHS(x1, x2, u);
+    der(x1) = der_x1;
+    der(x2) = der_x2;
+  end VDP_Opt_Function;
+  
 end VDP_pack;
