@@ -215,12 +215,11 @@ public class ModelicaCompiler {
 		dir.delete();
 	}
 	
-	public static CCompilerDelegator getCCompiler() {
-		return cCompiler;
-	}
-	
-	public static void setCCompiler(CCompilerDelegator cCompiler) {
-		ModelicaCompiler.cCompiler = cCompiler;
+	public CCompilerDelegator getCCompiler() {
+	    if (cCompiler != null)
+	        return cCompiler;
+	    else
+	        return CCompilerDelegator.delegatorFor(options);
 	}
 	
 	public static String getJModelicaHome() {
@@ -2101,7 +2100,66 @@ public class CompilationAbortedException extends RuntimeException {
 	}
 }
 
+private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER_OPTIONS = 
+    OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+        public void addOptions(OptionRegistry opt) {
+            opt.addStringOption(CCompilerDelegator.OPTION, "gcc", CCompilerDelegator.OPTION_DESC, new String[0]);
+        }
+        
+        public void modifyOptions(OptionRegistry opt) {
+            CCompilerDelegator.addCompilerOptionValues(opt);
+        }
+    });
+
+/**
+ * Base class for interface to C compiler.
+ * 
+ * To add a new delegator, call {@link #addDelegator(CCompilerDelegator.Creator)} before 
+ * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
+ * aspect adding a static field to this class that gets its value from addDelegator().
+ */
 public abstract class CCompilerDelegator {
+    
+    private static final Map<String,Creator> CREATORS = new HashMap<String,Creator>();
+    
+    private static final Creator GCC = addDelegator("gcc", new Creator() {
+        public CCompilerDelegator create() {
+            return new GccCompilerDelegator();
+        }
+    });
+    
+    public static final String OPTION = "c_compiler_delegator";
+    public static final String OPTION_DESC = "The C compiler to use to compile generated C code.";
+    
+    public interface Creator {
+        public CCompilerDelegator create();
+    }
+    
+    /**
+     * Add support for a new compiler delegator.
+     * 
+     * @param name     a short name for the delegator that the user can use to select it
+     * @param creator  the creator for the delegator class
+     */
+    public static Creator addDelegator(String name, Creator creator) {
+        if (CREATORS.containsKey(name))
+            throw new IllegalArgumentException("Compiler delegator name " + name + 
+                    " is already used by " + CREATORS.get(name).create().getClass().getSimpleName());
+        CREATORS.put(name, creator);
+        return creator;
+    }
+    
+    /**
+     * Create a C compiler delegator for the given set of options.
+     */
+    public static CCompilerDelegator delegatorFor(OptionRegistry opt) {
+        return CREATORS.get(opt.getStringOption(OPTION)).create();
+    }
+    
+    public static void addCompilerOptionValues(OptionRegistry opt) {
+        for (String name : CREATORS.keySet())
+            opt.addStringOptionAllowed(OPTION, name);
+    }
 	
 	private Map<String, String> env = System.getenv();
 	private String[] targetPlatforms = null;
