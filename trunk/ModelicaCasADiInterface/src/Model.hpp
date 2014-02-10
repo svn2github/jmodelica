@@ -152,12 +152,12 @@ class Model: public SharedNode {
         double evaluateExpression(CasADi::MX exp);        
         
         /** 
-         * Returns all initial equations in a stacked MX on the form: rhs - lhs.
+         * Returns all initial equations in a stacked MX on the form: lhs - rhs.
          * @return A MX.
          */
         const CasADi::MX getInitialResidual() const; 
         /** 
-         * Returns all DAE equations in a stacked MX on the form: rhs - lhs.
+         * Returns all DAE equations in a stacked MX on the form: lhs - rhs.
          * @return A MX.
          */
         const CasADi::MX getDaeResidual() const; 

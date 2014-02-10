@@ -42,7 +42,7 @@ class Constraint : public SharedNode {
         /** @return A MX */
         const CasADi::MX getRhs() const;
         /**
-         * Returns the residual of the constraint as: right-hand-side - left-hand-side.
+         * Returns the residual of the constraint as: left-hand-side - right-hand-side.
          * @return A MX
          */
         const CasADi::MX getResidual() const; 
@@ -60,7 +60,7 @@ class Constraint : public SharedNode {
 inline Constraint::Constraint() {}
 inline const CasADi::MX Constraint::getLhs() const{ return lhs; }
 inline const CasADi::MX Constraint::getRhs() const { return rhs; }
-inline const CasADi::MX Constraint::getResidual() const{ return rhs-lhs; }
+inline const CasADi::MX Constraint::getResidual() const{ return lhs - rhs; }
 inline Constraint::Type Constraint::getType() const{ return ct; }
 }; // End namespace
 #endif

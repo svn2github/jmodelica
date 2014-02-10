@@ -2056,6 +2056,7 @@ class LocalDAECollocator(CasadiCollocator):
                     g_i.append(-path[i] + lb[i])
                 if ub[i] != N.inf:
                     g_i.append(path[i] - ub[i])
+
         
         # Create path constraint functions
         path_constraint_input = []
@@ -4497,9 +4498,9 @@ class LocalDAECollocator2(CasadiCollocator):
             if cnstr.getType() == cnstr.EQ:
                 g_e.append(res)
             elif cnstr.getType() == cnstr.LEQ:
-                g_i.append(-res)
-            elif cnstr.getType() == cnstr.GEQ:
                 g_i.append(res)
+            elif cnstr.getType() == cnstr.GEQ:
+                g_i.append(-res)
         
         # Create path constraint functions
         path_constraint_input = []

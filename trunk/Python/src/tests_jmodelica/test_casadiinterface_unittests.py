@@ -285,7 +285,7 @@ def test_equationGetter():
     eq = Equation(lhs, rhs)
     assert( isEqual(eq.getLhs(), lhs) )
     assert( isEqual(eq.getRhs(), rhs) )
-    assert( isEqual(eq.getResidual(), rhs - lhs) )
+    assert( isEqual(eq.getResidual(), lhs - rhs) )
     
 @testattr(casadi = True)    
 def test_equationPrinting(): 
@@ -731,17 +731,17 @@ def test_Constraint():
     # Equality constraint
     assert( isEqual(equalityConstraint.getLhs(), lhs) )
     assert( isEqual(equalityConstraint.getRhs(), rhs) )
-    assert( isEqual(equalityConstraint.getResidual(), rhs - lhs) )
+    assert( isEqual(equalityConstraint.getResidual(), lhs - rhs) )
     assert( equalityConstraint.getType() == Constraint.EQ)
     # Less than or equal to constraint
     assert( isEqual(lessThanConstraint.getLhs(), lhs) )
     assert( isEqual(lessThanConstraint.getRhs(), rhs) )
-    assert( isEqual(equalityConstraint.getResidual(), rhs - lhs) )
+    assert( isEqual(equalityConstraint.getResidual(), lhs - rhs) )
     assert( lessThanConstraint.getType() == Constraint.LEQ )
     # Greater than or equal to constraint
     assert( isEqual(greaterThanConstraint.getLhs(), lhs) )
     assert( isEqual(greaterThanConstraint.getRhs(), rhs) )
-    assert( isEqual(greaterThanConstraint.getResidual(), rhs - lhs) )
+    assert( isEqual(greaterThanConstraint.getResidual(), lhs - rhs) )
     assert( greaterThanConstraint.getType() == Constraint.GEQ )
 
 @testattr(casadi = True)    
@@ -1028,8 +1028,8 @@ def test_ModelEqutionFunctionality():
     var2 = MX("var2")
     var3 = MX("var3")
     var4 = MX("var4")
-    res1 = var2 - var1
-    res2 = var4 - var3
+    res1 = var1 - var2
+    res2 = var3 - var4
     eq1 = Equation(var1, var2)
     eq2 = Equation(var3, var4)
 

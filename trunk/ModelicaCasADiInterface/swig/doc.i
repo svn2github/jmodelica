@@ -240,7 +240,7 @@ set in the attribute evaluatedBindingExpression for dependent parameters.
 ";  
  
 %feature("docstring") ModelicaCasADi::Model::getInitialResidual "
-Returns all initial equations in a stacked MX on the form: rhs - lhs.
+Returns all initial equations in a stacked MX on the form: lhs - rhs.
 
 Returns::
     
@@ -249,7 +249,7 @@ Returns::
 
 ";      
 %feature("docstring") ModelicaCasADi::Model::getDaeResidual "
-Returns all DAE equations in a stacked MX on the form: rhs - lhs.
+Returns all DAE equations in a stacked MX on the form: lhs - rhs.
 
 Returns::
     
@@ -312,7 +312,7 @@ Returns::
 "; 
 
 %feature("docstring") ModelicaCasADi::Equation::getResidual "
-Returns the residual on the form: right-hand-side - left-hand-side
+Returns the residual on the form: left-hand-side - right-hand-side
 
 Returns::
 
@@ -1001,7 +1001,7 @@ Returns::
 "; 
 
 %feature("docstring") ModelicaCasADi::Constraint::getResidual "
-Returns the residual of the constraint as: right-hand-side - left-hand-side.
+Returns the residual of the constraint as: left-hand-side - right-hand-side.
 
 Returns::
 

@@ -35,7 +35,7 @@ class Equation: public SharedNode {
         /** @return A MX */
         const CasADi::MX getRhs() const;
         /** 
-         * Returns the residual on the form: right-hand-side - left-hand-side
+         * Returns the residual on the form: left-hand-side - right-hand-side
          * @return A MX 
          */
         const CasADi::MX getResidual() const; 
@@ -50,7 +50,7 @@ class Equation: public SharedNode {
 
 inline const CasADi::MX Equation::getLhs() const { return lhs; }
 inline const CasADi::MX Equation::getRhs() const { return rhs; }
-inline const CasADi::MX Equation::getResidual() const { return rhs-lhs; }
+inline const CasADi::MX Equation::getResidual() const { return lhs - rhs; }
 inline void Equation::print(std::ostream& os) const { 
     lhs.print(os);
     os << " = ";
