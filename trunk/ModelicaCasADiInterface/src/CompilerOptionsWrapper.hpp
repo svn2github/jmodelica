@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "SharedNode.hpp"
 #include "org/jmodelica/util/OptionRegistry.h"
+#include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 
 namespace ModelicaCasADi 
 {
@@ -46,7 +47,7 @@ class CompilerOptionsWrapper: public SharedNode {
     private:
         org::jmodelica::util::OptionRegistry optr;
 };
-inline CompilerOptionsWrapper::CompilerOptionsWrapper() : optr() {}
+inline CompilerOptionsWrapper::CompilerOptionsWrapper() : optr(org::jmodelica::modelica::compiler::ModelicaCompiler::createOptions()) {}
 inline org::jmodelica::util::OptionRegistry CompilerOptionsWrapper::getOptionRegistry() { return optr; }
 }; // End namespace
 #endif

@@ -2109,6 +2109,10 @@ private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER
         public void modifyOptions(OptionRegistry opt) {
             CCompilerDelegator.addCompilerOptionValues(opt);
         }
+
+        public Object identity() {
+            return "org.jmodelica.modelica.compiler.ModelicaCompiler.CCOMPILER_OPTIONS";
+        }
     });
 
 /**

@@ -68,9 +68,20 @@ abstract public class OptionRegistry {
          * Change options that are in the registry.
          */
         public void modifyOptions(OptionRegistry opt) {}
+        
+        /**
+         * Returns an object that uniquely identifies this contributor, to protect 
+         * against the same contributor being added several times. One example is when 
+         * Modelica and Optimica versions of compiler are loaded in the same JVM.
+         * 
+         * Reccommended is a string literal in the jrag file.
+         */
+        public abstract Object identity();
     }
     
     private static java.util.List<OptionContributor> CONTRIBUTORS = new ArrayList<OptionContributor>();
+    
+    private static java.util.Map<Object,OptionContributor> CONTRIBUTOR_IDENTITES = new HashMap<Object,OptionContributor>();
     
     /**
      * Adds a new options contributor.
@@ -79,8 +90,15 @@ abstract public class OptionRegistry {
      * @return    the contributor, for convenience
      */
     public static OptionContributor addContributor(OptionContributor oc) {
-        CONTRIBUTORS.add(oc);
-        return oc;
+        Object id = oc.identity();
+        OptionContributor old = CONTRIBUTOR_IDENTITES.get(id);
+        if (old == null) {
+            CONTRIBUTOR_IDENTITES.put(id, oc);
+            CONTRIBUTORS.add(oc);
+            return oc;
+        } else {
+            return old;
+        }
     }
 	
 	public interface Inlining {
@@ -562,6 +580,10 @@ abstract public class OptionRegistry {
         public void addOptions(OptionRegistry opt) {
             for (Default o : Default.values())
                 opt.defaultOption(o);
+        }
+
+        public Object identity() {
+            return "org.jmodelica.util.OptionRegistry.BASE_CONTRIBUTOR";
         }
     });
 

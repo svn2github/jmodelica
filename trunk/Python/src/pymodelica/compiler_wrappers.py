@@ -43,7 +43,7 @@ class ModelicaCompiler(object):
         Modelica models. A compiler instance can be used multiple times.
         """
         try:
-            options = OptionRegistryInterface(self.options_file_path)
+            options = ModelicaCompilerInterface.createOptions(self.options_file_path)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
