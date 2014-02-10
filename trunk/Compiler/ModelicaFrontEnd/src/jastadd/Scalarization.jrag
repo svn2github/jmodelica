@@ -616,20 +616,23 @@ aspect Scalarization {
 	syn boolean FAttribute.isInternal() = false;
 	eq FInternalAttribute.isInternal()  = true;
 	
-	/**
-	 * \brief Scalarize the attribute, picking out the specific element from an array 
-	 *        expression or removing "each".
-	 */
-	public FAttribute FAttribute.scalarize(Index i, Map<String,FExp> indexMap) {
-		List<FAttribute> la = new List<FAttribute>();
-		for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
-			la.add(a.scalarize(i, indexMap));            // TODO: really send i here?
-		FAttribute res = new FAttribute(getType().fullCopy(), getName().fullCopy(), 
-				new Opt(), getAttributeSet(), getLevel(), new Opt(), getFFinalOpt().fullCopy(), la);
-		if (hasValue()) 
-			res.setValue(scalarizeValue(i, indexMap));
-		return res;
-	}
+    /**
+     * \brief Scalarize the attribute, picking out the specific element from an array 
+     *        expression or removing "each".
+     */
+    public FAttribute FAttribute.scalarize(Index i, Map<String,FExp> indexMap) {
+        FAttribute attr = createEmptyNode();
+        for (FAttribute a : getFAttributes())  // TODO: can they be nestled at this point?
+            attr.addFAttribute(a.scalarize(i, indexMap));            // TODO: really send i here?
+        attr.setType(getType().fullCopy());
+        attr.setName(getName().fullCopy());
+        attr.setAttributeSet(getAttributeSet());
+        attr.setLevel(getLevel());
+        attr.setFFinalOpt(getFFinalOpt().fullCopy());
+        if (hasValue()) 
+            attr.setValue(scalarizeValue(i, indexMap));
+        return attr;
+    }
 	
 	/**
 	 * Scalarize the value of this attribute, picking out the specific element from an array 
@@ -648,6 +651,23 @@ aspect Scalarization {
 		return v.scalarize(indexMap);
 	}
 	
+    @Override
+    public FIdDeclAttribute FIdDeclAttribute.scalarize(Index i, Map<String,FExp> indexMap) {
+        FIdDeclAttribute attr = (FIdDeclAttribute) super.scalarize(i, indexMap);
+        if (i == Index.NULL) {
+            FQName name = getFIdDecl().getFQName();
+            if (!name.hasFArraySubscripts()) {
+                List<FSubscript> list = extendedNameSubscript();
+                name = name.copyAndAddFas(new FArraySubscripts(list));
+                setFIdDecl(new FIdDecl(name));
+            }
+            name = name.scalarize(indexMap);
+            attr.setFIdDecl(new FIdDecl(name));
+        } else {
+            attr.setFIdDecl(new FIdDecl(getFIdDecl().getFQName().specify(i, true)));
+        }
+        return attr;
+    }
 	/**
 	 * \brief Scalarize the function variable.
 	 * 
@@ -1816,20 +1836,10 @@ aspect Scalarization {
 			 */
 			
 		    List<FAttribute> attrs = scalarizeAttributeList(Index.NULL, indexMap);
-			FQName name = null;
-			if (hasName()) {
-				name = getName();
-				if (!name.hasFArraySubscripts()) {
-					List<FSubscript> list = extendedNameSubscript();
-					name = name.copyAndAddFas(new FArraySubscripts(list));
-					setName(name);
-				}
-				name = name.scalarize(indexMap);
-			}
 			FNominal nominal = null;
 			if (hasNominal())
 				nominal = getNominal().scalarize(indexMap, Index.NULL);
-			createScalarFEquations(eqns, indexMap, attrs, name, nominal, getLeft(), getRight());
+			createScalarFEquations(eqns, indexMap, attrs, nominal, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1838,13 +1848,10 @@ aspect Scalarization {
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) {
 			    List<FAttribute> attrs = scalarizeAttributeList(i, indexMap);
-				FQName name = null;
-				if (hasName())
-					name = getName().specify(i, true);
 				FNominal nominal = null;
 				if (hasNominal())
 					nominal = getNominal().scalarize(indexMap, i);
-				createScalarFEquations(eqns, indexMap, attrs, name, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
+				createScalarFEquations(eqns, indexMap, attrs, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
 			}
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
@@ -1852,7 +1859,8 @@ aspect Scalarization {
 		}
 	}
 	
-	inh List<FSubscript> FAbstractEquation.extendedNameSubscript();
+	inh List<FSubscript> FIdDeclAttribute.extendedNameSubscript();
+    inh List<FSubscript> FAbstractEquation.extendedNameSubscript();
 	eq FForClauseE.getChild().extendedNameSubscript() {
 		List<FSubscript> list = extendedNameSubscript();
 		for (FForIndex fi : getFForIndexs()) 
@@ -1873,11 +1881,11 @@ aspect Scalarization {
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
-			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs, FQName name, FNominal nominal, FExp left, FExp right) {
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs,FNominal nominal, FExp left, FExp right) {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(attrs, name, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
+			eqns.add(new FEquation(attrs, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
 	public FNominal FNominal.scalarize(Map<String,FExp> indexMap, Index i) {

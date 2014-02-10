@@ -22,12 +22,6 @@ aspect InteractiveFMU{
 			Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
 			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
 			
-//			// Remove HGT stuff
-//			for (FAbstractEquation equation : equations())
-//				equation.unsetHGT();
-//			for (FVariable variable : variables())
-//				variable.unsetHGT();
-			
 			// Flush cache
 			root().flushAllRecursive();
 			
@@ -102,12 +96,12 @@ aspect InteractiveFMU{
 		FExp oldRhs = equation.getRight();
 		equation.setLeft(new FIdUseExp(resName));
 		equation.setRight(new FSubExp(oldLhs, oldRhs));
-        if (equation.hasName()) {
-            if (!fclass.lookupFV(equation.getName()).isUnknown()) {
-                equation.error("Unable to introduce equation name alias for equation with name '" + equation.getName() + "'");
+        if (equation.name() != null) {
+            if (!fclass.lookupFV(equation.name()).isUnknown()) {
+                equation.error("Unable to introduce equation name alias for equation with name '" + equation.name() + "'");
             } else {
                 FVariable nameVar = (FVariable) fv.fullCopy();
-                String nameName = equation.getName().toString();
+                String nameName = equation.name();
                 nameVar.setFQName(new FQNameString(nameName));
                 fclass.addFVariable(nameVar);
                 

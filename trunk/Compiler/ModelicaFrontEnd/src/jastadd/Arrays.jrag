@@ -558,6 +558,11 @@ aspect Arrays {
 	inh Size InstNominal.size();
 	eq FAbstractEquation.getNominal().size() = size();
 	
+	inh Size FIdDeclAttribute.size();
+    eq FAbstractEquation.getFAttribute().size() = size();
+    eq FVariable.getFAttribute().size() = size();
+    eq FDerivedType.getFAttribute().size() = getBaseType().size();
+    
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
 	
 	inh Size FAbstractEquation.parentTotalSize();

@@ -1285,12 +1285,6 @@ aspect FlatExpressions {
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
 		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
 		flattenAttrs(flattened, prefix);
-		if (hasName()) {
-			if (ndims() > 0)
-				flattened.setName(prefix.copyAndAppend(getName(), getLeft().size().createExpandedFArraySubscripts()));
-			else
-				flattened.setName(prefix.copyAndAppend(getName()));
-		}
 		if (hasNominal()) {
 			FNominal flatten = getNominal().flatten(prefix);
 			if (flatten != null)
@@ -1468,6 +1462,16 @@ aspect FlatExpressions {
         for (FAttribute attr : getFAttributes())
             flatAttrs.add(attr.flatten(prefix));
         flat.setFAttributeList(flatAttrs);
+        return flat;
+    }
+    
+    @Override
+    public FIdDeclAttribute FIdDeclAttribute.flatten(FQName prefix) {
+        FIdDeclAttribute flat = (FIdDeclAttribute)super.flatten(prefix);
+        if (size().ndims() > 0)
+            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name(), size().createExpandedFArraySubscripts())));
+        else
+            flat.setFIdDecl(new FIdDecl(prefix.copyAndAppend(getFIdDecl().name())));
         return flat;
     }
 	
@@ -2175,25 +2179,25 @@ aspect InstantiatedExpressions {
 	}
 
     public FAbstractEquation Equation.instantiate() {
-        FEquation eqn = copyLocationTo(new FEquation(equationType(), buildNameOpt(),
+        FEquation eqn = copyLocationTo(new FEquation(equationType(),
                 buildNominalOpt(), new List<FAttribute>(), getLeft().instantiate(), getRight().instantiate()));
         contributeHGT(eqn);
+        contributeNameAttribute(eqn);
         return eqn;
     }
-	
-	private Opt<FQName> Equation.buildNameOpt() {
-		AnnotationNode nameNode = annotation().vendorNode().forPath("name");
-		if (!nameNode.exists())
-			return new Opt<FQName>();
-		Exp nameExp = nameNode.exp();
-		if (nameExp == null)
-			nameNode.ast().error("Name annotation is incorrect");
-		else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
-			nameExp.error("Illegal equation name \"%s\"", nameExp);
-		else
-			return new Opt<FQName>(new FQNameString(nameExp.asAccess().asID()));
-		return new Opt<FQName>();
-	}
+    
+    public void Equation.contributeNameAttribute(FEquation eqn) {
+        AnnotationNode nameNode = annotation().vendorNode().forPath("name");
+        if (!nameNode.exists())
+            return;
+        Exp nameExp = nameNode.exp();
+        if (nameExp == null)
+            nameNode.ast().error("Name annotation is incorrect");
+        else if (!nameExp.isAccess() || !nameExp.asAccess().isNamed() || nameExp.asAccess().isArrayAccess())
+            nameExp.error("Illegal equation name \"%s\"", nameExp);
+        else
+            eqn.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
+    }
 	
 	/**
 	 * Builds a FNominal instance for "this" equation.  

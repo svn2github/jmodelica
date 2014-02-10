@@ -434,6 +434,16 @@ FAttribute : BaseNode ::= Type:FIdUse
 FInternalAttribute : FAttribute;
 
 /**
+ * An internal attribute for representing declaration of equation names.
+ */
+FIdDeclAttribute : FInternalAttribute ::= FIdDecl;
+
+/**
+ * An internal attribute for representing references to equations.
+ */
+//FEqnRefAttribute : FInternalAttribute;
+
+/**
  * Node representing the each prefix for attributes.
  */
 FEach : BaseNode;
@@ -497,7 +507,6 @@ FInitialEquation : FEquationType;
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
-                                          [Name:FQName]
                                           [Nominal:FNominal]
                                           FAttribute*;
 

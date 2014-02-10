@@ -823,6 +823,8 @@ aspect OptimicaFlatAPI {
 	eq BaseClassDecl.isOptimizationClass() = getRestriction().isOptimizationClass();
 	syn boolean InstClassDecl.isOptimizationClass() = getClassDecl().isOptimizationClass();
 	
+	eq FOptClass.getFAttribute().size() = Size.SCALAR;
+	
 }
 
 aspect OptimicaFVariableUses {
