@@ -533,6 +533,9 @@ $C_ode_initialization$
         _sw_init(1) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(2)), _sw_init(1), jmi->events_epsilon, JMI_REL_GEQ);
     }
     _der_x_3 = COND_EXP_EQ(_sw_init(0), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(_sw_init(1), JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(5)));
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (AD_WRAP_LITERAL(5)), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+    }
     ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
 ")})));
 end CCodeGenTest16;

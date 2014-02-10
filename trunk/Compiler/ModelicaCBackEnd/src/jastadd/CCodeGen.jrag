@@ -2490,6 +2490,9 @@ aspect CCodeGen {
 
 	
     private Collection<FRelExp> AbstractEquationBlock.activeSwitches_C = null;
+    private Collection<FRelExp> AbstractEquationBlock.inactiveSwitches_C = null;
+    private Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C = null;
+    private Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C = null;
     
     /**
      * Returns all active switches in the block. A switch is considered active
@@ -2497,14 +2500,10 @@ aspect CCodeGen {
      * in the block.
      */
     public Collection<FRelExp> AbstractEquationBlock.activeSwitches_C() {
-        if (activeSwitches_C == null) {
-            activeSwitches_C = new ArrayList<FRelExp>();
-            collectActiveSwitches_C(activeSwitches_C, false);
-        }
+        cacheSwitches_C();
         return activeSwitches_C;
     }
     
-    private Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C = null;
     
     /**
      * Returns all active initial switches in the block. A switch is considered
@@ -2512,29 +2511,67 @@ aspect CCodeGen {
      * aariables in the block.
      */
     public Collection<FRelExp> AbstractEquationBlock.activeInitialSwitches_C() {
-        if (activeInitialSwitches_C == null) {
-            activeInitialSwitches_C = new ArrayList<FRelExp>();
-            collectActiveSwitches_C(activeInitialSwitches_C, true);
-        }
+        cacheSwitches_C();
         return activeInitialSwitches_C;
     }
     
-    private void AbstractEquationBlock.collectActiveSwitches_C(Collection<FRelExp> res, boolean initial) {
+    /**
+     * Returns all inactive switches in the block. A switch is considered active
+     * in a block if is located in the block and depends on active variables
+     * in the block.
+     */
+    public Collection<FRelExp> AbstractEquationBlock.inactiveSwitches_C() {
+        cacheSwitches_C();
+        return inactiveSwitches_C;
+    }
+    
+    
+    /**
+     * Returns all inactive initial switches in the block. A switch is considered
+     * active in a block if is located in the block and depends on active
+     * aariables in the block.
+     */
+    public Collection<FRelExp> AbstractEquationBlock.inactiveInitialSwitches_C() {
+        cacheSwitches_C();
+        return inactiveInitialSwitches_C;
+    }
+    
+    private void AbstractEquationBlock.cacheSwitches_C() {
+        if (activeSwitches_C != null && activeInitialSwitches_C != null && inactiveSwitches_C != null && inactiveInitialSwitches_C != null)
+            return;
+        activeSwitches_C = new ArrayList<FRelExp>();
+        activeInitialSwitches_C = new ArrayList<FRelExp>();
+        inactiveSwitches_C = new ArrayList<FRelExp>();
+        inactiveInitialSwitches_C = new ArrayList<FRelExp>();
         Collection<FVariable> allVariables = allVariables();
-        for (FAbstractEquation equation : allEquations())
-            for (FRelExp relExp : initial ? equation.relExpInInitialEquation() : equation.relExpInEquation())
+        for (FAbstractEquation equation : allEquations()) {
+            for (FRelExp relExp : equation.relExpInInitialEquation()) {
                 if (relExp.dependsOn(allVariables))
-                    res.add(relExp);
+                    activeInitialSwitches_C.add(relExp);
+                else
+                    inactiveInitialSwitches_C.add(relExp);
+            }
+            for (FRelExp relExp : equation.relExpInEquation()) {
+                if (relExp.dependsOn(allVariables))
+                    activeSwitches_C.add(relExp);
+                else
+                    inactiveSwitches_C.add(relExp);
+            }
+        }
     }
     
 	
     /**
      * \brief Generate code for blocks of equations 
      */
-	public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
-		String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
-		str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
-	}
+    public void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        for (FRelExp relExp : inactiveSwitches_C())
+            p.printPreSteps(relExp, str, indent);
+        for (FRelExp relExp : inactiveInitialSwitches_C())
+            p.printPreSteps(relExp, str, indent);
+        String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+        str.format("%sef |= jmi_solve_block_residual(jmi->%s[%d]);\n", indent, var, residualBlockNumber_C());
+    }
 	
     public void SimpleEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         if (genBlockEnabled())
