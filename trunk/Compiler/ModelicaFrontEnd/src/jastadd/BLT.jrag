@@ -112,7 +112,7 @@ aspect BLT{
             
             SimpleEquationBlock seb = createSimpleEquationBlock(component, true);
             if (seb != null) {
-                if (seb.equation().isHGTPairedResidual())
+                if (useHGT && seb.equation().isHGTPairedResidual())
                     seb.equation().warning("Can not use hand guided tearing pair, equation and variable resides in solved block. Variable: " + seb.equation().getHGTIterationVariable().name() + ". Equation: " + seb.equation());
                 if (seb.isSolvable())
                     return seb;
@@ -398,10 +398,10 @@ aspect BLT{
 	
 	public class BiPGraph{}
 	
-	public BLT BiPGraph.computeBLT(OptionRegistry options) {
-		return computeBLT(options.getBooleanOption("merge_blt_blocks"),
+	public BLT BiPGraph.computeBLT(OptionRegistry options, boolean duringInteractiveFMU) {
+		return computeBLT(options.getBooleanOption("merge_blt_blocks") && !duringInteractiveFMU,
 				options.getBooleanOption("automatic_tearing"),
-				options.getBooleanOption("hand_guided_tearing"));
+				options.getBooleanOption("hand_guided_tearing") && !duringInteractiveFMU);
 	}
 	
 	public BLT BiPGraph.computeBLT(boolean mergeBLT, boolean useTearing, boolean useHGT) {

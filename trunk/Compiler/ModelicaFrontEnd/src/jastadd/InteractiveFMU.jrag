@@ -22,11 +22,11 @@ aspect InteractiveFMU{
 			Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
 			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
 			
-			// Remove HGT stuff
-			for (FAbstractEquation equation : equations())
-				equation.unsetHGT();
-			for (FVariable variable : variables())
-				variable.unsetHGT();
+//			// Remove HGT stuff
+//			for (FAbstractEquation equation : equations())
+//				equation.unsetHGT();
+//			for (FVariable variable : variables())
+//				variable.unsetHGT();
 			
 			// Flush cache
 			root().flushAllRecursive();
@@ -39,7 +39,7 @@ aspect InteractiveFMU{
 			aliasElimination.apply();
 			
 			// Redo BLT
-			computeMatchingsAndBLT();
+			computeMatchingsAndBLT(true);
 			
 			// Check for unsolved blocks
 			boolean allSolved = true;

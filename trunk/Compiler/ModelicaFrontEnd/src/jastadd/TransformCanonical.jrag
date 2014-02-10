@@ -367,8 +367,13 @@ aspect TransformCanonical {
 	 *    matchibng for the DAE initialization system.
      */	
 	public void FClass.computeMatchingsAndBLT() {
+        computeMatchingsAndBLT(false);
+    }
+	
+	
+	public void FClass.computeMatchingsAndBLT(boolean duringInteractiveFMU) {
 		beginStep("computeMatchingsAndBLT()");
-		computeMatchingsAndBLTWrapped();
+		computeMatchingsAndBLTWrapped(duringInteractiveFMU);
 		endStep("computeMatchingsAndBLT()");
 	}
 	
@@ -392,7 +397,7 @@ aspect TransformCanonical {
 					   BiPGraph.VarType.DISCRETE_PRE_VARIABLES, 
 					   BiPGraph.VarType.NON_FIXED_PARAMETERS);
 	
-	private void FClass.computeMatchingsAndBLTWrapped() {
+	private void FClass.computeMatchingsAndBLTWrapped(boolean duringInteractiveFMU) {
         // Make sure that we don't do this if any errors have been reported
         breakOnErrors();
 
@@ -442,7 +447,7 @@ aspect TransformCanonical {
 		// Perform BLT
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {	
 			try {
-				daeBLT = g.computeBLT(root().options);
+				daeBLT = g.computeBLT(root().options, duringInteractiveFMU);
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
@@ -550,7 +555,7 @@ aspect TransformCanonical {
 		if (root().options.getBooleanOption("equation_sorting") && g.isComplete()) {
 			g.tarjanReset();
 			try {
-				daeInitBLT = g.computeBLT(root().options);
+				daeInitBLT = g.computeBLT(root().options, duringInteractiveFMU);
 			} catch (BLTException e) {
 				error(e.getMessage());
 				return;
