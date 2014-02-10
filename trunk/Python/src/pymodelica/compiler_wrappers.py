@@ -611,7 +611,7 @@ class OptimicaCompiler(ModelicaCompiler):
         times.
         """
         try:
-            options = ModelicaCompilerInterface.createOptions(self.options_file_path)
+            options = OptimicaCompilerInterface.createOptions(self.options_file_path)
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
