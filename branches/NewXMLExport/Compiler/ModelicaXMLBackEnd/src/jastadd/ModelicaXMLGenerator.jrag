@@ -1,0 +1,674 @@
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+
+/**
+ * Aspect that adds XML codegeneration for flat models to the compiler
+ * 
+ * TODO Implement support for algorithm sections
+ * TODO Fix generation for FFunctionCallEquation, since it generates unvalid XML in some cases
+ * 
+ */
+aspect XMLCodeGenerator {
+	
+	// printer class
+	public class XMLPrettyPrint extends Printer {
+		public XMLPrettyPrint() {
+			super("\t");
+		}
+		
+		public void print(ASTNode node, PrintStream str, String indent) {
+			node.prettyPrintXML(this, str, indent);
+		}
+	}
+	
+	public void ASTNode.prettyPrintXML(PrintStream str, String indent) {
+		prettyPrintXML(new XMLPrettyPrint(), str, indent);
+	}
+	
+	public void ASTNode.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		prettyPrint(p, str, indent);
+	}
+	
+	//=========================================================================
+	// Helpers for XML generation
+	//=========================================================================
+	private static final String ASTNode.OPEN_TAG = "%s<%s%s>\n";
+	private static final String ASTNode.CLOSED_TAG = "%s<%s%s/>\n";
+	private static final String ASTNode.CLOSE_TAG = "%s</%s>\n";
+	
+	public void ASTNode.generateOpenTag(PrintStream str, String tag, String indent) {
+		generateOpenTag(str, tag, indent, null);
+	}
+	
+	public void ASTNode.generateOpenTag(PrintStream str, String tag, String indent,
+			String attributeName, String attributeValue) {
+		String attribute = " " + attributeName + "=\"" + attributeValue + "\"";
+		str.format(OPEN_TAG, indent, tag, attribute);
+	}
+
+	public void ASTNode.generateOpenTag(PrintStream str, String tag, String indent, 
+			Map<String, String> attributes) {
+		StringBuilder allAttributes = new StringBuilder();
+		if (attributes != null) {
+			for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+				allAttributes.append(" ").append(attribute.getKey()).append("=\"")
+					.append(attribute.getValue()).append("\"");
+			}
+		}
+		str.format(OPEN_TAG, indent, tag, allAttributes.toString());
+	}
+	
+	public void ASTNode.generateClosedTag(PrintStream str, String tag, String indent) {
+		generateClosedTag(str, tag, indent, null);
+	}
+	
+	public void ASTNode.generateClosedTag(PrintStream str, String tag, String indent,
+			String attributeName, String attributeValue) {
+		String attribute = " " + attributeName + "=\"" + attributeValue + "\"";
+		str.format(CLOSED_TAG, indent, tag, attribute);
+	}
+	
+	public void ASTNode.generateClosedTag(PrintStream str, String tag, String indent, 
+			Map<String, String> attributes) {
+		StringBuilder allAttributes = new StringBuilder();
+		if (attributes != null) {
+			for (Map.Entry<String, String> attribute : attributes.entrySet()) {	
+				allAttributes.append(" ").append(attribute.getKey()).append("=\"")
+					.append(attribute.getValue()).append("\"");
+			}
+		}
+		str.format(CLOSED_TAG, indent, tag, allAttributes.toString());
+	}
+	
+	public void ASTNode.generateCloseTag(PrintStream str, String tag, String indent) {
+		str.format(CLOSE_TAG, indent, tag);
+	}
+	
+	// not used for now, maybe use this later so we don't need to create maps
+	public void ASTNode.generateAttribute(PrintStream str, String tag, String indent) {
+		
+	}
+	
+	/**
+	 * Entry point for XML generation, generates XML for child nodes by calling
+	 * their print method
+	 */
+	public void FClass.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		// assume everything is a model for now
+		generateOpenTag(str, "class", indent, "kind", "model");
+		
+		generateOpenTag(str, "declaration", indentOneStep);
+		
+		// loop enum declarations and generate xml for them
+		for (FEnumDecl fenum : getFEnumDecls()) {
+					p.print(fenum, str, indentTwoSteps);
+		}
+		
+		// loop fvariables and generate XML for each of them
+		for (FVariable fv : getFVariables()) {
+			p.print(fv, str, indentTwoSteps);
+		}
+		
+		generateCloseTag(str, "declaration", indentOneStep);
+		
+		// add a newline between sections for clearer XML
+		str.print("\n");
+		
+		// generate xml for initial equations
+		if (getNumFInitialEquation() > 0) {
+			generateOpenTag(str, "equation", indentOneStep, "kind", "initial");
+			for (FAbstractEquation initEqu : getFInitialEquations()) {
+				p.print(initEqu, str, indentTwoSteps);
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+		}
+		
+		if (getNumFParameterEquation() > 0) {
+			// generate xml for parameter equations
+			// equation kind = parameter
+		}
+		
+		// add a newline between sections for clearer XML
+		str.print("\n");
+		
+		// generate xml for equations
+		if (hasFAbstractEquation()) {
+			//ArrayList<FAlgorithm> algorithms = new ArrayList<FAlgorithm>();
+			generateOpenTag(str, "equation", indentOneStep);
+			for (FAbstractEquation equ : getFAbstractEquations()) {
+				//check if this is an algorithm section
+				// TODO remove instanceof if possible
+				if (equ instanceof FAlgorithm) {
+					// generate algorithm code after equations, add all FAlgorithm to a list
+					//algorithms.add(equ);
+				} else {
+					// generate equation code
+					p.print(equ, str, indentTwoSteps);
+				}
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+			
+			// add a newline between sections for clearer XML
+			//str.print("\n");
+			
+			/*for (FAlgorithm alg : algorithms) {
+				// generate xml for algorithm section, add this later
+			}*/
+		}
+		generateCloseTag(str, "class", indent);
+	}
+	
+	//=========================================================================
+	// Code generation for declarations
+	//=========================================================================
+	public void FVariable.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		if (getFVisibilityType().isRuntimeOptionVisibility()) {
+			return;
+		}
+		
+		FTypePrefixInputOutput causalityPrefix = getFTypePrefixInputOutput();
+		FTypePrefixVariability variabilityPrefix = getFTypePrefixVariability();		
+		Map<String, String> attributes = new LinkedHashMap<String, String>();
+		attributes.put("name", displayName());
+		if (!variabilityPrefix.toString().equals("")) {
+			attributes.put("variability", variabilityPrefix.toString().trim());			
+		}
+		if (causalityPrefix != null) {
+			attributes.put("causality", causalityPrefix.toString());
+		}
+		
+		// start tag for component, add support for extends and classdefs later
+		generateOpenTag(str, "component", indent, attributes);
+		
+		String variableType = prettyPrintType();
+		if (variableType.equals("Real") || variableType.equals("Integer") || 
+				variableType.equals("Boolean") || variableType.equals("String")) {
+			generateClosedTag(str, "builtin", indentOneStep, "name", variableType);
+		} else {
+			generateClosedTag(str, "local",  indentOneStep, "name", variableType);
+		}
+		
+		// loop through attributes and generate modifiers
+		if (hasFAttribute()) {
+			generateOpenTag(str, "modifier", indentOneStep);
+			for (FAttribute attr : getFAttributes()) {
+				p.print(attr, str, indentTwoSteps);
+			}
+			generateCloseTag(str, "modifier", indentOneStep);
+		}
+		
+		// generate bindingexpression if it exists
+		if (hasBindingExp()) {
+			generateOpenTag(str, "bindingExpression", indentOneStep);
+			p.print(getBindingExp(), str, indentTwoSteps);
+			generateCloseTag(str, "bindingExpression", indentOneStep);
+		}
+		generateCloseTag(str, "component", indent);
+	}
+	
+	public void FDerivativeVariable.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// do not generate derivative variables for now
+	}
+	
+	// generate xml for enum declaration
+	public void FEnumDecl.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "classDefinition", indent, "name", getName().name());
+		generateOpenTag(str, "enumeration", indentOneStep);
+		for (FEnumLiteral fenum : getFEnumSpecification().enumLiterals()) {
+			p.print(fenum, str, indentTwoSteps);
+		}
+		generateCloseTag(str, "enumeration", indentOneStep);
+		generateCloseTag(str, "classDefinition", indent);
+	}
+	
+	public void FEnumLiteral.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "item", indent, "name", getName().name());
+	}
+	
+	// generate xml for attributes 
+	public void FAttribute.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "item", indent, "name", getName().name());
+		if (hasValue()) {
+			p.print(getValue(), str, p.indent(indent));
+		}
+		generateCloseTag(str, "item", indent);
+	}
+	
+	//=========================================================================
+	// Code generation for expressions
+	//=========================================================================
+	public void FExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		for (FExp expChild : childFExps()) {
+			p.print(expChild, str, indent);
+		}
+	}
+	
+	// if expressions, nested if expression is quite ugly maybe try to fix this if possible
+	public void FIfExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "if", indent);
+		generateOpenTag(str, "cond", indentOneStep);
+		p.print(getIfExp(), str, indentTwoSteps);
+		generateCloseTag(str, "cond", indentOneStep);
+		generateOpenTag(str, "then", indentOneStep);
+		p.print(getThenExp(), str, indentTwoSteps);
+		generateCloseTag(str, "then", indentOneStep);
+		generateOpenTag(str, "else", indentOneStep);
+		p.print(getElseExp(), str, indentTwoSteps);
+		generateCloseTag(str, "else", indentOneStep);
+		generateCloseTag(str, "if", indent);
+	}
+	
+	public void FExp.prettyPrintElseIfXML(Printer p, PrintStream str, String indent) {
+		p.print(this, str, indent);
+	}
+	
+	// avoid nesting loops
+	public void FIfExp.prettyPrintElseIfXML(Printer p, PrintStream str, String indent) {
+	}
+	
+	// array constructor
+	public void FArray.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// implement this later
+	}
+	
+	// binary operators
+	syn String ASTNode.builtinType() = null;
+	// < is represented by &lt; in xml
+	eq FLtExp.builtinType() = "&lt;";
+	eq FLeqExp.builtinType() = "&lt;=";
+	// > is represented by &gt; in xml
+	eq FGtExp.builtinType() = "&gt;";
+	eq FGeqExp.builtinType() = "&gt;=";
+	eq FEqExp.builtinType() = "==";
+	eq FNeqExp.builtinType() = "&lt;&gt;";
+	eq FOrExp.builtinType() = "or";
+	eq FAndExp.builtinType() = "and";
+	eq FAddExp.builtinType() = "+";
+	eq FSubExp.builtinType() = "-";
+	eq FMulExp.builtinType() = "*";
+	eq FDivExp.builtinType() = "/";
+	eq FPowExp.builtinType() = "^";
+	eq FDotAddExp.builtinType() = ".+";
+	eq FDotSubExp.builtinType() = ".-";
+	eq FDotMulExp.builtinType() = ".*";
+	eq FDotDivExp.builtinType() = "./";
+	eq FDotPowExp.builtinType() = ".^";
+	eq FStringAddExp.builtinType() = "+";
+	eq FNegExp.builtinType() = "-";
+	eq FNotExp.builtinType() = "not";
+	
+	// binary expressions, all binary expression should be function calls not operators
+	public void FBinExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "call", indent, "builtin", builtinType());
+		p.print(getLeft(), str, p.indent(indent));
+		p.print(getRight(), str, p.indent(indent));
+		generateCloseTag(str, "call", indent);
+	}
+	
+	// unary expressions
+	public void FUnaryExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "call", indent, "builtin", builtinType());
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "call", indent);
+	}
+	
+	// literal types
+	syn String ASTNode.literalType() = null;
+	eq FIntegerLitExp.literalType() = "integer";
+    eq FRealLitExp.literalType()    = "real";
+	eq FStringLitExp.literalType()  = "string";
+	
+	// literal expressions
+	public void FRealLitExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, literalType(), indent, "value", Double.toString(getValue()));
+	}
+	
+	public void FIntegerLitExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, literalType(), indent, "value", Integer.toString(getValue()));
+	}
+	
+	public void FStringLitExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, literalType(), indent, "value", getString());
+	}
+	
+	public void FBooleanLitExpFalse.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "false", indent);
+	}
+	
+	public void FBooleanLitExpTrue.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "true", indent);
+	}
+	
+	public void FEnumLitExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "local", indent, "name", (getEnum() + "." + getValue()));
+	}
+	
+	// generate identifiers
+	public void FIdUse.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		if (getFQName().isScalarized()) {
+			generateClosedTag(str, "local", indent, "name", name());
+		} else {
+			p.print(getFQName(), str, indent);
+		}
+	}
+	
+	public void FIdUseExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		p.print(getFIdUse(), str, indent);	
+	}
+	
+	// generate xml for qualified name
+	public void FQName.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "local", indent, "name", name());
+	}
+	
+	//=========================================================================
+	// Code generation for general function calls and builtin functions
+	//=========================================================================
+	public void FFunctionCall.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "call", indent);
+		generateOpenTag(str, "function", indent);
+		if (getName().getFQName().isScalarized()) {
+			generateClosedTag(str, "local", p.indent(indent), "name", name());
+		} else {
+			p.print(getName().getFQName(), str, p.indent(indent));
+		}
+		generateCloseTag(str, "function", indent);
+		for (FExp arg : getArgs()) {
+			p.print(arg, str, p.indent(indent));
+		}
+		generateCloseTag(str, "call", indent);
+	}
+	
+	// generate xml for builtin function calls
+	public void FBuiltInFunctionCall.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "call", indent, "builtin", builtInName());
+		for (FExp exp : childFExps()) {
+			p.print(exp, str, p.indent(indent));
+		}
+		generateCloseTag(str, "call", indent);
+	}
+	
+	// operators, if it is possible generate all these with a common entrypoint
+	// instead of individual generation
+	// builtin function der
+	public void FDerExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "der");
+		p.print(getFIdUse(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function pre
+	public void FPreExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "pre");
+		p.print(getFIdUse(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function time
+	public void FTimeExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "operator", indent, "name", "time");
+	}
+	
+	// builtin function reinit
+	public void FReinit.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "reinit");
+		p.print(getVar(), str, p.indent(indent));
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function smooth
+	public void FSmoothExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "smooth");
+		p.print(getOrder(), str, p.indent(indent));
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function sample
+	public void FSampleExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "sample");
+		p.print(getOffset(), str, p.indent(indent));
+		p.print(getInterval(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function change
+	public void FChangeExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "change");
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function edge
+	public void FEdgeExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "edge");
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function cardinality
+	public void FCardinality.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "cardinality");
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function homotopy
+	public void FHomotopyExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "homotopy");
+		p.print(getActual(), str, p.indent(indent));
+		p.print(getSimplified(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function finstream
+	public void FInStream.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "instream");
+		p.print(getFExp(), str, indent);
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	// builtin function fnoeventexp
+	public void FNoEventExp.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "operator", indent, "name", "noevent");
+		p.print(getFExp(), str, p.indent(indent));
+		generateCloseTag(str, "operator", indent);
+	}
+	
+	syn String ASTNode.simulationFunction() = null;
+	eq FTerminalExp.simulationFunction() = "terminal";
+	eq FInitialExp.simulationFunction() = "initial";
+	
+	// builtin functions initial and terminal
+	public void FSimulationStateBuiltIn.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "operator", indent, "name", simulationFunction());
+	}
+	
+	
+	//=========================================================================
+	// Code generation for equations
+	// TODO it seems like flattening is removing some equation constructs when i 
+	// tried to test them, find test cases where its possible to test for and connect
+	// if they are always flattened should we keep the generation for them?
+	//=========================================================================
+	
+	public void FEquation.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		generateOpenTag(str, "equal", indent);
+		p.print(getLeft(), str, indentOneStep);
+		p.print(getRight(), str, indentOneStep);
+		generateCloseTag(str, "equal", indent);
+	}
+	
+	public void FFunctionCallEquation.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// function calls of the following type: (x, y, z) = func(a, b); is
+		// currently generated as an equal clause, not sure if that is correct
+		int numLeft = getNumLeft();
+		if (numLeft > 0) {
+			// generate left side of function call
+			generateOpenTag(str, "equal", indent);
+			// should this be considered a function call?
+			for (FFunctionCallLeft left : getLefts()) {
+				p.print(left, str, p.indent(indent));
+			}
+		}
+		// generate right side of function call
+		p.print(getCall(), str, p.indent(indent));
+		if (numLeft > 0) {
+			generateCloseTag(str, "equal", indent);
+		}
+	}
+	
+	// lefthand side of special function call
+	public void FFunctionCallLeft.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		p.print(getFExp(), str, indent);
+	}
+	
+	// generate xml for if and when equations
+	public void FIfWhenElseEquation.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		if (isElse()) {
+			generateOpenTag(str, "else", indent);
+		}
+		for (FAbstractEquation equ : getFAbstractEquations()) {
+			p.print(equ, str, p.indent(indent));
+		}
+		if (isElse()) {
+			generateCloseTag(str, "else", indent);
+		}
+	}
+	
+	public void FIfWhenEquation.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, ifWhenType(), indent);
+		generateOpenTag(str, "cond", indentOneStep);
+		p.print(getTest(), str, indentOneStep);
+		generateCloseTag(str, "cond", indentOneStep);
+		generateOpenTag(str, "then", indentOneStep);
+		for (FAbstractEquation equ : getFAbstractEquations()) {
+			p.print(equ, str, indentTwoSteps);
+		}
+		generateCloseTag(str, "then", indentOneStep);
+		generateCloseTag(str, ifWhenType(), indent);
+	}
+	
+	
+	// always removed in flattening?
+	// generate xml for connect clause
+	public void FConnectClause.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateOpenTag(str, "connect", indent);
+		p.print(getConnector1(), str, indent);
+		p.print(getConnector2(), str, indent);
+		generateCloseTag(str, "connect", indent);
+	}
+	
+	// instance tree identifier
+	// TODO check if used and if not remove
+	public void FIdUseInstAccess.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		p.print(getInstAccess(), str, indent);
+	}
+	
+	// TODO check if used and if not remove
+	public void InstAccess.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		generateClosedTag(str, "local", indent, "name", name());
+	}
+	
+	// loop in equation section
+	// for loops are flattened in many cases? find test model where it is not flattened!
+	public void FForClauseE.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		// generate xml for loop index
+		generateOpenTag(str, "for", indent);
+		generateOpenTag(str, "index", indentOneStep, "name", getName().name());
+		// generate local name of for index?
+		generateCloseTag(str, "index", indentOneStep);
+		//getFForIndexList();
+		generateOpenTag(str, "loop", indentOneStep);
+		for (FAbstractEquation equ : getFAbstractEquations()) {
+			p.print(equ, str, indentTwoSteps);
+		}
+		generateCloseTag(str, "loop", indentOneStep);
+		generateCloseTag(str, "for", indent);
+	}
+	
+	//=============================================================================
+	// Code generation for algorithms
+	// Implementation of this will wait for a bit
+	//=============================================================================
+	
+	public void FAlgorithm.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// entrypoint for algorithm block
+		generateOpenTag(str, "algorithm", indent);
+		for (FStatement stmt : getFStatements()) {
+			// generate xml for each statement
+			p.print(stmt, str, indent);
+		}
+		generateCloseTag(str, "algorithm", indent);
+	}
+	
+	public void FAssignStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "algorithm", indent);
+		generateOpenTag(str, "to", indentOneStep);
+		p.print(getLeft(), str, indentTwoSteps);
+		generateCloseTag(str, "to", indentOneStep);
+		generateOpenTag(str, "from", indentOneStep);
+		p.print(getRight(), str, indentTwoSteps);
+		generateCloseTag(str, "from", indentOneStep);
+		generateCloseTag(str, "algorithm", indent);
+	}
+	
+	public void FBreakStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// no generation for break
+	}
+	
+	public void FReturnStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// no generation for return
+	}
+	
+	public void FIfWhenStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		// add other if and when clauses
+	}
+	
+	public void FForStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "for", indent);
+		generateOpenTag(str, "index", indentOneStep);
+		p.print(getIndex(), str, indentTwoSteps);
+		generateCloseTag(str, "index", indentOneStep);
+		generateOpenTag(str, "loop", indentOneStep);
+		p.print(getForStmts(), str, indentTwoSteps);
+		generateCloseTag(str, "loop", indentOneStep);
+		generateCloseTag(str, "for", indent);
+	}
+	
+	public void FWhileStmt.prettyPrintXML(Printer p, PrintStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "while", indent);
+		generateOpenTag(str, "cond", indentOneStep);
+		p.print(getTest(), str, indentTwoSteps);
+		generateCloseTag(str, "cond", indentOneStep);
+		generateOpenTag(str, "then", indentOneStep);
+		for (FStatement fs : getWhileStmts()) {
+			p.print(fs, str, indentTwoSteps);
+		}
+		generateCloseTag(str, "then", indentOneStep);
+		generateCloseTag(str, "while", indent);
+	}
+}
