@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the needed JModelica.org Python methods
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
-from pyjmi import transfer_to_casadi_interface, get_files_path
+from pyjmi import get_files_path
 
 def run_demo(with_plots=True):
     """
@@ -100,6 +100,7 @@ def run_demo(with_plots=True):
     
     ### 2. Solve the optimal control problem
     # Compile model
+    from pyjmi import transfer_to_casadi_interface
     op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
                                       file_paths)
     

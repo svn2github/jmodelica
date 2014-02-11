@@ -22,15 +22,12 @@ import os.path
 import numpy as N
 import matplotlib.pyplot as plt
 
-# Import CasADiInterface
-from pyjmi.casadi_interface import transfer_to_casadi_interface
-from pyjmi import get_files_path
-
 def run_demo(with_plots=True):
     """
     Demonstrate how to optimize a VDP oscillator using CasADiInterface.
     """
     # Compile and load optimization problem
+    from pyjmi import get_files_path, transfer_to_casadi_interface
     file_path = os.path.join(get_files_path(), "VDP.mop")
     op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", file_path)
     
