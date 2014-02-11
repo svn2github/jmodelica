@@ -2103,7 +2103,7 @@ public class CompilationAbortedException extends RuntimeException {
 private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER_OPTIONS = 
     OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
         public void addOptions(OptionRegistry opt) {
-            opt.addStringOption(CCompilerDelegator.OPTION, "gcc", CCompilerDelegator.OPTION_DESC, new String[0]);
+            opt.addStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME, CCompilerDelegator.OPTION_DESC, new String[0]);
         }
         
         public void modifyOptions(OptionRegistry opt) {
@@ -2120,19 +2120,25 @@ private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER
  * 
  * To add a new delegator, call {@link #addDelegator(CCompilerDelegator.Creator)} before 
  * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
- * aspect adding a static field to this class that gets its value from addDelegator().
+ * aspect to add a static field in this class that gets its value from addDelegator().
  */
 public abstract class CCompilerDelegator {
     
-    private static final Map<String,Creator> CREATORS = new HashMap<String,Creator>();
+    private static Map<String,Creator> CREATORS = creators();
     
-    private static final Creator GCC = addDelegator("gcc", new Creator() {
+    private static Map<String,Creator> creators() {
+        if (CREATORS == null)
+            CREATORS = new HashMap<String,Creator>();
+        return CREATORS;
+    }
+    
+    private static final Creator GCC = addDelegator(GccCompilerDelegator.NAME, new Creator() {
         public CCompilerDelegator create() {
             return new GccCompilerDelegator();
         }
     });
     
-    public static final String OPTION = "c_compiler_delegator";
+    public static final String OPTION = "c_compiler";
     public static final String OPTION_DESC = "The C compiler to use to compile generated C code.";
     
     public interface Creator {
@@ -2146,10 +2152,10 @@ public abstract class CCompilerDelegator {
      * @param creator  the creator for the delegator class
      */
     public static Creator addDelegator(String name, Creator creator) {
-        if (CREATORS.containsKey(name))
+        if (creators().containsKey(name))
             throw new IllegalArgumentException("Compiler delegator name " + name + 
                     " is already used by " + CREATORS.get(name).create().getClass().getSimpleName());
-        CREATORS.put(name, creator);
+        creators().put(name, creator);
         return creator;
     }
     
@@ -2157,11 +2163,11 @@ public abstract class CCompilerDelegator {
      * Create a C compiler delegator for the given set of options.
      */
     public static CCompilerDelegator delegatorFor(OptionRegistry opt) {
-        return CREATORS.get(opt.getStringOption(OPTION)).create();
+        return creators().get(opt.getStringOption(OPTION)).create();
     }
     
     public static void addCompilerOptionValues(OptionRegistry opt) {
-        for (String name : CREATORS.keySet())
+        for (String name : creators().keySet())
             opt.addStringOptionAllowed(OPTION, name);
     }
 	
@@ -2357,6 +2363,8 @@ public abstract class CCompilerDelegator {
  * Compiles DLL(s) from generated C code using make.
  */
 public class GccCompilerDelegator extends CCompilerDelegator {
+    
+    public static final String NAME = "gcc";
 
 	public GccCompilerDelegator() {}
 

@@ -826,6 +826,10 @@ abstract public class OptionRegistry {
 			opt.setValue(value);
 	}
     
+    public void setIntegerOptionDefault(String key, int value) {
+        findIntegerOption(key, false).setDefault(value);
+    }
+    
     public void expandIntegerOptionMax(String key, int val) {
         findIntegerOption(key, false).expandMax(val);
     }
@@ -886,6 +890,10 @@ abstract public class OptionRegistry {
 		else
 			opt.setValue(value);
 	}
+    
+    public void setStringOptionDefault(String key, String value) {
+        findStringOption(key, false).setDefault(value);
+    }
     
     public void addStringOptionAllowed(String key, String val) {
         findStringOption(key, false).addAllowed(val);
@@ -952,6 +960,10 @@ abstract public class OptionRegistry {
 			opt.setValue(value);
 	}
     
+    public void setRealOptionDefault(String key, double value) {
+        findRealOption(key, false).setDefault(value);
+    }
+    
     public void expandRealOptionMax(String key, double val) {
         findRealOption(key, false).expandMax(val);
     }
@@ -1006,6 +1018,10 @@ abstract public class OptionRegistry {
 		else
 			opt.setValue(value);
 	}
+    
+    public void setBooleanOptionDefault(String key, boolean value) {
+        findBooleanOption(key, false).setDefault(value);
+    }
 
 	public boolean getBooleanOption(String key) {
 		return findBooleanOption(key, false).getValue();
@@ -1123,10 +1139,11 @@ abstract public class OptionRegistry {
 	}
 
 
-	abstract static class Option {
-	    private String key;
+	private abstract static class Option {
+	    protected final String key;
 		private String description;
 		private boolean descriptionChanged = false;
+		private boolean defaultChanged = false;
 		private OptionType type;
 			
 		public Option(String key, String description, OptionType type) {
@@ -1180,10 +1197,16 @@ abstract public class OptionRegistry {
 			throw new InvalidOptionValueException("Option '" + key + "' does not allow the value '" +
 					value + "', " + allowedMsg);
 		}
+
+        protected void changeDefault() {
+            if (defaultChanged)
+                throw new IllegalArgumentException("Default value for " + key + " has already been changed.");
+            defaultChanged = true;
+        }
 		
 	}
 	
-	static class IntegerOption extends Option {
+	private static class IntegerOption extends Option {
 		protected int value;
 		private int min;
 		private int max;
@@ -1204,6 +1227,11 @@ abstract public class OptionRegistry {
 				invalidValue(value, "min: " + min + ", max: " + max);
 			this.value = value;
 		}
+
+        public void setDefault(int value) {
+            changeDefault();
+            this.value = value;
+        }
 		
 		public int getValue() {
 			return value;
@@ -1230,7 +1258,7 @@ abstract public class OptionRegistry {
 		}
 	}
 
-	static class StringOption extends Option {
+	private static class StringOption extends Option {
 		protected String value;
 		protected Map<String,String> vals;
 		
@@ -1266,6 +1294,11 @@ abstract public class OptionRegistry {
 				this.value = value;
 			}
 		}
+
+        public void setDefault(String value) {
+            changeDefault();
+            this.value = value;
+        }
 		
 		public String addAllowed(String value) {
 		    if (vals == null)
@@ -1293,7 +1326,7 @@ abstract public class OptionRegistry {
 		}
 	}
 
-	static class RealOption extends Option {
+	private static class RealOption extends Option {
 		protected double value;
 		protected double min;
 		protected double max;
@@ -1314,8 +1347,13 @@ abstract public class OptionRegistry {
 				invalidValue(value, "min: " + min + ", max: " + max);
 			this.value = value;
 		}
-		
-		public double getValue() {
+
+        public void setDefault(double value) {
+            changeDefault();
+            this.value = value;
+        }
+
+        public double getValue() {
 			return value;
 		}
         
@@ -1340,7 +1378,7 @@ abstract public class OptionRegistry {
 		}
 	}
 
-	static class BooleanOption extends Option {
+	private static class BooleanOption extends Option {
 		protected boolean value;
 		
 		public BooleanOption(String key, OptionType type, String description, boolean value) {
@@ -1351,6 +1389,11 @@ abstract public class OptionRegistry {
 		public void setValue(boolean value) {
 			this.value = value;
 		}
+
+        public void setDefault(boolean value) {
+            changeDefault();
+            this.value = value;
+        }
 		
 		public boolean getValue() {
 			return value;
