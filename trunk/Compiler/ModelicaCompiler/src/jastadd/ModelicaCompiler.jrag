@@ -139,7 +139,6 @@ public class ModelicaCompiler {
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
-	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
 	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
@@ -216,10 +215,7 @@ public class ModelicaCompiler {
 	}
 	
 	public CCompilerDelegator getCCompiler() {
-	    if (cCompiler != null)
-	        return cCompiler;
-	    else
-	        return CCompilerDelegator.delegatorFor(options);
+	    return CCompilerDelegator.delegatorFor(options);
 	}
 	
 	public static String getJModelicaHome() {
