@@ -2776,10 +2776,11 @@ aspect CCodeGen {
 	@Override
 	public void FEquation.genNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FVariable> forVariables) {
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		if (hasNominal())
-			str.print(getNominal().getValue().ceval().realValue());
-		else
+		if (hasNominal()) {
+			p.print(getNominal(), str, indent);
+		} else {
 			str.print('1');
+		}
 		str.print(";\n");
 	}
 	

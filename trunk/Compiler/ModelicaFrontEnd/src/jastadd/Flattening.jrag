@@ -1163,17 +1163,6 @@ aspect Flattening {
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
 	
 	
-	syn FNominal FNominal.flatten(FQName prefix) {
-		throw new UnsupportedOperationException();
-	}
-	eq InstNominal.flatten(FQName prefix) {  
-		if (hasEnabled()) {
-			if (!getEnabled().ceval().booleanValue())
-				return null;
-		}
-		return new FNominal(getValue().flatten(prefix));
-	}
-	
     /**
      * \brief Find functions, record and enumeration declarations that need to be flattened.
      */
@@ -1285,11 +1274,6 @@ aspect FlatExpressions {
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
 		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
 		flattenAttrs(flattened, prefix);
-		if (hasNominal()) {
-			FNominal flatten = getNominal().flatten(prefix);
-			if (flatten != null)
-				flattened.setNominal(flatten);
-		}
 		return flattened;
 	}
 
@@ -2179,10 +2163,10 @@ aspect InstantiatedExpressions {
 	}
 
     public FAbstractEquation Equation.instantiate() {
-        FEquation eqn = copyLocationTo(new FEquation(equationType(),
-                buildNominalOpt(), new List<FAttribute>(), getLeft().instantiate(), getRight().instantiate()));
+        FEquation eqn = copyLocationTo(new FEquation(equationType(), getLeft().instantiate(), getRight().instantiate()));
         contributeHGT(eqn);
         contributeNameAttribute(eqn);
+        contributeNominal(eqn);
         return eqn;
     }
     

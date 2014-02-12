@@ -555,9 +555,6 @@ aspect Arrays {
 		return left.equals(right) ? left : Size.SCALAR;
 	}
 	
-	inh Size InstNominal.size();
-	eq FAbstractEquation.getNominal().size() = size();
-	
 	inh Size FIdDeclAttribute.size();
     eq FAbstractEquation.getFAttribute().size() = size();
     eq FVariable.getFAttribute().size() = size();

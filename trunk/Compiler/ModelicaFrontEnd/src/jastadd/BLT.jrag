@@ -1470,7 +1470,7 @@ aspect BLT{
                     str.print(equationHasHGT ? 'M' : 'A');
                     str.print(") " + block.equation().toString()); 
                     if (block.equation().hasNominal())
-                        str.print("    (Nominal=" + block.equation().getNominal().getValue() + ")");
+                        str.print("    (Nominal=" + block.equation().getNominal() + ")");
                     str.println();
                 }
                 str.println();
@@ -1578,7 +1578,7 @@ aspect BLT{
 		public void prettyPrintEquation(CodeStream str) {
 			str.print("  " + equation());
 			if (equation().hasNominal())
-				str.print("    (Nominal=" + equation().getNominal().getValue() + ")");
+				str.print("    (Nominal=" + equation().getNominal() + ")");
 			str.println();
 		}
 		

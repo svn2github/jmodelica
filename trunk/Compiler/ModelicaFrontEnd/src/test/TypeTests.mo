@@ -1574,16 +1574,16 @@ equation
 			errorMessage="
 3 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 49:
-  Cannot evaluate boolean enabled expression: pEnabled
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The type of the enabled expression is not boolean
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 59:
-  Nominal expression should have parameter variability or less, pValues has variability
+Error: in file '...':
+Semantic error at line 0, column 0:
+  Nominal expression should have parameter variability or less, pValues has Continuousv ariability
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1358, column 59:
+Error: in file '...':
+Semantic error at line 0, column 0:
   Size of nominal expression pValues is not the same size as the surrounding equation, size of expression [2], size of equation scalar
 ")})));
 end EquationNominalTypeTest1;
