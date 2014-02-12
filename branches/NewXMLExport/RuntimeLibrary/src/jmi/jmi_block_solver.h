@@ -29,17 +29,19 @@
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
-#define JMI_BLOCK_INITIALIZE 0
-#define JMI_BLOCK_EVALUATE 1
-#define JMI_BLOCK_WRITE_BACK 2
-#define JMI_BLOCK_EVALUATE_INACTIVE 4
-#define JMI_BLOCK_EVALUATE_NON_REALS 8
-#define JMI_BLOCK_MIN 16
-#define JMI_BLOCK_MAX 32
-#define JMI_BLOCK_NOMINAL 64
-#define JMI_BLOCK_EVALUATE_JACOBIAN 128
-#define JMI_BLOCK_EQUATION_NOMINAL 256
-#define JMI_BLOCK_VALUE_REFERENCE 512
+#define JMI_BLOCK_INITIALIZE               0
+#define JMI_BLOCK_EVALUATE                 1
+#define JMI_BLOCK_WRITE_BACK               2
+#define JMI_BLOCK_EVALUATE_INACTIVE        4
+#define JMI_BLOCK_EVALUATE_NON_REALS       8
+#define JMI_BLOCK_MIN                      16
+#define JMI_BLOCK_MAX                      32
+#define JMI_BLOCK_NOMINAL                  64
+#define JMI_BLOCK_EVALUATE_JACOBIAN        128
+#define JMI_BLOCK_EQUATION_NOMINAL         256
+#define JMI_BLOCK_VALUE_REFERENCE          512
+#define JMI_BLOCK_NON_REAL_VALUE_REFERENCE 1024
+#define JMI_BLOCK_ACTIVE_SWITCH_INDEX      2048
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -186,11 +188,11 @@ typedef void (*jmi_block_solver_delete_func_t)(jmi_block_solver_t* block_solver)
 
 /**< \brief Equation block solver options. */
 struct jmi_block_solver_options_t {
-    double res_tol;                 /**< \brief Tolerance for the equation block solver */
-    double min_tol;                 /**< \brief Minimal allowed value for the tolerance */
-    double step_limit_factor;       /** < \brief Step limiting factor */
-    double regularization_tolerance; /** < \brief Tolerance for deciding when regularization should be performed */
-    int max_iter;                     /**< \brief Maximum number of iterations for the equation block solver before failure */
+    double res_tol;                         /**< \brief Tolerance for the equation block solver */
+    double min_tol;                         /**< \brief Minimal allowed value for the tolerance */
+    double step_limit_factor;               /**< \brief Step limiting factor */
+    double regularization_tolerance;        /**< \brief Tolerance for deciding when regularization should be performed */
+    int max_iter;                           /**< \brief Maximum number of iterations for the equation block solver before failure */
 
     int enforce_bounds_flag;                /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     int use_jacobian_equilibration_flag;    /**< \brief If jacobian equlibration should be used in equation block solvers */

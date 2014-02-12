@@ -28,6 +28,7 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     int j = 0; */
     int n_x = block->n;
     int info = 0;
+    int i;
     
     if (!solver) return -1;
     
@@ -42,6 +43,11 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->singular_jacobian = 0;
     solver->iwork = 5*n_x;
     solver->rwork = (double*)calloc(solver->iwork,sizeof(double));
+    solver->zero_vector = (double*)calloc(n_x,sizeof(double));
+
+    for (i=0; i<n_x; i++) {
+        solver->zero_vector[i] = 0.0;
+    }
 
     *solver_ptr = solver;
     return info==0? 0: -1;
@@ -55,12 +61,13 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     double* singular_values;
     int info;
     int i;
+	jmi_log_node_t destnode;
 
     char trans;
     jmi_linear_solver_t* solver = block->solver;
     iwork = solver->iwork;
     
-    /* If needed, reevaluate and factorize Jacobian */
+    /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
 
         /*printf("** Computing factorization in jmi_linear_solver_solve for block %d\n",block->id);*/
@@ -90,8 +97,18 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             }
             else
                 solver->equed = 'N';
-        }        
+        }
+	}
 
+	/* Log the jacobian.*/
+	if((block->callbacks->log_options.log_level >= 5)) {
+		destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
+                                     "Linear solver invoked for <block:%d>", block->id);
+		jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+	}
+
+	/*  If jacobian is reevaluated then factorize Jacobian. */
+    if (solver->cached_jacobian != 1) {
         /* Call 
         *  DGETRF computes an LU factorization of a general M-by-N matrix A
         *  using partial pivoting with row interchanges.
@@ -120,8 +137,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     /* Compute right hand side at initial x*/ 
-    info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE);
+    /* info = block->F(block->problem_data,block->initial, block->res, JMI_BLOCK_EVALUATE); */
+    info = block->F(block->problem_data,solver->zero_vector, block->res, JMI_BLOCK_EVALUATE);
     if(info) {
+		/* Close the LinearSolve log node and generate the Error/Warning node and return. */
+		if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
+
         if(block->init) {
             jmi_log_node(block->log, logError, "Error", "Failed to evaluate equations in <block: %d>", block->id);
         }
@@ -139,13 +160,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     
     if((block->callbacks->log_options.log_level >= 5)) {
-        jmi_log_node_t destnode;
-        destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
-                                      "Linear solver invoked for <block:%d>", block->id);
-
         jmi_log_reals(block->log, destnode, logInfo, "initial_guess", block->initial, block->n);
-        jmi_log_reals(block->log, destnode, logInfo, "b", block->res, block->n);
-        jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->factorization, block->n, block->n);
+        jmi_log_reals(block->log, destnode, logInfo, "b", block->res, block->n);     
         jmi_log_leave(block->log, destnode);
     }
  
@@ -193,17 +209,20 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     }
     if((solver->equed == 'C') || (solver->equed == 'B')) {
         for (i=0;i<n_x;i++) {
-             block->x[i] = block->initial[i] + block->res[i] * solver->cScale[i];
+             /* block->x[i] = block->initial[i] + block->res[i] * solver->cScale[i]; */
+             block->x[i] = block->res[i] * solver->cScale[i];
         }
     }
     else {
         for (i=0;i<n_x;i++) {
-            block->x[i] = block->initial[i] + block->res[i] ;
+            /* block->x[i] = block->initial[i] + block->res[i] ; */
+            block->x[i] = block->res[i];
         }
     }
-        
+    
     /* Write solution back to model */
-    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+    /* JMI_BLOCK_EVALUATE is used since it is needed for torn linear equation blocks! Might be changed in the future! */
+    block->F(block->problem_data,block->x, block->res, JMI_BLOCK_EVALUATE);
 
     return info==0? 0: -1;
 }
@@ -216,6 +235,7 @@ void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     free(solver->rScale);
     free(solver->cScale);
     free(solver->rwork);
+    free(solver->zero_vector);
     free(solver);
     block->solver = 0;
 }

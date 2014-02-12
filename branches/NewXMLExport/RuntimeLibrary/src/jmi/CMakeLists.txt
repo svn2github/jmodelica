@@ -94,9 +94,9 @@ if(NOT MSVC)
     endif()
 endif()
 
-if(JMFMI_FMU_EXTRA_LIBS)
+if(JMI_SUNDIALS AND JMI_LAPACK)
     add_executable(jmi_block_solver_test jmi_block_solver_test.c)
-    target_link_libraries(jmi_block_solver_test jmi sundials_kinsol_static sundials_nvecserial_static ${JMFMI_FMU_EXTRA_LIBS})
+    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK})
 endif()
 
 #Build ModelicaExternalC library

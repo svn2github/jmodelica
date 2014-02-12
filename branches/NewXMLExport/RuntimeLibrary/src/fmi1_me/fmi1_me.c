@@ -73,7 +73,7 @@ fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, f
     cb->emit_log = fmi1_me_emit_log;
     cb->is_log_category_emitted = fmi1_me_is_log_category_emitted;
     cb->log_options.logging_on_flag = loggingOn;
-    cb->log_options.log_level = logWarning;
+    cb->log_options.log_level = 5;
     cb->allocate_memory = functions.allocateMemory;
     cb->free_memory = functions.freeMemory;
     cb->model_name = jmi_get_model_identifier();       /**< \brief Name of the model (corresponds to a fixed compiled unit name) */

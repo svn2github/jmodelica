@@ -100,7 +100,7 @@ aspect IndexReduction {
 
             aliasElimination.apply();
             // Add derivative variables
-            addFDerivativeVariables.apply();
+            setFDerivativeVariables.apply();
 
             root().flushAllRecursive();
 
@@ -109,9 +109,16 @@ aspect IndexReduction {
 
             log.info("States:");
             Set<FVariable> stateSelectAlwaysVars = new HashSet<FVariable>();
-            for (FVariable fv : variables())
-                if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+            for (FVariable fv : variables()) {
+                if (fv.aliasSet() != null) {
+                    for (AliasManager.AliasVariable av : fv.aliasSet()) {
+                        if (av.getFVariable().stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS)
+                            stateSelectAlwaysVars.add(av.getFVariable());
+                    }
+                } else if (fv.stateSelectAttribute() == FRealVariable.StateSelect.ALWAYS) {
                     stateSelectAlwaysVars.add(fv);
+                }
+            }
             for (FVariable fv : differentiatedRealVariables()) {
                 if (fv.stateSelectAttribute() == FRealVariable.StateSelect.NEVER)
                     fv.warning(fv.name() + " has stateSelect=never, but must be selected as state");
@@ -376,7 +383,7 @@ aspect IndexReduction {
             if (!eb.differentiatedEquations().isEmpty()) {
                 add = true;
             } else {
-                for (FVariable var : eb.activeVariables()) {
+                for (FVariable var : eb.allVariables()) {
                     if (var.isDerivativeVariable()) {
                         add = true;
                         break;
@@ -389,11 +396,11 @@ aspect IndexReduction {
                 
                 // Step 1: Initialize, add all equations in blocks
                 // having differentiated equations
-                g.addAll(eb.equations());
+                g.addAll(eb.allEquations());
                 
                 // Step 2: Extract all active variables, i.e., highest order 
                 // derivatives for each variable
-                for (FVariable fv : eb.activeVariables())
+                for (FVariable fv : eb.allVariables())
                     z.add(fv);
             }
         }

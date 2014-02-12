@@ -1136,7 +1136,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		FlatteningTestCase(
 			name="ConnectTest24",
-			description="",
+			description="Check that self-connections are allowed with a warning",
 			flatModel="
 fclass ConnectTests.ConnectTest24
  Real a = 1;
@@ -1154,7 +1154,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		WarningTestCase(
 			name="ConnectTest25",
-			description="",
+			description="Check that self-connections are allowed with a warning",
 			errorMessage="
 1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
@@ -1162,6 +1162,48 @@ At line 1152, column 5:
   Ignored connection from connector to itself
 ")})));
 end ConnectTest25;
+
+
+model ConnectTest26
+    connector A
+        B b[2];
+    end A;
+    
+    connector B
+        Real x;
+        flow Real y;
+    end B;
+    
+    A a1, a2;
+equation
+    connect(a1, a2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectTest26",
+			description="Test array of composite connectors in connector",
+			flatModel="
+fclass ConnectTests.ConnectTest26
+ Real a1.b[1].x;
+ Real a1.b[1].y;
+ Real a1.b[2].x;
+ Real a1.b[2].y;
+ Real a2.b[1].x;
+ Real a2.b[1].y;
+ Real a2.b[2].x;
+ Real a2.b[2].y;
+equation
+ a1.b[1].x = a2.b[1].x;
+ - a1.b[1].y - a2.b[1].y = 0;
+ a1.b[2].x = a2.b[2].x;
+ - a1.b[2].y - a2.b[2].y = 0;
+ a1.b[1].y = 0;
+ a1.b[2].y = 0;
+ a2.b[1].y = 0;
+ a2.b[2].y = 0;
+end ConnectTests.ConnectTest26;
+")})));
+end ConnectTest26;
 
 
 model ConnectOuterTest1
@@ -1347,6 +1389,46 @@ equation
 end ConnectTests.ConnectOuterTest6;
 ")})));
 end ConnectOuterTest6;
+
+
+model ConnectOuterTest7
+    /* This verifies #3452, but the result is wrong, and should be updated 
+	   when #3451 is fixed. */
+    connector C
+		Real x;
+		flow Real y;
+	end C;
+    
+    model A
+        C c;
+    end A;
+    
+    model B
+        inner outer A a;
+    end B;
+    
+	model D
+        inner A a;
+        B b;
+	end D;
+	
+	D d;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ConnectOuterTest7",
+			description="Non-connected connector in component declared inner outer",
+			flatModel="
+fclass ConnectTests.ConnectOuterTest7
+ Real d.a.c.x;
+ Real d.a.c.y;
+ Real d.b.a.c.x;
+ Real d.b.a.c.y;
+equation
+ d.a.c.y = 0;
+end ConnectTests.ConnectOuterTest7;
+")})));
+end ConnectOuterTest7;
 
 
 
@@ -2299,6 +2381,104 @@ At line 1815, column 9:
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;
+
+//TODO: Wrong, #3374
+model Cardinality4
+	connector A = Real;
+
+    A x[2];
+    A y;
+equation
+    connect(x[1], x[2]);
+    connect(x[2], y);
+    if cardinality(x[1]) == 2 then
+        x[1] = time;
+    elseif cardinality(y) == 2 then
+        y = time;
+    else
+        x[2] = time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cardinality4",
+            description="cardinality(): array test",
+            flatModel="
+fclass ConnectTests.Cardinality4
+ Real x[2];
+ Real y;
+equation
+ if 3 == 2 then
+  x[1] = time;
+ elseif 1 == 2 then
+  y = time;
+ else
+  x[2] = time;
+ end if;
+ x[1] = x[2];
+ x[2] = y;
+end ConnectTests.Cardinality4;
+			
+")})));
+end Cardinality4;
+
+model Cardinality5
+	connector A = Real;
+
+    A x[2];
+    A y;
+equation
+    connect(x[1], y);
+    connect(y, x[2]);
+    if cardinality(x) == 2 then
+        x[1] = time;
+    elseif cardinality(y) == 2 then
+        y = time;
+    else
+        x[2] = time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Cardinality5",
+			description="cardinality(): non scalar",
+			errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 2350, column 20:
+  The argument of cardinality() must be a scalar reference to a connector
+			
+")})));
+end Cardinality5;
+
+//TODO: Wrong, #3374
+model Cardinality6
+	connector A = Real;
+
+    A x[3];
+equation
+    connect(x[1:2], x[2:3]);
+    for i in 1:3 loop
+		assert(cardinality(x[i]) == 1, "Message");
+	end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cardinality6",
+            description="cardinality(): array test",
+            flatModel="
+fclass ConnectTests.Cardinality6
+ Real x[3];
+equation
+ for i in 1:3 loop
+  assert(4 == 1, \"Message\");
+ end for;
+ x[1] = x[2];
+ x[2] = x[3];
+end ConnectTests.Cardinality6;
+			
+")})));
+end Cardinality6;
 
 
 model ConditionalNoErrTest1

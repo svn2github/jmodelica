@@ -139,14 +139,15 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
+ Modelica.Blocks.Interfaces.RealInput torque.tau(unit = \"N.m\") \"Accelerating torque acting at flange (= -flange.tau)\";
  parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
- Modelica.SIunits.Torque torque.flange.tau \"Cut torque in the flange\";
  parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia1.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
+ parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
  parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
@@ -162,28 +163,33 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.RotationalSpringConstant spring.c(final min = 0,start = 100000.0) = 10000.0 \"Spring constant\" /* 10000.0 */;
  parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
- Modelica.SIunits.Torque spring.flange_b.tau \"Cut torque in the flange\";
+ Modelica.SIunits.Torque spring.tau \"Torque between flanges (= flange_b.tau)\";
  constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0 \"Cut torque in the flange\";
- parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
+ parameter Real sine.amplitude \"Amplitude of sine wave\";
  Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
- Modelica.SIunits.Torque damper.flange_b.tau \"Cut torque in the flange\";
+ Modelica.SIunits.Torque damper.tau \"Torque between flanges (= flange_b.tau)\";
  parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
  parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
- parameter Real sine.amplitude \"Amplitude of sine wave\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
+ parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
  constant Real sine.pi = 3.141592653589793;
+ parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
+ parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
+ parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
+ parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
+ parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  Real inertia1._der_phi;
  Real inertia1._der_w;
  Real inertia2._der_phi;
@@ -207,30 +213,36 @@ parameter equation
  damper.d = damping;
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
+ torque.phi_support = fixed.phi0;
+ damper.flange_b.phi = torque.phi_support;
+ fixed.flange.phi = torque.phi_support;
+ idealGear.support.phi = torque.phi_support;
+ torque.support.phi = torque.phi_support;
+ idealGear.phi_support = torque.phi_support;
 equation
  inertia1.w = inertia1._der_phi;
  inertia1.a = inertia1._der_w;
- inertia1.J * inertia1.a = - torque.flange.tau + (- idealGear.flange_a.tau);
- idealGear.phi_a = inertia1.phi - fixed.phi0;
- idealGear.phi_b = inertia2.phi - fixed.phi0;
+ inertia1.J * inertia1.a = torque.tau + (- idealGear.flange_a.tau);
+ idealGear.phi_a = inertia1.phi - torque.phi_support;
+ idealGear.phi_b = inertia2.phi - torque.phi_support;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
  inertia2.a = inertia2._der_w;
  inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
- spring.flange_b.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
+ spring.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = inertia3.der(phi);
  inertia3.a = inertia3.der(w);
- inertia3.J * inertia3.a = - spring.flange_b.tau;
- damper.flange_b.tau = damper.d * damper.w_rel;
- damper.lossPower = damper.flange_b.tau * damper.w_rel;
- damper.phi_rel = fixed.phi0 - inertia2.phi;
+ inertia3.J * inertia3.a = - spring.tau;
+ damper.tau = damper.d * damper.w_rel;
+ damper.lossPower = damper.tau * damper.w_rel;
+ damper.phi_rel = torque.phi_support - inertia2.phi;
  damper.w_rel = damper.der(phi_rel);
  damper.a_rel = damper.der(w_rel);
- - torque.flange.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
- - damper.flange_b.tau + inertia2.flange_b.tau + (- spring.flange_b.tau) = 0;
- damper.flange_b.tau + fixed.flange.tau + idealGear.support.tau + (- torque.flange.tau) = 0;
+ torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
+ - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0;
+ damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  idealGear._der_phi_a = inertia1._der_phi;
  idealGear._der_phi_b = inertia2._der_phi;
@@ -1167,22 +1179,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real _der_x1[1];
  Real _der_x1[2];
- Real temp_2;
- Real temp_3;
- Real _der_temp_2;
- Real _der_temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real _der_temp_4;
+ Real _der_temp_5;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  _der_x1[1] + der(x2[1]) = 2;
  _der_x1[2] + der(x2[2]) = 3;
- ({temp_2, temp_3}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1[1] = temp_2;
- - x1[2] = temp_3;
- ({_der_temp_2, _der_temp_3}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - _der_x1[1] = _der_temp_2;
- - _der_x1[2] = _der_temp_3;
+ ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1[1] = temp_4;
+ - x1[2] = temp_5;
+ ({_der_temp_4, _der_temp_5}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - _der_x1[1] = _der_temp_4;
+ - _der_x1[2] = _der_temp_5;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f_der
@@ -1262,22 +1274,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real x1._der_a[2];
  Real x2._der_a[2];
- Real temp_2;
- Real temp_3;
- Real _der_temp_2;
- Real _der_temp_3;
+ Real temp_4;
+ Real temp_5;
+ Real _der_temp_4;
+ Real _der_temp_5;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  x1.der(a[1]) + x2.der(a[1]) = 2;
  x1._der_a[2] + x2._der_a[2] = 3;
- (IndexReduction.IndexReduction28_Record.R({temp_2, temp_3})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1.a[1] = temp_2;
- - x1.a[2] = temp_3;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_2, _der_temp_3})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
- - x1.der(a[1]) = _der_temp_2;
- - x1._der_a[2] = _der_temp_3;
+ (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1.a[1] = temp_4;
+ - x1.a[2] = temp_5;
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {x2.der(a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ - x1.der(a[1]) = _der_temp_4;
+ - x1._der_a[2] = _der_temp_5;
 
 public
  function IndexReduction.IndexReduction28_Record.f_der
@@ -1286,7 +1298,7 @@ public
   input Real[2] der_x;
   input Real[2, 2] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
-algorithm
+ algorithm
   der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y.a[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -1296,7 +1308,7 @@ algorithm
   input Real[2] x;
   input Real[2, 2] A;
   output IndexReduction.IndexReduction28_Record.R y;
-algorithm
+ algorithm
   y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y.a[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -1870,16 +1882,16 @@ fclass IndexReduction.IndexReduction39_MinExp
  Real x1;
  Real x2;
  Real x3;
- Real _der_x1;
  Real _der_x2;
+ Real _der_x3;
 initial equation 
- x3 = 0.0;
+ x1 = 0.0;
 equation
- _der_x1 + _der_x2 + der(x3) = 1;
+ der(x1) + _der_x2 + _der_x3 = 1;
  min(x1, x2) = 0;
  min(x1, x3) = 0;
- min(_der_x1, _der_x2) = 0.0;
- min(_der_x1, der(x3)) = 0.0;
+ noEvent(if x1 < x2 then der(x1) else _der_x2) = 0.0;
+ noEvent(if x1 < x3 then der(x1) else _der_x3) = 0.0;
 end IndexReduction.IndexReduction39_MinExp;
 ")})));
 end IndexReduction39_MinExp;
@@ -1900,16 +1912,16 @@ fclass IndexReduction.IndexReduction40_MaxExp
  Real x1;
  Real x2;
  Real x3;
- Real _der_x1;
  Real _der_x2;
+ Real _der_x3;
 initial equation 
- x3 = 0.0;
+ x1 = 0.0;
 equation
- _der_x1 + _der_x2 + der(x3) = 1;
+ der(x1) + _der_x2 + _der_x3 = 1;
  max(x1, x2) = 0;
  max(x1, x3) = 0;
- max(_der_x1, _der_x2) = 0.0;
- max(_der_x1, der(x3)) = 0.0;
+ noEvent(if x1 > x2 then der(x1) else _der_x2) = 0.0;
+ noEvent(if x1 > x3 then der(x1) else _der_x3) = 0.0;
 end IndexReduction.IndexReduction40_MaxExp;
 ")})));
 end IndexReduction40_MaxExp;
@@ -1932,9 +1944,9 @@ fclass IndexReduction.IndexReduction41_Homotopy
 initial equation 
  x2 = 0.0;
 equation
- 0.0 + der(x2) = 1;
+ der(x2) = 1;
 end IndexReduction.IndexReduction41_Homotopy;
-
+			
 ")})));
 end IndexReduction41_Homotopy;
 
@@ -2322,6 +2334,35 @@ end IndexReduction.IndexReduction49_DotPow;
 ")})));
 end IndexReduction49_DotPow;
 
+model DivFunc
+  Real x1;
+  Real x2;
+equation
+  der(x1) + der(x2) = 1;
+  x1 + div(x2, 3.14) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DivFunc",
+            description="Test differentiation of div() operator. This model probably makes no sence in the real world!",
+            flatModel="
+fclass IndexReduction.DivFunc
+ Real x1;
+ Real x2;
+ discrete Real temp_1;
+ Real _der_x1;
+initial equation 
+ pre(temp_1) = 0.0;
+ x2 = 0.0;
+equation
+ _der_x1 + der(x2) = 1;
+ x1 + temp_1 = 1;
+ temp_1 = if div(x2, 3.14) < pre(temp_1) or div(x2, 3.14) >= pre(temp_1) + 1 or initial() then div(x2, 3.14) else pre(temp_1);
+ _der_x1 = 0.0;
+end IndexReduction.DivFunc;
+")})));
+end DivFunc;
+
 model IndexReduction50
 	parameter StateSelect c1_ss = StateSelect.default; 
 	parameter StateSelect c2_ss = StateSelect.never; 
@@ -2380,7 +2421,7 @@ model IndexReduction51
     Real x(start = 2);
     Real y;
 equation
-    y = 0 * time;
+    y = 0*time;
     c1_phi = x - y;
     c1_phi = c2_phi;
     c1_w = der(c1_phi);
@@ -2393,6 +2434,7 @@ equation
         TransformCanonicalTestCase(
             name="IndexReduction51",
             description="Test of complicated index reduction, alias elimination, expression simplification and variability propagation issue",
+			eliminate_alias_variables=true,
             flatModel="
 fclass IndexReduction.IndexReduction51
  parameter StateSelect c1_ss = StateSelect.default /* StateSelect.default */;
@@ -2405,7 +2447,7 @@ fclass IndexReduction.IndexReduction51
  Real x(start = 2);
  constant Real y = 0;
  Real _der_c2_w;
- Real _der_der_c1_phi;
+ Real _der_der_x;
 initial equation 
  x = 2;
  c1_w = 0.0;
@@ -2415,8 +2457,8 @@ equation
  c2_w = der(x);
  c2_a = _der_c2_w;
  c2_a * p = 0;
- der(c1_w) = _der_der_c1_phi;
- _der_c2_w = _der_der_c1_phi;
+ der(c1_w) = _der_der_x;
+ _der_c2_w = _der_der_x;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -2635,12 +2677,17 @@ equation
         WarningTestCase(
             name="IndexReduction57",
             description="Test warnings for state select.",
+            automatic_tearing=false,
             errorMessage="
-2 warnings found:
+3 warnings found:
 
 Warning: in file '...':
 At line 0, column 0:
   Iteration variable \"b_v\" is missing start value!
+
+Warning: in file '...':
+At line 0, column 0:
+  Iteration variable \"v1\" is missing start value!
 
 Warning: in file '...':
 At line 0, column 0:
@@ -2695,8 +2742,8 @@ public
   output Real _der_y;
   Real y;
  algorithm
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.Simple._der_F;
 
@@ -2766,17 +2813,17 @@ public
   Real y;
   Real c;
  algorithm
-  c := 0;
   _der_c := 0.0;
+  c := 0;
   for i in 1:10 loop
    if i > x then
     break;
    end if;
-   c := c + 0.5;
    _der_c := _der_c;
+   c := c + 0.5;
   end for;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.For._der_F;
 
@@ -2861,10 +2908,10 @@ public
   Real b;
   Real _der_b;
  algorithm
-  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2(x1, x2, _der_x1, _der_x2);
-  y := a + b;
+  (a, b) := IndexReduction.AlgorithmDifferentiation.FunctionCall.F2(x1, x2);
   _der_y := _der_a + _der_b;
+  y := a + b;
   return;
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F1;
 
@@ -2878,10 +2925,10 @@ public
   Real a;
   Real b;
  algorithm
-  a := x1;
   _der_a := _der_x1;
-  b := sin(x2);
+  a := x1;
   _der_b := cos(x2) * _der_x2;
+  b := sin(x2);
   return;
  end IndexReduction.AlgorithmDifferentiation.FunctionCall._der_F2;
 
@@ -2949,14 +2996,14 @@ public
   Real b;
  algorithm
   if 10 > x then
+   _der_b := 0.0;
    b := 1;
-   _der_b := 0.0;
   else
-   b := 2;
    _der_b := 0.0;
+   b := 2;
   end if;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.If._der_F;
 
@@ -3020,11 +3067,11 @@ public
   size(a) := {size(x, 1)};
   size(_der_a) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
-   a[i1] := x[i1] .^ 2;
    _der_a[i1] := 2 .* x[i1] .* _der_x[i1];
+   a[i1] := x[i1] .^ 2;
   end for;
-  y := a[1];
   _der_y := _der_a[1];
+  y := a[1];
   return;
  end IndexReduction.AlgorithmDifferentiation.InitArray._der_F;
 
@@ -3088,14 +3135,14 @@ public
   Real y;
   Real c;
  algorithm
-  c := 0;
   _der_c := 0.0;
+  c := 0;
   while c < x loop
-   c := c + 0.5;
    _der_c := _der_c;
+   c := c + 0.5;
   end while;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.While._der_F;
 
@@ -3192,10 +3239,10 @@ public
   Real b;
   Real _der_b;
  algorithm
-  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, 0, _der_x1, _der_x2);
-  y := a + b;
+  (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, 0);
   _der_y := _der_a + _der_b;
+  y := a + b;
   return;
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F1;
 
@@ -3211,13 +3258,13 @@ public
   Real b;
  algorithm
   if c < 10 then
-   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
    (_der_a, _der_b) := IndexReduction.AlgorithmDifferentiation.Recursive._der_F2(x1, x2, c + 1, _der_x1, _der_x2);
+   (a, b) := IndexReduction.AlgorithmDifferentiation.Recursive.F2(x1, x2, c + 1);
   else
-   a := x1;
    _der_a := _der_x1;
-   b := sin(x2);
+   a := x1;
    _der_b := cos(x2) * _der_x2;
+   b := sin(x2);
   end if;
   return;
  end IndexReduction.AlgorithmDifferentiation.Recursive._der_F2;
@@ -3282,8 +3329,8 @@ public
   c := 0;
   c := if x > 23 then 2 else - 2;
   c := c + 23;
-  y := sin(x);
   _der_y := cos(x) * _der_x;
+  y := sin(x);
   return;
  end IndexReduction.AlgorithmDifferentiation.DiscreteComponents._der_F;
 
@@ -3360,8 +3407,8 @@ public
   output Real _der_y;
   Real y;
  algorithm
-  y := x ^ 2;
   _der_y := 2 * x * _der_x;
+  y := x ^ 2;
   return;
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_square;
 
@@ -3373,9 +3420,9 @@ public
   Real _der_y;
   Real y;
  algorithm
-  y := x ^ 2;
-  _der_y := 2 * x * _der_x;
   _der_der_y := 2 * x * _der_der_x + 2 * _der_x * _der_x;
+  _der_y := 2 * x * _der_x;
+  y := x ^ 2;
   return;
  end IndexReduction.AlgorithmDifferentiation.PlanarPendulum._der_der_square;
 
@@ -3383,9 +3430,217 @@ end IndexReduction.AlgorithmDifferentiation.PlanarPendulum;
 ")})));
   end PlanarPendulum;
 
+model SelfReference_AssignStmt
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := x * x;
+        y := y * x;
+        annotation(smoothOrder=1);
+    end F;
+    Real a = F(time * 2);
+    Real b = der(a);
 
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_SelfReference_AssignStmt",
+            description="Test differentiation of statements with lsh variable in rhs",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt
+ Real a;
+ Real b;
+ Real _der_a;
+equation
+ a = IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F(time * 2);
+ b = _der_a;
+ _der_a = IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F(time * 2, 2);
+
+public
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * x;
+  y := y * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt.F;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  _der_y := x * _der_x + _der_x * x;
+  y := x * x;
+  _der_y := y * _der_x + _der_y * x;
+  y := y * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt._der_F;
+
+end IndexReduction.AlgorithmDifferentiation.SelfReference_AssignStmt;
+")})));
+end SelfReference_AssignStmt;
+
+model SelfReference_FunctionCall
+    function F1
+        input Real x;
+        output Real y;
+    algorithm
+        (,y) := F2(x);
+        (,y) := F2(y);
+        annotation(smoothOrder=1);
+    end F1;
+    function F2
+        input Real x;
+        output Real y;
+        output Real z;
+    algorithm
+        y := 42;
+        z := x * x;
+        z := z * x;
+        annotation(smoothOrder=1);
+    end F2;
+    Real a = F1(time * 2);
+    Real b = der(a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmDifferentiation_SelfReference_FunctionCall",
+            description="Test differentiation of statements with lsh variable in rhs",
+            flatModel="
+fclass IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall
+ Real a;
+ Real b;
+ Real _der_a;
+equation
+ a = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1(time * 2);
+ b = _der_a;
+ _der_a = IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1(time * 2, 2);
+
+public
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1
+  input Real x;
+  output Real y;
+ algorithm
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F1;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2
+  input Real x;
+  output Real y;
+  output Real z;
+ algorithm
+  y := 42;
+  z := x * x;
+  z := z * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  Real y;
+ algorithm
+  (, _der_y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2(x, _der_x);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(x);
+  (, _der_y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2(y, _der_y);
+  (, y) := IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall.F2(y);
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F1;
+
+ function IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2
+  input Real x;
+  input Real _der_x;
+  output Real _der_y;
+  output Real _der_z;
+  Real y;
+  Real z;
+ algorithm
+  _der_y := 0.0;
+  y := 42;
+  _der_z := x * _der_x + _der_x * x;
+  z := x * x;
+  _der_z := z * _der_x + _der_z * x;
+  z := z * x;
+  return;
+ end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall._der_F2;
+
+end IndexReduction.AlgorithmDifferentiation.SelfReference_FunctionCall;
+")})));
+end SelfReference_FunctionCall;
 
 end AlgorithmDifferentiation;
 
+  model AlgorithmVariability1
+    parameter Real L = 1 "Pendulum length";
+    parameter Real g =9.81 "Acceleration due to gravity";
+    Real x "Cartesian x coordinate";
+    Real y "Cartesian x coordinate";
+    Real vx "Velocity in x coordinate";
+    Real vy "Velocity in y coordinate";
+    Real lambda "Lagrange multiplier";
+    Integer i;
+  equation
+    der(x) = vx;
+    der(y) = vy;
+    der(vx) = lambda*x;
+    der(vy) = lambda*y - g;
+    x^2 + y^2 = L;
+algorithm
+    if y < 3.12 then
+        i := 1;
+    else
+        i := -1;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmVariability1",
+            description="Test so that variability calculations are done propperly for algorithms",
+            flatModel="
+fclass IndexReduction.AlgorithmVariability1
+ parameter Real L = 1 \"Pendulum length\" /* 1 */;
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ discrete Integer i;
+ Real _der_y;
+ Real _der_vx;
+ Real _der_vy;
+ Real _der_x;
+ Real _der_der_y;
+initial equation 
+ x = 0.0;
+ _der_x = 0.0;
+ pre(i) = 0;
+equation
+ der(x) = vx;
+ _der_y = vy;
+ _der_vx = lambda * x;
+ _der_vy = lambda * y - g;
+ x ^ 2 + y ^ 2 = L;
+algorithm
+ if y < 3.12 then
+  i := 1;
+ else
+  i := - 1;
+ end if;
+equation
+ 2 * x * der(x) + 2 * y * _der_y = 0.0;
+ der(_der_x) = _der_vx;
+ _der_der_y = _der_vy;
+ 2 * x * der(_der_x) + 2 * der(x) * der(x) + (2 * y * _der_der_y + 2 * _der_y * _der_y) = 0.0;
+ _der_x = der(x);
+end IndexReduction.AlgorithmVariability1;
+")})));
+  end AlgorithmVariability1;
 
 end IndexReduction;

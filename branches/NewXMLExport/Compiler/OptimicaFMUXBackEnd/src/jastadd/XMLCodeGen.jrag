@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 aspect XMLCodeGen_Optimica {
 
 	//
-	public void FTimedVariable.prettyPrint_XML(Printer p, PrintStream str, String indent){
+	public void FTimedVariable.prettyPrint_XML(Printer p, CodeStream str, String indent){
 		String namespace = "exp";
 		String tag = "TimedVariable";	
 		String tagId = "Identifier";
@@ -35,7 +35,7 @@ aspect XMLCodeGen_Optimica {
 		str.println(indent + "</"+ namespace + ":" + tag + ">");	
 	}
 	
-	public void FRelationConstraint.prettyPrint_XML(Printer p, PrintStream str, String indent) {
+	public void FRelationConstraint.prettyPrint_XML(Printer p, CodeStream str, String indent) {
 		String namespace="opt";
 		String tag = xmlTag();	
 		FExp left = getLeft();

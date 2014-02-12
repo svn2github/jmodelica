@@ -1205,9 +1205,10 @@ aspect FlatNames {
     syn String FAttribute.name()    = getName().name();
     
     syn String FAbstractFunctionCall.name();
-    eq InstFunctionCall.name()     = getNameNoTransform().name();
-    eq FFunctionCall.name()        = getNameNoTransform().name();
-    eq FBuiltInFunctionCall.name() = builtInName();
+    eq InstFunctionCall.name()      = getNameNoTransform().name();
+    eq FFunctionCall.name()         = getNameNoTransform().name();
+    eq InstRecordConstructor.name() = getRecordNoTransform().name();
+    eq FBuiltInFunctionCall.name()  = builtInName();
     
     syn String FAbstractVariable.name() = null;
     eq FVariable.name()         = getFQNameNoTransform().name();
@@ -1711,7 +1712,7 @@ aspect FlatNames {
     		return new FQNameEmpty();
     	int fp = -1;
     	String name = getName();
-    	for (int i = 0; i < first && fp >= 0; i++)
+    	for (int i = 0; i < first && (i == 0 || fp >= 0); i++)
     		fp = name.indexOf('.', fp + 1);
     	if (fp < 0 && first > 0)
     		throw new ArrayIndexOutOfBoundsException(first);
@@ -1719,7 +1720,7 @@ aspect FlatNames {
     	for (int i = first; i < last && lp >= 0; i++)
     		lp = name.indexOf('.', lp + 1);
     	if (lp < 0 && last > 0)
-    		throw new ArrayIndexOutOfBoundsException(first);
+    		throw new ArrayIndexOutOfBoundsException(last);
     	lp = name.indexOf('.', lp + 1);
     	return new FQNameString((lp < 0) ? name.substring(fp + 1) : name.substring(fp + 1, lp));
     }
@@ -2060,15 +2061,20 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myModifiableComponents() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         // TODO: Only add components that are not final or constant
-         // TODO: Are there other reasons a component might not be modifiable?
-         for (InstComponentDecl icd : getInstComponentDecls())
-             l.add(icd);
          for (InstExtends ie : getInstExtendss())
         	 l.addAll(ie.myModifiableComponents());
+         for (InstComponentDecl icd : getInstComponentDecls())
+             if (icd.isModifiable())
+                 l.add(icd);
          return l;
      }
      eq InstSimpleShortClassDecl.myModifiableComponents() = actualInstClass().myModifiableComponents();
+     
+     /**
+      * May this component be altered by a modification?
+      */
+     syn boolean InstComponentDecl.isModifiable() = !isConstant() && !getComponentDecl().hasFinal();
+     // TODO: Are there other reasons a component might not be modifiable?
      
      /**
       * \brief Returns a list of all FFunctionVariables declared as "input".
@@ -2119,11 +2125,13 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = 
-    	 myInputs(getName().myInstClassDecl());
-     // If class is a record, then function call is record constructor
-     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs(InstClassDecl icd) = 
-    	 icd.isRecord() ? icd.myModifiableComponents() : icd.myInputs();
+     syn ArrayList<InstComponentDecl> InstFunctionCall.myInputs() = getName().myInstClassDecl().myCallInputs();
+
+     /**
+      * Returns a list of all components in this class that would be inputs in a function call or 
+      * record constructor. Treats all non-records as functions.
+      */
+     syn ArrayList<InstComponentDecl> InstClassDecl.myCallInputs() = isRecord() ? myModifiableComponents() : myInputs();
     	 
      syn ArrayList<InstComponentDecl> InstFunctionCall.myOutputs() = getName().myInstClassDecl().myOutputs();
      syn ArrayList<FFunctionVariable> FFunctionCall.myInputs()     = myFFunctionDecl().myInputs();
@@ -2376,7 +2384,13 @@ aspect FlatFunctionUtils {
      eq InstNode.getChild().myLefts()             = new ArrayList<FFunctionCallLeft>();
      eq FFunctionCallEquation.getCall().myLefts() = getLefts().toArrayList();
      eq FFunctionCallStmt.getCall().myLefts()     = getLefts().toArrayList();
-
+     
+     inh FAbstractFunctionCall FExp.myFunctionCall();
+     eq Root.getChild().myFunctionCall() = null;
+     eq FFunctionCall.getChild().myFunctionCall() = this;
+     eq FFunctionCallEquation.getLeft().myFunctionCall() = getCall();
+     eq FFunctionCallStmt.getLeft().myFunctionCall() = getCall();
+     
      /**
       * Get the name this expression should use for temporary variable.
       * 

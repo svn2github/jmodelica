@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.io.*;
 import java.lang.reflect.Constructor;
 
-import org.jmodelica.util.NotNullPrintStream;
+import org.jmodelica.util.NotNullCodeStream;
 
 /**
  * Abstract base class for code generation classes. 
@@ -184,7 +184,7 @@ public abstract class AbstractGenerator {
 	public void generate(String templateFile, String outputFile) 
 	  throws FileNotFoundException {
 		try {
-			PrintStream output = new NotNullPrintStream(new File(outputFile), "UTF-8");
+			CodeStream output = new NotNullCodeStream(new PrintStream(new File(outputFile), "UTF-8"));
 			if (templateFile == null) {
                 generate(null, output, null);
 			} else {
@@ -232,7 +232,7 @@ public abstract class AbstractGenerator {
 	}
 	
 	/**
-	 * \brief Internal modes for {@see #generate(Reader, PrintStream)}.
+	 * \brief Internal modes for {@see #generate(Reader, CodeStream)}.
 	 */
 	private enum Mode { NORMAL, TAG, START, BLURB, END, END_WS, BEFORE };
 
@@ -241,10 +241,10 @@ public abstract class AbstractGenerator {
      * 
      * @param templateReader A Reader object from which the template 
      * file can be used.
-     * @param genPrinter A PrintStream object to which the generated code
+     * @param genPrinter A CodeStream object to which the generated code
      * is written.
      */
-    public void generate(Reader templateReader, PrintStream genPrinter) {
+    public void generate(Reader templateReader, CodeStream genPrinter) {
         generate(templateReader, genPrinter, null);
     }
 
@@ -252,10 +252,10 @@ public abstract class AbstractGenerator {
 	 * \brief See generate(String templateFile, String outputFile).
 	 * 
 	 * @param templateReader  a Reader object from which the template file can be used.
-	 * @param genPrinter      a PrintStream object to which the generated code is written.
+	 * @param genPrinter      a CodeStream object to which the generated code is written.
 	 * @param includeDir      directory to look for included files in. If null, includes are not supported
 	 */
-	public void generate(Reader templateReader, PrintStream genPrinter, File includeDir) {
+	public void generate(Reader templateReader, CodeStream genPrinter, File includeDir) {
 		Mode mode = Mode.BEFORE;
 
 		final String startStr = startOfBlurb();

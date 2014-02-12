@@ -14,9 +14,9 @@ FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                  -1.0000000000000000E+00,         1.0000000000000000E+00,        -1.0000000000000000E+00;
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         </matrix>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </JacobianUpdated>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ScalingUpdated><value name="block">0</value>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ResidualScalingUpdated><value name="block">0</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="scaling">        4.0000000000000000E+00,         1.0000000000000000E+00,         1.0000000000000000E+00</vector>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ScalingUpdated>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ResidualScalingUpdated>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <NewtonSolve>Newton solver invoked for<value name="block">0</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="variables">"x1", "z1", "y1"</vector>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="max">       1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308</vector>
@@ -324,9 +324,9 @@ FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         </KinsolInfo>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         Newton solver finished with<value name="kinsol_exit_flag">KIN_SUCCESS</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </NewtonSolve>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <Rescaling>Attempting rescaling in<value name="block">0</value></Rescaling>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ScalingUpdated><value name="block">0</value>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ResidualScalingUpdated><value name="block">0</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="scaling">        3.2050179086651532E+01,         2.7050179324795298E+01,         2.7050179324795298E+01</vector>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ScalingUpdated>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ResidualScalingUpdated>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <NewtonSolve>Newton solver invoked for<value name="block">0</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="variables">"x1", "z1", "y1"</vector>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="max">       1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308</vector>
@@ -362,9 +362,9 @@ FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                   1.0
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]                   1.0000000000000000E+00,         0.0000000000000000E+00,         0.0000000000000000E+00,        -1.0000000000000000E+00;
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         </matrix>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </JacobianUpdated>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ScalingUpdated><value name="block">1</value>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ResidualScalingUpdated><value name="block">1</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="scaling">        2.0000000000000000E+00,         3.0000000000000000E+00,         4.0000000000000000E+00,         1.0000000000000000E+00</vector>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ScalingUpdated>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ResidualScalingUpdated>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <NewtonSolve>Newton solver invoked for<value name="block">1</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="variables">"w2", "der(x2)", "z2", "y2"</vector>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="max">       1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308</vector>
@@ -562,9 +562,9 @@ FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         </KinsolInfo>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         Newton solver finished with<value name="kinsol_exit_flag">KIN_SUCCESS</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </NewtonSolve>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <Rescaling>Attempting rescaling in<value name="block">1</value></Rescaling>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ScalingUpdated><value name="block">1</value>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <ResidualScalingUpdated><value name="block">1</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="scaling">        3.2737754008310660E+01,         1.0087929904467846E+02,         1.7634226223630662E+02,         3.2737754008310660E+01</vector>
-FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ScalingUpdated>
+FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       </ResidualScalingUpdated>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]       <NewtonSolve>Newton solver invoked for<value name="block">1</value>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="variables">"w2", "der(x2)", "z2", "y2"</vector>
 FMIL: module = Model, log level = 4: [INFO][FMU status:OK]         <vector name="max">       1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308,        1.7976931348623157E+308</vector>

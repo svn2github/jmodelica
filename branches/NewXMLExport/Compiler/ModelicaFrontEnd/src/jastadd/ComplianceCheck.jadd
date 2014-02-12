@@ -235,27 +235,15 @@ aspect ComplianceCheck {
 		super.complianceCheck(checkType);
 		boolean left  = getLeft().size().isUnknown();
 		boolean right = getRight().size().isUnknown();
-		if (left && !right) {
-			compliance("Assigning an expression of known size to an operand of unknown size is not supported");
-		}
-		if (!left && right) {
-			compliance("Assigning an expression of unknown size to an operand of known size is not supported");
-		}
 		if ((left || right) && getLeft().type().isRecord()) {
 			compliance("Record arrays of unknown sizes are not supported");
 		}
 	}
 	
-	public void FRecordConstructor.complianceCheck(ErrorCheckType checkType) {
-		for (FExp e : getArgs())
-			if (e.size().isUnknown())
+	public void InstRecordConstructor.complianceCheck(ErrorCheckType checkType) {
+		for (InstFunctionArgument a : getArgs())
+			if (a.getFExp().size().isUnknown())
 				compliance("Unknown sizes in record constructors is not supported");
-	}
-	public void FLinspace.complianceCheck(ErrorCheckType checkType) {
-		super.complianceCheck(checkType);
-		if (inFunction() && getN().ceval().isUnknown()) {
-			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
-		}
 	}
 	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {

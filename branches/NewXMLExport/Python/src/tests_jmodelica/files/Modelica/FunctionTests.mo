@@ -251,5 +251,18 @@ model TestZeroDimArray
   Real y = f(x, time);
 end TestZeroDimArray;
 
+model TestAssertSize
+    function f
+        input Integer n;
+        input Real[2,2] d;
+		input Real t;
+        output Real[2,n] c;
+    algorithm
+        c := d;
+    end f;
+
+    Real[2,3] x = f(3,{{1,2},{3,time}}, time);
+end TestAssertSize;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

@@ -38,7 +38,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentConstants());
 		}
 	
@@ -53,7 +53,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentConstants());
 		}
 	
@@ -68,7 +68,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentParameters());
 		}
 	
@@ -83,7 +83,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentParameters());
 		}
 	
@@ -98,7 +98,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentRealConstants());
 		}
 	
@@ -113,7 +113,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentRealConstants());
 		}
 	
@@ -128,7 +128,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentRealParameters());
 		}
 	
@@ -143,7 +143,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentRealParameters());
 		}
 	
@@ -158,7 +158,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentIntegerConstants());
 		}
 	
@@ -173,7 +173,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentEnumConstants());
 		}
 	
@@ -188,7 +188,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentIntegerConstants());
 		}
 	
@@ -203,7 +203,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentEnumConstants());
 		}
 	
@@ -218,7 +218,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentIntegerParameters());
 		}
 	
@@ -233,7 +233,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentEnumParameters());
 		}
 	
@@ -248,7 +248,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentIntegerParameters());
 		}
 	
@@ -263,7 +263,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentEnumParameters());
 		}
 	
@@ -278,7 +278,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentBooleanConstants());
 		}
 	
@@ -293,7 +293,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentBooleanConstants());
 		}
 	
@@ -308,7 +308,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentBooleanParameters());
 		}
 	
@@ -323,7 +323,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentBooleanParameters());
 		}
 	
@@ -338,7 +338,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_ci", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentStringConstants());
 		}
 	
@@ -353,7 +353,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_cd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentStringConstants());
 		}
 	
@@ -368,7 +368,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_pi", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIndependentStringParameters());
 		}
 	
@@ -383,7 +383,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_pd", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDependentStringParameters());
 		}
 	
@@ -398,7 +398,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_switches", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numEventIndicators());
 		}
 	
@@ -413,7 +413,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_initial_switches", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numInitialEventIndicators());
 		}
 	
@@ -428,7 +428,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_guards", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numGuardExpInEquations());
 		}
 
@@ -443,7 +443,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_guards_init", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numGuardExpInInitialEquations());
 		}
 	
@@ -459,7 +459,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_w", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numAlgebraicContinousRealVariables());
 		}
 	
@@ -474,7 +474,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteVariables());
 		}
 	
@@ -489,7 +489,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteRealVariables());
 		}
 	
@@ -504,7 +504,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_outputs", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numOutputs());
 		}
 	
@@ -519,7 +519,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteIntegerVariables());
 		}
 	
@@ -534,7 +534,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteEnumVariables());
 		}
 	
@@ -549,7 +549,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteBooleanVariables());
 		}
 	
@@ -564,7 +564,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_d", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDiscreteStringVariables());
 		}
 	
@@ -579,7 +579,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numInputs());
 		}
 	
@@ -594,7 +594,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numRealInputs());
 		}
 	
@@ -609,7 +609,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_integer_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numIntegerInputs());
 		}
 	
@@ -624,7 +624,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_enum_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numEnumInputs());
 		}
 	
@@ -639,7 +639,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_boolean_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numBooleanInputs());
 		}
 	
@@ -654,7 +654,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_string_u", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numStringInputs());
 		}
 	
@@ -669,7 +669,7 @@ public class GenericGenerator extends AbstractGenerator {
             super("n_ext_objs", myGenerator, fclass);
         }
     
-        public void generate(PrintStream genPrinter) {
+        public void generate(CodeStream genPrinter) {
             genPrinter.print(fclass.numExternalObjectVariables());
         }
     
@@ -684,7 +684,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_equations", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numScalarEquations());
 		}
 	
@@ -699,7 +699,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_event_indicators", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
 				genPrinter.print(fclass.numEventIndicators());
 			} else {
@@ -717,7 +717,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_initial_equations", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numInitialScalarEquations());
 		}
 	
@@ -732,7 +732,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_initial_event_indicators", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (!fclass.root().options.getBooleanOption("generate_only_initial_system")) {
 				genPrinter.print(fclass.numInitialEventIndicators());
 			} else {
@@ -750,7 +750,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_initial_guess_equations", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numInitialGuessEquations());
 		}
 	
@@ -765,7 +765,7 @@ public class GenericGenerator extends AbstractGenerator {
 			super("n_real_x", myGenerator, fclass);
 		}
 	
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print(fclass.numDifferentiatedRealVariables());
 		}
 	

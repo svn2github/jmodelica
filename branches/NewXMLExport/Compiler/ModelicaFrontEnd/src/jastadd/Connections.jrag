@@ -425,7 +425,9 @@ aspect Connections {
 		}
 		
 		public void addExpandableArrayMember(InstComponentDecl var, FQName name) {
-            addVar(new ConnectionSetEntry(var, true, name));
+		    // If var is present as inner, don't add it as outer
+		    if (getConnectionSet(new ConnectionSetEntry(var, false, name)) == null)
+		        addVar(new ConnectionSetEntry(var, true, name));
 		}
 		
 		/**
@@ -657,7 +659,7 @@ aspect Connections {
 		 * Assumes that the variable is an array and that <code>i</code> is suitable.
 		 */
 		public ConnectionSetEntry specifyCell(Index i) {
-		    return new ConnectionSetEntry(cd, outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
+		    return new ConnectionSetEntry(cd.findCell(i, 0), outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
 		}
 		
 		public boolean equals(Object o) {
@@ -733,6 +735,12 @@ aspect Connections {
 			FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
 		if (buildGraph && isOverconstrainedConnection(right.getVar())) {
 			csm.getGraph().addConnection(left, right, prefix, source);
+		} else if (isArray()) {
+		    for (Index i : indices()) {
+		        ConnectionSetEntry leftEntry = left.specifyCell(i);
+                ConnectionSetEntry rightEntry = right.specifyCell(i);
+                leftEntry.getVar().connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+		    }
 		} else {
 			SortedSet<InstComponentDecl> rightChildren = right.getVar().containedInstComponents();
 			for (InstComponentDecl leftComp : containedInstComponents()) {
@@ -1473,8 +1481,8 @@ aspect OverconstrainedConnections {
 
 			/**
 			 * Set the selected root of this subgraph.
-			 * @param root: The selected root node.
-			 * @param otherRoots: A collection to add any redundant roots to.
+			 * @param root        the selected root node
+			 * @param otherRoots  a collection to add any redundant roots to
 			 * @return true if unbreakable loop found
 			 */
 			public boolean markSelectedRoot(Node root, Collection<Node> otherRoots) {

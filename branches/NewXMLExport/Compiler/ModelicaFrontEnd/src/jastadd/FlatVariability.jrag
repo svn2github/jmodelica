@@ -39,13 +39,18 @@ aspect FlatVariability {
 	eq Continuous.continuousVariability() = true;
 	
 	
+    syn int FTypePrefixVariability.compareTo(FTypePrefixVariability other)
+        = variabilityLevel() - other.variabilityLevel();
+    syn boolean FTypePrefixVariability.equals(FTypePrefixVariability other)
+        = compareTo(other) == 0;
+	
 	/**
 	 * \brief Test if variability is at most the same as <code>other</code>.
 	 * 
 	 * Uses ordering of variabilities imposed by {@link #variabilityLevel()}.
 	 */
-	syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
-		variabilityLevel() <= other.variabilityLevel();
+    syn boolean FTypePrefixVariability.lessOrEqual(FTypePrefixVariability other) = 
+            compareTo(other) <= 0;
 	
 	syn boolean FTypePrefixVariability.structuralOrLess() = lessOrEqual(fStructParameter());
 	syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
@@ -124,14 +129,15 @@ aspect FlatVariability {
 	}
 	
 	eq FAlgorithm.variability() {
-		FTypePrefixVariability var = fConstant();
+		FTypePrefixVariability rhsVar = fConstant();
+		FTypePrefixVariability lhsVar = fConstant();
 		for (FVariable fv : referencedFVariablesInLHS()) {
-			var = var.combine(fv.variability());
+			lhsVar = lhsVar.combine(fv.variability());
 		}
 		for (FVariable fv : referencedFVariablesInRHS()) {
-			var = var.combine(fv.variability());
+			rhsVar = rhsVar.combine(fv.variability());
 		}
-		return var;
+		return lhsVar.combineDown(rhsVar);
 	}
 	
 	syn boolean FAbstractEquation.isConstant() = false;
@@ -303,7 +309,7 @@ aspect FlatVariability {
     }
 
     /**
-     * Convert all continous variables that are this expression refers to into discrete variables.
+     * Convert all continous variables that this expression refers to into discrete variables.
      */
     public void FExp.makeContinuousVariablesDiscrete() {}
     

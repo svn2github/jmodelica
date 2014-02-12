@@ -513,6 +513,8 @@ equation
 fclass ArrayTests.General.ArrayTest21
  constant Real x[1] = 0;
  constant Real x[2] = 0;
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
 end ArrayTests.General.ArrayTest21;
 ")})));
 end ArrayTest21;
@@ -532,7 +534,10 @@ equation
 fclass ArrayTests.General.ArrayTest22
  constant Real x[1] = 1;
  constant Real x[2] = 1;
+ constant Real y[1] = 1;
+ constant Real y[2] = 1;
 end ArrayTests.General.ArrayTest22;
+			
 ")})));
 end ArrayTest22;
 
@@ -553,7 +558,12 @@ fclass ArrayTests.General.ArrayTest23
  constant Real x[1,2] = 1;
  constant Real x[2,1] = 1;
  constant Real x[2,2] = 1;
+ constant Real y[1,1] = 1;
+ constant Real y[1,2] = 1;
+ constant Real y[2,1] = 1;
+ constant Real y[2,2] = 1;
 end ArrayTests.General.ArrayTest23;
+			
 ")})));
 end ArrayTest23;
 
@@ -958,10 +968,18 @@ model ArrayTest36
 			description="",
 			flatModel="
 fclass ArrayTests.General.ArrayTest36
+ parameter Real c[1].x;
  parameter Real c[1].b = 1 /* 1 */;
+ parameter Real c[2].x;
  parameter Real c[2].b = 4 /* 4 */;
+ parameter Real c[3].x;
  parameter Real c[3].b = 9 /* 9 */;
+parameter equation
+ c[1].x = c[1].b;
+ c[2].x = c[2].b;
+ c[3].x = c[3].b;
 end ArrayTests.General.ArrayTest36;
+			
 ")})));
 end ArrayTest36;
 
@@ -1128,7 +1146,7 @@ Semantic error at line 821, column 7:
   Can not infer array size of the variable x
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 823, column 2:
-  The right and left expression types of equation are not compatible
+  The array sizes of right and left hand side of equation are not compatible
 ")})));
 end UnknownSize6;
 
@@ -4876,6 +4894,12 @@ fclass ArrayTests.Constructors.LongForm.LongArrayForm4
  constant Real x3[3,1] = 7;
  constant Real x3[3,2] = 8;
  constant Real x3[3,3] = 9;
+ constant Real x1[1] = 1;
+ constant Real x1[2] = 2;
+ constant Real x1[3] = 3;
+ constant Real x2[1] = 4;
+ constant Real x2[2] = 5;
+ constant Real x2[3] = 6;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -4934,6 +4958,10 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
  constant Real xx[1,2] = 2;
  constant Real xx[2,1] = 3;
  constant Real xx[2,2] = 4;
+ constant Real x[1,1] = 1;
+ constant Real x[1,2] = 2;
+ constant Real x[2,1] = 3;
+ constant Real x[2,2] = 4;
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -5114,6 +5142,34 @@ Semantic error at line 1960, column 16:
 ")})));
 end ArrayIterTest5;
 
+
+model ArrayIterTest6
+    Real x[3,2] = { { 2 * i for i in 1:2 }, { i * i for i in 2:3 }, { 1, 2 } } * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest6",
+            description="Iteration expressions as members of array constructor",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest6
+ Real x[1,1];
+ Real x[1,2];
+ Real x[2,1];
+ Real x[2,2];
+ Real x[3,1];
+ Real x[3,2];
+equation
+ x[1,1] = 2 * time;
+ x[1,2] = 4 * time;
+ x[2,1] = 4 * time;
+ x[2,2] = 9 * time;
+ x[3,1] = time;
+ x[3,2] = 2 * time;
+end ArrayTests.Constructors.Iterators.ArrayIterTest6;
+")})));
+end ArrayIterTest6;
+
+
 model ArrayIterTestUnknown1
     function f
 		input Integer a;
@@ -5127,12 +5183,13 @@ model ArrayIterTestUnknown1
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTestUnknown1",
 			description="Array constructor with iterators: vectors of length 1",
+			variability_propagation=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1
- parameter Real x[1];
- parameter Real x[2];
- parameter Real x[3];
-parameter equation
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
  ({x[1], x[2], x[3]}) = ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f(6);
 
 public
@@ -5142,8 +5199,10 @@ public
   Real[:] temp_1;
  algorithm
   size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
+  for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
+   temp_1[i2] := i2 ^ 2;
+  end for;
   for i1 in 1:max(integer(a / 2 - 1) + 1, 0) loop
-   temp_1[i1] := i1 ^ 2;
    x[i1] := temp_1[i1];
   end for;
   return;
@@ -5216,6 +5275,9 @@ fclass ArrayTests.For.ForEquation2
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
+ constant Real a.y[1] = 3;
+ constant Real a.y[2] = 2;
+ constant Real a.y[3] = 1;
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -5554,6 +5616,14 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real z[2,1,2] = 0;
  constant Real z[2,2,1] = 0;
  constant Real z[2,2,2] = 1;
+ constant Real m[1].x[1,1] = 1;
+ constant Real m[1].x[1,2] = 0;
+ constant Real m[1].x[2,1] = 0;
+ constant Real m[1].x[2,2] = 1;
+ constant Real m[2].x[1,1] = 1;
+ constant Real m[2].x[1,2] = 0;
+ constant Real m[2].x[2,1] = 0;
+ constant Real m[2].x[2,2] = 1;
 initial equation 
  y[1,1,1] = 0.0;
  y[1,1,2] = 0.0;
@@ -6146,8 +6216,150 @@ end ArrayTests.Other.ArraySize3;
 ")})));
 end ArraySize3;
 
+
+model ArraySizeInIf1
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = false;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if a then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySizeInIf1",
+			description="Test that array size errors lock if branches if possible",
+			flatModel="
+fclass ArrayTests.Other.ArraySizeInIf1
+ parameter Boolean a = false /* false */;
+ parameter Integer b = 5 /* 5 */;
+ parameter Integer c = 2 /* 2 */;
+ parameter Integer d = 1 /* 1 */;
+ constant Real e[1] = 1;
+ constant Real e[2] = 2;
+ constant Real f[1] = 1;
+end ArrayTests.Other.ArraySizeInIf1;
+")})));
+end ArraySizeInIf1;
+
+
+model ArraySizeInIf2
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = false;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if time > 2 then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="Other_ArraySizeInIf2",
+			description="Test that array size errors don't lock if branches if not possible",
+			errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Semantic error at line 6225, column 5:
+  All branches in if equation with non-parameter tests must have the same number of equations
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Semantic error at line 6226, column 9:
+  The array sizes of right and left hand side of equation are not compatible
+")})));
+end ArraySizeInIf2;
+
+
+model ArraySizeInIf3
+    function f1
+        input Integer g;
+        output Real[g] h;
+    algorithm
+        h := 1:g;
+    end f1;
+    
+    function f2
+        input Integer i;
+        output Real[div(i, 2)] j;
+        output Real[mod(i, 2)] k;
+    algorithm
+        j := 1:div(i, 2);
+        k := 1:mod(i, 2);
+    end f2;
+    
+    parameter Boolean a = true;
+    parameter Integer b = 5;
+    parameter Integer c = if a then b else div(b, 2);
+    parameter Integer d = if a then 0 else mod(b, 2);
+    Real e[c];
+    Real f[d];
+equation
+    if a then
+        e = f1(b);
+    else
+        (e, f) = f2(b);
+    end if;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySizeInIf3",
+			description="",
+			flatModel="
+fclass ArrayTests.Other.ArraySizeInIf3
+ parameter Boolean a = true /* true */;
+ parameter Integer b = 5 /* 5 */;
+ parameter Integer c = 5 /* 5 */;
+ parameter Integer d = 0 /* 0 */;
+ constant Real e[1] = 1;
+ constant Real e[2] = 2;
+ constant Real e[3] = 3;
+ constant Real e[4] = 4;
+ constant Real e[5] = 5;
+end ArrayTests.Other.ArraySizeInIf3;
+")})));
+end ArraySizeInIf3;
+
 end Other;
 
-
-  annotation(uses(Modelica(version="3.0.1")));
 end ArrayTests;

@@ -52,23 +52,22 @@ public abstract class AbstractTag {
 	/**
 	 * Generate the code for this tag if it is active.
 	 * 
-	 * @param printer A PrintStream object for output of the generated code.
+	 * @param printer A CodeStream object for output of the generated code.
 	 */
-    public void generateTag(PrintStream printer) {
+    public void generateTag(CodeStream printer) {
         if (isActive())
             generate(printer);
     }
-	
 
 	/**
 	 * Method for implementing the code generation corresponding to the tag.
 	 * 
 	 * This method should not be called directly, 
-	 * see {@link #generateTag(java.io.PrintStream)} instead.
+	 * see {@link #generateTag(org.jmodelica.util.CodeStream))} instead.
 	 * 
-	 * @param printer A PrintStream object for output of the generated code.
+	 * @param printer A CodeStream object for output of the generated code.
 	 */
-	public abstract void generate(PrintStream printer);
+	public abstract void generate(CodeStream printer);
     
     /**
      * Check if this tag should be generated.

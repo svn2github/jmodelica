@@ -391,7 +391,7 @@ aspect MemoryUse {
 		ArrayList<Counter> list = new ArrayList<Counter>();
 		list.addAll(buildNodeCountMap.values());
 		Collections.sort(list);
-		PrintStream out = new PrintStream(file);
+		CodeStream out = new CodeStream(file);
 		for (Counter c : list)
 			out.println(c);
 		out.close();

@@ -357,19 +357,21 @@ aspect FlatTypeAnalysis {
 	syn FType FEventGenExp.argType() = getX().type();
 	eq FBinEventGenExp.argType() = getX().type().numericPromotion(getY().type());
 	
-	syn FType FRecordConstructor.type() = getType();
+	eq FRecordConstructor.type() = getType();
 	syn FType FRecordConstructor.getType() {
 		FRecordType res = getRecord().recordType().fullCopy();
-		if (!(getRecord() instanceof FIdUseInstAccess)) {
-			int n = getNumArg();
-			for (int i = 0; i < n; i++) 
-				res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
-		}
+		int n = getNumArg();
+		for (int i = 0; i < n; i++)
+		    if (getArg(i).size().isUnknown())
+		        res.getComponent(i).getFType().updateRecordArraySizes(getArg(i).type());
 		return res;
 	}
+    
+    eq InstRecordConstructor.type() = getRecord().recordType();
 	
-	syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
-	eq FIdUseInstAccess.recordType()    = getInstAccess().myInstClassDecl().recordType();
+	syn FRecordType FIdUse.recordType()     = myFRecordDecl().type();
+	eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
+    syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();
 	
 	eq FTranspose.type() = 
 		getFExp().ndims() < 2 ? 
@@ -425,6 +427,8 @@ aspect FlatTypeAnalysis {
 	eq FRealType.canBeRange()      = true;
 	eq FBooleanType.canBeRange()   = true;
 	eq FEnumType.canBeRange()      = true;
+    
+    eq FArgumentExp.type() = copiedFExp().type();
 	
 	eq FLinspace.type() {
 		// TODO: check that endpoints are real

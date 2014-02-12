@@ -116,7 +116,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print("fmiVersion=\"1.0\" ");
 			genPrinter.print("modelName=\""+fclass.name()+"\" ");
 			genPrinter.print("modelIdentifier=\""+fclass.nameUnderscore()+"\" ");
@@ -153,7 +153,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		*/
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			
 			//XML standard namespace
 			String xsiNS = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
@@ -183,7 +183,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			// extract all units and beloning unit definitions
 			HashMap<String,HashSet<String>> map = new HashMap<String,HashSet<String>>();
 			for(FVariable variable:fclass.allVariables()) {
@@ -238,7 +238,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (fclass.getNumFEnumDecl() > 0) {
 				genPrinter.print("<TypeDefinitions>");
 				List<FEnumDecl> enumDecls = fclass.getFEnumDecls();
@@ -292,7 +292,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			FClass.Experiment e = fclass.experiment;
 			if (e != null) {
 				genPrinter.print("<DefaultExperiment");
@@ -322,7 +322,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			genPrinter.print("<VendorAnnotations>");
 			genPrinter.print("\n\t\t<Tool name=\"JModelica\">");
 			HashSet<String> extLibraries = fclass.externalLibraries();
@@ -370,7 +370,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			// get and sort all FVariables
 			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
 			VariableNameComparator comp = new VariableNameComparator();			
@@ -504,12 +504,12 @@ public class XMLGenerator extends GenericXMLGenerator {
 	 * Helper method generating linear variable tag such that it can be overridden in 
 	 * OptimicaXMLVariableGenerator.
 	 */
-	protected void addLinearInfo(PrintStream genPrinter, FVariable variable){
+	protected void addLinearInfo(CodeStream genPrinter, FVariable variable){
 		//isLinear
 		genPrinter.print("\n\t\t\t<isLinear>"+variable.isLinear()+"</isLinear>");
 	}
 	
-	protected void addStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
+	protected void addStartAndFixedAttribute(CodeStream genPrinter, FVariable var) {
 		FExp e_start = null;
 		Boolean isFixed;
 		
@@ -545,7 +545,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 	/*
 	 * Helper method generating all real attributes.
 	 */
-	protected void addRealAttributes(PrintStream genPrinter, FRealVariable realvariable) {
+	protected void addRealAttributes(CodeStream genPrinter, FRealVariable realvariable) {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");		
 		//quantity
@@ -586,7 +586,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 	/*
 	 * Helper method generating all integer attributes.
 	 */
-	protected void addIntegerAttributes(PrintStream genPrinter, FIntegerVariable integervariable) {
+	protected void addIntegerAttributes(CodeStream genPrinter, FIntegerVariable integervariable) {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");		
 		//quantity
@@ -612,7 +612,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 	/*
 	 * Helper method generating all integer attributes.
 	 */
-	protected void addEnumAttributes(PrintStream genPrinter, FEnumVariable enumvariable) {
+	protected void addEnumAttributes(CodeStream genPrinter, FEnumVariable enumvariable) {
 		//declaredType
 		genPrinter.print("declaredType=\""+enumvariable.myFEnumDecl().name()+"\" ");	
 		
@@ -640,7 +640,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 	/*
 	 * Helper method generating all boolean attributes.
 	 */
-	protected void addBooleanAttributes(PrintStream genPrinter, FBooleanVariable booleanvariable) {
+	protected void addBooleanAttributes(CodeStream genPrinter, FBooleanVariable booleanvariable) {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start and fixed attribute
@@ -654,7 +654,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 	/*
 	 * Helper class generating all string attributes.
 	 */
-	protected void addStringAttributes(PrintStream genPrinter, FStringVariable stringvariable) {
+	protected void addStringAttributes(CodeStream genPrinter, FStringVariable stringvariable) {
 		//declaredType
 		//genPrinter.print("declaredType=\"String\" ");
 		//start attribute
@@ -680,7 +680,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<equ:BindingEquations>");			
@@ -741,7 +741,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			if(generateEqu){
 				genPrinter.println("<equ:DynamicEquations>");			
@@ -768,7 +768,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<equ:InitialEquations>");			
@@ -794,7 +794,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			//do nothing
 		}
 		
@@ -817,7 +817,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			Boolean generateEqu = fclass.root().options.getBooleanOption("generate_xml_equations");
 			if(generateEqu) {
 				genPrinter.println("<fun:FunctionsList>");			
@@ -845,7 +845,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 * (non-Javadoc)
 		 * @see org.jmodelica.codegen.AbstractTag#generate(java.io.PrintStream)
 		 */
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 
 		if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
 			return;

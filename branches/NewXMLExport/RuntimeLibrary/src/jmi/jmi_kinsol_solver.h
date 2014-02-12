@@ -100,7 +100,8 @@ extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
 extern void dgecon_(char *norm, int *n, double *a, int *lda, double *anorm, double *rcond, 
              double *work, int *iwork, int *info);
-
+extern double dlange_(char *norm, int *m, int *n, double *a, int *lda,
+             double *work);
 extern int dgeequ_(int *m, int *n, double *a, int *
     lda, double *r__, double *c__, double *rowcnd, double 
     *colcnd, double *amax, int *info);

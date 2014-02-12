@@ -342,7 +342,8 @@ aspect ErrorCheck {
   // TODO: find way to move side-effects out from inh attr
   inh boolean FExp.lockBranch(ErrorCheckType checkType);
   inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
-  inh boolean FIfEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
   eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
@@ -591,6 +592,8 @@ aspect InstanceErrorCheck {
 	    			getConditionalAttribute().collectErrors(checkType);
 	    		if (isActive() && hasInstModification())
 	    			getInstModification().collectErrors(checkType);
+                for (InstModification im : getMergedEnvironment())
+                    im.checkModificationNames(checkType);
 	    		
 	    		if (shouldCheckInto(checkType)) {
   		  		    errorChecked = false;
@@ -601,6 +604,12 @@ aspect InstanceErrorCheck {
 	    	}
 		}
 	}
+    
+    public void InstModification.checkModificationNames(ErrorCheckType checkType) {}
+    
+    public void InstElementModification.checkModificationNames(ErrorCheckType checkType) {
+        getName().allChecks(checkType);
+    }
 	
 	syn boolean InstComponentDecl.shouldCheckInto(ErrorCheckType checkType) =
 	        !isDisabled() || checkType.checkInactiveComponents() || root().options.getBooleanOption("check_inactive_contitionals");
@@ -703,7 +712,7 @@ aspect InstanceErrorCheck {
 	}
     syn boolean FExp.canEvaluateAsStructural() {
         for (FExp n : childFExps())
-            if (n.canEvaluateAsStructural())
+            if (!n.canEvaluateAsStructural())
                 return false;
         return true;
     }
@@ -802,10 +811,6 @@ aspect InstanceErrorCheck {
 		if (!errorChecked) {
 		    super.collectErrors(checkType);
 		    errorChecked = true;
-		    // TODO: The InstComponentDecl doesn't really have enough information to check this, 
-		    //       as it doesn't know about the original declaration or constraining type.
-		    //       Fixing that might need redesign of this part of the instance tree
-		    getInstComponentDecl().checkRedeclares(checkType);
 		}
 	}
 	
@@ -854,8 +859,8 @@ aspect InstanceErrorCheck {
 
 	public void InstClassRedeclare.collectErrors(ErrorCheckType checkType) {
 		super.collectErrors(checkType);
-		if (!inInstComponent())
-			getInstClassDecl().collectErrors(checkType);	
+//		if (!inInstComponent())
+//			getInstClassDecl().collectErrors(checkType);	
 	}
 
 	public void InstValueModification.collectErrors(ErrorCheckType checkType) {
@@ -1088,8 +1093,9 @@ aspect InstanceErrorCheck {
 	}
 	
 	syn String FAbstractFunctionCall.functionCallDecription() = "Calling function " + name() + "()";
-	eq FRecordConstructor.functionCallDecription() = "Record constructor for " + name();
-	eq InstFunctionCall.functionCallDecription()   = getName().myInstClassDecl().isRecord() ? 
+	eq FRecordConstructor.functionCallDecription()    = "Record constructor for " + name();
+    eq InstRecordConstructor.functionCallDecription() = "Record constructor for " + name();
+	eq InstFunctionCall.functionCallDecription()      = getName().myInstClassDecl().isRecord() ? 
 			"Record constructor for " + name() : super.functionCallDecription();
 	  
 	public boolean InstFunctionArgument.generateUnbindableError(String desc, boolean genForPos) {

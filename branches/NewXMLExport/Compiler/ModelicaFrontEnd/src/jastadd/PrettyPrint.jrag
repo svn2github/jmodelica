@@ -14,39 +14,56 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
 
-import org.jmodelica.util.NotNullPrintStream;
+import org.jmodelica.util.CodeStream;
+import org.jmodelica.util.NotNullCodeStream;
 
 aspect BasePrinter {
 
 	// superclass to all classes that perform the dispatch
     public class Printer {
+        
+        private static final Map<String,Map<String,String>> INDENT_MAPS = new HashMap<String,Map<String,String>>();
+        private final Map<String,String> INDENTS;
 		
 		protected String step;
 		
 		public Printer(String step) {
 			this.step = step;
+			Map<String,String> indents = INDENT_MAPS.get(step);
+			if (indents == null) {
+			    indents = new HashMap<String,String>();
+			    INDENT_MAPS.put(step, indents);
+			}
+			INDENTS = indents;
 		}
 		
 		public String indent(String old) {
-			return old + step;
+		    String res = INDENTS.get(old);
+		    if (res == null) {
+		        res = old + step;
+		        INDENTS.put(old, res);
+		    }
+			return res;
 		}
 
-		public void print(ASTNode node, PrintStream str, String indent) { 
+		public void print(ASTNode node, CodeStream str, String indent) { 
   		}
 
-		public void print(Collection<? extends ASTNode> nodes, PrintStream str, String indent) {
+		public void print(Collection<? extends ASTNode> nodes, CodeStream str, String indent) {
 			for (ASTNode node : nodes)
 				print(node, str, indent);
   		}
+		
+		public void print(String s, CodeStream str) {
+		    str.print(s);
+		}
   		
   		public String op(FBinExp e) { return e.op(); }
   		
 	}
-	
 }
 
 aspect PrettyPrint {
@@ -57,7 +74,7 @@ aspect PrettyPrint {
 			super(" ");
 		}
 		
- 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 		public void print(ASTNode node, CodeStream str, String indent) { 
  			node.prettyPrint(this, str, indent); 
  		}
 	}
@@ -68,7 +85,7 @@ aspect PrettyPrint {
 			super(" ");
 		}
 		
-		public void print(ASTNode node, PrintStream str, String indent) { 
+		public void print(ASTNode node, CodeStream str, String indent) { 
  			node._dumpTree(this, str, indent); 
  		}
 	}
@@ -96,12 +113,12 @@ aspect PrettyPrint {
 	
 	static PrettyPrinter ASTNode.prettyPrinter = new PrettyPrinter();
 	
-	public void ASTNode._dumpTree(PrintStream str, String indent) {
+	public void ASTNode._dumpTree(CodeStream str, String indent) {
  		_dumpTree(new DumpTreePrinter(),str,indent);
 	}
 
 	// dump node names
-	public void ASTNode._dumpTree(Printer p, PrintStream str, String indent) {
+	public void ASTNode._dumpTree(Printer p, CodeStream str, String indent) {
  		str.print(indent + getClass().getSimpleName() + "\n");
  		for(int i = 0; i < getNumChild(); i++)
    			p.print(getChild(i),str,p.indent(indent)); // distpatch through Printer
@@ -109,7 +126,7 @@ aspect PrettyPrint {
 
 	public String ASTNode.prettyPrint(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream str = new NotNullPrintStream(os);
+		CodeStream str = new NotNullCodeStream(os);
 		prettyPrint(str, indent);
 		return os.toString();
 	}
@@ -119,12 +136,12 @@ aspect PrettyPrint {
 		return super.prettyPrint(indent);
 	}
 
-	public void ASTNode.prettyPrint(PrintStream str,String indent) {
+	public void ASTNode.prettyPrint(CodeStream str,String indent) {
  		prettyPrint(prettyPrinter,str,indent);
 	}
 	
 	
-	public void ASTNode.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ASTNode.prettyPrint(Printer p, CodeStream str, String indent) {
   		for (ASTNode n : this)
    			p.print(n, str, indent);
 	}
@@ -135,7 +152,7 @@ aspect PrettyPrint {
 	 * Typical use: <code>list.prettyPrintWithSep(p, str, indent, ", ");</code> 
 	 * (Prints comma-separated list.)
 	 */
-	public void List.prettyPrintWithSep(Printer p, PrintStream str, String indent, String sep) {
+	public void List.prettyPrintWithSep(Printer p, CodeStream str, String indent, String sep) {
 		String prefix = "";
 		for (ASTNode n : this) {
 			str.print(prefix);
@@ -146,7 +163,7 @@ aspect PrettyPrint {
 	
 	public String List.toString() {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream str = new PrintStream(os);
+		CodeStream str = new CodeStream(os);
 		prettyPrintWithSep(prettyPrinter, str, "", ", ");
 		return os.toString();
 	}
@@ -157,7 +174,7 @@ aspect PrettyPrint {
 	 * Typical use: <code>prettyPrintWithSep(list, p, str, indent, ", ");</code> 
 	 * (Prints comma-separated list.)
 	 */
-	public static void ASTNode.prettyPrintWithSep(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, String sep) {
+	public static void ASTNode.prettyPrintWithSep(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String sep) {
 		String prefix = "";
 		for (ASTNode n : l) {
 			str.print(prefix);
@@ -170,7 +187,7 @@ aspect PrettyPrint {
 	 * \brief Prints a list of any type of ASTNode, adding <code>prefix</code> before each node and 
 	 * <code>suffix</code> after each node.
 	 */
-	public void List.prettyPrintWithFix(Printer p, PrintStream str, String indent, String prefix, String suffix) {
+	public void List.prettyPrintWithFix(Printer p, CodeStream str, String indent, String prefix, String suffix) {
 		for (ASTNode n : this) {
 			str.print(prefix);
 			p.print(n, str, indent);
@@ -182,7 +199,7 @@ aspect PrettyPrint {
 	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>prefix</code> before each node and 
 	 * <code>suffix</code> after each node.
 	 */
-	public static void ASTNode.prettyPrintWithFix(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, String prefix, String suffix) {
+	public static void ASTNode.prettyPrintWithFix(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String prefix, String suffix) {
 		for (ASTNode n : l) {
 			str.print(prefix);
 			p.print(n, str, indent);
@@ -194,7 +211,7 @@ aspect PrettyPrint {
 	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
-	public void List.prettyPrintWithIndent(Printer p, PrintStream str, String indent, String suffix) {
+	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent, String suffix) {
 		prettyPrintWithFix(p, str, indent, indent, suffix + "\n");
 	}
 	
@@ -202,7 +219,7 @@ aspect PrettyPrint {
 	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * <code>suffix</code> plus a line break after after each node.
 	 */
-	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent, String suffix) {
+	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent, String suffix) {
 		prettyPrintWithFix(l, p, str, indent, indent, suffix + "\n");
 	}
 	
@@ -210,7 +227,7 @@ aspect PrettyPrint {
 	 * \brief Prints a list of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * a line break after after each node.
 	 */
-	public void List.prettyPrintWithIndent(Printer p, PrintStream str, String indent) {
+	public void List.prettyPrintWithIndent(Printer p, CodeStream str, String indent) {
 		prettyPrintWithFix(p, str, indent, indent, "\n");
 	}
 	
@@ -218,17 +235,17 @@ aspect PrettyPrint {
 	 * \brief Prints an ArrayList of any type of ASTNode, adding <code>indent</code> before each node and 
 	 * a line break after after each node.
 	 */
-	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, PrintStream str, String indent) {
+	public static void ASTNode.prettyPrintWithIndent(java.util.List<? extends ASTNode> l, Printer p, CodeStream str, String indent) {
 		prettyPrintWithFix(l, p, str, indent, indent, "\n");
 	}
 	
-	public void Program.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Program.prettyPrint(Printer p, CodeStream str, String indent) {
 		for (StoredDefinition sd : getUnstructuredEntitys()) {
 			p.print(sd,str,indent);
 		}
 	}
  	
- 	public void StoredDefinition.prettyPrint(Printer p, PrintStream str, String indent) {
+ 	public void StoredDefinition.prettyPrint(Printer p, CodeStream str, String indent) {
  		if (hasWithin()) {
  			str.print(indent + "within");
  			if (getWithin().hasPackageName()) {
@@ -246,7 +263,8 @@ aspect PrettyPrint {
 	// specialize behavior for A
 	
 	
-    public void ShortClassDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void ShortClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);
 	    if (hasEncapsulated())
 	    	str.print("encapsulated ");
 	    if (hasPartial())
@@ -263,7 +281,7 @@ aspect PrettyPrint {
 	    	str.print("replaceable ");
 	    
 	    
-	    str.print(indent + getRestriction().toString());
+	    str.print(getRestriction().toString());
  		str.print(" " + getName().getID());
 	    str.print(" = ");
 	    str.print(getExtendsClauseShortClass().getSuper().name());
@@ -276,7 +294,8 @@ aspect PrettyPrint {
 	    
 	}
 	
-	public void FullClassDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FullClassDecl.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(indent);
 	    if (hasEncapsulated())
 	    	str.print("encapsulated ");
 	    if (hasPartial())
@@ -293,7 +312,7 @@ aspect PrettyPrint {
 	    	str.print("replaceable ");
 	    
  		
- 		str.print(indent + getRestriction().toString());
+ 		str.print(getRestriction().toString());
  		str.print(" " + getName().getID() + "\n");
 
 		
@@ -357,7 +376,7 @@ aspect PrettyPrint {
 		str.print(indent + "end " + getName().getID());
 	} 
 	
-	public void Algorithm.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Algorithm.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		if (hasInitial())
 			str.print("initial ");
@@ -368,7 +387,7 @@ aspect PrettyPrint {
 		}
 	}
 	
-	public void AssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void AssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getLeft(), str, indent);
 		str.print(":=");
@@ -376,7 +395,7 @@ aspect PrettyPrint {
 		str.println(';');
 	}
 	
-	public void FunctionCallStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FunctionCallStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print('(');
 		boolean first = true;
@@ -391,17 +410,17 @@ aspect PrettyPrint {
 		str.println(';');
 	}
 	
-	public void BreakStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void BreakStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.println("break;");
 	}
 	
-	public void ReturnStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ReturnStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.println("return;");
 	}
 	
-	public void IfStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void IfStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("if ");
 		boolean first = true;
@@ -419,7 +438,7 @@ aspect PrettyPrint {
 		str.println("end if;");
 	}
 	
-	public void ElseClause.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ElseClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumStmt() > 0) {
 			str.print(indent);
 			str.println("else");
@@ -430,7 +449,7 @@ aspect PrettyPrint {
 	}
 	
 	
-	public void WhenStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void WhenStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("when ");
 		boolean first = true;
@@ -446,7 +465,7 @@ aspect PrettyPrint {
 		str.println("end when;");
 	}
 	
-	public void IfWhenClause.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void IfWhenClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getTest(), str, indent);
 		str.println(" then");
 		for (Statement s : getStatements()) {
@@ -454,7 +473,7 @@ aspect PrettyPrint {
 		}
 	}
 	
-	public void ForStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("for ");
 		boolean first = true;
@@ -469,12 +488,12 @@ aspect PrettyPrint {
 		str.print(indent);
 		str.println("end for;");
 	}
-	public void ForStmtList.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ForStmtList.prettyPrint(Printer p, CodeStream str, String indent) {
 		for (Statement stmt : getStmts())
 			p.print(stmt, str, indent);
 	}
 	
-	public void WhileStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void WhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("while ");
 		p.print(getTest(), str, indent);
@@ -485,7 +504,7 @@ aspect PrettyPrint {
 		str.println("end while;");
 	}
 	
-	public void ForIndex.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getForIndexDecl().name());
 		if (hasExp()) {
 			str.print(" in ");
@@ -494,12 +513,12 @@ aspect PrettyPrint {
 	}
 	
 	// For debugging
-	public void LibNode.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void LibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.format("%s%structured library '%s' at '%s'\n", indent, 
 				(getStructured() ? "S" : "Uns"), getName(), getFileName());
 	}
 
-	public void ComponentDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);//+getVisibilityType().toString()+" ";
 		
 		if (hasRedeclare())
@@ -525,26 +544,29 @@ aspect PrettyPrint {
 		str.print(" " + getName().getID()); 
 	    if (hasVarArraySubscripts())
 			p.print(getVarArraySubscripts(),str,indent);
-		 p.print(getModificationOpt(),str,indent);
+		p.print(getModificationOpt(),str,indent);
+		 
+		if (hasConditionalAttribute()) 
+		    p.print(getConditionalAttribute(), str, indent);
 				 
-		if (hasConstrainingClause()) {
-		  p.print(getConstrainingClause(),str,indent);
-		
-		}		 
-
-				    
+		if (hasConstrainingClause()) 
+		    p.print(getConstrainingClause(), str, indent);
 	}
 
-	public void ConstrainingClause.prettyPrint(Printer p, PrintStream str, String indent) {
-       str.print(" constrainedby " + getAccess().name());
-       if (hasClassModification()) {
-    	   str.print(' ');
-	       p.print(getClassModification(),str,indent);
-       }
+    public void ConditionalAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" if ");
+        p.print(getExp(), str, indent);
+    }
 
+	public void ConstrainingClause.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" constrainedby " + getAccess().name());
+        if (hasClassModification()) {
+    	    str.print(' ');
+	        p.print(getClassModification(), str, indent);
+        }
 	}
 
-	public void ArraySubscripts.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumSubscript()>0) {
 			str.print("[");
 			for (int i=0;i<getNumSubscript();i++) {
@@ -556,15 +578,15 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void ColonSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ColonSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 	
-	public void ExpSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ExpSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getExp(),str,indent);
 	}
 
-	public void RangeExp.prettyPrint(Printer p, PrintStream str, String indent) { 
+	public void RangeExp.prettyPrint(Printer p, CodeStream str, String indent) { 
 		for (int i=0;i<getNumExp();i++) {
 			p.print(getExp(i),str,indent);
 			if (i<getNumExp()-1)
@@ -572,24 +594,24 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void ExtendsClause.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ExtendsClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent + "extends ");
 		p.print(getSuper(),str,indent);
 		p.print(getClassModificationOpt(),str,indent);
 	}
 
-	public void CompleteModification.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void CompleteModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getClassModification(),str,indent);
 		if (hasValueModification())
 		  p.print(getValueModification(),str,indent);
 	}
 	
-	public void ValueModification.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ValueModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(" = ");
 		p.print(getExp(),str,indent);
 	}
 	
-	public void ClassModification.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("(");
 		for (int i = 0; i < getNumArgument(); i++) {
 			p.print(getArgument(i), str, indent);
@@ -599,7 +621,7 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 	
-	public void ElementModification.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ElementModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (hasEach())
 			str.print(getEach() + " ");
 		if (hasFinal())
@@ -610,7 +632,7 @@ aspect PrettyPrint {
 	}
 
 
-	public void ComponentRedeclare.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ComponentRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (hasEach())
 			str.print(getEach().toString() + " ");
 		if (hasFinal())
@@ -620,7 +642,7 @@ aspect PrettyPrint {
 
 	}
 
-	public void ClassRedeclare.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ClassRedeclare.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (hasEach())
 			str.print(getEach().toString() + " ");
 		if (hasFinal())
@@ -630,18 +652,18 @@ aspect PrettyPrint {
 
 	}	
 
-	public void Opt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Opt.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumChild()>0)
 			p.print(getChild(0),str,indent);
 	}
 
-	public void Equation.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void Equation.prettyPrint(Printer p,CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(" = ");
 		p.print(getRight(),str,indent);
 	}
 
-	public void ConnectClause.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void ConnectClause.prettyPrint(Printer p,CodeStream str, String indent) {
 		str.print("connect(");
 		p.print(getConnector1(),str,indent);
 		str.print(",");
@@ -649,14 +671,14 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 	
-	public void DotAddExp.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void DotAddExp.prettyPrint(Printer p,CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		if(!(getRight() instanceof NegExp)) 
 			str.print(op());
 		p.print(getRight(),str,indent);
 	}
 		
-	public void DotSubExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void DotSubExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(op());
 		if (getRight().isAddOrSub()) {
@@ -667,7 +689,7 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void DotMulExp.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void DotMulExp.prettyPrint(Printer p,CodeStream str, String indent) {
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -683,7 +705,7 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void DotDivExp.prettyPrint(Printer p, PrintStream str, String indent){
+	public void DotDivExp.prettyPrint(Printer p, CodeStream str, String indent){
 		if (getLeft().isAddOrSub()) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -696,7 +718,7 @@ aspect PrettyPrint {
 		str.print(")");
 	}
 		
-	public void DotPowExp.prettyPrint(Printer p, PrintStream str, String indent){
+	public void DotPowExp.prettyPrint(Printer p, CodeStream str, String indent){
 		if (!(getLeft().isPrimary())) {
 			str.print("(");
 			p.print(getLeft(),str,indent);
@@ -712,7 +734,7 @@ aspect PrettyPrint {
 			p.print(getRight(),str,indent);
 	}
 		
-	public void NegExp.prettyPrint(Printer p,PrintStream str, String indent){
+	public void NegExp.prettyPrint(Printer p,CodeStream str, String indent){
 		str.print("-");
 		if (getExp().isAddOrSub()) {
 			str.print("(");
@@ -722,16 +744,16 @@ aspect PrettyPrint {
 			p.print(getExp(),str,indent);
 	}
 	
-	public void IfExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void IfExp.prettyPrint(Printer p, CodeStream str, String indent) {
         prettyPrintAsElseExp(p, str, indent);
     }
     
-    public void Exp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+    public void Exp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
         str.print(' ');
         p.print(this, str, indent);
     }
     
-    public void IfExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+    public void IfExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
         str.print("if ");
         p.print(getIfExp(), str, indent);
         str.print(" then ");
@@ -740,30 +762,30 @@ aspect PrettyPrint {
         getElseExp().prettyPrintAsElseExp(p, str, indent);
     }
 	
-	public void RealLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void RealLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getUNSIGNED_NUMBER());
 	}
 
-	public void IntegerLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void IntegerLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getUNSIGNED_INTEGER());
 	}
 	
-	public void TimeExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void TimeExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("time");
 	}
 
-	public void EndExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void EndExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("end");
 	}
 	
-	public void FunctionCall.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FunctionCall.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getName(),str,indent);
 		str.print("("); 
 		p.print(getFunctionArgumentsOpt(),str,indent);
 		str.print(")");
 	}
 
-	public void FunctionArguments.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FunctionArguments.prettyPrint(Printer p, CodeStream str, String indent) {
 		for (int i=0; i<getNumExp(); i++) {
 			p.print(getExp(i),str,indent);
 			if (i<getNumExp()-1)
@@ -771,56 +793,56 @@ aspect PrettyPrint {
 		}
 	}
 
-	public void NamedAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void NamedAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getID());
 	}
 		
-	public void Dot.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Dot.prettyPrint(Printer p, CodeStream str, String indent) {
 		getAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
 	
-	public void PN_Dot.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void PN_Dot.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(".");
 		p.print(getRight(),str,indent);	
 	}
 		
-	public void GlobalAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void GlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(".");
 		p.print(getAccess(),str,indent);	
 	}
 	
-	public void ComponentAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ComponentAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getID());
 		if (hasArraySubscripts())
 			p.print(getArraySubscripts(),str,indent);
 	}
 	
-	public void StringLitExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void StringLitExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("\"" + getSTRING() + "\"");
 	}
 
-	public void BooleanLitExpTrue.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void BooleanLitExpTrue.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("true");
 	}
 
-	public void BooleanLitExpFalse.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void BooleanLitExpFalse.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("false");
 	}
 	
-	public void ArrayConstructor.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void ArrayConstructor.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("{");
 		p.print(getFunctionArguments(),str,indent);
 		str.print("}");
 	}
 	
-	public void Matrix.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void Matrix.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("[");
 		getRows().prettyPrintWithSep(p, str, indent, "; ");
 		str.print("]");
 	}
 	
-	public void MatrixRow.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void MatrixRow.prettyPrint(Printer p, CodeStream str, String indent) {
 		getExps().prettyPrintWithSep(p, str, indent, ", ");
 	}
 	
@@ -831,7 +853,7 @@ aspect PrettyPrint {
 	eq AccessExp.isPrimary() = true;
 	eq RealLitExp.isPrimary() = true;
 
-	public void LogBinExp.prettyPrint(Printer p,PrintStream str, String indent) {
+	public void LogBinExp.prettyPrint(Printer p,CodeStream str, String indent) {
 		//str.print("((");
 		p.print(getLeft(),str,indent);
 		//str.print(")"+op()+"(");
@@ -860,7 +882,7 @@ aspect PrettyPrint {
 	eq DotDivExp.op() = "./";
 	eq DotPowExp.op() = ".^";
 	
-	public void NotExp.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void NotExp.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("not ");
 		p.print(getExp(),str,indent);
 	}
@@ -892,7 +914,7 @@ aspect PrettyPrint {
 
 aspect FlatPrettyPrint {
 	
-	public void FClass.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
 		String nextInd = p.indent(indent);
 		str.print(indent + "fclass " + name() + "\n");
 		for (FVariable fv : getFVariables()) {
@@ -954,7 +976,7 @@ aspect FlatPrettyPrint {
 	eq FPreStringVariable.displayName()       = name();
 	eq FDummyDerivativeVariable.displayName() = derPrefixName();
 
-	public void FVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		
 		str.print(getFTypePrefixVariability());
@@ -994,7 +1016,7 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
-	public void FVariable.printFAttributes(PrintStream str, String ... attributes) {
+	public void FVariable.printFAttributes(CodeStream str, String ... attributes) {
 		boolean first = true;
 		for (String attribute : attributes) {
 			if (attributeSet(attribute)) {
@@ -1010,7 +1032,7 @@ aspect FlatPrettyPrint {
 	
 	syn boolean FAttribute.shouldPrettyPrint() = !name().equals(HGT);
 
-	public void List.prettyPrintFAttributeList(PrintStream str, Printer p) {
+	public void List.prettyPrintFAttributeList(CodeStream str, Printer p) {
 	    boolean firstAttr = true;
 	    for (ASTNode astNode : this) {
 	        FAttribute attr = (FAttribute)astNode;
@@ -1027,7 +1049,7 @@ aspect FlatPrettyPrint {
 	        str.print(")");
 	}
 	
-    public void FAttribute.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FAttribute.prettyPrint(Printer p, CodeStream str, String indent) {
 			
 						if (hasFEach())
 							str.print("each ");
@@ -1041,20 +1063,20 @@ aspect FlatPrettyPrint {
 						}
 	}
 
-    public void FFunctionDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FFunctionDecl.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(indent + "function " + name() + "\n");
     	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";");
     	p.print(getFAlgorithm(), str, indent);
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
-    public void FRecordDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FRecordDecl.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(indent + "record " + name() + "\n");
     	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
     	str.print(indent + "end " + name() + ";\n\n");
     }
 
-    public void FEnumDecl.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FEnumDecl.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(indent + "type " + getName().name() + " = enumeration(");
     	p.print(getFEnumSpecification(),str,indent);
     	str.print(")");
@@ -1067,12 +1089,12 @@ aspect FlatPrettyPrint {
     	str.print(";\n\n");
     }
     
-    public void FEquationType.prettyPrint(Printer p, PrintStream str, String indent) {}
-    public void FInitialEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FEquationType.prettyPrint(Printer p, CodeStream str, String indent) {}
+    public void FInitialEquation.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(indent + "initial ");
     }
     
-    public void FDerivedType.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "type " + getName() + " = ");
 	    	str.print(getBaseType());
@@ -1081,28 +1103,28 @@ aspect FlatPrettyPrint {
     	}
     }
     
-    public abstract void FEnumSpecification.prettyPrint(Printer p, PrintStream str, String indent);
+    public abstract void FEnumSpecification.prettyPrint(Printer p, CodeStream str, String indent);
     
-    public void FEnumUnspecified.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FEnumUnspecified.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(":");
     }
 
-    public void FEnumLiteralList.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FEnumLiteralList.prettyPrint(Printer p, CodeStream str, String indent) {
     	getFEnumLiterals().prettyPrintWithSep(p, str, indent, ", ");
     }
 
-    public void FEnumLiteral.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FEnumLiteral.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getName(), str, indent);
 		p.print(getFStringCommentOpt(), str, indent);
     }
 
-    public void FStringComment.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FStringComment.prettyPrint(Printer p, CodeStream str, String indent) {
 	   	str.print(" \"");
 	   	str.print(getComment());
 	   	str.print("\"");
     }
 
-    public void FFunctionVariable.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FFunctionVariable.prettyPrint(Printer p, CodeStream str, String indent) {
     	if (hasFTypePrefixInputOutput()) {
     		str.print(getFTypePrefixInputOutput());
     		str.print(" ");
@@ -1127,20 +1149,20 @@ aspect FlatPrettyPrint {
     	}
     }
     
-    public void FQNamePart.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FQNamePart.prettyPrint(Printer p, CodeStream str, String indent) {
     	str.print(getName());
 		if (hasFArraySubscripts())
 			p.print(getFArraySubscripts(),str,indent);				    	
     }
     
-    public void FQName.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FQName.prettyPrint(Printer p, CodeStream str, String indent) {
     }
     
-    public void FQNameString.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FQNameString.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName());
     }
     
-    public void FQNameFull.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FQNameFull.prettyPrint(Printer p, CodeStream str, String indent) {
 		for (int i = 0, n = getNumFQNamePart(); i < n; i++) {
 			p.print(getFQNamePart(i), str, indent);
 			if (i < n - 1)
@@ -1148,7 +1170,7 @@ aspect FlatPrettyPrint {
 		}    	
     }
     
-    public void FArraySubscripts.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FArraySubscripts.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumFSubscript()>0) {
 			str.print("[");
 			for (int i=0;i<getNumFSubscript();i++) {
@@ -1160,19 +1182,19 @@ aspect FlatPrettyPrint {
 		}
 	}
 
-	public void FColonSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FColonSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 
-	public void FIntegerSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIntegerSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getValue());
 	}
 	
-	public void FExpSubscript.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FExpSubscript.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getFExp(),str,indent);
 	}
 
-	protected void FRangeExp.prettyPrintExp(Printer p, PrintStream str, String indent) { 
+	protected void FRangeExp.prettyPrintExp(Printer p, CodeStream str, String indent) { 
 		for (int i=0;i<getNumFExp();i++) {
 			p.print(getFExp(i),str,indent);
 			if (i<getNumFExp()-1)
@@ -1181,7 +1203,7 @@ aspect FlatPrettyPrint {
 	}
 
 
-	public void FEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FEquation.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
     	p.print(getLeft(),str,indent);
    		str.print(" = ");
@@ -1189,7 +1211,7 @@ aspect FlatPrettyPrint {
 	}
 
 
-	public void FIfWhenElseEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIfWhenElseEquation.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		if (isElse())
    			str.print("else");
@@ -1198,21 +1220,21 @@ aspect FlatPrettyPrint {
    		prettyPrintTail(p, str, indent);
 	}
 
-	protected void FIfWhenElseEquation.prettyPrintHead(Printer p, PrintStream str, String indent) {
+	protected void FIfWhenElseEquation.prettyPrintHead(Printer p, CodeStream str, String indent) {
    		str.print("\n");
 	}
 
-	protected void FIfWhenElseEquation.prettyPrintTail(Printer p, PrintStream str, String indent) {
+	protected void FIfWhenElseEquation.prettyPrintTail(Printer p, CodeStream str, String indent) {
 	}
 
-	protected void FIfWhenEquation.prettyPrintHead(Printer p, PrintStream str, String indent) {
+	protected void FIfWhenEquation.prettyPrintHead(Printer p, CodeStream str, String indent) {
    		str.print(ifWhenType());
    		str.print(" ");
     	p.print(getTest(), str, indent);
    		str.print(" then\n");
 	}
 
-	protected void FIfWhenEquation.prettyPrintTail(Printer p, PrintStream str, String indent) {
+	protected void FIfWhenEquation.prettyPrintTail(Printer p, CodeStream str, String indent) {
    		if (hasElse()) 
    			p.print(getElse(), str, indent);
    		if (!isElse()) {
@@ -1227,7 +1249,7 @@ aspect FlatPrettyPrint {
 	eq FWhenEquation.ifWhenType() = "when";
 	
 
-	public void FConnectClause.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FConnectClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("connect(");
     	p.print(getConnector1(),str,indent);
@@ -1236,7 +1258,7 @@ aspect FlatPrettyPrint {
    		str.print(")");
 	}
 
-	public void FFunctionCallEquation.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallEquation.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		if (getNumLeft() > 0) {
 	   		str.print("(");
@@ -1246,26 +1268,26 @@ aspect FlatPrettyPrint {
    		p.print(getCall(), str, indent);
 	}
 	
-	public void FAlgorithm.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FAlgorithm.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent);
 		p.print(getType(),str,"");
 		str.print("algorithm\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";");
 	}
 	
-	public void FAssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(), str, indent);
 		str.print(" := ");
 		p.print(getRight(), str, indent);
 	}
 	
-	public void InstAssignStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(), str, indent);
 		str.print(" := ");
 		p.print(getRight(), str, indent);
 	}
 	
-	public void FFunctionCallStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FFunctionCallStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumLeft() > 0) {
 			str.print("(");
 			getLefts().prettyPrintWithSep(p, str, indent, ", ");
@@ -1274,15 +1296,15 @@ aspect FlatPrettyPrint {
 		p.print(getCall(), str, indent);
 	}
 	
-	public void FBreakStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FBreakStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("break");
 	}
 	
-	public void FReturnStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FReturnStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("return");
 	}
 	
-	public void FIfWhenStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIfWhenStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		getFIfWhenClauses().prettyPrintWithSep(p, str, indent, indent + "else");
 		prettyPrintElse(p, str, indent);
 		str.print(indent);
@@ -1290,9 +1312,9 @@ aspect FlatPrettyPrint {
 		str.print(getKeyword());
 	}
 	
-	protected void FIfWhenStmt.prettyPrintElse(Printer p, PrintStream str, String indent) {}
+	protected void FIfWhenStmt.prettyPrintElse(Printer p, CodeStream str, String indent) {}
 	
-	protected void FIfStmt.prettyPrintElse(Printer p, PrintStream str, String indent) {
+	protected void FIfStmt.prettyPrintElse(Printer p, CodeStream str, String indent) {
 		if (getNumElseStmt() > 0) {
 			str.print(indent);
 			str.print("else\n");
@@ -1300,7 +1322,7 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
-	public void FIfWhenClause.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIfWhenClause.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getKeyword());
 		str.print(" ");
 		p.print(getTest(), str, indent);
@@ -1314,7 +1336,7 @@ aspect FlatPrettyPrint {
 	inh String FIfWhenClause.getKeyword();
 	eq FIfWhenStmt.getFIfWhenClause(int i).getKeyword() = getKeyword();
 	
-	public void FForStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("for ");
 		p.print(getIndex(), str, indent);
 		str.print(" loop\n");
@@ -1323,7 +1345,7 @@ aspect FlatPrettyPrint {
 		str.print("end for");
 	}
 	
-	public void InstForStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstForStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("for ");
 		getInstForIndexList().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(" loop\n");
@@ -1332,7 +1354,7 @@ aspect FlatPrettyPrint {
 		str.print("end for");
 	}
 	
-	public void FWhileStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FWhileStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("while ");
 		p.print(getTest(), str, indent);
 		str.print(" loop\n");
@@ -1341,7 +1363,7 @@ aspect FlatPrettyPrint {
 		str.print("end while");
 	}
 	
-	public void FExternalStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FExternalStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("external ");
 		p.print(getFExternalLanguage(), str, indent);
 		str.print(" ");
@@ -1355,26 +1377,26 @@ aspect FlatPrettyPrint {
 		str.print(")");
 	}
 	
-	public void FInitArrayStmt.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
 		str.print("size(" + fv.name() + ") := {");
 		str.print(fv.size().toUnclosedString() + "}");
 	}
 	
-	public void FExternalLanguage.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("\"");
 		str.print(getLanguage());
 		str.print("\"");
 	}
 	
-	public void InstExternal.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstExternal.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("external ");
 		p.print(getFExternalLanguage(), str, indent);
 		str.print(" ");
 		p.print(getInstExternalCall(), str, indent);
 	}
 	
-	public void InstExternalCall.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstExternalCall.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (hasReturnVar()) {
 			p.print(getReturnVar(), str, indent);
 			str.print(" = ");
@@ -1448,14 +1470,13 @@ aspect FlatPrettyPrint {
 	eq FDotPowExp.getLeft().shouldhaveParenthesis() = true;
 	eq FNegExp.getFExp().shouldhaveParenthesis()    = true;
 	
-	public final void FExp.prettyPrint(Printer p, PrintStream str, String indent) {
-		int myPrecedence = precedence();
-		int parentPrecedence = parentPrecedence();
-		boolean addParenthesis = false;
-		if (myPrecedence < parentPrecedence())
-			addParenthesis = true;
-		else if (myPrecedence == parentPrecedence && shouldhaveParenthesis())
-			addParenthesis = true;
+	/**
+	 * Returns true if this exp should add parenthesis given a certain precedence.
+	 */
+	syn boolean FExp.addParenthesis(int parentPrecedence) = precedence() < parentPrecedence || precedence() == parentPrecedence && shouldhaveParenthesis();
+	
+	public final void FExp.prettyPrint(Printer p, CodeStream str, String indent) {
+		boolean addParenthesis = addParenthesis(parentPrecedence());
 		if (addParenthesis)
 			str.print('(');
 		prettyPrintExp(p, str, indent);
@@ -1463,28 +1484,28 @@ aspect FlatPrettyPrint {
 			str.print(')');
 	}
 	
-	protected abstract void FExp.prettyPrintExp(Printer p, PrintStream str, String indent);
+	protected abstract void FExp.prettyPrintExp(Printer p, CodeStream str, String indent);
 	
-	protected void FUnknownSizeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FUnknownSizeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 	
-	protected void FNegExp.prettyPrintExp(Printer p,PrintStream str, String indent){
+	protected void FNegExp.prettyPrintExp(Printer p,CodeStream str, String indent){
 		str.print("- ");
 		p.print(getFExp(),str,indent);
 	}
 	
-	protected void FMatrix.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FMatrix.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("[");
 		getFExps().prettyPrintWithSep(p, str, indent, "; ");
 		str.print("]");
 	}
 	
-	protected void FMatrixRow.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FMatrixRow.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 	}
 	
-	protected void FBinExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FBinExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getLeft(),str,indent);
 		str.print(p.op(this));
 		p.print(getRight(),str,indent);
@@ -1511,28 +1532,28 @@ aspect FlatPrettyPrint {
 	eq FDotPowExp.op()    = " .^ ";
 	eq FStringAddExp.op() = " + ";
 	
-	protected void FNoExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FNoExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		// Dummy node
 	}
 	
-	protected void FUnsupportedExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FUnsupportedExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 	}
 	
-	protected void FNotExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FNotExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("not ");
 		p.print(getFExp(),str,indent);
 	}
 	
-	protected void FIfExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FIfExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		prettyPrintAsElseExp(p, str, indent);
 	}
 	
-	public void FExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+	public void FExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
 		str.print(' ');
 		p.print(this, str, indent);
 	}
 	
-	public void FIfExp.prettyPrintAsElseExp(Printer p, PrintStream str, String indent) {
+	public void FIfExp.prettyPrintAsElseExp(Printer p, CodeStream str, String indent) {
 		str.print("if ");
 		p.print(getIfExp(), str, indent);
 		str.print(" then ");
@@ -1541,141 +1562,148 @@ aspect FlatPrettyPrint {
 		getElseExp().prettyPrintAsElseExp(p, str, indent);
 	}
 	
-	protected void FRealLitExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FRealLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getValue());
 	}
 
-	protected void FIntegerLitExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FIntegerLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getValue());
 	}
 
-	protected void FEnumLitExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FEnumLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getEnum());
 		str.print('.');
 		str.print(getValue());
 	}
 	
-	protected void FTimeExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FTimeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("time");
 	}
 
-	protected void FEndExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FEndExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("end");
 	}
 	
-	protected void FStringLitExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FStringLitExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("\"" + getString() + "\"");
 	}
 
-	protected void FBooleanLitExpTrue.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FBooleanLitExpTrue.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("true");
 	}
 
-	protected void FBooleanLitExpFalse.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FBooleanLitExpFalse.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("false");
 	}
 	
-	public void FIdUse.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIdUse.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getFQName().isScalarized())
 			str.print(name());
 		else 
 			p.print(getFQName(), str, indent);
 	}
 	
-	public void FIdUseInstAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FIdUseInstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getInstAccess(), str, indent);
 	}
 
-	protected void FIdUseExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FIdUseExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getFIdUse(), str, indent);
 	}
 
-	protected void FInstAccessExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FInstAccessExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getInstAccess(), str, indent);
 	}
 	
-	public void InstAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(name());
 		if (hasFArraySubscripts())
 			p.print(getFArraySubscripts(), str, indent);
 	}
 	
-	public void InstDot.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstDot.prettyPrint(Printer p, CodeStream str, String indent) {
 		getInstAccesss().prettyPrintWithSep(p, str, indent, ".");
 	}
 	
-	public void InstGlobalAccess.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstGlobalAccess.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(".");
 		p.print(getInstAccess(), str, indent);
 	}
 	
-	protected void FDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FDerExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(name());
 	}
 
-	protected void FDummyDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FDummyDerExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(derPrefixName());
 	}
 
-	protected void FPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FPreExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(name());
 	}
 	
-	protected void InstDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void InstDerExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("der(");
 		p.print(getFExp(),str,indent);
 		str.print(")");
 	}
 	
-	protected void InstHDerExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void InstHDerExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("der(");
 		p.print(getFExp(),str,indent);
 		str.format(",%d)", getOrder());
 	}
 
-	protected void InstPreExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void InstPreExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("pre(");
 		p.print(getFExp(),str,indent);
 		str.format(")");
 	}
 	
-	protected void FSumExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FSumExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("sum(");
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
 	
-	protected void FProductExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FProductExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("product(");
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
 	
-	protected void FFunctionCall.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FFunctionCall.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, "", ", ");
 		str.print(")");
 	}
 
-	protected void InstFunctionCall.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void InstFunctionCall.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("(");
 		getArgs().prettyPrintWithSep(p, str, "", ", ");
 		str.print(")");
 	}
 
-	public void InstDefaultArgument.prettyPrint(Printer p, PrintStream str, String indent) {
+    protected void InstRecordConstructor.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print(getRecord().name());
+        str.print("(");
+        getArgs().prettyPrintWithSep(p, str, "", ", ");
+        str.print(")");
+    }
+
+	public void InstDefaultArgument.prettyPrint(Printer p, CodeStream str, String indent) {
 		p.print(getFExp(), str, indent);
 	}
 
-	public void InstNamedArgument.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void InstNamedArgument.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
 		str.print("=");
 		p.print(getFExp(), str, indent);
 	}
 	
-	protected void FBuiltInFunctionCall.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FBuiltInFunctionCall.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(builtInName());
 		str.print("(");
 		prettyPrintArguments(p, str, indent);
@@ -1690,7 +1718,7 @@ aspect FlatPrettyPrint {
 	 * Default implementation prints all direct FExp children (including those in Lists and Opts), 
 	 * separated by {@link #SEP}.
 	 */
-	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+	protected void FBuiltInFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		String pre = "";
 		for (FExp exp : childFExps()) {
 			str.print(pre);
@@ -1699,23 +1727,23 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
-	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+	protected void FInfArgsFunctionCall.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		getFExps().prettyPrintWithSep(p, str, indent, SEP);
 	}
 	
-	protected void FFillExp.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+	protected void FFillExp.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		p.print(getFillExp(), str, indent);
 		str.print(SEP);
 		super.prettyPrintArguments(p, str, indent);
 	}
 	
-	protected void FCatExp.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+	protected void FCatExp.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		p.print(getDim(), str, indent);
 		str.print(SEP);
 		super.prettyPrintArguments(p, str, indent);
 	}
 	
-	protected void FConnPotentialRoot.prettyPrintArguments(Printer p, PrintStream str, String indent) {
+	protected void FConnPotentialRoot.prettyPrintArguments(Printer p, CodeStream str, String indent) {
 		super.prettyPrintArguments(p, str, indent);
 		if (hasPriority()) {
 			str.print(SEP);
@@ -1798,7 +1826,7 @@ aspect FlatPrettyPrint {
 	eq FConnRootedDep.builtInName()      = "rooted";
 
 
-	public void FForClauseE.prettyPrint(Printer p, PrintStream str, String indent) {
+	public void FForClauseE.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(indent+"for ");
 		getFForIndexList().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(" loop\n");
@@ -1806,9 +1834,9 @@ aspect FlatPrettyPrint {
 		str.print(indent + "end for");
 	}
 	
-	public abstract void CommonForIndex.prettyPrint(Printer p, PrintStream str, String indent);
+	public abstract void CommonForIndex.prettyPrint(Printer p, CodeStream str, String indent);
 	
-    public void FForIndex.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void FForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getFVariable().name());
         if (hasFExp()) {
             str.print(" in ");
@@ -1816,7 +1844,7 @@ aspect FlatPrettyPrint {
         }
     }
 	
-    public void InstForIndex.prettyPrint(Printer p, PrintStream str, String indent) {
+    public void InstForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getInstPrimitive().name());
         if (hasFExp()) {
             str.print(" in ");
@@ -1824,19 +1852,19 @@ aspect FlatPrettyPrint {
         }
     }
 	
-	protected void FArray.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FArray.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("{");
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 		str.print("}");
 	}
 	
-	protected void FLongArray.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FLongArray.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("array(");
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");
 		str.print(")");
 	}
 	
-	protected void FIterExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FIterExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(getFExp(), str, indent);
 		str.print(" for ");
 		for (int i = getNumForIndex() - 1; i >= 0; i--) {
@@ -1846,14 +1874,14 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
-	protected void FSubscriptedExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FSubscriptedExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("(");
 		p.print(getFExp(), str, indent);
 		str.print(")");
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
-	protected void FArgumentExp.prettyPrintExp(Printer p, PrintStream str, String indent) {
+	protected void FArgumentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(copiedFExp(), str, indent);
 	}
 	
@@ -1895,7 +1923,7 @@ aspect PrettyPrint_MC {
 			super("    ");
 		}
 		
- 		public void print(ASTNode node, PrintStream str, String indent) { 
+ 		public void print(ASTNode node, CodeStream str, String indent) { 
  			node.prettyPrint(this, str, indent); 
  		}
   		
@@ -1905,12 +1933,12 @@ aspect PrettyPrint_MC {
 	
 	public String ASTNode.prettyPrint_MC(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		PrintStream str = new PrintStream(os);
+		CodeStream str = new CodeStream(os);
 		prettyPrint(str,indent);
 		return os.toString();
 	}
 
-	public void List.prettyPrintFAttributeList_MC(PrintStream str, Printer p) {
+	public void List.prettyPrintFAttributeList_MC(CodeStream str, Printer p) {
 	
 	    boolean attrSet = false;
 	    	boolean firstAttr = true;
@@ -1939,7 +1967,7 @@ aspect PrettyPrint_MC {
 	   		}
 	}
 
-	public void FVariable.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+	public void FVariable.prettyPrint_MC(Printer p, CodeStream str, String indent) {
 			str.print(indent);
 			
 			str.print(getFTypePrefixVariability());
@@ -1980,7 +2008,7 @@ aspect PrettyPrint_MC {
 	}
 
 
-	public void FClass.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+	public void FClass.prettyPrint_MC(Printer p, CodeStream str, String indent) {
 		String nextInd = p.indent(indent);
 	
 	    p.print(getFFunctionDecls(), str, indent);
@@ -2030,19 +2058,19 @@ aspect PrettyPrint_MC {
 	}
 
 
-	public void ASTNode.prettyPrint_MC(PrintStream str, String indent) {
+	public void ASTNode.prettyPrint_MC(CodeStream str, String indent) {
  		prettyPrint_MC(printer_MC, str, indent);
 	}
 
-	public void ASTNode.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+	public void ASTNode.prettyPrint_MC(Printer p, CodeStream str, String indent) {
  		prettyPrint(p, str, indent);
 	}
 	
-	public void FIdUseExp.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+	public void FIdUseExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
 		str.print(nameUnderscore());
 	}
 	
-	public void FDerExp.prettyPrint_MC(Printer p, PrintStream str, String indent) {
+	public void FDerExp.prettyPrint_MC(Printer p, CodeStream str, String indent) {
 		str.print("der(");
 		str.print(getFIdUse().nameUnderscore());
 		str.print(")");

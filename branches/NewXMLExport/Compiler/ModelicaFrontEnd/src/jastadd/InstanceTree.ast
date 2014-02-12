@@ -165,6 +165,7 @@ InstValueModification    : InstModification ::= /FExp/
 InstClassModification    : InstModification ::= InstArgument*;
 //Virtual modification for member of record type modification.
 InstRecordModification : InstValueModification ::= <Name:String> <Value:FExp>;
+InstDefaultRecordModification : InstRecordModification ::= <Source:InstModification>;
 //Virtual modification for cell of array constant value modification.
 InstArrayModification : InstValueModification ::= <Cell:FExp>;
 

@@ -35,6 +35,7 @@
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
 #define ONE RCONST(1.0)
 #define Ith(v,i)    NV_Ith_S(v,i)
+#define UROUND 1e-15
 
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 static void jmi_update_f_scale(jmi_block_solver_t *block);
@@ -278,6 +279,21 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     return ret;
 }
 
+static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    jmi_log_node_t node = jmi_log_enter(block->log, logError, "KinsolError");
+    realtype fnorm, snorm;
+    KINGetFuncNorm(solver->kin_mem, &fnorm);
+    KINGetStepLength(solver->kin_mem, &snorm);
+    
+    jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %d>",
+        "KINSol", block->cur_time, block->id);
+    jmi_log_fmt(block->log, node, logError, "<msg: %s>", "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
+    jmi_log_fmt(block->log, node, logError, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+                fnorm, snorm, solver->kin_stol);
+    jmi_log_leave(block->log, node);
+}
+
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category;
@@ -299,6 +315,8 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         category = logError;
     }
     
+    if (err_code != KIN_LINESEARCH_NONCONV) /* If the error is LINSEARCH_NONCONV it might not be an error depending 
+                                               in on the fnorm, so post-pone this error message in these cases */
     {
         jmi_log_node_t node = jmi_log_enter(block->log, category, "KinsolError");
         jmi_log_fmt(block->log, node, category, "Error occured in <function: %s> at <t: %f> when solving <block: %d>",
@@ -345,19 +363,12 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
 /* Logging callback used by KINSOL to report progress att higher log levels */
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
     int i;
-    long int nniters;
     jmi_block_solver_t *block = eh_data;
     jmi_kinsol_solver_t* solver = block->solver;
     struct KINMemRec* kin_mem = solver->kin_mem;
     realtype* residual_scaling_factors = N_VGetArrayPointer(solver->kin_f_scale);
     jmi_log_t *log = block->log;
-    
-    jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
-    jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
-    jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
-    
-    /* Get the number of iterations */
-    KINGetNumNonlinSolvIters(kin_mem, &nniters);
+
     
     /* Only output an iteration under certain conditions:
          *  1. nle_solver_log > 2
@@ -367,21 +378,32 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
          *  This approach gives one printout per iteration
          */
 
-    if ((block->callbacks->log_options.log_level >= 5) &&
-            (((strcmp("KINSolInit",function)==0) ||
-              (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0)))
+    if ((block->callbacks->log_options.log_level >= 5))
     {
-        jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
-        jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
-        jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
-        {
-            realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
-            jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "residuals");
-            for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
-            jmi_log_leave(log, node);
+        jmi_log_node_t topnode = jmi_log_enter(log, logInfo, "KinsolInfo");
+        jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
+        jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
+        
+        if ((((strcmp("KINSolInit",function)==0) ||
+              (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
+            long int nniters;
+            /* Get the number of iterations */
+            KINGetNumNonlinSolvIters(kin_mem, &nniters);
+    
+            jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%d>", nniters);
+            jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
+            {
+                realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
+                jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
+                for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
+                jmi_log_leave(log, node);
+            }
         }
+        
+        jmi_log_leave(log, topnode);
     }
-    jmi_log_leave(log, topnode);
+    
 }
 
 /* Print out meaningfull message based on KINSOL return flag */
@@ -463,7 +485,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     else
         solver->kin_stol = block->options->min_tol;
     
-    solver->kin_ftol = block->options->res_tol;
+    solver->kin_ftol = UROUND; /* block->options->res_tol; */
     
     /* If not set, set the default */
     if (block->options->regularization_tolerance == -1){
@@ -495,7 +517,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
             double nominal = RAbs(block->nominal[i]);
             if(nominal != 1.0) {
                 if(nominal == 0.0)
-                    nominal = 1/solver->kin_ftol;
+                    nominal = 1/solver->kin_stol;
                 else
                     nominal = 1/nominal;
                 Ith(solver->kin_y_scale,i)=nominal;
@@ -708,17 +730,33 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
 }
 
 /* Estimate condition number utilizing dgecon from LAPACK*/
-static realtype jmi_calculate_condition_number(jmi_block_solver_t * block, realtype* A) {
+static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     char norm = 'I';
     int N = block->n;
-    double Jnorm = 1.0, Jcond = 1.0;
+    double J_norm = 1.0;
+    double J_recip_cond = 1.0;
     int info;
-    
-    dgecon_(&norm, &N, A, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);
+
+    /* Copy Jacobian to factorization matrix */
+    DenseCopy(solver->J, solver->J_LU);
+    /* Perform LU factorization to be used with dgecon */
+    dgetrf_(&N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
+    if (info != 0 ) {
+    	/* If matrix i singular, return something very large to be evaluated*/
+    	return 1e100;
+    }
+
+    /* Compute infinity norm of J to be used with dgecon */
+    J_norm = dlange_(&norm, &N, &N, solver->J->data, &N, solver->lapack_work);
+
+    /* Compute reciprocal condition number */
+    dgecon_(&norm, &N, solver->J_LU->data, &N, &J_norm, &J_recip_cond, solver->lapack_work, solver->lapack_iwork,&info);
+    /* To be evaluated - why is this needed? Error handling due to J being used instead of J_LU?
     if(Jcond < 0) Jcond = -Jcond;
     if(Jcond == 0.0) Jcond = 1e-30;
-    return 1.0/Jcond;
+    */
+    return 1.0/J_recip_cond;
 }
 
 /* Callback from KINSOL called to calculate Jacobian */
@@ -761,7 +799,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(info != 0 ) {
         solver->J_is_singular_flag = 1;
-        jmi_log_node(block->log, logWarning, "Warning", "Singular Jacobian detected when factorizing in linear solver. "
+        jmi_log_node(block->log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
                      "Will try to regularize the equations in <block: %d>", block->id);
         if(N > 1) {
             jmi_kinsol_reg_matrix(block);
@@ -774,7 +812,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
                              "<JacobianConditionEstimate:%E> large values may lead to convergence problems.", cond);
         }
         */
-        solver->J_is_singular_flag = 0;        
+        solver->J_is_singular_flag = 0;
     }
     
     if(solver->force_new_J_flag ) {
@@ -800,7 +838,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     
     int N = block->n;
     char trans = 'N';
-    int ret, i;
+    int ret = 0, i;
     
     solver->updated_jacobian_flag = 0; /* The Jacobian is no longer current */
     
@@ -892,6 +930,25 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
 			ret = 0;
         }
+
+		/* Evaluate discrete variables after a regularization. */
+		if (block->at_event) {
+            jmi_log_node_t inner_node;
+			if(block->callbacks->log_options.log_level >= 5) {
+                inner_node =jmi_log_enter_fmt(block->log, logInfo, "RegularizationDiscreteUpdate", 
+                                "Evaluating switches after regularization.");
+                jmi_log_fmt(block->log, inner_node, logInfo, "Pre discrete variables");
+                block->log_discrete_variables(block->problem_data, inner_node);
+			}
+
+            block->F(block->problem_data, block->x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
+            
+            if(block->callbacks->log_options.log_level >= 5) {
+                jmi_log_fmt(block->log, inner_node, logInfo, "Post discrete variables");
+                block->log_discrete_variables(block->problem_data, inner_node);
+                jmi_log_leave(block->log, inner_node);
+			}
+		}
     }
     else {
         /* Normal linear system solve (with LU) to get Newton step */
@@ -899,14 +956,14 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         i = 1;
         
         if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J_LU->data, N, N);
-            jmi_log_reals(block->log, node, logInfo, "b", xd, N);
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J->data, N, N);
+            jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
         dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
         
         if((block->callbacks->log_options.log_level >= 6)) {
-            jmi_log_reals(block->log, node, logInfo, "x", xd, N);
+            jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
             jmi_log_leave(block->log, node);
         }
     }
@@ -1012,7 +1069,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         }
 
         if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ScalingUpdated", "<block:%d>", block->id);
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%d>", block->id);
             jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
             realtype* res = scale_ptr;
             for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
@@ -1022,10 +1079,10 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     }
     
     if (solver->using_max_min_scaling_flag) {
-        realtype cond = jmi_calculate_condition_number(block, solver->J->data);
+        realtype cond = jmi_calculate_jacobian_condition_number(block);
 
-        jmi_log_node(block->log, logInfo, "ConditionNumber",
-            "Calculated condition number in <block: %d>. Regularizing if <cond: %E> greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
+        jmi_log_node(block->log, logInfo, "Regularization",
+            "Calculated condition number in <block: %d>. Regularizing if <cond: %E> is greater than <regtol: %E>", block->id, cond, solver->kin_reg_tol);
         if (cond > solver->kin_reg_tol) {
             if(N > 1) {
                 int info;
@@ -1096,7 +1153,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     /*NOTE: it'd be nice to use "jmi->newton_tolerance" here
       However, newton_tolerance is not set yet at this point.
     */
-    solver->kin_ftol = block->options->min_tol;
+    solver->kin_ftol = UROUND; /* block->options->min_tol; */
     solver->kin_stol = block->options->min_tol;
     solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
     
@@ -1192,6 +1249,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     if(solver->num_bounds > 0) {
         free(solver->bound_vindex);
         free(solver->bound_kind);
+        free(solver->bound_limiting);
         free(solver->bounds);
         free(solver->active_bounds);
     }
@@ -1280,16 +1338,17 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     if(block->init) {
         jmi_kinsol_init(block);
     }
-    
-    /* Read initial values for iteration variables from variable vector.
-     * This is needed if the user has changed initial guesses in between calls to
-     * Kinsol.
-     */
-    flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
-    if(flag) {        
-        jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
-                     "when reading initial guess.", flag, block->id);
-        return flag;
+    else {
+        /* Read initial values for iteration variables from variable vector.
+        * This is needed if the user has changed initial guesses in between calls to
+        * Kinsol.
+        */
+        flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
+        if(flag) {        
+            jmi_log_node(log, logWarning, "Error", "<errorCode: %d> returned from <block: %d> "
+                         "when reading initial guess.", flag, block->id);
+            return flag;
+        }
     }
 
     /* update the scaling only once per time step */
@@ -1304,7 +1363,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
             
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
         KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;
@@ -1316,17 +1374,18 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
              from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
              value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
              as a success. Commenting out this code since it causes problems.*/
-        else if (flag == KIN_LINESEARCH_NONCONV) {
+        else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
             realtype fnorm;
             KINGetFuncNorm(solver->kin_mem, &fnorm);
-            if(fnorm < solver->kin_stol) {
+            if(fnorm < solver->kin_stol) { /* Kinsol returned nonconv but the residuals are converged */
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->id);*/
+            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
+                jmi_kinsol_linesearch_nonconv_error_message(block);
             }
 
         }
     }
+    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     
     /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
     if((block->n == 1) && block->options->use_Brent_in_1d_flag) {
@@ -1377,18 +1436,22 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         
         jmi_kinsol_solver_print_solve_start(block, &topnode);
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
         if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
-        } else if (flag == KIN_LINESEARCH_NONCONV) {
+        } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
             KINGetFuncNorm(solver->kin_mem, &fnorm);
             if(fnorm <= solver->kin_stol) {
                 flag = KIN_SUCCESS;
-                /*jmi_log_node(log, logWarning, "Warning", "Kinsol returned with the flag "
-                               "KIN_LINESEARCH_NONCONV but the residuals are converged in <block: %d>, continuing", block->id);*/
+            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
+                jmi_kinsol_linesearch_nonconv_error_message(block);
             }
         }
+        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
+        
         if(flag != KIN_SUCCESS) {
+            /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
+            solver->force_new_J_flag = 1;
+            
             if (flagNonscaled == 0) {
                 jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
                              "re-scaled equations failed in <block: %d>", block->id); 

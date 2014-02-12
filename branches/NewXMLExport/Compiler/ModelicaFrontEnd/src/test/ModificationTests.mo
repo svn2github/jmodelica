@@ -1727,6 +1727,33 @@ end ModificationTests.ArrayModifications47;
 end ArrayModifications47;
 
 
+model ArrayModifications48
+    model A
+        B[1] b;
+    end A;
+    
+    model B
+        parameter Real x;
+    end B;
+    
+    A a(b(x(fixed=false)));
+initial equation
+    a.b[1].x = 1;
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="ArrayModifications48",
+			description="Test setting boolean attribute of a member of an array component to a scalar constant without each",
+			flatModel="
+fclass ModificationTests.ArrayModifications48
+ parameter Real a.b[1].x(fixed = false);
+initial equation 
+ a.b[1].x = 1;
+end ModificationTests.ArrayModifications48;
+")})));
+end ArrayModifications48;
+
+
 
 /* ========= Modifications on type declarations ========= */
 

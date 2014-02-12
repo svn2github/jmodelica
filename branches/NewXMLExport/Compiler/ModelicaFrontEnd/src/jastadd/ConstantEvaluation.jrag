@@ -1048,10 +1048,14 @@ aspect ConstantEvaluation {
      		this.index = index;
      		value = this.type.getFEnumLiteralType(index - 1).getName();
     	}
-    	
-    	public int intValue() {
-    		return index;
-    	}
+        
+        public int intValue() {
+            return index;
+        }
+        
+        public double realValue() {
+            return index;
+        }
     	
     	public String stringValue() {
     		return value;
@@ -1176,8 +1180,11 @@ aspect ConstantEvaluation {
   syn CValue FExp.ceval() {
 	  if (isCircular()) 
 		  return CValue.UNKNOWN;
-	  if (isArray())
+	  if (isArray()) {
+          if (size().evaluated().isUnknown())
+	          return CValue.UNKNOWN;
 		  return cevalArray(Index.NULL);
+	  }
 	  return cevalCalc();
   }
   
@@ -1295,6 +1302,14 @@ aspect ConstantEvaluation {
 	  return res;
   }
   
+  eq InstRecordConstructor.cevalCalc() {
+      CValueRecord res = new CValueRecord((FRecordType) type());
+      int i = 0;
+      for (InstFunctionArgument arg : getArgs())
+          res.setMember(i++, arg.getFExp().ceval());
+      return res;
+  }
+  
   // TODO: expand to handle boolean end enum index
   eq FEndExp.cevalCalc() {
 	  int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
@@ -1343,6 +1358,8 @@ aspect ConstantEvaluation {
   }
   
   eq FUnknownSizeExp.cevalCalc() {
+      if (getVariable() == null)
+          return CValue.UNKNOWN;
 	  CValue val = getVariable().evaluationValue();
 	  return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
   }
@@ -1377,6 +1394,10 @@ aspect ConstantEvaluation {
   syn CValue FReductionExp.reduceStartValue();
   eq FSumExp.reduceStartValue()     = type().zeroCValue();
   eq FProductExp.reduceStartValue() = new CValueInteger(1);
+  
+  syn CValue FReductionExp.scalarReduceStartValue();
+  eq FSumExp.scalarReduceStartValue()     = type().scalarType().zeroCValue();
+  eq FProductExp.scalarReduceStartValue() = new CValueInteger(1);
   
   syn CValue FReductionExp.reduceOperation(CValue leftValue, CValue rightValue);
   eq FSumExp.reduceOperation(CValue leftValue, CValue rightValue)     = type().add(leftValue, rightValue);
@@ -2920,10 +2941,8 @@ aspect ConstantEvaluation {
    */
   syn CValue FType.sign(CValue v) = 
 	  CValue.UNKNOWN;
-  eq FRealType.sign(CValue v) = 
-	  new CValueReal(StrictMath.signum(v.realValue()));
   eq FIntegerType.sign(CValue v) = 
-	  new CValueInteger((int) StrictMath.signum(v.intValue()));
+	  new CValueInteger((int) StrictMath.signum(v.realValue()));
   
   /**
    * \brief Ceil expression for constant values.

@@ -22,6 +22,7 @@ from threading import Thread
 from compiler_exceptions import *
 import sys
 import traceback
+import os
 
 class LogErrorParser(xml.sax.ContentHandler):
     """
@@ -82,6 +83,97 @@ class LogErrorParser(xml.sax.ContentHandler):
             return CompilationWarning(node['kind'], node['file'], node['line'], \
                 node['column'], node['message'])
 
+class KeepLastStream():
+    """
+    Internal class that records the last contents sent to the SAX parser.
+    It is necessary so that we can recover from SAX parser errors that is
+    thrown when the compiler fail to start propperly. For example when the
+    JVM is unable to allocate enough memory.
+    """
+    def __init__(self, stream):
+        self.stream = stream
+        self.last = None
+        self.secondLastLine = None
+        self.lastLine = ''
+        self.line = 1 # Number of lines that has been read read
+    def read(self, num = -1):
+        """
+        Reads num bytes from the underlying stream and preserves the latest
+        read contents internaly. It also preservs the last two lines of the
+        previously read contents.
+        """
+        if self.last is not None:
+            # Count the number of lines in the previous contents
+            self.line += self.last.count('\n')
+            # Get the two last lines
+            lines = self.last.rsplit('\n', 2)
+            # Update lastLien and secondLastLine depending on how meny
+            # rows we got
+            if len(lines) == 1:
+                self.lastLine = self.lastLine + lines[0]
+            elif len(lines) == 2:
+                self.secondLastLine = self.lastLine + lines[0]
+                self.lastLine = lines[1]
+            else:
+                self.secondLastLine = lines[1]
+                self.lastLine = lines[2]
+        # Replace the old contents
+        self.last = self.stream.read(num)
+        return self.last
+    def genErrorMsg(self, e):
+        column = e.getColumnNumber()
+        localLine = e.getLineNumber() - self.line
+        
+        lines = self.last.split('\n')
+        lines[0] = self.lastLine + lines[0]
+        
+        # Add lines before...
+        if self.secondLastLine is not None:
+            lines = [self.secondLastLine] + lines
+            localLine += 1
+        # ... and after (if possible)
+        if localLine + 2 >= len(lines):
+            more = self.stream.read()
+            while localLine + 2 >= len(lines) and more:
+                pos = more.find('\n')
+                if pos == -1:
+                    lines[-1] = lines[-1] + more
+                    more = self.stream.read()
+                else:
+                    lines[-1] = lines[-1] + more[0:pos]
+                    lines.append('')
+                    more = more[pos + 1:]
+                    if not more:
+                        more = self.stream.read()
+        
+        #Construct message
+        message = []
+        if e.getLineNumber() > 2:
+            message.append('...' + os.linesep)
+        if localLine > 0:
+            message.append(lines[localLine - 1] + os.linesep)
+        message.append(lines[localLine])
+        if localLine + 1 < len(lines):
+            message.append(os.linesep + lines[localLine + 1])
+            if localLine + 2 < len(lines):
+                message.append(os.linesep + '...')
+        message = ''.join(message)
+        
+        if localLine + 1 >= len(lines) and column >= len(lines[localLine]):
+            return "Unexpected end of output from the compiler:%s%s" \
+                % (os.linesep, message)
+        else:
+            return "Unexpected output from the compiler, got '%s' in:%s%s" \
+                % (lines[localLine][column], os.linesep, message)
+    
+    def discardRemaining(self):
+        """
+        A convenient method that will discard remainding data in stream
+        """
+        data = self.stream.read()
+        while data is None or data != '':
+            data = self.stream.read()
+
 class LogHandlerThread(Thread):
     """
     A thread for reading the log stream
@@ -98,7 +190,7 @@ class LogHandlerThread(Thread):
         
         """
         Thread.__init__(self)
-        self.stream = stream
+        self.stream = KeepLastStream(stream)
         self.problems = [];
 
     def run(self):
@@ -107,8 +199,9 @@ class LogHandlerThread(Thread):
         """
         try:
             xml.sax.parse(self.stream, LogErrorParser(self.problems))
-        except:
-            raise
+        except xml.sax.SAXParseException, e:
+            self.stream.discardRemaining()
+            self.problems.append(CompilationException('xml.sax.SAXParseException', self.stream.genErrorMsg(e),""))
 
 class CompilerLogHandler:
     def __init__(self):
@@ -203,6 +296,12 @@ class CompilerLogHandler:
         if exception.kind == 'org.jmodelica.modelica.compiler.CcodeCompilationException' or \
             exception.kind == 'org.jmodelica.optimica.compiler.CcodeCompilationException':
             raise CcodeCompilationError(exception.message)
+        
+        if exception.kind == 'xml.sax.SAXParseException':
+            raise IOError(exception.message)
+
+        if exception.kind == 'org.jmodelica.util.exceptions.IllegalCompilerArgumentException':
+            raise IllegalCompilerArgumentError(exception.message)
         
         raise JError("%s\n%s" % (exception.message, exception.stacktrace))
 

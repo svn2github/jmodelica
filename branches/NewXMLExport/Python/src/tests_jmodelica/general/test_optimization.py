@@ -382,16 +382,24 @@ class TestOptInitBlockingFactors:
         m_y_1 = self.res_init.get_variable_data("m.y").x
         m_y_2 = self.res_init2.get_variable_data("m.y").x
         
-        m_u_1 = self.res_init.get_variable_data("m.u").x
-        m_u_2 = self.res_init2.get_variable_data("m.u").x
+        u_1 = self.res_init.get_variable_data("u").x
+        u_2 = self.res_init2.get_variable_data("u").x
         
         (n_x, n_g, n_h, dg_n_nz, dh_n_nz) = self.nlp.opt_coll_get_dimensions()
         
         x_init = N.zeros(n_x)
         self.nlp.opt_coll_get_initial(x_init)
-
-        offs_x_el_junc = 8 + 7*self.n_e*self.n_cp + self.n_e
-
+        
+        nbr_dx = self.nlp._model._n_real_dx.value
+        nbr_x  = self.nlp._model._n_real_x.value
+        nbr_u  = self.nlp._model._n_real_u.value
+        nbr_w  = self.nlp._model._n_real_w.value
+        
+        offs1 = nbr_dx + nbr_x + nbr_u + nbr_w
+        offs2 = offs1 - 1
+        #print nbr_dx, nbr_x, nbr_u, nbr_w, offs1, offs2
+        offs_x_el_junc = offs1 + offs2*self.n_e*self.n_cp + self.n_e
+        
         x_el_junc = N.zeros((self.n_e,3))
         
         for i in range(self.n_e):
@@ -402,29 +410,29 @@ class TestOptInitBlockingFactors:
         t_x_el_junc = N.linspace(0,t_f,self.n_e+1)
         t_x_el_junc = t_x_el_junc[1:]
 
-        offs_dx_p = 8 + 7*self.n_e*self.n_cp + self.n_e + 3*self.n_e
-        offs_x_p = offs_dx_p + 3
-        offs_u_p = offs_x_p + 3
-        offs_w_p = offs_u_p + 1
+        offs_dx_p = offs1 + offs2*self.n_e*self.n_cp + 4*self.n_e
+        offs_x_p = offs_dx_p + nbr_dx
+        offs_u_p = offs_x_p + nbr_x
+        offs_w_p = offs_u_p + nbr_u
 
         n_tp = 10
         
-        dx_p = N.zeros((n_tp,3))
-        x_p = N.zeros((n_tp,3))
-        u_p = N.zeros((n_tp,1))
-        w_p = N.zeros((n_tp,1))
+        dx_p = N.zeros((n_tp,nbr_dx))
+        x_p  = N.zeros((n_tp,nbr_x))
+        u_p  = N.zeros((n_tp,nbr_u))
+        w_p  = N.zeros((n_tp,nbr_w))
         
         for i in range(n_tp):
-            dx_p[i,:] = x_init[offs_dx_p + i*8:offs_dx_p + i*8 + 3]
-            x_p[i,:] = x_init[offs_x_p + i*8:offs_x_p + i*8 + 3]
-            u_p[i,:] = x_init[offs_u_p + i*8:offs_u_p + i*8 + 1]
-            w_p[i,:] = x_init[offs_w_p + i*8:offs_w_p + i*8 + 1]
+            dx_p[i,:] = x_init[offs_dx_p + i*offs1:offs_dx_p + i*offs1 + nbr_dx]
+            x_p[i,:]  = x_init[offs_x_p  + i*offs1:offs_x_p  + i*offs1 + nbr_x]
+            u_p[i,:]  = x_init[offs_u_p  + i*offs1:offs_u_p  + i*offs1 + nbr_u]
+            w_p[i,:]  = x_init[offs_w_p  + i*offs1:offs_w_p  + i*offs1 + nbr_w]
 
         t_tp = N.linspace(1,10,10)
 
         h=N.zeros(n_h)
         self.nlp.opt_coll_h(h)
-        print N.max(N.abs(h))
+        #print N.max(N.abs(h))
 
 #         plt.figure(3)
 #         plt.clf()
@@ -475,7 +483,7 @@ class TestOptInitBlockingFactors:
                                -0.48363351,  0.15624317,  0.56793272,  0.66948745,  0.56283272,
                                0.14759305])
         
-        m_u_2_res = N.array([ 0.        ,  0.30515581,  0.30515581,  0.30515581,  0.73893649,
+        u_2_res = N.array([ 0.        ,  0.30515581,  0.30515581,  0.30515581,  0.73893649,
                               0.73893649,  0.73893649, -0.920168  , -0.920168  , -0.920168  ,
                               0.0269131 ,  0.0269131 ,  0.0269131 ,  0.89776804,  0.89776804,
                               0.89776804])
@@ -524,20 +532,20 @@ class TestOptInitBlockingFactors:
                            [ 0.41211848],
                            [-0.54402111]])
         
-        w_p_res = N.array([[ 1.53589041],
-                           [ 1.68280695],
-                           [ 1.43395513],
-                           [ 0.44008136],
-                           [-0.69237618],
-                           [-1.07013001],
-                           [-0.41309502],
-                           [ 0.64521281],
-                           [ 1.11922602],
-                           [ 0.56787771]])
+        w_p_res = N.array([[ 1.53589041,  0.84147098],
+                           [ 1.68280695,  0.90929742],
+                           [ 1.43395513,  0.14112001],
+                           [ 0.44008136, -0.75680257],
+                           [-0.69237618, -0.95892497],
+                           [-1.07013001, -0.27941585],
+                           [-0.41309502,  0.6569871 ],
+                           [ 0.64521281,  0.98935824],
+                           [ 1.11922602,  0.41211848],
+                           [ 0.56787771, -0.54402111]])
         
         assert N.sum(N.abs(m_x1_2-m_x1_2_res))<1e-3
         assert N.sum(N.abs(m_x2_2-m_x2_2_res))<1e-3
-        assert N.sum(N.abs(m_u_2-m_u_2_res))<1e-3
+        assert N.sum(N.abs(u_2-u_2_res))<1e-3
         assert N.sum(N.abs(m_y_2-m_y_2_res))<1e-3
         
         assert N.sum(N.abs(x_el_junc-x_el_junc_res))<1e-3

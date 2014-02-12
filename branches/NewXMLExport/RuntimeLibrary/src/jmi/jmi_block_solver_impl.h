@@ -63,6 +63,7 @@ struct jmi_block_solver_t {
     jmi_block_solver_delete_func_t delete_solver;
     
     int init;              /**< \brief A flag for initialization */
+    int at_event;          /**< \brief A flag indicating if we are at an event */
 
     jmi_block_solver_residual_func_t F;
     jmi_block_solver_dir_der_func_t dF;

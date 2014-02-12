@@ -923,6 +923,27 @@ int jmi_save_last_successful_values(jmi_t *jmi) {
     return 0;
 }
 
+int jmi_block_completed_integrator_step(jmi_t *jmi) {
+    /*
+    int i;
+    
+    for (i = 0; i < jmi->n_dae_blocks; i++) {
+		jmi_block_residual_t* block = jmi->dae_block_residuals[i];
+        jmi_block_solver_t* block_solver = block->block_solver;
+        
+        if (block_solver->completed_integrator_step) {
+            int ret;
+            
+            ret = block_solver->completed_integrator_step(block_solver);
+            if (ret != 0) {
+                return -1;
+            }
+        }
+    }
+    */
+    return 0;
+}
+
 int jmi_reset_last_successful_values(jmi_t *jmi) {
     jmi_real_t* z;
     jmi_real_t* z_last;
@@ -2160,59 +2181,29 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
      * x <= 0
      * x <  0
      */
-    if (sw == 1.0){
-        if ((ev_ind <= -1*eps && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind >= eps && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
-            sw = 0.0;
-        }
-    }else{
-        if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
-            sw = 1.0;
-        }
-    }
-    return sw;
-}
 
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode) {
-    jmi_int_t nF,nR;
-    jmi_int_t nF0,nF1,nFp,nR0;
-    jmi_int_t i,size_switches;
-    jmi_real_t *event_indicators;
-    jmi_real_t eps = jmi->events_epsilon;
-    
-    jmi_init_get_sizes(jmi,&nF0,&nF1,&nFp,&nR0); /* Get the size of R0 and F0, (interested in R0) */
-    jmi_dae_get_sizes(jmi, &nF, &nR);
-    
-    if (mode==1) { 
-        size_switches = nR;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*) calloc(size_switches, sizeof(jmi_real_t));
-        /* TODO: Check return value from jmi_dae_R */
-        jmi_dae_R(jmi,event_indicators);
-    } else { /* INITIALIZE */
-        size_switches = nR0;
-        /* Allocate memory */
-        event_indicators = (jmi_real_t*) calloc(size_switches, sizeof(jmi_real_t));
-        /* TODO: Check return value from jmi_dae_R0 */
-        jmi_init_R0(jmi, event_indicators);
-    }
-
-    if (mode==1) {
-        for (i=0; i < size_switches; i=i+1) {
-            switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->relations[i]);
+    if (eps == 0.0) {
+        if (sw == 1.0){
+            if ((ev_ind < 0.0 && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind > 0.0 && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
+                sw = 0.0;
+            }
+        }else{
+            if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind > 0.0 && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind < 0.0 && rel == JMI_REL_LT)){
+                sw = 1.0;
+            }
         }
-    } else { /* INITIALIZE */
-        for (i=0; i < size_switches; i=i+1) {
-            if (i < nR) {
-                /* NORMAL SWITCHES FIRST */
-                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->relations[i]);
-            } else {
-                /* INITIALIZATION SWITCHES NEXT */
-                switches[i] = jmi_turn_switch(event_indicators[i], switches[i], eps, jmi->initial_relations[i-nR]);
+    } else {
+        if (sw == 1.0){
+            if ((ev_ind <= -1*eps && rel == JMI_REL_GEQ) || (ev_ind <= 0.0 && rel == JMI_REL_GT) || (ev_ind >= eps && rel == JMI_REL_LEQ) || (ev_ind >= 0.0 && rel == JMI_REL_LT)){
+                sw = 0.0;
+            }
+        }else{
+            if ((ev_ind >= 0.0 && rel == JMI_REL_GEQ) || (ev_ind >= eps && rel == JMI_REL_GT) || (ev_ind <= 0.0 && rel == JMI_REL_LEQ) || (ev_ind <= -1*eps && rel == JMI_REL_LT)){
+                sw = 1.0;
             }
         }
     }
-    free(event_indicators);
-    return 0;
+    return sw;
 }
 
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {

@@ -139,7 +139,6 @@ public class ModelicaCompiler {
 	
 	protected static LinkedList<CompilationHooks> globalHooksList = new LinkedList<CompilationHooks>();
 	protected LinkedList<CompilationHooks> hooksList = new LinkedList<CompilationHooks>(globalHooksList);
-	protected static CCompilerDelegator cCompiler = new GccCompilerDelegator();
 	protected IErrorHandler errorHandler = null;
 	
 	protected static String jmodelicaHome = System.getenv("JMODELICA_HOME");
@@ -151,6 +150,14 @@ public class ModelicaCompiler {
 	
 	protected String[] targetPlatforms = null;
 	protected Collection<Problem> warnings = new ArrayList<Problem>();
+	
+	public static OptionRegistry createOptions() {
+	    return new OptionRegistry() {};
+	}
+    
+    public static OptionRegistry createOptions(String file) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
+        return new OptionRegistry(file) {};
+    }
 	
 	public ModelicaCompiler(OptionRegistry options) {
 		this.options = options;
@@ -207,12 +214,8 @@ public class ModelicaCompiler {
 		dir.delete();
 	}
 	
-	public static CCompilerDelegator getCCompiler() {
-		return cCompiler;
-	}
-	
-	public static void setCCompiler(CCompilerDelegator cCompiler) {
-		ModelicaCompiler.cCompiler = cCompiler;
+	public CCompilerDelegator getCCompiler() {
+	    return CCompilerDelegator.delegatorFor(options);
 	}
 	
 	public static String getJModelicaHome() {
@@ -676,7 +679,7 @@ public class ModelicaCompiler {
 	        throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
 		// Always set certain options when compiling
 		// First save these options in temp options registry to reset when compiling has finished
-		OptionRegistry tempOptions = new OptionRegistry(options);    
+		OptionRegistry tempOptions = options.copy();    
 		
 		//Set options for the target.
 		target.setDefaultOptions(options);
@@ -998,22 +1001,29 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
+		ASTNode.getStepInfo().reset();
 		ASTNode.beginStep("parseModel()");
 		
 		SourceRoot sr = new SourceRoot(new Program());
-		sr.options.copyAllOptions(this.options);
+		sr.options = options.copy();
 		for (String name : names) {
 		    File f = new File(name);
 		    String name_tmp = name;
 		    if (f.isDirectory()) 
 		        name_tmp = LibNode.isStructuredLib(f) ? new File(f, LibNode.PACKAGE_FILE).getPath() : null;
             SourceRoot sr_tmp = (name_tmp != null) ? parseModel(name_tmp) : null;
-            if (!options.getBooleanOption("ignore_within") && sr_tmp != null && sr_tmp.isFileInLibrary()) {
-                String lib = sr_tmp.findOutermostLibraryDir();
-                String type = f.isDirectory() ? "Directory" : "File";
-                log.warning("%s '%s' is part of library at '%s', using library instead.", type, f.getPath(), lib);
-                name = lib;
-                f = new File(name);
+            if (!options.getBooleanOption("ignore_within")) {
+                String lib = null;
+                if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
+                    lib = sr_tmp.findOutermostLibraryDir();
+                else if (f.getName().equals(LibNode.PACKAGE_FILE))
+                    lib = f.getParent();
+                if (lib != null) {
+                    String type = f.isDirectory() ? "Directory" : "File";
+                    log.warning("%s '%s' is part of library at '%s', using library instead.", type, name, lib);
+                    name = lib;
+                    f = new File(name);
+                }
             }
 			if (f.isDirectory()) {
 				if (!sr.getProgram().getLibraryList().addLibrary(name)) 
@@ -1092,7 +1102,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("instantiateModel()");
 		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
-		ipr.options = new OptionRegistry(sr.options);
+		ipr.options = sr.options.copy();
 		
 		if (sr.options.getBooleanOption("compliance_as_warning"))
 			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
@@ -1171,7 +1181,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("prettyPrintRawFlat()");
 		if (fc.root().options.getBooleanOption("generate_mof_files")) {
 			log.debug("Creating raw .mof file...");
-			PrintStream out = new PrintStream(flatFile);
+			CodeStream out = new CodeStream(flatFile);
 			fc.prettyPrint_MC(out, "");
 			out.close();
 			log.debug("... raw .mof file created.");
@@ -1196,7 +1206,7 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("prettyPrintFlat()");
 		if (fc.root().options.getBooleanOption("generate_mof_files")) {
 			log.debug("Creating transformed .mof file...");
-			PrintStream out = new PrintStream(new File(sourceDir, instName + "_transformed.mof"));
+			CodeStream out = new CodeStream(new File(sourceDir, instName + "_transformed.mof"));
 			fc.prettyPrint_MC(out, "");
 			out.close();
 			log.debug("... transformed .mof file created.");
@@ -1437,11 +1447,11 @@ public class ModelicaCompiler {
 		}
 
 		try {
-			options = new OptionRegistry(optionsfile);
+			options = createOptions(optionsfile);
 		} catch(Exception e) {
 			log.warning("The options XML file could not be loaded, using defaults.");
 			log.debug(e);
-			options = new OptionRegistry();
+			options = createOptions();
 		}
 		
 		String opts = programarguments.get("opt");
@@ -1588,10 +1598,6 @@ public class ModelicaCompiler {
                 //If no target was set, assume jmu.
 				compileJMU(cl, name, compileTo);
 			}
-        } catch (IllegalCompilerArgumentException icae) {
-            log.error(icae.getMessage());
-            closeLogger();
-            System.exit(1);
 		} catch (CompilerException ce) {
 			if (options.getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator() != null) 
 				getDiagnosticsGenerator().writeProblems(ce.getProblems());
@@ -2114,7 +2120,76 @@ public class CompilationAbortedException extends RuntimeException {
 	}
 }
 
+private static final OptionRegistry.OptionContributor ModelicaCompiler.CCOMPILER_OPTIONS = 
+    OptionRegistry.addContributor(new OptionRegistry.OptionContributor() {
+        public void addOptions(OptionRegistry opt) {
+            opt.addStringOption(CCompilerDelegator.OPTION, GccCompilerDelegator.NAME, CCompilerDelegator.OPTION_DESC, new String[0]);
+        }
+        
+        public void modifyOptions(OptionRegistry opt) {
+            CCompilerDelegator.addCompilerOptionValues(opt);
+        }
+
+        public Object identity() {
+            return "org.jmodelica.modelica.compiler.ModelicaCompiler.CCOMPILER_OPTIONS";
+        }
+    });
+
+/**
+ * Base class for interface to C compiler.
+ * 
+ * To add a new delegator, call {@link #addDelegator(CCompilerDelegator.Creator)} before 
+ * OptionRegistry is instantiated. This is preferably accomplished by using a JastAdd 
+ * aspect to add a static field in this class that gets its value from addDelegator().
+ */
 public abstract class CCompilerDelegator {
+    
+    private static Map<String,Creator> CREATORS = creators();
+    
+    private static Map<String,Creator> creators() {
+        if (CREATORS == null)
+            CREATORS = new HashMap<String,Creator>();
+        return CREATORS;
+    }
+    
+    private static final Creator GCC = addDelegator(GccCompilerDelegator.NAME, new Creator() {
+        public CCompilerDelegator create() {
+            return new GccCompilerDelegator();
+        }
+    });
+    
+    public static final String OPTION = "c_compiler";
+    public static final String OPTION_DESC = "The C compiler to use to compile generated C code.";
+    
+    public interface Creator {
+        public CCompilerDelegator create();
+    }
+    
+    /**
+     * Add support for a new compiler delegator.
+     * 
+     * @param name     a short name for the delegator that the user can use to select it
+     * @param creator  the creator for the delegator class
+     */
+    public static Creator addDelegator(String name, Creator creator) {
+        if (creators().containsKey(name))
+            throw new IllegalArgumentException("Compiler delegator name " + name + 
+                    " is already used by " + CREATORS.get(name).create().getClass().getSimpleName());
+        creators().put(name, creator);
+        return creator;
+    }
+    
+    /**
+     * Create a C compiler delegator for the given set of options.
+     */
+    public static CCompilerDelegator delegatorFor(OptionRegistry opt) {
+        return creators().get(opt.getStringOption(OPTION)).create();
+    }
+    
+    public static void addCompilerOptionValues(OptionRegistry opt) {
+        for (String name : creators().keySet())
+            opt.addStringOptionAllowed(OPTION, name);
+    }
 	
 	private Map<String, String> env = System.getenv();
 	private String[] targetPlatforms = null;
@@ -2308,6 +2383,8 @@ public abstract class CCompilerDelegator {
  * Compiles DLL(s) from generated C code using make.
  */
 public class GccCompilerDelegator extends CCompilerDelegator {
+    
+    public static final String NAME = "gcc";
 
 	public GccCompilerDelegator() {}
 

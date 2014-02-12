@@ -18,7 +18,7 @@ import org.jmodelica.util.OptionRegistry;
 
 aspect Options {
 	
-	public OptionRegistry Root.options = new OptionRegistry();
-	public OptionRegistry InstProgramRoot.options = new OptionRegistry();
+	public OptionRegistry Root.options;
+	public OptionRegistry InstProgramRoot.options;
 			
 }

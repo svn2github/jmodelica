@@ -464,16 +464,29 @@ aspect Environments {
 	public void FExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {}
 	
-	public void FRecordConstructor.populateInstRecordModificationList(
+	public void InstRecordConstructor.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {
-		InstClassDecl icd = ((FIdUseInstAccess) getRecord()).getInstAccess().myInstClassDecl();
+		InstClassDecl icd = getRecord().myInstClassDecl();
 		ArrayList<InstComponentDecl> inputs = icd.myModifiableComponents();
 		Modification mod = org.getModification();
 		for (int i = 0; i < inputs.size(); i++) {
 			String name = inputs.get(i).name();
-			list.add(new InstRecordModification(mod, name, getArg(i)));
+			list.add(getArg(i).createInstRecordModification(mod, name));
 		}
 	}
+    
+    public InstRecordModification InstFunctionArgument.createInstRecordModification(Modification mod, String name) {
+        return new InstRecordModification(mod, name, getFExp());
+    }
+    
+    public InstRecordModification InstDefaultArgument.createInstRecordModification(Modification mod, String name) {
+        InstModification source = null;
+        if (getFExp().findComponentWithThisBindingExp() == null) {
+            source = getFExp().surroundingInstModification();
+            mod = source.getModification();
+        }
+        return new InstDefaultRecordModification(mod, name, getFExp(), source);
+    }
 	
 	public void FIdUseExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {
@@ -505,6 +518,14 @@ aspect Environments {
 			}
 		}
 	}
+	
+	/**
+	 * Find the InstModification containing this expression, if any.
+	 */
+	inh InstModification FExp.surroundingInstModification();
+    eq InstModification.getChild().surroundingInstModification() = this;
+    eq InstNode.getChild().surroundingInstModification()         = null;
+    eq Root.getChild().surroundingInstModification()             = null;
 	
 	
 	syn InstComponentRedeclare InstModification.matchInstComponentRedeclare(String name) = null;
@@ -1954,10 +1975,12 @@ aspect InstArrays {
 	 * class declarations).
 	 */
 	syn lazy FArraySubscripts InstComponentDecl.getFArraySubscripts() {
+	    if (myFSubscripts().isEmpty())
+	        return null;
 		FArraySubscripts fas = new FArraySubscripts();
 		for (FSubscript fs : myFSubscripts()) 
 			fas.addFSubscript(fs.deferredCopy());
-		return (fas.getNumChild() > 0) ? fas : null;
+		return fas;
 	}
 	
 	syn boolean InstComponentDecl.hasFArraySubscripts() = getFArraySubscripts()!=null;

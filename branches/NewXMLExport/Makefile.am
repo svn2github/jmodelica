@@ -16,6 +16,7 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
+
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
@@ -33,10 +34,115 @@ casadi:
 	make -f Makefile
 
 install_casadi: casadi
-	cd $(abs_builddir)/casadi_build/python/; \
-	find . -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/Python/
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
+	cp $(abs_builddir)/casadi_build/lib/*.* $(DESTDIR)$(prefix)/ThirdParty/CasADi/lib
+	mkdir -p $(DESTDIR)$(prefix)/Python/
+	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
+	## temp fix
+	cp $(abs_builddir)/casadi_build/swig/casadi.py $(DESTDIR)$(prefix)/Python/casadi
+
+## Install for CasADiInterface, Variables and targets. 
+## MC_interface installs the system with Python. 
+## If C++ compilation/tests are wanted there is the target MC_interface_cplusplus
+
+MC_INTERFACE=$(abs_top_srcdir)/ModelicaCasADiInterface
+
+export CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
+MC_SRC=$(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi
+OC_SRC=$(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi
+
+# The modelica casadi interface is built into a build folder
+MC_BUILD=$(abs_builddir)/ModelicaCasADiInterfaceBuild
+# Jars from the modified modelica and optimica compilers are put into the JModelica folder
+MC_COMPILERS_DIR=$(MC_BUILD)/JModelica.org
+MC_LIB=$(DESTDIR)$(prefix)/lib/casadi_interface
+
+CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
 
 
+# The CMake for ModelicaCasADi needs these variables.
+export MODELICA_CASADI_HOME= $(MC_INTERFACE)
+export MC_BUILD
+export IPOPT_HOME
+export CASADI_BUILD_DIR
+ 
+casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+
+ifcasadi:
+	mkdir -p $(MC_BUILD)/ifcasadi; \
+	cd $(MC_BUILD)/ifcasadi; \
+	case $(build) in \
+	*-cygwin*) \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	*-mingw*) \
+	cmake $(MC_SRC)/src/swig -G "MSYS Makefiles" ;; \
+	*) \
+	cmake $(MC_SRC)/src/swig ;; \
+	esac 
+	cd $(MC_BUILD)/ifcasadi;  make
+
+$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi
+	rm -rf $(MC_LIB)
+	mkdir -p $(MC_LIB)
+	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_LIB)
+	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_LIB)
+	cp $(MC_SRC)/bin/util.jar $(MC_LIB)
+	case $(build) in \
+	*-cygwin*) \
+	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
+	*-mingw*) \
+	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
+	*) \
+	cp $(MC_BUILD)/ifcasadi/libifcasadi.so $(MC_LIB) ;; \
+	esac 
+
+mc_modelica: ifcasadi
+	cd $(MC_SRC); $(ANT_OPTS) $(ANT)
+
+mc_optimica: ifcasadi
+	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
+
+$(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
+$(MC_SRC)/bin/util.jar:             mc_modelica
+
+$(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
+$(OC_SRC)/bin/util.jar:             mc_optimica
+
+$(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
+
+modelicacasadi_wrapper:
+	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
+	cd $(MC_BUILD)/modelicacasadi_wrapper; \
+	case $(build) in \
+	*-cygwin*) \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	*-mingw*) \
+	cmake $(MC_INTERFACE) -G "MSYS Makefiles" ;; \
+	*) \
+	cmake $(MC_INTERFACE) ;; \
+	esac 
+	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
+
+
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py: install_modelicacasadi_transfer
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py: install_modelicacasadi_transfer
+ 
+ $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py: install_modelicacasadi_wrapper
+ 
+ install_modelicacasadi_wrapper: $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper
+	cp $(MC_BUILD)/modelicacasadi_wrapper/swig/*modelicacasadi_wrapper* $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper 
+	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
+ 
+ install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
+	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
+	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+	
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
@@ -232,7 +338,19 @@ bindist: bindistdir
 test: install
 	$(prefix)/jm_tests -i
 
-clean-local: clean-frontends clean-python-packages
+clean-local: clean-frontends clean-python-packages clean-casadi-interface
+
+clean-casadi-interface: 
+	rm -rf $(MC_BUILD)
+#	rm -rf $(DESTDIR)$(prefix)/Python/casadi
+#	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
+if HAVE_ANT
+	cd $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi; \
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/casadi
+	cd $(abs_top_srcdir)/Compiler/OptimicaCompilerCasADi; \
+	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/casadi
+endif
+	
 
 clean-python-packages:
 if WITH_SUNDIALS
@@ -267,3 +385,5 @@ docs:
 docbook-docs:
 	cd docbook/UsersGuide; $(MAKE) all
 
+
+.PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper

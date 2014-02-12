@@ -89,13 +89,13 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 			super("defaultExperiment", "DefaultExperiment", myGenerator, fclass);
 		}
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (e != null) {
 				super.generate(genPrinter);
 			}
 		}
 		
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 			if (e.hasStart)
 				generateAttribute("startTime", Double.toString(e.start),     genPrinter);
 			if (e.hasStop)
@@ -132,7 +132,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		
 		public String[] children() { return new String[] {"annotation"}; }
 		
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("name", "JModelica", genPrinter);
 		}
 	}
@@ -151,7 +151,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 			super("annotation", "Annotation", myGenerator, fclass);
 		}
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			HashSet<String> extLibraries = fclass.externalLibraries();
 			HashSet<String> extIncludes = fclass.externalIncludes();
 			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();
@@ -179,7 +179,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 			}
 		}
 		
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("name", name, genPrinter);
             generateAttribute("value", replaceIllegalChars(value), genPrinter);
 		}
@@ -272,7 +272,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             					 "implementation"};
         }
 		
-		public void generateAttributes(PrintStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {		
             generateAttribute("fmiVersion",               "1.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
@@ -306,14 +306,14 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"baseUnit"}; }
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			//Generate code if any units are defined.
 			if(itr != null) {
 				super.generate(genPrinter);
 			}
 		}
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			while(itr.hasNext()) {
 				unit = itr.next();
 				super.generateChildren(genPrinter);
@@ -331,11 +331,11 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
 		public String[] children() { return new String[] {"displayUnitDefinition"}; }
 
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("unit", unit, genPrinter);
 		}
 
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			HashSet<String> defs = map.get(unit);
 			Iterator<String> defsit = defs.iterator();
 			while(defsit.hasNext()) {
@@ -350,7 +350,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("displayUnitDefinition", "DisplayUnitDefinition", myGenerator, fclass);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("displayUnit", def, genPrinter);
 				generateAttribute("gain",        "1", genPrinter);
 				generateAttribute("offset",      "0", genPrinter);
@@ -373,13 +373,13 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"type"}; }
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (fclass.getNumFEnumDecl() > 0) {
 				super.generate(genPrinter);
 			}
 		}
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			Iterator<FEnumDecl> itr = fclass.getFEnumDecls().iterator();
 			while (itr.hasNext()) {
 				enumdecl = itr.next();
@@ -395,7 +395,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             
             public String[] children() { return new String[] {"enumerationType"}; }
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("name", enumdecl.name(), genPrinter);
 				if (enumdecl.hasFStringComment()) {
 					generateAttribute("description", enumdecl.getFStringComment().getComment(), genPrinter);
@@ -413,12 +413,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"item"}; }
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
                 generateAttribute("min", "1",                        genPrinter);
 				generateAttribute("max", enumdecl.numEnumLiterals(), genPrinter);
 			}
 			
-			public void generateChildren(PrintStream genPrinter) {		
+			public void generateChildren(CodeStream genPrinter) {		
 				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
 				while (itr.hasNext()) {
 					literal = itr.next();
@@ -432,7 +432,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 					super("item", "Item", myGenerator, fclass);
 				}
 				
-				public void generateAttributes(PrintStream genPrinter) {
+				public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("name", literal.name(), genPrinter);
 					if (literal.hasFStringComment()) {
 						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
@@ -457,7 +457,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"variables"}; }
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			// get and sort all FVariables
 			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
 			VariableNameComparator comp = new VariableNameComparator();			
@@ -481,7 +481,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				return new String[] {"real", "integer", "boolean", "string", "enumeration", "directDependency"};
 			}
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("name",           variable.name(),           genPrinter);
 				generateAttribute("valueReference", variable.valueReference(), genPrinter);
 				if (variable.hasFStringComment()) {
@@ -527,12 +527,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("real", "Real", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isReal())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FRealVariable realvariable = (FRealVariable)variable;
 
 				if(realvariable.quantityAttributeSet()) {
@@ -566,12 +566,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("integer", "Integer", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isInteger())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
 				if(integervariable.quantityAttributeSet()) {
@@ -594,12 +594,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("boolean", "Boolean", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isBoolean())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateStartAndFixedAttribute(genPrinter, variable);
 			}
 		}
@@ -610,12 +610,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("string", "String", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isString())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateStartAndFixedAttribute(genPrinter, variable);
 			}
 		}
@@ -626,12 +626,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("enumeration", "Enumeration", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isEnum())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FEnumVariable enumvariable = (FEnumVariable)variable;
 				//declaredType
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
@@ -650,7 +650,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			}
 		}
 		
-		protected void generateStartAndFixedAttribute(PrintStream genPrinter, FVariable var) {
+		protected void generateStartAndFixedAttribute(CodeStream genPrinter, FVariable var) {
 			FExp e_start = null;
 			Boolean isFixed; // null = fixed is not set
 
@@ -690,7 +690,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				super("directDependency", "DirectDependency", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if (variable.isOutput() && variable.isReal()) {
 					generateOpening(xml, genPrinter);
 					for (FVariable dv : variable.dependsOn()) {
@@ -722,7 +722,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			super("modelStructure", "ModelStructure", myGenerator, fclass);
 		}
 
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 
 			if (!fclass.root().options.getStringOption("fmi_version").equals("2.0alpha")) {
 				return;
@@ -854,7 +854,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			super("capabilities", "Capabilities", myGenerator, fclass);
 		}
 		
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 
 			generateAttribute("canHandleVariableCommunicationStepSize", "true",  genPrinter);
 			generateAttribute("canHandleEvents",                        "true",  genPrinter);
@@ -926,7 +926,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             		              "defaultExperiment", "vendorAnnotations", "modelVariables", "modelStructure" };
         }
 		
-		public void generateAttributes(PrintStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {		
             generateAttribute("fmiVersion",               "2.0",                                   genPrinter);
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("guid",                     fclass.guid(),                           genPrinter);
@@ -956,14 +956,14 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			super("modelExchange", "ModelExchange", myGenerator, fclass);
 		}
 		
-		public void generateAttributes(PrintStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {		
 			generateAttribute("modelIdentifier",                     fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                  false,                   genPrinter);
 			generateAttribute("completedIntegratorStepNotNeeded",    true,                    genPrinter);
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess", true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",  false,                   genPrinter);
 			generateAttribute("canGetAndSetFMUstate",                false,                   genPrinter);
-			generateAttribute("canSerializeFMUState",                false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                false,                   genPrinter);
 			generateAttribute("providesDirectionalDerivative",       true,                    genPrinter);
         }
 	}
@@ -980,7 +980,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			super("coSimulation", "CoSimulation", myGenerator, fclass);
 		}
 		
-		public void generateAttributes(PrintStream genPrinter) {		
+		public void generateAttributes(CodeStream genPrinter) {		
 			generateAttribute("modelIdentifier",                        fclass.nameUnderscore(), genPrinter);
 			generateAttribute("needsExecutionTool",                     false,                   genPrinter);
 			generateAttribute("canHandleVariableCommunicationStepSize", true,                    genPrinter);
@@ -989,7 +989,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			generateAttribute("canRunAsynchronuously",                  false,                   genPrinter);
 			generateAttribute("canBeInstantiatedOnlyOncePerProcess",    true,                    genPrinter);
 			generateAttribute("canNotUseMemoryManagementFunctions",     false,                   genPrinter);
-			generateAttribute("canSerializeFMUState",                   false,                   genPrinter);
+			generateAttribute("canSerializeFMUstate",                   false,                   genPrinter);
 			generateAttribute("providesDirectionalDerivative",          true,                    genPrinter);
         }
 	}
@@ -1008,14 +1008,14 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"unit"}; }
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			//Generate code if any units are defined.
 			if(itr != null) {
 				super.generate(genPrinter);
 			}
 		}
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			while(itr.hasNext()) {
 				unit = itr.next();
 				super.generateChildren(genPrinter);
@@ -1028,16 +1028,16 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		private String def;
 
 		public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
-			super("unit", "unit", myGenerator, fclass);
+			super("unit", "Unit", myGenerator, fclass);
 		}
 
 		public String[] children() { return new String[] {"displayUnit"}; }
 
-		public void generateAttributes(PrintStream genPrinter) {
+		public void generateAttributes(CodeStream genPrinter) {
 			generateAttribute("name", unit, genPrinter);
 		}
 
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			HashSet<String> defs = map.get(unit);
 			Iterator<String> defsit = defs.iterator();
 			while(defsit.hasNext()) {
@@ -1052,7 +1052,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("displayUnit", "DisplayUnit", myGenerator, fclass);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("name",   def, genPrinter);
 				generateAttribute("factor", "1", genPrinter);
 				generateAttribute("offset", "0", genPrinter);
@@ -1075,13 +1075,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"simpleType"}; }
 		
-		public void generate(PrintStream genPrinter) {
+		public void generate(CodeStream genPrinter) {
 			if (fclass.getNumFEnumDecl() > 0) {
 				super.generate(genPrinter);
 			}
 		}
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			Iterator<FEnumDecl> itr = fclass.getFEnumDecls().iterator();
 			while (itr.hasNext()) {
 				enumdecl = itr.next();
@@ -1097,7 +1097,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             
             public String[] children() { return new String[] {"enumeration"}; }
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				generateAttribute("name", enumdecl.name(), genPrinter);
 				if (enumdecl.hasFStringComment()) {
 					generateAttribute("description", enumdecl.getFStringComment().getComment(), genPrinter);
@@ -1116,7 +1116,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"item"}; }
 			
-			public void generateChildren(PrintStream genPrinter) {		
+			public void generateChildren(CodeStream genPrinter) {		
 				Iterator<FEnumLiteral> itr = enumdecl.enumLiterals().iterator();
 				itemIndex = 0;
 				while (itr.hasNext()) {
@@ -1131,7 +1131,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 					super("item", "Item", myGenerator, fclass);
 				}
 				
-				public void generateAttributes(PrintStream genPrinter) {
+				public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("name",  literal.name(), genPrinter);
                     generateAttribute("value", itemIndex++,    genPrinter);
 					if (literal.hasFStringComment()) {
@@ -1158,7 +1158,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() { return new String[] {"variables"}; }
 		
-		public void generateChildren(PrintStream genPrinter) {
+		public void generateChildren(CodeStream genPrinter) {
 			// get and sort all FVariables
 			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
 			VariableNameComparator comp = new VariableNameComparator();			
@@ -1188,10 +1188,10 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			}
 
 			public String[] children() {
-				return new String[] {"real", "integer", "boolean", "string", "enumeration"};
+				return new String[] {"real", "integer", "boolean", "string", "variableEnumeration"};
 			}
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				
 				//Modify the negated bit of the valuReference if the variable is a negated alias.
 				int valueReference = variable.valueReference();
@@ -1280,12 +1280,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("real", "Real", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if (variable.isReal())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FRealVariable realvariable = (FRealVariable)variable;
 
 				if (realvariable.quantityAttributeSet()) {
@@ -1308,7 +1308,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				if (realvariable.nominalAttributeSet()) {
 					generateAttribute("nominal", realvariable.nominalAttribute(), genPrinter);
 				}
-				if (startValue != null) {
+				if (startValue != null && (!variable.isAlias() || variable.isNegated())) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 				if (realvariable.isDerivativeVariable()) {
@@ -1328,12 +1328,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("integer", "Integer", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isInteger())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
 				if(integervariable.quantityAttributeSet()) {
@@ -1345,7 +1345,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				if(integervariable.maxAttributeSet()) {
 					generateAttribute("max", integervariable.maxAttribute(), genPrinter);
 				}
-				if (startValue != null) {
+				if (startValue != null && !variable.isAlias()) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 			}
@@ -1357,13 +1357,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("boolean", "Boolean", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isBoolean())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
-				if (startValue != null) {
+			public void generateAttributes(CodeStream genPrinter) {
+				if (startValue != null && !variable.isAlias()) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 			}
@@ -1375,13 +1375,13 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("string", "String", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isString())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
-				if (startValue != null) {
+			public void generateAttributes(CodeStream genPrinter) {
+				if (startValue != null && !variable.isAlias()) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 			}
@@ -1390,15 +1390,15 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		public class XMLTag_enumeration extends XMLTag {
 
 			public XMLTag_enumeration(AbstractGenerator myGenerator, FClass fclass) {
-				super("enumeration", "Enumeration", myGenerator, fclass);
+				super("variableEnumeration", "Enumeration", myGenerator, fclass);
 			}
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if(variable.isEnum())
 					super.generate(genPrinter);
 			}
 
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				FEnumVariable enumvariable = (FEnumVariable)variable;
 				//declaredType
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
@@ -1412,7 +1412,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				if(enumvariable.maxAttributeSet()) {
 					generateAttribute("max", enumvariable.maxAttribute(), genPrinter);
 				}
-				if (startValue != null) {
+				if (startValue != null && !variable.isAlias()) {
 					generateAttribute("start", startValue, genPrinter);
 				}
 			}
@@ -1442,12 +1442,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"unknown"}; }
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if (fclass.numDerivativeVariables() > 0)
 					super.generate(genPrinter);
 			}
 			
-			public void generateChildren(PrintStream genPrinter) {
+			public void generateChildren(CodeStream genPrinter) {
 				for (FVariable var : fclass.derivativeVariables()) {
 					variable = var;
 					super.generateChildren(genPrinter);
@@ -1463,12 +1463,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"unknown"}; }
 			
-			public void generate(PrintStream genPrinter) {
+			public void generate(CodeStream genPrinter) {
 				if (fclass.numOutputs() > 0)
 					super.generate(genPrinter);
 			}
 			
-			public void generateChildren(PrintStream genPrinter) {
+			public void generateChildren(CodeStream genPrinter) {
 				for (FVariable var : fclass.outputs()) {
 					variable = var;
 					super.generateChildren(genPrinter);
@@ -1519,12 +1519,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			
 			public String[] children() { return new String[] {"unknown"}; }
 			
-			public void generate(PrintStream genPrinter) {	
+			public void generate(CodeStream genPrinter) {	
 				if (!initialUnknowns.isEmpty())
 					super.generate(genPrinter);
 			}
 			
-			public void generateChildren(PrintStream genPrinter) {
+			public void generateChildren(CodeStream genPrinter) {
 				for (FVariable var: initialUnknowns) {
 					variable = var;
 					super.generateChildren(genPrinter);
@@ -1538,7 +1538,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				super("unknown", "Unknown", myGenerator, fclass);
 			}
 			
-			public void generateAttributes(PrintStream genPrinter) {
+			public void generateAttributes(CodeStream genPrinter) {
 				
 				generateAttribute("index", variableIndexMap.get(variable.name()), genPrinter);
 				

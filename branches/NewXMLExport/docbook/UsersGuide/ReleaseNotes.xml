@@ -18,27 +18,28 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Modelica.Mechanics.MultiBody</para>
+            <para>Greatly improved support for
+            Modelica.Mechanics.MultiBody</para>
           </listitem>
 
           <listitem>
-            <para>expandable connectors</para>
+            <para>Support for expandable connectors</para>
           </listitem>
 
           <listitem>
-            <para>when statements</para>
+            <para>Support for when statements</para>
           </listitem>
 
           <listitem>
-            <para>event generating functions</para>
+            <para>Support for event generating built-in functions</para>
           </listitem>
 
           <listitem>
-            <para>over-constrained connection graphs</para>
+            <para>Support for overconstrained connection graphs</para>
           </listitem>
 
           <listitem>
-            <para>reinit() operator</para>
+            <para>Support for reinit() operator</para>
           </listitem>
         </itemizedlist></para>
     </section>
@@ -46,13 +47,76 @@
     <section>
       <title>Compilers</title>
 
-      <para/>
+      <para>The following compliance improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved support for algorithms, including when
+          statements.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved support for if equations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of discrete constructs.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved handling of attributes in alias sets.</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved index reduction algorithm.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for expandable connectors and for
+          overconstrained connection systems.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for automatic differentiation of functions with
+          smoothOrder annotation.</para>
+        </listitem>
+
+        <listitem>
+          <para>Added support for String operations.</para>
+        </listitem>
+
+        <listitem>
+          <para>Many bug fixes.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Added check mode, where a class is checked for errors to see if it
+      can be used in a simulation class.</para>
+
+      <para>Class annotations are now only allowed as the last element of the
+      class, as per the Modelica 3.2 specification.</para>
     </section>
 
     <section>
       <title>Simulation</title>
 
-      <para/>
+      <para>The following simulation improvements have been made:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Improved the simulation run-time with support for the
+          improvements made in the compiler</para>
+        </listitem>
+
+        <listitem>
+          <para>Improved the robustness when solving linear and nonlinear
+          blocks.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>JModelica.org now simulates the example models from the MultiBody
+      package in MSL with the exception of the few models that require dynamic
+      state selection.</para>
     </section>
 
     <section>
@@ -72,6 +136,8 @@
 
       <para>Jonathan Kämpe</para>
 
+      <para>Björn Lennernäs</para>
+
       <para>Fredrik Magnusson</para>
 
       <para>Jesper Mattsson</para>
@@ -88,8 +154,6 @@
         <title>Previous contributors</title>
 
         <para>Sofia Gedda</para>
-
-        <para>Björn Lennernäs</para>
 
         <para>Petter Lindgren</para>
 
@@ -172,7 +236,8 @@
         </listitem>
 
         <listitem>
-          <para>Inlining of simple functions is now activate by default</para>
+          <para>Inlining of simple functions is now activated by
+          default</para>
         </listitem>
 
         <listitem>

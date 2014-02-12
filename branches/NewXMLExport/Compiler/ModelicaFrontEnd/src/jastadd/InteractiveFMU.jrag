@@ -22,12 +22,6 @@ aspect InteractiveFMU{
 			Collection<FAbstractEquation> localIterations = new HashSet<FAbstractEquation>();
 			getDAEInitBLT().computeInteractiveFMU(this, new Enumerator(), localIterations);
 			
-			// Remove HGT stuff
-			for (FAbstractEquation equation : equations())
-				equation.setResidualOpt(new Opt<FResidual>());
-			for (FVariable variable : variables())
-				variable.unsetHGT();
-			
 			// Flush cache
 			root().flushAllRecursive();
 			
@@ -39,21 +33,21 @@ aspect InteractiveFMU{
 			aliasElimination.apply();
 			
 			// Redo BLT
-			computeMatchingsAndBLT();
+			computeMatchingsAndBLT(true);
 			
 			// Check for unsolved blocks
 			boolean allSolved = true;
 			for (AbstractEquationBlock aeb : daeBLT) {
 				if (aeb.isSolvable())
 					continue;
-				for (FAbstractEquation fae : aeb.equations())
+				for (FAbstractEquation fae : aeb.allEquations())
 					if (!localIterations.contains(fae))
 						allSolved = false;
 			}
 			for (AbstractEquationBlock aeb : daeInitBLT) {
 				if (aeb.isSolvable())
 					continue;
-				for (FAbstractEquation fae : aeb.equations())
+				for (FAbstractEquation fae : aeb.allEquations())
 					if (!localIterations.contains(fae))
 						allSolved = false;
 			}
@@ -70,7 +64,7 @@ aspect InteractiveFMU{
 	public abstract void AbstractEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations);
 	
 	public void EquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
-		for (SimpleEquationBlock subBlock : blocks)
+		for (SimpleEquationBlock subBlock : unsolvedBlocks)
 			subBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	
@@ -102,12 +96,12 @@ aspect InteractiveFMU{
 		FExp oldRhs = equation.getRight();
 		equation.setLeft(new FIdUseExp(resName));
 		equation.setRight(new FSubExp(oldLhs, oldRhs));
-        if (equation.hasName()) {
-            if (!fclass.lookupFV(equation.getName()).isUnknown()) {
-                equation.error("Unable to introduce equation name alias for equation with name '" + equation.getName() + "'");
+        if (equation.name() != null) {
+            if (!fclass.lookupFV(equation.name()).isUnknown()) {
+                equation.error("Unable to introduce equation name alias for equation with name '" + equation.name() + "'");
             } else {
                 FVariable nameVar = (FVariable) fv.fullCopy();
-                String nameName = equation.getName().toString();
+                String nameName = equation.name();
                 nameVar.setFQName(new FQNameString(nameName));
                 fclass.addFVariable(nameVar);
                 
@@ -162,9 +156,9 @@ aspect InteractiveFMU{
 	}
 	
 	public void TornEquationBlock.computeInteractiveFMU(FClass fclass, Enumerator indexEnumerator, Collection<FAbstractEquation> localIterations) {
-		for (SimpleEquationBlock solvedBlock : solvedBlocks)
+		for (SimpleEquationBlock solvedBlock : solvedBlocks())
 			solvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
-		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks)
+		for (SimpleEquationBlock unsolvedBlock : unsolvedBlocks())
 			unsolvedBlock.computeInteractiveFMU(fclass, indexEnumerator, localIterations);
 	}
 	

@@ -1457,22 +1457,29 @@ public
  function ArrayBuiltins.Transpose.Transpose11.f
   input Real[:, :] a;
   output Real[size(a, 2), size(a, 1)] b;
-  Real temp_1;
+  Real[:,:] temp_1;
+  Real temp_2;
  algorithm
+  size(temp_1) := {size(a, 1), size(a, 1)};
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(a, 1) loop
+    temp_2 := 0.0;
+    for i5 in 1:size(a, 2) loop
+     temp_2 := temp_2 + a[i3,i5] * (a[i4,i5] + a[i4,i5]);
+    end for;
+    temp_1[i3,i4] := temp_2;
+   end for;
+  end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 1) loop
-    temp_1 := 0.0;
-    for i3 in 1:size(transpose(a + a[:,:]), 1) loop
-     temp_1 := temp_1 + a[i1,i3] * (a[i2,i3] + a[i2,i3]);
-    end for;
-    b[i1,i2] := temp_1;
+    b[i1,i2] := temp_1[i1,i2];
    end for;
   end for;
   return;
  end ArrayBuiltins.Transpose.Transpose11.f;
 
 end ArrayBuiltins.Transpose.Transpose11;
-
+			
 ")})));
 end Transpose11;
 
@@ -2183,7 +2190,17 @@ fclass ArrayBuiltins.Cat.ArrayShortCat2
  constant Real x[3,1] = 7;
  constant Real x[3,2] = 8;
  constant Real x[3,3] = 9;
+ constant Real a = 1;
+ constant Real b[1,1] = 2;
+ constant Real b[1,2] = 3;
+ constant Real c[1] = 4;
+ constant Real c[2] = 7;
+ constant Real d[1,1] = 5;
+ constant Real d[1,2] = 6;
+ constant Real d[2,1] = 8;
+ constant Real d[2,2] = 9;
 end ArrayBuiltins.Cat.ArrayShortCat2;
+			
 ")})));
 end ArrayShortCat2;
 
@@ -2600,6 +2617,48 @@ end ArrayBuiltins.Linspace6;
 ")})));
 end Linspace6;
 
+model Linspace7
+ function f
+  input Integer x1;
+  input Integer x2;
+  input Integer n;
+  output Real[n] a = linspace(x1,x2,n);
+ algorithm
+ end f;
+
+ Real x[3] = f(1,4,3);
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Linspace7",
+			description="Linspace operator: basic test",
+			inline_functions="none",
+			variability_propagation=false,
+			flatModel="
+fclass ArrayBuiltins.Linspace7
+ Real x[1];
+ Real x[2];
+ Real x[3];
+equation
+ ({x[1], x[2], x[3]}) = ArrayBuiltins.Linspace7.f(1, 4, 3);
+
+public
+ function ArrayBuiltins.Linspace7.f
+  input Integer x1;
+  input Integer x2;
+  input Integer n;
+  output Real[n] a;
+ algorithm
+  for i1 in 1:n loop
+   a[i1] := x1 + (i1 - 1) * ((x2 - x1) / (n - 1));
+  end for;
+  return;
+ end ArrayBuiltins.Linspace7.f;
+
+end ArrayBuiltins.Linspace7;
+			
+")})));
+end Linspace7;
 
 
 model NdimsExp1
@@ -2995,16 +3054,19 @@ public
   input Real[:] v;
   output Real result;
   Real temp_1;
+  Real temp_2;
  algorithm
-  temp_1 := 0.0;
+  temp_2 := 0.0;
   for i1 in 1:size(v, 1) loop
-   temp_1 := temp_1 + v[i1] * v[i1];
+   temp_2 := temp_2 + v[i1] * v[i1];
   end for;
+  temp_1 := temp_2;
   result := sqrt(temp_1);
   return;
  end Modelica.Math.Vectors.length;
 
 end ArrayBuiltins.NonVectorizedSalarization3;
+			
 ")})));
 end NonVectorizedSalarization3;
 

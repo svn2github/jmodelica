@@ -767,6 +767,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
+        jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
 
 /**
@@ -1071,6 +1072,7 @@ struct jmi_t {
     int indep_extobjs_initialized;       /** <\brief Flag indicating if initialization of independent external objects have been done. */
     int dep_extobjs_initialized;         /** <\brief Flag indicating if initialization of dependent external objects have been done. */
     
+    jmi_real_t* nominals;                             /**< \brief Nominal values of differentiated states. */
     jmi_real_t *variable_scaling_factors;             /**< \brief Scaling factors. For convenience the vector has the same size as z but only scaling of reals are used. */
     int scaling_method;                               /**< \brief Scaling method: JMI_SCALING_NONE, JMI_SCALING_VARIABLES */
     jmi_block_residual_t** dae_block_residuals;       /**< \brief A vector of function pointers to DAE equation blocks */
@@ -1086,6 +1088,8 @@ struct jmi_t {
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
+	
+	int nbr_event_iter;                  /**< Counter for the nummber of global event iterations performed. */ 
 
     jmi_simple_color_info_t* color_info_A;  /**< \brief CPR coloring info for the ODE Jacobian A */
     jmi_simple_color_info_t* color_info_B;  /**< \brief CPR coloring info for the ODE Jacobian B */
@@ -1096,6 +1100,7 @@ struct jmi_t {
 
     jmi_options_t options;               /**< \brief Runtime options */
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
+    jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */
 
@@ -1352,20 +1357,6 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func);
 
 /**
- * \brief Evaluates the switches.
- * 
- * Evaluates the switches. Depending on the mode, it either evaluates
- * all the switches at initial time (mode=0) or otherwise (mode=1).
- * 
- * @param jmi The jmi_t struct
- * @param switches The switches (Input, Output)
- * @param eps The epsilon used in determining if a switch or not
- * @param mode Determine if we are evaluating initial switches or not.
- * @return Error code.
- */
-int jmi_evaluate_switches(jmi_t* jmi, jmi_real_t* switches, jmi_int_t mode);
-
-/**
  * \brief Compares two sets of switches.
  * 
  * Compares two sets of switches and returns (1) if they are equal and
@@ -1394,5 +1385,10 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
  * @return The new switch value
  */
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+
+/**
+ * \brief Calls each blocks completed integration step function.
+ */
+int jmi_block_completed_integrator_step(jmi_t *jmi);
 
 #endif

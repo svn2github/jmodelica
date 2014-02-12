@@ -22,6 +22,9 @@ aspect OptimicaTransformCanonical {
 		if (root().options.getBooleanOption("convert_free_dependent_parameters_to_algebraics")) {
 			for (FVariable fv : freeDependentParameters()) {
 				fv.setFTypePrefixVariability(new FContinuous());
+                for (FIdUseExp use : fv.uses())
+                    if (use.inObjective())
+                        use.replaceMe(new FTimedVariable(use.getFIdUse().fullCopy(), new FStartTimeExp()));
 			}
 		}
 
@@ -154,7 +157,7 @@ aspect OptimicaTransformCanonical {
 	protected void FOptClass.scalarizeClassAttributes() {
 		List<FAttribute> al = new List<FAttribute>();
 		for (FAttribute a : getFAttributes()) 
-			al.add(a.scalarize(Index.NULL));
+			al.add(a.scalarize(Index.NULL, Collections.<String,FExp>emptyMap()));
 		setFAttributeList(al);
 	}
 	
@@ -166,7 +169,7 @@ aspect OptimicaTransformCanonical {
 	
 	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap, true);
+		createArrayTemporaries(eqns, vars, indexMap);
 		//log.debug("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
@@ -190,7 +193,7 @@ aspect OptimicaTransformCanonical {
 	
 	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
 			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap, true);
+		createArrayTemporaries(eqns, vars, indexMap);
 		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
 		myIndexMap.putAll(indexMap);
 		Indices indices = indices();

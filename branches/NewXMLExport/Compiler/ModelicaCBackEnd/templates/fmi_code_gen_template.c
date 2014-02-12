@@ -16,6 +16,8 @@
 
 $external_func_includes$
 
+extern void dgemm_(char* TRANSA, char* TRANSB, int* M, int* N, int* K, double* ALPHA, double* A, int* LDA, double* B, int* LDB, double* BETA, double* C, int* LDC);
+
 const char *C_GUID = $C_guid$;
 
 static int model_ode_guards_init(jmi_t* jmi);
@@ -90,6 +92,8 @@ $C_DAE_initial_relations$
 
 $C_DAE_relations$
 
+$C_DAE_nominals$
+
 $C_variable_aliases$
 
 $C_runtime_option_map$
@@ -156,144 +160,145 @@ $C_export_functions$
 $C_export_wrappers$
 
 static int model_ode_guards(jmi_t* jmi) {
-  $C_ode_guards$
-  return 0;
+$C_ode_guards$
+    return 0;
 }
 
 static int model_ode_next_time_event(jmi_t* jmi, jmi_real_t* nextTime) {
 $C_ode_time_events$
-  return 0;
+    return 0;
 }
 
 static int model_ode_derivatives(jmi_t* jmi) {
-  int ef = 0;
-  $C_ode_derivatives$
-  return ef;
+    int ef = 0;
+$C_ode_derivatives$
+    return ef;
 }
 
 static int model_ode_derivatives_dir_der(jmi_t* jmi) {
-  int ef = 0;
-  $CAD_ode_derivatives$
-  return ef;
+    int ef = 0;
+$CAD_ode_derivatives$
+    return ef;
 }
 
 static int model_ode_outputs(jmi_t* jmi) {
-  int ef = 0;
-  $C_ode_outputs$
-  return ef;
+    int ef = 0;
+$C_ode_outputs$
+    return ef;
 }
 
 static int model_ode_guards_init(jmi_t* jmi) {
-  $C_ode_guards_init$
-  return 0;
+$C_ode_guards_init$
+    return 0;
 }
 
 static int model_ode_initialize(jmi_t* jmi) {
-  int ef = 0;
-  $C_ode_initialization$
-  return ef;
+    int ef = 0;
+$C_ode_initialization$
+    return ef;
 }
 
 
 static int model_ode_initialize_dir_der(jmi_t* jmi) {
-  int ef = 0;
-  /* This function is not needed - no derivatives of the initialization system is exposed.*/
-  return ef;
+    int ef = 0;
+    /* This function is not needed - no derivatives of the initialization system is exposed.*/
+    return ef;
 }
 
 static int model_dae_F(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_equation_residuals$
-	return 0;
+    return 0;
 }
 
 static int model_dae_dir_dF(jmi_t* jmi, jmi_real_t** res, jmi_real_t** dF, jmi_real_t** dz) {
 $C_DAE_equation_directional_derivative$
-	return 0;
+    return 0;
 }
 
 static int model_dae_R(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_event_indicator_residuals$
-	return 0;
+    return 0;
 }
 
 static int model_init_F0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_equation_residuals$
-	return 0;
+    return 0;
 }
 
 static int model_init_F1(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_guess_equation_residuals$
-	return 0;
+    return 0;
 }
 
 static int model_init_Fp(jmi_t* jmi, jmi_real_t** res) {
-  /* C_DAE_initial_dependent_parameter_residuals */
-	return -1;
+    /* C_DAE_initial_dependent_parameter_residuals */
+    return -1;
 }
 
 static int model_init_eval_parameters(jmi_t* jmi) {
 $C_DAE_initial_dependent_parameter_assignments$
-        return 0;
+    return 0;
 }
 
 static int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_event_indicator_residuals$
-	return 0;
+    return 0;
 }
 
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
-  jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
-	   N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
-	   N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
-	   N_string_ci, N_string_cd, N_string_pi, N_string_pd,
-	   N_real_dx,N_real_x, N_real_u, N_real_w,
-	   N_real_d,N_integer_d,N_integer_u,N_boolean_d,N_boolean_u,
-	   N_string_d,N_string_u, N_outputs,(int (*))Output_vrefs,
-           N_sw,N_sw_init,N_guards,N_guards_init,
-	   N_dae_blocks,N_dae_init_blocks,
-	   N_initial_relations, (int (*))DAE_initial_relations,
-	   N_relations, (int (*))DAE_relations,
-	   Scaling_method, N_ext_objs, jmi_callbacks);
+    jmi_init(jmi, N_real_ci, N_real_cd, N_real_pi, N_real_pd,
+             N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pd,
+             N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pd,
+             N_string_ci, N_string_cd, N_string_pi, N_string_pd,
+             N_real_dx, N_real_x, N_real_u, N_real_w,
+             N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
+             N_string_d, N_string_u, N_outputs, (int (*))Output_vrefs,
+             N_sw, N_sw_init, N_guards, N_guards_init,
+             N_dae_blocks, N_dae_init_blocks,
+             N_initial_relations, (int (*))DAE_initial_relations,
+             N_relations, (int (*))DAE_relations,
+             (jmi_real_t *) DAE_nominals,
+             Scaling_method, N_ext_objs, jmi_callbacks);
 
-  $C_dae_add_blocks_residual_functions$
+$C_dae_add_blocks_residual_functions$
 
-  $C_dae_init_add_blocks_residual_functions$
+$C_dae_init_add_blocks_residual_functions$
 
-  $CAD_dae_add_blocks_residual_functions$
+$CAD_dae_add_blocks_residual_functions$
 
-  $CAD_dae_init_add_blocks_residual_functions$
+$CAD_dae_init_add_blocks_residual_functions$
 
-	/* Initialize the DAE interface */
-	jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
-                     *model_dae_dir_dF,
-        		     CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
-        		     CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
-        		     CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
-        		     CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
-        		     CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
-		     *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
-		     	 *model_ode_derivatives_dir_der,
-                     *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
-                     *model_ode_guards_init,*model_ode_next_time_event);
+    /* Initialize the DAE interface */
+    jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
+                 *model_dae_dir_dF,
+                 CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
+                 CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
+                 CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
+                 CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
+                 CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
+                 *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
+                 *model_ode_derivatives_dir_der,
+                 *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
+                 *model_ode_guards_init,*model_ode_next_time_event);
 
-	/* Initialize the Init interface */
-	jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
-		      0, NULL, NULL,
-		      *model_init_F1, N_eq_F1, NULL,
-		      0, NULL, NULL,
-		      *model_init_Fp, N_eq_Fp, NULL,
-		      0, NULL, NULL,
-		      *model_init_eval_parameters,
-		      *model_init_R0, N_eq_R0, NULL,
-		      0, NULL, NULL);
+    /* Initialize the Init interface */
+    jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
+                  0, NULL, NULL,
+                  *model_init_F1, N_eq_F1, NULL,
+                  0, NULL, NULL,
+                  *model_init_Fp, N_eq_Fp, NULL,
+                  0, NULL, NULL,
+                  *model_init_eval_parameters,
+                  *model_init_R0, N_eq_R0, NULL,
+                  0, NULL, NULL);
 
-	return 0;
+    return 0;
 }
 
 int jmi_terminate(jmi_t* jmi) {
 $C_destruct_external_object$
-	return 0;
+    return 0;
 }
 
 int jmi_set_start_values(jmi_t* jmi) {
@@ -301,4 +306,6 @@ $C_set_start_values$
     return 0;
 }
 
-const char *jmi_get_model_identifier() { return "$C_model_id$"; }
+const char *jmi_get_model_identifier() {
+    return "$C_model_id$";
+}

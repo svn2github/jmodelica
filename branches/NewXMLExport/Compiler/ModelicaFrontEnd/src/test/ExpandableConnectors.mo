@@ -1279,6 +1279,50 @@ equation
 end ExpandableConnectors.Expandable33;
 ")})));
     end Expandable33;
+	
+	
+    model Expandable34
+        expandable connector EC
+        end EC;
+        
+        connector C = Real;
+        
+        model A
+            EC ec;
+        end A;
+        
+        A a;
+        EC ec;
+        C c1[2], c2[2];
+    equation
+        connect(ec, a.ec);
+        connect(ec.b1, c1);
+        connect(a.ec.b2, c2);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="Expandable34",
+			description="Make sure that extra equations aren't added for combinations of inner/outer connections",
+			flatModel="
+fclass ExpandableConnectors.Expandable34
+ Real a.ec.b1[2];
+ Real a.ec.b2[2];
+ Real ec.b1[2];
+ Real ec.b2[2];
+ Real c1[2];
+ Real c2[2];
+equation
+ a.ec.b1[1] = c1[1];
+ c1[1] = ec.b1[1];
+ a.ec.b1[2] = c1[2];
+ c1[2] = ec.b1[2];
+ a.ec.b2[1] = c2[1];
+ c2[1] = ec.b2[1];
+ a.ec.b2[2] = c2[2];
+ c2[2] = ec.b2[2];
+end ExpandableConnectors.Expandable34;
+")})));
+    end Expandable34;
 
     
     

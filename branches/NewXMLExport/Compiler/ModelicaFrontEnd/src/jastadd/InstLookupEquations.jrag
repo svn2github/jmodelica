@@ -45,7 +45,7 @@ aspect InstLookupEquations{
 		return null;
 	}
 	
-	syn FAbstractEquation FAbstractEquation.memberEquation(String name) = hasName() && getName().name().equals(name) ? this : null;
+	syn FAbstractEquation FAbstractEquation.memberEquation(String name) = name != null && name.equals(name()) ? this : null;
 	eq InstForClauseE.memberEquation(String name) {
 		FAbstractEquation match = super.memberEquation(name);
 		if (match != null)
@@ -60,5 +60,12 @@ aspect InstLookupEquations{
 	
 	syn FAbstractEquation FExp.referencedEquation() = null;
 	eq FInstAccessExp.referencedEquation() = getInstAccess().myEquation();
+	
+	syn String FAbstractEquation.name() {
+	    FAttribute attr = findAttribute("name");
+	    if (attr == null || !attr.isDecl())
+	        return null;
+	    return attr.getFIdDecl().name();
+	}
 	
 }

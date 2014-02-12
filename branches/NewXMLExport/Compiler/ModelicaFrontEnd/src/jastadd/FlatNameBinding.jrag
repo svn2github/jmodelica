@@ -620,8 +620,9 @@ aspect FlatFEquationBinding {
 	syn lazy Map<String, FAbstractEquation> FClass.equationMap() {
 		Map<String, FAbstractEquation> equationMap = new HashMap<String, FAbstractEquation>();
 		for (FAbstractEquation fae : getFAbstractEquations()) {
-			if (fae.hasName())
-				equationMap.put(fae.getName().toString(), fae);
+		    String name = fae.name();
+			if (name != null)
+				equationMap.put(name, fae);
 		}
 		return equationMap;
 	}

@@ -27,11 +27,12 @@ from scipy.io.matlab.mio import loadmat
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.io import ResultDymolaTextual
 from pyjmi.common.xmlparser import XMLException
-from pymodelica.compiler import compile_fmux, compile_fmu
+from pymodelica import compile_fmux, compile_fmu
 from pyfmi import FMUModel,load_fmu
 try:
     from pyjmi.optimization.casadi_collocation import *
-    from pyjmi.casadi_interface import CasadiModel
+    from pyjmi import CasadiModel
+    import casadi
 except (NameError, ImportError):
     pass
 
@@ -287,7 +288,7 @@ class TestLocalDAECollocator:
         xx_init = col.get_xx_init()
         N.testing.assert_allclose(
                 xx_init[col.var_indices[opts['n_e']][opts['n_cp']]['x']],
-                [435.4425832, 333.42862629],rtol=1e-5)
+                [435.4425832, 333.42862629],rtol=1e-3)
     
     @testattr(casadi = True)
     def test_init_traj_opt(self):
@@ -413,7 +414,7 @@ class TestLocalDAECollocator:
         col = res.solver
         xx_init = col.get_xx_init()
         N.testing.assert_equal(sum(xx_init == 1.),
-                               (n_e * n_cp + 1) * 3 + 2 * n_e)
+                               (n_e * n_cp + 1) * 4 + 2 * n_e)
         
         # Test with eliminated continuity variables
         opts['eliminate_cont_var'] = True
@@ -1604,7 +1605,7 @@ class TestLocalDAECollocator:
         opts["CVode_options"]["atol"] = 1e-8*model.nominal_continuous_states
         res = model.simulate(start_time=0., final_time=150., input=opt_input, options=opts)
         N.testing.assert_allclose([res.final("T"), res.final("c")],
-                                  [284.62140206, 345.22510435], rtol=5e-4)
+                                  [284.62140206, 346.31140807], rtol=5e-3)
 
     @testattr(casadi = True)
     def test_matrix_evaluations(self):
@@ -1629,7 +1630,7 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
         J_opt = res.get_J("opt")
         J_opt_cond = N.linalg.cond(J_opt)
-        N.testing.assert_allclose(J_opt_cond, 2.47e6, rtol=1e-2)
+        N.testing.assert_allclose(J_opt_cond, 3.37e6, rtol=1e-2)
 
         # Compute Hessian norms
         H_init = res.get_H("init")
@@ -1645,7 +1646,7 @@ class TestLocalDAECollocator:
         N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
         KKT_opt = res.get_KKT("opt")
         KKT_opt_cond = N.linalg.cond(KKT_opt)
-        N.testing.assert_allclose(KKT_opt_cond, 9.34e9, rtol=1e-2)
+        N.testing.assert_allclose(KKT_opt_cond, 1.17e10, rtol=1e-2)
 
         # Obtain symbolic matrices and matrix functions
         res.get_J("sym")

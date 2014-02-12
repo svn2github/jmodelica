@@ -75,7 +75,7 @@ public class DebugCompiler extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		
-		mc = new ModelicaCompiler(new OptionRegistry());
+		mc = new ModelicaCompiler(ModelicaCompiler.createOptions());
 		tempDir = getTempDir();
 		mc.setTempFileDir(tempDir);
 	}

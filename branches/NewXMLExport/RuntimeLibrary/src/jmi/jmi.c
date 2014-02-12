@@ -42,6 +42,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
         int n_dae_blocks, int n_dae_init_blocks,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations,
+        jmi_real_t* nominals,
         int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
@@ -205,6 +206,7 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     jmi_->initial_relations = (jmi_int_t*)calloc(n_initial_relations,sizeof(jmi_int_t));
     jmi_->relations = (jmi_int_t*)calloc(n_relations,sizeof(jmi_int_t));
 
+    /* TODO: if we define the incoming vectors as jmi_int_t*, then we can use memcpy instead */
     for (i=0;i<n_initial_relations;i++) {
         jmi_->initial_relations[i] = initial_relations[i];
     }
@@ -212,6 +214,9 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
     for (i=0;i<n_relations;i++) {
         jmi_->relations[i] = relations[i];
     }
+
+    jmi_->nominals = (jmi_real_t*) calloc(n_real_x, sizeof(jmi_real_t));
+    memcpy(jmi_->nominals, nominals, n_real_x * sizeof(jmi_real_t));
 
     jmi_->dae_block_residuals = (jmi_block_residual_t**)calloc(n_dae_blocks,
             sizeof(jmi_block_residual_t*));
@@ -235,13 +240,15 @@ int jmi_init(jmi_t** jmi, int n_real_ci, int n_real_cd, int n_real_pi,
 
     jmi_->is_initialized = 0;
 
+	jmi_->nbr_event_iter = 0;
+
     return 0;
 
 }
 
 int jmi_delete(jmi_t* jmi){
     int i;
-    if(jmi->dae != NULL) {
+    if (jmi->dae != NULL) {
         jmi_func_delete(jmi->dae->F);
         jmi_func_delete(jmi->dae->R);
         jmi_delete_simple_color_info(&jmi->color_info_A);
@@ -273,7 +280,8 @@ int jmi_delete(jmi_t* jmi){
     free(jmi->dz);
     free(jmi->initial_relations);
     free(jmi->relations);
-    for(i=0; i<JMI_ACTIVE_VAR_BUFS_NUM; i++) {
+    free(jmi->nominals);
+    for (i = 0; i < JMI_ACTIVE_VAR_BUFS_NUM; i++) {
         free(jmi->dz_active_variables_buf[i]);
     }
     free(jmi->variable_scaling_factors);
@@ -426,6 +434,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
+        jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
     }
 
     jmi->block_level = 0; /* to recover from errors */

@@ -326,6 +326,7 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(final
  constant Real y = 1;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
+ constant Real x[1] = 1;
 constraint 
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
@@ -706,6 +707,29 @@ m.p1
 m.x
 ")})));
 end DepParTest4;
+
+optimization DepParTest5 (
+		objectiveIntegrand=x^2 + y^2,
+		objective=x^2 + y^2)
+	parameter Real x(free=true,start=5);
+	parameter Real y = x;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="DepParTest5",
+			description="Test update of objective for free dependent parameters.",
+			flatModel="
+optimization OptimicaTransformCanonicalTests.DepParTest5(objectiveIntegrand = x ^ 2 + y ^ 2,objective = x ^ 2 + y(startTime) ^ 2)
+ parameter Real x(free = true,start = 5);
+ Real y;
+ parameter Real startTime = 0.0 /* 0.0 */;
+ parameter Real finalTime = 1.0 /* 1.0 */;
+equation
+ y = x;
+constraint 
+end OptimicaTransformCanonicalTests.DepParTest5;
+")})));
+end DepParTest5;
 
 optimization VariabilityPropagation1
 	parameter Real a(free=true);

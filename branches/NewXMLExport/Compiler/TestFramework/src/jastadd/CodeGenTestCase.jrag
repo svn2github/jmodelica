@@ -67,7 +67,7 @@ public abstract class CodeGenTestCase extends TestCase {
    	  	ByteArrayOutputStream os = new ByteArrayOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);
 	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
-	    		           new NotNullPrintStream(os));
+	    		           new NotNullCodeStream(os));
 	    String test = os.toString();
 	    String correct = filter(getGenCode());
 	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))
