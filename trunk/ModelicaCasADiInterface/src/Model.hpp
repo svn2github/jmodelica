@@ -28,12 +28,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Variable.hpp"
 #include "RealVariable.hpp"
 #include "Equation.hpp"
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 #include "Ref.hpp"
 
 namespace ModelicaCasADi 
 {  
-class Model: public SharedNode {
+class Model: public RefCountedNode {
     private:
         typedef std::map< std::string, Ref<ModelFunction> > functionMap;
         typedef std::map< std::string, Ref<VariableType> > typeMap;

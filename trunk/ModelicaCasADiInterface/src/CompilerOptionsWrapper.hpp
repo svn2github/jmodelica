@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <iostream>
 
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 #include "org/jmodelica/util/OptionRegistry.h"
 #include "org/jmodelica/modelica/compiler/ModelicaCompiler.h"
 
 namespace ModelicaCasADi 
 {
-class CompilerOptionsWrapper: public SharedNode {
+class CompilerOptionsWrapper: public RefCountedNode {
     public:
         CompilerOptionsWrapper(); 
         void setStringOption(std::string opt, std::string val);

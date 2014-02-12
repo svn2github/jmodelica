@@ -73,6 +73,7 @@ set(MC_HPP
   RealVariable.hpp
   Ref.hpp
   SharedNode.hpp
+  RefCountedNode.hpp
   sharedTransferFunctionality.hpp
   transferModelica.hpp
   transferOptimica.hpp
