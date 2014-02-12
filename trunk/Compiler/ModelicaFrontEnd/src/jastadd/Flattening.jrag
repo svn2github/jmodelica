@@ -2183,24 +2183,6 @@ aspect InstantiatedExpressions {
             eqn.addFAttribute(new FIdDeclAttribute("name", nameExp.asAccess().asID()));
     }
 	
-	/**
-	 * Builds a FNominal instance for "this" equation.  
-	 */
-	private Opt<FNominal> Equation.buildNominalOpt() {
-		AnnotationNode nominalNode = annotation().vendorNode().forPath("nominal");
-		if (!nominalNode.exists())
-			return new Opt<FNominal>();
-		InstNominal nominal = new InstNominal();
-		Exp enabledExp = nominalNode.forPath("enabled").exp();
-		if (enabledExp != null)
-			nominal.setEnabled(enabledExp.instantiate());
-		Exp valueExp = nominalNode.exp();
-		if (valueExp == null)
-			nominal.error("Nominal value is missing from nominal annotation");
-		nominal.setValue(valueExp.instantiate());
-		return new Opt<FNominal>(nominal);
-	}
-	
 	public FAbstractEquation ConnectClause.instantiate() {
 	    Opt o = null;
 	    if (getComment().hasStringComment())
