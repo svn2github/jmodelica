@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package LocalIteration
+package LocalIterationBack
     
     model CGenTest1
         Real a, b, c;
@@ -193,4 +193,4 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
 ")})));
     end CADGenTest1;
 
-end LocalIteration;
+end LocalIterationBack;
