@@ -121,6 +121,12 @@ abstract public class OptionRegistry {
 		public static final int DEBUG = 6;
 	}
 	
+    public interface LocalIteration {
+        public static final String OFF        = "off";
+        public static final String ANNOTATION = "annotation";
+        public static final String ALL        = "all";
+    }
+    
 	public enum OptionType { compiler, runtime }
 	public static final OptionType compiler = OptionType.compiler;
 	public static final OptionType runtime  = OptionType.runtime;
@@ -139,12 +145,15 @@ abstract public class OptionRegistry {
 			 "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
 			 "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
 			 "such divisions are made during tearing."),
-		LOCAL_ITERATION_IN_TEARING 
-			("local_iteration_in_tearing", 
-			 compiler, 
-			 false, 
-			 "If this option is set to true (default is false), equations that can be solved with local fixed" +
-			 "point iteration will be considered solved."),
+        LOCAL_ITERATION_IN_TEARING 
+            ("local_iteration_in_tearing", 
+             compiler, 
+             LocalIteration.OFF, 
+             "This option controls whether equations can be solved local in tearing. Possible options are: " +
+             "'off', local iterations are not used (default). " +
+             "'annotation', only equations that are annotated are candidates. " +
+             "'all', all equations are candidates.",
+             LocalIteration.OFF, LocalIteration.ANNOTATION, LocalIteration.ALL),
 		AUTOMATIC_TEARING
 			("automatic_tearing", 
 			 compiler, 

@@ -205,6 +205,7 @@ aspect FlatTypeCheck {
 	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
       typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);
+      typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();
 	  if (!left.isUnknown() && !right.isUnknown()) {

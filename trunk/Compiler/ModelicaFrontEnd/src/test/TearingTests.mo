@@ -651,7 +651,6 @@ equation
 			equation_sorting=true,
 			automatic_tearing=true,
 			inline_functions="none",
-			local_iteration_in_tearing=true,
 			description="Test of algorithm tearing",
 			methodResult="
 -------------------------------
@@ -672,39 +671,6 @@ Residual equations:
 -------------------------------
       ")})));
 end AlgorithmTearingTest2;
-
-model TearingLocalLoopTest1
-	Real a, b, c;
-equation
-	20 = c * a;
-	23 = c * b;
-	c = a + b;
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			equation_sorting=true,
-			automatic_tearing=true,
-			hand_guided_tearing=true,
-			local_iteration_in_tearing=true,
-			name="TearingLocalLoopTest1",
-			methodName="printDAEBLT",
-			methodResult="
--------------------------------
-Torn block of 1 iteration variables and 2 solved variables:
-Solved variables:
-  b()
-  a
-Iteration variables:
-  c()
-Solved equations:
- Iteration variables: b
-  23 = c * b
-  c = a + b
-Residual equations:
- Iteration variables: c
-  20 = c * a
--------------------------------
-")})));
-end TearingLocalLoopTest1;
 
 model TearingFixedFalse1
     parameter Real a(fixed = false);

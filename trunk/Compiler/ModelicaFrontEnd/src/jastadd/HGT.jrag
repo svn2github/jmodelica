@@ -112,7 +112,7 @@ aspect HGT {
     
     protected static void ASTNode.typeCheckHGTEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
         enabledExp.collectErrors(checkType);
-        if (!enabledExp.type().isBoolean()) {
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
             enabledExp.error("The type of the enabled expression is not boolean");
         } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
             if (enabledExp.ndims() == 0) {

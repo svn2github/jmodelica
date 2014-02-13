@@ -666,6 +666,15 @@ aspect Constructors {
 	}
 
 	
+	/**
+	 * \brief Create an FInternalAttribute with only the children that are 
+	 *        valid for them.
+	 */
+	public FInternalAttribute.FInternalAttribute(String name) {
+	    this(new FIdUse(new FQNameEmpty()), new FIdDecl(new FQNameString(name)), new Opt<FExp>(), 
+	            true, Integer.MAX_VALUE, new Opt<FEach>(), new Opt<FFinal>(), new List<FAttribute>());
+	}
+	
     /**
      * \brief Create an FInternalAttribute with only the children that are 
      *        valid for them.

@@ -1144,16 +1144,8 @@ Semantic error at line 8464, column 56:
   Cannot find class or component declaration for unknownParameter1
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-Semantic error at line 8464, column 56:
-  The type of the enabled expression is not boolean
-
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8468, column 56:
   Cannot find class or component declaration for unknownParameter2
-
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-Semantic error at line 8468, column 56:
-  The type of the enabled expression is not boolean
 
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
 Semantic error at line 8471, column 59:
