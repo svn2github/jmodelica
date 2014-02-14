@@ -159,7 +159,8 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         bool normalizedTime = fclass.root()._get_options().getBooleanOption(StringFromUTF(option.c_str()));
             
         // Create a model with the model identfier and normalizedTime flag. 
-        Ref<OptimizationProblem> optProblem = new OptimizationProblem(identfier, normalizedTime);
+        Ref<OptimizationProblem> optProblem = new OptimizationProblem();
+        optProblem->initializeProblem(identfier, normalizedTime);
        
         if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");

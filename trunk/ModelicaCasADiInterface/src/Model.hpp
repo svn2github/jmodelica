@@ -72,8 +72,11 @@ class Model: public RefCountedNode {
             NUM_OF_VARIABLE_KIND  // This must be defined last & no other
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
-        /** @param string identifier, typically <packagename>_<classname>, default empty string */
-        Model(std::string identifier = "");
+        /** Create a blank, uninitialized Model */
+        Model() {}
+        /** Initialize the Model, before populating it.
+         * @param string identifier, typically <packagename>_<classname>, default empty string */
+        void initializeModel(std::string identifier = "");
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
         /** @return A MX, this Model's time variable */
@@ -220,7 +223,7 @@ inline std::string Model::getIdentifier() { return identifier; }
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
 inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
-inline Model::Model(std::string identifier /* = "" */) : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {
+inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;
 }
 inline Ref<VariableType> Model::getVariableType(std::string typeName) const { 

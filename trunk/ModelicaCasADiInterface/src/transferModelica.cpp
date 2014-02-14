@@ -80,8 +80,9 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
 //         }
         
         // Create a model with the model identfier.
-        Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));
-        
+        Ref<Model> m = new Model();
+        m->initializeModel(env->toString(fclass.nameUnderscore().this$));
+
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable
         transferTime<mc::FClass>(m, fclass);
