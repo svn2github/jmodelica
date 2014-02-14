@@ -66,14 +66,8 @@ namespace jl = java::lang;
 using std::vector; using std::string;
 using org::jmodelica::util::OptionRegistry;
 using CasADi::MX;
-using ModelicaCasADi::Model;
-using ModelicaCasADi::Constraint;
-using ModelicaCasADi::OptimizationProblem;
-using ModelicaCasADi::CompilerOptionsWrapper;
-using ModelicaCasADi::Ref;
-using ModelicaCasADi::Variable;
-using ModelicaCasADi::TimedVariable;
 
+namespace ModelicaCasADi {
 
 vector< Ref<Constraint> >* transferPointConstraints(oc::FOptClass &fc){
     java::util::ArrayList pointConstraintsJM;
@@ -135,7 +129,9 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
     return timedModelVariables;
 }
 
-Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level)
+{
     try {
         // initalizeClass is needed on classes where static variables are acessed. 
         // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
@@ -158,8 +154,7 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         std::string option = "normalize_minimum_time_problems";
         bool normalizedTime = fclass.root()._get_options().getBooleanOption(StringFromUTF(option.c_str()));
             
-        // Create a model with the model identfier and normalizedTime flag. 
-        Ref<OptimizationProblem> optProblem = new OptimizationProblem();
+        // Initialize the model with the model identfier and normalizedTime flag. 
         optProblem->initializeProblem(identfier, normalizedTime);
        
         if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
@@ -201,11 +196,10 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         optProblem->setTimedVariables(timedVars);
         optProblem->setLagrangeTerm(lagrangeTerm);
         optProblem->setMayerTerm(mayerTerm);
-        
-        return optProblem;
     }
     catch (JavaError e) {
         rethrowJavaException(e);
     }
-    return NULL;
 }
+
+}; // End namespace

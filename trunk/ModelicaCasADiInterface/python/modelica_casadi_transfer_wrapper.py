@@ -20,13 +20,12 @@ from modelicacasadi_wrapper import *
 JVM_SET_UP=False
 
 
-def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto', 
-                compiler_options={}, compiler_log_level='warning'):
+def transfer_model(model, class_name, file_name=[],
+                   compiler_options={}, compiler_log_level='warning'):
     """ 
-    Compiles and transfers a model or optimization problem to the ModelicaCasADi 
-    interface. 
+    Compiles and transfers a model to the ModelicaCasADi interface. 
     
-    A model class name must be passed, all other arguments have default values. 
+    A destination model object and model class name must be passed, all other arguments have default values. 
     The different scenarios are:
     
     * Only class_name is passed: 
@@ -35,10 +34,64 @@ def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto',
     * class_name and file_name is passed:
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be file or library paths.
-        - Default compiler setting is 'auto' which means that the appropriate 
-          compiler will be selected based on model file ending, i.e. 
-          ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is 
-          found in file_name list.
+    
+    Library directories can be added to MODELICAPATH by listing them in a 
+    special compiler option 'extra_lib_dirs', for example:
+    
+        compiler_options = 
+            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
+        
+    Other options for the compiler should also be listed in the compiler_options 
+    dict.
+    
+        
+    Parameters::
+
+        model --
+            A blank Model to be populated.
+    
+        class_name -- 
+            The name of the model class.
+            
+        file_name -- 
+            A path (string) or paths (list of strings) to model files and/or 
+            libraries.
+            Default: Empty list.
+                        
+        compiler_options --
+            Options for the compiler.
+            Note that MODELICAPATH is set to the standard for this
+            installation if not given as an option.
+            Default: Empty dict.
+            
+        compiler_log_level --
+            Set the logging for the compiler. Valid options are:
+            'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
+            Default: 'warning'
+
+    """
+    _ensure_jvm()
+    if isinstance(file_name, basestring):
+        file_vec = [file_name]
+    else: 
+        file_vec = file_name
+    _transfer_modelica(model, class_name, _generate_StringVector(file_vec),
+                       _get_options(compiler_options), compiler_log_level)
+
+def transfer_optimization_problem(ocp, class_name, file_name=[],
+                                  compiler_options={}, compiler_log_level='warning'):
+    """ 
+    Compiles and transfers an optimization problem to the ModelicaCasADi interface. 
+    
+    A destination problem object and model class name must be passed, all other arguments have default values. 
+    The different scenarios are:
+    
+    * Only class_name is passed: 
+        - Class is assumed to be in MODELICAPATH.
+    
+    * class_name and file_name is passed:
+        - file_name can be a single path as a string or a list of paths 
+          (strings). The paths can be file or library paths.
     
     Library directories can be added to MODELICAPATH by listing them in a 
     special compiler option 'extra_lib_dirs', for example:
@@ -52,6 +105,9 @@ def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto',
         
     Parameters::
     
+        ocp --
+            A blank OptimizationProblem to be populated.
+
         class_name -- 
             The name of the model class.
             
@@ -59,15 +115,7 @@ def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto',
             A path (string) or paths (list of strings) to model files and/or 
             libraries.
             Default: Empty list.
-            
-        compiler -- 
-            The compiler used to compile the model. The different options are:
-              - 'auto': the compiler is selected automatically depending on 
-                 file ending
-              - 'modelica': the ModelicaCompiler is used
-              - 'optimica': the OptimicaCompiler is used
-            Default: 'auto'
-            
+
         compiler_options --
             Options for the compiler.
             Note that MODELICAPATH is set to the standard for this
@@ -78,33 +126,21 @@ def transfer_to_casadi_interface(class_name, file_name=[], compiler='auto',
             Set the logging for the compiler. Valid options are:
             'warning'/'w', 'error'/'e', 'info'/'i' or 'debug'/'d'. 
             Default: 'warning'
-                  
-    Returns::
-    
-        A Model or OptimizationProblem, dependent on which compiler
-        that was used. 
-    
+
     """
+    _ensure_jvm()
     if isinstance(file_name, basestring):
         file_vec = [file_name]
     else: 
         file_vec = file_name
-    
-    # JVM can only be set up once. SetUpJVM fails after tearDownJVM. 
+    return _transfer_optimica(ocp, class_name, _generate_StringVector(file_vec),
+                              _get_options(compiler_options), compiler_log_level)
+
+def _ensure_jvm():
     global JVM_SET_UP
     if not JVM_SET_UP:
         setUpJVM()
         JVM_SET_UP=True
-        
-    if _which_compiler(file_vec, compiler) == "MODELICA":
-        return _transfer_modelica(class_name, _generate_StringVector(file_vec),
-                                  _get_options(compiler_options),
-                                  compiler_log_level)
-    else:
-        return _transfer_optimica(class_name, _generate_StringVector(file_vec),
-                                  _get_options(compiler_options),
-                                  compiler_log_level)
-
 
 def _generate_StringVector(file_vec):
     string_file_vec = StringVector()
@@ -112,11 +148,11 @@ def _generate_StringVector(file_vec):
         string_file_vec.push_back(f_i)
     return string_file_vec
 
-def _transfer_modelica(class_name, files, options, log_level):
-    return modelicacasadi_wrapper._transferModelicaModel(class_name, files, options, log_level)
+def _transfer_modelica(model, class_name, files, options, log_level):
+    return modelicacasadi_wrapper._transferModelicaModel(model, class_name, files, options, log_level)
     
-def _transfer_optimica(class_name, files, options, log_level):
-    return modelicacasadi_wrapper._transferOptimizationProblem(class_name, files, options, log_level)
+def _transfer_optimica(ocp, class_name, files, options, log_level):
+    return modelicacasadi_wrapper._transferOptimizationProblem(ocp, class_name, files, options, log_level)
 
 
 def _get_options(compiler_options):

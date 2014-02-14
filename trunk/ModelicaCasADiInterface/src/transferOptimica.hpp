@@ -29,10 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "OptimizationProblem.hpp"
 #include "CompilerOptionsWrapper.hpp"
 
+namespace ModelicaCasADi {
+
 // Creates an optimica compiler and transfers the model modelName in the file modelFile. Optional compiler options.
-ModelicaCasADi::Ref<ModelicaCasADi::OptimizationProblem> transferOptimizationProblem(std::string modelName,
-                                                                 const std::vector<std::string> &modelFiles, 
-                                                                 ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options, 
-                                                                 std::string log_level);
+void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
+                                 std::string modelName,
+                                 const std::vector<std::string> &modelFiles, 
+                                 Ref<CompilerOptionsWrapper> options, 
+                                 std::string log_level);
+}; // End namespace
 
 #endif

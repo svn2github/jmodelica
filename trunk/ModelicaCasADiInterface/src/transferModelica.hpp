@@ -29,9 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Model.hpp"
 #include "CompilerOptionsWrapper.hpp"
 
-ModelicaCasADi::Ref<ModelicaCasADi::Model> transferModelicaModel(std::string modelName,
-                                             const std::vector<std::string> &modelFiles, 
-                                             ModelicaCasADi::Ref<ModelicaCasADi::CompilerOptionsWrapper> options, 
-                                             std::string log_level);
+namespace ModelicaCasADi {
+
+void transferModelicaModel(Ref<Model> model,
+                           std::string modelName,
+                           const std::vector<std::string> &modelFiles, 
+                           Ref<CompilerOptionsWrapper> options, 
+                           std::string log_level);
+
+}; // End namespace
 
 #endif
