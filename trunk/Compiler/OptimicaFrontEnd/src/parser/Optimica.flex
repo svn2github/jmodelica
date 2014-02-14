@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2014 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
 */
 
 
-package org.jmodelica.optimica.parser;
+package $PARSER_PACKAGE$;
 
 import org.jmodelica.util.AbstractModelicaScanner;
 import beaver.Scanner;
 import beaver.Symbol;
-import org.jmodelica.optimica.parser.OptimicaParser.Terminals;
+import $PARSER_PACKAGE$.OptimicaParser.Terminals;
 
 %%
 

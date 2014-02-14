@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2009-2014 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+package $PARSER_PACKAGE$;
 
+import $PARSER_PACKAGE$.ModelicaParser.Terminals;
 import org.jmodelica.util.AbstractModelicaScanner;
 import org.jmodelica.util.formattedPrint.FormattingItem;
 import beaver.Scanner;
