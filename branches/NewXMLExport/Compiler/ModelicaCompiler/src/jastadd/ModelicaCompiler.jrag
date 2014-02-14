@@ -1299,7 +1299,7 @@ public class ModelicaCompiler {
 		hookCheckAbort();
 		try {
 			FileOutputStream out = new FileOutputStream(new File(dir, name).getPath());
-			PrintStream ps = new PrintStream(out);
+			CodeStream ps = new CodeStream(out);
 			fc.prettyPrintXML(ps, "");
 			ps.close();
 		} catch (IOException e) {
