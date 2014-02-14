@@ -10,9 +10,6 @@ CASADI_INST_DIR=$(abs_builddir)/../../casadi_install
 
 
 $(CASADI_BUILD_DIR):
-	grep -q "#include <cmath>" $(CASADI_SRC_DIR)/swig/casadi.i || \
-	( sed -f $(CASADI_SRC_DIR)../cmath.sed $(CASADI_SRC_DIR)/swig/casadi.i > casadi.i.temp && \
-	mv casadi.i.temp $(CASADI_SRC_DIR)/swig/casadi.i )
 	mkdir -p $(CASADI_BUILD_DIR) && \
 	cd $(CASADI_BUILD_DIR) && \
 	case $(build) in \
