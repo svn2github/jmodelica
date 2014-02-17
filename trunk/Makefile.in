@@ -288,6 +288,11 @@ MC_BUILD = $(abs_builddir)/ModelicaCasADiInterfaceBuild
 MC_COMPILERS_DIR = $(MC_BUILD)/JModelica.org
 MC_LIB = $(DESTDIR)$(prefix)/lib/casadi_interface
 CASADI_BUILD_DIR = $(abs_builddir)/casadi_build
+
+# Paths for Java build
+JAVA_BUILD_DIR = $(abs_builddir)/java
+JAVA_MC_ANT_FILE = $(abs_top_srcdir)/Compiler/ModelicaCompiler/build.xml
+JAVA_OC_ANT_FILE = $(abs_top_srcdir)/Compiler/OptimicaCompiler/build.xml
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -945,19 +950,19 @@ install-python-packages: build-python-packages
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
 all-local: build-python-packages
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT)
+@HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
+@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f $(JAVA_MC_ANT_FILE)
+@HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f $(JAVA_OC_ANT_FILE)
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
 
 install-exec-local: install-python-packages
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/graphs.jar $(DESTDIR)$(prefix)/lib/
-@HAVE_ANT_TRUE@	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
+@HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
 	cp $(abs_top_srcdir)/JMI/LICENSE_CPL $(DESTDIR)$(prefix)/lib/
@@ -997,7 +1002,7 @@ install-exec-local: install-python-packages
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
@@ -1088,10 +1093,7 @@ clean-python-packages:
 	-rm -rf $(pyjmi_install_dir)|| echo  Could not remove $(pyjmi_install_dir)
 
 clean-frontends:
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
-@HAVE_ANT_TRUE@	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean
+@HAVE_ANT_TRUE@	rm -rf $(JAVA_BUILD_DIR)
 
 docs:
 	cd $(abs_top_srcdir); doxygen doc/JMI/jmi_doxydoc.conf

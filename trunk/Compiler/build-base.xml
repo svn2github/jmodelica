@@ -427,7 +427,7 @@
                     	<if>
                     		<not><isset property="@{testfile}.uptodate" /></not>
                     		<then>
-                                <java classname="org.jmodelica.modelica.compiler.JunitGenerator" 
+                                <java classname="${ast_package}.JunitGenerator" 
                                         classpath="${compiler_jars}" fork="true" failonerror="true" dir="." maxmemory="768M">
                                     <arg value="@{testfile}" />
                                     <arg value="${test_package_output}" />

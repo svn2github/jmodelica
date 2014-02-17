@@ -43,8 +43,7 @@ environ['JMODELICA_HOME'] = _jm_home
 MC_JAR = os.path.join(_jm_home,'lib','ModelicaCompiler.jar')     #Path to ModelicaCompiler jar file
 OC_JAR = os.path.join(_jm_home,'lib','OptimicaCompiler.jar')     #Path to OptimicaCompiler jar file
 UTIL_JAR = os.path.join(_jm_home,'lib','util.jar')               #Path to org.jmodelica.Util jar file
-GRAPHS_JAR = os.path.join(_jm_home,'lib','graphs.jar')           #Path to org.jmodelica.graphs jar file
-COMPILER_JARS = MC_JAR + os.pathsep + OC_JAR + os.pathsep + UTIL_JAR + os.pathsep + GRAPHS_JAR
+COMPILER_JARS = MC_JAR + os.pathsep + OC_JAR + os.pathsep + UTIL_JAR
 
 # Compiler classes
 _modelica_class = 'org.jmodelica.modelica.compiler.ModelicaCompiler'

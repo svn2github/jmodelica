@@ -210,12 +210,18 @@ endif
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
+# Paths for Java build
+JAVA_BUILD_DIR=$(abs_builddir)/java
+JAVA_MC_ANT_FILE=$(abs_top_srcdir)/Compiler/ModelicaCompiler/build.xml
+JAVA_OC_ANT_FILE=$(abs_top_srcdir)/Compiler/OptimicaCompiler/build.xml
+
 all-local: build-python-packages
 if HAVE_ANT
-	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
-	$(ANT_OPTS) $(ANT)
-	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
-	$(ANT_OPTS) $(ANT)
+	mkdir -p $(JAVA_BUILD_DIR)
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f $(JAVA_MC_ANT_FILE)
+	cd $(JAVA_BUILD_DIR); \
+	$(ANT_OPTS) $(ANT) -f $(JAVA_OC_ANT_FILE)
 endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
@@ -223,9 +229,9 @@ endif
 
 install-exec-local: install-python-packages
 if HAVE_ANT
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/ModelicaCompiler/bin/util.jar $(DESTDIR)$(prefix)/lib/
-	cp $(abs_top_srcdir)/Compiler/OptimicaCompiler/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/util.jar $(DESTDIR)$(prefix)/lib/
+	cp $(JAVA_BUILD_DIR)/bin/OptimicaCompiler.jar $(DESTDIR)$(prefix)/lib/
 endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/LICENSE $(DESTDIR)$(prefix)/ 
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/lib/
@@ -268,7 +274,7 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/LICENSE $(DESTDIR)$(prefix)/ThirdParty/Beaver/
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib
-	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
+	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
@@ -369,10 +375,7 @@ endif
 
 clean-frontends:
 if HAVE_ANT
-	cd $(abs_top_srcdir)/Compiler/ModelicaCompiler; \
-	$(ANT_OPTS) $(ANT) clean
-	cd $(abs_top_srcdir)/Compiler/OptimicaCompiler; \
-	$(ANT_OPTS) $(ANT) clean
+	rm -rf $(JAVA_BUILD_DIR)
 endif
 
 docs:
