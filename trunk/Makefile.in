@@ -291,8 +291,9 @@ CASADI_BUILD_DIR = $(abs_builddir)/casadi_build
 
 # Paths for Java build
 JAVA_BUILD_DIR = $(abs_builddir)/java
-JAVA_MC_ANT_FILE = $(abs_top_srcdir)/Compiler/ModelicaCompiler/build.xml
-JAVA_OC_ANT_FILE = $(abs_top_srcdir)/Compiler/OptimicaCompiler/build.xml
+COMPILER_DIR = $(abs_top_srcdir)/Compiler
+JAVA_MC_ANT_FILE = $(COMPILER_DIR)/ModelicaCompiler/build.xml
+JAVA_OC_ANT_FILE = $(COMPILER_DIR)/OptimicaCompiler/build.xml
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -952,9 +953,9 @@ install-python-packages: build-python-packages
 all-local: build-python-packages
 @HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f $(JAVA_MC_ANT_FILE)
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f $(JAVA_OC_ANT_FILE)
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml

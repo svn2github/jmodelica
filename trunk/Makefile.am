@@ -212,16 +212,17 @@ endif
 
 # Paths for Java build
 JAVA_BUILD_DIR=$(abs_builddir)/java
-JAVA_MC_ANT_FILE=$(abs_top_srcdir)/Compiler/ModelicaCompiler/build.xml
-JAVA_OC_ANT_FILE=$(abs_top_srcdir)/Compiler/OptimicaCompiler/build.xml
+COMPILER_DIR=$(abs_top_srcdir)/Compiler
+JAVA_MC_ANT_FILE=$(COMPILER_DIR)/ModelicaCompiler/build.xml
+JAVA_OC_ANT_FILE=$(COMPILER_DIR)/OptimicaCompiler/build.xml
 
 all-local: build-python-packages
 if HAVE_ANT
 	mkdir -p $(JAVA_BUILD_DIR)
 	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f $(JAVA_MC_ANT_FILE)
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	cd $(JAVA_BUILD_DIR); \
-	$(ANT_OPTS) $(ANT) -f $(JAVA_OC_ANT_FILE)
+	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options

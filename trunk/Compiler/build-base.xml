@@ -244,6 +244,8 @@
     	<if>
     	    <not><isset property="ast_uptodate" /></not>
     	    <then>
+                <!-- delete any stale generated files -->
+                <delete dir="${ast_output}" />
     	        <!-- create a directory for the generated files -->
     	        <mkdir dir="${java_output}" />
     	        <!-- run jastadd to generate AST files -->
