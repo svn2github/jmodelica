@@ -1196,11 +1196,14 @@ aspect CCodeGen {
 		str.print(");\n");
 	}
 	
+	@Override
 	public void FAssert.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("if (");
 		p.print(getTest(), str, indent);
 		str.print(" == JMI_FALSE) {\n");
+		p.printVarDecls(getMsg(), str, p.indent(indent));
+		p.printPreSteps(getMsg(), str, p.indent(indent));
 		str.print(p.indent(indent));
 		str.print("jmi_assert_failed(");
 		p.print(getMsg(), str, indent);
@@ -1210,7 +1213,16 @@ aspect CCodeGen {
 		str.print("}\n");
 	}
 	
-	
+    @Override
+    public void FAssert.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        p.printVarDecls(getTest(), str, indent);
+    }
+    
+    @Override
+    public void FAssert.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(getTest(), str, indent);
+    }
+    
     public void FReinit.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         str.format("%sjmi_ad_var_t %s;\n", indent, tempName_C());
     }

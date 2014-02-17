@@ -13248,83 +13248,83 @@ $C_DAE_equation_residuals$
 			generatedCode="
     char tmp_1[2];
     char tmp_2[2];
-    char tmp_3[23];
+    char tmp_3[2];
     char tmp_4[2];
     char tmp_5[2];
-    char tmp_6[23];
+    char tmp_6[2];
     char tmp_7[2];
     char tmp_8[2];
-    char tmp_9[24];
+    char tmp_9[2];
     char tmp_10[2];
     char tmp_11[2];
-    char tmp_12[24];
+    char tmp_12[2];
     char tmp_13[2];
     char tmp_14[2];
-    char tmp_15[24];
+    char tmp_15[2];
     char tmp_16[2];
     char tmp_17[2];
-    char tmp_18[24];
-    char tmp_19[2];
-    char tmp_20[2];
-    char tmp_21[24];
-    char tmp_22[2];
-    char tmp_23[2];
-    char tmp_24[24];
-    char tmp_25[2];
-    char tmp_26[2];
-    char tmp_27[24];
+    char tmp_18[2];
     snprintf(tmp_1, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_2, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_3, 23, \"Assertion error, %s < %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
     if (strcmp(tmp_1, tmp_2) < 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_3, JMI_ASSERT_ERROR);
+        char tmp_19[23];
+        snprintf(tmp_19, 23, \"Assertion error, %s < %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_19, JMI_ASSERT_ERROR);
     }
-    snprintf(tmp_4, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_3, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_4, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_3, tmp_4) > 0 == JMI_FALSE) {
+        char tmp_20[23];
+        snprintf(tmp_20, 23, \"Assertion error, %s > %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_20, JMI_ASSERT_ERROR);
+    }
     snprintf(tmp_5, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_6, 23, \"Assertion error, %s > %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_4, tmp_5) > 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_6, JMI_ASSERT_ERROR);
+    snprintf(tmp_6, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_5, tmp_6) == 0 == JMI_FALSE) {
+        char tmp_21[24];
+        snprintf(tmp_21, 24, \"Assertion error, %s == %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_21, JMI_ASSERT_ERROR);
     }
     snprintf(tmp_7, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_8, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_9, 24, \"Assertion error, %s == %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_7, tmp_8) == 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_9, JMI_ASSERT_ERROR);
+    snprintf(tmp_8, 2, \"%s\", E_0_e[(int) _b_2]);
+    if (strcmp(tmp_7, tmp_8) <= 0 == JMI_FALSE) {
+        char tmp_22[24];
+        snprintf(tmp_22, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_22, JMI_ASSERT_ERROR);
     }
+    snprintf(tmp_9, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_10, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_9, tmp_10) <= 0 == JMI_FALSE) {
+        char tmp_23[24];
+        snprintf(tmp_23, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_23, JMI_ASSERT_ERROR);
+    }
     snprintf(tmp_11, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_12, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
-    if (strcmp(tmp_10, tmp_11) <= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_12, JMI_ASSERT_ERROR);
+    snprintf(tmp_12, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_11, tmp_12) >= 0 == JMI_FALSE) {
+        char tmp_24[24];
+        snprintf(tmp_24, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_24, JMI_ASSERT_ERROR);
     }
     snprintf(tmp_13, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_14, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_15, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_13, tmp_14) <= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_15, JMI_ASSERT_ERROR);
+    if (strcmp(tmp_13, tmp_14) >= 0 == JMI_FALSE) {
+        char tmp_25[24];
+        snprintf(tmp_25, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_25, JMI_ASSERT_ERROR);
     }
+    snprintf(tmp_15, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_16, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_17, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_18, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_16, tmp_17) >= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_18, JMI_ASSERT_ERROR);
+    if (strcmp(tmp_15, tmp_16) != 0 == JMI_FALSE) {
+        char tmp_26[24];
+        snprintf(tmp_26, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_26, JMI_ASSERT_ERROR);
     }
-    snprintf(tmp_19, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_20, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_21, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_19, tmp_20) >= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_21, JMI_ASSERT_ERROR);
-    }
-    snprintf(tmp_22, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_23, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_24, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
-    if (strcmp(tmp_22, tmp_23) != 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_24, JMI_ASSERT_ERROR);
-    }
-    snprintf(tmp_25, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_26, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_27, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_25, tmp_26) != 0 == JMI_FALSE) {
+    snprintf(tmp_17, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_18, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_17, tmp_18) != 0 == JMI_FALSE) {
+        char tmp_27[24];
+        snprintf(tmp_27, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
         jmi_assert_failed(tmp_27, JMI_ASSERT_ERROR);
     }
 
