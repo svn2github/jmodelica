@@ -24,7 +24,7 @@
        clean-gen        - removes all generated files and their class files
  -->
 
-<project name="ModelicaCompiler" basedir=".." default="test">
+<project name="ModelicaCompiler" basedir=".." default="build">
     <include file="build-set.xml"/>
 
     <property name="sets" value="${mc_set.sets}"/>
