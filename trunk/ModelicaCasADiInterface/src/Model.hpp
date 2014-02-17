@@ -77,6 +77,7 @@ class Model: public RefCountedNode {
         /** Initialize the Model, before populating it.
          * @param string identifier, typically <packagename>_<classname>, default empty string */
         void initializeModel(std::string identifier = "");
+        virtual ~Model();
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
         /** @return A MX, this Model's time variable */
@@ -186,7 +187,7 @@ class Model: public RefCountedNode {
         std::vector<double> paramAndConstValVec;
         CasADi::MX timeVar;
         /// Vector containing pointers to all variables.
-        std::vector< Ref<Variable> > z;  
+        std::vector< Variable * > z;  
         /// Vector containing pointers to DAE equations
         std::vector< Ref<Equation> > daeEquations; 
         /// Vector containing pointers to all initial equations
@@ -222,7 +223,6 @@ class Model: public RefCountedNode {
 inline std::string Model::getIdentifier() { return identifier; }
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
-inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
 inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;
 }

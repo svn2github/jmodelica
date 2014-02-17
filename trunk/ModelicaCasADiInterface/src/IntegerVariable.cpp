@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi 
 {
 using CasADi::MX;
-IntegerVariable::IntegerVariable(MX var, Variable::Causality causality,
+IntegerVariable::IntegerVariable(Model *owner, MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
-                           Variable(var, causality, variability, declaredType) { 
+  Variable(owner, var, causality, variability, declaredType) { 
     if (variability == Variable::CONTINUOUS) {
 		throw std::runtime_error("An integer variable can not have continuous variability");
 	}

@@ -74,6 +74,7 @@ set(MC_HPP
   Ref.hpp
   SharedNode.hpp
   RefCountedNode.hpp
+  OwnedNode.hpp
   sharedTransferFunctionality.hpp
   transferModelica.hpp
   transferOptimica.hpp

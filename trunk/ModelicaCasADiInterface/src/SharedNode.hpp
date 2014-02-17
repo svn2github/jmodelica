@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ModelicaCasADi
 {
 class SharedNode: public Printable {
-    public:        
+    public:
         virtual void *_get_swig_p_type();
 };
 

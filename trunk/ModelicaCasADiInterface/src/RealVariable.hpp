@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
+class Model;
+
 class RealVariable : public Variable {
     public:
         /**
@@ -33,7 +35,7 @@ class RealVariable : public Variable {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        RealVariable(CasADi::MX var, Causality causality, 
+        RealVariable(Model *owner, CasADi::MX var, Causality causality, 
                      Variability variability,
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /**
@@ -54,7 +56,7 @@ class RealVariable : public Variable {
 
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
-        Ref<Variable> myDerivativeVariable;
+        Variable *myDerivativeVariable;
 };
 inline const Variable::Type RealVariable::getType() const { return Variable::REAL; }
 inline void RealVariable::setMyDerivativeVariable(Ref<Variable> diffVar) { 
@@ -69,7 +71,7 @@ inline void RealVariable::setMyDerivativeVariable(Ref<Variable> diffVar) {
     if (getVariability() != Variable::CONTINUOUS || isDerivative()) {
         throw std::runtime_error("A RealVariable that is a state variable must have continuous variability, and may not be a derivative variable.");
     }
-    myDerivativeVariable = diffVar; 	
+    myDerivativeVariable = diffVar.getNode(); 	
 }
 inline const Ref<Variable> RealVariable::getMyDerivativeVariable() const { return myDerivativeVariable; }
 inline bool RealVariable::isDerivative() const { return false; }

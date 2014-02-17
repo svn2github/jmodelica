@@ -118,7 +118,7 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
         bool foundCorrespondingVar = false;
         for  (int j = 0; j < allVars.size(); ++j) {
             if (timedMXFVars[i].isEqual(allVars[j]->getVar()) && !foundCorrespondingVar) {
-                timedModelVariables.push_back(new TimedVariable(timedMXVars[i], allVars[j], timedMXTimePoints[i]));
+                timedModelVariables.push_back(new TimedVariable(m.getNode(), timedMXVars[i], allVars[j], timedMXTimePoints[i]));
                 foundCorrespondingVar = true;
             }
         }

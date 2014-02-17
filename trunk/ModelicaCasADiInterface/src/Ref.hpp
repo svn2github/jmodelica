@@ -45,10 +45,13 @@ template <class T> class Ref {
 #endif
 
         const T *operator->() const { assert(node != NULL); return node; }
-        T *operator->() { assert(node != NULL); return node; }
+        T *operator->()             { assert(node != NULL); return node; }
+
+        const T &operator*() const { assert(node != NULL); return *node; }
+        T &operator*()             { assert(node != NULL); return *node; }
         
         const T *getNode() const { return node; }
-        T *getNode() { return node; }
+        T *getNode()             { return node; }
         
         template <class S>
         bool operator==(const Ref<S>& ref) const { return node == ref.getNode(); }

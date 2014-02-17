@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
+class Model;
+
 class IntegerVariable : public Variable {
     public:
         /**
@@ -34,7 +36,7 @@ class IntegerVariable : public Variable {
          * @param A Variability enum
          * @param A VariableType, default is a reference to NULL. 
          */ 
-        IntegerVariable(CasADi::MX var, Causality causality, 
+        IntegerVariable(Model *owner, CasADi::MX var, Causality causality, 
                      Variability variability,
                      Ref<VariableType> declaredType = Ref<VariableType>());
         /** @param The Integer Type enum */
