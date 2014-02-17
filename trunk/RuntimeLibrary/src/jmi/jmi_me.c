@@ -953,7 +953,6 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     
     bsop->res_tol = jmi->newton_tolerance;
 /*    op->block_solver_experimental_mode = 
-            jmi_block_solver_experimental_steepest_descent_first|
-            jmi_block_solver_experimental_converge_switches_first;
+            jmi_block_solver_experimental_steepest_descent_first;
    op->log_level = 5; */
 }
