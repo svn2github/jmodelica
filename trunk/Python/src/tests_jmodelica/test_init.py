@@ -26,8 +26,9 @@ import nose
 import nose.tools
 import logging
 
-from pymodelica.compiler import compile_jmu
+from pymodelica.compiler import compile_jmu, compile_fmu
 from pyjmi.jmi import JMUModel
+from pyfmi import load_fmu
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.common.algorithm_drivers import InvalidAlgorithmOptionException
 from pyjmi.common.algorithm_drivers import InvalidSolverArgumentException
@@ -80,6 +81,15 @@ class Test_init_std:
         assert (model.get('p1') == 1.0)
         assert (model.get('p2') == 2.0)
         assert (model.get('p3') == 6.0)
+        
+    @testattr(stddist = True)
+    def test_inlined_switches(self):
+        """ Test a model that need in-lined switches to initialize. """
+        path = os.path.join(get_files_path(), 'Modelica', 'event_init.mo')
+        fmu_name = compile_fmu('Init', path)
+        model = load_fmu(fmu_name)
+        model.initialize()
+        assert N.abs(model.get("x") - (-2.15298995))              < 1e-3
         
         
 class Test_init_ipopt:
