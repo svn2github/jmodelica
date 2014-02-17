@@ -627,7 +627,7 @@ model Error2
     output Real y[size(x,2),size(x,1)];
   algorithm
 	y := symmetric(x);
-	b := identity(n);
+	b := identity(n+1-1);
 	a := min(c);
 	a := max(c);
 	b := b^2;

@@ -248,7 +248,7 @@ aspect ComplianceCheck {
 	
 	public void FIdentity.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (inFunction() && getFExp().ceval().isUnknown()) {
+		if (inFunction() && !getFExp().canCeval()) {
 			compliance("Unknown size arg in operator " + name() + "() is not supported in functions");
 		}
 	}
