@@ -78,11 +78,11 @@
         <isset property="test_package"/>
         <else> <property name="test_package" value="org.jmodelica.test.${sub_package}.junitgenerated" /> </else>
     </if>
-	<propertyregex property="ast_package_dir" input="${ast_package}" regexp="\." replace="/" global="true" />
+	<propertyregex property="ast_package_dir" input="${ast_package}" defaultValue="${ast_package}" regexp="\." replace="/" global="true" />
     <property name="ast_output" value="${java_output}/${ast_package_dir}" />
-    <propertyregex property="parser_package_dir" input="${parser_package}" regexp="\." replace="/" global="true" />
+    <propertyregex property="parser_package_dir" input="${parser_package}" defaultValue="${parser_package}" regexp="\." replace="/" global="true" />
     <property name="parser_output" value="${java_output}/${parser_package_dir}" />
-    <propertyregex property="test_package_dir" input="${test_package}" regexp="\." replace="/" global="true" />
+    <propertyregex property="test_package_dir" input="${test_package}" defaultValue="${test_package}" regexp="\." replace="/" global="true" />
     <property name="test_package_output" value="${junit_output}/${test_package_dir}" />
 
 	
@@ -149,6 +149,18 @@
         			<var name="java_dirs_temp" value="${java_dirs_temp}:${@{module}.path}/src/java" />
         		</then>
         	</if>
+        	<if>
+        		<isset property="@{module}.pre_generated" />
+        		<then>
+        			<for list="${@{module}.pre_generated}" param="pregenerated">
+                        <sequential>
+                            <propertyregex property="java_dir_pre_temp" input="@{pregenerated}" regexp="\." replace="/" 
+                                    defaultValue="@{pregenerated}" override="true" global="true" />
+                            <var name="java_dirs_temp" value="${java_dirs_temp}:${java_output}/${java_dir_pre_temp}" />
+                        </sequential>
+        			</for>
+        		</then>
+        	</if>
         </sequential>
     </for>
     <property name="java_dirs" value="${java_dirs_temp}" />
@@ -172,11 +184,11 @@
     			<var name="build_file_patterns_temp" value="" />
     			<for list="${@{jar}.jar.packages}" param="package">
     				<sequential>
-                        <propertyregex property="build_class_dir" input="@{package}" regexp="\." replace="/" override="true" />
-    					<var name="build_file_patterns_temp" value="${build_file_patterns_temp}:${build_class_dir}/**/*.class" />
+                        <propertyregex property="build_class_dir" input="@{package}" defaultValue="@{package}" regexp="\." replace="/" override="true" />
+    					<var name="build_file_patterns_temp" value="${build_file_patterns_temp},${build_class_dir}/**/*.class" />
     				</sequential>
     			</for>
-    			<propertyregex property="build_file_patterns" input="${build_file_patterns_temp}" regexp="^:" replace="" override="true" />
+    			<propertyregex property="build_file_patterns" input="${build_file_patterns_temp}" regexp="^," replace="" override="true" />
                 <jar destfile="${jar_output}/@{jar}.jar">
                     <fileset dir="${class_output}" includes="${build_file_patterns}" />
                 </jar>
@@ -195,7 +207,7 @@
     			<if>
     				<isset property="@{module}.patch"/>
     				<then>
-    	                <propertyregex property="compile-patcher.javafile" input="${@{module}.patch}" regexp="\." replace="/" override="true" global="true" />
+    	                <propertyregex property="compile-patcher.javafile" input="${@{module}.patch}" defaultValue="${@{module}.patch}" regexp="\." replace="/" override="true" global="true" />
     	                <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" 
     	                	    debug="true" destdir="${class_output}" includeantruntime="false">
     	                    <src path="${@{module}.path}/src/java" />
@@ -272,7 +284,7 @@
                 <if>
                     <isset property="@{module}.patch"/>
                     <then>
-                    	<propertyregex property="@{module}.patch.path" input="${@{module}.patch}" regexp="\." replace="/" global="true" />
+                    	<propertyregex property="@{module}.patch.path" input="${@{module}.patch}" defaultValue="${@{module}.patch}" regexp="\." replace="/" global="true" />
                         <uptodate property="@{module}.patch.uptodate" targetfile="${ast_output}/ASTNode.java" 
                         	    srcfile="${@{module}.path}/src/java/${@{module}.patch.path}.java" />
                     	<if>
