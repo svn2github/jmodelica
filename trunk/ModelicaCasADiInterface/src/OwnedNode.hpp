@@ -31,6 +31,8 @@ class OwnedNode: public SharedNode {
     public:
         OwnedNode(RefCountedNode *owner) { assert(owner != NULL); this->owner = owner; }
 
+        bool isOwnedBy(RefCountedNode *owner) { return owner == this->owner; }
+
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
    protected:
         RefCountedNode *owner; // Should not be modified once the OwnedNode has been constructed.

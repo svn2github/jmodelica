@@ -709,12 +709,12 @@ def test_BooleanVariablePrinting():
     
 @testattr(casadi = True)    
 def test_TimedVariable():
-    m = Model()
+    opt = OptimizationProblem()
     
-    realVar = RealVariable(m, MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar = RealVariable(opt, MX("node"), Variable.INTERNAL, Variable.CONTINUOUS)
     timePoint = MX("ATimePointExpression")
     node = MX("node")
-    timedVar = TimedVariable(m, node, realVar, timePoint)
+    timedVar = TimedVariable(opt, node, realVar, timePoint)
     assert realVar == timedVar.getBaseVariable()
     assert node.isEqual(timedVar.getVar())
     assert timePoint.isEqual(timedVar.getTimePoint())
@@ -722,11 +722,11 @@ def test_TimedVariable():
 
 @testattr(casadi = True)    
 def test_TimedVariableInvalidBaseVarType():
-    m = Model()
+    opt = OptimizationProblem()
     
-    boolVar = BooleanVariable(m, MX("node"), Variable.INTERNAL, Variable.DISCRETE)
+    boolVar = BooleanVariable(opt, MX("node"), Variable.INTERNAL, Variable.DISCRETE)
     try:
-        timedVar = TimedVariable(m, MX("var"), boolVar, MX("ATimePointExpression"))
+        timedVar = TimedVariable(opt, MX("var"), boolVar, MX("ATimePointExpression"))
     except:
         errorString = sys.exc_info()[1].message 
     assert(errorString == "Timed variables only supported for real variables");
@@ -900,26 +900,25 @@ def test_OptimizationProblemPointConstraints():
     
 @testattr(casadi = True)    
 def test_OptimizationProblemTimedVariables():
-    m = Model()
-    
-    realVar1 = RealVariable(m, MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
-    realVar2 = RealVariable(m, MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
-
-    t1 = TimedVariable(m, MX("node1AtSomeTime"), realVar1, MX("someTime"))
-    t2 = TimedVariable(m, MX("node2AtSomeTime"), realVar2, MX("someOtherTime"))
-    timedVars = numpy.array([t1, t2])
-
-
     optTimedVars = OptimizationProblem()
+    
+    realVar1 = RealVariable(optTimedVars, MX("node1"), Variable.INTERNAL, Variable.CONTINUOUS)
+    realVar2 = RealVariable(optTimedVars, MX("node2"), Variable.INTERNAL, Variable.CONTINUOUS)
+
+    t1 = TimedVariable(optTimedVars, MX("node1AtSomeTime"), realVar1, MX("someTime"))
+    t2 = TimedVariable(optTimedVars, MX("node2AtSomeTime"), realVar2, MX("someOtherTime"))
+
+
     assert( len(optTimedVars.getTimedVariables()) == 0)
-    optTimedVars.setTimedVariables(timedVars)
+    optTimedVars.addTimedVariable(t1)
+    optTimedVars.addTimedVariable(t2)
     timedVarsFromModel = optTimedVars.getTimedVariables();
 
     assert( len(timedVarsFromModel) == 2 )
     assert( isEqual(t1.getVar(), timedVarsFromModel[0].getVar()) )
     assert( isEqual(t2.getVar(), timedVarsFromModel[1].getVar()) )
     assert( isEqual(realVar1.getVar(), timedVarsFromModel[0].getBaseVariable().getVar()) )
-    assert( isEqual(realVar1.getVar(), timedVarsFromModel[0].getBaseVariable().getVar()) )
+    assert( isEqual(realVar2.getVar(), timedVarsFromModel[1].getBaseVariable().getVar()) )
     
 @testattr(casadi = True)    
 def test_OptimizationProblemPrinting():

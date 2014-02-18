@@ -100,9 +100,8 @@ vector< Ref<Constraint> >* transferPathConstraints(oc::FOptClass &fc){
     return pathConstraints;
 }
 
-vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass &fc) {
+void transferTimedVariables(Ref<OptimizationProblem> m, oc::FOptClass &fc) {
     java::util::ArrayList timedVarList = fc.timedRealVariables();
-    vector< Ref< TimedVariable > > timedModelVariables;
     vector< Ref<Variable> > allVars = m->getAllVariables();
     vector< MX > timedMXVars;
     vector< MX > timedMXTimePoints;
@@ -117,16 +116,17 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
     for (int i = 0; i < timedMXFVars.size(); ++i) {
         bool foundCorrespondingVar = false;
         for  (int j = 0; j < allVars.size(); ++j) {
-            if (timedMXFVars[i].isEqual(allVars[j]->getVar()) && !foundCorrespondingVar) {
-                timedModelVariables.push_back(new TimedVariable(m.getNode(), timedMXVars[i], allVars[j], timedMXTimePoints[i]));
+            // todo: Replace with something better than linear search!
+            if (timedMXFVars[i].isEqual(allVars[j]->getVar())) {
+                m->addTimedVariable(new TimedVariable(m.getNode(), timedMXVars[i], allVars[j], timedMXTimePoints[i]));
                 foundCorrespondingVar = true;
+                break;
             }
         }
         if (!foundCorrespondingVar) {
             throw std::runtime_error("Could not find base variable for timed variable");
         }
     }
-    return timedModelVariables;
 }
 
 void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
@@ -174,7 +174,7 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         // Variables template
         transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (optProblem, fclass.allVariables());
         // Transfer timed variables. Depends on that other variables are transferred. 
-        vector< Ref<TimedVariable> > timedVars = transferTimedVariables(optProblem, fclass);
+        transferTimedVariables(optProblem, fclass);
         
         // Equations
         transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
@@ -193,7 +193,6 @@ void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
         optProblem->setPointConstraints(*(transferPointConstraints(fclass)));
         optProblem->setStartTime(MX(fclass.startTimeAttribute()));
         optProblem->setFinalTime(MX(fclass.finalTimeAttribute()));
-        optProblem->setTimedVariables(timedVars);
         optProblem->setLagrangeTerm(lagrangeTerm);
         optProblem->setMayerTerm(mayerTerm);
     }

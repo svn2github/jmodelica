@@ -19,12 +19,32 @@ using std::ostream; using CasADi::MX;
 
 namespace ModelicaCasADi{
 
+OptimizationProblem::~OptimizationProblem() {
+    // Delete all the OptimizationProblem's variables, since they are OwnedNodes with the OptimizationProblem as owner.
+    for (std::vector< TimedVariable * >::iterator it = timedVariables.begin(); it != timedVariables.end(); ++it) {
+        delete *it;
+        *it = NULL;
+    }
+}
+
 void OptimizationProblem::initializeProblem(std::string identifier /* = "" */, 
                                             bool normalizedTime /* = true */ ) {
     initializeModel(identifier);
     this->normalizedTime = normalizedTime;
 }
+
+std::vector< Ref<TimedVariable> > OptimizationProblem::getTimedVariables() const
+{
+    std::vector< Ref<TimedVariable> > result;
+    for (std::vector< TimedVariable * >::const_iterator it = timedVariables.begin(); it != timedVariables.end(); ++it) {
+        result.push_back(*it);
+    }
+    return result;
+}
+
 void OptimizationProblem::print(ostream& os) const { 
+//    os << "OptimizationProblem<" << this << ">"; return;
+
     using namespace std;
     os << "Model contained in OptimizationProblem:\n" << endl;
     Model::print(os);
@@ -56,11 +76,11 @@ void OptimizationProblem::print(ostream& os) const {
         }
         os << *it << endl;
     }
-    for (vector< Ref<TimedVariable> >::const_iterator it = timedVariables.begin(); it != timedVariables.end(); ++it) {
+    for (vector< TimedVariable * >::const_iterator it = timedVariables.begin(); it != timedVariables.end(); ++it) {
         if (it == timedVariables.begin()) {
             os << "\n-- Timed variables --\n";
         }
-        os << *it << endl;
+        os << **it << endl;
     }
     
     os << "\n-- Lagrange term --\n";

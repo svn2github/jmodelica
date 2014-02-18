@@ -28,10 +28,10 @@ namespace ModelicaCasADi{
 
 Model::~Model() {
     // Delete all the Model's variables, since they are OwnedNodes with the Model as owner.
-/*    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         delete *it;
         *it = NULL;
-    }*/
+    }
 }
 
 bool Model::checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const {
@@ -222,6 +222,7 @@ void Model::handleVariableTypeForAddedVariable(Ref<Variable> var){
 }
 
 void Model::addVariable(Ref<Variable> var) {
+    assert(var->isOwnedBy(this));
     if (!var->getVar().isSymbolic()) {
         throw std::runtime_error("The supplied variable is not symbolic and can not be variable"); 
     }
@@ -392,6 +393,8 @@ void printVector(std::ostream& os, const vector<T> &makeStringOf) {
 }
 
 void Model::print(std::ostream& os) const {
+//    os << "Model<" << this << ">"; return;
+
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
     if (!timeVar.isNull()) {
