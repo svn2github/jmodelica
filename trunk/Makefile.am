@@ -69,7 +69,6 @@ export CASADI_BUILD_DIR
 casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
 
 ifcasadi: casadi
-	touch -c $(MC_SRC)/src/java-generated/casadi # so that we can test the time stamp of the java-generated/casadi dir
 	mkdir -p $(MC_BUILD)/ifcasadi; \
 	cd $(MC_BUILD)/ifcasadi; \
 	case $(build) in \
@@ -100,10 +99,9 @@ $(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar
 mc_modelica: ifcasadi
 	cd $(MC_SRC); $(ANT_OPTS) $(ANT)
 
-$(OC_SRC)/src/java-generated/casadi: ifcasadi
-	cp -r $(MC_SRC)/src/java-generated/casadi $(OC_SRC)/src/java-generated
-
-mc_optimica: $(OC_SRC)/src/java-generated/casadi
+mc_optimica: ifcasadi
+	mkdir -p $(OC_SRC)/src/java-generated
+	cp -pr $(MC_SRC)/src/java-generated/casadi $(OC_SRC)/src/java-generated
 	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
