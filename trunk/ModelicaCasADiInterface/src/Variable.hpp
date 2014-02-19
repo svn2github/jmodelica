@@ -204,6 +204,7 @@ class Variable : public OwnedNode {
         AttributeValue* getAttributeForAlias(AttributeKey key);
         AttributeKey keyForAlias(AttributeKey key) const;
         void setAttributeForAlias(AttributeKey key, AttributeValue val);
+        Model &myModel() { return *((Model *)owner); }
     private:
         Causality causality;
         Variability variability;

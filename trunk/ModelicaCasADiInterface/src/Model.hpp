@@ -73,7 +73,7 @@ class Model: public RefCountedNode {
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
         /** Create a blank, uninitialized Model */
-        Model() {}
+        Model() { dirty = false; }
         /** Initialize the Model, before populating it.
          * @param string identifier, typically <packagename>_<classname>, default empty string */
         void initializeModel(std::string identifier = "");
@@ -177,6 +177,9 @@ class Model: public RefCountedNode {
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
 
+        /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
+        void setDirty() { dirty = true; }
+
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         /// Identifier, typically <packagename>_<classname>
@@ -194,6 +197,9 @@ class Model: public RefCountedNode {
         std::vector< Ref<Equation> > initialEquations; 
         /// A map for ModelFunction, key is ModelFunction's name.
         functionMap modelFunctionMap;  
+        /// Indicates whether any parameter values have been updated since
+        /// dependent parameters were last recalculated.
+        bool dirty;
         /// For classification according to the VariableKind enum. Differentiated variables may have their 
         /// myDerivativeVariable field set in the process. 
         VariableKind classifyVariable(Ref<Variable> var) const; 

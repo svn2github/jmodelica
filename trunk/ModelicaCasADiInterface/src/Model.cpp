@@ -226,6 +226,7 @@ void Model::addVariable(Ref<Variable> var) {
     if (!var->getVar().isSymbolic()) {
         throw std::runtime_error("The supplied variable is not symbolic and can not be variable"); 
     }
+    dirty = true; // todo: only if (dependent) parameter, or with dependent attributes?
     handleVariableTypeForAddedVariable(var);
     z.push_back(var.getNode());
 }
@@ -321,7 +322,10 @@ double Model::evalMX(MX exp) {
 }
 
 double Model::evaluateExpression(MX exp) {
-    calculateValuesForDependentParameters();
+    if (dirty) {
+        calculateValuesForDependentParameters();
+        dirty = false;
+    }
     return evalMX(exp); 
 }
 
