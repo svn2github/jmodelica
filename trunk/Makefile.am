@@ -212,6 +212,11 @@ endif
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
+# Hooks for extra build or install actions. Must be empty or the path of a shell script to execute. 
+# Both scripts will get the source directory as the first argument and the install directory as the second.
+BUILD_EXTRA=
+INSTALL_EXTRA=
+
 # Paths for Java build
 JAVA_BUILD_DIR=$(abs_builddir)/java
 COMPILER_DIR=$(abs_top_srcdir)/Compiler
@@ -229,6 +234,7 @@ endif
 	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) > $(abs_builddir)/version.txt
 	mkdir -p $(abs_builddir)/Options
 	$(abs_top_srcdir)/run_java.sh org.jmodelica.util.OptionRegistry $(abs_builddir)/Options/options.xml
+	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 install-exec-local: install-python-packages
 if HAVE_ANT
@@ -263,6 +269,7 @@ endif
   	*) \
 	cp $(abs_top_srcdir)/RuntimeLibrary/Makefiles/Makefile.linux $(DESTDIR)$(prefix)/Makefiles/MakeFile ;; \
 	esac
+	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 if WITH_MINGW
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/pthreads/lib
