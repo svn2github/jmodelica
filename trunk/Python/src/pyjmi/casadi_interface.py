@@ -98,7 +98,7 @@ if not modelicacasadi_present:
     class CI_OP:
         pass
 
-class OptimizationProblem(ModelBase, CI_OP):
+class OptimizationProblem(CI_OP, ModelBase):
 
     """
     Python wrapper for the CasADi interface class OptimizationProblem.
