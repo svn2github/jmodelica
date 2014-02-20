@@ -29,6 +29,6 @@ check-local:
 	cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
-	cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 
