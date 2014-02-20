@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import org.jmodelica.util.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.munkres.MunkresProblem;
+import org.jmodelica.util.munkres.IntegerCost;
 
 
 /* This causes conflicts
@@ -2702,7 +2704,7 @@ aspect IfEquations {
                     weights[i][j] += rightVars.contains(var) ? -1 : 1;
             }
         }
-        return new MunkresProblem(MunkresProblem.IntegerCost.create(weights)).solve();
+        return new MunkresProblem(IntegerCost.create(weights)).solve();
 	}
 	
 	private void FIfEquation.sortOutMatchedEquations(ArrayList<FEquation> eqns, int[][] match, int col, 
