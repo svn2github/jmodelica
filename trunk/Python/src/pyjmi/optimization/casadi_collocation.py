@@ -1768,6 +1768,9 @@ class LocalDAECollocator(CasadiCollocator):
                     is_variant[vr] = False
                     if mode == "attribute":
                         d = N.abs(var.getNominal())
+                        if d == 0.0:
+                            raise ValueError("Nominal value for %s is zero." %
+                                             name)
                         e = 0.
                     elif mode == "linear":
                         d = max([abs(traj_max), abs(traj_min)])
@@ -1788,7 +1791,10 @@ class LocalDAECollocator(CasadiCollocator):
                                 raise CasadiCollocatorException(
                                         "Could not do affine scaling " +
                                         "for variable %s." % name)
-                            if N.allclose(traj_max, 0.):
+                            if traj_max == 0.:
+                                print("Warning: Nominal trajectory for " +
+                                      "variable %s is " % name + 
+                                      "identically zero.")
                                 d = 1.
                             else:
                                 d = max([abs(traj_max), abs(traj_min)])
@@ -1809,12 +1815,12 @@ class LocalDAECollocator(CasadiCollocator):
                 name = var.getName()
                 if name == "startTime":
                     d = N.abs(self._denorm_t0_nom)
-                    if N.allclose(d, 0.):
+                    if d == 0.:
                         d = 1.
                     e = 0.
                 elif name == "finalTime":
                     d = N.abs(self._denorm_tf_nom)
-                    if N.allclose(d, 0.):
+                    if d == 0.:
                         d = 1.
                     e = 0.
                 else:
@@ -1829,9 +1835,16 @@ class LocalDAECollocator(CasadiCollocator):
                             d = 1.
                         else:
                             d = N.abs(nom_val)
+                            if d == 0.:
+                                raise ValueError("Nominal value for " +
+                                                 "%s is zero." % name)
                         e = 0.
                     else:
                         d = N.abs(data.x[0])
+                        if N.allclose(d, 0.):
+                            print("Warning: Nominal value for %s is " % name +
+                                  "too small. Setting scaling factor to 1.")
+                            d = 1.
                         e = 0.
                 vr_sf_map[vr] = invariant_var.numel()
                 invariant_var.append(var.var())
@@ -4145,6 +4158,9 @@ class LocalDAECollocator2(CasadiCollocator):
                         is_variant[name] = False
                         if mode == "attribute":
                             d = N.abs(op.get_attr(var, "nominal"))
+                            if d == 0.0:
+                                raise ValueError("Nominal value for " +
+                                                 "%s is zero." % name)
                             e = 0.
                         elif mode == "linear":
                             d = max([abs(traj_max), abs(traj_min)])
@@ -4165,7 +4181,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                     raise CasadiCollocatorException(
                                             "Could not do affine scaling " +
                                             "for variable %s." % name)
-                                if traj_max == 0.0:
+                                if traj_max == 0.:
                                     print("Warning: Nominal trajectory for " +
                                           "variable %s is " % name + 
                                           "identically zero.")
@@ -4204,12 +4220,12 @@ class LocalDAECollocator2(CasadiCollocator):
                 is_variant[name] = False
                 if name == "startTime":
                     d = N.abs(self._denorm_t0_nom)
-                    if N.allclose(d, 0.):
+                    if d == 0.:
                         d = 1.
                     e = 0.
                 elif name == "finalTime":
                     d = N.abs(self._denorm_tf_nom)
-                    if N.allclose(d, 0.):
+                    if d == 0.:
                         d = 1.
                     e = 0.
                 else:
@@ -4221,8 +4237,15 @@ class LocalDAECollocator2(CasadiCollocator):
                               "attribute value instead.")
                         nom_val = op.get_attr(var, "nominal")
                         d = N.abs(nom_val)
+                        if d == 0.:
+                            raise ValueError("Nominal value for %s " % name +
+                                             "is zero.")
                     else:
                         d = N.abs(data.x[0])
+                        if N.allclose(d, 0.):
+                            print("Warning: Nominal value for %s is " % name +
+                                  "too small. Setting scaling factor to 1.")
+                            d = 1.
                     e = 0.
                 name_idx_sf_map[name] = len(invariant_var)
                 invariant_var.append(var.getVar())
