@@ -21,7 +21,7 @@ Test module for testing the CASADI examples.
 from tests_jmodelica import testattr
 from pyjmi.examples import ccpp_new, vdp_casadi_new
 
-@testattr(casadi_new = True)
+@testattr(casadi = True)
 def test_ccpp_new():
     """Run the new Combined Cycle Power Plant example."""
     ccpp_new.run_demo(False)

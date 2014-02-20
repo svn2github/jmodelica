@@ -118,6 +118,7 @@ def run_demo(with_plots=True):
     opt_plant_sigma = opt_res['plant.sigma']
     opt_plant_load = opt_res['plant.load']
     opt_time = opt_res['time']
+    opt_input = N.vstack([opt_time, opt_plant_load]).T
     
     # Plot the optimized trajectories
     if with_plots:
@@ -151,23 +152,20 @@ def run_demo(with_plots=True):
 
     ### 3. Simulate to verify the optimal solution
     # Compile model
-    sim_fmu = compile_fmu("CombinedCycleStartup.Startup6Verification",
+    sim_fmu = compile_fmu("CombinedCycle.Optimization.Plants.CC0D_WarmStartUp",
                           file_paths)
 
     # Load model
     sim_model = load_fmu(sim_fmu)
     
-    # Get optimized input
-    opt_input = opt_res.solver.get_opt_input()
-    
     # Simulate using optimized input
     sim_res = sim_model.simulate(start_time=0., final_time=4000.,
-                                 input=opt_input)
+                                 input=('load', opt_input))
     
     # Extract variable profiles
-    sim_plant_p = sim_res['plant.p']
-    sim_plant_sigma = sim_res['plant.sigma']
-    sim_plant_load = sim_res['plant.load']
+    sim_plant_p = sim_res['p']
+    sim_plant_sigma = sim_res['sigma']
+    sim_plant_load = sim_res['load']
     sim_time = sim_res['time']
     
     # Plot the simulated trajectories
@@ -201,7 +199,7 @@ def run_demo(with_plots=True):
     
     # Verify solution for testing purposes
     N.testing.assert_allclose(opt_res.final('plant.p'),
-                              sim_res.final('plant.p'), rtol=5e-3)
+                              sim_res.final('p'), rtol=5e-3)
 
 if __name__=="__main__":
     run_demo()
