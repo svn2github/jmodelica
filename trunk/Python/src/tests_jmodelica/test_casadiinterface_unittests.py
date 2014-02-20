@@ -158,12 +158,12 @@ def test_DependentParameters():
     b = MX("b")
     c = MX("c")
     d = MX("d")
+    e = MX("e")
     funcVar = MX("funcVar")
     f = MXFunction([funcVar], [funcVar*2])
     f.init()
 
 
-    eq1 = MX(10)
     eq2 = a + MX(2)
     eq3 = a*b
     eq4 = f.call([a])[0]
@@ -172,20 +172,24 @@ def test_DependentParameters():
     r2 = RealVariable(model, b, Variable.INTERNAL, Variable.PARAMETER)
     r3 = RealVariable(model, c, Variable.INTERNAL, Variable.PARAMETER)
     r4 = RealVariable(model, d, Variable.INTERNAL, Variable.PARAMETER)
+    r5 = RealVariable(model, e, Variable.INTERNAL, Variable.PARAMETER)
 
     model.addVariable(r1)
     model.addVariable(r2)
     model.addVariable(r3)
     model.addVariable(r4)
+    model.addVariable(r5)
 
-    model.set("a", 10) # r1.setAttribute("bindingExpression", eq1)
+    model.set(["a", "e"], [10, -25])
     r2.setAttribute("bindingExpression", eq2)
     r3.setAttribute("bindingExpression", eq3)
     r4.setAttribute("bindingExpression", eq4)
 
-    assert model.get("b") == 12
-    assert model.get("c") == 120
-    assert model.get("d") == 20
+    varnames = ["a", "b", "c", "d", "e"]
+    answers = [10, 12, 120, 20, -25]
+    for name, value in zip(varnames, answers):
+        assert model.get(name) == value
+    assert numpy.array_equal(model.get(["a", "b", "c", "d", "e"]), answers)
     
 @testattr(casadi = True)    
 def test_DependentParameters_old():

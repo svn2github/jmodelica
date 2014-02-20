@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %module modelicacasadi_wrapper
 
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
+%include "vectors.i"
 
 %include "std_string.i"
 %include "std_vector.i"

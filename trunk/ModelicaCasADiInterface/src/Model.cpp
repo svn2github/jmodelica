@@ -34,17 +34,6 @@ Model::~Model() {
     }
 }
 
-void Model::set(string varName, double value) {
-    Ref<Variable> var = getVariable(varName);
-    if (var == NULL) {
-        throw std::runtime_error("No variable named " + varName);
-    }
-    if (var->getVariability() != Variable::PARAMETER) {
-        throw std::runtime_error("Tried to set non-parameter " + var->repr());
-    }
-    var->setAttribute("bindingExpression", value);
-}
-
 double Model::get(string varName) {
     Ref<Variable> var = getVariable(varName);
     if (var == NULL) {
@@ -58,6 +47,37 @@ double Model::get(string varName) {
     if (ex == NULL) throw std::runtime_error("Failed to evaluate " + var->repr());
     return evaluateExpression(*ex);
 }
+
+vector<double> Model::get(const vector<string> &varNames) {
+    vector<double> result;
+    for (vector< string >::const_iterator it = varNames.begin(); it != varNames.end(); ++it){
+        result.push_back(get(*it));
+    }
+    return result;
+}
+
+void Model::set(string varName, double value) {
+    Ref<Variable> var = getVariable(varName);
+    if (var == NULL) {
+        throw std::runtime_error("No variable named " + varName);
+    }
+    if (var->getVariability() != Variable::PARAMETER) {
+        throw std::runtime_error("Tried to set non-parameter " + var->repr());
+    }
+    var->setAttribute("bindingExpression", value);
+}
+
+void Model::set(const vector<string> &varNames, const vector<double> &values) {
+    if (varNames.size() != values.size()) {
+        throw std::runtime_error("Must specify the same number of variables and values.");
+    }
+    vector< string >::const_iterator name  = varNames.begin();
+    vector< double >::const_iterator value = values.begin();
+    for (; name != varNames.end(); ++name, ++value) {
+        set(*name, *value);
+    }
+}
+
 
 bool Model::checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const {
     // Since the variables are not sorted all variables are looped over.
@@ -367,6 +387,9 @@ void Model::calculateValuesForDependentParameters() {
                     paramAndConstMXVec.push_back(var->getVar());
                     paramAndConstValVec.push_back(val);
                     var->setAttribute("evaluatedBindingExpression", val);
+                }
+                else {
+                    var->setAttribute("evaluatedBindingExpression", bindingExpression);
                 }
             }
         }

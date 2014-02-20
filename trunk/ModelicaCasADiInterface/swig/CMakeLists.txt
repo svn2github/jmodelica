@@ -13,7 +13,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set(MODULE_NAME modelicacasadi_wrapper)
-set(CASADI_INTERFACE_DEPS doc.i ModelicaCasADi.i Ref.i)
+set(CASADI_INTERFACE_DEPS doc.i ModelicaCasADi.i Ref.i vectors.i)
 
 
 find_package(SWIG REQUIRED)

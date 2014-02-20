@@ -79,10 +79,16 @@ class Model: public RefCountedNode {
         void initializeModel(std::string identifier = "");
         virtual ~Model();
 
-        /** Set the binding expression of a parameter to a value */
-        void set(std::string varName, double value);
         /** Evaluate the value of a parameter */
         double get(std::string varName);
+        /** Evaluate the value of multiple parameters */
+        std::vector<double> get(const std::vector<std::string> &varNames);
+
+        /** Set the binding expression of a parameter to a value */
+        void set(std::string varName, double value);
+        /** Set the binding expressions of a number of parameters to a values */
+        void set(const std::vector<std::string> &varNames,
+                 const std::vector<double> &values);
 
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
