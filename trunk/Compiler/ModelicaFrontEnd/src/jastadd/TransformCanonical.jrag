@@ -2693,7 +2693,7 @@ aspect IfEquations {
         int nr = right.size();
         if (nl == 0 || nr == 0)
             return new int[0][0];
-        long[][] weights = new long[nl][nr];
+        int[][] weights = new int[nl][nr];
         for (int i = 0; i < nl; i++) {
             for (int j = 0; j < nr; j++) {
                 Set<FVariable> rightVars = right.get(j).variables();
@@ -2702,7 +2702,7 @@ aspect IfEquations {
                     weights[i][j] += rightVars.contains(var) ? -1 : 1;
             }
         }
-        return new MunkresProblem(weights).solve();
+        return new MunkresProblem(MunkresProblem.IntegerCost.create(weights)).solve();
 	}
 	
 	private void FIfEquation.sortOutMatchedEquations(ArrayList<FEquation> eqns, int[][] match, int col, 

@@ -162,6 +162,15 @@ aspect IndexReduction {
         }
     }
 
+    /**
+     * Check if this variable is marked as being set by a reinit().
+     */
+    syn boolean FAbstractVariable.isSetInReinit() = false;
+    eq FRealVariable.isSetInReinit() {
+        FAttribute a = findAttribute(FAttribute.STATE_SELECT);
+        return a != null && a.isInternal();
+    }
+
     
     /**
      * Create a new FQName that is a copy of this one, prefixed with "_der" <code>order</code> times in the last name part.
@@ -461,13 +470,14 @@ aspect IndexReduction {
             
             // Run matching
             // Compute weights for variables based on linearity
-            Map<Var, Long> weights = new HashMap<Var, Long>();
+            Map<Var, BiPGraphCost> weights = new HashMap<Var, BiPGraphCost>();
             for (Var var : gd.getVariables()) {
                 FVariable fv = var.getVariable();
-                long weight = calculateLinearityWeight(g, fv) + fv.stateSelectionWeight();
+                int linearity = calculateLinearityWeight(g, fv);
                 if (fv.getMeIntegrated() != null)
-                    weight += calculateLinearityWeight(g, fv.getMeIntegrated());
-                ASTNode.log.info("Weight: %s %d", var, weight);
+                    linearity += calculateLinearityWeight(g, fv.getMeIntegrated());
+                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), false, linearity);
+                ASTNode.log.info("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
             
@@ -542,51 +552,173 @@ aspect IndexReduction {
         return weight;
     }
     
+    
     syn FRealVariable.StateSelect FVariable.stateSelectAttribute() = FRealVariable.StateSelect.DEFAULT;
     eq FRealVariable.stateSelectAttribute() = isTemporary() ? FRealVariable.StateSelect.AVOID : StateSelect.values()[stateSelectAttributeInt() - 1];
     
-    public class FRealVariable {
+    public class FAbstractVariable {
         public enum StateSelect {
-            NEVER   (10L), 
-            AVOID   (10000L), 
-            DEFAULT (10000000L), 
-            PREFER  (10000000000L), 
-            ALWAYS  (10000000000000L);
+            NEVER   (BiPGraph.BiPGraphCost.STATE_SELECT_NEVER_WEIGHT_POSITION), 
+            AVOID   (BiPGraph.BiPGraphCost.STATE_SELECT_AVOID_WEIGHT_POSITION), 
+            DEFAULT (BiPGraph.BiPGraphCost.STATE_SELECT_DEFAULT_WEIGHT_POSITION), 
+            PREFER  (BiPGraph.BiPGraphCost.STATE_SELECT_PREFER_WEIGHT_POSITION), 
+            ALWAYS  (BiPGraph.BiPGraphCost.STATE_SELECT_ALWAYS_WEIGHT_POSITION);
             
-            private long w;
+            private int weightPos;
             
-            private StateSelect(long weight) {
-                w = weight;
+            private StateSelect(int weightPos) {
+                this.weightPos = weightPos;
             }
             
-            public long weight() {
-                return w;
+            public int weightPos() {
+                return weightPos;
             }
         }
     }
     
-    public static long BiPGraph.UNMATCHED_WEIGHT = 10000000000000000L;
-    
-    syn long FVariable.stateSelectionWeight() = 0;
-    eq FRealVariable.stateSelectionWeight() {
+    syn StateSelect FAbstractVariable.stateSelection() {
+        throw new UnsupportedOperationException("Unable to get state select from variable type " + getClass().getSimpleName());
+    }
+    eq FVariable.stateSelection() {
         FRealVariable frv = (FRealVariable) getMeIntegrated();
-        StateSelect ss = (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
-        long weight = ss.weight();
-        // Slightly increase weight for variables used in reinit(), since they give errors if they do not become states
-        if (isSetInReinit())
-            weight++;
-        return weight;
+        return (frv == null) ? StateSelect.DEFAULT : frv.stateSelectAttribute();
     }
     
-    /**
-     * Check if this variable is marked as being set by a reinit().
-     */
-    syn boolean FAbstractVariable.isSetInReinit() = false;
-    eq FRealVariable.isSetInReinit() {
-        FAttribute a = findAttribute(FAttribute.STATE_SELECT);
-        return a != null && a.isInternal();
+    public class BiPGraph{
+        
+        public static class BiPGraphCost implements MunkresCost<BiPGraphCost> {
+            
+            public static BiPGraphCost UNMATCHED_WEIGHT = new BiPGraphCost();
+            
+            private static final int NUM_WEIGHTS = 7;
+            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 0;
+            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 1;
+            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 2;
+            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 3;
+            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 4;
+            private static final int FIXED_WEIGHT_POSITION               = 5;
+            private static final int LINEARITY_WEIGHT_POSITION           = 6;
+            
+            private boolean unmatched = false;
+            private int[] weights = new int[NUM_WEIGHTS];
+            
+            private BiPGraphCost() {
+                unmatched = true;
+            }
+            
+            public BiPGraphCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int linearity) {
+                weights[stateSelect.weightPos()] += 1;
+                weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
+                weights[LINEARITY_WEIGHT_POSITION] += linearity;
+            }
+            
+            @Override
+            public int compareTo(BiPGraphCost other) {
+                int diff = Boolean.compare(unmatched, other.unmatched);
+                if (diff != 0)
+                    return diff;
+                for (int i = 0; i < weights.length; i++) {
+                    diff = Long.compare(weights[i], other.weights[i]);
+                    if (diff != 0)
+                        return diff;
+                }
+                return 0;
+            }
+            
+            @Override
+            public void subtract(BiPGraphCost other) {
+                unmatched |= other.unmatched;
+                for (int i = 0; i < weights.length; i++)
+                    weights[i] -= other.weights[i];
+            }
+            
+            @Override
+            public void add(BiPGraphCost other) {
+                unmatched |= other.unmatched;
+                for (int i = 0; i < weights.length; i++)
+                    weights[i] += other.weights[i];
+            }
+            
+            @Override
+            public boolean isZero() {
+                if (unmatched)
+                    return false;
+                for (int i = 0; i < weights.length; i++)
+                    if (weights[i] != 0)
+                        return false;
+                return true;
+            }
+            
+            @Override
+            public BiPGraphCost copy() {
+                BiPGraphCost copy = new BiPGraphCost();
+                copy.unmatched = unmatched;
+                for (int i = 0; i < weights.length; i++)
+                    copy.weights[i] = weights[i];
+                return copy;
+            }
+            
+            public String toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append("(");
+                sb.append(unmatched);
+                sb.append(" ");
+                for (int weight : weights) {
+                    sb.append(", ");
+                    sb.append(weight);
+                }
+                sb.append(")");
+                return sb.toString();
+            }
+            
+            public boolean isUnmatched() {
+                return unmatched;
+            }
+            
+            public static BiPGraphCost zeroCost() {
+                BiPGraphCost cost = new BiPGraphCost();
+                cost.unmatched = false;
+                return cost;
+            }
+        }
     }
-    
+
+    public void BiPGraph.matchMunkres(Map<Var, BiPGraphCost> weights) {
+
+        if (equationMap.size()==0 || variableMap.size()==0) {
+            throw new MunkresException("Empty set of equations or variables was given to the munkres algorithm");
+        }
+
+        BiPGraphCost cost[][] = new BiPGraphCost[equationMap.size()][variableMap.size()];
+
+        int i = 0;
+        
+        for (Eq e : getEquations()) {
+            int j = 0;
+            for (Var var : variableMap.values())
+                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : BiPGraphCost.UNMATCHED_WEIGHT;
+            i++;
+        }
+        
+        MunkresProblem<BiPGraphCost> munk = new MunkresProblem<BiPGraphCost>(cost);
+        int[][] result = munk.solve();
+        BiPGraphCost opt_cost = BiPGraphCost.zeroCost();
+        ASTNode.log.info("Munkres result:");
+        Eq[] eqs = equationMap.values().toArray(new Eq[equationMap.size()]);
+        Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
+        boolean failed = false;
+        for (i=0;i<result.length;i++) {
+            opt_cost.add(cost[result[i][0]][result[i][1]]);
+            Eq eqn = eqs[result[i][0]];
+            Var var = vars[result[i][1]];
+            match(eqn, var);
+            ASTNode.log.info("%s: %s %s", eqn, var, cost[result[i][0]][result[i][1]]);
+        }
+        ASTNode.log.info("Optimal cost: %s", opt_cost);
+        if (opt_cost.isUnmatched()) {
+            throw new MunkresException("Munkres algorithm was unable to find a matching");
+        }
+    }
     
     public class IndexReductionResult {
 
@@ -614,54 +746,25 @@ aspect IndexReduction {
             return dummyDerivatives;
         }
     }
+    
 }
 
 aspect MunkersProblem {
     
-    public void BiPGraph.matchMunkres(Map<Var, Long> weights) {
-
-        if (equationMap.size()==0 || variableMap.size()==0) {
-            throw new MunkresException("Empty set of equations or variables was given to the munkres algorithm");
-        }
-
-        long cost[][] = new long[equationMap.size()][variableMap.size()];   
-
-        int i = 0;
-        
-        for (Eq e : getEquations()) {
-            int j = 0;
-            for (Var var : variableMap.values())
-                cost[i][j++] = e.getVariables().contains(var) ? weights.get(var) : UNMATCHED_WEIGHT;
-            i++;
-        }
-        
-        MunkresProblem munk = new MunkresProblem(cost);
-        int[][] result = munk.solve();
-        long opt_cost = 0L;
-        ASTNode.log.info("Munkres result:");
-        Eq[] eqs = equationMap.values().toArray(new Eq[equationMap.size()]);
-        Var[] vars = variableMap.values().toArray(new Var[variableMap.size()]);
-        boolean failed = false;
-        for (i=0;i<result.length;i++) {
-            opt_cost += cost[result[i][0]][result[i][1]];
-            Eq eqn = eqs[result[i][0]];
-            Var var = vars[result[i][1]];
-            match(eqn, var);
-            ASTNode.log.info("%s: %s %d", eqn, var, cost[result[i][0]][result[i][1]]);
-        }
-        ASTNode.log.info("Optimal cost: %d", opt_cost);
-        if (opt_cost >= UNMATCHED_WEIGHT) {
-            throw new MunkresException("Munkres algorithm was unable to find a matching");
-        }
+    public interface MunkresCost<T> extends Comparable<T> {
+        public int compareTo(T other);
+        public void subtract(T other);
+        public void add(T other);
+        public boolean isZero();
+        public T copy();
     }
     
-    public class MunkresProblem {
+    public class MunkresProblem<T extends MunkresCost<T>> {
 
-        private long originalCost[][];
         private int n;
         private int m;
         private int k;
-        private long cost[][];
+        private T cost[][];
         private boolean rowCover[];
         private boolean columnCover[];
         private boolean starred[][];
@@ -684,40 +787,38 @@ aspect MunkersProblem {
          * Implementation of the Munkres (Hungarian) algorithm: based on the description at:
          * http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
          */
-        public MunkresProblem(long[][] cost) {
-            n = cost.length;
-            m = cost[0].length;
+        public MunkresProblem(T[][] initialCost) {
+            n = initialCost.length;
+            m = initialCost[0].length;
             k = (n < m) ? n : m;
-            originalCost = new long[n][m];
-            this.cost = new long[n][m];
+            cost = initialCost.clone();
             rowCover = new boolean[n];
             columnCover = new boolean[m];
             starred = new boolean[n][m];
             primed = new boolean[n][m]; 
             
             for (int i = 0; i < n; i++) {
+                cost[i] = initialCost[i].clone();
                 for (int j = 0; j < m; j++) {
-                    this.cost[i][j] = cost[i][j];
-                    originalCost[i][j] = cost[i][j];
                     starred[i][j] = false;
                     primed[i][j] = false;
+                    cost[i][j] = initialCost[i][j].copy();
                 }
             }
-            for (int i = 0; i < n; i++) { 
+            for (int i = 0; i < n; i++) {
                 rowCover[i] = false;
             }
-            for (int j = 0; j < m; j++) { 
+            for (int j = 0; j < m; j++) {
                 columnCover[j] = false;
-            }       
-            //System.out.println(this);
+            }
         }
         
         public int[][] solve() {
             minimizeRows();
-            //System.out.println(this);
+//            System.out.println(this);
             
             match();
-            //System.out.println(this);
+//            System.out.println(this);
             
             nextStep = COVER_MATCHED_COLUMNS;
             
@@ -726,27 +827,27 @@ aspect MunkersProblem {
                 
                 switch (nextStep) {
                     case COVER_MATCHED_COLUMNS:
-                        //System.out.println("Step: COVER_MATCHED_COLUMNS");
+//                        System.out.println("Step: COVER_MATCHED_COLUMNS");
                         int nbrMatchedColumns = coverMatchedColumns();
-                        //System.out.println(this);
+//                        System.out.println(this);
                         if (nbrMatchedColumns == k) {
                             done = true;
                         }
                         break;
                     case PRIME_ZEROS:
-                        //System.out.println("Step: PRIME_ZEROS");
+//                        System.out.println("Step: PRIME_ZEROS");
                         primeZeros();
-                        //System.out.println(this);
+//                        System.out.println(this);
                         break;
                     case AUGMENT_PATH:
-                        //System.out.println("Step: AUGMENT_PATH");
+//                        System.out.println("Step: AUGMENT_PATH");
                         augmentPath(rp, cp);
-                        //System.out.println(this);
+//                        System.out.println(this);
                         break;
                     case ADD_SUB_MIN_VALUE:
-                        //System.out.println("Step: ADD_SUB_MIN_VALUE");
+//                        System.out.println("Step: ADD_SUB_MIN_VALUE");
                         addSubMinValue();
-                        //System.out.println(this);
+//                        System.out.println(this);
                         break;
                     default:
                         done = true;
@@ -762,32 +863,30 @@ aspect MunkersProblem {
                         result[ind][0] = i;
                         result[ind][1] = j;
                         ind++;
-                    }       
+                    }
                 }
             }
             return result;
         }
         
         public void minimizeRows() {
-            long row_min = 0;
-            for (int i=0;i<n;i++) {
-                row_min = -1;
-                for (int j=0;j<m;j++) {
-                    if (row_min<0 || cost[i][j]<row_min) {
+            for (int i = 0; i < n; i++) {
+                T row_min = null;
+                for (int j=0;j<m;j++)
+                    if (row_min == null || cost[i][j].compareTo(row_min) < 0)
                         row_min = cost[i][j];
-                    }
-                }
-                for (int j=0;j<m;j++) {
-                    cost[i][j] -= row_min;
-                }
-            }   
+                for (int j = 0; j < m; j++)
+                    if (cost[i][j] != row_min)
+                        cost[i][j].subtract(row_min);
+                row_min.subtract(row_min);
+            }
         }
         
         public void match() {
             // Greedy matching: Hopcorft Karp would be better
             for (int i=0;i<n;i++) {
                 for (int j=0;j<m;j++) {
-                    if (cost[i][j]==0 && !rowCover[i] && !columnCover[j]) {
+                    if (cost[i][j].isZero() && !rowCover[i] && !columnCover[j]) {
                         starred[i][j] = true;
                         rowCover[i] = true;
                         columnCover[j] = true;
@@ -864,14 +963,14 @@ aspect MunkersProblem {
         }
         
         public void addSubMinValue() {
-            long minValue = findMinUncoveredValue();
+            T minValue = findMinUncoveredValue();
             for (int i=0;i<n;i++) {
                 for (int j=0;j<m;j++) {
                     if (rowCover[i]) {
-                        cost[i][j] = cost[i][j] + minValue;
+                        cost[i][j].add(minValue);
                     }
                     if (!columnCover[j]) {
-                        cost[i][j] = cost[i][j] - minValue;
+                        cost[i][j].subtract(minValue);
                     }
                 }
             }
@@ -883,7 +982,7 @@ aspect MunkersProblem {
                 if (!columnCover[j]) {
                     for (int i=0;i<n;i++) {
                         if (!rowCover[i]) {
-                            if (cost[i][j]==0) {
+                            if (cost[i][j].isZero()) {
                                 rp = i;
                                 cp = j;
                                 return;
@@ -897,18 +996,18 @@ aspect MunkersProblem {
             return;
         }
         
-        public long findMinUncoveredValue() {
-            long minValue = -1;
+        public T findMinUncoveredValue() {
+            T minValue = null;
             for (int j=0;j<m;j++) {
                 if (!columnCover[j]) {
                     for (int i=0;i<n;i++) {
-                        if (!rowCover[i] && (minValue<0 || cost[i][j]<minValue)) {
+                        if (!rowCover[i] && (minValue == null || cost[i][j].compareTo(minValue) < 0)) {
                             minValue = cost[i][j];
                         }
                     }
                 }
             }
-            return minValue;
+            return minValue.copy();
         }
         
         public boolean rowContainsStarred(int row) {
@@ -1032,5 +1131,56 @@ aspect MunkersProblem {
             }
             return str.toString();
         }
+        
+        public static class IntegerCost implements MunkresCost<IntegerCost> {
+            
+            private int value;
+            
+            private IntegerCost(int value) {
+                this.value = value;
+            }
+            
+            @Override
+            public int compareTo(IntegerCost other) {
+                // TODO Auto-generated method stub
+                return Long.compare(value, other.value);
+            }
+
+            @Override
+            public void subtract(IntegerCost other) {
+                value -= other.value;
+            }
+
+            @Override
+            public void add(IntegerCost other) {
+                value += other.value;
+            }
+
+            @Override
+            public boolean isZero() {
+                return value == 0;
+            }
+            
+            @Override
+            public IntegerCost copy() {
+                return new IntegerCost(value);
+            }
+            
+            public static IntegerCost[][] create(int[][] values) {
+                IntegerCost[][] costs = new IntegerCost[values.length][];
+                for (int j = 0; j < values.length; j++) {
+                    costs[j] = new IntegerCost[values[j].length];
+                    for (int i = 0; i < values.length; i++)
+                        costs[j][i] = new IntegerCost(values[j][i]);
+                }
+                return costs;
+            }
+            
+            @Override
+            public String toString() {
+                return Integer.toString(value);
+            };
+        }
+        
     }
 }
