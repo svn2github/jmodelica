@@ -175,6 +175,9 @@ AM_CONDITIONAL([WITH_SUNDIALS],[test "x$with_sundials" != xno])
 AC_SUBST(SUNDIALS_HOME)
 SUNDIALS_HOME=$sundials
 
+AC_SUBST(MINPACK_HOME)
+MINPACK_HOME="$CURR_DIR/minpack_install"
+
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
     [SuperLU installation directory @<:@default=check@:>@])],
@@ -341,6 +344,7 @@ AC_CONFIG_FILES([
  ThirdParty/Blas/Makefile
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
+ ThirdParty/Minpack/Makefile
  ThirdParty/CasADi/Makefile
  external/FMILibrary/Makefile
  JMI/src/Makefile

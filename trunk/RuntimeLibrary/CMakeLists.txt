@@ -25,10 +25,17 @@ project (SimulationRuntime)
 #Inputs through flags
 add_definitions(-DTOP_SRC)
 add_definitions(-DSUNDIALS_HOME)
+add_definitions(-DMINPACK_HOME)
 if(NOT TOP_SRC)
     set(TOP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
+
+if(NOT MINPACK_HOME)
+    set(MINPACK_HOME ${TOP_SRC}/ThirdParty/Minpack/cminpack-1.3.2/)
+    message(STATUS "MINPACK_HOME was not defined, using ${MINPACK_HOME}")
+endif()
+include_directories(${MINPACK_HOME})
 
 # Get the JModelica install directory
 if(CMAKE_INSTALL_DIR)

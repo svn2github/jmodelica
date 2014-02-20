@@ -54,11 +54,13 @@ set(JMISources
     jmi_block_solver.h
     jmi_block_solver_impl.h
     jmi_kinsol_solver.h
+    jmi_minpack_solver.h
     jmi_linear_solver.h
     jmi_simple_newton.h
 
     jmi_block_solver.c
     jmi_kinsol_solver.c
+    jmi_minpack_solver.c
     jmi_linear_solver.c
     jmi_simple_newton.c
 
@@ -111,6 +113,8 @@ if(NOT MSVC)
     set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long")
     if (WIN32)
         include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
+        #Flag that is needed for compiling lib togheter with MINPACK, no dll is created.
+        add_definitions(-DCMINPACK_NO_DLL)
     endif()
 endif()
 

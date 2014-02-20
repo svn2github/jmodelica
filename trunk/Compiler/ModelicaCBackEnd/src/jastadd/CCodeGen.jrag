@@ -2466,11 +2466,11 @@ aspect CCodeGen {
         str.format("%sdgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);\n", indent);
     }
     
-	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, CodeStream str) {
+	public void AbstractEquationBlock.genBlockAddCall_C(boolean dirDer, boolean inInit, String indent, CodeStream str, String nleSolver) {
 		if (!genRequiresBlockResidualFunction_C())
 			return;
 		for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
-			subBlock.genBlockAddCall_C(dirDer, inInit, indent, str);
+			subBlock.genBlockAddCall_C(dirDer, inInit, indent, str, nleSolver);
 		
 		str.print(indent);
 		str.print("jmi_dae_" + (inInit ? "init_" : "") + "add_equation_block(");
@@ -2483,7 +2483,7 @@ aspect CCodeGen {
 		str.print(nonRealVariables().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
-		str.print(genJMISolverConstant_C() + ", ");
+		str.print(genJMISolverConstant_C(nleSolver) + ", ");
 		str.print(residualBlockNumber_C() + ");\n");
 	}
 	
@@ -2493,12 +2493,17 @@ aspect CCodeGen {
 	eq FConstant.genJMIVariabilityConstant_C() = "JMI_CONSTANT_VARIABILITY";
 	eq FContinuous.genJMIVariabilityConstant_C() = "JMI_CONTINUOUS_VARIABILITY";
 	
-	public String AbstractEquationBlock.genJMISolverConstant_C() {
-		return "JMI_KINSOL_SOLVER";
-	}
-	public String EquationBlock.genJMISolverConstant_C() {
-	    return isLinear() ? "JMI_LINEAR_SOLVER" : "JMI_KINSOL_SOLVER";
-	}
+	public String AbstractEquationBlock.genJMISolverConstant_C(String nleSolver) {
+		if (nleSolver.equals("kinsol"))
+			return "JMI_KINSOL_SOLVER";
+		else if (nleSolver.equals("minpack"))
+			return "JMI_MINPACK_SOLVER";
+		else
+			throw new UnsupportedOperationException("The string value: " + nleSolver + " is not valid for the compiler option nonlinear_solver");
+ 	}
+	public String EquationBlock.genJMISolverConstant_C(String nleSolver) {
+    	return isLinear() ? "JMI_LINEAR_SOLVER" : super.genJMISolverConstant_C(nleSolver);
+ 	}
 
 	
     private Collection<FRelExp> AbstractEquationBlock.activeSwitches_C = null;

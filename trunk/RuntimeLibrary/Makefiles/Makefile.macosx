@@ -130,12 +130,14 @@ SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 RUNTIMELIBRARY_LIB_DIR = ${JMODELICA_HOME}/lib/RuntimeLibrary
 SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
+MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
 
 # Libraries necessary to link with jmi
 # Reused parts
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
+LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
 LIB_LAPACK   = $(JMI_LIB_DIR)/liblapack.a $(JMI_LIB_DIR)/libblas.a -lgfortran
-LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS)
+LIB_COMMON   = $(LIB_LAPACK) $(LIB_SUNDIALS) $(LIB_MINPACK)
 LIB_JMIC     = -ljmi -lModelicaExternalC
 LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad

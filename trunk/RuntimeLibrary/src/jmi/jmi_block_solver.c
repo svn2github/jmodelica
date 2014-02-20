@@ -32,6 +32,7 @@
 #include "jmi_simple_newton.h"
 #include "jmi_kinsol_solver.h"
 #include "jmi_linear_solver.h"
+#include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
 /**
@@ -93,6 +94,15 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->solver = solver;
             block_solver->solve = jmi_kinsol_solver_solve;
             block_solver->delete_solver = jmi_kinsol_solver_delete;
+        }
+        break;
+        
+        case JMI_MINPACK_SOLVER: {
+            jmi_minpack_solver_t* solver;    
+            jmi_minpack_solver_new(&solver, block_solver);
+            block_solver->solver = solver;
+            block_solver->solve = jmi_minpack_solver_solve;
+            block_solver->delete_solver = jmi_minpack_solver_delete;
         }
         break;
 

@@ -1,0 +1,253 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 3 as published
+    by the Free Software Foundation, or optionally, under the terms of the
+    Common Public License version 1.0 as published by IBM.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License, or the Common Public License, for more details.
+
+    You should have received copies of the GNU General Public License
+    and the Common Public License along with this program.  If not,
+    see <http://www.gnu.org/licenses/> or
+    <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
+*/
+
+#include <string.h>
+
+#include "jmi_minpack_solver.h"
+#include "jmi_block_solver_impl.h"
+
+static int fcn(void *problem_data, int n, const real *y, real *fvec, int iflag ){
+    jmi_block_solver_t *block = problem_data;
+    int ret;
+    
+    ret = block->F(block->problem_data,(jmi_real_t*)y,(jmi_real_t*)fvec,JMI_BLOCK_EVALUATE);
+    
+    return ret;
+}
+
+static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real *fjac,
+        int ldfjac, int iflag) {
+    
+    jmi_block_solver_t *block = problem_data;
+    int i, ret;
+    block->nb_fevals++;
+    
+    /* Test if input is OK (no -1.#IND) */
+    for (i=0;i<n;i++) {
+        /* Unrecoverable error*/
+        if (y[i]-y[i] != 0) {
+            jmi_log_node(block->log, logWarning, "Warning", "Not a number in arguments to <block: %d>", 
+                         block->id);
+            return -1;
+        }
+    }
+
+    if (iflag == 1) {
+        /*Evaluate the residual*/
+        ret = block->F(block->problem_data,(jmi_real_t*)y,(jmi_real_t*)fvec,JMI_BLOCK_EVALUATE);
+    } else {
+        /*Evaluate the jacobian*/
+        if (block->dF) {
+            int j;
+            /* Utilize directional derivatives to calculate Jacobian */
+            for(i = 0; i < n; i++){
+                block->dx[i] = 1;
+                ret |= block->dF(block->problem_data,(jmi_real_t*)y,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+                for(j = 0; j < n; j++){
+                    real dres = block->dres[j];
+                    (fjac)[i*n+j] = dres;
+                }
+                block->dx[i] = 0;
+            }       
+        } else {
+            /* Finite Difference Jacobian */
+            jmi_minpack_solver_t* solver = block->solver;
+            int flag;
+            real epsfcn = 1e-8;
+            
+            flag = fcn(problem_data,n,y,fvec,iflag);
+            
+            memcpy(solver->ytemp, y, n*sizeof(real));
+            
+            flag =  fdjac1(fcn,
+                problem_data, n, solver->ytemp, fvec, fjac, ldfjac,
+                n-1, n-1, epsfcn, solver->rworkj1, solver->rworkj2);
+                
+            if (flag < 0) {
+                ret = -1;
+            } else {
+                ret = 0;
+            }
+        }
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "JacobianUpdated", "<block:%d>", block->id);
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", fjac, n, n);
+            jmi_log_leave(block->log, node);
+        }
+    }
+    
+    if(ret) {
+        jmi_log_node(block->log, logWarning, "Warning", "<errorCode: %d> returned from <block: %d>", 
+                     ret, block->id);
+        return ret;
+    }
+    
+    /* Test if output is OK (no -1.#IND) */
+    if (iflag == 1) {
+        for (i=0;i<n;i++) {
+            double v = fvec[i];
+            /* Recoverable error*/
+            if (v- v != 0) {
+                jmi_log_node(block->log, logWarning, "Warning", 
+                             "Not a number in <output: %d> from <block: %d>", i, block->id);
+                ret = 1;
+            }
+        }
+    }
+
+    return ret; /*Success*/
+}
+
+int jmi_minpack_solver_new(jmi_minpack_solver_t** solver_ptr, jmi_block_solver_t* block) {
+    jmi_minpack_solver_t* solver;
+    int flag = 1, n = block->n;
+    
+    solver = (jmi_minpack_solver_t*)calloc(1,sizeof(jmi_minpack_solver_t));
+    
+    solver->lr = (int)((n*(n+1))/2+1);
+    
+    solver->yscale = (real*)calloc(n, sizeof(real));
+    solver->ytemp = (real*)calloc(n, sizeof(real));
+    solver->rwork1 = (real*)calloc(n, sizeof(real));
+    solver->rwork2 = (real*)calloc(n, sizeof(real));
+    solver->rwork3 = (real*)calloc(n, sizeof(real));
+    solver->rwork4 = (real*)calloc(n, sizeof(real));
+    solver->qTf = (real*)calloc(n, sizeof(real));
+    solver->qr = (real*)calloc(solver->lr, sizeof(real));
+    
+    solver->rworkj1 = (real*)calloc(n, sizeof(real));
+    solver->rworkj2 = (real*)calloc(n, sizeof(real));
+    
+    *solver_ptr = solver;
+    return flag;
+}
+
+static void jmi_minpack_solver_print_solve_start(jmi_block_solver_t * block,
+                                         jmi_log_node_t *destnode) {
+    if((block->callbacks->log_options.log_level >= 5)) {
+        jmi_log_t *log = block->log;
+        *destnode = jmi_log_enter_fmt(log, logInfo, "NewtonSolve", 
+                                      "Newton solver invoked for <block:%d>", block->id);
+        jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
+        jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
+        jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
+        jmi_log_reals(log, *destnode, logInfo, "nominal", block->nominal, block->n);
+        jmi_log_reals(log, *destnode, logInfo, "initial_guess", block->initial, block->n);        
+    }
+}
+
+static void jmi_minpack_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log_node_t *node, int flag) {
+    
+    if((block->callbacks->log_options.log_level >= 5)) {
+        jmi_log_t *log = block->log;
+        if (flag == 0) {
+            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+                     "improper input parameters.", flag, block->id);
+        } else if (flag  == 1) {
+            jmi_log_node(log, logInfo, "Info", "<returnCode: %d> returned from <block: %d> "
+                     "relative error between two consecutive iterates is at most xtol.", flag, block->id);
+        } else if (flag  == 2) {
+            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+                     "number of calls to fcn with iflag = 1 has reached maxfev.", flag, block->id);
+        } else if (flag  == 3) {
+            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+                     "xtol is too small. no further improvement in the approximate solution x is possible.", flag, block->id);
+        } else if (flag  == 4) {
+            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+                     "iteration is not making good progress, as measured by the improvement from the last five jacobian evaluations.", flag, block->id);
+        } else if (flag  == 5) {
+            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+                     "iteration is not making good progress, as measured by the improvement from the last ten iterations.", flag, block->id);
+        }
+        jmi_log_fmt(log, *node, logInfo, "Minpack solver finished with <minpack_exit_flag:%d>", flag);
+        
+        jmi_log_leave(log, *node);
+    }
+}
+
+static int jmi_minpack_init(jmi_block_solver_t * block) {
+    jmi_minpack_solver_t* solver = block->solver;
+    
+    /* set tolerances */
+    if((block->n > 1) || !block->options->use_Brent_in_1d_flag) {
+        solver->ytol = block->options->res_tol;
+        if(solver->ytol < block->options->min_tol) {
+            solver->ytol = block->options->min_tol;
+        }
+    }
+    else
+        solver->ytol = block->options->min_tol;
+    
+    return 1;
+}
+
+int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
+    jmi_minpack_solver_t* solver = block->solver;
+    jmi_log_node_t topnode;
+    int info;
+    int mode = 1; /* Scaling done internally, 2 for manual scaling */
+    int nprint = -1; /*No internal printing */
+    int nbr_fcn_evals = 0, nbr_jac_evals = 0;
+    int max_fcn_evals = 200; /* Max number of function evaluations */
+    real factor = 100.0;
+    
+    
+    if(block->init) {
+        jmi_minpack_init(block);
+    }
+    
+    jmi_minpack_solver_print_solve_start(block, &topnode);
+    info = __cminpack_func__(hybrj)(minpack_f, (void*)block, block->n, block->x,
+	      block->res, block->jac, block->n, solver->ytol,
+	      max_fcn_evals, solver->yscale, mode, factor,
+	      nprint, &nbr_fcn_evals, &nbr_jac_evals, solver->qr,
+	      solver->lr, solver->qTf, solver->rwork1, solver->rwork2,
+	      solver->rwork3, solver->rwork4);
+    jmi_minpack_solver_print_solve_end(block, &topnode, info);
+    
+    if (info != 1){
+        info = -1;
+    } else {
+        info = 0;
+    }
+    
+    return info;
+    
+}
+
+void jmi_minpack_solver_delete(jmi_block_solver_t* block) {
+    jmi_minpack_solver_t* solver = block->solver;
+    
+    free(solver->yscale);
+    free(solver->ytemp);
+    free(solver->rwork1);
+    free(solver->rwork2);
+    free(solver->rwork3);
+    free(solver->rwork4);
+    free(solver->qTf);
+    free(solver->qr);
+    
+    free(solver->rworkj1);
+    free(solver->rworkj2);
+    
+    /*Deallocate struct */
+    free(solver);
+    block->solver = 0;
+}

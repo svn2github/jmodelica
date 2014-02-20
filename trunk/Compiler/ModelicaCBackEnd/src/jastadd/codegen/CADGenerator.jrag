@@ -177,7 +177,7 @@ public class CADGenerator extends CGenerator {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEStructuredBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter);
+					block.genBlockAddCall_C(true, false, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
 			}
 		}
 	}
@@ -195,7 +195,7 @@ public class CADGenerator extends CGenerator {
 			if (shouldGenerateBlockJacobians(fclass)) {
 				fclass.getDAEInitBLT().genEnumerateResidualBlocks_C();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter);
+					block.genBlockAddCall_C(true, true, ASTNode.printer_CAD.indent(""), genPrinter, fclass.root().options.getStringOption("nonlinear_solver"));
 			}
 		}
 	}

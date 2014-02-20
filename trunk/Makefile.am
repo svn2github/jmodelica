@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS = -I m4
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary
+SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -287,6 +287,8 @@ endif
 	cp $(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar $(DESTDIR)$(prefix)/ThirdParty/Beaver/lib/ 
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Sundials	
 	cp -r $(SUNDIALS_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Sundials
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
+	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	
