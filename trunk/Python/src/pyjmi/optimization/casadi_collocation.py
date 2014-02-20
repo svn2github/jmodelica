@@ -3182,6 +3182,11 @@ class LocalDAECollocator2(CasadiCollocator):
         t0 = model.getVariable('startTime')
         tf = model.getVariable('finalTime')
         if op.get_attr(t0, "free") or op.get_attr(tf, "free"):
+            if not op.getNormalizedTimeFlag():
+                # Change this once #3438 has been fixed
+                raise CasadiCollocatorException(
+                        "Problems with free time horizons are only " +
+                        "supported if time has been normalized.")
             self._normalize_min_time = True
         else:
             self._normalize_min_time = False
@@ -3827,6 +3832,34 @@ class LocalDAECollocator2(CasadiCollocator):
              self.lterm] = casadi.substitute(ocp_expressions,
                                              self.mvar_struct_dx,
                                              coll_der)
+
+    def _check_linear_comb(self, expr):
+        """
+        Checks if expr is a linear combination of startTime and finalTime.
+        """
+        t0 = self.op.getVariable('startTime').getVar()
+        tf = self.op.getVariable('finalTime').getVar()
+        [zero] = casadi.substitute([expr], [t0, tf], [0., 0.])
+        if zero != 0.:
+            return False
+        f = casadi.MXFunction([t0, tf], [expr])
+        f.init()
+        if not f.grad(0).isConstant() or not f.grad(1).isConstant():
+            return False
+        return True
+
+    def _tp2cp(self, tp):
+        """
+        Computes the normalized collocation point given a time point.
+        """
+        t0_var = self.op.getVariable('startTime').getVar()
+        tf_var = self.op.getVariable('finalTime').getVar()
+        cp_f = casadi.MXFunction([t0_var, tf_var], [tp])
+        cp_f.init()
+        cp_f.setInput(0., 0)
+        cp_f.setInput(1., 1)
+        cp_f.evaluate()
+        return cp_f.output().toScalar()
     
     def _create_constraints(self):
         """
@@ -3892,16 +3925,36 @@ class LocalDAECollocator2(CasadiCollocator):
         if self.hs != "free":
             assert(N.allclose(time[-1], self.tf))
         
-        # Map constraint points to collocation points
-        if self._normalize_min_time:
-            raise NotImplementedError("Free time horizons not yet supported.")
+        # Compute constraint points
         if self.op.getTimedVariables().size > 0 and self.hs == "free":
             raise CasadiCollocatorException("Point constraints can not be " +
                                             "combined with free element " +
                                             "lengths.")
-        constraint_points = sorted(set(
-                [self.model.evaluateExpression(timed_var.getTimePoint()) for
-                 timed_var in self.op.getTimedVariables()]))
+        cnstr_points_expr = [timed_var.getTimePoint() for timed_var
+                             in self.op.getTimedVariables()]
+        if self._normalize_min_time:
+            for expr in cnstr_points_expr:
+                if not self._check_linear_comb(expr):
+                    raise CasadiCollocatorException(
+                            "Constraint point %s is not a " % repr(expr) +
+                            "convex combination of startTime and finalTime.")
+            t0_var = op.getVariable('startTime').getVar()
+            tf_var = op.getVariable('finalTime').getVar()
+
+            # Map time points to constraint points
+            cnstr_points_f = casadi.MXFunction(
+                    [t0_var, tf_var], [casadi.vertcat(cnstr_points_expr)])
+            cnstr_points_f.init()
+            cnstr_points_f.setInput(0., 0)
+            cnstr_points_f.setInput(1., 1)
+            cnstr_points_f.evaluate()
+            constraint_points = cnstr_points_f.output().toArray().reshape(-1)
+            constraint_points = sorted(set(constraint_points))
+        else:
+            constraint_points = sorted(set([self.model.evaluateExpression(expr)
+                                            for expr in cnstr_points_expr]))
+
+        # Map constraint points to collocation points
         nlp_timed_variables = []
         if self.hs == "free": # FIX!!!
             timed_variables = casadi.SXMatrix()
@@ -3940,8 +3993,12 @@ class LocalDAECollocator2(CasadiCollocator):
             timed_variables_sfs = []
             for tv in self.op.getTimedVariables():
                 timed_variables.append(tv.getVar())
-                tp = self.model.evaluateExpression(tv.getTimePoint())
-                (i, k) = collocation_constraint_points[tp]
+                tp = tv.getTimePoint()
+                if self._normalize_min_time:
+                    cp = self._tp2cp(tp)
+                else:
+                    cp = self.model.evaluateExpression(tp)
+                (i, k) = collocation_constraint_points[cp]
                 name = tv.getBaseVariable().getName()
                 (index, vt) = name_map[name]
                 if self.variable_scaling and self.nominal_traj is None:
@@ -5142,7 +5199,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                     d = variant_sf[i][k][sf_index]
                                     if self.init_traj is not None:
                                         time = time_points[i][k]
-                                        if self._normalize_min_time: # FIX!!!
+                                        if self._normalize_min_time:
                                             time = t0 + (tf - t0) * time
                                         v_init = traj[vt][var_idx].eval(time)
                                     xx_lb[var_indices[i][k][vt][var_idx]] = \
@@ -5163,7 +5220,7 @@ class LocalDAECollocator2(CasadiCollocator):
                         for k in self.time_points[i].keys():
                             if self.init_traj is not None:
                                 time = time_points[i][k]
-                                if self._normalize_min_time: # FIX!!!
+                                if self._normalize_min_time:
                                     time = t0 + (tf - t0) * time
                                 v_init = traj[vt][var_idx].eval(time)
                             xx_lb[var_indices[i][k][vt][var_idx]] = \
@@ -5236,6 +5293,7 @@ class LocalDAECollocator2(CasadiCollocator):
         var_map = self.var_map
         var_opt = {}
         var_indices = self.var_indices
+        op = self.op
         if self.variable_scaling:
             if self.nominal_traj is None:
                 sf = self._sf
@@ -5544,20 +5602,20 @@ class LocalDAECollocator2(CasadiCollocator):
         
         # Denormalize minimum time problem
         if self._normalize_min_time:
-            t0_var = self.ocp.variable('startTime')
-            tf_var = self.ocp.variable('finalTime')
-            if t0_var.getFree():
+            t0_var = op.getVariable('startTime')
+            tf_var = op.getVariable('finalTime')
+            if op.get_attr(t0_var, "free"):
                 name = t0_var.getName()
                 (ind, _) = name_map[name]
                 t0 = var_opt['p_opt'][ind]
             else:
-                t0 = t0_var.getStart()
-            if tf_var.getFree():
+                t0 = op.get_attr(t0_var, "_value")
+            if op.get_attr(tf_var, "free"):
                 name = tf_var.getName()
                 (ind, _) = name_map[name]
                 tf = var_opt['p_opt'][ind]
             else:
-                tf = tf_var.getStart()
+                tf = op.get_attr(tf_var, "_value")
             t_opt = t0 + (tf - t0) * t_opt
             var_opt['dx'] /= (tf - t0)
 
