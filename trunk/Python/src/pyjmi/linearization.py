@@ -99,6 +99,38 @@ def linearize_dae(model):
     n_w = model._n_real_w.value
     n_z = model._n_z.value
     n_eq = n_x+n_w
+    sc = model.jmimodel.get_variable_scaling_factors()
+    
+    if model.jmimodel.get_scaling_method() == jmi.JMI_SCALING_VARIABLES:
+        sc_dx = []
+        for var in model.get_dx_variable_names():
+            if not model._get_XMLDoc().is_alias(var[1]):
+                sc_dx.append(var[0])
+        sc_dx = N.diag([1.0/sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set(sc_dx))])
+        sc_x = []
+        for var in model.get_x_variable_names():
+            if not model._get_XMLDoc().is_alias(var[1]):
+                sc_x.append(var[0])
+        sc_x = N.diag([1.0/sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set(sc_x))])
+        sc_w = []
+        for var in model.get_w_variable_names():
+            if not model._get_XMLDoc().is_alias(var[1]):
+                sc_w.append(var[0])
+        sc_w = N.diag([1.0/sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set(sc_w))])
+        sc_u = []
+        for var in model.get_u_variable_names():
+            if not model._get_XMLDoc().is_alias(var[1]):
+                sc_u.append(var[0])
+        sc_u = N.diag([1.0/sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set(sc_u))])
+    else:
+        sc_dx = N.diag([1.0]*n_x)
+        sc_x = N.diag([1.0]*n_x)
+        sc_w = N.diag([1.0]*n_w)
+        sc_u = N.diag([1.0]*n_u)
+    #sc_dx = N.diag([sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set([var[0] for var in model.get_dx_variable_names()]))])
+    #sc_x  = N.diag([sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set([var[0] for var in model.get_x_variable_names()]))])
+    #sc_w  = N.diag([sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set([var[0] for var in model.get_w_variable_names()]))])
+    #sc_u  = N.diag([sc[jmi._translate_value_ref(ref)[0]] for ref in sorted(set([var[0] for var in model.get_u_variable_names()]))])
     
     E = N.zeros((n_eq*n_x))
 
@@ -108,7 +140,7 @@ def linearize_dae(model):
                           N.ones(n_z,dtype=int),
                           E)
     
-    E = N.reshape(E,(n_eq,n_x))
+    E = N.dot(N.reshape(E,(n_eq,n_x)),sc_dx)
     
     A = N.zeros((n_eq*n_x))
     
@@ -118,7 +150,7 @@ def linearize_dae(model):
                           N.ones(n_z,dtype=int),
                           A)
     
-    A = -N.reshape(A,(n_eq,n_x))
+    A = N.dot(-N.reshape(A,(n_eq,n_x)),sc_x)
     
     B = N.zeros((n_eq*n_u))
     
@@ -128,7 +160,7 @@ def linearize_dae(model):
                           N.ones(n_z,dtype=int),
                           B)
     
-    B = -N.reshape(B,(n_eq,n_u))
+    B = N.dot(-N.reshape(B,(n_eq,n_u)),sc_u)
     
     F = N.zeros((n_eq*n_w))
     
@@ -138,7 +170,7 @@ def linearize_dae(model):
                           N.ones(n_z,dtype=int),
                           F)
     
-    F = -N.reshape(F,(n_eq,n_w))
+    F = N.dot(-N.reshape(F,(n_eq,n_w)),sc_w)
     
     g = N.zeros(n_eq)
     
