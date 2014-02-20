@@ -75,7 +75,7 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
             
             memcpy(solver->ytemp, y, n*sizeof(real));
             
-            flag =  fdjac1(fcn,
+            flag =  __cminpack_func__(fdjac1)(fcn,
                 problem_data, n, solver->ytemp, fvec, fjac, ldfjac,
                 n-1, n-1, epsfcn, solver->rworkj1, solver->rworkj2);
                 

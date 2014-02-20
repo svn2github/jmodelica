@@ -113,14 +113,17 @@ if(NOT MSVC)
     set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long")
     if (WIN32)
         include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
-        #Flag that is needed for compiling lib togheter with MINPACK, no dll is created.
-        add_definitions(-DCMINPACK_NO_DLL)
     endif()
 endif()
 
-if(JMI_SUNDIALS AND JMI_LAPACK)
+if(WIN32)
+    #Flag that is needed for compiling lib togheter with MINPACK, no dll is created.
+    add_definitions(-DCMINPACK_NO_DLL)
+endif()
+
+if(JMI_SUNDIALS AND JMI_LAPACK AND JMI_MINPACK)
     add_executable(jmi_block_solver_test jmi_block_solver_test.c)
-    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK})
+    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK})
 endif()
 
 #Build ModelicaExternalC library
