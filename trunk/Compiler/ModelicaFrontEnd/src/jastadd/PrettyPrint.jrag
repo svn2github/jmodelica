@@ -918,7 +918,8 @@ aspect FlatPrettyPrint {
 		String nextInd = p.indent(indent);
 		str.print(indent + "fclass " + name() + "\n");
 		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
+	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
+	  		        !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
 	  			p.print(fv, str, nextInd);
 	  			str.print(";\n");  
 	  		}

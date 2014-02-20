@@ -12916,7 +12916,11 @@ model TestRuntimeOptions1
 			generate_ode=true,
 			generate_runtime_option_parameters=true,
 			variability_propagation=false,
-			template="$C_runtime_option_map$",
+			template="
+$C_runtime_option_map$
+$C_variable_aliases$
+$C_set_start_values$
+",
 			generatedCode="
 const char *fmi_runtime_options_map_names[] = {
     \"_block_jacobian_check\",
@@ -12953,6 +12957,60 @@ const int fmi_runtime_options_map_vrefs[] = {
 };
 
 const int fmi_runtime_options_map_length = 24;
+#define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define __cs_rel_tol_4 ((*(jmi->z))[jmi->offs_real_pi+1])
+#define __cs_step_size_6 ((*(jmi->z))[jmi->offs_real_pi+2])
+#define __events_default_tol_8 ((*(jmi->z))[jmi->offs_real_pi+3])
+#define __events_tol_factor_9 ((*(jmi->z))[jmi->offs_real_pi+4])
+#define __nle_solver_default_tol_13 ((*(jmi->z))[jmi->offs_real_pi+5])
+#define __nle_solver_min_tol_15 ((*(jmi->z))[jmi->offs_real_pi+6])
+#define __nle_solver_regularization_tolerance_16 ((*(jmi->z))[jmi->offs_real_pi+7])
+#define __nle_solver_step_limit_factor_17 ((*(jmi->z))[jmi->offs_real_pi+8])
+#define __nle_solver_tol_factor_18 ((*(jmi->z))[jmi->offs_real_pi+9])
+#define __block_solver_experimental_mode_3 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define __cs_solver_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define __iteration_variable_scaling_10 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define __log_level_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
+#define __nle_solver_max_iter_14 ((*(jmi->z))[jmi->offs_integer_pi+4])
+#define __residual_equation_scaling_21 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define __block_jacobian_check_1 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define __enforce_bounds_7 ((*(jmi->z))[jmi->offs_boolean_pi+1])
+#define __nle_solver_check_jac_cond_12 ((*(jmi->z))[jmi->offs_boolean_pi+2])
+#define __rescale_after_singular_jac_19 ((*(jmi->z))[jmi->offs_boolean_pi+3])
+#define __rescale_each_step_20 ((*(jmi->z))[jmi->offs_boolean_pi+4])
+#define __runtime_log_to_file_22 ((*(jmi->z))[jmi->offs_boolean_pi+5])
+#define __use_Brent_in_1d_23 ((*(jmi->z))[jmi->offs_boolean_pi+6])
+#define __use_jacobian_equilibration_24 ((*(jmi->z))[jmi->offs_boolean_pi+7])
+#define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
+
+    __block_jacobian_check_1 = (JMI_FALSE);
+    __block_jacobian_check_tol_2 = (1.0E-6);
+    __block_solver_experimental_mode_3 = (0);
+    __cs_rel_tol_4 = (1.0E-6);
+    __cs_solver_5 = (0);
+    __cs_step_size_6 = (0.001);
+    __enforce_bounds_7 = (JMI_FALSE);
+    __events_default_tol_8 = (1.0E-10);
+    __events_tol_factor_9 = (1.0E-4);
+    __iteration_variable_scaling_10 = (1);
+    __log_level_11 = (3);
+    __nle_solver_check_jac_cond_12 = (JMI_FALSE);
+    __nle_solver_default_tol_13 = (1.0E-10);
+    __nle_solver_max_iter_14 = (100);
+    __nle_solver_min_tol_15 = (1.0E-12);
+    __nle_solver_regularization_tolerance_16 = (-1.0);
+    __nle_solver_step_limit_factor_17 = (10.0);
+    __nle_solver_tol_factor_18 = (1.0E-4);
+    __rescale_after_singular_jac_19 = (JMI_TRUE);
+    __rescale_each_step_20 = (JMI_FALSE);
+    __residual_equation_scaling_21 = (1);
+    __runtime_log_to_file_22 = (JMI_FALSE);
+    __use_Brent_in_1d_23 = (JMI_FALSE);
+    __use_jacobian_equilibration_24 = (JMI_FALSE);
+    model_init_eval_parameters(jmi);
+    _x_0 = (0.0);
 ")})));
 end TestRuntimeOptions1;
 

@@ -5887,48 +5887,6 @@ Semantic error at line 9480, column 2:
 ")})));
 end TestExternalObj10;
 
-model TestRuntimeOptions1
-	Real x = 1;
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TestRuntimeOptions1",
-			description="Test that parameters for runtime options are generated properly",
-			generate_runtime_option_parameters=true,
-			nle_solver_tol_factor=1e-3,
-			generate_ode=true,
-			flatModel="
-fclass TransformCanonicalTests.TestRuntimeOptions1
- constant Real x = 1;
- parameter Boolean _block_jacobian_check = false /* false */;
- parameter Real _block_jacobian_check_tol = 1.0E-6 /* 1.0E-6 */;
- parameter Integer _block_solver_experimental_mode = 0 /* 0 */;
- parameter Real _cs_rel_tol = 1.0E-6 /* 1.0E-6 */;
- parameter Integer _cs_solver = 0 /* 0 */;
- parameter Real _cs_step_size = 0.001 /* 0.001 */;
- parameter Boolean _enforce_bounds = false /* false */;
- parameter Real _events_default_tol = 1.0E-10 /* 1.0E-10 */;
- parameter Real _events_tol_factor = 1.0E-4 /* 1.0E-4 */;
- parameter Integer _iteration_variable_scaling = 1 /* 1 */;
- parameter Integer _log_level = 3 /* 3 */;
- parameter Boolean _nle_solver_check_jac_cond = false /* false */;
- parameter Real _nle_solver_default_tol = 1.0E-10 /* 1.0E-10 */;
- parameter Integer _nle_solver_max_iter = 100 /* 100 */;
- parameter Real _nle_solver_min_tol = 1.0E-12 /* 1.0E-12 */;
- parameter Real _nle_solver_regularization_tolerance = -1.0 /* -1.0 */;
- parameter Real _nle_solver_step_limit_factor = 10.0 /* 10.0 */;
- parameter Real _nle_solver_tol_factor = 0.001 /* 0.001 */;
- parameter Boolean _rescale_after_singular_jac = true /* true */;
- parameter Boolean _rescale_each_step = false /* false */;
- parameter Integer _residual_equation_scaling = 1 /* 1 */;
- parameter Boolean _runtime_log_to_file = false /* false */;
- parameter Boolean _use_Brent_in_1d = false /* false */;
- parameter Boolean _use_jacobian_equilibration = false /* false */;
-end TransformCanonicalTests.TestRuntimeOptions1;
-")})));
-end TestRuntimeOptions1;
-
-
 
 package EventGeneratingExps
 
