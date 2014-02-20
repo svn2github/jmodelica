@@ -1294,19 +1294,6 @@ public class ModelicaCompiler {
 		}
 	}
 	
-	
-	private void generateFile(FClass fc, File dir, String name) {
-		hookCheckAbort();
-		try {
-			FileOutputStream out = new FileOutputStream(new File(dir, name).getPath());
-			CodeStream ps = new CodeStream(out);
-			fc.prettyPrintXML(ps, "");
-			ps.close();
-		} catch (IOException e) {
-			throw new RuntimeException("File I/O problem during code generation", e);
-		}
-	}
-	
 	private static String debugFindTemplateInSrcDir(String tmpl) {
 	    String name = new File(tmpl).getName();
 	    String src = getJModelicaHome();
@@ -1337,15 +1324,11 @@ public class ModelicaCompiler {
 		ASTNode.beginStep("generateCode()");
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
-		
-		if (target.suffix.equals("xml")) {
-			generateFile(fc, outDir, name + ".xml");
-		} else {
+
 		generateFile(fc, target.getXMLTemplates(fc), target.getXMLGenerator(fc),
 					outDir, "modelDescription.xml");
 		generateFile(fc, target.getCTemplates(fc), createCGenerator(fc), 
 					sourceDir, name + ".c");
-		}
 		
 		hookCodeGenerated(outDir);
 		log.debug("... code generated.");
@@ -1666,7 +1649,7 @@ public class ModelicaCompiler {
     */
     public enum TargetObject {
         
-    	XML       (Templates.NULL,      null,        "xml",  XMLGeneratorHolder.NULL),
+    	XML       (Templates.NULL,      null,        "xml",  XMLGeneratorHolder.XML),
         FMUME10   (Templates.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1),
         FMUME20   (Templates.FMUME20,   "fmume20",   "fmu",  XMLGeneratorHolder.FMI2),
         FMUCS10   (Templates.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1),
@@ -1875,7 +1858,7 @@ public class ModelicaCompiler {
                     options.setBooleanOption("generate_fmi_me_xml", false);
                     options.setBooleanOption("generate_fmi_cs_xml", false);
                     options.setBooleanOption("generate_xml_equations", false);
-                	break;
+                    break;
             }
             
             switch (this) {
@@ -1890,6 +1873,7 @@ public class ModelicaCompiler {
                 case FMUMECS20:
                 case JMU:
                 case FMUX:
+                case XML:
                     break;
             }
         }
@@ -1997,6 +1981,7 @@ public class XMLGeneratorHolder {
     public static final XMLGeneratorHolder FMI2  = new XMLGeneratorHolder(Fmi2XMLGenerator.CREATOR);
     public static final XMLGeneratorHolder JMI   = new XMLGeneratorHolder(XMLGenerator.CREATOR);
     public static final XMLGeneratorHolder FMIX  = new XMLGeneratorHolder(XMLGenerator.CREATOR);
+    public static final XMLGeneratorHolder XML   = new XMLGeneratorHolder(ModelicaGenerator.CREATOR);
 
     private final GenericXMLGenerator.Creator xmlGen;
 

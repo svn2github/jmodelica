@@ -1,0 +1,15 @@
+public class ModelicaXMLCodeGenTestCase extends CodeGenTestCase {
+	
+	public ModelicaXMLCodeGenTestCase() {}
+	
+	public ModelicaXMLCodeGenTestCase(String name, String description, String sourceFileName, String className, 
+			String result, boolean resultOnFile, String template, boolean templateOnFile) {
+		
+		super(name, description, sourceFileName, className, result, resultOnFile, 
+				null, templateOnFile);
+	}
+	
+	public AbstractGenerator createGenerator(FClass fc) {
+		return new ModelicaGenerator(new PrettyPrinter(), '$', fc);
+	}
+}

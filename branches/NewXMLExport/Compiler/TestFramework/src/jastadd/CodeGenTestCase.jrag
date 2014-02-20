@@ -66,8 +66,12 @@ public abstract class CodeGenTestCase extends TestCase {
 	protected boolean testTransformed(FClass fc) {
    	  	ByteArrayOutputStream os = new ByteArrayOutputStream();
   	    AbstractGenerator generator = createGenerator(fc);
-	    generator.generate(new BufferedReader(new StringReader(getTemplate())),
-	    		           new NotNullCodeStream(os));
+  	    if (getTemplate().equals("")) {
+  	    	generator.generate(null, new NotNullCodeStream(os));
+  	    } else {
+		    generator.generate(new BufferedReader(new StringReader(getTemplate())),
+		    		           new NotNullCodeStream(os));
+  	    }
 	    String test = os.toString();
 	    String correct = filter(getGenCode());
 	    if (!removeWhitespace(test).equals(removeWhitespace(correct)))

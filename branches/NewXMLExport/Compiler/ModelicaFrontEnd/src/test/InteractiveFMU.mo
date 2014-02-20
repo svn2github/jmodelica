@@ -35,18 +35,6 @@ package InteractiveFMU
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-  x
-Solution:
-  (- iter_1) / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  y
-Solution:
-  (- iter_0) / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
   res_1
 Solution:
   x + (- y) + (- time)
@@ -56,6 +44,18 @@ Computed variable:
   res_0
 Solution:
   y + (- x) + 2
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  y
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_1
+Solution:
+  x
 -------------------------------
 ")})));
     end ScalarEquation1;
@@ -79,12 +79,6 @@ Solution:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-  y
-Solution:
-  (- iter_0) / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
   x
 Solution:
   abs(y) + time
@@ -94,6 +88,12 @@ Computed variable:
   res_0
 Solution:
   y + (- x) + 2
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  y
 -------------------------------
 ")})));
     end ScalarEquation2;
@@ -134,12 +134,6 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  (- iter_1) / (- 1.0)
--------------------------------
 Solved block of 2 variables:
 Unknown variables:
   temp_2
@@ -149,15 +143,21 @@ Equations:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-  r.x
+  iter_0
 Solution:
-  (- iter_0) / (- 1.0)
+  r.x
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
   res_0
 Solution:
   temp_2 + (- r.x)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_1
+Solution:
+  x
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -204,18 +204,18 @@ Computed variable:
 Solution:
   sin(time)
 -------------------------------
-Solved block of 1 variables:
-Computed variable:
-  x
-Solution:
-  (- iter_0) / (- 1.0)
--------------------------------
 Solved block of 2 variables:
 Unknown variables:
   r.x
   temp_2
 Equations:
   (InteractiveFMU.FunctionCallEquation2.R(r.x, temp_2)) = InteractiveFMU.FunctionCallEquation2.F(x, y)
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  x
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -239,17 +239,11 @@ Solution:
             description="Test of interactive FMU and local iterations",
             equation_sorting=true,
             interactive_fmu=true,
-            local_iteration_in_tearing=true,
+            local_iteration_in_tearing="all",
             inline_functions="none",
             automatic_tearing=true,
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  c
-Solution:
-  (- iter_0) / (- 1.0)
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -269,6 +263,12 @@ Computed variable:
 Solution:
   20 + (- c * a)
 -------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  c
+-------------------------------
 ")})));
     end LocalIteration1;
     
@@ -285,17 +285,11 @@ Solution:
             description="Test of interactive FMU and local iterations",
             equation_sorting=true,
             interactive_fmu=true,
-            local_iteration_in_tearing=true,
+            local_iteration_in_tearing="all",
             inline_functions="none",
             automatic_tearing=true,
             methodName="printDAEBLT",
             methodResult="
--------------------------------
-Solved block of 1 variables:
-Computed variable:
-  c
-Solution:
-  (- iter_0) / (- 1.0)
 -------------------------------
 Non-solved block of 1 variables:
 Unknown variables:
@@ -315,7 +309,12 @@ Computed variable:
 Solution:
   20 + (- c * a)
 -------------------------------
-            
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  c
+-------------------------------
 ")})));
     end LocalIteration2;
     
@@ -338,12 +337,6 @@ Solution:
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
-  y
-Solution:
-  (- iter_0) / (- 1.0)
--------------------------------
-Solved block of 1 variables:
-Computed variable:
   x
 Solution:
   abs(y) + time
@@ -353,6 +346,12 @@ Computed variable:
   res_0
 Solution:
   y + (- x) + 2
+-------------------------------
+Solved block of 1 variables:
+Computed variable:
+  iter_0
+Solution:
+  y
 -------------------------------
 Solved block of 1 variables:
 Computed variable:
@@ -393,10 +392,10 @@ Alias sets:
             hand_guided_tearing=true,
             flatModel="
 fclass InteractiveFMU.Alias1
- Real a.a annotation(__Modelon(IterationVariable(enabled=true)));
+ input Real a.a annotation(__Modelon(IterationVariable(enabled=true)));
  Real c;
- input Real iter_0 \"a.a\" annotation(__Modelon(IterationVariable(enabled=true)));
- output Real res_0 annotation(__Modelon(IterationVariable(enabled=true)));
+ Real iter_0 \"a.a\";
+ output Real res_0;
 equation
  res_0 = time - c * a.a;
  c + a.a = 1;

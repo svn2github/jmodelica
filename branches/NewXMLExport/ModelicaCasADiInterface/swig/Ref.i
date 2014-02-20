@@ -34,8 +34,11 @@ namespace std {
     class vector {};
 }
 
-%feature("ref")   SharedNode "incRefNode($this);"
-%feature("unref") SharedNode "decRefNode($this);"
+// NB: We have this feature on SharedNode, but the actual implementation on
+// SharedNode throws an error, since we should only work with statically known
+// subclasses of it.
+%feature("ref")   ModelicaCasADi::SharedNode "ModelicaCasADi::incRefNode($this);"
+%feature("unref") ModelicaCasADi::SharedNode "ModelicaCasADi::decRefNode($this);"
 
 
 // For internal use. RefT should be ModelicaCasADi::Ref< T >

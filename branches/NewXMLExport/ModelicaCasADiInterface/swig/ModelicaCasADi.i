@@ -42,6 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "CompilerOptionsWrapper.hpp"
 
 #include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 #include "Ref.hpp"
 %}
 
@@ -62,10 +63,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "doc.i"
 
 
-%feature("ref")   SharedNode "ModelicaCasADi::incRefNode($this);"
-%feature("unref") SharedNode "ModelicaCasADi::decRefNode($this);"
-
-
 %include "std_string.i"
 %include "std_vector.i"
 
@@ -75,6 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // and before the header for the type T in question.
 
 %instantiate_Ref(ModelicaCasADi, SharedNode)
+%instantiate_Ref(ModelicaCasADi, RefCountedNode)
 
 %instantiate_Ref(ModelicaCasADi, Equation)
 %instantiate_Ref(ModelicaCasADi, Constraint)
@@ -102,6 +100,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // SWIG doesn't follow #includes in the header files
 %include "Printable.hpp"
 %include "SharedNode.hpp"
+%include "RefCountedNode.hpp"
 
 %include "Equation.hpp"
 %include "Constraint.hpp"
@@ -132,13 +131,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "transferOptimica.hpp"
 
 %extend ModelicaCasADi::SharedNode {
-    // consider: Could we take the argument as a const SharedNode * instead,
-    // to avoid some reference counting overhead?
-    bool __eq__(Ref<SharedNode> ref) {
-        return $self == ref.node;
+    // Should be ok to take the argument as a SharedNode * instead of a Ref<SharedNode>,
+    // since we don't keep it and the caller must own references to both this and node.
+    // On the other hand, Ref<SharedNode> is probably not functional, only Ref on its subclasses.
+    bool __eq__(const SharedNode *node) {
+        return $self == node;
     }
-    bool __ne__(Ref<SharedNode> ref) {
-        return $self != ref.node;
+    bool __ne__(const SharedNode *node) {
+        return $self != node;
     }
     bool __eq__(SWIG_Object obj) {
         return false; // Should only happen if obj is not a proxy for a SharedNode

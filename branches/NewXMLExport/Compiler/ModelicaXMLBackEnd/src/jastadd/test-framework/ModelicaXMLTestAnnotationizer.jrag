@@ -1,0 +1,27 @@
+
+aspect ModelicaXMLTestAnnotationizer {
+	
+abstract public class TestAnnotationizerHelper {
+		
+	public static class ModelicaXMLCodeGenTestCase extends CodeGenTestCase {
+		
+		public ModelicaXMLCodeGenTestCase(String filePath, String className, String description, String[] opts, String data) 
+				throws Exception {
+			super(filePath, className, description, opts, data);
+		}
+		
+		public ModelicaXMLCodeGenTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+			super(cd, filePath, className);
+		}
+		
+		public static void usage(String cl, String extra) {
+			TestAnnotationizerHelper.usage(cl, "XML code template");
+		}
+		
+		public AbstractGenerator createGenerator(FClass fc) {
+			return new ModelicaGenerator(new PrettyPrinter(), '$', fc);
+		}
+	}
+}
+
+}

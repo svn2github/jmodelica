@@ -113,7 +113,8 @@ def _generate_StringVector(file_vec):
     return string_file_vec
 
 def _transfer_modelica(class_name, files, options, log_level):
-    return modelicacasadi_wrapper._transferModelicaModel(class_name, files, options, log_level)
+	return modelicacasadi_wrapper._transferXmlModel(class_name, files)
+    #return modelicacasadi_wrapper._transferModelicaModel(class_name, files, options, log_level)
     
 def _transfer_optimica(class_name, files, options, log_level):
     return modelicacasadi_wrapper._transferOptimizationProblem(class_name, files, options, log_level)

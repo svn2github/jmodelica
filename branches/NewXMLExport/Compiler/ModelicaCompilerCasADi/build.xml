@@ -27,7 +27,7 @@
 <project name="ModelicaCompiler" default="build" basedir=".">
 	
 	<property name="modules" 
-		value="ModelicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaCBackEnd,ModelicaCompiler,ModelicaCompilerCasADi" />
+		value="ModelicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,ModelicaCBackEnd,ModelicaCompiler,ModelicaCompilerCasADi,ModelicaXMLBackEnd" />
 	
 	<property name="java_version" value="1.6"/>
 	<property name="java_compiler" value="javac${java_version}"/>

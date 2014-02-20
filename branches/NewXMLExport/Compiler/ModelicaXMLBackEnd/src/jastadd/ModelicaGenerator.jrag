@@ -1,0 +1,33 @@
+
+
+public class ModelicaGenerator extends GenericXMLGenerator {
+	
+	public static final Creator CREATOR = new Creator() {
+		
+		public ModelicaGenerator create(Printer p, char escapeChar, FClass fclass) {
+			return new ModelicaGenerator(p, escapeChar, fclass);
+		}
+	};
+	
+	public ModelicaGenerator(Printer p, char escapeChar, FClass fclass) {
+		super(p, escapeChar, fclass);
+	}
+	
+	public class Root_XML extends DAETag {
+		
+		public Root_XML(AbstractGenerator myGenerator, FClass fclass) {
+			super("rootXML", myGenerator, fclass);
+		}
+	
+		public void generate(CodeStream str) {
+			fclass.prettyPrintXML(str, "");
+		}
+	}
+	
+	/**
+	 * Name of the root tag to use if no template is given
+	 */
+	protected String root() {
+		return "rootXML";
+	}
+}

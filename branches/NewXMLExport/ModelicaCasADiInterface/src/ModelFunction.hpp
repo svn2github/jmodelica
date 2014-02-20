@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream> 
 #include <vector>
 #include "symbolic/casadi.hpp"
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 namespace ModelicaCasADi 
 {
-class ModelFunction : public SharedNode {
+class ModelFunction : public RefCountedNode {
     public:
         /** 
          * Create a ModelFunction, which is basically a wrapper around an MXFunction

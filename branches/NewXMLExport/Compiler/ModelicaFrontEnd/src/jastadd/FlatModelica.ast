@@ -507,7 +507,6 @@ FInitialEquation : FEquationType;
 abstract FAbstractEquation : BaseNode ::= Type:FEquationType
                                           /InitialEquation:FAbstractEquation*/
                                           /[DynamicFAbstractEquation:FAbstractEquation]/
-                                          [Nominal:FNominal]
                                           FAttribute*;
 
 /**
@@ -532,12 +531,6 @@ FFunctionCallEquation : FAbstractEquation ::= Left:FFunctionCallLeft* Call:FAbst
  * A class for storing hand guided tearing on system level.
  */
 FResidualPair : BaseNode ::= ResidualEquation:FIdUse IterationVariable:FIdUse <Level:int>;
-
-/**
- * A class for storing nominal equation values.
- */
-FNominal : BaseNode ::= Value:FExp;
-InstNominal : FNominal ::= [Enabled:FExp];
 
 /**
  * One of the left hand side variables in a function call equation. 

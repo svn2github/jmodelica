@@ -47,8 +47,10 @@ set(MC_CPP
   OptimizationProblem.cpp
   RealVariable.cpp
   sharedTransferFunctionality.cpp
+  tinyxml2.cpp
   transferModelica.cpp
   transferOptimica.cpp
+  transferXML.cpp
   Variable.cpp
   ${TYPES_CPP}
   jcc/initjcc.cpp
@@ -73,9 +75,12 @@ set(MC_HPP
   RealVariable.hpp
   Ref.hpp
   SharedNode.hpp
+  RefCountedNode.hpp
   sharedTransferFunctionality.hpp
+  tinyxml2.h
   transferModelica.hpp
   transferOptimica.hpp
+  transferXML.hpp
   Variable.hpp
   ${TYPES_HPP}
   jcc/initjcc.h

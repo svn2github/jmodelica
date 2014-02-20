@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _MODELICACASADI_CONSTRAINT
 #include <iostream>
 #include "symbolic/casadi.hpp"
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 namespace ModelicaCasADi{
-class Constraint : public SharedNode {
+class Constraint : public RefCountedNode {
     public:
         enum Type {
             EQ,

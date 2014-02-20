@@ -697,7 +697,7 @@ class TestLocalLoop1(SimulationTest):
         SimulationTest.setup_class_base(
             'TearingTests.mo',
             'TearingTests.TearingTest1',
-            options={"automatic_tearing":True,"local_iteration_in_tearing":True})
+            options={"automatic_tearing":True,"local_iteration_in_tearing":"all"})
 
     @testattr(stddist = True)
     def setUp(self):

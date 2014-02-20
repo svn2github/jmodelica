@@ -1836,10 +1836,7 @@ aspect Scalarization {
 			 */
 			
 		    List<FAttribute> attrs = scalarizeAttributeList(Index.NULL, indexMap);
-			FNominal nominal = null;
-			if (hasNominal())
-				nominal = getNominal().scalarize(indexMap, Index.NULL);
-			createScalarFEquations(eqns, indexMap, attrs, nominal, getLeft(), getRight());
+			createScalarFEquations(eqns, indexMap, attrs, getLeft(), getRight());
 		} else if (ndims() > 0) {
 			/*
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -1848,10 +1845,7 @@ aspect Scalarization {
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) {
 			    List<FAttribute> attrs = scalarizeAttributeList(i, indexMap);
-				FNominal nominal = null;
-				if (hasNominal())
-					nominal = getNominal().scalarize(indexMap, i);
-				createScalarFEquations(eqns, indexMap, attrs, nominal, getLeft().getArray().get(i), getRight().getArray().get(i));
+				createScalarFEquations(eqns, indexMap, attrs, getLeft().getArray().get(i), getRight().getArray().get(i));
 			}
 		} else {
 			throw new UnsupportedOperationException("Bad equation: ndims() for equation '" + 
@@ -1881,20 +1875,11 @@ aspect Scalarization {
 	 * \brief Scalarize left and right expressions and create new scalar equations.
 	 */
 	public void FEquation.createScalarFEquations(
-			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs,FNominal nominal, FExp left, FExp right) {
+			List<FAbstractEquation> eqns, Map<String,FExp> indexMap, List<FAttribute> attrs,FExp left, FExp right) {
 		if (left.inferType().isRecord()) 
 			left.inferType().scalarRecordFEquations(eqns, new FQNameEmpty(), indexMap, left, right);
 		else
-			eqns.add(new FEquation(attrs, nominal, left.scalarize(indexMap), right.scalarize(indexMap)));
-	}
-	
-	public FNominal FNominal.scalarize(Map<String,FExp> indexMap, Index i) {
-		FNominal scalarized = new FNominal();
-		FExp value = getValue();
-		if (i != null)
-			value = value.getArray().get(i);
-		scalarized.setValue(value.scalarize(indexMap));
-		return scalarized;
+			eqns.add(new FEquation(attrs, left.scalarize(indexMap), right.scalarize(indexMap)));
 	}
 	
 	// TODO: Introduce parameter object?

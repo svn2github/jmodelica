@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include "symbolic/casadi.hpp"
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 namespace ModelicaCasADi 
 {
-class Equation: public SharedNode {
+class Equation: public RefCountedNode {
     public:
         /** 
          * Create an equation with MX expressions for the left and right hand side

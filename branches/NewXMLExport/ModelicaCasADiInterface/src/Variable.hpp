@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "boost/flyweight.hpp"
 
 #include "types/VariableType.hpp"
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 #include "Ref.hpp"
 namespace ModelicaCasADi
 {
@@ -37,7 +37,7 @@ namespace ModelicaCasADi
  * A variable can also hold a VariableType that contains information about 
  * its default attributes or the attributes of its user defined type. 
  */
-class Variable : public SharedNode {
+class Variable : public RefCountedNode {
     public:
         typedef std::string AttributeKey; 
         typedef CasADi::MX AttributeValue;

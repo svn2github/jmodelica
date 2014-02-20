@@ -61,7 +61,7 @@ aspect XMLCodeGenerator {
 		}
 		str.format(OPEN_TAG, indent, tag, allAttributes.toString());
 	}
-	
+
 	public void ASTNode.generateClosedTag(CodeStream str, String tag, String indent) {
 		generateClosedTag(str, tag, indent, null);
 	}

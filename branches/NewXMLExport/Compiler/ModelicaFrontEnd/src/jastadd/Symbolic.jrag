@@ -21,12 +21,12 @@ aspect EquationSolve {
 	syn Solvability FAbstractEquation.isSolved(String name) = isSolved(name, false);
 	
 	syn Solvability FAbstractEquation.isSolved(String name, boolean duringTearing) = Solvability.UNSOLVABLE;
-
+	
 	eq FEquation.isSolved(String name, boolean duringTearing) {
 		boolean solvable = !(solution(name, duringTearing) instanceof FNoExp);
 		if (solvable)
 			return Solvability.ANALYTICALLY_SOLVABLE;
-		else if (duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+		else if (duringTearing && canUseLocalIteration())
 			return Solvability.NUMERICALLY_SOLVABLE;
 		else
 			return Solvability.UNSOLVABLE;
@@ -51,7 +51,7 @@ aspect EquationSolve {
 
 		if (inLeft && !inArgs)
 			return Solvability.ANALYTICALLY_SOLVABLE;
-		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+		else if (leftVars.size() == 1 && duringTearing && canUseLocalIteration())
 			return Solvability.NUMERICALLY_SOLVABLE;
 		else
 			return Solvability.UNSOLVABLE;
@@ -68,7 +68,7 @@ aspect EquationSolve {
 		
 		if (inLeft)
 			return Solvability.ANALYTICALLY_SOLVABLE;
-		else if (leftVars.size() == 1 && duringTearing && root().options.getBooleanOption("local_iteration_in_tearing"))
+		else if (leftVars.size() == 1 && duringTearing && canUseLocalIteration())
 			return Solvability.NUMERICALLY_SOLVABLE;
 		else
 			return Solvability.UNSOLVABLE;

@@ -842,10 +842,10 @@ $(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar
 	esac 
 
 mc_modelica: ifcasadi
-	cd $(MC_SRC); ant -f build.xml 
+	cd $(MC_SRC); $(ANT_OPTS) $(ANT)
 
 mc_optimica: ifcasadi
-	cd $(OC_SRC); ant -f build.xml 
+	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_SRC)/bin/util.jar:             mc_modelica

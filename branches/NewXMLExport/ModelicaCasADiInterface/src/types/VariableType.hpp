@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "boost/flyweight.hpp"
 
 //ModelicaCasADi
-#include "SharedNode.hpp"
+#include "RefCountedNode.hpp"
 
 namespace ModelicaCasADi 
 {
@@ -35,7 +35,7 @@ namespace ModelicaCasADi
  * Modelica and Optimica variables, or user defined types. 
  * 
  */
-class VariableType : public SharedNode {
+class VariableType : public RefCountedNode {
     public:
         typedef std::string AttributeKey; 
         typedef CasADi::MX AttributeValue;

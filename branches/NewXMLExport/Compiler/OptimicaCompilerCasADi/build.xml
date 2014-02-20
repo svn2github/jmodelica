@@ -27,7 +27,7 @@
 <project name="OptimicaCompiler" default="build" basedir=".">
 	
 	<property name="modules" 
-		value="ModelicaFrontEnd,OptimicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,OptimicaFMUXBackEnd,ModelicaCBackEnd,OptimicaCBackEnd,ModelicaCompiler,OptimicaCompiler,ModelicaCompilerCasADi,OptimicaCompilerCasADi" />
+		value="ModelicaFrontEnd,OptimicaFrontEnd,GenericCodeGen,TestFramework,FmiXMLCodeGen,ModelicaFMUXBackEnd,OptimicaFMUXBackEnd,ModelicaCBackEnd,OptimicaCBackEnd,ModelicaCompiler,OptimicaCompiler,ModelicaCompilerCasADi,OptimicaCompilerCasADi,ModelicaXMLBackEnd" />
 	
 	<property name="java_version" value="1.6"/>
 	<property name="java_compiler" value="javac${java_version}"/>
