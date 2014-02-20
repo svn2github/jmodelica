@@ -78,6 +78,12 @@ class Model: public RefCountedNode {
          * @param string identifier, typically <packagename>_<classname>, default empty string */
         void initializeModel(std::string identifier = "");
         virtual ~Model();
+
+        /** Set the binding expression of a parameter to a value */
+        void set(std::string varName, double value);
+        /** Evaluate the value of a parameter */
+        double get(std::string varName);
+
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
         /** @return A MX, this Model's time variable */

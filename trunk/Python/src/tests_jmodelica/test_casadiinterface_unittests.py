@@ -173,6 +173,43 @@ def test_DependentParameters():
     r3 = RealVariable(model, c, Variable.INTERNAL, Variable.PARAMETER)
     r4 = RealVariable(model, d, Variable.INTERNAL, Variable.PARAMETER)
 
+    model.addVariable(r1)
+    model.addVariable(r2)
+    model.addVariable(r3)
+    model.addVariable(r4)
+
+    model.set("a", 10) # r1.setAttribute("bindingExpression", eq1)
+    r2.setAttribute("bindingExpression", eq2)
+    r3.setAttribute("bindingExpression", eq3)
+    r4.setAttribute("bindingExpression", eq4)
+
+    assert model.get("b") == 12
+    assert model.get("c") == 120
+    assert model.get("d") == 20
+    
+@testattr(casadi = True)    
+def test_DependentParameters_old():
+    model = Model()
+
+    a = MX("a")
+    b = MX("b")
+    c = MX("c")
+    d = MX("d")
+    funcVar = MX("funcVar")
+    f = MXFunction([funcVar], [funcVar*2])
+    f.init()
+
+
+    eq1 = MX(10)
+    eq2 = a + MX(2)
+    eq3 = a*b
+    eq4 = f.call([a])[0]
+
+    r1 = RealVariable(model, a, Variable.INTERNAL, Variable.PARAMETER)
+    r2 = RealVariable(model, b, Variable.INTERNAL, Variable.PARAMETER)
+    r3 = RealVariable(model, c, Variable.INTERNAL, Variable.PARAMETER)
+    r4 = RealVariable(model, d, Variable.INTERNAL, Variable.PARAMETER)
+
     r1.setAttribute("bindingExpression", eq1)
     r2.setAttribute("bindingExpression", eq2)
     r3.setAttribute("bindingExpression", eq3)
@@ -188,7 +225,6 @@ def test_DependentParameters():
     assert r2.getAttribute("evaluatedBindingExpression").getValue() == 12
     assert r3.getAttribute("evaluatedBindingExpression").getValue() == 120
     assert r4.getAttribute("evaluatedBindingExpression").getValue() == 20
-    
     
 @testattr(casadi = True)    
 def test_DisallowedChangedBindingExpression():

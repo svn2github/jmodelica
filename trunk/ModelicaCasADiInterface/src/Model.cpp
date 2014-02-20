@@ -34,6 +34,31 @@ Model::~Model() {
     }
 }
 
+void Model::set(string varName, double value) {
+    Ref<Variable> var = getVariable(varName);
+    if (var == NULL) {
+        throw std::runtime_error("No variable named " + varName);
+    }
+    if (var->getVariability() != Variable::PARAMETER) {
+        throw std::runtime_error("Tried to set non-parameter " + var->repr());
+    }
+    var->setAttribute("bindingExpression", value);
+}
+
+double Model::get(string varName) {
+    Ref<Variable> var = getVariable(varName);
+    if (var == NULL) {
+        throw std::runtime_error("No variable named " + varName);
+    }
+    if (var->getVariability() > Variable::PARAMETER) {
+        throw std::runtime_error("Tried to get non-parameter " + var->repr());
+    }
+    calculateValuesForDependentParameters();
+    MX *ex = var->getAttribute("evaluatedBindingExpression");
+    if (ex == NULL) throw std::runtime_error("Failed to evaluate " + var->repr());
+    return evaluateExpression(*ex);
+}
+
 bool Model::checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const {
     // Since the variables are not sorted all variables are looped over.
     // Note:  May assign derivative variable to a state variable
@@ -322,14 +347,13 @@ double Model::evalMX(MX exp) {
 }
 
 double Model::evaluateExpression(MX exp) {
-    if (dirty) {
-        calculateValuesForDependentParameters();
-        dirty = false;
-    }
+    calculateValuesForDependentParameters();
     return evalMX(exp); 
 }
 
 void Model::calculateValuesForDependentParameters() {
+    if (!dirty) return;
+
     MX bindingExpression;
     double val;
     setUpValAndSymbolVecs();
@@ -347,6 +371,7 @@ void Model::calculateValuesForDependentParameters() {
             }
         }
     }
+    dirty = false;
 }
 
 

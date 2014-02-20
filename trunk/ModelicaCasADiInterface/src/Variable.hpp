@@ -60,10 +60,10 @@ class Variable : public OwnedNode {
             INTERNAL
         };
         enum Variability {
-            CONTINUOUS,
-            DISCRETE,
+            CONSTANT,
             PARAMETER,
-            CONSTANT
+            DISCRETE,
+            CONTINUOUS
         };
         Variable(Model *owner);
         /**
