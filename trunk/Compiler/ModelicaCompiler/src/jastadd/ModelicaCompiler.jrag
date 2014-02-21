@@ -59,6 +59,8 @@ import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
 import org.jmodelica.util.exceptions.ModelicaClassNotFoundException;
+import org.jmodelica.util.exceptions.PackingFailedException;
+import org.jmodelica.util.exceptions.CcodeCompilationException;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
@@ -2067,22 +2069,6 @@ public class JModelicaHomeNotFoundException extends Exception {
 	public JModelicaHomeNotFoundException() {
 	}
 	public JModelicaHomeNotFoundException(String msg) {
-		super(msg);
-	}
-}
-
-public class CcodeCompilationException extends RuntimeException {
-	public CcodeCompilationException() {
-	}
-	public CcodeCompilationException(String msg) {
-		super(msg);
-	}
-}
-
-public class PackingFailedException extends ModelicaException {
-	public PackingFailedException() {
-	}
-	public PackingFailedException(String msg) {
 		super(msg);
 	}
 }
