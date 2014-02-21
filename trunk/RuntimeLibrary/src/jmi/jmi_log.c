@@ -285,18 +285,7 @@ static void emit(log_t *log) {
                         log->c, log->severest_category, buf->msg);
             fflush(log->log_file);
         }
-    /*
-    if ((fmi1_me_t *)(jmi_callbacks->fmix_me)) {
-        ((fmiCallbackLogger)(jmi_callbacks->logger))((fmi1_me_t *)(jmi_callbacks->fmix_me),
-                                   jmi_callbacks->fmi_name,
-                                   category_to_fmiStatus(category),
-                                   category_to_fmiCategory(severest_category),
-                                   message);
-        
-    } else {
-        file_logger(stdout, stderr, category, severest_category, message);
-    }
-    */
+
         clear(buf);
         log->severest_category = logInfo;
     }

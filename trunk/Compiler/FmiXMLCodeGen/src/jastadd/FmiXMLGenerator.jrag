@@ -133,7 +133,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		public String[] children() { return new String[] {"annotation"}; }
 		
 		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", "JModelica", genPrinter);
+			generateAttribute("name", "JModelica,org", genPrinter);
 		}
 	}
 	
@@ -922,18 +922,19 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
 		public String[] children() {
-            return new String[] { "modelExchange",     "coSimulation",      "unitDefinitions", "typeDefinitions", 
-            		              "defaultExperiment", "vendorAnnotations", "modelVariables", "modelStructure" };
+            return new String[] { "modelExchange",     "coSimulation",   "unitDefinitions",
+                                  "typeDefinitions",   "logCategories",  "defaultExperiment",
+                                  "vendorAnnotations", "modelVariables", "modelStructure"};
         }
 		
 		public void generateAttributes(CodeStream genPrinter) {		
-            generateAttribute("fmiVersion",               "2.0",                                   genPrinter);
-            generateAttribute("modelName",                fclass.name(),                           genPrinter);
-            generateAttribute("guid",                     fclass.guid(),                           genPrinter);
-            generateAttribute("generationTool",           "JModelica.org",                         genPrinter);
-            generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
-            generateAttribute("variableNamingConvention", "structured",                            genPrinter);
-            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators() ,              genPrinter);
+            generateAttribute("fmiVersion",               "2.0",                         genPrinter);
+            generateAttribute("modelName",                fclass.name(),                 genPrinter);
+            generateAttribute("guid",                     fclass.guid(),                 genPrinter);
+            generateAttribute("generationTool",           "JModelica.org",               genPrinter);
+            generateAttribute("generationDateAndTime",    dateformat.format(new Date()), genPrinter);
+            generateAttribute("variableNamingConvention", "structured",                  genPrinter);
+            generateAttribute("numberOfEventIndicators",  numberOfEventIndicators() ,    genPrinter);
         }
 		
 		private int numberOfEventIndicators() {
@@ -1138,6 +1139,43 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 						generateAttribute("description", literal.getFStringComment().getComment(), genPrinter);
 					}
 				}
+			}
+		}
+	}
+    
+    /**
+	 * Internal class used to generate a LogCategories tag.
+	 * 
+	 * @see XMLTag
+	 */
+	public class XMLTag_logCategories extends XMLTag {
+		
+		private String[] categorieNames;
+		private String currentCategorieName;
+		
+		public XMLTag_logCategories(AbstractGenerator myGenerator, FClass fclass) {
+			super("logCategories", "LogCategories", myGenerator, fclass);
+            categorieNames = new String[] {"logLevel1", "logLevel2", "logLevel3",
+                                           "logLevel4", "logLevel5", "logLevel6"};
+		}
+		
+		public String[] children() { return new String[] {"category"}; }
+		
+		public void generateChildren(CodeStream genPrinter) {	
+			for (String name: categorieNames) {
+				currentCategorieName = name;
+				super.generateChildren(genPrinter);
+			}
+		}
+		
+        public class XMLTag_category extends XMLTag {
+			
+			public XMLTag_category(AbstractGenerator myGenerator, FClass fclass) {
+				super("category", "Category", myGenerator, fclass);
+            }
+			
+			public void generateAttributes(CodeStream genPrinter) {		
+				generateAttribute("name", currentCategorieName, genPrinter);
 			}
 		}
 	}

@@ -36,9 +36,6 @@ const char* fmi1_me_get_version() {
     return fmiVersion;
 }
 
-void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message);
-BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category);
-
 /* Creation and destruction of model instances and setting debug status */
 fmiComponent fmi1_me_instantiate_model(fmiString instanceName, fmiString GUID, fmiCallbackFunctions functions, fmiBoolean loggingOn) {
 
@@ -998,30 +995,6 @@ fmiStatus fmi1_me_terminate(fmiComponent c) {
     return fmiOK;
 }
 
-BOOL fmi1_me_emitted_category(jmi_log_t *log, jmi_log_category_t category) {
-    assert(0);
-    return 0;
-}
-
-BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
-
-    jmi_callbacks_t* jmi_callbacks = cb;
-    fmi1_me_t * self = (fmi1_me_t *)cb->model_data;
-    if ((self != NULL) && !jmi_callbacks->log_options.logging_on_flag) {
-        return FALSE;
-    }
-    
-    switch (category) {
-        case logError:   break;
-        case logWarning: if(cb->log_options.log_level < 3) return FALSE; break;
-        case logInfo:    if(cb->log_options.log_level < 4) return FALSE; break;
-    }
-    return TRUE;
-}
-
-void fmi1_me_create_log_file_if_needed(jmi_log_t *log) {
-}
-
 static fmiStatus category_to_fmiStatus(jmi_log_category_t c) {
     switch (c) {
     case logError:   return fmiError;
@@ -1038,9 +1011,6 @@ static const char *category_to_fmiCategory(jmi_log_category_t c) {
     case logInfo:    return "INFO";
     default:         return "UNKNOWN CATEGORY";
     }
-}
-
-void fmi1_me_emit(jmi_log_t *log, char* message) {
 }
 
 void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t category, jmi_log_category_t severest_category, char* message) {
@@ -1066,6 +1036,22 @@ void fmi1_me_emit_log(jmi_callbacks_t* jmi_callbacks, jmi_log_category_t categor
             break;
         }
     }
+}
+
+BOOL fmi1_me_is_log_category_emitted(jmi_callbacks_t* cb, jmi_log_category_t category) {
+
+    jmi_callbacks_t* jmi_callbacks = cb;
+    fmi1_me_t * self = (fmi1_me_t *)cb->model_data;
+    if ((self != NULL) && !jmi_callbacks->log_options.logging_on_flag) {
+        return FALSE;
+    }
+    
+    switch (category) {
+        case logError:   break;
+        case logWarning: if(cb->log_options.log_level < 3) return FALSE; break;
+        case logInfo:    if(cb->log_options.log_level < 4) return FALSE; break;
+    }
+    return TRUE;
 }
 
 fmiStatus fmi1_me_extract_debug_info(fmiComponent c) {
