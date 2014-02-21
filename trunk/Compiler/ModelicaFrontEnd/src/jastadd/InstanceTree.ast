@@ -62,15 +62,18 @@ InstReplacingSimpleShortClassDecl : InstSimpleShortClassDecl ::=
 InstReplacingPrimitiveClassDecl : InstReplacingFullClassDecl;
 
 abstract InstRestriction : BaseNode;
-InstModel     : InstRestriction;
-InstBlock     : InstRestriction;
-InstMClass    : InstRestriction;
-InstConnector : InstRestriction;
+InstModel               : InstRestriction;
+InstBlock               : InstRestriction;
+InstMClass              : InstRestriction;
+InstConnector           : InstRestriction;
 InstExpandableConnector : InstConnector;
-InstMType     : InstRestriction;
-InstMPackage  : InstRestriction;
-InstFunction  : InstRestriction;
-InstMRecord   : InstRestriction;
+InstMType               : InstRestriction;
+InstMPackage            : InstRestriction;
+InstFunction            : InstRestriction;
+InstMRecord             : InstRestriction;
+InstOperator            : InstRestriction;
+InstOperatorFunction    : InstFunction;
+InstOperatorRecord      : InstMRecord;
 
 InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
 InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;

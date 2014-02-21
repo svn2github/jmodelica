@@ -326,27 +326,30 @@ Encapsulated encapsulated =
   ;
 
 TypePrefix type_prefix_variability = 
-   DISCRETE                          {: return new Discrete(); :}
-  | PARAMETER                          {: return new Parameter(); :}
-  | CONSTANT                          {: return new Constant(); :}
+   DISCRETE         {: return new Discrete(); :}
+  | PARAMETER       {: return new Parameter(); :}
+  | CONSTANT        {: return new Constant(); :}
   ;
   
 TypePrefix type_prefix_input_output = 
-    INPUT                          {: return new Input(); :}
-  | OUTPUT                          {: return new Output(); :}
+    INPUT           {: return new Input(); :}
+  | OUTPUT          {: return new Output(); :}
   ;
 
 
 Restriction restriction = 
-  CLASS                            {: return new MClass(); :}
-  | MODEL                            {: return new Model(); :}
-  | BLOCK                            {: return new Block(); :}
-  | CONNECTOR                            {: return new Connector(); :}
-  | EXPANDABLE CONNECTOR             {: return new ExpandableConnector(); :}
-  | TYPE                            {: return new MType(); :}
-  | PACKAGE                            {: return new MPackage(); :}
-  | FUNCTION                            {: return new Function(); :}
-  | RECORD                            {: return new Record(); :}  
+  CLASS                    {: return new MClass(); :}
+  | MODEL                  {: return new Model(); :}
+  | BLOCK                  {: return new Block(); :}
+  | CONNECTOR              {: return new Connector(); :}
+  | EXPANDABLE CONNECTOR   {: return new ExpandableConnector(); :}
+  | TYPE                   {: return new MType(); :}
+  | PACKAGE                {: return new MPackage(); :}
+  | FUNCTION               {: return new Function(); :}
+  | RECORD                 {: return new Record(); :}  
+  | OPERATOR RECORD        {: return new OperatorRecord(); :}  
+  | OPERATOR FUNCTION      {: return new OperatorFunction(); :}
+  | OPERATOR               {: return new Operator(); :}
   ;
 
 Final final_ = 

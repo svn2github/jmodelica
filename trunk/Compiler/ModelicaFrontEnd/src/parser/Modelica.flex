@@ -129,14 +129,12 @@ ID = {NONDIGIT} ({DIGIT}|{NONDIGIT})* | {Q_IDENT}
 NONDIGIT = [a-zA-Z_]
 S_CHAR = [^\"\\]
 Q_IDENT = "\'" ( {Q_CHAR} | {S_ESCAPE} ) ( {Q_CHAR} | {S_ESCAPE} )* "\'"
-//Q_IDENT = "\'" ( {DIGIT}|{NONDIGIT} ) ( {DIGIT}|{NONDIGIT} )* "\'"
 STRING = "\"" ({S_CHAR}|{S_ESCAPE})* "\""
 Q_CHAR = [^\'\\]
 S_ESCAPE = "\\\'" | "\\\"" | "\\?" | "\\\\" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
 DIGIT = [0-9]
 UNSIGNED_INTEGER = {DIGIT} {DIGIT}*
 UNSIGNED_NUMBER = {DIGIT} {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )? ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* ( "." ( {UNSIGNED_INTEGER} )? )?
-// UNSIGNED_NUMBER = {DIGIT} {DIGIT}* "." ( {UNSIGNED_INTEGER} )?  ( (e|E) ( "+" | "-" )? {UNSIGNED_INTEGER} )? | {DIGIT}* "." ( {UNSIGNED_INTEGER} )? 
 
 
 LineTerminator = \r|\n|\r\n
@@ -172,6 +170,7 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "package"       { return newSymbol(Terminals.PACKAGE); }
   "function"      { return newSymbol(Terminals.FUNCTION); }
   "record"        { return newSymbol(Terminals.RECORD); }
+  "operator"      { return newSymbol(Terminals.OPERATOR); }
   
   "end"           { return newSymbol(Terminals.END); }
   "external"      { return newSymbol(Terminals.EXTERNAL); }
@@ -203,12 +202,12 @@ EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
   "initial" {WhiteSpace} "algorithm"  { addWhiteSpaces(yytext());
   										addLineBreaks(yytext()); 
                                         return newSymbol(Terminals.INITIAL_ALGORITHM); }
-  "operator" {WhiteSpace} "record"  { addWhiteSpaces(yytext());
-  										addLineBreaks(yytext());
-                                        return newSymbol(Terminals.RECORD); }
-  "operator" {WhiteSpace} "function"  { addWhiteSpaces(yytext());
-  										addLineBreaks(yytext()); 
-                                        return newSymbol(Terminals.FUNCTION); }
+//  "operator" {WhiteSpace} "record"  { addWhiteSpaces(yytext());
+//  										addLineBreaks(yytext());
+//                                        return newSymbol(Terminals.OPERATOR_RECORD); }
+//  "operator" {WhiteSpace} "function"  { addWhiteSpaces(yytext());
+//  										addLineBreaks(yytext()); 
+//                                        return newSymbol(Terminals.OPERATOR_FUNCTION); }
                                         
   "end" {WhiteSpace} "for"    { String s = yytext();
                                 addWhiteSpaces(s);

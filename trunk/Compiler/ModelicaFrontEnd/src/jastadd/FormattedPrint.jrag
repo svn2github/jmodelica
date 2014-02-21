@@ -241,10 +241,20 @@ aspect FormattedPrint {
 		return new FormattingLocator(FormattingLocator.Locator.START, getLine(getStart()), getColumn(getStart()) + 7);
 	}
 
-	@Override
-	public FormattingLocator ExpandableConnector.insideFormattingLocator() {
-		return new FormattingLocator(FormattingLocator.Locator.START, getLine(getStart()), getColumn(getStart()) + 10);
-	}
+    @Override
+    public FormattingLocator ExpandableConnector.insideFormattingLocator() {
+        return new FormattingLocator(FormattingLocator.Locator.START, getLine(getStart()), getColumn(getStart()) + 10);
+    }
+
+    @Override
+    public FormattingLocator OperatorFunction.insideFormattingLocator() {
+        return new FormattingLocator(FormattingLocator.Locator.START, getLine(getStart()), getColumn(getStart()) + 8);
+    }
+
+    @Override
+    public FormattingLocator OperatorRecord.insideFormattingLocator() {
+        return new FormattingLocator(FormattingLocator.Locator.START, getLine(getStart()), getColumn(getStart()) + 8);
+    }
 
 	@Override
 	public FormattingLocator EnumClassDecl.insideFormattingLocator() {
@@ -1635,7 +1645,9 @@ aspect FormattedPrint {
 		printStream.print(postFormatting);
 	}
 
-	eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
+    eq ExpandableConnector.toString() = "expandable" + insideFormatting + "connector";
+    eq OperatorRecord.toString()      = "operator"   + insideFormatting + "record";
+    eq OperatorFunction.toString()    = "operator"   + insideFormatting + "function";
 	
 	void FunctionCall.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
 		getName().doPrettyPrintFormatted(printer, printStream);
