@@ -2808,7 +2808,7 @@ class LocalDAECollocationAlg2Result(JMResultBase):
         elif point == "opt":
             J_fcn.setInput(self.solver.primal_opt, 0)
         elif point == "sym":
-            return J_fcn.eval([self.solver.xx, 0])[0]
+            return J_fcn.eval([self.solver.xx, []])[0]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         J_fcn.setInput([], 1)
@@ -2868,11 +2868,11 @@ class LocalDAECollocationAlg2Result(JMResultBase):
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "sym":
-            nu = casadi.ssym("nu", self.solver.c_e.numel())
-            sigma = casadi.ssym("sigma")
-            lam = casadi.ssym("lambda", self.solver.c_i.numel())
+            nu = casadi.msym("nu", self.solver.c_e.numel())
+            sigma = casadi.msym("sigma")
+            lam = casadi.msym("lambda", self.solver.c_i.numel())
             dual = casadi.vertcat([nu, lam])
-            return [H_fcn.eval([self.solver.xx, 0, sigma, dual])[0], sigma,
+            return [H_fcn.eval([self.solver.xx, [], sigma, dual])[0], sigma,
                     dual]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
@@ -2924,7 +2924,7 @@ class LocalDAECollocationAlg2Result(JMResultBase):
             if point == "sym":
                 return KKT
             else:
-                KKT_fcn = casadi.SXFunction([x, [], sigma, dual], [KKT])
+                KKT_fcn = casadi.MXFunction([x, [], sigma, dual], [KKT])
                 return KKT_fcn
         elif point == "init":
             x = self.solver.xx_init

@@ -88,10 +88,10 @@ class TestLocalDAECollocator:
         class_path = "VDP_pack.VDP_Opt_Scaled_Min_Time"
         compile_fmux(class_path, vdp_file_path)
         
-        class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time"
+        class_path = "VDP_pack.VDP_Opt_Unscaled_Min_Time_FMUX"
         compile_fmux(class_path, vdp_file_path)
 
-        class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start"
+        class_path = "VDP_pack.VDP_Opt_Min_Time_Nonzero_Start_FMUX"
         compile_fmux(class_path, vdp_file_path)
 
         class_path = "VDP_pack.VDP_Opt_DAE"
@@ -116,7 +116,7 @@ class TestLocalDAECollocator:
         class_path = "CSTR.CSTR_Opt_Scaled_Min_Time"
         compile_fmux(class_path, cstr_file_path)
         
-        class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time"
+        class_path = "CSTR.CSTR_Opt_Unscaled_Min_Time_FMUX"
         compile_fmux(class_path, cstr_file_path)
         
         pe_file_path = os.path.join(get_files_path(), 'Modelica',
@@ -166,12 +166,13 @@ class TestLocalDAECollocator:
         self.model_vdp_scaled_min_time = CasadiModel(
                 fmux_vdp_scaled_min_time, verbose=False)
         
-        fmux_vdp_unscaled_min_time = 'VDP_pack_VDP_Opt_Unscaled_Min_Time.fmux'
+        fmux_vdp_unscaled_min_time = \
+                'VDP_pack_VDP_Opt_Unscaled_Min_Time_FMUX.fmux'
         self.model_vdp_unscaled_min_time = CasadiModel(
                 fmux_vdp_unscaled_min_time, verbose=False)
 
         fmux_vdp_min_time_nonzero_start = \
-                'VDP_pack_VDP_Opt_Min_Time_Nonzero_Start.fmux'
+                'VDP_pack_VDP_Opt_Min_Time_Nonzero_Start_FMUX.fmux'
         self.model_vdp_min_time_nonzero_start = CasadiModel(
                 fmux_vdp_min_time_nonzero_start, verbose=False)
 
@@ -202,7 +203,8 @@ class TestLocalDAECollocator:
         self.model_cstr_scaled_min_time = CasadiModel(
                 fmux_cstr_scaled_min_time, verbose=False)
         
-        fmux_cstr_unscaled_min_time = 'CSTR_CSTR_Opt_Unscaled_Min_Time.fmux'
+        fmux_cstr_unscaled_min_time = \
+                'CSTR_CSTR_Opt_Unscaled_Min_Time_FMUX.fmux'
         self.model_cstr_unscaled_min_time = CasadiModel(
                 fmux_cstr_unscaled_min_time, verbose=False)
         

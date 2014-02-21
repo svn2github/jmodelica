@@ -3956,8 +3956,8 @@ class LocalDAECollocator2(CasadiCollocator):
 
         # Map constraint points to collocation points
         nlp_timed_variables = []
-        if self.hs == "free": # FIX!!!
-            timed_variables = casadi.SXMatrix()
+        if self.hs == "free":
+            timed_variables = []
         else:
             collocation_constraint_points = {}
             for constraint_point in constraint_points:
@@ -4376,19 +4376,8 @@ class LocalDAECollocator2(CasadiCollocator):
             raise NotImplementedError("eliminate_cont_var not yet supported.")
         if self.nominal_traj is not None:
             raise NotImplementedError("nominal_traj not yet supported.")
-        if self.discr == "LG" is not None:
-            raise NotImplementedError("Gauss not yet supported.")
-        if self.result_mode != "collocation_points":
-            raise NotImplementedError("result_mode not yet supported.")
         if self.measurement_data is not None:
             raise NotImplementedError("measurement_data not yet supported.")
-        if self.hs is not None:
-            raise NotImplementedError("hs not yet supported.")
-        if self.free_element_lengths_data is not None:
-            raise NotImplementedError(
-                    "free_element_lengths_data not yet supported.")
-        if self.blocking_factors is not None:
-            raise NotImplementedError("Blocking factors not yet supported.")
 
         # Create collocation and DAE functions
         sym_input = self.mvar_struct_cat
@@ -4746,7 +4735,7 @@ class LocalDAECollocator2(CasadiCollocator):
                 c_e.append(dae_constr)
 
         # Continuity constraints for x_{i, n_cp + 1}
-        if self.is_gauss: # FIX!!!
+        if self.is_gauss:
             if self.quadrature_constraint:
                 for i in xrange(1, self.n_e + 1):
                     # Evaluate x_{i, n_cp + 1} based on quadrature
@@ -4776,7 +4765,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     c_e.append(quad_constr)
         
         # Constraints for terminal values
-        if self.is_gauss: # FIX!!!
+        if self.is_gauss:
             for var_type in ['unelim_u', 'w']:
                 # Evaluate xx_{n_e, n_cp + 1} based on polynomial xx_{n_e}
                 xx_ne_np1 = 0
@@ -4815,7 +4804,7 @@ class LocalDAECollocator2(CasadiCollocator):
                 c_e.append(cont_constr)
         
         # Element length constraints
-        if self.hs == "free": # FIX!!!
+        if self.hs == "free":
             h_constr = casadi.sumRows(self.h[1:]) - 1
             c_e.append(h_constr)
         
@@ -4957,12 +4946,12 @@ class LocalDAECollocator2(CasadiCollocator):
             t0_var = self.model.getVariable('startTime')
             tf_var = self.model.getVariable('finalTime')
             if self.op.get_attr(t0_var, "free"):
-                (ind, _) = self._name_map["startTime"]
+                (ind, _) = self.name_map["startTime"]
                 t0 = self.var_map['p_opt'][ind]
             else:
                 t0 = self.op.get_attr(t0_var, "_value")
             if self.op.get_attr(tf_var, "free"):
-                (ind, _) = self._name_map["finalTime"]
+                (ind, _) = self.name_map["finalTime"]
                 tf = self.var_map['p_opt'][ind]
             else:
                 tf = self.op.get_attr(tf_var, "_value")
@@ -5055,7 +5044,6 @@ class LocalDAECollocator2(CasadiCollocator):
                     self.cost += (h_i * integrand * self.pol.w[k])
             
         # Add cost term for free element lengths
-        # FIX!!!
         if self.hs == "free":
             Q = self.free_element_lengths_data.Q
             c = self.free_element_lengths_data.c
@@ -5241,7 +5229,7 @@ class LocalDAECollocator2(CasadiCollocator):
                         xx_init[var_indices[i - 1][k][vt]]
         
         # Compute bounds and initial guesses for element lengths
-        if self.hs == "free": # FIX!!!
+        if self.hs == "free":
             h_0 = 1. / self.n_e
             h_bounds = self.free_element_lengths_data.bounds
             var_indices = self.get_var_indices()
@@ -5308,7 +5296,7 @@ class LocalDAECollocator2(CasadiCollocator):
         primal_opt = copy.copy(self.primal_opt)
         
         # Get element lengths
-        if self.hs == "free": # FIX!!!
+        if self.hs == "free":
             self.h_opt = N.hstack([N.nan, primal_opt[var_indices['h'][1:]]])
             h_scaled = self.horizon * self.h_opt
         else:
@@ -5326,12 +5314,12 @@ class LocalDAECollocator2(CasadiCollocator):
                 t_opt = N.array(t_opt).reshape([-1, 1])
             else:
                 t_opt = self.get_time().reshape([-1, 1])
-        elif self.result_mode == "mesh_points": # FIX!!!
+        elif self.result_mode == "mesh_points":
             t_opt = [self.time[0]]
             for h in h_scaled[1:]:
                 t_opt.append(t_opt[-1] + h)
             t_opt = N.array(t_opt).reshape([-1, 1])
-        elif self.result_mode == "element_interpolation": # FIX!!!
+        elif self.result_mode == "element_interpolation":
             t_opt = []
             t_start = 0.
             for i in xrange(1, self.n_e + 1):
@@ -5476,7 +5464,7 @@ class LocalDAECollocator2(CasadiCollocator):
                                                l, self.pol.p[k]))
                         var_opt['dx'][t_index, :] = dx_i_k.reshape(-1)
                         t_index += 1
-        elif self.result_mode == "element_interpolation": # FIX!!!
+        elif self.result_mode == "element_interpolation":
             tau_arr = N.linspace(0, 1, self.n_eval_points)
             for i in xrange(1, self.n_e + 1):
                 for tau in tau_arr:
@@ -5507,7 +5495,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     var_opt['dx'][t_index, :] = dx_i_tau.reshape(-1)
                     
                     t_index += 1
-        elif self.result_mode == "mesh_points": # FIX!!!
+        elif self.result_mode == "mesh_points":
             # Start time
             i = 1
             k = 0
@@ -5588,7 +5576,7 @@ class LocalDAECollocator2(CasadiCollocator):
             u_opt = var_opt['merged_u']
         else:
             t_index = 0
-            u_opt = N.empty([self.n_e * self.n_cp + 1, self.model.get_n_u()])
+            u_opt = N.empty([self.n_e * self.n_cp + 1, self.n_var['u']])
             for i in xrange(1, self.n_e + 1):
                 for k in time_points[i]:
                     unelim_u_i_k = primal_opt[var_indices[i][k]['unelim_u']]
