@@ -1545,6 +1545,8 @@ public class ModelicaCompiler {
 			mc.setArguments("ModelicaCompiler", args, programarguments);
 		} catch(Throwable e) {
 			log.error(e);
+			log.close();
+			System.exit(1);
 		}
 		// Compile model
 		mc.compileModelFromCommandLine(args, programarguments);
