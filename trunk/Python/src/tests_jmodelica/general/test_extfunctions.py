@@ -67,13 +67,26 @@ class TestExternalStatic:
         Test a model with external functions containing integer array and literal inputs.
         """
         cpath = "ExtFunctionTests.ExtFunctionTest4"
-        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath)
+        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
         res = model.simulate()
         
         nose.tools.assert_equals(res.final('myResult[1]'), 2) 
         nose.tools.assert_equals(res.final('myResult[2]'), 4)
         nose.tools.assert_equals(res.final('myResult[3]'), 6)
+        
+    @testattr(stddist = True)
+    def test_IntegerArraysCeval(self):
+        """
+        Test a model with external functions containing integer array and literal inputs. Constant evaluation during compilation.
+        """
+        cpath = "ExtFunctionTests.ExtFunctionTest4"
+        fmu_name = compile_fmu(cpath, TestExternalStatic.fpath, compiler_options={'variability_propagation':True})
+        model = load_fmu(fmu_name)
+        
+        nose.tools.assert_equals(model.get('myResult[1]'), 2) 
+        nose.tools.assert_equals(model.get('myResult[2]'), 4)
+        nose.tools.assert_equals(model.get('myResult[3]'), 6)
         
 class TestUtilities:
     @classmethod
@@ -126,12 +139,85 @@ class TestExternalShared:
     @testattr(stddist = True)
     def test_ExtFuncShared(self):
         """ 
-        Test compiling a model with external functions in a shared library.
+        Test compiling a model with external functions in a shared library. Simple.
         """
         cpath = "ExtFunctionTests.ExtFunctionTest1"
-        fmu_name = compile_fmu(cpath, TestExternalShared.fpath)
+        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('c'), 3) 
+        
+    @testattr(stddist = True)
+    def test_ExtFuncSharedCeval(self):
+        """ 
+        Test compiling a model with external functions in a shared library. Constant evaluation during compilation.
+        """
+        cpath = "ExtFunctionTests.ExtFunctionTest1"
+        fmu_name = compile_fmu(cpath, TestExternalShared.fpath, compiler_options={'variability_propagation':True})
+        model = load_fmu(fmu_name)
+        nose.tools.assert_equals(model.get('c'), 3)
 
+class TestExternalShared2:
+    
+    @classmethod
+    def setUpClass(self):
+        """
+        Sets up the test class.
+        """
+        self.cpath = "ExtFunctionTests.ExtFunctionTest2"
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtFuncShared(self):
+        """ 
+        Test compiling a model with external functions in a shared library. Arrays.
+        """
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
+        model = load_fmu(fmu_name)
+        s_ceval = model.get('s')
+        res = model.simulate()
+        s_sim1 = res.final('s')
+        #nose.tools.assert_equals(s_ceval, s_sim1)
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        s_sim2 = res.final('s')
+        nose.tools.assert_equals(s_sim1, s_sim2)
+        
+class TestExternalInf:
+    
+    @classmethod
+    def setUpClass(self):
+        """
+        Sets up the test class. Check timeout of infinite loop during constant evaluation.
+        """
+        self.cpath = "ExtFunctionTests.ExternalInfinityTest"
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtFuncShared(self):
+        """ 
+        Test compiling a model with external functions in a shared library. Infinite loop.
+        """
+        fmu_name = compile_fmu(self.cpath, self.fpath)
+        
+        
 class TestExternalObject:
     
     @classmethod

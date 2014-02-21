@@ -1104,6 +1104,49 @@ public class CGenerator extends GenericGenerator {
 			FClass fclass) {
 		super(expPrinter, escapeCharacter, fclass);
 	}
-
+	
+	
+	
+    public class ECETag_external_includes extends ExternalCEvalTag {
+        public ECETag_external_includes(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_external_includes", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            String inc = ext.include();
+            if (inc != null)
+                genPrinter.println(inc);
+        }
+    }
+    
+    public class ECETag_record_definitions extends ExternalCEvalTag {
+        public ECETag_record_definitions(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_record_definitions", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            for (FRecordDecl rec : ext.usedRecords()) {
+                rec.prettyPrint_C(genPrinter, "");
+            }
+        }
+    }
+    
+    public class ECETag_main extends ExternalCEvalTag {
+        public ECETag_main(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_main", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            ext.genSerializeMain_C(genPrinter, "");
+        }
+    }
 }
 
+public class ExternCEvalGenerator extends CGenerator {
+    public ExternCEvalGenerator(Printer expPrinter, char escapeCharacter, FClass fclass, FExternalStmt ext) {
+        super(expPrinter, escapeCharacter, fclass);
+        for (AbstractTag t : tagMap.values())
+            if (t instanceof ExternalCEvalTag)
+                ((ExternalCEvalTag)t).setExt(ext);
+    }
+}

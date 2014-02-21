@@ -524,7 +524,7 @@ abstract public class TestAnnotationizerHelper {
 	 * \brief Performs the flattening step of the compilation.
 	 */
 	protected FClass flatten(InstClassDecl icd) {
-		FClass fc = FClass.create(icd, filePath);
+		FClass fc = FClass.create(icd, filePath, null);
 		icd.flattenInstClassDecl(fc);
 		return fc;
 	}

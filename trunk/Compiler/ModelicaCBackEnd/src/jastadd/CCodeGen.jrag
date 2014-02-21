@@ -762,12 +762,12 @@ aspect CCodeGen {
 		}
 	}
 
-	public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+	public void Size.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
 		str.print(numElements());
 	}
 
     @Override
-    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+    public void MutableSize.printNumElements_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         evaluate();
         int known = 1;
         boolean printed = false;
@@ -775,7 +775,8 @@ aspect CCodeGen {
         for (int i = 0; i < size.length; i++) {
             // TODO: this will fail if hasValue(i) == false
             if (size[i] == UNKNOWN) {
-                FExp exp = src.dynamicFExp(exps[i]);
+                FExp exp = exps[i];
+                exp.parent = src;
                 if (printed)
                     str.print(" * ");
                 boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
@@ -798,12 +799,12 @@ aspect CCodeGen {
         }
 	}
 	
-    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+    public void Size.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
         str.print(toUnclosedString());
     }
 
 	@Override
-	public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, FExp src) {
+	public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
 		if (isUnknown()) {
 			for (int i = 0; i < size.length; i++) {
 				if (i > 0)
@@ -811,7 +812,8 @@ aspect CCodeGen {
 				if (exps[i] == null) {
 					str.print(size[i]);
 				} else {
-					FExp exp = src.dynamicFExp(exps[i]);
+                    FExp exp = exps[i];
+                    exp.parent = src;
 					exp.prettyPrint_C(p, str, indent); // TODO: This is a hack to get CAD gen to work!
 				}
 			}
@@ -3206,4 +3208,154 @@ aspect CCodeGen {
             eb.genReinitWritebacks_C(p, indent, str);
         }
 	}
+}
+
+aspect Serialize {
+    public void FExternalStmt.genSerializeMain_C(CodeStream str, String indent) {
+        ArrayList<FFunctionVariable> inputs  = myInputs();
+        ArrayList<FFunctionVariable> outputs = myOutputs();
+        
+        str.println("size_t d[25];");
+        str.println();
+        
+        str.println("/* Input declarations */");
+        for (FFunctionVariable ffv : inputs)
+            ffv.printDeclOrInit_C(ASTNode.printer_C, str, indent, ffv.name_C(), true, false);
+        str.println();
+        
+        str.println("/* Output declarations */");
+        for (FFunctionVariable ffv : outputs)
+            ffv.printDeclOrInit_C(ASTNode.printer_C, str, indent, ffv.name_C(), true, false);
+        str.println();
+        
+        str.println("/* Temp declarations */");
+        genVarDecls_C(ASTNode.printer_C, str, indent);
+        str.println();
+        
+        str.println("printf(\"START\\n\"); fflush(stdout);");
+        
+        str.println("/* Parse inputs */");
+        for (FFunctionVariable ffv : inputs) {
+            ffv.type().genSerializeInitIn_C(str, indent, ffv.name_C());
+            ffv.type().genSerialize_C(str, indent, ffv.name_C(), true);
+            str.println();
+        }
+        str.println();
+        
+        str.println("/* Initialize outputs */");
+        for (FFunctionVariable ffv : outputs)
+            ffv.type().genSerializeInitOut_C(str, indent, ffv.name_C());
+        str.println();
+        
+        str.println("/* Call the function */");
+        str.println("printf(\"CALC\\n\"); fflush(stdout);");
+        prettyPrint_C(ASTNode.printer_C, str, indent);
+        str.println("printf(\"DONE\\n\"); fflush(stdout);");
+        str.println();
+        
+        str.println("/* Print outputs */");
+        for (FFunctionVariable ffv : outputs) {
+            ffv.type().genSerialize_C(str, indent, ffv.name_C(), false);
+            str.println();
+        }
+        str.println();
+        
+        str.println("/* Free strings */");
+        for (FFunctionVariable ffv : inputs)
+            ffv.genFreeStrings_C(str, indent);
+        str.println();
+        
+        str.println("printf(\"END\\n\"); fflush(stdout);");
+    }
+    
+    /**
+     * Generate code that initializes the variable <code>name</code> of type 
+     * <code>this</code> with sizes parsed from stdin.
+     */
+    public void FType.genSerializeInitIn_C(CodeStream str, String indent, String name) {
+        if (isArray()) {
+            str.println(indent + "parseArrayDims("+ndims()+", d);");
+            str.format("%s%s_DYNAMIC_INIT_%d(%s%s", indent, arrayMacroType_C(), 
+                    ndims(), arrayInitExtraArgs_C(), name);
+            str.print(", d[0]");
+            for (int i = 1; i < ndims(); i++)
+                str.print("*d["+i+"]");
+            for (int i = 0; i < ndims(); i++)
+                str.print(", d["+i+"]");
+            str.println(");");
+        }
+    }
+    
+    /**
+     * Generate code that initializes the variable <code>name</code> of type 
+     * <code>this</code>.
+     */
+    public void FType.genSerializeInitOut_C(CodeStream str, String indent, String name) {
+        if (isArray()) {
+            str.format("%s%s_DYNAMIC_INIT_%d(%s%s, ", indent, arrayMacroType_C(), 
+                    ndims(), arrayInitExtraArgs_C(), name);
+            size().printNumElements_C(ASTNode.printer_C, str, indent, this);
+            str.print(", ");
+            size().printDimensions_C(ASTNode.printer_C, str, indent, this);
+            str.println(");");
+        }
+    }
+    
+    /**
+     * Generate code that parses the variable <code>name</code> of type 
+     * <code>this</code> from stdin.
+     */
+    public void FType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
+        str.formatln("%s%s%s(%s, %s);",
+                indent,
+                parse ? "parse" : "print",
+                isArray() ? "Array" : "",
+                name(),
+                name);
+    }
+    
+    public void FRecordType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
+        for (FRecordComponentType t : getComponents()) {
+            String n = name + "." + t.getName();
+            t.getFType().genSerialize_C(str, indent, n, parse);
+        }
+    }
+    
+    /**
+     * Generate code to free strings
+     */
+    public void FFunctionVariable.genFreeStrings_C(CodeStream str, String indent) {
+        Set<String> strComps = type().genStringComps_C(name_C());
+        if (strComps.size() > 0) {
+            for (String s : strComps) {
+                str.formatln("%sfree(%s)", indent, s);
+            }
+        }
+    }
+    public void FFunctionArray.genFreeStrings_C(CodeStream str, String indent) {
+        Set<String> strComps = type().genStringComps_C(name_C());
+        if (strComps.size() > 0) {
+            str.format("%sfor (i = 0; i < ", indent);
+            size().printNumElements_C(ASTNode.printer_C, str, indent, this);
+            str.println("; i++) {");
+            for (String s : strComps) {
+                str.formatln("%sfree(jmi_array_ref_1(%s,i));", indent+"    ", s);
+            }
+            str.println();
+        }
+    }
+    public Set<String> FType.genStringComps_C(String name) {
+        Set<String> s = new HashSet<String>();
+        genStringComps_C(s, name);
+        return s;
+    }
+    public void FType.genStringComps_C(Set<String> s, String name) {
+        if (isString())
+            s.add(name);
+    }
+    public void FRecordType.genStringComps_C(Set<String> s, String name) {
+        for (FRecordComponentType t : getComponents()) {
+            t.getFType().genStringComps_C(s, name + "." + t.getName());
+        }
+    }
 }

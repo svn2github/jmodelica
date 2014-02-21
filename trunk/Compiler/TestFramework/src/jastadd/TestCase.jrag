@@ -350,7 +350,7 @@ abstract public class TestCase {
         
         // Flatten class and check errors reported during flattening
         InstClassDecl icd = ipr.lookupInstClassQualified(getClassName());
-        FClass fc = FClass.create(icd, getSourceFileName());
+        FClass fc = FClass.create(icd, getSourceFileName(), null);
         try {
             icd.flattenInstClassDecl(fc);
             problems = sr.collectWarnings();
