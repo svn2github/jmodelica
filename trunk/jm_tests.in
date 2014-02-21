@@ -82,8 +82,10 @@ if [[ "${IPOPT_HOME}" != "" ]]; then
   if [[ "${SYS}" == Win ]]; then
     TAGS="${TAGS} -a windows"
   fi
-  if [[ "${SYS}" != Mac ]]; then
+  if [[ -e "${JMODELICA_HOME}/Python/casadi" ]]; then
     TAGS="${TAGS} -a casadi"
+  else
+    echo Skipping casadi tests, since CasADi does not seem to be installed.
   fi
 fi
 
