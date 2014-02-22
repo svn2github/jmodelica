@@ -428,7 +428,7 @@ class TestLocalDAECollocator2:
         res = lagrange_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
     
-    @testattr(casadi_new = True)
+    @testattr(casadi = True)
     def test_parameter_estimation(self):
         """
         Test a parameter estimation example with and without scaling.
@@ -858,7 +858,7 @@ class TestLocalDAECollocator2:
                                                  opt_res.final("qt.a2")]),
                                   a_ref, rtol=1e-4)
     
-    @testattr(casadi_new = True)
+    @testattr(casadi = True)
     def test_qt_par_est_user_interpolator(self):
         """
         Test parameter estimation for the quad tank with user-defined function.
@@ -911,10 +911,10 @@ class TestLocalDAECollocator2:
                                   a_ref, rtol=1e-4)
         
         # Inconsistent bounds on eliminated input with user-defined function
-        op.set_min('u1', 5.1)
+        op.getVariable('u1').setMin(5.1)
         N.testing.assert_raises(CasadiCollocatorException,
                                 op.optimize, self.algorithm, opts)
-        op.set_min('u1', -N.inf)
+        op.getVariable('u1').setMin(-N.inf)
     
     @testattr(casadi = True)
     def test_vdp_minimum_time(self):

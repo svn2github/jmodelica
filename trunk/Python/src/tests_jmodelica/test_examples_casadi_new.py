@@ -19,7 +19,8 @@ Test module for testing the CASADI examples.
 """
 
 from tests_jmodelica import testattr
-from pyjmi.examples import ccpp_new, vdp_casadi_new
+from pyjmi.examples import (ccpp_new, vdp_casadi_new, cstr_casadi_new,
+                            qt_par_est_casadi_new)
 
 @testattr(casadi = True)
 def test_ccpp_new():
@@ -30,3 +31,13 @@ def test_ccpp_new():
 def test_vdp_casadi_new():
     """Run the new VDP CasADi example."""
     vdp_casadi_new.run_demo(False)
+
+@testattr(casadi = True)
+def test_cstr_casadi_new():
+    """Run the new CSTR CasADi example."""
+    cstr_casadi_new.run_demo(False)
+
+@testattr(casadi = True)
+def test_qt_par_casadi_new():
+    """Run the new QT CasADi example."""
+    qt_par_est_casadi_new.run_demo(False)

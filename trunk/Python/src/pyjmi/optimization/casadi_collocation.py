@@ -557,7 +557,7 @@ class CasadiCollocator(object):
         
         self.solver.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
         self.solver.setInput(self.glub, casadi.NLP_SOLVER_UBG)
-        
+
         # Solve the problem
         t0 = time.clock()
         self.solver.solve()
@@ -3266,6 +3266,22 @@ class LocalDAECollocator2(CasadiCollocator):
                  'u': len(mvar_vectors["u"]),
                  'w': len(mvar_vectors["w"])}
 
+        # Exchange alias variables in measurement data
+        if self.measurement_data is not None:
+            eliminated = self.measurement_data.eliminated
+            constrained = self.measurement_data.constrained
+            unconstrained = self.measurement_data.unconstrained
+            for variable_list in [eliminated, constrained, unconstrained]:
+                for name in variable_list.keys():
+                    var = op.getVariable(name)
+                    if var is None:
+                        raise ValueError("Measured variable %s not " % name +
+                                         "found in model.")
+                    if var.isAlias():
+                        mvar_name = var.getModelVariable().getName()
+                        variable_list[mvar_name] = variable_list[name]
+                        del variable_list[name]
+
         # Create eliminated and uneliminated input lists
         if (self.measurement_data is None or
             len(self.measurement_data.eliminated) == 0):
@@ -4265,7 +4281,7 @@ class LocalDAECollocator2(CasadiCollocator):
                 is_variant[name] = False
                 d = 1.
                 e = 0.
-                name_idx_sf_map[vr] = len(invariant_var)
+                name_idx_sf_map[name] = len(invariant_var)
                 invariant_var.append(var.getVar())
                 invariant_d.append(d)
                 invariant_e.append(e)
@@ -4369,15 +4385,12 @@ class LocalDAECollocator2(CasadiCollocator):
                         " does not satisfy the input's upper bound.")
 
         # At this point, most features stop being supported
-        self._all_features = False
         if self.eliminate_der_var:
             raise NotImplementedError("eliminate_der_var not yet supported.")
         if self.eliminate_cont_var:
             raise NotImplementedError("eliminate_cont_var not yet supported.")
         if self.nominal_traj is not None:
             raise NotImplementedError("nominal_traj not yet supported.")
-        if self.measurement_data is not None:
-            raise NotImplementedError("measurement_data not yet supported.")
 
         # Create collocation and DAE functions
         sym_input = self.mvar_struct_cat
@@ -4836,41 +4849,38 @@ class LocalDAECollocator2(CasadiCollocator):
         c_i.append(G_i_constr)
         
         # Equality constraints for constrained inputs
-        # FIX!!!
-        if self._all_features:
-            if self.measurement_data is not None:
-                if self.variable_scaling and self.nominal_traj is None:
-                    sfs = self._sf
-                for i in xrange(1, self.n_e + 1):
-                    for k in xrange(1, self.n_cp + 1):
-                        for j in xrange(len(self.measurement_data.constrained)):
-                            # Retrieve variable and value
-                            var_name = self.measurement_data.constrained.keys()[j]
-                            vr = self.model.xmldoc.get_value_reference(var_name)
-                            (ind, vt) = vr_map[vr]
-                            constr_var = self.var_map[i][k]['unelim_u'][ind]
-                            constr_val = self.var_map[i][k]['constr_u'][j]
-                            
-                            # Scale variable
-                            if self.variable_scaling:
-                                if self.nominal_traj is None:
-                                    sf = sfs[vt][ind]
+        if self.measurement_data is not None:
+            if self.variable_scaling and self.nominal_traj is None:
+                sfs = self._sf
+            for i in xrange(1, self.n_e + 1):
+                for k in xrange(1, self.n_cp + 1):
+                    for j in xrange(len(self.measurement_data.constrained)):
+                        # Retrieve variable and value
+                        name = self.measurement_data.constrained.keys()[j]
+                        (ind, _) = name_map[name]
+                        constr_var = self.var_map[i][k]['unelim_u'][ind]
+                        constr_val = self.var_map[i][k]['constr_u'][j]
+                        
+                        # Scale variable
+                        if self.variable_scaling:
+                            if self.nominal_traj is None:
+                                sf = sfs[vt][ind]
+                                constr_var *= sf
+                            else: # FIX!!!
+                                sf_index = name_idx_sf_map[vr]
+                                if is_variant[vr]:
+                                    sf = variant_sf[i][k][sf_index]
                                     constr_var *= sf
                                 else:
-                                    sf_index = name_idx_sf_map[vr]
-                                    if is_variant[vr]:
-                                        sf = variant_sf[i][k][sf_index]
-                                        constr_var *= sf
-                                    else:
-                                        d = invariant_d[sf_index]
-                                        e = invariant_e[sf_index]
-                                        constr_var = d * constr_var + e
-                            
-                            # Add constraint
-                            input_constr = constr_var - constr_val
-                            if self.named_vars:
-                                input_constr = casadi.vertcat(input_constr)
-                            c_e.append(input_constr)
+                                    d = invariant_d[sf_index]
+                                    e = invariant_e[sf_index]
+                                    constr_var = d * constr_var + e
+                        
+                        # Add constraint
+                        input_constr = constr_var - constr_val
+                        if self.named_vars:
+                            input_constr = casadi.vertcat(input_constr)
+                        c_e.append(input_constr)
         
         # Store constraints, time and timed variables as data attributes
         self.c_e = c_e
@@ -4977,12 +4987,11 @@ class LocalDAECollocator2(CasadiCollocator):
         self.cost = self.cost_mayer + self.cost_lagrange
         
         # Add quadratic cost for measurement data
-        # FIX!!!
         if (self.measurement_data is not None and
             (len(self.measurement_data.unconstrained) +
              len(self.measurement_data.constrained) > 0)):
             # Retrieve scaling factors
-            if self.variable_scaling and self.nominal_traj is not None:
+            if self.variable_scaling and self.nominal_traj is not None: # FIX!!!
                 invariant_d = self._invariant_d
                 invariant_e = self._invariant_e
                 is_variant = self._is_variant
@@ -5005,15 +5014,14 @@ class LocalDAECollocator2(CasadiCollocator):
                     y_ref[i][k] = N.array(ref_val)
             
             # Calculate errors
-            vr_map = self._vr_map
+            name_map = self.name_map
             if self.variable_scaling and self.nominal_traj is None:
                 sfs = self._sf
             var_names = (self.measurement_data.constrained.keys() +
                          self.measurement_data.unconstrained.keys())
             for j in xrange(len(var_names)):
-                var_name = var_names[j]
-                vr = self.model.xmldoc.get_value_reference(var_name)
-                (ind, vt) = vr_map[vr]
+                name = var_names[j]
+                (ind, vt) = name_map[name]
                 for i in range(1, self.n_e + 1):
                     for k in range(1, self.n_cp + 1):
                         val = self.var_map[i][k][vt][ind]
