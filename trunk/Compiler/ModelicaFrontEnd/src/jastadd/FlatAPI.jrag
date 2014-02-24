@@ -1371,6 +1371,13 @@ aspect FlatAPI {
 		return this.meIntegrated;
 	}
 	
+    public FVariable FVariable.getTopIntegrated() {
+        FVariable fv = this;
+        while (fv.meIntegrated != null)
+            fv = fv.meIntegrated;
+        return fv;
+    }
+	
 }
 
 aspect ReferencedVariables {

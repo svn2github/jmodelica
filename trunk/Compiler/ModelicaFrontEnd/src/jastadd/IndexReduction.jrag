@@ -478,7 +478,8 @@ aspect IndexReduction {
                 int linearity = calculateLinearityWeight(g, fv);
                 if (fv.getMeIntegrated() != null)
                     linearity += calculateLinearityWeight(g, fv.getMeIntegrated());
-                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), false, linearity);
+                boolean fixed = fv.getTopIntegrated().fixedAttribute();
+                BiPGraphCost weight = new BiPGraphCost(fv.stateSelection(), fixed, linearity);
                 ASTNode.log.info("Weight: %s %s", var, weight);
                 weights.put(var, weight);
             }
