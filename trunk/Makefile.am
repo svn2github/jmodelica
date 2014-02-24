@@ -296,7 +296,16 @@ endif
 	cp $(CPPAD_HOME)/cppad/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local	
 	cp $(CPPAD_HOME)/cppad/local/*.hpp $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad/local
-	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy MSL" || cd $(abs_top_srcdir)/ThirdParty; find MSL -type f |grep -v /.svn | grep -v ~ |tar c -T - -f - | tar x -C $(DESTDIR)$(prefix)/ThirdParty
+	if [ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ]; then \
+	  echo "Installing in dist directory, don't copy MSL"; \
+	else \
+	  cd $(DESTDIR)$(prefix)/ThirdParty; \
+	  mkdir MSL; \
+	  cd MSL; \
+	  svn export -q $(abs_top_srcdir)/ThirdParty/MSL/Modelica; \
+	  svn export -q $(abs_top_srcdir)/ThirdParty/MSL/ModelicaServices; \
+	  svn export -q $(abs_top_srcdir)/ThirdParty/MSL/Complex.mo; \
+	fi
 	mkdir -p $(DESTDIR)$(prefix)/CodeGenTemplates
 	cp $(abs_top_srcdir)/JMI/LICENSE_GPL $(DESTDIR)$(prefix)/CodeGenTemplates/LICENSE
 	cp  $(abs_top_srcdir)/Compiler/ModelicaCBackEnd/templates/ceval_external_template.c $(DESTDIR)$(prefix)/CodeGenTemplates
