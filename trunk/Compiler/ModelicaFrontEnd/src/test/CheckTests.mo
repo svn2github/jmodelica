@@ -300,4 +300,44 @@ Semantic error at line 261, column 14:
 ")})));
 end FunctionNoAlgorithm3;
 
+model IfEquationElse1
+  Real x;
+equation
+  der(x) = time;
+  if time > 1 then
+    assert(time > 2, "msg");
+  else
+  end if;
+  when time > 2 then
+    if time > 1 then
+      reinit(x,1);
+    else
+    end if;
+  end when;
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEquationElse1",
+			description="Test empty else",
+			flatModel="
+fclass CheckTests.IfEquationElse1
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ x = 0.0;
+ pre(temp_1) = false;
+equation
+ der(x) = time;
+ if time > 1 then
+  assert(time > 2, \"msg\");
+ end if;
+ temp_1 = time > 2;
+ if temp_1 and not pre(temp_1) then
+  if time > 1 then
+   reinit(x, 1);
+  end if;
+ end if;
+end CheckTests.IfEquationElse1;
+")})));
+end IfEquationElse1;
+
 end CheckTests;

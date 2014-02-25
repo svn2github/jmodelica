@@ -2725,8 +2725,9 @@ aspect IfEquations {
 		List<FAbstractEquation> l = new List<FAbstractEquation>();
 		
 		// Generate equations for assignment equations that can be matched
-		Set<FAbstractVariable> varsInBoth = 
-			intersection(assignmentEquationMap().keySet(), getElse().assignmentEquationMap().keySet()); 
+		Set<FAbstractVariable> varsInBoth = assignmentEquationMap().keySet();
+		if (hasElse())
+		    varsInBoth = intersection(varsInBoth, getElse().assignmentEquationMap().keySet()); 
 		for (FAbstractVariable v : toSortedList(varsInBoth, FAbstractVariable.NAME_COMPARATOR)) {
 			FExp left = assignmentEquationMap().get(v).assignmentExp();
 			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
@@ -2741,7 +2742,12 @@ aspect IfEquations {
 		
 		// Find equations to match up among remaining FEquations based on indices
         ArrayList<FEquation> unmatchedLeft = unmatchedEquations(this, varsInBoth);
-        ArrayList<FEquation> unmatchedRight = unmatchedEquations(getElse(), varsInBoth);
+        ArrayList<FEquation> unmatchedRight;
+        if (hasElse())
+            unmatchedRight = unmatchedEquations(getElse(), varsInBoth);
+        else
+            unmatchedRight = new ArrayList<FEquation>();
+        
         int[][] match = matchEquationsMinimizeIncidences(unmatchedLeft, unmatchedRight);
         
 		// Sort remaining equations into those that should remain in if equation and those that should become residual eqns
@@ -2754,7 +2760,8 @@ aspect IfEquations {
         ArrayList<FEquation> residualRight = new ArrayList<FEquation>();
         List<FAbstractEquation> keepRight = new List<FAbstractEquation>();
         sortOutMatchedEquations(unmatchedRight, match, 1, residualRight, keepRight);
-        keepRight.addAll(toSortedList(getElse().nonFEquationSet(), CHILD_ORDER_COMPARATOR));
+        if (hasElse())
+            keepRight.addAll(toSortedList(getElse().nonFEquationSet(), CHILD_ORDER_COMPARATOR));
         
         // Generate residual equations
 		for (FEquation[] eqs : new ParallelIterable<FEquation>(new FEquation[2], true, residualLeft, residualRight)) {
