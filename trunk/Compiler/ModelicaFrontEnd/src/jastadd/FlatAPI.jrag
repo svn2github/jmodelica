@@ -3160,3 +3160,30 @@ aspect Sparsity {
 	}
 
 }
+
+aspect ExpressionGeneralisation {
+    /**
+     * Returns the expression stripped of any negations
+     */
+    syn FExp FExp.stripNegations()     = this;
+    eq FNegExp.stripNegations()        = getFExp().stripNegations();
+    
+    
+    syn boolean FEquation.isNegated() = getLeft().isNegated() ^ getRight().isNegated();
+    
+    /**
+     * Check if the expressions is negated
+     */
+    syn boolean FExp.isNegated()  = false;
+    eq FNegExp.isNegated()        = !getFExp().isNegated();
+    
+    /**
+     * Return this expression negated if <code>neg</code> is true.
+     */
+    syn FExp FExp.negated(boolean neg) {
+        if (neg)
+            return new FNegExp(unboundCopy());
+        else
+            return unboundCopy();
+    }
+}

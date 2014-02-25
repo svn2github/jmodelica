@@ -380,13 +380,6 @@ aspect VariabilityPropagation {
             }
             myFClass().getAliasManager().unAlias(this);
         }
-	}
-	
-    syn FExp FExp.negated(boolean neg) {
-        if (neg)
-            return new FNegExp(unboundCopy());
-        else
-            return unboundCopy();
     }
 }
 

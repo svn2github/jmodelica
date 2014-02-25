@@ -5093,9 +5093,8 @@ aspect SemiLinear {
                 FExp chainPos   = first.zeroFlowGetPos();
                 FExp chainNeg   = last.zeroFlowGetNeg();
                 FExp chainX     = chain.get(0).zeroFlowGetX();
-                if (first.zeroFlowNegated())
-                    chainX = new FNegExp(chainX.fullCopy());
                 
+                // S(1) = if X >= 0 SA else SB
                 newEquations.add(new FEquation(
                         first.zeroFlowGetNeg().fullCopy(), 
                         new FIfExp(new FGeqExp(chainX.fullCopy(), new FIntegerLitExp(0)),
@@ -5103,6 +5102,7 @@ aspect SemiLinear {
                                 chainNeg.fullCopy()
                                 )));
                 
+                // S(n+1) = S(n)
                 FEquation pre_e = null;
                 for (FEquation e : chain) {
                     if (pre_e != null)
@@ -5110,11 +5110,12 @@ aspect SemiLinear {
                     pre_e = e;
                 }
                 
+                // Y = semiLinear(X,SA,SB)
+                FExp slExp = new FSemiLinearExp(chainX.fullCopy(), chainPos.fullCopy(), chainNeg.fullCopy());
                 newEquations.add(new FEquation(
                         first.zeroFlowGetLeft().fullCopy(),
-                        new FSemiLinearExp(chainX.fullCopy(), chainPos.fullCopy(), chainNeg.fullCopy())
+                        slExp.negated(first.zeroFlowNegated())
                         ));
-                
             }
         }
     }
@@ -5156,18 +5157,10 @@ aspect SemiLinear {
         return (FSemiLinearExp) (l.isSemiLinear() ? l : r);
     } 
     syn FExp FEquation.zeroFlowGetX()     = zeroFlowGetRight().getX().stripNegations();
-    syn FExp FEquation.zeroFlowGetPos()   = isNegated() ? zeroFlowGetRight().getNegSlope() : zeroFlowGetRight().getPosSlope();
-    syn FExp FEquation.zeroFlowGetNeg()   = isNegated() ? zeroFlowGetRight().getPosSlope() : zeroFlowGetRight().getNegSlope();
+    syn FExp FEquation.zeroFlowGetPos()   = zeroFlowGetRight().getX().isNegated() ? zeroFlowGetRight().getNegSlope() : zeroFlowGetRight().getPosSlope();
+    syn FExp FEquation.zeroFlowGetNeg()   = zeroFlowGetRight().getX().isNegated() ? zeroFlowGetRight().getPosSlope() : zeroFlowGetRight().getNegSlope();
     
     syn boolean FEquation.zeroFlowNegated() = isNegated() ^ zeroFlowGetRight().getX().isNegated();
-    
-    syn FExp FExp.stripNegations()     = this;
-    eq FNegExp.stripNegations()        = getFExp().stripNegations();
-    
-    syn boolean FEquation.isNegated() = getLeft().isNegated() ^ getRight().isNegated();
-    syn boolean FExp.isNegated()  = false;
-    eq FNegExp.isNegated()        = !getFExp().isNegated();
-    
     
     syn String FEquation.zeroFlowGetKey() {
         StringBuilder sb = new StringBuilder();
