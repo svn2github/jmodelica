@@ -26,14 +26,67 @@ using std::string; using std::pair;
 
 namespace ModelicaCasADi{
 
+Model::~Model() {
+    // Delete all the Model's variables, since they are OwnedNodes with the Model as owner.
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
+        delete *it;
+        *it = NULL;
+    }
+}
+
+double Model::get(string varName) {
+    Ref<Variable> var = getVariable(varName);
+    if (var == NULL) {
+        throw std::runtime_error("No variable named " + varName);
+    }
+    if (var->getVariability() > Variable::PARAMETER) {
+        throw std::runtime_error("Tried to get non-parameter " + var->repr());
+    }
+    calculateValuesForDependentParameters();
+    MX *ex = var->getAttribute("evaluatedBindingExpression");
+    if (ex == NULL) throw std::runtime_error("Failed to evaluate " + var->repr());
+    return evaluateExpression(*ex);
+}
+
+vector<double> Model::get(const vector<string> &varNames) {
+    vector<double> result;
+    for (vector< string >::const_iterator it = varNames.begin(); it != varNames.end(); ++it){
+        result.push_back(get(*it));
+    }
+    return result;
+}
+
+void Model::set(string varName, double value) {
+    Ref<Variable> var = getVariable(varName);
+    if (var == NULL) {
+        throw std::runtime_error("No variable named " + varName);
+    }
+    if (var->getVariability() != Variable::PARAMETER) {
+        throw std::runtime_error("Tried to set non-parameter " + var->repr());
+    }
+    var->setAttribute("bindingExpression", value);
+}
+
+void Model::set(const vector<string> &varNames, const vector<double> &values) {
+    if (varNames.size() != values.size()) {
+        throw std::runtime_error("Must specify the same number of variables and values.");
+    }
+    vector< string >::const_iterator name  = varNames.begin();
+    vector< double >::const_iterator value = values.begin();
+    for (; name != varNames.end(); ++name, ++value) {
+        set(*name, *value);
+    }
+}
+
+
 bool Model::checkIfRealVarIsReferencedAsStateVar(Ref<RealVariable> var) const {
     // Since the variables are not sorted all variables are looped over.
     // Note:  May assign derivative variable to a state variable
-    for(vector< Ref<Variable> >::const_iterator it = z.begin(); it != z.end(); ++it){
+    for(vector< Variable * >::const_iterator it = z.begin(); it != z.end(); ++it){
         if((*it)->getType() == Variable::REAL) {
-            Ref<RealVariable> realTemp = (RealVariable*)it->getNode();
+            RealVariable *realTemp = (RealVariable*)*it;
             if(realTemp->isDerivative()) {
-                Ref<DerivativeVariable> derTemp = (DerivativeVariable*)realTemp.getNode();
+                Ref<DerivativeVariable> derTemp = (DerivativeVariable*)realTemp;
                 if(var.getNode() == derTemp->getMyDifferentiatedVariable().getNode()){
                     var->setMyDerivativeVariable(derTemp);
                     return true;
@@ -214,11 +267,13 @@ void Model::handleVariableTypeForAddedVariable(Ref<Variable> var){
 }
 
 void Model::addVariable(Ref<Variable> var) {
+    assert(var->isOwnedBy(this));
     if (!var->getVar().isSymbolic()) {
         throw std::runtime_error("The supplied variable is not symbolic and can not be variable"); 
     }
+    dirty = true; // todo: only if (dependent) parameter, or with dependent attributes?
     handleVariableTypeForAddedVariable(var);
-    z.push_back(var);
+    z.push_back(var.getNode());
 }
 
 vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
@@ -227,7 +282,7 @@ vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
 	}
     // Special case for last variable, due to size of offsets.
     vector< Ref<Variable> > varVec;
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if (classifyVariable(*it) == kind) {
             varVec.push_back(*it);
         }
@@ -237,7 +292,7 @@ vector< Ref<Variable> > Model::getVariables(VariableKind kind) {
 
 Ref<Variable> Model::getVariable(std::string name) {
     Ref<Variable> returnVar = Ref<Variable>(NULL);
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
             returnVar = *it;
             break;
@@ -248,7 +303,7 @@ Ref<Variable> Model::getVariable(std::string name) {
 
 Ref<Variable> Model::getModelVariable(std::string name) {
     Ref<Variable> returnVar;
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->getName() == name) {
             if( (*it)->isAlias()) {
                 returnVar = (*it)->getModelVariable();
@@ -261,9 +316,14 @@ Ref<Variable> Model::getModelVariable(std::string name) {
     return returnVar;
 }
 
+vector< Ref<Variable> > Model::getAllVariables() {
+    vector< Ref<Variable> > vars;
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) vars.push_back(*it);
+    return vars;
+}
 vector< Ref<Variable> > Model::getModelVariables() {
     vector< Ref<Variable> > modelVars;
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if (!(*it)->isAlias()) {
             modelVars.push_back(*it);
         }
@@ -272,7 +332,7 @@ vector< Ref<Variable> > Model::getModelVariables() {
 }
 vector< Ref<Variable> > Model::getAliases() {
     vector< Ref<Variable> > aliasVars;
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if ((*it)->isAlias()) {
             aliasVars.push_back(*it);
         }
@@ -312,10 +372,12 @@ double Model::evaluateExpression(MX exp) {
 }
 
 void Model::calculateValuesForDependentParameters() {
+    if (!dirty) return;
+
     MX bindingExpression;
     double val;
     setUpValAndSymbolVecs();
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         Ref<Variable> var = (*it);
         if (var->getVariability() == Variable::PARAMETER) {
             if (var->hasAttributeSet("bindingExpression")) {
@@ -326,16 +388,20 @@ void Model::calculateValuesForDependentParameters() {
                     paramAndConstValVec.push_back(val);
                     var->setAttribute("evaluatedBindingExpression", val);
                 }
+                else {
+                    var->setAttribute("evaluatedBindingExpression", bindingExpression);
+                }
             }
         }
     }
+    dirty = false;
 }
 
 
 void Model::setUpValAndSymbolVecs() {
     paramAndConstMXVec.clear();
     paramAndConstValVec.clear();
-    for (vector< Ref<Variable> >::iterator it = z.begin(); it != z.end(); ++it) {
+    for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
         if ( ((*it)->getVariability() == Variable::PARAMETER) ||
              ((*it)->getVariability() == Variable::CONSTANT)){
             if ((*it)->hasAttributeSet("bindingExpression")) {
@@ -371,16 +437,16 @@ const MX Model::getDaeResidual() const {
 
 
 template <class T> 
-string generatePrintStringForVector(const vector<T> &makeStringOf) {
-    std::stringstream result;
+void printVector(std::ostream& os, const vector<T> &makeStringOf) {
     typename vector<T>::const_iterator it;
     for ( it = makeStringOf.begin(); it < makeStringOf.end(); ++it) {
-         result << *it << "\n";
+         os << **it << "\n";
     }
-    return result.str();
 }
 
 void Model::print(std::ostream& os) const {
+//    os << "Model<" << this << ">"; return;
+
     using std::endl;
     os << "------------------------------- Variables -------------------------------\n" << endl;
     if (!timeVar.isNull()) {
@@ -388,7 +454,7 @@ void Model::print(std::ostream& os) const {
         timeVar.print(os);
         os << endl;
     }
-    os << generatePrintStringForVector(z);
+    printVector(os, z);
     os << "\n---------------------------- Variable types  ----------------------------\n" << endl;
     for (Model::typeMap::const_iterator it = typesInModel.begin(); it != typesInModel.end(); ++it) {
             os << it->second << endl;
@@ -399,10 +465,12 @@ void Model::print(std::ostream& os) const {
     }
     os << "\n------------------------------- Equations -------------------------------\n" << endl;
     if (!initialEquations.empty()) {
-        os << " -- Initial equations -- \n" << generatePrintStringForVector(initialEquations);
+        os << " -- Initial equations -- \n";
+        printVector(os, initialEquations);
     }
     if (!daeEquations.empty()) {
-        os << " -- DAE equations -- \n" << generatePrintStringForVector(daeEquations);
+        os << " -- DAE equations -- \n";
+        printVector(os, daeEquations);
     }
     os << endl;
 }

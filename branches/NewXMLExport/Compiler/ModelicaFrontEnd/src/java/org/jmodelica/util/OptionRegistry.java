@@ -120,12 +120,15 @@ abstract public class OptionRegistry {
 		public static final int VERBOSE = 5;
 		public static final int DEBUG = 6;
 	}
-	
     public interface LocalIteration {
         public static final String OFF        = "off";
         public static final String ANNOTATION = "annotation";
         public static final String ALL        = "all";
     }
+    public interface NonlinearSolver {
+		public static final String KINSOL  = "kinsol";
+		public static final String MINPACK = "minpack";
+	}
     
 	public enum OptionType { compiler, runtime }
 	public static final OptionType compiler = OptionType.compiler;
@@ -402,6 +405,12 @@ abstract public class OptionRegistry {
 	         compiler,
 	         false,
 	         "Ignore within clauses, both when reading input files and when error-checking. Default is false."),
+	    NLE_SOLVER
+		    ("nonlinear_solver",
+		    compiler,
+		    NonlinearSolver.KINSOL,
+		    "Decides which nonlinear equation solver that will be used. Default is kinsol.",
+		    NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
 		
 		// Runtime options
         /*

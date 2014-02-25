@@ -3656,12 +3656,16 @@ cstr.set('cstr.T_init', T_0_A)
           options. We then change number of finite elements from the default
           value of 50 to 100. We also specify that the trajectories computed
           in <xref linkend="opt-sec-dae-casadi-cstr-guess"/> are to be used as
-          initial guesses for the NLP variables.</para>
+          initial guesses and nominal values for the NLP variables. Finally,
+          we decrease the numerical tolerance due to the sensitive nature of
+          the problem.</para>
 
           <programlisting># Set options
 opt_opts = cstr.optimize_options()
 opt_opts['n_e'] = 100 # Number of elements
 opt_opts['init_traj'] = init_res.result_data
+opt_opts['nominal_traj'] = init_res.result_data
+opt_opts['IPOPT_options']['tol'] = 1e-10
 </programlisting>
 
           <para>We are now ready to solve the optimization problem and extract
@@ -3718,9 +3722,9 @@ plt.show()
           <para>As a final step, we verify the optimal control solution. This
           is important, because the optimization algorithm does not make any
           guarantees with regards to solution accuracy. An insufficient number
-          of elements and collocation points may result in poor solution
-          accuracy. We start by compiling and loading the model used for
-          simulation.</para>
+          of elements and collocation points or too high tolerances may result
+          in poor solution accuracy. We start by compiling and loading the
+          model used for simulation.</para>
 
           <programlisting># Compile model
 sim_fmu = compile_fmu("CSTR.CSTR", "CSTR.mop")
@@ -3750,8 +3754,11 @@ sim_model.set('c_init',c_0_A)
 sim_model.set('T_init',T_0_A)
 
 # Simulate using optimized input
+sim_opts = sim_model.simulate_options()
+sim_opts['CVode_options']['rtol'] = 1e-6
+sim_opts['CVode_options']['atol'] = 1e-8
 res = sim_model.simulate(start_time=0., final_time=150.,
-                         input=('Tc', opt_input))
+                         input=('Tc', opt_input), options=sim_opts)
 </programlisting>
 
           <para>Finally, we extract the simulation results and plot them. They

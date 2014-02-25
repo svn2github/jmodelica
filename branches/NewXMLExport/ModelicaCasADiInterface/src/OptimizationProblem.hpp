@@ -30,14 +30,16 @@ namespace ModelicaCasADi
 {
 class OptimizationProblem : public Model {
     public:
+        /** Create a blank, uninitialized OptimizationProblem */
+        OptimizationProblem() {}
+        virtual ~OptimizationProblem();
         /**
-         * Create an OptimizationProblem from the constraints and objective
-         * passed in as arguments.
+         * Initialize the OptimizationProblem, before populating it.
          * @param An optional string identifier, default is empty string. 
          * @param An option flag telling whether minumum time normalisation
          * has been performed (by the compiler). Default is true.
          */ 
-        OptimizationProblem(std::string identifier = "", bool normalizedTime = true);
+        void initializeProblem(std::string identifier = "", bool normalizedTime = true);
         /** @return An MX */
         CasADi::MX getStartTime() const;
         /** @return An MX */
@@ -81,8 +83,8 @@ class OptimizationProblem : public Model {
         void setLagrangeTerm(CasADi::MX lagrangeTerm);
         /** @param An MX */
         void setMayerTerm(CasADi::MX mayerTerm);
-        /** @param A std::vector of TimedVariable */
-        void setTimedVariables(const std::vector< Ref<TimedVariable> > &timedVariables);
+        /** @param A Ref<TimedVariable> to be added to the optimization problem during transfer*/
+        void addTimedVariable(Ref<TimedVariable> timedVariable);
         
         /** Allows the use of the operator << to print this class to a stream, through Printable */
         virtual void print(std::ostream& os) const;
@@ -94,7 +96,7 @@ class OptimizationProblem : public Model {
         CasADi::MX lagrangeTerm;
         CasADi::MX mayerTerm;
         bool normalizedTime;
-        std::vector< Ref<TimedVariable> > timedVariables;
+        std::vector< TimedVariable * > timedVariables;
         std::vector< Ref<Constraint> >  pathConstraints;
         std::vector< Ref<Constraint> >  pointConstraints;
 };
@@ -105,7 +107,6 @@ inline CasADi::MX OptimizationProblem::getLagrangeTerm() const { return lagrange
 inline CasADi::MX OptimizationProblem::getMayerTerm() const { return mayerTerm; }
 inline std::vector< Ref<Constraint> >  OptimizationProblem::getPathConstraints() const { return pathConstraints; }
 inline std::vector< Ref<Constraint> >  OptimizationProblem::getPointConstraints() const { return pointConstraints; }
-inline std::vector< Ref<TimedVariable> >  OptimizationProblem::getTimedVariables() const { return timedVariables; }
 
 inline void OptimizationProblem::setStartTime(CasADi::MX startTime) { this->startTime = startTime; }
 inline void OptimizationProblem::setFinalTime(CasADi::MX finalTime) { this->finalTime = finalTime; }
@@ -113,6 +114,6 @@ inline void OptimizationProblem::setPathConstraints(const std::vector< Ref<Const
 inline void OptimizationProblem::setPointConstraints(const std::vector< Ref<Constraint> > &pointConstraints) { this->pointConstraints = pointConstraints; }
 inline void OptimizationProblem::setLagrangeTerm(CasADi::MX lagrangeTerm) { this->lagrangeTerm = lagrangeTerm; } 
 inline void OptimizationProblem::setMayerTerm(CasADi::MX mayerTerm) { this->mayerTerm = mayerTerm; } 
-inline void OptimizationProblem::setTimedVariables(const std::vector< Ref<TimedVariable> > &timedVariables) { this->timedVariables = timedVariables; }
+inline void OptimizationProblem::addTimedVariable(Ref<TimedVariable> var) { assert(var->isOwnedBy(this)); timedVariables.push_back(var.getNode()); }
 }; // End namespace
 #endif

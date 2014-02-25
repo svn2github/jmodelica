@@ -5334,24 +5334,24 @@ $C_ode_guards$
                        model_ode_guards(jmi);
 /************* ODE section *********/
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(_time - (1), _sw(3), jmi->events_epsilon, JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(_time - (1), _sw(2), jmi->events_epsilon, JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(_time - (1.1), _sw(4), jmi->events_epsilon, JMI_REL_LT);
+        _sw(3) = jmi_turn_switch(_time - (1.1), _sw(3), jmi->events_epsilon, JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(5) = jmi_turn_switch(_time - (2), _sw(5), jmi->events_epsilon, JMI_REL_GT);
+        _sw(4) = jmi_turn_switch(_time - (2), _sw(4), jmi->events_epsilon, JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(6) = jmi_turn_switch(_time - (2.1), _sw(6), jmi->events_epsilon, JMI_REL_LT);
+        _sw(5) = jmi_turn_switch(_time - (2.1), _sw(5), jmi->events_epsilon, JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(7) = jmi_turn_switch(_time - (3), _sw(7), jmi->events_epsilon, JMI_REL_GT);
+        _sw(6) = jmi_turn_switch(_time - (3), _sw(6), jmi->events_epsilon, JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(8) = jmi_turn_switch(_time - (3.1), _sw(8), jmi->events_epsilon, JMI_REL_LT);
+        _sw(7) = jmi_turn_switch(_time - (3.1), _sw(7), jmi->events_epsilon, JMI_REL_LT);
     }
-    _temp_4_9 = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+    _temp_4_9 = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(2), _sw(3)), LOG_EXP_AND(_sw(4), _sw(5))), LOG_EXP_AND(_sw(6), _sw(7)));
     _x_1 = COND_EXP_EQ(LOG_EXP_AND(_temp_4_9, LOG_EXP_NOT(pre_temp_4_9)), JMI_TRUE, pre_x_1 + AD_WRAP_LITERAL(1.1), pre_x_1);
     _der_xx_19 = - _x_1;
 /************ Real outputs *********/
@@ -5364,14 +5364,14 @@ $C_ode_guards$
     _temp_1_6 = LOG_EXP_AND(_sw(0), pre_z_5);
     _w_3 = COND_EXP_EQ(LOG_EXP_AND(_temp_1_6, LOG_EXP_NOT(pre_temp_1_6)), JMI_TRUE, JMI_FALSE, pre_w_3);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_x_1 - (2), _sw(2), jmi->events_epsilon, JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(_x_1 - (2), _sw(1), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_3_8 = _sw(2);
+    _temp_3_8 = _sw(1);
     _z_5 = COND_EXP_EQ(LOG_EXP_AND(_temp_3_8, LOG_EXP_NOT(pre_temp_3_8)), JMI_TRUE, JMI_FALSE, pre_z_5);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_y_2 - (2), _sw(1), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_y_2 - (2), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_2_7 = LOG_EXP_AND(_sw(1), _z_5);
+    _temp_2_7 = LOG_EXP_AND(_sw(0), _z_5);
     _v_4 = COND_EXP_EQ(LOG_EXP_AND(_temp_2_7, LOG_EXP_NOT(pre_temp_2_7)), JMI_TRUE, JMI_FALSE, pre_v_4);
 /********* Write back reinits *******/
  
@@ -5388,32 +5388,32 @@ $C_ode_guards$
     _temp_1_6 = LOG_EXP_AND(_sw(0), pre_z_5);
     _z_5 = pre_z_5;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_y_2 - (2), _sw(1), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_y_2 - (2), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_2_7 = LOG_EXP_AND(_sw(1), _z_5);
+    _temp_2_7 = LOG_EXP_AND(_sw(0), _z_5);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_x_1 - (2), _sw(2), jmi->events_epsilon, JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(_x_1 - (2), _sw(1), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_3_8 = _sw(2);
+    _temp_3_8 = _sw(1);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(_time - (1), _sw(3), jmi->events_epsilon, JMI_REL_GT);
-    }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(_time - (1.1), _sw(4), jmi->events_epsilon, JMI_REL_LT);
+        _sw(2) = jmi_turn_switch(_time - (1), _sw(2), jmi->events_epsilon, JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(5) = jmi_turn_switch(_time - (2), _sw(5), jmi->events_epsilon, JMI_REL_GT);
+        _sw(3) = jmi_turn_switch(_time - (1.1), _sw(3), jmi->events_epsilon, JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(6) = jmi_turn_switch(_time - (2.1), _sw(6), jmi->events_epsilon, JMI_REL_LT);
+        _sw(4) = jmi_turn_switch(_time - (2), _sw(4), jmi->events_epsilon, JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(7) = jmi_turn_switch(_time - (3), _sw(7), jmi->events_epsilon, JMI_REL_GT);
+        _sw(5) = jmi_turn_switch(_time - (2.1), _sw(5), jmi->events_epsilon, JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(8) = jmi_turn_switch(_time - (3.1), _sw(8), jmi->events_epsilon, JMI_REL_LT);
+        _sw(6) = jmi_turn_switch(_time - (3), _sw(6), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_4_9 = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6))), LOG_EXP_AND(_sw(7), _sw(8)));
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(7) = jmi_turn_switch(_time - (3.1), _sw(7), jmi->events_epsilon, JMI_REL_LT);
+    }
+    _temp_4_9 = LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(2), _sw(3)), LOG_EXP_AND(_sw(4), _sw(5))), LOG_EXP_AND(_sw(6), _sw(7)));
     pre_w_3 = JMI_TRUE;
     _w_3 = pre_w_3;
     pre_v_4 = JMI_TRUE;
@@ -5423,6 +5423,7 @@ $C_ode_guards$
     pre_temp_2_7 = JMI_FALSE;
     pre_temp_3_8 = JMI_FALSE;
     pre_temp_4_9 = JMI_FALSE;
+
 ")})));
 end WhenTest1;
 
@@ -5866,14 +5867,14 @@ $C_ode_derivatives$
     _temp_1_6 = _sw(0);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_time - (3), _sw(1), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_time - (3), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_2_7 = _sw(1);
+    _temp_2_7 = _sw(0);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_time - (3), _sw(2), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_time - (3), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_3_8 = _sw(2);
+    _temp_3_8 = _sw(0);
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
 /********* Write back reinits *******/
  
@@ -5886,18 +5887,18 @@ $C_ode_derivatives$
     _y1_1 = pre_y1_1;
     _y2_2 = - _y1_1 + 5;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_time - (3), _sw(1), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_time - (3), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_2_7 = _sw(1);
+    _temp_2_7 = _sw(0);
     pre_z1_3 = 0.0;
     _z1_3 = pre_z1_3;
     pre_z3_5 = 0.0;
     _z3_5 = pre_z3_5;
     _z2_4 = - _z1_3 + (- _z3_5) + 5;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_time - (3), _sw(2), jmi->events_epsilon, JMI_REL_GT);
+        _sw(0) = jmi_turn_switch(_time - (3), _sw(0), jmi->events_epsilon, JMI_REL_GT);
     }
-    _temp_3_8 = _sw(2);
+    _temp_3_8 = _sw(0);
     pre_x_0 = 0.0;
     _x_0 = pre_x_0;
     pre_temp_1_6 = JMI_FALSE;
@@ -6461,29 +6462,29 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _a_2 = x[1];
         }
         if (_sw(0)) {
-          func_CCodeGenTests_dummyFunc_def(_a_2, &tmp_1, &tmp_2);
-          _y_1 = (tmp_2);
+            func_CCodeGenTests_dummyFunc_def(_a_2, &tmp_1, &tmp_2);
+            _y_1 = (tmp_2);
         } else {
-          func_CCodeGenTests_dummyFunc_def(_b_3, &tmp_3, &tmp_4);
-          _y_1 = (tmp_4);
+            func_CCodeGenTests_dummyFunc_def(_b_3, &tmp_3, &tmp_4);
+            _y_1 = (tmp_4);
         }
         if (_sw(0)) {
-          _x_0 = (tmp_1);
+            _x_0 = (tmp_1);
         } else {
-          _x_0 = (tmp_3);
+            _x_0 = (tmp_3);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            if (_sw(1)) {
-              func_CCodeGenTests_dummyFunc_def(_x_0, &tmp_5, &tmp_6);
-              (*res)[0] = tmp_6 - (_b_3);
+            if (_sw(0)) {
+                func_CCodeGenTests_dummyFunc_def(_x_0, &tmp_5, &tmp_6);
+                (*res)[0] = tmp_6 - (_b_3);
             } else {
-              func_CCodeGenTests_dummyFunc_def(_y_1, &tmp_7, &tmp_8);
-              (*res)[0] = tmp_8 - (_b_3);
+                func_CCodeGenTests_dummyFunc_def(_y_1, &tmp_7, &tmp_8);
+                (*res)[0] = tmp_8 - (_b_3);
             }
-            if (_sw(1)) {
-              (*res)[1] = tmp_5 - (_a_2);
+            if (_sw(0)) {
+                (*res)[1] = tmp_5 - (_a_2);
             } else {
-              (*res)[1] = tmp_7 - (_a_2);
+                (*res)[1] = tmp_7 - (_a_2);
             }
         }
     }
@@ -9768,21 +9769,21 @@ $C_DAE_event_indicator_residuals$
     }
     _temp_2_4 = _sw(1);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_x_0 - (0.7), _sw(2), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(_x_0 - (0.7), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }
-    _temp_3_5 = _sw(2);
+    _temp_3_5 = _sw(0);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(_x_0 - (0.8), _sw(3), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(2) = jmi_turn_switch(_x_0 - (0.8), _sw(2), jmi->events_epsilon, JMI_REL_GEQ);
     }
-    _temp_4_6 = _sw(3);
+    _temp_4_6 = _sw(2);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(_x_0 - (0.8), _sw(4), jmi->events_epsilon, JMI_REL_LT);
+        _sw(3) = jmi_turn_switch(_x_0 - (0.8), _sw(3), jmi->events_epsilon, JMI_REL_LT);
     }
-    _temp_5_7 = _sw(4);
+    _temp_5_7 = _sw(3);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(5) = jmi_turn_switch(_x_0 - (0.7), _sw(5), jmi->events_epsilon, JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(_x_0 - (0.7), _sw(1), jmi->events_epsilon, JMI_REL_LT);
     }
-    _temp_6_8 = _sw(5);
+    _temp_6_8 = _sw(1);
     _a_1 = pre_a_1;
     _b_2 = pre_b_2;
     if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
@@ -9805,21 +9806,21 @@ $C_DAE_event_indicator_residuals$
     }
     _temp_2_4 = _sw(1);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_x_0 - (0.7), _sw(2), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(0) = jmi_turn_switch(_x_0 - (0.7), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }
-    _temp_3_5 = _sw(2);
+    _temp_3_5 = _sw(0);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(_x_0 - (0.8), _sw(3), jmi->events_epsilon, JMI_REL_GEQ);
+        _sw(2) = jmi_turn_switch(_x_0 - (0.8), _sw(2), jmi->events_epsilon, JMI_REL_GEQ);
     }
-    _temp_4_6 = _sw(3);
+    _temp_4_6 = _sw(2);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(4) = jmi_turn_switch(_x_0 - (0.8), _sw(4), jmi->events_epsilon, JMI_REL_LT);
+        _sw(3) = jmi_turn_switch(_x_0 - (0.8), _sw(3), jmi->events_epsilon, JMI_REL_LT);
     }
-    _temp_5_7 = _sw(4);
+    _temp_5_7 = _sw(3);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(5) = jmi_turn_switch(_x_0 - (0.7), _sw(5), jmi->events_epsilon, JMI_REL_LT);
+        _sw(1) = jmi_turn_switch(_x_0 - (0.7), _sw(1), jmi->events_epsilon, JMI_REL_LT);
     }
-    _temp_6_8 = _sw(5);
+    _temp_6_8 = _sw(1);
     pre_a_1 = 0.0;
     _a_1 = pre_a_1;
     _a_1 = _a_1 - 1;
@@ -9834,10 +9835,9 @@ $C_DAE_event_indicator_residuals$
 
     (*res)[0] = _x_0 - (0.7);
     (*res)[1] = _x_0 - (0.7);
-    (*res)[2] = _x_0 - (0.7);
+    (*res)[2] = _x_0 - (0.8);
     (*res)[3] = _x_0 - (0.8);
-    (*res)[4] = _x_0 - (0.8);
-    (*res)[5] = _x_0 - (0.7);
+
 ")})));
 end Algorithm16;
 
@@ -12916,7 +12916,11 @@ model TestRuntimeOptions1
 			generate_ode=true,
 			generate_runtime_option_parameters=true,
 			variability_propagation=false,
-			template="$C_runtime_option_map$",
+			template="
+$C_runtime_option_map$
+$C_variable_aliases$
+$C_set_start_values$
+",
 			generatedCode="
 const char *fmi_runtime_options_map_names[] = {
     \"_block_jacobian_check\",
@@ -12953,6 +12957,60 @@ const int fmi_runtime_options_map_vrefs[] = {
 };
 
 const int fmi_runtime_options_map_length = 24;
+#define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
+#define __cs_rel_tol_4 ((*(jmi->z))[jmi->offs_real_pi+1])
+#define __cs_step_size_6 ((*(jmi->z))[jmi->offs_real_pi+2])
+#define __events_default_tol_8 ((*(jmi->z))[jmi->offs_real_pi+3])
+#define __events_tol_factor_9 ((*(jmi->z))[jmi->offs_real_pi+4])
+#define __nle_solver_default_tol_13 ((*(jmi->z))[jmi->offs_real_pi+5])
+#define __nle_solver_min_tol_15 ((*(jmi->z))[jmi->offs_real_pi+6])
+#define __nle_solver_regularization_tolerance_16 ((*(jmi->z))[jmi->offs_real_pi+7])
+#define __nle_solver_step_limit_factor_17 ((*(jmi->z))[jmi->offs_real_pi+8])
+#define __nle_solver_tol_factor_18 ((*(jmi->z))[jmi->offs_real_pi+9])
+#define __block_solver_experimental_mode_3 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define __cs_solver_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
+#define __iteration_variable_scaling_10 ((*(jmi->z))[jmi->offs_integer_pi+2])
+#define __log_level_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
+#define __nle_solver_max_iter_14 ((*(jmi->z))[jmi->offs_integer_pi+4])
+#define __residual_equation_scaling_21 ((*(jmi->z))[jmi->offs_integer_pi+5])
+#define __block_jacobian_check_1 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define __enforce_bounds_7 ((*(jmi->z))[jmi->offs_boolean_pi+1])
+#define __nle_solver_check_jac_cond_12 ((*(jmi->z))[jmi->offs_boolean_pi+2])
+#define __rescale_after_singular_jac_19 ((*(jmi->z))[jmi->offs_boolean_pi+3])
+#define __rescale_each_step_20 ((*(jmi->z))[jmi->offs_boolean_pi+4])
+#define __runtime_log_to_file_22 ((*(jmi->z))[jmi->offs_boolean_pi+5])
+#define __use_Brent_in_1d_23 ((*(jmi->z))[jmi->offs_boolean_pi+6])
+#define __use_jacobian_equilibration_24 ((*(jmi->z))[jmi->offs_boolean_pi+7])
+#define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _time ((*(jmi->z))[jmi->offs_t])
+#define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
+
+    __block_jacobian_check_1 = (JMI_FALSE);
+    __block_jacobian_check_tol_2 = (1.0E-6);
+    __block_solver_experimental_mode_3 = (0);
+    __cs_rel_tol_4 = (1.0E-6);
+    __cs_solver_5 = (0);
+    __cs_step_size_6 = (0.001);
+    __enforce_bounds_7 = (JMI_FALSE);
+    __events_default_tol_8 = (1.0E-10);
+    __events_tol_factor_9 = (1.0E-4);
+    __iteration_variable_scaling_10 = (1);
+    __log_level_11 = (3);
+    __nle_solver_check_jac_cond_12 = (JMI_FALSE);
+    __nle_solver_default_tol_13 = (1.0E-10);
+    __nle_solver_max_iter_14 = (100);
+    __nle_solver_min_tol_15 = (1.0E-12);
+    __nle_solver_regularization_tolerance_16 = (-1.0);
+    __nle_solver_step_limit_factor_17 = (10.0);
+    __nle_solver_tol_factor_18 = (1.0E-4);
+    __rescale_after_singular_jac_19 = (JMI_TRUE);
+    __rescale_each_step_20 = (JMI_FALSE);
+    __residual_equation_scaling_21 = (1);
+    __runtime_log_to_file_22 = (JMI_FALSE);
+    __use_Brent_in_1d_23 = (JMI_FALSE);
+    __use_jacobian_equilibration_24 = (JMI_FALSE);
+    model_init_eval_parameters(jmi);
+    _x_0 = (0.0);
 ")})));
 end TestRuntimeOptions1;
 
@@ -13248,83 +13306,83 @@ $C_DAE_equation_residuals$
 			generatedCode="
     char tmp_1[2];
     char tmp_2[2];
-    char tmp_3[23];
+    char tmp_3[2];
     char tmp_4[2];
     char tmp_5[2];
-    char tmp_6[23];
+    char tmp_6[2];
     char tmp_7[2];
     char tmp_8[2];
-    char tmp_9[24];
+    char tmp_9[2];
     char tmp_10[2];
     char tmp_11[2];
-    char tmp_12[24];
+    char tmp_12[2];
     char tmp_13[2];
     char tmp_14[2];
-    char tmp_15[24];
+    char tmp_15[2];
     char tmp_16[2];
     char tmp_17[2];
-    char tmp_18[24];
-    char tmp_19[2];
-    char tmp_20[2];
-    char tmp_21[24];
-    char tmp_22[2];
-    char tmp_23[2];
-    char tmp_24[24];
-    char tmp_25[2];
-    char tmp_26[2];
-    char tmp_27[24];
+    char tmp_18[2];
     snprintf(tmp_1, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_2, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_3, 23, \"Assertion error, %s < %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
     if (strcmp(tmp_1, tmp_2) < 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_3, JMI_ASSERT_ERROR);
+        char tmp_19[23];
+        snprintf(tmp_19, 23, \"Assertion error, %s < %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_19, JMI_ASSERT_ERROR);
     }
-    snprintf(tmp_4, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_3, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_4, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_3, tmp_4) > 0 == JMI_FALSE) {
+        char tmp_20[23];
+        snprintf(tmp_20, 23, \"Assertion error, %s > %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_20, JMI_ASSERT_ERROR);
+    }
     snprintf(tmp_5, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_6, 23, \"Assertion error, %s > %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_4, tmp_5) > 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_6, JMI_ASSERT_ERROR);
+    snprintf(tmp_6, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_5, tmp_6) == 0 == JMI_FALSE) {
+        char tmp_21[24];
+        snprintf(tmp_21, 24, \"Assertion error, %s == %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_21, JMI_ASSERT_ERROR);
     }
     snprintf(tmp_7, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_8, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_9, 24, \"Assertion error, %s == %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_7, tmp_8) == 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_9, JMI_ASSERT_ERROR);
+    snprintf(tmp_8, 2, \"%s\", E_0_e[(int) _b_2]);
+    if (strcmp(tmp_7, tmp_8) <= 0 == JMI_FALSE) {
+        char tmp_22[24];
+        snprintf(tmp_22, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_22, JMI_ASSERT_ERROR);
     }
+    snprintf(tmp_9, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_10, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_9, tmp_10) <= 0 == JMI_FALSE) {
+        char tmp_23[24];
+        snprintf(tmp_23, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_23, JMI_ASSERT_ERROR);
+    }
     snprintf(tmp_11, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_12, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
-    if (strcmp(tmp_10, tmp_11) <= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_12, JMI_ASSERT_ERROR);
+    snprintf(tmp_12, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_11, tmp_12) >= 0 == JMI_FALSE) {
+        char tmp_24[24];
+        snprintf(tmp_24, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_24, JMI_ASSERT_ERROR);
     }
     snprintf(tmp_13, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_14, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_15, 24, \"Assertion error, %s <= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_13, tmp_14) <= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_15, JMI_ASSERT_ERROR);
+    if (strcmp(tmp_13, tmp_14) >= 0 == JMI_FALSE) {
+        char tmp_25[24];
+        snprintf(tmp_25, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
+        jmi_assert_failed(tmp_25, JMI_ASSERT_ERROR);
     }
+    snprintf(tmp_15, 2, \"%s\", E_0_e[(int) _a_1]);
     snprintf(tmp_16, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_17, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_18, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_16, tmp_17) >= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_18, JMI_ASSERT_ERROR);
+    if (strcmp(tmp_15, tmp_16) != 0 == JMI_FALSE) {
+        char tmp_26[24];
+        snprintf(tmp_26, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
+        jmi_assert_failed(tmp_26, JMI_ASSERT_ERROR);
     }
-    snprintf(tmp_19, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_20, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_21, 24, \"Assertion error, %s >= %s\", E_0_e[(int) _a_1], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_19, tmp_20) >= 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_21, JMI_ASSERT_ERROR);
-    }
-    snprintf(tmp_22, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_23, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_24, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _a_1], E_0_e[(int) _b_2]);
-    if (strcmp(tmp_22, tmp_23) != 0 == JMI_FALSE) {
-        jmi_assert_failed(tmp_24, JMI_ASSERT_ERROR);
-    }
-    snprintf(tmp_25, 2, \"%s\", E_0_e[(int) _b_2]);
-    snprintf(tmp_26, 2, \"%s\", E_0_e[(int) _a_1]);
-    snprintf(tmp_27, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
-    if (strcmp(tmp_25, tmp_26) != 0 == JMI_FALSE) {
+    snprintf(tmp_17, 2, \"%s\", E_0_e[(int) _b_2]);
+    snprintf(tmp_18, 2, \"%s\", E_0_e[(int) _a_1]);
+    if (strcmp(tmp_17, tmp_18) != 0 == JMI_FALSE) {
+        char tmp_27[24];
+        snprintf(tmp_27, 24, \"Assertion error, %s <> %s\", E_0_e[(int) _b_2], E_0_e[(int) _a_1]);
         jmi_assert_failed(tmp_27, JMI_ASSERT_ERROR);
     }
 
@@ -13995,5 +14053,310 @@ $C_ode_derivatives$
 /********* Write back reinits *******/
 ")})));
 end TruncDivString1;
+
+model ExternalCeval1
+function f
+	input Real a;
+	output Real b;
+	external annotation(Include="#include \"example.h\"");
+end f;
+	Real x = f(2);
+equation
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ExternalCeval1",
+			description="Test code gen ceval of external functions.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+#include \"example.h\"
+
+
+size_t d[25];
+
+/* Input declarations */
+jmi_ad_var_t a_v;
+
+/* Output declarations */
+jmi_ad_var_t b_v;
+
+/* Temp declarations */
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse inputs */
+parse(Real, a_v);
+
+
+/* Initialize outputs */
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+b_v = f(a_v);
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print outputs */
+print(Real, b_v);
+
+
+/* Free strings */
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExternalCeval1;
+
+model ExternalCeval2
+function f
+	input Real[:,:] a;
+	output Real b[size(a,1),size(a,2)];
+	external "FORTRAN 77";
+end f;
+	Real[1,1] x = f({{1}});
+equation
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ExternalCeval2",
+			description="Test code gen ceval of external functions.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+size_t d[25];
+
+/* Input declarations */
+JMI_ARRAY_DYNAMIC(a_a, 2)
+
+/* Output declarations */
+JMI_ARRAY_DYNAMIC(b_a, 2)
+
+/* Temp declarations */
+JMI_ARRAY_DYNAMIC(tmp_1, 2)
+JMI_ARRAY_DYNAMIC(tmp_2, 2)
+extern void f_(jmi_ad_var_t*, jmi_int_t*, jmi_int_t*, jmi_ad_var_t*, jmi_int_t*, jmi_int_t*);
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse inputs */
+parseArrayDims(2, d);
+JMI_ARRAY_DYNAMIC_INIT_2(a_a, d[0]*d[1], d[0], d[1]);
+parseArray(Real, a_a);
+
+
+/* Initialize outputs */
+JMI_ARRAY_DYNAMIC_INIT_2(b_a, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+JMI_ARRAY_DYNAMIC_INIT_2(tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
+JMI_ARRAY_DYNAMIC_INIT_2(tmp_2, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
+jmi_matrix_to_fortran_real(b_a, b_a->var, tmp_2->var);
+f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1), tmp_2->var, &jmi_array_size(b_a, 0), &jmi_array_size(b_a, 1));
+jmi_matrix_from_fortran_real(b_a, tmp_2->var, b_a->var);
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print outputs */
+printArray(Real, b_a);
+
+
+/* Free strings */
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExternalCeval2;
+
+model ExternalCeval3
+record R1
+	Real x;
+	R2 r2;
+	Integer k;
+end R1;
+record R2
+	Boolean b;
+	String s;
+end R2;
+function f
+	input R1 in1;
+	input R2 in2;
+	input String[:,:] sin;
+	output R1 out1;
+	output String[size(sin,1)*size(sin,2)] sout;
+	external;
+end f;
+	R1 rec;
+	R2 t;
+equation
+	t = R2(false,"hej");
+	(rec) = f(R1(1,t,2), R2(true,"hej2"),{{"hej3"}});
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ExternalCeval3",
+			description="Test code gen ceval of external functions.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+typedef struct _R1_1_r {
+    jmi_ad_var_t x;
+    R2_0_r* r2;
+    jmi_ad_var_t k;
+} R1_1_r;
+JMI_RECORD_ARRAY_TYPE(R1_1_r, R1_1_ra)
+
+typedef struct _R2_0_r {
+    jmi_ad_var_t b;
+    char* s;
+} R2_0_r;
+JMI_RECORD_ARRAY_TYPE(R2_0_r, R2_0_ra)
+
+
+size_t d[25];
+
+/* Input declarations */
+JMI_RECORD_STATIC(R1_1_r, in1_v)
+JMI_RECORD_STATIC(R2_0_r, tmp_1)
+JMI_RECORD_STATIC(R2_0_r, in2_v)
+JMI_ARRAY_DYNAMIC(sin_a, 2)
+
+/* Output declarations */
+JMI_RECORD_STATIC(R1_1_r, out1_v)
+JMI_RECORD_STATIC(R2_0_r, tmp_2)
+JMI_ARRAY_DYNAMIC(sout_a, 1)
+
+/* Temp declarations */
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse inputs */
+parse(Real, in1_v.x);
+parse(Boolean, in1_v.r2.b);
+parse(String, in1_v.r2.s);
+parse(Integer, in1_v.k);
+
+parse(Boolean, in2_v.b);
+parse(String, in2_v.s);
+
+parseArrayDims(2, d);
+JMI_ARRAY_DYNAMIC_INIT_2(sin_a, d[0]*d[1], d[0], d[1]);
+parseArray(String, sin_a);
+
+
+/* Initialize outputs */
+JMI_ARRAY_DYNAMIC_INIT_1(sout_a, jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1), jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1));
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+f(in1_v, in2_v, sin_a->var, jmi_array_size(sin_a, 0), jmi_array_size(sin_a, 1), &out1_v, sout_a->var, jmi_array_size(sout_a, 0));
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print outputs */
+print(Real, out1_v.x);
+print(Boolean, out1_v.r2.b);
+print(String, out1_v.r2.s);
+print(Integer, out1_v.k);
+
+printArray(String, sout_a);
+
+
+/* Free strings */
+free(in1_v.r2.s)
+free(in2_v.s)
+for (i = 0; i < jmi_array_size(sin_a, 0) * jmi_array_size(sin_a, 1); i++) {
+    free(jmi_array_ref_1(sin_a,i));
+
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExternalCeval3;
+
+model ExternalCeval4
+	
+record R
+	String s;
+	Boolean b;
+end R;
+function f
+	input String s;
+	input Boolean b;
+	output R r;
+	output Integer i;
+	external i = realFunc(s,b,r);
+end f;
+	R x;
+	Integer y;
+equation
+	(x,y) = f("hej", true);
+
+	annotation(__JModelica(UnitTesting(tests={
+		CCodeGenTestCase(
+			name="ExternalCeval4",
+			description="Test code gen ceval of external functions.",
+			variability_propagation=false,
+			inline_functions="none",
+			template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_main$
+",
+			generatedCode="
+typedef struct _R_0_r {
+    char* s;
+    jmi_ad_var_t b;
+} R_0_r;
+JMI_RECORD_ARRAY_TYPE(R_0_r, R_0_ra)
+
+
+size_t d[25];
+
+/* Input declarations */
+char* s_v;
+jmi_ad_var_t b_v;
+
+/* Output declarations */
+jmi_ad_var_t i_v;
+JMI_RECORD_STATIC(R_0_r, r_v)
+
+/* Temp declarations */
+
+printf(\"START\\n\"); fflush(stdout);
+/* Parse inputs */
+parse(String, s_v);
+
+parse(Boolean, b_v);
+
+
+/* Initialize outputs */
+
+/* Call the function */
+printf(\"CALC\\n\"); fflush(stdout);
+i_v = realFunc(s_v, b_v, &r_v);
+printf(\"DONE\\n\"); fflush(stdout);
+
+/* Print outputs */
+print(Integer, i_v);
+
+print(String, r_v.s);
+print(Boolean, r_v.b);
+
+
+/* Free strings */
+free(s_v)
+
+printf(\"END\\n\"); fflush(stdout);
+")})));
+end ExternalCeval4;
 
 end CCodeGenTests;

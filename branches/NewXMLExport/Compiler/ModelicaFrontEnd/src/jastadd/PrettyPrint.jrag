@@ -918,7 +918,8 @@ aspect FlatPrettyPrint {
 		String nextInd = p.indent(indent);
 		str.print(indent + "fclass " + name() + "\n");
 		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable()) {
+	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
+	  		        !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
 	  			p.print(fv, str, nextInd);
 	  			str.print(";\n");  
 	  		}
@@ -1886,33 +1887,34 @@ aspect FlatPrettyPrint {
 	}
 	
 	syn String FTypePrefixInputOutput.toString();
-	eq FInput.toString() = "input";
-	eq FOutput.toString()= "output";
+	eq FInput.toString()      = "input";
+	eq FOutput.toString()     = "output";
 	syn String FTypePrefixVariability.toString();
-	eq FParameter.toString() = "parameter ";
-	eq FDiscrete.toString() = "discrete ";
-	eq FConstant.toString() = "constant ";
+	eq FParameter.toString()  = "parameter ";
+	eq FDiscrete.toString()   = "discrete ";
+	eq FConstant.toString()   = "constant ";
 	eq FContinuous.toString() = "";	
 	
 	syn String FTypePrefixVariability.toStringLiteral();
-	eq FParameter.toStringLiteral() = "Parameter";
-	eq FDiscrete.toStringLiteral() = "Discrete";
-	eq FConstant.toStringLiteral() = "Constant";
+	eq FParameter.toStringLiteral()  = "Parameter";
+	eq FDiscrete.toStringLiteral()   = "Discrete";
+	eq FConstant.toStringLiteral()   = "Constant";
 	eq FContinuous.toStringLiteral() = "Continuous";
 	
 	syn String Restriction.toString();
-	eq Model.toString() = "model";
-	eq Block.toString() = "block";
-	eq MClass.toString() = "class";
-	eq Connector.toString() = "connector";
-	eq MType.toString() = "type";
-	eq MPackage.toString() = "package";
-	eq Function.toString() = "function";
-	eq Record.toString() = "record";
+	eq Model.toString()     = "model";
+	eq Block.toString()     = "block";
+	eq MClass.toString()    = "class";
+    eq Connector.toString() = "connector";
+	eq MType.toString()     = "type";
+	eq MPackage.toString()  = "package";
+	eq Function.toString()  = "function";
+    eq Record.toString()    = "record";
+    eq Operator.toString()  = "operator";
 
     syn String ComponentDecl.toString() = prettyPrint("");
-    syn String Access.toString() = prettyPrint("");
-    syn String Modification.toString() = prettyPrint("");
+    syn String Access.toString()        = prettyPrint("");
+    syn String Modification.toString()  = prettyPrint("");
 }
 
 aspect PrettyPrint_MC {

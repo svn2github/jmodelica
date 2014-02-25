@@ -24,10 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "boost/flyweight.hpp"
 
 #include "types/VariableType.hpp"
-#include "RefCountedNode.hpp"
+#include "OwnedNode.hpp"
 #include "Ref.hpp"
 namespace ModelicaCasADi
 {
+class Model;
+
 /** 
  * Abstract class for Variables, using symolic MX. A variable holds data 
  * so that it can represent a Modelica or Optimica variable. This data
@@ -37,7 +39,8 @@ namespace ModelicaCasADi
  * A variable can also hold a VariableType that contains information about 
  * its default attributes or the attributes of its user defined type. 
  */
-class Variable : public RefCountedNode {
+
+class Variable : public OwnedNode {
     public:
         typedef std::string AttributeKey; 
         typedef CasADi::MX AttributeValue;
@@ -57,12 +60,12 @@ class Variable : public RefCountedNode {
             INTERNAL
         };
         enum Variability {
-            CONTINUOUS,
-            DISCRETE,
+            CONSTANT,
             PARAMETER,
-            CONSTANT
+            DISCRETE,
+            CONTINUOUS
         };
-        Variable();
+        Variable(Model *owner);
         /**
          * The Variable class should not be used, use subclasses such 
          * as RealVariable instead.
@@ -71,7 +74,7 @@ class Variable : public RefCountedNode {
          * @param An entry of the enum Variability
          * @param A VariableType, default is a reference to NULL. 
          */
-        Variable(CasADi::MX var, Causality causality,
+        Variable(Model *owner, CasADi::MX var, Causality causality,
                 Variability variability, 
                 Ref<VariableType> declaredType = Ref<VariableType>());
         
@@ -201,6 +204,7 @@ class Variable : public RefCountedNode {
         AttributeValue* getAttributeForAlias(AttributeKey key);
         AttributeKey keyForAlias(AttributeKey key) const;
         void setAttributeForAlias(AttributeKey key, AttributeValue val);
+        Model &myModel() { return *((Model *)owner); }
     private:
         Causality causality;
         Variability variability;

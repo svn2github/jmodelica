@@ -54,11 +54,12 @@ namespace jl = java::lang;
 using org::jmodelica::util::OptionRegistry;
 using std::cout;  using std::endl; using std::string;
 using std::vector;
-using ModelicaCasADi::Model;
-using ModelicaCasADi::CompilerOptionsWrapper;
-using ModelicaCasADi::Ref;
 
-Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+namespace ModelicaCasADi {
+
+void transferModelicaModel(Ref<Model> m, string modelName, const vector<string> &modelFiles,
+                                 Ref<CompilerOptionsWrapper> options, string log_level)
+{
     try {
         // initalizeClass is needed on classes where static variables are acessed. 
         // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
@@ -79,9 +80,9 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
 //             throw std::runtime_error("Enum variables are not supported in CasADiInterface");
 //         }
         
-        // Create a model with the model identfier.
-        Ref<Model> m = new Model(env->toString(fclass.nameUnderscore().this$));
-        
+        // Initialize the model with the model identfier.
+        m->initializeModel(env->toString(fclass.nameUnderscore().this$));
+
         /***** ModelicaCasADi::Model *****/
         // Transfer time variable
         transferTime<mc::FClass>(m, fclass);
@@ -100,13 +101,10 @@ Ref<Model> transferModelicaModel(string modelName, const vector<string> &modelFi
         
         // Functions
         transferFunctions<mc::FClass, mc::List, mc::FFunctionDecl>(m, fclass);
-        
-        // Done
-        return m;                   
     }
     catch (JavaError e) {
         rethrowJavaException(e);
     }
-    return NULL;
-    
 }
+
+}; // End namespace

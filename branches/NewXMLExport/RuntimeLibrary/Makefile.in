@@ -106,6 +106,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MINGW_HOME = @MINGW_HOME@
+MINPACK_HOME = @MINPACK_HOME@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -208,9 +209,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign RuntimeLibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu RuntimeLibrary/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign RuntimeLibrary/Makefile
+	  $(AUTOMAKE) --gnu RuntimeLibrary/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -408,7 +409,7 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	esac
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR)
-	cd $(RUNTIMELIBRARY_BUILD_DIR) && make $(AM_MAKEFLAGS) install
+	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 
 check-local:
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test

@@ -15,21 +15,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "Variable.hpp"
+#include "Model.hpp"
+
 using std::ostream; using CasADi::MX;
 namespace ModelicaCasADi 
 {
-Variable::Variable() : negated(false) {
+Variable::Variable(Model *owner) : negated(false), OwnedNode(owner) {
     var = MX();
     myModelVariable = Ref<Variable>(NULL);
     declaredType = Ref<VariableType>(NULL);
 }
 
-Variable::Variable(MX var, Variable::Causality causality, 
-                 Variable::Variability variability,
-                 Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
-                 causality(causality),
-                 variability(variability),
-                 negated(false) {
+Variable::Variable(Model *owner, MX var, Variable::Causality causality, 
+                   Variable::Variability variability,
+                   Ref<VariableType> declaredType /* Ref<VariableType>() */) : 
+  causality(causality), variability(variability), negated(false), OwnedNode(owner) {
     if (var.isConstant()) {
         throw std::runtime_error("A variable must have a symbolic MX");
     }
@@ -127,14 +127,17 @@ void Variable::setAttributeForAlias(AttributeKey key, AttributeValue val) {
 }
 
 void Variable::setAttribute(AttributeKey key, AttributeValue val) { 
-    if (key == "bindingExpression" && hasAttributeSet("bindingExpression")) {
-        MX bindingExpression = *getAttribute(key);
-        if (bindingExpression.isConstant() && (!val.isConstant())) {
-            throw std::runtime_error("It is not allowed to make independent parameters dependent");
-        } else if (!bindingExpression.isConstant()) {
-            throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
+    if (key == "bindingExpression") {
+        myModel().setDirty();
+        if (hasAttributeSet("bindingExpression")) {
+            MX bindingExpression = *getAttribute(key);
+            if (bindingExpression.isConstant() && (!val.isConstant())) {
+                throw std::runtime_error("It is not allowed to make independent parameters dependent");
+            } else if (!bindingExpression.isConstant()) {
+                throw std::runtime_error("It is not allowed to change binding expression of dependent parameters");
+            }
         }
-    } 
+    }
     
     if (isAlias()) {
         setAttributeForAlias(key, val);

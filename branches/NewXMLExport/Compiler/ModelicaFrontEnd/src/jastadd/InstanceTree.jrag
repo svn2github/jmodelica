@@ -1135,15 +1135,18 @@ aspect InstanceTreeConstruction {
     }
     
     public abstract InstRestriction Restriction.newInstRestriction();
-    public InstModel Model.newInstRestriction()         { return new InstModel(); }
-    public InstBlock Block.newInstRestriction()         { return new InstBlock(); }
-    public InstMClass MClass.newInstRestriction()       { return new InstMClass(); }
-    public InstConnector Connector.newInstRestriction() { return new InstConnector(); }
+    public InstModel               Model.newInstRestriction()               { return new InstModel(); }
+    public InstBlock               Block.newInstRestriction()               { return new InstBlock(); }
+    public InstMClass              MClass.newInstRestriction()              { return new InstMClass(); }
+    public InstConnector           Connector.newInstRestriction()           { return new InstConnector(); }
     public InstExpandableConnector ExpandableConnector.newInstRestriction() { return new InstExpandableConnector(); }
-    public InstMType MType.newInstRestriction()         { return new InstMType(); }
-    public InstMPackage MPackage.newInstRestriction()   { return new InstMPackage(); }
-    public InstFunction Function.newInstRestriction()   { return new InstFunction(); }
-    public InstMRecord Record.newInstRestriction()      { return new InstMRecord(); }
+    public InstMType               MType.newInstRestriction()               { return new InstMType(); }
+    public InstMPackage            MPackage.newInstRestriction()            { return new InstMPackage(); }
+    public InstFunction            Function.newInstRestriction()            { return new InstFunction(); }
+    public InstMRecord             Record.newInstRestriction()              { return new InstMRecord(); }
+    public InstOperator            Operator.newInstRestriction()            { return new InstOperator(); }
+    public InstOperatorFunction    OperatorFunction.newInstRestriction()    { return new InstOperatorFunction(); }
+    public InstOperatorRecord      OperatorRecord.newInstRestriction()      { return new InstOperatorRecord(); }
 
     // Build an InstExtends
 	public InstExtends ExtendsClause.newInstExtends() {

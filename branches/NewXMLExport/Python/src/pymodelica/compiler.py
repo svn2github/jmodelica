@@ -402,7 +402,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     """
     JVM_PATH = _get_separate_JVM()
         
-    JAVA_CLASS_PATH = pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver.jar')
+    JAVA_CLASS_PATH = pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar')
  
     comp = _which_compiler(file_name, compiler)
     if comp is 'MODELICA':

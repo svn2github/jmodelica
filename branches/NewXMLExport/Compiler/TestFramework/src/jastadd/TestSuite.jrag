@@ -51,7 +51,7 @@ public class TestSuite {
 		sr.collectTestCases(this,className);
 	}
 	
-	public void dumpJunit(String testFile, String dir) {
+	public File dumpJunit(String testFile, String dir) {
 		SourceRoot sr = new SourceRoot();
 		String lang = sr.language().toLowerCase();
 		
@@ -95,6 +95,8 @@ public class TestSuite {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return file;
 	}
 	
 	public void add(TestCase tc) {

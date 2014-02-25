@@ -76,6 +76,7 @@ set(MC_HPP
   Ref.hpp
   SharedNode.hpp
   RefCountedNode.hpp
+  OwnedNode.hpp
   sharedTransferFunctionality.hpp
   tinyxml2.h
   transferModelica.hpp

@@ -1205,10 +1205,6 @@ public class Var implements Comparable<Var> {
 		return this.isIter;
 	}
 	
-	public long stateSelectionWeight() {
-		return v.stateSelectionWeight();
-	}
-	
 	public boolean markedAsIterationVariable() {
 		return getVariable().isHGTVarComponent();
 	}

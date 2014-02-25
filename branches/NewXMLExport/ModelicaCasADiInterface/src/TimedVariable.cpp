@@ -19,8 +19,8 @@ using std::ostream; using CasADi::MX;
 using ModelicaCasADi::Variable;
 namespace ModelicaCasADi 
 {
-TimedVariable::TimedVariable(MX var, Ref<Variable> baseVariable, MX timePoint) :
-                Variable(var, Variable::INTERNAL, Variable::PARAMETER) {
+TimedVariable::TimedVariable(Model *owner, MX var, Ref<Variable> baseVariable, MX timePoint) :
+  Variable(owner, var, Variable::INTERNAL, Variable::PARAMETER) {
     
     if (baseVariable->getType() != Variable::REAL) {
         throw std::runtime_error("Timed variables only supported for real variables");

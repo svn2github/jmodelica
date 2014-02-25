@@ -55,7 +55,8 @@ typedef enum jmi_block_solver_jac_variability_t {
 typedef enum {
      JMI_SIMPLE_NEWTON_SOLVER, /* Only used for testing at some point. Not maintained. */
      JMI_KINSOL_SOLVER,
-     JMI_LINEAR_SOLVER
+     JMI_LINEAR_SOLVER,
+     JMI_MINPACK_SOLVER
 } jmi_block_solver_kind_t;
 
 /** \brief Scaling mode for the residuals in non-linear solver*/
@@ -76,9 +77,8 @@ typedef enum jmi_block_solver_iv_scaling_mode_t {
 /** \brief Experimental features in the solver */
 typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_none = 0,
-    jmi_block_solver_experimental_converge_switches_first = 1,
-    jmi_block_solver_experimental_steepest_descent = 2,
-    jmi_block_solver_experimental_steepest_descent_first = 4
+    jmi_block_solver_experimental_steepest_descent = 1,
+    jmi_block_solver_experimental_steepest_descent_first = 2
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {

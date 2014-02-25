@@ -14,7 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 /* FMI 2.0 functions common for both ME and CS.*/
 
 FMI_Export const char* fmiGetTypesPlatform() {
@@ -39,19 +38,9 @@ FMI_Export fmiComponent fmiInstantiate(fmiString instanceName,
                                        const fmiCallbackFunctions* functions, 
                                        fmiBoolean                  visible,
                                        fmiBoolean                  loggingOn) {
-                                           
-    
-    if (fmuType == fmiCoSimulation) {
-#ifndef FMUCS20
-        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Co-Simulation FMU.");
+    if (!can_instantiate(fmuType, instanceName, functions))
         return NULL;
-#endif
-    } else if (fmuType == fmiModelExchange) {
-#ifndef FMUME20
-        functions->logger(0, instanceName, fmiError, "ERROR", "The model is not compiled as a Model Exchange FMU.");
-        return NULL;
-#endif
-    }
+
     return fmi2_instantiate(instanceName, fmuType, fmuGUID, fmuResourceLocation,
                             functions, visible, loggingOn);
 }

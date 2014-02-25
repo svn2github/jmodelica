@@ -1654,7 +1654,7 @@ aspect CADCodeGen {
 	
 	@Override
 	public void FAssert.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
-		super.genTempVars_CAD(p, str, indent);
+		p.printPreSteps(getTest(), str, indent);
 		prettyPrint_C(p, str, indent);
 	}
 	

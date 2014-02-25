@@ -45,15 +45,21 @@ template <class T> class Ref {
 #endif
 
         const T *operator->() const { assert(node != NULL); return node; }
-        T *operator->() { assert(node != NULL); return node; }
+        T *operator->()             { assert(node != NULL); return node; }
+
+        const T &operator*() const { assert(node != NULL); return *node; }
+        T &operator*()             { assert(node != NULL); return *node; }
         
         const T *getNode() const { return node; }
-        T *getNode() { return node; }
+        T *getNode()             { return node; }
         
         template <class S>
         bool operator==(const Ref<S>& ref) const { return node == ref.getNode(); }
         template <class S>
         bool operator!=(const Ref<S>& ref) const { return node != ref.getNode(); }
+
+        bool operator==(void *p) const { return node == p; }
+        bool operator!=(void *p) const { return node != p; }
         
         void setNode(T *node) {
             if (this->node == node) return;
@@ -73,6 +79,11 @@ inline std::ostream &operator<<(std::ostream &os, Ref<T> t) {
     os << *t.getNode();
     return os;
 }
+
+template <class T>
+bool operator==(void *p, const Ref<T> &ref) { return ref.node == p; }
+template <class T>
+bool operator!=(void *p, const Ref<T> &ref) { return ref.node != p; }
 
 }; // End namespace
 #endif

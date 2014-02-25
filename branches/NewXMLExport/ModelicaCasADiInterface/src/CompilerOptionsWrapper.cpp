@@ -104,5 +104,5 @@ void CompilerOptionsWrapper::addRealOption(std::string opt, double val) {
 }
 
 
-void CompilerOptionsWrapper::print(std::ostream& os) const { os << env->toString(optr.this$); }
+void CompilerOptionsWrapper::print(std::ostream& os) const { os << "CompilerOptionsWrapper(" << env->toString(optr.this$) << ")"; }
 }; // End namespace

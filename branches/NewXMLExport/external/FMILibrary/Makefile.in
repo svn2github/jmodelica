@@ -106,6 +106,7 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MINGW_HOME = @MINGW_HOME@
+MINPACK_HOME = @MINPACK_HOME@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -207,9 +208,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign external/FMILibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu external/FMILibrary/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign external/FMILibrary/Makefile
+	  $(AUTOMAKE) --gnu external/FMILibrary/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

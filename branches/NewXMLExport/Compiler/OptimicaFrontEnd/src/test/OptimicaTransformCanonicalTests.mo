@@ -605,11 +605,11 @@ parameter equation
  dynamic[4] = if 4 <= N_states then true else false;
  dynamic[5] = if 5 <= N_states then true else false;
 equation
- der(x[1]) = (- a[1]) * x[1] + a[1] * x[2];
- der(x[2]) = (- a[2]) * x[2] + a[2] * x[3];
- der(x[3]) = (- a[3]) * x[3] + a[3] * x[4];
- 0 = (- a[4]) * x[4] + a[4] * x[5];
- 0 = (- a[5]) * x[5] + a[5] * u;
+ der(x[1]) = -3.0 * x[1] + 3.0 * x[2];
+ der(x[2]) = -2.5 * x[2] + 2.5 * x[3];
+ der(x[3]) = -2.0 * x[3] + 2.0 * x[4];
+ 0 = -1.5 * x[4] + 1.5 * x[5];
+ 0 = -1.0 * x[5] + u;
  y = x[1];
 end OptimicaTransformCanonicalTests.DAETest1;
 ")})));

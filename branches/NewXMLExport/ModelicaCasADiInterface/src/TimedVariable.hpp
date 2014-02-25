@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ModelicaCasADi
 {
+class Model;
+
 /** 
  * A timed variable keeps a reference to its base variable (e.g. a refernce to X
  * for X(1)), and a time point (e.g. 1). 
@@ -36,7 +38,7 @@ class TimedVariable : public Variable {
          * @param Ref<Variable> baseVariable, a reference to its base varible.
          * @param MX Timepoint, this variable's time point
          */
-        TimedVariable(CasADi::MX var, Ref<Variable> baseVariable, CasADi::MX timePoint);
+        TimedVariable(Model *owner, CasADi::MX var, Ref<Variable> baseVariable, CasADi::MX timePoint);
         
         /**
          * The time point for this TimedVariable

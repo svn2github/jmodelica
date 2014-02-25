@@ -165,15 +165,18 @@ BuiltInClassDecl : ClassDecl ::= Name:IdDecl;
 ConstrainingClause : SourceBaseNode ::= Access [ClassModification];
 
 abstract Restriction : SourceBaseNode;
-Model     : Restriction;
-Block     : Restriction;
-MClass    : Restriction;
-Connector : Restriction;
+Model               : Restriction;
+Block               : Restriction;
+MClass              : Restriction;
+Connector           : Restriction;
 ExpandableConnector : Connector;
-MType     : Restriction;
-MPackage  : Restriction;
-Function  : Restriction;
-Record    : Restriction;
+MType               : Restriction;
+MPackage            : Restriction;
+Function            : Restriction;
+Record              : Restriction;
+OperatorRecord      : Record;
+Operator            : Restriction;
+OperatorFunction    : Function;
 
 Replaceable  : SourceBaseNode;
 Redeclare    : SourceBaseNode;

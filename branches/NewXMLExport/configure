@@ -640,6 +640,7 @@ WITH_ECLIPSE_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
+MINPACK_HOME
 WITH_SUNDIALS_FALSE
 WITH_SUNDIALS_TRUE
 WITH_SUNDIALS
@@ -699,6 +700,7 @@ F77
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
+am__nodep
 AMDEPBACKSLASH
 AMDEP_FALSE
 AMDEP_TRUE
@@ -3006,11 +3008,11 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
-# Always define AMTAR for backward compatibility.
+# Always define AMTAR for backward compatibility.  Yes, it's still used
+# in the wild :-(  We should find a proper way to deprecate it ...
+AMTAR='$${TAR-tar}'
 
-AMTAR=${AMTAR-"${am_missing_run}tar"}
-
-am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
+am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 
 
 
@@ -3580,6 +3582,7 @@ fi
 if test "x$enable_dependency_tracking" != xno; then
   am_depcomp="$ac_aux_dir/depcomp"
   AMDEPBACKSLASH='\'
+  am__nodep='_no'
 fi
  if test "x$enable_dependency_tracking" != xno; then
   AMDEP_TRUE=
@@ -3604,6 +3607,7 @@ else
   # instance it was reported that on HP-UX the gcc test will end up
   # making a dummy file named `D' -- because `-MD' means `put the output
   # in D'.
+  rm -rf conftest.dir
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -3663,7 +3667,7 @@ else
 	break
       fi
       ;;
-    msvisualcpp | msvcmsys)
+    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
       # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
@@ -4659,8 +4663,8 @@ esac
 
 
 
-macro_version='2.4'
-macro_revision='1.3294'
+macro_version='2.4.2'
+macro_revision='1.3337'
 
 
 
@@ -5298,6 +5302,7 @@ else
   # instance it was reported that on HP-UX the gcc test will end up
   # making a dummy file named `D' -- because `-MD' means `put the output
   # in D'.
+  rm -rf conftest.dir
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -5357,7 +5362,7 @@ else
 	break
       fi
       ;;
-    msvisualcpp | msvcmsys)
+    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
       # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
@@ -18875,6 +18880,9 @@ fi
 SUNDIALS_HOME=$sundials
 
 
+MINPACK_HOME="$CURR_DIR/minpack_install"
+
+
 # Check whether --with-superlu was given.
 if test "${with_superlu+set}" = set; then :
   withval=$with_superlu; superlu=$withval
@@ -19536,7 +19544,7 @@ fi
 subdirs="$subdirs ThirdParty/Sundials/sundials-2.5.0"
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh RuntimeLibrary/Makefile jm_tests"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile docbook/UsersGuide/Makefile Python/jm_ipython.sh Python/jm_python.sh RuntimeLibrary/Makefile jm_tests"
 
 
 cat >confcache <<\_ACEOF
@@ -20774,6 +20782,7 @@ do
     "ThirdParty/Blas/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Blas/Makefile" ;;
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
+    "ThirdParty/Minpack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minpack/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "external/FMILibrary/Makefile") CONFIG_FILES="$CONFIG_FILES external/FMILibrary/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;

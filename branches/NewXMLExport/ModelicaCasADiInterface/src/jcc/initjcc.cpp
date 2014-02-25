@@ -34,14 +34,14 @@ jint initJVM()
     string mcjar = mclib + "/ModelicaCompiler.jar";
     string ocjar = mclib + "/OptimicaCompiler.jar";
     string utiljar = mclib + "/util.jar";
-    string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver.jar";
+    string beaverjar = jmhome + "/ThirdParty/Beaver/lib/beaver-rt.jar";
     string classpath = mcjar + CLASSPATH_SEP + ocjar + CLASSPATH_SEP + utiljar + CLASSPATH_SEP + beaverjar;
 
     string libpath = jmhome + "/lib/casadi_interface" + CLASSPATH_SEP
                    + jmhome + "/ThirdParty/CasADi/lib";
     
     return initJVM(classpath.data(), libpath.data());
-}
+	}
 
 jint initJVM(const char *classpath, const char *libpath)
 {
@@ -49,7 +49,7 @@ jint initJVM(const char *classpath, const char *libpath)
 
     //     ---------------- Windows ----------------
 #if defined(_MSC_VER) || defined(__WIN32)
-    string jvmpath = string(getenv_checked("JMODELICA_SDK_HOME")) + "\\Java\\jre7-i586\\bin\\client\\jvm.dll";
+	string jvmpath = string(getenv_checked("JMODELICA_SDK_HOME")) + "\\Java\\jdk1.7.0_15\\jre\\bin\\client\\jvm.dll";
 
     HINSTANCE hVM = LoadLibrary(jvmpath.data());
     if (hVM == NULL) {

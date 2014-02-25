@@ -358,9 +358,9 @@ template <class FVar, class JMDerivativeVariable, class JMRealVariable, class Li
 void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv) {
     JMDerivativeVariable fDer = JMDerivativeVariable(fv.myDerivativeVariable().this$);
     JMRealVariable fDiff = JMRealVariable(fv.this$);
-    ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(toMX(fDiff.asMXVariable()), getCausality(fDiff),
+    ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fDiff.asMXVariable()), getCausality(fDiff),
                                 getVariability(fDiff), getUserType<FVar>(m, fDiff));    
-    ModelicaCasADi::Ref<ModelicaCasADi::DerivativeVariable> derVar = new ModelicaCasADi::DerivativeVariable(toMX(fDer.asMXVariable()),
+    ModelicaCasADi::Ref<ModelicaCasADi::DerivativeVariable> derVar = new ModelicaCasADi::DerivativeVariable(m.getNode(), toMX(fDer.asMXVariable()),
                                      realVar, getUserType<FVar>(m, fDer));
     realVar->setMyDerivativeVariable(derVar);
     transferAttributes<FVar, List, Attribute, Comment>(realVar, fDiff);
@@ -380,7 +380,7 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &f
         transferDifferentiatedVariableAndItsDerivative<FVar, JMDerivativeVariable, JMRealVariable, List, Attribute, Comment>(m, fv);
         return; 
     } 
-    ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(toMX(fv.asMXVariable()), 
+    ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(realVar, fv);
     handleAliasVariable(m, realVar, fv);
@@ -390,7 +390,7 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &f
 
 template <class FVar, class List, class Attribute, class Comment>
 void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
-    ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(toMX(fv.asMXVariable()), 
+    ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
     handleAliasVariable(m, intVar, fv);
@@ -400,7 +400,7 @@ void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar
 
 template <class FVar, class List, class Attribute, class Comment>
 void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &fv){
-    ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(toMX(fv.asMXVariable()), 
+    ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()), 
                                 getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
     handleAliasVariable(m, boolVar, fv);

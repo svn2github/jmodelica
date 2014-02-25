@@ -176,6 +176,8 @@ def run_demo(with_plots=True):
     opt_opts = cstr.optimize_options()
     opt_opts['n_e'] = 100 # Number of elements
     opt_opts['init_traj'] = init_res.result_data
+    opt_opts['nominal_traj'] = init_res.result_data
+    opt_opts['IPOPT_options']['tol'] = 1e-10
     
     # Solve the optimal control problem
     res = cstr.optimize(options=opt_opts)
@@ -240,14 +242,20 @@ def run_demo(with_plots=True):
     sim_model.set('T_init',T_0_A)
 
     # Simulate using optimized input
+    sim_opts = sim_model.simulate_options()
+    sim_opts['CVode_options']['rtol'] = 1e-6
+    sim_opts['CVode_options']['atol'] = 1e-8
     res = sim_model.simulate(start_time=0., final_time=150.,
-                             input=('Tc', opt_input))
+                             input=('Tc', opt_input), options=sim_opts)
     
     # Extract variable profiles
     c_sim=res['c']
     T_sim=res['T']
     Tc_sim=res['Tc']
     time_sim = res['time']
+
+    # Verify results
+    N.testing.assert_array_less(abs(c_res[-1] - c_sim[-1])/c_res[-1], 5e-2)
     
     # Plot the results
     if with_plots:

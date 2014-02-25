@@ -293,9 +293,11 @@ class CompilerLogHandler:
         if exception.kind == 'org.jmodelica.util.OptionRegistry$UnknownOptionException':
             raise UnknownOptionError(exception.message)
         
-        if exception.kind == 'org.jmodelica.modelica.compiler.CcodeCompilationException' or \
-            exception.kind == 'org.jmodelica.optimica.compiler.CcodeCompilationException':
+        if exception.kind == 'org.jmodelica.util.exceptions.CcodeCompilationException':
             raise CcodeCompilationError(exception.message)
+        
+        if exception.kind == 'org.jmodelica.util.exceptions.PackingFailedException':
+            raise PackingFailedError(exception.message)
         
         if exception.kind == 'xml.sax.SAXParseException':
             raise IOError(exception.message)

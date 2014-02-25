@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jmodelica.util.Problem;
-import org.jmodelica.util.Problem.Severity;
 
 /**
  * Exception containing a list of compiler errors/warnings.

@@ -32,13 +32,21 @@ except ImportError:
     
 if modelicacasadi_present:
     from modelicacasadi_wrapper import OptimizationProblem as CI_OP
-    from modelicacasadi_transfer import transfer_to_casadi_interface as _transfer_to_casadi_interface
+    from modelicacasadi_transfer import transfer_model as _transfer_model
+    from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
+
+    def transfer_model(*args, **kwargs):
+        model = modelicacasadi_wrapper.Model() # no wrapper exists for Model yet
+        _transfer_model(model, *args, **kwargs)
+        return model
+
+    def transfer_optimization_problem(*args, **kwargs):
+        model = OptimizationProblem()
+        _transfer_optimization_problem(model, *args, **kwargs)
+        return model
 
     def transfer_to_casadi_interface(*args, **kwargs):
-        model = _transfer_to_casadi_interface(*args, **kwargs)
-        if isinstance(model, CI_OP):
-            return OptimizationProblem(model)
-        return model
+        return transfer_optimization_problem(*args, **kwargs)
 
 from pyjmi.common.core import ModelBase, get_temp_location
 from pyjmi.common import xmlparser
@@ -90,20 +98,20 @@ if not modelicacasadi_present:
     class CI_OP:
         pass
 
-class OptimizationProblem(ModelBase, CI_OP):
+class OptimizationProblem(CI_OP, ModelBase):
 
     """
     Python wrapper for the CasADi interface class OptimizationProblem.
     """
 
-    def __init__(self, optimization_problem):
+    def __init__(self):
         """
         Parameters::
 
             optimization_problem --
                 OptimizationProblem from CasADiInterface
         """
-        CI_OP.__init__(self, optimization_problem)
+        CI_OP.__init__(self)
         self.model = self
         
     def _default_options(self, algorithm):

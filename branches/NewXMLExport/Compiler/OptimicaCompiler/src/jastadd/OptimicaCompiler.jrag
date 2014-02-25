@@ -126,7 +126,7 @@ public class OptimicaCompiler extends ModelicaCompiler {
 		int arg = programarguments.size();
 	}
 	
-	public static void main(String args[]) {		
+	public static void main(String args[]) {
 		Hashtable<String, String> programarguments = extractProgramArguments(args, 0);
 		// create an empty compiler
 		OptimicaCompiler oc = new OptimicaCompiler();
@@ -135,6 +135,8 @@ public class OptimicaCompiler extends ModelicaCompiler {
 			oc.setArguments("OptimicaCompiler", args, programarguments);
 		} catch(Throwable t) {
 			log.error(t);
+			log.close();
+			System.exit(1);
 		}
 		// Compile model
 		oc.compileModelFromCommandLine(args, programarguments);

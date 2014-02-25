@@ -29,16 +29,19 @@ aspect FlatTree {
 	 * @param icd   the class being flattened
 	 * @param file  the path to the file to report errors on
 	 */
-	public static FClass FClass.create(InstClassDecl icl, String file) {
+	public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc) {
 		FlatRoot flatRoot = new FlatRoot(icl.createFClass());
 		flatRoot.setFileName(file);
 		FClass fc = flatRoot.getFClass(); // make FClass final
 		flatRoot.options = icl.root().options.copy();
+		fc.compiler = mc;
 		// TODO: We should change how the checkErrors() method works, 
 		//       since it relies on the behaviour of DefaultErrorHandler
 		icl.root().getErrorHandler().connectTo(flatRoot);
 		return fc;
 	}
+	
+	private ModelicaCompiler FClass.compiler = null;
 	
 	/**
 	 * Create a new FClass object.

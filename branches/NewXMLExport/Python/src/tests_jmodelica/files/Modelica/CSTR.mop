@@ -198,10 +198,26 @@ optimization CSTR_Opt_Unscaled_Min_Time(objective=finalTime, startTime=0,
   parameter Real T_ref = 280.099198;
 
 constraint
+  c(finalTime) = c_ref;
+  T(finalTime) = T_ref;
+
+end CSTR_Opt_Unscaled_Min_Time;
+
+optimization CSTR_Opt_Unscaled_Min_Time_FMUX(objective=finalTime, startTime=0,
+    finalTime(min=0.2, free=true, initialGuess=100))
+                                                 
+  extends CSTR(c(initialGuess=300), T(initialGuess=300, max=350),
+               Tc(initialGuess=350, min=230, max=370), c_init=956.271065,
+               T_init=250.051971);
+
+  parameter Real c_ref = 338.775766;
+  parameter Real T_ref = 280.099198;
+
+constraint
   c(1) = c_ref;
   T(1) = T_ref;
 
-end CSTR_Opt_Unscaled_Min_Time;
+end CSTR_Opt_Unscaled_Min_Time_FMUX;
 
 optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
                       startTime=0.0,

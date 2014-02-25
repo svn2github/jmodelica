@@ -1124,7 +1124,7 @@ equation
 		annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="ParameterEvalAnnotation1",
-			description="Test constant evaluation of sign()",
+			description="Test constant evaluation Evaluate parameter",
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation1
  parameter Real p1[1] = 1 /* 1 */;
@@ -1136,5 +1136,77 @@ fclass EvaluationTests.ParameterEvalAnnotation1
 end EvaluationTests.ParameterEvalAnnotation1;
 ")})));
 end ParameterEvalAnnotation1;
+
+model ParameterEvalAnnotation2
+	
+	parameter Real p;
+	parameter Real dp = p;
+	parameter Real p1 = 1 annotation (Evaluate=true);
+	parameter Real p2 = p1 + c;
+	parameter Real p3 = 3*p2 + 3;
+	parameter Real p4 = p1 + p;
+	parameter Real p5 = p3 + dp;
+	
+	constant Real c = 1;
+
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation2",
+			description="Test constant evaluation Evaluate parameter",
+			flatModel="
+fclass EvaluationTests.ParameterEvalAnnotation2
+ parameter Real p;
+ parameter Real dp;
+ parameter Real p1 = 1 /* 1 */;
+ parameter Real p2 = 2.0 /* 2.0 */;
+ parameter Real p3 = 9.0 /* 9.0 */;
+ parameter Real p4;
+ parameter Real p5;
+ constant Real c = 1;
+parameter equation
+ dp = p;
+ p4 = 1.0 + p;
+ p5 = 9.0 + dp;
+end EvaluationTests.ParameterEvalAnnotation2;
+")})));
+end ParameterEvalAnnotation2;
+
+model ParameterEvalAnnotation3
+	
+function f
+	input Real[2] i;
+	output Real[2] o = i;
+algorithm
+end f;
+
+function fs
+	input Real a;
+	output Real b = a;
+algorithm
+end fs;
+
+	constant Real[2] c = {1,2};
+	parameter Real[2] x = {1,2} + 2*f(c) annotation(Evaluate=true);
+	parameter Real[2] y = {1,2} + 2*fs(x);
+	parameter Real[2] z = 2*f(y);
+equation
+
+		annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ParameterEvalAnnotation3",
+			description="Test constant evaluation Evaluate parameter",
+			flatModel="
+fclass EvaluationTests.ParameterEvalAnnotation3
+ constant Real c[1] = 1;
+ constant Real c[2] = 2;
+ parameter Real x[1] = 3 /* 3 */;
+ parameter Real x[2] = 6.0 /* 6.0 */;
+ parameter Real y[1] = 7.0 /* 7.0 */;
+ parameter Real y[2] = 14.0 /* 14.0 */;
+ parameter Real z[1] = 14.0 /* 14.0 */;
+ parameter Real z[2] = 28.0 /* 28.0 */;
+end EvaluationTests.ParameterEvalAnnotation3;
+")})));
+end ParameterEvalAnnotation3;
 
 end EvaluationTests;

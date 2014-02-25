@@ -17,9 +17,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "BooleanVariable.hpp"
 namespace ModelicaCasADi 
 {
-BooleanVariable::BooleanVariable(CasADi::MX var, Variable::Causality causality,
+BooleanVariable::BooleanVariable(Model *owner, CasADi::MX var, Variable::Causality causality,
                            Variable::Variability variability, Ref<VariableType> declaredType /*= Ref<VariableType>()*/) :
-                           Variable(var, causality, variability, declaredType) { 
+  Variable(owner, var, causality, variability, declaredType) { 
     if (variability == Variable::CONTINUOUS) {
 		throw std::runtime_error("A boolean variable can not have continuous variability");
 	}

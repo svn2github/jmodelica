@@ -43,7 +43,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "SharedNode.hpp"
 #include "RefCountedNode.hpp"
+#include "OwnedNode.hpp"
 #include "Ref.hpp"
+#include "transferXML.hpp"
 %}
 
 %rename(_transferModelicaModel) transferModelicaModel;
@@ -59,6 +61,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
+%include "vectors.i"
 
 %include "doc.i"
 
@@ -73,6 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %instantiate_Ref(ModelicaCasADi, SharedNode)
 %instantiate_Ref(ModelicaCasADi, RefCountedNode)
+%instantiate_Ref(ModelicaCasADi, OwnedNode)
 
 %instantiate_Ref(ModelicaCasADi, Equation)
 %instantiate_Ref(ModelicaCasADi, Constraint)
@@ -101,6 +105,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %include "Printable.hpp"
 %include "SharedNode.hpp"
 %include "RefCountedNode.hpp"
+%include "OwnedNode.hpp"
 
 %include "Equation.hpp"
 %include "Constraint.hpp"
@@ -129,6 +134,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %include "transferModelica.hpp"
 %include "transferOptimica.hpp"
+%include "transferXML.hpp"
 
 %extend ModelicaCasADi::SharedNode {
     // Should be ok to take the argument as a SharedNode * instead of a Ref<SharedNode>,

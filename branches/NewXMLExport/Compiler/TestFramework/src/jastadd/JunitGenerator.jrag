@@ -75,9 +75,8 @@ public class JunitGenerator {
 		String className = new File(fileName).getName().replaceFirst("\\.[^.]*$", "");
  		JunitGenerator jg = new JunitGenerator(fileName, className);
 		StringBuilder str = new StringBuilder();
-		//jg.ts.printTests(str);
-		jg.ts.dumpJunit(fileName, args[1]);
-		//System.out.println(str.toString());
+		File outFile = jg.ts.dumpJunit(fileName, args[1]);
+		System.out.println("Generated '" + outFile.getPath() + "'.");
 	}
 	
 	

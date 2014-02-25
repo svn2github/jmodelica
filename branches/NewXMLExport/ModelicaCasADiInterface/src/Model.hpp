@@ -72,8 +72,24 @@ class Model: public RefCountedNode {
             NUM_OF_VARIABLE_KIND  // This must be defined last & no other
                                   // variables may be explicitly defined with a number
         }; // End enum VariableKind
-        /** @param string identifier, typically <packagename>_<classname>, default empty string */
-        Model(std::string identifier = "");
+        /** Create a blank, uninitialized Model */
+        Model() { dirty = false; }
+        /** Initialize the Model, before populating it.
+         * @param string identifier, typically <packagename>_<classname>, default empty string */
+        void initializeModel(std::string identifier = "");
+        virtual ~Model();
+
+        /** Evaluate the value of a parameter */
+        double get(std::string varName);
+        /** Evaluate the value of multiple parameters */
+        std::vector<double> get(const std::vector<std::string> &varNames);
+
+        /** Set the binding expression of a parameter to a value */
+        void set(std::string varName, double value);
+        /** Set the binding expressions of a number of parameters to a values */
+        void set(const std::vector<std::string> &varNames,
+                 const std::vector<double> &values);
+
         /** @param A MX */
         void setTimeVariable(CasADi::MX timeVar);
         /** @return A MX, this Model's time variable */
@@ -173,6 +189,9 @@ class Model: public RefCountedNode {
         /** Allows the use of operator << to print this class, through Printable. */
         virtual void print(std::ostream& os) const;
 
+        /** Notify the Model that dependent parameters and attributes may need to be recalculated. */
+        void setDirty() { dirty = true; }
+
         MODELICACASADI_SHAREDNODE_CHILD_PUBLIC_DEFS
     private:
         /// Identifier, typically <packagename>_<classname>
@@ -183,13 +202,16 @@ class Model: public RefCountedNode {
         std::vector<double> paramAndConstValVec;
         CasADi::MX timeVar;
         /// Vector containing pointers to all variables.
-        std::vector< Ref<Variable> > z;  
+        std::vector< Variable * > z;  
         /// Vector containing pointers to DAE equations
         std::vector< Ref<Equation> > daeEquations; 
         /// Vector containing pointers to all initial equations
         std::vector< Ref<Equation> > initialEquations; 
         /// A map for ModelFunction, key is ModelFunction's name.
         functionMap modelFunctionMap;  
+        /// Indicates whether any parameter values have been updated since
+        /// dependent parameters were last recalculated.
+        bool dirty;
         /// For classification according to the VariableKind enum. Differentiated variables may have their 
         /// myDerivativeVariable field set in the process. 
         VariableKind classifyVariable(Ref<Variable> var) const; 
@@ -219,8 +241,7 @@ class Model: public RefCountedNode {
 inline std::string Model::getIdentifier() { return identifier; }
 inline void Model::setTimeVariable(CasADi::MX timeVar) {this->timeVar = timeVar;}
 inline CasADi::MX Model::getTimeVariable() {return timeVar;}
-inline std::vector< Ref<Variable> > Model::getAllVariables() {return z;}
-inline Model::Model(std::string identifier /* = "" */) : z(), daeEquations(), initialEquations(), modelFunctionMap(), paramAndConstMXVec(), paramAndConstValVec() {
+inline void Model::initializeModel(std::string identifier) {
         this->identifier = identifier;
 }
 inline Ref<VariableType> Model::getVariableType(std::string typeName) const { 

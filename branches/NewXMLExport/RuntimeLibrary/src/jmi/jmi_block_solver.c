@@ -32,6 +32,7 @@
 #include "jmi_simple_newton.h"
 #include "jmi_kinsol_solver.h"
 #include "jmi_linear_solver.h"
+#include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
 /**
@@ -93,6 +94,15 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->solver = solver;
             block_solver->solve = jmi_kinsol_solver_solve;
             block_solver->delete_solver = jmi_kinsol_solver_delete;
+        }
+        break;
+        
+        case JMI_MINPACK_SOLVER: {
+            jmi_minpack_solver_t* solver;    
+            jmi_minpack_solver_new(&solver, block_solver);
+            block_solver->solver = solver;
+            block_solver->solve = jmi_minpack_solver_solve;
+            block_solver->delete_solver = jmi_minpack_solver_delete;
         }
         break;
 
@@ -312,71 +322,16 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
        
         jmi_log_reals(log, top_node, logInfo, "ivs", block_solver->x, block_solver->n);
 
-        converged = 0;
-        ef = 0;
-        if(options->experimental_mode & jmi_block_solver_experimental_converge_switches_first) {
-            while(1) {
-                jmi_log_node_t iter_node;
-                int non_reals_changed_flag;
-    
-                iter = 1;
-
-                iter_node = jmi_log_enter_fmt(log, logInfo, "SwitchIteration", "Local iteration <iter:%d> at <t:%E>",
-                                              iter, cur_time);
-                
-                /* Evaluate the block to update dependent variables if any */
-                ef = block_solver->F(block_solver->problem_data,block_solver->x,block_solver->res,JMI_BLOCK_EVALUATE);
-
-                if(ef != 0) {
-                    jmi_log_fmt(log, iter_node, logError, "Problem calling residual function <block:%d, iter:%d> at <t:%E>",
-                                block_solver->id, iter, cur_time);
-                    jmi_log_leave(log, iter_node);
-                    break;
-                }
-                
-                /* jmi_update_non_reals(jmi_block_residual_t* block, int* non_reals_changed_flag) */
-                ef =  block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
-                if(ef != 0) { 
-                    switch(ef) {
-                        case jmi_block_solver_status_err_event_eval:
-                            jmi_log_fmt(log, iter_node, logError, "Error evaluating switches in <block:%d, iter:%d> at <t:%E>",
-                                block_solver->id, iter, cur_time);
-                            break;
-                        case jmi_block_solver_status_err_f_eval:
-                            jmi_log_fmt(log, iter_node, logError, "Error updating discrete variables in <block:%d, iter:%d> at <t:%E>",
-                                block_solver->id, iter, cur_time);
-                            break;
-                        case jmi_block_solver_status_inf_event_loop:
-                            jmi_log_fmt(log, iter_node, logInfo, "Detected infinite loop in fixed point iteration in <block:%d, iter:%d> at <t:%E>",
-                                block_solver->id, iter, cur_time);
-                            break;
-                        case jmi_block_solver_status_event_non_converge:
-                            jmi_log_fmt(log, iter_node, logError, "Failed to converge during switches iteration due to too many iterations in <block:%d, iter:%d> at <t:%E>",
-                                block_solver->id, iter, cur_time);
-                            break;
-                        default:
-                            break;
-                    };
-                    jmi_log_leave(log, iter_node); 
-                    break; 
-                }
-                
-                block_solver->log_discrete_variables(block_solver->problem_data,top_node);
-                if(!non_reals_changed_flag) {
-                    jmi_log_fmt(log, iter_node, logInfo, "Found consistent switched state before solving at <t:%g>",
-                                cur_time);
-                    break;
-                }
-                jmi_log_leave(log, iter_node);
-            }
-        }
+        
         
         /* Save the initial values of the discrete variables for the iteration */
         block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
 
         if(block_solver->log_discrete_variables)
             block_solver->log_discrete_variables(block_solver->problem_data,top_node);
-
+        
+        converged = 0;
+        ef = 0;
         iter = 0;
         while (1){
             jmi_log_node_t iter_node;

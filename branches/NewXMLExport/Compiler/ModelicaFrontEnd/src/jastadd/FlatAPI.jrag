@@ -1371,6 +1371,13 @@ aspect FlatAPI {
 		return this.meIntegrated;
 	}
 	
+    public FVariable FVariable.getTopIntegrated() {
+        FVariable fv = this;
+        while (fv.meIntegrated != null)
+            fv = fv.meIntegrated;
+        return fv;
+    }
+	
 }
 
 aspect ReferencedVariables {
@@ -1911,6 +1918,49 @@ aspect FVariableUses {
 	eq FClass.getChild().inFunctionCall()        = false;
 	eq InstRoot.getChild().inFunctionCall()      = false;
 	
+	
+	
+    syn ArrayList<FFunctionVariable> FExternalStmt.myInputs() {
+        FFunctionDecl decl = containingFFunctionDecl();
+        ArrayList<FFunctionVariable> stmtInputs = decl.getFFunctionVariables().toArrayList();
+        stmtInputs.removeAll(decl.myOutputs());
+        return stmtInputs;
+    }
+	
+    syn ArrayList<FFunctionVariable> FExternalStmt.myOutputs() {
+        ArrayList<FFunctionVariable> funcOutputs = containingFFunctionDecl().myOutputs();
+        ArrayList<FFunctionVariable> stmtOutputs = new ArrayList<FFunctionVariable>();
+        
+        if (hasReturnVar() ) {
+            FFunctionVariable fv = getReturnVar().myFuncVar();
+            if (funcOutputs.contains(fv))
+                stmtOutputs.add(fv);
+        }
+        
+        for (FExp e : getArgs()) {
+            if (e instanceof FIdUseExp) {
+                FFunctionVariable fv = ((FIdUseExp) e).getFIdUse().myFuncVar();
+                if (funcOutputs.contains(fv))
+                    stmtOutputs.add(fv);
+            }
+        }
+        return stmtOutputs;
+    }
+    
+    /**
+     * Declarations of records used in this function
+     */
+    syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
+        Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
+        for (FFunctionVariable ffv : myInputs())
+            if (ffv.isRecord())
+                res.add(ffv.myFRecordDecl());
+        for (FFunctionVariable ffv : myOutputs())
+            if (ffv.isRecord())
+                res.add(ffv.myFRecordDecl());
+        return res;
+    }
+	
 	/**
 	 * Returnes the function input that this expressions corresponds to.
 	 * NOTICE, this method will throw exception if this exp does not reside in a function call.
@@ -1958,6 +2008,11 @@ aspect FVariableUses {
 	eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
 	eq FIdUseExp.getFIdUse().isAssignedTo()       = isAssignedTo();
 	eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
+	
+	inh boolean FExp.inBindingExp();
+	eq Root.getChild().inBindingExp() = false;
+	eq InstAssignable.getBindingFExp().inBindingExp() = true;
+	eq FVariable.getBindingExp().inBindingExp() = true;
 
 	/**
 	 * \brief Collection attribute returning all dependent parameters which
@@ -2846,25 +2901,42 @@ aspect FlatExternalFunctionAPI {
 		return buf.toString();
 	}
 	
-	coll HashSet<String> FClass.externalLibraries() 
-	  [new HashSet<String>()] with addAll root FClass;
-	FExternalStmt contributes library() when library() != null 
-	  to FClass.externalLibraries() for myFClass();
-	
-	coll HashSet<String> FClass.externalIncludes() 
-	  [new HashSet<String>()] with add root FClass;
-	FExternalStmt contributes include() when include() != null 
-	  to FClass.externalIncludes() for myFClass();
-	
-	coll HashSet<String> FClass.externalLibraryDirectories() 
-	  [new HashSet<String>()] with add root FClass;
-	FExternalStmt contributes libraryDirectory() when libraryDirectory() != null 
-	  to FClass.externalLibraryDirectories() for myFClass();
-	
-	coll HashSet<String> FClass.externalIncludeDirectories() 
-	  [new HashSet<String>()] with add root FClass;
-	FExternalStmt contributes includeDirectory() when includeDirectory() != null 
-	  to FClass.externalIncludeDirectories() for myFClass();
+    coll HashSet<FExternalStmt> FClass.myExternals()
+        [new HashSet<FExternalStmt>()] with add root FClass;
+    FExternalStmt contributes this
+        to FClass.myExternals() for myFClass();
+    
+    syn HashSet<String> FClass.externalLibraries() {
+        HashSet<String> res = new HashSet<String>();
+        for (FExternalStmt ext : myExternals())
+            if (ext.library() != null)
+                res.addAll(ext.library());
+        return res;
+    }
+    
+    syn HashSet<String> FClass.externalIncludes() {
+        HashSet<String> res = new HashSet<String>();
+        for (FExternalStmt ext : myExternals())
+            if (ext.include() != null)
+                res.add(ext.include());
+        return res;
+    }
+    
+    syn HashSet<String> FClass.externalLibraryDirectories() {
+        HashSet<String> res = new HashSet<String>();
+        for (FExternalStmt ext : myExternals())
+            if (ext.libraryDirectory() != null)
+                res.add(ext.libraryDirectory());
+        return res;
+    }
+    
+    syn HashSet<String> FClass.externalIncludeDirectories() {
+        HashSet<String> res = new HashSet<String>();
+        for (FExternalStmt ext : myExternals())
+            if (ext.includeDirectory() != null)
+                res.add(ext.includeDirectory());
+        return res;
+    }
 	
 	syn ArrayList<String> FExternalStmt.library() = library;
 	syn String FExternalStmt.include()            = include;

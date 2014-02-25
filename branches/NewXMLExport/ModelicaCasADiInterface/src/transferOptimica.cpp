@@ -66,14 +66,8 @@ namespace jl = java::lang;
 using std::vector; using std::string;
 using org::jmodelica::util::OptionRegistry;
 using CasADi::MX;
-using ModelicaCasADi::Model;
-using ModelicaCasADi::Constraint;
-using ModelicaCasADi::OptimizationProblem;
-using ModelicaCasADi::CompilerOptionsWrapper;
-using ModelicaCasADi::Ref;
-using ModelicaCasADi::Variable;
-using ModelicaCasADi::TimedVariable;
 
+namespace ModelicaCasADi {
 
 vector< Ref<Constraint> >* transferPointConstraints(oc::FOptClass &fc){
     java::util::ArrayList pointConstraintsJM;
@@ -106,9 +100,8 @@ vector< Ref<Constraint> >* transferPathConstraints(oc::FOptClass &fc){
     return pathConstraints;
 }
 
-vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass &fc) {
+void transferTimedVariables(Ref<OptimizationProblem> m, oc::FOptClass &fc) {
     java::util::ArrayList timedVarList = fc.timedRealVariables();
-    vector< Ref< TimedVariable > > timedModelVariables;
     vector< Ref<Variable> > allVars = m->getAllVariables();
     vector< MX > timedMXVars;
     vector< MX > timedMXTimePoints;
@@ -123,19 +116,22 @@ vector< Ref<TimedVariable> > transferTimedVariables(Ref<Model> m, oc::FOptClass 
     for (int i = 0; i < timedMXFVars.size(); ++i) {
         bool foundCorrespondingVar = false;
         for  (int j = 0; j < allVars.size(); ++j) {
-            if (timedMXFVars[i].isEqual(allVars[j]->getVar()) && !foundCorrespondingVar) {
-                timedModelVariables.push_back(new TimedVariable(timedMXVars[i], allVars[j], timedMXTimePoints[i]));
+            // todo: Replace with something better than linear search!
+            if (timedMXFVars[i].isEqual(allVars[j]->getVar())) {
+                m->addTimedVariable(new TimedVariable(m.getNode(), timedMXVars[i], allVars[j], timedMXTimePoints[i]));
                 foundCorrespondingVar = true;
+                break;
             }
         }
         if (!foundCorrespondingVar) {
             throw std::runtime_error("Could not find base variable for timed variable");
         }
     }
-    return timedModelVariables;
 }
 
-Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level) {
+void transferOptimizationProblem(Ref<OptimizationProblem> optProblem,
+    string modelName, const vector<string> &modelFiles, Ref<CompilerOptionsWrapper> options, string log_level)
+{
     try {
         // initalizeClass is needed on classes where static variables are acessed. 
         // See: http://mail-archives.apache.org/mod_mbox/lucene-pylucene-dev/201309.mbox/%3CBE880522-159F-4590-BC4D-9C5979A3594E@apache.org%3E
@@ -158,8 +154,8 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         std::string option = "normalize_minimum_time_problems";
         bool normalizedTime = fclass.root()._get_options().getBooleanOption(StringFromUTF(option.c_str()));
             
-        // Create a model with the model identfier and normalizedTime flag. 
-        Ref<OptimizationProblem> optProblem = new OptimizationProblem(identfier, normalizedTime);
+        // Initialize the model with the model identfier and normalizedTime flag. 
+        optProblem->initializeProblem(identfier, normalizedTime);
        
         if (!env->isInstanceOf(fclass.this$, oc::FOptClass::initializeClass)) {
             throw std::runtime_error("An OptimizationProblem can not be created from a Modelica model");
@@ -178,7 +174,7 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         // Variables template
         transferVariables<java::util::ArrayList, oc::FVariable, oc::FDerivativeVariable, oc::FRealVariable, oc::List, oc::FAttribute, oc::FStringComment> (optProblem, fclass.allVariables());
         // Transfer timed variables. Depends on that other variables are transferred. 
-        vector< Ref<TimedVariable> > timedVars = transferTimedVariables(optProblem, fclass);
+        transferTimedVariables(optProblem, fclass);
         
         // Equations
         transferDaeEquations<java::util::ArrayList, oc::FAbstractEquation>(optProblem, fclass.equations());
@@ -197,14 +193,12 @@ Ref<OptimizationProblem> transferOptimizationProblem(string modelName, const vec
         optProblem->setPointConstraints(*(transferPointConstraints(fclass)));
         optProblem->setStartTime(MX(fclass.startTimeAttribute()));
         optProblem->setFinalTime(MX(fclass.finalTimeAttribute()));
-        optProblem->setTimedVariables(timedVars);
         optProblem->setLagrangeTerm(lagrangeTerm);
         optProblem->setMayerTerm(mayerTerm);
-        
-        return optProblem;
     }
     catch (JavaError e) {
         rethrowJavaException(e);
     }
-    return NULL;
 }
+
+}; // End namespace
