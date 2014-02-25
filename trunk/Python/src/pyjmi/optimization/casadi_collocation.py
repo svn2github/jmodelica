@@ -741,12 +741,12 @@ class FreeElementLengthsData(object):
         self.Q = Q
         self.a = a
 
-class LocalDAECollocator(CasadiCollocator):
+class LocalDAECollocatorOld(CasadiCollocator):
     
     """Solves an optimal control problem using local collocation."""
     
     def __init__(self, model, options):
-        super(LocalDAECollocator, self).__init__(model)
+        super(LocalDAECollocatorOld, self).__init__(model)
         
         # Check normalization of minimum time problems
         t0 = self.ocp.variable('startTime')
@@ -3162,7 +3162,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             return None
 
-class LocalDAECollocator2(CasadiCollocator):
+class LocalDAECollocator(CasadiCollocator):
     
     """Solves an optimal control problem using local collocation."""
     
@@ -3457,7 +3457,7 @@ class LocalDAECollocator2(CasadiCollocator):
                     op_expressions,
                     self.mvar_struct_cat + self.mvar_struct_dx,
                     scaled_vars)
-    
+
     def _define_collocation(self):
         """
         Define collocation variables.
@@ -3497,7 +3497,7 @@ class LocalDAECollocator2(CasadiCollocator):
         collocation['der_vals_k'] = der_vals_k
         collocation['h_i'] = h_i
         self._collocation = collocation
-    
+
     def _create_nlp_variables(self):
         """
         Create the NLP variables and store them in a nested dictionary.

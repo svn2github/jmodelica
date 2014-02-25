@@ -23,9 +23,9 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the needed JModelica.org Python methods
-from pymodelica import compile_fmu, compile_fmux
+from pymodelica import compile_fmu
 from pyfmi import load_fmu
-from pyjmi import CasadiModel, get_files_path
+from pyjmi import get_files_path
 
 def run_demo(with_plots=True):
     """
@@ -45,7 +45,7 @@ def run_demo(with_plots=True):
     3.  Verifying the result from the second step by simulating the system
         once more usng the optimized input trajectory.
     
-    The model was developed by Francesco Casella and was published in
+    The model was developed by Francesco Casella and is published in
     @InProceedings{CFA2011,
       author = "Casella, Francesco and Donida, Filippo and {\AA}kesson, Johan",
       title = "Object-Oriented Modeling and Optimal Control: A Case Study in
@@ -63,7 +63,7 @@ def run_demo(with_plots=True):
     
     # Compile the optimization initialization model
     init_sim_fmu = compile_fmu("CombinedCycleStartup.Startup6Reference",
-                               file_paths)
+                               file_paths, separate_process=True)
     
     # Load the model
     init_sim_model = load_fmu(init_sim_fmu)
@@ -100,19 +100,18 @@ def run_demo(with_plots=True):
     
     ### 2. Solve the optimal control problem
     # Compile model
-    fmux = compile_fmux("CombinedCycleStartup.Startup6", file_paths)
-    
-    # Load model
-    opt_model = CasadiModel(fmux)
+    from pyjmi import transfer_to_casadi_interface
+    op = transfer_to_casadi_interface("CombinedCycleStartup.Startup6",
+                                      file_paths)
     
     # Set options
-    opt_opts = opt_model.optimize_options()
+    opt_opts = op.optimize_options()
     opt_opts['n_e'] = 50 # Number of elements
     opt_opts['init_traj'] = init_res.result_data # Simulation result
-    opt_opts['nominal_traj'] = init_res.result_data
+#    opt_opts['nominal_traj'] = init_res.result_data
     
     # Solve the optimal control problem
-    opt_res = opt_model.optimize(options=opt_opts)
+    opt_res = op.optimize(options=opt_opts)
     
     # Extract variable profiles
     opt_plant_p = opt_res['plant.p']

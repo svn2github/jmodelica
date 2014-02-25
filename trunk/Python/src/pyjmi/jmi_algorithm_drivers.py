@@ -1434,7 +1434,7 @@ class CasadiPseudoSpectralAlgOptions(OptionBase):
 class CasadiPseudoSpectralAlgResult(JMResultBase):
     pass
 
-class LocalDAECollocationAlg(AlgorithmBase):
+class LocalDAECollocationAlgOld(AlgorithmBase):
     
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
@@ -1443,7 +1443,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
     
     def __init__(self, model, options):
         """
-        Create a LocalDAECollocationAlg algorithm.
+        Create a LocalDAECollocationAlgOld algorithm.
         
         Parameters::
               
@@ -1456,17 +1456,17 @@ class LocalDAECollocationAlg(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                model.optimize_options('LocalDAECollocationAlgOptions')
+                model.optimize_options('LocalDAECollocationAlgOldOptions')
                 
                 or look at the docstring with help:
                 
-                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOldOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by LocalDAECollocationAlgOptions. An empty
+                  provided by LocalDAECollocationAlgOldOptions. An empty
                   dict will thus give all options with default values.
-                - A LocalDAECollocationAlgOptions object.
+                - A LocalDAECollocationAlgOldOptions object.
         """
         self._t0 = time.clock()
         self.model = model
@@ -1474,9 +1474,9 @@ class LocalDAECollocationAlg(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = LocalDAECollocationAlgOptions(options)
-        elif isinstance(options, LocalDAECollocationAlgOptions):
-            # user has passed LocalDAECollocationAlgOptions instance
+            self.options = LocalDAECollocationAlgOldOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOldOptions):
+            # user has passed LocalDAECollocationAlgOldOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -1488,7 +1488,7 @@ class LocalDAECollocationAlg(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator(model, self.options)
+        self.nlp = LocalDAECollocatorOld(model, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -1610,11 +1610,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
         
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlgResult object.
+        Load result data and create a LocalDAECollocationAlgOldResult object.
         
         Returns::
         
-            The LocalDAECollocationAlgResult object.
+            The LocalDAECollocationAlgOldResult object.
         """
         resultfile = self.result_file_name
         res = ResultDymolaTextual(resultfile)
@@ -1628,19 +1628,19 @@ class LocalDAECollocationAlg(AlgorithmBase):
         times['tot'] += times['post_processing']
         
         # Create and return result object
-        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
+        return LocalDAECollocationAlgOldResult(self.model, resultfile, self.nlp,
                                             res, self.options, self.times,
                                             h_opt)
     
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg
+        Get an instance of the options class for the LocalDAECollocationAlgOld
         algorithm, prefilled with default values. (Class method.)
         """
-        return LocalDAECollocationAlgOptions()
+        return LocalDAECollocationAlgOldOptions()
     
-class LocalDAECollocationAlgOptions(OptionBase):
+class LocalDAECollocationAlgOldOptions(OptionBase):
     
     """
     Options for optimizing CasADi models using a collocation algorithm. 
@@ -1922,10 +1922,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'measurement_data': None,
                 'IPOPT_options': {}}
         
-        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
+        super(LocalDAECollocationAlgOldOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
-class LocalDAECollocationAlgResult(JMResultBase):
+class LocalDAECollocationAlgOldResult(JMResultBase):
     
     """
     A JMResultBase object with the additional attributes times and h_opt.
@@ -1961,7 +1961,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlgResult, self).__init__(
+        super(LocalDAECollocationAlgOldResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times
@@ -2170,7 +2170,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
         else:
             return 1. / sigma_inv
 
-class LocalDAECollocationAlg2(AlgorithmBase):
+class LocalDAECollocationAlg(AlgorithmBase):
     
     """
     The algorithm is based on orthogonal collocation and relies on the solver 
@@ -2179,7 +2179,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
     
     def __init__(self, op, options):
         """
-        Create a LocalDAECollocationAlg2 algorithm.
+        Create a LocalDAECollocationAlg algorithm.
         
         Parameters::
               
@@ -2190,17 +2190,17 @@ class LocalDAECollocationAlg2(AlgorithmBase):
                 The options that should be used by the algorithm. For 
                 details on the options, see:
                 
-                model.optimize_options('LocalDAECollocationAlg2Options')
+                model.optimize_options('LocalDAECollocationAlgOptions')
                 
                 or look at the docstring with help:
                 
-                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlg2Options)
+                help(pyjmi.jmi_algorithm_drivers.LocalDAECollocationAlgOptions)
                 
                 Valid values are: 
                 - A dict that overrides some or all of the default values
-                  provided by LocalDAECollocationAlg2Options. An empty
+                  provided by LocalDAECollocationAlgOptions. An empty
                   dict will thus give all options with default values.
-                - A LocalDAECollocationAlg2Options object.
+                - A LocalDAECollocationAlgOptions object.
         """
         self._t0 = time.clock()
         self.op = op
@@ -2261,9 +2261,9 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         # handle options argument
         if isinstance(options, dict):
             # user has passed dict with options or empty dict = default
-            self.options = LocalDAECollocationAlg2Options(options)
-        elif isinstance(options, LocalDAECollocationAlg2Options):
-            # user has passed LocalDAECollocationAlg2Options instance
+            self.options = LocalDAECollocationAlgOptions(options)
+        elif isinstance(options, LocalDAECollocationAlgOptions):
+            # user has passed LocalDAECollocationAlgOptions instance
             self.options = options
         else:
             raise InvalidAlgorithmOptionException(options)
@@ -2275,7 +2275,7 @@ class LocalDAECollocationAlg2(AlgorithmBase):
             raise Exception(
                     'Could not find CasADi. Check pyjmi.check_packages()')
         
-        self.nlp = LocalDAECollocator2(self.op, self.options)
+        self.nlp = LocalDAECollocator(self.op, self.options)
             
         # set solver options
         self._set_solver_options()
@@ -2396,11 +2396,11 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         
     def get_result(self):
         """ 
-        Load result data and create a LocalDAECollocationAlg2Result object.
+        Load result data and create a LocalDAECollocationAlgResult object.
         
         Returns::
         
-            The LocalDAECollocationAlg2Result object.
+            The LocalDAECollocationAlgResult object.
         """
         if self.named_vars:
             return self.nlp
@@ -2416,19 +2416,19 @@ class LocalDAECollocationAlg2(AlgorithmBase):
         times['tot'] += times['post_processing']
         
         # Create and return result object
-        return LocalDAECollocationAlg2Result(self.model, resultfile, self.nlp,
+        return LocalDAECollocationAlgResult(self.model, resultfile, self.nlp,
                                              res, self.options, self.times,
                                              h_opt)
     
     @classmethod
     def get_default_options(cls):
         """ 
-        Get an instance of the options class for the LocalDAECollocationAlg2
+        Get an instance of the options class for the LocalDAECollocationAlg
         algorithm, prefilled with default values. (Class method.)
         """
-        return LocalDAECollocationAlg2Options()
+        return LocalDAECollocationAlgOptions()
     
-class LocalDAECollocationAlg2Options(OptionBase):
+class LocalDAECollocationAlgOptions(OptionBase):
     
     """
     Options for optimizing CasADi models using a collocation algorithm. 
@@ -2709,10 +2709,10 @@ class LocalDAECollocationAlg2Options(OptionBase):
                 'measurement_data': None,
                 'IPOPT_options': {}}
         
-        super(LocalDAECollocationAlg2Options, self).__init__(_defaults)
+        super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
 
-class LocalDAECollocationAlg2Result(JMResultBase):
+class LocalDAECollocationAlgResult(JMResultBase):
     
     """
     A JMResultBase object with the additional attributes times and h_opt.
@@ -2748,7 +2748,7 @@ class LocalDAECollocationAlg2Result(JMResultBase):
     
     def __init__(self, model=None, result_file_name=None, solver=None, 
                  result_data=None, options=None, times=None, h_opt=None):
-        super(LocalDAECollocationAlg2Result, self).__init__(
+        super(LocalDAECollocationAlgResult, self).__init__(
                 model, result_file_name, solver, result_data, options)
         self.h_opt = h_opt
         self.times = times

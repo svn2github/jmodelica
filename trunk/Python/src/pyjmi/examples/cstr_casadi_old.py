@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2014 Modelon AB
+# Copyright (C) 2011 Modelon AB
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@ import numpy as N
 import matplotlib.pyplot as plt
 
 # Import the needed JModelica.org Python methods
-from pymodelica import compile_fmu
+from pymodelica import compile_fmu, compile_fmux
 from pyfmi import load_fmu
-from pyjmi import transfer_to_casadi_interface, get_files_path
+from pyjmi import CasadiModel, get_files_path
 
 def run_demo(with_plots=True):
     """
@@ -128,11 +128,11 @@ def run_demo(with_plots=True):
     init_res = init_sim_model.simulate(start_time=0., final_time=150.)
 
     # Extract variable profiles
-    t_init_sim = init_res['time']
     c_init_sim = init_res['cstr.c']
     T_init_sim = init_res['cstr.T']
-    Tc_init_sim = init_res['cstr.Tc'] + N.zeros(t_init_sim.shape) # make Tc_init_sim be a vector
-
+    Tc_init_sim = init_res['cstr.Tc']
+    t_init_sim = init_res['time']
+    
     # Plot the initial guess trajectories
     if with_plots:
         plt.close(1)
@@ -157,27 +157,30 @@ def run_demo(with_plots=True):
         plt.show()
     
     ### 3. Solve the optimal control problem
-    # Compile and load optimization problem
-    op = transfer_to_casadi_interface("CSTR.CSTR_Opt2", file_path)
+    # Compile model
+    fmux = compile_fmux("CSTR.CSTR_Opt2", file_path)
+    
+    # Load model
+    cstr = CasadiModel(fmux)
     
     # Set reference values
-    op.set('Tc_ref', Tc_0_B)
-    op.set('c_ref', float(c_0_B))
-    op.set('T_ref', float(T_0_B))
+    cstr.set('Tc_ref', Tc_0_B)
+    cstr.set('c_ref', c_0_B)
+    cstr.set('T_ref', T_0_B)
     
     # Set initial values
-    op.set('cstr.c_init', float(c_0_A))
-    op.set('cstr.T_init', float(T_0_A))
+    cstr.set('cstr.c_init', c_0_A)
+    cstr.set('cstr.T_init', T_0_A)
     
     # Set options
-    opt_opts = op.optimize_options()
+    opt_opts = cstr.optimize_options()
     opt_opts['n_e'] = 100 # Number of elements
     opt_opts['init_traj'] = init_res.result_data
-    # opt_opts['nominal_traj'] = init_res.result_data
+    opt_opts['nominal_traj'] = init_res.result_data
     opt_opts['IPOPT_options']['tol'] = 1e-10
     
     # Solve the optimal control problem
-    res = op.optimize(options=opt_opts)
+    res = cstr.optimize(options=opt_opts)
     
     # Extract variable profiles
     c_res = res['cstr.c']
@@ -230,13 +233,13 @@ def run_demo(with_plots=True):
 
     # Load model
     sim_model = load_fmu(sim_fmu)
-
+    
     # Get optimized input
     (_, opt_input) = res.solver.get_opt_input()
     
     # Set initial values
-    sim_model.set('c_init', c_0_A)
-    sim_model.set('T_init', T_0_A)
+    sim_model.set('c_init',c_0_A)
+    sim_model.set('T_init',T_0_A)
 
     # Simulate using optimized input
     sim_opts = sim_model.simulate_options()
@@ -244,16 +247,16 @@ def run_demo(with_plots=True):
     sim_opts['CVode_options']['atol'] = 1e-8
     res = sim_model.simulate(start_time=0., final_time=150.,
                              input=('Tc', opt_input), options=sim_opts)
-
+    
     # Extract variable profiles
-    c_sim = res['c']
-    T_sim = res['T']
-    Tc_sim = res['Tc']
+    c_sim=res['c']
+    T_sim=res['T']
+    Tc_sim=res['Tc']
     time_sim = res['time']
 
     # Verify results
     N.testing.assert_array_less(abs(c_res[-1] - c_sim[-1])/c_res[-1], 5e-2)
-
+    
     # Plot the results
     if with_plots:
         plt.close(3)

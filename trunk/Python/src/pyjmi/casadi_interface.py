@@ -125,7 +125,7 @@ class OptimizationProblem(CI_OP, ModelBase):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
 
-    def optimize_options(self, algorithm='LocalDAECollocationAlg2'):
+    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
         """
         Returns an instance of the optimize options class containing options 
         default values. If called without argument then the options class for 
@@ -203,7 +203,7 @@ class OptimizationProblem(CI_OP, ModelBase):
                                      % (var.getName(), attr))
             return self.model.evaluateExpression(val_expr)
     
-    def optimize(self, algorithm='LocalDAECollocationAlg2', options={}):
+    def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
         """
         Solve an optimization problem.
             
@@ -218,10 +218,10 @@ class OptimizationProblem(CI_OP, ModelBase):
                 custom algorithms and to use them with this function.
 
                 The following algorithms are available:
-                - 'LocalDAECollocationAlg2'. This algorithm is based on direct
+                - 'LocalDAECollocationAlg'. This algorithm is based on direct
                   collocation on finite elements and the algorithm IPOPT is
                   used to obtain a numerical solution to the problem.
-                Default: 'LocalDAECollocationAlg2'
+                Default: 'LocalDAECollocationAlg'
                 
             options -- 
                 The options that should be used in the algorithm. The options
@@ -236,15 +236,15 @@ class OptimizationProblem(CI_OP, ModelBase):
                   values. An empty dict will thus give all options with default
                   values.
                 - An Options object for the corresponding algorithm, e.g.
-                  LocalDAECollocationAlgOptions2 for LocalDAECollocationAlg2.
+                  LocalDAECollocationAlgOptions for LocalDAECollocationAlg.
                 Default: Empty dict
             
         Returns::
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        if algorithm != "LocalDAECollocationAlg2":
-            raise ValueError("LocalDAECollocationAlg2 is the only supported " +
+        if algorithm != "LocalDAECollocationAlg":
+            raise ValueError("LocalDAECollocationAlg is the only supported " +
                              "algorithm.")
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
@@ -488,7 +488,7 @@ class CasadiModel(ModelBase):
         algorithm = getattr(algdrive, algorithm)
         return algorithm.get_default_options()
     
-    def optimize_options(self, algorithm='LocalDAECollocationAlg'):
+    def optimize_options(self, algorithm='LocalDAECollocationAlgOld'):
         """
         Returns an instance of the optimize options class containing options 
         default values. If called without argument then the options class for 
@@ -498,9 +498,9 @@ class CasadiModel(ModelBase):
         
             algorithm --
                 The algorithm for which the options class should be returned. 
-                Possible values are: 'LocalDAECollocationAlg' and
+                Possible values are: 'LocalDAECollocationAlgOld' and
                 'CasadiPseudoSpectralAlg'
-                Default: 'LocalDAECollocationAlg'
+                Default: 'LocalDAECollocationAlgOld'
                 
         Returns::
         
@@ -508,7 +508,7 @@ class CasadiModel(ModelBase):
         """
         return self._default_options(algorithm)    
     
-    def optimize(self, algorithm='LocalDAECollocationAlg', options={}):
+    def optimize(self, algorithm='LocalDAECollocationAlgOld', options={}):
         """
         Solve an optimization problem.
             
@@ -523,11 +523,11 @@ class CasadiModel(ModelBase):
                 custom algorithms and to use them with this function.
 
                 The following algorithms are available:
-                - 'LocalDAECollocationAlg'. This algorithm is based on direct
+                - 'LocalDAECollocationAlgOld'. This algorithm is based on direct
                   collocation on finite elements and the algorithm IPOPT is
                   used to obtain a numerical solution to the problem.
                 - 'CasadiPseudoSpectralAlg'
-                Default: 'LocalDAECollocationAlg'
+                Default: 'LocalDAECollocationAlgOld'
                 
             options -- 
                 The options that should be used in the algorithm. The options
@@ -542,7 +542,7 @@ class CasadiModel(ModelBase):
                   values. An empty dict will thus give all options with default
                   values.
                 - An Options object for the corresponding algorithm, e.g.
-                  LocalDAECollocationAlgOptions for LocalDAECollocationAlg.
+                  LocalDAECollocationAlgOldOptions for LocalDAECollocationAlgOld.
                 Default: Empty dict
             
         Returns::
