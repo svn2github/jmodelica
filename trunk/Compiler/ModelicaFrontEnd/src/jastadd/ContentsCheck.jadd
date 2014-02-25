@@ -276,14 +276,14 @@ aspect ContentCheck {
 	}
 	
 	syn boolean FIfWhenElseEquation.isBalancedEquations() = true; 
-	eq FIfEquation.isBalancedEquations() = hasElse() && elseIsBalancedEquations();
+	eq FIfEquation.isBalancedEquations() = numScalarEquations() == 0 || (hasElse() && elseIsBalancedEquations());
 	
 	syn boolean FIfWhenEquation.elseIsBalancedEquations() = 
 		numScalarEquations() == getElse().numScalarEquations() && 
 		getElse().isBalancedEquations();
 	
 	syn boolean FIfWhenElseEquation.isBalancedAssignments() = true; 
-	eq FIfEquation.isBalancedAssignments()   = hasElse() && elseIsBalancedAssignments();
+	eq FIfEquation.isBalancedAssignments()   = numScalarEquations() == 0 || (hasElse() && elseIsBalancedAssignments());
 	eq FWhenEquation.isBalancedAssignments() = !hasElse() || elseIsBalancedAssignments();
 	
 	syn boolean FIfWhenEquation.elseIsBalancedAssignments() = 
