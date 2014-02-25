@@ -67,7 +67,6 @@ class Model: public RefCountedNode {
             BOOLEAN_INPUT,
             STRING_DISCRETE,
             STRING_INPUT,
-            OUTPUT,
 
             NUM_OF_VARIABLE_KIND  // This must be defined last & no other
                                   // variables may be explicitly defined with a number
