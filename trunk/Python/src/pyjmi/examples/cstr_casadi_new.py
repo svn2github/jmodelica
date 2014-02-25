@@ -128,11 +128,11 @@ def run_demo(with_plots=True):
     init_res = init_sim_model.simulate(start_time=0., final_time=150.)
 
     # Extract variable profiles
+    t_init_sim = init_res['time']
     c_init_sim = init_res['cstr.c']
     T_init_sim = init_res['cstr.T']
-    Tc_init_sim = init_res['cstr.Tc']
-    t_init_sim = init_res['time']
-    
+    Tc_init_sim = init_res['cstr.Tc'] + N.zeros(t_init_sim.shape) # make Tc_init_sim be a vector
+
     # Plot the initial guess trajectories
     if with_plots:
         plt.close(1)
