@@ -1657,6 +1657,12 @@ aspect InstanceAST_API {
 	syn boolean InstNode.isClassDecl() = false;
 	eq InstClassDecl.isClassDecl()     = true;
 	eq InstExtends.isClassDecl()       = isInClassDecl();
+    
+    /**
+     * Check if this node is an extends.
+     */
+    syn boolean InstNode.isExtends() = false;
+    eq InstExtends.isExtends()     = true;
 	
 	/**
 	 * Check if this extends is part of a class declaration.

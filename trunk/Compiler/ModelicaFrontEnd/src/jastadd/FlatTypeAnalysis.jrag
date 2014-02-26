@@ -663,68 +663,78 @@ aspect InstBindingType {
 		}
 	}
 		
-	/**
-	 * \brief Constructs the type a specific attribute to this instance tree node should 
-	 *        have, given the scalar type of the attribute. 
-	 *        
-	 * Default is <code>null</code>, so override is necessary for all InstNode 
-	 * subclasses that needs this check.
-	 */
-	syn FType InstNode.attributeType(InstComponentModification icm) = null;
-		
-	/**
-	 * \brief Constructs the type a specific attribute to this primitive should 
-	 *        have, given the scalar type of the attribute.
-	 */
-	eq InstAssignable.attributeType(InstComponentModification icm) {
-		// TODO: This is only used to get the size of the type - perhaps it should return Size instead
-		FType res = icm.type();
-		InstNode decl = icm.myInstNode();
-		if (decl == this)
-			return res.sizedType(size());
-        if (icm.getEach()) {
-            return res;
-        } else {
-            if (decl.isClassDecl()) {
-                return res.sizedType(res.size().expand(decl.size()));
-            } else {
-                decl = commonAncestor(decl);
-                if (decl != null)
-                    return expandBindingType(res.sizedType(size()), decl);
-                else
-                    return res.sizedType(res.size().expand(size()));
-            }
-        }
-	}
-	
-	/**
-	 * \brief Add array dimensions for surrounding InstArrayComponentDecls to 
-	 *        type for binding expression.
-	 */
-	inh FType InstNode.expandBindingType(FType type, InstNode node);
-	eq InstClassDecl.getChild().expandBindingType(FType type, InstNode node) = type;
-	eq InstRoot.getChild().expandBindingType(FType type, InstNode node)      = type;
-	eq Root.getChild().expandBindingType(FType type, InstNode node)          = type;
-	eq InstArrayComponentDecl.getChild().expandBindingType(FType type, InstNode node) = 
-		expandBindingType(type.enclosingArrayType(myDimensionLength()), node);
-	eq InstNode.getChild().expandBindingType(FType type, InstNode node) = 
-		(node == this) ? type : expandBindingType(type, node);
-	
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     * 
+     * Default is <code>null</code>, so override is necessary for all InstNode 
+     * subclasses that needs this check.
+     */
+    syn Size InstNode.attributeSize(InstComponentModification icm) = null;
+
+    /**
+     * Constructs the size a specific attribute to this instance tree node should have. 
+     */
+    eq InstAssignable.attributeSize(InstComponentModification icm) {
+        InstNode decl = icm.myInstNode();
+        if (decl == this)
+            return size();
+        else if (icm.getEach()) 
+            return Size.SCALAR;
+        else if (decl == myInstClass())
+            return decl.size();
+        else
+            return expandBindingSize(size(), decl);
+    }
+
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to size for binding expression.
+     */
+    inh Size InstNode.expandBindingSize(Size size, InstNode node);
+    eq InstClassDecl.getChild().expandBindingSize(Size size, InstNode node)          = size;
+    eq InstRoot.getChild().expandBindingSize(Size size, InstNode node)               = size;
+    eq Root.getChild().expandBindingSize(Size size, InstNode node)                   = size;
+    eq InstArrayComponentDecl.getChild().expandBindingSize(Size size, InstNode node) = 
+        expandBindingSize(size.expand(myDimensionLength()), node);
+    eq InstNode.getChild().expandBindingSize(Size size, InstNode node)               = 
+        isMeOrMyClass(node) ? size : expandBindingSize(size, node);
+    
+    /**
+     * Add array dimensions for surrounding InstArrayComponentDecls to type for binding expression.
+     */
+    syn FType InstNode.expandBindingType(FType type, InstNode node) = 
+        type.sizedType(expandBindingSize(type.size(), node));
+    
+    /**
+     * Check if node is the same as this or the class of this component (if this is a component).
+     */
+    syn boolean InstNode.isMeOrMyClass(InstNode node) = node == this;
+    eq InstClassDecl.isMeOrMyClass(InstNode node)     = node.inheritingNode() == this;
+    eq InstComponentDecl.isMeOrMyClass(InstNode node) {
+        InstNode inherit = node.inheritingNode();
+        return inherit == this || inherit == myInstClass();
+    }
+    
+    /**
+     * If this is an extends, get the surrounding class or component, otherwise return this.
+     */
+    syn InstNode InstNode.inheritingNode() = this;
+    eq InstExtends.inheritingNode()        = findInheritingNode();
+    
+    /**
+     * Find the surrounding class or component.
+     */
+    inh InstNode InstExtends.findInheritingNode();
+    eq InstClassDecl.getInstExtends().findInheritingNode()     = this;
+    eq InstComponentDecl.getInstExtends().findInheritingNode() = this;
+    
+    /**
+     * Is this a member of an array component?
+     */
 	inh boolean InstAssignable.inArrayComponent();
 	eq InstClassDecl.getChild().inArrayComponent()          = false;
 	eq InstRoot.getChild().inArrayComponent()               = false;
 	eq FlatRoot.getChild().inArrayComponent()               = false;
 	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
-	
-	/**
-	 * \brief Add an enclosing dimension to type. 
-	 * 
-	 * Returns a FType that is a copy of this one, but with one 
-	 * more dimension, added first. If this type is scalar, an array type is 
-	 * created instead.
-	 */
-	syn FType FType.enclosingArrayType(int size) = arrayType(size().expand(size));
-	eq FUnknownType.enclosingArrayType(int size) = this;
 	
 }
 
