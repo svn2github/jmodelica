@@ -2173,7 +2173,7 @@ aspect Scalarization {
 		if (equation) {
     	    boolean init = inInitialEquationSection();
     	    boolean param = init || inParameterEquation() || inAttributeValue();
-    	    FTypePrefixVariability v = param ? fParameter() : fContinuous();
+            FTypePrefixVariability v = param ? fParameter() : fContinuous().combineDown(type().funcOutputVariability());
     	    if (variability().discreteVariability())
     	    	v = v.combineDown(variability());
 			type.createTempFVariables(vars, new FQNameString(tempVarName()), v, !init);
