@@ -35,7 +35,8 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
         int ldfjac, int iflag) {
     
     jmi_block_solver_t *block = problem_data;
-    int i, ret;
+    int i;
+    int ret = 0;
     block->nb_fevals++;
     
     /* Test if input is OK (no -1.#IND) */
@@ -47,8 +48,16 @@ static int minpack_f(void *problem_data, int n, const real *y, real *fvec, real 
             return -1;
         }
     }
+    if (iflag == 0) {
+        /* Log the progression of the solver */
+        jmi_log_node_t topnode = jmi_log_enter(block->log, logInfo, "MinpackInfo");
 
-    if (iflag == 1) {
+        jmi_log_fmt(block->log, topnode, logInfo, "<iteration_index:%d>", ++block->nb_iters);
+        jmi_log_reals(block->log, topnode, logInfo, "ivs", y, block->n);
+        jmi_log_reals(block->log, topnode, logInfo, "residual", fvec, block->n);
+
+        jmi_log_leave(block->log, topnode);
+    } else if (iflag == 1) {
         /*Evaluate the residual*/
         ret = block->F(block->problem_data,(jmi_real_t*)y,(jmi_real_t*)fvec,JMI_BLOCK_EVALUATE);
     } else {
@@ -121,9 +130,8 @@ int jmi_minpack_solver_new(jmi_minpack_solver_t** solver_ptr, jmi_block_solver_t
     
     solver = (jmi_minpack_solver_t*)calloc(1,sizeof(jmi_minpack_solver_t));
     
-    solver->lr = (int)((n*(n+1))/2+1);
+    solver->lr = (int)((n*(n+1))/2+1); /* Why +1?? */
     
-    solver->yscale = (real*)calloc(n, sizeof(real));
     solver->ytemp = (real*)calloc(n, sizeof(real));
     solver->rwork1 = (real*)calloc(n, sizeof(real));
     solver->rwork2 = (real*)calloc(n, sizeof(real));
@@ -143,8 +151,8 @@ static void jmi_minpack_solver_print_solve_start(jmi_block_solver_t * block,
                                          jmi_log_node_t *destnode) {
     if((block->callbacks->log_options.log_level >= 5)) {
         jmi_log_t *log = block->log;
-        *destnode = jmi_log_enter_fmt(log, logInfo, "NewtonSolve", 
-                                      "Newton solver invoked for <block:%d>", block->id);
+        *destnode = jmi_log_enter_fmt(log, logInfo, "PowellHybridMethod", 
+                                      "MINPACK invoked for <block:%d>", block->id);
         jmi_log_vrefs(log, *destnode, logInfo, "variables", 'r', block->value_references, block->n);
         jmi_log_reals(log, *destnode, logInfo, "max", block->max, block->n);
         jmi_log_reals(log, *destnode, logInfo, "min", block->min, block->n);
@@ -153,33 +161,32 @@ static void jmi_minpack_solver_print_solve_start(jmi_block_solver_t * block,
     }
 }
 
-static void jmi_minpack_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log_node_t *node, int flag) {
+static void jmi_minpack_solver_print_solve_end(jmi_minpack_solver_t* solver, jmi_block_solver_t * block,
+                                               const jmi_log_node_t *node, int flag) {
     
-    if((block->callbacks->log_options.log_level >= 5)) {
-        jmi_log_t *log = block->log;
-        if (flag == 0) {
-            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
-                     "improper input parameters.", flag, block->id);
-        } else if (flag  == 1) {
-            jmi_log_node(log, logInfo, "Info", "<returnCode: %d> returned from <block: %d> "
-                     "relative error between two consecutive iterates is at most xtol.", flag, block->id);
-        } else if (flag  == 2) {
-            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
-                     "number of calls to fcn with iflag = 1 has reached maxfev.", flag, block->id);
-        } else if (flag  == 3) {
-            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
-                     "xtol is too small. no further improvement in the approximate solution x is possible.", flag, block->id);
-        } else if (flag  == 4) {
-            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
-                     "iteration is not making good progress, as measured by the improvement from the last five jacobian evaluations.", flag, block->id);
-        } else if (flag  == 5) {
-            jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
-                     "iteration is not making good progress, as measured by the improvement from the last ten iterations.", flag, block->id);
-        }
-        jmi_log_fmt(log, *node, logInfo, "Minpack solver finished with <minpack_exit_flag:%d>", flag);
-        
-        jmi_log_leave(log, *node);
+    jmi_log_t *log = block->log;
+    if (flag == 0) {
+        jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+            "improper input parameters.", flag, block->id);
+    } else if (flag  == 1) {
+        jmi_log_node(log, logInfo, "Info", "<returnCode: %d> returned from <block: %d> "
+            "relative error between two consecutive iterates is at most <xtol: %f>.", flag, block->id, solver->ytol);
+    } else if (flag  == 2) {
+        jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+            "reached the maximum number of function calls allowed.", flag, block->id);
+    } else if (flag  == 3) {
+        jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+            "<xtol: %f> is too small. no further improvement in the approximate solution x is possible.", flag, block->id, solver->ytol, block->x);
+    } else if (flag  == 4) {
+        jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+            "iteration is not making good progress, as measured by the improvement from the last five jacobian evaluations.", flag, block->id);
+    } else if (flag  == 5) {
+        jmi_log_node(log, logError, "Error", "<returnCode: %d> returned from <block: %d> "
+            "iteration is not making good progress, as measured by the improvement from the last ten iterations.", flag, block->id);
     }
+    jmi_log_fmt(log, *node, logInfo, "Minpack solver finished with <minpack_exit_flag: %d>", flag);
+
+    jmi_log_leave(log, *node);
 }
 
 static int jmi_minpack_init(jmi_block_solver_t * block) {
@@ -202,27 +209,29 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
     jmi_minpack_solver_t* solver = block->solver;
     jmi_log_node_t topnode;
     int info;
-    int mode = 1; /* Scaling done internally, 2 for manual scaling */
-    int nprint = -1; /*No internal printing */
+    int mode = 2; /* Scale with nominals, 1 for scaling done internally */
+    int nprint = 200; /* Enables logging entire simulation. */
     int nbr_fcn_evals = 0, nbr_jac_evals = 0;
     int max_fcn_evals = 200; /* Max number of function evaluations */
-    real factor = 100.0;
+    real factor = block->options->step_limit_factor * 10; /* Default is 100 and is scaled with the option step_limit_factor */
     
     
     if(block->init) {
         jmi_minpack_init(block);
     }
+
+    block->nb_iters = 0;
     
     jmi_minpack_solver_print_solve_start(block, &topnode);
     info = __cminpack_func__(hybrj)(minpack_f, (void*)block, block->n, block->x,
 	      block->res, block->jac, block->n, solver->ytol,
-	      max_fcn_evals, solver->yscale, mode, factor,
+          max_fcn_evals, block->nominal, mode, factor,
 	      nprint, &nbr_fcn_evals, &nbr_jac_evals, solver->qr,
 	      solver->lr, solver->qTf, solver->rwork1, solver->rwork2,
 	      solver->rwork3, solver->rwork4);
-    jmi_minpack_solver_print_solve_end(block, &topnode, info);
+    jmi_minpack_solver_print_solve_end(solver, block, &topnode, info);
     
-    if (info != 1){
+    if (info != 1) {
         info = -1;
     } else {
         info = 0;
@@ -235,7 +244,6 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
 void jmi_minpack_solver_delete(jmi_block_solver_t* block) {
     jmi_minpack_solver_t* solver = block->solver;
     
-    free(solver->yscale);
     free(solver->ytemp);
     free(solver->rwork1);
     free(solver->rwork2);

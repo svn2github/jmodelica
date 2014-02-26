@@ -40,7 +40,6 @@ void jmi_minpack_solver_delete(jmi_block_solver_t* block_solver);
 struct jmi_minpack_solver_t {
     int lr;
     real ytol;
-    real *yscale;
     real *ytemp;
     
     real *qTf;
