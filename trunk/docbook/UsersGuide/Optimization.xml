@@ -177,12 +177,11 @@ plt.show()
         collocation with CasADi.</emphasis> This algorithm solves optimal
         control and parameter estimation problems. It is implemented in
         Python, uses CasADi for computing function derivatives and IPOPT for
-        solving the resulting NLP. Only regular equations in models are
-        supported currently. Use this method if you would like to test the
-        future default collocation algorithm in JModelica.org and if your
-        model is a continuous time DAE that does not contain functions or
-        records. Note that this algorithm offers significantly increased
-        performance as compared to the default algorithm.</para>
+        solving the resulting NLP. In terms of functionality, this algorithm
+        is very similar to the default JMU-based algorithm, but offers
+        significant performance improvements in several regards. It is however
+        still in a state of development, and is not as mature as the default
+        algorithm.</para>
       </listitem>
 
       <listitem>
@@ -216,12 +215,12 @@ model = JMUModel(model_name)
 </programlisting>
 
     <para>In this case, a JMU is compiled, corresponding compilation functions
-    are available for XML-based models required by the CasADi-based algorithms
-    and for compilation of FMUs. All operations that can be performed on the
-    model are available as methods of the <literal>model</literal> object and
-    can be accessed by tab completion. Invoking an optimization algorithm is
-    done by calling the method <literal>JMUModel.optimize</literal>, which
-    performs the following tasks:</para>
+    are available for the other algorithms. All operations that can be
+    performed on the model are available as methods of the
+    <literal>model</literal> object and can be accessed by tab completion.
+    Invoking an optimization algorithm is done by calling the method
+    <literal>JMUModel.optimize</literal>, which performs the following
+    tasks:</para>
 
     <itemizedlist>
       <listitem>
@@ -288,8 +287,9 @@ model = JMUModel(model_name)
 </programlisting>
 
     <para>Again, note that the parameters differs for different model classes.
-    The optimize method can be invoked without any arguments, which case the
-    default optimization algorithm, with default options, is invoked:</para>
+    The optimize method can be invoked without any arguments, in which case
+    the default optimization algorithm, with default options, is
+    invoked:</para>
 
     <programlisting>res = vdp.optimize()
 </programlisting>
@@ -343,12 +343,11 @@ opts['n_e'] = 5
 x1 = res['x1']
 </programlisting>
 
-    <para>Variable data is returned as numpy arrays in case of variables and
-    as numeric values in the case of parameters. The result object also
+    <para>Variable data is returned as NumPy arrays. The result object also
     contains references to the model that was optimized, the name of the
     result file that was written to disk, a solver object representing the
-    optimization algorithm and an options object that as used when solving the
-    optimization problem.</para>
+    optimization algorithm and an options object that was used when solving
+    the optimization problem.</para>
   </section>
 
   <section>
@@ -392,18 +391,21 @@ x1 = res['x1']
     <programlisting language="python">T_scaled*T_nom = f(p_scaled*p_nom)
 </programlisting>
 
-    <para>when <literal>variable scaling</literal> is enabled. The algorithm
-    in <xref linkend="opt-sec-dae-casadi"/> also has support for time-varying
-    scale factors.</para>
+    <para>when <literal>variable scaling</literal> is enabled.</para>
+
+    <para>The algorithm in <xref linkend="opt-sec-dae-casadi"/> also has
+    support for providing trajectories (obtained by for example simulation)
+    that are used for scaling. This means that it usually is not necessary to
+    provide nominal values for all variables, and that it is possible to use
+    time-varying scaling factors.</para>
 
     <para>For debugging purposes, is is sometimes useful to write a
     simulation/optimization/initialization result to file in scaled format, in
     order to detect if there are some variables which require additional
     scaling. The option <literal>write_scaled_result</literal> has been
     introduced as an option to the <literal>initialize</literal>,
-    <literal>simulate</literal> and <literal>optimize</literal> methods of
-    <literal>JMUModel</literal> and <literal>CasadiModel</literal> for this
-    purpose.</para>
+    <literal>simulate</literal> and <literal>optimize</literal> methods for
+    this purpose.</para>
   </section>
 
   <section xml:id="opt-sec-dae-jmu">
@@ -3104,7 +3106,8 @@ print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_
       Python interface, is significantly increased flexibility and
       extensibility of the implementation on one hand and significantly
       improved performance on the other. The goal is for the CasADi-based
-      algorithm to replace the C-based algorithm.</para>
+      algorithm to replace the C-based algorithm, once it has sufficiently
+      matured.</para>
 
       <para>The implementation relies on the class
       <literal>CasadiModel</literal>. A compiler method for creating compiled
@@ -3226,23 +3229,23 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
-              <entry><literal>graph</literal></entry>
+              <entry><literal>expand_to_SX</literal></entry>
 
-              <entry>'SX'</entry>
+              <entry>True</entry>
 
-              <entry>CasADi graph type. Possible values are "SX" and
-              "MX".</entry>
+              <entry>Whether to expand the CasADi MX graphs to SX
+              graphs.</entry>
             </row>
 
             <row>
-              <entry><literal>rename_vars</literal></entry>
+              <entry><literal>named_vars</literal></entry>
 
               <entry>False</entry>
 
-              <entry>Rename NLP variables according to their corresponding
-              Modelica/Optimica names. This only works if graph == "SX". This
-              is done in an inefficient manner and should only be used for
-              investigative purposes.</entry>
+              <entry>Whether to name the NLP variables according to their
+              corresponding Modelica/Optimica names. This disables the
+              solution of the NLP and should only be done for investigative
+              purposes..</entry>
             </row>
 
             <row>
