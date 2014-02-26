@@ -28,6 +28,7 @@ function extFunc1
 	input Boolean[size(a,1),size(a,2)] c;
 	output Real sum;
 	output Real[size(a,1),size(a,2),size(a,3)] o;
+	output Real[size(a,1)*size(a,2)*size(a,3)] step;
 	external "C" annotation(
 		Library="arrayFunctions",
 		Include="#include \"arrayFunctions.h\"");
@@ -35,15 +36,32 @@ end extFunc1;
 
 Real[3,3,3] x;
 Real s;
+Real[27] step;
 
 constant Real arg1 = 3.14;
 constant Real[3,3,3] arg2 = {{{1e1,1e2,1e3},{1e4,1e5,1e6},{1e7,1e8,1e9}},{{1,1,1},{1,1,1},{1,1,1}},{{1e-1,1e-2,1e-3},{1e-4,1e-5,1e-6},{1e-7,1e-8,1e-9}}};
 constant Integer[3,3,3] arg3 = {{{1,2,3},{4,5,6},{7,8,9}},{{11,12,13},{14,15,16},{17,18,19}},{{21,22,23},{24,25,26},{27,28,29}}};
 constant Boolean[3,3] arg4 = {{true,true,true},{true, false, true},{false,true,false}};
 equation
-	(s,x) = extFunc1(arg1, arg2, arg3, arg4);
+	(s,x,step) = extFunc1(arg1, arg2, arg3, arg4);
 
 end ExtFunctionTest2;
+
+model ExtFunctionBool
+	
+function copyBoolArray
+	input Boolean[:] a;
+	output Boolean[size(a,1)] b;
+	external "C" annotation(
+		Library="arrayFunctions",
+		Include="#include \"arrayFunctions.h\"");
+end copyBoolArray;
+
+constant Boolean[8] arg = {true,true,true,false,true,false,false,true};
+Boolean[8] res;
+equation
+	res = copyBoolArray(arg);
+end ExtFunctionBool;
 
 model ExtFunctionTest3
  Real a(start=10);

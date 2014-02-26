@@ -157,6 +157,44 @@ class TestExternalShared:
         model = load_fmu(fmu_name)
         nose.tools.assert_equals(model.get('c'), 3)
 
+class TestExternalBool:
+    
+    @classmethod
+    def setUpClass(self):
+        """
+        Sets up the test class.
+        """
+        self.cpath = "ExtFunctionTests.ExtFunctionBool"
+        self.dir = build_ext('array_shared', 'ExtFunctionTests.mo')
+        self.fpath = path(self.dir, "ExtFunctionTests.mo")
+    
+    @classmethod
+    def tearDownClass(self):
+        """
+        Cleans up after test class.
+        """
+        shutil.rmtree(self.dir, True)
+        
+    @testattr(stddist = True)
+    def test_ExtFuncBool(self):
+        """ 
+        Test compiling a model with external functions in a shared library. Boolean arrays.
+        """
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
+        model = load_fmu(fmu_name)
+        model.simulate()
+        fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
+        model2 = load_fmu(fmu_name)
+        model2.simulate()
+        trueInd  = {1,2,3,5,8}
+        falseInd = {4,6,7}
+        for i in trueInd:
+            assert(model.get('res[' + str(i) + ']'))
+            assert(model2.get('res[' + str(i) + ']'))
+        for i in falseInd:
+		    assert(not model.get('res[' + str(i) + ']'))
+		    assert(not model2.get('res[' + str(i) + ']'))
+
 class TestExternalShared2:
     
     @classmethod
@@ -178,14 +216,14 @@ class TestExternalShared2:
     @testattr(stddist = True)
     def test_ExtFuncShared(self):
         """ 
-        Test compiling a model with external functions in a shared library. Arrays.
+        Test compiling a model with external functions in a shared library. Real, Integer, and Boolean arrays.
         """
         fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':True})
         model = load_fmu(fmu_name)
         s_ceval = model.get('s')
         res = model.simulate()
         s_sim1 = res.final('s')
-        #nose.tools.assert_equals(s_ceval, s_sim1)
+        
         fmu_name = compile_fmu(self.cpath, self.fpath, compiler_options={'variability_propagation':False})
         model = load_fmu(fmu_name)
         res = model.simulate()
