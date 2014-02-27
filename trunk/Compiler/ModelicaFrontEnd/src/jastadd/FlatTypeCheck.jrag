@@ -202,22 +202,21 @@ aspect FlatTypeCheck {
     
     
   public void FEquation.typeCheck(ErrorCheckType checkType) {
-	  //log.debug("FEquation.typeCheck(checkType): " + getLeft().type() + " " + getRight().type());
       typeCheckHGTResidual(checkType);
       typeCheckNominal(checkType);
       typeCheckLocalIteration(checkType);
       FType left = getLeft().type();
       FType right = getRight().type();
-	  if (!left.isUnknown() && !right.isUnknown()) {
-		  if (!left.equivalentTo(right)) {
-		      if (left.scalarType().equivalentTo(right.scalarType())) {
-		          if (!lockBranch(checkType))
-		              error("The array sizes of right and left hand side of equation are not compatible");        
-		      } else {
-	              error("The right and left expression types of equation are not compatible");        
-		      }
-		  }
-	  }
+      if (!left.isUnknown() && !right.isUnknown()) {
+          if (!left.equivalentTo(right)) {
+              if (left.scalarType().equivalentTo(right.scalarType())) {
+                  if (!lockBranch(checkType))
+                      error("The array sizes of right and left hand side of equation are not compatible");
+              } else {
+                  error("The right and left expression types of equation are not compatible");
+              }
+          }
+      }
   }
   
   public void FConnectClause.typeCheck(ErrorCheckType checkType) {

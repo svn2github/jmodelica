@@ -1031,20 +1031,20 @@ aspect AlgorithmDifferentiation{
     }
     
     
-    syn int FFunctionDecl.order()   = getFAlgorithm().order();
-    syn int FAlgorithm.order()      = 0;
-    eq FDerivativeAlgorithm.order() = getOrder();
+    syn int FFunctionDecl.order()          = getFAlgorithm().order();
+    syn int FAlgorithm.order()             = 0;
+    eq FDerivativeAlgorithm.order()        = getOrder();
     
     syn int FFunctionVariable.order()      = getOrder();
     
-    syn int FAssignStmt.order()      = 0;
-    eq FDerivativeAssignStmt.order() = getOrder();
+    syn int FAssignStmt.order()            = 0;
+    eq FDerivativeAssignStmt.order()       = getOrder();
     
     syn int FFunctionCallStmt.order()      = 0;
     eq FDerivativeFunctionCallStmt.order() = getOrder();
     
-    syn int FInitArrayStmt.order()     = 0;
-    eq FDerivatedInitArrayStmt.order() = getOrder();
+    syn int FInitArrayStmt.order()         = 0;
+    eq FDerivatedInitArrayStmt.order()     = getOrder();
 }
 
  aspect ExpressionSimplification {
@@ -1067,17 +1067,17 @@ aspect AlgorithmDifferentiation{
 	eq FDotMulExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
 	eq FDotDivExp.isLiteralOne() =    getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
 
- 	rewrite FDotMulExp {
-		when (getLeftNoTransform().isLiteralZero())  to FExp getLeft();
-		when (getLeftNoTransform().isLiteralOne())   to FExp getRight();
-		when (getRightNoTransform().isLiteralZero()) to FExp getRight();
-		when (getRightNoTransform().isLiteralOne())  to FExp getLeft();
-	}
+    rewrite FDotMulExp {
+        when (getLeftNoTransform().isLiteralZero() && !isArray())  to FExp getLeft();
+        when (getLeftNoTransform().isLiteralOne())                 to FExp getRight();
+        when (getRightNoTransform().isLiteralZero() && !isArray()) to FExp getRight();
+        when (getRightNoTransform().isLiteralOne())                to FExp getLeft();
+    }
 
- 	rewrite FDotDivExp {
-		when (getLeftNoTransform().isLiteralZero() && ndims() == 0) to FExp getLeft();
-		when (getRightNoTransform().isLiteralOne())                 to FExp getLeft();
-	}
+    rewrite FDotDivExp {
+        when (getLeftNoTransform().isLiteralZero() && !isArray()) to FExp getLeft();
+        when (getRightNoTransform().isLiteralOne())               to FExp getLeft();
+    }
 
  	rewrite FDotSubExp {
 		when (getLeftNoTransform().isLiteralZero())  to FExp getRight().makeNegated();

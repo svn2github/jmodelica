@@ -6344,7 +6344,7 @@ equation
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf3",
-			description="",
+			description="Test that array size errors lock if branches if possible",
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
  parameter Boolean a = true /* true */;
@@ -6359,6 +6359,36 @@ fclass ArrayTests.Other.ArraySizeInIf3
 end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
+
+
+model ArraySimplify1
+    Real x[2], y[2], z[2];
+equation
+    der(x) = {1, 2} * time;
+    y = 0 * x;
+    z = x * 0;
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="Other_ArraySimplify1",
+			description="Correct simplification of array expressions",
+			flatModel="
+fclass ArrayTests.Other.ArraySimplify1
+ Real x[1];
+ Real x[2];
+ constant Real y[1] = 0;
+ constant Real y[2] = 0;
+ constant Real z[1] = 0;
+ constant Real z[2] = 0;
+initial equation 
+ x[1] = 0.0;
+ x[2] = 0.0;
+equation
+ der(x[1]) = time;
+ der(x[2]) = 2 * time;
+end ArrayTests.Other.ArraySimplify1;
+")})));
+end ArraySimplify1;
 
 end Other;
 
