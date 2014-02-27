@@ -4225,7 +4225,7 @@ op.set('cstr.T_init', float(T_0_A))
 
             <programlisting language="python"># Set options
 opt_opts = op.optimize_options()
-opt_opts['n_e'] = 100 # Number of elements
+opt_opts['n_e'] = 19 # Number of elements
 opt_opts['init_traj'] = init_res.result_data
 opt_opts['IPOPT_options']['tol'] = 1e-10
 
@@ -4254,9 +4254,9 @@ T_res = res['cstr.T']
 Tc_res = res['cstr.Tc']
 time_res = res['time']
 
-c_ref = res['c_ref']
-T_ref = res['T_ref']
-Tc_ref = res['Tc_ref']
+c_ref = res['c_ref'][0] # extract constant value as first element
+T_ref = res['T_ref'][0]
+Tc_ref = res['Tc_ref'][0]
 </programlisting>
 
             <para>Finally, we plot the result using the functions available in
@@ -4291,14 +4291,14 @@ plt.show()
             <para>Notice that parameters are returned as scalar values whereas
             variables are returned as vectors and that this must be taken into
             account when plotting. You should now see the plot shown in <xref
-            linkend="opt-fig-cstr-opt1"/>.</para>
+            linkend="opt-fig-cstr-casadi-opt1"/>.</para>
 
-            <figure xml:id="opt-fig-cstr-opt1">
+            <figure xml:id="opt-fig-cstr-casadi-opt1">
               <title>Optimal profiles for the CSTR problem.</title>
 
               <mediaobject>
                 <imageobject>
-                  <imagedata fileref="images/cstr.svg" scalefit="1"
+                  <imagedata fileref="images/cstr_casadi.svg" scalefit="1"
                              width="60%"/>
                 </imageobject>
               </mediaobject>
@@ -4413,16 +4413,16 @@ plt.show()
 </programlisting>
 
           <para>You should now see the plot shown in <xref
-          linkend="opt-fig-cstr-opt2"/>.</para>
+          linkend="opt-fig-cstr-casadi-opt2"/>.</para>
 
-          <figure xml:id="opt-fig-cstr-opt2">
+          <figure xml:id="opt-fig-cstr-casadi-opt2">
             <title>Optimal control profiles and simulated trajectories
             corresponding to the optimal control input.</title>
 
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/cstr_opt_cmp.svg" scalefit="1"
-                           width="60%"/>
+                <imagedata fileref="images/cstr_opt_cmp_casadi.svg"
+                           scalefit="1" width="60%"/>
               </imageobject>
             </mediaobject>
           </figure>
