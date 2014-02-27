@@ -132,6 +132,7 @@ int jmi_minpack_solver_new(jmi_minpack_solver_t** solver_ptr, jmi_block_solver_t
     
     solver->lr = (int)((n*(n+1))/2+1); /* Why +1?? */
     
+    solver->yscale = (real*)calloc(n, sizeof(real));
     solver->ytemp = (real*)calloc(n, sizeof(real));
     solver->rwork1 = (real*)calloc(n, sizeof(real));
     solver->rwork2 = (real*)calloc(n, sizeof(real));
@@ -208,12 +209,23 @@ static int jmi_minpack_init(jmi_block_solver_t * block) {
 int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
     jmi_minpack_solver_t* solver = block->solver;
     jmi_log_node_t topnode;
-    int info;
-    int mode = 2; /* Scale with nominals, 1 for scaling done internally */
+    int info, i;
+    int mode; /* 2 for scaling with nominals, 1 for scaling done internally */
     int nprint = 200; /* Enables logging entire simulation. */
     int nbr_fcn_evals = 0, nbr_jac_evals = 0;
     int max_fcn_evals = 200; /* Max number of function evaluations */
     real factor = block->options->step_limit_factor * 10; /* Default is 100 and is scaled with the option step_limit_factor */
+
+    if (block->options->iteration_variable_scaling_mode == 2) {
+        /* utilize the heuristict of MINPACK to guess nominal, internal scaling */
+        mode = 1;
+    } else {
+        /* utilize the heuristict of MINPACK to guess nominal, internal scaling */
+        mode = 2;
+        for (i = 0; i < block->n; i++) {
+            solver->yscale[i] = block->nominal[i];
+        }
+    }
     
     
     if(block->init) {
@@ -225,7 +237,7 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
     jmi_minpack_solver_print_solve_start(block, &topnode);
     info = __cminpack_func__(hybrj)(minpack_f, (void*)block, block->n, block->x,
 	      block->res, block->jac, block->n, solver->ytol,
-          max_fcn_evals, block->nominal, mode, factor,
+          max_fcn_evals, solver->yscale, mode, factor,
 	      nprint, &nbr_fcn_evals, &nbr_jac_evals, solver->qr,
 	      solver->lr, solver->qTf, solver->rwork1, solver->rwork2,
 	      solver->rwork3, solver->rwork4);
@@ -244,6 +256,7 @@ int jmi_minpack_solver_solve(jmi_block_solver_t* block) {
 void jmi_minpack_solver_delete(jmi_block_solver_t* block) {
     jmi_minpack_solver_t* solver = block->solver;
     
+    free(solver->yscale);
     free(solver->ytemp);
     free(solver->rwork1);
     free(solver->rwork2);
