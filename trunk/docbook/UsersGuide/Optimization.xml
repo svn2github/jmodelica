@@ -3090,10 +3090,9 @@ print "a4: " + str(sens_res.final('a4')) + ", standard deviation: " + str(sigma_
       algorithm is based on the CasADi package for evaluation of first and
       second order derivatives, and for integration with the IPOPT algorithm.
       The two main benefits of using CasADi, through its Python interface, is
-      significantly increased flexibility and extensibility of the
-      implementation on one hand and significantly improved performance on the
-      other. The goal is for the CasADi-based algorithm to replace the C-based
-      algorithm, once it has sufficiently matured.</para>
+      increased flexibility and extensibility of the implementation improved
+      performance. The goal is for the CasADi-based algorithm to replace the
+      C-based algorithm, once it has sufficiently matured.</para>
 
       <para>The direct collocation method can be used to solve dynamic
       optimization problems, including optimal control problems and parameter
@@ -3454,15 +3453,8 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       algorithm.</para>
 
       <para>JModelica.org's CasADi framework does not support simulation and
-      initialization of models. It is recommended to use FMI for these
+      initialization of models. It is recommended to use PyFMI for these
       purposes instead.</para>
-
-      <para>A limitation of the algorithm is that it currently does not
-      support record and function constructs in the Modelica code. Otherwise
-      the algorithm supports solution of the same problems as the JMI
-      algorithm. The solution of parameter estimation problems is done in a
-      slightly different way, which is still undocumented in this
-      document.</para>
 
       <para>Some statistics from IPOPT can be obtained by issuing the
       command</para>
@@ -4070,7 +4062,7 @@ print('T = %f' % T_0_B)
                         <m:mi>t</m:mi>
                       </m:mfenced>
 
-                      <m:mn> ≤ 370</m:mn>
+                      <m:mn>≤ 370</m:mn>
                     </m:mtd>
                   </m:mtr>
 
