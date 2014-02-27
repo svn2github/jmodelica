@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # Import the needed JModelica.org Python methods
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
-from pyjmi import transfer_to_casadi_interface, get_files_path
+from pyjmi import transfer_optimization_problem, get_files_path
 
 def run_demo(with_plots=True):
     """
@@ -71,7 +71,7 @@ def run_demo(with_plots=True):
     # Locate the Modelica and Optimica code
     file_path = os.path.join(get_files_path(), "CSTR.mop")
     
-    # Compile the stationary initialization model into a FMU
+    # Compile the stationary initialization model into an FMU
     init_fmu = compile_fmu("CSTR.CSTR_Init", file_path)
     
     # Load the FMU
@@ -94,7 +94,7 @@ def run_demo(with_plots=True):
     print('T = %f' % T_0_A)
     
     # Set inputs for Stationary point B
-    init_model = load_fmu(init_fmu)
+    init_model.reset() # reset the FMU so that we can initialize it again
     Tc_0_B = 280
     init_model.set('Tc', Tc_0_B)
 
@@ -158,7 +158,7 @@ def run_demo(with_plots=True):
     
     ### 3. Solve the optimal control problem
     # Compile and load optimization problem
-    op = transfer_to_casadi_interface("CSTR.CSTR_Opt2", file_path)
+    op = transfer_optimization_problem("CSTR.CSTR_Opt2", file_path)
     
     # Set reference values
     op.set('Tc_ref', Tc_0_B)
