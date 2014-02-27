@@ -1755,7 +1755,7 @@ plt.show()
 
                   <m:mo>=</m:mo>
 
-                  <m:mn>0</m:mn>
+                  <m:mn>1</m:mn>
                 </m:mtd>
               </m:mtr>
             </m:mtable>
@@ -1771,7 +1771,11 @@ plt.show()
             <m:mtable>
               <m:mtr>
                 <m:mtd columnalign="right">
-                  <m:mi>x</m:mi>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>1</m:mn>
+                  </m:msub>
 
                   <m:mo>⁡</m:mo>
 
@@ -1787,13 +1791,17 @@ plt.show()
                 <m:mtd columnalign="left">
                   <m:mo>=</m:mo>
 
-                  <m:mn>1</m:mn>
+                  <m:mn>0</m:mn>
 
                   <m:mi>,</m:mi>
 
                   <m:mspace width="1em"/>
 
-                  <m:mi>v</m:mi>
+                  <m:msub>
+                    <m:mi>x</m:mi>
+
+                    <m:mn>2</m:mn>
+                  </m:msub>
 
                   <m:mo>⁡</m:mo>
 
@@ -1810,50 +1818,29 @@ plt.show()
                   <m:mn>0</m:mn>
                 </m:mtd>
               </m:mtr>
-
-              <m:mtr>
-                <m:mtd columnalign="right">
-                  <m:mi>v</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-                </m:mtd>
-
-                <m:mtd columnalign="left">
-                  <m:mo>≤</m:mo>
-
-                  <m:mn>0.5</m:mn>
-
-                  <m:mi>,</m:mi>
-
-                  <m:mspace width="1em"/>
-
-                  <m:mo>-</m:mo>
-
-                  <m:mn>1</m:mn>
-
-                  <m:mo>≤</m:mo>
-
-                  <m:mi>u</m:mi>
-
-                  <m:mo>⁡</m:mo>
-
-                  <m:mfenced>
-                    <m:mi>t</m:mi>
-                  </m:mfenced>
-
-                  <m:mo>≤</m:mo>
-
-                  <m:mn>1</m:mn>
-                </m:mtd>
-              </m:mtr>
             </m:mtable>
 
             <m:mspace linebreak="newline"/>
           </m:math>
+
+          <m:mo>-</m:mo>
+
+          <m:mn>1</m:mn>
+
+          <m:mo>≤</m:mo>
+
+          <m:mi>u</m:mi>
+
+          <m:mo>⁡</m:mo>
+
+          <m:mfenced><m:mi>t</m:mi></m:mfenced>
+
+          <m:mo>≤</m:mo>
+
+          <m:mn>1</m:mn>
+
+          <m:mtr><m:mtd columnalign="left"><m:mspace
+          width="1em"/></m:mtd></m:mtr>
         </informalequation>
 
         <para>This problem is encoded in the following Optimica
@@ -4490,6 +4477,330 @@ plt.show()
           in simultaneous strategies for dynamic optimization."
           <emphasis>Chemical Engineering Science</emphasis>, <emphasis
           role="bold">57</emphasis>, pp. 575-593.</para>
+
+          <section>
+            <title>Minimum time problems</title>
+
+            <para>Minimum time problems are dynamic optimization problems
+            where not only the control inputs are optimized, but also the
+            final time. Typically, elements of such problems include initial
+            and terminal state constraints and an objective function where the
+            transition time is minimized. The following example will be used
+            to illustrate how minimum time problems are formulated in
+            Optimica. We consider the optimization problem:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:munder>
+                  <m:mi>min</m:mi>
+
+                  <m:mrow>
+                    <m:mi>u</m:mi>
+
+                    <m:mo>⁡</m:mo>
+
+                    <m:mfenced>
+                      <m:mi>t</m:mi>
+                    </m:mfenced>
+                  </m:mrow>
+                </m:munder>
+
+                <m:msub>
+                  <m:mi>t</m:mi>
+
+                  <m:mi>f</m:mi>
+                </m:msub>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para>subject to the Van der Pol dynamics:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mover>
+                          <m:mi>x</m:mi>
+
+                          <m:mo>.</m:mo>
+                        </m:mover>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:mfenced separators="">
+                        <m:mn>1</m:mn>
+
+                        <m:mo>-</m:mo>
+
+                        <m:msubsup>
+                          <m:mi>x</m:mi>
+
+                          <m:mn>2</m:mn>
+
+                          <m:mn>2</m:mn>
+                        </m:msubsup>
+                      </m:mfenced>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mo>-</m:mo>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mo>+</m:mo>
+
+                      <m:mi>u</m:mi>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mn>0</m:mn>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mover>
+                          <m:mi>x</m:mi>
+
+                          <m:mo>.</m:mo>
+                        </m:mover>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mfenced>
+                        <m:mn>0</m:mn>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>1</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+            </informalequation>
+
+            <para>and the constraints:</para>
+
+            <informalequation>
+              <m:math display="block" overflow="scroll">
+                <m:mtable>
+                  <m:mtr>
+                    <m:mtd columnalign="right">
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>1</m:mn>
+                      </m:msub>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>f</m:mi>
+                        </m:msub>
+                      </m:mfenced>
+                    </m:mtd>
+
+                    <m:mtd columnalign="left">
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+
+                      <m:mi>,</m:mi>
+
+                      <m:mspace width="1em"/>
+
+                      <m:msub>
+                        <m:mi>x</m:mi>
+
+                        <m:mn>2</m:mn>
+                      </m:msub>
+
+                      <m:mo>⁡</m:mo>
+
+                      <m:mfenced>
+                        <m:msub>
+                          <m:mi>t</m:mi>
+
+                          <m:mi>f</m:mi>
+                        </m:msub>
+                      </m:mfenced>
+
+                      <m:mo>=</m:mo>
+
+                      <m:mn>0</m:mn>
+                    </m:mtd>
+                  </m:mtr>
+                </m:mtable>
+
+                <m:mspace linebreak="newline"/>
+              </m:math>
+
+              <m:mo>-</m:mo>
+
+              <m:mn>1</m:mn>
+
+              <m:mo>≤</m:mo>
+
+              <m:mi>u</m:mi>
+
+              <m:mo>⁡</m:mo>
+
+              <m:mfenced><m:mi>t</m:mi></m:mfenced>
+
+              <m:mo>≤</m:mo>
+
+              <m:mn>1</m:mn>
+
+              <m:mtr><m:mtd columnalign="left"><m:mspace
+              width="1em"/></m:mtd></m:mtr>
+            </informalequation>
+
+            <para>This problem is encoded in the following Optimica
+            specification:</para>
+
+            <programlisting language="optimica">optimization VDP_Opt_Min_Time (objective = finalTime,
+                               startTime = 0,
+                               finalTime(free=true,min=0.2,initialGuess=1)) 
+
+  // The states
+  Real x1(start = 0,fixed=true);
+  Real x2(start = 1,fixed=true);
+
+  // The control signal
+  input Real u(free=true,min=-1,max=1);
+
+equation
+  // Dynamic equations
+  der(x1) = (1 - x2^2) * x1 - x2 + u;
+  der(x2) = x1;
+
+constraint
+  // terminal constraints
+  x1(finalTime)=0;
+  x2(finalTime)=0;
+end VDP_Opt_Min_Time;
+</programlisting>
+
+            <para>Notice how the class attribute <literal>finalTime</literal>
+            is set to be free in the optimization. The problem is solved by
+            the following Python script:</para>
+
+            <programlisting language="python"># Import numerical libraries
+import numpy as N
+import matplotlib.pyplot as plt
+
+# Import the JModelica.org Python packages
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
+from pyjmi import transfer_optimization_problem
+
+vdp = transfer_optimization_problem("VDP_Opt_Min_Time", "VDP_Opt_Min_Time.mop")
+res = vdp.optimize()
+
+# Extract variable profiles
+x1=res['x1']
+x2=res['x2']
+u=res['u']
+t=res['time']
+
+# Plot
+plt.figure(1)
+plt.clf()
+plt.subplot(311)
+plt.plot(t,x1)
+plt.grid()
+plt.ylabel('x1')
+
+plt.subplot(312)
+plt.plot(t,x2)
+plt.grid()
+plt.ylabel('x2')
+
+plt.subplot(313)
+plt.plot(t,u,'x-')
+plt.grid()
+plt.ylabel('u')
+plt.xlabel('time')
+plt.show()
+</programlisting>
+
+            <para>The resulting control and state profiles are shown in <xref
+            linkend="opt-fig-vdp-min-time"/>. Notice the difference as
+            compared to Figure <xref linkend="fig-vdp-opt"/>, where the Van
+            der Pol oscillator system is optimized using a quadratic objective
+            function.</para>
+
+            <figure xml:id="opt-fig-vdp-min-time">
+              <title>Minimum time profiles for the Van der Pol
+              Oscillator.</title>
+
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="images/vdp_min_time.svg" scalefit="1"
+                             width="60%"/>
+                </imageobject>
+              </mediaobject>
+            </figure>
+          </section>
         </section>
       </section>
     </section>
