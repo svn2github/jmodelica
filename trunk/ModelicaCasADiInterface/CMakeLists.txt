@@ -51,6 +51,20 @@ set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 set(JAVA_HOME $ENV{JAVA_HOME})
 
+# locate JCC installation, store in JCC_DIR
+execute_process(
+  COMMAND python -c "import os.path, inspect, jcc; print os.path.dirname(inspect.getfile(jcc));"
+  RESULT_VARIABLE FIND_JCC_RESULT
+  OUTPUT_VARIABLE JCC_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT FIND_JCC_RESULT EQUAL 0)
+  message(SEND_ERROR "Failed to get JCC installation path")
+  set(JCC_DIR "")
+endif()
+set(JCC_SRC_DIR "${JCC_DIR}/sources")
+include_directories(${JCC_SRC_DIR})
+
 # Add library path for libs
 link_directories(${CASADI_BUILD_DIR}/lib) 
 link_directories(${IPOPT_HOME}/lib) 
