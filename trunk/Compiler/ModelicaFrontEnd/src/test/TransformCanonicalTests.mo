@@ -1524,6 +1524,13 @@ fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[10].s1 = StateSelect.avoid;
  constant StateSelect b[10].s2 = StateSelect.never;
  Real b[10].x1(stateSelect = StateSelect.avoid);
+ Real b[1]._der_x1;
+ Real b[2]._der_x1;
+ Real b[3]._der_x1;
+ Real b[4]._der_x1;
+ Real b[5]._der_x1;
+ Real b[6]._der_x1;
+ Real b[7]._der_x1;
 equation
  b[1].x1 = time;
  b[2].x1 = time;
@@ -1535,6 +1542,13 @@ equation
  b[8].x1 = time;
  b[9].x1 = time;
  b[10].x1 = time;
+ b[1]._der_x1 = 1.0;
+ b[2]._der_x1 = 1.0;
+ b[3]._der_x1 = 1.0;
+ b[4]._der_x1 = 1.0;
+ b[5]._der_x1 = 1.0;
+ b[6]._der_x1 = 1.0;
+ b[7]._der_x1 = 1.0;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");

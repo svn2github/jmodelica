@@ -455,11 +455,12 @@ fclass VariabilityPropagationTests.Der2
  constant Real x = 0;
  Real y;
  Real z;
+ Real _der_z;
 equation
  z = time;
  y = 1;
+ _der_z = 1.0;
 end VariabilityPropagationTests.Der2;
-			
 ")})));
 end Der2;
 

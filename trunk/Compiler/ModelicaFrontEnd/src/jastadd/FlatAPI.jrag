@@ -494,6 +494,9 @@ aspect FlatAPI {
 	  [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
 	FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
 	to FClass.differentiatedRealVariablesSet() for myFClass();
+	FDerivativeVariable contributes
+	    myDifferentiatedVariable() when (shouldContribute())
+	to FClass.differentiatedRealVariablesSet() for myFClass();
 	syn int FVariable.differentiatedRealVariableIndex() =
 		myFClass().differentiatedRealVariables().indexOf(this);
 

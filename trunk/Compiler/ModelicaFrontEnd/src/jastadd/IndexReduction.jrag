@@ -194,6 +194,65 @@ aspect IndexReduction {
     
     public static final int BiPGraph.MAX_N_EQ_DIFFS = 5;
     
+    private static Map<Eq, FAbstractEquation> BiPGraph.differentiateEquations(Collection<Eq> eqns) {
+        Map<Eq, FAbstractEquation> diffedEqnsMap = new HashMap<Eq, FAbstractEquation>();
+        for (Eq eqn : eqns) {
+            FAbstractEquation fEqn = eqn.getEquation();
+            if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
+                throw new IndexReductionException("Maximum number of differentiations reached");
+            FAbstractEquation diffedFEqn = null;
+            // Look through member equations and check if the differentiated equation already exists
+            for (Eq groupMember : eqn.getGroupMembers())
+                if (groupMember.getMeDifferentiated() != null)
+                    diffedFEqn = groupMember.getMeDifferentiated().getEquation();
+            if (diffedFEqn == null) {
+                // It does not exsit, create it.
+                Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
+                if (diffedFEqns.size() != 1)
+                    throw new UnsupportedOperationException("Differentiation of equations should result" +
+                            " in a single equation when differentiating on time");
+                else
+                    diffedFEqn = diffedFEqns.iterator().next();
+            } else {
+                // It already exists, we need to flush cached value later, indicate with null.
+                diffedFEqn = null;
+            }
+            diffedEqnsMap.put(eqn, diffedFEqn);
+        }
+        return diffedEqnsMap;
+    }
+    
+    private boolean BiPGraph.removePreferDerivatives(Collection<Eq> eqns, Stack<Eq> workStack) {
+        boolean skip = false;
+        for (Eq eqn : eqns) {
+            for (FVariable fv : eqn.getEquation().variables()) {
+                if (fv.stateSelectAttribute() != FAbstractVariable.StateSelect.PREFER)
+                    continue;
+                if (fv.getMeDifferentiated() == null)
+                    continue;
+                Var derVar = getVariable(fv.getMeDifferentiated().name());
+                if (derVar == null)
+                    continue;
+                if (derVar.getMatching() != null)
+                    continue;
+                ASTNode.log.info("Removing derivative variable that was introduced due to StateSelect.Prefer, \"%s\"", derVar);
+                removeVariable(derVar);
+                Var var = addVariable(fv.name(), fv);
+                ASTNode.log.info("Introducing the original variable, \"%s\"", var);
+                for (FIdUseExp use : fv.uses()) {
+                    FAbstractEquation fae = use.myFEquation();
+                    if (fae == null)
+                        continue;
+                    for (Eq useEqn : getEquations(fae))
+                        useEqn.addVariable(var);
+                }
+                skip = true;
+                workStack.push(eqn);
+            }
+        }
+        return skip;
+    }
+    
     public IndexReductionResult BiPGraph.reduceIndex(boolean resetMatching) {
         IndexReductionResult result = new IndexReductionResult();
         if (resetMatching) {
@@ -249,6 +308,19 @@ aspect IndexReduction {
             }
             
             if (!pathFound) { // Step 3b-5
+                // First, differentiate all equations to see if it is possible.
+                // Remove derivative if we find StateSelect.Prefer variables that wasn't possible to select due to
+                // equation that can't be differentiated
+                Map<Eq, FAbstractEquation> diffedEqnsMap;
+                try {
+                    diffedEqnsMap = differentiateEquations(visitedEquations);
+                } catch (EquationDifferentiationException e) {
+                    ASTNode.log.info("Unable to differentiate equation:\n%s", e.equation);
+                    if (removePreferDerivatives(visitedEquations, eqToMatchStack))
+                        continue;
+                    else
+                        throw e;
+                }
                 for (Var var : visitedVariables) { // Loop over all visited variables, Step 3b-5i
                     // Create a new differentiated variable
                     FVariable diffedFVar = var.getVariable().createFDerivativeVariable();
@@ -262,25 +334,15 @@ aspect IndexReduction {
                     diffedVar.setMeIntegrated(var);
                 }
                 for (Eq eqn : visitedEquations) { // Step 3b-5ii
-                    FAbstractEquation fEqn = eqn.getEquation();
-                    if (eqn.numDifferentiations() > MAX_N_EQ_DIFFS)
-                        throw new IndexReductionException("Maximum number of differentiations reached");
-                    FAbstractEquation diffedFEqn = null;
-                    // Look through member equations and check if the differentiated equation already exisits
-                    for (Eq groupMember : eqn.getGroupMembers())
-                        if (groupMember.getMeDifferentiated() != null)
-                            diffedFEqn = groupMember.getMeDifferentiated().getEquation();
-                    if (diffedFEqn == null) {
-                        // It does not exsit, create it.
-                        Collection<FAbstractEquation> diffedFEqns = fEqn.diff("time");
-                        if (diffedFEqns.size() != 1)
-                            throw new UnsupportedOperationException("Differentiation of equations should result" +
-                                    " in a single equation when differentiating on time");
-                        else
-                            diffedFEqn = diffedFEqns.iterator().next();
+                    FAbstractEquation diffedFEqn = diffedEqnsMap.get(eqn);
+                    if (diffedFEqn != null) {
                         result.addEquation(diffedFEqn);
                     } else {
-                        // It already exisits we need to flush cached values since we might have added new variables
+                        // Already differentiated, look through member equations
+                        for (Eq groupMember : eqn.getGroupMembers())
+                            if (groupMember.getMeDifferentiated() != null)
+                                diffedFEqn = groupMember.getMeDifferentiated().getEquation();
+                        // It already exists we need to flush cached values since we might have added new variables
                         diffedFEqn.flushAllRecursive();
                     }
                     ASTNode.log.info("About to add equation: %s", diffedFEqn);
@@ -355,6 +417,10 @@ aspect IndexReduction {
         ASTNode.log.info("Matching:");
         ASTNode.log.info(printMatchingObj());
         
+        if (result.getEquations().isEmpty()) {
+            ASTNode.log.info("Index reduction did not change the system. Munkres is skipped.");
+            return result;
+        }
         // Selection of dummy derivatives
         /*
             The algorithm is implemented differently than in the original paper
