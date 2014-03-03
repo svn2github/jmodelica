@@ -2495,8 +2495,8 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
         named_vars --
             Whether to name the NLP variables according to their corresponding
-            Modelica/Optimica names. This is heavily inefficient and should
-            only be done for investigative purposes.
+            Modelica/Optimica names. This disables the solution of the NLP and
+            should only be done for investigative purposes.
 
             Type: bool
             Default: False
