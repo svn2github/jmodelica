@@ -39,6 +39,9 @@ AC_SUBST(SHAREDEXT)
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(SEP)
 SEP=':'
+# Handle BSD-stype cp - TODO: detect other BSD systems than Mac
+AC_SUBST(CP)
+CP="cp -au"
 AC_SUBST(CURR_DIR)
 CURR_DIR=`pwd`
 case $build in
@@ -63,6 +66,7 @@ case $build in
 	AC_DEFINE([WIN32],[0],[Not a win32])    
 	SHAREDEXT=".dylib";
 	SHARED_LDFLAGS=" -dynamiclib ";
+	CP="cp -a"
     ;;
   *)
 	echo "Linux detected"   
