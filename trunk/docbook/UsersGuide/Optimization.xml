@@ -3743,23 +3743,21 @@ Returns::
         <itemizedlist>
           <listitem>
             <para>How to solve a DAE initialization problem. The
-            initialization model have equations specifying that all
-            derivatives should be identically zero, which implies that a
-            stationary solution is obtained. Two stationary points,
-            corresponding to different inputs, are computed. We call the
-            stationary points A and B respectively. Point A corresponds to
-            operating conditions where the reactor is cold and the reaction
-            rate is low, whereas point B corresponds to a higher temperature
-            where the reaction rate is high. For more information about the
-            DAE initialization algorithm, see the JMI API
-            documentation.</para>
+            initialization model has equations specifying that all derivatives
+            should be identically zero, which implies that a stationary
+            solution is obtained. Two stationary points, corresponding to
+            different inputs, are computed. We call the stationary points A
+            and B respectively. Point A corresponds to operating conditions
+            where the reactor is cold and the reaction rate is low, whereas
+            point B corresponds to a higher temperature where the reaction
+            rate is high.</para>
           </listitem>
 
           <listitem>
             <para>An optimal control problem is solved where the objective is
             to transfer the state of the system from stationary point A to
             point B. The challenge is to ignite the reactor while avoiding
-            uncontrolled temperature increase. It is also demonstrated how to
+            uncontrolled temperature increases. It is also demonstrated how to
             set parameter and variable values in a model. More information
             about the simultaneous optimization algorithm can be found at
             JModelica.org API documentation.</para>
@@ -3779,11 +3777,11 @@ Returns::
         <para>Start the tutorial by creating a working directory and copy the
         file
         <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/CSTR.mop</filename>
-        to your working directory. An on-line version of <link
+        to your working directory. An online version of <link
         xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/CSTR.mop"><filename>CSTR.mop</filename></link>
         is also available (depending on which browser you use, you may have to
         accept the site certificate by clicking through a few steps). If you
-        choose to create Python script file, save it to the working
+        choose to create a Python script file, save it to the working
         directory.</para>
 
         <section>
@@ -3804,7 +3802,7 @@ from pyjmi import transfer_optimization_problem
 
           <para>To solve the initialization problem and simulate the model, we
           will first compile it as an FMU and load it in Python. These steps
-          are described in more detail Section 4.</para>
+          are described in more detail in Section 4.</para>
 
           <programlisting language="python"># Compile the stationary initialization model into an FMU
 init_fmu = compile_fmu("CSTR.CSTR_Init", "CSTR.mop")
@@ -4171,8 +4169,8 @@ plt.show()
             <para>Look at the plots and try to relate the trajectories to the
             optimal control problem. Why is this a good initial guess?</para>
 
-            <para>Once the initial guess is generated, we compile and the
-            model containing the optimal control problem:</para>
+            <para>Once the initial guess is generated, we compile the optimal
+            control problem:</para>
 
             <programlisting language="python"># Compile and load optimization problem
 op = transfer_optimization_problem("CSTR.CSTR_Opt2", "CSTR.mop")
@@ -4318,16 +4316,15 @@ plt.show()
 
           <para>Solving optimal control problems by means of direct
           collocation implies that the differential equation is approximated
-          by a discrete time counterpart. The accuracy of the solution is
+          by a time-discrete counterpart. The accuracy of the solution is
           dependent on the method of collocation and the number of elements.
           In order to assess the accuracy of the discretization, we may
-          simulate the system using a DAE solver using the optimal control
-          profile as input. With this approach, the state profiles are
-          computed with high accuracy and the result may then be compared with
-          the profiles resulting from optimization. Notice that this procedure
-          does not verify the optimality of the resulting optimal control
-          profiles, but only the accuracy of the discretization of the
-          dynamics.</para>
+          simulate the system using the optimal control profile as input. With
+          this approach, the state profiles are computed with high accuracy
+          and the result may then be compared with the profiles resulting from
+          optimization. Notice that this procedure does not verify the
+          optimality of the resulting optimal control profiles, but only the
+          accuracy of the discretization of the dynamics.</para>
 
           <para>We start by compiling and loading the model used for
           simulation:</para>
@@ -4452,8 +4449,7 @@ plt.show()
 
             <listitem>
               <para>Try varying the number of elements in the mesh and the
-              number of collocation points in each interval. 2-10 collocation
-              points are supported.</para>
+              number of collocation points in each interval.</para>
             </listitem>
           </orderedlist>
         </section>
