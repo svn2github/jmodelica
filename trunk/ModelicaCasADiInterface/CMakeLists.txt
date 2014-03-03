@@ -53,7 +53,7 @@ set(JAVA_HOME $ENV{JAVA_HOME})
 
 # locate JCC installation, store in JCC_DIR
 execute_process(
-  COMMAND python -c "import os.path, inspect, jcc; print os.path.dirname(inspect.getfile(jcc));"
+  COMMAND python -c "import os.path, inspect, jcc; print os.path.dirname(inspect.getfile(jcc)).replace(chr(92),'/');"
   RESULT_VARIABLE FIND_JCC_RESULT
   OUTPUT_VARIABLE JCC_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE
