@@ -103,19 +103,19 @@ aspect XMLCodeGenerator {
 		// assume everything is a model for now
 		generateOpenTag(str, "class", indent, "kind", "model");
 		
-		generateOpenTag(str, "declaration", indentOneStep);
+		//generateOpenTag(str, "declaration", indentOneStep);
 		
 		// loop enum declarations and generate xml for them
 		for (FEnumDecl fenum : getFEnumDecls()) {
-					p.print(fenum, str, indentTwoSteps);
+					p.print(fenum, str, indentOneStep);
 		}
 		
 		// loop fvariables and generate XML for each of them
 		for (FVariable fv : getFVariables()) {
-			p.print(fv, str, indentTwoSteps);
+			p.print(fv, str, indentOneStep);
 		}
 		
-		generateCloseTag(str, "declaration", indentOneStep);
+		//generateCloseTag(str, "declaration", indentOneStep);
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -127,15 +127,20 @@ aspect XMLCodeGenerator {
 				p.print(initEqu, str, indentTwoSteps);
 			}
 			generateCloseTag(str, "equation", indentOneStep);
+			// add a newline between sections for clearer XML
+			str.print("\n");
 		}
 		
 		if (getNumFParameterEquation() > 0) {
 			// generate xml for parameter equations
-			// equation kind = parameter
+			generateOpenTag(str, "equation", indentOneStep, "kind", "parameter");
+			for (FAbstractEquation paramEqu : getFParameterEquations()) {
+				p.print(paramEqu, str, indentTwoSteps);
+			}
+			generateCloseTag(str, "equation", indentOneStep);
+			str.print("\n");
 		}
 		
-		// add a newline between sections for clearer XML
-		str.print("\n");
 		
 		// generate xml for equations
 		if (hasFAbstractEquation()) {
@@ -183,6 +188,11 @@ aspect XMLCodeGenerator {
 		}
 		if (causalityPrefix != null) {
 			attributes.put("causality", causalityPrefix.toString());
+		}
+		if (hasFStringComment()) {
+			String comment = getFStringComment().toString();
+			comment = comment.replace("\"", "");
+			attributes.put("comment", comment);
 		}
 		
 		// start tag for component, add support for extends and classdefs later

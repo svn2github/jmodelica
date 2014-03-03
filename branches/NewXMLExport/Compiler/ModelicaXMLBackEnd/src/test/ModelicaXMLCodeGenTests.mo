@@ -15,7 +15,6 @@ equation
 			template="",
 			generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <component name=\"u\" causality=\"input\">
             <builtin name=\"Real\"/>
         </component>
@@ -30,7 +29,6 @@ equation
         <component name=\"y\" causality=\"output\">
             <builtin name=\"Real\"/>
         </component>
-    </declaration>
 
     <equation kind=\"initial\">
         <equal>
@@ -113,7 +111,6 @@ equation
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <component name=\"x1\">
             <builtin name=\"Real\"/>
         </component>
@@ -183,7 +180,6 @@ equation
         <component name=\"x23\">
             <builtin name=\"Real\"/>
         </component>
-    </declaration>
     
     <equation kind=\"initial\">
         <equal>
@@ -492,7 +488,6 @@ model TestEnumDeclaration
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <classDefinition name=\"ModelicaXMLCodeGenTests.TestEnumDeclaration.A\">
             <enumeration>
                 <item name=\"a\"/>
@@ -519,7 +514,6 @@ model TestEnumDeclaration
                 <local name=\"ModelicaXMLCodeGenTests.TestEnumDeclaration.B.b\"/>
             </bindingExpression>
         </component>
-    </declaration>
 </class>"
 )})));
 end TestEnumDeclaration;
@@ -556,7 +550,6 @@ equation
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <component name=\"x1\">
             <builtin name=\"Real\"/>
         </component>
@@ -614,7 +607,6 @@ equation
         <component name=\"pre(b9)\" variability=\"discrete\">
             <builtin name=\"Boolean\"/>
         </component>
-    </declaration>
     
     <equation kind=\"initial\">
         <equal>
@@ -776,7 +768,6 @@ equation
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <component name=\"x\">
             <builtin name=\"Real\"/>
             <modifier>
@@ -793,7 +784,6 @@ equation
                 </item>
             </modifier>
         </component>
-    </declaration>
     
     
     <equation>
@@ -833,7 +823,6 @@ equation
             template="",
             generatedCode="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <class kind=\"model\">
-    <declaration>
         <component name=\"theta\">
             <builtin name=\"Real\"/>
         </component>
@@ -855,7 +844,6 @@ equation
         <component name=\"u1\" causality=\"input\">
             <local name=\"Modelica.SIunits.ElectricPotential\"/>
         </component>
-    </declaration>
     
     <equation kind=\"initial\">
         <equal>
