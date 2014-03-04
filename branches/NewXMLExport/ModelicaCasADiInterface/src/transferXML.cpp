@@ -41,7 +41,8 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 	XMLElement* root = doc.FirstChildElement();
 	if (root != NULL) {
 		for (XMLElement* elem = root->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement()) {
-			if (!strcmp(elem->Value(), "declaration")) {
+			if (!strcmp(elem->Value(), "component") || !strcmp(elem->Value(), "classdef") 
+				|| !strcmp(elem->Value(), "extends")) {
 				// handle variables
 				transferVariables(m, elem);
 			} else if (!strcmp(elem->Value(), "equation")) {
@@ -68,17 +69,17 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 * ín the DOM and construct a Variable object from each variable and add them to the model m
 */
 void transferVariables(Ref<Model> m, XMLElement* elem) {
-	for (XMLElement* variable = elem->FirstChildElement(); variable != NULL; variable = variable->NextSiblingElement()) {
-		if (!strcmp(variable->Value(), "component")) {
-			XMLElement* child = variable->FirstChildElement();
+	//for (XMLElement* variable = elem->FirstChildElement(); variable != NULL; variable = variable->NextSiblingElement()) {
+		if (!strcmp(elem->Value(), "component")) {
+			XMLElement* child = elem->FirstChildElement();
 			if (!strcmp(child->Value(), "builtin")) {
 				const char* type = child->Attribute("name");
 				if (!strcmp(type, "Real")) {
-					addRealVariable(m, variable);
+					addRealVariable(m, elem);
 				} else if (!strcmp(type, "Integer")) {
-					addIntegerVariable(m, variable);
+					addIntegerVariable(m, elem);
 				} else if (!strcmp(type, "Boolean")) {
-					addBooleanVariable(m, variable);
+					addBooleanVariable(m, elem);
 				} else {
 					// string variable which is not supported in the casadi interface
 				}
@@ -90,7 +91,7 @@ void transferVariables(Ref<Model> m, XMLElement* elem) {
 		} else {
 			// classdef or extends clause which probably should not be imported
 		}
-	}
+	//}
 }
 
 /**
@@ -129,7 +130,11 @@ void addRealVariable(Ref<Model> m, XMLElement* variable) {
 	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
+	const char* comment = variable->Attribute("comment");
 	Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	if (comment != NULL) {
+		realVar->setAttribute("comment", CasADi::MX(comment));
+	}
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();
@@ -151,7 +156,11 @@ void addIntegerVariable(Ref<Model> m, XMLElement* variable) {
 	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
+	const char* comment = variable->Attribute("comment");
 	Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	if (comment != NULL) {
+		intVar->setAttribute("comment", CasADi::MX(comment));
+	}
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();
@@ -173,7 +182,11 @@ void addBooleanVariable(Ref<Model> m, XMLElement* variable) {
 	CasADi::MX var = CasADi::MX(variable->Attribute("name"));
 	const char* causality = variable->Attribute("causality");
 	const char* variability = variable->Attribute("variability");
+	const char* comment = variable->Attribute("comment");
 	Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), var, getCausality(causality), getVariability(variability), NULL);
+	if (comment != NULL) {
+		boolVar->setAttribute("comment", CasADi::MX(comment));
+	}
 	for (XMLElement* child = variable->FirstChildElement(); child != NULL; child = child->NextSiblingElement()) {
 		if (!strcmp(child->Value(), "bindingExpression")) {
 			XMLElement* expression = child->FirstChildElement();

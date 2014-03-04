@@ -192,7 +192,7 @@ aspect XMLCodeGenerator {
 		if (hasFStringComment()) {
 			String comment = getFStringComment().toString();
 			comment = comment.replace("\"", "");
-			attributes.put("comment", comment);
+			attributes.put("comment", comment.trim());
 		}
 		
 		// start tag for component, add support for extends and classdefs later
