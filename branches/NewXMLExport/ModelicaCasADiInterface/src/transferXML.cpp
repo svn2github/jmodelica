@@ -48,8 +48,12 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 			} else if (!strcmp(elem->Value(), "equation")) {
 				const char* equType = elem->Attribute("kind");
 				if (equType != NULL) {
-					// handle initial equations
-					transferInitialEquations(m, elem);
+					if (!strcmp(equType, "initial")) {
+						// handle initial equations
+						transferInitialEquations(m, elem);
+					} else if (!strcmp(equType, "parameter")) {
+						transferParameters(m, elem);
+					}
 				} else {
 					// handle equations
 					transferEquations(m, elem);
@@ -69,29 +73,27 @@ Ref<Model> transferXmlModel (Ref<Model> m, string modelName, const std::vector<s
 * ín the DOM and construct a Variable object from each variable and add them to the model m
 */
 void transferVariables(Ref<Model> m, XMLElement* elem) {
-	//for (XMLElement* variable = elem->FirstChildElement(); variable != NULL; variable = variable->NextSiblingElement()) {
-		if (!strcmp(elem->Value(), "component")) {
-			XMLElement* child = elem->FirstChildElement();
-			if (!strcmp(child->Value(), "builtin")) {
-				const char* type = child->Attribute("name");
-				if (!strcmp(type, "Real")) {
-					addRealVariable(m, elem);
-				} else if (!strcmp(type, "Integer")) {
-					addIntegerVariable(m, elem);
-				} else if (!strcmp(type, "Boolean")) {
-					addBooleanVariable(m, elem);
-				} else {
-					// string variable which is not supported in the casadi interface
-				}
-			} else if (!strcmp(child->Value(), "local")) {
-				// a component that is of another type than the primitive, 
-				// need to know what special type this is since we don't export that information
-				// currently this should be unimplemented until it is a part of the export
+	if (!strcmp(elem->Value(), "component")) {
+		XMLElement* child = elem->FirstChildElement();
+		if (!strcmp(child->Value(), "builtin")) {
+			const char* type = child->Attribute("name");
+			if (!strcmp(type, "Real")) {
+				addRealVariable(m, elem);
+			} else if (!strcmp(type, "Integer")) {
+				addIntegerVariable(m, elem);
+			} else if (!strcmp(type, "Boolean")) {
+				addBooleanVariable(m, elem);
+			} else {
+				// string variable which is not supported in the casadi interface
 			}
-		} else {
-			// classdef or extends clause which probably should not be imported
+		} else if (!strcmp(child->Value(), "local")) {
+			// a component that is of another type than the primitive, 
+			// need to know what special type this is since we don't export that information
+			// currently this should be unimplemented until it is a part of the export
 		}
-	//}
+	} else {
+		// classdef or extends clause which probably should not be imported
+	}
 }
 
 /**
@@ -119,6 +121,21 @@ void transferEquations(Ref<Model> m, XMLElement* elem) {
 			XMLElement* lhs = equation->FirstChildElement();
 			XMLElement* rhs = lhs->NextSiblingElement();
 			m->addDaeEquation(new ModelicaCasADi::Equation (expressionToMx(m, lhs), expressionToMx(m, rhs)));
+		}
+	}
+}
+
+/**
+* Takes an parameter equation and get the variable on the lefthand side from the model object.
+* The righthand side expression is then set as a bindingexpression to the lhs variable.
+*/
+void transferParameters(Ref<Model> m, XMLElement* elem) {
+	for (XMLElement* parameter = elem->FirstChildElement(); parameter != NULL; parameter = parameter->NextSiblingElement()) {
+		if (!strcmp(parameter->Value(), "equal")) {
+			XMLElement* lhs = parameter->FirstChildElement();
+			XMLElement* rhs = lhs->NextSiblingElement();
+			Ref<ModelicaCasADi::Variable> var =  m->getVariable(lhs->Attribute("name"));
+			var->setAttribute("bindingExpression", expressionToMx(m, rhs));
 		}
 	}
 }

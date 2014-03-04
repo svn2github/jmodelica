@@ -43,6 +43,7 @@ ModelicaCasADi::Ref<ModelicaCasADi::Model> transferXmlModel(ModelicaCasADi::Ref<
 void transferVariables(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferInitialEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 void transferEquations(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
+void transferParameters(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* elem);
 
 void addRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
 void addIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, tinyxml2::XMLElement* variable);
