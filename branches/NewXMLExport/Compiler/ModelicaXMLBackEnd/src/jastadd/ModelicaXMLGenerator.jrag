@@ -98,19 +98,19 @@ aspect XMLCodeGenerator {
 		// assume everything is a model for now
 		generateOpenTag(str, "class", indent, "kind", "model");
 		
-		//generateOpenTag(str, "declaration", indentOneStep);
+		for (FDerivedType ftype : getFDerivedTypes()) {
+			p.print(ftype, str, indentOneStep);
+		}
 		
 		// loop enum declarations and generate xml for them
 		for (FEnumDecl fenum : getFEnumDecls()) {
-					p.print(fenum, str, indentOneStep);
+			p.print(fenum, str, indentOneStep);
 		}
 		
 		// loop fvariables and generate XML for each of them
 		for (FVariable fv : getFVariables()) {
 			p.print(fv, str, indentOneStep);
 		}
-		
-		//generateCloseTag(str, "declaration", indentOneStep);
 		
 		// add a newline between sections for clearer XML
 		str.print("\n");
@@ -136,17 +136,15 @@ aspect XMLCodeGenerator {
 			str.print("\n");
 		}
 		
-		
 		// generate xml for equations
 		if (hasFAbstractEquation()) {
-			//ArrayList<FAlgorithm> algorithms = new ArrayList<FAlgorithm>();
+			ArrayList<FAbstractEquation> algorithms = new ArrayList<FAbstractEquation>();
 			generateOpenTag(str, "equation", indentOneStep);
 			for (FAbstractEquation equ : getFAbstractEquations()) {
-				//check if this is an algorithm section
 				// TODO remove instanceof if possible
 				if (equ instanceof FAlgorithm) {
 					// generate algorithm code after equations, add all FAlgorithm to a list
-					//algorithms.add(equ);
+					algorithms.add(equ);
 				} else {
 					// generate equation code
 					p.print(equ, str, indentTwoSteps);
@@ -155,11 +153,12 @@ aspect XMLCodeGenerator {
 			generateCloseTag(str, "equation", indentOneStep);
 			
 			// add a newline between sections for clearer XML
-			//str.print("\n");
+			str.print("\n");
 			
-			/*for (FAlgorithm alg : algorithms) {
+			for (FAbstractEquation alg : algorithms) {
 				// generate xml for algorithm section, add this later
-			}*/
+				p.print(alg, str, indentOneStep);
+			}
 		}
 		generateCloseTag(str, "class", indent);
 	}
@@ -247,6 +246,24 @@ aspect XMLCodeGenerator {
 			p.print(getValue(), str, p.indent(indent));
 		}
 		generateCloseTag(str, "item", indent);
+	}
+	
+	// generate derived types
+	public void FDerivedType.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		if (!getBaseType().isEnum()) {
+			generateOpenTag(str, "classDefinition", indent, "name", getName());
+			generateClosedTag(str, "builtin", indentOneStep, "name", getBaseType().toString());
+			if (hasFAttribute()) {
+				generateOpenTag(str, "modifier", indentOneStep);
+				for (FAttribute attr : getFAttributeList()) {
+					p.print(attr, str, indentTwoSteps);
+				}
+				generateCloseTag(str, "modifier", indentOneStep);
+			}
+			generateCloseTag(str, "classDefinition", indent);
+		}
 	}
 	
 	//=========================================================================
@@ -619,7 +636,7 @@ aspect XMLCodeGenerator {
 		generateOpenTag(str, "algorithm", indent);
 		for (FStatement stmt : getFStatements()) {
 			// generate xml for each statement
-			p.print(stmt, str, indent);
+			p.print(stmt, str, p.indent(indent));
 		}
 		generateCloseTag(str, "algorithm", indent);
 	}
