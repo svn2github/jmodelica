@@ -193,7 +193,7 @@ aspect CCodeGen {
 		if (isArray() && keepAsArray()) {
 			str.print(getFIdUse().toString_C(p));
 		} else {
-			if (myFV().isReal() && !inFunction() && 
+			if (type().isReal() && !inFunction() && 
 					root().options.getBooleanOption("enable_variable_scaling")) {
 				str.print("(");
 				p.print(getFIdUse(), str, indent);
@@ -538,6 +538,7 @@ aspect CCodeGen {
 	syn String FType.argType_C()  		= type_C();
 	eq FPrimitiveType.argType_C() 		= "jmi_ad_var_t";
 	eq FIntegerType.argType_C()   		= "jmi_int_t";
+	eq FBooleanType.argType_C()         = "jmi_int_t";
 	eq FExternalObjectType.argType_C()	= "void*";
 	
 	syn String FType.scalarType_C() 		= "jmi_ad_var_t";
@@ -557,9 +558,11 @@ aspect CCodeGen {
 	
 	syn String FType.scalarExternalType_C() = scalarType_C();
 	eq FIntegerType.scalarExternalType_C() = "jmi_int_t";
+	eq FBooleanType.scalarExternalType_C() = "jmi_int_t";
 	
 	syn String FType.arrayExternalType_C() = arrayType_C();
 	eq FIntegerType.arrayExternalType_C() = "jmi_int_array_t*";
+	eq FBooleanType.arrayExternalType_C() = "jmi_int_array_t*";
 	
 	public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
 		str.print(typeReturn_C());
@@ -639,9 +642,11 @@ aspect CCodeGen {
 	syn String FType.arrayMacroType_C()			= "JMI_ARRAY";
 	eq FRecordType.arrayMacroType_C()   		= "JMI_RECORD_ARRAY";
 	eq FExternalObjectType.arrayMacroType_C() 	= "JMI_EXTOBJ_ARRAY";
+	eq FStringType.arrayMacroType_C()           = "JMI_STRING_ARRAY";
 
 	syn String FType.arrayExternMacroType_C()	= arrayMacroType_C();
 	eq FIntegerType.arrayExternMacroType_C()	= "JMI_INT_ARRAY";
+	eq FBooleanType.arrayExternMacroType_C()   = "JMI_INT_ARRAY";
 
 	syn String FType.arrayDeclExtraArgs_C() = "";
 	eq FRecordType.arrayDeclExtraArgs_C()   = name_C() + ", " + nameArray_C() + ", ";
@@ -914,43 +919,31 @@ aspect CCodeGen {
 		lang.genFuncDecl(p, str, indent, this);
 	}
 	
-	public void FExternalLanguage.genVarDecls_C(
-			CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
-	
-	public void FExp.genExtFortanVarDecls_C(CodePrinter p, CodeStream str, String indent) {}
-	
-	public void FIdUseExp.genExtFortanVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		FType type = type();
-		if (type.isInteger() || type.isReal() && ndims() > 1) 
-			// We need temp var if we have >2 dimensions (real) or int
-			type.printExternDecl_C(p, str, indent, tempName_C(), this);
-	}
-	
-	public void FLitExp.genExtFortanVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		type().printExternDecl_C(p, str, indent, tempName_C(), this);
-	}
-	
-	public void FExp.genExtCVarDecls_C(CodePrinter p, CodeStream str, String indent) {}
-	
-	public void FIdUseExp.genExtCVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-		FType type = type();
-		if (type.isInteger()) 
-			// We need temp var if int
-			type.printExternDecl_C(p, str, indent, tempName_C(), this);
-	}
-	
-	public void FCExternalLanguage.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
-		for (FExp arg: stmt.getArgs()) {
-			arg.genExtCVarDecls_C(p, str, indent);
-		}
-	}
-	
-	public void FFortran77ExternalLanguage.genVarDecls_C(
-			CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
-		for (FExp arg: stmt.getArgs()) {
-			arg.genExtFortanVarDecls_C(p, str, indent);
-		}
-	}
+    /**
+     * Generates temporaries for an argument to an external function when necessary.
+     */
+    public void FExternalLanguage.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
+        for (FExp arg: stmt.getArgs()) {
+            if (extShouldArgConvert(arg))
+                arg.type().printExternDecl_C(p, str, indent, arg.tempName_C(), arg);
+        }
+    }
+    
+    /**
+     *  Does an to an external function need any conversion?
+     *  Boolean        => int
+     *  Integer        => int
+     *  Fortran matrix => transpose
+     */
+    syn boolean FExternalLanguage.extShouldArgConvert(FExp arg) = false;
+    eq FCExternalLanguage.extShouldArgConvert(FExp arg)         = arg.extShouldArgConvert(false);
+    eq FFortran77ExternalLanguage.extShouldArgConvert(FExp arg) = arg.extShouldArgConvert(true);
+    
+    syn boolean FExp.extShouldArgConvert(boolean fortran) = false;
+    eq FLitExp.extShouldArgConvert(boolean fortran)       = fortran;
+    eq FIdUseExp.extShouldArgConvert(boolean fortran)     =
+            type().isInteger() || type().isBoolean() || 
+            (fortran && type().isReal() && ndims() > 1);
 	
 	
 	public void FAlgorithm.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -1184,8 +1177,7 @@ aspect CCodeGen {
 	
 	public void FUnknownSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("jmi_array_size(");
-		FAbstractVariable fv = (FAbstractVariable) getVariable();
-		str.print(fv.name_C());
+        str.print(getVariable().name_C());
 		str.print(", ");
 		str.print(getDim());
 		str.print(")");
@@ -1740,6 +1732,10 @@ aspect CCodeGen {
 		arg.prepExternalIntegerInput(p, str, indent, lang);
 	}
 	
+    public void FBooleanType.prepExternalInput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
+        arg.prepExternalIntegerInput(p, str, indent, lang);
+    }
+	
 	public void FExp.prepExternalRealInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {}
 	
 	public void FIdUseExp.prepExternalRealInput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {		
@@ -1809,11 +1805,8 @@ aspect CCodeGen {
 	public void FExp.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {}
 	
 	public void FIdUseExp.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang) {
-		if (myFV() instanceof FFunctionVariable) {
-			FFunctionVariable ffv = (FFunctionVariable)myFV();
-			if (ffv.isOutput())
-				type().prepExternalOutput(p, str, indent, this, lang);
-		}
+		if (myCommonVarDecl().isOutput())
+			type().prepExternalOutput(p, str, indent, this, lang);
 	}
 	
 	public void FType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {}
@@ -1847,6 +1840,25 @@ aspect CCodeGen {
 			str.print(";\n");
 		}
 	}
+	
+	public void FBooleanType.prepExternalOutput(CodePrinter p, CodeStream str, String indent, FExp arg, FExternalLanguage lang) {
+	    // generate temp name
+	    String tempName = arg.tempName_C();
+	    if (arg.isArray()) {
+	        // if Fortran: cast to int and transpose (and copy - included in transpose)
+	        // if c: cast to int and copy
+	        MatrixOp op = (lang instanceof FCExternalLanguage) ? new MatrixOp("jmi_copy_matrix_from_int") : new MatrixOp("jmi_matrix_from_fortran_int");
+	        String dest = arg.prettyPrint_C(indent);
+	        op.genMatrixOp(p, str, indent, dest, tempName, dest);
+	    } else {
+	        // scalar, only copy needed
+	        str.print(indent);
+	        p.print(arg, str, indent);
+	        str.print(" = " + tempName);
+	        str.print(";\n");
+	    }
+	}
+	
 	
 	public void FExternalLanguage.genFuncCall(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
 	
@@ -1890,12 +1902,8 @@ aspect CCodeGen {
 	}
 	
 	public void FIdUseExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
-		if (myFV() instanceof FFunctionVariable) {
-			FFunctionVariable ffv = (FFunctionVariable)myFV();
-			if (ffv.isOutput() && !isArray()) {
-				str.print("&");
-			}
-		}
+		if (myCommonVarDecl().isOutput() && !isArray())
+			str.print("&");
 		if (useTempVar) 
 			str.print(tempName_C());
 		else 
@@ -1965,6 +1973,10 @@ aspect CCodeGen {
 	eq InstNode.getChild().nextTempNbr_C()      = 0;
 	eq FClass.getChild().nextTempNbr_C()        = nextTempNbr_C++;
 	eq FFunctionDecl.getChild().nextTempNbr_C() = nextTempNbr_C++;
+	eq InstFullClassDecl.getChild().nextTempNbr_C() = getInstRestriction().nextTempNbr_C();
+	private int InstFunction.nextTempNbr_C = 1;
+	syn int InstRestriction.nextTempNbr_C() = 0;
+	syn int InstFunction.nextTempNbr_C()    = nextTempNbr_C++;
 	
 	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
@@ -3212,20 +3224,26 @@ aspect CCodeGen {
 
 aspect Serialize {
     public void FExternalStmt.genSerializeMain_C(CodeStream str, String indent) {
-        ArrayList<FFunctionVariable> inputs  = myInputs();
-        ArrayList<FFunctionVariable> outputs = myOutputs();
+        ArrayList<CommonVariableDecl> inputs  = myInputs();
+        ArrayList<CommonVariableDecl> outputs = myOutputs();
         
-        str.println("size_t d[25];");
+        
+        for (CommonVariableDecl cvd : inputs)
+            cvd.type().setParent(this);
+        for (CommonVariableDecl cvd : outputs)
+            cvd.type().setParent(this);
+            
+            
         str.println();
         
         str.println("/* Input declarations */");
-        for (FFunctionVariable ffv : inputs)
-            ffv.printDeclOrInit_C(ASTNode.printer_C, str, indent, ffv.name_C(), true, false);
+        for (CommonVariableDecl cvd : inputs)
+            cvd.type().printDecl_C(ASTNode.printer_C, str, indent, cvd.name_C(), null, false);
         str.println();
         
         str.println("/* Output declarations */");
-        for (FFunctionVariable ffv : outputs)
-            ffv.printDeclOrInit_C(ASTNode.printer_C, str, indent, ffv.name_C(), true, false);
+        for (CommonVariableDecl cvd : outputs)
+            cvd.type().printDecl_C(ASTNode.printer_C, str, indent, cvd.name_C(), null, false);
         str.println();
         
         str.println("/* Temp declarations */");
@@ -3235,16 +3253,16 @@ aspect Serialize {
         str.println("printf(\"START\\n\"); fflush(stdout);");
         
         str.println("/* Parse inputs */");
-        for (FFunctionVariable ffv : inputs) {
-            ffv.type().genSerializeInitIn_C(str, indent, ffv.name_C());
-            ffv.type().genSerialize_C(str, indent, ffv.name_C(), true);
+        for (CommonVariableDecl cvd : inputs) {
+            cvd.type().genSerializeInitIn_C(str, indent, cvd.name_C());
+            cvd.type().genSerialize_C(str, indent, cvd.name_C(), true);
             str.println();
         }
         str.println();
         
         str.println("/* Initialize outputs */");
-        for (FFunctionVariable ffv : outputs)
-            ffv.type().genSerializeInitOut_C(str, indent, ffv.name_C());
+        for (CommonVariableDecl cvd : outputs)
+            cvd.type().genSerializeInitOut_C(str, indent, cvd.name_C());
         str.println();
         
         str.println("/* Call the function */");
@@ -3254,15 +3272,17 @@ aspect Serialize {
         str.println();
         
         str.println("/* Print outputs */");
-        for (FFunctionVariable ffv : outputs) {
-            ffv.type().genSerialize_C(str, indent, ffv.name_C(), false);
+        for (CommonVariableDecl cvd : outputs) {
+            cvd.type().genSerialize_C(str, indent, cvd.name_C(), false);
             str.println();
         }
         str.println();
         
         str.println("/* Free strings */");
-        for (FFunctionVariable ffv : inputs)
-            ffv.genFreeStrings_C(str, indent);
+        for (CommonVariableDecl cvd : inputs)
+            cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
+        for (CommonVariableDecl cvd : outputs)
+            cvd.type().genFreeStrings_C(str, indent, cvd.name_C());
         str.println();
         
         str.println("printf(\"END\\n\"); fflush(stdout);");
@@ -3274,12 +3294,15 @@ aspect Serialize {
      */
     public void FType.genSerializeInitIn_C(CodeStream str, String indent, String name) {
         if (isArray()) {
-            str.println(indent + "parseArrayDims("+ndims()+", d);");
-            str.format("%s%s_DYNAMIC_INIT_%d(%s%s", indent, arrayMacroType_C(), 
-                    ndims(), arrayInitExtraArgs_C(), name);
-            str.print(", d[0]");
-            for (int i = 1; i < ndims(); i++)
-                str.print("*d["+i+"]");
+            boolean unknown = size().isUnknown();
+            str.println(indent + "parseArrayDims("+ndims()+");");
+            str.format("%s%s_%s_INIT_%d(%s%s", indent, arrayMacroType_C(), 
+                    (unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
+            if (unknown) {
+                str.print(", d[0]");
+                for (int i = 1; i < ndims(); i++)
+                    str.print("*d["+i+"]");
+            }
             for (int i = 0; i < ndims(); i++)
                 str.print(", d["+i+"]");
             str.println(");");
@@ -3292,10 +3315,13 @@ aspect Serialize {
      */
     public void FType.genSerializeInitOut_C(CodeStream str, String indent, String name) {
         if (isArray()) {
-            str.format("%s%s_DYNAMIC_INIT_%d(%s%s, ", indent, arrayMacroType_C(), 
-                    ndims(), arrayInitExtraArgs_C(), name);
-            size().printNumElements_C(ASTNode.printer_C, str, indent, this);
-            str.print(", ");
+            boolean unknown = size().isUnknown();
+            str.format("%s%s_%s_INIT_%d(%s%s, ", indent, arrayMacroType_C(), 
+                    (unknown ? "DYNAMIC" : "STATIC"), ndims(), arrayInitExtraArgs_C(), name);
+            if (unknown) {
+                size().printNumElements_C(ASTNode.printer_C, str, indent, this);
+                str.print(", ");
+            }
             size().printDimensions_C(ASTNode.printer_C, str, indent, this);
             str.println(");");
         }
@@ -3324,24 +3350,22 @@ aspect Serialize {
     /**
      * Generate code to free strings
      */
-    public void FFunctionVariable.genFreeStrings_C(CodeStream str, String indent) {
-        Set<String> strComps = type().genStringComps_C(name_C());
+    public void FType.genFreeStrings_C(CodeStream str, String indent, String name) {
+        Set<String> strComps = genStringComps_C(name);
         if (strComps.size() > 0) {
-            for (String s : strComps) {
-                str.formatln("%sfree(%s)", indent, s);
+            if (isArray()) {
+                str.format("%sfor (vi = 0; vi < ", indent);
+                size().printNumElements_C(ASTNode.printer_C, str, indent, this);
+                str.println("; vi++) {");
+                for (String s : strComps) {
+                    str.formatln("%sfree(jmi_array_ref_1(%s,vi));", indent+"    ", s);
+                }
+                str.println("}");
+            } else {
+                for (String s : strComps) {
+                    str.formatln("%sfree(%s);", indent, s);
+                }
             }
-        }
-    }
-    public void FFunctionArray.genFreeStrings_C(CodeStream str, String indent) {
-        Set<String> strComps = type().genStringComps_C(name_C());
-        if (strComps.size() > 0) {
-            str.format("%sfor (i = 0; i < ", indent);
-            size().printNumElements_C(ASTNode.printer_C, str, indent, this);
-            str.println("; i++) {");
-            for (String s : strComps) {
-                str.formatln("%sfree(jmi_array_ref_1(%s,i));", indent+"    ", s);
-            }
-            str.println();
         }
     }
     public Set<String> FType.genStringComps_C(String name) {
@@ -3357,5 +3381,71 @@ aspect Serialize {
         for (FRecordComponentType t : getComponents()) {
             t.getFType().genStringComps_C(s, name + "." + t.getName());
         }
+    }
+    
+    
+    /**
+     * CommonVariableDecls from enclosing function
+     */
+    private ArrayList<CommonVariableDecl> FExternalStmt.myCommonVarDecls() {
+        FFunctionDecl decl = containingFFunctionDecl();
+        if (decl != null)
+            return new ArrayList<CommonVariableDecl>(decl.getFFunctionVariables().toArrayList());
+        else
+            return new ArrayList<CommonVariableDecl>(enclosingInstClassDecl().getInstComponentDecls().toArrayList());
+    }
+    
+    /**
+     * Non-output CommonVariableDecls from enclosing function
+     */
+    private ArrayList<CommonVariableDecl> FExternalStmt.myInputs() {
+        ArrayList<CommonVariableDecl> stmtInputs = myCommonVarDecls();
+        stmtInputs.removeAll(myOutputs());
+        return stmtInputs;
+    }
+    
+    /**
+     * Output CommonVariableDecls from enclosing function
+     */
+    private ArrayList<CommonVariableDecl> FExternalStmt.myOutputs() {
+        FFunctionDecl decl = containingFFunctionDecl();
+        if (decl != null)
+            return new ArrayList<CommonVariableDecl>(decl.myOutputs());
+        else
+            return new ArrayList<CommonVariableDecl>(enclosingInstClassDecl().myOutputs());
+    }
+    
+    /**
+     * Declarations of records used in this function
+     */
+    syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
+        Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
+        for (CommonVariableDecl cvd : myInputs())
+            if (cvd.type().isRecord())
+                res.add(cvd.type().myFRecordDecl());
+        for (CommonVariableDecl cvd : myOutputs())
+            if (cvd.type().isRecord())
+                res.add(cvd.type().myFRecordDecl());
+        return res;
+    }
+    
+    
+    syn String FIdUseInstAccess.name_C() = toString_C(printer_C);
+    
+    syn String FIdUseInstAccess.toString_C(CodePrinter p) {
+        return getInstAccess().toString_C(p);
+    }
+    
+    syn String InstAccess.toString_C(CodePrinter p) {
+        InstComponentDecl d = lookupInstComponent(name());
+        return d.name_C();
+    }
+    
+    public String InstComponentDecl.name_C() {
+        StringBuilder buf = new StringBuilder();
+        buf.append(getFQName().nameUnderscore());
+        buf.append('_');
+        buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
+        return buf.toString();
     }
 }

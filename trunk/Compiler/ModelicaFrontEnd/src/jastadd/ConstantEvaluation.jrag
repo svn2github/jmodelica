@@ -2057,6 +2057,11 @@ aspect ConstantEvaluation {
 	  public void prepareForFunctionEval();
 	  public CValue evaluationValue();
 	  public String name();
+        
+        // Added for codegeneration when evaluating external functions
+        public FType   type();
+        public String  name_C();
+        public boolean isOutput();
   }
   
   FAbstractVariable implements CommonVariableDecl;
@@ -2205,11 +2210,15 @@ aspect ConstantEvaluation {
   public void InstFullClassDecl.evaluate(Map<CommonVariableDecl, CValue> values) {
 	  // We assume this class is a function
 	  
- 	  FAlgorithm fab = findFunctionAlgorithm();
-   	  if (fab == null || hasInstExternal()) {
-		  values.clear();
-		  return;
-   	  }
+        FAlgorithm fab = findFunctionAlgorithm();
+        if (fab == null) {
+            if (hasInstExternal()) {
+                fab = getInstExternal().getFAlgorithm();
+            } else {
+                values.clear();
+                return;
+            }
+        }
 	  
 	  Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
 	  currentEvaluationValues = values;
@@ -2743,13 +2752,10 @@ aspect ConstantEvaluation {
   }
   
   public int FExternalStmt.evaluate(Map<CommonVariableDecl, CValue> values) {
-      for (FFunctionVariable ffv : containingFFunctionDecl().getFFunctionVariables()) {
-          if (ffv.isExternalObject()) {
-              values.clear();
-              return EVAL_RETURN;
-          }
+      if (!canEvaluate()) {
+          values.clear();
+          return EVAL_RETURN;
       }
-      
       return evaluateExternal(values);
   }
   
@@ -3311,20 +3317,67 @@ aspect AritmeticTransformations {
 
 aspect ExternalCEval {
     
-    public Process FClass.createExternCEvalProc(FExternalStmt ext) {
-        if (compiler != null)
-            return compiler.createExternCEvalProc(this, ext);
+    /**
+     * Retrieve ModelicaCompiler from root. Might be null.
+     */
+    inh ModelicaCompiler FExternalStmt.myCompiler();
+    eq FlatRoot.getChild().myCompiler() = getCompiler();
+    eq InstRoot.getChild().myCompiler() = getCompiler();
+    
+    private ModelicaCompiler FlatRoot.compiler = null;
+    public void FlatRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
+    public ModelicaCompiler FlatRoot.getCompiler()        { return compiler; }
+    
+    private ModelicaCompiler InstRoot.compiler = null;
+    public void InstRoot.setCompiler(ModelicaCompiler mc) { compiler = mc; }
+    public ModelicaCompiler InstRoot.getCompiler()        { return compiler; }
+    
+    /**
+     * Check external arguments
+     */
+    syn boolean FExternalStmt.canEvaluate() {
+        for (CommonVariableDecl cvd : myCommonVarDecls()) {
+            if (cvd.type().isExternalObject() || cvd.type().isRecord()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Create a process of this external function. Returns null if there was no
+     * compiler or the process could not be started.
+     */
+    public Process FExternalStmt.createExternCEvalProc(FExternalStmt ext) {
+        ModelicaCompiler mc = myCompiler();
+        if (mc != null)
+            return mc.createExternCEvalProc(this);
         return null;
     }
     
-    public void FClass.invalidateExternal(FExternalStmt ext) {
-        if (compiler != null)
-            compiler.invalidateExternal(ext);
+    /**
+     * Make sure we dont try evaluation again.
+     */
+    public void FExternalStmt.invalidateExternal() {
+        myCompiler().invalidateExternal(this);
     }
     
+    /**
+     * External functions does not have a FAlgorithm in the instance tree
+     * so we have to generate one.
+     */
+    syn nta FAlgorithm InstExternal.getFAlgorithm() {
+        FAlgorithm fab = new FAlgorithm(new List());
+        fab.addFStatement(createStmt(myInstFullClassDecl(), new FQNameFull(""), false));
+        return fab;
+    }
+    
+    /**
+     * Evaluate this external statement.
+     */
     public int FExternalStmt.evaluateExternal(Map<CommonVariableDecl, CValue> values) {
         
-        Process proc = myFClass().createExternCEvalProc(this);
+        Process proc = createExternCEvalProc(this);
         
         if (proc == null) {
             values.clear();
@@ -3335,12 +3388,12 @@ aspect ExternalCEval {
         ProcessCommunicator com = new ProcessCommunicator(proc);
         try {
             com.accept("START");
-            for (FFunctionVariable ffv : myInputs())
-                com.put(values.get(ffv));
+            for (CommonVariableDecl cvd : myInputs())
+                com.put(values.get(cvd));
             com.accept("CALC");
             com.accept("DONE");
-            for (FFunctionVariable ffv : myOutputs())
-                values.put(ffv, com.get(ffv.type()));
+            for (CommonVariableDecl cvd : myOutputs())
+                values.put(cvd, com.get(cvd.type()));
             com.accept("END");
             res = com.end();
         } catch (IOException e) {
@@ -3349,7 +3402,7 @@ aspect ExternalCEval {
         com.destroy();
         
         if (res != 0) {
-            myFClass().invalidateExternal(this);
+            invalidateExternal();
             values.clear();
             ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
             return EVAL_RETURN;
@@ -3387,7 +3440,7 @@ aspect ExternalCEval {
          * Print <code>val</code>, serialized, to the process 
          */
         public void put(CValue val) throws IOException {
-    //        ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString());
+//            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString());
             val.serialize(out);
             out.flush();
         }
@@ -3396,12 +3449,13 @@ aspect ExternalCEval {
          * Read <code>type</code>, serialized, from the process 
          */
         public CValue get(FType type) throws IOException {
-    //        ModelicaCompiler.log.debug("ProcessCommunicator READ: " + type.toString());
-            return type.deserialize(in);
+            CValue val = type.deserialize(in);
+//            ModelicaCompiler.log.debug("ProcessCommunicator READ: " + val.toString());
+            return val;
         }
         
         /**
-         * Read a line. Check equals to s.
+         * Read a line. Check equals to <code>s</code>.
          */
         public void accept(String s) throws IOException {
             String line = in.readLine();
@@ -3412,12 +3466,15 @@ aspect ExternalCEval {
         }
         
         /**
-         * Retrieve exit value from process
+         * Wait for and retrieve exit value from process.
          */
         public int end() {
             int res;
             try {
+                process.waitFor();
                 res = process.exitValue();
+            } catch (InterruptedException e) {
+                res = -99;
             } catch (IllegalThreadStateException e) {
                 res = -100;
             }
@@ -3467,6 +3524,11 @@ aspect ExternalCEval {
     public void CValueBoolean.serialize(BufferedWriter buff) throws IOException {
         buff.write(booleanValue() ? "1\n" : "0\n");
     }
+    public void CValueString.serialize(BufferedWriter buff) throws IOException {
+        String s = stringValue();
+        buff.write("" + s.length() + " ");
+        buff.write(s + "\n");
+    }
     
     
     
@@ -3489,14 +3551,30 @@ aspect ExternalCEval {
     }
     public CValue FRealType.deserializeScalar(BufferedReader buff) throws IOException {
         String s = buff.readLine();
+        if (s == null)
+            throw new IOException();
         return new CValueReal(Double.parseDouble(s));
     }
     public CValue FIntegerType.deserializeScalar(BufferedReader buff) throws IOException {
         String s = buff.readLine();
+        if (s == null)
+            throw new IOException();
         return new CValueInteger((int) Double.parseDouble(s));
     }
     public CValue FBooleanType.deserializeScalar(BufferedReader buff) throws IOException {
         String s = buff.readLine();
+        if (s == null)
+            throw new IOException();
         return new CValueBoolean(Double.parseDouble(s) != 0);
+    }
+    public CValue FStringType.deserializeScalar(BufferedReader buff) throws IOException {
+        String s = buff.readLine();
+        if (s == null)
+            throw new IOException();
+        int len = Integer.parseInt(s);
+        char[] c = new char[len];
+        buff.read(c,0,len);
+        s = buff.readLine();
+        return new CValueString(new String(c));
     }
 }

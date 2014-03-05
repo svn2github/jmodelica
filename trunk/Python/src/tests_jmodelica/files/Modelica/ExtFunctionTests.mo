@@ -159,4 +159,126 @@ equation
 	x = whileTrue(1);
 end ExternalInfinityTest;
 
+package CEval
+  model RealTest
+    function fRealScalar
+      input  Real x_in;
+      output Real x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fRealScalar;
+    
+    function fRealArray
+      input  Real[2] x_in;
+      output Real[size(x_in,1)] x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fRealArray;
+    
+    function fRealArrayUnknown
+      input  Real[:] x_in;
+      output Real[size(x_in,1)] x_out;
+    external "C" fRealArray(x_in, x_out) annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fRealArrayUnknown;
+
+    constant Real    xScalar        = fRealScalar(3);
+    constant Real[2] xArray         = fRealArray({4,5});
+    constant Real[2] xArrayUnknown  = fRealArrayUnknown({6,7});
+  end RealTest;
+  
+  model IntegerTest
+    function fIntegerScalar
+      input  Integer x_in;
+      output Integer x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fIntegerScalar;
+    
+    function fIntegerArray
+      input  Integer[2] x_in;
+      output Integer[size(x_in,1)] x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fIntegerArray;
+    
+    function fIntegerArrayUnknown
+      input  Integer[:] x_in;
+      output Integer[size(x_in,1)] x_out;
+    external "C" fIntegerArray(x_in, x_out) annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fIntegerArrayUnknown;
+
+    constant Integer    xScalar        = fIntegerScalar(3);
+    constant Integer[2] xArray         = fIntegerArray({4,5});
+    constant Integer[2] xArrayUnknown  = fIntegerArrayUnknown({6,7});
+  end IntegerTest;
+  
+  model BooleanTest
+    function fBooleanScalar
+      input  Boolean x_in;
+      output Boolean x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fBooleanScalar;
+    
+    function fBooleanArray
+      input  Boolean[2] x_in;
+      output Boolean[size(x_in,1)] x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fBooleanArray;
+    
+    function fBooleanArrayUnknown
+      input  Boolean[:] x_in;
+      output Boolean[size(x_in,1)] x_out;
+    external "C" fBooleanArray(x_in, x_out) annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fBooleanArrayUnknown;
+
+    constant Boolean    xScalar        = fBooleanScalar(true);
+    constant Boolean[2] xArray         = fBooleanArray({false,false});
+    constant Boolean[2] xArrayUnknown  = fBooleanArrayUnknown({false,true});
+  end BooleanTest;
+  
+  model StringTest
+    function fStringScalar
+      input  String x_in;
+      output String x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fStringScalar;
+    
+    function fStringArray
+      input  String[2] x_in;
+      output String[size(x_in,1)] x_out;
+    external "C" annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fStringArray;
+    
+    function fStringArrayUnknown
+      input  String[:] x_in;
+      output String[size(x_in,1)] x_out;
+    external "C" fStringArray(x_in, x_out) annotation(
+      Library="externalFunctions",
+      Include="#include \"externalFunctions.h\"");
+    end fStringArrayUnknown;
+
+    constant String    xScalar        = fStringScalar("abcde");
+    constant String[2] xArray         = fStringArray({"abc","def"});
+    constant String[2] xArrayUnknown  = fStringArrayUnknown({"abc","def"});
+  end StringTest;
+end CEval;
+
 end ExtFunctionTests;
