@@ -1507,8 +1507,8 @@ int jmi_get_type_from_value_ref(int vref) {
 int jmi_dae_directional_FD_dF(jmi_t* jmi, jmi_func_t *func, jmi_real_t *res, jmi_real_t* dF, jmi_real_t* dv) {
     jmi_real_t h = 0.0001;
     
-    int n_eq;
-    int n_eq_R;
+    int n_eq = 0;
+    int n_eq_R = 0;
     int i;
     int offs;
 

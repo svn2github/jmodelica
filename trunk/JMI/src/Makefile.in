@@ -466,7 +466,7 @@ libjmi_la_SOURCES = jmi.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/external/Assimulo/src/lib -std=c89 -pedantic -Werror
+libjmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -I$(abs_top_srcdir)/external/Assimulo/src/lib -std=c89 -pedantic -Werror -O2
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -477,7 +477,7 @@ libjmi_algorithm_la_SOURCES = jmi_init_opt.h \
                               jmi_opt_coll.c \
                               jmi_opt_coll_radau.c
 
-libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
+libjmi_algorithm_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror -O2
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force
 # static inclusion of the runtime libraries when creating model so:s.
@@ -504,9 +504,9 @@ libfmi_cs_la_SOURCES = fmi1_cs.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod.h \
                     $(abs_top_srcdir)/external/Assimulo/src/lib/kinsol_jmod_impl.h 
 
-libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
+libfmi_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror -O2
 libfmi_la_LDFLAGS = -no-undefined -static-libtool-libs
-libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
+libfmi_cs_la_CFLAGS = -Wall -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror -O2
 libfmi_cs_la_LDFLAGS = -no-undefined -static-libtool-libs
 MSLCSOURCES = $(abs_top_srcdir)/ThirdParty/MSL/Modelica/Resources/C-Sources
 libModelicaExternalC_la_SOURCES = ModelicaUtilities.h \
@@ -544,7 +544,7 @@ libjmi_solver_la_SOURCES = jmi_opt_coll_radau.c \
                            jmi_init_opt_ipopt.cpp \
                            jmi_init_opt_TNLP.cpp
 
-libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror
+libjmi_solver_la_CFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include -std=c89 -pedantic -Werror -O2
 libjmi_solver_la_CXXFLAGS = -Wall -I$(IPOPT_INC) -DJMI_AD=JMI_AD_NONE -g -I$(SUNDIALS_HOME)/include
 # Don't build shared libraries of libjmi and libjmicppad. This is not
 # really needed, and also (more importantly perhaps) I cannot force

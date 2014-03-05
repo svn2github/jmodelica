@@ -110,7 +110,7 @@ set(STANDARDTABLESSources
 #Build jmi library
 add_library(jmi STATIC ${JMISources})
 if(NOT MSVC)
-    set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long")
+    set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2")
     if (WIN32)
         include_directories(${TOP_SRC}/ThirdParty/pthreads/include)
     endif()

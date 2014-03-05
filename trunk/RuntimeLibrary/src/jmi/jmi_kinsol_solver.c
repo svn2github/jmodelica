@@ -165,7 +165,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
-    realtype *jac_fd;
+    realtype *jac_fd = NULL;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
     
@@ -296,7 +296,7 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
 
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
-    jmi_log_category_t category;
+    jmi_log_category_t category = logWarning;
     jmi_block_solver_t *block = eh_data;
     jmi_kinsol_solver_t* solver = block->solver;
     realtype fnorm, snorm;
