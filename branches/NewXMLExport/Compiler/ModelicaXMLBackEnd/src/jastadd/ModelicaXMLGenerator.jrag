@@ -88,11 +88,6 @@ aspect XMLCodeGenerator {
 		str.format(CLOSE_TAG, indent, tag);
 	}
 	
-	// not used for now, maybe use this later so we don't need to create maps
-	public void ASTNode.generateAttribute(CodeStream str, String tag, String indent) {
-		
-	}
-	
 	/**
 	 * Entry point for XML generation, generates XML for child nodes by calling
 	 * their print method
@@ -617,7 +612,6 @@ aspect XMLCodeGenerator {
 	
 	//=============================================================================
 	// Code generation for algorithms
-	// Implementation of this will wait for a bit
 	//=============================================================================
 	
 	public void FAlgorithm.prettyPrintXML(Printer p, CodeStream str, String indent) {
@@ -633,26 +627,59 @@ aspect XMLCodeGenerator {
 	public void FAssignStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
 		String indentOneStep = p.indent(indent);
 		String indentTwoSteps = p.indent(indentOneStep);
-		generateOpenTag(str, "algorithm", indent);
+		generateOpenTag(str, "assign", indent);
 		generateOpenTag(str, "to", indentOneStep);
 		p.print(getLeft(), str, indentTwoSteps);
 		generateCloseTag(str, "to", indentOneStep);
 		generateOpenTag(str, "from", indentOneStep);
 		p.print(getRight(), str, indentTwoSteps);
 		generateCloseTag(str, "from", indentOneStep);
-		generateCloseTag(str, "algorithm", indent);
+		generateCloseTag(str, "assign", indent);
 	}
 	
 	public void FBreakStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		// no generation for break
+		generateClosedTag(str, "break", p.indent(indent));
 	}
 	
 	public void FReturnStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		// no generation for return
+		generateClosedTag(str, "return", p.indent(indent));
 	}
 	
-	public void FIfWhenStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
-		// add other if and when clauses
+	public void FWhenStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "when", indent);
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			p.print(clause, str, indentTwoSteps);
+		}
+		generateCloseTag(str, "when", indent);
+	}
+	
+	public void FIfStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		String indentTwoSteps = p.indent(indentOneStep);
+		generateOpenTag(str, "if", indent);
+		for (FIfWhenClause clause : getFIfWhenClauses()) {
+			p.print(clause, str, indentTwoSteps);
+		}
+		if (getNumElseStmt() > 0) {
+			for (FStatement stmt : getElseStmts()) {
+				p.print(stmt, str, indentTwoSteps);
+			}
+		}
+		generateCloseTag(str, "if", indent);
+	}
+	
+	public void FIfWhenClause.prettyPrintXML(Printer p, CodeStream str, String indent) {
+		String indentOneStep = p.indent(indent);
+		generateOpenTag(str, "cond", indent);
+		p.print(getTest(), str, indentOneStep);
+		generateCloseTag(str, "cond", indent);
+		generateOpenTag(str, "then", indent);
+		for (FStatement stmt : getFStatements()) {
+			p.print(stmt, str, indentOneStep);
+		}
+		generateCloseTag(str, "then", indent);
 	}
 	
 	public void FForStmt.prettyPrintXML(Printer p, CodeStream str, String indent) {
@@ -681,5 +708,9 @@ aspect XMLCodeGenerator {
 		}
 		generateCloseTag(str, "then", indentOneStep);
 		generateCloseTag(str, "while", indent);
+	}
+	
+	public void FFunctionCallStmt.prettyprintXML(Printer p, CodeStream str, String indent) {
+		// TODO implement this when generation of functions is implemented
 	}
 }
