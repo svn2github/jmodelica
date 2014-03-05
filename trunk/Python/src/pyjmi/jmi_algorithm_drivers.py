@@ -2336,27 +2336,17 @@ class LocalDAECollocationAlg(AlgorithmBase):
                              "must be the same as the number of elements.")
         
         # Check validity of nominal_traj_mode
-        #~ var_vectors = self.model._var_vectors
-        #~ ocp_names = [[var.getName() for var in var_vectors[vt]] for vt in ['x', 'u', 'w']]
-        #~ ocp_names = reduce(list.__add__, ocp_names)
-        #~ ocp_names += [convert_casadi_der_name(str(var.der())) for var in var_vectors['x']]
-        #~ for name in self.nominal_traj_mode.keys():
-            #~ if name not in ocp_names:
-                #~ if name != "_default_mode":
-                    #~ aliases = self.model.xmldoc.get_aliases_for_variable(name)
-                    #~ found_alias = False
-                    #~ if aliases is not None:
-                        #~ for alias in aliases[0]:
-                            #~ if alias in ocp_names:
-                                #~ self.nominal_traj_mode[alias] = \
-                                        #~ self.nominal_traj_mode[name]
-                                #~ del self.nominal_traj_mode[name]
-                                #~ found_alias = True
-                                #~ break
-                    #~ if not found_alias:
-                        #~ raise XMLException("Could not find variable " + name +
-                                           #~ ", as referenced by " +
-                                           #~ "nominal_traj_mode.")
+        for name in self.nominal_traj_mode.keys():
+            if name != "_default_mode":
+                var = self.op.getVariable(name)
+                if var is None:
+                    raise ValueError(
+                            "Nominal mode provided for variable %s, " % name +
+                            "but variable %s not found in model." % name)
+                if var.isAlias():
+                    mvar = var.getModelVariable()
+                    nominal_traj_mode[mvar.getName()] = nominal_traj_mode[name]
+                    del nominal_traj_mode[name]
         
         # Solver options
         self.solver_options = self.IPOPT_options
