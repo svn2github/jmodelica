@@ -1116,7 +1116,6 @@ public class ModelicaCompiler {
 		
 		InstProgramRoot ipr = sr.getProgram().getInstProgramRoot();
 		ipr.options = sr.options.copy();
-		ipr.setCompiler(this);
 		
 		if (sr.options.getBooleanOption("compliance_as_warning"))
 			sr.setErrorHandler(new ComplianceWarnErrorHandler(sr.getErrorHandler()));
@@ -1279,8 +1278,8 @@ public class ModelicaCompiler {
 		return new CADGenerator(new PrettyPrinter(), '$', fc);
 	}
 	
-    protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
+    protected ExternCEvalGenerator createCGenerator(FClass fc, FExternalStmt ext) {
+        return new ExternCEvalGenerator(new PrettyPrinter(), '$', fc, ext);
     }
 	
 	/**
@@ -1292,7 +1291,7 @@ public class ModelicaCompiler {
 	 * @param dir   the directory to put the output file in
 	 * @param name  the name of the output file
 	 */
-	private void generateFile(String tmpl, AbstractGenerator gen, File dir, String name) 
+	private void generateFile(FClass fc, String tmpl, AbstractGenerator gen, File dir, String name) 
 			throws FileNotFoundException {
 		if (tmpl != null) {
 		    if (debugSrcIsHome) 
@@ -1344,9 +1343,9 @@ public class ModelicaCompiler {
 		log.info("Generating code...");
 		String name = fc.nameUnderscore();
 		
-		generateFile(target.getXMLTemplates(fc), target.getXMLGenerator(fc),
+		generateFile(fc, target.getXMLTemplates(fc), target.getXMLGenerator(fc),
 					outDir, "modelDescription.xml");
-		generateFile(target.getCTemplates(fc), createCGenerator(fc), 
+		generateFile(fc, target.getCTemplates(fc), createCGenerator(fc), 
 					sourceDir, name + ".c");
 		
 		hookCodeGenerated(outDir);
@@ -1684,7 +1683,7 @@ public class ModelicaCompiler {
     /**
      * If there is no executable corresponding to <code>ext</code>, create one.
      */
-    private String getCompiledExternal(FExternalStmt ext) {
+    private String getCompiledExternal(FClass fc, FExternalStmt ext) {
         String executable = compiledExternals.get(ext.getName());
         if (executable == null) {
             String source = ext.getName().replace(".", "_");
@@ -1699,17 +1698,16 @@ public class ModelicaCompiler {
             if (ext.includeDirectory() != null)
                 incDirs.add(ext.includeDirectory());
             try {
-                generateFile(target.getCTemplates(null), createCGenerator(ext), sourceDir, source + ".c");
+                generateFile(fc, target.getCTemplates(fc), createCGenerator(fc, ext), sourceDir, source + ".c");
                 executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs);
                 new File(sourceDir, source + ".c").delete();
-                log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
+                log.debug("Compiled external function to executable for constant evaluation: " + ext.getName() + " '" + executable + "'");
             } catch (FileNotFoundException e) {
                 executable = "";
-                log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
+                log.debug("Could not generate code for constant evaluation of external function. Function: " + ext.getName());
             } catch (CcodeCompilationException e) {
                 executable = "";
-                log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
-                e.printStackTrace(new PrintStream(log.debugStream()));
+                log.debug("Could not compile external function for constant evaluation. Function: " + ext.getName());
             }
             compiledExternals.put(ext.getName(), executable);
         }
@@ -1744,9 +1742,9 @@ public class ModelicaCompiler {
     /**
      * Start a process for constant evaluation of <code>ext</code>.
      */
-    public Process createExternCEvalProc(FExternalStmt ext) {
+    public Process createExternCEvalProc(FClass fc, FExternalStmt ext) {
         Process proc = null;
-        String executable = getCompiledExternal(ext);
+        String executable = getCompiledExternal(fc, ext);
         if (executable.length() > 0) {
             try {
                 ProcessBuilder pb = new ProcessBuilder(executable);
@@ -2298,7 +2296,7 @@ public abstract class CCompilerDelegator {
     /**
      * Compile DLL(s) from generated C code.
      */
-    public final void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
+    public void compileCCode(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
             Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
         compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, getTargetPlatforms());
     }
@@ -2306,7 +2304,7 @@ public abstract class CCompilerDelegator {
     /**
      * Compile an executable for build platform.
      */
-    public final String compileCCodeLocal(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
+    public String compileCCodeLocal(String fileName, ModelicaCompiler.TargetObject targetObject, File workDir, 
             Set<String> ext_libs, Set<String> ext_lib_dirs, Set<String> ext_incl_dirs) {
         String[] platform = {ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), getTargetPlatforms())};
         compileCCode(fileName, targetObject, workDir, ext_libs, ext_lib_dirs, ext_incl_dirs, platform);

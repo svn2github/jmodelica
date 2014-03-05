@@ -16,32 +16,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "jmi.h"
-
-/* Modelica utility functions */
-char* ModelicaAllocateString(size_t size)
-{
-	return malloc(size);
-}
 
 $ECE_external_includes$
  
-/* Manual debugging */
 #define DEBUG 0
 #define DBGP(x) if (DEBUG) { printf(x); fflush(stdout);}
 
 /* Format specifier when printing jmi_ad_var_t */
 #define jmi_real_format "%.16f"
 
+/* Char buffer when reading jmi_ad_var_t. This is necessary
+   since "%lf" is not allowed in c89. */
+char buff[32];
+
 /* Used record definitions */
 $ECE_record_definitions$
 
-/* Parses ND dimensions into dimension buffer */
-#define parseArrayDims(ND) \
-    for (di = 0; di < ND; di++) { scanf("%d",&d[di]); }
-
-/* Parse/print basic types */
+/* Dimensions */
+int parseArrayDims(int nd, size_t* d)
+{
+    int i;
+    int ne = 1;
+    for (i = 0; i < nd; i++) {
+        scanf("%d",&d[i]);
+        ne = ne * d[i];
+    }
+    return ne;
+}
+ 
+/* Basic types */
 #define parseReal(X) \
     DBGP("Parse number: "); \
     scanf("%s",buff); \
@@ -53,15 +57,14 @@ $ECE_record_definitions$
     fflush(stdout); \
     
 #define parseString(STR) \
-    parseArrayDims(1); \
-    getchar(); \
-    STR = malloc(sizeof(char)*(d[0]+1)); \
+    parseArrayDims(1,&d); \
+    str = malloc(sizeof(char)*(d[0]+1)); \
     DBGP("Parse string: "); \
-    for (si = 0; si < d[0]; si++) STR[si] = getchar(); \
-    STR[d[0]] = '\0';
+    for (i = 0; i < d[0]; i++) str[i] = getchar(); \
+    str[d[0]] = '\0';
     
 #define printString(STR) \
-    printf("%d\n%s\n", strlen(STR), STR); \
+    printf("%d %s\n", strlen(*str), str); \
     fflush(stdout); \
 
 #define parseInteger(X) parseReal(X)
@@ -71,24 +74,14 @@ $ECE_record_definitions$
 #define parse(TYPE, X) parse##TYPE(X)
 #define print(TYPE, X) print##TYPE(X)
 
-/* Parse/print arrays */
-#define parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { parse##TYPE(jmi_array_ref_1(ARR,vi)); }
-#define printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { print##TYPE(jmi_array_val_1(ARR,vi)); }
+/* Arrays */
+#define parseArray(TYPE,ARR) for (i = 1; i <= ARR->num_elems; i++) { parse##TYPE(jmi_array_ref_1(ARR,i)); }
+#define printArray(TYPE,ARR) for (i = 1; i <= ARR->num_elems; i++) { print##TYPE(jmi_array_val_1(ARR,i)); }
 
-/* Main */
+/* Parse, run, print */
 int main(int argc, const char* argv[])
 {
-
-	/* Char buffer when reading jmi_ad_var_t. This is necessary
-	   since "%lf" is not allowed in c89. */
-	char buff[32];
-
-	/* Size buffer for reading array dimensions */
-	size_t d[25];
-	
-	/* Indices for parsing/printing vars, dimensions, and strings */
-    size_t vi,di,si;
-	
+    size_t i;
     JMI_DYNAMIC_INIT()
     
     $ECE_main$

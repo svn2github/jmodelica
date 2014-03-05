@@ -174,7 +174,7 @@ ceval:
 	$(MAKE) -f $(MAKEFILE) JMI_AD=JMI_AD_NONE ceval_
 
 ceval_: $(OBJS)
-	if not exist "$(BINARY_BASE_DIR)" mkdir $(BINARY_BASE_DIR)
+	mkdir $(BINARY_BASE_DIR)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $(OBJS) -L${RUNTIMELIBRARY_LIB_DIR} $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) $(LIBS_CEVAL) -static-libstdc++
 	$(RM) $(OBJS)
 

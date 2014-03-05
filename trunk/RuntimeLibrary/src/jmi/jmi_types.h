@@ -30,9 +30,6 @@ typedef double jmi_real_t; /*< Typedef for the real number
 typedef int jmi_int_t; /*< Typedef for the integer number
                < representation used in the Runtime
                < Library. */
-typedef char* jmi_string_t; /*< Typedef for the string
-               < representation used in the external constant
-               < evaluation framework. */
 typedef void* jmi_extobj_t; /*< Typedef for the external object
                < representation used in the Runtime
                < Library. */

@@ -192,8 +192,8 @@ class TestExternalBool:
             assert(model.get('res[' + str(i) + ']'))
             assert(model2.get('res[' + str(i) + ']'))
         for i in falseInd:
-            assert(not model.get('res[' + str(i) + ']'))
-            assert(not model2.get('res[' + str(i) + ']'))
+		    assert(not model.get('res[' + str(i) + ']'))
+		    assert(not model2.get('res[' + str(i) + ']'))
 
 class TestExternalShared2:
     
@@ -411,86 +411,6 @@ class TestModelicaError:
             assert abs(e.t - 2.0) < 0.01, 'Simulation stopped at wrong time'
         
 
-class TestCEval:
-    @classmethod
-    def setUpBase(self, cpath):
-        self.dir = build_ext('basic_static', 'ExtFunctionTests.mo')
-        self.cpath = cpath
-        self.fpath = path(self.dir, "ExtFunctionTests.mo")
-    
-    @classmethod
-    def tearDownClass(self):
-        shutil.rmtree(self.dir, True)
-
-class TestCEvalReal(TestCEval):
-    '''
-    Test constant evaluation of external function with reals.
-    '''
-    @classmethod
-    def setUpClass(self):
-        self.setUpBase("ExtFunctionTests.CEval.RealTest");
-    
-    @testattr(stddist = True)
-    def test_ExtFuncReal(self):
-        fmu_name = compile_fmu(self.cpath, self.fpath)
-        model = load_fmu(fmu_name)
-        res = model.simulate()
-        nose.tools.assert_equals(res.final('xScalar'), 3*3.14)
-        nose.tools.assert_equals(res.final('xArray[2]'), 4)
-        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
-
-class TestCEvalInteger(TestCEval):
-    '''
-    Test constant evaluation of external function with reals.
-    '''
-    @classmethod
-    def setUpClass(self):
-        self.setUpBase("ExtFunctionTests.CEval.IntegerTest");
-    
-    @testattr(stddist = True)
-    def test_ExtFuncInteger(self):
-        fmu_name = compile_fmu(self.cpath, self.fpath)
-        model = load_fmu(fmu_name)
-        res = model.simulate()
-        nose.tools.assert_equals(res.final('xScalar'), 3*3)
-        nose.tools.assert_equals(res.final('xArray[2]'), 4)
-        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
-
-class TestCEvalBoolean(TestCEval):
-    '''
-    Test constant evaluation of external function with reals.
-    '''
-    @classmethod
-    def setUpClass(self):
-        self.setUpBase("ExtFunctionTests.CEval.BooleanTest");
-    
-    @testattr(stddist = True)
-    def test_ExtFuncBoolean(self):
-        fmu_name = compile_fmu(self.cpath, self.fpath)
-        model = load_fmu(fmu_name)
-        res = model.simulate()
-        nose.tools.assert_equals(res.final('xScalar'), False)
-        nose.tools.assert_equals(res.final('xArray[2]'), True)
-        nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
-
-class TestCEvalString(TestCEval):
-    '''
-    Test constant evaluation of external function with strings.
-    '''
-    @classmethod
-    def setUpClass(self):
-        self.setUpBase("ExtFunctionTests.CEval.StringTest");
-    
-    @testattr(stddist = True)
-    def test_ExtFuncString(self):
-        fmu_name = compile_fmu(self.cpath, self.fpath)
-        model = load_fmu(fmu_name)
-        #TODO: enable when model.get_string implemented
-        #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
-        #nose.tools.assert_equals(model.get('xArray[2]'), 'dbf')
-        #nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 'dbf')
-        
-        
 def build_ext(target, mofile):
     """
     Build a library for an external function.

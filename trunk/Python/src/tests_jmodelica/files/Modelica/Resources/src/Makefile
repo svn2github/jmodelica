@@ -42,8 +42,6 @@ array_shared: $(PREF)arrayFunctions.$(SUFF) lib_dir
 array_static: libarrayFunctions.a lib_dir
 	mv $< $(DIR)
 
-basic_static: libexternalFunctions.a lib_dir
-	mv $< $(DIR)
 
 ext_objects: libextObjects.a lib_dir
 	mv $< $(DIR)

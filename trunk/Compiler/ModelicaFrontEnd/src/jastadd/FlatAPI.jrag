@@ -1923,6 +1923,46 @@ aspect FVariableUses {
 	
 	
 	
+    syn ArrayList<FFunctionVariable> FExternalStmt.myInputs() {
+        FFunctionDecl decl = containingFFunctionDecl();
+        ArrayList<FFunctionVariable> stmtInputs = decl.getFFunctionVariables().toArrayList();
+        stmtInputs.removeAll(decl.myOutputs());
+        return stmtInputs;
+    }
+	
+    syn ArrayList<FFunctionVariable> FExternalStmt.myOutputs() {
+        ArrayList<FFunctionVariable> funcOutputs = containingFFunctionDecl().myOutputs();
+        ArrayList<FFunctionVariable> stmtOutputs = new ArrayList<FFunctionVariable>();
+        
+        if (hasReturnVar() ) {
+            FFunctionVariable fv = getReturnVar().myFuncVar();
+            if (funcOutputs.contains(fv))
+                stmtOutputs.add(fv);
+        }
+        
+        for (FExp e : getArgs()) {
+            if (e instanceof FIdUseExp) {
+                FFunctionVariable fv = ((FIdUseExp) e).getFIdUse().myFuncVar();
+                if (funcOutputs.contains(fv))
+                    stmtOutputs.add(fv);
+            }
+        }
+        return stmtOutputs;
+    }
+    
+    /**
+     * Declarations of records used in this function
+     */
+    syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
+        Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
+        for (FFunctionVariable ffv : myInputs())
+            if (ffv.isRecord())
+                res.add(ffv.myFRecordDecl());
+        for (FFunctionVariable ffv : myOutputs())
+            if (ffv.isRecord())
+                res.add(ffv.myFRecordDecl());
+        return res;
+    }
 	
 	/**
 	 * Returnes the function input that this expressions corresponds to.

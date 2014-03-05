@@ -48,14 +48,6 @@ struct jmi_int_array_t {
     jmi_int_t*  var;
 };
 
-typedef struct jmi_string_array_t jmi_string_array_t;
-struct jmi_string_array_t {
-    int*        size;
-    int         num_dims;
-    int         num_elems;
-    jmi_string_t*  var;
-};
-
 typedef struct jmi_extobj_array_t jmi_extobj_array_t;
 struct jmi_extobj_array_t {
     int*            size;
@@ -87,9 +79,6 @@ struct _jmi_dynamic_list {
 #define JMI_INT_ARRAY_STATIC(name, ne, nd) \
     JMI_RECORD_ARRAY_STATIC(jmi_int_t, jmi_int_array_t, name, ne, nd)
 
-#define JMI_STRING_ARRAY_STATIC(name, ne, nd) \
-    JMI_RECORD_ARRAY_STATIC(jmi_string_t, jmi_string_array_t, name, ne, nd)
-
 #define JMI_EXTOBJ_ARRAY_STATIC(name, ne, nd) \
     JMI_RECORD_ARRAY_STATIC(void*, jmi_extobj_array_t, name, ne, nd)
 
@@ -106,9 +95,6 @@ struct _jmi_dynamic_list {
 
 #define JMI_INT_ARRAY_DYNAMIC(name, nd) \
     JMI_RECORD_ARRAY_DYNAMIC(jmi_int_t, jmi_int_array_t, name, nd)
-
-#define JMI_STRING_ARRAY_DYNAMIC(name, nd) \
-    JMI_RECORD_ARRAY_DYNAMIC(jmi_string_t, jmi_string_array_t, name, nd)
 
 #define JMI_EXTOBJ_ARRAY_DYNAMIC(name, nd) \
     JMI_RECORD_ARRAY_DYNAMIC(void*, jmi_extobj_array_t, name, nd)
@@ -222,32 +208,6 @@ struct _jmi_dynamic_list {
 #define JMI_EXTOBJ_ARRAY_STATIC_INIT_23 JMI_ARRAY_STATIC_INIT_23
 #define JMI_EXTOBJ_ARRAY_STATIC_INIT_24 JMI_ARRAY_STATIC_INIT_24
 #define JMI_EXTOBJ_ARRAY_STATIC_INIT_25 JMI_ARRAY_STATIC_INIT_25
-
-#define JMI_STRING_ARRAY_STATIC_INIT_1 JMI_ARRAY_STATIC_INIT_1
-#define JMI_STRING_ARRAY_STATIC_INIT_2 JMI_ARRAY_STATIC_INIT_2
-#define JMI_STRING_ARRAY_STATIC_INIT_3 JMI_ARRAY_STATIC_INIT_3
-#define JMI_STRING_ARRAY_STATIC_INIT_4 JMI_ARRAY_STATIC_INIT_4
-#define JMI_STRING_ARRAY_STATIC_INIT_5 JMI_ARRAY_STATIC_INIT_5
-#define JMI_STRING_ARRAY_STATIC_INIT_6 JMI_ARRAY_STATIC_INIT_6
-#define JMI_STRING_ARRAY_STATIC_INIT_7 JMI_ARRAY_STATIC_INIT_7
-#define JMI_STRING_ARRAY_STATIC_INIT_8 JMI_ARRAY_STATIC_INIT_8
-#define JMI_STRING_ARRAY_STATIC_INIT_9 JMI_ARRAY_STATIC_INIT_9
-#define JMI_STRING_ARRAY_STATIC_INIT_10 JMI_ARRAY_STATIC_INIT_10
-#define JMI_STRING_ARRAY_STATIC_INIT_11 JMI_ARRAY_STATIC_INIT_11
-#define JMI_STRING_ARRAY_STATIC_INIT_12 JMI_ARRAY_STATIC_INIT_12
-#define JMI_STRING_ARRAY_STATIC_INIT_13 JMI_ARRAY_STATIC_INIT_13
-#define JMI_STRING_ARRAY_STATIC_INIT_14 JMI_ARRAY_STATIC_INIT_14
-#define JMI_STRING_ARRAY_STATIC_INIT_15 JMI_ARRAY_STATIC_INIT_15
-#define JMI_STRING_ARRAY_STATIC_INIT_16 JMI_ARRAY_STATIC_INIT_16
-#define JMI_STRING_ARRAY_STATIC_INIT_17 JMI_ARRAY_STATIC_INIT_17
-#define JMI_STRING_ARRAY_STATIC_INIT_18 JMI_ARRAY_STATIC_INIT_18
-#define JMI_STRING_ARRAY_STATIC_INIT_19 JMI_ARRAY_STATIC_INIT_19
-#define JMI_STRING_ARRAY_STATIC_INIT_20 JMI_ARRAY_STATIC_INIT_20
-#define JMI_STRING_ARRAY_STATIC_INIT_21 JMI_ARRAY_STATIC_INIT_21
-#define JMI_STRING_ARRAY_STATIC_INIT_22 JMI_ARRAY_STATIC_INIT_22
-#define JMI_STRING_ARRAY_STATIC_INIT_23 JMI_ARRAY_STATIC_INIT_23
-#define JMI_STRING_ARRAY_STATIC_INIT_24 JMI_ARRAY_STATIC_INIT_24
-#define JMI_STRING_ARRAY_STATIC_INIT_25 JMI_ARRAY_STATIC_INIT_25
 
 /* Dynamic array initialization macros */
 #define JMI_RECORD_ARRAY_DYNAMIC_INIT_1(type, name, ne, d1) \
@@ -432,58 +392,6 @@ struct _jmi_dynamic_list {
     JMI_RECORD_ARRAY_DYNAMIC_INIT_24(jmi_int_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24)
 #define JMI_INT_ARRAY_DYNAMIC_INIT_25(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25) \
     JMI_RECORD_ARRAY_DYNAMIC_INIT_25(jmi_int_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25)
-
-/* Dynamic array initialization macros for string arrays */
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_1(name, ne, d1) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_1(jmi_string_t, name, ne, d1)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_2(name, ne, d1, d2) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_2(jmi_string_t, name, ne, d1, d2)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_3(name, ne, d1, d2, d3) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_3(jmi_string_t, name, ne, d1, d2, d3)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_4(name, ne, d1, d2, d3, d4) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_4(jmi_string_t, name, ne, d1, d2, d3, d4)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_5(name, ne, d1, d2, d3, d4, d5) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_5(jmi_string_t, name, ne, d1, d2, d3, d4, d5)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_6(name, ne, d1, d2, d3, d4, d5, d6) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_6(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_7(name, ne, d1, d2, d3, d4, d5, d6, d7) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_7(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_8(name, ne, d1, d2, d3, d4, d5, d6, d7, d8) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_8(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_9(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_9(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_10(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_10(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_11(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_11(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_12(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_12(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_13(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_13(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_14(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_14(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_15(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_15(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_16(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_16(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_17(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_17(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_18(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_18(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_19(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_19(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_20(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_20(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_21(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_21(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_22(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_22(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_23(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_23(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_24(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_24(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24)
-#define JMI_STRING_ARRAY_DYNAMIC_INIT_25(name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25) \
-    JMI_RECORD_ARRAY_DYNAMIC_INIT_25(jmi_string_t, name, ne, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24, d25)
 
 /* Dynamic array initialization macros for external object arrays */
 #define JMI_EXTOBJ_ARRAY_DYNAMIC_INIT_1(name, ne, d1) \

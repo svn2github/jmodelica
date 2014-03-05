@@ -41,10 +41,6 @@ aspect FlatNameBinding {
 		FAbstractVariable fv = lookupOutermostFV(getFQName());
 		return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;
 	}
-	
-    syn CommonVariableDecl FIdUseExp.myCommonVarDecl() = getFIdUse().myCommonVarDecl();
-    syn CommonVariableDecl FIdUse.myCommonVarDecl() = myFV();
-    eq  FIdUseInstAccess.myCommonVarDecl() = getInstAccess().myInstComponentDecl();
     
 	eq Root.getChild().lookupFV(FQName fqn)          = null;
 	eq Root.getChild().lookupDerFV(FQName fqn)       = null;
