@@ -726,6 +726,7 @@ aspect InstBindingType {
     inh InstNode InstExtends.findInheritingNode();
     eq InstClassDecl.getInstExtends().findInheritingNode()     = this;
     eq InstComponentDecl.getInstExtends().findInheritingNode() = this;
+    eq Root.getChild().findInheritingNode()                    = null;
     
     /**
      * Is this a member of an array component?
@@ -735,7 +736,7 @@ aspect InstBindingType {
 	eq InstRoot.getChild().inArrayComponent()               = false;
 	eq FlatRoot.getChild().inArrayComponent()               = false;
 	eq InstArrayComponentDecl.getChild().inArrayComponent() = true;
-	
+
 }
 
 aspect TypePromotion {

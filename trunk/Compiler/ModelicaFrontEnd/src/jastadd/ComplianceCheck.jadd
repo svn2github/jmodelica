@@ -81,28 +81,7 @@ aspect ComplianceCheck {
 	public void FUnsupportedExp.collectErrors(ErrorCheckType checkType) {
 		compliance("Unsupported expression type");
 	}
-    
-    
-    public void FConnectClause.complianceCheck(ErrorCheckType checkType) {
-        InstAccess left  = getConnector1().getInstAccess();
-        InstAccess right = getConnector2().getInstAccess();
-        if (left.isNestledExpandableConnectorPart() || right.isNestledExpandableConnectorPart())
-            compliance("Adding variables to non-declared nested expandable connectors is not supported");
-    }
-    
-    syn boolean InstAccess.isNestledExpandableConnectorPart() = false;
-    eq InstDot.isNestledExpandableConnectorPart() {
-        InstComponentDecl exp = findReferencedExpandableConnector();
-        int n = getNumInstAccess();
-        return exp != null && n > 2 && getInstAccess(n - 2).myInstComponentDecl() != exp;
-    }
-    
-    inh boolean InstComponentDecl.inExpandableConnector();
-    eq InstExpandableConnectorDecl.getChild().inExpandableConnector() = true;
-    eq InstClassDecl.getChild().inExpandableConnector()               = false;
-    eq InstRoot.getChild().inExpandableConnector()                    = false;
-    eq FlatRoot.getChild().inExpandableConnector()                    = false;
-    
+
 	
 	public void FBreakStmt.complianceCheck(ErrorCheckType checkType) {
 		if (!inFunction() && enclosingLoop() instanceof InstForStmt)

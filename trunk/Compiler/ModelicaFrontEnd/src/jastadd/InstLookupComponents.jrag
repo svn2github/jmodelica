@@ -53,7 +53,7 @@ aspect InstLookupComponents {
 	eq InstComponentAccess.qualifiedLookupInstComponent(String name)           = 
 		lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 	eq InstComponentArrayAccess.qualifiedLookupInstComponent(String name)      = 
-			lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
+        lookupArrayElement(myInstComponentDecl()).memberInstComponentConstrained(name);
 
 	inh InstComponentDecl InstAccess.localLookupInstComponent(String name);
 	eq InstRoot.getChild().localLookupInstComponent(String name)          = null;
@@ -112,26 +112,26 @@ aspect InstLookupComponents {
 		}
 		return array;
 	}
-	
-	/**
-	 * Lookup component, re-evaluating any array accesses except in last component.
-	 */
-	public InstComponentDecl InstAccess.lookupEvaluatingIndices() {
-		InstAccess cur = getFirstInstAccess();
-		InstComponentDecl icd = cur.myInstComponentDecl();
-		
-		InstAccess next = cur.getNextInstAccess();
-		while (next != null) {
-			icd = cur.lookupArrayElement(icd);
-			icd = icd.memberInstComponent(next.name());
-			cur = next;
-			next = next.getNextInstAccess();
-		}
-		icd = cur.lookupArrayElement(icd);
-		
-		return icd;
-	}
-	
+
+    /**
+     * Lookup component, re-evaluating any array accesses except in last component.
+     */
+    public InstComponentDecl InstAccess.lookupEvaluatingIndices() {
+        InstAccess cur = getFirstInstAccess();
+        InstComponentDecl icd = cur.myInstComponentDecl();
+        
+        InstAccess next = cur.getNextInstAccess();
+        while (next != null && icd != null) {
+            icd = cur.lookupArrayElement(icd);
+            icd = icd.memberInstComponent(next.name());
+            cur = next;
+            next = next.getNextInstAccess();
+        }
+        icd = cur.lookupArrayElement(icd);
+        
+        return icd;
+    }
+
 	eq SourceRoot.getChild().lookupInstComponent(String name) = null;
 	// This equation is necessary since InstAccesses may be present in FExps.	
 	eq FlatRoot.getChild().lookupInstComponent(String name) = null;
